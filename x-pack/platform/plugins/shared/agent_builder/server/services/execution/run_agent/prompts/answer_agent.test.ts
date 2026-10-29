@@ -10,6 +10,7 @@ import { getStructuredAnswerPrompt } from './answer_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
+  ...jest.requireActual('../utils/to_langchain_messages'),
   prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
@@ -37,9 +38,13 @@ describe('getStructuredAnswerPrompt', () => {
         instructions: '',
       },
       skills: [],
-      actions: [],
-      answerActions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),
@@ -75,9 +80,13 @@ describe('getStructuredAnswerPrompt', () => {
         instructions: '',
       },
       skills: [],
-      actions: [],
-      answerActions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),

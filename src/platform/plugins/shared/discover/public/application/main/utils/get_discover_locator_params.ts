@@ -17,6 +17,7 @@ import type { DiscoverAppLocatorParams } from '../../../../common/app_locator';
 import type { ProfileStateMap } from '../../../../common/context_awareness';
 import type { TabState } from '../state_management/redux';
 import { getExpandedDocRef } from './expanded_doc';
+import { getDefinedControlGroupState } from '../state_management/utils/get_defined_control_group_state';
 
 type DiscoverLocatorParams = DiscoverAppLocatorParams & { timeRange: TimeRange | undefined };
 
@@ -45,6 +46,9 @@ export const getDiscoverLocatorParams = ({
   ...(dataView?.isPersisted()
     ? { dataViewId: dataView?.id }
     : { dataViewSpec: dataView?.toMinimalSpec() }),
+  // Controls live on the tab's attributes (not app state), so carry them explicitly
+  // to keep ES|QL controls working when the deep-link is opened in a fresh browser.
+  esqlControls: getDefinedControlGroupState(currentTab.attributes.controlGroupState),
   filters,
   timeRange,
   refreshInterval,

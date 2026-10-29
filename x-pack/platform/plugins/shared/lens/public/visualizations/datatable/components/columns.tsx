@@ -61,7 +61,8 @@ export const createGridColumns = (
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  isInteractive?: boolean
 ) => {
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
@@ -242,6 +243,7 @@ export const createGridColumns = (
         'data-test-subj': 'lensDatatableResetWidth',
         isDisabled: initialWidth == null,
       });
+
       if (!isTransposed && onColumnHide) {
         additionalActions.push({
           color: 'text',
@@ -304,22 +306,25 @@ export const createGridColumns = (
         display: <div css={columnStyle}>{name}</div>,
         displayAsText: name,
         schema: field,
-        actions: {
-          showHide: false,
-          showMoveLeft: false,
-          showMoveRight: false,
-          showSortAsc: {
-            label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-              defaultMessage: 'Sort ascending',
-            }),
-          },
-          showSortDesc: {
-            label: i18n.translate('xpack.lens.table.sort.descLabel', {
-              defaultMessage: 'Sort descending',
-            }),
-          },
-          additional: additionalActions,
-        },
+        isResizable: isInteractive,
+        actions: !isInteractive
+          ? false
+          : {
+              showHide: false,
+              showMoveLeft: false,
+              showMoveRight: false,
+              showSortAsc: {
+                label: i18n.translate('xpack.lens.table.sort.ascLabel', {
+                  defaultMessage: 'Sort ascending',
+                }),
+              },
+              showSortDesc: {
+                label: i18n.translate('xpack.lens.table.sort.descLabel', {
+                  defaultMessage: 'Sort descending',
+                }),
+              },
+              additional: additionalActions,
+            },
       };
 
       if (initialWidth) {

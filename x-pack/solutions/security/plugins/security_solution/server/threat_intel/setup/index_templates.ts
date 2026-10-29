@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   THREAT_REPORTS_INDEX,
@@ -95,6 +98,13 @@ const threatReportsTemplate = {
             },
             body_text_bm25: { type: 'text' as const },
             language: { type: 'keyword' as const },
+            // Linked article URL when the source provides one (RSS link, etc.).
+            article_url: {
+              type: 'keyword' as const,
+              ignore_above: FEED_TEXT_IGNORE_ABOVE,
+            },
+            // Feed publication date when the source supplies one; `@timestamp` stays ingest time.
+            published_at: { type: 'date' as const },
           },
         },
         severity: {
@@ -128,12 +138,15 @@ const threatReportsTemplate = {
                 tier_basis: { type: 'keyword' as const },
                 // Port from socket extraction (v17): ip:port / domain:port → integer.
                 port: { type: 'integer' as const },
-                // Per-IOC nearest-ref URL from Maltrail trail files (v19). The promote_threat_indicators
+                // Per-IOC nearest-ref URL from indicator-list files (v19). The promote_threat_indicators
                 // task copies this into sources[].reference for the indicators companion index.
                 reference: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
-                // Index of the Maltrail block this IOC belongs to (v19). Used by the sync task
+                // Index of the indicator-list block this IOC belongs to (v19). Used by the sync task
                 // to associate each IOC with its source reference URL.
                 block_index: { type: 'integer' as const },
+                // Semantic review did not run (batch/overflow budget). Heuristic tier is kept
+                // for debugging; promote_threat_indicators skips these so they never go live.
+                deferred_unreviewed: { type: 'boolean' as const },
               },
             },
             ioc_set_hash: { type: 'keyword' as const },
@@ -159,6 +172,14 @@ const threatReportsTemplate = {
                 telemetry_targets: { type: 'keyword' as const },
                 llm_confidence: { type: 'float' as const },
                 confidence: { type: 'float' as const },
+              },
+            },
+            artifacts: {
+              type: 'nested' as const,
+              properties: {
+                type: { type: 'keyword' as const },
+                value: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                context: { type: 'text' as const, index: false },
               },
             },
             threat_actors: { type: 'keyword' as const },
@@ -219,6 +240,31 @@ const threatReportsTemplate = {
                 extraction_mode: { type: 'keyword' as const },
                 // Whether extract_diamond considered this report suitable (observability).
                 suitable: { type: 'boolean' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
+                context_chars: { type: 'integer' as const },
+                source_chars: { type: 'integer' as const },
+              },
+            },
+            core: {
+              properties: {
+                model_id: { type: 'keyword' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
+                context_chars: { type: 'integer' as const },
+                source_chars: { type: 'integer' as const },
+                // Coverage for semantic IOC review: deferred candidates kept a
+                // heuristic tier and were never model-judged.
+                adjudication: {
+                  properties: {
+                    provider: { type: 'keyword' as const },
+                    reviewed: { type: 'integer' as const },
+                    approved: { type: 'integer' as const },
+                    downgraded: { type: 'integer' as const },
+                    deterministic_references: { type: 'integer' as const },
+                    deferred_unreviewed: { type: 'integer' as const },
+                  },
+                },
               },
             },
             // assess_relevance gate verdict — persisted on every enrichment run.
@@ -231,6 +277,8 @@ const threatReportsTemplate = {
                 has_original_commentary: { type: 'boolean' as const },
                 reason: { type: 'text' as const, index: false },
                 assessed_at: { type: 'date' as const },
+                context_mode: { type: 'keyword' as const },
+                context_coverage: { type: 'float' as const },
               },
             },
             // Structured vulnerability fields from the kev adapter (keyword/date, aggregatable).
@@ -308,6 +356,16 @@ const threatReportsTemplate = {
             last_hunt_status: { type: 'keyword' as const },
             last_hunt_run_id: { type: 'keyword' as const },
             last_hunt_event_hit_count: { type: 'integer' as const },
+            // Hunt coverage ledger. The ATT&CK technique ids this space has already
+            // searched for the report (bounded by the writer), so a later run spends its
+            // query budget on the rest. `coverage_pending` is true while a later run
+            // could still search more, which keeps the report in the candidate pool.
+            // `pending_technique_ids` is the other half of the ledger: the techniques a
+            // run could not search but a later one still should, kept so the next run does
+            // not depend on its own extraction returning them again.
+            hunted_technique_ids: { type: 'keyword' as const },
+            pending_technique_ids: { type: 'keyword' as const },
+            coverage_pending: { type: 'boolean' as const },
             // rank_score * a boost derived from hunt feedback. Reserved mapping
             // only: no writer or reader exists yet, Hunt Watch's writer owns it.
             corroborated_rank_score: { type: 'float' as const },
@@ -873,11 +931,263 @@ const migrateExistingContentScrubbedMapping = async (
   }
 };
 
+/** `content.published_at` for clusters created before publish-date lookback existed. */
+const migrateExistingPublishedAtMapping = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('published-at-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      if (!contentProps?.published_at) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: { properties: { published_at: { type: 'date' } } },
+          },
+        });
+        log.info(`Migrated content.published_at on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate content.published_at on ${indexName}: ${
+          (err as Error).message
+        }. The mapping is dynamic: strict, so writes of reports carrying published_at will be rejected and ingest will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
+/**
+ * `evidence.hunted_technique_ids`, `evidence.pending_technique_ids` and
+ * `evidence.coverage_pending`, the hunt coverage ledger, for
+ * clusters whose reports index predates them. `evidence` is already `nested`, so the fragment
+ * declares it nested: an omitted `type` defaults to `object`, which Elasticsearch refuses to merge
+ * into a nested field. An index without `evidence` is left to the stale-index check, since the
+ * v30 object-to-nested change cannot be applied in place.
+ */
+const migrateExistingHuntLedgerMapping = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('hunt-ledger-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const evidenceProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.evidence as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      // An index without evidence is stale beyond this migration; the schema check reports it.
+      if (
+        evidenceProps &&
+        (!evidenceProps.hunted_technique_ids ||
+          !evidenceProps.pending_technique_ids ||
+          !evidenceProps.coverage_pending)
+      ) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            evidence: {
+              type: 'nested',
+              properties: {
+                hunted_technique_ids: { type: 'keyword' },
+                pending_technique_ids: { type: 'keyword' },
+                coverage_pending: { type: 'boolean' },
+              },
+            },
+          },
+        });
+        log.info(`Migrated evidence hunt coverage ledger fields on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate the evidence hunt coverage ledger on ${indexName}: ${
+          (err as Error).message
+        }. The mapping is dynamic: strict, so hunt evidence writes carrying the ledger will be rejected until the mapping is updated.`
+      );
+    }
+  }
+};
+
 /**
  * Index templates only apply at creation time, so clusters that created these
  * indices before `index.hidden` was set still expose them to index patterns and
  * `*` searches. Settings updates are cheap and idempotent.
  */
+
+/** Consolidated core artifacts and context metadata for enrichment pipeline upgrades. */
+const migrateExistingCoreEnrichmentMappings = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('core-enrichment-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const extractedProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.extracted as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const coreProps = (
+        extractedProps?.core as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const diamondProps = (
+        extractedProps?.diamond as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const gateProps = (
+        extractedProps?.gate as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      const adjudicationProps = (
+        coreProps?.adjudication as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const iocProps = (
+        extractedProps?.iocs as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      const needsMigration = !(
+        contentProps?.article_url &&
+        extractedProps?.artifacts &&
+        iocProps?.deferred_unreviewed &&
+        coreProps?.model_id &&
+        coreProps?.context_mode &&
+        coreProps?.context_coverage &&
+        coreProps?.context_chars &&
+        coreProps?.source_chars &&
+        adjudicationProps?.provider &&
+        adjudicationProps?.reviewed &&
+        adjudicationProps?.approved &&
+        adjudicationProps?.downgraded &&
+        adjudicationProps?.deterministic_references &&
+        adjudicationProps?.deferred_unreviewed &&
+        diamondProps?.context_mode &&
+        diamondProps?.context_coverage &&
+        diamondProps?.context_chars &&
+        diamondProps?.source_chars &&
+        gateProps?.context_mode &&
+        gateProps?.context_coverage
+      );
+
+      if (needsMigration) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                article_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+              },
+            },
+            extracted: {
+              properties: {
+                artifacts: {
+                  type: 'nested',
+                  properties: {
+                    type: { type: 'keyword' },
+                    value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    context: { type: 'text', index: false },
+                  },
+                },
+                iocs: {
+                  // `extracted.iocs` is `nested` on every index this migration ever
+                  // runs against (declared by the template, or backfilled by an
+                  // earlier iocs migration below). Omitting `type` here defaults
+                  // the merge fragment to `object`, and Elasticsearch rejects
+                  // merging a non-nested fragment into an existing nested field:
+                  // `can't merge a non-nested mapping [extracted.iocs] with a
+                  // nested mapping`. That rejection fails this whole migration,
+                  // which fails `assertMigratedSchemaIsUsable`, which keeps
+                  // threat-intel bootstrap (and everything gated on it: workflow
+                  // install, task scheduling) permanently unready.
+                  type: 'nested',
+                  properties: {
+                    deferred_unreviewed: { type: 'boolean' },
+                  },
+                },
+                core: {
+                  properties: {
+                    model_id: { type: 'keyword' },
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                    context_chars: { type: 'integer' },
+                    source_chars: { type: 'integer' },
+                    adjudication: {
+                      properties: {
+                        provider: { type: 'keyword' },
+                        reviewed: { type: 'integer' },
+                        approved: { type: 'integer' },
+                        downgraded: { type: 'integer' },
+                        deterministic_references: { type: 'integer' },
+                        deferred_unreviewed: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+                diamond: {
+                  properties: {
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                    context_chars: { type: 'integer' },
+                    source_chars: { type: 'integer' },
+                  },
+                },
+                gate: {
+                  properties: {
+                    context_mode: { type: 'keyword' },
+                    context_coverage: { type: 'float' },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated consolidated core mappings on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate consolidated core mappings on ${indexName}: ${
+          err instanceof Error ? err.message : String(err)
+        }. Core enrichment writes will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
 const migrateExistingIndicesToHidden = async (
   esClient: ElasticsearchClient,
   reportIndices: readonly string[],
@@ -1285,6 +1595,73 @@ const migrateExistingVulnerabilityMappings = async (
   }
 };
 
+/**
+ * KEV reports written before the adapter stamped `rank_score` (and
+ * `extracted.relevance`) sort behind every enriched report in the hunt candidates
+ * query (`rank_score` desc, `missing: 0`), and ingest dedup skips an unchanged KEV
+ * entry for 90 days, so they never pick the field up on their own. Backfill the
+ * adapter's neutral baseline (`severity.score * 0.5`) onto KEV documents that lack
+ * it. Idempotent, and cheap once done: a `count` on the same query runs first, so a
+ * boot after the backfill costs one count per report index and no scan or refresh.
+ */
+const backfillKevRankScore = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('kev-rank-score-backfill');
+
+  const query = {
+    bool: {
+      filter: [{ term: { 'lineage.extraction_method': 'kev' } }],
+      must_not: [{ exists: { field: 'rank_score' } }],
+    },
+  };
+
+  for (const indexName of reportIndices) {
+    try {
+      const pending = (await esClient.count({ index: indexName, query }))?.count;
+      // An unknown count (a mocked or unexpected response) falls through to the
+      // backfill, which is idempotent; only a definite zero skips it.
+      if (pending !== 0) {
+        await backfillIndex(esClient, indexName, query, log);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to backfill rank_score on KEV reports in ${indexName}: ${
+          (err as Error).message
+        }. Those reports keep sorting last in the hunt candidates query until re-ingested.`
+      );
+    }
+  }
+};
+
+const backfillIndex = async (
+  esClient: ElasticsearchClient,
+  indexName: string,
+  query: QueryDslQueryContainer,
+  log: Logger
+): Promise<void> => {
+  const result = await esClient.updateByQuery({
+    index: indexName,
+    conflicts: 'proceed',
+    query,
+    script: {
+      lang: 'painless',
+      source: [
+        'double relevance = 0.5;',
+        'if (ctx._source.extracted == null) { ctx._source.extracted = new HashMap(); }',
+        'ctx._source.extracted.relevance = relevance;',
+        'double score = ctx._source.severity != null && ctx._source.severity.score != null ? ctx._source.severity.score : 70;',
+        'ctx._source.rank_score = score * relevance;',
+      ].join(' '),
+    },
+  });
+  if ((result?.updated ?? 0) > 0) {
+    log.info(`Backfilled rank_score on ${result.updated} KEV report(s) in ${indexName}`);
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -1320,22 +1697,48 @@ interface RequiredMapping {
 }
 
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
+  { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.published_at' },
+  { path: 'extracted.artifacts' },
+  { path: 'extracted.core.model_id' },
+  { path: 'extracted.core.context_mode' },
+  { path: 'extracted.core.context_coverage' },
+  { path: 'extracted.core.context_chars' },
+  { path: 'extracted.core.source_chars' },
+  { path: 'extracted.core.adjudication' },
+  { path: 'extracted.core.adjudication.provider' },
+  { path: 'extracted.core.adjudication.reviewed' },
+  { path: 'extracted.core.adjudication.approved' },
+  { path: 'extracted.core.adjudication.downgraded' },
+  { path: 'extracted.core.adjudication.deterministic_references' },
+  { path: 'extracted.core.adjudication.deferred_unreviewed' },
   { path: 'extracted.diamond' },
+  { path: 'extracted.diamond.context_mode' },
+  { path: 'extracted.diamond.context_coverage' },
+  { path: 'extracted.diamond.context_chars' },
+  { path: 'extracted.diamond.source_chars' },
   { path: 'extracted.gate' },
+  { path: 'extracted.gate.context_mode' },
+  { path: 'extracted.gate.context_coverage' },
   { path: 'extracted.vulnerability' },
   { path: 'extracted.iocs.tier' },
   { path: 'extracted.iocs.port' },
-  // v19 writes `reference` and `block_index` (Maltrail chunking) in one putMapping, so
+  { path: 'extracted.iocs.deferred_unreviewed' },
+  // v19 writes `reference` and `block_index` (indicator-list chunking) in one putMapping, so
   // this leaf is checked on its own: a failed v19 followed by a successful v26
   // keyword-bounds putMapping re-adds `reference` but not `block_index`, so verifying
-  // `reference` alone would pass while `dynamic: strict` rejects Maltrail reports that
-  // carry `block_index`. Maltrail ships enabled by default, so this is a live path.
+  // `reference` alone would pass while `dynamic: strict` rejects historical indicator-list
+  // reports that carry `block_index`.
   { path: 'extracted.iocs.block_index' },
   { path: 'lineage.content_scrubbed_at' },
   // v30: attribution/feedback merged into evidence, object -> nested. Not
   // putMapping-able; without this leaf a stale index rejects writes under
   // dynamic:strict and the workflow swallows it.
   { path: 'evidence.space_id' },
+  // Leaves of the hunt coverage ledger, patched onto the nested evidence field in place.
+  { path: 'evidence.hunted_technique_ids' },
+  { path: 'evidence.pending_technique_ids' },
+  { path: 'evidence.coverage_pending' },
   { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.reference', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
@@ -1544,7 +1947,11 @@ export const installIndexTemplates = async ({
   await migrateExistingIndicatorKeywordBounds(esClient, log);
   await migrateExistingReportKeywordBounds(esClient, reportIndices, log);
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
+  await backfillKevRankScore(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
+  await migrateExistingCoreEnrichmentMappings(esClient, reportIndices, log);
+  await migrateExistingPublishedAtMapping(esClient, reportIndices, log);
+  await migrateExistingHuntLedgerMapping(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   // Fails the install (and therefore bootstrap readiness) when a migration left the

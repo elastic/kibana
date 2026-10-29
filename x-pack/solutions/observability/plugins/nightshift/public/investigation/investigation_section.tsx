@@ -8,34 +8,39 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiSkeletonText,
-  EuiSpacer,
   EuiTitle,
+  euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { ListInvestigationItem, Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { getSeverityLabel } from '@kbn/significant-events-schema';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
+import type { SeverityDotColor } from '../common/severity';
 import { SEVERITY_DOT_COLOR } from '../common/severity';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
 } from '../hooks/use_investigation_sections';
-import { InvestigationListItem } from './investigation_list_item';
+import { useKibana } from '../hooks/use_kibana';
+import { InvestigationCardActions } from './investigation_card_actions';
 
 export interface InvestigationSectionProps {
   id: InvestigationSectionId;
-  investigations: ListInvestigationItem[];
+  investigations: InvestigationSummary[];
   total: number;
   hasMore: boolean;
   isInitialLoading?: boolean;
@@ -44,8 +49,16 @@ export interface InvestigationSectionProps {
   onShowMore: () => void;
   onRetry: () => void;
   selectedInvestigationId?: string;
-  onInvestigationClick?: (investigation: ListInvestigationItem) => void;
+  onInvestigationClick?: (investigation: InvestigationSummary) => void;
+  /** Whether the section's body is shown. Sections are open unless the list says otherwise. */
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
+  /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
+  isHighlighted?: boolean;
 }
+
+/** Set on a section by the list, to the height of the sticky page header that would cover it. */
+export const STICKY_HEADER_HEIGHT_VAR = '--nightshiftStickyHeaderHeight';
 
 /** The scroll anchor a severity tile and a `?severity=` deep link both target. */
 export const getInvestigationSectionAnchorId = (id: InvestigationSectionId): string =>
@@ -72,17 +85,17 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
           defaultMessage: 'In progress',
         }),
       };
-    case 'failed':
+    case 'not-rated':
       return {
         ...anchors,
-        title: i18n.translate('xpack.nightshift.investigations.failedSectionTitle', {
-          defaultMessage: 'Failed & cancelled',
+        title: i18n.translate('xpack.nightshift.investigations.notRatedSectionTitle', {
+          defaultMessage: 'Not rated',
         }),
       };
-    case '80-critical':
-    case '60-high':
-    case '40-medium':
-    case '20-low':
+    case 'critical':
+    case 'high':
+    case 'medium':
+    case 'low':
       return { ...anchors, title: getSeverityLabel(id), severity: id };
     default: {
       const exhaustive: never = id;
@@ -126,27 +139,39 @@ export const isInvestigationSectionVisible = (section: InvestigationSectionState
     hasError: section.error != null,
   }) !== 'hidden';
 
-const SectionPanel = ({
+/** The card the header and its content share, so the two sit flush against each other. */
+const SectionCard = ({
   children,
-  paddingSize = 'l',
-  'data-test-subj': dataTestSubj,
+  highlightColor,
 }: {
   children: React.ReactNode;
-  paddingSize?: 'none' | 'l';
-  'data-test-subj'?: string;
+  /** Set while the card is highlighted. */
+  highlightColor?: SeverityDotColor;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const strongBorderColors: Record<SeverityDotColor, string> = {
+    danger: euiTheme.colors.borderStrongDanger,
+    risk: euiTheme.colors.borderStrongRisk,
+    warning: euiTheme.colors.borderStrongWarning,
+    neutral: euiTheme.colors.borderStrongNeutral,
+  };
 
   return (
     <EuiPanel
-      hasBorder
+      // The border is drawn here rather than by `hasBorder`, which paints it with a pseudo-element
+      // that the highlight could not recolor.
+      hasBorder={false}
       hasShadow={false}
-      paddingSize={paddingSize}
-      data-test-subj={dataTestSubj}
+      paddingSize="none"
       css={css`
         box-sizing: border-box;
         overflow: hidden;
-        border-radius: ${euiTheme.size.s};
+        border: ${euiTheme.border.width.thin} solid
+          ${highlightColor != null ? strongBorderColors[highlightColor] : euiTheme.border.color};
+
+        ${euiCanAnimate} {
+          transition: border-color ${euiTheme.animation.normal} ease;
+        }
       `}
     >
       {children}
@@ -154,42 +179,70 @@ const SectionPanel = ({
   );
 };
 
-const SectionHeading = ({
-  presentation: { id, title, severity, headingId },
-  total,
-  showCount,
+/** A part of the card's content, divided from the header (or the part above) by a rule. */
+const SectionBlock = ({
+  children,
+  paddingSize = 'base',
+  'data-test-subj': dataTestSubj,
 }: {
-  presentation: SectionPresentation;
-  total: number;
-  showCount: boolean;
+  children: React.ReactNode;
+  paddingSize?: 'none' | 'base';
+  'data-test-subj'?: string;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {severity != null && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="dot" color={SEVERITY_DOT_COLOR[severity]} aria-hidden={true} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiTitle
-          size="xs"
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-          `}
-        >
-          <h2 id={headingId}>{title}</h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      {showCount && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge data-test-subj={`nightshiftInvestigationSectionCount-${id}`}>{total}</EuiBadge>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <div
+      data-test-subj={dataTestSubj}
+      css={css`
+        border-top: ${euiTheme.border.thin};
+        padding: ${paddingSize === 'none' ? 0 : `${euiTheme.size.m} ${euiTheme.size.base}`};
+      `}
+    >
+      {children}
+    </div>
   );
 };
+
+const SectionHeading = ({
+  presentation: { id, title, severity },
+  total,
+  showCount,
+  isOpen,
+}: {
+  presentation: SectionPresentation;
+  total: number;
+  showCount: boolean;
+  isOpen: boolean;
+}): React.ReactElement => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    {/* Drawn here rather than with EUI's arrow, which is a button of its own. */}
+    <EuiFlexItem grow={false}>
+      <EuiIcon
+        type="chevronSingleRight"
+        aria-hidden="true"
+        css={css`
+          transform: rotate(${isOpen ? '90deg' : '0deg'});
+        `}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <span>{title}</span>
+      </EuiTitle>
+    </EuiFlexItem>
+    {showCount && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge
+          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
+        >
+          {total}
+        </EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
 
 const RetryCallout = ({
   presentation: { id, title },
@@ -248,9 +301,10 @@ const SectionRows = ({
   'investigations' | 'selectedInvestigationId' | 'onInvestigationClick'
 >): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
 
   return (
-    <SectionPanel paddingSize="none">
+    <SectionBlock paddingSize="none">
       <EuiFlexGroup
         role="list"
         direction="column"
@@ -264,16 +318,31 @@ const SectionRows = ({
         `}
       >
         {investigations.map((investigation) => (
-          <EuiFlexItem role="listitem" key={investigation.investigation_id} grow={false}>
-            <InvestigationListItem
-              investigation={investigation}
-              isSelected={investigation.investigation_id === selectedInvestigationId}
-              onClick={onInvestigationClick}
-            />
+          <EuiFlexItem
+            role="listitem"
+            key={investigation.id}
+            grow={false}
+            data-test-subj="nightshiftInvestigationListItem"
+            {...(onInvestigationClick
+              ? getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+                  detail: investigation.in_progress ? 'running' : 'complete',
+                })
+              : {})}
+          >
+            {InvestigationCard && (
+              <InvestigationCard
+                investigation={investigation}
+                isSelected={investigation.id === selectedInvestigationId}
+                onClick={onInvestigationClick}
+                actions={<InvestigationCardActions investigation={investigation} />}
+              />
+            )}
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-    </SectionPanel>
+    </SectionBlock>
   );
 };
 
@@ -323,7 +392,11 @@ export const InvestigationSection = ({
   onRetry,
   selectedInvestigationId,
   onInvestigationClick,
+  isOpen = true,
+  onToggle,
+  isHighlighted = false,
 }: InvestigationSectionProps): React.ReactElement | null => {
+  const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
   const view = getSectionView({
     isInitialLoading,
@@ -335,20 +408,23 @@ export const InvestigationSection = ({
     switch (visibleView) {
       case 'loading':
         return (
-          <SectionPanel data-test-subj={`nightshiftInvestigationSectionSkeleton-${id}`}>
+          <SectionBlock data-test-subj={`nightshiftInvestigationSectionSkeleton-${id}`}>
             <EuiSkeletonText lines={3} />
-          </SectionPanel>
+          </SectionBlock>
         );
       case 'unloadable':
-        return <RetryCallout presentation={presentation} isUnloadable onRetry={onRetry} />;
+        return (
+          <SectionBlock>
+            <RetryCallout presentation={presentation} isUnloadable onRetry={onRetry} />
+          </SectionBlock>
+        );
       case 'rows':
         return (
           <>
             {error != null && (
-              <>
+              <SectionBlock>
                 <RetryCallout presentation={presentation} isUnloadable={false} onRetry={onRetry} />
-                <EuiSpacer size="s" />
-              </>
+              </SectionBlock>
             )}
             <SectionRows
               investigations={investigations}
@@ -356,14 +432,13 @@ export const InvestigationSection = ({
               onInvestigationClick={onInvestigationClick}
             />
             {hasMore && (
-              <>
-                <EuiSpacer size="s" />
+              <SectionBlock>
                 <ShowMoreButton
                   presentation={presentation}
                   isLoadingMore={isLoadingMore}
                   onShowMore={onShowMore}
                 />
-              </>
+              </SectionBlock>
             )}
           </>
         );
@@ -389,10 +464,71 @@ export const InvestigationSection = ({
       direction="column"
       gutterSize="none"
       responsive={false}
+      css={css`
+        /* Jumping here lands below Kibana's fixed headers and the page's sticky header bar (whose height
+           the list measures), with a little room above the card. */
+        scroll-margin-top: calc(
+          var(--euiFixedHeadersOffset, 0px) + var(${STICKY_HEADER_HEIGHT_VAR}, 0px) +
+            ${euiTheme.size.base}
+        );
+
+        /* Focus lands here programmatically after a jump; the square ring would poke out past the
+           card's rounded corners, and the highlighted border already marks the section. */
+        &:focus {
+          outline: none;
+        }
+      `}
     >
-      <SectionHeading presentation={presentation} total={total} showCount={view !== 'loading'} />
-      <EuiSpacer size="s" />
-      {renderBody(view)}
+      {/* A heading cannot live inside the accordion's button, so screen readers get this one, which
+          also names the region. */}
+      <EuiScreenReaderOnly>
+        <h2 id={presentation.headingId}>{presentation.title}</h2>
+      </EuiScreenReaderOnly>
+      <SectionCard
+        highlightColor={
+          isHighlighted && presentation.severity != null
+            ? SEVERITY_DOT_COLOR[presentation.severity]
+            : undefined
+        }
+      >
+        <EuiAccordion
+          id={`${presentation.anchorId}-accordion`}
+          forceState={isOpen ? 'open' : 'closed'}
+          arrowDisplay="none"
+          onToggle={onToggle}
+          paddingSize="none"
+          buttonContent={
+            <SectionHeading
+              presentation={presentation}
+              total={total}
+              showCount={view !== 'loading'}
+              isOpen={isOpen}
+            />
+          }
+          buttonProps={{
+            'data-test-subj': `nightshiftInvestigationSectionToggle-${id}`,
+            // The padding is on the button, so the whole row is clickable and takes the hover.
+            css: css`
+              box-sizing: border-box;
+              align-items: center;
+              block-size: ${euiTheme.size.xxxl};
+              padding: 0 ${euiTheme.size.base};
+
+              &:hover,
+              &:focus {
+                text-decoration: none;
+              }
+
+              &:hover,
+              &:focus-visible {
+                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+              }
+            `,
+          }}
+        >
+          {renderBody(view)}
+        </EuiAccordion>
+      </SectionCard>
     </EuiFlexGroup>
   );
 };

@@ -547,7 +547,7 @@ describe('Prebuilt rule asset schema', () => {
       const result = PrebuiltRuleAsset.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"note: Invalid input: expected string, received object"`
+        `"note: Invalid input: expected string, received Object"`
       );
     });
 

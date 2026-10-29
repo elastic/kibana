@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { EsqlEditor, PageObjects } from '@kbn/scout';
 import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
 
 const setEsqlQueryAndRun = async (
   dashboard: PageObjects['dashboard'],
-  page: ScoutPage,
-  codeEditor: KibanaCodeEditorWrapper,
+  esqlEditor: EsqlEditor,
   query: string
 ) => {
-  await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-  await codeEditor.setCodeEditorValue(query);
-  const searchButton = page.testSubj.locator('ESQLEditor-run-query-button');
-  await expect(searchButton).toBeEnabled();
-  await searchButton.click();
+  await esqlEditor.setQueryAndRun(query);
   await dashboard.waitForRenderComplete();
 };
 
@@ -49,11 +43,10 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
   spaceTest(
     'should keep the table type when the user adds a limit via Try ESQL',
     async ({ pageObjects, page }) => {
-      const { dashboard, lens } = pageObjects;
-      const codeEditor = new KibanaCodeEditorWrapper(page);
+      const { dashboard, lens, esqlEditor } = pageObjects;
 
       await spaceTest.step('set ESQL query and validate the chart type is table', async () => {
-        await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-*');
+        await setEsqlQueryAndRun(dashboard, esqlEditor, 'from logstash-*');
         expect(await lens.getChartSwitchType()).toBe('Table');
       });
 
@@ -96,7 +89,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
       await spaceTest.step(
         'add limit to query and verify table type and bytes column persist',
         async () => {
-          await setEsqlQueryAndRun(dashboard, page, codeEditor, 'from logstash-* | limit 100');
+          await setEsqlQueryAndRun(dashboard, esqlEditor, 'from logstash-* | limit 100');
           await expect(page.testSubj.locator('lnsChartSwitchPopover')).toHaveText('Table');
 
           const bytesDimension = page.testSubj
@@ -111,20 +104,18 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
   spaceTest(
     'should add a limit without changing the chart type or the color',
     async ({ pageObjects, page }) => {
-      const { dashboard, lens } = pageObjects;
-      const codeEditor = new KibanaCodeEditorWrapper(page);
+      const { dashboard, lens, esqlEditor } = pageObjects;
 
       await spaceTest.step('create a line chart panel with a red Y-axis color', async () => {
         await setEsqlQueryAndRun(
           dashboard,
-          page,
-          codeEditor,
+          esqlEditor,
           'from logstash-* | stats maxB = max(bytes) by geo.dest'
         );
         await dashboard.waitForPanelsToLoad(1);
 
         // Wait for flyout to be ready before switching to line chart
-        await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+        await esqlEditor.waitReady();
         await lens.switchToVisualization('line', { search: 'Line' });
         await dashboard.waitForPanelsToLoad(1);
 
@@ -167,8 +158,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
 
           await setEsqlQueryAndRun(
             dashboard,
-            page,
-            codeEditor,
+            esqlEditor,
             'from logstash-* | stats maxB = max(bytes) by geo.dest | limit 10'
           );
 

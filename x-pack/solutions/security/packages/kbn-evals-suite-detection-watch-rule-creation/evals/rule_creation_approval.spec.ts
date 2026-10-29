@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { EvalConnector } from '@kbn/evals';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -76,7 +76,8 @@ const sweepCreatedRules = async (
   createdRuleIds.clear();
 };
 
-evaluate.describe(
+// https://github.com/elastic/security-team/issues/20396
+evaluate.describe.skip(
   'Rule Creation Worker — approval gate',
   { tag: tags.serverless.security.complete },
   () => {
@@ -118,7 +119,7 @@ evaluate.describe(
         log,
       }: {
         fetch: HttpHandler;
-        connector: AvailableConnectorWithId;
+        connector: EvalConnector;
         log: ToolingLog;
       }) => {
         await ensureJudgeConnectorAccessible({ fetch, connector, log });

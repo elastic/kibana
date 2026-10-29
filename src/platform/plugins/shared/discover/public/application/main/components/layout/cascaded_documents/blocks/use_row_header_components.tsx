@@ -148,7 +148,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.viewDocs', {
       defaultMessage: 'Open in new tab',
     }),
-    icon: 'discoverApp',
+    icon: 'productDiscover',
     'data-test-subj': 'dscCascadeRowContextActionOpenInNewTab',
     onClick(this: RowClickActionContext, e) {
       e.preventDefault();

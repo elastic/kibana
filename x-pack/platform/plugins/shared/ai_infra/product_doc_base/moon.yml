@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/management-settings-ids'
   - '@kbn/cloud-plugin'
+  - '@kbn/lock-manager'
 tags:
   - plugin
   - prod
@@ -51,6 +52,4 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

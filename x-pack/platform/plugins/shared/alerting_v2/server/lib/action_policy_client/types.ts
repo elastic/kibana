@@ -13,7 +13,7 @@ import type {
 
 export interface UpdateActionPolicyParams {
   data: UpdateActionPolicyData;
-  options: { id: string; version: string };
+  options: { id: string };
 }
 
 export interface CreateActionPolicyParams {
@@ -46,8 +46,8 @@ export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 export interface FindActionPoliciesArgs {
   page?: number;
   perPage?: number;
+  filter?: string;
   search?: string;
-  enabled?: boolean;
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }
@@ -59,6 +59,11 @@ export interface FindActionPoliciesResponse {
   perPage: number;
 }
 
-export interface MatchActionPoliciesForRuleParams {
-  ruleTags?: string[];
+export interface MatchActionPoliciesParams {
+  routingTags?: string[];
+}
+
+export interface GetRoutingTagsParams {
+  search?: string;
+  policiesPerTag: number;
 }

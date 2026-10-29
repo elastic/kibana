@@ -340,6 +340,26 @@ describe('MetricVisComponent', function () {
       expect(screen.getByText(secondaryValue)).toBeInTheDocument();
     });
 
+    it('should show the secondary metric name on hover when the name is displayed as a tooltip', async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      await renderMetricChart({
+        config: {
+          ...config,
+          metric: { ...config.metric, secondaryNameVisibility: 'tooltip' },
+          dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+        },
+      });
+
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      const secondaryValue = screen.getByText(`number-${table.rows[0][minPriceColumnId]}`);
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+
+      await user.hover(secondaryValue);
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(secondaryLabel);
+    });
+
     it('should display progress bar if min and max provided', async () => {
       const { rerender } = await renderMetricChart({
         config: {
@@ -504,6 +524,37 @@ describe('MetricVisComponent', function () {
     });
   });
 
+  it.each([undefined, minPriceColumnId])(
+    'should display N/A without calculating palette bounds for empty data with max %s',
+    async (max) => {
+      mockGetColorForValue.mockClear();
+      await renderMetricChart({
+        data: { ...table, rows: [] },
+        config: {
+          dimensions: { metric: basePriceColumnId, max },
+          metric: {
+            ...defaultMetricParams,
+            palette: {
+              type: 'palette',
+              name: 'custom',
+              params: {
+                range: 'percent',
+                colors: ['#54B399', '#E7664C'],
+                gradient: false,
+                stops: [],
+                rangeMin: 0,
+                rangeMax: 100,
+              },
+            },
+          },
+        },
+      });
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+      expect(mockGetColorForValue).not.toHaveBeenCalled();
+    }
+  );
+
   it('should convert null values to NaN', async () => {
     const metricId = faker.lorem.word();
 
@@ -642,8 +693,8 @@ describe('MetricVisComponent', function () {
 
       // 5 columns x 2 rows by default
       expect(screen.getByRole('list')).toHaveStyle({
-        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr))',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr))',
       });
 
       // now configure maxCols: 2
@@ -659,8 +710,8 @@ describe('MetricVisComponent', function () {
 
       // changed to 2 columns x 3 rows now
       expect(screen.getByRole('list')).toHaveStyle({
-        'grid-template-columns': 'repeat(2, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(3, minmax(80px, 1fr)',
+        'grid-template-columns': 'repeat(2, minmax(0, 1fr))',
+        'grid-template-rows': 'repeat(3, minmax(80px, 1fr))',
       });
 
       // now configure maxCols: 5 and minTiles: 10
@@ -677,8 +728,8 @@ describe('MetricVisComponent', function () {
 
       // changed to 5 columns x 2 rows now
       expect(screen.getByRole('list')).toHaveStyle({
-        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr))',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr))',
       });
     });
 
@@ -774,8 +825,8 @@ describe('MetricVisComponent', function () {
       // will show 10 (5 x 2) empty tiles (higher than config)
       expect(screen.getAllByRole('presentation')).toHaveLength(10);
       expect(screen.getByRole('list')).toHaveStyle({
-        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr))',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr))',
       });
     });
   });

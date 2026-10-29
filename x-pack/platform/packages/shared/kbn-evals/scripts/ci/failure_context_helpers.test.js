@@ -24,8 +24,13 @@ const {
 const SUITE = 'significant-events';
 
 const CONNECTOR = {
-  config: { apiUrl: 'https://openrouter.test/api/v1/chat/completions', defaultModel: 'test/model' },
-  secrets: { apiKey: 'sk-test' },
+  config: {
+    providerConfig: {
+      url: 'https://openrouter.test/api/v1/chat/completions',
+      model_id: 'test/model',
+    },
+  },
+  secrets: { providerSecrets: { api_key: 'sk-test' } },
 };
 
 const MESSAGES = [
@@ -122,7 +127,7 @@ describe('buildOpenrouterChatRequest', () => {
   it('builds a plain text request by default (weekly rollup path)', () => {
     const { url, headers, body } = buildOpenrouterChatRequest(CONNECTOR, MESSAGES);
 
-    expect(url).toBe(CONNECTOR.config.apiUrl);
+    expect(url).toBe(CONNECTOR.config.providerConfig.url);
     expect(headers.authorization).toBe('Bearer sk-test');
     expect(body).toEqual({
       model: 'test/model',
@@ -149,7 +154,7 @@ describe('buildOpenrouterChatRequest', () => {
 
   it('throws when the connector is incomplete', () => {
     expect(() => buildOpenrouterChatRequest({ config: {}, secrets: {} }, MESSAGES)).toThrow(
-      'OpenRouter connector is missing apiUrl, defaultModel, or apiKey'
+      'OpenRouter connector is missing providerConfig.url, providerConfig.model_id, or providerSecrets.api_key'
     );
   });
 });
@@ -297,10 +302,15 @@ describe('resolveTriageConnector', () => {
       JSON.stringify({
         [TRIAGE_OPENROUTER_CONNECTOR_ID]: {
           config: {
-            apiUrl: 'https://example.invalid/chat',
-            defaultModel: 'google/gemini-3.7-flash-stale',
+            provider: 'openai',
+            taskType: 'chat_completion',
+            inferenceId: TRIAGE_OPENROUTER_CONNECTOR_ID,
+            providerConfig: {
+              model_id: 'google/gemini-3.7-flash-stale',
+              url: 'https://example.invalid/chat',
+            },
           },
-          secrets: { apiKey: 'sk-generated' },
+          secrets: { providerSecrets: { api_key: 'sk-generated' } },
         },
       }),
       'utf8'
@@ -309,7 +319,7 @@ describe('resolveTriageConnector', () => {
     const { connector, modelId } = resolveTriageConnector();
 
     expect(modelId).toBe('openrouter-google-gemini-3-7-flash');
-    expect(connector.config.defaultModel).toBe('google/gemini-3.7-flash');
-    expect(connector.secrets.apiKey).toBe('sk-test');
+    expect(connector.config.providerConfig.model_id).toBe('google/gemini-3.7-flash');
+    expect(connector.secrets.providerSecrets.api_key).toBe('sk-test');
   });
 });

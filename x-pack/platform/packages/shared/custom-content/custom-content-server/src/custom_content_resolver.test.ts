@@ -70,6 +70,17 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).toContain('Output ONLY valid HTML');
     expect(systemArg).not.toContain('Liquid template syntax');
   });
+
+  it('tells the model that links are only allowed to Dashboards and Discover', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    await resolve({ prompt: 'Show a KPI card' });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Links are only allowed to Dashboards and Discover');
+    expect(systemArg).toContain('external URLs, is removed at render time');
+    expect(systemArg).not.toContain('Do NOT use <a> anchor tags');
+  });
 });
 
 describe('createCustomContentTemplateResolver — output validation', () => {
@@ -169,7 +180,7 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     [
       'a rejected query',
       responseError('verification_exception', 400, 'Unknown column [nope]'),
-      /ES\|QL query is invalid: Unknown column \[nope\].*generate_esql/,
+      /ES\|QL query is invalid: Unknown column \[nope\].*if it was generated, retry with a more specific description/,
     ],
     [
       'unparseable syntax',

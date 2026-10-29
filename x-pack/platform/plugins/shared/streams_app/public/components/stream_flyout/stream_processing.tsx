@@ -86,7 +86,7 @@ export function StreamProcessing({ name, refreshStreams }: StreamFlyoutProps) {
           .euiFlyoutBody__overflowContent {
             box-sizing: border-box;
             height: 100%;
-            padding: ${euiTheme.size.l};
+            padding: ${euiTheme.size.xxs};
           }
 
           .euiFlyoutBody__overflowContent > div {

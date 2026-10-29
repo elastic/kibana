@@ -1,24 +1,26 @@
 # mitre_attack
 
-Managed MITRE ATT&CK data source for Kibana.
+Managed MITRE data source for Kibana.
 
-This plugin makes structured MITRE ATT&CK data available to the Security solution without external network calls. It registers a Saved Object type, populates it at startup from an artifact bundled with Kibana, and exposes a read-only client for server-side consumers.
+This plugin makes structured MITRE ATT&CK Enterprise and MITRE ATLAS data available to the Security solution without external network calls. It registers a Saved Object type, populates it at startup from an artifact bundled with Kibana, and exposes a read-only client for server-side consumers.
 
 It replaces the hardcoded `mitre_tactics_techniques.ts` blob in `security_solution`, which is a large generated file that has to be lazily loaded in the browser, carries no entity descriptions, and produces a very large pull request on every MITRE version bump.
 
 ## What this plugin owns
 
 - The `mitre-attack-entity` Saved Object type. Space agnostic, hidden, stored in the Security Solution Saved Objects index.
-- Startup population of that type from the artifact shipped in `@kbn/security-mitre-attack-server`.
+- Startup population of that type from the artifact shipped in `@kbn/security-mitre-attack-server`. The artifact carries every supported framework (ATT&CK Enterprise and ATLAS); each entity is stamped with its `framework` and `framework_version`.
 - `MitreAttackDataClient`, a read-only client returned from the server `start` contract.
 
 ## Configuration
 
-The plugin is disabled by default. Nothing is registered and nothing is populated unless this key is set:
+The plugin is enabled by default. To turn the managed source off, set:
 
 ```yaml
-xpack.mitreAttack.managedSourceEnabled: true
+xpack.mitreAttack.managedSourceEnabled: false
 ```
+
+With the flag off nothing is registered and nothing is populated, and `security_solution` consumers fall back to the legacy `mitre_tactics_techniques.ts` blob. The flag and the legacy blob are scheduled for removal once the cutover is confirmed (tracked in https://github.com/elastic/security-team/issues/19076).
 
 The value is exposed to the browser, so the public `start` contract reports it as `isEnabled` for UI code that needs to choose between this data source and the legacy blob.
 
@@ -50,8 +52,11 @@ public start(core: CoreStart, plugins: { mitreAttack?: MitreAttackServerStart })
     // All active enterprise tactics and techniques for the latest shipped version.
     const collection = await dataClient.list({ types: ['tactic', 'technique'] });
 
-    // A single entity by its MITRE id.
+    // A single entity by its MITRE id (enterprise by default).
     const tactic = await dataClient.getById('TA0001');
+
+    // ATLAS entities (AML.* ids) live under their own framework.
+    const atlasTechnique = await dataClient.getById('AML.T0024', { framework: 'atlas' });
   }
 }
 ```
@@ -62,18 +67,18 @@ In `setup()`, the plugin registers a `mitreAttack` request handler context via `
 
 ## Internal API route
 
-`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE ATT&CK entities grouped by type, with the `description` field omitted for compactness.
+`GET /internal/mitre/entities` (version `1`) returns all indexed MITRE entities for one framework grouped by type, with the `description` field omitted for compactness. Bucket order is part of the contract: tactics are returned in matrix order (ascending `position`), techniques and subtechniques alphabetically by `name`, so consumers do not need to sort.
 
 | Query parameter | Type | Default | Notes |
 |---|---|---|---|
-| `framework` | `'enterprise'` | `'enterprise'` | Currently the only supported value |
+| `framework` | `'enterprise'` \| `'atlas'` | `'enterprise'` | Each response covers a single framework |
 | `framework_version` | string ≤ 32 chars | latest indexed | Pin to a specific version |
 | `types` | comma-separated or array of `'tactic'`, `'technique'`, `'subtechnique'` (max 3) | all | Filter by entity type |
 | `status` | `'active'` \| `'all'` | `'active'` | `'all'` includes revoked and deprecated entities |
 
 **Authorization:** the route opts out of authorization (`authz: { enabled: false }`) with a documented reason. It serves public MITRE reference data bundled with Kibana, holds no user or tenant data, and is consumed by features whose privileges differ, so gating on any single privilege would deny legitimate callers. Requests are still authenticated.
 
-**404 when flag off:** the route is only registered when `managedSourceEnabled: true`. Requests when the flag is off receive a 404 rather than a 403, because the route does not exist at all. A request that arrives after the flag is on but before `start()` has finished returns 503, signalling that the client is not yet ready and the caller should retry.
+**404 when flag off:** the route is only registered when `managedSourceEnabled` is `true` (the default). Requests when the flag is off receive a 404 rather than a 403, because the route does not exist at all. A request that arrives after the flag is on but before `start()` has finished returns 503, signalling that the client is not yet ready and the caller should retry.
 
 ## Saved Object mappings
 

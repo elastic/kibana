@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  AS_CODE_DATA_VIEW_SPEC_TYPE,
-  AS_CODE_ESQL_DATA_SOURCE_TYPE,
-} from '@kbn/as-code-data-views-schema';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { get, isUndefined, omitBy } from 'lodash';
 import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import type { StoredVisContextRequestData } from './vis_context';
 
-/** Rebuilds the chart fingerprint from its ES|QL attributes, falling back to available tab fields. */
-export const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
+/** Rebuilds the chart fingerprint, using the supplied ID for an inline Data View. */
+export const getVisContextRequestData = (
+  tab: DiscoverSessionApiTab,
+  inlineDataViewId?: string
+): StoredVisContextRequestData => {
   const breakdownField = tab.breakdown_field || undefined;
   const esqlFingerprint = tab.vis_context
     ? extractEsqlFingerprint(tab.vis_context.attributes)
@@ -29,11 +30,17 @@ export const getVisContextRequestData = (tab: DiscoverSessionApiTab) => {
   }
 
   const { data_source: dataSource } = tab;
-  const dataViewId = 'ref_id' in dataSource ? dataSource.ref_id : undefined;
+  let dataViewId: string | undefined;
+
+  if ('ref_id' in dataSource) {
+    dataViewId = dataSource.ref_id;
+  } else if (dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE) {
+    dataViewId = inlineDataViewId;
+  }
+
   const timeField =
     dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? dataSource.time_field : undefined;
-  const timeInterval =
-    dataSource.type === AS_CODE_ESQL_DATA_SOURCE_TYPE ? undefined : tab.chart_interval;
+  const timeInterval = 'chart_interval' in tab ? tab.chart_interval : undefined;
 
   return omitBy({ dataViewId, timeField, timeInterval, breakdownField }, isUndefined);
 };

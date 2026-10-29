@@ -64,7 +64,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
-
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
         '**/ai_suggestions_*.spec.ts',
@@ -75,6 +77,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'mki',
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
@@ -117,6 +122,17 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ])
     : scoutDefaultProjects;
 
+  const chromiumArgs = [
+    // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+    ...(process.env.KIBANA_TEST_IPV6_ONLY === 'true'
+      ? ['--host-resolver-rules=MAP localhost [::1]']
+      : []),
+    // Chromium strips credentials embedded in HTTP(S)_PROXY, so it cannot use
+    // Citadel's per-job authenticated proxy URL. Keep only the browser direct;
+    // the Playwright runner and the rest of the job remain proxied.
+    ...(process.env.USE_CITADEL_PROXY === 'true' ? ['--no-proxy-server'] : []),
+  ];
+
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
     metadata: options.metadata,
@@ -157,6 +173,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
       ignoreHTTPSErrors: true,
+      ...(chromiumArgs.length > 0 ? { launchOptions: { args: chromiumArgs } } : {}),
     },
 
     // Timeout for each test, includes test, hooks and fixtures

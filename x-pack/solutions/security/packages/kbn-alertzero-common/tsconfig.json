@@ -18,6 +18,5 @@
     "@kbn/zod",
     "@kbn/deeplinks-security",
     "@kbn/workflows",
-    "@kbn/agentic-investigations-plugin",
   ]
 }

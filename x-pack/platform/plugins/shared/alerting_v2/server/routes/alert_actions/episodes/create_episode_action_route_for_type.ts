@@ -23,7 +23,7 @@ import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../../lib/security/privileges';
 import { ALERTING_V2_EPISODES_API_PATH } from '../../constants';
-import { BaseAlertingRoute } from '../../base_alerting_route';
+import { BaseAlertingRoute, type AlertingRouteSchemas } from '../../base_alerting_route';
 import { AlertingRouteContext } from '../../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptions';
 
@@ -38,6 +38,9 @@ interface CreateEpisodeActionRouteForTypeOptions<
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
   access?: RouteConfigOptions<RouteMethod>['access'];
+  availability?: RouteConfigOptions<RouteMethod>['availability'];
+  /** Statuses only some action types can produce, declared by those routes. */
+  additionalResponses?: NonNullable<AlertingRouteSchemas['response']>;
 }
 
 export const createEpisodeActionRouteForType = <
@@ -49,6 +52,8 @@ export const createEpisodeActionRouteForType = <
   bodySchema,
   oasOperationObject,
   access,
+  availability,
+  additionalResponses,
 }: CreateEpisodeActionRouteForTypeOptions<TAction>): RouteDefinition<
   EpisodeAlertActionParams,
   unknown,
@@ -63,7 +68,7 @@ export const createEpisodeActionRouteForType = <
   @injectable()
   class CreateTypedEpisodeActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_EPISODES_API_PATH}/{episode_id}/${pathSuffix}`;
+    static path = `${ALERTING_V2_EPISODES_API_PATH}/{id}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -71,8 +76,9 @@ export const createEpisodeActionRouteForType = <
     };
     static routeOptions = {
       access,
+      availability,
       summary,
-      description: 'Create an action for a specific alert episode.',
+      description: 'Create an action for a specific alert.',
       oasOperationObject,
     } as const;
     static schemas = {
@@ -90,9 +96,9 @@ export const createEpisodeActionRouteForType = <
         },
         404: {
           body: () => errorResponseSchema,
-          description:
-            'Indicates the alert episode was not found, or is not the latest episode of its series (activate and deactivate only).',
+          description: 'Indicates the alert was not found.',
         },
+        ...additionalResponses,
       },
     };
 
@@ -109,7 +115,7 @@ export const createEpisodeActionRouteForType = <
 
     protected async execute() {
       await this.alertActionsClient.createEpisodeAction({
-        episodeId: this.request.params.episode_id,
+        episodeId: this.request.params.id,
         action: {
           action_type: actionType,
           ...this.request.body,

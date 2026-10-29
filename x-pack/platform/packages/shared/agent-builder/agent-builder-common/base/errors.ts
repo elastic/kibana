@@ -9,6 +9,7 @@ import { ServerSentEventError } from '@kbn/sse-utils';
 import { AgentExecutionErrorCode } from '../agents/execution_errors';
 import type { ExecutionErrorMetaOf } from '../agents/execution_errors';
 import type { HookExecutionMode, HookLifecycle } from '../hooks/lifecycle';
+import type { SerializedExecutionError } from '../agents/execution_status';
 
 /**
  * Code to identify agentBuilder errors
@@ -23,6 +24,7 @@ export enum AgentBuilderErrorCode {
   agentUnavailable = 'agentUnavailable',
   conversationNotFound = 'conversationNotFound',
   conversationWriteConflict = 'conversationWriteConflict',
+  conversationBusy = 'conversationBusy',
   conversationAlreadyExists = 'conversationAlreadyExists',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
@@ -62,6 +64,35 @@ export const createAgentBuilderError = (
   meta?: Record<string, any>
 ): AgentBuilderError<AgentBuilderErrorCode> => {
   return new AgentBuilderError(errorCode, message, meta ?? {});
+};
+
+/**
+ * Rebuilds an `AgentBuilderError` from its serialized form, including the `cause` chain, so that
+ * re-serializing it loses nothing and the error type guards keep working.
+ */
+export const deserializeExecutionError = (
+  serialized: SerializedExecutionError
+): AgentBuilderError<AgentBuilderErrorCode> => {
+  const error = createAgentBuilderError(serialized.code, serialized.message, serialized.meta);
+  const causes = serialized.causes ?? [];
+  let cause: (Error & { code?: string }) | undefined;
+  for (const link of [...causes].reverse()) {
+    const next: Error & { code?: string; cause?: unknown } = new Error(link.message);
+    if (link.name) {
+      next.name = link.name;
+    }
+    if (link.code) {
+      next.code = link.code;
+    }
+    if (cause) {
+      next.cause = cause;
+    }
+    cause = next;
+  }
+  if (cause) {
+    (error as Error & { cause?: unknown }).cause = cause;
+  }
+  return error;
 };
 
 /**
@@ -303,6 +334,35 @@ export const createConversationWriteConflictError = ({
     AgentBuilderErrorCode.conversationWriteConflict,
     `Conversation ${conversationId} was modified concurrently and the change could not be saved`,
     { ...meta, conversationId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when another live execution already holds the conversation.
+ */
+export type AgentBuilderConversationBusyError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationBusy>;
+
+/**
+ * Checks if the given error is a {@link AgentBuilderConversationBusyError}
+ */
+export const isConversationBusyError = (err: unknown): err is AgentBuilderConversationBusyError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationBusy;
+};
+
+export const createConversationBusyError = ({
+  conversationId,
+  activeExecutionId,
+  meta = {},
+}: {
+  conversationId: string;
+  activeExecutionId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationBusyError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationBusy,
+    `Conversation ${conversationId} already has an execution in progress`,
+    { ...meta, conversationId, activeExecutionId, statusCode: 409 }
   );
 };
 
@@ -633,6 +693,7 @@ export const AgentBuilderErrorUtils = {
   isAgentUnavailableError,
   isConversationNotFoundError,
   isConversationWriteConflictError,
+  isConversationBusyError,
   isPluginNotFoundError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
@@ -650,6 +711,7 @@ export const AgentBuilderErrorUtils = {
   createAgentUnavailableError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
+  createConversationBusyError,
   createPluginNotFoundError,
   createWorkflowAbortedError,
   createWorkflowExecutionError,

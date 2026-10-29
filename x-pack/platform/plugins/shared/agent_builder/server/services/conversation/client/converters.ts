@@ -8,6 +8,7 @@
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   Conversation,
+  ConversationEvent,
   ConversationRound,
   ConversationRoundStep,
   ConversationAttachmentSummary,
@@ -35,6 +36,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ExecutionPeek } from '../../execution/persistence';
 import type {
   ConversationPermissions,
   ConversationWithPermissions,
@@ -100,6 +102,7 @@ export const fromEsWithoutRounds = (
     user: {
       id: document._source.user_id,
       username: document._source.user_name,
+      type: document._source.user_type,
     },
     title: document._source.title,
     created_at: document._source.created_at,
@@ -119,6 +122,7 @@ export const fromEsWithoutRounds = (
           },
         }
       : {}),
+    ...(document._source.feedback ? { feedback: document._source.feedback } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -237,7 +241,11 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
+export const fromEs = (
+  document: Document,
+  user: CurrentUser,
+  execution?: ExecutionPeek
+): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
   const perUserFlags = {
     read_by: migrateReadBy(document._source),
@@ -275,10 +283,12 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
+    active_execution: document._source!.active_execution,
+    ...(execution ? { execution } : {}),
   };
 
   const events =
-    isEventsNative && storedEvents && storedEvents.length > 0
+    isEventsNative && storedEvents != null && storedEvents.length > 0
       ? storedEvents
       : roundsToEvents(conversation);
 
@@ -330,6 +340,7 @@ const stripInternalFields = (conversation: NormalizedConversation): Conversation
   const {
     read_by: _readBy,
     pinned_by: _pinnedBy,
+    execution: _execution,
     ...conversationWithoutInternalFields
   } = conversation;
 
@@ -403,6 +414,7 @@ export const toEs = (
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    user_type: conversation.user.type,
     space,
     title: conversation.title,
     created_at: conversation.created_at,
@@ -426,6 +438,7 @@ export const toEs = (
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
     // Only events-native conversations persist their timeline; legacy ones keep deriving it
     // from rounds on read (see fromEs).
     ...(isEventsNative
@@ -433,6 +446,9 @@ export const toEs = (
           events: conversation.events ?? [],
           schema_version: conversation.schema_version,
         }
+      : {}),
+    ...(conversation.feedback && Object.keys(conversation.feedback).length > 0
+      ? { feedback: conversation.feedback }
       : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
@@ -491,7 +507,8 @@ export const updateConversation = ({
   return {
     ...merged,
     schema_version: CONVERSATION_SCHEMA_VERSION,
-    events: reconcileEvents(merged),
+    // `conversation.rounds` are the document's rounds at write time: what the caller could see.
+    events: reconcileEvents(merged, conversation.rounds),
   };
 };
 
@@ -500,11 +517,14 @@ export const createRequestToEs = ({
   space,
   currentUser,
   creationDate,
+  leadingEvents = [],
 }: {
-  conversation: ConversationCreateRequest;
+  /** `active_execution` comes from the create request's `activeExecution`, never from the request itself. */
+  conversation: ConversationCreateRequest & Pick<Conversation, 'active_execution'>;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
+  leadingEvents?: ConversationEvent[];
 }): ConversationProperties => {
   // Honor conversation.user override if provided (used for persistent sub-agent
   // creations where ownership is snapshotted from the parent conversation).
@@ -514,22 +534,27 @@ export const createRequestToEs = ({
   const forEvents: Conversation = {
     id: '',
     agent_id: conversation.agent_id,
-    user: { id: effectiveUser.id, username: effectiveUser.username },
+    user: { id: effectiveUser.id, username: effectiveUser.username, type: effectiveUser.type },
     title: conversation.title,
     created_at: createdAt,
     updated_at: createdAt,
     rounds: conversation.rounds,
     ...(conversation.origin ? { origin: conversation.origin } : {}),
   };
-  const events =
-    conversation.events && conversation.events.length > 0
+  // `leadingEvents` (the `conversation_created` activity) stay outside the caller-events-else-rounds
+  // choice, so a caller who sent none still gets the rounds projection.
+  const events = [
+    ...leadingEvents,
+    ...(conversation.events && conversation.events.length > 0
       ? conversation.events
-      : roundsToEvents(forEvents);
+      : roundsToEvents(forEvents)),
+  ];
 
   return {
     agent_id: conversation.agent_id,
     user_id: effectiveUser.id,
     user_name: effectiveUser.username,
+    user_type: effectiveUser.type,
     space,
     title: conversation.title,
     created_at: createdAt,
@@ -557,5 +582,6 @@ export const createRequestToEs = ({
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
   };
 };

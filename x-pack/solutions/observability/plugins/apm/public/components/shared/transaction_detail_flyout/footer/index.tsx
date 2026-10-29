@@ -5,49 +5,87 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import type { FlyoutFooterMenuItem, FlyoutFooterMenuPanel } from '@kbn/flyout-template';
+import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { useMemo } from 'react';
+import { getFlyoutFooterMenuItem } from '../../flyout_footer_menu/get_flyout_footer_menu_item';
 import { TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useTransactionDetailFlyoutLinks } from '../hooks/use_transaction_detail_flyout_links';
 
-export function TransactionDetailFlyoutFooter() {
+const DATA_TEST_SUBJ_PREFIX = 'transactionDetailFlyoutActionsMenu';
+
+export interface TransactionDetailFlyoutFooterMenu {
+  panels: FlyoutFooterMenuPanel[];
+  isLoading: boolean;
+  hasActions: boolean;
+}
+
+/**
+ * Resolves the transaction detail flyout footer "Actions" menu as `Footer.PrimaryActionMenu`
+ * panels. Items use the `transactionDetailFlyoutActionsMenuItem-*` test subjects.
+ */
+export function useTransactionDetailFlyoutFooterMenu(): TransactionDetailFlyoutFooterMenu {
   const {
     loading,
+    apm: { transactionDetailsHref },
     discover: { href: discoverHref, openInDiscoverTab },
   } = useTransactionDetailFlyoutLinks();
 
-  const label = openInDiscoverTab
-    ? i18n.translate('xpack.apm.transactionDetailFlyout.openTracesInDiscoverTabAction', {
-        defaultMessage: 'Open traces in a Discover tab',
-      })
-    : i18n.translate('xpack.apm.transactionDetailFlyout.openTracesInDiscoverAction', {
-        defaultMessage: 'Open traces in Discover',
-      });
+  const panels = useMemo<FlyoutFooterMenuPanel[]>(() => {
+    const items: FlyoutFooterMenuItem[] = [];
 
-  return (
-    <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            size="s"
-            iconType="discoverApp"
-            isLoading={loading}
-            isDisabled={loading || !(openInDiscoverTab || discoverHref)}
-            data-test-subj="transactionDetailFlyoutOpenInDiscoverButton"
-            {...(openInDiscoverTab ? { onClick: openInDiscoverTab } : { href: discoverHref })}
-            {...getEbtProps({
+    if (discoverHref || openInDiscoverTab) {
+      items.push(
+        getFlyoutFooterMenuItem(
+          {
+            id: 'openTracesInDiscover',
+            name: openInDiscoverTab
+              ? i18n.translate('xpack.apm.transactionDetailFlyout.openTracesInDiscoverTabAction', {
+                  defaultMessage: 'Open traces in a Discover tab',
+                })
+              : i18n.translate('xpack.apm.transactionDetailFlyout.openTracesInDiscoverAction', {
+                  defaultMessage: 'Open traces in Discover',
+                }),
+            href: discoverHref,
+            onClick: openInDiscoverTab,
+            ebt: {
               action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
               element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
               detail: 'traces',
-            })}
-          >
-            {label}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
-  );
+            },
+          },
+          DATA_TEST_SUBJ_PREFIX
+        )
+      );
+    }
+
+    if (transactionDetailsHref) {
+      items.push(
+        getFlyoutFooterMenuItem(
+          {
+            id: 'openTransactionDetails',
+            name: i18n.translate('xpack.apm.transactionDetailFlyout.openTransactionDetailsAction', {
+              defaultMessage: 'Open transaction details',
+            }),
+            href: transactionDetailsHref,
+            ebt: {
+              action: EBT_CLICK_ACTIONS.VIEW_SPAN,
+              element: TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
+              detail: 'transactionDetails',
+            },
+          },
+          DATA_TEST_SUBJ_PREFIX
+        )
+      );
+    }
+
+    return [{ id: 0, items }];
+  }, [discoverHref, openInDiscoverTab, transactionDetailsHref]);
+
+  const hasActions = panels[0].items.length > 0;
+
+  // Indices loading only affects Discover; keep the menu usable when other actions
+  // (e.g. transaction details via locator) are already available.
+  return { panels, isLoading: loading && !hasActions, hasActions };
 }

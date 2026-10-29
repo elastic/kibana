@@ -5,25 +5,68 @@
  * 2.0.
  */
 
-import type { EpisodeDataSource } from '../types/episode_data_source';
+import {
+  ALERT_SEVERITY_MAJOR,
+  ALERT_SEVERITY_MINOR,
+  ALERT_SEVERITY_WARNING,
+  getRuleDetailsRoute,
+  STACK_MANAGEMENT_RULES_HOST,
+  type LocatorHost,
+} from '@kbn/rule-data-utils';
+import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
+import {
+  EPISODE_SEVERITY_WARNING_LABEL,
+  EPISODE_SEVERITY_MINOR_LABEL,
+  EPISODE_SEVERITY_MAJOR_LABEL,
+} from '../components/severity/translations';
+import { getSeveritySortRank } from '../components/severity/severity_utils';
 import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
 import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
+import { ELASTIC_SOURCE_ICON, CLASSIC_SOURCE_LABEL } from '../source_labels';
 import { resolveClassicRules } from './apis/resolve_classic_rules';
+import { fetchClassicSearchFields } from './apis/fetch_classic_search_fields';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
 
+export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
+  {
+    value: ALERT_SEVERITY_WARNING,
+    label: EPISODE_SEVERITY_WARNING_LABEL,
+    color: 'warning',
+    sortRank: getSeveritySortRank(ALERT_SEVERITY_WARNING),
+  },
+  {
+    value: ALERT_SEVERITY_MINOR,
+    label: EPISODE_SEVERITY_MINOR_LABEL,
+    color: 'neutral',
+    sortRank: getSeveritySortRank(ALERT_SEVERITY_MINOR),
+  },
+  {
+    value: ALERT_SEVERITY_MAJOR,
+    label: EPISODE_SEVERITY_MAJOR_LABEL,
+    color: 'risk',
+    sortRank: getSeveritySortRank(ALERT_SEVERITY_MAJOR),
+  },
+];
+
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
+  host?: LocatorHost;
 }
 
 export const createClassicEpisodeSource = ({
   ruleTypeIds,
+  host = STACK_MANAGEMENT_RULES_HOST,
 }: CreateClassicEpisodeSourceOptions): EpisodeDataSource => ({
   id: CLASSIC_EPISODE_SOURCE_ID,
+  label: CLASSIC_SOURCE_LABEL,
+  icon: ELASTIC_SOURCE_ICON,
   queryKeyPrefix: classicAlertQueryKeys.all(),
+
+  severityExtensions: CLASSIC_SEVERITY_EXTENSIONS,
 
   fetchEpisodes: ({ services, pageSize, filterState, sortState, timeRange, abortSignal }) =>
     fetchClassicAlertsAsEpisodes({
@@ -32,6 +75,7 @@ export const createClassicEpisodeSource = ({
       pageSize,
       filterState,
       sortState,
+      severityExtensions: CLASSIC_SEVERITY_EXTENSIONS,
       timeRange,
       abortSignal,
     }),
@@ -70,5 +114,11 @@ export const createClassicEpisodeSource = ({
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
 
+  fetchSearchFields: ({ services, abortSignal }) =>
+    fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
+
   actionExtensions: classicActionExtensions,
+
+  getRuleDetailsHref: (ruleId) =>
+    `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
 });

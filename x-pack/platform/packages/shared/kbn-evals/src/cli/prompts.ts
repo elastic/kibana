@@ -11,6 +11,7 @@ import { parse } from 'yaml';
 import inquirer from 'inquirer';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { resolveEvalSuites, type EvalSuiteDefinition } from './suites';
+import { DEFAULT_SCOUT_TARGET, type ScoutTarget } from './scout_target';
 
 const KIBANA_DEV_YML = 'config/kibana.dev.yml';
 
@@ -20,17 +21,17 @@ export interface AvailableConnectorEntry {
   source: 'env' | 'kibana.dev.yml';
 }
 
-export const parseConnectorsFromEnv = (): AvailableConnectorEntry[] => {
-  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS;
-  if (!raw) {
-    return [];
-  }
+function parseEnvVar(envVarName: string): AvailableConnectorEntry[] {
+  const raw = process.env[envVarName];
+  if (!raw) return [];
 
   try {
-    const parsed = JSON.parse(Buffer.from(raw, 'base64').toString('utf-8')) as Record<
-      string,
-      { name?: string }
-    >;
+    let parsed: Record<string, { name?: string }>;
+    try {
+      parsed = JSON.parse(Buffer.from(raw, 'base64').toString('utf-8'));
+    } catch {
+      parsed = JSON.parse(raw);
+    }
     return Object.entries(parsed).map(([id, connector]) => ({
       id,
       name: connector?.name ?? id,
@@ -39,6 +40,21 @@ export const parseConnectorsFromEnv = (): AvailableConnectorEntry[] => {
   } catch {
     return [];
   }
+}
+
+/**
+ * Returns connectors from both `KIBANA_TESTING_INFERENCE_ENDPOINTS` (inference endpoints)
+ * and `KIBANA_TESTING_AI_CONNECTORS` (stack connectors). Inference endpoints are listed first;
+ * duplicates from the stack connector env var are excluded.
+ */
+export const parseConnectorsFromEnv = (): AvailableConnectorEntry[] => {
+  const inferenceEndpoints = parseEnvVar('KIBANA_TESTING_INFERENCE_ENDPOINTS');
+  const stackConnectors = parseEnvVar('KIBANA_TESTING_AI_CONNECTORS');
+
+  const seen = new Set(inferenceEndpoints.map((c) => c.id));
+  const deduped = stackConnectors.filter((c) => !seen.has(c.id));
+
+  return [...inferenceEndpoints, ...deduped];
 };
 
 interface KibanaDevYmlConnector {
@@ -75,9 +91,9 @@ export const parseConnectorsFromKibanaDevYml = (repoRoot: string): AvailableConn
 };
 
 /**
- * Returns all available connectors, merging from KIBANA_TESTING_AI_CONNECTORS
- * and kibana.dev.yml. Env connectors take precedence (listed first); duplicates
- * from kibana.dev.yml are excluded.
+ * Returns all available connectors, merging from KIBANA_TESTING_INFERENCE_ENDPOINTS,
+ * KIBANA_TESTING_AI_CONNECTORS, and kibana.dev.yml. Inference endpoints are listed first;
+ * duplicates from other sources are excluded.
  */
 export const getAllAvailableConnectors = (repoRoot: string): AvailableConnectorEntry[] => {
   const envConnectors = parseConnectorsFromEnv();
@@ -126,13 +142,14 @@ const formatConnectorChoice = (c: AvailableConnectorEntry): { name: string; valu
 export const promptForConnector = async (
   repoRoot: string,
   log: ToolingLog,
-  message = 'Select evaluation connector (judge):'
+  message = 'Select evaluation connector (judge):',
+  defaultConnectorId?: string
 ): Promise<string> => {
   const connectors = getAllAvailableConnectors(repoRoot);
 
   if (connectors.length === 0) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run `node scripts/evals init`.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run `node scripts/evals init`.'
     );
   }
 
@@ -141,11 +158,25 @@ export const promptForConnector = async (
     return connectors[0].id;
   }
 
+  // The default judge is listed first as `default (<connector>)` and pre-selected.
+  const defaultConnector = connectors.find((c) => c.id === defaultConnectorId);
+  if (defaultConnectorId && !defaultConnector) {
+    log.warning(
+      `Default judge ${defaultConnectorId} is not among the available connectors. Run \`node scripts/evals init\` to refresh them.`
+    );
+  }
+  const choices = connectors.filter((c) => c !== defaultConnector).map(formatConnectorChoice);
+  if (defaultConnector) {
+    const { name, value } = formatConnectorChoice(defaultConnector);
+    choices.unshift({ name: `default (${name})`, value });
+  }
+
   const { connectorId } = await inquirer.prompt<{ connectorId: string }>({
     type: 'list',
     name: 'connectorId',
     message,
-    choices: connectors.map(formatConnectorChoice),
+    choices,
+    default: defaultConnector?.id,
   });
 
   return connectorId;
@@ -160,7 +191,7 @@ export const promptForProject = async (
 
   if (connectors.length === 0) {
     throw new Error(
-      'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run `node scripts/evals init`.'
+      'No connectors available. Set KIBANA_TESTING_INFERENCE_ENDPOINTS, or run `node scripts/evals init`.'
     );
   }
 
@@ -238,22 +269,15 @@ export const readLocalEsUrl = (repoRoot: string): string | undefined => {
 
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
 
-export const SCOUT_EVALS_ARGS = [
+export const scoutEvalsArgs = (
+  serverConfigSet?: string,
+  { arch, domain }: ScoutTarget = DEFAULT_SCOUT_TARGET
+): string[] => [
   'start-server',
   '--arch',
-  'stateful',
+  arch,
   '--domain',
-  'classic',
-  '--serverConfigSet',
-  DEFAULT_SERVER_CONFIG_SET,
-] as const;
-
-export const scoutEvalsArgs = (serverConfigSet?: string): string[] => [
-  'start-server',
-  '--arch',
-  'stateful',
-  '--domain',
-  'classic',
+  domain,
   '--serverConfigSet',
   serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET,
 ];

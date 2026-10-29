@@ -1,5 +1,5 @@
 {
-  "sha1": "9d65cb41eb477cf647ada0a9398fb6cf5a66d4b7",
+  "sha1": "bfc27dcf047fa85840c40a5e721763e5ac7fd79f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,7 +30,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 143,
+        "line": 183,
         "column": 2
       }
     },
@@ -44,7 +44,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 153,
+        "line": 193,
         "column": 45
       }
     },
@@ -544,7 +544,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 307,
+        "line": 304,
         "column": 15
       }
     },
@@ -560,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/container_asset_details_flyout.spec.ts",
-        "line": 347,
+        "line": 344,
         "column": 9
       }
     },
@@ -704,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory_k8s_integration_links.spec.ts",
-        "line": 39,
-        "column": 37
+        "line": 42,
+        "column": 13
       }
     },
     {
@@ -800,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 106,
-        "column": 25
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -816,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 130,
-        "column": 9
+        "line": 139,
+        "column": 22
       }
     },
     {
@@ -832,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 193,
-        "column": 38
+        "line": 204,
+        "column": 19
       }
     },
     {
@@ -848,8 +848,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 196,
-        "column": 38
+        "line": 207,
+        "column": 19
       }
     },
     {
@@ -864,8 +864,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 219,
-        "column": 15
+        "line": 229,
+        "column": 13
       }
     },
     {
@@ -880,8 +880,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/inventory.spec.ts",
-        "line": 253,
-        "column": 22
+        "line": 264,
+        "column": 20
       }
     },
     {

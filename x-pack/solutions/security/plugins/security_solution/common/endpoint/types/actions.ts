@@ -44,6 +44,12 @@ export interface ActionResponseOutput<
      * this value may not be available and thus will be empty string in those cases
      */
     canceled_id?: string;
+
+    /**
+     * The UUID of the duplicate action that was already queued or running on the endpoint when this most
+     * recent one arrived on the host
+     */
+    duplicate_of_id?: string;
   } & TOutputContent;
 }
 

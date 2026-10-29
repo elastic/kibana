@@ -8,7 +8,11 @@
 import type { OperatorFunction } from 'rxjs';
 import { catchError, throwError } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { AgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import type {
+  AgentBuilderError,
+  AgentBuilderErrorCode,
+  ConversationOriginType,
+} from '@kbn/agent-builder-common';
 import { createInternalError, isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { ModelProvider } from '@kbn/inference-common';
 import { getCurrentTraceId } from '../../../tracing';
@@ -55,7 +59,9 @@ export function convertErrors<T>({
   executionId,
   logger,
   modelProvider,
+  roundOrigin,
   trackingService,
+  workflowExecutionId,
 }: {
   agentId: string;
   analyticsService?: AnalyticsService;
@@ -63,7 +69,10 @@ export function convertErrors<T>({
   executionId?: string;
   logger: Logger;
   modelProvider: ModelProvider;
+  roundOrigin?: ConversationOriginType;
   trackingService?: TrackingService;
+  /** The workflow execution whose `ai.agent` step started the round. */
+  workflowExecutionId?: string;
 }): OperatorFunction<T, T> {
   return ($source) => {
     return $source.pipe(
@@ -84,6 +93,8 @@ export function convertErrors<T>({
           executionId,
           error: err,
           modelProvider,
+          roundOrigin,
+          workflowExecutionId,
         });
 
         return throwError(() => toClientError(err));

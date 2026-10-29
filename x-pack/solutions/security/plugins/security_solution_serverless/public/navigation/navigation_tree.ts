@@ -7,14 +7,9 @@
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import {
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  SecurityGroupName,
-  SecurityPageName,
-} from '@kbn/security-solution-navigation';
+import { SecurityGroupName, SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 import { type Services } from '../common/services';
@@ -22,13 +17,10 @@ import { createManagementFooterItemsTree } from './management_footer_items';
 
 export const createNavigationTree = async (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  alertZeroEnabled: boolean = false
 ): Promise<NavigationTreeDefinition> => {
   const showAgentBuilder = chatExperience === AIChatExperience.Agent;
-  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
-    AGENT_BUILDER_NAV_AT_TOP_FLAG,
-    false
-  );
   const agentBuilderLink = {
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
@@ -40,25 +32,28 @@ export const createNavigationTree = async (
 
   return {
     body: [
-      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      contextEngineLink,
+      // With AlertZero off, keep the original order: Context Engine stays at the top without Agents, and
+      // Agents and Context Engine follow Workflows. With AlertZero on, Agents and Context Engine sit
+      // between Escalations and Watches, and Context Engine follows Workflows without Agents.
+      ...(!alertZeroEnabled && !showAgentBuilder ? [contextEngineLink] : []),
+      ...(alertZeroEnabled
+        ? [
+            ...defaultNavigationTree.alertZero(),
+            ...(showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
+            ...defaultNavigationTree.alertZeroSecondary(),
+          ]
+        : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
       },
-      // AlertZero body (nodes omitted when xpack.alertzero.enabled is false)
-      ...defaultNavigationTree.alertZero(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      ...defaultNavigationTree.alertZeroSecondary(),
       defaultNavigationTree.rules(),
-      services.uiSettings.get(
-        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-        services.experimentalFeatures.enableAlertsAndAttacksAlignment
-      )
+      services.experimentalFeatures.enableAlertsAndAttacksAlignment
         ? defaultNavigationTree.alertDetections()
         : {
             id: SecurityPageName.alerts,
@@ -66,8 +61,8 @@ export const createNavigationTree = async (
             link: securityLink(SecurityPageName.alerts),
           },
       ...getWorkflowsNavPanel(services),
-      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
-      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
+      ...(alertZeroEnabled && !showAgentBuilder ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',
@@ -79,9 +74,7 @@ export const createNavigationTree = async (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(
-        services.experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ),
+      defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -151,7 +144,7 @@ export const createNavigationTree = async (
         title: i18nStrings.devTools,
         icon: 'code',
       },
-      createManagementFooterItemsTree(services, chatExperience),
+      createManagementFooterItemsTree(chatExperience),
     ],
   };
 };

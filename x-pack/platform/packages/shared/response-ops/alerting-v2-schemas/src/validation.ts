@@ -80,6 +80,22 @@ export function validateEsqlQuery(query: string): string | void {
   }
 }
 
+/** Placeholder source a segment is parsed against. Never executed. */
+const SEGMENT_SOURCE = 'FROM _';
+
+/** A leading pipe is tolerated on a segment; the pipe is always supplied internally. */
+const stripLeadingPipe = (segment: string): string => segment.replace(/^\s*\|\s*/, '');
+
+/**
+ * Validate an appendable segment on its own, against a placeholder source.
+ * Composing cannot do this: the parser drops a command it fails to read, so an
+ * unparseable segment yields the base query unchanged and validates.
+ * @returns Error message if invalid, undefined if valid
+ */
+export function validateEsqlQuerySegment(segment: string): string | void {
+  return validateEsqlQuery(`${SEGMENT_SOURCE}\n| ${stripLeadingPipe(segment)}`);
+}
+
 /**
  * Validate the query obtained by composing `base` with `segment`.
  * @returns Error message if the composition or the result is invalid, undefined if valid
@@ -101,9 +117,8 @@ export function validateComposedEsqlQuery(base: string, segment: string): string
  * always supplied internally.
  */
 export function composeEsqlQuery(base: string, segment: string): string {
-  const normalizedSegment = segment.replace(/^\s*\|\s*/, '');
   const { root: baseRoot } = Parser.parse(base);
-  const { root: segmentRoot } = Parser.parse('FROM _\n| ' + normalizedSegment);
+  const { root: segmentRoot } = Parser.parse(`${SEGMENT_SOURCE}\n| ${stripLeadingPipe(segment)}`);
   // drop the "FROM _" from the validated block command
   const segmentCommands = segmentRoot.commands.slice(1);
   const composedRoot = {

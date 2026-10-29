@@ -27,8 +27,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
   const objectRemover = new ObjectRemover(supertest);
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/290845
-  describe.skip('user managed api key', () => {
+  describe('user managed api key', () => {
     let apiKey: string;
 
     before(async () => {
@@ -98,7 +97,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       // The caller's key is not persisted on the rule, so its lifecycle stays with the framework
       expect(response.body.api_key_created_by_user).to.eql(false);
       expect(response.body.api_key_owner).to.eql('elastic');
-      expect(await apiKeyExists(testRuleData.rule_type_id, testRuleData.name)).to.eql(true);
+      await expectApiKeyToExist(testRuleData.rule_type_id, testRuleData.name);
 
       // Make sure the rule runs successfully with the generated key
       const events = await retry.try(async () => {
@@ -245,7 +244,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', updatedData.name)).to.eql(true);
+        await expectApiKeyToExist('test.noop', updatedData.name);
       });
 
       it('should successfully clone rule with user managed API key', async () => {
@@ -272,6 +271,9 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           consumer: 'alertsFixture',
           params: {},
           created_by: 'elastic',
+          created_by_profile_uid: null,
+          updated_by_profile_uid: null,
+          api_key_owner_profile_uid: null,
           schedule: { interval: '1m' },
           scheduled_task_id: response.body.scheduled_task_id,
           created_at: response.body.created_at,
@@ -358,6 +360,9 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           consumer: 'alertsFixture',
           params: {},
           created_by: 'elastic',
+          created_by_profile_uid: null,
+          updated_by_profile_uid: null,
+          api_key_owner_profile_uid: null,
           schedule: { interval: '1m' },
           scheduled_task_id: response.body.scheduled_task_id,
           created_at: response.body.created_at,
@@ -418,7 +423,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists(response.body.rule_type_id, response.body.name)).to.eql(true);
+        await expectApiKeyToExist(response.body.rule_type_id, response.body.name);
       });
 
       it('should successfully bulk edit rule with user managed API key', async () => {
@@ -489,7 +494,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_bulk_edit2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_bulk_edit2');
       });
 
       it('should successfully update api key for rule with user managed API key', async () => {
@@ -538,7 +543,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_update_api_key2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_update_api_key2');
       });
 
       it('should successfully enable rule with user managed API key', async () => {
@@ -579,7 +584,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_enable2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_enable2');
       });
 
       it('should successfully bulk enable rule with user managed API key', async () => {
@@ -626,7 +631,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         });
 
         // Ensure an API key was generated
-        expect(await apiKeyExists('test.noop', 'test_bulk_enable2')).to.eql(true);
+        await expectApiKeyToExist('test.noop', 'test_bulk_enable2');
       });
 
       it('should successfully delete rule with user managed API key', async () => {
@@ -689,6 +694,61 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
         expect(invalidateResponse.previously_invalidated_api_keys).to.eql([]);
       });
     });
+
+    // A declared borrowed key is cloned even when the rule currently runs on a user owned key.
+    describe('declared borrowed key on a user managed rule', () => {
+      it('clones a declared borrowed key on bulk edit of a user managed rule instead of persisting it', async () => {
+        const ruleId = await createRule(apiKey, 'test_borrowed_over_user_managed');
+        objectRemover.add(SuperuserAtSpace1.space.id, ruleId, 'rule', 'alerting');
+
+        const response = await superTestWithoutAuth
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .set('Authorization', `ApiKey ${apiKey}`)
+          .set(ALERTING_CLONE_API_KEY_HEADER, 'true')
+          .send({
+            ids: [ruleId],
+            operations: [{ operation: 'add', field: 'tags', value: ['another-tag'] }],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.rules[0].api_key_created_by_user).to.eql(false);
+
+        await checkAAD({
+          supertest,
+          spaceId: SuperuserAtSpace1.space.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: ruleId,
+        });
+
+        // The rule now runs on its own key, so revoking the caller's would not break it
+        await expectApiKeyToExist('test.noop', 'test_borrowed_over_user_managed');
+      });
+
+      it('clones a declared borrowed key on update of a user managed rule instead of persisting it', async () => {
+        const ruleId = await createRule(apiKey, 'test_borrowed_over_user_managed_update');
+        objectRemover.add(SuperuserAtSpace1.space.id, ruleId, 'rule', 'alerting');
+
+        const response = await superTestWithoutAuth
+          .put(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule/${ruleId}`)
+          .set('kbn-xsrf', 'foo')
+          .set('Authorization', `ApiKey ${apiKey}`)
+          .set(ALERTING_CLONE_API_KEY_HEADER, 'true')
+          .send({
+            name: 'test_borrowed_over_user_managed_update',
+            tags: ['bar'],
+            params: { foo: true },
+            schedule: { interval: '12s' },
+            actions: [],
+            throttle: '1m',
+            notify_when: 'onThrottleInterval',
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.api_key_created_by_user).to.eql(false);
+        await expectApiKeyToExist('test.noop', 'test_borrowed_over_user_managed_update');
+      });
+    });
   });
 
   async function apiKeyExists(ruleTypeId: string, ruleName: string) {
@@ -703,6 +763,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       .expect(200);
 
     return !!allApiKeys.apiKeys.find((key: { name: string }) => key.name === generatedApiKeyName);
+  }
+
+  async function expectApiKeyToExist(ruleTypeId: string, ruleName: string) {
+    // The _query search hits the .security index, which can lag a just-completed write,
+    // so poll the read until the generated key is searchable instead of asserting once.
+    await retry.waitForWithTimeout(`API key for "${ruleName}" to be queryable`, 30_000, () =>
+      apiKeyExists(ruleTypeId, ruleName)
+    );
   }
 
   async function createRule(apiKey: string, ruleName: string, enabled: boolean = true) {

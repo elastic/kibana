@@ -9,7 +9,7 @@
 
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import { EuiGlobalToastList } from '@elastic/eui';
-import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
+import React, { useEffect, useState, type FunctionComponent, useCallback, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -19,11 +19,15 @@ import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { ToastWithRichTitle } from './deduplicate_toasts';
 import { deduplicateToasts } from './deduplicate_toasts';
 import type { ToastsTelemetry } from './telemetry';
+import type { InternalScreenReaderStart } from '../screen_reader';
+import type { GetMountedText, ToastContentPart } from './use_toast_announcements';
+import { useToastAnnouncements } from './use_toast_announcements';
 
 interface Props {
   toasts$: Observable<Toast[]>;
   reportEvent: ReturnType<ToastsTelemetry['start']>;
   dismissToast: (toastId: string) => void;
+  notifyScreenReader: InternalScreenReaderStart['notify'];
 }
 
 interface State {
@@ -31,19 +35,56 @@ interface State {
   idToToasts: Record<string, Toast[]>;
 }
 
-const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
-  ...toast,
-  title: toast.title instanceof Function ? <MountWrapper mount={toast.title} /> : toast.title,
-  text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
-});
+const getContentNodeKey = (toastId: string, part: ToastContentPart) => `${toastId}:${part}`;
 
 export const GlobalToastList: FunctionComponent<Props> = ({
   toasts$,
   dismissToast,
   reportEvent,
+  notifyScreenReader,
 }) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
+  // Rendered mount point content, so that announcements can read its text
+  const contentNodes = useRef(new Map<string, HTMLElement>());
+
+  const renderContent = (
+    toastId: string,
+    part: ToastContentPart,
+    content: ToastWithRichTitle[ToastContentPart]
+  ) => {
+    if (!(content instanceof Function)) {
+      return content;
+    }
+    const key = getContentNodeKey(toastId, part);
+    return (
+      <span
+        ref={(node) => {
+          if (node) {
+            contentNodes.current.set(key, node);
+          } else {
+            contentNodes.current.delete(key);
+          }
+        }}
+      >
+        <MountWrapper mount={content} />
+      </span>
+    );
+  };
+
+  const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
+    ...toast,
+    title: renderContent(toast.id, 'title', toast.title),
+    text: renderContent(toast.id, 'text', toast.text),
+  });
+
+  const getMountedText = useCallback<GetMountedText>(
+    (toastId, part) =>
+      contentNodes.current.get(getContentNodeKey(toastId, part))?.textContent ?? '',
+    []
+  );
+
+  useToastAnnouncements({ idToToasts, getMountedText, notifyScreenReader });
 
   const reportToastDismissal = useCallback(
     (representedToasts: State['idToToasts'][number]) => {
@@ -99,6 +140,9 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
         defaultMessage: 'Notification message list',
       })}
+      // Announced through the shared screen reader announcer instead, which batches them with
+      // other announcements instead of interrupting them
+      aria-live="off"
       data-test-subj="globalToastList"
       toasts={toasts.map(convertToEui)}
       dismissToast={closeToastsRepresentedById}

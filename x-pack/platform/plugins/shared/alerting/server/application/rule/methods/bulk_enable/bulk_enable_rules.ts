@@ -23,6 +23,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
+import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -182,7 +183,10 @@ const bulkEnableRulesWithOCC = async (
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
+  // UIAM keys held by rules that get a new key set below, keyed by rule id
+  const replacedUiamApiKeys = new Map<string, string>();
   let scheduleValidationError = '';
 
   await withSpan(
@@ -241,11 +245,17 @@ const bulkEnableRulesWithOCC = async (
             }
 
             const nowIso = new Date().toISOString();
-            const newApiKeyAttributes = !rule.attributes.apiKey
+            // An enabled rule that holds only a UIAM key, such as one created by a UIAM service
+            // account, already runs on that key. Keep it rather than re-keying the rule as the caller.
+            const hasApiKeyInUse =
+              Boolean(rule.attributes.apiKey) ||
+              Boolean(rule.attributes.enabled && rule.attributes.uiamApiKey);
+            const newApiKeyAttributes = !hasApiKeyInUse
               ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
+                  profileUid,
                   shouldUpdateApiKey: true,
                   apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
                   refresh: false,
@@ -261,6 +271,7 @@ const bulkEnableRulesWithOCC = async (
                 : rule.attributes),
               enabled: true,
               updatedBy: username,
+              updatedByProfileUid: profileUid,
               updatedAt: nowIso,
               ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {
@@ -305,6 +316,18 @@ const bulkEnableRulesWithOCC = async (
               ...rule,
               attributes: updatedAttributes,
             });
+
+            // A rule with only a UIAM key, such as one created by a UIAM service account, no
+            // longer uses that key once it gets a new key set. Invalidate it after the write.
+            // Recorded only once the rule is queued for the write, so a rule that fails before
+            // then keeps the key it still holds.
+            if (
+              newApiKeyAttributes &&
+              rule.attributes.uiamApiKey &&
+              !rule.attributes.apiKeyCreatedByUser
+            ) {
+              replacedUiamApiKeys.set(rule.id, rule.attributes.uiamApiKey);
+            }
 
             context.auditLogger?.log(
               ruleAuditEvent({
@@ -389,6 +412,17 @@ const bulkEnableRulesWithOCC = async (
       ruleIdsFailedToEnable[rule.id] = true;
     }
   });
+
+  const uiamApiKeysToInvalidate = [...replacedUiamApiKeys.entries()]
+    .filter(([ruleId]) => !ruleIdsFailedToEnable[ruleId])
+    .map(([, uiamApiKey]) => uiamApiKey);
+  if (uiamApiKeysToInvalidate.length > 0) {
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: uiamApiKeysToInvalidate },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    );
+  }
 
   // Remove all failed to enable rule ids and rule type ids
   const ruleIdsToClearFlapping: string[] = [];

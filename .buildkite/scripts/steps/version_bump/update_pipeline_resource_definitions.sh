@@ -98,7 +98,8 @@ echo "Opened PR: $prUrl"
 if [ "${DRY_RUN:-}" = "true" ]; then
   echo "DRY_RUN is enabled — skipping auto-merge and merge wait"
 else
-  gh pr merge --repo elastic/kibana --auto --squash --delete-branch "$prUrl"
+  gh pr merge --repo elastic/kibana --auto --squash "$prUrl"
 
-  wait_for_pr_merge "$prUrl"
+  # main goes through the merge queue, which can take well over the default 60 minutes.
+  wait_for_pr_merge "$prUrl" 7200
 fi

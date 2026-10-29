@@ -117,7 +117,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataViewReady = reject;
   });
 
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
     String(toFormat)
@@ -154,12 +154,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (dataView) {
         resolveInitialDataViewReady(dataView);
       }
-      dataViews$.next(dataView ? [dataView] : undefined);
+      dataSources$.next(dataView ? [dataView] : undefined);
     });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldNameSubscription = combineLatest([
-    dataViews$,
+    dataSources$,
     dataControlStateManager.api.fieldName$,
     dataControlStateManager.api.valuesSource$,
   ])
@@ -313,7 +313,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       blockingError$,
       setBlockingError,
       setDataLoading,
-      dataViews$,
+      dataSources$,
       field$,
       fieldFormatter,
       onEdit,
@@ -359,7 +359,17 @@ export const initializeDataControlManager = async <EditorState extends object = 
       } as WithAllKeys<DataControlState>;
     },
     reinitializeState: (newState) => {
-      dataControlStateManager.reinitializeState(newState);
+      const { values_source, esql_query, data_view_id, field_name } =
+        dataControlStateManager.getLatestState();
+      // ES|QL controls do not serialize their derived data view and field, and the query
+      // subscription only re-derives them when the query changes, so keep them when it doesn't
+      const keepDerivedDataSource =
+        newState?.values_source === ControlValuesSource.ESQL &&
+        values_source === ControlValuesSource.ESQL &&
+        newState.esql_query === esql_query;
+      dataControlStateManager.reinitializeState(
+        keepDerivedDataSource ? { ...newState, data_view_id, field_name } : newState
+      );
       labelManager.reinitializeState(newState);
     },
   };

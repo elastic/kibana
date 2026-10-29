@@ -9,6 +9,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ENABLE_IAC_PROVISIONER_FLAG } from '../../../../common/constants';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  MAX_IAC_RENDER_INTEGRATIONS,
+} from '../../../../common/types/rest_spec/iac_provisioner';
 import { apiTest, testData } from '../fixtures';
 
 const { VALID_RENDER_BODY } = testData;
@@ -64,7 +68,7 @@ apiTest.describe(
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
         body: {
           provider: 'aws',
-          workflow: 'federated_identity',
+          workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
           integrations: VALID_RENDER_BODY.integrations,
         },
         responseType: 'json',
@@ -105,7 +109,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 400 when more than 10 integrations are sent',
+      'returns 400 when more integrations than the render limit are sent',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
 
@@ -113,7 +117,7 @@ apiTest.describe(
           headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
           body: {
             ...VALID_RENDER_BODY,
-            integrations: Array.from({ length: 11 }, (_, i) => ({
+            integrations: Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS + 1 }, (_, i) => ({
               name: `pkg_${i}`,
               policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
             })),
@@ -122,6 +126,30 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
+      }
+    );
+
+    apiTest(
+      'accepts exactly the render limit of integrations and reaches the handler',
+      async ({ apiClient, samlAuth }) => {
+        // The boundary itself must pass schema validation: a stale lower cap would answer 400
+        // here, while a payload of unknown packages that reaches the handler answers 404.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(testData.FLEET_READ_ROLE);
+
+        const response = await apiClient.post(testData.RENDER_TEMPLATE_PATH, {
+          headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
+          body: {
+            ...VALID_RENDER_BODY,
+            integrations: Array.from({ length: MAX_IAC_RENDER_INTEGRATIONS }, (_, i) => ({
+              name: `this_package_does_not_exist_${i}`,
+              policyTemplates: [{ name: 'tpl', enabledInputs: ['input'] }],
+            })),
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toContain('this_package_does_not_exist');
       }
     );
 

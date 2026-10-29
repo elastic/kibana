@@ -16,14 +16,17 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SearchHit,
+  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { EntityRiskScoreRecord } from '../../../../../common/api/entity_analytics/common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getRiskScoreData, getAnomalyData, getVulnerabilityData } from './utils';
 import type { AnomalyRecord } from './utils/get_anomaly_data';
+import type { RiskScoreType } from '../../risk_score/score_type_filter';
 
 interface GetEnrichedEntitiesParams {
   anomalyFromDate: number;
@@ -31,8 +34,10 @@ interface GetEnrichedEntitiesParams {
   filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   fields?: QueryDslFieldAndFormat[];
   size?: number;
+  sort?: SortCombinations[];
   searchAfter?: Array<string | number>;
   getAlertInputsForRiskScore?: boolean;
+  riskScoreType?: RiskScoreType;
 }
 
 export interface EnrichedEntity {
@@ -53,6 +58,7 @@ interface EnrichedEntityServiceOpts {
   esClient: ElasticsearchClient;
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
+  mitreDataClient?: MitreAttackDataClient;
   ml: EntityAnalyticsRoutesDeps['ml'];
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
@@ -68,13 +74,16 @@ export class EnrichEntityService {
     filter,
     fields,
     size,
+    sort,
     searchAfter,
     getAlertInputsForRiskScore = true,
+    riskScoreType,
   }: GetEnrichedEntitiesParams): Promise<EnrichedEntityResult> {
     // Proxies a call to the entity store to get the entities matching the input filter
     const { entities, fields: entityFields } = await this.opts.entityStoreClient.listEntities({
       filter,
       size,
+      ...(sort ? { sort } : {}),
       searchAfter,
       ...(fields ? { fields } : {}),
     });
@@ -95,11 +104,13 @@ export class EnrichEntityService {
         ...sharedOpts,
         spaceId: this.opts.spaceId,
         getAlerts: getAlertInputsForRiskScore,
+        scoreType: riskScoreType,
       }),
       getAnomalyData({
         ...sharedOpts,
         experimentalFeatures: this.opts.experimentalFeatures,
         fromDate: anomalyFromDate,
+        mitreDataClient: this.opts.mitreDataClient,
         toDate: anomalyToDate,
         ml: this.opts.ml,
         request: this.opts.request,

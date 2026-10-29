@@ -54,6 +54,24 @@ describe('useAllHost', () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it('labels the search with the hosts page execution context', () => {
+    renderHook(() => useAllHost(props), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'hosts_all',
+          },
+        },
+      })
+    );
+  });
+
   it('does not run search when skip = true', () => {
     const localProps = {
       ...props,

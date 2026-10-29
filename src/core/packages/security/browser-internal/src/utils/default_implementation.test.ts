@@ -36,7 +36,7 @@ describe('getDefaultSecurityImplementation', () => {
 
     it('create rejects', async () => {
       await expect(
-        implementation.serviceAccounts.create({ name: 'my-service-account' })
+        implementation.serviceAccounts.create({ name: 'my-service-account', roles: ['viewer'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
   });

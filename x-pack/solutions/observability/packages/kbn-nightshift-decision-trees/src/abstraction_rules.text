@@ -1,0 +1,12 @@
+## CRITICAL: Keep the Graph Small
+
+The decision tree MUST be compact, generic, and reusable. **Aim for 5-12 nodes total.** A good tree captures the *pattern* of investigation, not every individual step.
+
+### Abstraction Rules
+
+- **One Evidence node per distinct operation type**, not per API call. Three Elasticsearch field-value queries are one `Query Elasticsearch fields` node. But querying metrics and searching logs are different operations.
+- **Labels must name the data source AND operation.** GOOD: `Query metrics by field`, `Search application logs`, `List alert rules`. BAD: `Gather Context`, `Process Data`, `Get Info`, `Fetch resource by ID`.
+- **One Symptom node per question category**, not per question.
+- **Merge similar decisions.** "Did the API return data?" and "Did the query succeed?" are the same decision node.
+- **Strip specific values from node labels** — no metric names, PR numbers, channel names, timestamps, or one-off IDs.
+- **Preserve key query entities in evidence metadata** — metric names, field names, index patterns, keywords, namespaces, resources, service names and filters belong in `evidence_gatherer_metadata` for the corresponding E-node. Preserve the exact reusable query entities from the investigation and tool calls whenever they are available.

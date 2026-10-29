@@ -28,7 +28,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     const RouteClass = makeRouteClass();
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe('/api/alerting/v2/series/_bulk_snooze');
+    expect(RouteClass.path).toBe('/internal/alerting/v2/series/_bulk_snooze');
     expect(RouteClass.options?.summary).toBe('Bulk snooze alert episode series');
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
@@ -44,8 +44,8 @@ describe('createBulkSeriesActionRouteForType', () => {
     const request = {
       body: {
         items: [
-          { group_hash: 'group-1', expiry: '2026-08-12T00:00:00.000Z' },
-          { group_hash: 'group-2' },
+          { series_id: 'series-1', snoozed_until: '2026-08-12T00:00:00.000Z' },
+          { series_id: 'series-2' },
         ],
       },
     } as unknown as KibanaRequest;
@@ -59,8 +59,8 @@ describe('createBulkSeriesActionRouteForType', () => {
     await route.handle();
 
     expect(alertActionsClient.createBulkSeriesActions).toHaveBeenCalledWith([
-      { action_type: 'snooze', group_hash: 'group-1', expiry: '2026-08-12T00:00:00.000Z' },
-      { action_type: 'snooze', group_hash: 'group-2' },
+      { action_type: 'snooze', series_id: 'series-1', snoozed_until: '2026-08-12T00:00:00.000Z' },
+      { action_type: 'snooze', series_id: 'series-2' },
     ]);
     expect(ctx.response.ok).toHaveBeenCalledWith({
       body: { affected_count: 2, errors: [] },
@@ -71,7 +71,7 @@ describe('createBulkSeriesActionRouteForType', () => {
     const RouteClass = makeRouteClass();
     const { ctx } = createRouteDependencies();
     const request = {
-      body: { items: [{ group_hash: 'group-1' }] },
+      body: { items: [{ series_id: 'series-1' }] },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
     alertActionsClient.createBulkSeriesActions.mockRejectedValueOnce(new Error('boom'));
