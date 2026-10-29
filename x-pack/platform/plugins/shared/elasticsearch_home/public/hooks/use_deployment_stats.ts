@@ -45,6 +45,7 @@ const FULL_DATA_PANEL_ACCESS: DataPanelAccess = {
 const initialStats: DeploymentStats = {
   dataPanelAccess: FULL_DATA_PANEL_ACCESS,
   indicesCount: null,
+  dataStreamsCount: null,
   vectorCount: null,
   storeSizeBytes: null,
   workflowsCount: null,
@@ -107,6 +108,7 @@ export const useDeploymentStats = () => {
       return {
         dataPanelAccess: esStats?.dataPanelAccess ?? FULL_DATA_PANEL_ACCESS,
         indicesCount: esStats?.indicesCount ?? null,
+        dataStreamsCount: esStats?.dataStreamsCount ?? null,
         vectorCount: esStats?.vectorCount ?? null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
         documentsCount: esStats?.documentsCount ?? null,

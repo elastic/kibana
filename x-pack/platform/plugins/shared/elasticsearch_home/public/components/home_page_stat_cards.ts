@@ -23,6 +23,7 @@ interface StatCardDeps {
   /** Namespaces a telemetry id under the hosting plugin's prefix. */
   getTelemetryId: (suffix: string) => string;
   dataCardTooltip?: string;
+  showDataStreams?: boolean;
 }
 
 type HomePageStats = Omit<HomePageStatPanelProps, 'newIndex'>;
@@ -75,6 +76,7 @@ const buildDataCard = ({
   stats,
   getTelemetryId,
   dataCardTooltip,
+  showDataStreams,
 }: StatCardDeps): HomePageStats => ({
   iconType: 'database',
   title: i18n.translate('xpack.elasticsearchHome.home.dataCard.title', {
@@ -86,11 +88,22 @@ const buildDataCard = ({
   metrics: [
     {
       key: 'totalIndices',
-      label: i18n.translate('xpack.elasticsearchHome.home.stats.totalIndicesLabel', {
-        defaultMessage: 'Total indices',
+      label: i18n.translate('xpack.elasticsearchHome.home.stats.indicesLabel', {
+        defaultMessage: 'Indices',
       }),
       value: formatNumber(stats.indicesCount),
     },
+    ...(showDataStreams
+      ? [
+          {
+            key: 'dataStreams',
+            label: i18n.translate('xpack.elasticsearchHome.home.stats.dataStreamsLabel', {
+              defaultMessage: 'Data streams',
+            }),
+            value: formatNumber(stats.dataStreamsCount),
+          },
+        ]
+      : []),
     ...(stats.dataPanelAccess.showDocuments
       ? [
           {

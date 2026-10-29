@@ -24,6 +24,7 @@ const FAVORITES_PATH = '/internal/content_management/favorites/dashboard';
 const esStats = {
   dataPanelAccess: { showPanel: true, showDocuments: false, showTotalSize: true },
   indicesCount: 3,
+  dataStreamsCount: 2,
   vectorCount: 120,
   storeSizeBytes: 2048,
   documentsCount: 42,
@@ -101,6 +102,7 @@ describe('useDeploymentStats', () => {
     expect(result.current.stats).toEqual({
       dataPanelAccess: { showPanel: true, showDocuments: true, showTotalSize: true },
       indicesCount: null,
+      dataStreamsCount: null,
       vectorCount: null,
       storeSizeBytes: null,
       workflowsCount: null,
@@ -137,6 +139,7 @@ describe('useDeploymentStats', () => {
         // the stats show as unavailable rather than disappearing
         dataPanelAccess: { showPanel: true, showDocuments: true, showTotalSize: true },
         indicesCount: null,
+        dataStreamsCount: null,
         vectorCount: null,
         storeSizeBytes: null,
         documentsCount: null,

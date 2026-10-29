@@ -72,6 +72,7 @@ describe('registerDeploymentStatsRoute', () => {
     mockFetchIndexStats.mockResolvedValue({
       dataPanelAccess: FULL_ACCESS,
       indicesCount: 3,
+      dataStreamsCount: 1,
       storeSizeBytes: 1024,
       vectorCount: 5,
       documentsCount: 4,
@@ -89,6 +90,7 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         dataPanelAccess: FULL_ACCESS,
         indicesCount: 3,
+        dataStreamsCount: 1,
         storeSizeBytes: 1024,
         vectorCount: 5,
         documentsCount: 4,
@@ -104,6 +106,7 @@ describe('registerDeploymentStatsRoute', () => {
     mockFetchIndexStats.mockResolvedValue({
       dataPanelAccess: FULL_ACCESS,
       indicesCount: null,
+      dataStreamsCount: null,
       storeSizeBytes: null,
       vectorCount: null,
       documentsCount: null,
@@ -120,6 +123,7 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         dataPanelAccess: FULL_ACCESS,
         indicesCount: null,
+        dataStreamsCount: null,
         storeSizeBytes: null,
         vectorCount: null,
         documentsCount: null,
@@ -140,6 +144,7 @@ describe('registerDeploymentStatsRoute', () => {
     mockFetchIndexStats.mockResolvedValue({
       dataPanelAccess: FULL_ACCESS,
       indicesCount: 3,
+      dataStreamsCount: 1,
       storeSizeBytes: 1024,
       vectorCount: null,
       documentsCount: 4,
@@ -163,6 +168,7 @@ describe('registerDeploymentStatsRoute', () => {
       body: {
         dataPanelAccess: FULL_ACCESS,
         indicesCount: 3,
+        dataStreamsCount: 1,
         storeSizeBytes: 1024,
         vectorCount: null,
         documentsCount: 4,

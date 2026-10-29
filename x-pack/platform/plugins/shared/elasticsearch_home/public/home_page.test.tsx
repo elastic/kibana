@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -50,6 +51,7 @@ const fullAccess = { showPanel: true, showDocuments: true, showTotalSize: true }
 const stats = {
   dataPanelAccess: fullAccess,
   indicesCount: 3,
+  dataStreamsCount: 2,
   documentsCount: 42,
   vectorCount: 120,
   storeSizeBytes: 2048,
@@ -64,6 +66,7 @@ const stats = {
 const emptyStats = {
   dataPanelAccess: fullAccess,
   indicesCount: 0,
+  dataStreamsCount: 0,
   documentsCount: 0,
   vectorCount: 0,
   storeSizeBytes: 0,
@@ -87,6 +90,7 @@ describe('HomePage', () => {
     isInTrial = false,
     isServerlessEnabled = false,
     isServerless = false,
+    projectType,
     canMonitorAllIndices = true,
     canReadWorkflow = true,
     navLinks = ALL_NAV_LINKS,
@@ -95,6 +99,7 @@ describe('HomePage', () => {
     isInTrial?: boolean;
     isServerlessEnabled?: boolean;
     isServerless?: boolean;
+    projectType?: CloudStart['serverless']['projectType'];
     canMonitorAllIndices?: boolean;
     canReadWorkflow?: boolean;
     navLinks?: string[];
@@ -103,6 +108,7 @@ describe('HomePage', () => {
     const cloud = cloudMock.createStart();
     cloud.isInTrial.mockReturnValue(isInTrial);
     cloud.isServerlessEnabled = isServerlessEnabled;
+    cloud.serverless = { ...cloud.serverless, projectType };
 
     const application = applicationServiceMock.createStartContract();
     application.capabilities = {
@@ -242,12 +248,15 @@ describe('HomePage', () => {
   });
 
   describe('the data card', () => {
-    const renderWithAccess = (dataPanelAccess: typeof fullAccess) => {
+    const renderWithAccess = (
+      dataPanelAccess: typeof fullAccess,
+      projectType?: CloudStart['serverless']['projectType']
+    ) => {
       mockUseDeploymentStats.mockReturnValue({
         stats: { ...stats, dataPanelAccess },
         isLoading: false,
       });
-      renderHomePage();
+      renderHomePage({ projectType });
     };
 
     it('shows an info icon on the title when the host supplies a tooltip', () => {
@@ -297,10 +306,17 @@ describe('HomePage', () => {
 
     // a role with only `view_index_metadata` can count indices but read neither documents nor sizes
     it('is dropped when only one stat would be left', () => {
-      renderWithAccess({ showPanel: true, showDocuments: false, showTotalSize: false });
+      renderWithAccess({ showPanel: true, showDocuments: false, showTotalSize: false }, 'vectordb');
 
       expect(screen.queryByTestId('homePageDataCard')).not.toBeInTheDocument();
       expect(screen.getByTestId('homePageDashboardsCard')).toBeInTheDocument();
+    });
+
+    it('is kept with only the index and data stream counts', () => {
+      renderWithAccess({ showPanel: true, showDocuments: false, showTotalSize: false });
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-dataStreams')).toBeInTheDocument();
     });
 
     it('is kept with two stats', () => {
@@ -308,6 +324,20 @@ describe('HomePage', () => {
 
       expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
       expect(screen.getByTestId('homePageDataCard-documents')).toBeInTheDocument();
+    });
+
+    it('counts data streams next to the indices', () => {
+      renderHomePage();
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices-value')).toHaveTextContent('3');
+      expect(screen.getByTestId('homePageDataCard-dataStreams-value')).toHaveTextContent('2');
+    });
+
+    it('leaves out the data streams stat on Vector DB, which has no data streams', () => {
+      renderHomePage({ projectType: 'vectordb' });
+
+      expect(screen.queryByTestId('homePageDataCard-dataStreams')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
     });
 
     it('drops the total size stat for a role that cannot monitor indices', () => {
@@ -427,6 +457,17 @@ describe('HomePage', () => {
       renderHomePage();
 
       expect(bannerProps()).toEqual(expect.objectContaining({ hasData: true }));
+    });
+
+    it('receives hasData=false when there are data streams but no indices', () => {
+      mockUseDeploymentStats.mockReturnValue({
+        stats: { ...emptyStats, dataStreamsCount: 2 },
+        isLoading: false,
+      });
+
+      renderHomePage();
+
+      expect(bannerProps()).toEqual(expect.objectContaining({ hasData: false }));
     });
 
     it('receives hasData=false when there are no indices and no vectors', () => {

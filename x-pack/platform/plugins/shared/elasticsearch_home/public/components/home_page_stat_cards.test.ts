@@ -52,6 +52,7 @@ const createDeps = ({
     stats: {
       dataPanelAccess,
       indicesCount: 0,
+      dataStreamsCount: 0,
       documentsCount: 0,
       vectorCount: 0,
       storeSizeBytes: 0,
