@@ -359,13 +359,13 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           }
           // Lowercased, without a leading '#' or '/', spaces as '_'. Mirrored by
           // normalizeSequenceToken in common/sessions.ts.
-          String tokenOf(def raw) {
+          String tokenOf(def raw, int maxLength) {
             String s = clean(raw);
             if (s == null) { return ''; }
             s = s.toLowerCase();
             while (s.startsWith('#') || s.startsWith('/')) { s = s.substring(1); }
             s = s.replace(' ', '_');
-            return s.length() > params.tokenLength ? s.substring(0, params.tokenLength) : s;
+            return s.length() > maxLength ? s.substring(0, maxLength) : s;
           }
           void addToken(def tokens, String token) {
             if (token != '' && (tokens.isEmpty() || tokens[tokens.size() - 1] != token)) {
@@ -472,10 +472,10 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.exit_page = exitPage != null ? exitPage : (journey.isEmpty() ? null : journey[journey.size() - 1]);
 
           def pageTokens = [];
-          for (page in journey) { addToken(pageTokens, tokenOf(page)); }
+          for (page in journey) { addToken(pageTokens, tokenOf(page, params.tokenLength)); }
           def clickTokens = [];
           for (bag in metricsOf(ctx.click_targets, 'targets')) {
-            if (bag instanceof Map) { addToken(clickTokens, tokenOf(bag[params.clickTarget])); }
+            if (bag instanceof Map) { addToken(clickTokens, tokenOf(bag[params.clickTarget], params.tokenLength)); }
           }
           def eventTokens = [];
           for (token in pageTokens) { eventTokens.add('p:' + token); }
