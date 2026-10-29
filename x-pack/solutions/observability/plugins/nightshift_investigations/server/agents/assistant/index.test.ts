@@ -11,9 +11,11 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import {
-  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
-  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  getNightshiftBoundHookWorkflowId,
 } from '@kbn/workflows/managed';
 import type { NightshiftAgentTypeOptions } from '../investigation';
 import { getInvestigationAgentType } from '../investigation';
@@ -34,10 +36,14 @@ const options: NightshiftAgentTypeOptions = {
   telemetryConnectorId: 'telemetry',
 };
 
-const staticConfiguration = (definition: AgentTypeDefinition): AgentBaseConfiguration => {
+const configurationFor = async (
+  definition: AgentTypeDefinition,
+  spaceId = 'default'
+): Promise<AgentBaseConfiguration> => {
   const { baseConfiguration } = definition;
-  if (typeof baseConfiguration === 'function') throw new Error('Expected a static configuration');
-  return baseConfiguration;
+  if (typeof baseConfiguration !== 'function')
+    throw new Error('Expected a per-space configuration');
+  return baseConfiguration({ request: httpServerMock.createKibanaRequest(), spaceId });
 };
 
 describe('Nightshift assistant agent type', () => {
@@ -56,9 +62,9 @@ describe('Nightshift assistant agent type', () => {
     );
   });
 
-  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', () => {
-    const { instructions, ...assistant } = staticConfiguration(getAssistantAgentType(options));
-    const { instructions: investigatorInstructions, ...investigator } = staticConfiguration(
+  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', async () => {
+    const { instructions, ...assistant } = await configurationFor(getAssistantAgentType(options));
+    const { instructions: investigatorInstructions, ...investigator } = await configurationFor(
       getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
     );
 
@@ -66,8 +72,15 @@ describe('Nightshift assistant agent type', () => {
     expect(instructions).not.toBe(investigatorInstructions);
     expect(assistant).toMatchObject({
       connector_ids: ['telemetry'],
-      workflow_ids: [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID],
-      post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID],
+      workflow_ids: [
+        getNightshiftBoundHookWorkflowId(
+          NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+          'default'
+        ),
+      ],
+      post_execution_workflow_ids: [
+        getNightshiftBoundHookWorkflowId(NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID, 'default'),
+      ],
     });
     expect(assistant.connector_ids).toEqual(investigator.connector_ids);
     expect(assistant.workflow_ids).toEqual(investigator.workflow_ids);
@@ -79,7 +92,7 @@ describe('Nightshift assistant agent type', () => {
   it('points to the workspace files instead of embedding their guidance', () => {
     for (const path of [
       '/workspace/connectors.md',
-      '/workspace/elastic.md',
+      '/workspace/.connector-docs/elastic.md',
       '/workspace/cortex/INDEX.md',
       '/workspace/memories/.index.json',
     ]) {
