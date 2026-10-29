@@ -61,7 +61,6 @@ export const createDefaultServicesMock = (): AlertsKibanaServices => {
     share: sharePluginMock.createStartContract(),
     expressions: {} as unknown,
     rendering: {} as unknown,
-    triggersActionsUi: { getAlertFormatter: jest.fn() },
   } as unknown as AlertsKibanaServices;
 };
 

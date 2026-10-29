@@ -138,7 +138,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-application-browser-mocks",
     "@kbn/alerts-ui-shared",
-    "@kbn/triggers-actions-ui-plugin",
     "@kbn/es-types",
     "@kbn/app-header",
     "@kbn/flyout-template",

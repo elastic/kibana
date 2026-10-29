@@ -9,13 +9,7 @@ import { partition } from 'lodash';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { FlyoutFooterMenuItem, FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import type { EpisodeAction } from '../../actions/types';
-import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from '../../actions/view_in_app_action_id';
 import * as i18n from './translations';
-
-/**
- * Navigation actions, grouped with "View details" at the top of the menu.
- */
-const NAVIGATION_ACTION_IDS: ReadonlySet<string> = new Set([VIEW_V1_ALERT_IN_APP_ACTION_ID]);
 
 /**
  * Episode workflow actions, grouped together right below the navigation group. Every other
@@ -55,8 +49,9 @@ export const buildEpisodeMenuPanels = ({
   viewDetailsHref,
   onSuccess,
 }: BuildEpisodeMenuPanelsParams): FlyoutFooterMenuPanel[] => {
-  const [navigationActions, nonNavigationActions] = partition(actions, (action) =>
-    NAVIGATION_ACTION_IDS.has(action.id)
+  const [navigationActions, nonNavigationActions] = partition(
+    actions,
+    (action) => action.isNavigationAction === true
   );
   const [workflowActions, otherActions] = partition(
     nonNavigationActions,

@@ -178,7 +178,6 @@ const mockServices = {
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
   storage: mockStorage,
-  triggersActionsUi: { getAlertFormatter: jest.fn() },
   docLinks: {
     links: {
       alerting: {
@@ -384,7 +383,6 @@ describe('AlertsListPage', () => {
       expect.objectContaining({
         http: mockServices.http,
         expressions: mockServices.expressions,
-        getAlertFormatter: mockServices.triggersActionsUi.getAlertFormatter,
       })
     );
   });

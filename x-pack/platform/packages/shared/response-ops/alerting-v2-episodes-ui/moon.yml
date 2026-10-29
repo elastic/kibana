@@ -74,7 +74,6 @@ dependsOn:
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
   - '@kbn/response-ops-alerts-apis'
-  - '@kbn/alerts-ui-shared'
   - '@kbn/connector-specs'
 tags:
   - shared-browser

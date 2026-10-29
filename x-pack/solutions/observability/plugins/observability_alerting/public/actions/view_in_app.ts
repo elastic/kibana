@@ -6,18 +6,33 @@
  */
 
 import { castArray } from 'lodash';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { i18n } from '@kbn/i18n';
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { getAlertViewInAppUrl, type AlertFormatter } from '@kbn/alerts-ui-shared';
 import { ALERT_GROUP, ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
-import type { AlertEpisode } from '../queries/episodes_query';
-import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
-import type { ClassicAlertActionContext } from '../classic_alerts/utils/map_alert';
-import { fetchClassicAlertById } from '../classic_alerts/apis/fetch_classic_alert_by_id';
-import type { EpisodeAction } from './types';
-import { getErrorMessage } from './helpers';
-import * as i18n from './translations';
-import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from './view_in_app_action_id';
+import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { CLASSIC_EPISODE_SOURCE_ID } from '@kbn/alerting-v2-episodes-ui/classic_alerts/constants';
+import type { ClassicAlertActionContext } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
+import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
+import { getErrorMessage } from '@kbn/alerting-v2-episodes-ui/actions/helpers';
+
+export const VIEW_V1_ALERT_IN_APP_ACTION_ID = 'VIEW_V1_ALERT_IN_APP';
+
+export const VIEW_IN_APP = i18n.translate(
+  'xpack.observabilityAlerting.actions.viewInAppDisplayName',
+  { defaultMessage: 'View in app' }
+);
+
+export const VIEW_IN_APP_NO_LINK = i18n.translate(
+  'xpack.observabilityAlerting.actions.viewInAppNoLinkTitle',
+  { defaultMessage: 'No app view is available for this alert' }
+);
+
+export const VIEW_IN_APP_ERROR = i18n.translate(
+  'xpack.observabilityAlerting.actions.viewInAppErrorTitle',
+  { defaultMessage: 'Unable to open the alert in its app' }
+);
 
 export interface ViewInAppActionDeps {
   http: HttpStart;
@@ -86,8 +101,9 @@ export const createViewInAppAction = ({
 }: ViewInAppActionDeps): EpisodeAction => ({
   id: VIEW_V1_ALERT_IN_APP_ACTION_ID,
   order: 25,
-  displayName: i18n.VIEW_IN_APP,
+  displayName: VIEW_IN_APP,
   iconType: 'magnify',
+  isNavigationAction: true,
   supportsBulk: false,
   enforcesOwnPrivileges: true,
   isCompatible: ({ episodes }) => getViewInAppTarget(episodes, getAlertFormatter) != null,
@@ -121,7 +137,7 @@ export const createViewInAppAction = ({
     } catch (error) {
       newTab?.close();
       notifications.toasts.addDanger({
-        title: i18n.VIEW_IN_APP_ERROR,
+        title: VIEW_IN_APP_ERROR,
         text: getErrorMessage(error),
       });
       return;
@@ -129,7 +145,7 @@ export const createViewInAppAction = ({
 
     if (!url) {
       newTab?.close();
-      notifications.toasts.addWarning({ title: i18n.VIEW_IN_APP_NO_LINK });
+      notifications.toasts.addWarning({ title: VIEW_IN_APP_NO_LINK });
       return;
     }
 

@@ -469,7 +469,6 @@ const AlertsListPageContent = () => {
               capabilities: services.application.capabilities,
               uiSettings: services.uiSettings,
             }),
-          getAlertFormatter: services.triggersActionsUi.getAlertFormatter,
         }),
         alertsCapability
       ),

@@ -10,7 +10,6 @@ import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { FlyoutFooterMenuCustomItem, FlyoutFooterMenuItem } from '@kbn/flyout-template';
 import type { EpisodeAction } from '../../actions/types';
-import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from '../../actions/view_in_app_action_id';
 import { buildEpisodeMenuPanels } from './build_episode_menu_panels';
 
 const episodes: AlertEpisode[] = [
@@ -75,19 +74,19 @@ describe('buildEpisodeMenuPanels', () => {
     ]);
   });
 
-  it('places View in app directly under view details, ahead of workflow actions', () => {
+  it('places navigation actions directly under view details, ahead of workflow actions', () => {
     const items = getItems(
       [
         makeAction('ALERTING_V2_EDIT_EPISODE_TAGS'),
         makeAction('ALERTING_V2_ACK_EPISODE'),
-        makeAction(VIEW_V1_ALERT_IN_APP_ACTION_ID),
+        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
       ],
       '/alerts/ep-1'
     );
 
     expect(describeItems(items)).toEqual([
       'alertingV2EpisodeTakeAction-viewDetails',
-      `alertingV2EpisodeTakeAction-${VIEW_V1_ALERT_IN_APP_ACTION_ID}`,
+      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
       '|',
       'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
       '|',
@@ -95,14 +94,17 @@ describe('buildEpisodeMenuPanels', () => {
     ]);
   });
 
-  it('leads the menu with View in app when there is no view details link', () => {
+  it('leads the menu with navigation actions when there is no view details link', () => {
     const items = getItems(
-      [makeAction('ALERTING_V2_ACK_EPISODE'), makeAction(VIEW_V1_ALERT_IN_APP_ACTION_ID)],
+      [
+        makeAction('ALERTING_V2_ACK_EPISODE'),
+        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
+      ],
       null
     );
 
     expect(describeItems(items)).toEqual([
-      `alertingV2EpisodeTakeAction-${VIEW_V1_ALERT_IN_APP_ACTION_ID}`,
+      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
       '|',
       'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
     ]);

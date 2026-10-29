@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared';
-import type { AlertEpisode } from '../queries/episodes_query';
-import type { ClassicAlertActionContext } from '../classic_alerts/utils/map_alert';
-import { fetchClassicAlertById } from '../classic_alerts/apis/fetch_classic_alert_by_id';
-import { createViewInAppAction } from './view_in_app';
-import * as i18n from './translations';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { ClassicAlertActionContext } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
+import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
+import { createViewInAppAction, VIEW_IN_APP_ERROR, VIEW_IN_APP_NO_LINK } from './view_in_app';
 
-jest.mock('../classic_alerts/apis/fetch_classic_alert_by_id');
+jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
 
 const mockFetchClassicAlertById = fetchClassicAlertById as jest.MockedFunction<
   typeof fetchClassicAlertById
@@ -48,8 +46,7 @@ const makeNativeEpisode = (id: string): AlertEpisode =>
 const defaultFormatter: AlertFormatter = () => ({ reason: '', link: '/app/apm' });
 
 const setup = (formatter: AlertFormatter | null = defaultFormatter) => {
-  const http = httpServiceMock.createStartContract({ basePath: '/s/space' });
-  const notifications = notificationServiceMock.createStartContract();
+  const { http, notifications } = coreMock.createStart({ basePath: '/s/space' });
   const getAlertFormatter = jest.fn(() => formatter ?? undefined);
   const action = createViewInAppAction({ http, notifications, getAlertFormatter });
   return { http, notifications, getAlertFormatter, action };
@@ -276,7 +273,7 @@ describe('createViewInAppAction', () => {
 
       expect(newTab.close).toHaveBeenCalled();
       expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: i18n.VIEW_IN_APP_NO_LINK,
+        title: VIEW_IN_APP_NO_LINK,
       });
     });
 
@@ -288,7 +285,7 @@ describe('createViewInAppAction', () => {
 
       expect(newTab.close).toHaveBeenCalled();
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: i18n.VIEW_IN_APP_ERROR,
+        title: VIEW_IN_APP_ERROR,
         text: 'not found',
       });
     });
