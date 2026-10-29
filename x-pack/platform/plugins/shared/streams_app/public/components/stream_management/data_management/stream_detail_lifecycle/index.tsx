@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -47,6 +47,16 @@ function StreamDetailLifecycleInner({
   const { timeState } = useTimefilter();
   const data = useDataStreamStats({ definition, timeState });
 
+  // Bumped whenever a save triggers a definition refresh. The lifecycle preview
+  // providers use it to hold back tearing down the preview until the refreshed
+  // definition arrives, which avoids the summary flashing the pre-save value
+  // during the (asynchronous, SWR-style) refetch.
+  const [refreshSignal, setRefreshSignal] = useState(0);
+  const refreshDefinitionAndSignal = useCallback(() => {
+    setRefreshSignal((signal) => signal + 1);
+    refreshDefinition();
+  }, [refreshDefinition]);
+
   const {
     isOpen: isImportFlyoutOpen,
     flyout: importFlyout,
@@ -55,7 +65,7 @@ function StreamDetailLifecycleInner({
     ilmPolicies: importPreviewIlmPolicies,
     hasImportableStreams,
     isLoadingStreams: isLoadingImportStreams,
-  } = useImportLifecycleFlyout({ definition, refreshDefinition });
+  } = useImportLifecycleFlyout({ definition, refreshDefinition: refreshDefinitionAndSignal });
   useRegisterLifecycleFlyoutOpen(STREAM_LIFECYCLE_FLYOUT_IDS.importLifecycle, isImportFlyoutOpen);
   const { isAnyFlyoutOpen } = useLifecycleFlyoutCoordination();
   const importLifecycleFlyoutContext = useImportLifecycleFlyoutContext();
@@ -106,8 +116,9 @@ function StreamDetailLifecycleInner({
     <EuiFlexGroup gutterSize="m" direction="column">
       <StreamDetailGeneralData
         definition={definition}
-        refreshDefinition={refreshDefinition}
+        refreshDefinition={refreshDefinitionAndSignal}
         data={data}
+        refreshSignal={refreshSignal}
         isImportFlyoutOpen={isImportFlyoutOpen}
         importPreviewLifecycle={importPreviewLifecycle}
         importPreviewIlmPolicies={importPreviewIlmPolicies}
@@ -116,7 +127,8 @@ function StreamDetailLifecycleInner({
       <StreamDetailFailureStore
         definition={definition}
         data={data}
-        refreshDefinition={refreshDefinition}
+        refreshDefinition={refreshDefinitionAndSignal}
+        refreshSignal={refreshSignal}
         isImportFlyoutOpen={isImportFlyoutOpen}
         importPreviewFailureStore={importPreviewFailureStore}
       />

@@ -15,6 +15,7 @@ import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
+import { ProtectionModes } from '../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../mocks';
 
@@ -47,6 +48,9 @@ describe('Policy-Changing license watcher', () => {
   let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
   let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
 
+  const Enterprise = licenseMock.createLicense({
+    license: { type: 'enterprise', mode: 'enterprise' },
+  });
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
@@ -143,6 +147,233 @@ describe('Policy-Changing license watcher', () => {
       packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy.value.windows.popup
         .malware.message
     ).not.toEqual(CustomMessage);
+  });
+
+  describe('Enterprise -> Platinum license downgrade', () => {
+    // Device Control (windows/mac + their popups) is ON by default in `policyFactory()`.
+    // Pinning `global_manifest_version` away from its 'latest' default lets the assertions
+    // below prove that Protection Updates was actually reset, rather than happening to
+    // already match the default.
+    const createFullyLicensedPolicy = (): PackagePolicy =>
+      MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+        pc.global_manifest_version = '1.0.0';
+        return pc;
+      });
+
+    it('strips device control and protection updates while leaving platinum-tier protections alone', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [createFullyLicensedPolicy()],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalled();
+
+      const updatedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      // Enterprise-only features must be stripped for a platinum license
+      expect(updatedPolicy.windows.device_control?.enabled).toBe(false);
+      expect(updatedPolicy.mac.device_control?.enabled).toBe(false);
+      expect(updatedPolicy.windows.popup.device_control?.enabled).toBe(false);
+      expect(updatedPolicy.mac.popup.device_control?.enabled).toBe(false);
+      expect(updatedPolicy.global_manifest_version).toBe('latest');
+
+      // Platinum-tier protections must NOT be stripped (this is what differentiates the
+      // platinum branch of unsetPolicyFeaturesAccordingToLicenseLevel from the
+      // policyFactoryWithoutPaidFeatures branch used for gold/basic downgrades)
+      const licensedDefaults = policyFactory();
+      expect(updatedPolicy.windows.ransomware.mode).toBe(licensedDefaults.windows.ransomware.mode);
+      expect(updatedPolicy.windows.memory_protection.mode).toBe(
+        licensedDefaults.windows.memory_protection.mode
+      );
+      expect(updatedPolicy.windows.behavior_protection.mode).toBe(
+        licensedDefaults.windows.behavior_protection.mode
+      );
+      expect(updatedPolicy.windows.ransomware.mode).not.toBe('off');
+      expect(updatedPolicy.windows.memory_protection.mode).not.toBe('off');
+      expect(updatedPolicy.windows.behavior_protection.mode).not.toBe('off');
+    });
+
+    it('does not update an already-compliant policy under an enterprise license', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [createFullyLicensedPolicy()],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Enterprise);
+
+      expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
+    });
+
+    it('sets custom_yara_signatures to false while leaving memory protection enabled, then converges', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.windows.memory_protection.mode = ProtectionModes.prevent;
+            pc.mac.memory_protection.mode = ProtectionModes.prevent;
+            pc.linux.memory_protection.mode = ProtectionModes.prevent;
+            pc.windows.memory_protection.custom_yara_signatures = true;
+            pc.mac.memory_protection.custom_yara_signatures = true;
+            pc.linux.memory_protection.custom_yara_signatures = true;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+
+      const persistedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(persistedPolicy.windows.memory_protection.mode).not.toBe('off');
+      expect(persistedPolicy.mac.memory_protection.mode).not.toBe('off');
+      expect(persistedPolicy.linux.memory_protection.mode).not.toBe('off');
+      expect(persistedPolicy.windows.memory_protection.custom_yara_signatures).toBe(false);
+      expect(persistedPolicy.mac.memory_protection.custom_yara_signatures).toBe(false);
+      expect(persistedPolicy.linux.memory_protection.custom_yara_signatures).toBe(false);
+
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [MockPackagePolicyWithEndpointPolicy(() => persistedPolicy)],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('resets registry_credential_hardening to false on downgrade while leaving credential_hardening alone', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.windows.attack_surface_reduction.registry_credential_hardening = {
+              enabled: true,
+            };
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+
+      const persistedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(
+        persistedPolicy.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+      ).toBe(false);
+      // credential_hardening is Platinum-tier, not Enterprise-tier, so it must be unaffected.
+      expect(persistedPolicy.windows.attack_surface_reduction.credential_hardening.enabled).toBe(
+        policyFactory().windows.attack_surface_reduction.credential_hardening.enabled
+      );
+    });
+
+    it('leaves registry_credential_hardening absent on downgrade when it was never set', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            delete pc.windows.attack_surface_reduction.registry_credential_hardening;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Platinum);
+
+      // Device control is still Enterprise-only and enabled by `policyFactory()`, so the
+      // downgrade triggers an update - but not because of this field.
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+
+      const persistedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(persistedPolicy.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+  });
+
+  describe('Linux ransomware license downgrade', () => {
+    it('turns linux.ransomware and its popup off when downgrading from platinum to gold', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+            pc.linux.popup.ransomware = { message: 'custom', enabled: true };
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Gold);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalled();
+
+      const updatedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(updatedPolicy.linux.ransomware).toEqual({ mode: 'off', supported: false });
+      expect(updatedPolicy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+    });
+
+    it('does not materialize linux ransomware branches for a policy that never had them', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            delete pc.linux.ransomware;
+            delete pc.linux.popup.ransomware;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      // Device Control (on by default in `policyFactory()`) is what actually makes this policy
+      // non-compliant with Gold and triggers the update; that keeps this case representative of
+      // a real legacy policy rather than depending on linux.ransomware to force the update.
+      await pw.watch(Gold);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalled();
+
+      const updatedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(updatedPolicy.linux).not.toHaveProperty('ransomware');
+      expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
+    });
   });
 
   describe('retry logic', () => {

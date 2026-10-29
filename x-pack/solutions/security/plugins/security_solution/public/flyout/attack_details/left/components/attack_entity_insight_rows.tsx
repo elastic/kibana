@@ -98,7 +98,10 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
 
     const dataAsNestedObject = sampleSource as unknown as Ecs;
 
-    const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
+    const hostEntityId = euidApi?.euid.getEuidFromObject(
+      euidApi.getBuiltInEntityDefinition('host'),
+      dataAsNestedObject
+    );
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEntityId,
       identityFields: identityFields ?? undefined,
@@ -140,7 +143,6 @@ export const AttackHostInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         entityId={hostEntityStoreId}
         timestamp={timestamp}
         scopeId={scopeId}
-        expandedOnFirstRender={false}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
         onPreviewEntity={resolvedOverrides?.onPreviewEntity ?? onPreviewEntity}
@@ -184,7 +186,10 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
 
     const dataAsNestedObject = sampleSource as unknown as Ecs;
 
-    const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
+    const userEntityId = euidApi?.euid.getEuidFromObject(
+      euidApi.getBuiltInEntityDefinition('user'),
+      dataAsNestedObject
+    );
     const userEntityFromStore = useEntityFromStore({
       entityId: userEntityId,
       identityFields: identityFields ?? legacyUserIdentityForStore,
@@ -216,7 +221,6 @@ export const AttackUserInsightsRow: React.FC<AttackInsightsRowBaseProps> = memo(
         entityId={userEntityStoreId}
         timestamp={timestamp}
         scopeId={scopeId}
-        expandedOnFirstRender={false}
         isAttackDetails={true}
         renderIpLink={renderIpLink}
         onPreviewEntity={resolvedOverrides?.onPreviewEntity ?? onPreviewEntity}

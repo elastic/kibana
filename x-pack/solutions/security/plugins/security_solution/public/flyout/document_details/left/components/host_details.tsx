@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -126,11 +126,6 @@ export interface HostDetailsProps {
    */
   scopeId: string;
   /**
-   * Whether the panel is expanded on first render. Defaults to true (document details).
-   * Set to false for attack flyout so multiple entity panels start collapsed.
-   */
-  expandedOnFirstRender?: boolean;
-  /**
    * When provided (e.g. from EntitiesDetails), use this for entity/risk so the left panel
    * shows host risk level even when global time is still initializing.
    */
@@ -171,7 +166,6 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   entityId,
   timestamp,
   scopeId,
-  expandedOnFirstRender = true,
   hostEntityFromStoreResult,
   isAttackDetails = false,
   renderIpLink,
@@ -242,10 +236,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const hostIdentityFieldsForStore = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        'host',
+        euidApi.getBuiltInEntityDefinition('host'),
         hostEntityFromStoreResult?.entityRecord ?? hostEntityFromStoreResult?.entity
       ),
-    [euidApi?.euid, hostEntityFromStoreResult?.entityRecord, hostEntityFromStoreResult?.entity]
+    [euidApi, hostEntityFromStoreResult?.entityRecord, hostEntityFromStoreResult?.entity]
   );
   const observedHost = useObservedHost(hostName, scopeId, hostEntityFromStoreResult);
 
@@ -488,7 +482,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         headerContent: relatedUsersCount,
         link: hostLink,
       }}
-      expand={{ expandable: true, expandedOnFirstRender }}
+      expand={{ expandable: true, expandedOnFirstRender: true }}
       data-test-subj={HOST_DETAILS_TEST_ID}
     >
       <EuiTitle size="xxs">
@@ -503,7 +497,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <AnomalyTableProvider
         criteriaFields={hostToCriteria({
           hostItem: hostDetails,
-          euid: euidApi?.euid,
+          euidApi: euidApi ?? undefined,
           entityRecord: hostEntityFromStoreResult?.entityRecord,
         })}
         startDate={from}

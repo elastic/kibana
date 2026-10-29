@@ -8,6 +8,36 @@ import { uniq, values, sumBy } from 'lodash';
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { isIndexNotFoundError } from '../../lib/helpers/is_index_not_found_error';
+
+async function fetchPerIndexPattern<T>(
+  apmEventClient: APMEventClient,
+  fetch: (index: string) => Promise<Record<string, T> | undefined>
+): Promise<Record<string, T>> {
+  const responses = await Promise.all(
+    getApmIndexPatterns(apmEventClient).map(async (index) => {
+      try {
+        return await fetch(index);
+      } catch (error) {
+        if (isIndexNotFoundError(error)) {
+          return undefined;
+        }
+        throw error;
+      }
+    })
+  );
+
+  const indices: Record<string, T> = {};
+  for (const response of responses) {
+    if (response) {
+      for (const [indexName, value] of Object.entries(response)) {
+        indices[indexName] = value;
+      }
+    }
+  }
+
+  return indices;
+}
 
 export async function getTotalIndicesStats({
   context,
@@ -15,14 +45,31 @@ export async function getTotalIndicesStats({
 }: {
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
-}) {
-  const index = getApmIndicesCombined(apmEventClient);
+}): Promise<{
+  _all: { total: { store: { size_in_bytes: number } } };
+  indices: Record<string, IndicesStatsIndicesStats>;
+}> {
   const esClient = (await context.core).elasticsearch.client;
-  const totalStats = await esClient.asCurrentUser.indices.stats({
-    index,
-    expand_wildcards: 'all',
-  });
-  return totalStats;
+  const indices = await fetchPerIndexPattern<IndicesStatsIndicesStats>(
+    apmEventClient,
+    async (index) =>
+      (
+        await esClient.asCurrentUser.indices.stats({
+          index,
+          expand_wildcards: 'all',
+        })
+      ).indices
+  );
+
+  const totalSize = sumBy(
+    values(indices),
+    (indexStats) => indexStats?.total?.store?.size_in_bytes ?? 0
+  );
+
+  return {
+    _all: { total: { store: { size_in_bytes: totalSize } } },
+    indices,
+  };
 }
 
 export function getEstimatedSizeForDocumentsInIndex({
@@ -67,14 +114,17 @@ export async function getIndicesLifecycleStatus({
   context: ApmPluginRequestHandlerContext;
   apmEventClient: APMEventClient;
 }) {
-  const index = getApmIndicesCombined(apmEventClient);
   const esClient = (await context.core).elasticsearch.client;
-  const { indices } = await esClient.asCurrentUser.ilm.explainLifecycle({
-    index,
-    filter_path: 'indices.*.phase',
-  });
-
-  return indices || {};
+  return fetchPerIndexPattern(
+    apmEventClient,
+    async (index) =>
+      (
+        await esClient.asCurrentUser.ilm.explainLifecycle({
+          index,
+          filter_path: 'indices.*.phase',
+        })
+      ).indices
+  );
 }
 
 export async function getIndicesInfo({
@@ -95,15 +145,20 @@ export async function getIndicesInfo({
     ],
     features: ['settings'],
     expand_wildcards: 'all',
+    ignore_unavailable: true,
   });
 
   return indicesInfo;
 }
 
-export function getApmIndicesCombined(apmEventClient: APMEventClient) {
+function getApmIndexPatterns(apmEventClient: APMEventClient) {
   const {
     indices: { transaction, span, metric, error },
   } = apmEventClient;
 
-  return uniq([transaction, span, metric, error]).join();
+  return uniq([transaction, span, metric, error]);
+}
+
+export function getApmIndicesCombined(apmEventClient: APMEventClient) {
+  return getApmIndexPatterns(apmEventClient).join();
 }

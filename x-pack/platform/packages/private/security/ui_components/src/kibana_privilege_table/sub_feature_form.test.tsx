@@ -167,7 +167,7 @@ describe('SubFeatureForm', () => {
     const button = wrapper.find(EuiButtonGroup);
 
     act(() => {
-      button.props().onChange('cool_all');
+      button.props().onChange?.('cool_all');
     });
 
     expect(onChange).toHaveBeenCalledWith(['cool_all']);
@@ -201,7 +201,7 @@ describe('SubFeatureForm', () => {
     const button = wrapper.find(EuiButtonGroup);
 
     act(() => {
-      button.props().onChange('cool_read');
+      button.props().onChange?.('cool_read');
     });
 
     expect(onChange).toHaveBeenCalledWith(['cool_toggle_1', 'cool_read']);
@@ -237,7 +237,7 @@ describe('SubFeatureForm', () => {
     const button = wrapper.find(EuiButtonGroup);
 
     act(() => {
-      button.props().onChange('none');
+      button.props().onChange?.('none');
     });
 
     expect(onChange).toHaveBeenCalledWith([]);
@@ -392,7 +392,7 @@ describe('SubFeatureForm', () => {
     const button = wrapper.find(EuiButtonGroup);
 
     act(() => {
-      button.props().onChange('none');
+      button.props().onChange?.('none');
     });
 
     expect(onChange).toHaveBeenCalledWith([]);

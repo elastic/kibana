@@ -44,9 +44,10 @@ describe('StorageService', () => {
     ];
 
     it('should return early when docs array is empty', async () => {
-      await storageService.bulkIndexDocs({ index, docs: [] });
+      const result = await storageService.bulkIndexDocs({ index, docs: [] });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      expect(result).toEqual({ attempted: 0, docs: [], errors: [] });
     });
 
     it('should successfully bulk index documents', async () => {
@@ -58,7 +59,7 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      await storageService.bulkIndexDocs({ index, docs: mockDocs });
+      const result = await storageService.bulkIndexDocs({ index, docs: mockDocs });
 
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
@@ -70,6 +71,9 @@ describe('StorageService', () => {
         ],
         refresh: false,
       });
+      expect(result).toEqual({ attempted: 2, docs: mockDocs, errors: [] });
+      expect(result.docs[0]).toBe(mockDocs[0]);
+      expect(result.docs[1]).toBe(mockDocs[1]);
     });
 
     it('should pass custom refresh option when provided', async () => {
@@ -107,7 +111,7 @@ describe('StorageService', () => {
       });
     });
 
-    it('should log error when bulk response contains errors', async () => {
+    it('should log error and expose per-doc rejections when bulk response contains errors', async () => {
       const mockBulkResponse = {
         items: [
           { create: { _id: '1', status: 201 } },
@@ -129,9 +133,24 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      await storageService.bulkIndexDocs({ index, docs: mockDocs });
+      const result = await storageService.bulkIndexDocs({ index, docs: mockDocs });
 
       expect(mockLogger.error).toHaveBeenCalled();
+      expect(result).toEqual({
+        attempted: 2,
+        docs: [mockDocs[0]],
+        errors: [
+          {
+            code: 'mapper_parsing_exception',
+            message: 'failed to parse',
+            details: { statusCode: 400 },
+            index,
+            document: mockDocs[1],
+          },
+        ],
+      });
+      expect(result.docs[0]).toBe(mockDocs[0]);
+      expect(result.errors[0].document).toBe(mockDocs[1]);
     });
 
     it('should handle bulk response with errors but no error items gracefully', async () => {
@@ -144,9 +163,10 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      await storageService.bulkIndexDocs({ index, docs: [mockDocs[0]] });
+      const result = await storageService.bulkIndexDocs({ index, docs: [mockDocs[0]] });
 
       expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(result).toEqual({ attempted: 1, docs: [mockDocs[0]], errors: [] });
     });
 
     it('should throw error and log when bulk operation fails', async () => {
@@ -184,7 +204,7 @@ describe('StorageService', () => {
       // @ts-expect-error - not all fields are used
       mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
 
-      await storageService.bulkIndexDocsAcrossIndices({
+      const result = await storageService.bulkIndexDocsAcrossIndices({
         docs: [
           { index: '.rule-events', doc: mockDocs[0] },
           { index: '.alert-actions', doc: mockDocs[1] },
@@ -202,6 +222,49 @@ describe('StorageService', () => {
         ],
         refresh: 'wait_for',
       });
+      expect(result).toEqual({ attempted: 2, docs: mockDocs, errors: [] });
+    });
+
+    it('reports partial failures with per-doc rejection details and preserves the target index', async () => {
+      const mockBulkResponse = {
+        items: [
+          { create: { _id: '1', status: 201 } },
+          {
+            create: {
+              _id: '2',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'boom', status: 400 },
+            },
+          },
+        ],
+        errors: true,
+      };
+
+      // @ts-expect-error - not all fields are used
+      mockEsClient.bulk.mockResolvedValue(mockBulkResponse);
+
+      const result = await storageService.bulkIndexDocsAcrossIndices({
+        docs: [
+          { index: '.rule-events', doc: mockDocs[0] },
+          { index: '.alert-actions', doc: mockDocs[1] },
+        ],
+      });
+
+      expect(result).toEqual({
+        attempted: 2,
+        docs: [mockDocs[0]],
+        errors: [
+          {
+            code: 'mapper_parsing_exception',
+            message: 'boom',
+            details: { statusCode: 400 },
+            index: '.alert-actions',
+            document: mockDocs[1],
+          },
+        ],
+      });
+      expect(result.docs[0]).toBe(mockDocs[0]);
+      expect(result.errors[0].document).toBe(mockDocs[1]);
     });
 
     it('defaults refresh to false when omitted', async () => {
@@ -224,9 +287,10 @@ describe('StorageService', () => {
     });
 
     it('returns early when the docs array is empty', async () => {
-      await storageService.bulkIndexDocsAcrossIndices({ docs: [] });
+      const result = await storageService.bulkIndexDocsAcrossIndices({ docs: [] });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      expect(result).toEqual({ attempted: 0, docs: [], errors: [] });
     });
 
     it('throws and logs when the underlying bulk call fails', async () => {

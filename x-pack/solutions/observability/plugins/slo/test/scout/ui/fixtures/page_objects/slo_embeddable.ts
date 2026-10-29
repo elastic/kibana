@@ -49,12 +49,14 @@ export class SLOEmbeddable {
 
   /** Selects an SLO definition by name in the configuration flyout. */
   async selectDefinition(name: string) {
-    await this.selectComboBoxOption(this.definitionSelector, name);
+    // Definitions are fetched server-side via onSearchChange; type to surface the match.
+    await this.page.components.comboBox('sloDefinitionSelector').setSelectedOptions([name]);
   }
 
   /** Selects an SLO instance by name in the configuration flyout. */
   async selectInstance(name: string) {
-    await this.selectComboBoxOption(this.instanceSelector, name);
+    // Instances are fetched server-side via async/onSearchChange; type to surface the match.
+    await this.page.components.comboBox('sloInstanceSelector').setSelectedOptions([name]);
   }
 
   /** Switches the configuration flyout to "Grouped SLOs" mode. */
@@ -65,21 +67,5 @@ export class SLOEmbeddable {
   /** Clicks the confirm button to save the embeddable configuration. */
   async confirm() {
     await this.confirmButton.click();
-  }
-
-  /**
-   * Type-and-pick interaction for an EuiComboBox scoped to a wrapper locator.
-   * Uses keyboard navigation (ArrowDown + Enter) to pick the highlighted
-   * option, mirroring how a keyboard user would interact with the combo box.
-   * Tolerates duplicate names (which can appear when the suite-wide `sloData`
-   * fixture seeds the same SLO across repeated local runs) without resorting
-   * to index-based locators forbidden by `playwright/no-nth-methods`.
-   */
-  private async selectComboBoxOption(wrapper: Locator, name: string) {
-    const input = wrapper.locator('input[role="combobox"]');
-    await input.click();
-    await input.fill(name);
-    await this.page.keyboard.press('ArrowDown');
-    await this.page.keyboard.press('Enter');
   }
 }

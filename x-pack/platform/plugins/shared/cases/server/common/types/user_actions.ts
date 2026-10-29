@@ -6,10 +6,10 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { UserActionAttributes } from '../../../common/types/domain';
+import type { ActionSource, UserActionAttributes } from '../../../common/types/domain';
 import {
-  UserActionAttributesRt,
-  CaseUserActionWithoutReferenceIdsRt,
+  UserActionAttributesSchema,
+  CaseUserActionWithoutReferenceIdsSchema,
 } from '../../../common/types/domain';
 import type { User } from './user';
 
@@ -23,10 +23,11 @@ interface UserActionCommonPersistedAttributes {
 export interface UserActionPersistedAttributes extends UserActionCommonPersistedAttributes {
   type: string;
   payload: Record<string, unknown>;
+  source?: ActionSource | null;
 }
 
-export const UserActionTransformedAttributesRt = UserActionAttributesRt;
-export const UserActionPersistedAttributesRt = CaseUserActionWithoutReferenceIdsRt;
+export const UserActionTransformedAttributesSchema = UserActionAttributesSchema;
+export const UserActionPersistedAttributesSchema = CaseUserActionWithoutReferenceIdsSchema;
 
 export type UserActionTransformedAttributes = UserActionAttributes;
 export type UserActionSavedObjectTransformed = SavedObject<UserActionTransformedAttributes>;

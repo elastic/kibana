@@ -5,61 +5,68 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
-import { useService } from '@kbn/core-di-browser';
-import { summarizeExplicitlyLinkedActionPolicies } from '@kbn/alerting-v2-rule-form';
-import { ActionPoliciesApi } from '../../../../services/action_policies_api';
-import { actionPolicyKeys } from '../../../../hooks/query_key_factory';
+import { useMemo } from 'react';
+import { useMatchedActionPolicies } from '@kbn/alerting-v2-rule-form';
+import type { MatchedActionPolicy } from '@kbn/alerting-v2-schemas';
+import { useService, CoreStart } from '@kbn/core-di-browser';
 
-/** Max policies fetched from the list API; linked counts may undercount when the space has more. */
-export const LINKED_ACTION_POLICIES_FETCH_LIMIT = 100;
+const CATEGORY_ORDER: Record<MatchedActionPolicy['category'], number> = {
+  tags: 0,
+  catch_all: 1,
+};
+
+/** Matching-criteria first, then catch-all, then name. */
+export const sortMatchedActionPolicies = (
+  items: readonly MatchedActionPolicy[]
+): MatchedActionPolicy[] =>
+  [...items].sort((a, b) => {
+    const categoryDiff = CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category];
+    if (categoryDiff !== 0) {
+      return categoryDiff;
+    }
+    return a.action_policy.name.localeCompare(b.action_policy.name, 'en');
+  });
 
 export interface UseLinkedActionPoliciesResult {
-  totalCount: number;
-  catchAllCount: number;
-  matchingCriteriaCount: number;
-  /** True when the space has more policies than {@link LINKED_ACTION_POLICIES_FETCH_LIMIT} and the list response was truncated. */
-  isCountTruncated: boolean;
+  items: MatchedActionPolicy[];
+  evaluatedCount: number;
+  /** True when some policies in the space were not evaluated and the list may be incomplete. */
+  isMatchTruncated: boolean;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
 }
 
-export const useLinkedActionPolicies = (ruleId: string): UseLinkedActionPoliciesResult => {
-  const actionPoliciesApi = useService(ActionPoliciesApi);
-  const enabled = Boolean(ruleId);
-
-  const { isLoading, error, data } = useQuery({
-    queryKey: actionPolicyKeys.linkedForRule(ruleId),
-    queryFn: () =>
-      actionPoliciesApi.listActionPolicies({
-        page: 1,
-        perPage: LINKED_ACTION_POLICIES_FETCH_LIMIT,
-      }),
-    enabled,
-    refetchOnWindowFocus: false,
-    /*
-     * Client-side filter for policies whose matcher explicitly includes rule.id.
-     * We do not use _match_for_rule here — that endpoint returns broader matches
-     * (global and global-filtered policies), not only explicit rule.id linkage.
-     */
-    select: (response) => {
-      const summary = summarizeExplicitlyLinkedActionPolicies(response.items, ruleId);
-
-      return {
-        ...summary,
-        isCountTruncated: response.total > LINKED_ACTION_POLICIES_FETCH_LIMIT,
-      };
-    },
+export const useLinkedActionPolicies = (routingTags: string[]): UseLinkedActionPoliciesResult => {
+  const http = useService(CoreStart('http'));
+  const {
+    isLoading,
+    isPreviousData = false,
+    error,
+    items,
+    evaluatedCount,
+    isTruncated,
+  } = useMatchedActionPolicies({
+    http,
+    routingTags,
   });
+  /*
+   * keepPreviousData keeps the last tag query on screen with isLoading false.
+   * Hide those rows until the match for the current routing tags arrives.
+   */
+  const awaitingCurrentMatches = isPreviousData && error == null;
+
+  const sortedItems = useMemo(
+    () => (awaitingCurrentMatches ? [] : sortMatchedActionPolicies(items)),
+    [awaitingCurrentMatches, items]
+  );
 
   return {
-    totalCount: data?.totalCount ?? 0,
-    catchAllCount: data?.catchAllCount ?? 0,
-    matchingCriteriaCount: data?.matchingCriteriaCount ?? 0,
-    isCountTruncated: data?.isCountTruncated ?? false,
-    isLoading: enabled && isLoading,
+    items: sortedItems,
+    evaluatedCount: awaitingCurrentMatches ? 0 : evaluatedCount,
+    isMatchTruncated: awaitingCurrentMatches ? false : isTruncated,
+    isLoading: isLoading || awaitingCurrentMatches,
     isError: error != null,
-    error: error instanceof Error ? error : error != null ? new Error(String(error)) : null,
+    error,
   };
 };

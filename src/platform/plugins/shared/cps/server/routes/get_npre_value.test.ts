@@ -8,7 +8,6 @@
  */
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { registerGetNpreValueRoute } from './get_npre_value';
 import { NpreClient } from '../npre/npre_client';
@@ -28,11 +27,14 @@ describe('get_npre_value route', () => {
     return { handler, routeConfig };
   };
 
-  it('registers route with authz delegated to the scoped Elasticsearch client', () => {
+  it('registers route with authz disabled', () => {
     const { routeConfig } = createHandler();
 
     expect(routeConfig.path).toBe('/internal/cps/project_routing/{projectRoutingName}');
-    expect(routeConfig.security?.authz).toEqual(AuthzDisabled.delegateToESClient);
+    expect(routeConfig.security?.authz).toEqual({
+      enabled: false,
+      reason: expect.stringContaining('Kibana internal user'),
+    });
   });
 
   it('returns the raw npre value', async () => {

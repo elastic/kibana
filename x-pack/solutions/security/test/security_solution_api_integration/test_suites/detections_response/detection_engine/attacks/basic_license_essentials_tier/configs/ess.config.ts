@@ -14,15 +14,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'publicAttacksApiEnabled',
-        ])}`,
-      ],
-    },
     testFiles: [require.resolve('..')],
     junit: {
       reportName: 'Detection Engine - Attacks APIs Integration Tests - ESS Env - Basic License',

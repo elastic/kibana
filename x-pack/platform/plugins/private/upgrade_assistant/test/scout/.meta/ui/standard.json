@@ -1,5 +1,8 @@
 {
   "sha1": "a7cc2ea8ab3a1097ad8df564986fcf50ebc58192",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "1d90445d06d6584-224e5c59cb01ba8",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/deprecation_pages.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 33,
+        "column": 10
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/deprecation_pages.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 40,
+        "column": 18
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/es_deprecation_logs_page.spec.ts",
-        "line": 29,
-        "column": 9
+        "line": 23,
+        "column": 10
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/es_deprecation_logs_page.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 23,
+        "column": 61
       }
     },
     {
@@ -67,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 17,
-        "column": 9
+        "line": 13,
+        "column": 14
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 27,
-        "column": 9
+        "line": 19,
+        "column": 7
       }
     },
     {
@@ -95,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 37,
+        "column": 13
       }
     },
     {
@@ -123,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/overview_page.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 25,
+        "column": 41
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout/ui/tests/overview_page.spec.ts",
-        "line": 34,
-        "column": 9
+        "line": 26,
+        "column": 25
       }
     }
   ]

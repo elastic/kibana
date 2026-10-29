@@ -14,8 +14,8 @@ import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
  *
  * The `newFlyoutSystemDisabled` experimental feature flag controls whether the
  * "Enable new flyout" advanced setting is registered:
- * - when the flag is off (the default), the setting is registered and defaults to `false`, so the
- *   new flyout is disabled unless the user explicitly opts in;
+ * - when the flag is off (the default), the setting is registered and defaults to `true`, so the
+ *   new flyout is enabled unless the user explicitly opts out;
  * - when the flag is on, the setting is unregistered and the new flyout is always disabled —
  *   regardless of any value the user may have previously stored for it.
  */
@@ -29,7 +29,7 @@ export const useIsNewFlyoutEnabled = (): boolean => {
     return false;
   }
 
-  // The advanced setting is registered (and defaults to `false`) whenever the flag is off, so it is
-  // the source of truth for whether the user has opted in to the new flyout.
-  return uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, false);
+  // The advanced setting is registered (and defaults to `true`) whenever the flag is off, so it is
+  // the source of truth for whether the user has opted out of the new flyout.
+  return uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true);
 };

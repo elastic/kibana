@@ -8,17 +8,11 @@
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
-import {
-  waitForEndpointPackage,
-  waitForTransformPropagation,
-  seedScenario,
-  SCENARIOS,
-} from '../../src/data_generators/endpoint_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+import { seedTroubleshootingScenarios } from '../../src/data_generators/scenario_seeding';
+import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
-const ALL_SCENARIO_COUNT = Object.keys(SCENARIOS).length;
 
 const COMMON_CRITERIA = [
   `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
@@ -194,31 +188,13 @@ const P0_EVALS = [
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
 
-  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
-    await waitForEndpointPackage(kbnClient, esClient, log);
-
-    const { transforms } = await esClient.transform.getTransformStats({
-      transform_id: UNITED_TRANSFORM_WILDCARD,
-    });
-    unitedTransformId = transforms[0].id;
-
-    try {
-      await chatClient.converse({ message: 'hello' });
-    } catch (e) {
-      log.warning(`Warmup failed: ${e}`);
-    }
-
-    const clients = { esClient, internalEsClient };
-    await cleanupSeededData(clients);
-
-    // waiting for transforms takes a while so seed all scenarios here
-    for (const scenario of Object.values(SCENARIOS)) {
-      await seedScenario(clients, scenario);
-    }
-
-    await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: ALL_SCENARIO_COUNT,
-      metadataUnited: ALL_SCENARIO_COUNT,
+  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
+    unitedTransformId = await seedTroubleshootingScenarios({
+      kbnClient,
+      esClient,
+      internalEsClient,
+      agentBuilderClient,
+      log,
     });
   });
 
@@ -357,6 +333,6 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       ignore_unavailable: true,
     });
 
-    await cleanupSeededData({ esClient, internalEsClient });
+    await cleanupTroubleshootingData({ esClient, internalEsClient });
   });
 });

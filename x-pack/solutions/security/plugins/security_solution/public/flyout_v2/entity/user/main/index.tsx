@@ -17,13 +17,15 @@ import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/ap
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
+import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
 } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { Header } from './header';
@@ -34,8 +36,10 @@ import { useManagedUser } from '../../../../flyout/entity_details/shared/hooks/u
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
-  getRiskFromEntityRecord,
+  getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
+import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -54,6 +58,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface UserProps {
   /**
@@ -71,6 +76,12 @@ export interface UserProps {
    * Used directly when `hit` is not provided, or as a fallback when EUID resolution yields no value.
    */
   entityId?: string;
+  /**
+   * `single` (default) shows the `entityId` record only. `resolved` also loads every record that
+   * resolves to `entityId`; when aliases exist the flyout renders the group view: summary fields
+   * are aggregated across the group and asset criticality is read-only.
+   */
+  mode?: EntityViewMode;
   /**
    * Scope id (timeline id, table id, etc.) — used for downstream containers and queries.
    */
@@ -95,12 +106,17 @@ export const User: FC<UserProps> = memo(function User({
   userName,
   hit,
   entityId: entityIdProp,
+  mode: requestedMode = 'single',
   scopeId = '',
   contextID,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
   const euidApi = useEntityStoreEuidApi();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  // Resolution-group view is only available on the new Entity Analytics page; otherwise fall back
+  // to the single-entity view so the header, summary grid and copy link stay consistent.
+  const mode: EntityViewMode = isNewEntityAnalyticsPage ? requestedMode : 'single';
   const {
     openUserFlyoutAsChild,
     openEntityDetailsAsChild,
@@ -115,7 +131,13 @@ export const User: FC<UserProps> = memo(function User({
   } = useFlyoutApi();
 
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('user', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('user'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -131,10 +153,13 @@ export const User: FC<UserProps> = memo(function User({
 
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    mode,
     identityFields: userStoreIdentityFields,
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
+  const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     const legacyFields =
@@ -142,13 +167,13 @@ export const User: FC<UserProps> = memo(function User({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'user',
+          euidApi.getBuiltInEntityDefinition('user'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -181,6 +206,7 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
+      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -226,7 +252,9 @@ export const User: FC<UserProps> = memo(function User({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
+  // Group view is read-only: a single criticality edit can't target every member.
   const onCriticalitySave =
+    !isGroupView &&
     !!assetCriticalityPrivileges.data?.has_write_permissions &&
     entityFromStoreResult.entityRecord &&
     observedUser.entityRecord
@@ -243,6 +271,7 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -254,23 +283,51 @@ export const User: FC<UserProps> = memo(function User({
   ) : undefined;
 
   const onOpenUser = useCallback(() => {
-    openUserFlyoutAsChild({ userName, entityId, scopeId, title: userName });
-  }, [openUserFlyoutAsChild, userName, entityId, scopeId]);
+    openUserFlyoutAsChild({
+      userName,
+      entityId,
+      mode,
+      scopeId,
+      title: userName,
+      origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+    });
+  }, [openUserFlyoutAsChild, userName, entityId, mode, scopeId]);
 
   const onShowRelatedEntity = useCallback(
-    (params: {
-      engineType: string | undefined;
-      entityId: string;
-      entityName: string | undefined;
-    }) =>
+    (
+      params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      },
+      origin: FlyoutOrigin
+    ) =>
       openEntityDetailsAsChild({
         engineType: params.engineType,
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
+        origin,
       }),
     [openEntityDetailsAsChild, scopeId]
+  );
+
+  const onShowRelatedEntityFromGraph = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.GRAPH_NODE),
+    [onShowRelatedEntity]
+  );
+
+  const onShowRelatedEntityFromResolution = useCallback(
+    (params: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => onShowRelatedEntity(params, FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK),
+    [onShowRelatedEntity]
   );
 
   const openDetailsPanel = useCallback(
@@ -283,14 +340,22 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             onShowEntity: onOpenUser,
             title: userName,
+            subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
+            origin:
+              path.subTab === RiskScoreLeftPanelSubTab.RESOLUTION
+                ? FLYOUT_ORIGIN.RISK_SUMMARY_RESOLUTION
+                : FLYOUT_ORIGIN.RISK_SUMMARY_ENTITY,
           });
         case EntityDetailsLeftPanelTab.ANOMALIES:
           return openEntityAnomalyInsights({
             entityType: EntityType.user,
             value: userName,
             entityId: entityStoreEntityId,
+            mode,
+            scopeId,
             onOpenEntity: onOpenUser,
             title: userName,
+            origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
           });
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
@@ -299,16 +364,21 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onOpenUser,
                 title: userName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
               });
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return openEntityMisconfigurationInsights({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onOpenUser,
                 title: userName,
+                origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
               });
           }
           break;
@@ -318,9 +388,11 @@ export const User: FC<UserProps> = memo(function User({
             entityId: entityStoreEntityId,
             scopeId,
             entityName: userName,
-            onShowEntity: onShowRelatedEntity,
+            onShowEntity: onShowRelatedEntityFromGraph,
             onShowOriginatingEntity: onOpenUser,
             title: userName,
+            flyoutType: FLYOUT_TYPE.USER,
+            origin: FLYOUT_ORIGIN.VISUALIZATIONS_GRAPH,
           });
         case EntityDetailsLeftPanelTab.RESOLUTION_GROUP:
           if (!entityStoreEntityId) return;
@@ -329,9 +401,11 @@ export const User: FC<UserProps> = memo(function User({
             entityType: 'user',
             entityName: userName,
             scopeId,
+            mode,
             onShowEntity: onOpenUser,
-            onShowRelatedEntity,
+            onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,
+            origin: FLYOUT_ORIGIN.RESOLUTION_SECTION,
           });
         // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
         case EntityDetailsLeftPanelTab.OKTA: {
@@ -341,7 +415,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: oktaManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -353,7 +426,6 @@ export const User: FC<UserProps> = memo(function User({
               managedUser: entraManagedUser,
               value: userName,
               onOpenUser,
-              title: userName,
             });
           }
           break;
@@ -373,16 +445,16 @@ export const User: FC<UserProps> = memo(function User({
       scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
+      mode,
       managedUser,
       onOpenUser,
-      onShowRelatedEntity,
+      onShowRelatedEntityFromGraph,
+      onShowRelatedEntityFromResolution,
     ]
   );
 
-  const riskLevel = observedUser.entityRecord
-    ? ((getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level ??
-        'Unknown') as RiskSeverity)
-    : undefined;
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(observedUser.entityRecord, isGroupView);
 
   return (
     <>
@@ -392,15 +464,21 @@ export const User: FC<UserProps> = memo(function User({
           managedUser={managedUser}
           lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
+          aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
+          mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}
           riskLevel={riskLevel}
+          scopeId={scopeId}
+          showEntityAnalyticsCopyLink
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {observedUser.entityRecord && (
           <EntitySummaryGrid
             entityRecord={observedUser.entityRecord}
+            aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
           />
@@ -422,10 +500,16 @@ export const User: FC<UserProps> = memo(function User({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
-            skipRiskAndCriticality={noEntityInStore}
+            aliasRecords={aliasRecords}
+            noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
+            entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
-            onShowEntity={onShowRelatedEntity}
+            mode={mode}
+            onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
+            riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+            isGroupView={isGroupView}
           />
         )}
       </EuiFlyoutBody>

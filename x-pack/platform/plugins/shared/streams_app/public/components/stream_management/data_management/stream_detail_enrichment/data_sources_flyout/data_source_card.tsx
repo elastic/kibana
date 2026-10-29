@@ -136,6 +136,7 @@ export const DataSourceCard = ({
             <PreviewTable
               documents={previewDocs.map(flattenObjectNestedLast) as FlattenRecord[]}
               height={350}
+              showLeadingControlColumns={false}
             />
           )}
         </EuiAccordion>

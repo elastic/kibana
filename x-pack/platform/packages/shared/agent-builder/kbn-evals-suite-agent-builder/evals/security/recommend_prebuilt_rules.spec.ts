@@ -27,7 +27,7 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
  *    (already-installed rules -> `find-security-rules`, editing a rule ->
  *    `detection-rule-edit`, ML jobs -> `find-security-ml-jobs`, alert triage ->
  *    `alert-analysis`, authoring a custom Alerting V2 / ES|QL rule ->
- *    `rule-management`). These answer "can the agent distinguish when to call
+ *    `rule-authoring`). These answer "can the agent distinguish when to call
  *    this skill vs. others?" and mirror the find-rules "Boundaries" suite.
  *
  * Requirements for the eval target Kibana:
@@ -36,7 +36,7 @@ import { createEvaluateDataset } from '../../src/evaluate_dataset';
  *   registered and the agent cannot route to it.
  * - The boundary examples that route to `find-security-rules` also require the
  *   `dexAiSkillFindRules` flag, so that sibling skill is registered too.
- * - The boundary example that routes to `rule-management` requires the Alerting V2
+ * - The boundary example that routes to `rule-authoring` requires the Alerting V2
  *   plugin enabled (`xpack.alerting_v2.enabled: true`); that plugin is disabled by
  *   default, so otherwise its skill is never registered and the agent cannot route
  *   to it.
@@ -62,11 +62,11 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
 });
 
 // Tactic under test. The ID is stable across MITRE and rule-package versions, so
-// we assert on it rather than rule names/counts. Defense Evasion (TA0005) is one
-// of the largest tactics in the bundled catalog, so a tactic query reliably
-// returns many installable rules.
+// we assert on it rather than rule names/counts. Stealth (TA0005, renamed from
+// Defense Evasion in ATT&CK v19) is one of the largest tactics in the bundled
+// catalog, so a tactic query reliably returns many installable rules.
 const TACTIC_ID = 'TA0005';
-const TACTIC_NAME = 'Defense Evasion';
+const TACTIC_NAME = 'Stealth';
 
 const FIND_PREBUILT_RULES_TOOL_ID = 'security.find_prebuilt_rules';
 const GET_CATALOG_OVERVIEW_TOOL_ID = 'security.get_installable_catalog_overview';
@@ -165,7 +165,7 @@ const tagsFromFilter = (step: ToolCallStep): string[] => {
     : [];
 };
 
-// The 14 canonical MITRE ATT&CK Enterprise tactics the skill routes to (its prompt table).
+// The 15 canonical MITRE ATT&CK Enterprise tactics the skill routes to (its prompt table).
 // Unlike tags, tactics are NOT discovered from a tool — they are a fixed set — so the grounding
 // source of truth is this constant, and the schema accepts any string, so this guard is real.
 const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
@@ -173,7 +173,7 @@ const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
   { id: 'TA0002', name: 'Execution' },
   { id: 'TA0003', name: 'Persistence' },
   { id: 'TA0004', name: 'Privilege Escalation' },
-  { id: 'TA0005', name: 'Defense Evasion' },
+  { id: 'TA0005', name: 'Stealth' },
   { id: 'TA0006', name: 'Credential Access' },
   { id: 'TA0007', name: 'Discovery' },
   { id: 'TA0008', name: 'Lateral Movement' },
@@ -183,6 +183,7 @@ const CANONICAL_TACTICS: ReadonlyArray<{ id: string; name: string }> = [
   { id: 'TA0040', name: 'Impact' },
   { id: 'TA0042', name: 'Resource Development' },
   { id: 'TA0043', name: 'Reconnaissance' },
+  { id: 'TA0112', name: 'Defense Impairment' },
 ];
 
 const CANONICAL_TACTIC_IDS = new Set(CANONICAL_TACTICS.map((tactic) => tactic.id));
@@ -490,7 +491,7 @@ evaluate.describe(
               'Distractor queries that touch rules/prebuilt vocabulary but concern ' +
               'already-installed rules, rule editing, ML jobs, alert triage, or authoring a ' +
               'custom alerting rule, and should activate a sibling skill (find-security-rules, ' +
-              'detection-rule-edit, find-security-ml-jobs, alert-analysis, rule-management) ' +
+              'detection-rule-edit, find-security-ml-jobs, alert-analysis, rule-authoring) ' +
               'rather than recommend-prebuilt-rules.',
             examples: [
               {
@@ -570,7 +571,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Alerting V2 Rule Authoring',
-                  expectedSkill: 'rule-management',
+                  expectedSkill: 'rule-authoring',
                 },
               },
             ],

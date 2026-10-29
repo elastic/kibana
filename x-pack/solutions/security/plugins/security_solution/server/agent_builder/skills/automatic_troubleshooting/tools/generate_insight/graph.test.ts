@@ -40,7 +40,7 @@ const createModel = ({
   insights,
 }: {
   insightType: WorkflowInsightType;
-  insights: unknown[];
+  insights: unknown;
 }): ModelMock => {
   const categorizeInvoke = jest.fn().mockResolvedValue({ insightType });
   const generateInvoke = jest.fn().mockResolvedValue({ insights });
@@ -101,6 +101,7 @@ describe('createGenerateInsightGraph', () => {
     const graph = buildGraph(model);
     const result = await graph.invoke({});
 
+    expect(mockCreateFromDefendInsights).toHaveBeenCalledTimes(1);
     expect(mockCreateFromDefendInsights).toHaveBeenCalledWith(
       defendInsights,
       ['endpoint-1'],
@@ -118,8 +119,9 @@ describe('createGenerateInsightGraph', () => {
   });
 
   describe('policy_response_failure gate', () => {
-    it('does not generate or persist an insight when the refetch is all-success', async () => {
+    it('still calls through to suppress stale insights when the refetch is all-success', async () => {
       mockGetPolicyResponseFailureEvents.mockResolvedValueOnce([]);
+      mockCreateFromDefendInsights.mockResolvedValueOnce([]);
       const { model, generateInvoke, withStructuredOutput } = createModel({
         insightType: WorkflowInsightType.enum.policy_response_failure,
         insights: [{ group: 'should-not-be-used', events: [{ id: 'x' }] }],
@@ -134,12 +136,20 @@ describe('createGenerateInsightGraph', () => {
       });
       expect(generateInvoke).not.toHaveBeenCalled();
       expect(withStructuredOutput).toHaveBeenCalledTimes(1);
-      expect(mockCreateFromDefendInsights).not.toHaveBeenCalled();
+      expect(mockCreateFromDefendInsights).toHaveBeenCalledWith(
+        [],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.policy_response_failure,
+        'connector-id',
+        'model-name',
+        'space-1'
+      );
       expect(result.results).toEqual([]);
     });
 
     it('passes ccsEnabled through to the refetch', async () => {
       mockGetPolicyResponseFailureEvents.mockResolvedValueOnce([]);
+      mockCreateFromDefendInsights.mockResolvedValueOnce([]);
       const { model } = createModel({
         insightType: WorkflowInsightType.enum.policy_response_failure,
         insights: [],
@@ -214,13 +224,79 @@ describe('createGenerateInsightGraph', () => {
         insightType: WorkflowInsightType.enum.policy_response_failure,
         insights: [{ group: 'no-events', events: [] }],
       });
+      mockCreateFromDefendInsights.mockResolvedValueOnce([]);
 
       const graph = buildGraph(model);
       const result = await graph.invoke({});
 
       expect(generateInvoke).toHaveBeenCalledTimes(1);
-      expect(mockCreateFromDefendInsights).not.toHaveBeenCalled();
+      expect(mockCreateFromDefendInsights).toHaveBeenCalledWith(
+        [],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.policy_response_failure,
+        'connector-id',
+        'model-name',
+        'space-1'
+      );
       expect(result.results).toEqual([]);
+    });
+  });
+
+  describe('malformed structured output', () => {
+    it('throws a descriptive error and does not call the service when insights is undefined', async () => {
+      const { model } = createModel({
+        insightType: WorkflowInsightType.enum.incompatible_antivirus,
+        insights: undefined,
+      });
+
+      const graph = buildGraph(model);
+      const error = await graph.invoke({}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(
+        'Automatic Troubleshooting insight generation failed for insight type "incompatible_antivirus": the model returned no usable insights envelope (structured output was missing or malformed). This is NOT a "no findings" result — no insights were created or suppressed and existing insights were left unchanged.'
+      );
+      expect(mockCreateFromDefendInsights).not.toHaveBeenCalled();
+    });
+
+    it('throws a descriptive error and does not call the service when insights is not an array', async () => {
+      const { model } = createModel({
+        insightType: WorkflowInsightType.enum.custom,
+        insights: { not: 'an array' },
+      });
+
+      const graph = buildGraph(model);
+      const error = await graph.invoke({}).catch((e) => e);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe(
+        'Automatic Troubleshooting insight generation failed for insight type "custom": the model returned no usable insights envelope (structured output was missing or malformed). This is NOT a "no findings" result — no insights were created or suppressed and existing insights were left unchanged.'
+      );
+      expect(mockCreateFromDefendInsights).not.toHaveBeenCalled();
+    });
+
+    it('still filters out insights with no events from a well-formed response', async () => {
+      const actionableInsight = {
+        group: 'real-group',
+        events: [{ id: 'event-1', endpointId: 'endpoint-1', value: 'v' }],
+      };
+      mockCreateFromDefendInsights.mockResolvedValueOnce([{ id: 'wi-1' }]);
+      const { model } = createModel({
+        insightType: WorkflowInsightType.enum.custom,
+        insights: [actionableInsight, { group: 'empty', events: [] }],
+      });
+
+      const graph = buildGraph(model);
+      await graph.invoke({});
+
+      expect(mockCreateFromDefendInsights).toHaveBeenCalledWith(
+        [actionableInsight],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.custom,
+        'connector-id',
+        'model-name',
+        'space-1'
+      );
     });
   });
 
@@ -250,8 +326,9 @@ describe('createGenerateInsightGraph', () => {
       ]);
     });
 
-    it('preserves the empty no-op behavior for non-PRF types with no insights', async () => {
+    it('still calls through to suppress stale insights for non-PRF types with no findings', async () => {
       mockGetPolicyResponseFailureEvents.mockResolvedValue([]);
+      mockCreateFromDefendInsights.mockResolvedValueOnce([]);
       const { model } = createModel({
         insightType: WorkflowInsightType.enum.custom,
         insights: [],
@@ -261,7 +338,14 @@ describe('createGenerateInsightGraph', () => {
       const result = await graph.invoke({});
 
       expect(mockGetPolicyResponseFailureEvents).not.toHaveBeenCalled();
-      expect(mockCreateFromDefendInsights).not.toHaveBeenCalled();
+      expect(mockCreateFromDefendInsights).toHaveBeenCalledWith(
+        [],
+        ['endpoint-1'],
+        WorkflowInsightType.enum.custom,
+        'connector-id',
+        'model-name',
+        'space-1'
+      );
       expect(result.results).toEqual([]);
     });
   });

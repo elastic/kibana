@@ -55,7 +55,7 @@ fields:
   - name: requires_escalation
     control: TOGGLE
     label: Toggle label
-    type: keyword
+    type: boolean
 `;
 
 const invalidTemplateDefinition = `

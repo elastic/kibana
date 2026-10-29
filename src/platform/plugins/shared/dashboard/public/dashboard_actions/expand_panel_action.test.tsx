@@ -51,7 +51,7 @@ describe('Expand panel action', () => {
   });
 
   it('returns the correct icon based on expanded panel id', async () => {
-    expect(await action.getIconType(context)).toBe('expand');
+    expect(await action.getIconType(context)).toBe('maximize');
     expandedPanelId$.next('superPanelId');
     expect(await action.getIconType(context)).toBe('minimize');
   });

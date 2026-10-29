@@ -24,37 +24,22 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from '@kbn/alerting-v2-episodes-ui/components/severity/severity_utils';
+import {
+  AlertEpisodeStatusBadge,
+  getEpisodeStatusBadgeLabel,
+} from '@kbn/alerting-v2-episodes-ui/components/status/status_badge';
+import { FlappingBadge } from '@kbn/alerting-v2-episodes-ui/components/flapping/flapping_badge';
+import { FLAPPING_BADGE_LABEL } from '@kbn/alerting-v2-episodes-ui/components/flapping/translations';
+import { isEpisodeSnoozed } from '@kbn/alerting-v2-episodes-ui/utils/is_episode_snoozed';
 import * as i18n from '../translations';
 
 export interface EpisodeHeaderBadgesArgs {
   status: AlertEpisodeStatus | undefined;
   severity: string | undefined | null;
-  tags: string[];
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  isFlapping?: boolean;
 }
-
-type AppHeaderBadgeColor = NonNullable<AppHeaderBadge['color']>;
-
-const STATUS_BADGE_COLORS: Record<AlertEpisodeStatus, AppHeaderBadgeColor> = {
-  [ALERT_EPISODE_STATUS.INACTIVE]: 'success',
-  [ALERT_EPISODE_STATUS.PENDING]: 'warning',
-  [ALERT_EPISODE_STATUS.ACTIVE]: 'danger',
-  [ALERT_EPISODE_STATUS.RECOVERING]: 'primary',
-};
-
-const STATUS_BADGE_LABELS: Record<AlertEpisodeStatus, string> = {
-  [ALERT_EPISODE_STATUS.INACTIVE]: i18n.STATUS_BADGE_INACTIVE,
-  [ALERT_EPISODE_STATUS.PENDING]: i18n.STATUS_BADGE_PENDING,
-  [ALERT_EPISODE_STATUS.ACTIVE]: i18n.STATUS_BADGE_ACTIVE,
-  [ALERT_EPISODE_STATUS.RECOVERING]: i18n.STATUS_BADGE_RECOVERING,
-};
-
-const getStatusBadgeColor = (status: AlertEpisodeStatus): AppHeaderBadgeColor =>
-  STATUS_BADGE_COLORS[status] ?? 'hollow';
-
-const getStatusBadgeLabel = (status: AlertEpisodeStatus): string =>
-  STATUS_BADGE_LABELS[status] ?? i18n.STATUS_BADGE_UNKNOWN;
 
 const getEffectiveStatus = (
   status: AlertEpisodeStatus | undefined,
@@ -71,20 +56,9 @@ const getEffectiveStatus = (
   return status;
 };
 
-const getSeverityBadgeColor = (severity: string): AppHeaderBadgeColor => {
-  const normalized = normalizeEpisodeSeverity(severity);
-  const color = EPISODE_SEVERITY_BADGE_COLORS[normalized];
-
-  if (color === 'risk') {
-    return 'warning';
-  }
-
-  return color as AppHeaderBadgeColor;
-};
-
 const getSnoozeTooltip = (groupAction: AlertEpisodeGroupAction): string => {
-  if (groupAction.snoozeExpiry) {
-    return i18n.getSnoozedUntilTooltip(new Date(groupAction.snoozeExpiry));
+  if (groupAction.snoozedUntil) {
+    return i18n.getSnoozedUntilTooltip(new Date(groupAction.snoozedUntil));
   }
 
   return i18n.SNOOZED_BADGE_TOOLTIP;
@@ -113,30 +87,58 @@ const renderIconBadge =
       </EuiToolTip>
     );
 
-const renderFilledBadge =
+const renderSeverityBadge =
   (color: EuiBadgeProps['color'], dataTestSubj: string) =>
   ({ badgeText }: { badgeText: string }) =>
     (
-      <EuiBadge color={color} fill data-test-subj={dataTestSubj}>
+      <EuiBadge color={color} data-test-subj={dataTestSubj}>
         {badgeText}
       </EuiBadge>
     );
 
+const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
+
+const renderStatusBadge =
+  (status: AlertEpisodeStatus) =>
+  ({ badgeText }: { badgeText: string }) =>
+    (
+      <AlertEpisodeStatusBadge
+        status={status}
+        data-test-subj="alertingV2EpisodeDetailsHeaderStatusBadge"
+      >
+        {badgeText}
+      </AlertEpisodeStatusBadge>
+    );
+
+// The app header caps badges at three, so status/severity/action badges
+// would otherwise be crowded out by a variable number of tag badges.
 export const getEpisodeHeaderBadges = ({
   status,
   severity,
-  tags,
   episodeAction,
   groupAction,
+  isFlapping = false,
 }: EpisodeHeaderBadgesArgs): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [];
   const effectiveStatus = getEffectiveStatus(status, groupAction);
 
   if (effectiveStatus) {
     badges.push({
-      label: getStatusBadgeLabel(effectiveStatus),
-      color: getStatusBadgeColor(effectiveStatus),
+      label: getEpisodeStatusBadgeLabel(effectiveStatus),
+      color: 'hollow',
       'data-test-subj': 'alertingV2EpisodeDetailsHeaderStatusBadge',
+      renderCustomBadge: renderStatusBadge(effectiveStatus),
+    });
+  }
+
+  if (isFlapping) {
+    badges.push({
+      label: FLAPPING_BADGE_LABEL,
+      color: 'hollow',
+      'data-test-subj': 'alertingV2EpisodeDetailsHeaderFlappingBadge',
+      // Shared FlappingBadge owns the popover; render it via custom badge so AppHeader
+      // does not wrap it in a plain EuiBadge.
+      renderCustomBadge: renderFlappingBadge,
     });
   }
 
@@ -154,7 +156,7 @@ export const getEpisodeHeaderBadges = ({
     });
   }
 
-  if (groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
+  if (groupAction && isEpisodeSnoozed(groupAction.lastSnoozeAction, groupAction.snoozedUntil)) {
     const snoozeTooltip = getSnoozeTooltip(groupAction);
     badges.push({
       label: i18n.SNOOZED_BADGE_LABEL,
@@ -171,24 +173,17 @@ export const getEpisodeHeaderBadges = ({
 
   if (isSupportedEpisodeSeverity(severity)) {
     const normalized = normalizeEpisodeSeverity(severity);
-    const severityColor = getSeverityBadgeColor(severity);
+    const severityColor = EPISODE_SEVERITY_BADGE_COLORS[normalized];
     badges.push({
       label: getEpisodeSeverityLabel(normalized),
-      color: severityColor,
+      color: 'default',
       'data-test-subj': `alertingV2EpisodeSeverityBadge-${normalized}`,
-      // `renderCustomBadge` is used here to ensure the badge is filled with the appropriate severity color, as native AppHeader badges do not support "fill" styling.
-      renderCustomBadge: renderFilledBadge(
+      // AppHeader badge colors omit `risk` / `neutral`; render through EuiBadge so the
+      // shared severity tokens apply.
+      renderCustomBadge: renderSeverityBadge(
         severityColor,
         `alertingV2EpisodeSeverityBadge-${normalized}`
       ),
-    });
-  }
-
-  for (const tag of tags) {
-    badges.push({
-      label: tag,
-      color: 'hollow',
-      'data-test-subj': `alertingV2EpisodeDetailsHeaderTagBadge-${tag}`,
     });
   }
 

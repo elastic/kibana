@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { OverallLatencyDistributionResponse } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -18,15 +18,17 @@ export interface DependencyLatencyDistributionResponse {
 export const dependencyLatencyDistributionRoute =
   defineRoute<DependencyLatencyDistributionResponse>()({
     endpoint: 'GET /internal/apm/dependencies/charts/distribution',
-    params: z.object({
-      query: z
-        .object({
-          dependencyName: z.string(),
-          spanName: z.string(),
-          percentileThreshold: z.coerce.number(),
-        })
-        .merge(rangeSchema)
-        .merge(kuerySchema)
-        .merge(environmentSchema),
-    }),
+    params: lazySchema(() =>
+      z.object({
+        query: z
+          .object({
+            dependencyName: z.string(),
+            spanName: z.string(),
+            percentileThreshold: z.coerce.number(),
+          })
+          .merge(rangeSchema)
+          .merge(kuerySchema)
+          .merge(environmentSchema),
+      })
+    ),
   });

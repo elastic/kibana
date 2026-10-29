@@ -10,18 +10,24 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import {
+  EuiButtonIcon,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
   RULE_NAME_INPUT_TITLE,
+  RULE_TAG_COPY_LABEL,
   RULE_TAG_INPUT_TITLE,
   RULE_TAG_PLACEHOLDER,
 } from '../translations';
@@ -33,9 +39,12 @@ import { LabelWithTooltip } from './label_with_tooltip';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
+const TAG_SUGGESTIONS_PER_PAGE = 10000;
+
 export const RuleDetails = () => {
+  const { euiTheme } = useEuiTheme();
   const { formData, baseErrors, plugins } = useRuleFormState();
-  const { uiActions } = plugins;
+  const { uiActions, http, notifications } = plugins;
 
   const dispatch = useRuleFormDispatch();
 
@@ -44,6 +53,18 @@ export const RuleDetails = () => {
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
   }, [tags]);
+
+  const { tags: existingTags, isLoading: isLoadingTagSuggestions } = useGetRuleTagsQuery({
+    http,
+    toasts: notifications.toasts,
+    perPage: TAG_SUGGESTIONS_PER_PAGE,
+    enabled: true,
+  });
+
+  const suggestedTagsOptions = useMemo(
+    () => existingTags.map((tag: string) => ({ label: tag })),
+    [existingTags]
+  );
 
   const onNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,14 +76,48 @@ export const RuleDetails = () => {
     [dispatch]
   );
 
-  const onAddTag = useCallback(
-    (searchValue: string) => {
+  const addTags = useCallback(
+    (values: string[]) => {
+      const merged = [...tags];
+      // De-duplicate case-insensitively (against existing tags and within the batch),
+      // preserving the casing of the first occurrence. Keeps `Prod`/`prod` from both landing.
+      const seen = new Set(tags.map((tag) => tag.trim().toLowerCase()));
+      values.forEach((value) => {
+        const trimmed = value.trim();
+        const normalized = trimmed.toLowerCase();
+        if (trimmed.length > 0 && !seen.has(normalized)) {
+          seen.add(normalized);
+          merged.push(trimmed);
+        }
+      });
+
+      if (merged.length === tags.length) {
+        return;
+      }
+
       dispatch({
         type: 'setTags',
-        payload: tags.concat([searchValue]),
+        payload: merged,
       });
     },
     [dispatch, tags]
+  );
+
+  const onAddTag = useCallback((searchValue: string) => addTags(searchValue.split(',')), [addTags]);
+
+  const onPasteTags = useCallback(
+    (e: React.ClipboardEvent<HTMLDivElement>) => {
+      // Tags copied from badges arrive newline-separated on the clipboard, but the
+      // single-line input would collapse them into one tag. Read the raw clipboard
+      // and split on newlines/commas before the input sanitizes the value.
+      const text = e.clipboardData.getData('text');
+      if (!/[\n\r,]/.test(text)) {
+        return;
+      }
+      e.preventDefault();
+      addTags(text.split(/[\n\r,]+/));
+    },
+    [addTags]
   );
 
   const onSetTag = useCallback(
@@ -101,6 +156,13 @@ export const RuleDetails = () => {
     min-width: 0;
   `;
 
+  // The xs copy button is taller than the label text, which would grow the Tags
+  // label row and push its input below the Rule name input. Collapse the extra
+  // height so both inputs stay aligned.
+  const copyButtonCss = css`
+    margin-block: -${euiTheme.size.xs};
+  `;
+
   return (
     <>
       <EuiFlexGroup>
@@ -126,20 +188,49 @@ export const RuleDetails = () => {
           <EuiFormRow
             fullWidth
             label={RULE_TAG_INPUT_TITLE}
-            labelAppend={OptionalFieldLabel}
+            labelAppend={
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                alignItems="center"
+                justifyContent="flexEnd"
+              >
+                <EuiFlexItem grow={false}>{OptionalFieldLabel}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiCopy textToCopy={tags.join('\n')}>
+                    {(copy) => (
+                      <EuiToolTip content={RULE_TAG_COPY_LABEL} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          css={copyButtonCss}
+                          iconType="copy"
+                          size="xs"
+                          color="text"
+                          onClick={copy}
+                          isDisabled={tags.length === 0}
+                          data-test-subj="ruleDetailsTagsCopyButton"
+                          aria-label={RULE_TAG_COPY_LABEL}
+                        />
+                      </EuiToolTip>
+                    )}
+                  </EuiCopy>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isInvalid={!!baseErrors?.tags?.length}
             error={baseErrors?.tags}
           >
             <EuiComboBox
               isInvalid={!!baseErrors?.tags?.length}
               fullWidth
-              noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}
               data-test-subj="ruleDetailsTagsInput"
+              options={suggestedTagsOptions}
+              isLoading={isLoadingTagSuggestions}
               selectedOptions={tagsOptions}
               onCreateOption={onAddTag}
               onChange={onSetTag}
               onBlur={onBlur}
+              onPaste={onPasteTags}
             />
           </EuiFormRow>
         </EuiFlexItem>

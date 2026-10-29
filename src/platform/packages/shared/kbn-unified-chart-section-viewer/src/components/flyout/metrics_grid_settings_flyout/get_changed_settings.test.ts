@@ -8,12 +8,15 @@
  */
 
 import { getChangedSettings } from './get_changed_settings';
-import type { MetricsGridSettings } from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 
 const applied: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
+  histogramVisualization: 'lnsXY',
+  dimensions: ['host.name'],
+  searchTerm: '',
 };
 
 describe('getChangedSettings', () => {
@@ -32,11 +35,20 @@ describe('getChangedSettings', () => {
       counterAggregation: 'sum',
       gaugeAggregation: 'min',
       histogramPercentile: 'p90',
+      histogramVisualization: 'lnsXY',
+      dimensions: ['host.name'],
+      searchTerm: '',
     };
 
     expect(getChangedSettings(draft, applied)).toEqual({
       gaugeAggregation: 'min',
       histogramPercentile: 'p90',
     });
+  });
+
+  it('ignores a `dimensions` difference -- it is not a flyout-editable setting', () => {
+    const draft: MetricsGridSettings = { ...applied, dimensions: ['service.name'] };
+
+    expect(getChangedSettings(draft, applied)).toEqual({});
   });
 });

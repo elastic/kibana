@@ -67,7 +67,7 @@ Use the rule IDs below to identify the problem and the appropriate fix.
 
 **Scenario 1:** You have several unrelated changes that each require a model version. Ship them in separate PRs.
 
-**Scenario 2:** You only added one version but CI still reports two. Validation uses two baselines: your PR merge-base and the **current Serverless release**. If the Serverless release was recently rolled back, the "current release" baseline may make your branch look like it defines two new versions. Wait for the release state to normalize, or contact the {{kib}} Core team.
+**Scenario 2:** You only added one version but CI still reports two. Validation uses two baselines: your PR merge-base and the **current Serverless release**. If the Serverless release was recently rolled back, the "current release" baseline may make your branch look like it defines two new versions. Wait for the release state to normalize, or [open an issue](https://github.com/elastic/kibana/issues/new/choose) if the check still reports two versions.
 
 **Fix:** Split the change so that each PR adds exactly one new model version.
 
@@ -162,6 +162,12 @@ These rules apply to both new and existing types.
 **Problem:** A new model version is missing `schemas.create`.
 
 **Fix:** Add `schemas.create` to the model version.
+
+### `model-version/missing-update-schema` [model-version-missing-update]
+
+**Problem:** A model version defines `schemas.update`, but a later model version does not. Updates are only validated against the latest model version's `update` schema, so a missing one silently turns update validation off.
+
+**Fix:** Add `schemas.update` to every model version after the first one that defines it.
 
 ### `model-version/mappings-not-in-schema` [model-version-mappings-not-in-schema]
 

@@ -1,0 +1,22 @@
+{
+  "flow_status": {
+    "4": {
+      "status": "blocked",
+      "reason": "ML jobs failed to provision"
+    }
+  },
+  "skipped_steps": [
+    {
+      "flow": "Overview panel — Behavioral anomalies accordion",
+      "checklist_step": "2 — Missing prerequisites",
+      "reason": "Out of scope for this session"
+    }
+  ],
+  "suppressions": [
+    {
+      "title": "Duplicate privilege-check API calls on single flyout open",
+      "reason": "Matches knowledge/entity-analytics.md: \"Duplicate privilege-check calls on flyout open are a known, tracked perf issue, not a new bug\""
+    }
+  ],
+  "session_cap_note": "raised from 60 min mid-session"
+}

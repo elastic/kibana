@@ -55,6 +55,7 @@ import {
   CoreInjectionServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { CoreSystem } from './core_system';
 import {
   KIBANA_LOADED_EVENT,
@@ -503,10 +504,10 @@ describe('#start()', () => {
         application: expect.any(Object),
         chrome: expect.any(Object),
         overlays: expect.any(Object),
-        featureFlags: expect.any(Object),
         http: expect.any(Object),
         docLinks: expect.any(Object),
         customBranding: expect.any(Object),
+        notifications: expect.any(Object),
       },
       expect.any(HTMLElement)
     );
@@ -653,8 +654,9 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(({ targetDomElement }): void => {
+    MockNotificationsService.start.mockImplementation(({ targetDomElement }) => {
       targetDomElementInStart = targetDomElement;
+      return notificationServiceMock.createStartContract();
     });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement

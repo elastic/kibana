@@ -15,20 +15,32 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
+import { getEbtProps } from '@kbn/ebt-click';
+import type { ApmRuleType } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
-import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
+import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../../../app/service_map/ebt_constants';
 import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
+import {
+  getAggsTypeFromRule,
+  getAlertDetailsRangeStart,
+  getAnomalyTimestamp,
+  isAnomalyRuleType,
+} from '../alert_details_app_section/helpers';
 import { getServiceMapTimeRange } from './get_service_map_time_range';
 import { buildKueryFromAlert, buildFiltersFromAlert } from './build_alert_filters';
 
@@ -43,8 +55,11 @@ const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
 
 const EMBEDDABLE_HEIGHT = 400;
 
-export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionProps) {
+export function AlertDetailsServiceMapSection({ alert, rule }: AlertDetailsAppSectionProps) {
   const embeddableDeps = useApmEmbeddableDeps();
+  const license = useObservable(
+    embeddableDeps ? embeddableDeps.pluginsStart.licensing.license$ : EMPTY
+  );
 
   const serviceName =
     alert.fields[SERVICE_NAME] != null ? String(alert.fields[SERVICE_NAME]) : undefined;
@@ -88,22 +103,37 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
       ? transactionTypeField[0]
       : transactionTypeField;
 
-    const paddedRange = alertStart
-      ? getPaddedAlertTimeRange(String(alertStart), alertEnd != null ? String(alertEnd) : undefined)
+    // Anchor the padded window like the alert details charts do: for anomaly alerts
+    // the range starts at the anomaly timestamp, so the flyout covers the same window.
+    const rangeStart = alertStart
+      ? getAlertDetailsRangeStart({
+          alertStart: String(alertStart),
+          isAnomaly: isAnomalyRuleType(alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType),
+          anomalyTimestamp: getAnomalyTimestamp(alert),
+        })
+      : undefined;
+
+    const paddedRange = rangeStart
+      ? getPaddedAlertTimeRange(rangeStart, alertEnd != null ? String(alertEnd) : undefined)
       : undefined;
 
     return {
-      kuery: '',
-      initialTransactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
+      transactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
       rangeFrom: paddedRange?.from,
       rangeTo: paddedRange?.to,
-      source: SERVICE_FLYOUT_SOURCES.alertDetails,
+      // Inherit the rule's aggregation so e.g. a p95 latency rule opens a p95 flyout chart.
+      latencyAggregationType: getAggsTypeFromRule(rule.params.aggregationType ?? 'avg'),
     };
-  }, [alert, alertStart, alertEnd]);
+  }, [alert, rule.params.aggregationType, alertStart, alertEnd]);
 
   const [hasNoServices, setHasNoServices] = useState(false);
 
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
+    return null;
+  }
+
+  // hide service map section without Platinum license or service map enabled.
+  if (!license || !isActivePlatinumLicense(license) || !embeddableDeps.config.serviceMapEnabled) {
     return null;
   }
 
@@ -133,6 +163,10 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 color="primary"
                 href={fullMapUrl}
                 data-test-subj="apmAlertDetailsExploreInServiceMap"
+                {...getEbtProps({
+                  action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
+                  element: SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK,
+                })}
               >
                 {EXPLORE_IN_SERVICE_MAP_LABEL}
               </EuiButtonEmpty>

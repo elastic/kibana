@@ -146,13 +146,6 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Number of enabled alerting v2 rules.' },
             type: 'long',
           },
-          count_agent_builder_assisted: {
-            _meta: {
-              description:
-                'Number of alerting v2 rules currently tagged as created/edited via Agent Builder.',
-            },
-            type: 'long',
-          },
           count_total: {
             _meta: { description: 'Total number of alerting v2 rules.' },
             type: 'long',
@@ -209,6 +202,42 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'boolean',
           },
           min_created_at: { _meta: { description: 'Earliest rule creation date.' }, type: 'date' },
+          count_by_recovery_strategy: {
+            no_breach: {
+              _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+              type: 'long',
+            },
+            condition: {
+              _meta: { description: 'Number of rules with recovery strategy condition.' },
+              type: 'long',
+            },
+            query: {
+              _meta: { description: 'Number of rules with recovery strategy query.' },
+              type: 'long',
+            },
+            manual: {
+              _meta: { description: 'Number of rules with recovery strategy manual.' },
+              type: 'long',
+            },
+          },
+          count_by_no_data_strategy: {
+            ignore: {
+              _meta: { description: 'Number of rules with no-data strategy ignore.' },
+              type: 'long',
+            },
+            keep_last: {
+              _meta: { description: 'Number of rules with no-data strategy keep_last.' },
+              type: 'long',
+            },
+            resolve: {
+              _meta: { description: 'Number of rules with no-data strategy resolve.' },
+              type: 'long',
+            },
+            alert: {
+              _meta: { description: 'Number of rules with no-data strategy alert.' },
+              type: 'long',
+            },
+          },
           action_policies_avg_group_by_fields_count: {
             _meta: { description: 'Average number of group by fields per action policy.' },
             type: 'float',
@@ -238,13 +267,6 @@ describe('registerAlertingV2UsageCollector', () => {
           },
           action_policies_count_with_matcher: {
             _meta: { description: 'Number of action policies with a matcher.' },
-            type: 'long',
-          },
-          action_policies_count_agent_builder_assisted: {
-            _meta: {
-              description:
-                'Number of action policies currently tagged as created/edited via Agent Builder.',
-            },
             type: 'long',
           },
           action_policies_unique_workflow_count: {

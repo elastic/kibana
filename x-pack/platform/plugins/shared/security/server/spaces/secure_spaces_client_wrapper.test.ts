@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   AuditEvent,
   AuditLogger,
@@ -32,17 +33,17 @@ interface Opts {
 
 const spaces = deepFreeze([
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default Space',
     disabledFeatures: [],
   },
   {
-    id: 'marketing',
+    id: asSpaceId('marketing'),
     name: 'Marketing Space',
     disabledFeatures: [],
   },
   {
-    id: 'sales',
+    id: asSpaceId('sales'),
     name: 'Sales Space',
     disabledFeatures: [],
   },
@@ -167,7 +168,7 @@ describe('SecureSpacesClientWrapper', () => {
   describe('#getAll', () => {
     const savedObjects = [
       {
-        id: 'default',
+        id: asSpaceId('default'),
         attributes: {
           name: 'foo-name',
           description: 'foo-description',
@@ -175,7 +176,7 @@ describe('SecureSpacesClientWrapper', () => {
         },
       },
       {
-        id: 'marketing',
+        id: asSpaceId('marketing'),
         attributes: {
           name: 'bar-name',
           description: 'bar-description',
@@ -183,7 +184,7 @@ describe('SecureSpacesClientWrapper', () => {
         },
       },
       {
-        id: 'sales',
+        id: asSpaceId('sales'),
         attributes: {
           name: 'bar-name',
           description: 'bar-description',
@@ -270,12 +271,10 @@ describe('SecureSpacesClientWrapper', () => {
                   .flat(),
               ],
             },
-          } as CheckPrivilegesResponse);
+          } as unknown as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
-          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrowError(
-            'Forbidden'
-          );
+          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrow('Forbidden');
 
           expect(baseClient.getAll).toHaveBeenCalledWith({ purpose: scenario.purpose ?? 'any' });
           expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
@@ -308,7 +307,7 @@ describe('SecureSpacesClientWrapper', () => {
                   .flat(),
               ],
             },
-          } as CheckPrivilegesResponse);
+          } as unknown as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
           const actualSpaces = await wrapper.getAll({ purpose: scenario.purpose });
@@ -364,7 +363,7 @@ describe('SecureSpacesClientWrapper', () => {
             { resource: spaceId, privilege: authorization.actions.login, authorized: false },
           ],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       await expect(wrapper.get(spaceId)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -400,7 +399,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ resource: spaceId, privilege: authorization.actions.login, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       const response = await wrapper.get(spaceId);
@@ -419,7 +418,7 @@ describe('SecureSpacesClientWrapper', () => {
 
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
-        id: spaceId,
+        id: asSpaceId(spaceId),
       });
     });
   });
@@ -437,7 +436,7 @@ describe('SecureSpacesClientWrapper', () => {
       expectNoAuthorizationCheck(authorization);
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
-        id: 'default',
+        id: asSpaceId('default'),
       });
     });
 
@@ -457,7 +456,7 @@ describe('SecureSpacesClientWrapper', () => {
             { resource: spaceId, privilege: authorization.actions.login, authorized: false },
           ],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       await expect(
@@ -488,7 +487,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ resource: spaceId, privilege: authorization.actions.login, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
 
       const response = await wrapper.getPersistedFeatureVisibility(spaceId);
@@ -506,14 +505,175 @@ describe('SecureSpacesClientWrapper', () => {
       });
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
-        id: spaceId,
+        id: asSpaceId(spaceId),
+      });
+    });
+  });
+
+  describe('#isInitialSolutionSetupRequired', () => {
+    it('delegates to base client when security is not enabled', async () => {
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
+        securityEnabled: false,
+      });
+      baseClient.isInitialSolutionSetupRequired.mockResolvedValue(true);
+
+      const response = await wrapper.isInitialSolutionSetupRequired();
+      expect(baseClient.isInitialSolutionSetupRequired).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(true);
+      expectNoAuthorizationCheck(authorization);
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    test(`throws a forbidden error when unauthorized`, async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: false,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      await expect(
+        wrapper.isInitialSolutionSetupRequired()
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to get initial solution setup state"`
+      );
+
+      expect(baseClient.isInitialSolutionSetupRequired).not.toHaveBeenCalled();
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'failure', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    it('returns setup state when authorized', async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+      baseClient.isInitialSolutionSetupRequired.mockResolvedValue(true);
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: true,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      const response = await wrapper.isInitialSolutionSetupRequired();
+
+      expect(baseClient.isInitialSolutionSetupRequired).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(true);
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+  });
+
+  describe('#completeInitialSolutionSetup', () => {
+    it('delegates to base client when security is not enabled', async () => {
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
+        securityEnabled: false,
+      });
+
+      await wrapper.completeInitialSolutionSetup('es');
+      expect(baseClient.completeInitialSolutionSetup).toHaveBeenCalledTimes(1);
+      expect(baseClient.completeInitialSolutionSetup).toHaveBeenCalledWith('es');
+      expectNoAuthorizationCheck(authorization);
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    test(`throws a forbidden error when unauthorized`, async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: false,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      await expect(
+        wrapper.completeInitialSolutionSetup('security')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to complete initial solution setup"`
+      );
+
+      expect(baseClient.completeInitialSolutionSetup).not.toHaveBeenCalled();
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'failure', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    it('completes setup when authorized', async () => {
+      const username = 'some_user';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: true,
+        privileges: {
+          kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
+
+      await wrapper.completeInitialSolutionSetup('oblt');
+
+      expect(baseClient.completeInitialSolutionSetup).toHaveBeenCalledWith('oblt');
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: authorization.actions.space.manage,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
+        type: 'space',
+        id: 'default',
       });
     });
   });
 
   describe('#create', () => {
     const space = Object.freeze({
-      id: 'new_space',
+      id: asSpaceId('new_space'),
       name: 'new space',
       disabledFeatures: [],
     });
@@ -547,7 +707,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.create(space)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -582,7 +742,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       const response = await wrapper.create(space);
@@ -608,7 +768,7 @@ describe('SecureSpacesClientWrapper', () => {
 
   describe('#update', () => {
     const space = Object.freeze({
-      id: 'existing_space',
+      id: asSpaceId('existing_space'),
       name: 'existing space',
       disabledFeatures: [],
     });
@@ -642,7 +802,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.update(space.id, space)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -677,7 +837,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       const response = await wrapper.update(space.id, space);
@@ -703,7 +863,7 @@ describe('SecureSpacesClientWrapper', () => {
 
   describe('#delete', () => {
     const space = Object.freeze({
-      id: 'existing_space',
+      id: asSpaceId('existing_space'),
       name: 'existing space',
       disabledFeatures: [],
     });
@@ -736,7 +896,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: false }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await expect(wrapper.delete(space.id)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -773,7 +933,7 @@ describe('SecureSpacesClientWrapper', () => {
         privileges: {
           kibana: [{ privilege: authorization.actions.space.manage, authorized: true }],
         },
-      } as CheckPrivilegesResponse);
+      } as unknown as CheckPrivilegesResponse);
       authorization.checkPrivilegesWithRequest.mockReturnValue({ globally: checkPrivileges });
 
       await wrapper.delete(space.id);

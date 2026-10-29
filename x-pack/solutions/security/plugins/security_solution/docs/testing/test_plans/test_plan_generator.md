@@ -51,75 +51,59 @@ This step is critical. Without it, all GitHub API calls to `elastic` repositorie
 
 ---
 
-## Step 2 — Generate Your Figma Personal Access Token
+## Step 2 — Ensure Figma access
 
-1. Open [figma.com](https://figma.com) and log in with your `@elastic.co` account
-2. Click your profile avatar (top-left) → **Settings**
-3. Scroll down to **"Personal access tokens"**
-4. Click **"Generate new token"**, give it a name like `cursor-mcp`, and click **Generate**
-5. **Copy the token** — it will only be shown once
+Make sure you can sign in to [figma.com](https://figma.com) with your `@elastic.co` account and open the Kibana / Security Solution designs. If your workspace access is set up correctly, no personal access token is needed — the Figma MCP setup in Step 3 uses OAuth against your account, not a manually generated token.
+
+> **If you had a `cursor-mcp` (or similarly named) personal access token from an earlier setup**, you can revoke it at [figma.com](https://figma.com) → profile avatar → **Settings** → **Personal access tokens**. It is no longer used by the flow below.
 
 ---
 
-## Step 3 — Configure the Figma MCP Server in Cursor
+## Step 3 — Enable the Figma MCP
 
-Cursor reads MCP configuration from a file called `mcp.json`. The Figma MCP allows the agent to fetch design context from linked Figma files.
+The Figma MCP allows the agent to fetch design context from linked Figma files. The test-plan-generator skill uses the **official Figma MCP tools** (`get_metadata`, `get_screenshot`, `get_design_context`, `get_figjam`) and drives them by the `fileKey` / `nodeId` extracted from each Figma URL found in an issue — often across multiple Figma files in a single session.
+
+The skill requires a Figma MCP setup that accepts explicit `fileKey` / `nodeId` params on every call, which is what the metadata-first flow in [`references/gathering-context.md`](../../../.agents/skills/test-plan-generator/references/gathering-context.md#figma) relies on. **Both of the following official flows produce that setup and are supported** — pick whichever matches your Cursor version. They install the same MCP server; the connection appears under **Cursor Settings → MCP** either way.
+
+> **Why not the Figma Desktop dev-mode MCP server?** Figma Desktop's local MCP server operates on the file that is currently open in Figma Desktop, not on arbitrary `fileKey` values. It works well for interactive designer flows but breaks the skill's core assumption: given a Figma URL from an issue, resolve its file/node and read it. Using it here risks generating a test plan from whichever file happens to be open in Figma Desktop rather than the one the issue links to, with no obvious error surface. Use either supported flow below instead.
 
 > **Note on the GitHub MCP:** The GitHub MCP is optional. In practice, the agent works more reliably using the `gh` CLI for all GitHub interactions (reading issues, posting comments, navigating sub-issues). When the GitHub MCP is enabled alongside the agent doing complex multi-step work, it can interfere with parallel tool calls and cause Cursor to hang. The recommended setup is to use `gh` CLI as the primary GitHub tool and leave the GitHub MCP disabled unless you have a specific reason to enable it.
 
-### Locate or create the file
+### Option A — Cursor plugin flow (`/add-plugin figma` or the Figma install deep link)
 
-- **macOS / Linux:** `~/.cursor/mcp.json`
-- **Windows:** `%APPDATA%\Cursor\mcp.json`
+This is Figma's currently documented default install path for Cursor. It works from inside the Agent chat and, on newer Cursor builds, also installs any Figma-side skills that ship with the plugin.
 
-Open the file (create it if it doesn't exist) and paste the following, replacing the placeholder value with your actual Figma token:
-```json
-{
-  "mcpServers": {
-    "figma": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR_FIGMA_TOKEN_HERE", "--stdio"]
-    }
+1. Open a new Agent chat in Cursor.
+2. Type `/add-plugin figma` and press Enter. Alternatively, follow Figma's install deep link from [https://developers.figma.com/docs/figma-mcp-server/](https://developers.figma.com/docs/figma-mcp-server/) — the deep link opens Cursor and drives the same flow.
+3. Cursor prompts **Install → Connect → Open → Allow access**. Accept each prompt.
+4. Sign in with your `@elastic.co` Figma account when the browser opens, and authorize Cursor.
+5. Verify: open **Cursor Settings → MCP** and confirm **Figma** appears with a green status indicator. Hovering over it should show `get_metadata`, `get_screenshot`, `get_design_context`, and `get_figjam` among the available tools.
+
+### Option B — Cursor Integrations UI
+
+If your Cursor build does not expose `/add-plugin` yet, use the Integrations UI. It installs the same Figma MCP server.
+
+1. Open **Cursor Settings** (`⌘ ,` on macOS).
+2. Go to the **Integrations** section.
+3. Find **Figma** and click **Connect**.
+4. Sign in with your `@elastic.co` Figma account and authorize Cursor.
+5. Verify: still in Cursor Settings, open the **MCP** tab and confirm Figma appears with a green status indicator. Hovering over it should show `get_metadata`, `get_screenshot`, `get_design_context`, and `get_figjam` among the available tools.
+
+Either way, the integration is managed by Cursor — no manual `mcp.json` entry is required for Figma.
+
+### Migrating from older setups
+
+- **Framelink `figma-developer-mcp` (older npm package).** Earlier versions of this guide asked you to install this package via `npx`. It exposes different tools (`get_figma_data`, `download_figma_images`) that the test-plan-generator skill no longer calls — the metadata-first flow relies on the official tools listed above. Remove any `mcp.json` entry that looks like:
+  ```json
+  "figma": {
+    "command": "npx",
+    "args": ["-y", "figma-developer-mcp", "--figma-api-key=…", "--stdio"]
   }
-}
-```
+  ```
+  before running either supported flow from Step 3. Otherwise Cursor connects to Framelink's server, the skill's Figma calls fail with "tool not found", and the setup silently falls back to metadata-less scenarios.
+- **Figma Desktop local dev-mode MCP entry.** If your `mcp.json` has an entry pointing at `http://127.0.0.1:3845/mcp` (Figma Desktop's local MCP server), remove it before running either supported flow from Step 3 — for the reason called out above, it is not a drop-in replacement for URL-driven fetches and can silently target the wrong file.
 
-If you do want to enable the GitHub MCP as well, add it alongside Figma:
-```json
-{
-  "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_GITHUB_TOKEN_HERE"
-      }
-    },
-    "figma": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR_FIGMA_TOKEN_HERE", "--stdio"]
-    }
-  }
-}
-```
-
-> **Why this approach?**
->
-> - **Figma** uses the `figma-developer-mcp` package, which is the officially recommended package for Cursor (optimised for code generation from designs). The token is passed as a CLI argument — not as an environment variable — because that is how this package expects it. The older `@figma/mcp-server` package does not exist, and `@modelcontextprotocol/server-figma` has been deprecated.
->
-> - **GitHub MCP** uses a remote HTTP server hosted by GitHub — no local installation needed. The older `@modelcontextprotocol/server-github` npm package was deprecated in April 2025. This MCP is optional — see the note above.
-
-### Save the file and restart Cursor
-
-After saving, fully quit and reopen Cursor. The MCP servers start automatically on launch.
-
-### Verify the MCPs are connected
-
-1. Open Cursor Settings → **MCP** tab
-2. You should see `figma` listed with a green status indicator
-3. Hover over the `figma` entry — you should see 2 available tools listed
-
-> If a server shows as disconnected, double-check the token values and that the JSON has no syntax errors. Use [jsonlint.com](https://jsonlint.com) to validate if needed.
+> If Figma shows as disconnected in Cursor Settings → MCP, sign out of the integration and reconnect. If `mcp.json` has other entries and Cursor reports a JSON error, validate with [jsonlint.com](https://jsonlint.com).
 
 ---
 
@@ -171,22 +155,26 @@ The skill and its reference files were added to the repository by the Engineerin
 The files live at:
 ```
 x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/
-├── SKILL.md                              # Agent instructions
+├── SKILL.md                                        # Agent instructions
 ├── references/
-│   ├── common-mistakes.md                # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
-│   ├── document-structure.md             # Test plan template, required sections, the Pending work pattern, and the Issue Clarity Assessment block
-│   ├── draft-coherence-review.md         # Holistic end-to-end draft review (D1–D9 document coherence + S1–S8 source fidelity); run on the assembled draft before saving
-│   ├── example-test-plan.md              # Fully-worked end-to-end example for a UI feature with a linked PR
-│   ├── example-test-plan-backend.md      # Sibling example for a backend / parser feature without UI and without a linked PR (synthetic issue numbers)
-│   ├── gathering-context.md              # Step 1 in detail: gh CLI commands, URL handling, images, Figma, sub-issues, PRs, test catalog, AC origin tagging, orphan-PR handling
-│   ├── issue-clarity-assessment.md       # Rubric, 5 dimensions, grading anchors, per-issue + combined readability scoring, Coverage Ratio (with the no-PR boundary case), stop-and-ask gate, two worked examples
-│   ├── mode-generate.md                  # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
-│   ├── mode-update.md                    # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
-│   ├── optional-scenarios.md             # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities
-│   ├── output-formats.md                 # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout
-│   └── security-test-directories.md      # Map of existing test locations in the repo
+│   ├── common-mistakes.md                          # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
+│   ├── critical-workflows.md                       # File-lookup convention that routes the skill to the team-owned map below when generating scenarios that touch a Security Solution area
+│   ├── critical-workflows-security-solution.md     # Security Solution team's list of critical workflows and impact-based priority rules (P0 / P1) used to raise scenario priorities beyond the default P2
+│   ├── document-structure.md                       # Test plan template, required sections, the Pending work pattern, and the Issue Clarity Assessment block
+│   ├── draft-coherence-review.md                   # Holistic end-to-end draft review (D1–D9 document coherence + S1–S8 source fidelity); run on the assembled draft before saving
+│   ├── example-test-plan.md                        # Fully-worked end-to-end example for a UI feature with a linked PR, including the Figma metadata-first variants
+│   ├── example-test-plan-backend.md                # Sibling example for a backend / parser feature without UI and without a linked PR (synthetic issue numbers)
+│   ├── gathering-context.md                        # Step 1 in detail: gh CLI commands, URL handling, images, Figma (metadata-first flow + session budget), sub-issues, PRs, test catalog, AC origin tagging, orphan-PR handling
+│   ├── issue-clarity-assessment.md                 # Rubric, 5 dimensions, grading anchors, per-issue + combined readability scoring, Coverage Ratio (with the no-PR boundary case), stop-and-ask gate, two worked examples
+│   ├── mode-generate.md                            # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
+│   ├── mode-update.md                              # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
+│   ├── optional-scenarios.md                       # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities, critical-workflows pointer
+│   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage marker
+│   └── security-test-directories.md                # Map of existing test locations in the repo
 └── scripts/
-    └── publish_test_plan.sh              # Deterministic publish step (invoked in Step 4)
+    ├── publish_test_plan.sh                        # Deterministic publish step (invoked in Step 4)
+    ├── resolve_verbosity.sh                        # Verbosity values for update mode (invoked in mode-update.md Step 1)
+    └── test_scripts.py                             # Unit tests for both scripts (python3 -m unittest)
 ```
 
 > **Why a skill and not a Cursor rule?** Skills are the current standard for extending AI agents in Kibana, agreed by Kibana tech leads and the AI guild. They are more efficient than rules (loaded on demand, not on every agent session), portable across agents, and version-controlled like any other code.
@@ -235,6 +223,81 @@ Or with a full URL:
 /test-plan-generator create a test plan for https://github.com/elastic/kibana/issues/1234
 ```
 
+### Choosing a verbosity level (optional)
+
+Every command accepts an optional verbosity keyword — `lean`, `standard`, or `detailed` — that controls **prose density and per-scenario metadata only**. It never changes which scenarios are written, their priorities, or which `⚠️` entries appear in *Known Limitations*.
+
+```
+/test-plan-generator generate a lean test plan for issue #1234
+/test-plan-generator generate a detailed test plan for issue #1234
+```
+
+If you omit the keyword, the agent uses `standard` (the current default). The chosen level is persisted as a hidden `<!-- verbosity: … -->` marker in the published comment, so `update` runs preserve it automatically. To flip the level later, just include the keyword in the update invocation — the agent re-renders `Overview`, `Feature Background`, `Assumptions`, and the per-scenario metadata lines at the new level (scenario titles and Gherkin stay as they are) and announces the change in its post-save message. Moving from `lean` to a higher level, or to `detailed` from any level, re-reads every linked PR (a `lean` plan does not keep test names, and only a `detailed` plan keeps the PR details), so that update takes longer. If the issue has no linked PR, moving up from `lean` searches the code for existing tests instead. Plans published before this marker existed are treated as `standard`: the first `update` only adds the marker, unless you pass a different level keyword.
+
+**When to reach for `lean`** — small, well-understood changes; issues where the reviewer already knows the domain; drafts you plan to skim.
+
+**When to reach for `detailed`** — cross-team handovers; issues that will be read by people unfamiliar with the feature; drafts that need per-scenario traceability. `detailed` adds a `**Source:**` line that cites the scenario's origin from one of four categories: a consolidated AC (`AC1 (#1234)`), a PR artifact (endpoint / component / saved-object type / etc.), an always-evaluated coverage trigger (upgrade / CRUD per persisted object / dependency data lifecycle), or a code-derived fact discovered outside issue and PR bodies.
+
+#### Before / after — the `Overview` and per-scenario blocks under each level
+
+`standard`:
+
+````markdown
+## Overview
+
+This test plan covers the automated escalation policy feature introduced in #1234, which allows security engineers to define time-based escalation rules for security alerts. It validates end-to-end behaviour across rule creation, alert routing, and downstream notification, and confirms that the feature meets the acceptance criteria stated in the epic and the linked PR.
+
+...
+
+#### Scenario: Editor can create a new escalation rule
+
+**Priority:** P0
+
+**Automation coverage**: 2 unit tests (`escalation_rule_form.test.tsx` — "renders create form", "submits valid payload"), 1 e2e test (`escalation_rules.cy.ts` — "creates rule from empty state")
+
+```gherkin
+...
+```
+````
+
+`lean`:
+
+````markdown
+## Overview
+
+Validates the automated escalation policy feature from #1234 end-to-end (rule creation, alert routing, notifications).
+
+...
+
+#### Scenario: Editor can create a new escalation rule
+
+**Priority:** P0
+
+**Automation coverage**: 🤖 automated (3 tests)
+
+```gherkin
+...
+```
+````
+
+`detailed` (adds `**Source:**` between `**Priority:**` and `**Automation coverage**` — everything else identical to `standard`):
+
+````markdown
+#### Scenario: Editor can create a new escalation rule
+
+**Priority:** P0
+
+**Source:** AC1 (#1234); PR #5678 (endpoint `POST /rules`); PR #5678 (component `EscalationRuleForm`)
+
+**Automation coverage**: 2 unit tests (`escalation_rule_form.test.tsx` — "renders create form", "submits valid payload"), 1 e2e test (`escalation_rules.cy.ts` — "creates rule from empty state")
+
+```gherkin
+...
+```
+````
+
+The `Assumptions` section shrinks similarly under `lean` — only bullets whose value was **confirmed from a concrete source** (issue body, PR, Figma, sub-issue) are rendered as a compact `; `-separated line, and unconfirmed bullets remain in *Known Limitations* with their `⚠️` unchanged. The agent never invents defaults just to fill the section — that would violate the skill's core "never assume, always ask" rule. If nothing was confirmed, the section renders `See _Known Limitations_ for open assumptions.` and points there.
+
 ### Updating an existing test plan
 
 If the issue changes and you need to update the plan:
@@ -254,7 +317,7 @@ If you want to force a full re-read of all linked PRs regardless of activity:
 /test-plan-generator publish test plan for issue #1234
 ```
 
-The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP and performs the same flow manually. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
+The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it writes the hidden markers at the top in a fixed order, detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP: it runs the script with `--dry-run` (which does not need `gh`) to get the comment body, then posts it through the MCP. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
 
 ---
 
@@ -268,13 +331,18 @@ Your GitHub token is not authorized for the Elastic organization. Go to [github.
 
 The GitHub MCP is optional — the agent uses `gh` CLI as the primary method for all GitHub interactions. If you have enabled the GitHub MCP and it shows as disconnected, check that the `mcp.json` entry uses `"type": "http"` and the URL `https://api.githubcopilot.com/mcp/`. Ensure your GitHub token is correctly placed in the `Authorization` header value (after `Bearer `). Fully quit and reopen Cursor after any changes to `mcp.json`. If you continue to have issues, simply disable the GitHub MCP and rely on `gh` CLI — the agent works more reliably that way.
 
-### Figma MCP not connecting or "package not found"
+### Figma MCP not connecting
 
-Make sure you are using `figma-developer-mcp` as the package name — not `@figma/mcp-server` or `@modelcontextprotocol/server-figma` (both are incorrect or deprecated). The token must be passed as a CLI argument in the `args` array (e.g., `--figma-api-key=YOUR_TOKEN`), not as an environment variable. See Step 3 for the exact configuration.
+Both supported flows from Step 3 (`/add-plugin figma` / Figma install deep link, or Cursor Integrations) surface the Figma connection under **Cursor Settings → MCP**. If that entry is red / disconnected:
+
+- **Option A path** — re-run `/add-plugin figma` from the Agent chat, or open the Figma install deep link again. Accept the *Install → Connect → Open → Allow access* prompts, sign in with your `@elastic.co` Figma account when the browser opens, and fully quit and reopen Cursor after connecting.
+- **Option B path** — open Cursor Settings → **Integrations** → **Figma** and re-run **Connect**. Sign in with your `@elastic.co` Figma account and fully quit and reopen Cursor after connecting.
+- **If you followed an older version of this guide** and installed Framelink's `figma-developer-mcp` npm package via `npx`, remove that entry from `mcp.json` — the skill no longer calls Framelink's tools and Cursor will surface a "tool not found" style error when the skill runs. See the migration note at the bottom of Step 3.
+- **If your `mcp.json` has a Figma Desktop local dev-mode entry** (`http://127.0.0.1:3845/mcp`), remove it before running either flow. That server does not accept `fileKey` params, so the skill can silently generate a test plan against whichever file happens to be open in Figma Desktop instead of the one the issue links to. See the note in Step 3 for why neither of the two supported flows uses it.
 
 ### "Cannot read Figma file"
 
-Make sure the Figma file is shared with your `@elastic.co` account. The token can only access files your account can view.
+Make sure the Figma file is shared with your `@elastic.co` account and that the Figma MCP OAuth session (installed in Step 3 via either `/add-plugin figma` / the install deep link, or Cursor Settings → Integrations → Figma) is using that account. The MCP can only access files your account can view.
 
 ### The agent says it cannot connect to GitHub and falls back to `gh` CLI
 
@@ -303,7 +371,7 @@ When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fa
 
 | Exit code | Meaning | Fix |
 |---|---|---|
-| 65 | The draft does not start with `<!-- test-plan-generated -->` | The agent should have prepended the marker. If you see this, the draft was edited externally — open `.agents/tmp/test-plan-#<issue>.md` and make sure the first two lines are the marker and `generated-by:` lines. |
+| 65 | The draft's top markers are wrong: no model identifier (no `--model` and no `generated-by:` line), or a duplicated or invalid `verbosity:` / `tokens:` marker | The script writes the top markers itself, so this usually means the draft was edited externally, or an `update` draft kept the old markers from the published comment. Open `.agents/tmp/test-plan-#<issue>.md`, fix or remove the marker lines at the top, and publish again. |
 | 66 | Draft file does not exist | Run `generate test plan for issue #<n>` first to create the draft. |
 | 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
 | 70 | Unexpected response from GitHub API (could not resolve comment id, or API returned no URL) | Usually a transient API issue. Re-run the publish command. If it persists, check `gh api /repos/<owner>/<repo>/issues/<n>/comments` manually to confirm the comment is reachable. |
@@ -359,7 +427,7 @@ The skill files live in the repository under `x-pack/solutions/security/plugins/
 
 **How does the agent self-review the draft before saving?**
 Three layers, all run during Step 3 just before the draft is written, in this order:
-1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It is a 9-row table mapping the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*, *"the issue is thin but the PR fills the gaps"*, *"I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
+1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It maps the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*, *"the issue is thin but the PR fills the gaps"*, *"I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
 2. The expanded `references/common-mistakes.md` file. 8 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts and a structural check on the Issue Clarity Assessment block.
 3. The *draft coherence review* in `references/draft-coherence-review.md` — a holistic end-to-end re-read of the assembled draft against the gathered context corpus. The previous two layers are itemised (per-scenario rules, per-category mistakes, sum-checks); this layer compares sections of the draft against each other and against the issue / PR / Figma sources gathered in Step 1. It is split into two short tables: *Document-as-whole coherence* (D1–D9: e.g. *Overview* matches what scenarios actually test, *Scope* bullets map to scenarios bidirectionally, *Known Limitations* claims match the document, voice and detail level consistent across scenarios) and *Source fidelity* (S1–S8: e.g. ACs verbatim from the issue, *Feature Background* motivation traceable to source, UI element names / error strings / feature-flag names matching their origin tag). Each row is graded Consistent / Drift / Incoherent — Drift and Incoherent findings are fixed on the draft before saving, or recorded as a `⚠️` entry in *Known Limitations* if unresolvable. This layer is not published — its only externally visible effects are draft edits and new `⚠️` entries.
 

@@ -34,7 +34,7 @@ export const ciMapCmd: Command<void> = {
         return labels.map((label) => ({
           label,
           suiteId: suite.id,
-          command: `EVALUATION_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
+          command: `EVAL_CONNECTOR_ID=<connector-id> node scripts/evals run --suite ${suite.id}`,
         }));
       }),
     ];

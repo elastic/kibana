@@ -14,7 +14,7 @@ import { mutationKeys } from '../mutation_keys';
 import type { ServerError } from '../types';
 import { bulkUnmuteAlerts, type BulkUnmuteAlertsRule } from '../apis/bulk_unmute_alerts';
 
-const ERROR_TITLE = i18n.translate('alertsApis.bulkUnmuteAlerts.error', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.bulkUnmuteAlerts.error', {
   defaultMessage: 'Error unmuting alerts',
 });
 

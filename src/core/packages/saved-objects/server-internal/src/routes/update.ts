@@ -13,6 +13,13 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_NAME_LENGTH,
+  MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_VERSION_LENGTH,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import {
@@ -57,23 +64,37 @@ For transferring or backing up saved objects, prefer the import and export APIs 
       },
       validate: {
         params: schema.object({
-          type: schema.string({ meta: { description: 'The saved object type.' } }),
-          id: schema.string({ meta: { description: 'The saved object identifier.' } }),
+          type: schema.string({
+            maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH,
+            meta: { description: 'The saved object type.' },
+          }),
+          id: schema.string({
+            maxLength: MAX_SAVED_OBJECT_ID_LENGTH,
+            meta: { description: 'The saved object identifier.' },
+          }),
         }),
         body: schema.object({
-          attributes: schema.recordOf(schema.string(), schema.any()),
-          version: schema.maybe(schema.string()),
+          attributes: schema.recordOf(
+            schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+            schema.any()
+          ),
+          version: schema.maybe(schema.string({ maxLength: MAX_SAVED_OBJECT_VERSION_LENGTH })),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
-                name: schema.string(),
-                type: schema.string(),
-                id: schema.string(),
+                name: schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+                type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
               }),
-              { maxSize: 1000 }
+              { maxSize: MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT }
             )
           ),
-          upsert: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+          upsert: schema.maybe(
+            schema.recordOf(
+              schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+              schema.any()
+            )
+          ),
         }),
       },
     },

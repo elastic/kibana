@@ -9,7 +9,11 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { isIndexNotFoundError } from './es_error_helpers';
+import {
+  getElasticsearchErrorMessage,
+  isElasticsearchQueryError,
+  isIndexNotFoundError,
+} from './es_error_helpers';
 
 const makeResponseError = (type: string, statusCode = 404) =>
   new errors.ResponseError({
@@ -36,5 +40,37 @@ describe('isIndexNotFoundError', () => {
   it('returns false for null/undefined', () => {
     expect(isIndexNotFoundError(null)).toBe(false);
     expect(isIndexNotFoundError(undefined)).toBe(false);
+  });
+});
+
+describe('isElasticsearchQueryError', () => {
+  it('returns true for search_phase_execution_exception with query_shard_exception root cause', () => {
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'all shards failed',
+          root_cause: [
+            {
+              type: 'query_shard_exception',
+              reason: 'failed to create query: For input string: "2s"',
+            },
+          ],
+        },
+      },
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+
+    expect(isElasticsearchQueryError(error)).toBe(true);
+    expect(getElasticsearchErrorMessage(error)).toBe(
+      'failed to create query: For input string: "2s"'
+    );
+  });
+
+  it('returns false for index_not_found_exception', () => {
+    expect(isElasticsearchQueryError(makeResponseError('index_not_found_exception'))).toBe(false);
   });
 });

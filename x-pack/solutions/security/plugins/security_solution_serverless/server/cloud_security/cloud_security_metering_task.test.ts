@@ -7,13 +7,16 @@
 import Chance from 'chance';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { getCloudProductTier } from './cloud_security_metering';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
+import { cloudSecurityMetringCallback, getCloudProductTier } from './cloud_security_metering';
 import {
   getCloudSecurityUsageRecord,
   getSearchQueryByCloudSecuritySolution,
 } from './cloud_security_metering_task';
 
 import type { ServerlessSecurityConfig } from '../config';
+import type { MeteringCallbackInput } from '../types';
 
 import type { ProductTier } from '../../common/product';
 import { CLOUD_SECURITY_TASK_TYPE, CSPM, KSPM, CNVM, BILLABLE_ASSETS_CONFIG } from './constants';
@@ -326,5 +329,62 @@ describe('should return the relevant product tier', () => {
     const tier = getCloudProductTier(serverlessSecurityConfig, logger);
 
     expect(tier).toBe('none');
+  });
+});
+
+describe('cloudSecurityMetringCallback', () => {
+  const buildInput = (config: ServerlessSecurityConfig): MeteringCallbackInput => ({
+    esClient: mockEsClient,
+    cloudSetup: { serverless: { projectId: 'project-id' } } as CloudSetup,
+    logger,
+    taskId: 'task-id',
+    lastSuccessfulReport: new Date(),
+    signal: new AbortController().signal,
+    config,
+  });
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should return no records if cloud product line is missing', async () => {
+    const result = await cloudSecurityMetringCallback(
+      buildInput({
+        productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
+      } as unknown as ServerlessSecurityConfig)
+    );
+
+    expect(result).toEqual({ records: [] });
+    expect(mockEsClient.search).not.toHaveBeenCalled();
+  });
+
+  it('should collect usage for CSPM, KSPM and CNVM', async () => {
+    mockEsClient.search.mockResolvedValue({
+      hits: { hits: [] },
+    } as never);
+
+    await cloudSecurityMetringCallback(
+      buildInput({
+        productTypes: [{ product_line: 'cloud', product_tier: 'complete' }],
+        cloudSecurityMetering: { cspm: { enabled: true } },
+      } as unknown as ServerlessSecurityConfig)
+    );
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(3);
+  });
+
+  it('should skip CSPM usage when CSPM metering is disabled', async () => {
+    mockEsClient.search.mockResolvedValue({
+      hits: { hits: [] },
+    } as never);
+
+    await cloudSecurityMetringCallback(
+      buildInput({
+        productTypes: [{ product_line: 'cloud', product_tier: 'complete' }],
+        cloudSecurityMetering: { cspm: { enabled: false } },
+      } as unknown as ServerlessSecurityConfig)
+    );
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(2);
   });
 });

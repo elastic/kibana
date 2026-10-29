@@ -70,6 +70,20 @@ describe('DurationInput', () => {
       renderDurationInput({ errors: 'Value is required' });
       expect(screen.getByText('Value is required')).toBeInTheDocument();
     });
+
+    it('hides units smaller than minDurationMs', () => {
+      renderDurationInput({ value: '5m', minDurationMs: 60 * 1000 });
+      const select = screen.getByTestId('testDurationUnitInput') as HTMLSelectElement;
+      const values = Array.from(select.options).map((o) => o.value);
+      expect(values).toEqual(['m', 'h', 'd']);
+    });
+
+    it('keeps all units when minDurationMs is not provided', () => {
+      renderDurationInput({ value: '5m' });
+      const select = screen.getByTestId('testDurationUnitInput') as HTMLSelectElement;
+      const values = Array.from(select.options).map((o) => o.value);
+      expect(values).toEqual(['s', 'm', 'h', 'd']);
+    });
   });
 
   describe('number input changes', () => {

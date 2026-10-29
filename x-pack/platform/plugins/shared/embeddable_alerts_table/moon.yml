@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
+  - '@kbn/scout'
   - '@kbn/presentation-publishing'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'
@@ -45,6 +46,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -52,7 +54,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -13,10 +13,16 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
-import type { AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
+import type {
+  AgentAvailabilityConfig,
+  AgentTypeRegistry,
+  AiIndexResolver,
+} from '@kbn/agent-builder-server/agents';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { defaultAiIndices } from './default_ai_indices';
 import { createConfigurationResolver } from './resolve_configuration';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
@@ -36,7 +42,7 @@ import {
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
 import { createAgentTypeRegistry } from './types/registry';
-import { createClient } from './persisted/client';
+import { createClient, createSystemClient } from './persisted/client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -54,8 +60,14 @@ export interface AgentsServiceStartDeps {
 export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
   private typeRegistry: AgentTypeRegistry;
+  /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
+  /** In-memory UI visibility overrides for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly hiddenByAgentId = new Map<string, boolean>();
+  private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
+  private settingsDeps?: Pick<AgentsServiceStartDeps, 'uiSettings' | 'savedObjects'>;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
@@ -65,7 +77,14 @@ export class AgentsService {
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
 
-    this.typeRegistry.register({ id: chatAgentTypeId, baseConfiguration: {} });
+    this.typeRegistry.register({
+      id: chatAgentTypeId,
+      baseConfiguration: async ({ request }) => ({
+        ai_indices: (await this.isExperimentalEnabled(request))
+          ? Object.keys(defaultAiIndices)
+          : [],
+      }),
+    });
 
     return {
       register: (agent) => {
@@ -78,7 +97,24 @@ export class AgentsService {
       registerType: (type) => {
         this.typeRegistry.register(type);
       },
+      registerAiIndexResolver: (resolver) => {
+        if (this.aiIndexResolver) {
+          throw new Error('An AI index resolver is already registered');
+        }
+        this.aiIndexResolver = resolver;
+      },
     };
+  }
+
+  private async isExperimentalEnabled(request: KibanaRequest): Promise<boolean> {
+    if (!this.settingsDeps) {
+      throw new Error('Agent type base configuration resolved before #start');
+    }
+    const { uiSettings, savedObjects } = this.settingsDeps;
+    return uiSettings
+      .asScopedToClient(savedObjects.getScopedClient(request))
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false);
   }
 
   private validateAgentTypes() {
@@ -98,6 +134,7 @@ export class AgentsService {
 
     const { logger } = this.setupDeps;
     const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    this.settingsDeps = { uiSettings, savedObjects };
 
     this.validateAgentTypes();
 
@@ -112,6 +149,8 @@ export class AgentsService {
       security,
       toolsService,
       logger,
+      availabilityByAgentId: this.availabilityByAgentId,
+      hiddenByAgentId: this.hiddenByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -139,16 +178,50 @@ export class AgentsService {
       });
     };
 
+    const ensure: AgentsServiceStart['ensure'] = async ({
+      spaceId,
+      agent,
+      availability,
+      hidden,
+    }) => {
+      if (this.builtinRegistry.has(agent.id)) {
+        throw new Error(
+          `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
+        );
+      }
+      if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
+        throw new Error(`Cannot ensure agent "${agent.id}": unknown agent type "${agent.type}"`);
+      }
+
+      if (availability) {
+        this.availabilityByAgentId.set(agent.id, availability);
+      }
+      if (hidden !== undefined) {
+        this.hiddenByAgentId.set(agent.id, hidden);
+      }
+
+      const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });
+      await systemClient.ensureAgent(agent);
+    };
+
     const resolveAgentConfiguration: AgentsServiceStart['resolveAgentConfiguration'] = ({
       agent,
       request,
     }) => {
       const spaceId = getCurrentSpaceId({ request, spaces });
-      return configurationResolver({
+      return configurationResolver.resolveConfig({
         agentType: agent.type,
         configuration: agent.configuration,
         ctx: { request, spaceId },
       });
+    };
+
+    const resolveAgentBaseConfiguration: AgentsServiceStart['resolveAgentBaseConfiguration'] = ({
+      agentType,
+      request,
+    }) => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      return configurationResolver.resolveBase(agentType, { request, spaceId });
     };
 
     const removeToolRefsFromAgents = async ({
@@ -201,13 +274,16 @@ export class AgentsService {
 
     return {
       getRegistry,
+      ensure,
       resolveAgentConfiguration,
+      resolveAgentBaseConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
       removePluginRefsFromAgents,
       getAgentsUsingPlugins,
       removeSkillRefsFromAgents,
       getAgentsUsingSkills,
+      getAiIndexResolver: () => this.aiIndexResolver,
     };
   }
 }

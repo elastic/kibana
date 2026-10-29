@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/server';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { SettingsServiceContract } from './settings_service';
 
 /**
@@ -14,14 +14,12 @@ import type { SettingsServiceContract } from './settings_service';
  * write alerting advanced settings. Bind this token to the appropriate
  * client (e.g. `uiSettings.globalAsScopedToClient(internalSoClient)`).
  */
-export const UiSettingsClientToken = Symbol.for(
-  'alerting_v2.UiSettingsClient'
-) as ServiceIdentifier<IUiSettingsClient>;
+export const UiSettingsClientToken = createToken<IUiSettingsClient>('alerting_v2.UiSettingsClient');
 
 /**
  * SettingsService — typed wrapper around the UI settings client for alerting
  * advanced settings.
  */
-export const SettingsServiceToken = Symbol.for(
+export const SettingsServiceToken = createToken<SettingsServiceContract>(
   'alerting_v2.SettingsService'
-) as ServiceIdentifier<SettingsServiceContract>;
+);

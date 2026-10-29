@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import {
   EntityIdentifierFields,
@@ -19,11 +18,13 @@ import { AlertsDetailsTable } from '../../../../../cloud_security_posture/compon
 import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { useFlyoutApi } from '../../../../use_flyout_api';
 import { cellActionRenderer } from '../../../../shared/components/cell_actions';
+import { ALERTS_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../../../../document/main/utils/get_header_title';
 import { ALERTS_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsInsights.title', {
-  defaultMessage: 'Alerts',
-});
+const TITLE = ALERTS_INSIGHTS_TITLE;
 
 const ICON_TYPE = EntityIconByType;
 const FIELD: Record<
@@ -43,21 +44,32 @@ export interface AlertsInsightsProps {
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
+  /**
+   * Entity-store lookup mode of the originating entity flyout. In `resolved` mode the table also
+   * covers the entities that resolve to `entityId`. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
+  /**
+   * Scope of the originating panel.
+   */
+  scopeId?: string;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
 }
 
 export const AlertsInsights = memo(
-  ({ entityType, value, entityId, onShowEntity }: AlertsInsightsProps) => {
+  ({ entityType, value, entityId, mode, scopeId, onShowEntity }: AlertsInsightsProps) => {
     const { openDocumentFlyoutFromIndexAsChild } = useFlyoutApi();
 
     const onExpandAlert = useCallback(
-      (eventId: string, indexName: string) => {
+      (eventId: string, indexName: string, ruleName?: string) => {
         openDocumentFlyoutFromIndexAsChild({
           documentId: eventId,
           indexName,
           renderCellActions: cellActionRenderer,
           onAlertUpdated: noop,
+          origin: FLYOUT_ORIGIN.ALERTS_INSIGHTS_ALERT,
+          title: getAlertHistoryTitle(ruleName),
         });
       },
       [openDocumentFlyoutFromIndexAsChild]
@@ -78,6 +90,8 @@ export const AlertsInsights = memo(
             field={FIELD[entityType]}
             value={value}
             entityId={entityId}
+            mode={mode}
+            scopeId={scopeId}
             // The alerts table only resolves host/user entity types; for generic it relies on
             // the `field`/`value` filter (`related.entity`) instead.
             entityType={

@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
-import { useAttacksPageFetchMethod } from '../../../../hooks/attacks/use_attacks_page_fetch_method';
+import { fetchQueryAttacks } from '../../../../containers/detection_engine/alerts/api';
 import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 const ATTACK_TITLES_QUERY_ID = 'attacks-kpi-attack-titles';
@@ -34,7 +34,6 @@ export interface UseAttackTitlesProps {
  */
 export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
   const { deleteQuery, setQuery } = useGlobalTime();
-  const attacksPageFetchMethod = useAttacksPageFetchMethod();
 
   // Get the attack details query
   const attacksDetailsQuery = useMemo(() => {
@@ -55,7 +54,7 @@ export const useAttackTitles = ({ attackIds }: UseAttackTitlesProps) => {
     response,
     setQuery: setDetailsQuery,
   } = useQueryAlerts<AttackDetails, {}>({
-    fetchMethod: attacksPageFetchMethod,
+    fetchMethod: fetchQueryAttacks,
     query: attacksDetailsQuery,
     skip: attackIds.length === 0,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_DETAILS,

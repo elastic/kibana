@@ -17,6 +17,12 @@ import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attac
 import { workflowExecutor, type WorkflowExecutorDeps } from '.';
 import { executeGenerationWorkflow } from '../../../routes/generate/helpers';
 
+const mockIsWorkflowsEnabledForSpace = jest.fn();
+
+jest.mock('../../is_workflows_enabled_for_space', () => ({
+  isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+}));
+
 const mockGenerateHash = jest.fn().mockReturnValue('mock-alert-hash');
 const mockTransformToBaseAlertDocument = jest.fn().mockReturnValue({
   'kibana.alert.url': 'https://localhost:5601/app/security/attack_discovery/mock-doc-id',
@@ -193,6 +199,8 @@ describe('workflowExecutor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockIsWorkflowsEnabledForSpace.mockResolvedValue(true);
+
     (executeGenerationWorkflow as jest.Mock).mockResolvedValue(mockSuccessOutcome);
 
     (ruleExecutorServices.alertsClient.report as jest.Mock).mockReturnValue({
@@ -259,6 +267,47 @@ describe('workflowExecutor', () => {
           validation_workflow_id: 'default',
         },
         workflowsManagementApi: mockWorkflowsManagementApi,
+      })
+    );
+  });
+
+  it('derives composite toggles from a legacy custom_only workflowConfig (backward compat)', async () => {
+    // Legacy-persisted schedules only carry the single-enum shape (no `skillEnabled`),
+    // so the executor must derive the composite toggles. `custom_only` meant
+    // "default retrieval off, custom workflows only".
+    const options = {
+      ...executorOptions,
+      params: { ...params, workflowConfig: { alertRetrievalMode: 'custom_only' } },
+    } as unknown as RuleExecutorOptions;
+
+    await workflowExecutor({ deps, options });
+
+    expect(executeGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowConfig: expect.objectContaining({
+          alert_retrieval_mode: 'custom_query',
+          default_retrieval_enabled: false,
+          skill_enabled: true,
+        }),
+      })
+    );
+  });
+
+  it('derives default_retrieval_enabled=false from legacy defaultAlertRetrievalEnabled=false', async () => {
+    const options = {
+      ...executorOptions,
+      params: { ...params, workflowConfig: { defaultAlertRetrievalEnabled: false } },
+    } as unknown as RuleExecutorOptions;
+
+    await workflowExecutor({ deps, options });
+
+    expect(executeGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowConfig: expect.objectContaining({
+          alert_retrieval_mode: 'custom_query',
+          default_retrieval_enabled: false,
+          skill_enabled: true,
+        }),
       })
     );
   });
@@ -872,6 +921,27 @@ describe('workflowExecutor', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('no discoveries to persist')
       );
+    });
+  });
+
+  describe('per-space setting check', () => {
+    it('returns { state: {} } without calling executeGenerationWorkflow when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      const result = await workflowExecutor({ deps, options });
+
+      expect(executeGenerationWorkflow).not.toHaveBeenCalled();
+      expect(result).toEqual({ state: {} });
+    });
+
+    it('does not throw when isWorkflowsEnabledForSpace returns false', async () => {
+      mockIsWorkflowsEnabledForSpace.mockResolvedValue(false);
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await expect(workflowExecutor({ deps, options })).resolves.toBeDefined();
     });
   });
 });

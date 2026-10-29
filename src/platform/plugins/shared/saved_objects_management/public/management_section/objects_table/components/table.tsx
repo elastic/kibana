@@ -251,7 +251,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiIconTip
               aria-label={typeLabel}
               type={object.meta.icon || 'apps'}
-              size="s"
+              size="m"
               content={typeLabel}
               iconProps={{ 'data-test-subj': 'objectType' }}
             />

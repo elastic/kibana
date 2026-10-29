@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { getParsedParams } from '../lib/helper/parse_search';
 import { esKuerySelector } from '../state/selectors';

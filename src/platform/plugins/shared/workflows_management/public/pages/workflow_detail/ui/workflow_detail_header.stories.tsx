@@ -10,7 +10,7 @@
 import type { Decorator, StoryContext, StoryObj } from '@storybook/react';
 import moment from 'moment';
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { ChangeHistoryProvider } from '@kbn/change-history-ui';
@@ -64,7 +64,12 @@ const StoryWrapper: React.FC<{
   // Execute initialDispatch if provided
   React.useEffect(() => {
     dispatch(setWorkflow(defaultWorkflow));
-    dispatch(_setComputedDataInternal({ workflowDefinition: defaultWorkflow.definition }));
+    dispatch(
+      _setComputedDataInternal({
+        yamlString: undefined,
+        workflowDefinition: defaultWorkflow.definition,
+      })
+    );
     initialDispatch?.(dispatch);
   }, [dispatch, initialDispatch]);
 

@@ -12,8 +12,6 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import {
   EuiButtonIcon,
-  EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
@@ -51,6 +50,7 @@ import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rat
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useIsInteractive } from '../../hooks/use_is_interactive';
 
 import {
   getGroupTableItems,
@@ -92,6 +92,7 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  parentApi?: unknown;
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
@@ -99,6 +100,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
+  parentApi,
 }) => {
   const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -335,6 +337,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
   const isAnalysisControlsDisabled = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+  const isInteractive = useIsInteractive(parentApi);
 
   return (
     <div data-test-subj="aiopsLogRateAnalysisResults">
@@ -352,7 +355,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       >
         <>
           {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
-            <LogRateAnalysisOptions foundGroups={foundGroups} />
+            <LogRateAnalysisOptions foundGroups={foundGroups} isInteractive={isInteractive} />
           )}
           {embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (
             <EuiFlexItem grow={false}>
@@ -366,6 +369,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
                   data-test-subj="aiopsLogRateAnalysisOptionsButton"
                   iconType="controls"
                   onClick={onEmbeddableOptionsClickHandler}
+                  isDisabled={!isInteractive}
                   aria-label={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonAriaLabel', {
                     defaultMessage: 'Analysis options',
                   })}
@@ -380,7 +384,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            <LogRateAnalysisOptions foundGroups={foundGroups} growFirstItem={true} />
+            <LogRateAnalysisOptions
+              foundGroups={foundGroups}
+              growFirstItem={true}
+              isInteractive={isInteractive}
+            />
           </EuiFlexGroup>
         </>
       )}
@@ -388,43 +396,40 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       {errors.length > 0 ? (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut
+          <KbnWarningCallout
+            size="s"
             announceOnMount={false}
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
                 'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
               values: { errorCount: errors.length },
             })}
-            color="warning"
-            iconType="warning"
-            size="s"
+            text={errors.length === 1 ? errors[0] : undefined}
+            actionProps={
+              overrides !== undefined
+                ? {
+                    primary: {
+                      'data-test-subj': 'aiopsLogRateAnalysisResultsTryToContinueAnalysisButton',
+                      onClick: () => startHandler(true),
+                      children: (
+                        <FormattedMessage
+                          id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
+                          defaultMessage="Try to continue analysis"
+                        />
+                      ),
+                    },
+                  }
+                : undefined
+            }
           >
-            <EuiText size="s">
-              {errors.length === 1 ? (
-                <p>{errors[0]}</p>
-              ) : (
-                <ul>
-                  {errors.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                </ul>
-              )}
-              {overrides !== undefined ? (
-                <p>
-                  <EuiButton
-                    data-test-subj="aiopsLogRateAnalysisResultsTryToContinueAnalysisButton"
-                    size="s"
-                    onClick={() => startHandler(true)}
-                  >
-                    <FormattedMessage
-                      id="xpack.aiops.logRateAnalysis.page.tryToContinueAnalysisButtonText"
-                      defaultMessage="Try to continue analysis"
-                    />
-                  </EuiButton>
-                </p>
-              ) : null}
-            </EuiText>
-          </EuiCallOut>
+            {errors.length > 1 && (
+              <ul>
+                {errors.map((e, i) => (
+                  <li key={i}>{e}</li>
+                ))}
+              </ul>
+            )}
+          </KbnWarningCallout>
           <EuiSpacer size="xs" />
         </>
       ) : null}
@@ -478,6 +483,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            parentApi={parentApi}
           />
         ) : null}
         {showLogRateAnalysisResultsTable && !groupResults ? (
@@ -486,6 +492,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            parentApi={parentApi}
           />
         ) : null}
       </div>

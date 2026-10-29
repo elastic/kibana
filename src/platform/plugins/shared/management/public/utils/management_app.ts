@@ -7,19 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
+import type { AppDeepLinkLocations } from '@kbn/core/public';
 import type { CreateManagementItemArgs, Mount } from '../types';
 import { ManagementItem } from './management_item';
+
+export type ManagementAppPaddingSize = 'none' | 's' | 'm' | 'l';
 
 export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
   mount: Mount;
   basePath: string;
   keywords?: string[];
+  /**
+   * Opt-in override for the `KibanaPageTemplate` main section padding. When left
+   * unset, the template's own default padding is used, so most apps should not
+   * need to set this.
+   */
+  mainPaddingSize?: ManagementAppPaddingSize;
+  /**
+   * Overrides `visibleIn` at runtime; each emission rebuilds the management deep links.
+   * `visibleIn` applies until the first emission and again if the observable errors.
+   * Only honored for apps registered during setup.
+   */
+  visibleIn$?: Observable<AppDeepLinkLocations[]>;
 }
 
 export class ManagementApp extends ManagementItem {
   public readonly mount: Mount;
   public readonly basePath: string;
   public readonly keywords: string[];
+  public readonly mainPaddingSize?: ManagementAppPaddingSize;
+  public readonly visibleIn$?: Observable<AppDeepLinkLocations[]>;
 
   constructor(args: RegisterManagementAppArgs) {
     super(args);
@@ -27,5 +45,7 @@ export class ManagementApp extends ManagementItem {
     this.mount = args.mount;
     this.basePath = args.basePath;
     this.keywords = args.keywords || [];
+    this.mainPaddingSize = args.mainPaddingSize;
+    this.visibleIn$ = args.visibleIn$;
   }
 }

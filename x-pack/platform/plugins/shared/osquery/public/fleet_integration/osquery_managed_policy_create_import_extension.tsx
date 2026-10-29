@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -428,6 +428,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           >
             <EuiSpacer size="s" />
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.osquery.fleetIntegration.osqueryConfig.cautionCalloutTitle',
                 {

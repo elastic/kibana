@@ -13,6 +13,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -210,6 +211,93 @@ describe('RedMetricsChartActions', () => {
       expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
         expect.objectContaining({
           serviceOverviewTab: undefined,
+        })
+      );
+    });
+
+    it('passes anomalyThreshold to the locator when anomaly is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.WARNING, score: 50 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ anomalyThreshold: 'warning' }),
+        })
+      );
+    });
+
+    it('does not set anomalyThreshold on the locator query when anomaly is not provided', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} />);
+
+      expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
+    });
+
+    it('does not set anomalyThreshold when anomaly severity is unknown', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.UNKNOWN, score: 0 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl.mock.calls[0][0].query).not.toHaveProperty('anomalyThreshold');
+    });
+
+    it('passes expected bounds comparison params when anomaly is provided', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          anomaly={{ severity: ML_ANOMALY_SEVERITY.MINOR, score: 40 }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            comparisonEnabled: true,
+            offset: 'expected_bounds',
+          }),
+        })
+      );
+    });
+
+    it('does not set expected bounds comparison params when anomaly is not provided', () => {
+      setupMocks();
+      render(<RedMetricsChartActions {...defaultProps} />);
+
+      const query = mockApmGetRedirectUrl.mock.calls[0][0].query;
+      expect(query).not.toHaveProperty('comparisonEnabled');
+      expect(query).not.toHaveProperty('offset');
+    });
+
+    it('uses the provided timeRange for the APM locator (anomaly timestamp anchoring happens upstream)', () => {
+      setupMocks();
+      render(
+        <RedMetricsChartActions
+          {...defaultProps}
+          timeRange={{ from: '2026-07-16T10:00:00.000Z', to: '2026-07-16T11:00:00.000Z' }}
+          anomaly={{
+            severity: ML_ANOMALY_SEVERITY.MINOR,
+            score: 40,
+            timestamp: new Date('2026-07-16T09:30:00.000Z').getTime(),
+          }}
+        />
+      );
+
+      expect(mockApmGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            rangeFrom: '2026-07-16T10:00:00.000Z',
+            rangeTo: '2026-07-16T11:00:00.000Z',
+          }),
         })
       );
     });

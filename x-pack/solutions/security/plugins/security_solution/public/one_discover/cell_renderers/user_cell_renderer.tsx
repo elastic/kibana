@@ -14,11 +14,19 @@ import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import { formatFlyoutTitle, USER_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import { User } from '../../flyout_v2/entity/user/main';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export const USER_CELL_RENDERER_FIELDS = new Set(['user.name']);
 
@@ -50,7 +58,7 @@ export const UserCellRenderer = React.memo<UserCellRendererProps>(
       (userName: string) => {
         if (!userName) return;
 
-        overlays.openSystemFlyout(
+        const ref = overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
@@ -64,10 +72,17 @@ export const UserCellRenderer = React.memo<UserCellRendererProps>(
           }),
           {
             ...defaultDocumentFlyoutProperties,
+            title: formatFlyoutTitle(USER_TITLE, userName),
             historyKey,
             session: 'start',
           }
         );
+        trackFlyoutOpen(services.telemetry, ref, {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.USER,
+          session: FLYOUT_SESSION_KIND.START,
+          origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+        });
       },
       [
         overlays,

@@ -172,7 +172,7 @@ describe('CorrelationsDetails', () => {
 
       fireEvent.click(getByTestId(`${ATTACK_CORRELATIONS_TABLE_TEST_ID}AlertPreviewButton`));
 
-      expect(onShowAlert).toHaveBeenCalledWith('alert-id-1', '.alerts-test');
+      expect(onShowAlert).toHaveBeenCalledWith('alert-id-1', '.alerts-test', 'Alert: Test Rule');
     });
   });
 

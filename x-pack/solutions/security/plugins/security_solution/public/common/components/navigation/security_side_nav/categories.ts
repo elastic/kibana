@@ -12,7 +12,6 @@ import { SecurityPageName } from '../../../../../common';
 export const getNavCategories = (
   chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
-  isNewEAHomePageEnabled?: boolean,
   isAgentBuilderNavAtTop?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
@@ -48,9 +47,7 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        isNewEAHomePageEnabled
-          ? SecurityPageName.entityAnalyticsHomePage
-          : SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.entityAnalyticsHomePage,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,

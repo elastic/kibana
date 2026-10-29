@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/private/upgrade_assistant
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/management-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/features-plugin'
@@ -48,12 +49,14 @@ dependsOn:
   - '@kbn/reindex-service-plugin'
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __jest__/**/*
@@ -65,6 +68,4 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

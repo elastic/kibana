@@ -32,7 +32,12 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/compone
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 import type { DataStream } from '../../../../../../common/types';
-import { isNextGenIlm } from '../../../../lib/data_streams';
+import {
+  isIlmLifecyclePreferred,
+  isLookupDslNotApplicable,
+  isLookupIndexMode,
+  isLookupLifecycleNotApplicable,
+} from '../../../../lib/data_streams';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
@@ -51,7 +56,7 @@ import { DataRetentionValue } from '../data_retention_value';
 import { formatByteSizeString } from '../../../../lib/format_bytes';
 
 interface TableDataStream extends DataStream {
-  isNextGenIlm: boolean;
+  isIlmLifecyclePreferred: boolean;
 }
 
 interface Props {
@@ -102,7 +107,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   const data = useMemo(() => {
     return (dataStreams || []).map((dataStream) => ({
       ...dataStream,
-      isNextGenIlm: isNextGenIlm(dataStream),
+      isIlmLifecyclePreferred: isIlmLifecyclePreferred(dataStream),
     }));
   }, [dataStreams]);
 
@@ -227,16 +232,18 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ),
   });
 
-  columns.push({
-    field: 'indexMode',
-    name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
-      defaultMessage: 'Index mode',
-    }),
-    sortable: true,
-    render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
-    width: '7.5em',
-    minWidth: '7.5em',
-  });
+  if (config.enableIndexMode) {
+    columns.push({
+      field: 'indexMode',
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.table.indexModeColumnTitle', {
+        defaultMessage: 'Index mode',
+      }),
+      sortable: true,
+      render: (indexMode: DataStream['indexMode']) => indexModeLabels[indexMode],
+      width: '7.5em',
+      minWidth: '7.5em',
+    });
+  }
 
   columns.push({
     field: 'lifecycle',
@@ -264,13 +271,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     sortable: true,
     render: (lifecycle: DataStream['lifecycle'], dataStream) => (
       <ConditionalWrap
-        condition={dataStream.isNextGenIlm}
+        condition={dataStream.isIlmLifecyclePreferred}
         wrap={(children) => <EuiTextColor color="subdued">{children}</EuiTextColor>}
       >
         <>
           <DataRetentionValue dataStream={dataStream} infiniteAsIcon={INFINITE_AS_ICON} />
 
-          {!dataStream.isNextGenIlm &&
+          {!dataStream.isIlmLifecyclePreferred &&
+            !isLookupLifecycleNotApplicable(dataStream) &&
             dataStream.lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
               <>
                 {' '}
@@ -337,7 +345,9 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   if (
     selection.every(
       (dataStream: DataStream) =>
-        dataStream.privileges.manage_data_stream_lifecycle && !isNextGenIlm(dataStream)
+        dataStream.privileges.manage_data_stream_lifecycle &&
+        (!isIlmLifecyclePreferred(dataStream) || isLookupIndexMode(dataStream)) &&
+        !isLookupDslNotApplicable(dataStream)
     )
   ) {
     dataStreamActions.push({
@@ -452,12 +462,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="success"
-                iconType="refresh"
-                onClick={reload}
-                data-test-subj="reloadButton"
-              >
+              <EuiButton iconType="refresh" onClick={reload} data-test-subj="reloadButton">
                 <FormattedMessage
                   id="xpack.idxMgmt.dataStreamList.reloadDataStreamsButtonLabel"
                   defaultMessage="Reload"

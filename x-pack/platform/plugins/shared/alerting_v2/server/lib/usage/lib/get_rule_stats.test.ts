@@ -18,7 +18,6 @@ beforeEach(() => {
 function mockRuleSearchResponse({
   total = 20,
   countEnabled = 15,
-  countAgentBuilderAssisted = 7,
   kindBuckets = [
     { key: 'metric', doc_count: 12 },
     { key: 'log', doc_count: 8 },
@@ -35,10 +34,21 @@ function mockRuleSearchResponse({
   countWithGrouping = 4,
   avgGroupingFieldsCount = 2.0,
   minCreatedAt = '2026-01-15T12:00:00.000Z',
+  recoveryStrategyBuckets = [
+    { key: 'no_breach', doc_count: 9 },
+    { key: 'condition', doc_count: 3 },
+    { key: 'query', doc_count: 6 },
+    { key: 'manual', doc_count: 2 },
+  ],
+  noDataStrategyBuckets = [
+    { key: 'ignore', doc_count: 12 },
+    { key: 'keep_last', doc_count: 3 },
+    { key: 'resolve', doc_count: 1 },
+    { key: 'alert', doc_count: 4 },
+  ],
 }: {
   total?: number;
   countEnabled?: number;
-  countAgentBuilderAssisted?: number;
   kindBuckets?: Array<{ key: string; doc_count: number }>;
   scheduleBuckets?: Array<{ key: string; doc_count: number }>;
   lookbackBuckets?: Array<{ key: string; doc_count: number }>;
@@ -49,6 +59,8 @@ function mockRuleSearchResponse({
   countWithGrouping?: number;
   avgGroupingFieldsCount?: number | null;
   minCreatedAt?: string | null;
+  recoveryStrategyBuckets?: Array<{ key: string; doc_count: number }>;
+  noDataStrategyBuckets?: Array<{ key: string; doc_count: number }>;
 } = {}) {
   esClient.search.mockResponseOnce({
     took: 1,
@@ -57,7 +69,6 @@ function mockRuleSearchResponse({
     hits: { total: { value: total, relation: 'eq' }, max_score: null, hits: [] },
     aggregations: {
       count_enabled: { doc_count: countEnabled },
-      count_agent_builder_assisted: { doc_count: countAgentBuilderAssisted },
       count_by_kind: { buckets: kindBuckets },
       count_by_schedule: { buckets: scheduleBuckets },
       count_by_lookback: { buckets: lookbackBuckets },
@@ -71,6 +82,8 @@ function mockRuleSearchResponse({
         value: minCreatedAt ? Date.parse(minCreatedAt) : null,
         value_as_string: minCreatedAt ?? undefined,
       },
+      count_by_recovery_strategy: { buckets: recoveryStrategyBuckets },
+      count_by_no_data_strategy: { buckets: noDataStrategyBuckets },
     },
   } as any);
 }
@@ -84,7 +97,6 @@ describe('getRuleStats', () => {
     expect(result).toEqual({
       count_total: 20,
       count_enabled: 15,
-      count_agent_builder_assisted: 7,
       count_by_kind: { metric: 12, log: 8 },
       count_by_schedule: [
         { name: '1m', value: 10 },
@@ -98,6 +110,8 @@ describe('getRuleStats', () => {
       count_with_grouping: 4,
       avg_grouping_fields_count: 2.0,
       min_created_at: '2026-01-15T12:00:00.000Z',
+      count_by_recovery_strategy: { no_breach: 9, condition: 3, query: 6, manual: 2 },
+      count_by_no_data_strategy: { ignore: 12, keep_last: 3, resolve: 1, alert: 4 },
     });
   });
 
@@ -105,7 +119,6 @@ describe('getRuleStats', () => {
     mockRuleSearchResponse({
       total: 0,
       countEnabled: 0,
-      countAgentBuilderAssisted: 0,
       kindBuckets: [],
       scheduleBuckets: [],
       lookbackBuckets: [],
@@ -116,6 +129,8 @@ describe('getRuleStats', () => {
       countWithGrouping: 0,
       avgGroupingFieldsCount: null,
       minCreatedAt: null,
+      recoveryStrategyBuckets: [],
+      noDataStrategyBuckets: [],
     });
 
     const result = await getRuleStats(esClient);
@@ -123,7 +138,6 @@ describe('getRuleStats', () => {
     expect(result).toEqual({
       count_total: 0,
       count_enabled: 0,
-      count_agent_builder_assisted: 0,
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
@@ -134,6 +148,8 @@ describe('getRuleStats', () => {
       count_with_grouping: 0,
       avg_grouping_fields_count: null,
       min_created_at: null,
+      count_by_recovery_strategy: {},
+      count_by_no_data_strategy: {},
     });
   });
 
@@ -150,7 +166,6 @@ describe('getRuleStats', () => {
     expect(result).toEqual({
       count_total: 0,
       count_enabled: 0,
-      count_agent_builder_assisted: 0,
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
@@ -161,6 +176,8 @@ describe('getRuleStats', () => {
       count_with_grouping: 0,
       avg_grouping_fields_count: null,
       min_created_at: null,
+      count_by_recovery_strategy: {},
+      count_by_no_data_strategy: {},
     });
   });
 
@@ -172,7 +189,6 @@ describe('getRuleStats', () => {
       hits: { total: 3, max_score: null, hits: [] },
       aggregations: {
         count_enabled: { doc_count: 2 },
-        count_agent_builder_assisted: { doc_count: 1 },
         count_by_kind: { buckets: [] },
         count_by_schedule: { buckets: [] },
         count_by_lookback: { buckets: [] },
@@ -183,6 +199,8 @@ describe('getRuleStats', () => {
         count_with_grouping: { doc_count: 0 },
         avg_grouping_fields_count: { value: null },
         min_created_at: { value: null },
+        count_by_recovery_strategy: { buckets: [] },
+        count_by_no_data_strategy: { buckets: [] },
       },
     } as any);
 

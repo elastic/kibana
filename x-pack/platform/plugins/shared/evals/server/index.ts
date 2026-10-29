@@ -14,7 +14,36 @@ import type {
   EvalsStartDependencies,
 } from './types';
 
-export type { EvalsPluginSetup, EvalsPluginStart };
+export type {
+  EvalsPluginSetup,
+  EvalsPluginStart,
+  EvaluatorSummary,
+  ModelConnectorSummary,
+} from './types';
+export type { EvaluateFn, EvaluateParams } from './evaluation/create_evaluate_contract';
+export { EvaluationExecutionError } from './evaluation/evaluation_execution_error';
+export type {
+  EvaluatorContext,
+  EvaluatorResult,
+  RegisteredEvaluatorDefinition,
+  TraceAccessor,
+} from './evaluators/types';
+export type { EvidenceRound, ToolCallEvidence } from './evaluators/evidence/types';
+
+export {
+  generateExperimentRun,
+  generateSavedWorkflowYaml,
+  experimentRequestToParams,
+} from './workflow_generator';
+
+export type {
+  GenerateExperimentParams,
+  GeneratedExperimentRun,
+  GeneratedExecution,
+  GeneratedSavedWorkflow,
+  WorkflowEvaluatorInput,
+  ExperimentRunMode,
+} from './workflow_generator';
 
 export const plugin: PluginInitializer<
   EvalsPluginSetup,
@@ -27,3 +56,4 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export type { EvalsMode } from './config';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
@@ -122,14 +122,7 @@ module.exports = [
                 sourceMap: !isProd,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
             {
               loader: 'sass-loader',
               options: {
@@ -155,15 +148,7 @@ module.exports = [
                 sourceMap: !isProd,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !isProd,
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
             {
               loader: 'sass-loader',
               options: {
@@ -173,7 +158,7 @@ module.exports = [
                       loaderContext.context || loaderContext.rootContext,
                       path.resolve(
                         kibanaRoot,
-                        'src/core/public/styles/core_app/_globals_borealislight.scss'
+                        'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                       )
                     )
                   );

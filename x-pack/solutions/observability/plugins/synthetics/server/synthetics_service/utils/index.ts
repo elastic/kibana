@@ -6,3 +6,4 @@
  */
 
 export * from './secrets';
+export * from './redact_inspected_secrets';

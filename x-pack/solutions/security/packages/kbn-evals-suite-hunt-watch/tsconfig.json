@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/evals",
+    "@kbn/tooling-log",
+    "@kbn/workflows",
+    "@kbn/core",
+    "@kbn/alertzero-common",
+    "@kbn/management-settings-ids",
+    "@kbn/repo-info",
+    "@kbn/proposals-common",
+    "@kbn/utility-types"
+  ]
+}

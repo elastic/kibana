@@ -49,11 +49,11 @@ describe('LoggingService', () => {
       it('forwards configuration changes to logging system', async () => {
         const config1: LoggerContextConfigType = {
           appenders: new Map(),
-          loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
+          loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn', filters: [] }],
         };
         const config2: LoggerContextConfigType = {
           appenders: new Map(),
-          loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all' }],
+          loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all', filters: [] }],
         };
 
         getContract().configure(['test', 'context'], of(config1, config2));
@@ -73,11 +73,11 @@ describe('LoggingService', () => {
         const updates$ = new Subject<LoggerContextConfigType>();
         const config1: LoggerContextConfigType = {
           appenders: new Map(),
-          loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
+          loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn', filters: [] }],
         };
         const config2: LoggerContextConfigType = {
           appenders: new Map(),
-          loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all' }],
+          loggers: [{ name: 'subcontext', appenders: ['default'], level: 'all', filters: [] }],
         };
 
         const contract = getContract();
@@ -101,7 +101,7 @@ describe('LoggingService', () => {
         const updates$ = new Subject<LoggerContextConfigType>();
         const config1: LoggerContextConfigType = {
           appenders: new Map(),
-          loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn' }],
+          loggers: [{ name: 'subcontext', appenders: ['console'], level: 'warn', filters: [] }],
         };
 
         getContract().configure(['test', 'context'], updates$);

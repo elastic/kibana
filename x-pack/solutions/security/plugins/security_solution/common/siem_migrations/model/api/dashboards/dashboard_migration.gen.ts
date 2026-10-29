@@ -40,7 +40,7 @@ export const CreateDashboardMigrationRequestBody = lazySchema(() =>
     /**
      * The dashboard migration name
      */
-    name: NonEmptyString,
+    name: NonEmptyString.describe('The dashboard migration name'),
   })
 );
 export type CreateDashboardMigrationRequestBody = z.infer<
@@ -55,7 +55,7 @@ export const CreateDashboardMigrationResponse = lazySchema(() =>
     /**
      * The migration id created.
      */
-    migration_id: NonEmptyString,
+    migration_id: NonEmptyString.describe('The migration id created.'),
   })
 );
 export type CreateDashboardMigrationResponse = z.infer<typeof CreateDashboardMigrationResponse>;
@@ -171,7 +171,7 @@ export const GetDashboardMigrationDashboardsResponse = lazySchema(() =>
     /**
      * The total number of rules in migration.
      */
-    total: z.number(),
+    total: z.number().describe('The total number of rules in migration.'),
     data: z.array(DashboardMigrationDashboard),
   })
 );
@@ -266,7 +266,10 @@ export const InstallMigrationDashboardsRequestBody = lazySchema(() =>
     /**
      * The list of dashboard migration ids to install
      */
-    ids: z.array(NonEmptyString).optional(),
+    ids: z
+      .array(NonEmptyString)
+      .optional()
+      .describe('The list of dashboard migration ids to install'),
   })
 );
 export type InstallMigrationDashboardsRequestBody = z.infer<
@@ -281,7 +284,7 @@ export const InstallMigrationDashboardsResponse = lazySchema(() =>
     /**
      * The number of dashboards that were installed.
      */
-    installed: z.number(),
+    installed: z.number().describe('The number of dashboards that were installed.'),
   })
 );
 export type InstallMigrationDashboardsResponse = z.infer<typeof InstallMigrationDashboardsResponse>;
@@ -303,12 +306,16 @@ export const StartDashboardsMigrationRequestBody = lazySchema(() =>
     /**
      * Settings applicable to current dashboard migration task execution.
      */
-    settings: DashboardMigrationTaskExecutionSettings,
+    settings: DashboardMigrationTaskExecutionSettings.describe(
+      'Settings applicable to current dashboard migration task execution.'
+    ),
     langsmith_options: LangSmithOptions.optional(),
     /**
      * The optional indicator to retry the dashboard translation based on this filter criteria.
      */
-    retry: DashboardMigrationRetryFilter.optional(),
+    retry: DashboardMigrationRetryFilter.optional().describe(
+      'The optional indicator to retry the dashboard translation based on this filter criteria.'
+    ),
   })
 );
 export type StartDashboardsMigrationRequestBody = z.infer<
@@ -323,7 +330,11 @@ export const StartDashboardsMigrationResponse = lazySchema(() =>
     /**
      * Indicates the migration has been started. `false` means the migration does not need to be started.
      */
-    started: z.boolean(),
+    started: z
+      .boolean()
+      .describe(
+        'Indicates the migration has been started. `false` means the migration does not need to be started.'
+      ),
   })
 );
 export type StartDashboardsMigrationResponse = z.infer<typeof StartDashboardsMigrationResponse>;
@@ -345,7 +356,7 @@ export const StopDashboardsMigrationResponse = lazySchema(() =>
     /**
      * Indicates the migration has been stopped.
      */
-    stopped: z.boolean(),
+    stopped: z.boolean().describe('Indicates the migration has been stopped.'),
   })
 );
 export type StopDashboardsMigrationResponse = z.infer<typeof StopDashboardsMigrationResponse>;
@@ -368,7 +379,7 @@ export const UpdateDashboardMigrationRequestBody = lazySchema(() =>
       /**
        * The dashboard migration name
        */
-      name: NonEmptyString.optional(),
+      name: NonEmptyString.optional().describe('The dashboard migration name'),
     })
     .strict()
 );
@@ -406,7 +417,7 @@ export const UpsertDashboardMigrationResourcesResponse = lazySchema(() =>
     /**
      * The request has been processed correctly.
      */
-    acknowledged: z.boolean(),
+    acknowledged: z.boolean().describe('The request has been processed correctly.'),
   })
 );
 export type UpsertDashboardMigrationResourcesResponse = z.infer<

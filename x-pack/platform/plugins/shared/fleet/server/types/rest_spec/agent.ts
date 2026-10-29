@@ -18,6 +18,37 @@ import { NewAgentActionSchema } from '../models';
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { ListResponseSchema } from '../../routes/schema/utils';
 
+const validateAgentsKueryField = (value: string) => {
+  const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+  if (validationObj?.error) {
+    return validationObj?.error;
+  }
+};
+
+export const AGENT_ID_MAX_LENGTH = 512;
+// The Fleet UI "select all" bulk selection excludes every managed and agentless agent by ID
+// (up to SO_SEARCH_LIMIT IDs, ~420k characters), so the limit must fit that generated query.
+export const AGENTS_KUERY_MAX_LENGTH = 500_000;
+
+const bulkAgentsSchema = ({
+  idsDescription,
+  kueryDescription,
+}: { idsDescription?: string; kueryDescription?: string } = {}) =>
+  schema.oneOf([
+    schema.arrayOf(
+      schema.string({
+        maxLength: AGENT_ID_MAX_LENGTH,
+        ...(idsDescription && { meta: { description: idsDescription } }),
+      }),
+      { maxSize: 10000 }
+    ),
+    schema.string({
+      maxLength: AGENTS_KUERY_MAX_LENGTH,
+      ...(kueryDescription && { meta: { description: kueryDescription } }),
+      validate: validateAgentsKueryField,
+    }),
+  ]);
+
 const ActionIdSchema = schema.object({
   actionId: schema.string(),
 });
@@ -299,6 +330,7 @@ export const AgentResponseSchema = schema.object({
   default_api_key: schema.maybe(schema.string()),
   default_api_key_id: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
+  policy_base_id: schema.maybe(schema.string()),
   policy_revision: schema.maybe(schema.oneOf([schema.literal(null), schema.number()])),
   last_checkin: schema.maybe(schema.string()),
   last_checkin_status: schema.maybe(
@@ -471,40 +503,45 @@ export const PostAgentUnenrollRequestSchema = {
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.maybe(schema.boolean()),
-      revoke: schema.maybe(schema.boolean()),
+      force: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Unenrolls the agent even if it is enrolled in a hosted agent policy or is a managed agent. Does not revoke API keys immediately. To do so, also set `revoke`.',
+          },
+        })
+      ),
+      revoke: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
+          },
+        })
+      ),
     })
   ),
 };
 
 export const PostBulkAgentUnenrollRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([
-      schema.arrayOf(
-        schema.string({
-          meta: {
-            description: 'list of agent IDs',
-          },
-        }),
-        { maxSize: 10000 }
-      ),
-      schema.string({
-        meta: {
-          description: 'KQL query string, leave empty to action all agents',
-        },
-      }),
-    ]),
+    agents: bulkAgentsSchema({
+      idsDescription: 'list of agent IDs',
+      kueryDescription: 'KQL query string, leave empty to action all agents',
+    }),
     force: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Unenrolls hosted agents too',
+          description:
+            'Also unenrolls agents that are enrolled in hosted agent policies or are managed agents. Does not revoke API keys immediately. To do so, also set `revoke`.',
         },
       })
     ),
     revoke: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Revokes API keys of agents',
+          description:
+            'Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
         },
       })
     ),
@@ -528,17 +565,10 @@ export const PostRemoveCollectorRequestSchema = {
 
 export const PostBulkRemoveCollectorsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([
-      schema.arrayOf(
-        schema.string({
-          meta: { description: 'List of collector agent IDs' },
-        }),
-        { maxSize: 10000 }
-      ),
-      schema.string({
-        meta: { description: 'KQL query string. Leave empty to target all collectors' },
-      }),
-    ]),
+    agents: bulkAgentsSchema({
+      idsDescription: 'List of collector agent IDs',
+      kueryDescription: 'KQL query string. Leave empty to target all collectors',
+    }),
     includeInactive: schema.maybe(
       schema.boolean({
         meta: {
@@ -572,7 +602,7 @@ export const PostAgentUpgradeRequestSchema = {
 
 export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
@@ -619,7 +649,7 @@ export const PostRequestDiagnosticsActionRequestSchema = {
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]), {
@@ -679,7 +709,7 @@ export const DeleteAgentUploadFileResponseSchema = schema.object({
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
@@ -721,7 +751,7 @@ export const MigrateSingleAgentResponseSchema = ActionIdSchema;
 
 export const BulkMigrateAgentsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     uri: schema.uri(),
     enrollment_token: schema.string(),
     settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
@@ -736,7 +766,7 @@ export const BulkMigrateAgentsResponseSchema = schema.oneOf([ActionIdSchema, Dry
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
     batchSize: schema.maybe(schema.number()),
@@ -840,6 +870,12 @@ export const GetActionStatusRequestSchema = {
     latest: schema.maybe(
       schema.number({ meta: { description: 'Return only the latest N actions' } })
     ),
+    scheduledOnly: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'Return only actions whose start_time is in the future' },
+      })
+    ),
     errorSize: schema.number({
       defaultValue: 5,
       meta: { description: 'Number of error details to include per action' },
@@ -897,6 +933,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
         schema.literal('ROLLBACK'),
         schema.literal('REMOVE_COLLECTOR'),
+        schema.literal('RESTART'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -991,7 +1028,7 @@ export const ChangeAgentPrivilegeLevelResponseSchema = ActionIdOrMessageSchema;
 
 export const BulkChangeAgentsPrivilegeLevelRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     user_info: schema.maybe(
       schema.object({
@@ -1021,10 +1058,29 @@ export const PostAgentRollbackResponseSchema = ActionIdOrMessageSchema;
 
 export const PostBulkAgentRollbackRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
     dryRun: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const PostAgentRestartRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      maxLength: 512,
+      meta: { description: 'The agent ID to restart' },
+    }),
+  }),
+};
+
+export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentRestartRequestSchema = {
+  body: schema.object({
+    agents: bulkAgentsSchema(),
+    batchSize: schema.maybe(schema.number({ min: 1 })),
+    includeInactive: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -1038,8 +1094,14 @@ export const PostBulkAgentRollbackResponseSchema = schema.oneOf([
 export const PostGenerateAgentsReportRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([
-      schema.arrayOf(schema.string(), { maxSize: 10000 }),
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 512 }), {
+        minSize: 1,
+        maxSize: 10000,
+      }),
       schema.string({
+        // 10 000 chars matches the FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH constant that will be
+        // introduced by #288283; inlined here to satisfy CodeQL without pulling in that PR.
+        maxLength: 10000,
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {

@@ -19,10 +19,6 @@ export type {
 } from './lib/workflow_filters';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
-export {
-  getStepExecutionsByIds,
-  getStepExecutionsByWorkflowExecution,
-} from './repositories/step_execution_repository';
 export { WorkflowRepository } from './repositories/workflow_repository';
 export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';
 

@@ -28,10 +28,10 @@ const appsItemId = basicMock.navItems.primaryItems[2].id;
 const resultExplorerItemId = securityMock.navItems.primaryItems[11].sections?.[2].items[0].id;
 
 // Test ID helpers
-const logoId = `kbnChromeNav-logo`;
 const primaryItemId = (id: string) => `kbnChromeNav-primaryItem-${id}`;
 const secondaryItemId = (id: string) => `kbnChromeNav-secondaryItem-${id}`;
 const moreMenuId = 'kbnChromeNav-moreMenuTrigger';
+const primaryNavigationId = 'kbnChromeNav-primaryNavigation';
 const popoverId = (label: string) => `side-nav-popover-${label}`;
 const popoverItemId = (id: string) => `kbnChromeNav-popoverItem-${id}`;
 const nestedMenuItemId = (id: string) => `kbnChromeNav-nestedMenuItem-${id}`;
@@ -57,30 +57,9 @@ describe('Expanded mode', () => {
   });
 
   it('should render the side navigation', () => {
-    const { container } = render(
-      <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-    );
+    const { container } = render(<TestComponent isCollapsed={false} items={basicMock.navItems} />);
 
     expect(container).toMatchSnapshot();
-  });
-
-  describe('Solution logo', () => {
-    /**
-     * GIVEN the side navigation is in expanded mode
-     * WHEN the navigation renders the solution logo
-     * THEN I should see the solution label
-     */
-    it('should display the solution label next to the logo', () => {
-      render(
-        <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-      );
-
-      const solutionLogo = screen.getByTestId(logoId);
-
-      // The label is NOT wrapped with `<EuiScreenReaderOnly />` in expanded mode
-      // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
-      expect(solutionLogo.children[1].className).not.toContain('euiScreenReaderOnly');
-    });
   });
 
   describe('Primary menu', () => {
@@ -92,9 +71,7 @@ describe('Expanded mode', () => {
        * THEN I should see a popover with the submenu
        */
       it('(with submenu) should show a popover with the submenu on hover (with submenu)', async () => {
-        render(
-          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-        );
+        render(<TestComponent isCollapsed={false} items={basicMock.navItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
@@ -115,7 +92,6 @@ describe('Expanded mode', () => {
       it('(with submenu) should NOT show a popover if the item with submenu is already active', async () => {
         render(
           <TestComponent
-            logo={basicMock.logo}
             items={basicMock.navItems}
             isCollapsed={false}
             initialActiveItemId={appsItemId}
@@ -150,7 +126,6 @@ describe('Expanded mode', () => {
             initialActiveItemId={appsItemId}
             isCollapsed={false}
             items={basicMock.navItems}
-            logo={basicMock.logo}
           />
         );
 
@@ -173,9 +148,7 @@ describe('Expanded mode', () => {
        * THEN focus should move to the popover
        */
       it('(with submenu) should move focus to popover on Enter when focused item has submenu', async () => {
-        render(
-          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-        );
+        render(<TestComponent isCollapsed={false} items={basicMock.navItems} />);
 
         const appsLink = screen.getByTestId(primaryItemId('apps_overview'));
 
@@ -201,9 +174,7 @@ describe('Expanded mode', () => {
        * THEN I should not see a popover
        */
       it('(without submenu) should NOT show a popover on hover (without submenu)', async () => {
-        render(
-          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-        );
+        render(<TestComponent isCollapsed={false} items={basicMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
@@ -223,9 +194,7 @@ describe('Expanded mode', () => {
        * AND I should not see a side panel
        */
       it('(without submenu) should redirect and NOT open side panel when clicking item without submenu', async () => {
-        render(
-          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-        );
+        render(<TestComponent isCollapsed={false} items={basicMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const expectedHref = basicMock.navItems.primaryItems[0].href;
@@ -246,9 +215,7 @@ describe('Expanded mode', () => {
        * THEN I should be redirected to its href
        */
       it('(without submenu) should redirect on Enter when focused item has no submenu', async () => {
-        render(
-          <TestComponent isCollapsed={false} items={basicMock.navItems} logo={basicMock.logo} />
-        );
+        render(<TestComponent isCollapsed={false} items={basicMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
         const expectedHref = basicMock.navItems.primaryItems[0].href;
@@ -273,13 +240,7 @@ describe('Expanded mode', () => {
        * THEN a tooltip shows up with a beta badge with beta icon
        */
       it('should show tooltip with beta badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={observabilityMock.navItems} />);
 
         const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
 
@@ -300,13 +261,7 @@ describe('Expanded mode', () => {
        * THEN a tooltip shows up with a beta badge with flask icon
        */
       it('should show tooltip with flask badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={observabilityMock.navItems} />);
 
         const casesLink = screen.getByTestId(primaryItemId('cases'));
 
@@ -327,13 +282,7 @@ describe('Expanded mode', () => {
        * THEN a tooltip shows up with a badge reading "New"
        */
       it('should show tooltip with new badge on hover', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={observabilityMock.navItems} />);
 
         const alertsLink = screen.getByTestId(primaryItemId('alerts'));
 
@@ -348,6 +297,25 @@ describe('Expanded mode', () => {
         expect(badge).toBeInTheDocument();
         expect(badge).toHaveTextContent('New');
       });
+
+      /**
+       * GIVEN the side navigation is in expanded mode
+       * AND a primary menu item is new
+       * WHEN I visit that item and navigate away
+       * THEN hovering it no longer shows a New tooltip
+       */
+      it('should hide new tooltip after visiting the item and navigating away', async () => {
+        render(<TestComponent isCollapsed={false} items={observabilityMock.navItems} />);
+
+        const alertsLink = screen.getByTestId(primaryItemId('alerts'));
+
+        await user.click(alertsLink);
+        await user.click(screen.getByTestId(primaryItemId('discover')));
+        await user.hover(alertsLink);
+        flushPopoverTimers();
+
+        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+      });
     });
 
     describe('More menu', () => {
@@ -358,17 +326,28 @@ describe('Expanded mode', () => {
        * THEN I should see a "More" primary menu item
        */
       it('should render the "More" primary menu item when items overflow', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
         expect(moreButton).toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
+       * WHEN the navigation renders every item before measuring which ones fit
+       * THEN the primary menu only reports a measured overflow split once the items moved to "More"
+       */
+      it('should only report a measured overflow split once items moved to "More"', async () => {
+        render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
+
+        const primaryMenu = screen.getByTestId(primaryNavigationId);
+
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'false');
+
+        await screen.findByTestId(moreMenuId);
+
+        expect(primaryMenu).toHaveAttribute('data-overflow-measured', 'true');
       });
 
       /**
@@ -378,13 +357,7 @@ describe('Expanded mode', () => {
        * THEN I should see a popover with secondary menu
        */
       it('should show popover with secondary menu on hover over "More"', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -410,13 +383,7 @@ describe('Expanded mode', () => {
        * AND I should see a side panel with that submenu
        */
       it('should open side panel when clicking submenu item inside "More" popover', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -471,13 +438,7 @@ describe('Expanded mode', () => {
        * AND I should be redirected to that item’s href
        */
       it('should NOT open side panel when clicking item without submenu in "More" popover', async () => {
-        render(
-          <TestComponent
-            isCollapsed={false}
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-          />
-        );
+        render(<TestComponent isCollapsed={false} items={securityMock.navItems} />);
 
         const moreButton = await screen.findByTestId(moreMenuId);
 
@@ -515,7 +476,6 @@ describe('Expanded mode', () => {
             initialActiveItemId={resultExplorerItemId}
             isCollapsed={false}
             items={securityMock.navItems}
-            logo={securityMock.logo}
           />
         );
 

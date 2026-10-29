@@ -7,12 +7,21 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { Position, type NodeProps } from '@xyflow/react';
+import { ConnectionHandle } from './connection_handle';
 import type { SourceNode as SourceNodeType } from '../types';
+import { SOURCE_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
-
-const SOURCE_NODE_WIDTH = 207;
+import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeType>) {
   const { euiTheme } = useEuiTheme();
@@ -20,11 +29,18 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
   return (
     <>
       <EuiPanel
+        // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
+        // on the card, so Shift+click multi-select stays stable.
+        className="nokey"
         hasShadow={false}
         hasBorder
         paddingSize="m"
         data-test-subj="streamsCanvasSourceNode"
-        css={getNodeCardStyles(euiTheme, { width: SOURCE_NODE_WIDTH, selected, dragging })}
+        css={getNodeCardStyles(euiTheme, {
+          width: SOURCE_NODE_WIDTH,
+          selected,
+          dragging,
+        })}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -37,10 +53,10 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: ${euiTheme.size.xs};
+                padding: ${euiTheme.size.xxs};
               `}
             >
-              <EuiIcon type={data.iconType} size="s" />
+              {data.iconType ? <EuiIcon type={data.iconType} size="s" aria-hidden={true} /> : null}
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem
@@ -49,16 +65,38 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
               overflow: hidden;
             `}
           >
-            <EuiText size="xs">
-              <strong>{data.title}</strong>
-            </EuiText>
-            <EuiText size="xs" color="subdued">
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: ${euiTheme.size.xs};
+                flex-wrap: wrap;
+              `}
+            >
+              <EuiText size="m">
+                <strong>{data.title}</strong>
+              </EuiText>
+              {data.signals?.map((signal) => (
+                <EuiBadge
+                  key={signal}
+                  color="hollow"
+                  data-test-subj="streamsCanvasSourceSignalBadge"
+                >
+                  {DESTINATION_SIGNAL_LABELS[signal]}
+                </EuiBadge>
+              ))}
+            </div>
+            <EuiText size="s" color="subdued">
               {data.subtitle}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <Handle type="source" position={Position.Right} isConnectable={false} />
+      <ConnectionHandle
+        type="source"
+        position={Position.Right}
+        isConnectable={Boolean(data.sourceId)}
+      />
     </>
   );
 }

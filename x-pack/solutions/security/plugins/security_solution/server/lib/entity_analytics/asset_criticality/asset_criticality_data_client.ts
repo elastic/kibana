@@ -101,6 +101,7 @@ export class AssetCriticalityDataClient {
           },
         },
         settings: {
+          auto_expand_replicas: '0-1',
           default_pipeline: getIngestPipelineName(this.options.namespace),
         },
       },

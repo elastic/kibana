@@ -7,19 +7,67 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import type {
-  ListPolicyExecutionHistoryResponse,
-  PolicyExecutionOutcomeFilter,
+import {
+  type ListPolicyExecutionHistoryRequest,
+  type ListPolicyExecutionHistoryResponse,
+  type PolicyExecutionOutcomeFilter,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { executionHistoryKeys } from './query_key_factory';
+
+export interface ListExecutionHistoryUiParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  ruleIds?: string[];
+  outcomes?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
+  from?: string;
+  to?: string;
+  sortField?: 'dispatchedAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export const toListExecutionHistoryRequest = ({
+  page,
+  perPage,
+  search,
+  ruleIds,
+  outcomes,
+  episodeIds,
+  from,
+  to,
+  sortField,
+  sortOrder,
+  ...rest
+}: ListExecutionHistoryUiParams): Complete<Partial<ListPolicyExecutionHistoryRequest>> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    search,
+    rule_ids: ruleIds,
+    outcomes,
+    alert_ids: episodeIds,
+    from,
+    to,
+    sort_field: sortField === 'dispatchedAt' ? 'dispatched_at' : sortField,
+    sort_order: sortOrder,
+  };
+};
 
 interface UseFetchExecutionHistoryParams {
   page: number;
   perPage: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
+  outcomes?: PolicyExecutionOutcomeFilter;
+  episodeIds?: string[];
+  from?: string;
+  to?: string;
+  sortField?: 'dispatchedAt';
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const useFetchExecutionHistory = ({
@@ -27,14 +75,43 @@ export const useFetchExecutionHistory = ({
   perPage,
   search,
   ruleIds,
-  outcome,
+  outcomes,
+  episodeIds,
+  from,
+  to,
+  sortField,
+  sortOrder,
 }: UseFetchExecutionHistoryParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
   return useQuery<ListPolicyExecutionHistoryResponse, Error>({
-    queryKey: executionHistoryKeys.list({ page, perPage, search, ruleIds, outcome }),
+    queryKey: executionHistoryKeys.list({
+      page,
+      perPage,
+      search,
+      ruleIds,
+      outcomes,
+      episodeIds,
+      from,
+      to,
+      sortField,
+      sortOrder,
+    }),
     queryFn: () =>
-      executionHistoryApi.listExecutionHistory({ page, perPage, search, ruleIds, outcome }),
+      executionHistoryApi.listActionPolicyExecutions(
+        toListExecutionHistoryRequest({
+          page,
+          perPage,
+          search,
+          ruleIds,
+          outcomes,
+          episodeIds,
+          from,
+          to,
+          sortField,
+          sortOrder,
+        })
+      ),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

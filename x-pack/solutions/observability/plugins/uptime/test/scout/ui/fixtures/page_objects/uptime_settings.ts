@@ -23,21 +23,11 @@ export class UptimeSettingsPage {
   }
 
   async clearDefaultConnectors(): Promise<void> {
-    const clearConnectors = this.page.locator(
-      '[data-test-subj="default-connectors-input-loaded"] >> [data-test-subj="comboBoxClearButton"]'
-    );
-    if (await clearConnectors.isVisible()) {
-      await clearConnectors.click();
-    }
+    await this.page.components.comboBox('default-connectors-input-loaded').clear();
   }
 
   async clearToEmailAddresses(): Promise<void> {
-    const clearToEmail = this.page.locator(
-      '[data-test-subj=toEmailAddressInput] >> [data-test-subj=comboBoxClearButton]'
-    );
-    if (await clearToEmail.isVisible()) {
-      await clearToEmail.click();
-    }
+    await this.page.components.comboBox('toEmailAddressInput').clear();
   }
 
   async fillToEmail(text: string): Promise<void> {

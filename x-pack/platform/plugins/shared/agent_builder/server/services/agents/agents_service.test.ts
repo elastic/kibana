@@ -14,13 +14,20 @@ import {
 } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAiIndexId,
+  chatAgentTypeId,
+  SYSTEM_USER_ID,
+} from '@kbn/agent-builder-common';
+import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
+import { defaultAiIndices } from './default_ai_indices';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
-import { createClient } from './persisted/client';
+import { createClient, createSystemClient } from './persisted/client';
 import { runSkillRefCleanup } from './persisted/skill_reference_cleanup';
 import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
@@ -34,17 +41,28 @@ const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
 >;
 const isAllowedAgentTypeMock = isAllowedAgentType as jest.MockedFunction<typeof isAllowedAgentType>;
 const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
+const createSystemClientMock = createSystemClient as jest.MockedFunction<typeof createSystemClient>;
 const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
 const runSkillRefCleanupMock = runSkillRefCleanup as jest.MockedFunction<typeof runSkillRefCleanup>;
 
-const createStartDeps = (): AgentsServiceStartDeps => ({
-  security: securityServiceMock.createStart(),
-  elasticsearch: elasticsearchServiceMock.createStart(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  savedObjects: savedObjectsServiceMock.createStartContract(),
-  spaces: undefined,
-  toolsService: createToolsServiceStartMock(),
-});
+const createStartDeps = ({
+  experimentalEnabled = true,
+}: { experimentalEnabled?: boolean } = {}): AgentsServiceStartDeps => {
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const uiSettingsClient = uiSettingsServiceMock.createClient();
+  uiSettingsClient.get.mockImplementation(async (settingId: string) =>
+    settingId === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ? experimentalEnabled : false
+  );
+  uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
+  return {
+    security: securityServiceMock.createStart(),
+    elasticsearch: elasticsearchServiceMock.createStart(),
+    uiSettings,
+    savedObjects: savedObjectsServiceMock.createStartContract(),
+    spaces: undefined,
+    toolsService: createToolsServiceStartMock(),
+  };
+};
 
 describe('AgentsService', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -60,6 +78,7 @@ describe('AgentsService', () => {
     isAllowedBuiltinAgentMock.mockReset();
     isAllowedAgentTypeMock.mockReset();
     createClientMock.mockReset();
+    createSystemClientMock.mockReset();
     runToolRefCleanupMock.mockReset();
     runSkillRefCleanupMock.mockReset();
   });
@@ -149,10 +168,12 @@ describe('AgentsService', () => {
   describe('#start', () => {
     let started: AgentsServiceStart;
     let request: KibanaRequest;
+    const ensureAgent = jest.fn();
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
-      service.setup({ logger });
+      service.setup({ logger }).registerType({ id: 'test-agent-type', baseConfiguration: {} });
+      ensureAgent.mockReset();
       createClientMock.mockResolvedValue({
         getAgentsUsingTools: (params: { toolIds: string[] }) =>
           runToolRefCleanupMock({
@@ -185,8 +206,159 @@ describe('AgentsService', () => {
             logger: undefined,
           }),
       } as any);
+      createSystemClientMock.mockReturnValue({ ensureAgent });
       started = service.start(createStartDeps());
       request = httpServerMock.createKibanaRequest();
+    });
+
+    describe('#resolveAgentConfiguration', () => {
+      const resolve = (configuration: AgentConfiguration) =>
+        started.resolveAgentConfiguration({
+          agent: { type: chatAgentTypeId, configuration } as AgentDefinition,
+          request,
+        });
+
+      it('grants the default AI index to chat agents that have none', async () => {
+        const resolved = await resolve({ tools: [], ai_indices: [] });
+
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId]);
+      });
+
+      it("unions the default AI index with the agent's own", async () => {
+        const resolved = await resolve({ tools: [], ai_indices: ['custom-index'] });
+
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
+      });
+
+      it('derives the chat type defaults from the default AI indices map', async () => {
+        const resolved = await resolve({ tools: [], ai_indices: [] });
+
+        expect(resolved.ai_indices).toEqual(Object.keys(defaultAiIndices));
+      });
+
+      describe('when Agent Builder experimental features are off', () => {
+        beforeEach(() => {
+          service = new AgentsService();
+          service.setup({ logger });
+          started = service.start(createStartDeps({ experimentalEnabled: false }));
+        });
+
+        it('does not grant the default AI index', async () => {
+          const resolved = await resolve({ tools: [], ai_indices: [] });
+
+          expect(resolved.ai_indices).toEqual([]);
+        });
+
+        it("keeps the agent's own AI indices", async () => {
+          const resolved = await resolve({ tools: [], ai_indices: ['custom-index'] });
+
+          expect(resolved.ai_indices).toEqual(['custom-index']);
+        });
+      });
+    });
+
+    describe('#ensure', () => {
+      const agent = {
+        id: 'system-agent',
+        type: chatAgentTypeId,
+        name: 'System agent',
+        description: 'Installed at startup',
+        configuration: { tools: [] },
+      };
+
+      it('uses a system-scoped client for the requested space', async () => {
+        await started.ensure({ spaceId: 'space-1', agent });
+
+        expect(createSystemClientMock).toHaveBeenCalledWith(
+          expect.objectContaining({ space: 'space-1', logger })
+        );
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
+      });
+
+      it('rejects an unknown agent type', async () => {
+        await expect(
+          started.ensure({ spaceId: 'space-1', agent: { ...agent, type: 'unknown' } })
+        ).rejects.toThrow('unknown agent type "unknown"');
+      });
+
+      it('keeps availability out of the persisted agent document', async () => {
+        await started.ensure({
+          spaceId: 'space-1',
+          agent,
+          availability: {
+            cacheMode: 'space',
+            handler: async () => ({ status: 'unavailable' }),
+          },
+        });
+
+        expect(ensureAgent).toHaveBeenCalledTimes(1);
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
+      });
+
+      it('applies ensure-registered availability when reading the agent', async () => {
+        await started.ensure({
+          spaceId: 'default',
+          agent,
+          availability: {
+            cacheMode: 'none',
+            handler: async () => ({ status: 'unavailable', reason: 'off' }),
+          },
+        });
+
+        createClientMock.mockResolvedValue({
+          has: jest.fn().mockResolvedValue(true),
+          getWithAccess: jest.fn().mockResolvedValue({
+            ...agent,
+            access_control: undefined,
+            created_by: undefined,
+            permissions: {
+              update_agent: true,
+              update_access_control: true,
+              update_approvals: true,
+            },
+          }),
+        } as any);
+
+        const registry = await started.getRegistry({ request });
+        await expect(registry.get(agent.id)).rejects.toThrow(`Agent ${agent.id} is not available`);
+      });
+
+      describe('hidden', () => {
+        const typedAgent = { ...agent, id: 'typed-system-agent', type: 'test-agent-type' };
+        const persistedTypedAgent = {
+          ...typedAgent,
+          access_control: undefined,
+          created_by: { id: undefined, username: SYSTEM_USER_ID },
+          permissions: { update_agent: true, update_access_control: true, update_approvals: true },
+        };
+
+        const getAgent = async () => {
+          createClientMock.mockResolvedValue({
+            has: jest.fn().mockResolvedValue(true),
+            getWithAccess: jest.fn().mockResolvedValue(persistedTypedAgent),
+          } as any);
+          const registry = await started.getRegistry({ request });
+          return registry.get(typedAgent.id);
+        };
+
+        it('keeps hidden out of the persisted agent document', async () => {
+          await started.ensure({ spaceId: 'space-1', agent: typedAgent, hidden: false });
+
+          expect(ensureAgent).toHaveBeenCalledWith(typedAgent);
+        });
+
+        it('hides a system-created non-chat agent by default', async () => {
+          await started.ensure({ spaceId: 'default', agent: typedAgent });
+
+          expect((await getAgent()).hidden).toBe(true);
+        });
+
+        it('applies an ensure-registered hidden:false when reading the agent', async () => {
+          await started.ensure({ spaceId: 'default', agent: typedAgent, hidden: false });
+
+          expect((await getAgent()).hidden).toBe(false);
+        });
+      });
     });
 
     describe('#getAgentsUsingTools', () => {

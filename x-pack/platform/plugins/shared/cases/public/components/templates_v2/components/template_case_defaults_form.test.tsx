@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithTestingProviders } from '../../../common/mock';
 import { CaseSeverity } from '../../../../common/types/domain';
 import type { ParsedTemplateDefinition } from '../../../../common/types/domain/template/v1';
 import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
@@ -57,8 +58,25 @@ describe('TemplateCaseDefaultsForm', () => {
     fields: [],
   };
 
+  it('renders the case-default description in a markdown editor populated with the template markdown', () => {
+    const markdownDescription = '# Runbook\n\n1. Review the **source** host';
+
+    renderWithTestingProviders(
+      <TemplateCaseDefaultsForm
+        parsedTemplate={{ ...baseTemplate, description: markdownDescription }}
+      />
+    );
+
+    // EuiMarkdownEditor renders a real textarea inside its container, confirming the default
+    // description is an editable markdown field rather than a plain textarea.
+    const editorContainer = screen.getByTestId('caseDefaultsDescriptionInput');
+    const textarea = within(editorContainer).getByRole('textbox');
+    expect(textarea.tagName).toBe('TEXTAREA');
+    expect(textarea).toHaveValue(markdownDescription);
+  });
+
   it('renders only the canonical severities — no empty / "null" option', () => {
-    render(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
+    renderWithTestingProviders(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
 
     const severitySelect = screen.getByTestId('caseDefaultsSeverityInput');
     const options = within(severitySelect).getAllByRole('option');
@@ -76,7 +94,7 @@ describe('TemplateCaseDefaultsForm', () => {
   });
 
   it('defaults severity to "low" when the template does not specify one', () => {
-    render(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
+    renderWithTestingProviders(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} />);
 
     expect(screen.getByTestId('caseDefaultsSeverityInput')).toHaveValue(CaseSeverity.LOW);
   });
@@ -85,7 +103,9 @@ describe('TemplateCaseDefaultsForm', () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
-    render(<TemplateCaseDefaultsForm parsedTemplate={baseTemplate} onChange={onChange} />);
+    renderWithTestingProviders(
+      <TemplateCaseDefaultsForm parsedTemplate={baseTemplate} onChange={onChange} />
+    );
 
     await user.selectOptions(screen.getByTestId('caseDefaultsSeverityInput'), CaseSeverity.HIGH);
 

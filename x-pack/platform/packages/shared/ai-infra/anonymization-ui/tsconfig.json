@@ -14,5 +14,6 @@
     "@kbn/i18n-react",
     "@kbn/zod",
     "@kbn/core-http-common",
+    "@kbn/core-http-browser",
   ]
 }

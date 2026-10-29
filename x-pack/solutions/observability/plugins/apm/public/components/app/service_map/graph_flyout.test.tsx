@@ -30,6 +30,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {},
+    share: {},
+    lens: {},
+    dataViews: {},
+    plugins: {},
+  }),
+}));
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -37,14 +47,18 @@ jest.mock('@xyflow/react', () => {
     ReactFlow: ({
       children,
       nodes,
+      edges,
       onNodeClick,
+      onEdgeClick,
       onPaneClick,
       onMoveStart,
       onNodeDragStart,
     }: {
       children: React.ReactNode;
       nodes: ServiceMapNode[];
+      edges: ServiceMapEdge[];
       onNodeClick?: (event: React.MouseEvent, node: ServiceMapNode) => void;
+      onEdgeClick?: (event: React.MouseEvent, edge: ServiceMapEdge) => void;
       onPaneClick?: (event: React.MouseEvent) => void;
       onMoveStart?: () => void;
       onNodeDragStart?: () => void;
@@ -58,6 +72,13 @@ jest.mock('@xyflow/react', () => {
           >
             {node.data.label}
           </button>
+        ))}
+        {edges.map((edge) => (
+          <button
+            key={edge.id}
+            data-test-subj={`serviceMapEdge-${edge.id}`}
+            onClick={(event) => onEdgeClick?.(event, edge)}
+          />
         ))}
         <button data-test-subj="serviceMapPaneClick" onClick={(event) => onPaneClick?.(event)} />
         <button data-test-subj="serviceMapMoveStart" onClick={() => onMoveStart?.()} />
@@ -129,8 +150,23 @@ jest.mock('./popover', () => ({
 }));
 
 jest.mock('../../shared/service_flyout', () => ({
-  ServiceFlyout: ({ service }: { service: ServiceMapNode['data'] }) => (
-    <div data-test-subj="serviceFlyoutMock">{service.label}</div>
+  ServiceFlyout: ({ service }: { service: { name: string } }) => (
+    <div data-test-subj="serviceFlyoutMock">{service.name}</div>
+  ),
+}));
+
+jest.mock('../../shared/request_flyout', () => ({
+  RequestFlyout: ({
+    connection,
+    onClose,
+  }: {
+    connection: { sourceLabel: string; targetLabel: string };
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="requestFlyoutMock">
+      {connection.sourceLabel} → {connection.targetLabel}
+      <button data-test-subj="requestFlyoutMockClose" onClick={onClose} />
+    </div>
   ),
 }));
 
@@ -165,7 +201,17 @@ const serviceToDependencyEdge: ServiceMapEdge = {
   id: 'opbeans-java~postgresql',
   source: 'opbeans-java',
   target: 'postgresql',
-  data: { isBidirectional: false },
+  data: {
+    isBidirectional: false,
+    sourceData: { id: 'opbeans-java', 'service.name': 'opbeans-java' },
+    targetData: {
+      id: 'postgresql',
+      'span.destination.service.resource': 'postgresql',
+      'span.type': 'db',
+      'span.subtype': 'postgresql',
+    },
+    resources: ['postgresql'],
+  },
 } as ServiceMapEdge;
 
 const defaultProps = {
@@ -230,5 +276,58 @@ describe('ServiceMapGraph service flyout selection', () => {
     fireEvent.click(screen.getByTestId('serviceMapPaneClick'));
 
     expect(screen.queryByTestId('serviceMapPopoverMock')).not.toBeInTheDocument();
+  });
+});
+
+describe('ServiceMapGraph request flyout selection', () => {
+  it('opens the request flyout, not a popover, for edges', () => {
+    render(<ServiceMapGraph {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+
+    expect(screen.getByTestId('requestFlyoutMock')).toHaveTextContent('opbeans-java → postgresql');
+    expect(screen.queryByTestId('serviceMapPopoverMock')).not.toBeInTheDocument();
+  });
+
+  it('keeps the request flyout open when clicking empty map space or dragging the map', () => {
+    render(<ServiceMapGraph {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+    fireEvent.click(screen.getByTestId('serviceMapPaneClick'));
+    fireEvent.click(screen.getByTestId('serviceMapMoveStart'));
+    fireEvent.click(screen.getByTestId('serviceMapNodeDragStart'));
+
+    expect(screen.getByTestId('requestFlyoutMock')).toBeInTheDocument();
+  });
+
+  it('closes the request flyout from the flyout', () => {
+    render(<ServiceMapGraph {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+    fireEvent.click(screen.getByTestId('requestFlyoutMockClose'));
+
+    expect(screen.queryByTestId('requestFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('replaces the request flyout when a node is selected', () => {
+    render(<ServiceMapGraph {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+    fireEvent.click(screen.getByTestId('serviceMapNode-opbeans-java'));
+
+    expect(screen.queryByTestId('requestFlyoutMock')).not.toBeInTheDocument();
+    expect(screen.getByTestId('serviceFlyoutMock')).toBeInTheDocument();
+  });
+
+  it('does not keep an edge selected when it cannot open a flyout', () => {
+    const edgeWithoutSource = {
+      ...serviceToDependencyEdge,
+      data: { isBidirectional: false, targetData: serviceToDependencyEdge.data?.targetData },
+    } as ServiceMapEdge;
+    render(<ServiceMapGraph {...defaultProps} edges={[edgeWithoutSource]} />);
+
+    fireEvent.click(screen.getByTestId('serviceMapEdge-opbeans-java~postgresql'));
+
+    expect(screen.queryByTestId('requestFlyoutMock')).not.toBeInTheDocument();
   });
 });

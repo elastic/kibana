@@ -57,6 +57,13 @@ interface GenericEntityFlyoutContentProps {
    * in the EUI system flyout). Legacy callers omit this and keep the default.
    */
   flyoutBodyProps?: Omit<React.ComponentProps<typeof FlyoutBody>, 'children'>;
+  /**
+   * When true, hides the "open in tool" header icons on the section panels. Used by the new EUI
+   * system flyout, where sections are opened via {@link openGenericEntityDetailsPanelByPath}.
+   */
+  hideHeaderIcons?: boolean;
+  /** Scope the flyout was opened from; a scope that pins a time range bounds the insights alert count. */
+  scopeId?: string;
 }
 
 export const GenericEntityFlyoutContent = ({
@@ -65,6 +72,8 @@ export const GenericEntityFlyoutContent = ({
   identityFields,
   onAssetCriticalityChange,
   flyoutBodyProps,
+  hideHeaderIcons = false,
+  scopeId,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
   const entityDisplayValue = Object.values(identityFields)[0] ?? '';
@@ -116,6 +125,8 @@ export const GenericEntityFlyoutContent = ({
         isPreviewMode={false}
         openDetailsPanel={openGenericEntityDetailsPanelByPath}
         entityType={EntityType.generic}
+        hideHeaderIcons={hideHeaderIcons}
+        scopeId={scopeId}
       />
       <ExpandableSection
         title={

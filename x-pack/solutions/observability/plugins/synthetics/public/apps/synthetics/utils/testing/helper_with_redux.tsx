@@ -7,10 +7,10 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import type { Store } from 'redux';
-import { createStore as createReduxStore, applyMiddleware } from 'redux';
+import type { Store } from 'redux-v4';
+import { createStore as createReduxStore, applyMiddleware } from 'redux-v4';
 
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import createSagaMiddleware from 'redux-saga';
 
 import type { AppState } from '../../state';
@@ -31,15 +31,19 @@ export const MountWithReduxProvider: FC<
     useRealStore?: boolean;
   }>
 > = ({ children, state, useRealStore }) => {
-  const store = useRealStore
-    ? createRealStore()
-    : {
-        dispatch: jest.fn(),
-        getState: jest.fn().mockReturnValue(state || { selectedFilters: null }),
-        subscribe: jest.fn(),
-        replaceReducer: jest.fn(),
-        [Symbol.observable]: jest.fn(),
-      };
+  const store = React.useMemo(
+    () =>
+      useRealStore
+        ? createRealStore()
+        : {
+            dispatch: jest.fn(),
+            getState: jest.fn().mockReturnValue(state || { selectedFilters: null }),
+            subscribe: jest.fn(),
+            replaceReducer: jest.fn(),
+            [Symbol.observable]: jest.fn(),
+          },
+    [state, useRealStore]
+  );
 
   return <ReduxProvider store={store}>{children}</ReduxProvider>;
 };

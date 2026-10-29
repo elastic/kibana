@@ -7,6 +7,9 @@ These are the most frequent ways this skill produces low-quality output. Check a
 - [Hallucinating scenarios](#hallucinating-scenarios)
 - [Duplicating sub-issue coverage](#duplicating-sub-issue-coverage)
 - [Speculative optional sections](#speculative-optional-sections)
+- [Scoping out coverage by feature-flag state](#scoping-out-coverage-by-feature-flag-state)
+- [Silent CRUD gaps](#silent-crud-gaps)
+- [Ignoring dependency data lifecycle](#ignoring-dependency-data-lifecycle)
 - [UI-step Gherkin](#ui-step-gherkin)
 - [Overlooking sub-issue acceptance criteria](#overlooking-sub-issue-acceptance-criteria)
 - [Overlooking PR artifacts](#overlooking-pr-artifacts)
@@ -31,11 +34,35 @@ Writing scenarios that are already covered in a sub-issue test plan. Always cros
 
 ## Speculative optional sections
 
-Including RBAC, upgrade, CCS, multi-space, or multi-tenant sections when the issue does not explicitly warrant them. Each optional section has a clear inclusion criterion in [`optional-scenarios.md`](optional-scenarios.md) — if the criterion is not met, omit the section entirely.
+Including RBAC, CCS, multi-space, or multi-tenant sections when the issue does not explicitly warrant them. Each optional section has a clear inclusion criterion in [`optional-scenarios.md`](optional-scenarios.md#optional-section-templates) — if the criterion is not met, omit the section entirely. Upgrade, CRUD, and dependency-data lifecycle are **not** optional; they are always evaluated (see [Scoping out coverage by feature-flag state](#scoping-out-coverage-by-feature-flag-state), [Silent CRUD gaps](#silent-crud-gaps), and [Ignoring dependency data lifecycle](#ignoring-dependency-data-lifecycle), and the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) table).
 
 ❌ **Bad** — Adding a 6-scenario RBAC matrix because the user said *"be thorough"*, even though the issue body mentions no roles or permissions.
 
-✅ **Good** — Apply the inclusion criteria from [`optional-scenarios.md`](optional-scenarios.md) per section. If the criterion is not met, omit. If unsure, ask the user — never add a section speculatively.
+✅ **Good** — Apply the inclusion criteria from [`optional-scenarios.md`](optional-scenarios.md#optional-section-templates) per section. If the criterion is not met, omit. If unsure, ask the user — never add a section speculatively.
+
+## Scoping out coverage by feature-flag state
+
+Using the fact that a feature is behind an off-by-default flag as a reason to omit upgrade / migration scenarios. A flag hides the feature from users — it does not stop schema, saved-object, config, or navigation changes from shipping. Upgrade risk is a property of what the code ships, not of what the flag exposes. See the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) table.
+
+❌ **Bad** — *Out of scope: Upgrade/migration scenarios — the feature is gated behind an off-by-default flag and is not yet enabled in any released build.* The flag hides the surface from users, but the SO type, config gate, and any related migration code all ship with the release.
+
+✅ **Good** — Evaluate upgrade against the trigger in [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage): does the feature ship a mapping / SO / config / navigation change? If yes, upgrade coverage stays in scope. If `TARGET_VERSION` cannot be confirmed, keep the scenarios and flag `TARGET_VERSION` as `⚠️` in *Assumptions* — never drop the scenarios themselves.
+
+## Silent CRUD gaps
+
+Basing scope on what the PR happens to demo (usually Create + Read) and leaving Update / Delete unaddressed with no explanation. If a persisted object exists in the code, U and D are either reachable — through a dedicated code path or through a platform-generic endpoint — and must be covered, or they are unreachable and must be documented as out-of-scope with a reason.
+
+❌ **Bad** — A plan for a new attachment / saved-object / configuration type whose *Scope* lists creation and viewing but says nothing about update or delete, even though the platform-generic write path reaches both operations for the same type.
+
+✅ **Good** — Build a `C / R / U / D` table per persisted object during Step 2. If a platform-generic endpoint reaches U or D even without a dedicated code path, write scenarios for the reachable path. If genuinely unreachable, add a bullet under *Out of scope* stating the object, the op, and the reason.
+
+## Ignoring dependency data lifecycle
+
+Writing scenarios only for the feature's own persisted objects while ignoring what the feature *references* from other stores. If the feature stores an id or snapshots a value from another system, it inherits the responsibility to degrade gracefully when that referenced data is deleted, updated, or unavailable.
+
+❌ **Bad** — A plan that covers the feature's own CRUD end-to-end but says nothing about what happens when a referenced object is deleted from its owning store, when a snapshotted value drifts from the live source, or when the dependency store is disabled.
+
+✅ **Good** — For each dependency (referenced id, snapshotted value, read-through query), write at least one scenario for: dangling reference, drift after snapshot, and dependency unavailability. Or document the exclusion under *Out of scope* with a reason.
 
 ## UI-step Gherkin
 

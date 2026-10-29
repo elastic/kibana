@@ -15,31 +15,37 @@ components:
           type: boolean
         has_write_permissions:
           type: boolean
+        has_install_permissions:
+          type: boolean
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  type: object
-                  additionalProperties:
-                    type: boolean
-                index:
-                  type: object
-                  additionalProperties:
-                    type: object
-                    additionalProperties:
-                      type: boolean
-            kibana:
-              type: object
-              additionalProperties:
-                type: boolean
-          required:
-            - elasticsearch
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
+        install_privileges:
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
       required:
         - has_all_required
         - privileges
+    EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              type: object
+              additionalProperties:
+                type: boolean
+            index:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: boolean
+        kibana:
+          type: object
+          additionalProperties:
+            type: boolean
+      required:
+        - elasticsearch
     EntityAfterKey:
       type: object
       additionalProperties:
@@ -102,6 +108,11 @@ components:
         - user
         - service
         - generic
+
+    EntityViewMode:
+      type: string
+      enum: [single, resolved]
+      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
 
     RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.

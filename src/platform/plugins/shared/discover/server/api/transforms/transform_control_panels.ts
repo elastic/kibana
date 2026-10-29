@@ -7,83 +7,124 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isObject } from 'lodash';
+import { prettifyError, ZodError } from '@kbn/zod';
 import { transformType } from '@kbn/embeddable-plugin/server';
-import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import type { DiscoverSessionControlPanels } from '../schema';
-import { discoverSessionControlPanelsSchema } from '../schema';
+import { discoverSessionApiControlPanelSchema } from '@kbn/as-code-discover-schema';
+import {
+  getControlOrder,
+  isRecord,
+  convertControlGroupEntryToApi,
+} from '../../../common/session/control_panels';
+import type { DiscoverSessionApiControlPanels, DiscoverSessionWarning } from '../schema';
 
-export const transformControlPanelsOut = (
-  controlGroupJson: string | undefined
-): DiscoverSessionControlPanels | undefined => {
-  if (!controlGroupJson) {
-    return undefined;
-  }
-  const parsed: unknown = (() => {
-    try {
-      return JSON.parse(controlGroupJson);
-    } catch {
-      throw new Error('controlGroupJson is not valid JSON');
-    }
-  })();
+const createDroppedControlPanelsWarning = (
+  tabId: string,
+  controlGroupJson: string,
+  reason: string
+): DiscoverSessionWarning => ({
+  type: 'dropped_property',
+  tab_id: tabId,
+  key: 'control_panels',
+  value: controlGroupJson,
+  message: reason,
+});
 
-  if (!isObject(parsed) || Object.values(parsed).some((v) => !isObject(v))) {
-    throw new Error('controlGroupJson must be a JSON object');
-  }
-
-  if (Object.values(parsed).some((panel) => typeof panel.type !== 'string')) {
-    throw new Error('controlGroupJson panels must have a type');
-  }
-
-  const panels = Object.entries(parsed)
-    .sort(([, panelA], [, panelB]) => (panelA.order ?? 0) - (panelB.order ?? 0))
-    .map(([id, panel]) => {
-      const { order, width, grow, type, ...config } = panel;
-      // `convertCamelCasedKeysToSnakeCase` is idempotent, so it is safe to run on non-legacy config too.
-      const snakeCasedConfig = convertCamelCasedKeysToSnakeCase(config);
-
-      return {
-        id,
-        type: transformType(type),
-        ...(width !== undefined && { width }),
-        ...(grow !== undefined && { grow }),
-        config: snakeCasedConfig,
-      };
-    });
-
-  if (!panels.length) {
-    return undefined;
+const getDroppedPanelDetails = (panel: unknown) => {
+  if (!isRecord(panel)) {
+    return {};
   }
 
-  return discoverSessionControlPanelsSchema.validate(panels, undefined, undefined, {
-    stripUnknownKeys: true,
+  const { type: panelType, ...panelConfig } = panel;
+
+  if (typeof panelType !== 'string') {
+    return { item_config: panel };
+  }
+
+  return { item_type: panelType, item_config: panelConfig };
+};
+
+const createDroppedPanelWarning = (
+  tabId: string,
+  panelId: string,
+  panel: unknown,
+  error: unknown
+): DiscoverSessionWarning => {
+  const reason = error instanceof Error ? error.message : 'Unknown error';
+
+  return {
+    type: 'dropped_item',
+    tab_id: tabId,
+    key: 'control_panels',
+    item_id: panelId,
+    ...getDroppedPanelDetails(panel),
+    message: error instanceof ZodError ? prettifyError(error) : reason,
+  };
+};
+
+/*
+ * Converts one stored panel to the API shape and validates it.
+ * Throws so the caller can drop only that panel and return a warning.
+ */
+const parseControlPanelEntry = (
+  id: string,
+  panel: unknown
+): DiscoverSessionApiControlPanels[number] => {
+  const control = convertControlGroupEntryToApi(id, panel);
+
+  return discoverSessionApiControlPanelSchema.parse({
+    ...control,
+    type: transformType(control.type),
   });
 };
 
-export const transformControlPanelsIn = (
-  controlPanels: DiscoverSessionControlPanels | undefined
-): string | undefined => {
-  if (!controlPanels?.length) {
-    return undefined;
+/*
+ * Transforms stored control panels for the API response while preserving valid panels.
+ * Warns for each panel dropped individually, or for the whole property if its JSON is unreadable.
+ */
+export const transformControlPanelsOut = (
+  controlGroupJson: string | undefined,
+  tabId: string
+): { panels: DiscoverSessionApiControlPanels | undefined; warnings: DiscoverSessionWarning[] } => {
+  if (!controlGroupJson) {
+    return { panels: undefined, warnings: [] };
   }
 
-  const panels = Object.fromEntries(
-    controlPanels.map((panel, order) => {
-      const { id, type, width, grow, config } = panel;
-      const flattenedConfig = isObject(config) ? config : {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(controlGroupJson);
+  } catch {
+    return {
+      panels: undefined,
+      warnings: [createDroppedControlPanelsWarning(tabId, controlGroupJson, 'Invalid JSON.')],
+    };
+  }
 
-      return [
-        id,
-        {
-          order,
-          type,
-          ...(width !== undefined && { width }),
-          ...(grow !== undefined && { grow }),
-          ...flattenedConfig,
-        },
-      ];
-    })
+  if (!isRecord(parsed)) {
+    return {
+      panels: undefined,
+      warnings: [
+        createDroppedControlPanelsWarning(tabId, controlGroupJson, 'Expected a JSON object.'),
+      ],
+    };
+  }
+
+  const entries = Object.entries(parsed).sort(
+    ([, panelA], [, panelB]) => getControlOrder(panelA) - getControlOrder(panelB)
   );
 
-  return JSON.stringify(panels);
+  const panels: DiscoverSessionApiControlPanels = [];
+  const warnings: DiscoverSessionWarning[] = [];
+
+  for (const [id, panel] of entries) {
+    try {
+      panels.push(parseControlPanelEntry(id, panel));
+    } catch (error) {
+      warnings.push(createDroppedPanelWarning(tabId, id, panel, error));
+    }
+  }
+
+  return {
+    panels: panels.length ? panels : undefined,
+    warnings,
+  };
 };

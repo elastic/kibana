@@ -7,22 +7,25 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   EntityIdentifierFields,
   EntityType,
 } from '../../../../../../common/entity_analytics/types';
 import { useFlyoutApi } from '../../../../use_flyout_api';
+import {
+  formatFlyoutTitle,
+  MISCONFIGURATION_FINDING_TITLE,
+  MISCONFIGURATION_INSIGHTS_TITLE,
+} from '../../../../shared/constants/flyout_titles';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
 import type { CloudPostureEntityIdentifier } from '../../../../../cloud_security_posture/components/entity_insight';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 
-const TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.misconfigurationInsights.title',
-  { defaultMessage: 'Misconfigurations' }
-);
+const TITLE = MISCONFIGURATION_INSIGHTS_TITLE;
 
 const ICON_TYPE = EntityIconByType;
 const FIELD: Record<
@@ -42,6 +45,11 @@ export interface MisconfigurationInsightsProps {
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
   entityId?: string;
+  /**
+   * Entity-store lookup mode of the originating entity flyout. In `resolved` mode the table also
+   * covers the entities that resolve to `entityId`. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
 }
@@ -50,14 +58,20 @@ export interface MisconfigurationInsightsProps {
  * Tool flyout displaying CSP misconfiguration findings for an entity.
  */
 export const MisconfigurationInsights = memo(
-  ({ entityType, value, entityId, onShowEntity }: MisconfigurationInsightsProps) => {
+  ({ entityType, value, entityId, mode, onShowEntity }: MisconfigurationInsightsProps) => {
     const { openMisconfigurationFindingAsChild } = useFlyoutApi();
 
     const onShowFinding = useCallback(
-      (resourceId: string, ruleId: string) => {
-        openMisconfigurationFindingAsChild({ resourceId, ruleId }, { title: value });
+      (resourceId: string, ruleId: string, ruleName?: string) => {
+        openMisconfigurationFindingAsChild(
+          { resourceId, ruleId },
+          {
+            title: formatFlyoutTitle(MISCONFIGURATION_FINDING_TITLE, ruleName),
+            origin: FLYOUT_ORIGIN.MISCONFIGURATION_FINDING,
+          }
+        );
       },
-      [openMisconfigurationFindingAsChild, value]
+      [openMisconfigurationFindingAsChild]
     );
 
     return (
@@ -76,6 +90,7 @@ export const MisconfigurationInsights = memo(
             value={value}
             entityId={entityId}
             entityType={entityType}
+            mode={mode}
             onShowFinding={onShowFinding}
           />
         </div>

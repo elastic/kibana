@@ -12,6 +12,7 @@ import {
 import {
   INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
   INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS,
 } from '@kbn/security-solution-plugin/common/api/initialization';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -41,8 +42,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('bootstraps prebuilt rules by installing required packages from EPR', async () => {
-      await retryService.tryWithRetries(
-        'initializeSecuritySolution',
+      await retryService.tryForTime(
+        60000 * 10,
         async () => {
           await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
           await deleteEndpointFleetPackage({ supertest, es, log, retryService });
@@ -50,7 +51,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body } = await initializeSecuritySolution(supertest, [
             INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
             INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
-          ]).expect(200);
+          ])
+            .timeout(INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS)
+            .expect(200);
 
           const prebuiltRulesResult = body.flows[INITIALIZATION_FLOW_INIT_PREBUILT_RULES];
           const endpointResult = body.flows[INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION];
@@ -68,11 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
           });
         },
-        {
-          retryCount: 10,
-          retryDelay: 5000,
-          timeout: 60000 * 10, // total timeout applied to all attempts altogether, 10 mins
-        }
+        { description: 'initializeSecuritySolution', retryDelay: 5000 }
       );
     });
 

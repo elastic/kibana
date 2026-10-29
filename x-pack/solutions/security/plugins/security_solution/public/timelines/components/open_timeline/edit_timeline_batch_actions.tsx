@@ -16,15 +16,21 @@ import type { DeleteTimelines, OpenTimelineResult } from './types';
 import { EditTimelineActions } from './export_timeline';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { getSelectedTimelineIdsAndSearchIds, getRequestIds } from '.';
+import { useSuperTimelineGate } from './use_super_timeline_gate';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
+  onRemoveSelectedFromCase,
   selectedItems,
+  showExportAction = true,
   tableRef,
   timelineType = TimelineTypeEnum.default,
 }: {
   deleteTimelines?: DeleteTimelines;
+  /** Adds a "Remove from case" item, used in the case view */
+  onRemoveSelectedFromCase?: () => void;
   selectedItems?: OpenTimelineResult[];
+  showExportAction?: boolean;
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
 }) => {
@@ -36,6 +42,12 @@ export const useEditTimelineBatchActions = ({
     onOpenDeleteTimelineModal,
     onCloseDeleteTimelineModal,
   } = useEditTimelineActions();
+
+  const {
+    isEnabled: isSuperTimelineActionEnabled,
+    tooltip: superTimelineTooltip,
+    handleOpen: handleOpenSuperTimeline,
+  } = useSuperTimelineGate({ selectedItems });
 
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
@@ -71,7 +83,7 @@ export const useEditTimelineBatchActions = ({
     (closePopover: () => void) => {
       const disabled = selectedItems == null || selectedItems.length === 0;
       const items = [];
-      if (selectedItems) {
+      if (selectedItems && showExportAction) {
         items.push(
           <EuiContextMenuItem
             data-test-subj="export-timeline-action"
@@ -81,6 +93,39 @@ export const useEditTimelineBatchActions = ({
             onClick={handleEnableExportTimelineDownloader}
           >
             {i18n.EXPORT_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (timelineType === TimelineTypeEnum.default) {
+        items.push(
+          <EuiContextMenuItem
+            data-test-subj="view-super-timeline-action"
+            disabled={!isSuperTimelineActionEnabled}
+            icon="merge"
+            key="SuperTimelineItemKey"
+            onClick={
+              isSuperTimelineActionEnabled ? () => handleOpenSuperTimeline(closePopover) : undefined
+            }
+            toolTipContent={superTimelineTooltip}
+            toolTipProps={{ position: 'left' }}
+          >
+            {i18n.VIEW_SUPER_TIMELINE}
+          </EuiContextMenuItem>
+        );
+      }
+      if (onRemoveSelectedFromCase) {
+        items.push(
+          <EuiContextMenuItem
+            data-test-subj="remove-timelines-from-case-action"
+            disabled={disabled}
+            icon="trash"
+            key="RemoveFromCaseItemKey"
+            onClick={() => {
+              closePopover();
+              onRemoveSelectedFromCase();
+            }}
+          >
+            {i18n.REMOVE_FROM_CASE}
           </EuiContextMenuItem>
         );
       }
@@ -120,6 +165,8 @@ export const useEditTimelineBatchActions = ({
     },
     [
       selectedItems,
+      showExportAction,
+      onRemoveSelectedFromCase,
       deleteTimelines,
       timelineIds,
       searchIds,
@@ -129,6 +176,9 @@ export const useEditTimelineBatchActions = ({
       timelineType,
       handleEnableExportTimelineDownloader,
       handleOnOpenDeleteTimelineModal,
+      isSuperTimelineActionEnabled,
+      handleOpenSuperTimeline,
+      superTimelineTooltip,
     ]
   );
   return { onCompleteBatchActions, getBatchItemsPopoverContent };

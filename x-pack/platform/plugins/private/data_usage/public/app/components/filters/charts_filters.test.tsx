@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { TestProvider } from '../../../../common/test_utils';
-import { render, type RenderResult } from '@testing-library/react';
+import { render, within, type RenderResult } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { ChartsFilters, type ChartsFiltersProps } from './charts_filters';
 import type { FilterName } from '../../hooks';
@@ -36,6 +36,14 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useKibana: () => mockUseKibana,
   };
 });
+
+// The option label is rendered inside the selectable list item rather than as a
+// `title` attribute on the option element itself.
+const expectOptionLabels = (options: HTMLElement[], expectedLabels: string[]) => {
+  expectedLabels.forEach((label, index) => {
+    expect(within(options[index]).getByTitle(label)).toBeInTheDocument();
+  });
+};
 
 describe('Charts Filters', () => {
   let user: UserEvent;
@@ -127,7 +135,8 @@ describe('Charts Filters', () => {
       (option) => option.getAttribute('aria-checked') === 'true'
     );
     expect(checkedOptions).toHaveLength(2);
-    expect(checkedOptions.map((option) => option.title)).toEqual(
+    expectOptionLabels(
+      checkedOptions,
       Object.keys(METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP).slice(0, 2)
     );
 
@@ -136,7 +145,8 @@ describe('Charts Filters', () => {
       (option) => option.getAttribute('aria-checked') === 'false'
     );
     expect(unCheckedOptions).toHaveLength(7);
-    expect(unCheckedOptions.map((option) => option.title)).toEqual(
+    expectOptionLabels(
+      unCheckedOptions,
       Object.keys(METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP).slice(2)
     );
   });

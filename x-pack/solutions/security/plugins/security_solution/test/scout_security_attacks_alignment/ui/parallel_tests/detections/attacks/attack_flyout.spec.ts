@@ -8,8 +8,7 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
-  'securitySolution:enableAlertsAndAttacksAlignment';
+const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
 
 spaceTest.describe(
   'Attack details flyout',
@@ -25,7 +24,7 @@ spaceTest.describe(
       const { detectionsAttackDiscoveryPage, attackDetailsRightPanelPage } = pageObjects;
 
       await scoutSpace.uiSettings.set({
-        [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
+        [ENABLE_NEW_FLYOUT_SETTING]: false,
       });
       await browserAuth.loginAsPlatformEngineer();
 
@@ -42,7 +41,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+      await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

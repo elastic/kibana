@@ -15,7 +15,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isoToEpoch } from '@kbn/zod-helpers/v4';
 import type { ApmEvent } from '@kbn/apm-types';
 import { rangeSchema } from '@kbn/apm-api-shared';
@@ -92,20 +92,23 @@ export type DiagnosticsBundle = Promise<{
 const getServiceMapDiagnosticsRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   endpoint: 'POST /internal/apm/diagnostics/service-map',
-  params: z.object({
-    body: rangeSchema
-      .merge(
-        z.object({
-          sourceNode: z.string().max(1024),
-          destinationNode: z.string().max(1024),
-        })
-      )
-      .merge(
-        z.object({
-          traceId: z.string().max(1024).optional(),
-        })
-      ),
-  }),
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  params: lazySchema(() =>
+    z.object({
+      body: rangeSchema
+        .merge(
+          z.object({
+            sourceNode: z.string().max(1024),
+            destinationNode: z.string().max(1024),
+          })
+        )
+        .merge(
+          z.object({
+            traceId: z.string().max(1024).optional(),
+          })
+        ),
+    })
+  ),
   handler: async (resources): Promise<ServiceMapDiagnosticResponse> => {
     const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
@@ -194,15 +197,18 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
 const getDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics',
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: z.object({
-    query: z
-      .object({
-        kuery: z.string().max(10_000).optional(),
-        start: z.string().max(1024).transform(isoToEpoch).optional(),
-        end: z.string().max(1024).transform(isoToEpoch).optional(),
-      })
-      .optional(),
-  }),
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          kuery: z.string().max(10_000).optional(),
+          start: z.string().max(1024).transform(isoToEpoch).optional(),
+          end: z.string().max(1024).transform(isoToEpoch).optional(),
+        })
+        .optional(),
+    })
+  ),
   handler: async (
     resources
   ): Promise<{

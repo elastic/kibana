@@ -54,6 +54,7 @@ export function createAddLogRateAnalysisEmbeddableAction(
       openLazyFlyout({
         core: coreStart,
         parentApi: context.embeddable,
+        returnFocus: context.returnFocus,
         flyoutProps: {
           hideCloseButton: true,
           focusedPanelId: context.embeddable.uuid,

@@ -13,6 +13,7 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
 } from '../../../../common/constants';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { type CasesClient } from '../../../client';
@@ -121,6 +122,9 @@ export const processCase = async (
   const documentsForCase = await casesClient.attachments.getAllDocumentsAttachedToCase({
     caseId,
     filter: combineFilters([legacyFilter, unifiedFilter], 'or' as const),
+    // Entity attachments aren't alerts/events, so include their unified type explicitly
+    // or the getter's default alert/event type filter would exclude them.
+    unifiedAttachmentTypes: [SECURITY_ENTITY_ATTACHMENT_TYPE],
   });
 
   // Combine document ids from cases-comments and cases-attachments for deduplication

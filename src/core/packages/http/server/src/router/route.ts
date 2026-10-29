@@ -251,9 +251,13 @@ export type Privileges = Array<Privilege | PrivilegeSet>;
  * Describes the authorization requirements when authorization is enabled.
  *
  * - `requiredPrivileges`: An array of privileges or privilege sets that are required for the route.
+ * - `extendedPrivileges`: A flat list of privilege name strings checked and surfaced in
+ *   `request.authzResult` but not enforced. Missing extended privileges never produce a 403.
+ *   Privilege sets (`anyRequired` / `allRequired`) are not supported here — only string names.
  */
 export interface AuthzEnabled {
   requiredPrivileges: Privileges;
+  extendedPrivileges?: Privilege[];
 }
 
 /**
@@ -452,6 +456,32 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   oasOperationObject?: OASOperationObjectProvider;
 
   /**
+   * Stable identifier for this operation in generated OAS documents.
+   *
+   * When omitted, the ID is derived from the method and the path, which yields
+   * names like `put-foo-id`. SDK and CLI code generators turn the ID into
+   * command and method names, so set it explicitly on public APIs where the
+   * derived name would read poorly.
+   *
+   * Prefer kebab-case `verb-resource` names such as `create-dashboard`. That
+   * keeps CLI command names consistent across resources.
+   *
+   * IDs must be unique across the generated document. A duplicate raises an
+   * error during OAS generation.
+   *
+   * @example
+   * ```ts
+   * router.put({
+   *  path: '/api/dashboards/{id}',
+   *  access: 'public',
+   *  summary: `Upsert a dashboard`,
+   *  operationId: 'upsert-dashboard',
+   * })
+   * ```
+   */
+  operationId?: string;
+
+  /**
    * Whether this route should be treated as "invisible" and excluded from router
    * OAS introspection.
    *
@@ -488,6 +518,13 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * @default false
    */
   httpResource?: boolean;
+
+  /**
+   * When set to `info`, core emits a slim HTTP response log at info for this
+   * route (`status`, `path`, `http.request.id`). The full access-log record
+   * remains at debug.
+   */
+  httpResponseLogLevel?: 'info';
 
   /**
    * Based on the the ES API specification (see https://github.com/elastic/elasticsearch-specification)

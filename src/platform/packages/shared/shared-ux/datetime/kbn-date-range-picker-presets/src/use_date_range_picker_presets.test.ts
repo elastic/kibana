@@ -24,12 +24,17 @@ const defaultPresets: PresetItem[] = [
   { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
 ];
 
+const lockedPresets: PresetItem[] = defaultPresets.map((preset) => ({
+  ...preset,
+  isEditable: false,
+}));
+
 const createServiceMock = (
   overrides: Partial<jest.Mocked<DateRangePickerPresetsService>> = {}
 ): jest.Mocked<DateRangePickerPresetsService> => ({
   getDefaultPresets: jest.fn(() => defaultPresets),
-  getPresets$: jest.fn(() => of(defaultPresets)),
-  getCanWrite$: jest.fn(() => of(true)),
+  getPresets$: jest.fn(() => of(lockedPresets)),
+  canPersist: jest.fn(() => true),
   savePreset: jest.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),
   deletePreset: jest.fn<Promise<void>, [PresetItem]>().mockResolvedValue(undefined),
   ...overrides,
@@ -78,7 +83,7 @@ describe('useDateRangePickerPresets', () => {
     });
 
     it('omits save/delete handlers when the user cannot write', () => {
-      const service = createServiceMock({ getCanWrite$: jest.fn(() => of(false)) });
+      const service = createServiceMock({ canPersist: jest.fn(() => false) });
       const { hook } = renderPresetsHook({ service });
 
       expect(hook.result.current.onPresetSave).toBeUndefined();
@@ -148,21 +153,21 @@ describe('useDateRangePickerPresets', () => {
   });
 
   describe('when disabled', () => {
-    it('returns the default presets without reading stored presets', () => {
+    it('returns the locked quick ranges without reading stored presets', () => {
       const service = createServiceMock();
       const { hook } = renderPresetsHook({ service, persistenceEnabled: false });
 
-      expect(hook.result.current.presets).toEqual(defaultPresets);
+      expect(hook.result.current.presets).toEqual(lockedPresets);
       expect(service.getPresets$).not.toHaveBeenCalled();
     });
 
-    it('omits save/delete handlers and skips the canWrite check', () => {
+    it('omits save/delete handlers and skips the canPersist check', () => {
       const service = createServiceMock();
       const { hook } = renderPresetsHook({ service, persistenceEnabled: false });
 
       expect(hook.result.current.onPresetSave).toBeUndefined();
       expect(hook.result.current.onPresetDelete).toBeUndefined();
-      expect(service.getCanWrite$).not.toHaveBeenCalled();
+      expect(service.canPersist).not.toHaveBeenCalled();
     });
   });
 });

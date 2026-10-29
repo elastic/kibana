@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
+import { assertFlyoutApmChartsRendered } from '../../fixtures/service_flyout_helpers';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
@@ -133,12 +133,9 @@ test.describe(
 
         // Suggestions can be empty under load on cloud/serverless, but the
         // control supports committing typed values via onCreateOption.
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
-          SERVICE_MAP_TEST_SERVICE,
-          {
-            useFill: true,
-            settleTimeoutMs: EXTENDED_TIMEOUT,
-          }
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
+          [SERVICE_MAP_TEST_SERVICE],
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await expect
@@ -189,32 +186,22 @@ test.describe(
         });
         await expect(pageObjects.serviceFlyoutPage.title).toHaveText(SERVICE_MAP_TEST_SERVICE);
         await expect(pageObjects.serviceFlyoutPage.actions).toBeVisible();
-        await assertFlyoutChartsRendered(pageObjects.serviceFlyoutPage, [
-          'latency',
-          'throughput',
-          'failedTransactionRate',
-        ]);
+        await assertFlyoutApmChartsRendered(pageObjects.serviceFlyoutPage);
 
         await page.keyboard.press('Escape');
         await expect(pageObjects.serviceFlyoutPage.flyout).toBeHidden();
       });
 
-      await test.step('click on a service map edge and verify popover contents', async () => {
-        await pageObjects.serviceMapPage.openEdgePopover(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
+      await test.step('click on a service map edge and verify the request flyout', async () => {
+        await pageObjects.serviceMapPage.openEdgeFlyout(SERVICE_MAP_TEST_POSTGRESQL_EDGE);
 
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverContent).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
-          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`
-        );
-        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
-        await expect(pageObjects.serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText(
-          'Explore traces'
+        await expect(pageObjects.serviceMapPage.requestFlyoutTitle).toHaveText(
+          `${SERVICE_MAP_TEST_SERVICE} → ${SERVICE_MAP_TEST_POSTGRESQL_DEPENDENCY}`,
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await page.keyboard.press('Escape');
-        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
+        await expect(pageObjects.serviceMapPage.requestFlyout).toBeHidden();
       });
 
       await test.step('maximize the Service map panel', async () => {
@@ -246,13 +233,11 @@ test.describe(
         await pageObjects.dashboard.expectTimeRangeBadgeMissing();
       });
 
-      await test.step('click View full service map button and verify navigation', async () => {
+      await test.step('click View in Service map button and verify navigation', async () => {
         await expect(pageObjects.serviceMapPage.serviceMapViewFullMapButton).toBeVisible();
         await pageObjects.serviceMapPage.serviceMapViewFullMapButton.click();
 
-        await expect(page).toHaveURL(
-          new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
-        );
+        await expect(page).toHaveURL(new RegExp(`/app/apm(?:#)?/service-map`));
       });
     });
 
@@ -300,9 +285,9 @@ test.describe(
           })
           .toBe(0);
 
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
-          SERVICE_MAP_TEST_SERVICE,
-          { useFill: true, settleTimeoutMs: EXTENDED_TIMEOUT }
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
+          [SERVICE_MAP_TEST_SERVICE],
+          { timeout: EXTENDED_TIMEOUT }
         );
         await pageObjects.serviceMapPage.selectServiceMapEditorEnvironment(
           SERVICE_MAP_TEST_ENVIRONMENT_STAGING

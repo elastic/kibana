@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButtonGroup, EuiToolTip } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   useStreamEnrichmentSelector,
@@ -16,6 +17,37 @@ import {
   selectIsInteractiveMode,
   selectHasAnyErrors,
 } from './state_management/stream_enrichment_state_machine/selectors';
+
+const interactiveLabel = i18n.translate('xpack.streams.enrichment.editMode.interactiveAriaLabel', {
+  defaultMessage: 'Interactive visual editor',
+});
+
+const yamlLabel = i18n.translate('xpack.streams.enrichment.editMode.yamlAriaLabel', {
+  defaultMessage: 'YAML editor',
+});
+
+const interactiveTooltip = i18n.translate(
+  'xpack.streams.enrichment.editMode.interactiveDescriptionTooltip',
+  {
+    defaultMessage: 'Edit processors and conditions with a visual editor',
+  }
+);
+
+const yamlTooltip = i18n.translate('xpack.streams.enrichment.editMode.yamlDescriptionTooltip', {
+  defaultMessage: 'Edit processors and conditions as YAML',
+});
+
+const errorsTooltip = i18n.translate('xpack.streams.enrichment.editMode.errorsTooltip', {
+  defaultMessage: 'Fix errors before switching modes',
+});
+
+const interactiveUnavailableTooltip = i18n.translate(
+  'xpack.streams.enrichment.editMode.interactiveDisabledTooltip',
+  {
+    defaultMessage:
+      'The current YAML configuration contains features that cannot be represented in the interactive editor.',
+  }
+);
 
 export const EditModeToggle = () => {
   const isInteractiveMode = useStreamEnrichmentSelector(selectIsInteractiveMode);
@@ -31,21 +63,44 @@ export const EditModeToggle = () => {
 
   const editMode = isInteractiveMode ? 'interactive' : 'yaml';
 
-  const toggleButtons = [
+  const isInteractiveDisabled = interactiveModeIsUnavailable || (hasErrors && !isInteractiveMode);
+  const isYamlDisabled = hasErrors && isInteractiveMode;
+
+  const getInteractiveToolTipContent = (): string => {
+    if (hasErrors && !isInteractiveMode) {
+      return errorsTooltip;
+    }
+    if (interactiveModeIsUnavailable) {
+      return interactiveUnavailableTooltip;
+    }
+    return interactiveTooltip;
+  };
+
+  const getYamlToolTipContent = (): string => {
+    if (isYamlDisabled) {
+      return errorsTooltip;
+    }
+    return yamlTooltip;
+  };
+
+  const toggleButtons: EuiButtonGroupOptionProps[] = [
     {
       id: 'interactive',
-      label: i18n.translate('xpack.streams.enrichment.editMode.interactive', {
-        defaultMessage: 'Interactive',
-      }),
-      isDisabled: interactiveModeIsUnavailable || (hasErrors && !isInteractiveMode),
+      label: interactiveLabel,
+      iconType: 'cursorDefault',
+      // Suppress the native title when using EuiToolTip via toolTipContent
+      title: '',
+      toolTipContent: getInteractiveToolTipContent(),
+      isDisabled: isInteractiveDisabled,
       'data-test-subj': 'streamsAppEnrichmentEditModeInteractiveButton',
     },
     {
       id: 'yaml',
-      label: i18n.translate('xpack.streams.enrichment.editMode.yaml', {
-        defaultMessage: 'YAML',
-      }),
-      isDisabled: hasErrors && isInteractiveMode,
+      label: yamlLabel,
+      iconType: 'code',
+      title: '',
+      toolTipContent: getYamlToolTipContent(),
+      isDisabled: isYamlDisabled,
       'data-test-subj': 'streamsAppEnrichmentEditModeYamlButton',
     },
   ];
@@ -58,35 +113,18 @@ export const EditModeToggle = () => {
     }
   };
 
-  // Determine tooltip content based on state
-  const getTooltipContent = () => {
-    if (hasErrors) {
-      return i18n.translate('xpack.streams.enrichment.editMode.errorsTooltip', {
-        defaultMessage: 'Fix errors before switching modes',
-      });
-    }
-    if (interactiveModeIsUnavailable) {
-      return i18n.translate('xpack.streams.enrichment.editMode.interactiveDisabledTooltip', {
-        defaultMessage:
-          'The current YAML configuration contains features that cannot be represented in the interactive editor.',
-      });
-    }
-    return undefined;
-  };
-
   return (
-    <EuiToolTip content={getTooltipContent()}>
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.streams.enrichment.editMode.legend', {
-          defaultMessage: 'Edit mode selection',
-        })}
-        options={toggleButtons}
-        idSelected={editMode}
-        onChange={handleChange}
-        buttonSize="compressed"
-        isFullWidth={false}
-        data-test-subj="streamsAppEnrichmentEditModeToggle"
-      />
-    </EuiToolTip>
+    <EuiButtonGroup
+      legend={i18n.translate('xpack.streams.enrichment.editMode.legend', {
+        defaultMessage: 'Edit mode selection',
+      })}
+      options={toggleButtons}
+      idSelected={editMode}
+      onChange={handleChange}
+      buttonSize="compressed"
+      isIconOnly
+      isFullWidth={false}
+      data-test-subj="streamsAppEnrichmentEditModeToggle"
+    />
   );
 };

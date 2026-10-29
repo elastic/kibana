@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-export type ActiveFilter = 'active' | 'inactive' | 'all';
+export type ActiveFilter = 'active' | 'expired' | 'inactive' | 'all';
 
 const NOT_HIDDEN_KUERY = 'not hidden:true';
+
+// A token past its expiration can no longer enroll an agent, but nothing writes `active: false`
+// back to its document, so expiry has to be part of the filter for each bucket to hold the tokens
+// the list reports under that status.
+const EXPIRED_KUERY = 'expire_at <= "now"';
 
 export function buildKuery(
   search: string,
@@ -27,7 +32,9 @@ export function buildKuery(
   }
 
   if (activeFilter === 'active') {
-    parts.push('(active:true)');
+    parts.push(`(active:true and not (${EXPIRED_KUERY}))`);
+  } else if (activeFilter === 'expired') {
+    parts.push(`(active:true and ${EXPIRED_KUERY})`);
   } else if (activeFilter === 'inactive') {
     parts.push('(active:false)');
   }

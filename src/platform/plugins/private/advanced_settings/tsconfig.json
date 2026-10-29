@@ -19,8 +19,10 @@
     "@kbn/management-settings-section-registry",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
+    "@kbn/management-settings-ids",
     "@kbn/spaces-plugin",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/serverless-common-settings"
   ],
   "exclude": [
     "target/**/*",

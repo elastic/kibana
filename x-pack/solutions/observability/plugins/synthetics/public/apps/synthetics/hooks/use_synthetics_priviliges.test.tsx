@@ -14,8 +14,8 @@ jest.mock('../../../hooks/use_capabilities', () => ({
   useCanReadSyntheticsIndex: jest.fn().mockReturnValue({ canRead: true, loading: false }),
 }));
 
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useSelector: jest.fn().mockReturnValue({ error: { body: { message: 'License not active' } } }),

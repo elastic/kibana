@@ -16,6 +16,7 @@ import { type CustomProcess } from '../../../../../flyout/document_details/sessi
 import { AlertsTab } from './alerts_tab';
 import { MetadataTab } from './metadata_tab';
 import { ProcessTab } from './process_tab';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 export const SESSION_VIEW_DETAILS_TEST_ID = `${PREFIX}SessionViewDetails` as const;
 
@@ -77,6 +78,7 @@ export const SessionViewDetails = memo(
           indexName: alertIndex,
           renderCellActions,
           onAlertUpdated,
+          origin: FLYOUT_ORIGIN.SESSION_VIEW_ALERT,
         });
       },
       [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]

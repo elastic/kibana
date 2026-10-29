@@ -187,3 +187,29 @@ export const DELETE_FILE_TITLE = i18n.translate('xpack.cases.caseView.files.dele
 export const REMOVED_FILE = i18n.translate('xpack.cases.caseView.files.removedFile', {
   defaultMessage: 'removed file',
 });
+
+export const REMOVED_FILE_NAME = (fileName: string) =>
+  i18n.translate('xpack.cases.caseView.files.removedFileName', {
+    defaultMessage: 'removed file {fileName}',
+    values: { fileName },
+  });
+
+export const FILES_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.caseView.files.filesCount', {
+    defaultMessage: '{count, plural, one {# file} other {# files}}',
+    values: { count },
+  });
+
+export const FILE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.files.fileActionsPopoverAriaLabel',
+  {
+    defaultMessage: 'File actions',
+  }
+);
+
+export const DUPLICATE_FILE_WARNING = (fileName: string) =>
+  i18n.translate('xpack.cases.caseView.files.duplicateFileWarning', {
+    defaultMessage:
+      'A file named "{fileName}" is already attached — uploading will add a second copy.',
+    values: { fileName },
+  });

@@ -7,7 +7,10 @@
 
 import * as uuid from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
+import {
+  agentPolicyRouteService,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import type {
   AgentPolicy,
@@ -124,6 +127,7 @@ export async function generateAgent(
       enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
+      policy_base_id: removeVersionSuffixFromPolicyId(policyId),
       policy_revision: 1,
       agent: {
         id,
@@ -285,3 +289,26 @@ export const addUninstallTokenToPolicy = async (
 
   return savedObject.id;
 };
+
+export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+export const POLICY_BASE_ID_BACKFILL_TASK_ID = 'task:fleet:setup:backfillPolicyBaseId';
+
+async function getPolicyBaseIdBackfillTask(providerContext: FtrProviderContext) {
+  const res = await providerContext
+    .getService('es')
+    .get<{ task: { status: string } }>(
+      { index: TASK_MANAGER_INDEX, id: POLICY_BASE_ID_BACKFILL_TASK_ID },
+      { ignore: [404] }
+    );
+  return res.found ? res._source : undefined;
+}
+
+// The policy_base_id backfill runs in a Fleet setup task, after the setup response.
+// The task is removed once it ran.
+export async function waitForPolicyBaseIdBackfill(providerContext: FtrProviderContext) {
+  await providerContext.getService('retry').tryForTime(60000, async () => {
+    if (await getPolicyBaseIdBackfillTask(providerContext)) {
+      throw new Error('The policy_base_id backfill task has not run yet');
+    }
+  });
+}

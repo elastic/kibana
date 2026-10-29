@@ -109,7 +109,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
 
   return (
     <EuiPanel data-test-subj="ruleStatusPanel" hasBorder paddingSize="none">
-      <EuiPanel hasShadow={false}>
+      <EuiPanel hasShadow={false} hasBorder={false}>
         <EuiFlexGroup justifyContent="flexStart" gutterSize="xs" alignItems="baseline">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
@@ -149,18 +149,18 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
         </EuiText>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiPanel hasShadow={false}>
-        <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
-          <EuiFlexItem>
+      <EuiPanel hasShadow={false} hasBorder={false}>
+        <EuiFlexGroup gutterSize="none" direction="row" wrap>
+          <EuiFlexItem data-test-subj="ruleStatusLastResponseStat" css={{ minWidth: 160 }}>
             <EuiStat
               data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-              titleSize="m"
+              titleSize="xxs"
               descriptionElement="strong"
-              titleElement="h5"
+              titleElement="div"
               title={
                 <EuiHealth
                   data-test-subj={`ruleStatus-${rule.executionStatus.status}`}
-                  textSize="m"
+                  textSize="s"
                   color={healthColor}
                   style={{ fontWeight: 400 }}
                 >
@@ -184,7 +184,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
         </EuiFlexGroup>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiPanel hasShadow={false}>
+      <EuiPanel hasShadow={false} hasBorder={false}>
         <RulesListNotifyBadge
           snoozeSettings={rule}
           loading={!rule}

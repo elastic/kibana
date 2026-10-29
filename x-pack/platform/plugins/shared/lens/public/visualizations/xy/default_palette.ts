@@ -14,5 +14,6 @@ import { isLineSeries } from './state_helpers';
 /**
  * Returns the default palette id for a given series type.
  */
-export const getDefaultPalette = (seriesType: LensSeriesType): KbnPaletteId =>
-  isLineSeries(seriesType) ? KbnPalette.ElasticLineOptimized : KbnPalette.Default;
+export const getDefaultPalette = (seriesType: LensSeriesType): KbnPaletteId => {
+  return isLineSeries(seriesType) ? KbnPalette.ElasticLineOptimized : KbnPalette.Default;
+};

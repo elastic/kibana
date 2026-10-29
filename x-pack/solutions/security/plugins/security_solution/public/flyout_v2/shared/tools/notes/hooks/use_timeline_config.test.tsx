@@ -15,8 +15,8 @@ import { pinEvent } from '../../../../../timelines/store/actions';
 import type { State } from '../../../../../common/store';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -75,6 +75,28 @@ describe('useTimelineConfig', () => {
   describe('when not in the timeline flyout', () => {
     it('returns undefined when isTimelineFlyout is false', () => {
       const { result } = renderUseTimelineConfig(EVENT_ID, false);
+      expect(result.current).toBeUndefined();
+    });
+  });
+
+  describe('when the active timeline is a Super Timeline', () => {
+    it('returns undefined so the "Attach to current Timeline" callout and Save button are never shown', () => {
+      // WHY: Super Timelines are transient and read-only. Showing "Save current Timeline" would
+      // persist the Super Timeline as a new saved object, defeating the never-persisted contract.
+      const superTimelineStore = createMockStore({
+        ...mockGlobalStateWithSavedTimeline,
+        timeline: {
+          ...mockGlobalStateWithSavedTimeline.timeline,
+          timelineById: {
+            ...mockGlobalStateWithSavedTimeline.timeline.timelineById,
+            [TimelineId.active]: {
+              ...mockGlobalStateWithSavedTimeline.timeline.timelineById[TimelineId.active],
+              isSuperTimeline: true,
+            },
+          },
+        },
+      });
+      const { result } = renderUseTimelineConfig(EVENT_ID, true, superTimelineStore);
       expect(result.current).toBeUndefined();
     });
   });

@@ -9,7 +9,7 @@
 
 import type { Node, Range } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { YamlValidationErrorSeverity } from '../../../features/validate_workflow_yaml/model/types';
+import type { YamlValidationErrorSeverity } from '@kbn/workflows-yaml';
 
 // Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
 export enum MarkerSeverity {

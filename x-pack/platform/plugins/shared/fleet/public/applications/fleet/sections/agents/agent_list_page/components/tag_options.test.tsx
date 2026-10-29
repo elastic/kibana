@@ -62,6 +62,7 @@ describe('TagOptions', () => {
       [],
       ['agent'],
       expect.anything(),
+      undefined,
       'Tag deleted',
       'Tag delete failed'
     );
@@ -85,6 +86,7 @@ describe('TagOptions', () => {
       ['newName'],
       ['agent'],
       expect.anything(),
+      undefined,
       'Tag renamed',
       'Tag rename failed'
     );
@@ -106,6 +108,7 @@ describe('TagOptions', () => {
       ['newName'],
       ['agent'],
       expect.anything(),
+      undefined,
       'Tag renamed',
       'Tag rename failed'
     );

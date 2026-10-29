@@ -9,7 +9,7 @@
  * Configuration for the Security Labs artifact builder.
  */
 export interface TaskConfig {
-  /** Date-based version in YYYY.MM.DD format */
+  /** Artifact version (`YYYY.MM.DD-HHMMSS` UTC; legacy `YYYY.MM.DD` still accepted) */
   version: string;
   /** Folder for temporary build files */
   buildFolder: string;
@@ -21,12 +21,18 @@ export interface TaskConfig {
   embeddingClusterUsername: string;
   /** Password for the embedding cluster */
   embeddingClusterPassword: string;
-  /** GitHub repository URL for Security Labs content (stub: SECURITY_LABS_REPO) */
+  /** GitHub repository URL for Security Labs content (e.g. https://github.com/elastic/security-labs-elastic-co) */
   githubRepoUrl: string;
-  /** GitHub token for accessing the repository */
+  /** Git ref (branch, tag, or commit) to fetch content from. Defaults to `main`. */
+  githubRef: string;
+  /** Repository-relative path that holds the article markdown (e.g. `_content/articles`). */
+  contentSubPath: string;
+  /** GitHub token for accessing the repository (required for internal repos). */
   githubToken?: string;
   /** Local path to Security Labs content (alternative to GitHub fetch) */
   localContentPath?: string;
+  /** Inference endpoint used to generate the semantic_text embeddings. */
+  inferenceId: string;
 }
 
 /**

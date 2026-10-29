@@ -13,13 +13,24 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 
 import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
-import { ExperimentalFeaturesService } from '../../../../../services';
-
 import { SelectedPolicyTab } from '../../components';
 
 import { useOnSubmit, updateAgentlessCloudConnectorConfig } from './form';
+import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
 type MockFn = jest.MockedFunction<any>;
+
+jest.mock('./aws_onboarding_telemetry', () => ({
+  useAwsOnboardingTelemetry: jest.fn(() => ({
+    reportCredentialsAdded: jest.fn(),
+    reportDeployClicked: jest.fn(),
+    reportEnrollmentSucceeded: jest.fn(),
+  })),
+}));
+
+jest.mock('../../../../../../../hooks/use_request/agentless_policy', () => ({
+  sendCreateAgentlessPolicy: jest.fn().mockRejectedValue(new Error('mocked agentless api')),
+}));
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -320,9 +331,6 @@ describe('useOnSubmit', () => {
   describe('input deployment mode filtering', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
-        enableVarGroups: true,
-      } as any);
     });
 
     it('should disable inputs that are not allowed for agentless deployment mode', async () => {
@@ -807,6 +815,47 @@ describe('useOnSubmit', () => {
   });
 
   describe('updateAgentlessCloudConnectorConfig', () => {
+    // The setters receive functional updates, so apply them on top of the given state
+    const applyUpdate = (setter: jest.Mock, prev: any) => {
+      const update = setter.mock.calls[0][0];
+      return typeof update === 'function' ? update(prev) : update;
+    };
+
+    it('should keep changes queued earlier in the same render, e.g. supports_agentless', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      // `packagePolicy` is the state of this render, without the agentless flag that was queued
+      // by the setup technology hook in the same render
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [{ vars: { 'aws.supports_cloud_connectors': { value: true } } }],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+      const newAgentPolicy = { supports_agentless: true } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(applyUpdate(setPackagePolicy, { ...packagePolicy, supports_agentless: true })).toEqual(
+        expect.objectContaining({ supports_agentless: true, supports_cloud_connector: true })
+      );
+      expect(
+        applyUpdate(setNewAgentPolicy, { ...newAgentPolicy, name: 'Agentless policy for aws-1' })
+      ).toEqual(
+        expect.objectContaining({ name: 'Agentless policy for aws-1', supports_agentless: true })
+      );
+    });
+
     it('should update agentless cloud connector config when enabled and target CSP is aws', () => {
       const setNewAgentPolicy = jest.fn();
       const setPackagePolicy = jest.fn();
@@ -847,7 +896,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -857,7 +906,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: true,
       });
@@ -901,7 +950,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -911,7 +960,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: false,
       });
@@ -957,7 +1006,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -967,7 +1016,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: true,
       });
@@ -1011,7 +1060,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -1021,7 +1070,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: false,
       });
@@ -1065,7 +1114,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -1075,7 +1124,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: true,
       });
@@ -1119,7 +1168,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -1129,7 +1178,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: false,
       });
@@ -1212,6 +1261,107 @@ describe('useOnSubmit', () => {
 
       expect(setNewAgentPolicy).not.toHaveBeenCalled();
       expect(setPackagePolicy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('AWS onboarding telemetry on agentless submit', () => {
+    const mockReportCredentialsAdded = jest.fn();
+    const mockReportDeployClicked = jest.fn();
+
+    const awsPackageInfo: PackageInfo = {
+      name: 'aws_cloudwatch_input_otel',
+      version: '0.5.0',
+      description: '',
+      format_version: '',
+      release: 'ga',
+      owner: { github: '' },
+      title: 'AWS CloudWatch (OpenTelemetry)',
+      latestVersion: '0.5.0',
+      assets: {} as any,
+      status: 'not_installed',
+      policy_templates: [
+        {
+          name: 'aws',
+          title: 'AWS',
+          description: '',
+          deployment_modes: {
+            default: { enabled: true },
+            agentless: { enabled: true },
+          },
+          inputs: [
+            {
+              type: 'cloudwatch',
+              title: 'CloudWatch',
+              description: '',
+              deployment_modes: ['agentless'],
+            },
+          ],
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (useConfig as MockFn).mockReturnValue({ agentless: { enabled: true } } as any);
+      (useAwsOnboardingTelemetry as jest.Mock).mockReturnValue({
+        reportCredentialsAdded: mockReportCredentialsAdded,
+        reportDeployClicked: mockReportDeployClicked,
+        reportEnrollmentSucceeded: jest.fn(),
+      });
+    });
+
+    it('calls reportCredentialsAdded and reportDeployClicked with enabled input types on agentless submit', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: awsPackageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await act(async () => {
+        await renderResult.result.current.onSubmit();
+      });
+
+      expect(mockReportCredentialsAdded).toHaveBeenCalledTimes(1);
+      expect(mockReportDeployClicked).toHaveBeenCalledWith('agentless', expect.any(Array));
+    });
+
+    it('does not call telemetry when submitting in non-agentless mode', async () => {
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: awsPackageInfo,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      await act(async () => {
+        await renderResult.result.current.onSubmit();
+      });
+
+      expect(mockReportCredentialsAdded).not.toHaveBeenCalled();
+      expect(mockReportDeployClicked).not.toHaveBeenCalled();
     });
   });
 });

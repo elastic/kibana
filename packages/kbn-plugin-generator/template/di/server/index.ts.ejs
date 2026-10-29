@@ -1,0 +1,11 @@
+import { ContainerModule } from 'inversify';
+import { Route } from '@kbn/core-di-server';
+import { ExampleService } from './example_service';
+import { ExampleRoute } from './route';
+
+const pluginModule = new ContainerModule(({ bind }) => {
+  bind(ExampleService).toSelf().inRequestScope();
+  bind(Route).toConstantValue(ExampleRoute);
+});
+
+export { pluginModule as module };

@@ -11,8 +11,8 @@ import type { TypeOf } from '@kbn/config-schema';
 /** Schema that validates the file download API */
 export const EndpointActionFileDownloadSchema = {
   params: schema.object({
-    action_id: schema.string({ minLength: 1 }),
-    file_id: schema.string({ minLength: 1 }),
+    action_id: schema.string({ minLength: 1, maxLength: 256 }),
+    file_id: schema.string({ minLength: 1, maxLength: 256 }),
   }),
 };
 

@@ -15,8 +15,23 @@ export interface ContextMenuPosition {
   y: number;
 }
 
+/**
+ * What the menu was opened on:
+ * - `pane`: empty canvas — tidy the whole graph.
+ * - `selection`: two or more selected nodes — tidy just those.
+ *
+ * A single node (or a selection of one) offers no tidy action, so it never opens
+ * the menu.
+ */
+export type CanvasContextMenuTarget = 'pane' | 'selection';
+
 interface CanvasContextMenuProps {
   position: ContextMenuPosition | null;
+  target: CanvasContextMenuTarget;
+  /** Snapshots history, re-lays-out the relevant nodes, and closes the menu. */
+  onTidyUp: () => void;
+  /** Reopen the menu at a new cursor position (right-click elsewhere while open). */
+  onReopen: (position: ContextMenuPosition) => void;
   onClose: () => void;
 }
 
@@ -30,7 +45,13 @@ const CONTEXT_MENU_VIEWPORT_MARGIN = 8;
  * `EuiPopover`, whose outside-click detection competes with React Flow's own
  * pointer handling.
  */
-export function CanvasContextMenu({ position, onClose }: CanvasContextMenuProps) {
+export function CanvasContextMenu({
+  position,
+  target,
+  onTidyUp,
+  onReopen,
+  onClose,
+}: CanvasContextMenuProps) {
   const { euiTheme } = useEuiTheme();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -55,14 +76,25 @@ export function CanvasContextMenu({ position, onClose }: CanvasContextMenuProps)
     return null;
   }
 
+  const tidyUpLabel =
+    target === 'selection'
+      ? i18n.translate('xpack.streams.canvas.contextMenu.tidyUpSelectionLabel', {
+          defaultMessage: 'Tidy up selection',
+        })
+      : i18n.translate('xpack.streams.canvas.contextMenu.tidyUpLabel', {
+          defaultMessage: 'Tidy up',
+        });
+
   return (
     <>
       <div
         role="presentation"
         onClick={onClose}
         onContextMenu={(event) => {
+          // Right-clicking elsewhere while the menu is open should move the menu
+          // to the new spot rather than force a second right-click to reopen it.
           event.preventDefault();
-          onClose();
+          onReopen({ x: event.clientX, y: event.clientY });
         }}
         css={css`
           position: fixed;
@@ -79,17 +111,16 @@ export function CanvasContextMenu({ position, onClose }: CanvasContextMenuProps)
           z-index: ${Number(euiTheme.levels.menu) + 1};
         `}
       >
-        <EuiPanel paddingSize="none" hasShadow data-test-subj="streamsCanvasNodeContextMenu">
+        <EuiPanel paddingSize="none" hasShadow data-test-subj="streamsCanvasContextMenu">
           <EuiContextMenuPanel
             items={[
               <EuiContextMenuItem
-                key="action"
-                data-test-subj="streamsCanvasNodeContextMenuAction"
-                onClick={onClose}
+                key="tidyUp"
+                icon="grid"
+                data-test-subj="streamsCanvasContextMenuTidyUp"
+                onClick={onTidyUp}
               >
-                {i18n.translate('xpack.streams.canvas.nodeContextMenu.actionLabel', {
-                  defaultMessage: 'Action',
-                })}
+                {tidyUpLabel}
               </EuiContextMenuItem>,
             ]}
           />

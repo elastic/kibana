@@ -10,49 +10,64 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { Main } from './main';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
-
-export interface FederatedDataFeatureFlags {
-  enableFederatedIdentityAuth?: boolean;
-  enableGoogleCloudStorageDataSourceType?: boolean;
-  enableAzureDataSourceType?: boolean;
-}
+import type { DataFederationKibanaServices, FederatedDataFeatureFlags } from './types';
+import { DataSourcesClient } from './data_sources_client';
+import { DatasetsClient } from './datasets_client';
+import { getDiscoverLocator } from './get_discover_locator';
+import { createServiceRegistry } from './service_registry';
+import { createReportUiCounter } from './ui_counters';
 
 export const mountManagementSection = (
   coreStart: CoreStart,
   { element, history }: ManagementAppMountParams,
   {
     cloudInfo,
-    isCloudEnabled = false,
+    share,
+    usageCollection,
     featureFlags: {
-      enableFederatedIdentityAuth: enableFederatedIdentityAuthConfig = false,
       enableGoogleCloudStorageDataSourceType = false,
       enableAzureDataSourceType = false,
     } = {},
   }: {
     cloudInfo?: FederatedIdentityClusterInfo;
-    isCloudEnabled?: boolean;
+    share?: SharePluginStart;
+    usageCollection?: UsageCollectionStart;
     featureFlags?: FederatedDataFeatureFlags;
   }
 ) => {
-  const enableFederatedIdentityAuth = isCloudEnabled && enableFederatedIdentityAuthConfig;
+  const serviceRegistry = createServiceRegistry({
+    enableGoogleCloudStorageDataSourceType,
+    enableAzureDataSourceType,
+  });
+
+  const services: DataFederationKibanaServices = {
+    dataSourcesClient: new DataSourcesClient(coreStart.http),
+    datasetsClient: new DatasetsClient(coreStart.http),
+    toasts: coreStart.notifications.toasts,
+    docLinks: coreStart.docLinks,
+    discoverLocator: getDiscoverLocator(coreStart.application.capabilities, share),
+    cloudInfo,
+    featureFlags: {
+      enableGoogleCloudStorageDataSourceType,
+      enableAzureDataSourceType,
+    },
+    serviceRegistry,
+    reportUiCounter: createReportUiCounter(usageCollection),
+  };
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <Router history={history}>
-        <Main
-          httpClient={coreStart.http}
-          toasts={coreStart.notifications.toasts}
-          cloudInfo={cloudInfo}
-          featureFlags={{
-            enableFederatedIdentityAuth,
-            enableGoogleCloudStorageDataSourceType,
-            enableAzureDataSourceType,
-          }}
-        />
-      </Router>
+      <KibanaContextProvider services={services}>
+        <Router history={history}>
+          <Main />
+        </Router>
+      </KibanaContextProvider>
     ),
     element
   );

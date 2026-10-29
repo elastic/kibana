@@ -34,6 +34,7 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridSorting,
   EuiDataGridToolBarVisibilityOptions,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import type {
   MappingRuntimeFields,
@@ -106,18 +107,20 @@ export interface SystemCellComponentMap {
 
 export type SystemCellId = keyof SystemCellComponentMap;
 
-type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
-  close: () => void;
-};
+interface CaseInfo {
+  id: string;
+  owner: string;
+}
 
 type UseCasesAddToExistingCaseModal = (
-  props?: Record<string, unknown> & { onSuccess: () => void }
+  props?: Record<string, unknown> & {
+    onSuccess: (theCase: CaseInfo, isNewCase: boolean) => void;
+  }
 ) => {
   open: ({
     getAttachments,
   }: {
-    getAttachments: ({ theCase }: { theCase?: { id: string } }) => any[];
+    getAttachments: ({ theCase }: { theCase?: CaseInfo }) => any[];
   }) => void;
   close: () => void;
 };
@@ -145,13 +148,11 @@ export interface CasesService {
     getCasesContext: () => FC<any>;
   };
   hooks: {
-    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
-    groupAlertsByRule: (items: any[]) => any[];
+    groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
-    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 
@@ -545,6 +546,8 @@ export type RenderContext<AC extends AdditionalContext> = {
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
+
+  allowLinks?: boolean;
 } & SetRequired<
   Pick<
     AlertsTableProps<AC>,
@@ -622,8 +625,6 @@ export interface PublicAlertsDataGridProps
     featureId: string;
     owner: CasesOwner[];
     appId?: string;
-    syncAlerts?: boolean;
-    extractObservables?: boolean;
   };
   /**
    * If true, hides the bulk actions controls
@@ -645,6 +646,10 @@ export interface PublicAlertsDataGridProps
    * Options to customize the actions menu for each cell
    */
   cellActionsOptions?: CellActionsOptions;
+  /**
+   * When `false`, the page size selector is hidden. Defaults to `true`.
+   */
+  isInteractive?: boolean;
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
@@ -717,12 +722,34 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
       canModifyAlerts?: boolean;
     };
 
+export type BulkActionGroupId =
+  | 'status'
+  | 'assignees'
+  | 'cases'
+  | 'caseRemoval'
+  | 'tags'
+  | 'timeline'
+  | 'custom'
+  | 'workflow'
+  | 'chat';
+
 export interface BulkActionsConfig {
   label: string;
   key: string;
+  icon?: EuiContextMenuPanelItemDescriptor['icon'];
+  groupId?: BulkActionGroupId;
   'data-test-subj'?: string;
+  /**
+   * Disables the item when a "select all" includes alerts that aren't loaded,
+   * because `onClick` only receives loaded alerts.
+   */
   disableOnQuery: boolean;
   disabledLabel?: string;
+  /**
+   * Caps how many alerts the action accepts. When more are selected, counting every matching
+   * alert under a "select all", the item is disabled and `reason` is shown as its tooltip.
+   */
+  selectionLimit?: { max: number; reason: string };
   onClick?: (
     selectedIds: TimelineItem[],
     isAllSelected: boolean,

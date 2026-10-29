@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 
 import type { SerializedTimeRange, ViewMode } from '@kbn/presentation-publishing';
@@ -90,7 +90,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }) => {
         createNewEmbeddable(panelType, serializedState);
       },
-      disableTriggers: true,
+      disableTriggers$: new BehaviorSubject<boolean>(true),
       // this is required to disable inline editing now enabled by default
       canEditInline: false,
       type: 'canvas',

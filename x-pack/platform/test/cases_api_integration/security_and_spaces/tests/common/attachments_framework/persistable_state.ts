@@ -156,10 +156,54 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 404,
         });
       });
+
+      describe('schema validation', () => {
+        it('rejects a lens payload missing data', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [{ type: LENS_ATTACHMENT_TYPE, owner: 'securitySolutionFixture' }] as never,
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('rejects a lens payload with a malformed state (non-object)', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              {
+                type: LENS_ATTACHMENT_TYPE,
+                data: { state: 'not-an-object' },
+                owner: 'securitySolutionFixture',
+              },
+            ] as never,
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('rejects a lens payload with an unknown top-level key', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              {
+                type: LENS_ATTACHMENT_TYPE,
+                data: { state: { attributes: { title: 'viz' } } },
+                owner: 'securitySolutionFixture',
+                extra: 'nope',
+              },
+            ] as never,
+            expectedHttpCode: 400,
+          });
+        });
+      });
     });
 
-    // TODO: Enable when https://github.com/elastic/kibana/pull/262597 is merged
-    describe.skip('ML anomaly swimlane', () => {
+    describe('ML anomaly swimlane', () => {
       const mlPayload = {
         type: 'ml.anomaly_swimlane',
         data: {
@@ -203,8 +247,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // TODO: Enable when https://github.com/elastic/kibana/pull/262597 is merged
-    describe.skip('AIOps change point chart', () => {
+    describe('AIOps change point chart', () => {
       const aiopsPayload = {
         type: 'aiops.change_point_chart',
         data: {
@@ -250,8 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // TODO: Enable when https://github.com/elastic/kibana/pull/262597 is merged
-    describe.skip('mixed persistable state types', () => {
+    describe('mixed persistable state types', () => {
       it('creates lens and ML in bulk on the same case', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const updatedCase = await bulkCreateAttachments({

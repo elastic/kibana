@@ -8,17 +8,18 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { getDisplayedFeaturePrivileges } from '@kbn/security-ui-components/src/kibana_privilege_table/__fixtures__';
-import type { Space } from '@kbn/spaces-plugin/public';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import type { Role } from '../../../../../../../common';
+import { createAllSpacesEntry, type DisplaySpace } from '../display_space';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -28,22 +29,18 @@ const createRole = (kibana: Role['kibana'] = []): Role => {
   };
 };
 
-const displaySpaces: Space[] = [
+const displaySpaces: DisplaySpace[] = [
   {
-    id: 'foo',
+    id: asSpaceId('foo'),
     name: 'Foo Space',
     disabledFeatures: [],
   },
   {
-    id: 'default',
+    id: asSpaceId('default'),
     name: 'Default Space',
     disabledFeatures: [],
   },
-  {
-    id: '*',
-    name: 'Global',
-    disabledFeatures: [],
-  },
+  createAllSpacesEntry('Global'),
 ];
 
 const renderComponent = (props: React.ComponentProps<typeof PrivilegeSpaceForm>) => {

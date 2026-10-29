@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { asCodeSearchRequestSchema } from './schema';
-export { getTagsSearchRequest } from './get_tags_search_request';
+export { asCodeSearchRequestSchema, getAsCodeSearchRequestSchema } from './schema';

@@ -35,10 +35,10 @@ describe('useGetCases', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnGetCases).toBeCalled();
+      expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['securitySolution'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -82,7 +82,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [...OWNERS] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -107,7 +107,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['cases'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -125,7 +125,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['observability'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -143,7 +143,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['my-owner'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -161,7 +161,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: '123',
@@ -184,10 +184,139 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: {
         ...DEFAULT_FILTER_OPTIONS,
         search: 'test #123',
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
+  it('merges search-bar extendedFieldFilters with picker filters and strips matched tokens from search', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(
+      () =>
+        useGetCases({
+          filterOptions: {
+            search: 'Escalate:true free text',
+            extendedFieldFilters: [{ label: 'Customer Facing', value: 'false' }],
+          },
+        }),
+      {
+        wrapper: (props) => <TestProviders {...props} />,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: 'free text',
+        extendedFieldFilters: [
+          { label: 'Customer Facing', value: 'false' },
+          { label: 'Escalate', value: 'true' },
+        ],
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
+  it('ignores search-bar extendedFieldFilters with empty values', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(
+      () =>
+        useGetCases({
+          filterOptions: {
+            search: 'Escalate:"" free text',
+          },
+        }),
+      {
+        wrapper: (props) => <TestProviders {...props} />,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: 'free text',
+        extendedFieldFilters: [],
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
+  it('retains valid search-bar extendedFieldFilters alongside empty values', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(
+      () =>
+        useGetCases({
+          filterOptions: {
+            search: 'Escalate:"" Customer:true free text',
+          },
+        }),
+      {
+        wrapper: (props) => <TestProviders {...props} />,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: 'free text',
+        extendedFieldFilters: [{ label: 'Customer', value: 'true' }],
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
+  it('dedupes overlapping search-bar and picker extendedFieldFilters', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(
+      () =>
+        useGetCases({
+          filterOptions: {
+            search: 'Escalate:true',
+            extendedFieldFilters: [{ label: 'Escalate', value: 'true' }],
+          },
+        }),
+      {
+        wrapper: (props) => <TestProviders {...props} />,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: '',
+        extendedFieldFilters: [{ label: 'Escalate', value: 'true' }],
         owner: ['securitySolution'],
       },
       queryParams: DEFAULT_QUERY_PARAMS,

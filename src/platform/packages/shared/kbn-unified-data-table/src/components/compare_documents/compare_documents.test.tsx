@@ -67,7 +67,6 @@ const renderCompareDocuments = ({
       ariaDescribedBy="test"
       ariaLabelledBy="test"
       dataView={dataViewWithTimefieldMock}
-      isPlainRecord={false}
       selectedFieldNames={['message', 'extension', 'bytes']}
       selectedDocIds={['0', '1', '2']}
       schemaDetectors={[]}
@@ -101,7 +100,7 @@ describe('CompareDocuments', () => {
       Object {
         "aria-describedby": "test",
         "aria-labelledby": "test",
-        "className": "css-d1lkc2-useComparisonCss-useComparisonCss",
+        "className": "css-q5zi8p-indicatorCss",
         "columnVisibility": Object {
           "setVisibleColumns": [Function],
           "visibleColumns": Array [

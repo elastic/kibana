@@ -11,21 +11,26 @@ import React from 'react';
 import type { EuiTableProps } from '@elastic/eui';
 import { EuiTable, EuiTableBody, EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 import { FormattedValue } from './formatted_value';
+import type { RenderKeyValue } from './formatted_value';
 import type { KeyValuePair } from './utils/get_flattened_key_value_pairs';
+
+const KEY_COLUMN_WIDTH = '24em';
 
 export function KeyValueTable({
   keyValuePairs,
   tableProps = {},
   dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS',
   dateTimezone = 'Browser',
+  renderValue,
 }: {
   keyValuePairs: KeyValuePair[];
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
   dateFormat?: string;
   dateTimezone?: string;
+  renderValue?: RenderKeyValue;
 }) {
   return (
-    <EuiTable compressed {...tableProps}>
+    <EuiTable compressed tableLayout="fixed" {...tableProps}>
       <EuiTableBody>
         {keyValuePairs.map(({ key, value }) => {
           const asArray = castArray(value);
@@ -35,16 +40,19 @@ export function KeyValueTable({
                 value={asArray[0]}
                 dateFormat={dateFormat}
                 dateTimezone={dateTimezone}
+                fieldKey={key}
+                renderValue={renderValue}
               />
             ) : (
               <ul>
                 {asArray.map((val, index) => (
-                  <li>
+                  <li key={`${key}-${String(val)}-${index}`}>
                     <FormattedValue
-                      key={index}
                       value={val}
                       dateFormat={dateFormat}
                       dateTimezone={dateTimezone}
+                      fieldKey={key}
+                      renderValue={renderValue}
                     />
                   </li>
                 ))}
@@ -53,7 +61,7 @@ export function KeyValueTable({
 
           return (
             <EuiTableRow key={key}>
-              <EuiTableRowCell style={{ whiteSpace: 'nowrap' }}>
+              <EuiTableRowCell width={KEY_COLUMN_WIDTH}>
                 <strong data-test-subj="dot-key">{key}</strong>
               </EuiTableRowCell>
               <EuiTableRowCell data-test-subj="value">{valueList}</EuiTableRowCell>

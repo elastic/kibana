@@ -25,14 +25,14 @@ export const createAgentHandler = ({
       agentParams: {
         nextInput,
         conversation,
-        source,
-        capabilities,
+        origin,
+        author,
         browserApiTools,
         structuredOutput,
         outputSchema,
         configurationOverrides,
-        action,
         executionId,
+        roundId,
       },
       runId,
       abortSignal,
@@ -43,8 +43,8 @@ export const createAgentHandler = ({
       {
         nextInput,
         conversation,
-        source,
-        capabilities,
+        origin,
+        author,
         runId,
         abortSignal,
         agentId: agent.id,
@@ -53,8 +53,8 @@ export const createAgentHandler = ({
         structuredOutput,
         outputSchema,
         configurationOverrides,
-        action,
         executionId,
+        roundId,
       },
       context
     );

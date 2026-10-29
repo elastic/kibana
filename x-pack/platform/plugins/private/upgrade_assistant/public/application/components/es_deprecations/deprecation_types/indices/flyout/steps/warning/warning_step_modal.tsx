@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiSpacer,
   EuiTitle,
@@ -21,6 +20,7 @@ import {
   EuiText,
   EuiCode,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
@@ -227,7 +227,7 @@ const WarningReadOnlyModalStep: React.FunctionComponent<WarningModalStepProps> =
         {isMLAnomalyIndex && <MlAnomalyCallout />}
         {warnings.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount={false}
               title={
                 <FormattedMessage
@@ -235,16 +235,15 @@ const WarningReadOnlyModalStep: React.FunctionComponent<WarningModalStepProps> =
                   defaultMessage="Enable compatibility by setting this index to read-only"
                 />
               }
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutDetail"
-                  defaultMessage="Note that any attempts to insert new documents or update existing ones will fail. You can choose to reindex after upgrading if needed, to convert the index into a writable one."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutDetail"
+                    defaultMessage="Note that any attempts to insert new documents or update existing ones will fail. You can choose to reindex after upgrading if needed, to convert the index into a writable one."
+                  />
+                </p>
+              }
+            />
 
             <EuiSpacer />
 

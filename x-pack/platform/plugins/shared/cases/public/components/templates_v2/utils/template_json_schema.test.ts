@@ -6,6 +6,7 @@
  */
 
 import { getTemplateDefinitionJsonSchema } from './template_json_schema';
+import { FieldType } from '../../../../common/types/domain/template/fields';
 
 type JsonSchemaObject = Record<string, unknown>;
 
@@ -346,6 +347,194 @@ describe('getTemplateDefinitionJsonSchema', () => {
       const severityEnum = (props.severity as JsonSchemaObject).enum as unknown[] | undefined;
 
       expect(severityEnum).toEqual(expect.arrayContaining(['low', 'medium', 'high', 'critical']));
+    });
+  });
+
+  describe('metadata key strictness', () => {
+    const getBranchMetadata = (branch: JsonSchemaObject): JsonSchemaObject | undefined => {
+      const directProps = branch.properties as JsonSchemaObject | undefined;
+      if (directProps?.metadata) {
+        return directProps.metadata as JsonSchemaObject;
+      }
+      if (Array.isArray(branch.allOf)) {
+        for (const entry of branch.allOf as JsonSchemaObject[]) {
+          const metadata = (entry.properties as JsonSchemaObject | undefined)?.metadata as
+            | JsonSchemaObject
+            | undefined;
+          if (metadata) {
+            return metadata;
+          }
+        }
+      }
+      return undefined;
+    };
+
+    it('marks metadata objects as additionalProperties:false so Monaco flags misspelled keys', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branches = getFieldsOneOfBranches(schema);
+
+      const metadataObjects = branches
+        .map(({ branch }) => getBranchMetadata(branch))
+        .filter((metadata): metadata is JsonSchemaObject => metadata?.type === 'object');
+
+      expect(metadataObjects.length).toBeGreaterThan(0);
+      for (const metadata of metadataObjects) {
+        expect(metadata.additionalProperties).toBe(false);
+      }
+    });
+
+    it('keeps each control real metadata keys allowed (so additionalProperties:false never false-flags them)', () => {
+      // Because metadata is locked to additionalProperties:false, any real metadata key the renderer
+      // supports must be present as a named property — otherwise Monaco would wrongly flag it as "not
+      // allowed". This guards against a future control prop being dropped from the Zod named props.
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branches = getFieldsOneOfBranches(schema);
+
+      const metadataKeysFor = (control: string): string[] => {
+        const branch = branches.find(({ controlConst }) => controlConst === control);
+        const metadata = branch ? getBranchMetadata(branch.branch) : undefined;
+        return Object.keys((metadata?.properties as JsonSchemaObject | undefined) ?? {});
+      };
+
+      // `default` is honored at runtime for a date picker, so it must be an allowed key.
+      expect(metadataKeysFor('DATE_PICKER')).toEqual(
+        expect.arrayContaining(['show_time', 'timezone', 'default'])
+      );
+      expect(metadataKeysFor('USER_PICKER')).toEqual(expect.arrayContaining(['multiple']));
+      expect(metadataKeysFor('TEXTAREA')).toEqual(expect.arrayContaining(['markdown']));
+      expect(metadataKeysFor('MARKDOWN')).toEqual(expect.arrayContaining(['content']));
+      expect(metadataKeysFor('TOGGLE')).toEqual(expect.arrayContaining(['default']));
+    });
+
+    it('includes both options and default in the SELECT_BASIC metadata schema', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branches = getFieldsOneOfBranches(schema);
+
+      const selectBranch = branches.find(({ controlConst }) => controlConst === 'SELECT_BASIC');
+      expect(selectBranch).toBeDefined();
+
+      const metadata = getBranchMetadata(selectBranch!.branch);
+      const metadataProps = metadata?.properties as JsonSchemaObject | undefined;
+
+      expect(metadataProps?.options).toBeDefined();
+      expect(metadataProps?.default).toBeDefined();
+    });
+
+    // Every control whose value flows through useYamlFormSync honors `metadata.default` at runtime.
+    // Because metadata is locked to additionalProperties:false, each such control MUST declare
+    // `default` as a named property — otherwise the editor false-flags a working default (the
+    // DATE_PICKER regression). Parametrized so a newly-added control can't silently reintroduce it.
+    const valueBearingControls = Object.values(FieldType).filter(
+      (control) => control !== FieldType.MARKDOWN
+    );
+
+    it.each(valueBearingControls)('allows default in the %s metadata schema', (control) => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branch = getFieldsOneOfBranches(schema).find(
+        ({ controlConst }) => controlConst === control
+      );
+      expect(branch).toBeDefined();
+
+      const metadata = getBranchMetadata(branch!.branch);
+      expect((metadata?.properties as JsonSchemaObject | undefined)?.default).toBeDefined();
+    });
+
+    it('omits default for the display-only MARKDOWN control (it holds no value)', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const branch = getFieldsOneOfBranches(schema).find(
+        ({ controlConst }) => controlConst === FieldType.MARKDOWN
+      );
+      expect(branch).toBeDefined();
+
+      const metadata = getBranchMetadata(branch!.branch);
+      expect((metadata?.properties as JsonSchemaObject | undefined)?.default).toBeUndefined();
+    });
+  });
+
+  describe('defaultSnippets (field-type scaffolding autocomplete)', () => {
+    interface Snippet {
+      label: string;
+      description?: string;
+      body: JsonSchemaObject;
+    }
+
+    const getFieldSnippets = (): Snippet[] => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
+      const itemsSchema = fieldsSchema.items as JsonSchemaObject;
+      return itemsSchema.defaultSnippets as Snippet[];
+    };
+
+    it('attaches a defaultSnippet for every field control plus a $ref reference', () => {
+      const snippets = getFieldSnippets();
+      expect(Array.isArray(snippets)).toBe(true);
+
+      const controls = snippets
+        .map(({ body }) => body.control)
+        .filter((control): control is string => typeof control === 'string');
+
+      // Every control the field catalog supports is offered as a ready-to-edit snippet.
+      for (const control of Object.values(FieldType)) {
+        expect(controls).toContain(control);
+      }
+
+      // …and a `$ref` snippet exists for library references (no `control`).
+      const refSnippet = snippets.find(({ body }) => '$ref' in body);
+      expect(refSnippet).toBeDefined();
+      expect(refSnippet!.body.$ref).toEqual(expect.any(String));
+    });
+
+    it('gives every snippet a human-readable label and body', () => {
+      const snippets = getFieldSnippets();
+      for (const { label, body } of snippets) {
+        expect(typeof label).toBe('string');
+        expect(label.length).toBeGreaterThan(0);
+        expect(body).toBeInstanceOf(Object);
+      }
+    });
+
+    it('scaffolds the required metadata for controls that need it', () => {
+      const snippets = getFieldSnippets();
+      const byControl = (control: string) => snippets.find(({ body }) => body.control === control);
+
+      const select = byControl(FieldType.SELECT_BASIC);
+      expect((select!.body.metadata as JsonSchemaObject).options).toBeDefined();
+
+      const markdown = byControl(FieldType.MARKDOWN);
+      expect((markdown!.body.metadata as JsonSchemaObject).content).toBeDefined();
+    });
+
+    it('includes type on every field-control snippet (the schema requires it for all inline controls)', () => {
+      // The generated schema marks `type` required on every control branch (incl. MARKDOWN, whose
+      // Zod default doesn't drop it from `required`). A control snippet that omits `type` inserts a
+      // field the editor immediately flags "missing property type" — this guards that regression.
+      const controlSnippets = getFieldSnippets().filter(
+        ({ body }) => typeof body.control === 'string'
+      );
+      expect(controlSnippets.length).toBeGreaterThan(0);
+      for (const { body } of controlSnippets) {
+        expect(body.type).toBeDefined();
+      }
+    });
+
+    it('exposes $ref as a completable key on a field entry', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const fieldsSchema = (schema.properties as JsonSchemaObject)?.fields as JsonSchemaObject;
+      const itemsSchema = fieldsSchema.items as JsonSchemaObject;
+      const props = itemsSchema.properties as JsonSchemaObject;
+
+      expect(props.$ref).toBeDefined();
+      expect((props.$ref as JsonSchemaObject).type).toBe('string');
+    });
+
+    it('offers an assignee (uid) snippet', () => {
+      const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
+      const assignees = (schema.properties as JsonSchemaObject)?.assignees as JsonSchemaObject;
+      const itemsSchema = assignees.items as JsonSchemaObject;
+      const snippets = itemsSchema.defaultSnippets as Snippet[];
+
+      expect(Array.isArray(snippets)).toBe(true);
+      expect(snippets[0].body.uid).toEqual(expect.any(String));
     });
   });
 });

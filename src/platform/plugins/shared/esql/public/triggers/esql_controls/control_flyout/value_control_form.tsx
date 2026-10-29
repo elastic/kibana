@@ -9,15 +9,16 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiFormLabel,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ESQLColumn } from '@kbn/es-types';
 import type { TimeRange } from '@kbn/es-query';
 import {
   ESQLVariableType,
@@ -33,8 +34,8 @@ import {
   getESQLResults,
   getIndexPatternFromESQLQuery,
 } from '@kbn/esql-utils';
+import { ESQLValuesPreview } from '@kbn/esql-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { isEqual } from 'lodash';
@@ -44,7 +45,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { reportEsqlError } from '@kbn/esql-editor';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
-import { ChooseColumnPopover } from './choose_column_popover';
 import { ControlLabel, ControlSelectionType } from './shared_form_components';
 
 interface ValueControlFormProps {
@@ -126,10 +126,11 @@ export function ValueControlForm({
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
-  const [queryColumns, setQueryColumns] = useState<string[]>(
-    valuesRetrieval ? [valuesRetrieval] : []
+  const [queryColumns, setQueryColumns] = useState<ESQLColumn[]>(
+    valuesRetrieval ? [{ name: valuesRetrieval, type: 'keyword' as const }] : []
   );
   const [showValuesPreview, setShowValuesPreview] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [label, setLabel] = useState(initialState?.title ?? '');
 
   const shouldDefaultToMultiSelect = variableType === ESQLVariableType.MULTI_VALUES;
@@ -182,6 +183,7 @@ export function ValueControlForm({
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
+      setIsLoading(true);
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
         const results = await getESQLResults({
@@ -197,7 +199,7 @@ export function ValueControlForm({
         if (!isMounted() || controller.signal.aborted) {
           return;
         }
-        const columns = results.response.columns.map((col) => col.name);
+        const columns = results.response.columns;
         setQueryColumns(columns);
         setShowValuesPreview(true);
 
@@ -217,6 +219,7 @@ export function ValueControlForm({
           setEsqlQueryErrors([]);
           setIsValid(true);
         } else {
+          setEsqlQueryErrors([]);
           setIsValid(false);
         }
 
@@ -228,6 +231,7 @@ export function ValueControlForm({
         setIsValid(false);
         setEsqlQueryErrors([e]);
       }
+      setIsLoading(false);
     },
     [isMounted, search, timeRange, esqlVariables, core.uiSettings, setIsValid]
   );
@@ -342,72 +346,36 @@ export function ValueControlForm({
             isLoading={false}
             esqlVariables={esqlVariables}
           />
-          {showValuesPreview && (
-            <EuiFormRow
-              label={i18n.translate('esql.flyout.previewValues.placeholder', {
-                defaultMessage: 'Values preview',
-              })}
-              fullWidth
+          {isLoading ? (
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="xl"
               css={css`
-                margin-block-start: ${theme.euiTheme.size.base};
+                text-align: center;
               `}
             >
-              <>
-                {queryColumns.length === 0 && (
-                  <EuiCallOut
-                    announceOnMount
-                    title={i18n.translate('esql.flyout.displayNoValuesForControlCallout.title', {
-                      defaultMessage:
-                        "This query isn't returning any values. Edit it and run it again.",
-                    })}
-                    color="warning"
-                    iconType="warning"
-                    size="s"
-                    data-test-subj="esqlNoValuesForControlCallout"
-                  />
-                )}
-                {queryColumns.length === 1 && (
-                  <EuiPanel
-                    paddingSize="s"
-                    color="primary"
-                    css={css`
-                      white-space: wrap;
-                      overflow-y: auto;
-                      max-height: 200px;
-                    `}
-                    data-test-subj="esqlValuesPreview"
-                  >
-                    {selectedValues.map((value) => value.label).join(', ')}
-                  </EuiPanel>
-                )}
-                {queryColumns.length > 1 && (
-                  <EuiCallOut
-                    announceOnMount
-                    title={i18n.translate('esql.flyout.displayMultipleColsCallout.title', {
-                      defaultMessage: 'Your query must return a single column',
-                    })}
-                    color="warning"
-                    iconType="warning"
-                    size="s"
-                    data-test-subj="esqlMoreThanOneColumnCallout"
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="esql.flyout.displayMultipleColsCallout.description"
-                        defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
-                        values={{
-                          totalColumns: queryColumns.length,
-                          boldText: <strong>STATS BY</strong>,
-                          chooseColumnPopover: (
-                            <ChooseColumnPopover columns={queryColumns} updateQuery={updateQuery} />
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiCallOut>
-                )}
-              </>
-            </EuiFormRow>
+              <EuiLoadingSpinner size="l" />
+            </EuiPanel>
+          ) : (
+            showValuesPreview && (
+              <EuiFormRow
+                label={i18n.translate('esql.flyout.previewValues.placeholder', {
+                  defaultMessage: 'Values preview',
+                })}
+                fullWidth
+                css={css`
+                  margin-block-start: ${theme.euiTheme.size.base};
+                `}
+              >
+                <ESQLValuesPreview
+                  values={selectedValues.map((v) => v.label)}
+                  columns={queryColumns}
+                  error={esqlQueryErrors?.[0]}
+                  updateQuery={updateQuery}
+                />
+              </EuiFormRow>
+            )
           )}
         </>
       )}

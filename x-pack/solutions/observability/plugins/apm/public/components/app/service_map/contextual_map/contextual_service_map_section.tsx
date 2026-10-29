@@ -5,17 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
+import { invalidLicenseMessage } from '../../../../../common/service_map';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
+import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
+import { LicensePrompt } from '../../../shared/license_prompt';
+import { APM_EBT_ACTIONS } from '../../ebt_constants';
+import { DisabledPrompt } from '../disabled_prompt';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
-import {
-  CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
-  CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES,
-} from './constants';
+import { EXPLORE_IN_SERVICE_MAP_LABEL } from './i18n';
+import { useContextualServiceMapState } from './use_contextual_service_map_state';
 
 export const DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT = 400;
 
@@ -23,17 +30,19 @@ const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.contextualServiceMap.p
   defaultMessage: 'Service map',
 });
 
-const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
-  'xpack.apm.contextualServiceMap.panel.exploreInServiceMap',
-  { defaultMessage: 'Explore in Service map' }
-);
-
 export interface ContextualServiceMapSectionProps {
   serviceName: string;
   rangeFrom: string;
   rangeTo: string;
   environment: string;
   kuery: string;
+  /**
+   * Seeded as filter-bar pills on the global map Explore link (and embeddable
+   * full-map href). Use for non-Controls fields such as transaction.name/type.
+   */
+  filterPills?: Array<{ field: string; value: string }>;
+  /** Initial query scope for the service flyout opened from this map (e.g. the host page's filters). */
+  flyoutOptions?: ServiceFlyoutOptions;
   /** Fixed graph area height when `sectionHeight` is not set. */
   panelHeight?: number;
   /** Fixed outer panel height; map graph fills remaining space below header controls. */
@@ -51,6 +60,8 @@ export function ContextualServiceMapSection({
   rangeTo,
   environment,
   kuery,
+  filterPills,
+  flyoutOptions,
   panelHeight = DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT,
   sectionHeight,
   embeddableMinHeight,
@@ -58,53 +69,65 @@ export function ContextualServiceMapSection({
   exploreLinkTestSubj = 'apmContextualServiceMapExploreInServiceMap',
   embeddableContainerTestSubj = 'apmContextualServiceMapEmbeddableContainer',
 }: ContextualServiceMapSectionProps) {
-  const { core } = useApmPluginContext();
-  const [baseMaxHops, setBaseMaxHops] = useState(CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS);
-  const [maxVisibleNodes, setMaxVisibleNodes] = useState(CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES);
-  const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => new Set());
-
-  const resetExpansions = useCallback(() => {
-    setExpandedNodeIds(new Set());
-  }, []);
-
-  const onExpand = useCallback((nodeId: string) => {
-    setExpandedNodeIds((prev) => {
-      const next = new Set(prev);
-      next.add(nodeId);
-      return next;
-    });
-  }, []);
-
-  const onCollapse = useCallback((nodeId: string) => {
-    setExpandedNodeIds((prev) => {
-      const next = new Set(prev);
-      next.delete(nodeId);
-      return next;
-    });
-  }, []);
-
-  const onBaseMaxHopsChange = useCallback(
-    (value: number) => {
-      setBaseMaxHops(value);
-      resetExpansions();
-    },
-    [resetExpansions]
-  );
-
-  const onMaxVisibleNodesChange = useCallback(
-    (value: number) => {
-      setMaxVisibleNodes(value);
-      resetExpansions();
-    },
-    [resetExpansions]
-  );
-
-  useEffect(() => {
-    resetExpansions();
-  }, [serviceName, resetExpansions]);
+  const license = useLicenseContext();
+  const { core, config } = useApmPluginContext();
+  const {
+    baseMaxHops,
+    maxVisibleNodes,
+    expandedNodeIds,
+    hasExpandedNodes,
+    onExpand,
+    onCollapse,
+    onBaseMaxHopsChange,
+    onMaxVisibleNodesChange,
+    resetExpansions,
+  } = useContextualServiceMapState({ serviceName });
 
   if (!serviceName) {
     return null;
+  }
+
+  if (!license) {
+    return null;
+  }
+
+  const hasValidLicense = isActivePlatinumLicense(license);
+  const isServiceMapEnabled = config.serviceMapEnabled;
+
+  if (!hasValidLicense || !isServiceMapEnabled) {
+    const unavailablePrompt = isServiceMapEnabled ? (
+      <LicensePrompt text={invalidLicenseMessage} />
+    ) : (
+      <DisabledPrompt />
+    );
+
+    return (
+      <EuiPanel
+        hasBorder
+        data-test-subj={sectionTestSubj}
+        css={
+          sectionHeight !== undefined
+            ? {
+                height: sectionHeight,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }
+            : undefined
+        }
+      >
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>{SERVICE_MAP_PANEL_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ maxWidth: 600, alignSelf: 'center', width: '100%' }}>
+            {unavailablePrompt}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
   }
 
   const fullMapHref = getServiceMapUrl(core, {
@@ -113,6 +136,7 @@ export function ContextualServiceMapSection({
     environment,
     kuery,
     serviceName,
+    filterPills,
   });
 
   const titleRow = (
@@ -123,7 +147,14 @@ export function ContextualServiceMapSection({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink href={fullMapHref} data-test-subj={exploreLinkTestSubj}>
+        <EuiLink
+          href={fullMapHref}
+          data-test-subj={exploreLinkTestSubj}
+          {...getEbtProps({
+            action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
+            element: SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK,
+          })}
+        >
           {EXPLORE_IN_SERVICE_MAP_LABEL}
         </EuiLink>
       </EuiFlexItem>
@@ -137,7 +168,7 @@ export function ContextualServiceMapSection({
       onBaseMaxHopsChange={onBaseMaxHopsChange}
       onMaxVisibleNodesChange={onMaxVisibleNodesChange}
       onCollapseAll={resetExpansions}
-      hasExpandedNodes={expandedNodeIds.size > 0}
+      hasExpandedNodes={hasExpandedNodes}
     />
   );
 
@@ -158,6 +189,8 @@ export function ContextualServiceMapSection({
         environment={environment}
         kuery={kuery}
         serviceName={serviceName}
+        filterPills={filterPills}
+        flyoutOptions={flyoutOptions}
         core={core}
         enableContextualMap
         contextualMapBaseMaxHops={baseMaxHops}

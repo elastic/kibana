@@ -21,17 +21,21 @@ import {
   RuleFormCircuitBreakerError,
   RuleFormErrorPromptWrapper,
   RuleFormResolveRuleError,
+  RuleFormRulePermissionError,
   RuleFormRuleTypeError,
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
-import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
+import {
+  getAvailableRuleTypes,
+  getEditRulePermissions,
+  parseRuleCircuitBreakerErrorMessage,
+} from './utils';
 import type { RuleFormStepId } from './constants';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
 export interface EditRuleFormProps {
   id: string;
   plugins: RuleFormPlugins;
-  showMustacheAutocompleteSwitch?: boolean;
   connectorFeatureId?: string;
   isFlyout?: boolean;
   onCancel?: () => void;
@@ -46,7 +50,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   const {
     id,
     plugins,
-    showMustacheAutocompleteSwitch = false,
     connectorFeatureId = 'alerting',
     onCancel,
     onSubmit,
@@ -122,18 +125,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
-  const canEditRule = useMemo(() => {
-    if (!ruleType || !fetchedFormData) {
-      return false;
-    }
-
-    const { consumer, actions } = fetchedFormData;
-    const hasAllPrivilege = !!ruleType.authorizedConsumers[consumer]?.all;
-    const canExecuteActions = !!application.capabilities.actions?.execute;
-
-    return hasAllPrivilege && (canExecuteActions || (!canExecuteActions && !actions.length));
-  }, [ruleType, fetchedFormData, application]);
-
   const computedInitialMetadata = useMemo(() => {
     // Injecting isEdit only for esquery rules to enable this feature: https://github.com/elastic/kibana/issues/226839
     // to minimize possible changes to other ruletypes
@@ -178,7 +169,22 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
+  const { canEditRule, canEditActions } = getEditRulePermissions({
+    ruleType,
+    consumer: fetchedFormData.consumer,
+    hasActions: fetchedFormData.actions.length > 0,
+    canExecuteActions: !!application.capabilities.actions?.execute,
+  });
+
   if (!canEditRule) {
+    return (
+      <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
+        <RuleFormRulePermissionError />
+      </RuleFormErrorPromptWrapper>
+    );
+  }
+
+  if (!canEditActions) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
         <RuleFormActionPermissionError />
@@ -235,7 +241,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
         }).map(({ ruleType: rt }) => rt),
         flappingSettings,
         validConsumers: DEFAULT_VALID_CONSUMERS,
-        showMustacheAutocompleteSwitch,
       }}
     >
       <RuleFormUIComponent

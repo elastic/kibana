@@ -72,6 +72,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const prevInterval: string[] = [];
 
   for await (const response of rulesFinder.find()) {
@@ -96,6 +97,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
           skipped,
           errors,
           username,
+          profileUid,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );

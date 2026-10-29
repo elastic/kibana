@@ -7,17 +7,13 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { MlRoute } from '../../router';
 import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
-import { MlPageHeader } from '../../../components/page_header';
-import { PageTitle } from '../../../components/page_title';
 
 const ModelsList = dynamic(async () => ({
   default: (await import('../../../model_management/models_list')).ModelsList,
@@ -38,7 +34,6 @@ export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute =>
       }),
     },
   ],
-  enableDatePicker: true,
   'data-test-subj': 'mlPageModelManagement',
 });
 
@@ -49,18 +44,6 @@ const PageWrapper: FC = () => {
   });
   return (
     <PageLoader context={context}>
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.modelManagement.trainedModelsHeader"
-              defaultMessage="Trained Models"
-            />
-          }
-        />
-      </MlPageHeader>
-
-      <EuiSpacer size="m" />
       <ModelsList />
     </PageLoader>
   );

@@ -149,10 +149,10 @@ describe('correctness evaluator', () => {
     });
   });
 
-  it('registers correctness in the evaluator registry', () => {
-    const registry = createEvaluatorRegistry();
+  it('registers correctness in the evaluator registry', async () => {
+    const scoped = createEvaluatorRegistry().asScoped({ spaceId: 'default' });
 
-    expect(registry.get('correctness')).toBeDefined();
-    expect(registry.list()).toHaveLength(6);
+    await expect(scoped.get('correctness')).resolves.toBeDefined();
+    await expect(scoped.list()).resolves.toHaveLength(6);
   });
 });

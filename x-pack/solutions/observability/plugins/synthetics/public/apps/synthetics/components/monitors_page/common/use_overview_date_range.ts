@@ -6,13 +6,13 @@
  */
 
 import { useLocation } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { useAbsoluteDate } from '../../../hooks';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 
 const { OVERVIEW_DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
 
-const firstValue = (value: string | string[] | null): string | undefined =>
+const firstValue = (value: string | Array<string | null> | null): string | undefined =>
   (Array.isArray(value) ? value[0] : value) ?? undefined;
 
 /**
@@ -25,7 +25,7 @@ const firstValue = (value: string | string[] | null): string | undefined =>
  */
 export function useOverviewDateRange() {
   const { search } = useLocation();
-  const params = parse(search[0] === '?' ? search.slice(1) : search);
+  const params = queryString.parse(search[0] === '?' ? search.slice(1) : search);
 
   return {
     dateRangeStart: firstValue(params.dateRangeStart) || OVERVIEW_DATE_RANGE_START,

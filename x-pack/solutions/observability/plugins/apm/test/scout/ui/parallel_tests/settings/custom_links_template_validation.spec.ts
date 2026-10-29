@@ -6,13 +6,12 @@
  */
 
 import { randomUUID } from 'crypto';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import {
   createTemplateLinkFromSettings,
-  deleteCustomLinkIfExists,
+  deleteCustomLinksByLabel,
   getExpectedTemplateUrl,
   TEMPLATE_URL,
 } from '../../fixtures/custom_links_helpers';
@@ -32,10 +31,8 @@ test.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    test.afterEach(async ({ page, pageObjects: { customLinksPage } }) => {
-      for (const label of createdLabels) {
-        await deleteCustomLinkIfExists(customLinksPage, page, label);
-      }
+    test.afterEach(async ({ kbnClient }) => {
+      await deleteCustomLinksByLabel(kbnClient, [...createdLabels]);
       createdLabels.clear();
     });
 
@@ -103,18 +100,16 @@ test.describe(
       await expect(page.getByTestId('service.name.value')).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
-      const serviceNameComboBox = new EuiComboBoxWrapper(page, {
-        dataTestSubj: 'service.name.value',
-      });
-      expect(await serviceNameComboBox.getSelectedValue()).toBe(SERVICE_SYNTH_NODE_1);
+      const serviceNameComboBox = page.components.comboBox('service.name.value');
+      const [serviceNameValue] = await serviceNameComboBox.getSelectedOptions();
+      expect(serviceNameValue).toBe(SERVICE_SYNTH_NODE_1);
 
       await expect(page.getByTestId('service.environment.value')).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
-      const serviceEnvComboBox = new EuiComboBoxWrapper(page, {
-        dataTestSubj: 'service.environment.value',
-      });
-      expect(await serviceEnvComboBox.getSelectedValue()).toBe(PRODUCTION_ENVIRONMENT);
+      const serviceEnvComboBox = page.components.comboBox('service.environment.value');
+      const [serviceEnvValue] = await serviceEnvComboBox.getSelectedOptions();
+      expect(serviceEnvValue).toBe(PRODUCTION_ENVIRONMENT);
 
       await customLinksPage.fillLabel(defaultLabel);
       await customLinksPage.fillUrl(TEMPLATE_URL);
@@ -126,9 +121,8 @@ test.describe(
       await customLinksPage.clickSave();
 
       await transactionDetailsPage.openActionMenu();
-      await expect(page.getByRole('link', { name: defaultLabel })).toBeVisible({
-        timeout: EXTENDED_TIMEOUT,
-      });
+      const defaultLink = await transactionDetailsPage.revealCustomLink(defaultLabel);
+      await expect(defaultLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       expect(await transactionDetailsPage.getCustomLinkHref(defaultLabel)).toBe(expectedUrl);
     });
   }

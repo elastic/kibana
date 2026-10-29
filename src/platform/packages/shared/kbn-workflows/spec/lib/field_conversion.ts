@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type { Document } from 'yaml';
 import { parseDocument } from 'yaml';
 import {
@@ -16,7 +16,10 @@ import {
 } from '../builtin_workflow_input_definitions';
 import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
-import type { JsonSchema } from '../schema/common/json_model_shape_schema';
+import {
+  isSchemaValuedAdditionalProperties,
+  type JsonSchema,
+} from '../schema/common/json_model_shape_schema';
 import {
   isManualTrigger,
   type LegacyWorkflowInput,
@@ -27,10 +30,19 @@ export type NormalizableFieldSchema =
   | JsonModelSchemaType
   | Array<LegacyWorkflowInput | WorkflowOutput>;
 
-export type RenderInputValue = (value: unknown) => unknown;
+/**
+ * Indicates whether an input value comes from the workflow schema or the caller.
+ */
+export type RenderInputValueSource = 'default' | 'provided';
 
-function renderValue(value: unknown, renderInputValue?: RenderInputValue): unknown {
-  return renderInputValue ? renderInputValue(value) : value;
+export type RenderInputValue = (value: unknown, source: RenderInputValueSource) => unknown;
+
+function renderValue(
+  value: unknown,
+  renderInputValue: RenderInputValue | undefined,
+  source: RenderInputValueSource
+): unknown {
+  return renderInputValue ? renderInputValue(value, source) : value;
 }
 
 /**
@@ -133,6 +145,18 @@ export function normalizeFieldsToJsonSchema(
     }
   }
 
+  if (
+    typeof fields === 'object' &&
+    fields !== null &&
+    !Array.isArray(fields) &&
+    'additionalProperties' in fields &&
+    isSchemaValuedAdditionalProperties(
+      (fields as { additionalProperties?: unknown }).additionalProperties
+    )
+  ) {
+    return fields as JsonModelSchemaType;
+  }
+
   if (Array.isArray(fields)) {
     return convertLegacyFieldsToJsonSchema(fields as LegacyWorkflowInput[]);
   }
@@ -224,7 +248,7 @@ function applyDefaultToObjectProperty(
 ): unknown {
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
-      return renderValue(prop.default, renderInputValue);
+      return renderValue(prop.default, renderInputValue, 'default');
     }
     if (prop.type === 'object' && prop.properties) {
       return applyDefaultFromSchema(prop, undefined, inputsSchema, renderInputValue);
@@ -241,7 +265,7 @@ function applyDefaultToObjectProperty(
     return applyDefaultFromSchema(prop, currentValue, inputsSchema, renderInputValue);
   }
 
-  return renderValue(currentValue, renderInputValue);
+  return renderValue(currentValue, renderInputValue, 'provided');
 }
 
 /**
@@ -414,12 +438,12 @@ function applyDefaultFromSchema(
         renderInputValue
       );
     }
-    return renderValue(value, renderInputValue);
+    return renderValue(value, renderInputValue, 'provided');
   }
 
   // If value is not provided, use default if available
   if (schema.default !== undefined) {
-    return renderValue(schema.default, renderInputValue);
+    return renderValue(schema.default, renderInputValue, 'default');
   }
 
   // For objects, create object with defaults for required properties or properties with defaults
@@ -438,8 +462,37 @@ function applyDefaultFromSchema(
   return undefined;
 }
 
+const hasPropertyDefault = (
+  propertySchema: JSONSchema7Definition | undefined,
+  rootSchema: JsonModelSchemaType
+): boolean => {
+  if (!propertySchema || typeof propertySchema !== 'object') {
+    return false;
+  }
+  const resolvedSchema = propertySchema.$ref
+    ? resolveRef(propertySchema.$ref, rootSchema) ?? propertySchema
+    : propertySchema;
+  return resolvedSchema.default !== undefined;
+};
+
+/**
+ * Drops top-level inputs with a default from `required`, so plain JSON Schema validators
+ * (e.g. Monaco) accept omitting them the same way applyInputDefaults fills them in.
+ */
+export function omitRequiredWithDefaults(schema: JsonModelSchemaType): JsonModelSchemaType {
+  const { required, properties } = schema as JSONSchema7;
+  if (!required || !properties) {
+    return schema;
+  }
+  return {
+    ...schema,
+    required: required.filter((key) => !hasPropertyDefault(properties[key], schema)),
+  } as JsonModelSchemaType;
+}
+
 /**
  * Applies default values from JSON Schema to workflow inputs
+ * Keep in sync with omitRequiredWithDefaults when changing which inputs receive defaults.
  * @param inputs - The actual input values provided (may be partial or undefined)
  * @param inputsSchema - The normalized JSON Schema inputs definition
  * @returns The inputs with defaults applied

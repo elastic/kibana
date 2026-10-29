@@ -95,6 +95,53 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('logs custom fields from the task under kibana.task.data in the task-run event', async () => {
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        params: {
+          addEventFields: {
+            alert_event_count: 5,
+            source: 'sample-source',
+            nested: { value: 'sample-value' },
+          },
+        },
+      });
+      currentTaskId = scheduledTask.id;
+
+      await runTaskSoon({ id: scheduledTask.id });
+
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana-event-log*',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.provider': 'taskManager' } },
+                { term: { 'event.action': 'task-run' } },
+                { term: { 'kibana.task.id': scheduledTask.id } },
+                { term: { 'event.outcome': 'success' } },
+              ],
+            },
+          },
+        });
+        expect(response.hits.hits.length).to.eql(1);
+
+        const event = response.hits.hits[0]._source as Record<string, any>;
+        // custom fields provided by the task
+        expect(event.kibana.task.data).to.eql({
+          alert_event_count: 5,
+          source: 'sample-source',
+          nested: { value: 'sample-value' },
+        });
+        // task manager owned fields
+        expect(event.event.action).to.eql('task-run');
+        expect(event.event.outcome).to.eql('success');
+        expect(event.kibana.task.id).to.eql(scheduledTask.id);
+        expect(event.kibana.task.type).to.eql('sampleTask');
+        expect(event.kibana.task.execution.uuid).to.be.a('string');
+      });
+    });
+
     it('logs a task-run event when a task fails', async () => {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',

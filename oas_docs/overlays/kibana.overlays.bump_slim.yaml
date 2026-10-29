@@ -1,8 +1,9 @@
 overlay: 1.0.0
 info:
-  title: Bump slim overlay — replace Dashboards & Visualizations with tech-preview placeholders
+  title: Bump slim overlay for external Dashboards & Visualizations references
   version: 0.0.1
-  # ⚠️  TEMPORARY — retire this file when Dashboards & Visualizations APIs reach GA.
+  # ⚠️  TEMPORARY — retire this file when the primary API docs can render the full
+  # Dashboards and Visualizations schemas.
   # See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
   # Current external hosting: https://elastic.github.io/dashboards-api-spec/
 
@@ -11,7 +12,7 @@ actions:
   # DASHBOARDS
   # Strategy: strip each operation down to just a redirect notice.
   # - Remove real operation (parameters, requestBody, responses, description)
-  # - Re-inject a minimal shell with the tech-preview notice as the sole description
+  # - Re-inject a minimal shell with the external-reference notice as the sole description
   # This keeps every endpoint visible in the Bump nav while rendering nothing
   # except the link to the external full reference.
   #
@@ -22,7 +23,7 @@ actions:
   # and the endpoints would disappear from the nav entirely.
   # ──────────────────────────────────────────────
 
-  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
+  # Keep these URLs aligned with the external API documentation.
   - target: "$.paths['/api/dashboards'].get"
     description: "Strip GET /api/dashboards down to redirect notice"
     remove: true
@@ -35,10 +36,10 @@ actions:
       get:
         tags:
           - Dashboards
-        summary: "Get dashboards"
-        operationId: get-dashboards-redirect
+        summary: "Search dashboards"
+        operationId: search-dashboards
         description: |
-          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
@@ -48,9 +49,9 @@ actions:
         tags:
           - Dashboards
         summary: "Create a dashboard"
-        operationId: create-dashboard-redirect
+        operationId: create-dashboard
         description: |
-          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
@@ -73,9 +74,9 @@ actions:
         tags:
           - Dashboards
         summary: "Get a dashboard"
-        operationId: get-dashboard-redirect
+        operationId: get-dashboard
         description: |
-          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
@@ -84,10 +85,10 @@ actions:
       put:
         tags:
           - Dashboards
-        summary: "Update a dashboard"
-        operationId: update-dashboard-redirect
+        summary: "Upsert a dashboard"
+        operationId: upsert-dashboard
         description: |
-          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
@@ -97,9 +98,9 @@ actions:
         tags:
           - Dashboards
         summary: "Delete a dashboard"
-        operationId: delete-dashboard-redirect
+        operationId: delete-dashboard
         description: |
-          > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
         responses:
@@ -110,7 +111,7 @@ actions:
   # VISUALIZATIONS — same strategy.
   # ──────────────────────────────────────────────
 
-  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
+  # Keep these URLs aligned with the external API documentation.
   - target: "$.paths['/api/visualizations'].get"
     description: "Strip GET /api/visualizations down to redirect notice"
     remove: true
@@ -123,10 +124,10 @@ actions:
       get:
         tags:
           - Visualizations
-        summary: "Get visualizations"
-        operationId: get-visualizations-redirect
+        summary: "Search visualizations"
+        operationId: search-visualizations
         description: |
-          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
@@ -135,10 +136,10 @@ actions:
       post:
         tags:
           - Visualizations
-        summary: "Create a visualization"
-        operationId: create-visualization-redirect
+        summary: "Create visualization"
+        operationId: create-visualization
         description: |
-          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
@@ -160,10 +161,10 @@ actions:
       get:
         tags:
           - Visualizations
-        summary: "Get a visualization"
-        operationId: get-visualization-redirect
+        summary: "Get visualization"
+        operationId: get-visualization
         description: |
-          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
@@ -172,10 +173,10 @@ actions:
       put:
         tags:
           - Visualizations
-        summary: "Update a visualization"
-        operationId: update-visualization-redirect
+        summary: "Upsert visualization"
+        operationId: upsert-visualization
         description: |
-          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
@@ -184,10 +185,10 @@ actions:
       delete:
         tags:
           - Visualizations
-        summary: "Delete a visualization"
-        operationId: delete-visualization-redirect
+        summary: "Delete visualization"
+        operationId: delete-visualization
         description: |
-          > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          > This documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
         responses:
@@ -197,19 +198,19 @@ actions:
   # ──────────────────────────────────────────────
   # Tag-level descriptions (section intro above the operations list).
   # ──────────────────────────────────────────────
-  # ⚠️  TODO before tech preview GA: update the URLs below.
+  # Keep these URLs aligned with the external API documentation.
   - target: '$.tags[?(@.name=="Dashboards")]'
-    description: "Replace Dashboards tag description with tech-preview notice"
+    description: "Replace Dashboards tag description with external-reference notice"
     update:
       description: |
-        > **Technical preview** — The Dashboards API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
 
   - target: '$.tags[?(@.name=="Visualizations")]'
-    description: "Replace Visualizations tag description with tech-preview notice"
+    description: "Replace Visualizations tag description with external-reference notice"
     update:
       description: |
-        > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+        > This documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**

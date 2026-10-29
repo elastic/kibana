@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { stringify } from 'yaml';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getSpaceUrlPrefix } from '../../../../common/lib/api';
 import {
@@ -17,13 +18,17 @@ import {
 } from '../../../../common/lib/authentication/users';
 
 const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
+const TEMPLATES_URL = '/internal/cases/templates';
 
-const buildCreateBody = (overrides: Record<string, unknown> = {}) => ({
-  name: 'priority',
-  owner: 'securitySolutionFixture',
-  definition: 'name: priority\ncontrol: SELECT_BASIC\ntype: keyword\n',
-  ...overrides,
-});
+const buildCreateBody = (overrides: Record<string, unknown> = {}) => {
+  const name = (overrides.name as string) ?? 'priority';
+  return {
+    name,
+    owner: 'securitySolutionFixture',
+    definition: `name: ${name}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+    ...overrides,
+  };
+};
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -78,6 +83,17 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
       });
 
+      it('returns 400 when a field-library definition is a reference', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(buildCreateBody({ definition: '$ref: existing_field\n' }))
+          .expect(400);
+
+        expect(body.message).to.contain('Invalid field definition');
+      });
+
       it('returns 409 when a field definition with the same name already exists', async () => {
         await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
@@ -92,6 +108,22 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send(buildCreateBody())
           .expect(409);
+      });
+
+      it('returns 400 when the name attribute does not match the YAML name', async () => {
+        const { body } = await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              name: 'not_priority',
+              definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            })
+          )
+          .expect(400);
+
+        expect(body.message).to.contain('must match the name in the YAML definition');
       });
 
       it('name conflict check is case-insensitive', async () => {
@@ -250,7 +282,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send(
             buildCreateBody({
-              definition: 'name: priority\ncontrol: SELECT_BASIC\ntype: keyword\nlabel: Priority\n',
+              definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\nlabel: Priority\n',
             })
           )
           .expect(200);
@@ -267,19 +299,99 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(403);
       });
 
-      it('returns 409 when updating to a name already used by another definition', async () => {
-        await supertest
-          .post(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}`)
-          .set('kbn-xsrf', 'true')
-          .send(buildCreateBody({ name: 'severity' }))
-          .expect(200);
-
-        await supertestWithoutAuth
+      it('rejects a rename with a structured field_identity_immutable 409', async () => {
+        // FAILURE SCENARIO: renaming "priority" would orphan every case value
+        // stored under priority_as_keyword and break Cases analytics.
+        const { body } = await supertestWithoutAuth
           .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
           .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
           .set('kbn-xsrf', 'true')
-          .send(buildCreateBody({ name: 'severity' }))
+          .send(
+            buildCreateBody({
+              name: 'severity',
+              definition: 'name: severity\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            })
+          )
           .expect(409);
+
+        expect(body.statusCode).to.eql(409);
+        expect(body.error).to.eql('Conflict');
+        expect(body.message).to.contain('name and type determine how its values are stored');
+        expect(body.attributes).to.eql({
+          code: 'field_identity_immutable',
+          changed: ['name'],
+        });
+      });
+
+      it('rejects a type change with a structured field_identity_immutable 409', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              definition: 'name: priority\ncontrol: INPUT_NUMBER\ntype: integer\n',
+            })
+          )
+          .expect(409);
+
+        expect(body.attributes).to.eql({
+          code: 'field_identity_immutable',
+          changed: ['type'],
+        });
+      });
+
+      it('rejects a combined name and type change listing both changed parts', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              name: 'severity',
+              definition: 'name: severity\ncontrol: INPUT_NUMBER\ntype: integer\n',
+            })
+          )
+          .expect(409);
+
+        expect(body.attributes).to.eql({
+          code: 'field_identity_immutable',
+          changed: ['name', 'type'],
+        });
+      });
+
+      it('returns 400 when the name attribute does not match the YAML name', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              name: 'priority',
+              definition: 'name: severity\ncontrol: INPUT_TEXT\ntype: keyword\n',
+            })
+          )
+          .expect(400);
+
+        expect(body.message).to.contain('must match the name in the YAML definition');
+      });
+
+      it('allows a metadata-only update that keeps the identity', async () => {
+        const { body } = await supertestWithoutAuth
+          .put(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .send(
+            buildCreateBody({
+              description: 'updated description',
+              definition:
+                'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\nlabel: "New Label"\nvalidation:\n  required: true\n',
+            })
+          )
+          .expect(200);
+
+        expect(body.name).to.eql('priority');
+        expect(body.description).to.eql('updated description');
       });
 
       it('allows renaming a definition to its own current name', async () => {
@@ -343,6 +455,91 @@ export default ({ getService }: FtrProviderContext): void => {
           .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
           .set('kbn-xsrf', 'true')
           .expect(404);
+      });
+
+      it('returns 409 when an active template references the field via $ref', async () => {
+        // FAILURE SCENARIO: deleting "priority" while "Incident Template" has $ref: priority in its definition
+        await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Incident Template',
+            owner: 'securitySolutionFixture',
+            definition: stringify({
+              name: 'Incident Template',
+              fields: [{ $ref: 'priority' }],
+            }),
+            isEnabled: true,
+          })
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .delete(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .expect(409);
+
+        expect(body.message).to.contain('"Incident Template"');
+      });
+
+      it('returns 409 when a template references the field via $ref with a local name alias', async () => {
+        // FAILURE SCENARIO: The template uses { $ref: 'priority', name: 'custom_priority' }.
+        // The `fieldDefinitions` keyword cache stores "custom_priority" as the resolved name.
+        // A query against the cache would miss this ref. The hybrid approach (match_phrase
+        // pre-filter + YAML parse) finds the $ref: priority value correctly regardless.
+        // The alias must satisfy the authoring charset (letters, digits, underscores) — it
+        // replaces the library field's name and becomes part of the storage key.
+        await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Aliased Ref Template',
+            owner: 'securitySolutionFixture',
+            definition: stringify({
+              name: 'Aliased Ref Template',
+              fields: [{ $ref: 'priority', name: 'custom_priority' }],
+            }),
+            isEnabled: true,
+          })
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .delete(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .expect(409);
+
+        expect(body.message).to.contain('"Aliased Ref Template"');
+      });
+
+      it('succeeds when the only referencing template has been deleted', async () => {
+        // Create a template that references the field, then soft-delete it
+        const { body: templateBody } = await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'Deleted Template',
+            owner: 'securitySolutionFixture',
+            definition: stringify({
+              name: 'Deleted Template',
+              fields: [{ $ref: 'priority' }],
+            }),
+            isEnabled: true,
+          })
+          .expect(200);
+
+        await supertest
+          .post(`${getSpaceUrlPrefix('space1')}${TEMPLATES_URL}/_bulk_delete`)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [templateBody.templateId] })
+          .expect(204);
+
+        // Field definition can now be deleted because the only referencing template is gone
+        await supertestWithoutAuth
+          .delete(`${getSpaceUrlPrefix('space1')}${FIELD_DEFINITIONS_URL}/${fieldDefinitionId}`)
+          .auth(secOnlyManageTemplates.username, secOnlyManageTemplates.password)
+          .set('kbn-xsrf', 'true')
+          .expect(204);
       });
     });
   });

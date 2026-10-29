@@ -16,6 +16,7 @@ import type { FileKind } from '../../../common/types';
 import type { CreateRouteDefinition } from '../../../common/api_routes';
 import { MaxByteSizeExceededError } from '../../file_client/stream_transforms/max_byte_size_transform/errors';
 import { FILES_API_ROUTES } from '../api_routes';
+import { fileId } from '../common_schemas';
 import { fileErrors } from '../../file';
 import { getById } from './helpers';
 import type { FileKindRouter } from './types';
@@ -25,7 +26,7 @@ export const method = 'put' as const;
 
 const rt = {
   params: schema.object({
-    id: schema.string(),
+    id: fileId,
   }),
   body: schema.stream() as Type<unknown>,
   query: schema.object({

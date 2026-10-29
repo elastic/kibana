@@ -15,6 +15,7 @@ import { ScheduleTypeSelector } from './schedule_type_selector';
 import { SplayTimeField } from './splay_time_field';
 import { StartDateField } from './start_date_field';
 import { StopAfterField } from './stop_after_field';
+import { ONE_DAY_MS, floorTo30Min, roundUpTo30Min } from './slot_utils';
 import {
   ADVANCED_PARTS_ADVISORY_BODY,
   ADVANCED_PARTS_ADVISORY_TITLE,
@@ -45,9 +46,10 @@ export interface ScheduleSectionProps {
   showErrors?: boolean;
 }
 
-const weekdaysAreValid = (data: ScheduleFormData): boolean => {
-  if (data.scheduleType !== 'rrule') return true;
+const weekdaysAreValid = (data: ScheduleFormData, scheduleType: ScheduleType): boolean => {
+  if (scheduleType !== 'rrule') return true;
   if (data.recurrence.frequency !== 'custom') return true;
+  if ((data.recurrence.repeatUnit ?? 'weeks') !== 'weeks') return true;
 
   return data.recurrence.byweekday.length > 0;
 };
@@ -62,6 +64,22 @@ export const ScheduleSection = ({
 }: ScheduleSectionProps) => {
   const handleTypeChange = useCallback(
     (scheduleType: ScheduleType) => {
+      // Re-seed startDate only when it's stale, not just because we're entering
+      // rrule mode — otherwise a valid startDate from an earlier rrule session
+      // gets clobbered by an interval -> rrule round trip.
+      const isStale = value.startDate.getTime() < floorTo30Min(new Date()).getTime();
+      if (scheduleType === 'rrule' && value.scheduleType !== 'rrule' && isStale) {
+        const startDate = roundUpTo30Min(new Date());
+        onChange({
+          ...value,
+          scheduleType,
+          startDate,
+          stopAfter: { ...value.stopAfter, date: new Date(startDate.getTime() + ONE_DAY_MS) },
+        });
+
+        return;
+      }
+
       onChange({ ...value, scheduleType });
     },
     [onChange, value]
@@ -110,12 +128,16 @@ export const ScheduleSection = ({
     return null;
   }
 
-  const isRecurrence = value.scheduleType === 'rrule';
+  // A locked section belongs to the pack, not to the value it was handed: the
+  // selector already presents the locked mode, so the fields below have to
+  // match it or the two halves of the section describe different schedules.
+  const effectiveScheduleType = lockedScheduleType ?? value.scheduleType;
+  const isRecurrence = effectiveScheduleType === 'rrule';
   const hasUnknownParts =
     isRecurrence &&
     !!value.recurrence._unknown &&
     Object.keys(value.recurrence._unknown).length > 0;
-  const weekdaysError = !weekdaysAreValid(value);
+  const weekdaysError = !weekdaysAreValid(value, effectiveScheduleType);
 
   return (
     <div data-test-subj="osquery-schedule-section">
@@ -129,7 +151,7 @@ export const ScheduleSection = ({
       ) : null}
 
       <ScheduleTypeSelector
-        value={value.scheduleType}
+        value={effectiveScheduleType}
         onChange={handleTypeChange}
         lockedScheduleType={lockedScheduleType}
         disabled={disabled}

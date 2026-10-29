@@ -15,6 +15,7 @@
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
+    "@kbn/cases-plugin",
   ],
   "exclude": [
     "target/**/*",

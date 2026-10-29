@@ -40,7 +40,7 @@ export const PresentationPanelTitle = ({
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }) => {
   const { euiTheme } = useEuiTheme();
   const isEditableTitle = viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api);
@@ -52,6 +52,20 @@ export const PresentationPanelTitle = ({
     });
   }, [api]);
 
+  /**
+   * Ensures the flyout opens on Enter across all browsers, since some browsers (e.g. Safari)
+   * do not fire click events when Enter is pressed on <a> elements without an href.
+   */
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault(); // prevent `onClick` event from firing and causing a double flyout
+        onClick();
+      }
+    },
+    [onClick]
+  );
+
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
 
@@ -61,6 +75,14 @@ export const PresentationPanelTitle = ({
 
       .kbnGridPanel--active & {
         pointer-events: none; // prevent drag event from triggering onClick
+      }
+    `;
+    const editableTitleStyles = css`
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        text-decoration: none;
       }
     `;
 
@@ -85,7 +107,8 @@ export const PresentationPanelTitle = ({
       <EuiLink
         color="text"
         onClick={onClick}
-        css={titleStyles}
+        onKeyDown={onKeyDown}
+        css={[titleStyles, editableTitleStyles]}
         aria-label={i18n.translate('embeddableApi.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
           values: { title: panelTitle },
@@ -97,6 +120,7 @@ export const PresentationPanelTitle = ({
     );
   }, [
     onClick,
+    onKeyDown,
     hideTitle,
     panelTitle,
     isEditableTitle,

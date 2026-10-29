@@ -76,7 +76,7 @@ export function getPreconfiguredFleetServerHostFromConfig(
       ? [
           {
             id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
-            name: 'Internal Fleet Server for agentless',
+            name: 'Internal Fleet Server for managed integrations',
             host_urls: cloudServerHosts,
             is_default: false,
             is_preconfigured: true,
@@ -193,6 +193,8 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       await fleetServerHostService.update(soClient, esClient, id, data, {
         fromPreconfiguration: true,
         secretHashes,
+        // the Kibana config file declares the whole host: a secret it no longer names is removed
+        declaresAllSecrets: true,
       });
       await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, id, {
         isDefault: data.is_default,

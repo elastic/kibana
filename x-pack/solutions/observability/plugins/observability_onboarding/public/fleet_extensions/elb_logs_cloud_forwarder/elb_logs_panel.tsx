@@ -21,6 +21,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
+import { useLocation } from 'react-router-dom';
+import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
+import { reportAwsOnboardingDeployClicked } from '@kbn/fleet-plugin/common';
 import {
   buildCloudFormationUrl,
   buildS3BucketArn,
@@ -35,9 +39,13 @@ interface CloudForwarderFlowResponse {
 
 interface ElbLogsPanelProps {
   http: Pick<HttpStart, 'post'>;
+  analytics?: AnalyticsServiceStart;
 }
 
-export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
+export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http, analytics }) => {
+  const location = useLocation();
+  const routeState = location.state as CreatePackagePolicyRouteState | undefined;
+  const isAwsQuickstart = routeState?.telemetrySource === 'aws_quickstart';
   const [isEnabled, setIsEnabled] = useState(false);
   const [s3BucketName, setS3BucketName] = useState('');
   const [flowData, setFlowData] = useState<CloudForwarderFlowResponse | null>(null);
@@ -89,6 +97,14 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
           buildS3BucketArn(trimmedBucketName)
         )
       : undefined;
+
+  const handleLaunchStack = useCallback(() => {
+    if (!isAwsQuickstart || !analytics) return;
+    // S3 bucket name is user input (PII risk) — we do NOT include it in the payload.
+    // credentials_added is NOT emitted here: on the CloudFormation path the user enters
+    // AWS credentials directly in the AWS console, not in Kibana.
+    reportAwsOnboardingDeployClicked(analytics, sessionStorage, { path: 'aws_cloudformation' });
+  }, [isAwsQuickstart, analytics]);
 
   return (
     <>
@@ -197,10 +213,12 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
                     data-test-subj="fleetIntegrationElbLogsLaunchStackButton"
                     href={cloudFormationHref}
                     target="_blank"
+                    rel="noopener noreferrer"
                     iconSide="right"
                     iconType="external"
                     size="s"
                     isDisabled={!isValidS3BucketName(trimmedBucketName)}
+                    onClick={handleLaunchStack}
                   >
                     {i18n.translate(
                       'xpack.observability_onboarding.fleetIntegration.elbLogs.launchStackButtonLabel',

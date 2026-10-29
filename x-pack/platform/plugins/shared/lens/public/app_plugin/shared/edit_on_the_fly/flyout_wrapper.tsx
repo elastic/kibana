@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -23,7 +24,7 @@ import {
   EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
@@ -31,6 +32,10 @@ import type { FlyoutWrapperProps } from './types';
 
 const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
   defaultMessage: 'Apply and close',
+});
+
+const closeConfigurationLabel = i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
+  defaultMessage: 'Close configuration',
 });
 
 export const FlyoutWrapper = ({
@@ -49,8 +54,26 @@ export const FlyoutWrapper = ({
   applyButtonDisabledTooltip,
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
+  /**
+   * EUI clips right flyouts at -50% of their width, and project chrome replaces
+   * it with a rounded inset(0 0 0 -50%). On narrow flyouts that cuts the
+   * drag-drop extras, so extend the left edge by the extra-target gutter and
+   * keep chrome's rounded right corners.
+   */
+  const customizeLensClipPathFix = css`
+    body
+      .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
+        [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
+      ) {
+      clip-path: inset(
+        0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame} ${euiTheme
+            .border.radius.frame} 0
+      ) !important;
+    }
+  `;
   return (
     <>
+      <Global styles={customizeLensClipPathFix} />
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
           hasBorder={false}
@@ -60,7 +83,7 @@ export const FlyoutWrapper = ({
           `}
           data-test-subj="editFlyoutHeader"
         >
-          {/* Header row 1: Title */}
+          {/* Header row 1: Title + close (same onCancel as footer Cancel) */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
@@ -98,6 +121,17 @@ export const FlyoutWrapper = ({
                   </EuiFlexGroup>
                 </h2>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={closeConfigurationLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="text"
+                  iconType="cross"
+                  onClick={onCancel}
+                  data-test-subj="euiFlyoutCloseButton"
+                  aria-label={closeConfigurationLabel}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />

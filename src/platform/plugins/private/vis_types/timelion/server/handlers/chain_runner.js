@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import parseSheet from './lib/parse_sheet';
+import preProcessChainFn from './lib/preprocess_chain';
 import repositionArguments from './lib/reposition_arguments';
 import indexArguments from './lib/index_arguments';
 import validateTime from './lib/validate_time';
@@ -34,7 +35,7 @@ const MAX_SERIES_PER_SHEET = 100;
 const MAX_RESOLVE_DEPTH = 10;
 
 export default function chainRunner(tlConfig) {
-  const preprocessChain = require('./lib/preprocess_chain')(tlConfig);
+  const preprocessChain = preProcessChainFn(tlConfig);
 
   let queryCache = {};
   const stats = {};

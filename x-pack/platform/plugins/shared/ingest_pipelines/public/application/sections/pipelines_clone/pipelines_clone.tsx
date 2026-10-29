@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 
 import { normalizePipelineNameFromParams } from '../../lib/normalize_pipeline_name_from_params';
+import { PipelineAppHeader } from '../../components';
 import { PipelinesCreate } from '../pipelines_create';
 import { getErrorText } from '../utils';
 
@@ -51,12 +52,21 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   if (isLoading && isInitialRequest) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
-          defaultMessage="Loading pipeline…"
+      <>
+        <PipelineAppHeader
+          title={i18n.translate('xpack.ingestPipelines.create.pageTitle', {
+            defaultMessage: 'Create pipeline',
+          })}
+          history={props.history}
+          docLink={services.documentation.getCreatePipelineUrl()}
         />
-      </SectionLoading>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.ingestPipelines.clone.loadingPipelinesDescription"
+            defaultMessage="Loading pipeline…"
+          />
+        </SectionLoading>
+      </>
     );
   } else {
     // We still show the create form even if we were not able to load the

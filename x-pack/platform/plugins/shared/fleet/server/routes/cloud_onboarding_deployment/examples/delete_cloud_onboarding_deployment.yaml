@@ -19,3 +19,14 @@ responses:
               statusCode: 400
               error: 'Bad Request'
               message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundResponseExample:
+            description: 'The requested cloud onboarding deployment does not exist'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found'

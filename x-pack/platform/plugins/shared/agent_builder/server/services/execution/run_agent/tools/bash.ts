@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import { createOtherResult } from '@kbn/agent-builder-server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { IBashService } from '@kbn/agent-builder-server/runner';
 import { SAFEGUARD_TOKEN_COUNT } from '../bash/output_truncation';
 
@@ -94,6 +94,10 @@ Most notable limitations:
 - No -R/--raw-input: use awk/sed/grep for non-JSON text.
 - If a flag or function errors as unsupported, adapt — don't retry it.
 
+### code execution
+
+There is **no** code execution available in the bash environment. Python, node, exec-js are **not** available.
+
 ## Guidelines
 
 - Prefer bash tool for composition, piping, and writing files. Prefer other VFS tools (read_file, list_files...) when they are sufficient for the task.
@@ -116,7 +120,7 @@ export const createBashTool = ({
   bashService,
 }: {
   bashService: IBashService;
-}): BuiltinToolDefinition<typeof schema> => {
+}): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.bash,
     description,
@@ -127,6 +131,16 @@ export const createBashTool = ({
     maxResultTokens: SAFEGUARD_TOKEN_COUNT * 2,
     handler: async ({ command }) => {
       const result = await bashService.exec(command);
+      if (result.exit_code !== 0 && result.stderr) {
+        return {
+          results: [
+            createErrorResult({
+              message: `Command exited with code ${result.exit_code}`,
+              metadata: { ...result },
+            }),
+          ],
+        };
+      }
       return { results: [createOtherResult(result)] };
     },
   };

@@ -6,21 +6,18 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { isEmpty } from 'lodash';
 import {
   buildDataTableRecord,
   type DataTableRecord,
   type EsHitRecord,
   getFieldValue,
 } from '@kbn/discover-utils';
-import { isNonLocalIndexName } from '@kbn/es-query';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/main/constants/local_storage';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { RULE_PREVIEW_BANNER, RulePreviewPanelKey } from '../../../rule_details/right';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -30,10 +27,8 @@ import { EventKindDescription } from '../../../../flyout_v2/document/main/compon
 import { EventRenderer } from '../../../../flyout_v2/document/main/components/event_renderer';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/main/components/alert_description';
-import {
-  ABOUT_SECTION_TEST_ID,
-  ABOUT_SECTION_TITLE,
-} from '../../../../flyout_v2/document/main/components/about_section';
+import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/main/components/about_section';
+import { ABOUT_SECTION_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
 import { AlertStatus } from '../../../../flyout_v2/document/main/components/alert_status';
 import { AlertReason } from '../../../../flyout_v2/document/main/components/alert_reason';
 import { MitreAttack } from '../../../../flyout_v2/document/main/components/mitre_attack';
@@ -48,25 +43,16 @@ const KEY = 'about';
  */
 export const AboutSection = memo(() => {
   const { telemetry } = useKibana().services;
-  const {
-    dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-    indexName,
-    isRulePreview,
-    scopeId,
-    searchHit,
-  } = useDocumentDetailsContext();
-  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
+  const { dataAsNestedObject, dataFormattedForFieldBrowser, scopeId, searchHit } =
+    useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
-  const { ruleId, ruleName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const hit: DataTableRecord = useMemo(
     () => buildDataTableRecord(searchHit as EsHitRecord),
     [searchHit]
   );
-
-  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
 
   const eventKind = useMemo(() => getFieldValue(hit, 'event.kind') as string, [hit]);
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
@@ -76,12 +62,6 @@ export const AboutSection = memo(() => {
     title: KEY,
     defaultValue: true,
   });
-
-  const ruleSummaryDisabled = useMemo(
-    () =>
-      isEmpty(ruleName) || isEmpty(ruleId) || isRulePreview || !canReadRules || isRemoteDocument,
-    [canReadRules, isRemoteDocument, isRulePreview, ruleId, ruleName]
-  );
 
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
@@ -101,11 +81,7 @@ export const AboutSection = memo(() => {
   const content =
     eventKind === EventKind.signal ? (
       <>
-        <AlertDescription
-          hit={hit}
-          onShowRuleSummary={openRulePreview}
-          ruleSummaryDisabled={ruleSummaryDisabled}
-        />
+        <AlertDescription hit={hit} onShowRuleSummary={openRulePreview} />
         <AlertReason hit={hit} />
         <MitreAttack hit={hit} />
         <AlertStatus hit={hit} />

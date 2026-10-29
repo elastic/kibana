@@ -322,6 +322,50 @@ describe('runManualOrchestration', () => {
       );
     });
 
+    describe('when the caller disables the gate', () => {
+      const gateDisabledParams = {
+        ...baseParams,
+        trigger: 'workflow',
+        workflowConfig: {
+          ...baseParams.workflowConfig,
+          ground_truth_gate_enabled: false,
+          skill_enabled: false,
+        },
+      };
+
+      it('does not run the gate', async () => {
+        await runManualOrchestration(gateDisabledParams);
+
+        expect(mockRunGatePhase).not.toHaveBeenCalled();
+      });
+
+      it('forwards the retrieval result to the generation step unchanged', async () => {
+        await runManualOrchestration(gateDisabledParams);
+
+        expect(mockRunGenerationStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alertRetrievalResult: mockAlertRetrievalResult,
+          })
+        );
+      });
+
+      it('does not resume the skill report workflow', async () => {
+        await runManualOrchestration(gateDisabledParams);
+
+        expect(mockInvokeSkillReportWorkflow).not.toHaveBeenCalled();
+      });
+    });
+
+    it('runs the gate when the caller enables it explicitly', async () => {
+      await runManualOrchestration({
+        ...baseParams,
+        trigger: 'workflow',
+        workflowConfig: { ...baseParams.workflowConfig, ground_truth_gate_enabled: true },
+      });
+
+      expect(mockRunGatePhase).toHaveBeenCalled();
+    });
+
     it('fails closed and skips generation when the gate throws', async () => {
       mockRunGatePhase.mockRejectedValue(new Error('gate boom'));
 
@@ -442,7 +486,7 @@ describe('runManualOrchestration', () => {
 
     it('throws instead of returning a silent no_alerts outcome', async () => {
       await expect(runManualOrchestration(baseParams)).rejects.toThrow(
-        /sole source.*gate added 0 alerts/i
+        /No alerts were available to analyze for the selected time range/i
       );
     });
 

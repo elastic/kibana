@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { assertFlyoutChartsRendered } from '../../fixtures/service_flyout_helpers';
+import { assertFlyoutApmChartsRendered } from '../../fixtures/service_flyout_helpers';
 import {
   DEPENDENCY_POSTGRESQL,
   EDGE_OPBEANS_JAVA_TO_POSTGRESQL,
@@ -80,11 +80,7 @@ test.describe(
       expect(flyoutTitle).toContain(SERVICE_OPBEANS_JAVA);
       await expect(serviceFlyoutPage.content).toBeVisible();
 
-      await assertFlyoutChartsRendered(serviceFlyoutPage, [
-        'latency',
-        'throughput',
-        'failedTransactionRate',
-      ]);
+      await assertFlyoutApmChartsRendered(serviceFlyoutPage);
 
       await expect(serviceFlyoutPage.transactionsSection).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
@@ -107,16 +103,35 @@ test.describe(
       await expect(serviceFlyoutPage.flyout).toBeHidden();
     });
 
-    test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
+    test('opens the request flyout when clicking on an edge', async ({
+      pageObjects: { serviceMapPage },
+      page,
+    }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await serviceMapPage.openEdgePopover(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
-      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
-      await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText('Explore traces');
+      await serviceMapPage.openEdgeFlyout(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
 
-      const popoverTitle = await serviceMapPage.getPopoverTitle();
-      expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`);
+      await expect(serviceMapPage.requestFlyoutTitle).toHaveText(
+        `${SERVICE_OPBEANS_JAVA} → ${DEPENDENCY_POSTGRESQL}`
+      );
+
+      // The operations table loads the fixture's PostgreSQL operation and opens its child flyout.
+      const operationLink = page.testSubj
+        .locator('requestFlyoutOperationNameLink')
+        .filter({ hasText: 'SELECT * FROM product' });
+      await expect(operationLink).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      await operationLink.click();
+      await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toContainText(
+        'SELECT * FROM product',
+        { timeout: EXTENDED_TIMEOUT }
+      );
+
+      // The first Escape closes the operation child only, the second the request flyout itself.
+      await page.keyboard.press('Escape');
+      await expect(page.testSubj.locator('requestFlyoutOperationDetailHeader')).toBeHidden();
+      await expect(serviceMapPage.requestFlyout).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(serviceMapPage.requestFlyout).toBeHidden();
     });
 
     test('shows popover when clicking on a dependency node', async ({
@@ -133,7 +148,7 @@ test.describe(
       await expect(serviceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
     });
 
-    test('navigates to Discover (traces)', async ({
+    test('navigates to Discover (traces) from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage, discover, dataGrid },
     }) => {
@@ -143,14 +158,14 @@ test.describe(
 
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openTracesInDiscover');
+      await serviceFlyoutPage.clickFooterAction('openTracesInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
       await dataGrid.waitForDocTableRendered();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('traces-'));
     });
 
-    test('navigates to Discover (logs)', async ({
+    test('navigates to Discover (logs) from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage, discover, dataGrid },
     }) => {
@@ -160,14 +175,14 @@ test.describe(
 
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openLogsInDiscover');
+      await serviceFlyoutPage.clickFooterAction('openLogsInDiscover');
 
       await expect(page).toHaveURL(new RegExp(`/app/discover`));
       await dataGrid.waitForDocTableRendered();
       expect(await discover.getEsqlQueryValue()).toMatch(new RegExp('logs-'));
     });
 
-    test('navigates to Service Details (alerts) and page loads', async ({
+    test('navigates to Observability Alerts from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage },
     }) => {
@@ -176,13 +191,13 @@ test.describe(
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openAlerts');
+      await serviceFlyoutPage.clickFooterAction('openAlerts');
 
-      await expect(page).toHaveURL(new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/alerts`));
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`/app/observability/alerts`));
+      await expect(page.getByTestId('alertsPageWithData')).toBeVisible();
     });
 
-    test('navigates to SLOs and page loads', async ({
+    test('navigates to SLOs from flyout footer actions', async ({
       page,
       pageObjects: { serviceMapPage, serviceFlyoutPage },
     }) => {
@@ -191,7 +206,7 @@ test.describe(
       await serviceMapPage.openServiceNodeFlyout(SERVICE_OPBEANS_JAVA);
       await expect(serviceFlyoutPage.flyout).toBeVisible();
 
-      await serviceFlyoutPage.clickAction('openSlos');
+      await serviceFlyoutPage.clickFooterAction('openSlos');
 
       await expect(page).toHaveURL(new RegExp(`/app/slos`));
       await expect(
@@ -212,7 +227,7 @@ test.describe(
       await expect(page).toHaveURL(
         new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
       );
-      await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toBeVisible();
+      await expect(page.getByTestId('appHeaderTitle')).toBeVisible();
     });
 
     test('navigates to Dependency Details from popover', async ({

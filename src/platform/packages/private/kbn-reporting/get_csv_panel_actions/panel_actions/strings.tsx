@@ -14,6 +14,7 @@ import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_cli
 
 interface I18nStrings {
   displayName: string;
+  fallbackDiscoverTitle: string;
   toasts: {
     error: {
       title: string;
@@ -30,6 +31,9 @@ export const getI18nStrings = (apiClient: ReportingAPIClient): Record<'generate'
   generate: {
     displayName: i18n.translate('reporting.share.panelAction.generateCsvPanelTitle', {
       defaultMessage: 'Generate CSV report',
+    }),
+    fallbackDiscoverTitle: i18n.translate('reporting.share.panelAction.fallbackDiscoverTitle', {
+      defaultMessage: 'Untitled Discover session',
     }),
     toasts: {
       error: {

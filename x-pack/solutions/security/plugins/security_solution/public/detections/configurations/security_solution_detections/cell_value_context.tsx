@@ -8,7 +8,7 @@
 import React, { createContext, useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { PageScope } from '../../../data_view_manager/constants';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -17,6 +17,7 @@ import { getAllFieldsByName } from '../../../common/containers/source';
 import type { AlertColumnHeaders } from './columns';
 import { eventRenderedViewColumns, getColumns } from './columns';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface AlertTableCellContextProps {
   browserFields: BrowserFields;
@@ -35,7 +36,8 @@ export const AlertTableCellContextProvider = ({
   sourcererScope: PageScope;
   children: React.ReactNode;
 }) => {
-  const browserFields = useBrowserFields(sourcererScope);
+  const { dataView } = useDataView(sourcererScope);
+  const browserFields = useBrowserFields(dataView);
   const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const license = useLicense();
   const gridColumns = useMemo(() => {

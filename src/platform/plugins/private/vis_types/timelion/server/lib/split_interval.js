@@ -8,7 +8,7 @@
  */
 
 export default function splitInterval(interval) {
-  if (!interval.match(/[0-9]+[mshdwMy]+/g)) {
+  if (!interval.match(/^[0-9]+[mshdwMy]+$/)) {
     throw new Error('Malformed `interval`: ' + interval);
   }
   const parts = interval.match(/[0-9]+|[mshdwMy]+/g);

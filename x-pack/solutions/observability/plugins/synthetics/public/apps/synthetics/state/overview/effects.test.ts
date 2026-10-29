@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import sagaHelper from 'redux-saga-testing';
 import { call, put, select } from 'redux-saga/effects';
 import type {
   GetTrendPayload,
@@ -18,6 +17,24 @@ import { trendStatsBatch } from './actions';
 import { fetchOverviewTrendStats as trendsApi } from './api';
 import { selectOverviewTrends } from '.';
 import { selectOverviewStatus } from '../overview_status';
+import { RequestCancellationManager } from '../request_cancellation_manager';
+
+/**
+ * Minimal step-through saga test helper (replaces the `redux-saga-testing` package).
+ *
+ * Returns a wrapper around Jest's `it` that lazily advances the generator on each
+ * step: the yielded effect is passed to the callback, and the callback's return
+ * value is fed back into the generator on the next step.
+ */
+const sagaHelper = <T>(generator: IterableIterator<T>) => {
+  let input: unknown;
+  return (title: string, fn: (result: T) => unknown): void => {
+    it(title, () => {
+      const { value } = generator.next(input);
+      input = fn(value);
+    });
+  };
+};
 
 const TEST_TRENDS_LENGTH = 300;
 
@@ -72,6 +89,22 @@ describe('overview effects', () => {
 
     it('terminates', (result) => {
       expect(result).toBeUndefined();
+    });
+
+    it('marks a canceled batch as retryable', () => {
+      const request = { configId: 'monitor-1', locationIds: ['us-east'], schedule: '3' };
+      const manager = new RequestCancellationManager();
+      manager.startLoad();
+      const generator = fetchTrendEffect(trendStatsBatch.get([request]), manager);
+
+      expect(generator.next().value).toEqual(call(trendsApi, [request], manager.signal));
+
+      manager.cancel();
+
+      expect(generator.throw(new Error('canceled')).value).toEqual(
+        put(trendStatsBatch.fail([request]))
+      );
+      expect(generator.next().done).toBe(true);
     });
   });
 

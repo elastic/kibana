@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../../common/constants';
 import { DEFAULT_STACK_BY_FIELD } from '..';
 import { AlertSelection } from '../alert_selection';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -87,8 +88,6 @@ export const useSettingsView = ({
     useState<string>(DEFAULT_STACK_BY_FIELD);
   const [localConnectorId, setLocalConnectorId] = useState<string | undefined>(connectorId);
 
-  // Feature flag and workflow configuration
-  const [isWorkflowsEnabledFlag, setIsWorkflowsEnabledFlag] = useState<boolean>(false);
   const fetchDefaultEsqlQueryResult = useFetchDefaultEsqlQuery();
   const { resetCache: resetDefaultEsqlQueryCache } = fetchDefaultEsqlQueryResult;
   const {
@@ -109,17 +108,9 @@ export const useSettingsView = ({
 
   const workflowConfiguration = draftWorkflowConfiguration;
 
-  // Load feature flag value
-  useEffect(() => {
-    const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
-      );
-      setIsWorkflowsEnabledFlag(enabled);
-    };
-    loadFeatureFlag();
-  }, [featureFlags]);
+  const isWorkflowsEnabledFlag =
+    featureFlags.useBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   const isWorkflowsEnabled = isWorkflowsEnabledOverride ?? isWorkflowsEnabledFlag;
 

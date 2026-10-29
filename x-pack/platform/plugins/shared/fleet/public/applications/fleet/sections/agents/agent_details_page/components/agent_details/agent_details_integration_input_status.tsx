@@ -8,7 +8,8 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { InputStatusFormatter } from './input_status_utils';
 
@@ -21,17 +22,15 @@ export const AgentDetailsIntegrationInputStatus: React.FunctionComponent<{
   inputStatusFormatter: InputStatusFormatter;
 }> = memo(({ inputStatusFormatter }) => {
   return inputStatusFormatter.hasError ? (
-    <EuiCallOut
+    <KbnDangerCallout
       announceOnMount
       title={inputStatusFormatter.getErrorTitleFromStatus()}
-      color="danger"
-      iconType="error"
       data-test-subj="integrationInputErrorCallOut"
     >
       <StyledEuiText size="s" data-test-subj="integrationInputErrorDescription">
         {inputStatusFormatter.description}
       </StyledEuiText>
-    </EuiCallOut>
+    </KbnDangerCallout>
   ) : (
     <StyledEuiText size="s">{inputStatusFormatter.description}</StyledEuiText>
   );

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiRangeProps } from '@elastic/eui';
 import { EuiPanel, EuiIcon } from '@elastic/eui';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { SideEffectContext } from '../side_effect_context';
 import type { Vector2 } from '../../types';
 import * as selectors from '../../store/selectors';

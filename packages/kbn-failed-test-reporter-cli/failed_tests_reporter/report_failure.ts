@@ -7,12 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
-import type { TestFailure } from './get_failures';
+import type { ExistingFailedTestIssue, FlakySuiteIssue } from './existing_failed_test_issues';
+import {
+  NOT_AVAILABLE,
+  formatDurationFromTime,
+  formatDurationSeconds,
+  formatOwners,
+  getConfigPathFromCommandLine,
+} from './failure_details';
+import { isScoutFailure } from './failure_identity';
+import type { JUnitTestType, TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
-import type { GithubApi } from './github_api';
+import type { GithubApi, GithubIssueComment } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { withTestHistoryDashboardLink } from './test_history_dashboard';
 
 function redactHostnameSuffix(text: string, suffix: string): string {
   const escaped = suffix.replace(/\./g, '\\.');
@@ -38,10 +47,6 @@ export function redactSensitiveGithubFailureText(text: string): string {
   return out.replace(/\S+@elastic\.co\b/g, '<redacted>@elastic.co');
 }
 
-function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtended {
-  return 'id' in failure && 'target' in failure && 'location' in failure;
-}
-
 function truncateFailureBody(failure: string, maxCharacters: number = 8192): string {
   return failure.length <= maxCharacters
     ? failure
@@ -51,16 +56,87 @@ function truncateFailureBody(failure: string, maxCharacters: number = 8192): str
       ].join('\n');
 }
 
-function getFailureBodyFromIssueBody(body: string): string | undefined {
-  const match = body.match(/```[\r\n]+([\s\S]*?)[\r\n]+```/);
-  if (!match) {
-    return undefined;
+function getCodeBlocksFromText(text: string): string[] {
+  const blocks: string[] = [];
+  const codeBlockRe = /```[\r\n]+([\s\S]*?)[\r\n]+```/g;
+  let match: RegExpExecArray | null;
+  while ((match = codeBlockRe.exec(text)) !== null) {
+    blocks.push(match[1].trim());
   }
-
-  return match[1].trim();
+  return blocks;
 }
 
-const NOT_AVAILABLE = 'N/A';
+/**
+ * JUnit failure text is a single blob combining the error message and the stack
+ * trace. Extract just the message, i.e. everything before the first stack-frame
+ * line, falling back to the full blob when the heuristic yields nothing.
+ */
+export function extractErrorMessage(failureText: string): string {
+  const lines = failureText.split('\n');
+  const firstStackFrame = lines.findIndex((line) => /^\s+at /.test(line));
+  if (firstStackFrame === -1) {
+    return failureText.trim();
+  }
+  const message = lines.slice(0, firstStackFrame).join('\n').trim();
+  return message || failureText.trim();
+}
+
+interface ErrorMessageForComment {
+  /** redacted, truncated message to post; only set when the message is truly new */
+  newErrorMessage?: string;
+  /** true when the message is already present on the issue (body or a previous comment) */
+  alreadyReported: boolean;
+}
+
+/**
+ * Decide whether the current error message should be posted in the follow-up
+ * comment. It is included only when it is truly new: not already contained in
+ * any code block of the issue body or of any previous comment. When the
+ * message is a known one, `alreadyReported` lets the comment say so instead of
+ * silently omitting it.
+ */
+function getErrorMessageForComment(
+  issueBody: string,
+  comments: GithubIssueComment[],
+  errorMessage: string | undefined
+): ErrorMessageForComment {
+  const currentErrorMsg = errorMessage ? truncateFailureBody(errorMessage).trim() : '';
+  if (!currentErrorMsg) {
+    return { alreadyReported: false };
+  }
+
+  const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
+  // The current message from CI is raw. Historical blocks are usually already
+  // redacted (we redact before posting), but older issues may still hold raw
+  // text. Redacting them again is idempotent.
+  const alreadyReported = [issueBody, ...comments.map((comment) => comment.body)]
+    .flatMap(getCodeBlocksFromText)
+    .some((block) => redactSensitiveGithubFailureText(block).includes(redactedCurrent));
+
+  return alreadyReported
+    ? { alreadyReported }
+    : { newErrorMessage: redactedCurrent, alreadyReported };
+}
+
+const ALREADY_REPORTED_NOTE = 'Error message matches a failure already reported on this issue.';
+
+/**
+ * Render the part of a follow-up comment below the build link: the error
+ * message when it is new to this issue, a short note when it is a repeat of a
+ * known one, or nothing when no message was available to compare.
+ */
+function renderErrorMessageSection({
+  newErrorMessage,
+  alreadyReported,
+}: ErrorMessageForComment): string {
+  if (newErrorMessage) {
+    return `\n\nNew error message:\n\`\`\`\n${newErrorMessage}\n\`\`\``;
+  }
+  if (alreadyReported) {
+    return `\n\n${ALREADY_REPORTED_NOTE}`;
+  }
+  return '';
+}
 
 /**
  * Render a `| Field | Value |` markdown table. Shared by all test types so the
@@ -74,39 +150,13 @@ function renderDetailsTable(rows: Array<[string, string]>): string[] {
   ];
 }
 
-/**
- * Normalize a comma separated list of code owners so it renders consistently
- * regardless of whether the source joined with `,` (FTR) or `, ` (Scout).
+/*
+ * The `JUnit` functions below handle every failure that arrives as JUnit XML —
+ * FTR, Jest, and Cypress — as opposed to the `Scout` ones, which handle Scout's
+ * NDJSON failure reports.
  */
-function formatOwners(owners?: string): string {
-  if (!owners) {
-    return NOT_AVAILABLE;
-  }
-  const normalized = owners
-    .split(',')
-    .map((owner) => owner.trim())
-    .filter(Boolean)
-    .join(', ');
-  return normalized || NOT_AVAILABLE;
-}
 
-function formatDurationSeconds(seconds: number): string {
-  return `${seconds.toFixed(2)}s`;
-}
-
-/**
- * Duration is reported as a seconds string in JUnit reports, but is not always
- * present (and unit tests may pass non-numeric values).
- */
-function formatDurationFromTime(time?: string): string {
-  if (!time) {
-    return NOT_AVAILABLE;
-  }
-  const seconds = Number(time);
-  return Number.isFinite(seconds) ? formatDurationSeconds(seconds) : NOT_AVAILABLE;
-}
-
-function createFTRTitle(failure: TestFailure, prependTitle: string): string {
+function createJUnitTitle(failure: TestFailure, prependTitle: string): string {
   if (prependTitle && prependTitle.trim() !== '') {
     return `Failing test: ${prependTitle} ${failure.classname} - ${failure.name}`;
   }
@@ -117,7 +167,7 @@ function createScoutTitle(failure: ScoutTestFailureExtended): string {
   return `Failing test: ${failure.classname} - ${failure.name}`;
 }
 
-function createFTRBody(
+function createJUnitBody(
   failure: TestFailure,
   buildUrl: string,
   branch: string,
@@ -157,16 +207,10 @@ function createFTRBody(
     metadata['test.type'] = failure.testType;
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), metadata);
-}
-
-/**
- * Extract the config path from a command line, e.g. the Playwright/FTR `--config` flag.
- */
-function getConfigPathFromCommandLine(command?: string): string {
-  if (!command) return NOT_AVAILABLE;
-  const configMatch = command.match(/--config(?:=|\s+)(\S+)/);
-  return configMatch ? configMatch[1] : NOT_AVAILABLE;
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), metadata),
+    failure
+  );
 }
 
 /**
@@ -222,15 +266,28 @@ function createScoutBody(
     }
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
-    'test.class': failure.classname,
-    'test.name': failure.name,
-    'test.failCount': 1,
-    'test.type': 'scout',
-  });
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), {
+      'test.class': failure.classname,
+      'test.name': failure.name,
+      'test.failCount': 1,
+      'test.type': 'scout',
+    }),
+    failure
+  );
 }
 
-async function createFTRFailureIssue(
+/**
+ * Distinct from the type definition so we don't silently create new GitHub
+ * labels if we add a new test framework.
+ */
+const JUNIT_FRAMEWORK_LABELS: Record<JUnitTestType, string> = {
+  ftr: 'ftr',
+  jest: 'jest',
+  cypress: 'cypress',
+};
+
+async function createJUnitFailureIssue(
   buildUrl: string,
   failure: TestFailure,
   api: GithubApi,
@@ -238,9 +295,11 @@ async function createFTRFailureIssue(
   pipeline: string,
   prependTitle: string
 ) {
-  const title = createFTRTitle(failure, prependTitle);
-  const body = createFTRBody(failure, buildUrl, branch, pipeline);
-  const labels = ['failed-test'];
+  const title = createJUnitTitle(failure, prependTitle);
+  const body = createJUnitBody(failure, buildUrl, branch, pipeline);
+  const labels = failure.testType
+    ? ['failed-test', JUNIT_FRAMEWORK_LABELS[failure.testType]]
+    : ['failed-test'];
 
   return await api.createIssue(title, body, labels);
 }
@@ -270,12 +329,38 @@ export async function createFailureIssue(
   if (isScoutFailure(failure)) {
     return createScoutFailureIssue(buildUrl, failure, api, branch, pipeline);
   } else {
-    return createFTRFailureIssue(buildUrl, failure, api, branch, pipeline, prependTitle);
+    return createJUnitFailureIssue(buildUrl, failure, api, branch, pipeline, prependTitle);
   }
 }
 
-function createFTRComment(buildUrl: string, branch: string, pipeline: string): string {
-  return `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+/** Options of a follow-up comment. */
+interface CommentOptions {
+  /** Name the test in the first line, for an issue that tracks a whole suite */
+  nameTest?: boolean;
+}
+
+/** How a suite issue names the failed test: a Scout failure only knows its describe and title */
+export const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
+  isScoutFailure(failure) ? `${failure.classname} ${failure.name}` : failure.name;
+
+function createJUnitComment(
+  buildUrl: string,
+  branch: string,
+  pipeline: string,
+  errorMessage: ErrorMessageForComment,
+  failure?: TestFailure,
+  { nameTest }: CommentOptions = {}
+): string {
+  /*
+   * The error message is only included when it has not been reported on the
+   * issue before (see getErrorMessageForComment), so repeat failures with a
+   * known error stay compact while genuinely new errors surface immediately.
+   */
+  const subject = nameTest && failure ? `New failure of \`${testLabel(failure)}\`` : 'New failure';
+  const buildLink = `${subject}: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  const prefix =
+    branch === 'main' && failure ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 function createScoutComment(
@@ -283,28 +368,13 @@ function createScoutComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  newErrorMessage?: string
+  errorMessage: ErrorMessageForComment,
+  { nameTest }: CommentOptions = {}
 ): string {
-  const base = `New failure for "${failure.target}" target: [${
-    pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})`;
-  if (!newErrorMessage) {
-    /*
-     * If there's a failure with the same error message as before, just post a comment
-     * with pipeline link and failure target.
-     *
-     * Example:
-     *
-     * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
-     */
-    return base;
-  }
-
   /*
-   * If there's a new error message, include it in the comment. This provides more
-   * context on how the failure has changed since the issue was opened or last updated.
-   *
-   * Example:
+   * When there's a new error message, include it in the comment. This provides
+   * more context on how the failure has changed since the issue was opened or
+   * last updated. Example:
    *
    * New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://buildkite.com/elastic/kibana-on-merge/builds/123456)
    *
@@ -321,28 +391,48 @@ function createScoutComment(
    *   - Expect "toBeEnabled" with timeout 10000ms
    *   - waiting for locator('notExist')
    * ```
+   *
+   * When the error message was already reported on this issue (body or any
+   * previous comment), a short note replaces the code block. When no message
+   * was available to compare, only the link line is posted.
    */
-
-  return `${base}\n\nNew error message:\n\`\`\`\n${redactSensitiveGithubFailureText(
-    newErrorMessage
-  )}\n\`\`\``;
+  const subject = nameTest ? `New failure of \`${testLabel(failure)}\`` : 'New failure';
+  const buildLink = `${subject} for "${failure.target}" target: [${
+    pipeline || 'CI Build'
+  } - ${branch}](${buildUrl})`;
+  const prefix = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
-async function updateFTRFailureIssue(
+async function updateJUnitFailureIssue(
   buildUrl: string,
   issue: ExistingFailedTestIssue,
   api: GithubApi,
   branch: string,
-  pipeline: string
+  pipeline: string,
+  failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = failure
+    ? withTestHistoryDashboardLink(
+        updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+        failure
+      )
+    : updateIssueMetadata(issue.github.body, { 'test.failCount': newCount });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const commentText = createFTRComment(buildUrl, branch, pipeline);
+  let errorMessage: ErrorMessageForComment = { alreadyReported: false };
+  if (failure) {
+    const comments = await api.getIssueComments(issue.github.number);
+    errorMessage = getErrorMessageForComment(
+      issue.github.body,
+      comments,
+      extractErrorMessage(failure.failure)
+    );
+  }
+
+  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -357,27 +447,17 @@ async function updateScoutFailureIssue(
   failure: ScoutTestFailureExtended
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = withTestHistoryDashboardLink(
+    updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+    failure
+  );
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
-  const previousFailureBody = getFailureBodyFromIssueBody(issue.github.body);
-  let newErrorMessage: string | undefined;
-  if (failure.errorMessage && previousFailureBody) {
-    const currentErrorMsg = truncateFailureBody(failure.errorMessage).trim();
-    // Current error.message from CI is raw. The issue's first code block is usually already
-    // redacted (we redact on create), but older issues may still hold raw text. Redacting
-    // previous again is idempotent.
-    const redactedPrevious = redactSensitiveGithubFailureText(previousFailureBody);
-    const redactedCurrent = redactSensitiveGithubFailureText(currentErrorMsg);
-    if (!redactedPrevious.includes(redactedCurrent)) {
-      newErrorMessage = redactedCurrent;
-    }
-  }
+  const comments = await api.getIssueComments(issue.github.number);
+  const errorMessage = getErrorMessageForComment(issue.github.body, comments, failure.errorMessage);
 
-  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, newErrorMessage);
+  const commentText = createScoutComment(failure, buildUrl, branch, pipeline, errorMessage);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -394,6 +474,44 @@ export async function updateFailureIssue(
   if (failure && isScoutFailure(failure)) {
     return updateScoutFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   } else {
-    return updateFTRFailureIssue(buildUrl, issue, api, branch, pipeline);
+    return updateJUnitFailureIssue(buildUrl, issue, api, branch, pipeline, failure);
   }
+}
+
+/**
+ * Record a failure on the flaky suite issue tracking its test, as on a per-test issue: bump the
+ * fail count, reopen the issue and comment with the build. The body text and the
+ * `flaky-test-suite` metadata belong to `report_flaky_test_issues` and are left alone, so the
+ * count lives in the `failed-test` metadata next to it.
+ */
+export async function updateSuiteIssue(
+  buildUrl: string,
+  issue: FlakySuiteIssue,
+  api: GithubApi,
+  branch: string,
+  pipeline: string,
+  failure: TestFailure | ScoutTestFailureExtended
+) {
+  const { number } = issue.github;
+  // the daily report edits the body too, so count on what github has now rather than on the
+  // ci-stats copy, which is all there is in dry-run mode
+  const body = (await api.getIssue(number))?.body ?? issue.github.body;
+  const newCount = getIssueMetadata(body, 'test.failCount', 0) + 1;
+  const newBody = updateIssueMetadata(body, { 'test.failCount': newCount });
+
+  await api.editIssueBodyAndEnsureOpen(number, newBody);
+
+  const comments = await api.getIssueComments(number);
+  const scout = isScoutFailure(failure);
+  const errorMessage = getErrorMessageForComment(
+    body,
+    comments,
+    scout ? failure.errorMessage : extractErrorMessage(failure.failure)
+  );
+  const commentText = scout
+    ? createScoutComment(failure, buildUrl, branch, pipeline, errorMessage, { nameTest: true })
+    : createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure, { nameTest: true });
+  await api.addIssueComment(number, commentText);
+
+  return { newBody, newCount };
 }

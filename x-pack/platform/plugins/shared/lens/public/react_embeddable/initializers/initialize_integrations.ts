@@ -11,6 +11,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
+import { getRepresentativeQuery, withLegacyAggregateQuerySlot } from '@kbn/lens-common';
 import type {
   LegacyLensStateApi,
   LensByRefSerializedAPIConfig,
@@ -67,7 +68,8 @@ export function initializeIntegrations(getLatestState: GetStateType): {
 
         return {
           ...state,
-          attributes,
+          // mixed-version compat: mirror the ES|QL layer query into the legacy slot
+          attributes: attributes && withLegacyAggregateQuerySlot(attributes),
         };
       },
       // TODO: workout why we have this duplicated
@@ -75,7 +77,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
       getSavedVis: () => getLatestState().attributes,
       isTextBasedLanguage: () => isTextBasedLanguage(getLatestState()),
       getTextBasedLanguage: () => {
-        const query = getLatestState().attributes?.state.query;
+        const query = getRepresentativeQuery(getLatestState().attributes);
         if (!query || !isOfAggregateQueryType(query)) {
           return;
         }

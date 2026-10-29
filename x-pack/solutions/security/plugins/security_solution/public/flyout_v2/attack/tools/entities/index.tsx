@@ -18,7 +18,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
@@ -34,10 +33,7 @@ import {
   ATTACK_ENTITIES_TOOL_LOADING_TEST_ID,
   ATTACK_ENTITIES_TOOL_TEST_ID,
 } from './test_ids';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyoutV2.attack.tools.entities.title', {
-  defaultMessage: 'Entities',
-});
+import { ATTACK_ENTITIES_TITLE } from '../../../shared/constants/flyout_titles';
 
 export interface EntitiesDetailsProps {
   /**
@@ -81,7 +77,7 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+        <DocumentToolsFlyoutHeader title={ATTACK_ENTITIES_TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={ATTACK_ENTITIES_TOOL_TEST_ID}>
         {loading && (

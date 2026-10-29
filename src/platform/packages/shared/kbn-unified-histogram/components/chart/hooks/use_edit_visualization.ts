@@ -7,35 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { VISUALIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { UnifiedHistogramServices } from '../../..';
+import type { UnifiedHistogramLensActionsOptions, UnifiedHistogramServices } from '../../..';
 
 // Avoid taking a dependency on uiActionsPlugin just for this const
 const visualizeFieldTrigger: typeof VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
 
 export const useEditVisualization = ({
   services,
-  dataView,
+  dataSource,
   relativeTimeRange,
   lensAttributes,
-  isPlainRecord,
+  lensEditorOptions,
 }: {
   services: UnifiedHistogramServices;
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   relativeTimeRange?: TimeRange;
   lensAttributes?: TypedLensByValueInput['attributes'];
-  isPlainRecord?: boolean;
+  lensEditorOptions?: UnifiedHistogramLensActionsOptions['navigation'];
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
 
   const checkCanVisualize = useCallback(async () => {
-    if (!dataView.id || isPlainRecord) {
+    if (!dataSource?.id) {
       return false;
     }
+
+    if (dataSource.kind !== 'index-pattern') {
+      return false;
+    }
+
+    const dataView = dataSource.getDataView();
+
     if (!dataView.isTimeBased() || !dataView.getTimeField().visualizable) {
       return false;
     }
@@ -49,7 +56,7 @@ export const useEditVisualization = ({
     );
 
     return Boolean(compatibleActions.length);
-  }, [dataView, isPlainRecord, services.uiActions]);
+  }, [dataSource, services.uiActions]);
 
   const onEditVisualization = useMemo(() => {
     if (!canVisualize || !lensAttributes) {
@@ -57,13 +64,16 @@ export const useEditVisualization = ({
     }
 
     return () => {
-      services.lens.navigateToPrefilledEditor({
-        id: '',
-        time_range: relativeTimeRange,
-        attributes: lensAttributes,
-      });
+      services.lens.navigateToPrefilledEditor(
+        {
+          id: '',
+          time_range: relativeTimeRange,
+          attributes: lensAttributes,
+        },
+        lensEditorOptions
+      );
     };
-  }, [canVisualize, lensAttributes, relativeTimeRange, services.lens]);
+  }, [canVisualize, lensAttributes, lensEditorOptions, relativeTimeRange, services.lens]);
 
   useEffect(() => {
     checkCanVisualize().then(setCanVisualize);

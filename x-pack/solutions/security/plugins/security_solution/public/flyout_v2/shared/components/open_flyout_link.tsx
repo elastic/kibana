@@ -7,16 +7,23 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
+import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { flyoutProviders } from './flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
-import { useKibana } from '../../../common/lib/kibana';
+import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
+import {
+  buildFlyoutContent,
+  getFlyoutTypeForField,
+  buildFlyoutTitleFromField,
+  buildFlyoutDescriptorFromField,
+} from '../utils/build_flyout_content';
+import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
+import { useFlyoutSessionContext } from '../../session_context';
+import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
+import { useFlyoutV2UrlWriter } from '../url_state/flyout_v2_url_writer';
+import { urlParamKeyForHistoryKey, decodeFlyoutV2UrlParam } from '../url_state/flyout_v2_url_param';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -24,9 +31,16 @@ export interface OpenFlyoutLinkProps {
    */
   field: string;
   /**
-   * Field value
+   * Field value. Used both to open the flyout and, by default, to derive its history title.
    */
   value: string;
+  /**
+   * Value to use for the link text and history title instead of `value`. For fields where the
+   * navigation target and the display text differ (e.g. rule name links, which navigate by rule
+   * UUID but display the rule name), pass the display value here so the title isn't derived from
+   * the UUID.
+   */
+  displayValue?: string;
   /**
    * The source document record. When provided, enables entity resolution for host/user flyouts.
    */
@@ -62,52 +76,87 @@ export type OpenFlyoutLinkRenderer = FC<OpenFlyoutLinkProps>;
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
+  displayValue,
   hit,
   asParent = false,
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
 }) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
+  const open = useOpenFlyout();
   const history = useHistory();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
+  const { historyKey, session: sessionMode } = useFlyoutSessionContext();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value, hit), [field, value, hit]);
+  const flyoutType = useMemo(() => getFlyoutTypeForField(field), [field]);
+  const flyoutDescriptor = useMemo(
+    () => buildFlyoutDescriptorFromField(field, value),
+    [field, value]
+  );
+  const titleValue = displayValue ?? value;
+  const flyoutTitle = useMemo(
+    () => buildFlyoutTitleFromField(field, titleValue) ?? titleValue,
+    [field, titleValue]
+  );
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const resolvedSession = asParent ? 'start' : sessionMode;
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={{ session: resolvedSession, historyKey }}>
-              {flyoutContent}
-            </FlyoutSessionContextProvider>
-          ),
-        }),
+      const resolvedSession = asParent ? FLYOUT_SESSION_KIND.START : sessionMode;
+      const mode = resolvedSession === FLYOUT_SESSION_KIND.INHERIT ? 'inherit' : 'start';
+      let onClose: (() => void) | undefined;
+      if (flyoutDescriptor) {
+        // For a child ('inherit') open, closing it must revert to the parent (the session-start
+        // root), NOT clear the whole flyoutV2 param — otherwise the still-open parent tool flyout is
+        // lost on refresh. Read the current root before writeOnOpen mutates the stack.
+        const parentDescriptor =
+          mode === 'inherit'
+            ? decodeFlyoutV2UrlParam(
+                new URLSearchParams(history?.location?.search ?? '').get(urlParamKey)
+              )?.[0] ?? null
+            : null;
+        writeOnOpen(flyoutDescriptor, mode);
+        onClose = buildOnClose(parentDescriptor);
+      }
+      open(
+        flyoutContent,
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,
           session: resolvedSession,
-          outsideClickCloses: resolvedSession === 'start',
-        }
+          outsideClickCloses: resolvedSession === FLYOUT_SESSION_KIND.START,
+          title:
+            resolvedSession === FLYOUT_SESSION_KIND.INHERIT
+              ? buildFlyoutNavTitle(flyoutTitle)
+              : flyoutTitle,
+          ...(onClose && { onClose }),
+        },
+        flyoutType
+          ? {
+              surface: FLYOUT_SURFACE.FLYOUT,
+              flyoutType,
+              session: resolvedSession,
+              origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
+            }
+          : undefined,
+        resolvedSession
       );
     }
   }, [
     defaultDocumentFlyoutProperties,
-    history,
+    open,
     flyoutContent,
+    flyoutType,
+    flyoutDescriptor,
+    history,
     historyKey,
-    overlays,
-    services,
-    sessionMode,
-    store,
+    urlParamKey,
+    writeOnOpen,
+    buildOnClose,
     asParent,
+    flyoutTitle,
+    sessionMode,
   ]);
 
   if (!flyoutContent) {
@@ -116,7 +165,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   return (
     <EuiLink onClick={onClick} data-test-subj={dataTestSubj}>
-      {children ?? value}
+      {children ?? titleValue}
     </EuiLink>
   );
 };

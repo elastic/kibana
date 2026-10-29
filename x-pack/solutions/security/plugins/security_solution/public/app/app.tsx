@@ -8,8 +8,8 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import type { Store, Action } from 'redux';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import type { Store, Action } from 'redux-v4';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
@@ -20,6 +20,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
 import { APP_NAME } from '../../common/constants';
+import { useEnsureSecurityLabs } from '../common/hooks/use_ensure_security_labs';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -117,6 +118,13 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   const CloudProvider = services.cloud?.CloudContextProvider ?? React.Fragment;
 
   useInstallEntityStoreV2(services);
+  useEnsureSecurityLabs({
+    productDocBase: services.productDocBase,
+    uiSettings: services.uiSettings,
+    logger: services.logger,
+    // Product-doc install routes require manage llm_product_doc (Agent Builder All / manageAgents).
+    hasManagePrivilege: services.application.capabilities.agentBuilder?.manageAgents === true,
+  });
 
   // Set conversation flyout active config on mount, clear on unmount.
   // Skip if the sidebar is already open (e.g. navigating from Agent Builder

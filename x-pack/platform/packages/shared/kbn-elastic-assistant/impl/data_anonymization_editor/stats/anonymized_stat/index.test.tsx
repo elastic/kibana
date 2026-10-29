@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { getTooltipContent } from './helpers';
 import * as i18n from './translations';
 import { AnonymizedStat } from '.';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
@@ -31,34 +28,34 @@ describe('AnonymizedStat', () => {
     expect(screen.getByTestId('anonymizedFieldsStat')).toHaveTextContent('0Anonymized');
   });
 
-  it('shows the correct tooltip content when anonymized is 0 and isDataAnonymizable is false', async () => {
+  it('shows the correct tooltip content when anonymized is 0 and isDataAnonymizable is false', () => {
     render(
-      <EuiToolTip content={getTooltipContent({ anonymized: 0, isDataAnonymizable: false })}>
+      <TestProviders>
         <AnonymizedStat {...defaultProps} />
-      </EuiToolTip>
+      </TestProviders>
     );
 
-    await userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
+    fireEvent.mouseOver(screen.getByTestId('anonymizedFieldsStat'));
 
-    await waitFor(() => {
-      expect(screen.getByText(i18n.NONE_OF_THE_DATA_WILL_BE_ANONYMIZED(false))).toBeInTheDocument();
-    });
+    expect(screen.getByText(i18n.NONE_OF_THE_DATA_WILL_BE_ANONYMIZED(false))).toBeInTheDocument();
   });
 
-  it('shows correct tooltip content when anonymized is positive and isDataAnonymizable is true', async () => {
+  it('shows correct tooltip content when anonymized is positive and isDataAnonymizable is true', () => {
     const anonymized = 3;
     const isDataAnonymizable = true;
 
     render(
-      <EuiToolTip content={getTooltipContent({ anonymized, isDataAnonymizable })}>
-        <AnonymizedStat {...defaultProps} anonymized={anonymized} />
-      </EuiToolTip>
+      <TestProviders>
+        <AnonymizedStat
+          {...defaultProps}
+          anonymized={anonymized}
+          isDataAnonymizable={isDataAnonymizable}
+        />
+      </TestProviders>
     );
 
-    await userEvent.hover(screen.getByTestId('anonymizedFieldsStat'));
+    fireEvent.mouseOver(screen.getByTestId('anonymizedFieldsStat'));
 
-    await waitFor(() => {
-      expect(screen.getByText(i18n.FIELDS_WILL_BE_ANONYMIZED(anonymized))).toBeInTheDocument();
-    });
+    expect(screen.getByText(i18n.FIELDS_WILL_BE_ANONYMIZED(anonymized))).toBeInTheDocument();
   });
 });

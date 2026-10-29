@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
-  const totalDocCount = 14005;
+  const totalDocCount = 14004;
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`loads the log pattern analysis flyout and shows patterns in discover`, async () => {
-      await ml.navigation.navigateToDiscoverViaAppsMenu();
+      await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
       await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 20, 2015 @ 00:00:00.000',
@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`loads the log pattern analysis flyout and hides patterns in discover`, async () => {
-      await ml.navigation.navigateToDiscoverViaAppsMenu();
+      await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
       await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.timePicker.setAbsoluteRange(
         'Sep 20, 2015 @ 00:00:00.000',

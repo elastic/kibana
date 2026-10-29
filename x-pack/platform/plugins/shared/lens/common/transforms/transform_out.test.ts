@@ -6,10 +6,10 @@
  */
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensByValueSerializedState } from '@kbn/lens-common';
+import type { LensByValueSerializedState, XYVisualizationState } from '@kbn/lens-common';
 
 import { simpleMetricAttributes } from '@kbn/lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock';
-import { getTransformOut } from './transform_out';
+import { getTransformOut, migrateAttributes } from './transform_out';
 
 interface MetricPanelWithDurationFormat {
   layers?: Array<{ metrics?: Array<{ format?: unknown }> }>;
@@ -134,7 +134,7 @@ describe('getTransformOut', () => {
     expect(result.title).toEqual('Attributes title');
   });
 
-  it('down-converts GA duration units when GA schemas are disabled', () => {
+  it('emits GA duration units', () => {
     const builder = new LensConfigBuilder(undefined, true);
     const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
       title: 'Attributes title',
@@ -153,37 +153,7 @@ describe('getTransformOut', () => {
       references: [],
     };
 
-    const result = transformOut(storedState, [], undefined, undefined, false);
-
-    expect(getDurationFormat(result)).toEqual({
-      type: 'duration',
-      from: 'minutes',
-      to: 'humanize',
-    });
-
-    toAPIFormatSpy.mockRestore();
-  });
-
-  it('preserves GA duration units when GA schemas are active', () => {
-    const builder = new LensConfigBuilder(undefined, true);
-    const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
-      title: 'Attributes title',
-      description: '',
-      type: 'metric',
-      layers: [
-        {
-          metrics: [{ format: { type: 'duration', from: 'min', to: 'auto-approximate' } }],
-        },
-      ],
-    } as unknown as ReturnType<LensConfigBuilder['toAPIFormat']>);
-    const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
-
-    const storedState: LensByValueSerializedState = {
-      attributes: simpleMetricAttributes,
-      references: [],
-    };
-
-    const result = transformOut(storedState, [], undefined, undefined, true);
+    const result = transformOut(storedState, []);
 
     expect(getDurationFormat(result)).toEqual({
       type: 'duration',
@@ -192,5 +162,96 @@ describe('getTransformOut', () => {
     });
 
     toAPIFormatSpy.mockRestore();
+  });
+
+  describe('BWC: by-ref panels missing their savedObjectRef reference', () => {
+    // See https://github.com/elastic/kibana/issues/285475
+
+    it('returns ref_id from legacy savedObjectId when no savedObjectRef reference exists', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const transformOut = getTransformOut(builder, transformDrilldownsOut, false);
+
+      const storedState: LensByValueSerializedState = {
+        // @ts-expect-error - testing legacy savedObjectId
+        savedObjectId: 'legacy-saved-object-id',
+      };
+
+      const result = transformOut(storedState, []) as { ref_id?: string };
+
+      expect(result.ref_id).toEqual('legacy-saved-object-id');
+    });
+
+    it('falls through to by-value when savedObjectId is present alongside attributes (hybrid state)', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
+
+      const storedState: LensByValueSerializedState = {
+        // @ts-expect-error - testing legacy savedObjectId
+        savedObjectId: 'legacy-saved-object-id',
+        attributes: simpleMetricAttributes,
+        references: [],
+      };
+
+      // Should not throw and should not return the savedObjectId as ref_id —
+      // the embedded attributes take precedence for hybrid panels.
+      const result = transformOut(storedState, []) as { ref_id?: string };
+
+      expect(result.ref_id).toBeUndefined();
+    });
+  });
+});
+
+describe('migrateAttributes', () => {
+  const getAreaAttributes = (version?: number) =>
+    ({
+      title: 'Area chart',
+      visualizationType: 'lnsXY',
+      ...(version ? { version } : {}),
+      references: [],
+      state: {
+        datasourceStates: {},
+        filters: [],
+        query: { language: 'kuery', query: '' },
+        visualization: {
+          legend: { isVisible: true, position: 'bottom' },
+          preferredSeriesType: 'area',
+          layers: [
+            {
+              layerId: 'layer',
+              layerType: 'data',
+              seriesType: 'area',
+              accessors: ['y'],
+              xAccessor: 'x',
+            },
+          ],
+        },
+      },
+    } as unknown as LensByValueSerializedState['attributes']);
+
+  const getAreaFill = (attributes: { state: unknown }) =>
+    (attributes.state as { visualization: XYVisualizationState }).visualization.areaFill;
+
+  it.each([undefined, 1, 2])(
+    'migrates a version %s area chart without areaFill to v3 with a solid fill',
+    (version) => {
+      const result = migrateAttributes(getAreaAttributes(version));
+
+      expect(result.version).toBe(3);
+      expect(getAreaFill(result)).toBe('solid');
+    }
+  );
+
+  it('leaves attributes from an unknown future version untouched', () => {
+    const result = migrateAttributes(getAreaAttributes(99));
+
+    expect(result.version).toBe(99);
+    expect(getAreaFill(result)).toBeUndefined();
+  });
+
+  it('keeps an unset areaFill on v3 area charts', () => {
+    const result = migrateAttributes(getAreaAttributes(3));
+
+    expect(result.version).toBe(3);
+    expect(getAreaFill(result)).toBeUndefined();
   });
 });

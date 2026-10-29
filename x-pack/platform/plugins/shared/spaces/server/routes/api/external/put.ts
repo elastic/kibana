@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 
 import type { ExternalRouteDeps } from '.';
 import { putSpaceExamples } from './examples';
@@ -64,12 +65,13 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       createLicensedRouteHandler(async (context, request, response) => {
         const spacesClient = getSpacesService().createSpacesClient(request);
 
-        const space = request.body;
+        // Body id was format-validated by getSpaceSchema; trusted re-brand into Space.id.
+        const space = { ...request.body, id: brandSpaceId(request.body.id) };
         const id = request.params.id;
 
         let result: Space;
         try {
-          result = await spacesClient.update(id, { ...space });
+          result = await spacesClient.update(id, space);
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return response.notFound();

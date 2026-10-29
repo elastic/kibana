@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -12,6 +12,11 @@ import { rangeSchema, kuerySchema, offsetSchema } from '../../default_api_types'
 
 export interface DependencyOperation {
   spanName: string;
+  /**
+   * Span subtype (e.g. 'redis', 'http', 'grpc', 'postgresql') or service target type
+   * from service_destination metrics. Optional — absent when neither field is indexed.
+   */
+  spanType?: string;
   latency: number | null;
   throughput: number;
   failureRate: number | null;
@@ -28,16 +33,20 @@ export interface DependencyOperationsResponse {
 
 export const dependencyOperationsRoute = defineRoute<DependencyOperationsResponse>()({
   endpoint: 'GET /internal/apm/dependencies/operations',
-  params: z.object({
-    query: rangeSchema
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(offsetSchema)
-      .merge(
-        z.object({
-          dependencyName: z.string(),
-          searchServiceDestinationMetrics: BooleanFromString.default(false),
-        })
-      ),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: rangeSchema
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(offsetSchema)
+        .merge(
+          z.object({
+            dependencyName: z.string(),
+            searchServiceDestinationMetrics: BooleanFromString.default(false),
+            /** Optional: when set, only include spans from this service. */
+            serviceName: z.string().optional(),
+          })
+        ),
+    })
+  ),
 });

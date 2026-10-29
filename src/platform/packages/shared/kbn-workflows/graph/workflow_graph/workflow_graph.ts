@@ -85,10 +85,20 @@ export class WorkflowGraph {
     return undefined;
   }
 
-  public getNodeStack(nodeId: string): string[] {
-    const predecessors = this.getAllPredecessors(nodeId).toReversed();
+  public getNodeStack(
+    nodeId: string,
+    precomputedPredecessors?: readonly GraphNodeUnion[]
+  ): string[] {
+    const currentNode = this.getNode(nodeId);
+
+    if (!currentNode) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
+
+    const predecessors = (precomputedPredecessors ?? this.getAllPredecessors(nodeId)).toReversed();
 
     const stack: string[] = [];
+
     for (const node of predecessors) {
       if (node.type.startsWith('enter-')) {
         stack.push(node.id);
@@ -98,6 +108,11 @@ export class WorkflowGraph {
         stack.pop();
       }
     }
+
+    if (currentNode.type.startsWith('exit-')) {
+      stack.pop();
+    }
+
     return stack;
   }
 

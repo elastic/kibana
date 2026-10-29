@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { TransactionDetailRedirectInfo } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
@@ -15,10 +15,12 @@ export interface RootTransactionByTraceIdResponse {
 
 export const rootTransactionByTraceIdRoute = defineRoute<RootTransactionByTraceIdResponse>()({
   endpoint: 'GET /internal/apm/traces/{traceId}/root_transaction',
-  params: z.object({
-    path: z.object({
-      traceId: z.string(),
-    }),
-    query: rangeSchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        traceId: z.string(),
+      }),
+      query: rangeSchema,
+    })
+  ),
 });

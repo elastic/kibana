@@ -13,12 +13,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiLink,
   EuiSearchBar,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -28,6 +26,8 @@ import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
+import { SecretConnectionPanel } from './secret_connection_panel';
+import { kibanaService } from '../../../../../utils/kibana_service';
 
 export interface ListParamItem extends SyntheticsParams {
   id: string;
@@ -186,17 +186,6 @@ export const ParamsList = () => {
     );
   };
 
-  const renderToolRight = () => {
-    return [
-      <AddParamFlyout
-        isEditingItem={isEditingItem}
-        setIsEditingItem={setIsEditingItem}
-        items={items}
-        key="add-param-flyout"
-      />,
-    ];
-  };
-
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
@@ -224,24 +213,12 @@ export const ParamsList = () => {
 
   return (
     <div>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.synthetics.params.description"
-          defaultMessage="Define variables and parameters that you can use in the configuration of browser and lightweight monitors, such as credentials or URLs. {learnMore}"
-          values={{
-            learnMore: (
-              <EuiLink
-                data-test-subj="syntheticsParamsListLink"
-                href="https://www.elastic.co/guide/en/observability/current/synthetics-params-secrets.html"
-                target="_blank"
-              >
-                {LEARN_MORE}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
+      {kibanaService.secretConnectionsEnabled && (
+        <>
+          <SecretConnectionPanel />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiInMemoryTable<ListParamItem>
         data-test-subj={
           isLoading ? 'syntheticsParamsTable-loading' : 'syntheticsParamsTable-loaded'
@@ -278,7 +255,6 @@ export const ParamsList = () => {
         search={{
           onChange: ({ query: queryText }) => setQuery(queryText?.text ?? ''),
           toolsLeft: renderToolsLeft(),
-          toolsRight: renderToolRight(),
           box: {
             incremental: true,
             'data-test-subj': 'syntheticsParamsSearchInput',
@@ -299,6 +275,11 @@ export const ParamsList = () => {
         }}
         noItemsMessage={isLoading ? LOADING_TEXT : undefined}
       />
+      <AddParamFlyout
+        isEditingItem={isEditingItem}
+        setIsEditingItem={setIsEditingItem}
+        items={items}
+      />
       {isDeleteModalVisible && deleteParam && (
         <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />
       )}
@@ -312,10 +293,6 @@ const PARAMS_TABLE = i18n.translate('xpack.synthetics.settingsRoute.params.table
 
 const PARAMS_LABEL = i18n.translate('xpack.synthetics.settingsRoute.params.label', {
   defaultMessage: 'Parameters',
-});
-
-const LEARN_MORE = i18n.translate('xpack.synthetics.settingsRoute.params.learnMore', {
-  defaultMessage: 'Learn more.',
 });
 
 const EDIT_PARAM = i18n.translate('xpack.synthetics.settingsRoute.params.editLabel', {

@@ -53,8 +53,12 @@ import {
 import { ServiceNodeWithCollapseAffordance } from './service_node_with_collapse_affordance';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
 import { ServiceFlyout } from '../../../shared/service_flyout';
-import { SERVICE_FLYOUT_SOURCES } from '../../../shared/service_flyout/constants';
+import { SERVICE_FLYOUT_SOURCE_SERVICE_MAP } from '../../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
+import { useServiceMapFlyoutProps } from '../use_service_map_flyout_props';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { RequestFlyout } from '../../../shared/request_flyout';
+import { useServiceMapEdgeFlyoutProps } from '../use_service_map_edge_flyout_props';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
 
@@ -84,7 +88,7 @@ export interface ContextualServiceMapGraphProps {
   kuery: string;
   start: string;
   end: string;
-  highlightedServiceName?: string;
+  highlightedServiceNames?: string[];
   fullMapHref?: string;
   showFocusMap?: boolean;
   clearKueryOnPopoverNavigation?: boolean;
@@ -110,7 +114,7 @@ function ContextualGraphInner({
   kuery,
   start,
   end,
-  highlightedServiceName,
+  highlightedServiceNames,
   fullMapHref,
   showFocusMap,
   clearKueryOnPopoverNavigation,
@@ -120,6 +124,7 @@ function ContextualGraphInner({
 }: ContextualServiceMapGraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
+  const { core, share, lens, dataViews, plugins } = useApmPluginContext();
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
@@ -130,11 +135,14 @@ function ContextualGraphInner({
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
   const [selectedServiceNodeForFlyout, setSelectedServiceNodeForFlyout] =
     useState<ServiceMapServiceNode | null>(null);
-  const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
+  const [selectedEdgeForFlyout, setSelectedEdgeForFlyout] = useState<ServiceMapEdgeType | null>(
     null
   );
+  const edgeFlyoutConnection = useServiceMapEdgeFlyoutProps({ selectedEdgeForFlyout });
   const selectedServiceNodeForFlyoutRef = useRef<ServiceMapServiceNode | null>(null);
   selectedServiceNodeForFlyoutRef.current = selectedServiceNodeForFlyout;
+  const selectedEdgeForFlyoutRef = useRef<string | null>(null);
+  selectedEdgeForFlyoutRef.current = selectedEdgeForFlyout?.id ?? null;
 
   const expandedNodeIdsKey = useMemo(
     () => [...expandedNodeIds].sort((a, b) => a.localeCompare(b)).join('\0'),
@@ -164,10 +172,18 @@ function ContextualGraphInner({
       if (!isServiceNode(n)) {
         return n;
       }
-      const contextHighlight = Boolean(highlightedServiceName && n.id === highlightedServiceName);
+      const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
       return { ...n, data: { ...n.data, contextHighlight } };
     });
-  }, [visibleNodes, visibleEdges, highlightedServiceName]);
+  }, [visibleNodes, visibleEdges, highlightedServiceNames]);
+
+  const flyoutProps = useServiceMapFlyoutProps({
+    selectedServiceNodeForFlyout,
+    environment,
+    flyoutOptions,
+    start,
+    end,
+  });
 
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(visibleEdges);
@@ -193,7 +209,7 @@ function ContextualGraphInner({
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
   }, [expandedNodeIdsKey]);
 
   const collapseContext = useMemo<CollapsibleServiceMapContextValue>(
@@ -214,7 +230,7 @@ function ContextualGraphInner({
       setSelectedNodeId(newSelectedId);
       setSelectedNodeForPopover(newSelectedId && !isServiceNode(node) ? node : null);
       setSelectedServiceNodeForFlyout(newSelectedId && isServiceNode(node) ? node : null);
-      setSelectedEdgeForPopover(null);
+      setSelectedEdgeForFlyout(null);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, { selectedNodeId: newSelectedId, selectedEdgeId: null })
       );
@@ -227,8 +243,8 @@ function ContextualGraphInner({
       setSelectedNodeId(null);
       setSelectedNodeForPopover(null);
       setSelectedServiceNodeForFlyout(null);
-      const newSelectedEdge = selectedEdgeForPopover?.id === edge.id ? null : edge;
-      setSelectedEdgeForPopover(newSelectedEdge);
+      const newSelectedEdge = selectedEdgeForFlyout?.id === edge.id ? null : edge;
+      setSelectedEdgeForFlyout(newSelectedEdge);
       setEdges((currentEdges) =>
         applyEdgeHighlighting(currentEdges, {
           selectedNodeId: null,
@@ -236,32 +252,37 @@ function ContextualGraphInner({
         })
       );
     },
-    [selectedEdgeForPopover, setEdges, applyEdgeHighlighting]
+    [selectedEdgeForFlyout, setEdges, applyEdgeHighlighting]
   );
 
   const handlePopoverClose = useCallback(() => {
     setSelectedNodeId(null);
     setSelectedNodeForPopover(null);
     setSelectedServiceNodeForFlyout(null);
-    setSelectedEdgeForPopover(null);
+    setSelectedEdgeForFlyout(null);
     setEdges((currentEdges) => applyEdgeHighlighting(currentEdges, null));
   }, [setEdges, applyEdgeHighlighting]);
 
-  const handlePaneClick = useCallback(() => {
-    if (selectedServiceNodeForFlyoutRef.current) {
-      return;
+  // An edge that cannot open a flyout is not left selected.
+  React.useEffect(() => {
+    if (selectedEdgeForFlyout && !edgeFlyoutConnection) {
+      handlePopoverClose();
     }
+  }, [selectedEdgeForFlyout, edgeFlyoutConnection, handlePopoverClose]);
+
+  const requestFlyoutDeps = useMemo(
+    () => ({ core, share, lens, dataViews }),
+    [core, share, lens, dataViews]
+  );
+
+  const handlePaneClick = useCallback(() => {
+    // Pane clicks don't close the service flyout or the edge flyout — both survive map interaction.
+    if (selectedServiceNodeForFlyoutRef.current) return;
+    if (selectedEdgeForFlyoutRef.current) return;
     handlePopoverClose();
   }, [handlePopoverClose]);
 
-  const flyoutSource = flyoutOptions?.source ?? SERVICE_FLYOUT_SOURCES.serviceMap;
-
-  const handleServiceFlyoutView = useCallback(
-    ({ tabId }: { tabId: string }) => {
-      telemetry.reportServiceFlyoutViewed({ tabId, source: flyoutSource });
-    },
-    [telemetry, flyoutSource]
-  );
+  const flyoutSource = SERVICE_FLYOUT_SOURCE_SERVICE_MAP;
 
   const topLeftToolbarStyles = useMemo(
     () => css`
@@ -291,9 +312,12 @@ function ContextualGraphInner({
   const fitViewLabel = i18n.translate('xpack.apm.serviceMap.fitViewControl', {
     defaultMessage: 'Fit View',
   });
-  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
-    defaultMessage: 'View full service map',
-  });
+  const viewInServiceMapButtonLabel = i18n.translate(
+    'xpack.apm.serviceMap.viewInServiceMapButton',
+    {
+      defaultMessage: 'View in Service map',
+    }
+  );
 
   return (
     <ServiceMapHighlightProvider>
@@ -382,14 +406,14 @@ function ContextualGraphInner({
                       />
                     </EuiToolTip>
                     {fullMapHref && (
-                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                      <EuiToolTip content={viewInServiceMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
                           display="empty"
                           color="text"
                           size="s"
                           iconType="apps"
                           href={fullMapHref}
-                          aria-label={viewFullMapButtonLabel}
+                          aria-label={viewInServiceMapButtonLabel}
                           data-test-subj="serviceMapViewFullMapButton"
                           css={mapToolbarControlIconCss}
                         />
@@ -401,7 +425,6 @@ function ContextualGraphInner({
             </ReactFlow>
             <MapPopover
               selectedNode={selectedNodeForPopover}
-              selectedEdge={selectedEdgeForPopover}
               focusedServiceName={focalServiceId}
               environment={environment}
               kuery={kuery}
@@ -413,16 +436,24 @@ function ContextualGraphInner({
               alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
               clearKueryOnNavigation={clearKueryOnPopoverNavigation}
             />
-            {selectedServiceNodeForFlyout && (
+            {flyoutProps && (
               <ServiceFlyout
-                key={selectedServiceNodeForFlyout.data.id}
-                service={selectedServiceNodeForFlyout.data}
+                key={flyoutProps.service.name}
+                service={flyoutProps.service}
+                deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
+                filters={flyoutProps.filters}
+                telemetry={{ client: telemetry, source: flyoutSource }}
+                onClose={handlePopoverClose}
+              />
+            )}
+            {edgeFlyoutConnection && (
+              <RequestFlyout
+                key={selectedEdgeForFlyout?.id}
+                deps={requestFlyoutDeps}
+                connection={edgeFlyoutConnection}
                 environment={environment}
-                kuery={flyoutOptions?.kuery ?? kuery}
-                initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
-                initialRangeTo={flyoutOptions?.rangeTo ?? end}
-                initialTransactionType={flyoutOptions?.initialTransactionType}
-                onView={handleServiceFlyoutView}
+                rangeFrom={start}
+                rangeTo={end}
                 onClose={handlePopoverClose}
               />
             )}

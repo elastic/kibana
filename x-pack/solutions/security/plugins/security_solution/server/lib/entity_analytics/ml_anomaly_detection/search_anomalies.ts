@@ -7,13 +7,15 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { buildEntitiesFilter, getMatchedEntityId } from './build_entities_filter';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
 import type { AnomalyHit, RawAnomalyRecord } from './types';
+import { getIdentityFieldsByEntityId, resolveRecordFields } from './resolve_record_fields';
+import type { EntityIdentityFields } from './resolve_record_fields';
 
 // A missing/empty selection means "no severity filter", which defaults to the
 // standard threshold of 1 rather than truly unbounded (record_score 0 anomalies are noise).
@@ -38,31 +40,30 @@ export const buildScoreRangeFilter = (
 
 interface RequiredHit {
   _id: string;
-  _source: Required<RawAnomalyRecord>;
-  fields?: Record<string, unknown>;
+  _source: RawAnomalyRecord;
 }
 
-const mapToAnomalyHit = (hit: RequiredHit): AnomalyHit | undefined => {
+const mapToAnomalyHit = (
+  hit: RequiredHit,
+  entityId: string,
+  identityFields?: EntityIdentityFields
+): AnomalyHit => {
   const { _id: id, _source: src } = hit;
-  const entityId = (hit.fields?.entity_id as string[] | undefined)?.[0];
-  if (!entityId) return undefined;
+  const { actual, typical, detectorFunction, ...dimensions } = resolveRecordFields(
+    src,
+    identityFields
+  );
   return {
     _id: id,
     entityId,
     jobId: src.job_id,
     detectorIndex: src.detector_index,
-    detectorFunction: src.function ?? '',
+    detectorFunction: detectorFunction ?? '',
     timestamp: src.timestamp,
     recordScore: src.record_score,
-    actual: src.actual[0],
-    typical: src.typical[0],
-    fieldName: src.field_name,
-    byFieldName: src.by_field_name,
-    byFieldValue: src.by_field_value,
-    overFieldName: src.over_field_name,
-    overFieldValue: src.over_field_value,
-    partitionFieldName: src.partition_field_name,
-    partitionFieldValue: src.partition_field_value,
+    ...(actual !== undefined && { actual }),
+    ...(typical !== undefined && { typical }),
+    ...dimensions,
   };
 };
 
@@ -85,7 +86,8 @@ const DEFAULT_SORT_SPEC: Array<{ field: AnomalySortField; order: AnomalySortOrde
 
 export interface SearchEntityAnomaliesOpts {
   entityType: EntityType;
-  entityId: string;
+  entityIds: string[];
+  entityRecords: Entity[];
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -107,7 +109,8 @@ export interface SearchEntityAnomaliesResult {
 
 export const searchEntityAnomalies = async ({
   entityType,
-  entityId,
+  entityIds,
+  entityRecords,
   fromMs,
   toMs,
   scoreRanges,
@@ -135,21 +138,28 @@ export const searchEntityAnomalies = async ({
 
   if (effectiveJobIds.length === 0) return empty;
 
+  const entityFilter = buildEntitiesFilter(entityType, entityRecords);
+  if (!entityFilter) {
+    logger.warn(
+      `Cannot build entity filter for "${entityIds.join(
+        ', '
+      )}" (type: ${entityType}): entity records lack identity fields`
+    );
+    return empty;
+  }
+
   try {
     const resp = await mlSystem.mlAnomalySearch<RawAnomalyRecord>(
       {
         from,
         size,
         track_total_hits: true,
-        runtime_mappings: {
-          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-        },
-        fields: ['entity_id'],
         query: {
           bool: {
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
+              { exists: { field: 'detector_index' } },
               buildScoreRangeFilter(scoreRanges),
               {
                 range: {
@@ -159,7 +169,7 @@ export const searchEntityAnomalies = async ({
                   },
                 },
               },
-              { term: { entity_id: entityId } },
+              entityFilter,
               { terms: { job_id: effectiveJobIds } },
             ],
           },
@@ -172,22 +182,20 @@ export const searchEntityAnomalies = async ({
     const rawTotal = resp.hits.total;
     const total = rawTotal == null ? 0 : typeof rawTotal === 'number' ? rawTotal : rawTotal.value;
 
+    // Every record the query counted in `total` is returned; the guard only narrows the client's
+    // optional `_id` / `_source` typing, which search hits always carry.
+    const identityFieldsByEntityId = getIdentityFieldsByEntityId(entityType, entityRecords);
     const hits = resp.hits.hits
-      .filter(
-        (hit): hit is typeof hit & RequiredHit =>
-          hit._id != null &&
-          hit._source?.actual?.[0] != null &&
-          hit._source?.typical?.[0] != null &&
-          hit._source?.detector_index != null &&
-          (hit.fields?.entity_id as string[] | undefined)?.[0] != null
-      )
-      .map(mapToAnomalyHit)
-      .filter((hit): hit is AnomalyHit => hit != null);
+      .filter((hit): hit is typeof hit & RequiredHit => hit._id != null && hit._source != null)
+      .map((hit) => {
+        const entityId = getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0];
+        return mapToAnomalyHit(hit, entityId, identityFieldsByEntityId.get(entityId));
+      });
 
     return { hits, total };
   } catch (error) {
     logger.warn(
-      `Error searching anomalies for entity "${entityId}" (type: ${entityType}): ${
+      `Error searching anomalies for entity "${entityIds.join(', ')}" (type: ${entityType}): ${
         error instanceof Error ? error.message : String(error)
       }`
     );

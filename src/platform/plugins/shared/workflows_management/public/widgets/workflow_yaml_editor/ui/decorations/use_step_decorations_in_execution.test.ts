@@ -9,7 +9,7 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import type { monaco } from '@kbn/monaco';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
@@ -157,6 +157,7 @@ const renderHookWithProviders = (
   // YAML is loaded and isExecutionsTab is true. Pre-seeding both ensures the
   // workflowLookup is available regardless of which path the selector takes.
   const computedData: ComputedData = {
+    yamlString: initialYaml,
     workflowLookup: {
       steps: {
         'step-1': createStepInfo({ stepId: 'step-1', lineStart: 1, lineEnd: 3 }),
@@ -247,6 +248,7 @@ describe('useStepDecorationsInExecution', () => {
         store.dispatch(setYamlString('version: "1"'));
         store.dispatch(
           _setComputedDataInternal({
+            yamlString: 'version: "1"',
             workflowLookup: { steps: undefined as any },
           })
         );

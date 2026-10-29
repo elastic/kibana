@@ -19,33 +19,31 @@ export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_assigned').then((m) => m.episodeAssignedTriggerPublicDefinition)
+    import('./triggers/alert_assigned').then((m) => m.alertAssignedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_unassigned').then((m) => m.episodeUnassignedTriggerPublicDefinition)
+    import('./triggers/alert_unassigned').then((m) => m.alertUnassignedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_acked').then((m) => m.episodeAckedTriggerPublicDefinition)
+    import('./triggers/alert_acked').then((m) => m.alertAckedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_unacked').then((m) => m.episodeUnackedTriggerPublicDefinition)
+    import('./triggers/alert_unacked').then((m) => m.alertUnackedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_tagged').then((m) => m.episodeTaggedTriggerPublicDefinition)
+    import('./triggers/alert_tagged').then((m) => m.alertTaggedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_snoozed').then((m) => m.episodeSnoozedTriggerPublicDefinition)
+    import('./triggers/alert_snoozed').then((m) => m.alertSnoozedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_unsnoozed').then((m) => m.episodeUnsnoozedTriggerPublicDefinition)
+    import('./triggers/alert_unsnoozed').then((m) => m.alertUnsnoozedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_activated').then((m) => m.episodeActivatedTriggerPublicDefinition)
+    import('./triggers/alert_activated').then((m) => m.alertActivatedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('./triggers/episode_deactivated').then(
-      (m) => m.episodeDeactivatedTriggerPublicDefinition
-    )
+    import('./triggers/alert_deactivated').then((m) => m.alertDeactivatedTriggerPublicDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./triggers/rule_created').then((m) => m.ruleCreatedTriggerPublicDefinition)
@@ -61,5 +59,15 @@ export function registerTriggerDefinitions(
   );
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./triggers/rule_disabled').then((m) => m.ruleDisabledTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_events_generated').then(
+      (m) => m.ruleEventsGeneratedTriggerPublicDefinition
+    )
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_execution_failed').then(
+      (m) => m.ruleExecutionFailedTriggerPublicDefinition
+    )
   );
 }

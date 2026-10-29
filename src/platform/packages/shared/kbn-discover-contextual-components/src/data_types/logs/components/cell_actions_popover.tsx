@@ -78,6 +78,7 @@ export function CellActionsPopover({
   const { euiTheme } = useEuiTheme();
   const popoverTitleId = useGeneratedHtmlId();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+  const displayName = property?.displayName ?? name;
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
@@ -114,7 +115,7 @@ export function CellActionsPopover({
               font-family: ${euiTheme.font.familyCode};
             `}
           >
-            <strong id={popoverTitleId}>{name}</strong>{' '}
+            <strong id={popoverTitleId}>{displayName}</strong>{' '}
             {typeof renderFormattedValue === 'function' ? (
               <>{renderFormattedValue(formattedValue)}</>
             ) : rawValue != null && typeof rawValue !== 'object' ? (
@@ -170,7 +171,7 @@ export function CellActionsPopover({
               key="copyToClipboardAction"
               size="s"
               iconType="copy"
-              aria-label={copyValueAriaText(name)}
+              aria-label={copyValueAriaText(displayName)}
               onClick={copy}
               data-test-subj={`dataTableCellAction_copyToClipboardAction_${name}`}
             >

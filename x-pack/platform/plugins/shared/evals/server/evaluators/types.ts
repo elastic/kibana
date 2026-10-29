@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Direction } from '@kbn/evals-common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
@@ -31,20 +32,57 @@ export interface EvaluatorResult {
     label?: string;
     explanation?: string;
     metadata?: Record<string, unknown>;
+    /** Overrides the evaluator's `direction` for this score alone. */
+    direction?: Direction;
   }>;
 }
 
-export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
+/**
+ * Whether an evaluator ships with Kibana or was defined by a user. Callers act
+ * on it — built-ins have no management actions — but resolution does not: a
+ * persisted definition is compiled into this same shape.
+ */
+export type EvaluatorOrigin = 'built_in' | 'user_defined';
+
+/**
+ * An evaluator as a plugin registers it. The registry marks it `built_in`, so it resolves in
+ * every space and its name is reserved.
+ */
+export interface RegisteredEvaluatorDefinition<ReferenceData = Record<string, unknown>> {
+  /** Follows the same rules as a user-defined evaluator's name. */
   name: string;
+  /** A semver version. */
   version: string;
   kind: 'llm' | 'code';
   description: string;
+  direction: Direction;
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 
+export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>>
+  extends RegisteredEvaluatorDefinition<ReferenceData> {
+  origin: EvaluatorOrigin;
+}
+
+/**
+ * Resolution within one space. Asynchronous because persisted definitions are
+ * read from Elasticsearch, and scoped because which ones exist depends on the
+ * space the caller is acting in.
+ */
+export interface ScopedEvaluatorRegistry {
+  list(): Promise<EvaluatorDefinition[]>;
+  get(name: string, version?: string): Promise<EvaluatorDefinition | undefined>;
+}
+
 export interface EvaluatorRegistry {
-  list(): EvaluatorDefinition[];
-  get(name: string, version?: string): EvaluatorDefinition | undefined;
+  /** Whether a name is taken by a built-in, and so cannot be defined by a user. */
+  isBuiltIn(name: string): boolean;
+  asScoped(options: { spaceId: string }): ScopedEvaluatorRegistry;
+  /**
+   * Adds a plugin-owned evaluator next to the ones Kibana ships. Throws for an invalid name
+   * or version, a name Kibana ships, or a name and version already registered.
+   */
+  register(definition: RegisteredEvaluatorDefinition): void;
 }

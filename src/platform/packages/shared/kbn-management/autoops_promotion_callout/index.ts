@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { AutoOpsPromotionCalloutProps } from './src/callout';
-export { AutoOpsPromotionCallout } from './src/callout';
+export type { AutoOpsPromotionCalloutProps, AutoOpsEnabledCalloutProps } from './src/callout';
+export {
+  AutoOpsPromotionCallout,
+  AutoOpsEnabledCallout,
+  AUTOOPS_ENABLED_CALLOUT_DISMISSED_KEY,
+} from './src/callout';

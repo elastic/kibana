@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { IngestStreamLifecycleDSL } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import {
   Form,
   UseField,
@@ -38,6 +39,7 @@ import {
 import { DslStepsFlyoutArrayView } from './sections';
 import { useStyles } from './use_styles';
 import type { EditDslStepsFlyoutChangeMeta, EditDslStepsFlyoutProps } from './types';
+import { useStreamsPrivileges } from '../../../../../../hooks/use_streams_privileges';
 
 const FragmentFormWrapper = ({ children }: React.PropsWithChildren) => <>{children}</>;
 
@@ -60,8 +62,12 @@ export const EditDslStepsFlyout = ({
     () => dataTestSubjProp ?? 'streamsEditDslStepsFlyout',
     [dataTestSubjProp]
   );
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const { footerStyles } = useStyles();
+  const { focusProps } = usePushFlyoutFocus();
 
   const initialStepsRef = useRef<IngestStreamLifecycleDSL>(initialSteps);
   const expectedInitialStepsCountRef = useRef<number>(
@@ -268,13 +274,15 @@ export const EditDslStepsFlyout = ({
 
   return (
     <EuiFlyout
-      type="push"
+      type={canvas.enabled ? 'overlay' : 'push'}
       size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <Form form={form} FormWrapper={FragmentFormWrapper}>
         <OnStepFieldErrorsChangeProvider value={onStepFieldErrorsChange}>

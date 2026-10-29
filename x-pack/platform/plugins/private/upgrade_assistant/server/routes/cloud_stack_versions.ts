@@ -359,7 +359,7 @@ export function registerCloudStackVersionsRoute(deps: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          currentVersion: schema.string(),
+          currentVersion: schema.string({ maxLength: 64 }),
         }),
       },
     },

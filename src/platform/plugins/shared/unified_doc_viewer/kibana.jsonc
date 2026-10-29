@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/unified-doc-viewer-plugin",
-  "owner": ["@elastic/kibana-data-discovery"],
+  "owner": ["@elastic/kibana-discover"],
   "group": "platform",
   "visibility": "shared",
   "description": "This plugin contains services reliant on the plugin lifecycle for the unified doc viewer component (see @kbn/unified-doc-viewer).",

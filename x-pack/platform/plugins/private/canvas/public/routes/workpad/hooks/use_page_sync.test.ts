@@ -13,7 +13,7 @@ const mockGetParams = jest.fn();
 const mockGetState = jest.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: (selector: any) => selector(mockGetState()),
 }));

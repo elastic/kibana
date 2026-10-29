@@ -18,14 +18,15 @@ project:
   sourceRoot: x-pack/platform/packages/private/kbn-scout-release-testing
 dependsOn:
   - '@kbn/scout'
-  - '@kbn/test'
   - '@kbn/unified-doc-viewer'
+  - '@kbn/discover-plugin'
 tags:
   - functional-tests
   - package
   - dev
   - group-platform
   - private
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

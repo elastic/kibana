@@ -8,7 +8,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { getManageSlosUrl } from './use_manage_slos_url';
 
@@ -19,6 +19,11 @@ describe('getManageSlosUrl', () => {
   const getEnvironmentFilter = (): Filter | undefined => {
     const [{ filters }] = getRedirectUrl.mock.calls.at(-1) as [{ filters: Filter[] }];
     return filters.find((filter) => filter.meta.key === 'service.environment');
+  };
+
+  const getServiceFilter = (): Filter | undefined => {
+    const [{ filters }] = getRedirectUrl.mock.calls.at(-1) as [{ filters: Filter[] }];
+    return filters.find((filter) => filter.meta.key === 'service.name');
   };
 
   beforeEach(() => {
@@ -67,5 +72,29 @@ describe('getManageSlosUrl', () => {
     getManageSlosUrl(sloListLocator, { serviceName: 'frontend' });
 
     expect(getEnvironmentFilter()).toBeUndefined();
+  });
+
+  it('matches service.name and slo.groupings.service.name for grouped SLO instances', () => {
+    getManageSlosUrl(sloListLocator, { serviceName: 'frontend' });
+
+    const serviceFilter = getServiceFilter();
+    expect(serviceFilter).toEqual({
+      meta: {
+        alias: 'service.name: frontend',
+        disabled: false,
+        key: 'service.name',
+        negate: false,
+        type: 'custom',
+      },
+      query: {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { match_phrase: { 'service.name': 'frontend' } },
+            { match_phrase: { 'slo.groupings.service.name': 'frontend' } },
+          ],
+        },
+      },
+    });
   });
 });

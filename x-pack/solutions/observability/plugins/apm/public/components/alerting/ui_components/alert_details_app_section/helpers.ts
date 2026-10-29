@@ -8,7 +8,9 @@ import type { EuiCallOutProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asPercent } from '@kbn/observability-plugin/common';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { TopAlert } from '@kbn/observability-plugin/public';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ANOMALY_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getApmMlDetectorLabel } from '../../../../../common/anomaly_detection';
@@ -23,9 +25,43 @@ export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType
 export const isAnomalyRuleType = (ruleTypeId: ApmRuleType): ruleTypeId is ApmRuleType.Anomaly =>
   ruleTypeId === ApmRuleType.Anomaly;
 
+/** Epoch millis of the anomaly behind an anomaly alert, if present and parseable. */
+export const getAnomalyTimestamp = (
+  alert: TopAlert<{ [ANOMALY_TIMESTAMP]?: string | number }>
+): number | undefined => {
+  const anomalyTimestampField = alert.fields[ANOMALY_TIMESTAMP];
+  if (anomalyTimestampField === undefined || anomalyTimestampField === null) {
+    return undefined;
+  }
+
+  const timestamp = new Date(anomalyTimestampField).getTime();
+  return Number.isNaN(timestamp) ? undefined : timestamp;
+};
+
 export const isErrorCountRuleType = (
   ruleTypeId: ApmRuleType
 ): ruleTypeId is ApmRuleType.ErrorCount => ruleTypeId === ApmRuleType.ErrorCount;
+
+/**
+ * For anomaly alerts, use the anomaly timestamp as the range start so padded alert
+ * time ranges cover the anomaly despite ML detection delay. An anomaly alert cannot
+ * fire before the anomaly exists, so alertStart is never earlier than anomalyTimestamp.
+ */
+export const getAlertDetailsRangeStart = ({
+  alertStart,
+  isAnomaly,
+  anomalyTimestamp,
+}: {
+  alertStart: string;
+  isAnomaly: boolean;
+  anomalyTimestamp?: number;
+}): string => {
+  if (!isAnomaly || anomalyTimestamp === undefined) {
+    return alertStart;
+  }
+
+  return new Date(anomalyTimestamp).toISOString();
+};
 
 export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);

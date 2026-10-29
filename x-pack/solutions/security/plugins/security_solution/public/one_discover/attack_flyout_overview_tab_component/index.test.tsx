@@ -8,7 +8,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AttackFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 

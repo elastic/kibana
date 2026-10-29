@@ -5,37 +5,59 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { type ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FilterBar } from './filter_bar';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
+import { SavedViews } from './saved_views';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 
-export const InventoryHeaderContent = () => {
+interface InventoryHeaderContentProps {
+  /** Map-only legend control rendered before the view switcher. */
+  legendControls?: ReactNode;
+}
+
+export const InventoryHeaderContent = ({
+  legendControls,
+}: InventoryHeaderContentProps): React.ReactElement => {
   const { nodeType, changeView, view } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
 
   return (
-    <>
-      <FilterBar interval="60s" />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-        <Toolbar nodeType={nodeType} currentTime={currentTime} />
-        <EuiFlexGroup
-          responsive={false}
-          css={css`
-            margin: 0;
-            justify-content: flex-end;
-          `}
-        >
+    <EuiFlexGroup
+      data-test-subj="inventoryPageHeader"
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem>
+            <FilterBar interval="60s" />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ViewSwitcher view={view} onChange={changeView} />
+            <SavedViews />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexGroup>
-    </>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+          <Toolbar nodeType={nodeType} currentTime={currentTime} />
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            justifyContent="flexEnd"
+          >
+            {legendControls != null && <EuiFlexItem grow={false}>{legendControls}</EuiFlexItem>}
+            <EuiFlexItem grow={false}>
+              <ViewSwitcher view={view} onChange={changeView} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

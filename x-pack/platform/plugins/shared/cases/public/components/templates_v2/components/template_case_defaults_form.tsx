@@ -11,7 +11,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import type { ParsedTemplateDefinition } from '../../../../common/types/domain/template/v1';
-import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
+import type { CaseAssignees } from '../../../../common/types/domain/user/v1';
 import type { CaseSeverity } from '../../../../common/types/domain';
 import { severities } from '../../severity/config';
 import { SEVERITY_TITLE } from '../../severity/translations';
@@ -28,6 +28,7 @@ import { useGetCategories } from '../../../containers/use_get_categories';
 import { CategoryComponent } from '../../category/category_component';
 import type { OnCaseDefaultChange } from '../case_default_fields';
 import { DebouncedTemplateTextField } from './debounced_template_text_field';
+import { DebouncedTemplateMarkdownField } from './debounced_template_markdown_field';
 import * as i18n from '../translations';
 
 interface TemplateCaseDefaultsFormProps {
@@ -224,11 +225,12 @@ export const TemplateCaseDefaultsForm: React.FC<TemplateCaseDefaultsFormProps> =
         dataTestSubj="caseDefaultsTitleInput"
       />
 
-      <DebouncedTemplateTextField
-        multiline
+      <DebouncedTemplateMarkdownField
         label={commonI18n.DESCRIPTION}
+        ariaLabel={i18n.CASE_DEFAULT_DESCRIPTION_ARIA_LABEL}
         value={parsedTemplate.description ?? ''}
         onChange={handleDescriptionChange}
+        editorId="caseDefaultsDescription"
         dataTestSubj="caseDefaultsDescriptionInput"
       />
 

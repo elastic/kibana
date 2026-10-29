@@ -6,6 +6,7 @@
  */
 import type { Environment } from '../../common/environment_rt';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { APMServiceDetailLocator, APM_APP_LOCATOR_ID } from './service_detail_locator';
 import {
   enableComparisonByDefault,
@@ -57,6 +58,35 @@ describe('APMLocatorDefinition', () => {
 
     expect(location.path).toBe(
       '/services/example-app/overview?anomalyThreshold=major&comparisonEnabled=false&environment=development&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+    );
+  });
+
+  it('should use the provided anomalyThreshold instead of the default', async () => {
+    const location = await locator.getLocation({
+      serviceName: 'example-app',
+      query: {
+        environment: 'development' as Environment,
+        anomalyThreshold: ML_ANOMALY_SEVERITY.WARNING,
+      },
+    });
+
+    expect(location.path).toBe(
+      '/services/example-app/overview?anomalyThreshold=warning&comparisonEnabled=false&environment=development&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+    );
+  });
+
+  it('should pass comparisonEnabled and offset through to the generated path', async () => {
+    const location = await locator.getLocation({
+      serviceName: 'example-app',
+      query: {
+        environment: 'development' as Environment,
+        comparisonEnabled: true,
+        offset: 'expected_bounds',
+      },
+    });
+
+    expect(location.path).toBe(
+      '/services/example-app/overview?anomalyThreshold=major&comparisonEnabled=true&environment=development&kuery=&latencyAggregationType=avg&offset=expected_bounds&rangeFrom=now-15m&rangeTo=now&serviceGroup='
     );
   });
 

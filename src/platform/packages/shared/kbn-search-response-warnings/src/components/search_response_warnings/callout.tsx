@@ -8,34 +8,38 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ViewDetailsPopover } from './view_details_popover';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { useViewDetailsActionProps } from './view_details_popover';
 import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 
 interface Props {
   warnings: SearchResponseWarning[];
+  isDismissed: boolean;
+  onDismiss: () => void;
 }
 
 export const SearchResponseWarningsCallout = (props: Props) => {
-  if (!props.warnings.length) {
+  const { euiTheme } = useEuiTheme();
+  const viewDetailsActionProps = useViewDetailsActionProps(props.warnings);
+
+  if (!props.warnings.length || props.isDismissed) {
     return null;
   }
 
   return (
-    <EuiCallOut
+    <KbnWarningCallout
       title={getWarningsTitle(props.warnings)}
-      color="warning"
-      iconType="warning"
+      text={getWarningsDescription(props.warnings)}
       size="s"
+      actionProps={{ primary: viewDetailsActionProps }}
       data-test-subj="searchResponseWarningsCallout"
-    >
-      <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
-        <EuiFlexItem grow={false}>{getWarningsDescription(props.warnings)}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ViewDetailsPopover displayAsLink={true} warnings={props.warnings} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
+      onDismiss={props.onDismiss}
+      css={css`
+        margin: ${euiTheme.size.xxs} ${euiTheme.size.xs};
+      `}
+    />
   );
 };

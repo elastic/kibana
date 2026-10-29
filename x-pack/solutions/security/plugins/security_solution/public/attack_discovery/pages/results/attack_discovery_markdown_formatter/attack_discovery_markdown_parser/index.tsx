@@ -8,8 +8,7 @@
 import type { Plugin } from 'unified';
 import type { RemarkTokenizer } from '@elastic/eui';
 
-import { getIconFromFieldName } from './helpers';
-import type { ParsedField } from '../types';
+import { parseFieldToken } from './helpers';
 
 export const AttackDiscoveryMarkdownParser: Plugin = function () {
   // NOTE: the use of `this.Parse` and the other idioms below required by the Remark `Plugin` should NOT be replicated outside this file
@@ -39,17 +38,10 @@ export const AttackDiscoveryMarkdownParser: Plugin = function () {
       return true;
     }
 
-    const parsedField: ParsedField = {
-      name: fieldName,
-      icon: getIconFromFieldName(fieldName),
-      operator: ':',
-      value: fieldValue,
-    };
-
     // must consume the exact & entire match string
     return eat(`${START_DELIMITER}${rawContent}${END_DELIMITER}`)({
       type: 'fieldPlugin',
-      ...parsedField,
+      ...parseFieldToken(fieldName, fieldValue),
     });
   };
 

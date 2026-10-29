@@ -9,12 +9,13 @@
 
 const THRESHOLD = 0.15;
 const MARKER = '<!-- bundle-size-limits-comment -->';
+const LIMITS_PATH = 'packages/kbn-rspack-optimizer/limits.yml';
 
-const getContent = async ({ github, context }, ref) => {
+const getContent = async ({ github, context }, ref, path) => {
   const { data } = await github.rest.repos.getContent({
     owner: context.repo.owner,
     repo: context.repo.repo,
-    path: 'packages/kbn-optimizer/limits.yml',
+    path,
     ref,
   });
   return Buffer.from(data.content, 'base64').toString('utf8');
@@ -32,21 +33,33 @@ const parseYaml = (content) => {
 module.exports = async ({ github, context }) => {
   const pr = context.payload.pull_request;
 
-  const [baseContent, headContent] = await Promise.all([
-    getContent({ github, context }, pr.base.sha),
-    getContent({ github, context }, pr.head.sha),
-  ]);
-
-  const baseMap = parseYaml(baseContent);
-  const headMap = parseYaml(headContent);
+  // The workflow runs on every push and base change, so check here whether the PR's diff
+  // against its current base touches the limits file. A retarget can drop it from the diff.
+  const files = await github.paginate(github.rest.pulls.listFiles, {
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: pr.number,
+    per_page: 100,
+  });
+  const touchesLimits = files.some(({ filename }) => filename === LIMITS_PATH);
 
   const bigIncreases = [];
-  for (const [plugin, headSize] of Object.entries(headMap)) {
-    const baseSize = baseMap[plugin];
-    if (baseSize != null && headSize > baseSize) {
-      const pct = (headSize - baseSize) / baseSize;
-      if (pct >= THRESHOLD) {
-        bigIncreases.push({ plugin, baseSize, headSize, pct });
+  if (touchesLimits) {
+    const [baseContent, headContent] = await Promise.all([
+      getContent({ github, context }, pr.base.sha, LIMITS_PATH),
+      getContent({ github, context }, pr.head.sha, LIMITS_PATH),
+    ]);
+
+    const baseMap = parseYaml(baseContent);
+    const headMap = parseYaml(headContent);
+
+    for (const [plugin, headSize] of Object.entries(headMap)) {
+      const baseSize = baseMap[plugin];
+      if (baseSize != null && headSize > baseSize) {
+        const pct = (headSize - baseSize) / baseSize;
+        if (pct >= THRESHOLD) {
+          bigIncreases.push({ plugin, baseSize, headSize, pct });
+        }
       }
     }
   }
@@ -80,7 +93,7 @@ module.exports = async ({ github, context }) => {
     .join('\n');
 
   const body =
-    `@${pr.user.login}, this PR increases one or more page-load bundle sizes by 15% or more:\n\n` +
+    `@${pr.user.login}, this PR increases one or more page-load bundle sizes in \`${LIMITS_PATH}\` by 15% or more:\n\n` +
     `| Plugin | Before (bytes) | After (bytes) | Change |\n` +
     `|--------|----------------|---------------|--------|\n` +
     `${rows}\n\n` +

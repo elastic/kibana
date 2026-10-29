@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { DispatcherService } from './dispatcher';
 
 /**
  * DispatcherService singleton
  */
-export const DispatcherServiceInternalToken = Symbol.for(
+export const DispatcherServiceInternalToken = createToken<DispatcherService>(
   'alerting_v2.DispatcherServiceInternal'
-) as ServiceIdentifier<DispatcherService>;
+);
+
+/** Absolute Kibana URL used to make alert links absolute. */
+export const KibanaBaseUrlToken = createToken<string>('alerting_v2.KibanaBaseUrl');

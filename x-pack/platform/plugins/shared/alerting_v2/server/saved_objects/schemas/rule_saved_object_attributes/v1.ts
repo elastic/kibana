@@ -16,16 +16,18 @@ import { schema } from '@kbn/config-schema';
  * but keeping them apart lets us change the storage model (e.g. versioning,
  * denormalization) without breaking the public API.
  */
+export const ruleMetadataSchema = schema.object({
+  name: schema.string(),
+  description: schema.maybe(schema.string()),
+  owner: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
+  builder_type: schema.maybe(schema.string()),
+});
+
 export const ruleSavedObjectAttributesSchema = schema.object({
   kind: schema.oneOf([schema.literal('alert'), schema.literal('signal')]),
 
-  metadata: schema.object({
-    name: schema.string(),
-    description: schema.maybe(schema.string()),
-    owner: schema.maybe(schema.string()),
-    tags: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
-    builder_type: schema.maybe(schema.string()),
-  }),
+  metadata: ruleMetadataSchema,
   time_field: schema.string(),
   schedule: schema.object({
     every: schema.string(),

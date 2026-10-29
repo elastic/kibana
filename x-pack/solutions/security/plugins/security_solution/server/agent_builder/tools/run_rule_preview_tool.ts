@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import { ToolType } from '@kbn/agent-builder-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -40,9 +41,10 @@ const RULE_PREVIEW_SHARED_DEFAULTS = {
   severity: 'low',
 } as const;
 
-const runRulePreviewSchema = z.object({
-  command: z.string().describe(
-    `CLI-style command for previewing a detection rule. The first word is the rule type subcommand.
+const runRulePreviewSchema = lazySchema(() =>
+  z.object({
+    command: z.string().describe(
+      `CLI-style command for previewing a detection rule. The first word is the rule type subcommand.
 
 Supported types: esql, eql, query, saved_query, threshold, threat_match, machine_learning, new_terms
 
@@ -59,8 +61,9 @@ Schedule flags (optional, all commands):
 Help:
   --help                   list all rule types
   <rule_type> --help       type-specific options and examples`
-  ),
-});
+    ),
+  })
+);
 
 export function runRulePreviewTool(
   deps: RunRulePreviewDeps
@@ -77,6 +80,13 @@ Pass --help in the command to discover supported rule types, required flags, and
 The tool returns the generated previewId and the attachment metadata. Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.`,
     schema: runRulePreviewSchema,
     tags: ['security', 'detection', 'rule-preview', 'attachment'],
+    annotations: {
+      title: 'Run Rule Preview',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async (
       { command },
       { request, spaceId, savedObjectsClient, attachments, prompts, callContext }
@@ -237,7 +247,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
         body,
         enableLoggedRequests: false,
         request,
-        spaceId,
+        spaceId: brandSpaceId(spaceId),
         actionsClient,
         license,
         savedObjectsClient,

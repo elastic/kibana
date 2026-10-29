@@ -17,6 +17,18 @@ export const ENTITY_ANOMALIES_OVERVIEW_TIMEFRAME = i18n.translate(
   { defaultMessage: 'Last 30 days' }
 );
 
+export const ENTITY_ANOMALIES_OVERVIEW_TIMEFRAME_HOURS = (hours: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entityAnomalies.timeframeHoursLabel', {
+    defaultMessage: 'Last {hours, plural, one {hour} other {# hours}}',
+    values: { hours },
+  });
+
+export const ENTITY_ANOMALIES_OVERVIEW_TIMEFRAME_DAYS = (days: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.entityAnomalies.timeframeDaysLabel', {
+    defaultMessage: 'Last {days, plural, one {day} other {# days}}',
+    values: { days },
+  });
+
 export const ENTITY_ANOMALIES_ALL_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.allAnomaliesLink',
   { defaultMessage: 'All anomalies' }
@@ -57,6 +69,11 @@ export const getEntityAnomaliesCountLabel = (count: number) =>
 export const ENTITY_ANOMALIES_SWIMLANE_MAX_SCORE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.swimlane.maxAnomalyScore',
   { defaultMessage: 'Max anomaly score' }
+);
+
+export const ENTITY_ANOMALIES_SWIMLANE_ANOMALY_COUNT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityAnomalies.overview.swimlane.anomalyCount',
+  { defaultMessage: 'Anomaly count' }
 );
 
 export const ENTITY_ANOMALIES_SWIMLANE_X_AXIS_LABEL = i18n.translate(
@@ -196,6 +213,15 @@ export const ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.recentAnomaliesEmptyMessage',
   { defaultMessage: 'No anomalies detected within last 30 days' }
 );
+
+export const ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE_FOR_TIMEFRAME = (timeframe: string) =>
+  i18n.translate(
+    'xpack.securitySolution.entityAnalytics.entityAnomalies.recentAnomaliesEmptyMessageForTimeframe',
+    {
+      defaultMessage: 'No anomalies detected within {timeframe}',
+      values: { timeframe: timeframe.toLowerCase() },
+    }
+  );
 
 export const ENTITY_ANOMALY_DATE_RANGE_LAST_15_MINUTES = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityAnomalies.tab.dateRangePicker.last15MinutesLabel',

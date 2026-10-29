@@ -17,16 +17,25 @@ jest.mock('../../containers/api', () => ({
   patchCase: (...args: unknown[]) => mockPatchCase(...args),
 }));
 
+const mockReportTemplateApplied = jest.fn();
+const mockReportTemplateCleared = jest.fn();
+jest.mock('../../analytics/templates/use_template_apply_ebt', () => ({
+  useTemplateAppliedEBT: () => mockReportTemplateApplied,
+  useTemplateClearedEBT: () => mockReportTemplateCleared,
+}));
+
 const mockShowSuccessToast = jest.fn();
 const mockShowErrorToast = jest.fn();
+const mockShowInfoToast = jest.fn();
 jest.mock('../../common/use_cases_toast', () => ({
   useCasesToast: () => ({
     showSuccessToast: mockShowSuccessToast,
     showErrorToast: mockShowErrorToast,
+    showInfoToast: mockShowInfoToast,
   }),
 }));
 
-// The hook reloads the page on success; jsdom doesn't implement reload, so stub it.
+// The hook exposes a "Reload page" action on success; jsdom doesn't implement reload, so stub it.
 const originalLocation = window.location;
 const mockReload = jest.fn();
 beforeAll(() => {
@@ -284,7 +293,7 @@ describe('useChangeAppliedTemplate', () => {
     expect(mockPatchCase.mock.calls[0][0].updatedCase).not.toHaveProperty('connector');
   });
 
-  it('reloads the page on success so all components reflect the applied template', async () => {
+  it('shows a reload notification on success instead of reloading automatically', async () => {
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
       wrapper: TestProviders,
     });
@@ -294,11 +303,22 @@ describe('useChangeAppliedTemplate', () => {
     });
 
     await waitFor(() => {
-      expect(mockReload).toHaveBeenCalled();
+      expect(mockShowInfoToast).toHaveBeenCalled();
     });
+
+    // The page must not reload on its own; the user triggers it via the toast action.
+    expect(mockReload).not.toHaveBeenCalled();
+
+    // The toast exposes a persistent "Reload page" action that reloads when clicked.
+    const [, , actionProps, options] = mockShowInfoToast.mock.calls[0];
+    expect(options).toEqual({ toastLifeTimeMs: Infinity });
+    act(() => {
+      actionProps.primary.onClick();
+    });
+    expect(mockReload).toHaveBeenCalled();
   });
 
-  it('shows error toast on failure and does not reload', async () => {
+  it('shows error toast on failure and does not reload or notify success', async () => {
     mockPatchCase.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useChangeAppliedTemplate(), {
@@ -313,6 +333,202 @@ describe('useChangeAppliedTemplate', () => {
       expect(mockShowErrorToast).toHaveBeenCalled();
     });
 
+    expect(mockShowInfoToast).not.toHaveBeenCalled();
     expect(mockReload).not.toHaveBeenCalled();
+  });
+
+  describe('telemetry', () => {
+    const renderMutation = () =>
+      renderHook(() => useChangeAppliedTemplate(), { wrapper: TestProviders });
+
+    const newTemplate = { id: 'tmpl-2', version: 5, fields: templateFields };
+
+    it('reports an initial apply when the case carried no template', async () => {
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate({
+          caseData: basicCase,
+          newTemplate,
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockReportTemplateApplied).toHaveBeenCalledWith({
+          entryPoint: 'case_view_sidebar',
+          applyMode: 'initial',
+        });
+      });
+
+      expect(mockReportTemplateApplied).toHaveBeenCalledTimes(1);
+      expect(mockReportTemplateCleared).not.toHaveBeenCalled();
+    });
+
+    it('reports a replacement when the case already carried a different template', async () => {
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate({
+          caseData: caseWithTemplate,
+          newTemplate,
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockReportTemplateApplied).toHaveBeenCalledWith({
+          entryPoint: 'case_view_sidebar',
+          applyMode: 'replacement',
+        });
+      });
+
+      expect(mockReportTemplateApplied).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a replacement even when the case template no longer resolves', async () => {
+      // A case can reference a deleted or disabled template. Presence on the case is what decides
+      // the mode, so an implementation that resolved the template first would report `initial` here.
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate({
+          caseData: { ...basicCase, template: { id: 'deleted-tmpl', version: 1 } },
+          newTemplate,
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockReportTemplateApplied).toHaveBeenCalledWith({
+          entryPoint: 'case_view_sidebar',
+          applyMode: 'replacement',
+        });
+      });
+
+      expect(mockReportTemplateApplied).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a clear when the template is removed', async () => {
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate({
+          caseData: caseWithTemplate,
+          newTemplate: null,
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockReportTemplateCleared).toHaveBeenCalledWith({
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      expect(mockReportTemplateCleared).toHaveBeenCalledTimes(1);
+      expect(mockReportTemplateApplied).not.toHaveBeenCalled();
+    });
+
+    it('reports nothing for a caller that passes no entry point', async () => {
+      // The deprecated legacy case view writes through this mutation and must stay silent.
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate({ caseData: caseWithTemplate, newTemplate });
+      });
+
+      await waitFor(() => {
+        expect(mockShowInfoToast).toHaveBeenCalled();
+      });
+
+      expect(mockReportTemplateApplied).not.toHaveBeenCalled();
+      expect(mockReportTemplateCleared).not.toHaveBeenCalled();
+    });
+
+    it('reports nothing when the patch fails', async () => {
+      mockPatchCase.mockRejectedValue(new Error('Network error'));
+
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate({
+          caseData: caseWithTemplate,
+          newTemplate,
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockShowErrorToast).toHaveBeenCalled();
+      });
+
+      expect(mockReportTemplateApplied).not.toHaveBeenCalled();
+      expect(mockReportTemplateCleared).not.toHaveBeenCalled();
+    });
+
+    it('still reports when the caller unmounts before the server answers', async () => {
+      // This is why the report lives in the mutation's own onSuccess. React Query runs a per-call
+      // onSuccess only while the caller still has listeners, so the same report written at the call
+      // site would be lost here.
+      let resolvePatch: (value: unknown) => void = () => {};
+      mockPatchCase.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolvePatch = resolve;
+          })
+      );
+
+      const { result, unmount } = renderMutation();
+
+      act(() => {
+        result.current.mutate({
+          caseData: basicCase,
+          newTemplate,
+          entryPoint: 'case_view_sidebar',
+        });
+      });
+
+      // The mutation starts asynchronously, so wait for the request to be in flight before
+      // unmounting; otherwise there is nothing to resolve and the test proves nothing.
+      await waitFor(() => {
+        expect(mockPatchCase).toHaveBeenCalled();
+      });
+
+      unmount();
+
+      act(() => {
+        resolvePatch([caseWithTemplate]);
+      });
+
+      await waitFor(() => {
+        expect(mockReportTemplateApplied).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockReportTemplateApplied).toHaveBeenCalledWith({
+        entryPoint: 'case_view_sidebar',
+        applyMode: 'initial',
+      });
+    });
+
+    it('reports once even though the caller also passes its own onSuccess', async () => {
+      // The sidebar always passes a per-call onSuccess to close its modal. A report added there as
+      // well would double-count, and each suite mocks the other side, so assert it here.
+      const callerOnSuccess = jest.fn();
+      const { result } = renderMutation();
+
+      act(() => {
+        result.current.mutate(
+          { caseData: basicCase, newTemplate, entryPoint: 'case_view_sidebar' },
+          { onSuccess: callerOnSuccess }
+        );
+      });
+
+      await waitFor(() => {
+        expect(callerOnSuccess).toHaveBeenCalled();
+      });
+
+      expect(mockReportTemplateApplied).toHaveBeenCalledTimes(1);
+    });
   });
 });

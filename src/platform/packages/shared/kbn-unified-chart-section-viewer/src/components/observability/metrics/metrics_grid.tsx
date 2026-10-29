@@ -14,18 +14,29 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
+import {
+  createESQLQuery,
+  firstNonNullable,
+  getAggregationLabel,
+  getMetricUniqueKey,
+} from '../../../common/utils';
+import type { HistogramBoundsByMetricKey } from './hooks/use_fetch_histogram_bounds';
+import { useHistogramHeatmap } from './hooks/use_histogram_heatmap';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -34,7 +45,7 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-import { getEsqlQuery } from './utils/get_esql_query';
+import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
@@ -80,6 +91,7 @@ export type MetricsGridProps = Pick<
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
+  userSource?: string;
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
   getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
   /**
@@ -94,11 +106,22 @@ export type MetricsGridProps = Pick<
    *
    */
   isTabSelected: boolean;
+  /**
+   * `ChartsGrid` hides an inactive grid with CSS rather than unmounting it, so per-chart
+   * fetches that should pause while hidden (exemplars) need this flag explicitly.
+   */
+  isComponentVisible: boolean;
+  /** Min/max fetched for the visible histogram charts. Empty until the heatmaps flag is on. */
+  histogramBounds?: HistogramBoundsByMetricKey;
+  histogramBoundsLoading?: boolean;
 };
+
+const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
 };
+
 export const MetricsGrid = ({
   metricItems,
   onBrushEnd,
@@ -106,6 +129,7 @@ export const MetricsGrid = ({
   actions,
   dimensions,
   whereStatements,
+  userSource,
   services,
   columns,
   fetchParams,
@@ -114,20 +138,17 @@ export const MetricsGrid = ({
   getUserMessages,
   getDescription,
   isTabSelected,
+  isComponentVisible,
+  histogramBounds = EMPTY_HISTOGRAM_BOUNDS,
+  histogramBoundsLoading = false,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
+  const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
+    useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
-
-  const userSource = useMemo<string | undefined>(() => {
-    const userEsql = getEsqlQuery(fetchParams.query);
-    if (!userEsql) return undefined;
-    const pattern = getIndexPatternFromESQLQuery(userEsql);
-    return pattern || undefined;
-  }, [fetchParams.query]);
 
   const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
     useGridNavigation({
@@ -163,7 +184,6 @@ export const MetricsGrid = ({
 
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
-      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
       onFlyoutStateChange({
         gridPosition: index,
         metricUniqueKey: getMetricUniqueKey(metricItem),
@@ -173,6 +193,17 @@ export const MetricsGrid = ({
     },
     [onFlyoutStateChange]
   );
+
+  const isFlyoutOpen = Boolean(flyoutData) && isTabSelected;
+
+  // Keyed on whether the flyout is open rather than on `flyoutData`, so switching metrics while it
+  // is open does not dismiss the other flyouts again. This covers both View details and a tab
+  // restoring its `flyoutState` when it becomes active.
+  useEffect(() => {
+    if (isFlyoutOpen) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+    }
+  }, [isFlyoutOpen]);
 
   const handleCloseFlyout = useCallback(() => {
     if (!flyoutState) {
@@ -255,13 +286,19 @@ export const MetricsGrid = ({
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
+                  profileId={profileId}
+                  gridSettings={gridSettings}
+                  onMetricExplored={onMetricExplored}
+                  isComponentVisible={isComponentVisible}
+                  histogramBounds={histogramBounds}
+                  histogramBoundsLoading={histogramBoundsLoading}
                 />
               </EuiFlexItem>
             );
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {flyoutData && isTabSelected && (
+      {flyoutData && isFlyoutOpen && (
         <MetricInsightsFlyout
           metricItem={flyoutData.metricItem}
           esqlQuery={flyoutData.esqlQuery}
@@ -294,6 +331,12 @@ interface ChartItemProps
   whereStatements?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  gridSettings: MetricsGridSettings;
+  onMetricExplored?: (metricUniqueKey: string) => void;
+  isComponentVisible: boolean;
+  histogramBounds: HistogramBoundsByMetricKey;
+  histogramBoundsLoading: boolean;
 }
 
 const ChartItem = React.memo(
@@ -320,12 +363,32 @@ const ChartItem = React.memo(
     onFocusCell,
     onViewDetails,
     userMessages,
+    profileId,
+    gridSettings,
+    onMetricExplored,
+    isComponentVisible,
+    histogramBounds,
+    histogramBoundsLoading,
   }: ChartItemProps) => {
-    const { profileId, gridSettings } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
+    );
+
+    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+      (event) => {
+        // Only count clicks on panel action controls (Inspect, View details, Explore in
+        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
+        // on the chart body, legend, or time series selection.
+        const isActionClick = (event.target as HTMLElement).closest(
+          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
+        );
+        if (isActionClick) {
+          onMetricExplored?.(getMetricUniqueKey(metricItem));
+        }
+      },
+      [onMetricExplored, metricItem]
     );
 
     const applicableDimensions = useStableApplicableDimensions(
@@ -333,7 +396,34 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
+    const exemplars = useFetchExemplars({
+      fetchParams,
+      services,
+      metricItem,
+      whereStatements,
+      originalSource: userSource,
+      profileId,
+      isComponentVisible,
+    });
+    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
+    void exemplars;
+
+    const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
+      useHistogramHeatmap({
+        metricItem,
+        applicableDimensions,
+        histogramBounds,
+        histogramBoundsLoading,
+        whereStatements,
+        originalSource: userSource,
+        histogramVisualization: gridSettings.histogramVisualization,
+        description,
+      });
+
     const esqlQuery = useMemo(() => {
+      if (shouldRenderHistogram) {
+        return distributionQuery ?? '';
+      }
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
       return isSupported
@@ -345,7 +435,20 @@ const ChartItem = React.memo(
             gridSettings,
           })
         : '';
-    }, [metricItem, applicableDimensions, whereStatements, userSource, gridSettings]);
+    }, [
+      shouldRenderHistogram,
+      distributionQuery,
+      metricItem,
+      applicableDimensions,
+      whereStatements,
+      userSource,
+      gridSettings,
+    ]);
+
+    const yAxisTitle = useMemo(() => {
+      const instrument = firstNonNullable(metricItem.metricTypes);
+      return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
+    }, [metricItem.metricTypes, gridSettings]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
@@ -354,6 +457,40 @@ const ChartItem = React.memo(
       color,
       gridSettings,
     });
+
+    const lensConfig = useMemo(() => {
+      if (heatmapConfig) {
+        return heatmapConfig;
+      }
+
+      // Bounds are loading or failed. No series yet; the empty XY config keeps the
+      // loader or the bounds error.
+      if (shouldRenderHistogram) {
+        return buildXySeriesConfig({
+          query: '',
+          title: metricItem.metricName,
+          description,
+          chartLayers: [],
+        });
+      }
+
+      return buildXySeriesConfig({
+        query: esqlQuery,
+        title: metricItem.metricName,
+        description,
+        chartLayers,
+        yAxisTitle,
+      });
+    }, [
+      heatmapConfig,
+      shouldRenderHistogram,
+      metricItem.metricName,
+      description,
+      esqlQuery,
+      chartLayers,
+      yAxisTitle,
+    ]);
+
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -375,11 +512,15 @@ const ChartItem = React.memo(
         isFocused={isFocused}
         isSelected={isSelected}
         onFocus={onFocusCell}
+        onClickCapture={recordExploredMetric}
       >
         <Chart
           id={metricItem.metricName}
           isSelected={isSelected}
-          esqlQuery={esqlQuery}
+          lensConfig={lensConfig}
+          // Chart does not know which configs are heatmaps. Click-to-filter is
+          // disabled here because ES|QL cannot compare a histogram value to a number.
+          disableClickFilter={lensConfig.chartType === 'heatmap'}
           size={size}
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
@@ -388,9 +529,8 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
-          title={metricItem.metricName}
-          description={description}
-          chartLayers={chartLayers}
+          isLoading={shouldRenderHistogram && histogramBoundsLoading}
+          error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
           syncTooltips={false}
           titleHighlight={titleHighlight}
@@ -454,6 +594,7 @@ const A11yGridCell = React.forwardRef(
       isFocused,
       isSelected,
       onFocus,
+      onClickCapture,
     }: React.PropsWithChildren<{
       id: string;
       rowIndex: number;
@@ -462,6 +603,7 @@ const A11yGridCell = React.forwardRef(
       isFocused: boolean;
       isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
+      onClickCapture?: React.MouseEventHandler<HTMLDivElement>;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
@@ -484,6 +626,7 @@ const A11yGridCell = React.forwardRef(
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
+        onClickCapture={onClickCapture}
         css={css`
           outline: none;
           cursor: pointer;

@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiFilterButton, EuiPopover } from '@elastic/eui';
-import {
-  EPISODE_SEVERITIES,
-  EPISODE_SEVERITY_FILTER_NONE,
-  getEpisodeSeverityLabel,
-} from '../severity/severity_utils';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBadge, EuiFilterButton, EuiHealth, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EPISODE_SEVERITY_FILTER_NONE } from '../severity/severity_utils';
+import { useSeverityRegistry } from '../../hooks/use_severity_registry';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
-
-const SEVERITY_FILTER_OPTIONS: Array<{ label: string; value: string }> = [
-  ...EPISODE_SEVERITIES.map((severity) => ({
-    label: getEpisodeSeverityLabel(severity),
-    value: severity,
-  })),
-  {
-    label: i18n.SEVERITY_FILTER_NONE_LABEL,
-    value: EPISODE_SEVERITY_FILTER_NONE,
-  },
-];
 
 interface AlertEpisodesSeverityFilterProps {
   selectedSeverities?: string[] | null;
@@ -38,8 +24,24 @@ export function AlertEpisodesSeverityFilter({
   'data-test-subj': dataTestSubj = 'severityFilter',
 }: AlertEpisodesSeverityFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const { entries } = useSeverityRegistry();
 
-  const options = SEVERITY_FILTER_OPTIONS;
+  const options = useMemo(
+    () => [
+      ...[...entries].reverse().map(({ label, value, color }) => ({
+        label,
+        value,
+        prepend: <EuiBadge color={color} aria-hidden />,
+      })),
+      {
+        label: i18n.SEVERITY_FILTER_NONE_LABEL,
+        value: EPISODE_SEVERITY_FILTER_NONE,
+        prepend: <EuiHealth color={euiTheme.colors.textSubdued} />,
+      },
+    ],
+    [entries, euiTheme]
+  );
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
@@ -56,7 +58,7 @@ export function AlertEpisodesSeverityFilter({
       aria-label={i18n.SEVERITY_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
           isSelected={isOpen}

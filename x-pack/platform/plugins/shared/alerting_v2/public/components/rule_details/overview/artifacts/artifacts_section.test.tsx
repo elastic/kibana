@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { RuleApiResponse } from '../../../../services/rules_api';
 import { ArtifactsSection } from './artifacts_section';
 
 jest.mock('./dashboard_artifacts_subsection', () => ({
@@ -22,11 +23,38 @@ jest.mock('./action_policies_artifacts_subsection', () => ({
   ),
 }));
 
+const mockCanRead = jest.fn();
+
+jest.mock('@kbn/core-di-browser', () => ({
+  CoreStart: (key: string) => key,
+  useService: () => ({ canRead: mockCanRead }),
+}));
+
+const rule: RuleApiResponse = {
+  id: 'rule-1',
+  kind: 'alert',
+  enabled: true,
+  version: 1,
+  metadata: { name: 'Test Rule' },
+  time_field: '@timestamp',
+  schedule: { every: '5m', lookback: '10m' },
+  query: { base: 'FROM logs-*' },
+  created_by: { profile_uid: 'alice@example.com' },
+  created_at: '2026-03-01T12:00:00.000Z',
+  updated_by: { profile_uid: 'bob@example.com' },
+  updated_at: '2026-03-04T12:00:00.000Z',
+};
+
 describe('ArtifactsSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCanRead.mockReturnValue(true);
+  });
+
   it('renders the artifacts accordion with dashboard and action policy subsections', () => {
     render(
       <I18nProvider>
-        <ArtifactsSection />
+        <ArtifactsSection rule={rule} />
       </I18nProvider>
     );
 
@@ -35,5 +63,19 @@ describe('ArtifactsSection', () => {
     expect(screen.getByTestId('ruleArtifactsSubsectionsRow')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardArtifactsSubsectionMock')).toBeInTheDocument();
     expect(screen.getByTestId('actionPoliciesArtifactsSubsectionMock')).toBeInTheDocument();
+    expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
+  });
+
+  it('hides the action policies subsection when the user cannot read action policies', () => {
+    mockCanRead.mockReturnValue(false);
+
+    render(
+      <I18nProvider>
+        <ArtifactsSection rule={rule} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('dashboardArtifactsSubsectionMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('actionPoliciesArtifactsSubsectionMock')).not.toBeInTheDocument();
   });
 });

@@ -18,6 +18,7 @@ import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
@@ -64,9 +65,9 @@ function buildVisualizationState(config: LegacyMetricConfig): LegacyMetricVisual
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     accessor: ACCESSOR,
-    size: layer.metric.size,
-    titlePosition: layer.metric.labels?.alignment,
-    textAlign: layer.metric.values?.alignment,
+    ...(layer.metric.size ? { size: layer.metric.size } : {}),
+    ...(layer.metric.labels?.alignment ? { titlePosition: layer.metric.labels?.alignment } : {}),
+    ...(layer.metric.values?.alignment ? { textAlign: layer.metric.values?.alignment } : {}),
     ...(layer.metric.apply_color_to
       ? stripUndefined({
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
@@ -106,7 +107,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null || isEsqlTableTypeDataSource(dataSource)) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   const props: DeepPartial<DeepMutable<LegacyMetricConfig>> = {

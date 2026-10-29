@@ -14,6 +14,9 @@ import { appContextService } from '../services';
 import {
   FleetError,
   RegistryError,
+  RegistryConnectionError,
+  RegistryResponseError,
+  PackageFipsIncompatibleError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
   defaultFleetErrorHandler,
@@ -52,6 +55,33 @@ describe('defaultFleetErrorHandler', () => {
       expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
     });
 
+    it('502: RegistryConnectionError surfaces categorized attributes', async () => {
+      const error = new RegistryConnectionError('cannot connect', {
+        type: 'dns',
+        reason: 'ENOTFOUND',
+      });
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultFleetErrorHandler({ error, response });
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 502,
+        body: { message: error.message, attributes: { type: 'dns', reason: 'ENOTFOUND' } },
+      });
+    });
+
+    it('500: RegistryResponseError surfaces http attributes', async () => {
+      const error = new RegistryResponseError('bad response', 500);
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultFleetErrorHandler({ error, response });
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: error.message, attributes: { type: 'http', reason: '500' } },
+      });
+    });
+
     it('415: PackageUnsupportedMediaType', async () => {
       const error = new PackageUnsupportedMediaTypeError('123');
       const response = httpServerMock.createResponseFactory();
@@ -88,6 +118,18 @@ describe('defaultFleetErrorHandler', () => {
       // logging
       expect(mockContract.logger?.error).toHaveBeenCalledTimes(1);
       expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
+    });
+
+    it('400: PackageFipsIncompatibleError', async () => {
+      const error = new PackageFipsIncompatibleError('not FIPS compatible');
+      const response = httpServerMock.createResponseFactory();
+
+      await defaultFleetErrorHandler({ error, response });
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: { message: error.message },
+      });
     });
 
     it('400: FleetError', async () => {

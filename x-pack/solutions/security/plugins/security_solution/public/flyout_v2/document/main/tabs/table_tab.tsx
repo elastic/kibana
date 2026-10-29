@@ -12,7 +12,8 @@ import { css } from '@emotion/react';
 import { EuiInMemoryTable, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -38,6 +39,7 @@ import { useHighlightedFields } from '../hooks/use_highlighted_fields';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { OpenFlyoutLinkRenderer } from '../../../shared/components/open_flyout_link';
 import { EventKind } from '../constants/event_kinds';
@@ -59,6 +61,11 @@ const PIN_ACTION_CSS = css`
     .flyout_table__pinAction {
       opacity: 1;
     }
+  }
+  /* the pin action is hidden with opacity, which keeps it in the tab order:
+     reveal it on keyboard focus so it has a visible focus indicator */
+  .flyout_table__pinAction:focus-visible {
+    opacity: 1;
   }
 `;
 
@@ -122,18 +129,13 @@ export interface TableTabProps {
    */
   scopeId?: string;
   /**
-   * Whether the flyout is opened in rule preview
-   */
-  isRulePreview?: boolean;
-  /**
    * Wraps each value cell with cell actions (filter for/out, copy, etc.). The caller decides
    * what to inject (real security cell actions in Security Solution, no-op elsewhere).
    */
   renderCellActions: CellActionRenderer;
   /**
    * Optional wrapper that turns supported field values (host, ip, rule) into links that open the
-   * relevant system flyout. Injected by the new flyout; when omitted (legacy expandable flyout),
-   * the value cell keeps using the `PreviewLink` preview panel.
+   * relevant system flyout. When omitted, the value cell falls back to the `PreviewLink` preview panel.
    */
   renderFlyoutLink?: OpenFlyoutLinkRenderer;
 }
@@ -142,13 +144,7 @@ export interface TableTabProps {
  * Table view displayed in the document details flyout Table tab
  */
 export const TableTab = memo(
-  ({
-    hit,
-    scopeId = '',
-    isRulePreview = false,
-    renderCellActions,
-    renderFlyoutLink,
-  }: TableTabProps) => {
+  ({ hit, scopeId = '', renderCellActions, renderFlyoutLink }: TableTabProps) => {
     const smallFontSize = useEuiFontSize('xs').fontSize;
     const { euiTheme } = useEuiTheme();
     const {
@@ -162,7 +158,8 @@ export const TableTab = memo(
       [hit]
     );
 
-    const browserFields = useBrowserFields(getSourcererScopeId(scopeId));
+    const { dataView } = useDataView(getSourcererScopeId(scopeId));
+    const browserFields = useBrowserFields(dataView);
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -185,21 +182,31 @@ export const TableTab = memo(
 
     const euidApi = useEntityStoreEuidApi();
     const hostDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('host', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('host'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const userDocumentIdentityFields = useMemo(
-      () => euidApi?.euid.getEntityIdentifiersFromDocument('user', hit.flattened) ?? null,
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEntityIdentifiersFromDocument(
+          euidApi.getBuiltInEntityDefinition('user'),
+          hit.flattened
+        ) ?? null,
+      [euidApi, hit.flattened]
     );
     const isHostEntity = hostDocumentIdentityFields != null;
     const hostEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('host', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const userEuidFromDocument = useMemo(
-      () => euidApi?.euid.getEuidFromObject('user', hit.flattened),
-      [euidApi?.euid, hit.flattened]
+      () =>
+        euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), hit.flattened),
+      [euidApi, hit.flattened]
     );
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEuidFromDocument,
@@ -367,7 +374,6 @@ export const TableTab = memo(
           scopeId,
           getLinkValue,
           ruleId,
-          isRulePreview,
           onTogglePinned,
           entityId,
           renderCellActions,
@@ -381,7 +387,6 @@ export const TableTab = memo(
         scopeId,
         getLinkValue,
         ruleId,
-        isRulePreview,
         onTogglePinned,
         renderCellActions,
         hit,

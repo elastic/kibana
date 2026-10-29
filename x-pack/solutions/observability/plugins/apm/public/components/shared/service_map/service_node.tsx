@@ -35,6 +35,7 @@ import { AlertsBadge } from '../badge/alerts_badge';
 import { SloStatusBadge } from '../slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
 import { useServiceMapAlertsNavigate } from './service_map_alerts_navigate_context';
+import { useServiceMapInteractivity } from './service_map_interactivity_context';
 import { HighlightWrapper } from './highlight_wrapper';
 import { SERVICE_MAP_EBT_ELEMENTS } from './ebt_constants';
 
@@ -52,6 +53,7 @@ export const ServiceNode = memo(
     const canReadSlos = !!apmPluginContext?.core?.application?.capabilities?.slo?.read;
     const { onSloBadgeClick } = useServiceMapSloFlyout();
     const navigateToAlertsTab = useServiceMapAlertsNavigate(data.label);
+    const isInteractive = useServiceMapInteractivity();
     const isDarkMode = colorMode === 'DARK';
 
     const { borderColor, borderWidth } = useMemo(() => {
@@ -128,19 +130,22 @@ export const ServiceNode = memo(
       justify-content: center;
       box-shadow: 0 ${euiTheme.size.xxs} ${euiTheme.size.xxs}
         ${euiTheme.colors.backgroundBaseSubdued};
-      cursor: pointer;
+      cursor: ${isInteractive ? 'pointer' : 'default'};
       pointer-events: all;
 
-      &:focus-visible {
-        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-        outline-offset: ${euiTheme.size.xxs};
-      }
+      ${isInteractive &&
+      css`
+        &:focus-visible {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.size.xxs};
+        }
 
-      [data-id]:focus &,
-      [data-id]:focus-visible & {
-        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
-        outline-offset: ${euiTheme.size.xxs};
-      }
+        [data-id]:focus &,
+        [data-id]:focus-visible & {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.size.xxs};
+        }
+      `}
     `;
 
     const iconStyles = css`
@@ -182,14 +187,16 @@ export const ServiceNode = memo(
             <div
               data-test-subj="serviceMapNodeServiceCircle"
               css={circleStyles}
-              role="button"
-              tabIndex={0}
+              role={isInteractive ? 'button' : undefined}
+              tabIndex={isInteractive ? 0 : -1}
               aria-label={ariaLabel}
-              aria-pressed={selected}
-              {...getEbtProps({
-                action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
-                element: SERVICE_MAP_EBT_ELEMENTS.SERVICE_NODE,
-              })}
+              aria-pressed={isInteractive ? selected : undefined}
+              {...(isInteractive
+                ? getEbtProps({
+                    action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+                    element: SERVICE_MAP_EBT_ELEMENTS.SERVICE_NODE,
+                  })
+                : {})}
             >
               {iconUrl && (
                 <img src={iconUrl} alt={data.agentName} css={iconStyles} aria-hidden="true" />
@@ -232,7 +239,7 @@ export const ServiceNode = memo(
                       sloCount={data.sloCount}
                       serviceName={data.label}
                       compactLabelOnNarrowScreens
-                      {...(onSloBadgeClick
+                      {...(isInteractive && onSloBadgeClick
                         ? {
                             onClick: (e) => {
                               e.stopPropagation();

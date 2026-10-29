@@ -31,14 +31,42 @@ interface CopyToModalProps {
   sourceFeatureName: string;
   currentFeatureId: string;
   taskType: string;
+  /**
+   * The source row lists only prompt-template endpoints. Targets that do not
+   * are excluded, and a messages row cannot copy onto a template-only row.
+   */
+  allowTemplateRequiredModels?: boolean;
   onApply: (selectedFeatureIds: string[]) => void;
   onClose: () => void;
 }
+
+/** A copy target has to share task type and template-endpoint policy. */
+export const isCopyTargetDisabled = ({
+  allowTemplateRequiredModels,
+  currentFeatureId,
+  feature,
+  taskType,
+}: {
+  allowTemplateRequiredModels: boolean;
+  currentFeatureId: string;
+  feature: Pick<InferenceFeatureConfig, 'allowTemplateRequiredModels' | 'featureId' | 'taskType'>;
+  taskType: string;
+}): boolean => {
+  if (
+    !feature.taskType ||
+    feature.taskType !== taskType ||
+    feature.featureId === currentFeatureId
+  ) {
+    return true;
+  }
+  return (feature.allowTemplateRequiredModels === true) !== allowTemplateRequiredModels;
+};
 
 export const CopyToModal: React.FC<CopyToModalProps> = ({
   sourceFeatureName,
   currentFeatureId,
   taskType,
+  allowTemplateRequiredModels = false,
   onApply,
   onClose,
 }) => {
@@ -78,8 +106,12 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
           id: `section-${parentId}`,
           label: parentNameMap.get(parentId) ?? parentId,
           children: children.map((f) => {
-            const isDisabled =
-              !f.taskType || f.taskType !== taskType || f.featureId === currentFeatureId;
+            const isDisabled = isCopyTargetDisabled({
+              allowTemplateRequiredModels,
+              currentFeatureId,
+              feature: f,
+              taskType,
+            });
             return {
               id: f.featureId,
               label: (
@@ -96,7 +128,14 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
         },
       ];
     });
-  }, [registeredFeatures, currentFeatureId, taskType, idToSelectedMap, handleToggle]);
+  }, [
+    allowTemplateRequiredModels,
+    registeredFeatures,
+    currentFeatureId,
+    taskType,
+    idToSelectedMap,
+    handleToggle,
+  ]);
 
   const handleApply = useCallback(() => {
     const selected = Object.entries(idToSelectedMap)

@@ -27,7 +27,7 @@ export const BackToExternalAppLink = memo<BackToExternalAppLinkProps>(
         onClick={handleBackOnClick}
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiIcon type="arrowLeft" size="s" aria-hidden={true} />
+          <EuiIcon type="chevronSingleLeft" size="s" aria-hidden={true} />
           {backButtonLabel || (
             <FormattedMessage id="xpack.securitySolution.list.backButton" defaultMessage="Back" />
           )}

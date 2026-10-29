@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useMonitorDetail } from './use_monitor_detail';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
+import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../../common/runtime_types';
 import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
@@ -27,7 +28,7 @@ describe('useMonitorDetail', () => {
       expect.objectContaining({
         index: SYNTHETICS_INDEX_PATTERN,
       }),
-      ['config-123', 'US East', undefined],
+      ['config-123', 'US East', undefined, undefined],
       expect.any(Object)
     );
   });
@@ -39,7 +40,7 @@ describe('useMonitorDetail', () => {
       expect.objectContaining({
         index: `remote-cluster-1:${SYNTHETICS_INDEX_PATTERN}`,
       }),
-      ['config-123', 'US East', 'remote-cluster-1'],
+      ['config-123', 'US East', 'remote-cluster-1', undefined],
       expect.any(Object)
     );
   });
@@ -57,6 +58,38 @@ describe('useMonitorDetail', () => {
         { exists: { field: 'summary' } },
       ])
     );
+  });
+
+  it('filters heartbeat monitors by monitor.id (their pings carry no config_id)', () => {
+    renderHook(() => useMonitorDetail('k8s-monitor', 'US East', undefined, 'heartbeat'));
+
+    const params = useEsSearchMock.mock.calls[0][0];
+    const filters = params.query.bool.filter;
+
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        { term: { 'monitor.id': 'k8s-monitor' } },
+        { term: { 'observer.geo.name': 'US East' } },
+        { exists: { field: 'summary' } },
+      ])
+    );
+    expect(filters).not.toContainEqual({ term: { config_id: 'k8s-monitor' } });
+  });
+
+  it('matches location-less pings for a heartbeat monitor on the placeholder location', () => {
+    renderHook(() =>
+      useMonitorDetail('k8s-monitor', HEARTBEAT_UNMAPPED_LOCATION_LABEL, undefined, 'heartbeat')
+    );
+
+    const params = useEsSearchMock.mock.calls[0][0];
+    const filters = params.query.bool.filter;
+
+    expect(filters).toContainEqual({
+      bool: { must_not: { exists: { field: 'observer.geo.name' } } },
+    });
+    expect(filters).not.toContainEqual({
+      term: { 'observer.geo.name': HEARTBEAT_UNMAPPED_LOCATION_LABEL },
+    });
   });
 
   it('bounds the query by a @timestamp lower bound so it prunes frozen-tier shards', () => {

@@ -6,45 +6,30 @@
  */
 
 import type {
-  ConversationSource,
-  ConversationSourceAuthor,
-  ConversationSourceType,
-  ExecutionStatus,
-  SerializedExecutionError,
+  ConversationOrigin,
+  ConversationRoundAuthor,
+  ConversationOriginType,
 } from '@kbn/agent-builder-common';
-import type { ChatRequestBodyPayload, ChatResponse } from './chat';
+import type { ChatRequestBodyPayload } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
-  source?: ConversationSource & {
-    type: ConversationSourceType;
-    author?: ConversationSourceAuthor;
+  execution_idempotency_key: string;
+  origin?: ConversationOrigin & {
+    type: ConversationOriginType;
+    author?: ConversationRoundAuthor;
   };
   callback: {
     url: string;
   };
 }
 
-export const isChatCallbackRequestBodyPayload = (
-  payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
-): payload is ChatCallbackRequestBodyPayload => {
-  return 'callback' in payload;
-};
-
 export interface ChatCallbackAcceptedResponse {
   execution_id: string;
-  status: ExecutionStatus.scheduled;
+  conversation_id: string;
 }
 
-export interface ChatCallbackSuccessPayload {
-  execution_id: string;
-  status: ExecutionStatus.completed;
-  response: ChatResponse;
-}
-
-export interface ChatCallbackFailurePayload {
-  execution_id: string;
-  status: ExecutionStatus.failed | ExecutionStatus.aborted;
-  error?: SerializedExecutionError;
-}
-
-export type CallbackPayload = ChatCallbackSuccessPayload | ChatCallbackFailurePayload;
+export type {
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
+} from '@kbn/agent-builder-common';

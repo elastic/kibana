@@ -28,7 +28,7 @@ const ChangeHistoryRowActions = ({
         ? [
             {
               name: i18n.ROW_ACTIONS_COMPARE_TO_THIS_VERSION,
-              icon: 'diff' as const,
+              icon: 'compare' as const,
               onClick: () => {
                 setIsOpen(false);
                 onCompareToVersion();
@@ -57,6 +57,7 @@ const ChangeHistoryRowActions = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.ROW_ACTIONS_ARIA_LABEL}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"

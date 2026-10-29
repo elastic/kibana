@@ -23,6 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { PhaseName } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { isEqual } from 'lodash';
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
 import type { EditDeletePhaseFlyoutProps, EditDeletePhaseFlyoutValue } from './types';
@@ -37,6 +38,7 @@ import {
   type EditDeletePhaseFlyoutForm,
 } from './form';
 import { getMaximumRetentionMessage, parseInterval, zodResolver } from '../shared';
+import { useStreamsPrivileges } from '../../../../../../hooks/use_streams_privileges';
 
 const isEditDeletePhaseFlyoutForm = (data: unknown): data is EditDeletePhaseFlyoutForm => {
   if (!data || typeof data !== 'object') return false;
@@ -65,6 +67,10 @@ export const EditDeletePhaseFlyout = ({
   const formId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditDeletePhaseFlyout';
   const { footerStyles, headerStyles, sectionStyles } = useEditDeletePhaseFlyoutStyles();
+  const { focusProps } = usePushFlyoutFocus();
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const schema = useMemo(
     () => getEditDeletePhaseFlyoutFormSchema({ maximumRetentionPeriod }),
@@ -247,13 +253,15 @@ export const EditDeletePhaseFlyout = ({
 
   return (
     <EuiFlyout
-      type="push"
+      type={canvas.enabled ? 'overlay' : 'push'}
       size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>

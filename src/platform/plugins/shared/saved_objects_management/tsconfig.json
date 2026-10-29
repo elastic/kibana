@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout*/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/data-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
@@ -32,7 +33,8 @@
     "@kbn/css-utils",
     "@kbn/content-management-plugin",
     "@kbn/scout",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": [
     "target/**/*",

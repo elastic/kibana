@@ -39,6 +39,14 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/alerts-ui-shared'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/ui-callout'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/agent-builder-common'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/core-chrome-browser-mocks'
 tags:
   - shared-browser
   - package
@@ -53,6 +61,4 @@ fileGroups:
     - '**/*.d.ts'
     - index.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
