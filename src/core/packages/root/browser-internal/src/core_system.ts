@@ -457,6 +457,9 @@ export class CoreSystem {
 
       await this.plugins.start(core);
 
+      // Settle the loader ring and fade the splash before tearing it down.
+      await dismissBootSplash();
+
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
       this.rootDomElement.appendChild(coreUiTargetDomElement);
@@ -549,4 +552,51 @@ export class CoreSystem {
       },
     });
   }
+}
+
+type BootSplashRing = HTMLElement & {
+  exit?: () => void;
+  exitMark?: () => void;
+  loading?: boolean;
+};
+
+/**
+ * Finish any remaining splash exit before Core replaces `document.body`.
+ * Bootstrap normally fades ring then mark; this catches the fallback path.
+ */
+async function dismissBootSplash(): Promise<void> {
+  const splash = document.getElementById('kbn_loading_message');
+  if (!splash || splash.classList.contains('kbnWelcomeView--exit')) {
+    return;
+  }
+
+  const ring = splash.querySelector('elastic-loader-ring') as BootSplashRing | null;
+  const wait = (ms: number) =>
+    new Promise<void>((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+
+  if (ring) {
+    if (!ring.hasAttribute('exiting')) {
+      if (typeof ring.exit === 'function') {
+        ring.exit();
+      } else {
+        ring.loading = false;
+        ring.setAttribute('exiting', '');
+      }
+      await wait(260);
+    }
+    if (!ring.hasAttribute('exiting-mark')) {
+      if (typeof ring.exitMark === 'function') {
+        ring.exitMark();
+      } else {
+        ring.setAttribute('exiting-mark', '');
+      }
+      await wait(260);
+    }
+    return;
+  }
+
+  splash.classList.add('kbnWelcomeView--exit');
+  await wait(260);
 }

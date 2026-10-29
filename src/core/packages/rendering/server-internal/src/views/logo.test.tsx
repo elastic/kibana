@@ -9,54 +9,31 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { load, type CheerioAPI } from 'cheerio';
+import { load } from 'cheerio';
 
-import { icon as EuiLogoElasticIcon } from '@elastic/eui/lib/components/icon/assets/logo_elastic';
-
-import { Logo } from './logo';
+import { Logo, LOADING_ELASTIC_RING_MARK_PATH } from './logo';
 
 const render = () => load(renderToStaticMarkup(<Logo />));
 
-describe('Logo (boot splash)', () => {
-  it('carries the .kbnLoader hook so legacy_styles.css can animate it', () => {
-    // legacy_styles.css selects `.kbnLoaderWrap .kbnLoader path` to apply
-    // the EuiLoadingElastic keyframes; this class must stay in sync.
-    expect(render()('svg.kbnLoader')).toHaveLength(1);
+describe('Logo (static loader ring)', () => {
+  it('renders a 120×120 loader-ring SVG', () => {
+    const $ = render();
+    expect($('svg.kbnLoader')).toHaveLength(1);
+    expect($('svg.kbnLoader').attr('viewBox')).toBe('0 0 120 120');
+    expect($('svg.kbnLoader').attr('width')).toBe('120');
   });
 
-  it('renders the six logoElastic paths the keyframes target via nth-of-type', () => {
-    // legacy_styles.css applies a staggered `animation-delay` to
-    // `nth-of-type(1)`..`nth-of-type(6)`. Adding/removing a path here
-    // would silently break the animation cadence.
-    expect(render()('svg.kbnLoader > path')).toHaveLength(6);
+  it('renders the five ring segments from the static design', () => {
+    expect(render()('svg.kbnLoader > circle')).toHaveLength(5);
   });
 
-  it('is decorative; the loading announcement belongs to the wrapper', () => {
-    // The `role="progressbar"` + aria-label live on `.kbnLoaderWrap` in
-    // template.tsx (mirroring how <EuiLoadingElastic /> wraps its icon).
+  it('renders the centre mark path', () => {
+    const $ = render();
+    expect($('svg.kbnLoader > path.kbnLoaderMark')).toHaveLength(1);
+    expect($('path.kbnLoaderMark').attr('d')).toBe(LOADING_ELASTIC_RING_MARK_PATH);
+  });
+
+  it('is decorative', () => {
     expect(render()('svg').attr('aria-hidden')).toBe('true');
-  });
-
-  // Drift guard: rather than hard-coding the palette, compare our inlined
-  // SSR copy of the logo against the actual `logoElastic` asset shipped
-  // by `@elastic/eui` (the same one `<EuiLoadingElastic />` uses under
-  // the hood, see node_modules/@elastic/eui/lib/components/icon/assets/
-  // logo_elastic.js). If EUI rebrands the logo, this test fails and the
-  // next person knows to re-copy the SVG paths into logo.tsx.
-  it('stays byte-for-byte in sync with @elastic/eui logoElastic', () => {
-    const collect = ($: CheerioAPI) =>
-      $('path')
-        .map((_, el) => ({
-          fill: $(el).attr('fill'),
-          stroke: $(el).attr('stroke'),
-          'stroke-width': $(el).attr('stroke-width'),
-          d: $(el).attr('d'),
-        }))
-        .get();
-
-    const ours = render();
-    const eui = load(renderToStaticMarkup(<EuiLogoElasticIcon />));
-
-    expect(collect(ours)).toEqual(collect(eui));
   });
 });

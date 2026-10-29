@@ -40,7 +40,14 @@ body, html {
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   justify-content: center;
+  opacity: 1;
+  transition: opacity 250ms ease;
 }
+
+.kbnWelcomeView.kbnWelcomeView--exit {
+  opacity: 0;
+}
+
 
 .kbnWelcomeTitle {
   color: #000;
@@ -62,6 +69,24 @@ body, html {
   color: #98A2B3;
 }
 
+/*
+ * Visually hide the welcome text on the boot splash — the ring is the
+ * loading affordance — but keep the element in the DOM so bootstrap can
+ * still read the data-error-message-* attributes on failure.
+ */
+.kbnLoaderWrap > .kbnWelcomeText {
+  position: absolute;
+  width: 1px;
+  height: 1px !important;
+  line-height: 1px !important;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .kbnLoaderWrap {
   text-align: center;
   line-height: 1;
@@ -71,67 +96,30 @@ body, html {
   -ms-text-size-adjust: 100%;
   font-kerning: normal;
   font-weight: 400;
+  position: relative;
 }
 
 /*
- * Sized to match <EuiLoadingElastic size="xxl" /> (euiTheme.size.xxl,
- * i.e. 2.5 * 16px = 40px on the Borealis base). This rule is the
- * single source of truth for the splash-logo size: it applies to both
- * the default `Logo` SVG (views/logo.tsx) and the `<img>` rendered by
- * `template.tsx` when an operator configures `customBranding.logo`, so
- * default and custom-branded splashes always render at the same size.
+ * Sized to match the Loader Ring handoff default (120px). Applies to the
+ * `<elastic-loader-ring>` CE, the static `Logo` SVG (error screen), and
+ * custom-branded `<img>` so splash variants stay the same size.
  */
+.kbnLoaderWrap > elastic-loader-ring,
 .kbnLoaderWrap > svg,
-.kbnLoaderWrap > img {
-  width: 40px;
-  height: 40px;
+.kbnLoaderWrap > img,
+.kbnWelcomeView > svg {
+  width: 120px;
+  height: 120px;
   margin: auto;
   line-height: 1;
+  display: block;
+  overflow: visible;
 }
 
 /*
- * Replica of @elastic/eui's `euiLoadingElasticStyles` so the boot
- * splash animates identically to <EuiLoadingElastic />. We can't use
- * the EUI component on the splash because this markup is rendered
- * before any JS / Emotion has booted, so the animation lives in plain
- * CSS shipped via /ui/legacy_styles.css (parser-blocking <link> in
- * <head>, loaded before the inline body script flips the splash to
- * `display: flex`).
- *
- * Scoped to `.kbnLoaderWrap` so the same <Logo /> stays static when
- * reused by the legacy browser error screen.
+ * Custom-branded splash still needs a loading affordance (the custom
+ * logo image is static). Keep the slim progress bar for that case only.
  */
-@keyframes kbnLoadingElastic {
-  0%   { transform: scale3d(.2, .2, -.7); }
-  40%  { transform: scale3d(1, 1, 2); }
-  50%  { transform: scale3d(.99, .99, 2); }
-  70%  { transform: scale3d(.96, .96, -2.5); }
-  100% { transform: scale3d(.98, .98, 2); }
-}
-
-.kbnLoaderWrap .kbnLoader path {
-  transform-style: preserve-3d;
-  transform-origin: 50% 50%;
-}
-
-@media not (prefers-reduced-motion: reduce) {
-  .kbnLoaderWrap .kbnLoader path {
-    animation-name: kbnLoadingElastic;
-    animation-fill-mode: forwards;
-    animation-direction: alternate;
-    animation-duration: 1s;
-    animation-timing-function: cubic-bezier(0, 0.63, 0.49, 1);
-    animation-iteration-count: infinite;
-  }
-
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(1) { animation-delay: 0s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(2) { animation-delay: 0.035s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(3) { animation-delay: 0.125s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(4) { animation-delay: 0.155s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(5) { animation-delay: 0.075s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(6) { animation-delay: 0.06s; }
-}
-
 .kbnProgress {
   display: inline-block;
   position: relative;
@@ -139,6 +127,7 @@ body, html {
   height: 4px;
   overflow: hidden;
   line-height: 1;
+  margin-top: 16px;
 }
 
 .kbnProgress:before {

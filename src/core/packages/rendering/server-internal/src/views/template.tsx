@@ -39,16 +39,29 @@ export const Template: FunctionComponent<Props> = ({
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;
   const colorScheme = darkMode === 'system' ? 'light dark' : darkMode ? 'dark' : 'light';
-  // Both branches render at 40×40 — the size is owned by the
-  // `.kbnLoaderWrap > svg, .kbnLoaderWrap > img` rule in
-  // `legacy_styles.css` so default and custom-branded splashes can't
-  // drift apart. The `width`/`height` attrs here just give the browser
-  // a stable intrinsic size to avoid layout shift while the custom logo
-  // image loads.
+  const loadingLabel = i18n.translate('core.ui.loadingElasticAriaLabel', {
+    defaultMessage: 'Loading Elastic',
+  });
+  // Custom branding keeps a static <img> + progress bar. The default splash
+  // uses `<elastic-loader-ring>` (vanilla CE from /ui/loader_ring.js) so the
+  // full sweep animation runs before React boots. Size is owned by
+  // `.kbnLoaderWrap > …` in `legacy_styles.css` (120×120).
   const logo = customBranding.logo ? (
-    <img src={customBranding.logo} width="40" height="40" alt="logo" />
+    <img src={customBranding.logo} width="120" height="120" alt="logo" />
   ) : (
     <Logo />
+  );
+  const bootLoader = customBranding.logo ? (
+    logo
+  ) : (
+    // Custom element — attributes must be strings for SSR.
+    createElement('elastic-loader-ring', {
+      mode: 'sweep',
+      size: '120',
+      thickness: '5',
+      label: loadingLabel,
+      'data-test-subj': 'kbnLoadingElasticRing',
+    })
   );
   return (
     <html lang={locale}>
@@ -102,19 +115,25 @@ export const Template: FunctionComponent<Props> = ({
           data-test-subj="kbnLoadingMessage"
         >
           {/*
-           * `role="progressbar"` + `aria-label` mirror what
-           * `<EuiLoadingElastic />` exposes. The wrapper owns the
-           * loading announcement so the inline SVG in `<Logo />` can
-           * stay decorative (`aria-hidden`).
+           * Default splash: `<elastic-loader-ring>` owns `role="status"` /
+           * aria itself (see /ui/loader_ring.js). Custom branding keeps
+           * the wrapper announcement + progress bar (static logo image).
+           *
+           * Welcome text stays in the DOM (visually hidden) so bootstrap
+           * can still read the data-error-message-* attrs on failure.
            */}
           <div
             className="kbnLoaderWrap"
-            role="progressbar"
-            aria-label={i18n.translate('core.ui.loadingElasticAriaLabel', {
-              defaultMessage: 'Loading Elastic',
-            })}
+            {...(customBranding.logo
+              ? {
+                  role: 'status' as const,
+                  'aria-live': 'polite' as const,
+                  'aria-busy': 'true' as const,
+                  'aria-label': loadingLabel,
+                }
+              : {})}
           >
-            {logo}
+            {bootLoader}
             <div
               className="kbnWelcomeText"
               data-error-message-title={i18n.translate('core.ui.welcomeErrorMessageTitle', {
@@ -132,7 +151,7 @@ export const Template: FunctionComponent<Props> = ({
                 defaultMessage: 'Loading Elastic',
               })}
             </div>
-            <div className="kbnProgress" />
+            {customBranding.logo ? <div className="kbnProgress" /> : null}
           </div>
         </div>
 
@@ -162,6 +181,8 @@ export const Template: FunctionComponent<Props> = ({
             window.__kbnCspNotEnforced__ = true;
           `}
         </script>
+        {/* Loader-ring CE must define before bootstrap flips the splash visible. */}
+        <script src={`${uiPublicUrl}/loader_ring.js`} />
         <script src={bootstrapScriptUrl} />
       </body>
     </html>
