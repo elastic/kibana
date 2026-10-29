@@ -119,6 +119,10 @@ steps:
         and give the reason in one sentence under "reason". Leave "reason"
         empty when the tool returned a rule.
 
+        If the tool rejected the request, copy its rejectionCode exactly under
+        "rejection_code". Leave "rejection_code" empty in every other case,
+        including when the tool returned a rule or an error.
+
         Write the name, the description and the reason in ASD-STE100 Simplified
         Technical English.
       schema:
@@ -186,9 +190,17 @@ steps:
             type: string
             description: >-
               Why the tool returned no rule, in one sentence. Empty when it returned one.
+          # Required, so a model that drops it cannot turn a gap with no data into one
+          # that is retried on every sweep.
+          rejection_code:
+            type: string
+            enum: ['', NO_DATA, INCOHERENT, NOT_SECURITY_RELEVANT, INVALID_OUTPUT]
+            description: >-
+              The tool's rejectionCode when it rejected the request. Empty otherwise.
         required:
           - rule
           - attachment_id
+          - rejection_code
 
   # A draft missing its query, name, description or attachment is not reviewable, so
   # nothing below runs for it and `reviewed` stays false: the caller keeps the gap
@@ -217,6 +229,13 @@ steps:
           and not (steps.draft_creation.output.structured_output.rule.interval contains 'Unknown')
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
+      # The tool rejected the request for a reason another run would not change: no
+      # index fits the gap, or the request makes no sense as a rule. Any other unusable
+      # draft, such as a model mistake or a tool error, can pass on the next sweep.
+      final: >-
+        ${{ steps.draft_creation.output.structured_output.rejection_code == 'NO_DATA'
+          or steps.draft_creation.output.structured_output.rejection_code == 'INCOHERENT'
+          or steps.draft_creation.output.structured_output.rejection_code == 'NOT_SECURITY_RELEVANT' }}
 
   - name: preview_creation
     type: workflow.execute
@@ -335,11 +354,11 @@ steps:
           or steps.propose_creation.output.decision == 'dismissed' }}
       decision: "{{ steps.propose_creation.output.decision }}"
       rule_name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
-      # The tool built no rule, for example because no data source exists for the gap.
-      # A retry would fail the same way, so the caller stops asking about the gap. A
-      # draft that could not be copied to the investigation is not this case: that can
-      # pass on the next sweep.
-      no_rule: "${{ steps.draft_ready.output.ok != true }}"
+      # The tool rejected the request for a reason a retry would not change, for example
+      # because no data source exists for the gap, so the caller stops asking about the
+      # gap. A draft with a model mistake or a tool error, or one that could not be
+      # copied to the investigation, is not this case: that can pass on the next sweep.
+      no_rule: "${{ steps.draft_ready.output.ok != true and steps.draft_ready.output.final == true }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-

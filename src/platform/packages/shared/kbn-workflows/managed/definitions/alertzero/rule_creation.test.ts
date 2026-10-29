@@ -174,6 +174,35 @@ describe('Detection Rule Creation worker', () => {
       ).toBe(expected);
     });
 
+    // NO_DATA, INCOHERENT and NOT_SECURITY_RELEVANT come back the same on every run.
+    // INVALID_OUTPUT, a tool error (no code) or a missing code may not.
+    it.each([
+      ['NO_DATA', true],
+      ['INCOHERENT', true],
+      ['NOT_SECURITY_RELEVANT', true],
+      ['INVALID_OUTPUT', false],
+      ['', false],
+      [undefined, false],
+    ])('treats rejection code %p as final: %p', (code, expected) => {
+      expect(evaluate(flagOf('draft_ready', 'final'), draftContext({ rejection_code: code }))).toBe(
+        expected
+      );
+    });
+
+    it('asks the agent to copy the tool rejection code into a required field', () => {
+      const draft = stepByName('draft_creation');
+      const schema = draft?.with?.schema as JSONSchema7;
+      expect(schema.required).toContain('rejection_code');
+      expect((schema.properties?.rejection_code as JSONSchema7).enum).toEqual([
+        '',
+        'NO_DATA',
+        'INCOHERENT',
+        'NOT_SECURITY_RELEVANT',
+        'INVALID_OUTPUT',
+      ]);
+      expect(draft?.with?.message).toContain('copy its rejectionCode exactly');
+    });
+
     // The no-draft answer the prompt asks for has to satisfy the output schema, or
     // the agent step fails validation instead of handing draft_ready a draft to
     // reject. Empty strings in every field would not: several are enums, a number
@@ -185,6 +214,7 @@ describe('Detection Rule Creation worker', () => {
       const noDraft = {
         attachment_id: '',
         reason: 'The data source does not exist.',
+        rejection_code: 'NO_DATA',
         rule: {
           name: '',
           description: '',
@@ -286,11 +316,13 @@ describe('Detection Rule Creation worker', () => {
       );
     });
 
-    // A draft that could not be copied to the investigation can pass on the next sweep,
-    // so only a draft the tool never built reports no_rule.
+    // Only a rejection a retry would not change reports no_rule. A model mistake, a tool
+    // error or a draft that could not be copied to the investigation can pass on the
+    // next sweep.
     it.each([
-      ['a draft the tool did not build', { ok: false }, true],
-      ['a complete draft', { ok: true }, false],
+      ['a draft the tool rejected for good', { ok: false, final: true }, true],
+      ['an unusable draft a retry could fix', { ok: false, final: false }, false],
+      ['a complete draft', { ok: true, final: false }, false],
     ])('reports no_rule for %s', (_scenario, ready, expected) => {
       const expression = emit.no_rule.trim().slice(3, -2).trim();
       expect(
