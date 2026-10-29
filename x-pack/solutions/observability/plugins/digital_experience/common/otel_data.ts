@@ -35,6 +35,8 @@ export const EVENT_DOCUMENT_LOAD = 'documentLoad';
 export const EVENT_NAVIGATION = 'browser.navigation';
 export const EVENT_CLICK = 'click';
 export const EVENT_USER_ACTION_CLICK = 'browser.user_action.click';
+export const EVENT_RAGE_CLICK = 'browser.frustration.rage_click';
+export const EVENT_DEAD_CLICK = 'browser.frustration.dead_click';
 
 export const SPAN_KIND_CLIENT = 'Client';
 export const SPAN_STATUS_ERROR = 'Error';

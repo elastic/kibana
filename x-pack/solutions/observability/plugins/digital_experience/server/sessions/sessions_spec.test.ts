@@ -13,7 +13,10 @@ import {
   SESSIONS_JOURNEY_SIZE,
   SESSIONS_JOURNEY_URL_CANDIDATES,
   SESSIONS_MANAGED_BY,
+  SESSIONS_CLICK_PATH_SIZE,
+  SESSIONS_ERROR_GROUPS_SIZE,
   SESSIONS_PIPELINE_NAME,
+  SESSIONS_SEQUENCE_TOKEN_LENGTH,
   SESSIONS_TRANSFORM_ID,
   SESSIONS_VERSION,
 } from '../../common/sessions';
@@ -26,6 +29,9 @@ import {
   sessionsIndexTemplate,
 } from './sessions_spec';
 import {
+  SOURCE_CLICK_TARGET_FIELD,
+  SOURCE_ERROR_GROUP_FIELD,
+  SOURCE_HAS_REPLAY_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
@@ -140,9 +146,31 @@ describe('sessions transform spec', () => {
         'user_seen',
         'user_agent_seen',
         'geo_seen',
+        'has_replay',
+        'rage_clicks',
+        'dead_clicks',
+        'error_groups',
+        'click_targets',
         ...CORE_WEB_VITALS,
       ])
     );
+    expect(aggregations.has_replay.filter).toEqual({ term: { [SOURCE_HAS_REPLAY_FIELD]: true } });
+    expect(aggregations.error_groups.aggs?.groups.terms).toEqual({
+      field: SOURCE_ERROR_GROUP_FIELD,
+      size: SESSIONS_ERROR_GROUPS_SIZE,
+    });
+    // `top_metrics` of size > 1 fails on shards where the field is unmapped, hence the filter.
+    expect(aggregations.click_targets.filter.bool?.filter).toEqual(
+      expect.arrayContaining([{ exists: { field: SOURCE_CLICK_TARGET_FIELD } }])
+    );
+    expect(aggregations.click_targets.aggs?.targets.top_metrics).toEqual({
+      metrics: { field: SOURCE_CLICK_TARGET_FIELD },
+      sort: { '@timestamp': 'asc' },
+      size: SESSIONS_CLICK_PATH_SIZE,
+    });
+    expect(aggregations.lcp.aggs?.samples).toEqual({
+      value_count: { field: 'attributes.browser.web_vital.value' },
+    });
     // url.full is a wildcard field in the OTel templates: terms works, top_metrics does not.
     expect(aggregations.pages.aggs?.urls.terms).toEqual({
       field: SOURCE_URL_FIELD,
@@ -194,6 +222,20 @@ describe('sessions transform spec', () => {
         'user_agent',
         'geo',
         'web_vitals',
+        'web_vitals_samples',
+        'has_replay',
+        'replay_event_count',
+        'rage_click_count',
+        'dead_click_count',
+        'error_groups',
+        'pages',
+        'clicks',
+        'path_key',
+        'click_path_key',
+        'page_sequence',
+        'click_sequence',
+        'event_sequence',
+        'network',
       ])
     );
   });
@@ -213,6 +255,8 @@ describe('sessions transform spec', () => {
       fields: SESSION_ATTRIBUTE_FIELDS,
       vitals: [...CORE_WEB_VITALS],
       journeySize: SESSIONS_JOURNEY_SIZE,
+      tokenLength: SESSIONS_SEQUENCE_TOKEN_LENGTH,
+      clickTarget: SOURCE_CLICK_TARGET_FIELD,
     });
   });
 });

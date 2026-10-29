@@ -20,7 +20,12 @@ export const RUM_LAST_SEEN_TOP_SIZE = 1;
 export const RUM_SEQUENCE_TOP_SIZE = 10;
 export const RUM_CLICK_TARGET_FIELD = 'attributes.browser.css_selector';
 export const RUM_SESSIONS_TRANSFORM_ID = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
-export const RUM_SESSIONS_INDEX = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
+/**
+ * Sessions index written by the digitalExperience plugin's sessions transform, which ux reads but
+ * doesn't own. Mirrors `SESSIONS_INDEX_PATTERN` there: ux can't import it, as that plugin can
+ * optionally depend on this one.
+ */
+export const RUM_SESSIONS_INDEX = 'digital-experience-sessions-*';
 export const RUM_SESSIONS_INDEX_PATTERN = 'ux-rum-sessions-*';
 export const RUM_SESSIONS_TEMPLATE_NAME = 'ux-rum-sessions';
 export const RUM_SESSIONS_PIPELINE_NAME = 'ux-rum-sessions-dest';
