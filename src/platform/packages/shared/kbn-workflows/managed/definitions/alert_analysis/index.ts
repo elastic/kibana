@@ -19,8 +19,8 @@ export const SECURITY_ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analys
 export const SECURITY_ALERT_ANALYSIS_WORKFLOW = {
   id: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   pluginId: 'securitySolution',
-  version: 7,
-  billable: true,
+  version: 6,
+  billable: false,
   visibility: {
     selectors: ['rule_action'],
     solutions: ['security'],
