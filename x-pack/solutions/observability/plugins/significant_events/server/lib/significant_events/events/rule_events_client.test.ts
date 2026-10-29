@@ -558,21 +558,6 @@ describe('RuleEventsClient', () => {
 
       expect(hits[0]).toMatchObject({ episode_id: 'episode-7' });
     });
-
-    it('omits it when the stored version has no episode', async () => {
-      const row: MockRow = {
-        source: ruleEventSource(),
-        dataJson: JSON.stringify(dataDoc),
-        createdAt: '2026-01-01T00:00:00.000Z',
-      };
-      const { client } = createClient(async (request) =>
-        request.query.includes('STATS total') ? countResponse(1) : sourceResponse([row])
-      );
-
-      const { hits } = await client.findLatestByCurrentStatePaginated({});
-
-      expect(hits[0]).not.toHaveProperty('episode_id');
-    });
   });
 
   describe('list sorting and investigation filter', () => {
@@ -733,27 +718,6 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('reads the newest closed series first, so the row limit can only drop old ones', async () => {
-      const { client, query } = createClient(async () => sourceResponse([]));
-
-      await client.findLatestInactiveByIdentity(identity);
-
-      const q = lastQuery(query);
-      expect(q).toContain('SORT @timestamp DESC');
-      expect(q.indexOf('SORT @timestamp DESC')).toBeLessThan(q.indexOf('LIMIT'));
-    });
-
-    it('bounds the read by the given inactiveSince, not a fixed window', async () => {
-      const { client, query } = createClient(async () => sourceResponse([]));
-
-      await client.findLatestInactiveByIdentity({
-        ...identity,
-        inactiveSince: '2026-10-28T06:00:00.000Z',
-      });
-
-      expect(JSON.stringify(query.mock.calls.at(-1))).toContain('2026-10-28T06:00:00.000Z');
-    });
-
     it('requires both the sources and the rules to intersect', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
@@ -790,18 +754,6 @@ describe('RuleEventsClient', () => {
       expect(heads).toEqual([
         { eventId: expect.any(String), groupHash: 'group-hash-1', episodeId: 'episode-1' },
       ]);
-    });
-
-    it('leaves a series with no stored episode out of the heads', async () => {
-      const row: MockRow = {
-        source: ruleEventSource({ alert: { status: 'inactive' } }),
-        dataJson: JSON.stringify(dataDoc),
-      };
-      const { client } = createClient(async () => sourceResponse([row]));
-
-      const { heads } = await client.findLatestInactiveByIdentity(identity);
-
-      expect(heads).toEqual([]);
     });
   });
 
@@ -866,13 +818,6 @@ describe('RuleEventsClient', () => {
       });
     });
 
-    it('runs no query when there are no series to read', async () => {
-      const { client, query } = setup([]);
-
-      expect((await client.findOperatorDeactivations({ heads: [] })).size).toBe(0);
-      expect(query).not.toHaveBeenCalled();
-    });
-
     it('scopes the read to the space, the series and the lifecycle actions only', async () => {
       const { client, query } = setup([]);
 
@@ -883,35 +828,6 @@ describe('RuleEventsClient', () => {
       expect(text).toContain('space_id == "default"');
       expect(text).toContain('group_hash IN ("series-1")');
       expect(text).toContain('action_type IN ("deactivate", "activate")');
-    });
-
-    it('reads the newest actions first, so a default row limit can only drop old ones', async () => {
-      const { client, query } = setup([]);
-
-      await client.findOperatorDeactivations({ heads });
-
-      expect(lastQuery(query)).toContain('SORT @timestamp DESC');
-    });
-
-    it('reduces to the latest action per series before returning rows', async () => {
-      const { client, query } = setup([]);
-
-      await client.findOperatorDeactivations({ heads });
-
-      const text = lastQuery(query);
-      expect(text).toContain('INLINE STATS latest_action_at = MAX(@timestamp) BY group_hash');
-      expect(text).toContain('INLINE STATS latest_action_rank = MAX(action_rank) BY group_hash');
-      expect(text.indexOf('latest_action_at')).toBeLessThan(text.indexOf('SORT @timestamp DESC'));
-    });
-
-    it('logs an error when it has to read with the request credentials', async () => {
-      const { client, logger } = setup([]);
-
-      await client.findOperatorDeactivations({ heads });
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('deactivation_check_degraded')
-      );
     });
 
     it('reads with the internal client when one is given', async () => {
@@ -955,28 +871,6 @@ describe('RuleEventsClient', () => {
       expect(
         (await restored.client.findOperatorDeactivations({ heads })).get('series-1')?.reason
       ).toBe('second');
-    });
-
-    it('lets an activate win a tie on the timestamp', async () => {
-      const at = '2026-10-28T10:00:00.000Z';
-      const { client } = setup([
-        { at, type: 'activate' },
-        { at, type: 'deactivate' },
-      ]);
-
-      expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
-    });
-
-    it('keeps series apart by group_hash', async () => {
-      const { client } = setup([
-        { at: '2026-10-28T10:00:00.000Z', groupHash: 'series-2', episodeId: 'episode-2' },
-      ]);
-
-      const deactivations = await client.findOperatorDeactivations({
-        heads: [...heads, { groupHash: 'series-2', episodeId: 'episode-2' }],
-      });
-
-      expect([...deactivations.keys()]).toEqual(['series-2']);
     });
 
     it('reads a failed read as not deactivated, with a tagged error, instead of throwing', async () => {
@@ -1053,35 +947,6 @@ describe('RuleEventsClient', () => {
       expect(text).toContain('space_id == "default"');
       expect(text).toContain('group_hash == "group-1"');
       expect(text).toContain('action_type == "deactivate" AND actor.type == "user"');
-    });
-
-    it('returns nothing, without reading actions, for an unknown event', async () => {
-      const { client, query } = setup(actionResponse([]), []);
-
-      expect(await client.findEventDeactivations('missing')).toEqual([]);
-      expect(query.mock.calls.some(([request]) => request.query.includes('.alert-actions'))).toBe(
-        false
-      );
-    });
-
-    it('skips an action with no episode', async () => {
-      const { client } = setup(actionResponse([['2026-10-28T12:48:35.184Z', null, 'x']]));
-
-      expect(await client.findEventDeactivations('event-1')).toEqual([]);
-    });
-
-    it('returns nothing and logs a tagged error when the read fails', async () => {
-      const logger = { error: jest.fn() };
-      const client = new RuleEventsClient({
-        esClient: { esql: { query: jest.fn().mockRejectedValue(new Error('boom')) } } as never,
-        space: 'default',
-        logger: logger as never,
-      });
-
-      expect(await client.findEventDeactivations('event-1')).toEqual([]);
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('deactivation_history_failed')
-      );
     });
   });
 

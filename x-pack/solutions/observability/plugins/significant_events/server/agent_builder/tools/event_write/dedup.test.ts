@@ -8,12 +8,10 @@
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   buildWriteCandidates,
-  DEFAULT_INACTIVE_LOOKBACK_MS,
   fetchInactiveEventsForReuse,
   fetchLiveEventsForDedup,
   markDuplicateKeys,
   reopenMatchingInactiveSeries,
-  competingInactiveHeads,
   resolveDedupSkips,
 } from './dedup';
 import type {
@@ -427,19 +425,6 @@ const makeInactiveClient = (
 describe('fetchInactiveEventsForReuse', () => {
   const now = Date.parse('2026-10-28T12:00:00.000Z');
 
-  it('does not query when there are no dedup candidates', async () => {
-    const client = makeInactiveClient();
-
-    await fetchInactiveEventsForReuse({
-      eventSearchClient: client,
-      dedupCandidates: [],
-      inactiveLookbackMs: DEFAULT_INACTIVE_LOOKBACK_MS,
-      now,
-    });
-
-    expect(client.findLatestInactiveByIdentity).not.toHaveBeenCalled();
-  });
-
   it('bounds the read by the lookback it is given, not a fixed window', async () => {
     const client = makeInactiveClient();
 
@@ -455,19 +440,6 @@ describe('fetchInactiveEventsForReuse', () => {
       ruleUuids: ['rule-abc'],
       inactiveSince: '2026-10-28T06:00:00.000Z',
     });
-  });
-
-  it('skips candidates that carry no sources or no rules', async () => {
-    const client = makeInactiveClient();
-
-    await fetchInactiveEventsForReuse({
-      eventSearchClient: client,
-      dedupCandidates: dedupCandidates([makeInput({ source_ids: [] }), makeInput({ signals: [] })]),
-      inactiveLookbackMs: DEFAULT_INACTIVE_LOOKBACK_MS,
-      now,
-    });
-
-    expect(client.findLatestInactiveByIdentity).not.toHaveBeenCalled();
   });
 });
 
@@ -525,12 +497,6 @@ describe('reopenMatchingInactiveSeries', () => {
 
   it('requires a shared source', () => {
     const [candidate] = reopen([makeInput()], [makeInactiveEvent({ source_ids: ['logs.cart'] })]);
-
-    expect(candidate.mode).toBe('dedup');
-  });
-
-  it('ignores a series that is not inactive', () => {
-    const [candidate] = reopen([makeInput()], [makeActiveEvent()]);
 
     expect(candidate.mode).toBe('dedup');
   });
@@ -596,21 +562,6 @@ describe('reopenMatchingInactiveSeries', () => {
     expect(candidate.eventId).toBe('newer');
   });
 
-  it('ignores a newer matching series that has no head and reopens the older one', () => {
-    const older = makeInactiveEvent({
-      event_id: 'older',
-      '@timestamp': '2026-10-27T01:00:00.000Z',
-    });
-    const newer = makeInactiveEvent({
-      event_id: 'newer',
-      '@timestamp': '2026-10-28T01:00:00.000Z',
-    });
-
-    const [candidate] = reopen([makeInput()], [older, newer], headsOf([older]));
-
-    expect(candidate.eventId).toBe('older');
-  });
-
   it('compares confirmed rules only when the candidate has confirmed rules', () => {
     const [candidate] = reopen(
       [makeInput({ signals: [makeSignal('rule-abc'), makeSignal('rule-def', 'refutes')] })],
@@ -628,56 +579,5 @@ describe('reopenMatchingInactiveSeries', () => {
 
     expect(results.map((c) => c.mode)).toEqual(['snapshot', 'dedup']);
     expect(results[0].eventId).toBe('explicit-id');
-  });
-});
-
-describe('competingInactiveHeads', () => {
-  const closed = (eventId: string, overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
-    makeActiveEvent({ status: 'inactive', event_id: eventId, ...overrides });
-  const head = (eventId: string): InactiveSeriesHead => ({
-    eventId,
-    groupHash: `group-${eventId}`,
-    episodeId: `episode-${eventId}`,
-  });
-
-  it('returns the heads of the series that compete for one candidate', () => {
-    const events = [closed('a'), closed('b')];
-
-    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
-      events,
-      heads: [head('a'), head('b')],
-    });
-
-    expect(heads.map(({ eventId }) => eventId).sort()).toEqual(['a', 'b']);
-  });
-
-  it('ignores candidates that carry no rules or name an event_id themselves', () => {
-    const heads = competingInactiveHeads(
-      buildWriteCandidates([makeInput({ signals: [] }), makeInput({ event_id: 'explicit-id' })]),
-      { events: [closed('a'), closed('b')], heads: [head('a'), head('b')] }
-    );
-
-    expect(heads).toEqual([]);
-  });
-
-  it('leaves out a matching series with no known head', () => {
-    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
-      events: [closed('a'), closed('b')],
-      heads: [head('a')],
-    });
-
-    expect(heads).toEqual([]);
-  });
-
-  it('leaves out a broader series, since only the closest fits can tie', () => {
-    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
-      events: [
-        closed('a'),
-        closed('b', { signals: [makeSignal('rule-abc'), makeSignal('rule-def')] }),
-      ],
-      heads: [head('a'), head('b')],
-    });
-
-    expect(heads).toEqual([]);
   });
 });

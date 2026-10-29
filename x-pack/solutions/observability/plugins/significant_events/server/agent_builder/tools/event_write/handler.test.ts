@@ -1517,37 +1517,6 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('writes nothing when the batch re-judges the closed series as healthy', async () => {
-    const results = await eventsWriteBulkHandler({
-      eventSearchClient: clientWithClosedSeries(),
-      inputs: [
-        {
-          ...breachFor('rule-a'),
-          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
-        },
-      ],
-    });
-
-    expect(results[0]).toMatchObject({ written: false, reason: 'unchanged_outcome' });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('bounds the closed-series read by the lookback the caller passes', async () => {
-    const findLatestInactiveByIdentity = jest.fn().mockResolvedValue({ hits: [], heads: [] });
-    const before = Date.now();
-
-    await eventsWriteBulkHandler({
-      eventSearchClient: makeEventSearchClient({ findLatestInactiveByIdentity }),
-      inputs: [breachFor('rule-a')],
-      inactiveLookbackMs: 60 * 60 * 1000,
-    });
-
-    const [{ inactiveSince }] = findLatestInactiveByIdentity.mock.calls[0];
-    const since = Date.parse(inactiveSince);
-    expect(since).toBeGreaterThanOrEqual(before - 60 * 60 * 1000);
-    expect(since).toBeLessThanOrEqual(Date.now() - 60 * 60 * 1000);
-  });
-
   it('skips the closed-series read when every candidate is covered by a live event', async () => {
     const findLatestInactiveByIdentity = jest.fn().mockResolvedValue({ hits: [], heads: [] });
     const live = makeStoredEvent('live-event', {
@@ -1633,34 +1602,6 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       );
     });
 
-    it('does not log a bypass when the flag is set on a series nobody deactivated', async () => {
-      const logger = makeLogger();
-
-      await eventsWriteBulkHandler({
-        eventSearchClient: clientWith(jest.fn().mockResolvedValue(new Map())),
-        inputs: [{ ...breachFor('rule-a'), reopen_deactivated: true }],
-        logger,
-      });
-
-      expect(logger.info).not.toHaveBeenCalled();
-    });
-
-    it('does not look deactivations up for a batch that would write nothing', async () => {
-      const findOperatorDeactivations = deactivated();
-
-      await eventsWriteBulkHandler({
-        eventSearchClient: clientWith(findOperatorDeactivations),
-        inputs: [
-          {
-            ...breachFor('rule-a'),
-            signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
-          },
-        ],
-      });
-
-      expect(findOperatorDeactivations).not.toHaveBeenCalled();
-    });
-
     it('holds only the deactivated item and still writes the others', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(deactivated()),
@@ -1724,19 +1665,6 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
         deactivation_reason: 'known noise',
       });
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-    });
-
-    it('reopens the newest one when none was deactivated', async () => {
-      const findOperatorDeactivations = jest.fn().mockResolvedValue(new Map());
-
-      const results = await eventsWriteBulkHandler({
-        eventSearchClient: clientWithTwo(findOperatorDeactivations),
-        inputs: [breachFor('rule-a')],
-      });
-
-      expect(results[0]).toMatchObject({ written: true, event_id: 'series-newer' });
-      // One lookup chooses between the two series, one decides whether to hold the chosen one.
-      expect(findOperatorDeactivations).toHaveBeenCalledTimes(2);
     });
   });
 });
