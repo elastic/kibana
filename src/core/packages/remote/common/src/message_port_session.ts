@@ -8,13 +8,14 @@
  */
 
 import type { MessagePort } from 'node:worker_threads';
-import { RpcSession, type RpcStub } from 'capnweb';
+import { newMessagePortRpcSession, RpcSession, type RpcStub } from 'capnweb';
 
 /**
- * JSON-string MessagePort transport.
+ * JSON-string MessagePort transport, used only under Jest.
  *
  * Cap'n Web's structured-clone transport checks `instanceof Array`. That fails when a message
- * is delivered across a Jest VM realm. Strings are parsed in the session's own realm.
+ * is delivered into a Jest VM realm. Strings are parsed in the session's own realm.
+ * Production sessions use `newMessagePortRpcSession`, which posts the value directly.
  */
 class StringMessagePortTransport {
   readonly encodingLevel = 'string' as const;
@@ -86,7 +87,13 @@ class StringMessagePortTransport {
   }
 }
 
+type CapnWebMessagePort = Parameters<typeof newMessagePortRpcSession>[0];
+
 /** Opens a Cap'n Web session on one end of a MessageChannel. */
 export function openPortSession<T>(port: MessagePort, localMain?: object): RpcStub<T> {
-  return new RpcSession<T>(new StringMessagePortTransport(port), localMain).getRemoteMain();
+  if (process.env.JEST_WORKER_ID) {
+    return new RpcSession<T>(new StringMessagePortTransport(port), localMain).getRemoteMain();
+  }
+  // Cap'n Web types this as the DOM MessagePort. Node's worker MessagePort is the runtime value.
+  return newMessagePortRpcSession<T>(port as unknown as CapnWebMessagePort, localMain);
 }
