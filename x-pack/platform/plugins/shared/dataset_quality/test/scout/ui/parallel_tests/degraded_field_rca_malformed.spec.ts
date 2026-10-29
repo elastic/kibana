@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import rison from '@kbn/rison';
 
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 import {
   LOGS_TYPE,
   buildDataStreamName,
   createComponentTemplate,
   createIndexTemplate,
   createMalformedFieldRecord,
-  deleteComponentTemplateIfExists,
-  deleteDataStreamIfExists,
-  deleteIndexTemplateIfExists,
   logsSynthMalformedMappings,
 } from '../../common';
 
@@ -57,30 +52,6 @@ const FLYOUT = {
   createConvertProcessor: 'datasetQualityDetailsFlyoutCreateConvertProcessorAccordion',
 } as const;
 
-/**
- * Opens the details page with a quality issue already expanded from URL state.
- *
- * TODO(https://github.com/elastic/kibana/issues/287030): collapse onto
- * `pageObjects.datasetQualityDetails.goto`, which already models this state.
- */
-const gotoDetails = async (
-  page: ScoutPage,
-  { view }: { view?: 'classic' | 'wired' } = {}
-): Promise<void> => {
-  const state = {
-    v: 2,
-    dataStream: DATA_STREAM,
-    timeRange: TIME_RANGE,
-    ...(view ? { view } : {}),
-    expandedQualityIssue: { name: MALFORMED_FIELD, type: 'degraded' },
-  };
-
-  await page.gotoApp(testData.DATA_QUALITY_DETAILS_APP_PATH, {
-    params: { [testData.DATA_QUALITY_URL_STATE_KEY]: rison.encode(state) },
-  });
-  await page.testSubj.locator('datasetDetailsContainer').waitFor({ state: 'visible' });
-};
-
 test.describe(
   'Dataset quality details - malformed field root cause',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -105,33 +76,32 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
     });
 
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
-      await deleteIndexTemplateIfExists(esClient, INDEX_TEMPLATE, log);
-      await deleteComponentTemplateIfExists(esClient, COMPONENT_TEMPLATE, log);
-    });
-
-    test('reports a type mismatch as the root cause', async ({ page, pageObjects }) => {
+    test('reports a type mismatch as the root cause', async ({ pageObjects }) => {
       const { datasetQualityDetails } = pageObjects;
 
-      await gotoDetails(page);
+      await datasetQualityDetails.goto({
+        dataStream: DATA_STREAM,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: MALFORMED_FIELD, type: 'degraded' },
+      });
 
       await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.cause)).toContainText(
         'Field malformed'
       );
     });
 
-    test('offers manual mitigations for a data set of no integration', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('offers manual mitigations for a data set of no integration', async ({ pageObjects }) => {
       const { datasetQualityDetails } = pageObjects;
       const nonIntegrationCustomName = `${LOGS_TYPE}@custom`;
 
-      await gotoDetails(page);
+      await datasetQualityDetails.goto({
+        dataStream: DATA_STREAM,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: MALFORMED_FIELD, type: 'degraded' },
+      });
       await datasetQualityDetails.waitUntilMitigationsLoaded();
 
       await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();
@@ -171,14 +141,16 @@ test.describe(
       ).toBeHidden();
     });
 
-    test('offers stream mitigations for wired and classic streams', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('offers stream mitigations for wired and classic streams', async ({ pageObjects }) => {
       const { datasetQualityDetails } = pageObjects;
 
       await test.step('for a wired stream', async () => {
-        await gotoDetails(page, { view: 'wired' });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          view: 'wired',
+          expandedQualityIssue: { name: MALFORMED_FIELD, type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();
@@ -200,7 +172,12 @@ test.describe(
       });
 
       await test.step('for a classic stream', async () => {
-        await gotoDetails(page, { view: 'classic' });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          view: 'classic',
+          expandedQualityIssue: { name: MALFORMED_FIELD, type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();

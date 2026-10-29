@@ -11,14 +11,10 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import {
   buildDataStreamName,
-  cleanUpAll,
-  createFailedLogRecord,
   createComponentTemplate,
+  createFailedLogRecord,
   createIndexTemplate,
-  deleteComponentTemplateIfExists,
   deleteDataStreamIfExists,
-  deleteIndexTemplateIfExists,
-  deletePipelineIfExists,
   getLogsForDataset,
   indexLogs,
   logLevelNormalizationProcessors,
@@ -47,7 +43,7 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
-      // Pre-clean so a leftover stream from an interrupted run does not double the counts.
+      // Pre-clean: a CI retry reruns this hook, and a leftover stream would double the counts.
       await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
 
       // The painless script throws for any unexpected `log.level`, which is how
@@ -76,17 +72,9 @@ test.describe(
       await refreshFailureStore(esClient, DATA_STREAM);
     });
 
+    // Admin: failed docs are read from the failure store, which neither `viewer` nor `editor` can read.
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await cleanUpAll([
-        () => deleteDataStreamIfExists(esClient, DATA_STREAM, log),
-        () => deleteIndexTemplateIfExists(esClient, INDEX_TEMPLATE, log),
-        () => deleteComponentTemplateIfExists(esClient, COMPONENT_TEMPLATE, log),
-        () => deletePipelineIfExists(esClient, PIPELINE, log),
-      ]);
     });
 
     test('reports the failed docs in the summary KPIs and as a single quality issue', async ({
