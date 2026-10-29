@@ -20,6 +20,7 @@ const rulePayload: AlertStatusChangedTriggerPayload = {
     groupHash: 'hash-1',
     status: 'active',
     previousStatus: 'pending',
+    severity: 'high',
   },
   rule: { id: 'rule-1', name: 'CPU above 90%', tags: ['k8s'] },
   execution: { executionId: 'execution-1', scheduledAt: '2026-10-15T10:00:00.000Z' },
@@ -33,6 +34,7 @@ const clientPayload: AlertStatusChangedTriggerPayload = {
     groupHash: 'hash-2',
     status: 'active',
     previousStatus: null,
+    severity: null,
   },
   rule: null,
   execution: null,
@@ -56,6 +58,26 @@ describe('alertStatusChangedTriggerCommonDefinition', () => {
     const result = alertStatusChangedEventSchema.safeParse({
       ...rulePayload,
       alert: { ...rulePayload.alert, status: 'recovered' },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a payload that omits alert.severity instead of sending null', () => {
+    const { severity: _omit, ...alertWithoutSeverity } = rulePayload.alert;
+
+    const result = alertStatusChangedEventSchema.safeParse({
+      ...rulePayload,
+      alert: alertWithoutSeverity,
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a severity outside the alert event severities', () => {
+    const result = alertStatusChangedEventSchema.safeParse({
+      ...rulePayload,
+      alert: { ...rulePayload.alert, severity: 'urgent' },
     });
 
     expect(result.success).toBe(false);

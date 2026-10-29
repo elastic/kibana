@@ -25,7 +25,13 @@ const ruleRunEvent: AlertStatusChangedEvent = {
   payload: {
     spaceId: 'my-space',
     source: 'internal',
-    alert: { id: 'alert-1', groupHash: 'hash-1', status: 'active', previousStatus: 'pending' },
+    alert: {
+      id: 'alert-1',
+      groupHash: 'hash-1',
+      status: 'active',
+      previousStatus: 'pending',
+      severity: 'high',
+    },
     rule: { id: 'rule-1', name: 'Rule 1', tags: ['k8s'] },
     execution: { executionId: 'execution-uuid', scheduledAt: '2025-01-01T00:00:00.000Z' },
   },
@@ -36,7 +42,13 @@ const clientEvent: AlertStatusChangedEvent = {
   payload: {
     spaceId: 'my-space',
     source: 'datadog',
-    alert: { id: 'alert-2', groupHash: 'hash-2', status: 'active', previousStatus: null },
+    alert: {
+      id: 'alert-2',
+      groupHash: 'hash-2',
+      status: 'active',
+      previousStatus: null,
+      severity: null,
+    },
     rule: null,
     execution: null,
   },

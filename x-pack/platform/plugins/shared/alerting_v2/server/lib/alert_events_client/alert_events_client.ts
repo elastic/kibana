@@ -9,7 +9,11 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import type { CreateAlertEventData, CreateAlertEventResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  AlertEventSeverity,
+  CreateAlertEventData,
+  CreateAlertEventResponse,
+} from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   alertEventStatus,
@@ -179,6 +183,8 @@ export class AlertEventsClient {
         episodeId,
         status: episodeStatus,
         previousStatus,
+        // An inactive alert reports no severity, even when the writer sent one.
+        severity: episodeStatus === alertEpisodeStatus.inactive ? null : event.severity ?? null,
       });
     }
 
@@ -198,19 +204,21 @@ export class AlertEventsClient {
     episodeId,
     status,
     previousStatus,
+    severity,
   }: {
     source: string;
     groupHash: string;
     episodeId: string;
     status: AlertEpisodeStatus;
     previousStatus: AlertEpisodeStatus | null;
+    severity: AlertEventSeverity | null;
   }): Promise<void> {
     try {
       await this.alertStatusChangedPublisher.publishAlertStatusChanges([
         {
           spaceId: this.spaceId,
           source,
-          alert: { id: episodeId, groupHash, status, previousStatus },
+          alert: { id: episodeId, groupHash, status, previousStatus, severity },
           rule: null,
           execution: null,
         },

@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
   ALERT_EPISODE_STATUS,
+  alertEventSeveritySchema,
   ID_MAX_LENGTH,
   MAX_NAME_LENGTH,
   tagsSchema,
@@ -85,6 +86,12 @@ export const alertStatusChangedEventSchema = lazySchema(() =>
                   'Last status of the series before the change, or null for the first event of a series. It is "inactive" when the series opens a new alert after its previous one ended.',
               }
             )
+          ),
+          severity: alertEventSeveritySchema.nullable().describe(
+            i18n.translate('xpack.alertingV2.triggers.alertStatusChanged.schema.alert.severity', {
+              defaultMessage:
+                'Severity of the alert, when the event that changed its status carries one. Null when it carries none, which is common for recovering, and always null for inactive.',
+            })
           ),
         })
         .strict()

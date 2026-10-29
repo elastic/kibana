@@ -287,10 +287,54 @@ describe('AlertEventsClient.createAlertEvent status changes', () => {
           groupHash: result.group_hash,
           status: ALERT_EPISODE_STATUS.ACTIVE,
           previousStatus: null,
+          severity: null,
         },
         rule: null,
         execution: null,
       },
+    ]);
+  });
+
+  it.each([
+    ALERT_EPISODE_STATUS.PENDING,
+    ALERT_EPISODE_STATUS.ACTIVE,
+    ALERT_EPISODE_STATUS.RECOVERING,
+  ])('publishes the severity the writer sent on a %s event', async (alertStatus) => {
+    const { client, publisher } = createClient([]);
+
+    await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'severity-fp',
+      alert_status: alertStatus,
+      severity: 'critical',
+    });
+
+    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+      expect.objectContaining({
+        alert: expect.objectContaining({ status: alertStatus, severity: 'critical' }),
+      }),
+    ]);
+  });
+
+  it('publishes a null severity for an inactive event even when the writer sent one', async () => {
+    const { client, publisher } = createClient([
+      { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.active },
+    ]);
+
+    await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'severity-fp',
+      alert_status: ALERT_EPISODE_STATUS.INACTIVE,
+      severity: 'high',
+    });
+
+    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+      expect.objectContaining({
+        alert: expect.objectContaining({
+          status: ALERT_EPISODE_STATUS.INACTIVE,
+          severity: null,
+        }),
+      }),
     ]);
   });
 

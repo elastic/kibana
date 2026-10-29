@@ -12,14 +12,26 @@ import { ALERT_STATUS_CHANGED_EVENT_TYPE } from './events';
 const firstPayload: AlertStatusChangedTriggerPayload = {
   spaceId: 'space-1',
   source: 'internal',
-  alert: { id: 'alert-1', groupHash: 'hash-1', status: 'active', previousStatus: 'pending' },
+  alert: {
+    id: 'alert-1',
+    groupHash: 'hash-1',
+    status: 'active',
+    previousStatus: 'pending',
+    severity: 'high',
+  },
   rule: { id: 'rule-1', name: 'Rule 1', tags: ['k8s'] },
   execution: { executionId: 'execution-uuid', scheduledAt: '2025-01-01T00:00:00.000Z' },
 };
 
 const secondPayload: AlertStatusChangedTriggerPayload = {
   ...firstPayload,
-  alert: { id: 'alert-2', groupHash: 'hash-2', status: 'pending', previousStatus: null },
+  alert: {
+    id: 'alert-2',
+    groupHash: 'hash-2',
+    status: 'pending',
+    previousStatus: null,
+    severity: null,
+  },
 };
 
 describe('AlertStatusChangedEventPublisher', () => {

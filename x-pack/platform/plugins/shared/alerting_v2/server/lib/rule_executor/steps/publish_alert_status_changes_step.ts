@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ALERT_EPISODE_STATUS, type AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertStatusChangedTriggerPayload } from '../../../../common/workflows/triggers';
 import type { AlertStatusTransition } from '../../director/director';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -22,14 +23,26 @@ const RULE_EXECUTION_SOURCE = 'internal';
 
 const toKey = (episodeId: string, status: string): string => `${episodeId}:${status}`;
 
+/**
+ * `storedSeverity` is the severity of the stored event, which the executor only
+ * writes on breached events. An inactive alert reports none even if its event
+ * carried one.
+ */
 const toPayload = (
   { groupHash, episodeId, previousStatus, status }: AlertStatusTransition,
+  storedSeverity: AlertEventSeverity | undefined,
   rule: RuleResponse,
   { spaceId, executionId, scheduledAt }: RuleExecutionInput
 ): AlertStatusChangedTriggerPayload => ({
   spaceId,
   source: RULE_EXECUTION_SOURCE,
-  alert: { id: episodeId, groupHash, status, previousStatus },
+  alert: {
+    id: episodeId,
+    groupHash,
+    status,
+    previousStatus,
+    severity: status === ALERT_EPISODE_STATUS.INACTIVE ? null : storedSeverity ?? null,
+  },
   rule: { id: rule.id, name: rule.metadata.name, tags: [...(rule.metadata.tags ?? [])] },
   execution: { executionId, scheduledAt },
 });
@@ -69,13 +82,15 @@ export class PublishAlertStatusChangesStep implements RuleExecutionStep {
         return { type: 'continue', state };
       }
 
-      const stored = new Set(
-        storedAlertEvents.flatMap(({ alert }) => (alert ? [toKey(alert.id, alert.status)] : []))
+      const storedSeverities = new Map(
+        storedAlertEvents.flatMap(({ alert, severity }) =>
+          alert ? [[toKey(alert.id, alert.status), severity] as const] : []
+        )
       );
 
       const transitions = alertStatusTransitions.filter(({ episodeId, status }) => {
         const key = toKey(episodeId, status);
-        return stored.has(key) && !published.has(key);
+        return storedSeverities.has(key) && !published.has(key);
       });
 
       if (transitions.length === 0) {
@@ -88,7 +103,14 @@ export class PublishAlertStatusChangesStep implements RuleExecutionStep {
 
       try {
         await this.publisher.publishAlertStatusChanges(
-          transitions.map((transition) => toPayload(transition, rule, input))
+          transitions.map((transition) =>
+            toPayload(
+              transition,
+              storedSeverities.get(toKey(transition.episodeId, transition.status)),
+              rule,
+              input
+            )
+          )
         );
       } catch (error) {
         state.logger.warn({

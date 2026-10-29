@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertStatusTransition } from '../../director/director';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createMockAlertStatusChangedEventPublisher } from '../../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher.mock';
@@ -73,11 +74,64 @@ describe('PublishAlertStatusChangesStep', () => {
           groupHash: 'hash-1',
           status: 'active',
           previousStatus: 'pending',
+          severity: null,
         },
         rule: { id: 'rule-1', name: 'CPU above 90%', tags: ['k8s'] },
         execution: { executionId: 'execution-1', scheduledAt: '2025-01-01T00:00:00.000Z' },
       },
     ]);
+  });
+
+  describe('severity', () => {
+    const stateWithSeverity = (
+      changed: AlertStatusTransition,
+      severity: AlertEventSeverity | undefined
+    ) =>
+      createRulePipelineState({
+        rule,
+        alertStatusTransitions: [changed],
+        storedAlertEvents: [
+          createAlertEvent({
+            group_hash: changed.groupHash,
+            type: 'alert',
+            alert: { id: changed.episodeId, status: changed.status },
+            severity,
+          }),
+        ],
+      });
+
+    it.each(['pending', 'active', 'recovering'] as const)(
+      'reports the severity the stored %s event carries',
+      async (status) => {
+        const state = stateWithSeverity(transition({ status }), 'critical');
+
+        await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+        expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+          expect.objectContaining({ alert: expect.objectContaining({ status, severity: 'critical' }) }),
+        ]);
+      }
+    );
+
+    it('reports null when the stored event carries no severity', async () => {
+      const state = stateWithSeverity(transition({ status: 'recovering' }), undefined);
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+        expect.objectContaining({ alert: expect.objectContaining({ severity: null }) }),
+      ]);
+    });
+
+    it('reports null for an inactive alert even when its stored event carries a severity', async () => {
+      const state = stateWithSeverity(transition({ status: 'inactive' }), 'high');
+
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+        expect.objectContaining({ alert: expect.objectContaining({ severity: null }) }),
+      ]);
+    });
   });
 
   it('only publishes transitions whose alert event was stored', async () => {
