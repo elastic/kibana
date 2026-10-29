@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
@@ -19,6 +19,7 @@ import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
+import { useAlertingLocators } from '../../application/locator_context';
 import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
 import { UserCapabilities } from '../../services/user_capabilities';
 import {
@@ -53,6 +54,7 @@ export interface RuleLibraryListProps {
 
 export const RuleLibraryList = ({ onCreateFromTemplate }: RuleLibraryListProps) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const { rulesLocators } = useAlertingLocators();
   const dataSource = useRuleTemplatesDataSource();
 
   const itemConfig = useMemo(
@@ -68,6 +70,23 @@ export const RuleLibraryList = ({ onCreateFromTemplate }: RuleLibraryListProps) 
     }),
     [canWrite, onCreateFromTemplate]
   );
+
+  const renderRuleCount = (item: ContentListItem) => {
+    const { id: templateId, rule_count: ruleCount } = toTemplate(item);
+    if (ruleCount === undefined) return null;
+    if (ruleCount === 0) return ruleCount;
+
+    return (
+      <EuiLink
+        href={rulesLocators.getRedirectUrl({ derivedFromTemplateId: templateId })}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-test-subj="ruleLibraryRuleCountLink"
+      >
+        {ruleCount}
+      </EuiLink>
+    );
+  };
 
   const emptyState = (
     <EuiEmptyPrompt
@@ -165,6 +184,14 @@ export const RuleLibraryList = ({ onCreateFromTemplate }: RuleLibraryListProps) 
                 </EuiFlexGroup>
               );
             }}
+          />
+          <Column
+            id="ruleCount"
+            name={i18n.translate('xpack.alertingV2.ruleLibrary.column.ruleCount', {
+              defaultMessage: 'Rules',
+            })}
+            width="6em"
+            render={renderRuleCount}
           />
           <Column.Actions width="14em" sticky={false}>
             <Action

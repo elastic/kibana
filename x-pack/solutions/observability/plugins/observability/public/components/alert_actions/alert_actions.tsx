@@ -115,6 +115,7 @@ export function AlertActions(
     parentAlert,
     rowIndex,
     onExpandedAlertIndexChange,
+    onRemoveFromCase,
     services,
   } = props;
   const {
@@ -190,6 +191,22 @@ export function AlertActions(
 
   const actionsMenuItems = [
     ...caseAlertActionItems,
+
+    ...(onRemoveFromCase
+      ? [
+          <EuiContextMenuItem
+            key="removeFromCase"
+            data-test-subj="removeAlertFromCase"
+            icon="trash"
+            onClick={() => {
+              closeActionsPopover();
+              onRemoveFromCase(alert._id);
+            }}
+          >
+            {REMOVE_FROM_CASE}
+          </EuiContextMenuItem>,
+        ]
+      : []),
 
     <InvestigateAlertActionItem
       key="investigateAlert"
@@ -314,6 +331,10 @@ export default AlertActions;
 
 const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetailsTextLabel', {
   defaultMessage: 'Alert details',
+});
+
+const REMOVE_FROM_CASE = i18n.translate('xpack.observability.alertsTable.removeFromCaseTextLabel', {
+  defaultMessage: 'Remove from case',
 });
 
 export type AlertActions = typeof AlertActions;

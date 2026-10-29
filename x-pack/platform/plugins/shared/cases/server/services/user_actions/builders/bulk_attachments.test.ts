@@ -81,18 +81,18 @@ describe('BulkAttachmentsUserActionBuilder', () => {
     const res = builder.build(args);
 
     expect(res.eventDetails.getMessage('ua-id')).toBe(
-      'User deleted 3 security.alert attachments from case id: test-id - user action id: ua-id'
+      'User deleted 3 security.alert items from case id: test-id - user action id: ua-id'
     );
   });
 
-  it('uses the singular in the log message for a single attachment', () => {
+  it('uses the singular in the log message for a single item', () => {
     const res = builder.build({
       ...args,
       payload: { bulkAttachments: { attachmentType: 'file', count: 1 } },
     });
 
     expect(res.eventDetails.getMessage('ua-id')).toBe(
-      'User deleted 1 file attachment from case id: test-id - user action id: ua-id'
+      'User deleted 1 file item from case id: test-id - user action id: ua-id'
     );
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -18,6 +18,7 @@ import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
 import { runAttachmentsReconciliation } from './attachments_runner';
+import { sweepDeletedSpaces } from './deleted_spaces_sweep';
 
 /**
  * Task type registered with Task Manager. Namespaced with `cases.analyticsV2.`
@@ -51,10 +52,13 @@ interface RegisterReconciliationTaskArgs {
    * and dovetailing Task Manager's tick budget across all surfaces.
    */
   getRunnerDeps: () => Promise<{
+    esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
     attachmentsWriter: CasesAttachmentsV2WriterContract;
+    /** False when the Spaces plugin is disabled, so there are no `space` SOs to compare against. */
+    deletedSpacesSweepEnabled: boolean;
   }>;
 }
 
@@ -87,7 +91,7 @@ export function registerReconciliationTask({
     [RECONCILIATION_TASK_TYPE]: {
       title: 'Cases analytics v2 reconciliation',
       description:
-        'Periodically re-emits analytics docs for cases updated since the last successful tick. Durability backstop for the fire-and-forget write hooks.',
+        'Periodically re-emits analytics docs for cases updated since the last successful tick and deletes docs of deleted spaces. Durability backstop for the fire-and-forget write hooks.',
       // No auto-retry. The runner pins the cursor on failure and the
       // next scheduled tick re-walks the same window naturally. A retry
       // inside the same poll interval would stack a second failing run
@@ -203,6 +207,26 @@ export function registerReconciliationTask({
             }
           }
 
+          let deletedSpacesError: unknown;
+          if (deps.deletedSpacesSweepEnabled && !signal.aborted) {
+            try {
+              await sweepDeletedSpaces({
+                esClient: deps.esClient,
+                savedObjectsClient: deps.savedObjectsClient,
+                logger,
+                signal,
+              });
+            } catch (err) {
+              deletedSpacesError = err;
+              logger.error(
+                `cases-analyticsV2: deleted-spaces sweep failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. It will be retried on the next tick.`,
+                { error: err }
+              );
+            }
+          }
+
           // If the tick was cancelled mid-flight, log it once so the
           // skipped surfaces are visible in the task log rather than
           // looking like a silent no-op.
@@ -216,7 +240,12 @@ export function registerReconciliationTask({
           // failure on one or two sides, the successful side(s)' new
           // cursors land, so an extended outage on one surface doesn't
           // force a tenant-wide re-walk of the others on recovery.
-          if (casesError != null || activityError != null || attachmentsError != null) {
+          if (
+            casesError != null ||
+            activityError != null ||
+            attachmentsError != null ||
+            deletedSpacesError != null
+          ) {
             // Surface the failure via Task Manager's `taskRunError` so
             // task metrics reflect the per-tick outcome. Return rather
             // than throw so the successful surfaces' new cursors still
@@ -226,6 +255,7 @@ export function registerReconciliationTask({
               cases: casesError,
               activity: activityError,
               attachments: attachmentsError,
+              deletedSpaces: deletedSpacesError,
             });
             return {
               state: nextState,
@@ -401,11 +431,14 @@ function composeReconciliationError(errors: {
   cases?: unknown;
   activity?: unknown;
   attachments?: unknown;
+  deletedSpaces?: unknown;
 }): Error {
   const failing: string[] = [];
   if (errors.cases != null) failing.push(`cases (${asMessage(errors.cases)})`);
   if (errors.activity != null) failing.push(`activity (${asMessage(errors.activity)})`);
   if (errors.attachments != null) failing.push(`attachments (${asMessage(errors.attachments)})`);
+  if (errors.deletedSpaces != null)
+    failing.push(`deleted spaces (${asMessage(errors.deletedSpaces)})`);
   return new Error(`${failing.join(' AND ')} reconciliation failed`);
 }
 

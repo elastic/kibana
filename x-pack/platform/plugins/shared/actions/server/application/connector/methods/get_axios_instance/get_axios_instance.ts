@@ -20,10 +20,8 @@ export async function getAxiosInstance(
 ): Promise<AxiosInstance> {
   const { getAxiosInstanceWithAuth, connectorTokenClient } = context;
 
-  const { actionType, authMode, validatedSecrets, profileUid } = await getConnectorAuth(
-    context,
-    connectorId,
-    {
+  const { actionType, actionTypeId, authMode, validatedSecrets, profileUid } =
+    await getConnectorAuth(context, connectorId, {
       onActionType: (resolvedActionType, resolvedActionTypeId) => {
         if (!isWorkflowsOnlyConnectorType(resolvedActionType)) {
           throw new Error(
@@ -31,11 +29,11 @@ export async function getAxiosInstance(
           );
         }
       },
-    }
-  );
+    });
 
   return await getAxiosInstanceWithAuth({
     connectorId,
+    connectorTypeId: actionTypeId,
     connectorTokenClient,
     additionalHeaders: actionType.globalAuthHeaders,
     secrets: validatedSecrets,

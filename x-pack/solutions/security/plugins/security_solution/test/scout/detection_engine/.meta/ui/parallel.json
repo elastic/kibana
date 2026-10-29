@@ -1,5 +1,5 @@
 {
-  "sha1": "4c1a5b8b46254e3bb8f4ec7401cbc90af6f28dea",
+  "sha1": "ae36625c711253f959355b317542bee476410033",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,17 @@
       }
     },
     {
+      "id": "2b399116595eb54-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.setup.ts",
+        "line": 123,
+        "column": 13
+      }
+    },
+    {
       "id": "eb023ae1d3c943e-e095692b83aa564",
       "title": "Coverage Overview — managed MITRE source renders the tactic matrix from the managed source",
       "expectedStatus": "passed",
@@ -25,8 +36,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
-        "line": 21,
-        "column": 9
+        "line": 27,
+        "column": 66
       }
     },
     {
@@ -39,7 +50,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
-        "line": 34,
+        "line": 41,
         "column": 9
       }
     },
@@ -53,8 +64,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
-        "line": 43,
-        "column": 28
+        "line": 50,
+        "column": 53
+      }
+    },
+    {
+      "id": "eb023ae1d3c943e-a15c48607ac25b1",
+      "title": "Coverage Overview — managed MITRE source shows the ATLAS matrix on the MITRE ATLAS tab with seeded tactics in position order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
+        "line": 59,
+        "column": 60
+      }
+    },
+    {
+      "id": "eb023ae1d3c943e-47a8756ef36fc26",
+      "title": "Coverage Overview — managed MITRE source places a rule mapped only to ATLAS in its ATLAS technique cell",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/coverage_overview.spec.ts",
+        "line": 89,
+        "column": 7
       }
     },
     {
@@ -87,6 +126,162 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/eql_rule_edit_non_blocking_errors.spec.ts",
         "line": 58,
         "column": 25
+      }
+    },
+    {
+      "id": "3792ebcf0d84334-3c3c03f720c5bea",
+      "title": "Indicator match alert: investigate in timeline shows the indicator match enrichment of the alert in the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_alert_timeline.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    },
+    {
+      "id": "b123e8831afc408-e7a9917586def5e",
+      "title": "Indicator match rule creation: define step validates the index patterns and the queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_define_step.spec.ts",
+        "line": 24,
+        "column": 29
+      }
+    },
+    {
+      "id": "b123e8831afc408-b472e2541ab96c6",
+      "title": "Indicator match rule creation: define step defaults the schedule to a 1h interval and 5m lookback",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_define_step.spec.ts",
+        "line": 63,
+        "column": 15
+      }
+    },
+    {
+      "id": "291e2d875a93447-ea82c2b7874f3df",
+      "title": "Indicator match rule creation: indicator mapping validates the indicator mapping when continuing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_mapping.spec.ts",
+        "line": 30,
+        "column": 34
+      }
+    },
+    {
+      "id": "f4dd60ff03d4015-968dc8466c836a9",
+      "title": "Indicator match rule creation: create and enable creates and enables an Indicator match rule that generates an alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_rule_creation.spec.ts",
+        "line": 42,
+        "column": 55
+      }
+    },
+    {
+      "id": "39a16299a3d4d71-7a3f5da4f92002c",
+      "title": "Indicator match rule duplication duplicates the rule from the rules table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_rule_duplication.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
+    {
+      "id": "39a16299a3d4d71-51da72ed89ea163",
+      "title": "Indicator match rule duplication duplicates the rule from the rules table's bulk actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_rule_duplication.spec.ts",
+        "line": 35,
+        "column": 35
+      }
+    },
+    {
+      "id": "39a16299a3d4d71-d2919f853099b8a",
+      "title": "Indicator match rule duplication duplicates the rule from the rule details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/indicator_match_rule_duplication.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "891d42bba391f14-480ad456e6a6480",
+      "title": "Rule creation MITRE picker — MITRE ATLAS framework persists MITRE ATT&CK and MITRE ATLAS mappings together after rule save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker_atlas.spec.ts",
+        "line": 33,
+        "column": 66
+      }
+    },
+    {
+      "id": "891d42bba391f14-4d01ec633f9b881",
+      "title": "Rule creation MITRE picker — MITRE ATLAS framework preserves the MITRE ATLAS framework when a rule is edited without touching its threat mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/mitre_picker_atlas.spec.ts",
+        "line": 131,
+        "column": 11
       }
     },
     {

@@ -523,6 +523,20 @@ describe('useEntityFlyoutApi', () => {
     );
   });
 
+  it('openEntityAnomalyInsights persists the originating scope in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
+    );
+  });
+
   it('openEntityAnomalyInsights omits the mode from the descriptor in single mode', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({
@@ -589,6 +603,25 @@ describe('useEntityFlyoutApi', () => {
       scopeId: 'scope-1',
     });
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
+  });
+
+  it('openEntityResolution persists the resolved mode of the originating flyout', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityResolution({
+      entityId: 'entity-1',
+      entityType: EntityType.host,
+      entityName: 'host-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
+        entityId: 'entity-1',
+        mode: 'resolved',
+      })
+    );
   });
 
   it('openEntityEntraInsights writes an entityEntraInsights descriptor and clears the param on close', () => {

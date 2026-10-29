@@ -93,7 +93,7 @@ export const FLYOUT_TAB_TIMELINE = i18n.translate(
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
-    defaultMessage: 'Metadata',
+    defaultMessage: 'Data container',
   }
 );
 

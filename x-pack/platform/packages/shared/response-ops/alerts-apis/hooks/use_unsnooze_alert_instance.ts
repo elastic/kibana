@@ -14,7 +14,7 @@ import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { unsnoozeAlertInstance } from '../apis/unsnooze_alert_instance';
 
-const ERROR_TITLE = i18n.translate('alertsApis.unsnoozeAlert.error', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.unsnoozeAlert.error', {
   defaultMessage: 'Error unsnoozing alert',
 });
 

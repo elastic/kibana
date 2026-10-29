@@ -10,6 +10,8 @@ import type { RuleSeverity } from '../../../constants/detection_rules';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 
+export type MitreFramework = 'enterprise' | 'atlas';
+
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
  */
@@ -43,6 +45,9 @@ export class RuleCreateWizardPage {
   readonly savedThreatTactics: Locator;
   readonly savedThreatTechniques: Locator;
   readonly savedThreatSubtechniques: Locator;
+  readonly addMitreFrameworkButton: Locator;
+  readonly editAboutTab: Locator;
+  readonly editSubmitButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -98,6 +103,78 @@ export class RuleCreateWizardPage {
     this.savedThreatSubtechniques = aboutSection.locator(
       '[data-test-subj="threatSubtechniqueLink"]'
     );
+    this.addMitreFrameworkButton = this.page.testSubj.locator('addMitreFramework');
+    this.editAboutTab = this.page.testSubj.locator('edit-rule-about-tab');
+    this.editSubmitButton = this.page.testSubj.locator('ruleEditSubmitButton');
+  }
+
+  /** Locator for the MITRE picker section of one framework on the About step. */
+  mitreFrameworkSection(framework: MitreFramework): Locator {
+    return this.page.testSubj.locator(`mitreFrameworkSection-${framework}`);
+  }
+
+  /** Locator for one framework's threat block in the rule details About section. */
+  savedThreatFrameworkGroup(framework: MitreFramework): Locator {
+    return this.page.testSubj
+      .locator('aboutRule')
+      .locator(`[data-test-subj="threatFrameworkGroup-${framework}"]`);
+  }
+
+  /** Adds a framework section through the "Add framework" popover and waits for it to load. */
+  async addMitreFramework(framework: MitreFramework): Promise<void> {
+    await this.addMitreFrameworkButton.click();
+    await this.page.testSubj.locator(`addMitreFramework-${framework}`).click();
+    const section = this.mitreFrameworkSection(framework);
+    await section.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
+    await section
+      .locator('[data-test-subj="mitreAttackLoading"]')
+      .waitFor({ state: 'hidden', timeout: DATA_LOAD_TIMEOUT_MS });
+  }
+
+  /** Selects a tactic by id inside one framework section. */
+  async selectMitreTacticByIdInSection(framework: MitreFramework, tacticId: string): Promise<void> {
+    await this.page.components
+      .superSelect('mitreAttackTactic', this.mitreFrameworkSection(framework))
+      .selectOptionByValue(tacticId);
+  }
+
+  /** Clicks "Add technique" inside one framework section, then selects the technique by id. */
+  async addAndSelectMitreTechniqueByIdInSection(
+    framework: MitreFramework,
+    techniqueId: string
+  ): Promise<void> {
+    const section = this.mitreFrameworkSection(framework);
+    await section.locator('[data-test-subj="addMitreAttackTechnique"]').click();
+    await this.page.components
+      .superSelect('mitreAttackTechnique', section)
+      .selectOptionByValue(techniqueId);
+  }
+
+  /** Clicks "Add subtechnique" inside one framework section, then selects the subtechnique by id. */
+  async addAndSelectMitreSubtechniqueByIdInSection(
+    framework: MitreFramework,
+    subtechniqueId: string
+  ): Promise<void> {
+    const section = this.mitreFrameworkSection(framework);
+    await section.locator('[data-test-subj="addMitreAttackSubtechnique"]').click();
+    await this.page.components
+      .superSelect('mitreAttackSubtechnique', section)
+      .selectOptionByValue(subtechniqueId);
+  }
+
+  /** Opens the rule edit page on the About tab and waits for the name field. */
+  async gotoEditAbout(ruleId: string): Promise<void> {
+    await this.page.gotoApp(`security/rules/id/${ruleId}/edit`);
+    await this.editAboutTab.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+    await this.editAboutTab.click();
+    await this.aboutRuleName.waitFor({ state: 'visible' });
+  }
+
+  /** Renames the rule on the edit page, saves, and waits for the details page. */
+  async renameAndSaveEditedRule(name: string): Promise<void> {
+    await this.aboutRuleName.fill(name);
+    await this.editSubmitButton.click();
+    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: DATA_LOAD_TIMEOUT_MS });
   }
 
   /**

@@ -9,8 +9,7 @@ import { useMemo } from 'react';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import type { Streams, PhaseName } from '@kbn/streams-schema';
-import { isIlmLifecycle, TIER_TO_PHASE } from '@kbn/streams-schema';
+import { TIER_TO_PHASE, type PhaseName } from '@kbn/streams-schema';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { lastValueFrom } from 'rxjs';
@@ -123,12 +122,14 @@ export const useIngestionRate = ({
 type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 
 export const useIngestionRatePerTier = ({
-  definition,
+  indexName,
+  isIlm,
   calculatedStats,
   timeState,
   isFailureStore = false,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  indexName: string;
+  isIlm: boolean;
   calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isFailureStore?: boolean;
@@ -158,11 +159,7 @@ export const useIngestionRatePerTier = ({
 
       const { interval, intervalType } = intervalData;
 
-      const indexName = isFailureStore
-        ? getFailureStoreIndexName(definition.stream.name)
-        : definition.stream.name;
-
-      const isIlm = isIlmLifecycle(definition.effective_lifecycle);
+      const queryIndex = isFailureStore ? getFailureStoreIndexName(indexName) : indexName;
 
       // DSL/disabled streams derive each index's phase from its actual `_tier` allocation.
       // `_tier` has no fielddata, so we can't aggregate on it directly; instead we run one filter
@@ -212,7 +209,7 @@ export const useIngestionRatePerTier = ({
         >(
           {
             params: {
-              index: indexName,
+              index: queryIndex,
               track_total_hits: false,
               body: {
                 size: 0,
@@ -272,7 +269,7 @@ export const useIngestionRatePerTier = ({
         const ilmExplain = await streamsRepositoryClient.fetch(
           'GET /internal/streams/{name}/lifecycle/_explain',
           {
-            params: { path: { name: definition.stream.name } },
+            params: { path: { name: indexName } },
             signal,
           }
         );
@@ -344,7 +341,8 @@ export const useIngestionRatePerTier = ({
       return { start, end, interval, buckets: normalizedBuckets };
     },
     [
-      definition,
+      indexName,
+      isIlm,
       calculatedStats,
       timeState,
       core,
@@ -363,18 +361,16 @@ export const useIngestionRatePerTier = ({
 };
 
 export const getAggregations = async ({
-  definition,
+  indexName,
   timeState,
   totalDocs,
-  isFailureStore = false,
   core,
   search,
   signal,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  indexName: string;
   timeState: TimeState;
   totalDocs?: number;
-  isFailureStore?: boolean;
   core: CoreStart;
   search: ISearchStart;
   signal: AbortSignal;
@@ -387,10 +383,6 @@ export const getAggregations = async ({
   }
 
   const { interval, intervalType } = intervalData;
-
-  const indexName = isFailureStore
-    ? getFailureStoreIndexName(definition.stream.name)
-    : definition.stream.name;
 
   const {
     rawResponse: { aggregations },
