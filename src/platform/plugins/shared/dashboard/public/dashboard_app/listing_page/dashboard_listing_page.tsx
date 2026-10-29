@@ -47,6 +47,9 @@ export const DashboardListingPage = ({
   const { getListingTabs } = useDashboardMountContext();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
+  // Hold off rendering the listing until the title lookup settles.
+  // The listing table removes the title from the URL on load, so it must not mount mid-lookup.
+  const [isFindingTitle, setIsFindingTitle] = useState(Boolean(redirectTitle));
   useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -118,7 +121,10 @@ export const DashboardListingPage = ({
     findService
       .findByTitle(redirectTitle)
       .then((result) => {
-        if (!result) return;
+        if (!result) {
+          setIsFindingTitle(false);
+          return;
+        }
         redirectTo({
           destination: 'dashboard',
           id: result.id,
@@ -127,13 +133,13 @@ export const DashboardListingPage = ({
       })
       .catch(() => {
         // show the listing filtered by title if the dashboard can not be looked up
+        setIsFindingTitle(false);
       });
-    // Title search only occurs on the initial value. The listing table removes the title
-    // from the URL on load, so this effect must not re-run when the title prop changes.
+    // Title search only occurs on the initial value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (showNoDataPage === undefined) {
+  if (showNoDataPage === undefined || isFindingTitle) {
     return null;
   }
 
