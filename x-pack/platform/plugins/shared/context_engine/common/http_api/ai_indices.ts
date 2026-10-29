@@ -146,11 +146,10 @@ export interface QueryAiIndicesRequest {
   params?: Record<string, AiIndexQueryParamValue>;
   /** Defaults to `DEFAULT_AI_INDEX_QUERY_LIMIT`. Capped at `MAX_AI_INDEX_QUERY_LIMIT`. */
   limit?: number;
-  /** When set, rows are limited to this user's documents and documents with no `user_id`. */
+  /** Limits rows to this user's documents plus those with no `user_id`. */
   user_id?: string;
 }
 
-/** Caller-supplied scope for a read; absent means no user filter. */
 export interface AiIndexReadScope {
   userId?: string;
 }

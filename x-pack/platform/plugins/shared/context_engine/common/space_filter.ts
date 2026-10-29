@@ -60,7 +60,6 @@ export const buildAiIndexUserFilter = (userId: string): QueryDslQueryContainer =
   },
 });
 
-/** The space filter, narrowed to `userId` when the caller sends one. */
 export const buildAiIndexReadFilter = ({
   spaceId,
   userId,
