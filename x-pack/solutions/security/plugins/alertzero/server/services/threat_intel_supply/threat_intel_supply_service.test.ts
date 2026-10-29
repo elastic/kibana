@@ -24,6 +24,8 @@ import {
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { ThreatIntelSupplyService } from './threat_intel_supply_service';
+import type { SupplyDocumentLabel, SupplyDocumentStates } from './keyed_supply_store.mock';
+import { createHardGateEsClient, createKeyedSupplyStore } from './keyed_supply_store.mock';
 import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyHuntDisabledError,
@@ -603,5 +605,263 @@ describe('ThreatIntelSupplyService', () => {
       DEFAULT_SPACE_ID,
       request
     );
+  });
+});
+
+describe('ThreatIntelSupplyService end state by space', () => {
+  type Operation = 'ensure' | 'teardown' | 'restore';
+
+  interface Row {
+    name: string;
+    operation: Operation;
+    seed: SupplyDocumentStates;
+    installer?: boolean;
+    gateOk?: boolean;
+    failUpdates?: SupplyDocumentLabel[];
+    /** Models a concurrent enable in space B right after the attribute document of A goes off. */
+    raceEnablesBAfterAttrAOff?: boolean;
+    expectedDocs: SupplyDocumentStates;
+    expectedOutcome:
+      | 'ok'
+      | 'ThreatIntelSupplyNotInstalledError'
+      | 'ThreatIntelSupplyHuntDisabledError'
+      | 'ThreatIntelSupplyHardGateError'
+      | 'Error';
+  }
+
+  const allOff: SupplyDocumentStates = {
+    ingest: false,
+    enrich: false,
+    attrA: false,
+    attrB: false,
+    cthA: false,
+    cthB: false,
+  };
+
+  const rows: Row[] = [
+    {
+      name: 'enable A, nothing else on: ingest, enrich and attribute-A turn on',
+      operation: 'ensure',
+      seed: allOff,
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'enable A while B hunts: globals stay on, attribute-A turns on',
+      operation: 'ensure',
+      seed: { ...allOff, ingest: true, enrich: true, attrB: true, cthB: true },
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, attrB: true, cthB: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'enable A with attribute-A missing: the installer adds it and it turns on',
+      operation: 'ensure',
+      seed: { ingest: false, enrich: false, attrB: false, cthA: false, cthB: false },
+      installer: true,
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'enable A with enrich missing and no installer: nothing is left changed',
+      operation: 'ensure',
+      seed: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
+      expectedDocs: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
+      expectedOutcome: 'ThreatIntelSupplyNotInstalledError',
+    },
+    {
+      name: 'disable A, B off: attribute-A and both globals turn off',
+      operation: 'teardown',
+      seed: { ...allOff, ingest: true, enrich: true, attrA: true },
+      expectedDocs: allOff,
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'disable A, B on: only attribute-A turns off',
+      operation: 'teardown',
+      seed: { ...allOff, ingest: true, enrich: true, attrA: true, attrB: true, cthB: true },
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrB: true, cthB: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'disable A with attribute-A missing: globals still turn off by refcount',
+      operation: 'teardown',
+      seed: { ingest: true, enrich: true, attrB: false, cthA: false, cthB: false },
+      expectedDocs: { ingest: false, enrich: false, attrB: false, cthA: false, cthB: false },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'disable A when the global update is forbidden: attribute-A is off, ingest stays on',
+      operation: 'teardown',
+      seed: { ...allOff, ingest: true, enrich: true, attrA: true },
+      failUpdates: ['ingest'],
+      expectedDocs: { ...allOff, ingest: true, enrich: true },
+      expectedOutcome: 'Error',
+    },
+    {
+      name: 'disable A while the default space hunts: globals stay on',
+      operation: 'teardown',
+      seed: { ...allOff, ingest: true, enrich: true, attrA: true, cthDefault: true },
+      expectedDocs: { ...allOff, ingest: true, enrich: true, cthDefault: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'disable A while B enables concurrently: globals stay on',
+      operation: 'teardown',
+      seed: { ...allOff, ingest: true, enrich: true, attrA: true },
+      raceEnablesBAfterAttrAOff: true,
+      expectedDocs: { ...allOff, ingest: true, enrich: true, cthB: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'restore A from ingest drifted off: ingest turns back on',
+      operation: 'restore',
+      seed: { ...allOff, enrich: true, attrA: true, cthA: true },
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, cthA: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'restore A from everything off reaches the same end state as a first enable',
+      operation: 'restore',
+      seed: { ...allOff, cthA: true },
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, cthA: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: '13c. restore A from a mix of off and missing documents reaches the same end state',
+      operation: 'restore',
+      seed: { ingest: true, enrich: false, attrB: false, cthA: true, cthB: false },
+      installer: true,
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, cthA: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'restore A with Hunt off: nothing is written',
+      operation: 'restore',
+      seed: allOff,
+      expectedDocs: allOff,
+      expectedOutcome: 'ThreatIntelSupplyHuntDisabledError',
+    },
+    {
+      name: 'restore A with the hard gate blocked: nothing is written',
+      operation: 'restore',
+      seed: { ...allOff, cthA: true },
+      gateOk: false,
+      expectedDocs: { ...allOff, cthA: true },
+      expectedOutcome: 'ThreatIntelSupplyHardGateError',
+    },
+    {
+      name: 'restore A with attribute-A missing and an installer: it is installed and turns on',
+      operation: 'restore',
+      seed: { ingest: true, enrich: true, attrB: false, cthA: true, cthB: false },
+      installer: true,
+      expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, cthA: true },
+      expectedOutcome: 'ok',
+    },
+    {
+      name: 'restore A with attribute-A missing and no installer: the globals it could fix stay on',
+      operation: 'restore',
+      seed: { ingest: false, enrich: false, attrB: false, cthA: true, cthB: false },
+      // Hunt is already on in A, so the failed ensure is not undone (see ensureSupplyForSpace).
+      expectedDocs: { ingest: true, enrich: true, attrB: false, cthA: true, cthB: false },
+      expectedOutcome: 'ThreatIntelSupplyNotInstalledError',
+    },
+  ];
+
+  const run = async (row: Row) => {
+    const gateEsClient = createHardGateEsClient(row.gateOk !== false);
+
+    const fake = createKeyedSupplyStore({
+      seed: row.seed,
+      failUpdates: row.failUpdates,
+      afterUpdate: row.raceEnablesBAfterAttrAOff
+        ? ({ label, enabled, store }) => {
+            if (label === 'attrA' && !enabled) {
+              store.set(
+                `${SPACE_B}/${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}-${SPACE_B}`,
+                {
+                  enabled: true,
+                }
+              );
+            }
+          }
+        : undefined,
+    });
+    const service = new ThreatIntelSupplyService({
+      management: fake.management,
+      managedWorkflows: Promise.resolve(fake.managedWorkflows),
+      logger: loggingSystemMock.createLogger() as Logger,
+      getEsClient: async () => gateEsClient,
+      enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
+      getWorkflowInstaller: row.installer ? () => fake.installer : undefined,
+      getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+      getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+    });
+
+    const operations: Record<Operation, () => Promise<unknown>> = {
+      ensure: () => service.ensureSupplyForSpace(SPACE_A, request),
+      teardown: () => service.teardownSupplyForSpace(SPACE_A, request),
+      restore: () => service.restoreSupplyForSpace(SPACE_A, request),
+    };
+    const outcome = await operations[row.operation]().then(
+      () => 'ok',
+      (error: Error) => error.constructor.name
+    );
+    return { docs: fake.snapshot(), outcome };
+  };
+
+  describe.each(rows)('$name', (row) => {
+    it('leaves the documents in the expected end state', async () => {
+      expect((await run(row)).docs).toEqual(row.expectedDocs);
+    });
+
+    it('returns the expected outcome', async () => {
+      expect((await run(row)).outcome).toBe(row.expectedOutcome);
+    });
+  });
+
+  describe('status', () => {
+    const statusFor = async (seed: SupplyDocumentStates) => {
+      const fake = createKeyedSupplyStore({ seed });
+      const esClient = createHardGateEsClient(true);
+      return new ThreatIntelSupplyService({
+        management: fake.management,
+        managedWorkflows: Promise.resolve(fake.managedWorkflows),
+        logger: loggingSystemMock.createLogger() as Logger,
+        getEsClient: async () => esClient,
+        enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
+        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+      }).getSupplyStatus(SPACE_A, request);
+    };
+
+    it('reports drift when Hunt is on in A and a required document is missing', async () => {
+      const { drift } = await statusFor({ ingest: true, attrA: true, cthA: true, cthB: false });
+      expect(drift).toBe(true);
+    });
+
+    it('marks only the deployment rows in use elsewhere when A is off and B hunts', async () => {
+      const { workflows } = await statusFor({
+        ...allOff,
+        ingest: true,
+        enrich: true,
+        attrB: true,
+        cthB: true,
+      });
+      expect(workflows.map(({ key, inUseElsewhere }) => [key, inUseElsewhere])).toEqual([
+        ['ingest', true],
+        ['enrich', true],
+        ['attribute', undefined],
+      ]);
+    });
+
+    it('reports no drift when nobody hunts, even with the globals left on', async () => {
+      const { drift } = await statusFor({ ...allOff, ingest: true, enrich: true });
+      expect(drift).toBe(false);
+    });
+
+    it('marks nothing in use elsewhere when nobody hunts', async () => {
+      const { workflows } = await statusFor({ ...allOff, ingest: true, enrich: true });
+      expect(workflows.some(({ inUseElsewhere }) => inUseElsewhere)).toBe(false);
+    });
   });
 });

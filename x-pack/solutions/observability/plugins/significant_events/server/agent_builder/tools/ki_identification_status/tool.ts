@@ -17,7 +17,7 @@ import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { getKiIdentificationStatusToolHandler } from './handler';
@@ -64,7 +64,7 @@ export const createKiIdentificationStatusTool = ({
       await assertCanReadSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
       // A completed run's status carries stored features and queries, read as the internal user.
       await scopedClients.sourcesClient.assertReadable(source.id);
       const status = await getKiIdentificationStatusToolHandler({

@@ -83,6 +83,12 @@ export const CHART_TOGGLE_HIDE = i18n.translate('xpack.kubernetesSecurity.charts
   defaultMessage: 'Hide charts',
 });
 
+export const LAST_UPDATED = (relativeTime: string) =>
+  i18n.translate('xpack.kubernetesSecurity.appHeader.lastUpdated', {
+    defaultMessage: 'Updated {relativeTime}',
+    values: { relativeTime },
+  });
+
 export const COUNT_WIDGET_CLUSTERS = i18n.translate(
   'xpack.kubernetesSecurity.countWidget.clusters',
   {

@@ -1,10 +1,13 @@
 version: "1"
 name: Alert Triage batch
 description: >
-  Triages one batch of alerts of a single detection rule for the Alert Triage sweep. Opens one
-  Investigation, classifies every alert with the Security Alert Analysis workflow, writes each
-  verdict as an alert tag and note, and hands the confident false positives to the closure review
-  as one proposal. Started by the sweep with `workflow.executeAsync` and never waits for a human.
+  Triages one batch of alerts of a single detection rule for the Alert Triage sweep. Classifies
+  every alert with the Security Alert Analysis workflow, writes each verdict as an alert tag and
+  note, and groups the confident false positives into closure proposals: each joins the open
+  proposal of its pattern or starts a new one with its own Investigation and review. The alerts in
+  no proposal go into the Investigation of the first proposal, or into one of their own, closed,
+  when the batch has no proposal. Started by the sweep with `workflow.executeAsync` and never
+  waits for a human.
   The sweep claimed the alerts with `az:triage_pending` and recorded this execution as
   `az:triage_exec:<id>`; this run removes both when it has written the outcome, or marks the
   alerts `az:triage_failed` when it cannot classify them.
@@ -70,17 +73,22 @@ triggers:
           maximum: 1
           description: Minimum confidence for a false positive to be proposed for closure.
 
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Alert Triage worker"
+
 steps:
   # ---------------------------------------------------------------------------
-  # 1. Abort before opening an Investigation when Alert Analysis is off in this
+  # 1. Abort before classifying when Alert Analysis is off in this
   #    space. Enablement is checked at Worker turn-on; this is the runtime
   #    complement for the case where the operator later turns analysis off and
   #    leaves the Worker running. Empty verdicts are not a substitute — the
   #    sub-workflow also returns [] when no connector resolves for the model tier.
   #
   #    Same runtime_config endpoint the analysis workflow reads. Fail-closed: a
-  #    failed fetch after retries fails the run rather than creating a hollow
-  #    Investigation.
+  #    failed fetch after retries fails the run rather than classifying with a
+  #    setting nobody read.
   # ---------------------------------------------------------------------------
   - name: fetch_analysis_runtime_config
     type: kibana.request
@@ -124,16 +132,47 @@ steps:
   # 1b. Load the batch's alert documents. The sweep passes ids only, so the batch loads the
   #     documents Alert Analysis takes instead of the sweep pushing up to 100 documents through the
   #     engine. An alert deleted since planning is missing from the result; if none can be loaded the
-  #     run marks them failed and stops.
+  #     run marks them failed and stops. Only the fields Alert Analysis and the pattern keys read
+  #     are loaded. A size error is the same on every attempt, so it is not retried and its alerts
+  #     are marked failed. Any other error leaves the claim for the next sweep to reclaim.
   # ---------------------------------------------------------------------------
   - name: load_alerts
     type: alertzero.triage.loadAlerts
     on-failure:
       retry:
+        condition: "${{ error.type != 'StepSizeLimitExceeded' }}"
         max-attempts: 3
         delay: 5s
+      # Not a fallback: `error` is empty inside fallback steps, so the error is read from the step below.
+      continue: true
     with:
       alert_ids: "${{ inputs.alert_ids }}"
+
+  - name: guard_load_succeeded
+    type: if
+    condition: "${{ steps.load_alerts.error != blank }}"
+    steps:
+      - name: release_claims_load_failed
+        type: kibana.SetAlertTags
+        # Nothing removes `az:triage_failed`, so tagging on a transient error would take the
+        # alerts out of triage for good.
+        if: "${{ steps.load_alerts.error.type == 'StepSizeLimitExceeded' }}"
+        # shortcut: if this tagging fails the claim stays and a later sweep repeats the size error, upgrade if seen.
+        on-failure:
+          continue: true
+        with:
+          ids: "${{ inputs.alert_ids }}"
+          tags:
+            tags_to_add:
+              - "az:triage_failed"
+            tags_to_remove:
+              - "az:triage_pending"
+              - "az:triage_exec:{{ execution.id }}"
+
+      - name: abort_load_failed
+        type: workflow.fail
+        with:
+          message: "Alert Triage could not load the alerts of this batch: {{ steps.load_alerts.error.message }}"
 
   - name: guard_alerts_loaded
     type: if
@@ -159,84 +198,12 @@ steps:
             None of the {{ inputs.alert_ids.size }} alerts of this batch could be loaded; they may
             have been deleted since the sweep planned it.
 
-  # ---------------------------------------------------------------------------
-  # 2. Open an Investigation conversation seeded from the `investigation`
-  #    template. Seeds status, severity, and the workflow_execution_ids that link
-  #    the Investigation to this run.
-  # ---------------------------------------------------------------------------
-  - name: create_investigation
-    type: ai.conversation.create
-    with:
-      template_id: investigation
-      title: "Alert Triage — {{ inputs.rule_name }}"
-      access_control:
-        access_mode: public
-      metadata:
-        status: open
-        # The rule input carries no severity, so it is read off the first alert. A rule's alerts share one severity unless the rule
-        # maps it per alert. Both alert document shapes are read: dotted keys and nested objects.
-        severity: "{{ steps.load_alerts.output.alerts[0]['kibana.alert.severity'] | default: steps.load_alerts.output.alerts[0].kibana.alert.severity | default: 'medium' }}"
-        description: >-
-          Automated triage of {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %} from rule
-          "{{ inputs.rule_name }}" ({{ inputs.rule_id }}).
-        workflow_execution_ids: ["{{ execution.id }}"]
-
-  # ---------------------------------------------------------------------------
-  # 3. Attach the analysed alerts to the Investigation in chunks of 20.
-  #    security.alerts caps at 20 ids per call; foreach+chunk splits larger
-  #    batches into multiple chips. render_inline: true so chips show in the
-  #    Investigation flyout without a separate attachment panel.
-  # ---------------------------------------------------------------------------
-  - name: init_attach_chunk_tracking
+  # Failure Investigations (below) are counted for the grouping telemetry. Set before any can be created.
+  - name: init_failure_conversations
     type: data.set
     with:
-      failed_attach_chunk_count: 0
-      total_attach_chunk_count: "${{ steps.load_alerts.output.alerts | map: '_id' | chunk: 20 | size }}"
+      failure_conversation_count: 0
 
-  - name: attach_alerts
-    type: foreach
-    foreach: "${{ steps.load_alerts.output.alerts | map: '_id' | chunk: 20 | json }}"
-    steps:
-      - name: attach_alert_chunk
-        type: ai.attachment.add
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-          continue: true
-        with:
-          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-          type: security.alerts
-          render_inline: true
-          data:
-            alertIds: "${{ foreach.item }}"
-          description: "Alerts analysed in this triage run"
-
-      # Retries exhaust before continue: true takes over, so an error here means this
-      # chunk never attached — those alert ids have no evidence chip in the
-      # Investigation. Counted so post_comment_triage_started reports accurate
-      # coverage instead of unconditionally claiming every alert is attached.
-      - name: record_attach_alert_chunk_failure
-        type: data.set
-        if: "${{ steps.attach_alert_chunk.error != blank }}"
-        with:
-          failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
-
-  - name: post_comment_triage_started
-    type: ai.conversation.add_user_message
-    on-failure:
-      continue: true
-    with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      message: |-
-        Triage started for rule **{{ inputs.rule_name }}** ({{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}). Model routed via the `alertzero_efficient` Model Management feature.
-        {% if variables.failed_attach_chunk_count > 0 %}
-        ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
-        {% else %}
-        Alerts attached above.
-        {% endif %}
-
-        [View execution]({{ execution.url }})
   # ---------------------------------------------------------------------------
   # 4. Run the Security Alert Analysis sub-workflow.
   #
@@ -256,8 +223,9 @@ steps:
   #    autoCloseConfidenceScoreMinThreshold is passed through so the sub-workflow
   #    reports against the same floor this Worker applies in compute_fp_candidates.
   #
-  #    investigationConversationId lets the sub-workflow post per-batch progress
-  #    comments into the Investigation.
+  #    No investigationConversationId: the batch has no Investigation while it classifies, so the
+  #    sub-workflow posts no progress comments. A conversation is created for a new proposal, a
+  #    failure, or a batch that has no proposal to hold its alerts.
   # ---------------------------------------------------------------------------
   - name: classify_alerts
     type: workflow.execute
@@ -267,12 +235,45 @@ steps:
         max-attempts: 2
         delay: 30s
       fallback:
+        - name: create_classify_failed_investigation
+          type: ai.conversation.create
+          with:
+            template_id: investigation
+            title: "Alert Triage — {{ inputs.rule_name }}"
+            access_control:
+              access_mode: public
+            metadata:
+              status: open
+              description: >-
+                Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
+                "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
+              workflow_execution_ids: ["{{ execution.id }}"]
+        - name: attach_classify_failed_alerts
+          type: foreach
+          foreach: "${{ inputs.alert_ids | chunk: 20 | json }}"
+          steps:
+            - name: attach_classify_failed_alert_chunk
+              type: ai.attachment.add
+              on-failure:
+                retry:
+                  max-attempts: 3
+                  delay: 5s
+                continue: true
+              with:
+                conversation_id: "{{ steps.create_classify_failed_investigation.output.conversation_id }}"
+                type: security.alerts
+                render_inline: false
+                data:
+                  alertIds: "${{ foreach.item }}"
+                description: "Alerts of this batch that were not classified"
+
         - name: post_comment_classify_failed
           type: ai.conversation.add_user_message
           on-failure:
             continue: true
           with:
-            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ steps.create_classify_failed_investigation.output.conversation_id }}"
             message: >-
               ⚠️ Classification step failed for {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}.
               The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
@@ -293,8 +294,8 @@ steps:
                 - "az:triage_pending"
                 - "az:triage_exec:{{ execution.id }}"
 
-        # Fallback handles the comment and the tags only. Without this fail the parent continues
-        # into empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
+        # Fallback handles the comment and the tags only. The run would fail after the fallback
+        # anyway (it re-throws the classify error); this fails it first with the likely causes.
         - name: abort_classify_failed
           type: workflow.fail
           with:
@@ -306,6 +307,7 @@ steps:
       workflow-id: system-security-alert-analysis
       run-as-mode: inherit
       inputs:
+        authorName: "{{ consts.author_name }}"
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
         alerts: "${{ steps.load_alerts.output.alerts }}"
@@ -313,7 +315,6 @@ steps:
         autoCloseConfidenceScoreMinThreshold: "${{ inputs.confidence_floor }}"
         connectorIdByFeature: alertzero_efficient
         calledByWorker: true
-        investigationConversationId: "{{ steps.create_investigation.output.conversation_id }}"
 
   # ---------------------------------------------------------------------------
   # 5. Compute the FP candidate list: verdicts classified as false_positive
@@ -327,6 +328,8 @@ steps:
     type: data.set
     with:
       fp_threshold_expr: "v.confidence_score >= {{ inputs.confidence_floor }}"
+      fp_below_floor_expr: "v.confidence_score < {{ inputs.confidence_floor }}"
+      fp_candidate_expr: "v.classification == 'false_positive' and v.confidence_score >= {{ inputs.confidence_floor }}"
 
   - name: compute_fp_candidates
     type: data.set
@@ -344,53 +347,6 @@ steps:
     type: data.set
     with:
       fp_candidate_count: "${{ variables.fp_candidate_ids | size }}"
-
-  # Distinct hosts and users behind the candidates, for the proposal title. Same predicate as
-  # `compute_fp_candidates`, so the title never names an entity whose alerts are not being closed.
-  # `__missing__` marks an alert with no host or user field and is not a name.
-  - name: compute_fp_entities
-    type: data.set
-    with:
-      fp_hosts: >-
-        ${{ steps.classify_alerts.output.verdicts
-            | where: 'classification', 'false_positive'
-            | where_exp: 'v', variables.fp_threshold_expr
-            | reject: 'host_name', '__missing__'
-            | map: 'host_name' | uniq }}
-      fp_users: >-
-        ${{ steps.classify_alerts.output.verdicts
-            | where: 'classification', 'false_positive'
-            | where_exp: 'v', variables.fp_threshold_expr
-            | reject: 'user_name', '__missing__'
-            | map: 'user_name' | uniq }}
-
-  # Title suffix, empty when no candidate carries a host or user. Per list: up to 5 names show as
-  # the first 2 plus `+N`, more than 5 collapse to a count. Hosts lead and users follow in
-  # parentheses; a list that is empty drops out (`for` users when there are no hosts).
-  - name: build_fp_entity_summary
-    type: data.set
-    with:
-      fp_entity_summary: >-
-        {%- assign host_count = variables.fp_hosts | size -%}
-        {%- assign user_count = variables.fp_users | size -%}
-        {%- capture host_text -%}
-        {%- if host_count > 5 -%}{{ host_count }} hosts
-        {%- else -%}
-        {%- for name in variables.fp_hosts limit: 2 -%}{%- unless forloop.first -%}, {% endunless -%}{{ name | truncate: 40 }}{%- endfor -%}
-        {%- if host_count > 2 %} +{{ host_count | minus: 2 }}{% endif -%}
-        {%- endif -%}
-        {%- endcapture -%}
-        {%- capture user_text -%}
-        {%- if user_count > 5 -%}{{ user_count }} users
-        {%- else -%}
-        {%- for name in variables.fp_users limit: 2 -%}{%- unless forloop.first -%}, {% endunless -%}{{ name | truncate: 40 }}{%- endfor -%}
-        {%- if user_count > 2 %} +{{ user_count | minus: 2 }}{% endif -%}
-        {%- endif -%}
-        {%- endcapture -%}
-        {%- if host_count > 0 and user_count > 0 -%}on {{ host_text }} ({{ user_text }})
-        {%- elsif host_count > 0 -%}on {{ host_text }}
-        {%- elsif user_count > 0 -%}for {{ user_text }}
-        {%- endif -%}
 
   # Guard: analysis is on (or this run would have aborted at step 1) but the
   # sub-workflow returned 0 verdicts for a non-empty batch — a missing Model
@@ -414,18 +370,55 @@ steps:
         type: if
         condition: "${{ variables.verdict_count == 0 }}"
         steps:
+          - name: create_classification_empty_investigation
+            type: ai.conversation.create
+            with:
+              template_id: investigation
+              title: "Alert Triage — {{ inputs.rule_name }}"
+              access_control:
+                access_mode: public
+              metadata:
+                status: open
+                description: >-
+                  Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
+                  "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
+                workflow_execution_ids: ["{{ execution.id }}"]
+          - name: attach_classification_empty_alerts
+            type: foreach
+            foreach: "${{ inputs.alert_ids | chunk: 20 | json }}"
+            steps:
+              - name: attach_classification_empty_alert_chunk
+                type: ai.attachment.add
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_classification_empty_investigation.output.conversation_id }}"
+                  type: security.alerts
+                  render_inline: false
+                  data:
+                    alertIds: "${{ foreach.item }}"
+                  description: "Alerts of this batch that got no verdict"
+
           - name: post_comment_classification_empty
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ steps.create_classification_empty_investigation.output.conversation_id }}"
               message: >-
                 ⚠️ Alert Analysis returned no verdicts for {{ steps.load_alerts.output.alerts.size }} alert{% if steps.load_alerts.output.alerts.size != 1 %}s{% endif %}.
-                Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
+                Analysis is on for this space (a disabled setting aborts earlier).
                 Likely causes: the `alertzero_efficient` Model Management feature has no connector,
                 or the sub-workflow skipped the batch.
                 Alerts have NOT been tagged or closed.
+          - name: count_classification_empty_conversation
+            type: data.set
+            with:
+              failure_conversation_count: "${{ variables.failure_conversation_count | plus: 1 }}"
         else:
           # Partial miss: at least one verdict came back (the all-empty case is handled
           # above), but the sub-workflow's missing_alert_ids is nonempty — the model
@@ -437,12 +430,45 @@ steps:
             type: if
             condition: "${{ variables.missing_alert_count > 0 }}"
             steps:
+              - name: create_missing_alert_ids_investigation
+                type: ai.conversation.create
+                with:
+                  template_id: investigation
+                  title: "Alert Triage — {{ inputs.rule_name }}"
+                  access_control:
+                    access_mode: public
+                  metadata:
+                    status: open
+                    description: >-
+                      Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
+                      "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
+                    workflow_execution_ids: ["{{ execution.id }}"]
+              - name: attach_missing_alerts
+                type: foreach
+                foreach: "${{ steps.classify_alerts.output.missing_alert_ids | chunk: 20 | json }}"
+                steps:
+                  - name: attach_missing_alert_chunk
+                    type: ai.attachment.add
+                    on-failure:
+                      retry:
+                        max-attempts: 3
+                        delay: 5s
+                      continue: true
+                    with:
+                      conversation_id: "{{ steps.create_missing_alert_ids_investigation.output.conversation_id }}"
+                      type: security.alerts
+                      render_inline: false
+                      data:
+                        alertIds: "${{ foreach.item }}"
+                      description: "Alerts of this batch that got no verdict"
+
               - name: post_comment_missing_alert_ids
                 type: ai.conversation.add_user_message
                 on-failure:
                   continue: true
                 with:
-                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  author_name: "{{ consts.author_name }}"
+                  conversation_id: "{{ steps.create_missing_alert_ids_investigation.output.conversation_id }}"
                   message: >-
                     ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
                     {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} in this batch (see the sub-workflow's
@@ -450,6 +476,11 @@ steps:
                     closure by this Worker; only the {{ variables.verdict_count }} matched
                     alert{% if variables.verdict_count != 1 %}s{% endif %} will be triaged below. Re-run the Worker or follow up manually on
                     the missing alert{% if variables.missing_alert_count != 1 %}s{% endif %}.
+
+              - name: count_missing_alert_ids_conversation
+                type: data.set
+                with:
+                  failure_conversation_count: "${{ variables.failure_conversation_count | plus: 1 }}"
 
   # Alerts that came back without a verdict (the model dropped them, or the whole batch returned
   # none) would otherwise stay claimed with no tag to say why, and be planned again by every
@@ -489,36 +520,20 @@ steps:
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
 
-  - name: post_comment_classification_results
-    type: ai.conversation.add_user_message
+  # Telemetry: how the batch was classified.
+  - name: report_batch_classified
+    type: alertzero.reportWorkerOutcome
     on-failure:
       continue: true
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      message: |-
-        Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
-
-        {{ steps.classify_alerts.output.grouped_counts_summary }}
-
-        {{ steps.classify_alerts.output.generated_summary }}{% if steps.classify_alerts.output.connector_id != '' %} _(Connector: `{{ steps.classify_alerts.output.connector_id }}`{% if steps.classify_alerts.output.agent_id != '' %}, Agent: `{{ steps.classify_alerts.output.agent_id }}`{% endif %})_{% endif %}
-
-  # ---------------------------------------------------------------------------
-  # 6. Record the impacted hosts and users on the Investigation through the shared
-  #    investigations.attachImpact step (the landing-page entity pills read it).
-  #    The sub-workflow caps impacted_entities at 100. The step rejects an empty list
-  #    and needs manage_investigations; a failure is not worth failing the run for.
-  # ---------------------------------------------------------------------------
-  - name: attach_impact_gate
-    type: if
-    condition: "${{ steps.classify_alerts.output.impacted_entities.size > 0 }}"
-    steps:
-      - name: attach_impact
-        type: investigations.attachImpact
-        on-failure:
-          continue: true
-        with:
-          conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-          entities: "${{ steps.classify_alerts.output.impacted_entities }}"
+      event: alert_triage_batch_classified
+      alerts_total: "${{ variables.alert_count | default: 0 }}"
+      verdicts_true_positive: "${{ steps.classify_alerts.output.true_positive_count | default: 0 }}"
+      verdicts_false_positive: "${{ steps.classify_alerts.output.false_positive_count | default: 0 }}"
+      verdicts_inconclusive: "${{ steps.classify_alerts.output.inconclusive_count | default: 0 }}"
+      alerts_without_verdict: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
+      fp_candidates: "${{ variables.fp_candidate_count | default: 0 }}"
+      fp_below_floor: "${{ steps.classify_alerts.output.false_positive_count | default: 0 | minus: variables.fp_candidate_count | at_least: 0 }}"
 
   # ---------------------------------------------------------------------------
   # 7. Apply static AZ classification tags to every analysed alert (R5).
@@ -538,6 +553,20 @@ steps:
   # per alert. Every step of a loop is recorded in the execution, so a per-alert loop over a
   # thousand alerts is thousands of step records on the same event loop as the UI.
   # The ids are partitioned by classification here.
+  #
+  # Only a false positive at or above the confidence floor keeps `az:false_positive`: it is the one
+  # the closure review proposes to close. A false positive below the floor is a guess nobody is
+  # asked about, so it is tagged `az:inconclusive` like the review's other dead ends. Otherwise it
+  # would stay open as `az:false_positive` and nothing would ever revisit it.
+  - name: compute_below_floor_fp_ids
+    type: data.set
+    with:
+      az_below_floor_fp_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_below_floor_expr
+            | map: 'alert_id' }}
+
   - name: compute_az_tag_ids
     type: data.set
     with:
@@ -548,11 +577,13 @@ steps:
       az_false_positive_ids: >-
         ${{ steps.classify_alerts.output.verdicts
             | where: 'classification', 'false_positive'
+            | where_exp: 'v', variables.fp_threshold_expr
             | map: 'alert_id' }}
       az_inconclusive_ids: >-
         ${{ steps.classify_alerts.output.verdicts
             | where: 'classification', 'inconclusive'
-            | map: 'alert_id' }}
+            | map: 'alert_id'
+            | concat: variables.az_below_floor_fp_ids }}
 
   # Each list is walked in chunks of 500 ids, as floor_alert_triage_review.yaml does for its
   # re-tag. One call carries the whole chunk, so a batch costs a call per chunk and class rather
@@ -577,6 +608,7 @@ steps:
             tags_to_remove:
               - "az:false_positive"
               - "az:inconclusive"
+              - "az:model_fp"
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
             tags_to_add:
@@ -600,8 +632,11 @@ steps:
               - "az:inconclusive"
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
+            # `az:model_fp` records the model's judgement for Rule Tuning. It is not a verdict tag
+            # and survives the re-tag to `az:inconclusive` when the proposal is not approved.
             tags_to_add:
               - "az:false_positive"
+              - "az:model_fp"
 
   - name: set_az_inconclusive_tags
     type: foreach
@@ -619,13 +654,745 @@ steps:
             tags_to_remove:
               - "az:true_positive"
               - "az:false_positive"
+              - "az:model_fp"
               - "az:triage_pending"
               - "az:triage_exec:{{ execution.id }}"
             tags_to_add:
               - "az:inconclusive"
 
   # ---------------------------------------------------------------------------
-  # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
+  # 7b. Tag every classified alert with its pattern keys, whatever its verdict.
+  #
+  #     `az:triage_strict_key:<hash>` and `az:triage_wide_key:<hash>` record which pattern an alert
+  #     belongs to. Grouping, the proposal summary and Decisions read them. They are not verdict
+  #     tags, so the sweep ignores them. They are written in a step of their own, because each key
+  #     pair is a different tag set and `kibana.SetAlertTags` sends one tag set for all its ids. The
+  #     step makes one call per distinct key pair. The keys are data for tuning, so a failure after
+  #     the retries does not fail the run.
+  # ---------------------------------------------------------------------------
+  - name: tag_pattern_keys
+    type: alertzero.triage.tagPatternKeys
+    if: "${{ variables.verdict_count > 0 }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+    with:
+      alert_ids: "${{ steps.classify_alerts.output.verdicts | map: 'alert_id' }}"
+      fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+      space_id: "{{ workflow.spaceId }}"
+
+  # ---------------------------------------------------------------------------
+  # 7b. Group the confident false positives into proposals.
+  #
+  #     The alerts of one pattern (the wide pattern key) join the open proposal of that
+  #     pattern, or start one. Several patterns in a batch give several new proposals, and
+  #     alerts that match nothing are pooled into one. Each new proposal gets its own
+  #     Investigation, so the first decided review cannot close another proposal's. At
+  #     supervised autonomy, or with the `alertzero.triageGrouping` flag off, the step plans one
+  #     proposal for the batch, as before grouping existed.
+  #
+  #     Conversations and tags come before the notes, so each note can link to the
+  #     Investigation its alert ended up in. The reviews start after the notes.
+  # ---------------------------------------------------------------------------
+  - name: init_grouping
+    type: data.set
+    with:
+      no_items: []
+      group_mints: []
+      group_joins: []
+      mint_conversation_ids: []
+      no_conversation_ids: [""]
+      home_conversation_id: ""
+      batch_conversation_created: false
+      failed_review_count: 0
+      started_alert_count: 0
+
+  # The alerts that are in no proposal (true positives, inconclusive verdicts, false positives below the
+  # floor), routed to an Investigation after the grouping. The filter is a pre-rendered predicate, as
+  # above: a quoted `variables.fp_candidate_ids contains ...` inside `reject_exp` rejected nothing
+  # in the engine, so every alert counted as being in no proposal.
+  - name: compute_other_alerts
+    type: data.set
+    with:
+      other_alert_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | reject_exp: 'v', variables.fp_candidate_expr
+            | map: 'alert_id' }}
+
+  - name: count_other_alerts
+    type: data.set
+    with:
+      other_alert_count: "${{ variables.other_alert_ids | size }}"
+
+  # A failure here re-tags the candidates and fails the run (the fallback re-throws): no proposal
+  # exists for them, and they must not stay `az:false_positive`.
+  - name: group_fp_candidates_call
+    type: alertzero.triage.groupFpCandidates
+    if: "${{ variables.verdict_count > 0 }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      fallback:
+        - name: retag_grouping_failed
+          type: foreach
+          foreach: "${{ variables.fp_candidate_ids | chunk: 500 | json }}"
+          steps:
+            - name: retag_grouping_failed_call
+              type: kibana.SetAlertTags
+              on-failure:
+                retry:
+                  max-attempts: 3
+                  delay: 5s
+                continue: true
+              with:
+                ids: "${{ foreach.item }}"
+                tags:
+                  tags_to_remove:
+                    - "az:false_positive"
+                  tags_to_add:
+                    - "az:inconclusive"
+        - name: create_grouping_failed_investigation
+          type: ai.conversation.create
+          with:
+            template_id: investigation
+            title: "Alert Triage — {{ inputs.rule_name }}"
+            access_control:
+              access_mode: public
+            metadata:
+              status: open
+              description: >-
+                Triage of {{ inputs.alert_ids.size }} alert{% if inputs.alert_ids.size != 1 %}s{% endif %} from rule
+                "{{ inputs.rule_name }}" ({{ inputs.rule_id }}) needs attention.
+              workflow_execution_ids: ["{{ execution.id }}"]
+        - name: post_comment_grouping_failed
+          type: ai.conversation.add_user_message
+          on-failure:
+            continue: true
+          with:
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ steps.create_grouping_failed_investigation.output.conversation_id }}"
+            message: >-
+              ⚠️ The false positives could not be grouped into proposals: {{ error.message }}.
+              {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} re-tagged az:inconclusive, because no proposal exists for them.
+    with:
+      fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+      autonomy: "{{ inputs.autonomy }}"
+      space_id: "{{ workflow.spaceId }}"
+      rule_name: "{{ inputs.rule_name }}"
+      confidence_floor: "${{ inputs.confidence_floor }}"
+      impacted_entities: "${{ steps.classify_alerts.output.impacted_entities }}"
+      other_alert_ids: "${{ variables.other_alert_ids }}"
+      inconclusive_alert_ids: >-
+        ${{ steps.classify_alerts.output.verdicts
+            | where: 'classification', 'inconclusive'
+            | map: 'alert_id' }}
+
+  - name: resolve_grouping
+    type: data.set
+    with:
+      group_mints: "${{ steps.group_fp_candidates_call.output.mints | default: variables.no_items }}"
+      group_joins: "${{ steps.group_fp_candidates_call.output.joins | default: variables.no_items }}"
+
+  - name: count_grouping
+    type: data.set
+    with:
+      mint_count: "${{ variables.group_mints | size }}"
+      join_count: "${{ variables.group_joins | size }}"
+
+  - name: count_proposals
+    type: data.set
+    with:
+      proposal_count: "${{ variables.mint_count | plus: variables.join_count }}"
+
+  # One Investigation per new proposal, seeded from the `investigation` template, with its alerts and
+  # impacted entities attached. The alerts get `az:proposal:<root id>`, so an analyst can find
+  # the proposal from an alert. The tag is not a verdict tag, so the sweep ignores it.
+  - name: process_mints
+    type: foreach
+    foreach: "${{ variables.group_mints | json }}"
+    steps:
+      # A failed create must not fail the run: every candidate already carries az:false_positive and
+      # its claim is gone, so aborting here would strand the mints that have no review yet. The
+      # mint keeps its place in `mint_conversation_ids` as an empty id, and `start_reviews` re-tags
+      # its alerts instead of starting a review that has no Investigation.
+      - name: create_proposal_investigation
+        type: ai.conversation.create
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          template_id: investigation
+          title: "Alert Triage — {{ inputs.rule_name }}"
+          access_control:
+            access_mode: public
+          metadata:
+            status: open
+            description: >-
+              Closure proposal for {{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %} from rule
+              "{{ inputs.rule_name }}" ({{ inputs.rule_id }}).
+            workflow_execution_ids: ["{{ execution.id }}"]
+
+      - name: wrap_mint_conversation_id
+        type: data.set
+        if: "${{ steps.create_proposal_investigation.error == blank }}"
+        with:
+          new_conversation_ids: "${{ steps.create_proposal_investigation.output.conversation_id | split: ',' }}"
+
+      - name: record_mint_conversation
+        type: data.set
+        if: "${{ steps.create_proposal_investigation.error == blank }}"
+        with:
+          mint_conversation_ids: "${{ variables.mint_conversation_ids | concat: variables.new_conversation_ids }}"
+
+      - name: record_mint_without_conversation
+        type: data.set
+        if: "${{ steps.create_proposal_investigation.error != blank }}"
+        with:
+          mint_conversation_ids: "${{ variables.mint_conversation_ids | concat: variables.no_conversation_ids }}"
+
+      # Everything below needs the Investigation. Without it the mint has nothing to attach to, and
+      # its alerts are re-tagged in `start_reviews` instead.
+      - name: fill_mint_investigation
+        type: if
+        condition: "${{ steps.create_proposal_investigation.error == blank }}"
+        steps:
+          - name: init_mint_attach_tracking
+            type: data.set
+            with:
+              failed_attach_chunk_count: 0
+              total_attach_chunk_count: "${{ steps.process_mints.item.alert_ids | chunk: 20 | size }}"
+
+          - name: attach_mint_alerts
+            type: foreach
+            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 20 | json }}"
+            steps:
+              - name: attach_mint_alert_chunk
+                type: ai.attachment.add
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+                  type: security.alerts
+                  render_inline: false  # security.alerts has no inline renderer: inline it draws an empty block
+                  data:
+                    alertIds: "${{ foreach.item }}"
+                  description: "Alerts in this closure proposal"
+
+              - name: record_attach_mint_alert_chunk_failure
+                type: data.set
+                if: "${{ steps.attach_mint_alert_chunk.error != blank }}"
+                with:
+                  failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+
+          # First message of the Investigation. It describes only this proposal's alerts. The batch counts
+          # and the model summary cover other alerts too, which made the numbers disagree.
+          - name: post_comment_mint_analysis
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+              message: |-
+                Proposing to close **{{ steps.process_mints.item.alert_ids.size }} alert{% if steps.process_mints.item.alert_ids.size != 1 %}s{% endif %}** out of {{ variables.alert_count }} analyzed from rule **{{ inputs.rule_name }}** as false positives.
+
+                Verdicts across the batch: {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
+
+                Every one was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}{% if steps.process_mints.item.kind == 'keyed' or steps.process_mints.item.kind == 'overflow' or steps.process_mints.item.kind == 'failed_join' %}, and they share one pattern{% else %}. They do not necessarily share a pattern{% endif %}.
+                {%- assign shown = 0 -%}
+                {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_mints.item.alert_ids contains v.alert_id %}
+
+                **Why:** {{ v.rationale }}
+                {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
+
+                [View all alerts of this proposal](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_mints.item.proposal_alerts_page_query }})
+
+                {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
+
+                {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
+
+                [View execution]({{ execution.url }})
+
+          - name: attach_mint_impact_gate
+            type: if
+            condition: "${{ steps.process_mints.item.impacted_entities.size > 0 }}"
+            steps:
+              - name: attach_mint_impact
+                type: investigations.attachImpact
+                on-failure:
+                  continue: true
+                with:
+                  conversationId: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+                  entities: "${{ steps.process_mints.item.impacted_entities }}"
+
+          - name: tag_mint_alerts
+            type: foreach
+            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 500 | json }}"
+            steps:
+              - name: tag_mint_alert_chunk
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_add:
+                      - "az:proposal:{{ steps.process_mints.item.proposal_id }}"
+                    tags_to_remove: []
+
+  # Alerts added to an open proposal go into its Investigation, which already has its review.
+  - name: process_joins
+    type: foreach
+    foreach: "${{ variables.group_joins | json }}"
+    steps:
+      - name: init_joined_attach_tracking
+        type: data.set
+        with:
+          failed_attach_chunk_count: 0
+          total_attach_chunk_count: "${{ steps.process_joins.item.alert_ids | chunk: 20 | size }}"
+
+      - name: attach_joined_alerts
+        type: foreach
+        foreach: "${{ steps.process_joins.item.alert_ids | chunk: 20 | json }}"
+        steps:
+          - name: attach_joined_alert_chunk
+            type: ai.attachment.add
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              conversation_id: "{{ steps.process_joins.item.conversation_id }}"
+              type: security.alerts
+              render_inline: false
+              data:
+                alertIds: "${{ foreach.item }}"
+              description: "Alerts added to this closure proposal"
+
+          - name: record_attach_joined_alert_chunk_failure
+            type: data.set
+            if: "${{ steps.attach_joined_alert_chunk.error != blank }}"
+            with:
+              failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+
+      - name: attach_joined_impact_gate
+        type: if
+        condition: "${{ steps.process_joins.item.impacted_entities.size > 0 }}"
+        steps:
+          - name: attach_joined_impact
+            type: investigations.attachImpact
+            on-failure:
+              continue: true
+            with:
+              conversationId: "{{ steps.process_joins.item.conversation_id }}"
+              entities: "${{ steps.process_joins.item.impacted_entities }}"
+
+      - name: tag_joined_alerts
+        type: foreach
+        foreach: "${{ steps.process_joins.item.alert_ids | chunk: 500 | json }}"
+        steps:
+          - name: tag_joined_alert_chunk
+            type: kibana.SetAlertTags
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              ids: "${{ foreach.item }}"
+              tags:
+                tags_to_add:
+                  - "az:proposal:{{ steps.process_joins.item.owner_proposal_id }}"
+                tags_to_remove: []
+
+      - name: post_comment_joined_owner
+        type: ai.conversation.add_user_message
+        on-failure:
+          continue: true
+        with:
+          author_name: "{{ consts.author_name }}"
+          conversation_id: "{{ steps.process_joins.item.conversation_id }}"
+          message: |-
+            The proposal above now holds **{{ steps.process_joins.item.total_alerts }} alerts**: {{ steps.process_joins.item.alert_ids.size }} more from rule **{{ inputs.rule_name }}** joined it (revision {{ steps.process_joins.item.revision }}).
+
+            They share the pattern, and each was classified as a false positive with confidence of at least {{ inputs.confidence_floor }}.
+            {%- assign shown = 0 -%}
+            {%- for v in steps.classify_alerts.output.verdicts -%}{%- if shown < 1 and steps.process_joins.item.alert_ids contains v.alert_id %}
+
+            **Why:** {{ v.rationale }}
+            {%- assign shown = shown | plus: 1 -%}{%- endif -%}{%- endfor %}
+
+            [View the added alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
+
+            {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
+
+  # ---------------------------------------------------------------------------
+  # 7c. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives
+  #     below the floor) still need a durable record. When the batch made or joined exactly one
+  #     proposal, they go into its Investigation, so the batch has one. Otherwise (no proposal, or
+  #     several, so no single Investigation is the obvious home) they get an Investigation of their
+  #     own, closed straight away, as there is nothing to decide.
+  # ---------------------------------------------------------------------------
+  - name: route_other_alerts
+    type: if
+    condition: "${{ variables.other_alert_count > 0 }}"
+    steps:
+      - name: home_from_mint
+        type: if
+        condition: "${{ variables.proposal_count == 1 and variables.mint_count == 1 }}"
+        steps:
+          - name: set_home_from_mint
+            type: data.set
+            with:
+              home_conversation_id: "${{ variables.mint_conversation_ids | first }}"
+
+      - name: home_from_join
+        type: if
+        condition: "${{ variables.proposal_count == 1 and variables.join_count == 1 }}"
+        steps:
+          - name: set_home_from_join
+            type: data.set
+            with:
+              home_conversation_id: "${{ variables.group_joins | map: 'conversation_id' | first }}"
+
+      - name: create_batch_investigation_gate
+        type: if
+        condition: "${{ variables.home_conversation_id == '' }}"
+        steps:
+          # A failed create must not fail the run: the candidates are already tagged and their
+          # reviews start after this, so failing here would strand them without a proposal. The alerts
+          # then keep their verdict tags and notes, and the notes carry no Investigation link.
+          - name: create_batch_investigation
+            type: ai.conversation.create
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              template_id: investigation
+              title: "Alert Triage — {{ inputs.rule_name }}"
+              access_control:
+                access_mode: public
+              metadata:
+                status: open
+                description: >-
+                  Automated triage of {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %} from rule
+                  "{{ inputs.rule_name }}" ({{ inputs.rule_id }}).
+                workflow_execution_ids: ["{{ execution.id }}"]
+          - name: set_home_from_batch_investigation
+            type: data.set
+            if: "${{ steps.create_batch_investigation.error == blank }}"
+            with:
+              home_conversation_id: "{{ steps.create_batch_investigation.output.conversation_id }}"
+              batch_conversation_created: true
+
+      # Nothing to record when the batch Investigation could not be created.
+      - name: record_other_alerts
+        type: if
+        condition: "${{ variables.home_conversation_id != '' }}"
+        steps:
+          - name: init_other_attach_tracking
+            type: data.set
+            with:
+              failed_attach_chunk_count: 0
+              total_attach_chunk_count: "${{ variables.other_alert_ids | chunk: 20 | size }}"
+
+          - name: attach_other_alerts
+            type: foreach
+            foreach: "${{ variables.other_alert_ids | chunk: 20 | json }}"
+            steps:
+              - name: attach_other_alert_chunk
+                type: ai.attachment.add
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  conversation_id: "{{ variables.home_conversation_id }}"
+                  type: security.alerts
+                  render_inline: false
+                  data:
+                    alertIds: "${{ foreach.item }}"
+                  description: "Alerts analysed in this triage run that are not in a closure proposal"
+
+              - name: record_attach_other_alert_chunk_failure
+                type: data.set
+                if: "${{ steps.attach_other_alert_chunk.error != blank }}"
+                with:
+                  failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+
+          - name: count_other_entities
+            type: data.set
+            with:
+              other_entity_count: "${{ steps.group_fp_candidates_call.output.other_impacted_entities | default: variables.no_items | size }}"
+
+          - name: attach_other_impact_gate
+            type: if
+            condition: "${{ variables.other_entity_count > 0 }}"
+            steps:
+              - name: attach_other_impact
+                type: investigations.attachImpact
+                on-failure:
+                  continue: true
+                with:
+                  conversationId: "{{ variables.home_conversation_id }}"
+                  entities: "${{ steps.group_fp_candidates_call.output.other_impacted_entities }}"
+
+          - name: post_comment_other_alerts
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ variables.home_conversation_id }}"
+              message: |-
+                {% if variables.batch_conversation_created and variables.proposal_count == 0 %}Triage of rule **{{ inputs.rule_name }}** is complete. No closure proposal was needed.{% elsif variables.batch_conversation_created %}Triage of rule **{{ inputs.rule_name }}** is complete. The alerts in this Investigation are in none of the {{ variables.proposal_count }} closure proposals of this batch, each of which has its own Investigation.{% else %}This batch also held alerts that are in no closure proposal.{% endif %}
+
+                {{ variables.other_alert_count }} of the {{ variables.alert_count }} analyzed alert{% if variables.alert_count != 1 %}s{% endif %} {% if variables.other_alert_count == 1 %}is{% else %}are{% endif %} in no closure proposal: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive, {{ variables.other_alert_count | minus: steps.classify_alerts.output.true_positive_count | minus: steps.classify_alerts.output.inconclusive_count | at_least: 0 }} false positive below the {{ inputs.confidence_floor }} confidence floor.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
+
+                {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
+
+                [View execution]({{ execution.url }})
+
+          # Nothing is left to decide, so the Investigation of a batch without a proposal is closed.
+          # The patch errors when `agentBuilder:experimentalFeatures` is off, which must not fail the run.
+          - name: close_batch_investigation
+            type: ai.conversation.metadata.patch
+            if: "${{ variables.batch_conversation_created }}"
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ variables.home_conversation_id }}"
+              updates:
+                status: closed
+
+          - name: report_batch_investigation_closed
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_batch_investigation.error == blank and steps.close_batch_investigation.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ variables.home_conversation_id }}"
+              close_reason: other
+
+  # Telemetry: how well the keys group the batch, and what grouping did with it. After the alerts in no
+  # proposal are routed, because that can create the batch's only Investigation.
+  - name: report_batch_grouped
+    type: alertzero.reportWorkerOutcome
+    if: "${{ variables.verdict_count > 0 and steps.tag_pattern_keys.error == blank }}"
+    on-failure:
+      continue: true
+    with:
+      event: alert_triage_batch_grouped
+      alerts_with_strict_key: "${{ steps.tag_pattern_keys.output.alerts_with_strict_key }}"
+      strict_keys: "${{ steps.tag_pattern_keys.output.strict_keys }}"
+      strict_keys_single_alert: "${{ steps.tag_pattern_keys.output.strict_keys_single_alert }}"
+      wide_keys: "${{ steps.tag_pattern_keys.output.wide_keys }}"
+      wide_keys_single_alert: "${{ steps.tag_pattern_keys.output.wide_keys_single_alert }}"
+      fp_candidates_on_fallback: "${{ steps.tag_pattern_keys.output.fp_candidates_on_fallback }}"
+      grouping: "{% if variables.fp_candidate_count == 0 %}no_candidates{% else %}{{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}{% endif %}"
+      alerts_joined: "${{ steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
+      proposals_created: "${{ steps.group_fp_candidates_call.output.proposals_created | default: 0 }}"
+      alerts_pooled: "${{ steps.group_fp_candidates_call.output.alerts_pooled | default: 0 }}"
+      conversation_created: "${{ variables.mint_count > 0 or variables.failure_conversation_count > 0 or variables.batch_conversation_created }}"
+
+  # ---------------------------------------------------------------------------
+  # 8. Hand each new closure proposal to the review workflow.
+  #
+  #    The proposal waits for an analyst for up to 72 h at Manual autonomy, so the proposal lives
+  #    in `system-security-floor-alert-triage-review`, started with `workflow.executeAsync`,
+  #    one review per new proposal and in its own Investigation. This run finishes in minutes.
+  #    The review raises the proposal, applies the outcome (re-tag on dismissal) and closes its
+  #    Investigation. The review has no concurrency limit.
+  #
+  #    The dispatch status is read per review, because nothing else closes the Investigation of
+  #    a proposal whose review never ran. A review that could not be dispatched must not stop the
+  #    others: each is counted, and the run fails after every review was tried and the joins
+  #    were written.
+  #
+  #    Autonomy (`manual` gates, `supervised` auto-approves) is passed to the review, which owns
+  #    the mapping to `autoApprove`.
+  # ---------------------------------------------------------------------------
+  - name: start_reviews
+    type: foreach
+    foreach: "${{ variables.group_mints | json }}"
+    steps:
+      - name: resolve_mint_conversation
+        type: data.set
+        with:
+          mint_conversation_id: "{{ variables.mint_conversation_ids[steps.start_reviews.index] }}"
+
+      - name: start_fp_review
+        type: workflow.executeAsync
+        if: "${{ variables.mint_conversation_id != '' }}"
+        # Reached only when the review could not be started at all. A review that was started
+        # and then skipped or failed is handled from its reported status below.
+        # `continue: true` keeps the loop going, and `failed_review_count` fails the run at the end.
+        on-failure:
+          continue: true
+          fallback:
+            - name: retag_review_not_started
+              type: foreach
+              foreach: "${{ steps.start_reviews.item.alert_ids | chunk: 500 | json }}"
+              steps:
+                - name: retag_review_not_started_call
+                  type: kibana.SetAlertTags
+                  on-failure:
+                    retry:
+                      max-attempts: 3
+                      delay: 5s
+                    continue: true
+                  with:
+                    ids: "${{ foreach.item }}"
+                    tags:
+                      tags_to_remove:
+                        - "az:false_positive"
+                      tags_to_add:
+                        - "az:inconclusive"
+            - name: post_comment_review_not_started
+              type: ai.conversation.add_user_message
+              on-failure:
+                continue: true
+              with:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ variables.mint_conversation_ids[steps.start_reviews.index] }}"
+                message: >-
+                  ⚠️ The closure review could not be started: {{ error.message }}.
+                  {{ steps.start_reviews.item.alert_ids.size }} alert{% if steps.start_reviews.item.alert_ids.size != 1 %}s{% endif %} re-tagged az:inconclusive, because no proposal exists for them.
+        with:
+          workflow-id: system-security-floor-alert-triage-review
+          run-as-mode: inherit
+          inputs:
+            conversation_id: "{{ variables.mint_conversation_ids[steps.start_reviews.index] }}"
+            rule_id: "{{ inputs.rule_id }}"
+            rule_name: "{{ inputs.rule_name }}"
+            fp_candidate_ids: "${{ steps.start_reviews.item.alert_ids }}"
+            title: "{{ steps.start_reviews.item.title }}"
+            comment: "{{ steps.start_reviews.item.comment }}"
+            proposal_id: "{{ steps.start_reviews.item.proposal_id }}"
+            confidence_floor: "${{ inputs.confidence_floor }}"
+            autonomy: "{{ inputs.autonomy }}"
+
+      # `workflow.executeAsync` reports the child's status as it was when the engine returned
+      # the execution id, and the engine applies the concurrency policy and validates the inputs
+      # before that, so `skipped` and `failed` are already final here. No separate read of the
+      # execution is needed.
+      #
+      # One value per outcome so every branch below is a single comparison (if-conditions take
+      # no filters, and `and`/`or` have no precedence).
+      #   not_started → the dispatch itself failed, and its fallback already re-tagged
+      #   failed      → the review never ran to a decision (skipped, rejected inputs, cancelled, timed out)
+      #   started     → pending, running, parked or already finished
+      - name: resolve_review_dispatch
+        type: data.set
+        with:
+          review_dispatch: >-
+            {% if variables.mint_conversation_id == '' %}no_investigation{% elsif steps.start_fp_review.error %}not_started{% elsif steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+
+      # The Investigation could not be created, so there is no review to start and no proposal. The
+      # alerts leave az:false_positive like every other outcome without a proposal.
+      - name: handle_no_investigation
+        type: if
+        condition: "${{ variables.review_dispatch == 'no_investigation' }}"
+        steps:
+          - name: retag_no_investigation
+            type: foreach
+            foreach: "${{ steps.start_reviews.item.alert_ids | chunk: 500 | json }}"
+            steps:
+              - name: retag_no_investigation_call
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_remove:
+                      - "az:false_positive"
+                    tags_to_add:
+                      - "az:inconclusive"
+
+      - name: handle_review_started
+        type: if
+        condition: "${{ variables.review_dispatch == 'started' }}"
+        steps:
+          - name: count_started_alerts
+            type: data.set
+            with:
+              started_alert_count: "${{ variables.started_alert_count | plus: steps.start_reviews.item.alert_ids.size }}"
+
+          - name: post_comment_review_started
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ variables.mint_conversation_ids[steps.start_reviews.index] }}"
+              message: >-
+                Closure of {{ steps.start_reviews.item.alert_ids.size }} alert{% if steps.start_reviews.item.alert_ids.size != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor was handed to the closure review.
+                Autonomy level: {{ inputs.autonomy }}.
+                {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
+                The outcome is posted here and this Investigation is closed when it is decided.
+
+      - name: handle_review_failed
+        type: if
+        condition: "${{ variables.review_dispatch == 'failed' }}"
+        steps:
+          - name: retag_review_failed
+            type: foreach
+            foreach: "${{ steps.start_reviews.item.alert_ids | chunk: 500 | json }}"
+            steps:
+              - name: retag_review_failed_call
+                type: kibana.SetAlertTags
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: 5s
+                  continue: true
+                with:
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_remove:
+                      - "az:false_positive"
+                    tags_to_add:
+                      - "az:inconclusive"
+
+          - name: post_comment_review_failed
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              author_name: "{{ consts.author_name }}"
+              conversation_id: "{{ variables.mint_conversation_ids[steps.start_reviews.index] }}"
+              message: >-
+                ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
+                {% if inputs.autonomy == 'supervised' %}The {{ steps.start_reviews.item.alert_ids.size }} candidate alert{% if steps.start_reviews.item.alert_ids.size != 1 %}s{% endif %} {% if steps.start_reviews.item.alert_ids.size == 1 %}is{% else %}are{% endif %} re-tagged az:inconclusive (the model's false-positive judgement is kept as az:model_fp). At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if steps.start_reviews.item.alert_ids.size == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ steps.start_reviews.item.alert_ids.size }} alert{% if steps.start_reviews.item.alert_ids.size != 1 %}s{% endif %} {% if steps.start_reviews.item.alert_ids.size == 1 %}remains{% else %}remain{% endif %} open and re-tagged az:inconclusive (the model's false-positive judgement is kept as az:model_fp), since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
+
+      - name: count_failed_review
+        type: data.set
+        if: "${{ variables.review_dispatch != 'started' }}"
+        with:
+          failed_review_count: "${{ variables.failed_review_count | plus: 1 }}"
+
+  # ---------------------------------------------------------------------------
+  # 9. Write a verdict note to each alert referencing the Investigation (R4, R13).
   #    Always written — never gated on autonomy level. The only verdict note on the
   #    Worker path: the sub-workflow skips its own when calledByWorker is true.
   #
@@ -639,12 +1406,17 @@ steps:
   #    A parallel branch cannot carry `on-failure`, so a note that fails here is not retried in
   #    place. `settled` lets every note in the chunk run, the failed ones are collected, and
   #    they are retried serially afterwards with the same retry as before. A note that still
-  #    fails fails the run, as it always did.
+  #    fails is counted and fails the run at the end.
+  #
+  #    The notes come after the proposals are started. A run that dies here (a note that keeps
+  #    failing, or the run timeout) must not leave tagged alerts with no proposal: the notes need
+  #    only the Investigation ids, which exist by now.
   # ---------------------------------------------------------------------------
   - name: init_failed_verdict_notes
     type: data.set
     with:
       failed_note_verdicts: []
+      failed_note_count: 0
 
   - name: add_verdict_notes
     type: foreach
@@ -674,7 +1446,12 @@ steps:
                   eventId: "{{ foreach.item.alert_id }}"
                   timelineId: ''
                   note: |
-                    [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+                    {%- assign note_conversation = '' -%}
+                    {%- assign note_alert = foreach.item.alert_id -%}
+                    {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
+                    {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
+                    {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
+                    {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
 
                     **Verdict:** {{ foreach.item.classification }}
                     **Confidence:** {{ foreach.item.confidence_score }}
@@ -726,10 +1503,12 @@ steps:
     steps:
       - name: retry_verdict_note
         type: kibana.request
+        # `continue: true` keeps the loop going, and `failed_note_count` fails the run at the end.
         on-failure:
           retry:
             max-attempts: 3
             delay: 5s
+          continue: true
         with:
           method: PATCH
           path: "/s/{{ workflow.spaceId }}/api/note"
@@ -738,7 +1517,12 @@ steps:
               eventId: "{{ foreach.item.alert_id }}"
               timelineId: ''
               note: |
-                [Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }}) · [Workflow execution]({{ execution.url }})
+                {%- assign note_conversation = '' -%}
+                {%- assign note_alert = foreach.item.alert_id -%}
+                {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
+                {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
+                {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
+                {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
 
                 **Verdict:** {{ foreach.item.classification }}
                 **Confidence:** {{ foreach.item.confidence_score }}
@@ -754,170 +1538,79 @@ steps:
             kbn-xsrf: string
             Content-Type: application/json
 
-  # Tags are reported as submitted, not written: SetAlertTags returns the update-by-query body on
-  # HTTP 200, so a call whose `updated` is below the chunk size (ids matching no alert) passes
-  # unchecked. Notes are confirmed, since a failed note retries and then fails the run.
-  - name: post_comment_alert_updates
-    type: ai.conversation.add_user_message
+      - name: count_failed_verdict_note
+        type: data.set
+        if: "${{ steps.retry_verdict_note.error != blank }}"
+        with:
+          failed_note_count: "${{ variables.failed_note_count | plus: 1 }}"
+
+  # What this batch did, for the execution history. The Investigation holds the verdicts too, and the
+  # telemetry privacy rules do not apply here: it stays in the deployment.
+  - name: log_batch_summary
+    type: console
+    with:
+      message: |-
+        Alert Triage batch for rule "{{ inputs.rule_name }}" ({{ inputs.rule_id }}): {{ variables.alert_count }} alert{% if variables.alert_count != 1 %}s{% endif %}.
+        {%- if steps.classify_alerts.output.connector_id != '' %}
+        Model: connector `{{ steps.classify_alerts.output.connector_id }}`{% if steps.classify_alerts.output.agent_id != '' %}, agent `{{ steps.classify_alerts.output.agent_id }}`{% endif %}.
+        {%- endif %}
+        Verdicts: {{ steps.classify_alerts.output.true_positive_count | default: 0 }} true positive, {{ variables.fp_candidate_count }} false positive at or above the floor, {{ steps.classify_alerts.output.false_positive_count | default: 0 | minus: variables.fp_candidate_count | at_least: 0 }} false positive below the floor, {{ steps.classify_alerts.output.inconclusive_count | default: 0 }} inconclusive, {{ variables.alert_count | minus: variables.verdict_count | at_least: 0 }} without a verdict.
+        Grouping: {{ steps.group_fp_candidates_call.output.grouping | default: 'no_candidates' }}.
+        {%- if variables.group_mints.size == 0 and variables.group_joins.size == 0 %}
+        No proposal created and no proposal joined.
+        {%- endif %}
+        {%- for mint in variables.group_mints %}
+        Created proposal {{ mint.proposal_id }} ({{ mint.kind }}) for {{ mint.alert_ids.size }} alert{% if mint.alert_ids.size != 1 %}s{% endif %}.
+        {%- endfor %}
+        {%- for join in variables.group_joins %}
+        Joined proposal {{ join.owner_proposal_id }} (revision {{ join.revision }}) with {{ join.alert_ids.size }} alert{% if join.alert_ids.size != 1 %}s{% endif %}.
+        {%- endfor %}
+
+  # Fails the run when a review could not be dispatched, so it shows up in execution history, like
+  # a dispatch that could not be started always did. After every proposal had its turn and before the
+  # run report, as before: a failed run reports nothing.
+  - name: abort_review_failed
+    type: workflow.fail
+    if: "${{ variables.failed_review_count > 0 }}"
+    with:
+      message: >-
+        {{ variables.failed_review_count }} Alert Triage closure review{% if variables.failed_review_count != 1 %}s{% endif %} could not be started or ended
+        before reaching a decision. The alerts were classified, tagged and noted.
+
+  - name: abort_note_failed
+    type: workflow.fail
+    if: "${{ variables.failed_note_count > 0 }}"
+    with:
+      message: >-
+        {{ variables.failed_note_count }} verdict note{% if variables.failed_note_count != 1 %}s{% endif %} could not be written after retries.
+        The alerts were classified, tagged and handed to a closure proposal where one applies.
+
+  # Telemetry: the run's outcome, last so it sees whether the closure review started.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
     on-failure:
       continue: true
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-      message: >-
-        Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
-
-  # ---------------------------------------------------------------------------
-  # 9. Hand the closure proposal to the review workflow (if any FP candidates).
-  #
-  #    The proposal waits for an analyst for up to 72 h at Manual autonomy, and a noisy rule
-  #    produces one every run. Waiting here would park this run, the proposal bridge and the gate
-  #    per batch, so the proposal lives in `system-security-floor-alert-triage-review`, started
-  #    with `workflow.executeAsync`. This run finishes in minutes. The review raises the
-  #    proposal, applies the outcome (re-tag on dismissal) and closes the Investigation.
-  #
-  #    The review has no concurrency limit, so every batch with confident false positives raises
-  #    its proposal. The dispatch status is still read below, because nothing else closes the
-  #    Investigation of a batch whose review never ran.
-  #
-  #    Autonomy (`manual` gates, `supervised` auto-approves) is passed to the review, which owns
-  #    the mapping to `autoApprove`.
-  # ---------------------------------------------------------------------------
-  - name: gate_fp_close
-    type: if
-    condition: "${{ variables.fp_candidate_count > 0 }}"
-    steps:
-      - name: start_fp_review
-        type: workflow.executeAsync
-        # Reached only when the review could not be started at all. A review that was started
-        # and then skipped or failed is handled from its reported status below. The fallback
-        # re-throws afterwards, so the run fails and shows up in execution history.
-        on-failure:
-          fallback:
-            - name: post_comment_review_not_started
-              type: ai.conversation.add_user_message
-              on-failure:
-                continue: true
-              with:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                message: >-
-                  ⚠️ The closure review could not be started: {{ error.message }}.
-                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
-        with:
-          workflow-id: system-security-floor-alert-triage-review
-          run-as-mode: inherit
-          inputs:
-            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-            rule_id: "{{ inputs.rule_id }}"
-            rule_name: "{{ inputs.rule_name }}"
-            fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
-            entity_summary: "{{ variables.fp_entity_summary }}"
-            confidence_floor: "${{ inputs.confidence_floor }}"
-            autonomy: "{{ inputs.autonomy }}"
-
-      # `workflow.executeAsync` reports the child's status as it was when the engine returned
-      # the execution id, and the engine applies the concurrency policy and validates the inputs
-      # before that, so `skipped` and `failed` are already final here. No separate read of the
-      # execution is needed.
-      #
-      # One value per outcome so every branch below is a single comparison (if-conditions take
-      # no filters, and `and`/`or` have no precedence).
-      #   failed  → the review never ran to a decision (skipped, rejected inputs, cancelled, timed out)
-      #   started → pending, running, parked or already finished
-      - name: resolve_review_dispatch
-        type: data.set
-        with:
-          review_dispatch: >-
-            {% if steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
-
-      - name: handle_review_started
-        type: if
-        condition: "${{ variables.review_dispatch == 'started' }}"
-        steps:
-          - name: post_comment_review_started
-            type: ai.conversation.add_user_message
-            on-failure:
-              continue: true
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              message: >-
-                Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor was handed to the closure review.
-                Autonomy level: {{ inputs.autonomy }}.
-                {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
-                The outcome is posted here and this Investigation is closed when it is decided.
-
-      - name: handle_review_failed
-        type: if
-        condition: "${{ variables.review_dispatch == 'failed' }}"
-        steps:
-          - name: post_comment_review_failed
-            type: ai.conversation.add_user_message
-            on-failure:
-              continue: true
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              message: >-
-                ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
-                {% if inputs.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive, since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
-
-          # Fails the run so a review that never ran shows up in execution history, like a
-          # dispatch that could not be started does.
-          - name: abort_review_failed
-            type: workflow.fail
-            with:
-              message: >-
-                The Alert Triage closure review ended as {{ steps.start_fp_review.output.status }}
-                before it reached a decision. The alerts were classified, tagged and noted.
-
-  # ---------------------------------------------------------------------------
-  # 10. No-FP branch: close the Investigation immediately.
-  #
-  #     This branch MUST be explicit. A batch that classifies nothing as a
-  #     false positive still needs a closed Investigation — it is the branch
-  #     that gets forgotten in tests and in code review.
-  #
-  #     Nested rather than `and`-combined (see compute_classification_guard_counts):
-  #     fp_candidate_count is also 0 for a zero-verdict batch (missing connector,
-  #     skipped sub-workflow), and that case already posted a warning via
-  #     guard_classification_nonempty_inner above. Requiring verdict_count > 0 here
-  #     stops that batch from ALSO closing the Investigation and posting "Triage
-  #     complete" as if a real zero-FP analysis had run; it stays open instead.
-  # ---------------------------------------------------------------------------
-  - name: close_investigation_no_fp
-    type: if
-    condition: "${{ variables.fp_candidate_count == 0 }}"
-    steps:
-      - name: close_investigation_no_fp_when_analyzed
-        type: if
-        condition: "${{ variables.verdict_count > 0 }}"
-        steps:
-          # This is the most common branch (no FP candidates), so an unhandled patch failure
-          # here would fail most triage runs. `ai.conversation.metadata.patch` errors when
-          # `agentBuilder:experimentalFeatures` is off; `continue: true` is required alongside
-          # `fallback` — fallback alone still re-throws the original error afterwards (see
-          # on_failure/README.md) and would skip post_comment_outcome_no_fp below.
-          - name: close_no_fp
-            type: ai.conversation.metadata.patch
-            on-failure:
-              continue: true
-              fallback:
-                - name: log_no_fp_close_failed
-                  type: console
-                  with:
-                    message: >-
-                      Triage completed with no false-positive candidates, but the Investigation
-                      could not be marked closed: {{ error.message }}. Investigation
-                      {{ steps.create_investigation.output.conversation_id }} stays open.
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              updates:
-                status: closed
-
-          - name: post_comment_outcome_no_fp
-            type: ai.conversation.add_user_message
-            on-failure:
-              continue: true
-            with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              message: >-
-                Triage complete. No false positive alerts met the {{ inputs.confidence_floor }} confidence floor; no proposal created.
-                {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+      event: worker_run_completed
+      candidates_found: "${{ variables.alert_count | default: 0 }}"
+      items_dispatched: "${{ variables.verdict_count | default: 0 }}"
+      items_failed: "${{ variables.alert_count | default: 0 | minus: variables.verdict_count | at_least: 0 }}"
+      items_in_flight: "{{ variables.started_alert_count | default: 0 | plus: steps.group_fp_candidates_call.output.alerts_joined | default: 0 }}"
+      degraded_reason: |-
+        {%- if variables.alert_count > 0 and variables.verdict_count == 0 -%}
+        dependency_unavailable
+        {%- elsif variables.verdict_count < variables.alert_count -%}
+        missing_data
+        {%- else -%}
+        none
+        {%- endif -%}
+      run_outcome: |-
+        {%- if variables.alert_count == 0 -%}
+        empty_nothing_pending
+        {%- elsif variables.verdict_count == 0 -%}
+        failed_all_items
+        {%- elsif variables.verdict_count < variables.alert_count -%}
+        degraded_partial
+        {%- else -%}
+        produced
+        {%- endif -%}

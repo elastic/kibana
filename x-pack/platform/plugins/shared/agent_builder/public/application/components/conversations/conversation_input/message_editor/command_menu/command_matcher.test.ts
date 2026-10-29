@@ -14,14 +14,14 @@ const allCommands = sortedCommandDefinitions;
 describe('matchCommand', () => {
   describe('multiple command sequences', () => {
     it('matches the command sequence closest to the cursor', () => {
-      const result = matchCommand('@foo /bar', allCommands);
+      const result = matchCommand('#foo /bar', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
       expect(result.activeCommand?.query).toBe('bar');
     });
 
     it('matches earlier sequence when it is closest to cursor', () => {
-      const result = matchCommand('/foo @bar', allCommands);
+      const result = matchCommand('/foo #bar', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
       expect(result.activeCommand?.query).toBe('bar');
@@ -67,28 +67,28 @@ describe('matchCommand', () => {
       expect(result.activeCommand?.query).toBe('summarize text');
     });
 
-    it('matches "@" at start of input', () => {
-      const result = matchCommand('@', allCommands);
+    it('matches "#" at start of input', () => {
+      const result = matchCommand('#', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
       expect(result.activeCommand?.query).toBe('');
       expect(result.activeCommand?.commandStartOffset).toBe(0);
     });
 
-    it('matches "@" after whitespace', () => {
-      const result = matchCommand('hello @', allCommands);
+    it('matches "#" after whitespace', () => {
+      const result = matchCommand('hello #', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
       expect(result.activeCommand?.query).toBe('');
     });
 
-    it('does not match "@" mid-word', () => {
-      const result = matchCommand('user@host', allCommands);
+    it('does not match "#" mid-word', () => {
+      const result = matchCommand('user#host', allCommands);
       expect(result.isActive).toBe(false);
     });
 
-    it('captures query text after @ command', () => {
-      const result = matchCommand('@pac', allCommands);
+    it('captures query text after # command', () => {
+      const result = matchCommand('#pac', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.query).toBe('pac');
     });
@@ -109,25 +109,25 @@ describe('matchCommand', () => {
   });
 
   describe('no stickiness — always the closest word-boundary trigger, no memory of prior state', () => {
-    it('picks "/" over an earlier "@" once "/" is closer, with no memory of "@" having been active', () => {
-      const result = matchCommand('@foo /bar', allCommands);
+    it('picks "/" over an earlier "#" once "/" is closer, with no memory of "#" having been active', () => {
+      const result = matchCommand('#foo /bar', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Skill);
       expect(result.activeCommand?.query).toBe('bar');
     });
 
-    it('picks "@" over an earlier "/" once "@" is closer', () => {
-      const result = matchCommand('/foo @bar', allCommands);
+    it('picks "#" over an earlier "/" once "#" is closer', () => {
+      const result = matchCommand('/foo #bar', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
       expect(result.activeCommand?.query).toBe('bar');
     });
 
-    it('never mistakes the "/" inside an "@type/name" mention for a new trigger', () => {
+    it('never mistakes the "/" inside an "#type/name" mention for a new trigger', () => {
       // "/" here isn't at a word boundary (preceded by "connector", not
       // whitespace), so it's excluded as a candidate outright — no
       // stickiness bookkeeping needed to protect this case.
-      const result = matchCommand('@connector/workday', allCommands);
+      const result = matchCommand('#connector/workday', allCommands);
       expect(result.isActive).toBe(true);
       expect(result.activeCommand?.command.id).toBe(CommandId.Sml);
       expect(result.activeCommand?.query).toBe('connector/workday');

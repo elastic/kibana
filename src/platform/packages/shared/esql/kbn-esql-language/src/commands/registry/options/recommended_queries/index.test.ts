@@ -48,7 +48,7 @@ describe('getRecommendedQueriesTemplates', () => {
       const queries = queryStrings({ timeField: '@timestamp' });
 
       expect(queries.some((query) => query.includes('SORT @timestamp'))).toBe(true);
-      expect(queries.some((query) => query.includes('TBUCKET(100)'))).toBe(true);
+      expect(queries.some((query) => query.includes('TBUCKET(50)'))).toBe(true);
       expect(queries.some((query) => query.includes('`@timestamp`'))).toBe(false);
     });
 
@@ -56,7 +56,7 @@ describe('getRecommendedQueriesTemplates', () => {
       const queries = queryStrings({ timeField: 'event-time' });
 
       expect(queries.some((query) => query.includes('SORT `event-time`'))).toBe(true);
-      expect(queries.some((query) => /BUCKET\(\s*`event-time`, 100/.test(query))).toBe(true);
+      expect(queries.some((query) => /BUCKET\(\s*`event-time`, 50/.test(query))).toBe(true);
       expect(queries.filter((query) => /(?<!`)event-time(?!`)/.test(query))).toEqual([]);
     });
 

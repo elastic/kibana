@@ -114,7 +114,7 @@ describe('useAttackCaseAttachments', () => {
       expect.objectContaining({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: ['alert-1', 'alert-2'],
-        metadata: { index: ALERTS_INDEX },
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-1'] },
       }),
     ]);
   });
@@ -188,7 +188,7 @@ describe('useAttackCaseAttachments', () => {
         expect.objectContaining({
           type: SECURITY_ALERT_ATTACHMENT_TYPE,
           attachmentId: ['alert-1', 'alert-2'],
-          metadata: { index: ALERTS_INDEX },
+          metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-1'] },
         }),
         expect.objectContaining({
           type: SECURITY_ATTACK_ATTACHMENT_TYPE,
@@ -197,7 +197,7 @@ describe('useAttackCaseAttachments', () => {
         expect.objectContaining({
           type: SECURITY_ALERT_ATTACHMENT_TYPE,
           attachmentId: ['alert-3'],
-          metadata: { index: ALERTS_INDEX },
+          metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-2'] },
         }),
       ]);
     });

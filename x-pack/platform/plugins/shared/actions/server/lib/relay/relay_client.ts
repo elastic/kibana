@@ -51,6 +51,7 @@ const RELAY_MAX_PAGE_LIMIT = 200;
 
 interface RelayErrorResponse {
   message?: string;
+  reason?: string;
 }
 
 /** Raw shape of the cursor-paginated bindings list response body. */
@@ -281,8 +282,14 @@ export class RelayClient implements RelayClientContract {
       return response;
     }
 
-    const relayMessage = (response.data as RelayErrorResponse | undefined)?.message;
-    throw new RelayRequestError(path, response.status, relayMessage);
+    const { message: relayMessage, reason } =
+      (response.data as RelayErrorResponse | undefined) ?? {};
+    throw new RelayRequestError(
+      path,
+      response.status,
+      relayMessage,
+      typeof reason === 'string' ? reason : undefined
+    );
   }
 
   /**

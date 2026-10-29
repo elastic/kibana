@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { configureMigrations } from './migrations';
 
 /**
@@ -76,6 +76,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
         type: 'keyword',
         ignore_above: 1024,
       },
+      extractObservables: {
+        type: 'boolean',
+      },
       /*
       updated_at: {
         type: 'date',
@@ -121,6 +124,39 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: (attrs) => attrs,
         create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
+    '3': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            // Allows aggregating the space-level extractObservables default in telemetry.
+            extractObservables: { type: 'boolean' },
+          },
+        },
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => {
+            if (doc.attributes.extractObservables !== undefined) {
+              return { attributes: {} };
+            }
+            // Follow the owner default (on only for securitySolution), as the read path does.
+            return {
+              attributes: { extractObservables: doc.attributes.owner === SECURITY_SOLUTION_OWNER },
+            };
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { extractObservables: schema.maybe(schema.boolean()) },
+          { unknowns: 'allow' }
+        ),
+        create: schema.object(
+          { extractObservables: schema.maybe(schema.boolean()) },
+          { unknowns: 'allow' }
+        ),
       },
     },
   },

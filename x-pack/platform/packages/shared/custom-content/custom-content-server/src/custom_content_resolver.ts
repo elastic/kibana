@@ -110,7 +110,7 @@ const describeSamplingFailure = (error: unknown): string => {
       : undefined;
 
   if (type === 'verification_exception' || type === 'parsing_exception') {
-    return `ES|QL query is invalid: ${reason}. Build the query with the generate_esql tool instead of writing it directly, then retry.`;
+    return `ES|QL query is invalid: ${reason}. If you supplied the query, correct it or ask the user for a valid one; if it was generated, retry with a more specific description or an exact index.`;
   }
   if (type === 'security_exception') {
     return `No access to the index targeted by this ES|QL query: ${reason}. Use an index the current user can read.`;

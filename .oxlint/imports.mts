@@ -141,6 +141,18 @@ const importsRules: DummyRuleMap = {
       },
     ],
   ],
+  '@kbn/imports/restricted_redux_imports': [
+    'warn',
+    {
+      paths: ['redux', 'redux-v4'].map((name) => ({
+        name,
+        importNames: ['createStore', 'legacy_createStore'],
+        message: 'Prefer configureStore from the matching Redux Toolkit package.',
+      })),
+    },
+  ],
+  '@kbn/imports/no_redux_toolkit_middleware_spread': 'warn',
+  '@kbn/imports/no_redux_toolkit_state_reassignment': 'warn',
   '@kbn/imports/no_unresolvable_imports': 'error',
   '@kbn/imports/uniform_imports': 'error',
   '@kbn/imports/no_unused_imports': 'error',
@@ -182,7 +194,6 @@ const REDUX_TOOLKIT_V1_DIRS = [
   'x-pack/platform/plugins/shared/content_connectors',
   'x-pack/platform/plugins/shared/fleet',
   'x-pack/platform/plugins/shared/index_management',
-  'x-pack/platform/plugins/shared/lens',
   'x-pack/platform/plugins/shared/license_management',
   'x-pack/platform/plugins/shared/maps',
   'x-pack/platform/plugins/shared/osquery',
