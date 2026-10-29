@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { countsForTree, parseMermaidDecisionTree } from '@kbn/nightshift-decision-trees';
+import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeStore, DecisionTreeDetail } from '../../decision_trees/store';
 import { DecisionTreeVersionWriteError } from '../../decision_trees/store';
 import { createSubmitOptimizerResultTool } from './submit_optimizer_result_tool';
@@ -864,8 +865,8 @@ describe('nightshift_submit_optimizer_result counts', () => {
   it('keeps learnings for a tree that this submit does not edit or traverse', async () => {
     const otherTreeId = 'symptom:checkout-errors';
     const store = createStore(stored(FULL_TREE));
-    const learning = {
-      kind: 'system' as const,
+    const learning: LearningRecord = {
+      kind: 'system',
       tree_id: otherTreeId,
       category: 'architecture',
       content: 'Errors come from the gateway.',
