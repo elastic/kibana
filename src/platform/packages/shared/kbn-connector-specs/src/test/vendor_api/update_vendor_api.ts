@@ -18,7 +18,7 @@ import {
 } from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import { bundleSpec } from './bundle_spec';
-import { isJsonObject } from './json_pointer';
+import { forEachRef, isJsonObject } from './json_pointer';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
 import type {
@@ -28,7 +28,7 @@ import type {
   UnmatchedRequest,
   VendorApiManifest,
 } from './manifest';
-import { parseManifest, serializeManifest } from './manifest';
+import { matchesPathTemplate, parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
@@ -109,6 +109,14 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `${finding.action}: no generated input passes the action's schema; add an input to ${FIXTURES}`;
     case 'handler-error':
       return `${finding.action}: the handler threw: ${finding.message}`;
+    case 'no-auth-type':
+      return `${
+        finding.action
+      }: threw before sending a request under every auth type: ${Object.entries(finding.errors)
+        .map(([authType, message]) => `${authType}: ${message}`)
+        .join('; ')}`;
+    case 'auth-type-error':
+      return `auth type ${finding.authType} can't be used against the contract mock, so no action was recorded with it: ${finding.message}`;
     case 'request-violation':
       return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
@@ -125,6 +133,8 @@ const describeFinding = (finding: RecordingFinding): string => {
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
+  kind === 'no-auth-type' ||
+  kind === 'auth-type-error' ||
   kind === 'request-violation' ||
   kind === 'read-scope' ||
   kind === 'unused-query' ||
@@ -264,10 +274,12 @@ export const updateVendorApi = async ({
   for (const [action, requests] of Object.entries(recording.unmatched)) {
     for (const { method, path: requestPath } of requests) {
       const acknowledged = previous?.unmatched?.[action]?.find(
-        (entry) => entry.method === method && entry.path === requestPath
+        (entry) => entry.method === method && matchesPathTemplate(entry.path, requestPath)
       );
       if (acknowledged) {
-        unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        if (!unmatched[action]?.includes(acknowledged)) {
+          unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        }
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
         problems.add(
@@ -277,6 +289,9 @@ export const updateVendorApi = async ({
     }
   }
 
+  // Offline runs apply the overlay to the snapshots, so they keep what its updates reference.
+  const overlayRefs: string[] = [];
+  overlay?.actions.forEach(({ update }) => forEachRef(update, (ref) => overlayRefs.push(ref)));
   const files: Record<string, string> = {};
   const sources: Record<string, ManifestSource> = {};
   for (const [name, document] of Object.entries(raw)) {
@@ -284,15 +299,17 @@ export const updateVendorApi = async ({
       .flat()
       .filter(({ source }) => source === name);
     const file = snapshotFile(name);
-    files[file] = toStableJson(projectSpec(document, used));
+    files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
     const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
     const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
+    const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],
       url: urls[name],
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
+      ...(note === undefined ? {} : { note }),
     };
   }
   files[MANIFEST] = serializeManifest({

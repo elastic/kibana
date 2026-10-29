@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { generateKeyPairSync } from 'crypto';
+import { Readable } from 'stream';
 import axios from 'axios';
 import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
 import { createEmulatorFetch } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { authTypeSpecs } from '../../server';
 import type {
   ActionContext,
@@ -51,10 +53,53 @@ const findAuthType = (id: string): NormalizedAuthType => {
   return authType as NormalizedAuthType;
 };
 
+let privateKey: string | undefined;
+
+// A key auth types can sign with, generated once, as the mock accepts any signature.
+const samplePrivateKey = (): string => {
+  privateKey ??= generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+  }).privateKey;
+  return privateKey;
+};
+
+const FORM_BOUNDARY = 'contract-mock-boundary';
+
+// The http adapter sends FormData as multipart; axios' fetch adapter would label it
+// form-urlencoded, and the jsdom fetch polyfill can't read it back.
+const toMultipart = async (form: FormData): Promise<Buffer> => {
+  const parts: Buffer[] = [];
+  for (const [name, value] of form) {
+    const header =
+      typeof value === 'string'
+        ? `Content-Disposition: form-data; name="${name}"`
+        : `Content-Disposition: form-data; name="${name}"; filename="${value.name}"\r\n` +
+          `Content-Type: ${value.type || 'application/octet-stream'}`;
+    const content =
+      typeof value === 'string' ? Buffer.from(value) : Buffer.from(await value.arrayBuffer());
+    parts.push(
+      Buffer.from(`--${FORM_BOUNDARY}\r\n${header}\r\n\r\n`),
+      content,
+      Buffer.from('\r\n')
+    );
+  }
+  parts.push(Buffer.from(`--${FORM_BOUNDARY}--\r\n`));
+  return Buffer.concat(parts);
+};
+
+// Secrets whose schema takes any string, but that auth types decode.
+const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
+  accountKey: () => Buffer.from('contract-mock-accountKey').toString('base64'),
+};
+
 const placeholdersFor = (key: string): readonly string[] => [
+  ...(key in DECODED_PLACEHOLDERS ? [DECODED_PLACEHOLDERS[key]()] : []),
   `contract-mock-${key}`,
   'https://contract-mock.invalid/',
   'contract-mock@example.com',
+  samplePrivateKey(),
 ];
 
 const toSecrets = (
@@ -71,7 +116,10 @@ const toSecrets = (
       secrets[key] = fallback.data;
       continue;
     }
-    const placeholder = placeholdersFor(key).find((value) => field.safeParse(value).success);
+    const options = field instanceof z.ZodEnum ? field.options : [];
+    const placeholder = [...options, ...placeholdersFor(key)].find(
+      (value) => field.safeParse(value).success
+    );
     if (placeholder !== undefined) {
       secrets[key] = placeholder;
     }
@@ -92,12 +140,12 @@ const silentLogger: Logger = {
   get: () => silentLogger,
 };
 
-const authContext: AuthContext = {
+const createAuthContext = (): AuthContext => ({
   getCustomHostSettings: () => undefined,
   getToken: async () => ACCESS_TOKEN,
   logger: silentLogger,
   sslSettings: {},
-};
+});
 
 /**
  * Builds an action context whose client is answered in-process by the contract mock: a real
@@ -125,15 +173,35 @@ export const createContractContext = async ({
   const { id, schema } = getSchemaForAuthType(definition);
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
+  const streamed = new WeakSet<object>();
   const client = axios.create({ adapter: 'fetch', env: { fetch: mock.fetch } });
+  // Registered first, so it runs after the interceptors that connectors add.
+  client.interceptors.request.use(async (requestConfig) => {
+    if (requestConfig.data instanceof FormData) {
+      requestConfig.data = await toMultipart(requestConfig.data);
+      requestConfig.headers.setContentType(`multipart/form-data; boundary=${FORM_BOUNDARY}`);
+    }
+    // The http adapter answers `responseType: 'stream'` with a Node stream, as the MCP client's
+    // fetch expects of Kibana's axios instances; the fetch adapter refuses it.
+    if (requestConfig.responseType === 'stream') {
+      requestConfig.responseType = 'arraybuffer';
+      streamed.add(requestConfig);
+    }
+    return requestConfig;
+  });
+  client.interceptors.response.use((response) =>
+    streamed.has(response.config)
+      ? { ...response, data: Readable.from([Buffer.from(response.data)]) }
+      : response
+  );
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
-  await findAuthType(id).configure(authContext, client, authSecrets);
+  await findAuthType(id).configure(createAuthContext(), client, authSecrets);
 
   const ctx: ActionContext = {
     client,
-    config: { ...config },
+    config: connector.schema ? await connector.schema.parseAsync(config) : { ...config },
     secrets: authSecrets,
     log: silentLogger,
     getClient: async (clientType) => {
@@ -146,7 +214,8 @@ export const createContractContext = async ({
     if (!action) {
       throw new Error(`${connector.metadata.id} has no action ${name}`);
     }
-    return action.handler(ctx, await action.input.parseAsync(input));
+    const parsed = await action.input.parseAsync(input);
+    return action.handler(ctx, parsed);
   };
 
   return { ctx, mock, runAction };
