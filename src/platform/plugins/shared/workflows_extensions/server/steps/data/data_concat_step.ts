@@ -8,7 +8,7 @@
  */
 
 import { stableStringify } from '@kbn/std';
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { dataConcatStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -59,7 +59,6 @@ async function concatSinglePass(
   const seen = dedupe ? new Set<string>() : null;
   const result: unknown[] = [];
   let totalCount = 0;
-  const yieldToEventLoop = createEventLoopYielder();
 
   for (let i = 0; i < rawArrays.length; i++) {
     const resolved = resolveToArray(renderFn(rawArrays[i]), i);

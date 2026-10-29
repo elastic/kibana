@@ -9,7 +9,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFindStepCommonDefinition } from '../../../common/steps/data';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -25,7 +25,6 @@ async function searchForMatch(
   kqlAst: KueryNode,
   context: FindStepContext
 ): Promise<{ item: unknown; index: number | null; aborted?: boolean }> {
-  const yieldToEventLoop = createEventLoopYielder();
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
 

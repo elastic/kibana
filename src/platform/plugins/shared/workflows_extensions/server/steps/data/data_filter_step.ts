@@ -8,7 +8,7 @@
  */
 
 import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFilterStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -44,7 +44,6 @@ export const dataFilterStepDefinition = createServerStepDefinition({
       const kqlAst = parseKqlCondition(condition);
       const filteredItems: unknown[] = [];
       let matchedCount = 0;
-      const yieldToEventLoop = createEventLoopYielder();
 
       for (let index = 0; index < items.length; index++) {
         const item = items[index];

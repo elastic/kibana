@@ -102,7 +102,7 @@ describe('executionFlowLoop', () => {
   });
 
   it('yields to the event loop between nodes once the time budget has passed', async () => {
-    let now = 0;
+    let now = 1e12;
     jest.spyOn(performance, 'now').mockImplementation(() => now);
     const setImmediateSpy = jest.spyOn(global, 'setImmediate');
     const workflowExecutionCursor = createMockWorkflowExecutionCursor({
@@ -128,7 +128,7 @@ describe('executionFlowLoop', () => {
 
     await executionFlowLoop(params);
 
-    expect(setImmediateSpy).toHaveBeenCalledTimes(2);
+    expect(setImmediateSpy).toHaveBeenCalledTimes(3);
   });
 
   it('does not call runNode when execution cursor is not executing', async () => {

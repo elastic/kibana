@@ -8,7 +8,7 @@
  */
 
 import { get } from 'lodash';
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 
 export const MAX_AGGREGATE_ITEMS = 100_000;
 
@@ -77,7 +77,6 @@ export async function groupItemsByKeys(
   abortSignal?: AbortSignal
 ): Promise<Map<string, unknown[]>> {
   const groups = new Map<string, unknown[]>();
-  const yieldToEventLoop = createEventLoopYielder();
 
   for (let i = 0; i < items.length; i++) {
     await yieldToEventLoop();

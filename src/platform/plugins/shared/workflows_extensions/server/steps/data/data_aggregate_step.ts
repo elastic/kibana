@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import {
   assignBucket,
   computeMetric,
@@ -45,7 +45,6 @@ async function buildAggregatedResults(
   hasBuckets: boolean
 ): Promise<Array<Record<string, unknown>>> {
   const results: Array<Record<string, unknown>> = [];
-  const yieldToEventLoop = createEventLoopYielder();
 
   for (const [compositeKey, groupItems] of groups) {
     await yieldToEventLoop();
@@ -195,7 +194,6 @@ async function aggregateWithBuckets(
   context: { abortSignal: AbortSignal; logger: { debug: (msg: string) => void } }
 ): Promise<{ output: Array<Record<string, unknown>> } | { error: Error }> {
   const bucketedItems: Array<{ item: unknown; bucket: string }> = [];
-  const yieldToEventLoop = createEventLoopYielder();
 
   for (let i = 0; i < items.length; i++) {
     await yieldToEventLoop();

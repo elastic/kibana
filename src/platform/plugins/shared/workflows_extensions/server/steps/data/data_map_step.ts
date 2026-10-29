@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import {
   dataMapStepCommonDefinition,
   DEFAULT_INDEX_BINDING,
@@ -167,7 +167,6 @@ export const dataMapStepDefinition = createServerStepDefinition({
         context.contextManager.createTemplateRenderer?.() ??
         ((value, additionalContext) =>
           context.contextManager.renderInputTemplate(value, additionalContext));
-      const yieldToEventLoop = createEventLoopYielder();
       const mappedItems: Array<Record<string, unknown>> = [];
       for (const [currentIndex, currentItem] of itemsArray.entries()) {
         await yieldToEventLoop();

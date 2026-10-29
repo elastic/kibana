@@ -8,7 +8,7 @@
  */
 
 export { ExecutionError } from './errors/execution_error';
-export { createEventLoopYielder } from './lib/create_event_loop_yielder';
+export { yieldToEventLoop } from './lib/yield_to_event_loop';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
 export { buildWorkflowFilters } from './lib/workflow_filters';

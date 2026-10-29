@@ -19,7 +19,7 @@ import {
   type WorkflowContext,
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { createEventLoopYielder } from '@kbn/workflows/server';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { buildWorkflowRenderContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
@@ -232,7 +232,6 @@ export class WorkflowContextManager {
     obj: Record<string, unknown>
   ): Promise<Record<string, unknown>> {
     const context = this.getRenderingContext(obj);
-    const yieldToEventLoop = createEventLoopYielder();
     const rendered: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       await yieldToEventLoop();
