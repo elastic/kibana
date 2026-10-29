@@ -47,7 +47,7 @@ describe('useGetLayerTabsLabel', () => {
     const layerConfigs = [createLayerConfig('layer1', 'referenceLine')];
     const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
 
-    expect(result.current('layer1')).toBe('Reference line');
+    expect(result.current('layer1')).toBe('Reference lines');
   });
 
   it('numbers source-specific labels independently', () => {
@@ -69,8 +69,8 @@ describe('useGetLayerTabsLabel', () => {
     ];
     const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
 
-    expect(result.current('layer1')).toBe('Reference line 1');
-    expect(result.current('layer2')).toBe('Reference line 2');
+    expect(result.current('layer1')).toBe('Reference lines 1');
+    expect(result.current('layer2')).toBe('Reference lines 2');
   });
 
   it('returns label for single annotation layer', () => {
@@ -109,10 +109,10 @@ describe('useGetLayerTabsLabel', () => {
     const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
 
     expect(result.current('layer1')).toBe('Data layer 1');
-    expect(result.current('layer2')).toBe('Reference line 1');
+    expect(result.current('layer2')).toBe('Reference lines 1');
     expect(result.current('layer3')).toBe('Data layer 2');
     expect(result.current('layer4')).toBe('Annotation');
-    expect(result.current('layer5')).toBe('Reference line 2');
+    expect(result.current('layer5')).toBe('Reference lines 2');
   });
 
   it('excludes hidden layers from counting', () => {

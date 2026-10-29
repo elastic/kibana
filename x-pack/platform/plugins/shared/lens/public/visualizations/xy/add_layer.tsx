@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
@@ -212,34 +213,63 @@ export function AddLayerButton({
               title: i18n.translate('xpack.lens.configPanel.selectReferenceSourceTitle', {
                 defaultMessage: 'Reference lines',
               }),
+              width: 400,
               items: [
                 {
-                  name: i18n.translate('xpack.lens.configPanel.staticReferenceLinesButtonLabel', {
-                    defaultMessage: 'Static values',
-                  }),
-                  icon: 'number',
-                  'data-test-subj': 'lnsReferenceLineLayer_static',
-                  onClick: () => {
-                    addLayer(LayerTypes.REFERENCELINE, {
-                      ignoreInitialValues: false,
-                      datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
-                    });
-                    toggleLayersChoice(false);
-                  },
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon="number"
+                      data-test-subj="lnsReferenceLineLayer_static"
+                      onClick={() => {
+                        addLayer(LayerTypes.REFERENCELINE, {
+                          ignoreInitialValues: false,
+                          datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.staticReferenceLinesButtonLabel"
+                          defaultMessage="Static reference lines"
+                        />
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.staticReferenceLinesDescription"
+                          defaultMessage="Set fixed values for budgets, targets, or thresholds."
+                        />
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
                 },
                 {
-                  name: i18n.translate('xpack.lens.configPanel.esqlReferenceLinesButtonLabel', {
-                    defaultMessage: 'ES|QL query',
-                  }),
-                  icon: 'code',
-                  'data-test-subj': 'lnsReferenceLineLayer_esql',
-                  onClick: () => {
-                    addLayer(LayerTypes.REFERENCELINE, {
-                      ignoreInitialValues: true,
-                      datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
-                    });
-                    toggleLayersChoice(false);
-                  },
+                  renderItem: () => (
+                    <EuiContextMenuItem
+                      icon="code"
+                      data-test-subj="lnsReferenceLineLayer_esql"
+                      onClick={() => {
+                        addLayer(LayerTypes.REFERENCELINE, {
+                          ignoreInitialValues: true,
+                          datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
+                        });
+                        toggleLayersChoice(false);
+                      }}
+                    >
+                      <EuiText size="s">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.esqlReferenceLinesButtonLabel"
+                          defaultMessage="ES|QL reference lines"
+                        />
+                      </EuiText>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.lens.configPanel.esqlReferenceLinesDescription"
+                          defaultMessage="Calculate thresholds using a separate ES|QL query."
+                        />
+                      </EuiText>
+                    </EuiContextMenuItem>
+                  ),
                 },
               ],
             },

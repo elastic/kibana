@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AddLayerButton } from './add_layer';
 import type { XYVisualizationState } from './types';
@@ -124,7 +125,8 @@ describe('Reference layer source selection', () => {
         addLayer={addLayer}
         eventAnnotationService={eventAnnotationServiceMock}
         isEsqlChart={isEsqlChart}
-      />
+      />,
+      { wrapper: I18nProvider }
     );
     fireEvent.click(screen.getByLabelText('Add layer'));
     fireEvent.click(screen.getByTestId('lnsLayerAddButton-referenceLine'));
@@ -139,7 +141,16 @@ describe('Reference layer source selection', () => {
     async (source, datasourceId, ignoreInitialValues) => {
       const addLayer = renderReferenceMenu(true);
       expect(addLayer).not.toHaveBeenCalled();
-      fireEvent.click(await screen.findByTestId(`lnsReferenceLineLayer_${source}`));
+      const menuItem = await screen.findByTestId(`lnsReferenceLineLayer_${source}`);
+      expect(menuItem).toHaveTextContent(
+        source === 'static' ? 'Static reference lines' : 'ES|QL reference lines'
+      );
+      expect(menuItem).toHaveTextContent(
+        source === 'static'
+          ? 'Set fixed values for budgets, targets, or thresholds.'
+          : 'Calculate thresholds using a separate ES|QL query.'
+      );
+      fireEvent.click(menuItem);
       expect(addLayer).toHaveBeenCalledWith(LayerTypes.REFERENCELINE, {
         ignoreInitialValues,
         datasourceId,
