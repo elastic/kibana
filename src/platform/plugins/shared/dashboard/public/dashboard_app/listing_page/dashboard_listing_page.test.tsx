@@ -96,7 +96,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
   mockFindByTitle.mockResolvedValue(undefined);
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({ title: 'search by title', redirectTo });
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).not.toHaveBeenCalled();
@@ -113,7 +113,7 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   });
   const redirectTo = jest.fn();
 
-  renderDashboardListingPage({ title: 'search by title', redirectTo });
+  renderDashboardListingPage({ redirectTitle: 'search by title', redirectTo });
 
   await waitFor(() => {
     expect(redirectTo).toHaveBeenCalledWith({

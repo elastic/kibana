@@ -30,11 +30,16 @@ export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
   redirectTo: DashboardRedirect;
   initialFilter?: string;
-  title?: string;
+  /**
+   * Title of a dashboard to redirect to, read from the `title` URL param.
+   * Only the value at mount is used: on load, the dashboard with a matching title is looked up
+   * and redirected to. If there is no unique match, the listing is filtered by this title instead.
+   */
+  redirectTitle?: string;
 }
 
 export const DashboardListingPage = ({
-  title,
+  redirectTitle,
   redirectTo,
   initialFilter,
   kbnUrlStateStorage,
@@ -108,13 +113,12 @@ export const DashboardListingPage = ({
   }, [kbnUrlStateStorage]);
 
   useEffect(() => {
-    if (!title) return;
+    if (!redirectTitle) return;
 
-    let canceled = false;
     findService
-      .findByTitle(title)
+      .findByTitle(redirectTitle)
       .then((result) => {
-        if (canceled || !result) return;
+        if (!result) return;
         redirectTo({
           destination: 'dashboard',
           id: result.id,
@@ -124,11 +128,10 @@ export const DashboardListingPage = ({
       .catch(() => {
         // show the listing filtered by title if the dashboard can not be looked up
       });
-
-    return () => {
-      canceled = true;
-    };
-  }, [title, redirectTo]);
+    // Title search only occurs on the initial value. The listing table removes the title
+    // from the URL on load, so this effect must not re-run when the title prop changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (showNoDataPage === undefined) {
     return null;
@@ -142,7 +145,7 @@ export const DashboardListingPage = ({
       {!showNoDataPage && (
         <DashboardListing
           useSessionStorageIntegration={true}
-          initialFilter={initialFilter ?? title ?? ''}
+          initialFilter={initialFilter ?? redirectTitle ?? ''}
           goToDashboard={(id, viewMode) => {
             redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
           }}
