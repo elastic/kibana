@@ -31,6 +31,9 @@ const MENU_WIDTH = 280;
 const MENU_ROW_HEIGHT = 32;
 const MAX_VISIBLE_ROWS = 7;
 
+// The list is virtualized, so only a window of rows is in the DOM: find a row by its list position
+const getRowSelector = (index: number) => `[role="option"][aria-posinset="${index + 1}"]`;
+
 const loadingLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.commandMenu.list.loading',
   { defaultMessage: 'Loading...' }
@@ -92,8 +95,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
     }, [optionKeysSignature]);
 
     const scrollIndexIntoView = (index: number) => {
-      const items = containerRef.current?.querySelectorAll('.euiSelectableListItem');
-      const item = items?.[index];
+      const item = containerRef.current?.querySelector(getRowSelector(index));
       item?.scrollIntoView?.({ block: 'nearest' });
     };
     const handleSetActive = (next: (index: number) => number) => {
@@ -176,7 +178,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
     `;
 
     const activeHighlightStyles = css`
-      .euiSelectableListItem:nth-child(${activeIndex + 1}) {
+      ${getRowSelector(activeIndex)} {
         background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
         border-radius: ${euiTheme.border.radius.small};
       }
