@@ -242,7 +242,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
         await testSubjects.existOrFail(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
         await testSubjects.missingOrFail('visualizeSaveButton', {
           timeout: config.get('timeouts.waitFor'),
@@ -344,7 +343,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
         await testSubjects.existOrFail(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });

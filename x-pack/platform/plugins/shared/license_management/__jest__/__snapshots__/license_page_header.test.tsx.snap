@@ -3,7 +3,7 @@
 exports[`LicenseStatus component should display display warning is expired 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -67,7 +67,7 @@ exports[`LicenseStatus component should display display warning is expired 1`] =
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div
@@ -101,7 +101,7 @@ exports[`LicenseStatus component should display display warning is expired 1`] =
 exports[`LicenseStatus component should display normally when license is active 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -165,7 +165,7 @@ exports[`LicenseStatus component should display normally when license is active 
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div

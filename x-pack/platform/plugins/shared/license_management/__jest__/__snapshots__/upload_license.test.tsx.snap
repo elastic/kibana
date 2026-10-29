@@ -3,7 +3,7 @@
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -63,7 +63,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div
@@ -185,7 +185,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -245,7 +245,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div
@@ -410,7 +410,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -470,7 +470,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div
@@ -635,7 +635,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -695,7 +695,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div
@@ -860,7 +860,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 exports[`UploadLicense should display error when ES returns error 1`] = `
 <DocumentFragment>
   <div
-    class="css-zkj008-root"
+    class="css-zvz5pu-root"
     data-test-subj="appHeader"
   >
     <div
@@ -920,7 +920,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             </div>
           </div>
           <div
-            class="titleActionsReveal css-1oeh8gv-titleActionsReveal"
+            class="css-19suw3t-titleActions"
           />
         </div>
         <div
