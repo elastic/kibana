@@ -37,6 +37,67 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % DEPRECATIONS
 % Paste in deprecations.md
 
+## 9.6.0 [kibana-9.6.0-deprecations]
+
+$$$kibana-292914$$$
+::::{dropdown} Migrate from Cases `customFields` and legacy templates to `extended_fields`
+**Details**<br> The Cases `customFields` fields and the `templates` setting in the case configuration are deprecated in favor of `extended_fields`. The case APIs now document `extended_fields` and return `extended_fields_labels`, a read-only map from each storage key to a readable label.
+
+**Impact**<br> `customFields` and legacy `templates` keep working as before. The API reference marks them as deprecated.
+
+**Action**<br> Use `extended_fields` in new integrations, and migrate existing clients and workflows that use `customFields` or legacy templates.
+
+View [#292914]({{kib-pull}}292914).
+::::
+
+% Not included in the 9.6.0 notes. Reason: Applies only to Serverless Elasticsearch, according to the pull request, and the plugin is deleted rather than deprecated. Draft from the pull request description.
+% $$$kibana-293914$$$
+% ::::{dropdown} The `search_notebooks` plugin is removed
+% **Details**<br> The `search_notebooks` plugin, which added links to Python notebooks in the Console, is deleted. It was used only on Serverless Elasticsearch.
+%
+% **Impact**<br> The links to Python notebooks no longer appear in the Console.
+%
+% **Action**<br> No action is required.
+%
+% View [#293914]({{kib-pull}}293914).
+% ::::
+
+% Not included in the 9.6.0 notes. Reason: Deprecates APIs of the plugin start contract, which concerns plugin developers only. Draft from the pull request description, not verified in code.
+% $$$kibana-291995$$$
+% ::::{dropdown} Migrate plugin code from single-evaluation feature flag methods
+% **Details**<br> The `getBooleanValue`, `getStringValue`, and `getNumberValue` methods on the browser and server plugin start contracts are deprecated. One-shot evaluation on the HTTP request-handler context is not deprecated.
+%
+% **Impact**<br> The methods keep working. Your editor marks them as deprecated.
+%
+% **Action**<br> Use the observable (`$`) evaluation APIs of the feature flags service instead.
+%
+% View [#291995]({{kib-pull}}291995).
+% ::::
+
+% Not included in the 9.6.0 notes. Reason: Already published in the 9.5.0 deprecations, and the pull request is in the 9.5.0 release.
+% $$$kibana-277542$$$
+% ::::{dropdown} Replace the deprecated `include_comments` parameter in `cases.getCase`
+% **Details**<br> The `include_comments` parameter on the `cases.getCase` workflow step is deprecated. It cannot represent all unified case attachment types. Existing workflows that set `include_comments` continue to work unchanged.
+%
+% **Impact**<br> Workflows that set `include_comments: true` on `cases.getCase` might receive an incomplete attachment array when unified attachments are present. YAML expressions that read legacy comment fields can return `undefined`.
+%
+% **Action**<br> Use the `cases.getAllAttachments` step to retrieve case attachments instead of `include_comments` on `cases.getCase`.
+%
+% View [#277542]({{kib-pull}}277542).
+% ::::
+
+% Not included in the 9.6.0 notes. Reason: Already published in the 9.5.0 deprecations, and the pull request is in the 9.5.0 release.
+% $$$kibana-276925$$$
+% ::::{dropdown} Migrate to the renamed Managed integrations API
+% **Details**<br> The agentless policies API is renamed to the Managed integrations API. The `/api/fleet/agentless_policies` paths are now served at `/api/fleet/managed_integrations`, and the response model is renamed from `AgentlessPolicy` to `ManagedIntegration`. The original `agentless_policies` paths remain available as deprecated aliases that forward to the same handlers.
+%
+% **Impact**<br> Clients that call the `agentless_policies` paths keep working. Clients that reference the `AgentlessPolicy` schema no longer find it.
+%
+% **Action**<br> Update integrations to call `/api/fleet/managed_integrations` and consume the `ManagedIntegration` response model.
+%
+% View [#276925]({{kib-pull}}276925).
+% ::::
+
 ## 9.5.0 [kibana-9.5.0-deprecations]
 
 $$$kibana-276925$$$

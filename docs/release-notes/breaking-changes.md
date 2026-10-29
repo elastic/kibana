@@ -41,6 +41,17 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.6.0 [kibana-9.6.0-breaking-changes]
 
+$$$kibana-291514$$$
+::::{dropdown} Stop using the Playground app, which {{kib}} no longer includes
+**Details**<br> {{kib}} no longer includes the Playground app (`searchPlayground`), which was deprecated for several releases. When you upgrade, {{kib}} deletes the saved playgrounds. The `xpack.searchPlayground` settings are no longer valid. If you leave an `xpack.searchPlayground.*` key in `kibana.yml`, {{kib}} ignores it, logs a deprecation warning, and keeps starting.
+
+**Impact**<br> Saved playgrounds, including their prompts, queries, index selections, and connector settings, are inaccessible after the upgrade and you can't export them.
+
+**Action**<br> Before you upgrade, copy any prompts, queries, and settings that you want to keep. After you upgrade, remove the `xpack.searchPlayground.*` settings from `kibana.yml`.
+
+View [#291514]({{kib-pull}}291514).
+::::
+
 $$$kibana-285645$$$
 ::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
 **Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
@@ -59,6 +70,64 @@ $$$kibana-285645$$$
 
 View [#285645]({{kib-pull}}285645).
 ::::
+
+$$$kibana-283150$$$
+::::{dropdown} Update HTTPS proxy TLS settings if the email connector fails after upgrade
+**Details**<br> {{kib}} now ships nodemailer 9, which validates the proxy server's TLS certificate when the email connector sends mail through an HTTPS proxy. Earlier versions skipped that check, so a proxy with a self-signed, expired, or hostname-mismatched certificate now causes sending to fail. Hosted and cloud SMTP with public certificate authorities is unaffected.
+
+**Impact**<br> Self-managed deployments that route email through an HTTPS proxy with a certificate that isn't trusted by default can no longer send email until TLS verification is updated.
+
+**Action**<br> Trust the proxy certificate, or set `xpack.actions.ssl.proxyVerificationMode: none` to restore the previous behavior. Note that `certificate` behaves the same as `full` on the proxy connection: a custom CA or relaxed hostname check does not apply there.
+
+View [#283150]({{kib-pull}}283150).
+::::
+
+$$$kibana-282404$$$
+::::{dropdown} Update `additional_datastreams_permissions` values to the `<type>-<suffix>` format
+**Details**<br> {{fleet}} now validates the `additional_datastreams_permissions` field of a package policy against the documented `<type>-<suffix>` data stream format, for example `logs-nginx-*`. Before, the validation accepted values that only started with, contained, or ended with a valid type.
+
+**Impact**<br> {{fleet}} rejects values that don't start with a valid data stream type followed by a hyphen and a non-empty suffix, for example `logs*`.
+
+**Action**<br> Update any `additional_datastreams_permissions` values to the `<type>-<suffix>` format.
+
+View [#282404]({{kib-pull}}282404).
+::::
+
+% Not included in the 9.6.0 notes. Reason: Already published in the 9.5.0 breaking changes, and the pull request is in the 9.5.0 release.
+% $$$kibana-280959$$$
+% ::::{dropdown} Stop using the package policy and agent policy APIs to manage agentless integrations
+% **Details**<br> {{fleet}} turns on the `disableAgentlessLegacyAPI` feature flag. The package policy and agent policy APIs no longer create, update, upgrade, or copy managed integrations.
+%
+% **Impact**<br> Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs receive a `400` error.
+%
+% **Action**<br> Use the Managed integrations API (`/api/fleet/managed_integrations`) instead.
+%
+% View [#280959]({{kib-pull}}280959).
+% ::::
+
+% Not included in the 9.6.0 notes. Reason: The feature is disabled by default and unreleased, so the change to the internal API needs no client migration (stated in the pull request). Draft from the pull request description, not verified in code.
+% $$$kibana-287992$$$
+% ::::{dropdown} Update clients of the internal Cases workflow run API to use generic attachment origins
+% **Details**<br> The origin contract of the internal API that records workflow runs in case activity replaces alert-specific origins with generic attachment origins.
+%
+% **Impact**<br> Clients that send alert-specific origins to this internal API must send generic attachment origins instead.
+%
+% **Action**<br> Send generic attachment origins.
+%
+% View [#287992]({{kib-pull}}287992).
+% ::::
+
+% Not included in the 9.6.0 notes. Reason: Affects only an internal validation helper. Production code already passes only the options that remain, so no user-facing change (stated in the pull request). Draft from the pull request description, not verified in code.
+% $$$kibana-298713$$$
+% ::::{dropdown} Workflow datetime values longer than 64 characters are rejected
+% **Details**<br> The `isoDateTime()` validation helper now checks values against static patterns and rejects values longer than 64 characters by default. The helper no longer supports the `local` and `precision` options.
+%
+% **Impact**<br> Values that exceed the length limit fail validation. The workflow editor flags invalid datetimes such as `2024-02-30T10:00Z` before you run a workflow.
+%
+% **Action**<br> Shorten datetime values that exceed 64 characters.
+%
+% View [#298713]({{kib-pull}}298713).
+% ::::
 
 ## 9.5.2 [kibana-9.5.2-breaking-changes]
 
