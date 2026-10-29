@@ -243,6 +243,7 @@ describe('Detection Rule Creation worker', () => {
         ['logs-acme.repro-*', 'custom-xdr-*'],
       ],
       ['from logs-*, remote1:logs-*\n| where from_port > 1', ['logs-*', 'remote1:logs-*']],
+      ['FROM "logs-*", """custom-xdr-*""" METADATA _id', ['logs-*', 'custom-xdr-*']],
       ['FROM custom-xdr-*', ['custom-xdr-*']],
       ['', []],
     ])('hands the preview the indices of %j', (query, expected) => {

@@ -212,7 +212,8 @@ steps:
   # The draft has no index list of its own: its sources are the `FROM` clause, which
   # the preview checks for `read` before running so that an index the worker cannot
   # see is named rather than counted as zero. Index names are lowercase by rule, so
-  # the query is downcased to find the command whatever its case.
+  # the query is downcased to find the command whatever its case, and a source may
+  # be quoted (`FROM "logs-*"`), so the quotes come off too.
   - name: probe_indices
     type: data.set
     if: "${{ steps.draft_ready.output.ok == true }}"
@@ -221,7 +222,7 @@ steps:
         {%- assign parts = steps.draft_creation.output.structured_output.rule.query | downcase | split: 'from ' -%}
         {%- assign sources = parts[1] | default: '' | split: '|' | first | split: 'metadata' | first | split: ',' -%}
         {%- for source in sources -%}
-        {%- assign name = source | strip -%}
+        {%- assign name = source | remove: '"' | strip -%}
         {%- if name != '' -%},{{ name | json }}{%- endif -%}
         {%- endfor -%}
 
