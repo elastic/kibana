@@ -42,7 +42,7 @@ export async function createRules({
   const { actionsClient, rulesClient } = deps;
 
   const bulkInputs: BulkCreateRulesParams<RuleParams>['rules'] = [];
-  const pending = new Map<RuleObjectId, ImportRuleSuccess>();
+  const byId = new Map<RuleObjectId, ImportRuleSuccess>();
   const successes: ImportRuleSuccess[] = [];
   const errors: ImportRuleError[] = [];
 
@@ -69,8 +69,9 @@ export async function createRules({
         options: { id },
         allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
       });
-      pending.set(id, {
+      byId.set(id, {
         rule_id: rule.rule_id,
+        outcome: 'created',
         telemetry: {
           id,
           type: rule.type,
@@ -98,7 +99,7 @@ export async function createRules({
   });
 
   for (const id of successfulIds) {
-    const created = pending.get(id);
+    const created = byId.get(id);
 
     if (created != null) {
       successes.push(created);
@@ -106,7 +107,7 @@ export async function createRules({
   }
 
   for (const err of bulkErrors) {
-    const failed = pending.get(err.rule.id);
+    const failed = byId.get(err.rule.id);
 
     if (failed != null) {
       errors.push(

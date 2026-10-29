@@ -73,6 +73,7 @@ export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({
           showSingleSeries: false,
         },
         preferredSeriesType: 'area',
+        areaFill: 'solid',
         tickLabelsVisibilitySettings: {
           x: true,
           yLeft: true,

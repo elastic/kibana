@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { randomUUID } from 'node:crypto';
 import type { Streams } from '@kbn/streams-schema';
 import { emptyAssets } from '@kbn/streams-schema';
 import {
@@ -14,6 +15,7 @@ import {
   enableStreams,
   putStream,
 } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
+import { createTestSource, deleteTestSource } from './helpers/test_source';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { RoleCredentials } from '../../services';
 import type { SignificantEventsSupertestRepositoryClient } from './helpers/repository_client';
@@ -67,7 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const reconcileProbe = (expectStatusCode: number) =>
     apiClient
       .fetch('POST /internal/streams/queries/_reconcile', {
-        params: { body: { streamNames: ['logs.maintenance-probe-missing'] } },
+        params: { body: { sourceIds: ['logs.maintenance-probe-missing'] } },
       })
       .expect(expectStatusCode);
 
@@ -83,8 +85,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // The maintenance state is a single deployment-wide document, so always leave
-    // it enabled; a leaked `paused` state would block the other suites' rule work.
+    // The maintenance state is one document per space, so always leave this space
+    // enabled; a leaked `paused` state would block the other suites' rule work.
     afterEach(async () => {
       await resumeMaintenance(apiClient);
     });
@@ -129,7 +131,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(await getMaintenanceStatus(apiClient).then((s) => s.state)).to.eql('enabled');
     });
 
-    it('wipes data, restores registered streams, keeps reads healthy, and is repeatable', async () => {
+    it('clears only current-space data, preserves shared streams and sources, and is repeatable', async () => {
+      const otherSpaceId = `maintenance-reset-${randomUUID()}`;
+      const sentinelIds = ['maintenance-other-space', 'maintenance-untagged'];
+      const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        useCookieHeader: true,
+        withInternalHeaders: true,
+      });
+      await supertest
+        .post('/api/spaces/space')
+        .set('kbn-xsrf', 'foo')
+        .send({ id: otherSpaceId, name: otherSpaceId })
+        .expect(200);
       await apiClient
         .fetch('GET /internal/significant_events/events', { params: { query: {} } })
         .expect(200);
@@ -141,10 +154,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: resetStream,
         ...emptyAssets,
       });
+      const createdSourceIds: string[] = [];
       try {
-        await upsertFeature(apiClient, RESET_STREAM_NAME, {
+        const resetSource = await createTestSource(
+          roleScopedSupertest,
+          'Maintenance reset',
+          `FROM ${RESET_STREAM_NAME},${RESET_STREAM_NAME}.*`
+        );
+        createdSourceIds.push(resetSource.id);
+        const orphanSource = await createTestSource(
+          roleScopedSupertest,
+          'Maintenance reset orphan',
+          `FROM ${ORPHAN_RULE_STREAM_NAME},${ORPHAN_RULE_STREAM_NAME}.*`
+        );
+        createdSourceIds.push(orphanSource.id);
+        await upsertFeature(apiClient, resetSource.id, {
           id: 'reset-feature',
-          stream_name: RESET_STREAM_NAME,
           type: 'entity',
           subtype: 'service',
           title: 'Reset feature',
@@ -154,20 +179,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           evidence: ['service.name=reset-service'],
           tags: ['reset'],
         });
-        await upsertQuery(apiClient, RESET_STREAM_NAME, 'reset-linked-query', {
+        await upsertQuery(apiClient, resetSource.id, 'reset-linked-query', {
           title: 'Maintenance reset linked rule',
           esql: {
-            query: `FROM ${RESET_STREAM_NAME},${RESET_STREAM_NAME}.* | WHERE KQL("message:'linked'")`,
+            query: `FROM ${resetSource.viewName} | WHERE KQL("message:'linked'")`,
           },
         });
-        await upsertQuery(apiClient, ORPHAN_RULE_STREAM_NAME, 'reset-orphan-query', {
+        await upsertQuery(apiClient, orphanSource.id, 'reset-orphan-query', {
           title: 'Maintenance reset orphan rule',
           esql: {
-            query: `FROM ${ORPHAN_RULE_STREAM_NAME},${ORPHAN_RULE_STREAM_NAME}.* | WHERE KQL("message:'orphan'")`,
+            query: `FROM ${orphanSource.viewName} | WHERE KQL("message:'orphan'")`,
           },
         });
 
-        /* Remove the query revision so Reset must discover its orphan rule from the stream tag. */
+        /* Remove the query revision so Reset must discover its orphan rule from the source tag. */
         await esClient.deleteByQuery({
           index: '.significant_events-knowledge_indicators',
           refresh: true,
@@ -176,11 +201,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               filter: [
                 { term: { id: 'reset-orphan-query' } },
                 { term: { type: 'query' } },
-                { term: { 'stream.name': ORPHAN_RULE_STREAM_NAME } },
+                { term: { 'source.id': orphanSource.id } },
               ],
             },
           },
         });
+
+        /* Pause now: the KI sync sweep deletes exactly this orphan, and its guard is the only thing that stops it. */
+        await pauseMaintenance(apiClient);
 
         const seededRules = await alertingApi.searchRulesV2(roleAuthc, {
           search: 'Maintenance reset',
@@ -197,7 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             detection_id: 'maintenance-reset-detection',
             rule_uuid: 'maintenance-reset-rule',
             rule_name: 'Maintenance reset rule',
-            stream_name: RESET_STREAM_NAME,
+            source_id: resetSource.id,
             change_point_type: 'spike',
             p_value: 0.01,
             'kibana.space_ids': ['default'],
@@ -219,20 +247,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           index: DISCOVERIES_DATA_STREAM,
           id: 'maintenance-reset-discovery',
           refresh: 'wait_for',
-          document: { '@timestamp': timestamp, kind: 'discovery' },
+          document: { '@timestamp': timestamp, kind: 'discovery', 'kibana.space_ids': ['default'] },
         });
 
-        await pauseMaintenance(apiClient);
+        for (const index of [...REGISTERED_DATA_STREAMS, DISCOVERIES_DATA_STREAM]) {
+          for (const [offset, id] of sentinelIds.entries()) {
+            await esClient.create({
+              index,
+              id,
+              refresh: 'wait_for',
+              document: {
+                '@timestamp': timestamp,
+                id,
+                type: 'feature',
+                'source.id': resetSource.id,
+                ...(offset === 0 ? { 'kibana.space_ids': [otherSpaceId] } : {}),
+                feature: { type: 'entity', slug: id, confidence: 90, properties: {} },
+              },
+            });
+          }
+        }
+        const backingIndicesBefore = await esClient.indices.getDataStream({
+          name: REGISTERED_DATA_STREAMS.join(','),
+        });
+
         const reset = await resetMaintenance(apiClient);
         expect(reset.state).to.eql('enabled');
         if (!reset.deleted) {
           throw new Error('Reset response omitted deletion counts');
         }
-        expect(reset.deleted).to.eql({
-          knowledgeIndicators: 1,
+        const { knowledgeIndicators, ...deleted } = reset.deleted;
+        // Creating a source onboards it, which can add computed features before the reset.
+        expect(knowledgeIndicators).to.be.above(0);
+        expect(deleted).to.eql({
           storedQueries: 1,
           rules: 2,
-          investigations: 0,
           dataStreams: 3,
         });
         expect(
@@ -244,16 +293,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         for (const dataStream of REGISTERED_DATA_STREAMS) {
           expect(await dataStreamExists(esClient, dataStream)).to.be(true);
-          expect((await esClient.count({ index: dataStream })).count).to.be(0);
+          expect(
+            (
+              await esClient.count({
+                index: dataStream,
+                query: { term: { 'kibana.space_ids': 'default' } },
+              })
+            ).count
+          ).to.be(0);
+          expect(
+            (await esClient.count({ index: dataStream, query: { ids: { values: sentinelIds } } }))
+              .count
+          ).to.be(2);
         }
-        expect(await dataStreamExists(esClient, DISCOVERIES_DATA_STREAM)).to.be(false);
+        expect(
+          await esClient.indices.getDataStream({ name: REGISTERED_DATA_STREAMS.join(',') })
+        ).to.eql(backingIndicesBefore);
+        expect((await esClient.count({ index: DISCOVERIES_DATA_STREAM })).count).to.be(2);
+        await supertest.get(`/internal/nightshift/sources/${resetSource.id}`).expect(200);
+        expect(
+          (await esClient.esql.query({ query: `FROM ${resetSource.viewName} | LIMIT 1` })).columns
+        ).to.be.an('array');
 
-        expect((await listFeatures(apiClient, RESET_STREAM_NAME)).features).to.eql([]);
-        expect((await getQueries(apiClient, RESET_STREAM_NAME)).queries).to.eql([]);
+        expect((await listFeatures(apiClient, resetSource.id)).features).to.eql([]);
+        expect((await getQueries(apiClient, resetSource.id)).queries).to.eql([]);
         const events = await apiClient
           .fetch('GET /internal/significant_events/events', { params: { query: {} } })
           .expect(200);
-        expect(events.body.total).to.be(0);
+        // Historical events are deliberately retained; reset must only keep the reader healthy.
+        expect(events.body).to.have.property('hits');
         const detections = await apiClient
           .fetch('GET /internal/significant_events/detections', { params: { query: {} } })
           .expect(200);
@@ -268,13 +336,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           knowledgeIndicators: 0,
           storedQueries: 0,
           rules: 0,
-          investigations: 0,
           dataStreams: 0,
         });
         for (const dataStream of REGISTERED_DATA_STREAMS) {
           expect(await dataStreamExists(esClient, dataStream)).to.be(true);
         }
       } finally {
+        for (const index of REGISTERED_DATA_STREAMS) {
+          await esClient.deleteByQuery({
+            index,
+            query: { ids: { values: sentinelIds } },
+            refresh: true,
+            ignore_unavailable: true,
+          });
+        }
+        await supertest
+          .delete(`/api/spaces/space/${otherSpaceId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
         await esClient.indices.deleteDataStream(
           { name: DISCOVERIES_DATA_STREAM },
           { ignore: [404] }
@@ -283,6 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: DISCOVERIES_TEST_TEMPLATE },
           { ignore: [404] }
         );
+        await Promise.all(createdSourceIds.map((id) => deleteTestSource(roleScopedSupertest, id)));
         await deleteStream(apiClient, RESET_STREAM_NAME);
         await deleteStream(apiClient, ORPHAN_RULE_STREAM_NAME);
       }

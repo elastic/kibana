@@ -411,8 +411,17 @@ describe('detection rule workflows', () => {
           caseSteps.map(({ name }) => name),
         ])
       ).toEqual([
-        ['dismissed', ['mark_alerts_declined', 'close_investigation_declined', 'stop_declined']],
-        ['expired', ['stop_expired']],
+        [
+          'dismissed',
+          [
+            'mark_alerts_declined',
+            'close_investigation_declined',
+            'report_investigation_closed_declined',
+            'report_review_completed_declined',
+            'stop_declined',
+          ],
+        ],
+        ['expired', ['report_review_completed_undecided', 'stop_expired']],
       ]);
       expect(entryDecision.default).toBeUndefined();
       for (const [decision, routed] of [
@@ -462,8 +471,9 @@ describe('detection rule workflows', () => {
       const exceptionActionInput = exceptionInputs.actionInput as Record<string, string>;
       expect(exceptionActionInput.rule_id).toBe('{{ inputs.rule_uuid }}');
       // `${{ }}` keeps the entries as objects.
+      // The bounded copy, never the raw agent output.
       expect(exceptionActionInput.entries).toBe(
-        '${{ steps.diagnose_rule.output.structured_output.exception_entries }}'
+        '${{ steps.bound_exception_entries.output.entries_json | json_parse }}'
       );
       expect(manualInputs).not.toHaveProperty('actionWorkflowId');
       expect(manualInputs).not.toHaveProperty('actionInput');
@@ -574,6 +584,8 @@ describe('detection rule workflows', () => {
       ) as WorkflowYaml;
       const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
       const reviewSteps = flattenSteps(review.steps as unknown as NestedStep[]);
+      const screen = tuningSteps.find(({ name }) => name === 'screen_rule_fp_rates')!;
+      const screenQuery = String(screen.with?.query);
       const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
       const harvestQuery = String(harvest.with?.query);
       const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
@@ -593,9 +605,91 @@ describe('detection rule workflows', () => {
         );
       });
 
+      // Security alerts are indexed with `_id = kibana.alert.uuid`; reading the uuid
+      // from doc values avoids the stored-fields loader `METADATA _id` needs, which
+      // dominated the harvest's run time.
+      it('keys the recency sort on the alert uuid instead of _id', () => {
+        expect(harvestQuery).not.toContain('METADATA _id');
+        expect(harvestQuery).toContain(
+          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", `kibana.alert.uuid`)'
+        );
+      });
+
+      // The rate is measured over every alert of the rule in the window, in a plain
+      // STATS over doc values; the harvest then reads only the FPs of the rules that
+      // passed, so the unreviewed queue never dilutes or inflates the rate.
       it('measures FP rate independently from the unreviewed work queue', () => {
-        expect(harvestQuery).toContain('fp_rate_count = COUNT(*) WHERE is_fp');
-        expect(harvestQuery).toContain('fp_rate_count * 100 >= total_count');
+        expect(screenQuery).toContain('fp_count = COUNT(*) WHERE is_fp');
+        expect(screenQuery).toContain('fp_count * 100 >= total_count');
+        expect(screenQuery).not.toContain('INLINE STATS');
+        expect(harvestQuery).not.toContain('total_count');
+
+        const filter = JSON.stringify(harvest.with?.filter);
+        expect(filter).toContain('"term":{"kibana.alert.workflow_status":"closed"}');
+        expect(filter).toContain('"term":{"kibana.alert.workflow_reason":"false_positive"}');
+        expect(filter).toContain(
+          '"terms":{"kibana.alert.rule.uuid":"${{ steps.resolve_screened_rules.output.rows | map: \'0\' }}"'
+        );
+      });
+
+      // untagged_fp_count counts every FP without the reviewed tag, and every unreviewed
+      // FP is untagged, so it bounds the unreviewed count from above: the screen's
+      // min_fp_count check can only let through rules the harvest then rejects, never
+      // drop a real candidate.
+      it('pre-filters on the FP count without replacing the harvest gate', () => {
+        expect(screenQuery).toContain(
+          'AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+        );
+        expect(screenQuery).toContain(
+          'untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
+        );
+        expect(harvestQuery).toContain(
+          'WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
+        );
+      });
+
+      // A reviewed rule keeps its tagged FPs in the window and would outrank
+      // unreviewed rules for the screen's slots on fp_count alone; ranking on
+      // untagged FPs lets it fall out while the rate gate still counts every FP.
+      it('ranks the screen on untagged false positives', () => {
+        expect(screenQuery).toContain('| SORT untagged_fp_count DESC');
+        expect(screenQuery).not.toContain('SORT fp_count');
+        expect(screenQuery).toContain('fp_count * 100 >= total_count');
+      });
+
+      // The review tags only the newest 100 ids; the watermark retires the older
+      // untagged FPs with them. A rule with hundreds of FPs would keep a positive
+      // untagged count after its review, so the screen compares the newest FP with
+      // the newest reviewed alert, in the same pass, exactly as the harvest does.
+      // The watermark is taken over FP alerts only, as the harvest's is (its DSL filter
+      // keeps FPs only), so a reopened tagged alert moves both the same way.
+      it('drops fully reviewed rules in the screen, whatever their size', () => {
+        expect(screenQuery).toContain('last_fp_at = MAX(@timestamp) WHERE is_fp');
+        expect(screenQuery).toContain(
+          'reviewed_watermark = MAX(@timestamp) WHERE is_fp AND MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")'
+        );
+        expect(screenQuery).toContain(
+          '| WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)'
+        );
+        expect(screenQuery).not.toContain('INLINE STATS');
+      });
+
+      it('screens only when there are enabled rules and harvests only screened rules', () => {
+        const resolveEnabled = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
+        const resolveScreened = tuningSteps.find(({ name }) => name === 'resolve_screened_rules')!;
+
+        expect(String(resolveEnabled.if)).toContain('steps.list_enabled_rules.error == null');
+        expect(String(screen.if)).toContain('steps.resolve_enabled_rules.output.count > 0');
+        expect(String(harvest.if)).toContain('steps.resolve_screened_rules.output.count > 0');
+        expect(screen['on-failure']).toEqual({ continue: true });
+
+        const filter = JSON.stringify(screen.with?.filter);
+        expect(filter).toContain(
+          '"terms":{"kibana.alert.rule.uuid":"${{ steps.resolve_enabled_rules.output.rule_uuids }}"'
+        );
+        expect(String(resolveScreened.with?.count)).toContain(
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[3]' | size"
+        );
       });
 
       // A review can outlive its sweep (cancelled sweep, manual run). Its rule must
@@ -627,51 +721,67 @@ describe('detection rule workflows', () => {
           'parsed_count == steps.collect_active_rules.output.expected'
         );
 
-        const filter = JSON.stringify(harvest.with?.filter);
+        const filter = JSON.stringify(screen.with?.filter);
         expect(filter).toContain('must_not');
         expect(filter).toContain(
           '"kibana.alert.rule.uuid":"${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"'
         );
       });
 
-      // `kibana.alert.rule.enabled` on an alert is a creation-time snapshot, so a rule
-      // disabled after alerting keeps harvesting until its FPs age out of the window.
-      // The sweep checks live enabled status for the harvested candidates only and
-      // drops disabled rules from the fan-out source (a parallel branch body cannot
-      // carry a step-level `if`).
-      it('skips reviews for rules that are no longer enabled', () => {
-        const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
-        const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
+      // `kibana.alert.rule.enabled` on an alert is a creation-time snapshot, and a
+      // deleted rule's alerts outlive it, so both kinds would keep taking harvest
+      // slots until their FPs age out of the window. The sweep lists the space's
+      // enabled rules first and scopes the screen to them, so only live rules compete.
+      it('screens only rules that are enabled right now', () => {
+        const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_rules')!;
+        const resolveEnabled = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
+        const resolveScreened = tuningSteps.find(({ name }) => name === 'resolve_screened_rules')!;
         const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
 
-        const filterKql = String(collect.with?.filter_kql);
-        expect(filterKql).toContain('alert.attributes.enabled: true');
-        expect(filterKql).toContain('alert.id: ("alert:{{ row[0] }}")');
-
         const path = String(lookup.with?.path);
-        expect(path).toContain('/api/detection_engine/rules/_find?');
-        expect(path).toContain('per_page={{ consts.max_candidate_rules }}');
-        expect(path).toContain('{{ steps.collect_candidates.output.filter_kql | url_encode }}');
-        expect(String(lookup.if)).toContain('steps.collect_candidates.output.count > 0');
+        // The alerting _find honours `fields`; the detection engine one returns 500.
+        expect(path).toContain('/api/alerting/rules/_find?');
+        expect(path).toContain(
+          "{{ 'alert.attributes.enabled: true and alert.attributes.consumer: siem' | url_encode }}"
+        );
+        expect(path).toContain('per_page={{ consts.enabled_rules_page_size }}');
+        expect(path).toContain('fields=revision');
         expect(lookup['on-failure']).toEqual({ continue: true });
+        expect(String(resolveEnabled.with?.rule_uuids)).toContain(
+          "steps.list_enabled_rules.output.data | default: consts.no_rows | map: 'id'"
+        );
+        // The result window is the saved-objects page cap; a fuller space is reported.
+        const consts = (tuning as unknown as { consts: Record<string, number> }).consts;
+        expect(consts.enabled_rules_page_size).toBe(10000);
+        expect(String(resolveEnabled.with?.truncated)).toBe(
+          '${{ steps.list_enabled_rules.output.total > consts.enabled_rules_page_size }}'
+        );
+        const report = tuningSteps.find(({ name }) => name === 'report_worker_run_completed')!;
+        expect(String(report.with?.degraded_reason)).toContain(
+          '{% elsif steps.resolve_enabled_rules.output.truncated %}capacity'
+        );
+        expect(String(report.with?.run_outcome)).toContain(
+          '{%- elsif steps.resolve_enabled_rules.output.truncated -%}\ndegraded_partial'
+        );
 
         const rowsExpr = String(rows.with?.rows);
         expect(rowsExpr).toContain(
-          "where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]'"
+          "where_exp: 'row', 'steps.resolve_enabled_rules.output.rule_revision_keys contains row[4]'"
         );
         // No `default` after where_exp: an empty filtered array is legitimate and a
         // default would resurrect every disabled candidate.
         expect(rowsExpr).not.toMatch(/where_exp:.*\| default:/);
+        expect(String(resolveScreened.with?.rows)).not.toMatch(/where_exp:.*\| default:/);
         // The engine's rehydration planner cannot see step paths inside the quoted
         // where_exp argument. This direct reference keeps the keys resident.
         expect(String(rows.with?.rule_revision_keys)).toContain(
-          '${{ steps.resolve_current_revisions.output.rule_revision_keys }}'
+          '${{ steps.resolve_enabled_rules.output.rule_revision_keys }}'
         );
         // Slice after the enabled filter: the pool overscans the launch cap so
         // disabled candidates cannot starve enabled rules ranked below them.
-        expect(rowsExpr).toContain('| slice: 0, steps.collect_candidates.output.fanout_limit');
-        expect(String(collect.with?.fanout_limit)).toContain(
+        expect(rowsExpr).toContain('| slice: 0, steps.resolve_screened_rules.output.fanout_limit');
+        expect(String(resolveScreened.with?.fanout_limit)).toContain(
           'inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep'
         );
 
@@ -683,18 +793,18 @@ describe('detection rule workflows', () => {
       // Rule A was edited after its false positives, so they came from an older
       // version. Rule B was not edited. Only rule B should be reviewed.
       it('reviews a rule only on false positives from its current version', () => {
-        const resolveVersions = tuningSteps.find(
-          ({ name }) => name === 'resolve_current_revisions'
-        )!;
+        const resolveEnabled = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
+        const resolveScreened = tuningSteps.find(({ name }) => name === 'resolve_screened_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
 
+        expect(screenQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
         expect(harvestQuery).toContain('BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`');
 
         const currentVersions = createWorkflowLiquidEngine().parseAndRenderSync(
-          String(resolveVersions.with?.rule_revision_keys),
+          String(resolveEnabled.with?.rule_revision_keys),
           {
             steps: {
-              list_enabled_candidates: {
+              list_enabled_rules: {
                 output: {
                   data: [
                     { id: 'rule-a', revision: 2 },
@@ -705,45 +815,116 @@ describe('detection rule workflows', () => {
             },
           }
         );
+        const steps = {
+          resolve_enabled_rules: { output: { rule_revision_keys: currentVersions } },
+          resolve_screened_rules: { output: { fanout_limit: 10 } },
+        };
 
-        // The last column is the "rule@version" key the harvest query adds to each row.
-        const ruleAOldVersion = [
-          'rule-a',
-          12,
-          '2026-10-01T00:00:00.000Z',
-          ['a1'],
-          20,
-          12,
-          ',rule-a@1,',
-        ];
+        // The last column is the "rule@version" key both queries add to each row.
+        const screenedRows = resolveExpression(resolveScreened.with?.rows, {
+          consts: tuning.consts,
+          steps: {
+            ...steps,
+            screen_rule_fp_rates: {
+              output: {
+                values: [
+                  ['rule-a', 20, 12, ',rule-a@1,'],
+                  ['rule-b', 20, 15, ',rule-b@5,'],
+                ],
+              },
+            },
+          },
+        });
+        expect(screenedRows).toEqual([['rule-b', 20, 15, ',rule-b@5,']]);
+
+        const ruleAOldVersion = ['rule-a', 12, '2026-10-01T00:00:00.000Z', ['a1'], ',rule-a@1,'];
         const ruleBCurrentVersion = [
           'rule-b',
           15,
           '2026-10-01T00:00:00.000Z',
           ['b1'],
-          20,
-          15,
           ',rule-b@5,',
         ];
-
         const reviewedRows = resolveExpression(rows.with?.rows, {
           consts: tuning.consts,
           steps: {
+            ...steps,
             harvest_fp_alerts_by_rule: {
               output: { values: [ruleAOldVersion, ruleBCurrentVersion] },
             },
-            resolve_current_revisions: { output: { rule_revision_keys: currentVersions } },
-            collect_candidates: { output: { fanout_limit: 10 } },
           },
         });
-
         expect(reviewedRows).toEqual([ruleBCurrentVersion]);
       });
 
+      // The harvest no longer carries the rule's totals; the review gets them from
+      // the screen row with the same rule@revision key.
+      it('hands each review the totals of its own screen row', () => {
+        const resolveTotals = tuningSteps.find(({ name }) => name === 'resolve_totals')!;
+        const launch = tuningSteps.find(({ name }) => name === 'run_review')!;
+        const launchInputs = launch.with?.inputs as Record<string, string>;
+
+        const row = resolveExpression(resolveTotals.with?.row, {
+          foreach: { item: ['rule-b', 15, '2026-10-01T00:00:00.000Z', ['b1'], ',rule-b@5,'] },
+          steps: {
+            resolve_screened_rules: {
+              output: {
+                rows: [
+                  ['rule-a', 20, 12, ',rule-a@1,'],
+                  ['rule-b', 20, 15, ',rule-b@5,'],
+                ],
+              },
+            },
+          },
+        });
+
+        expect(row).toEqual(['rule-b', 20, 15, ',rule-b@5,']);
+        expect(launchInputs.total_alert_count).toBe(
+          '${{ steps.resolve_totals.output.row.1 | default: 0 }}'
+        );
+        expect(launchInputs.total_fp_count).toBe(
+          '${{ steps.resolve_totals.output.row.2 | default: 0 }}'
+        );
+      });
+
       describe('expiring stale tuning proposals', () => {
+        const expireStaleProposalsStep = tuningSteps.find(
+          ({ name }) => name === 'expire_stale_tuning_proposals'
+        ) as NestedStep & {
+          foreach?: string;
+        };
+        const fetchProposalRuleStep = tuningSteps.find(
+          ({ name }) => name === 'fetch_proposal_rule'
+        )!;
         const expireSteps = ['expire_deleted_rule_proposal', 'expire_changed_rule_proposal'].map(
           (stepName) => tuningSteps.find(({ name }) => name === stepName)!
         );
+
+        it('checks only exception proposals for staleness, not Rule Coverage proposals', () => {
+          const exception = { actionWorkflowId: 'system-alertzero-action-add-rule-exception' };
+          const install = { actionWorkflowId: 'system-alertzero-action-install-prebuilt-rule' };
+          const context = {
+            consts: tuning.consts,
+            steps: {
+              list_pending_tuning_proposals: { output: { proposals: [exception, install] } },
+            },
+          };
+
+          expect(resolveExpression(expireStaleProposalsStep.foreach, context)).toEqual([exception]);
+        });
+
+        it("looks up an exception proposal's rule by rule_id, not id", async () => {
+          const path = await createWorkflowLiquidEngine().parseAndRender(
+            String(fetchProposalRuleStep.with?.path),
+            {
+              workflow: { spaceId: 'default' },
+              foreach: { item: { actionInput: { rule_id: 'rule-1' } } },
+            }
+          );
+
+          expect(path).toBe('/s/default/api/detection_engine/rules?id=rule-1');
+        });
+
         const proposal = (expectedRevision?: number) => ({
           id: 'proposal-1',
           actionInput: { id: 'rule-1', expected_revision: expectedRevision },
@@ -796,6 +977,8 @@ describe('detection rule workflows', () => {
         expect(consts.max_candidate_rules).toBe(20);
         expect(consts.max_rules_per_sweep).toBe(10);
         expect(consts.max_candidate_rules).toBeGreaterThan(consts.max_rules_per_sweep);
+        expect(consts.max_screened_rules).toBeGreaterThanOrEqual(consts.max_candidate_rules);
+        expect(screenQuery).toContain('LIMIT {{ consts.max_screened_rules }}');
         expect(harvestQuery).toContain('LIMIT {{ consts.max_candidate_rules }}');
 
         const trigger = (
@@ -812,33 +995,37 @@ describe('detection rule workflows', () => {
       });
 
       it('does not split one rule history when its name changes', () => {
-        const groupClause = harvestQuery
-          .split('\n')
-          .find((line) => line.trimStart().startsWith('BY '));
+        for (const query of [screenQuery, harvestQuery]) {
+          const groupClause = query.split('\n').find((line) => line.trimStart().startsWith('BY '));
 
-        expect(groupClause).not.toContain('kibana.alert.rule.name');
+          expect(groupClause).not.toContain('kibana.alert.rule.name');
+        }
       });
 
       // The per-document exclusions live in the DSL filter so Lucene drops the rows
       // before ES|QL sees them.
-      it('excludes hidden building-block alerts and bounds the window in the filter', () => {
-        const filter = JSON.stringify(harvest.with?.filter);
+      it('excludes EQL sequence members and bounds the window in the filter', () => {
+        for (const step of [screen, harvest]) {
+          const filter = JSON.stringify(step.with?.filter);
 
-        expect(filter).toContain('"exists":{"field":"kibana.alert.building_block_type"}');
-        expect(filter).toContain(
-          '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
-        );
+          expect(filter).toContain('"exists":{"field":"kibana.alert.group.index"}');
+          expect(filter).toContain(
+            '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
+          );
+        }
       });
 
       // The tag API writes to the alerts index of the space it runs in, so anything the
       // harvest reads outside that space could never be marked.
       it('harvests only the space it can tag in', () => {
+        expect(screenQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
         expect(harvestQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
       });
 
       // A partial aggregation returns a short alert_ids list, so alerts that drove an
       // approved change would stay untagged and come back on the next sweep.
       it('refuses partial harvest results', () => {
+        expect(screen.with?.allow_partial_results).toBe(false);
         expect(harvest.with?.allow_partial_results).toBe(false);
       });
 
@@ -1080,7 +1267,7 @@ describe('detection rule workflows', () => {
         expect(accepts([])).toBe(false);
         // Only `${{ }}` keeps objects; `{{ }}` renders a string.
         expect(
-          accepts('${{ steps.diagnose_rule.output.structured_output.exception_entries }}')
+          accepts('${{ steps.bound_exception_entries.output.entries_json | json_parse }}')
         ).toBe(false);
       });
 
@@ -1239,6 +1426,40 @@ describe('detection rule workflows', () => {
         expect(comment).not.toContain('marks these alerts acknowledged');
       });
 
+      // The unbacktested branch names the one reason that applies, so a threshold
+      // rule with a query change is not told it is the wrong rule type.
+      it.each([
+        ['saved_query', 'query', 'does not support saved query rules or machine learning rules'],
+        [
+          'machine_learning',
+          'query',
+          'does not support saved query rules or machine learning rules',
+        ],
+        ['esql', 'exception', 'cannot apply an exception to an ES|QL rule'],
+        ['query', 'exception', 'could not convert the proposed exception into a preview filter'],
+        ['query', 'threshold', 'does not support this change on a query rule'],
+      ])(
+        'explains why a %s rule with a %s change has no backtest',
+        async (type, changeType, reason) => {
+          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+          const comment = String((compose.with as Record<string, string>).comment);
+
+          const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
+            inputs: {},
+            consts: {},
+            steps: {
+              fetch_rule: { output: { type, name: 'r', id: 'id' } },
+              diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              can_preview_query_change: { output: { supported: false } },
+            },
+          });
+
+          expect(rendered).toContain('No backtest is available for this change.');
+          expect(rendered).toContain(reason);
+          expect(rendered).toContain('Approving still applies the proposed change');
+        }
+      );
+
       // The diagnosis schema leaves its title unbounded and the proposal step
       // rejects anything longer, so an unbounded forward fails the whole review.
       it('bounds the proposal title to what the proposal step accepts', async () => {
@@ -1254,26 +1475,24 @@ describe('detection rule workflows', () => {
         expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
       });
 
-      // Appended with `trigger_mode: never` so the note does not run the investigation
-      // agent. A direct request rather than the journal note workflow keeps the
-      // proposal gate the only synchronous child in its wake-up cycle.
+      // Appended as a user message so the note does not run the investigation agent. A
+      // step rather than the journal note workflow keeps the proposal gate the only
+      // synchronous child in its wake-up cycle.
       it.each([
         ['post_fp_pattern', '{{ steps.diagnose_rule.output.structured_output.fp_pattern }}'],
         ['post_reasoning', '{{ steps.diagnose_rule.output.structured_output.reasoning }}'],
       ])('posts %s to the investigation without running the agent', (stepName, field) => {
         const note = reviewSteps.find(({ name }) => name === stepName)!;
-        const body = note.with?.body as Record<string, string>;
+        const input = note.with as Record<string, string>;
 
-        expect(note.type).toBe('kibana.request');
-        expect(note.with?.method).toBe('POST');
-        expect(note.with?.path).toBe('/s/{{ workflow.spaceId }}/api/chat/converse');
+        expect(note.type).toBe('ai.conversation.add_user_message');
         expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
         expect(note['on-failure']).toEqual({ continue: true });
-        expect(body.conversation_id).toBe(
+        expect(input.conversation_id).toBe(
           '{{ steps.create_investigation.output.conversation_id }}'
         );
-        expect(body.trigger_mode).toBe('never');
-        expect(body.input).toContain(field);
+        expect(input.author_name).toBe('{{ consts.author_name }}');
+        expect(input.message).toContain(field);
         expect(reviewSteps.indexOf(note)).toBeLessThan(
           reviewSteps.findIndex(({ name }) => name === 'compose_proposal')
         );
@@ -1382,17 +1601,44 @@ describe('detection rule workflows', () => {
         expect(emitInput).toContain('_shards.failed == 0');
       });
 
-      it('excludes rule modes with omitted preview fields from auto-apply', () => {
+      // An EQL sequence writes one building-block alert per matched event next to the
+      // sequence alert. The sweep leaves those out when it counts false positives, so
+      // the backtest counts the same way or a two-event sequence reads as three alerts.
+      it('leaves EQL sequence members out of both preview counts', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const counts = previewSteps.filter(({ type }) => type === 'elasticsearch.search');
+
+        expect(counts).toHaveLength(2);
+        for (const count of counts) {
+          const query = count.with?.query as {
+            bool: { filter: unknown[]; must_not: unknown[] };
+          };
+          expect(query.bool.filter).toEqual([
+            { term: { 'kibana.alert.rule.uuid': expect.stringContaining('previewId') } },
+          ]);
+          expect(query.bool.must_not).toEqual([{ exists: { field: 'kibana.alert.group.index' } }]);
+        }
+      });
+
+      // Data view, timestamp override and alert suppression are passed through to
+      // both preview bodies instead of excluding the rule from the backtest.
+      it('previews rules with a data view, timestamp override or alert suppression', () => {
         const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.data_view_id == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.timestamp_override == null'
-        );
-        expect(String(support.with?.supported)).toContain(
-          'steps.fetch_rule.output.alert_suppression == null'
-        );
+        expect(String(support.with?.supported)).not.toContain('data_view_id');
+        expect(String(support.with?.supported)).not.toContain('timestamp_override');
+        expect(String(support.with?.supported)).not.toContain('alert_suppression');
+
+        const previewStep = reviewSteps.find(({ name }) => name === 'run_previews')!;
+        const bodies = previewStep.with?.inputs as Record<string, Record<string, string>>;
+        for (const body of [bodies.preview_body, bodies.proposed_body]) {
+          expect(body.data_view_id).toBe('${{ steps.fetch_rule.output.data_view_id }}');
+          expect(body.timestamp_override).toBe('${{ steps.fetch_rule.output.timestamp_override }}');
+          expect(body.timestamp_override_fallback_disabled).toBe(
+            '${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}'
+          );
+          expect(body.alert_suppression).toBe('${{ steps.fetch_rule.output.alert_suppression }}');
+        }
         expect(String(support.with?.supported)).toContain(
           "steps.diagnose_rule.output.structured_output.change_type == 'query'"
         );
@@ -1404,6 +1650,65 @@ describe('detection rule workflows', () => {
         expect(String(previews.if)).toContain(
           'steps.can_preview_query_change.output.supported == true'
         );
+      });
+
+      // The gate is a hand-written table of rule type by change type, evaluated here
+      // rather than string-matched so a dropped or misspelled cell fails the test.
+      // Saved query rules carry no inline query and machine learning rules none at
+      // all; an exception cannot be previewed on an ES|QL rule, which has no filters.
+      describe('backtest gate', () => {
+        const evaluateGate = (
+          type: string,
+          changeType: string,
+          exceptionFilter: { error: null; output: { filters: unknown[] } } | { error: string }
+        ) => {
+          const support = reviewSteps.find(({ name }) => name === 'can_preview_query_change')!;
+          const expression = String(support.with?.supported).trim().slice(3, -2).trim();
+          return createWorkflowLiquidEngine().evalValueSync(expression, {
+            steps: {
+              fetch_rule: { error: null, output: { type, enabled: true } },
+              diagnose_rule: { output: { structured_output: { change_type: changeType } } },
+              build_exception_filter: exceptionFilter,
+            },
+          });
+        };
+        const builtFilter = { error: null, output: { filters: [{ bool: {} }] } };
+
+        it.each([
+          ['query', { query: true, exception: true, threshold: false, schedule: true }],
+          ['eql', { query: true, exception: true, threshold: false, schedule: true }],
+          ['esql', { query: true, exception: false, threshold: false, schedule: true }],
+          ['new_terms', { query: true, exception: true, threshold: false, schedule: true }],
+          ['threat_match', { query: true, exception: true, threshold: false, schedule: true }],
+          ['threshold', { query: true, exception: true, threshold: true, schedule: true }],
+          ['saved_query', { query: false, exception: false, threshold: false, schedule: false }],
+          [
+            'machine_learning',
+            { query: false, exception: false, threshold: false, schedule: false },
+          ],
+        ])('decides each change type on a %s rule', (type, expected) => {
+          for (const [changeType, supported] of Object.entries(expected)) {
+            expect([changeType, evaluateGate(type, changeType, builtFilter)]).toEqual([
+              changeType,
+              supported,
+            ]);
+          }
+        });
+
+        it.each(['risk_score', 'manual'])('never previews a %s change', (changeType) => {
+          expect(evaluateGate('query', changeType, builtFilter)).toBe(false);
+        });
+
+        // Falling back to the rule's own filters would backtest the unchanged rule.
+        it('withholds the exception backtest when the filter was not built', () => {
+          expect(evaluateGate('query', 'exception', { error: 'boom' })).toBe(false);
+          expect(
+            evaluateGate('query', 'exception', {
+              error: null,
+              output: { filters: null as unknown as unknown[] },
+            })
+          ).toBe(false);
+        });
       });
 
       it('bounds direct review inputs', () => {
@@ -1422,6 +1727,137 @@ describe('detection rule workflows', () => {
         expect(properties.preview_invocation_count).toEqual(
           expect.objectContaining({ minimum: 1, maximum: 10 })
         );
+      });
+
+      describe('diagnosis schema and exception caps', () => {
+        const diagnose = reviewSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const diagnosisSchema = (diagnose.with as Record<string, unknown>).schema as {
+          type?: string;
+          oneOf: Array<{ properties: Record<string, any> }>;
+        };
+        const exceptionBranch = diagnosisSchema.oneOf.find(
+          ({ properties }) => properties.change_type?.const === 'exception'
+        )!;
+        const bound = reviewSteps.find(({ name }) => name === 'bound_exception_entries')!;
+        const consts = review.consts as Record<string, number>;
+
+        const collectKeys = (node: unknown, key: string): unknown[] =>
+          node && typeof node === 'object'
+            ? Object.entries(node).flatMap(([k, v]) => [
+                ...(k === key ? [v] : []),
+                ...collectKeys(v, key),
+              ])
+            : [];
+
+        const runBound = (entries: unknown[]): Array<Record<string, unknown>> => {
+          const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+            String((bound.with as Record<string, string>).entries_json),
+            {
+              consts,
+              steps: {
+                diagnose_rule: { output: { structured_output: { exception_entries: entries } } },
+              },
+            }
+          );
+          return JSON.parse(rendered);
+        };
+
+        // Gemini answers 400 to the schema when either cap is present, so the caps
+        // live after parsing instead (see the bound_exception_entries tests below).
+        it('sends no maxItems on exception_entries or on any entry values', () => {
+          const { exception_entries: entries } = exceptionBranch.properties;
+          expect(entries.type).toBe('array');
+          expect(entries).not.toHaveProperty('maxItems');
+          expect(entries.minItems).toBe(1);
+          expect(collectKeys(diagnosisSchema, 'maxItems')).toEqual([5]);
+        });
+
+        // Claude rejects an unwrapped root oneOf, so the root must keep its shape for
+        // the ai.agent wrap-and-pick behaviour.
+        it('keeps the schema root a typeless oneOf', () => {
+          expect(diagnosisSchema).not.toHaveProperty('type');
+          expect(Array.isArray(diagnosisSchema.oneOf)).toBe(true);
+          expect(
+            diagnosisSchema.oneOf.map(({ properties }) => properties.change_type.const)
+          ).toEqual(
+            expect.arrayContaining([
+              'exception',
+              'query',
+              'risk_score',
+              'threshold',
+              'schedule',
+              'manual',
+            ])
+          );
+        });
+
+        it('declares the platform caps as consts', () => {
+          expect(consts.max_exception_entries).toBe(100);
+          expect(consts.max_exception_values).toBe(1000);
+        });
+
+        // bound_exception_entries is a backstop: on overflow, reject_oversized_exception
+        // fails the run first, so these truncations are unreachable in a real run.
+        it('backstop bound_exception_entries truncates entries at consts.max_exception_entries', () => {
+          const oversized = Array.from({ length: consts.max_exception_entries + 25 }, (_, i) => ({
+            field: `host.name.${i}`,
+            operator: 'is',
+            value: `v${i}`,
+          }));
+
+          const result = runBound(oversized);
+
+          expect(result).toHaveLength(consts.max_exception_entries);
+          expect(result[0]).toEqual(oversized[0]);
+          expect(result[result.length - 1]).toEqual(oversized[consts.max_exception_entries - 1]);
+        });
+
+        it('backstop bound_exception_entries truncates values at consts.max_exception_values, keeping order', () => {
+          const values = Array.from(
+            { length: consts.max_exception_values + 40 },
+            (_, i) => `v${i}`
+          );
+
+          const [entry] = runBound([{ field: 'host.name', operator: 'is_one_of', values }]);
+
+          expect(entry.field).toBe('host.name');
+          expect(entry.operator).toBe('is_one_of');
+          expect(entry.values).toEqual(values.slice(0, consts.max_exception_values));
+        });
+
+        it('passes in-bound entries of every operator shape through unchanged', () => {
+          const entries = [
+            { field: 'user.name', operator: 'is', value: 'svc "quoted"' },
+            { field: 'host.name', operator: 'is_not_one_of', values: ['a', 'b\\c'] },
+            { field: 'a.b', operator: 'exists' },
+          ];
+
+          expect(runBound(entries)).toEqual(entries);
+        });
+
+        it('feeds only the bounded entries to every consumer', () => {
+          const raw = 'steps.diagnose_rule.output.structured_output.exception_entries';
+          const consumers = reviewSteps.filter(({ with: w }) =>
+            JSON.stringify(w ?? {}).includes('bound_exception_entries')
+          );
+          expect(consumers.map(({ name }) => name)).toEqual(
+            expect.arrayContaining([
+              'build_exception_filter',
+              'attach_exception',
+              'propose_exception',
+              'compose_proposal',
+            ])
+          );
+          // check_exception_entries is the overflow gate: it reads the raw entries
+          // to fail the run on overflow, before bound_exception_entries normalizes.
+          const rawUsers = reviewSteps.filter(
+            ({ name, with: w }) =>
+              !['bound_exception_entries', 'check_exception_entries'].includes(name) &&
+              JSON.stringify(w ?? {}).includes(raw)
+          );
+          expect(rawUsers.map(({ name }) => name)).toEqual([]);
+          expect(bound.if).toContain("change_type == 'exception'");
+        });
       });
 
       // security.setAlertTags declares its inputs as a zod union, so a whole-array
@@ -1503,7 +1939,7 @@ describe('detection rule workflows', () => {
       // the diagnosis and, once tagged, places the reviewed watermark.
       it('keeps only the newest false positives as alert ids', () => {
         expect(harvestQuery).toContain(
-          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", _id)'
+          'fp_recency_key = CONCAT(DATE_FORMAT("yyyyMMddHHmmssSSS", @timestamp), "|", `kibana.alert.uuid`)'
         );
         expect(harvestQuery).toContain('recent_keys = TOP(fp_recency_key');
         expect(harvestQuery).toContain('MV_EXPAND recent_keys');
@@ -1513,29 +1949,22 @@ describe('detection rule workflows', () => {
 
       // The gates live in the review children (one execution = one resume slot),
       // while the sweep fans out synchronously and joins once every gate settles.
-      it('fans out one sync review per rule and joins on all gates', () => {
-        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')! as NestedStep & {
-          mode?: string;
-          concurrency?: { max: number; 'count-waiting': boolean };
-        };
-        const launches = tuningSteps.filter(({ type }) => type === 'workflow.execute');
+      it('fans out one async review per rule without waiting on its gate', () => {
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
+        const launches = tuningSteps.filter(({ type }) => type === 'workflow.executeAsync');
 
-        expect(fanOut.type).toBe('parallel');
-        // Settled: one failed review must not skip the other rules' gates.
-        expect(fanOut.mode).toBe('settled');
-        // A slot per launched rule (max_rules_per_sweep; the input can only lower
-        // the cap) so every gate opens at once.
-        expect(fanOut.concurrency).toEqual({ max: 10, 'count-waiting': false });
-        // A timeout here would abort branches and cancel children mid-approval;
-        // the child gate's own timeout is the only clock.
+        // A sync launch would park the sweep in WAITING_FOR_CHILD for up to 72h
+        // per gate and block the space's scheduled sweeps behind it.
+        expect(fanOut.type).toBe('foreach');
         expect(fanOut).not.toHaveProperty('timeout');
         expect(fanOut).not.toHaveProperty('branch-timeout');
 
         expect(launches.map(({ name }) => name)).toEqual(['run_review']);
         expect(launches[0].with?.['workflow-id']).toBe(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID);
-        expect(launches[0]).not.toHaveProperty('on-failure');
+        // A start the engine rejects must not stop the remaining rules' reviews.
+        expect(launches[0]['on-failure']).toEqual({ continue: true });
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
-        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.executeAsync');
+        expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.execute');
 
         const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
@@ -1544,36 +1973,39 @@ describe('detection rule workflows', () => {
         expect(concurrency.max).toBe(1);
       });
 
-      // The limit is per space; with max 1 a sweep waiting on its gates (up to 72h)
-      // would make every scheduled 2h sweep get skipped until it finishes.
-      it('keeps sweeping a space for new rules while earlier gates are pending', () => {
+      // The sweep finishes in seconds now that it does not join on gates, so two
+      // sweeps in one space would only race each other for the same rules.
+      it('runs one sweep per space at a time', () => {
         const { concurrency } = (tuning as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { strategy: string; max: number } };
 
         expect(concurrency.strategy).toBe('drop');
-        expect(concurrency.max).toBe(5);
+        expect(concurrency.max).toBe(1);
       });
 
-      // The fan-in reads the settled aggregate, so the summary cannot run before
-      // every gate has resolved or failed.
-      it('summarizes decisions from the settled fan-out results', () => {
-        const summary = tuningSteps.find(({ name }) => name === 'summarize_decisions')!;
+      // Decisions land in each review, not in the sweep: the sweep can only report
+      // what it started and what was already in flight.
+      it('reports launches and in-flight reviews instead of decisions', () => {
         const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
-        const summaryInput = JSON.stringify(summary.with);
+        const outputs = emit.with as Record<string, string>;
 
-        expect(summaryInput).toContain('steps.run_reviews.output.failed');
-        expect(summaryInput).toContain("where: 'approved'");
-        expect(summaryInput).toContain("where: 'applied'");
-        for (const key of [
+        expect(tuningSteps.map(({ name }) => name)).not.toContain('summarize_decisions');
+        expect(Object.keys(outputs).sort()).toEqual([
+          'harvest_failed',
+          'lookup_failed',
+          'reviews_in_flight',
           'reviews_requested',
-          'reviews_approved',
-          'reviews_failed',
-          'rules_applied',
-        ]) {
-          expect(String((emit.with as Record<string, string>)[key])).toContain(
-            `steps.summarize_decisions.output.${key}`
-          );
-        }
+          'rules_truncated',
+        ]);
+        expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
+        expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
+        expect(outputs.harvest_failed).toContain('steps.list_enabled_rules.error != null');
+        expect(outputs.harvest_failed).toContain('steps.screen_rule_fp_rates.error != null');
+        expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
+        expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
+        expect(outputs.rules_truncated).toBe(
+          '${{ steps.resolve_enabled_rules.output.truncated | default: false }}'
+        );
       });
     });
 

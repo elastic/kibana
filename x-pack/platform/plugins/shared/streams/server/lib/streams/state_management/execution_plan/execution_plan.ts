@@ -47,7 +47,6 @@ import type {
   DeleteEsqlViewAction,
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
-  DeleteQueriesAction,
   ElasticsearchAction,
   UpdateDataStreamMappingsAction,
   UpdateLifecycleAction,
@@ -63,7 +62,6 @@ import type {
   UnlinkSystemsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
-  UnlinkFeaturesAction,
 } from './types';
 
 /**
@@ -97,10 +95,8 @@ export class ExecutionPlan {
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
       update_data_stream_mappings: [],
-      delete_queries: [],
       unlink_assets: [],
       unlink_systems: [],
-      unlink_features: [],
       update_ingest_settings: [],
       upsert_esql_view: [],
       delete_esql_view: [],
@@ -193,10 +189,8 @@ export class ExecutionPlan {
         delete_dot_streams_document,
         update_data_stream_mappings,
         update_failure_store,
-        delete_queries,
         unlink_assets,
         unlink_systems,
-        unlink_features,
         update_ingest_settings,
         upsert_esql_view,
         delete_esql_view,
@@ -238,10 +232,8 @@ export class ExecutionPlan {
       await Promise.all([
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
-        this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
         this.unlinkSystems(unlink_systems),
-        this.unlinkFeatures(unlink_features),
         this.deleteEsqlViews(delete_esql_view),
       ]);
 
@@ -274,24 +266,6 @@ export class ExecutionPlan {
     }
   }
 
-  private async deleteQueries(actions: DeleteQueriesAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    const { getKnowledgeIndicatorClient, logger } = this.dependencies;
-    if (!getKnowledgeIndicatorClient) {
-      logger.debug(
-        'Skipping deleteQueries: Knowledge Indicator client is not available (significant events disabled)'
-      );
-      return;
-    }
-    const kiClient = await getKnowledgeIndicatorClient();
-    return Promise.all(
-      actions.map((action) => kiClient.deleteAllQueries(action.request.definition.name))
-    );
-  }
-
   private async unlinkAssets(actions: UnlinkAssetsAction[]) {
     if (actions.length === 0) {
       return;
@@ -310,27 +284,6 @@ export class ExecutionPlan {
   private async unlinkSystems(actions: UnlinkSystemsAction[]) {
     // Systems have been removed; this is a no-op kept for backward compatibility
     // with existing execution plans that may contain unlink_systems actions.
-  }
-
-  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    const { getKnowledgeIndicatorClient, logger } = this.dependencies;
-    if (!getKnowledgeIndicatorClient) {
-      logger.debug(
-        'Skipping unlinkFeatures: Knowledge Indicator client is not available (significant events disabled)'
-      );
-      return;
-    }
-    const kiClient = await getKnowledgeIndicatorClient();
-    return Promise.all(
-      actions.map(async (action) => {
-        await kiClient.deleteAllQueries(action.request.name);
-        await kiClient.deleteIndicators(action.request.name);
-      })
-    );
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {

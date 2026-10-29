@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/utility-types'
   - '@kbn/es-query'
+  - '@kbn/inference-common'
 tags:
   - shared-common
   - package
@@ -34,6 +35,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

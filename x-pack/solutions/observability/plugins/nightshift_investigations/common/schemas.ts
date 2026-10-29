@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
+import type { JsonValue } from '@kbn/utility-types';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { INVESTIGATION_SUBJECT_TYPES } from './workflows/triggers';
 
@@ -25,6 +26,7 @@ export const MAX_ALERTS_PER_INVESTIGATION = 20;
 // A rule type writes one evaluation entry per metric or criterion, so this bounds a hostile
 // array rather than a realistic rule.
 const MAX_EVALUATION_ENTRIES = 20;
+const MAX_V2_ALERT_DATA_LENGTH = 32_000;
 
 export const investigationSubjectTypeSchema = z.enum(INVESTIGATION_SUBJECT_TYPES);
 
@@ -33,6 +35,56 @@ export const investigationSubjectSchema = z.object({
   id: z.string().min(1).max(500),
   summary: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
+
+/** Bound on notification destinations one investigation fans out to; one per automation is the norm. */
+export const MAX_INVESTIGATION_NOTIFICATIONS = 5;
+
+const MAX_NOTIFICATION_PARAM_LENGTH = 4096;
+const MAX_NOTIFICATION_PARAM_ENTRIES = 20;
+const MAX_NOTIFICATION_PARAM_DEPTH = 3;
+
+// A finite schema rejects deeply nested or cyclic input without unbounded recursion.
+const notificationParamValueSchema = (remainingDepth: number): z.ZodType<JsonValue> => {
+  const scalar = z.union([
+    z.string().max(MAX_NOTIFICATION_PARAM_LENGTH),
+    z.number(),
+    z.boolean(),
+    z.null(),
+  ]);
+  if (remainingDepth === 0) {
+    return scalar;
+  }
+  const child = notificationParamValueSchema(remainingDepth - 1);
+  return z.union([
+    scalar,
+    z.array(child).max(MAX_NOTIFICATION_PARAM_ENTRIES),
+    z
+      .record(z.string().max(128), child)
+      .refine((value) => Object.keys(value).length <= MAX_NOTIFICATION_PARAM_ENTRIES, {
+        message: 'notification params exceed the 20-key limit',
+      }),
+  ]);
+};
+
+/** Generic destination envelope; notification handlers validate connector-specific params at runtime. */
+export const investigationNotificationDestinationSchema = z.strictObject({
+  type: z.string().min(1).max(100),
+  connector_id: z.string().min(1).max(500),
+  params: z
+    .record(z.string().max(128), notificationParamValueSchema(MAX_NOTIFICATION_PARAM_DEPTH - 1))
+    .refine((value) => Object.keys(value).length <= MAX_NOTIFICATION_PARAM_ENTRIES, {
+      message: 'notification params exceed the 20-key limit',
+    })
+    .refine((value) => JSON.stringify(value).length <= MAX_NOTIFICATION_PARAM_LENGTH, {
+      message: 'notification params exceed the 4096-character JSON limit',
+    }),
+  automation_id: z.string().max(500).optional(),
+  automation_name: z.string().max(500).optional(),
+});
+
+export const investigationNotificationDestinationsSchema = z
+  .array(investigationNotificationDestinationSchema)
+  .max(MAX_INVESTIGATION_NOTIFICATIONS);
 
 export const alertSnapshotGroupSchema = z.object({
   field: z.string().max(500),
@@ -85,8 +137,8 @@ export const alertSnapshotSchema = z.object({
   /** `kibana.alert.status` */
   status: z.string().min(1).max(100),
   /** `kibana.alert.start` */
-  start: z.string().max(100).datetime({ offset: true }),
-  timestamp: z.string().max(100).datetime({ offset: true }).optional(),
+  start: isoDateTime({ offset: true }).max(100),
+  timestamp: isoDateTime({ offset: true }).max(100).optional(),
   /** `kibana.alert.flapping` — written by the alerting framework for every alert. */
   flapping: z.boolean().optional(),
   /**
@@ -119,6 +171,37 @@ export const alertSnapshotSchema = z.object({
 });
 
 /**
+ * A point-in-time copy of an alerting v2 episode, resolved server-side from its id. Unlike a
+ * classic alert it has no rule type, category or reason, and the alert's own fields live in
+ * `data`.
+ */
+export const v2AlertSnapshotSchema = z.object({
+  alert_version: z.literal('v2'),
+  /** `episode.id` */
+  id: z.string().min(1).max(500),
+  rule_id: z.string().min(1).max(500),
+  rule_name: z.string().min(1).max(500).optional(),
+  group_hash: z.string().min(1).max(500),
+  /** `episode.status` */
+  status: z.string().min(1).max(100),
+  /** Timestamp of the episode's first event. */
+  start: isoDateTime({ offset: true }).max(100),
+  last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
+  severity: z.string().min(1).max(100).optional(),
+  source: z.string().min(1).max(500).optional(),
+  /** The `data` of the latest event that carried any. */
+  data: z
+    .record(z.string().max(128), z.unknown())
+    .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
+    .optional(),
+});
+
+export const investigationAlertSnapshotSchema = z.discriminatedUnion('alert_version', [
+  alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
+  v2AlertSnapshotSchema,
+]);
+
+/**
  * Strict, so that an alert investigation carries alert data and nothing else. In particular a
  * caller cannot pass the `event_uuid` the workflow's attach steps read and have the results land
  * on a significant event: one investigation has one trigger today, and an alert is not a
@@ -128,7 +211,7 @@ export const alertSnapshotSchema = z.object({
  */
 export const alertInvestigationContextSchema = z
   .object({
-    alerts: z.array(alertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+    alerts: z.array(investigationAlertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
   })
   .strict();
 
@@ -158,8 +241,13 @@ export const freeFormContextSchema = z
   });
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
+export type InvestigationNotificationDestination = z.infer<
+  typeof investigationNotificationDestinationSchema
+>;
 export type AlertSnapshotGroup = z.infer<typeof alertSnapshotGroupSchema>;
 export type AlertSnapshotEvaluation = z.infer<typeof alertSnapshotEvaluationSchema>;
 export type AlertSnapshot = z.infer<typeof alertSnapshotSchema>;
+export type V2AlertSnapshot = z.infer<typeof v2AlertSnapshotSchema>;
+export type InvestigationAlertSnapshot = z.infer<typeof investigationAlertSnapshotSchema>;
 export type AlertInvestigationContext = z.infer<typeof alertInvestigationContextSchema>;
 export type InvestigationContext = z.infer<typeof freeFormContextSchema>;

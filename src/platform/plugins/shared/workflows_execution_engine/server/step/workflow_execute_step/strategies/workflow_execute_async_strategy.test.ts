@@ -269,6 +269,104 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     );
   });
 
+  describe('execution chain in the child context', () => {
+    const getChildContext = (): Record<string, unknown> =>
+      mockEngine.executeWorkflow.mock.calls[0][1] as Record<string, unknown>;
+
+    it("makes a top-level parent the only hop of its direct child's chain", async () => {
+      (mockStepRuntime.workflowExecution as any).context = {};
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'async-step-1'
+      );
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          executionChain: [
+            { executionId: 'parent-exec-1', invocation: 'async', workflowId: 'parent-workflow-id' },
+          ],
+        })
+      );
+    });
+
+    it("appends the parent to a grandchild's chain after the top-level hop", async () => {
+      (mockStepRuntime.workflowExecution as any).context = {
+        executionChain: [
+          { executionId: 'top-exec-1', invocation: 'sync', workflowId: 'top-workflow-id' },
+        ],
+        parentWorkflowExecutionId: 'top-exec-1',
+        parentWorkflowId: 'top-workflow-id',
+      };
+      (mockStepRuntime.workflowExecution as any).triggeredBy = 'workflow-step';
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        1,
+        false,
+        'async-step-1'
+      );
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          executionChain: [
+            { executionId: 'top-exec-1', invocation: 'sync', workflowId: 'top-workflow-id' },
+            { executionId: 'parent-exec-1', invocation: 'async', workflowId: 'parent-workflow-id' },
+          ],
+          parentWorkflowExecutionId: 'parent-exec-1',
+          parentWorkflowId: 'parent-workflow-id',
+        })
+      );
+    });
+
+    it('keeps the execution chain next to an inherited service account', async () => {
+      (mockStepRuntime.workflowExecution as any).context = {};
+
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0, true, 'child');
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          executionChain: [
+            { executionId: 'parent-exec-1', invocation: 'async', workflowId: 'parent-workflow-id' },
+          ],
+          inheritParentIdentity: true,
+          parentStepName: 'child',
+        })
+      );
+    });
+
+    it('omits the chain when the parent is a child without a stored chain', async () => {
+      (mockStepRuntime.workflowExecution as any).context = {
+        parentWorkflowExecutionId: 'unknown-exec',
+        parentWorkflowId: 'unknown-workflow-id',
+      };
+      (mockStepRuntime.workflowExecution as any).triggeredBy = 'workflow-step';
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        1,
+        false,
+        'async-step-1'
+      );
+
+      expect(getChildContext()).not.toHaveProperty('executionChain');
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({ parentWorkflowInvocation: 'async' })
+      );
+    });
+  });
+
   it('should log info about the started execution', async () => {
     await strategy.execute(
       createMockWorkflow(),

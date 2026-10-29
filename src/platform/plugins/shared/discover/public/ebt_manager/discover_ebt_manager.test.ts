@@ -160,69 +160,6 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
-        eventType: 'discover_query_performance',
-        schema: {
-          eventName: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'The name of the query performance event that is tracked i.e. discoverFetchAll, discoverFetchMore',
-            },
-          },
-          duration: {
-            type: 'integer',
-            _meta: {
-              description: 'The event duration in milliseconds',
-            },
-          },
-          queryRangeSeconds: {
-            type: 'long',
-            _meta: {
-              description: 'The query time range in seconds',
-            },
-          },
-          phraseQueryCount: {
-            type: 'integer',
-            _meta: {
-              description: 'The number of phrase queries found in the Elasticsearch requests',
-            },
-          },
-          multiMatchTypes: {
-            type: 'array',
-            items: {
-              type: 'keyword',
-              _meta: {
-                description: 'Multi-match query types found in the Elasticsearch requests',
-              },
-            },
-            _meta: {
-              description: 'Multi-match query types found in the Elasticsearch requests',
-            },
-          },
-          fetchType: {
-            type: 'keyword',
-            _meta: {
-              description: 'The fetch implementation used for the query request',
-            },
-          },
-          querySourceCommand: {
-            type: 'keyword',
-            _meta: {
-              description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
-              optional: true,
-            },
-          },
-          approximation: {
-            type: 'boolean',
-            _meta: {
-              description: 'Whether the response contains approximate results',
-              optional: true,
-            },
-          },
-        },
-      });
-
-      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
         eventType: 'discover_in_dashboard',
         schema: {
           eventName: {
@@ -1166,24 +1103,15 @@ describe('DiscoverEBTManager', () => {
         meta: {
           fetchType: 'fetchTextBased',
           multi_match_types: ['match_phrase', 'phrase'],
+          query_source_command: 'FROM',
+          approximationApplied: false,
         },
       });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_performance',
-        {
-          eventName: 'testQueryEvent',
-          duration: 750,
-          queryRangeSeconds: 300,
-          phraseQueryCount: 2,
-          multiMatchTypes: ['match_phrase', 'phrase'],
-          fetchType: 'fetchTextBased',
-          querySourceCommand: 'FROM',
-        }
-      );
+      expect(coreSetupMock.analytics.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('should track PROMQL as a query source command', () => {
+    it('should track PROMQL as a query source command in the performance event meta', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1207,21 +1135,23 @@ describe('DiscoverEBTManager', () => {
 
       tracker.reportEvent({ requestAdapter: undefined });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_performance',
-        {
-          eventName: 'testQueryEvent',
-          duration: 750,
-          queryRangeSeconds: 300,
-          phraseQueryCount: 0,
-          multiMatchTypes: [],
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 0,
+        meta: {
           fetchType: 'fetchTextBased',
-          querySourceCommand: 'PROMQL',
-        }
-      );
+          multi_match_types: [],
+          query_source_command: 'PROMQL',
+          approximationApplied: false,
+        },
+      });
     });
 
-    it('should omit query source command for classic queries', () => {
+    it('should omit query source command and approximationApplied for classic queries', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1246,17 +1176,18 @@ describe('DiscoverEBTManager', () => {
 
       tracker.reportEvent({ requestAdapter: undefined });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_performance',
-        {
-          eventName: 'testQueryEvent',
-          duration: 750,
-          queryRangeSeconds: 300,
-          phraseQueryCount: 0,
-          multiMatchTypes: [],
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 0,
+        meta: {
           fetchType: 'fetchDocuments',
-        }
-      );
+          multi_match_types: [],
+        },
+      });
     });
 
     it('should avoid re-analyzing the same request multiple times', () => {
@@ -1310,7 +1241,7 @@ describe('DiscoverEBTManager', () => {
       analyzeSpy.mockRestore();
     });
 
-    it('should track approximation as true when the response has approximate results', () => {
+    it('should track approximationApplied as true when the response has approximate results', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1330,15 +1261,25 @@ describe('DiscoverEBTManager', () => {
         },
       });
 
-      tracker.reportEvent({ requestAdapter: undefined, approximation: true });
+      tracker.reportEvent({ requestAdapter: undefined, approximationApplied: true });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_performance',
-        expect.objectContaining({ approximation: true })
-      );
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 0,
+        meta: {
+          fetchType: 'fetchTextBased',
+          multi_match_types: [],
+          query_source_command: 'FROM',
+          approximationApplied: true,
+        },
+      });
     });
 
-    it('should track approximation as false when the response does not have approximate results', () => {
+    it('should track approximationApplied as false when the response does not have approximate results', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1358,15 +1299,25 @@ describe('DiscoverEBTManager', () => {
         },
       });
 
-      tracker.reportEvent({ requestAdapter: undefined, approximation: false });
+      tracker.reportEvent({ requestAdapter: undefined, approximationApplied: false });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_performance',
-        expect.objectContaining({ approximation: false })
-      );
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 0,
+        meta: {
+          fetchType: 'fetchTextBased',
+          multi_match_types: [],
+          query_source_command: 'FROM',
+          approximationApplied: false,
+        },
+      });
     });
 
-    it('should omit approximation from the event when not provided', () => {
+    it('should default approximationApplied to false for ES|QL queries when not provided', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1388,10 +1339,20 @@ describe('DiscoverEBTManager', () => {
 
       tracker.reportEvent({ requestAdapter: undefined });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith(
-        'discover_query_performance',
-        expect.not.objectContaining({ approximation: true })
-      );
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 0,
+        meta: {
+          fetchType: 'fetchTextBased',
+          multi_match_types: [],
+          query_source_command: 'FROM',
+          approximationApplied: false,
+        },
+      });
     });
   });
 

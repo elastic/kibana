@@ -69,6 +69,8 @@ interface ConversationQueueProps {
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  /** When false, cards are inert and their chat control and menu are disabled. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   /** A function, not a value: the URL is per-card and only the caller can resolve it. */
   getChatHref?: (id: Investigation['id']) => string | undefined;
@@ -126,6 +128,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     onClickCard,
     onClickRecommendedAction,
     onOpenChat,
+    canOpenInvestigationDetails = true,
     getChatHref,
     getOutcomeLabel,
     selectedIds,
@@ -150,10 +153,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
     }
     const rows = isOpen ? briefingList : heldRows;
 
-    // Filtered, the badge counts the matching rows. Rows still to load may match too, so
-    // the figure is a floor then.
-    const badgeCount = isFiltered ? `${rows.length}${remaining > 0 ? '+' : ''}` : count;
-
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -167,10 +166,10 @@ export const ConversationQueue = memo<ConversationQueueProps>(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isCountUnavailable ? null : badgeCount === undefined ? (
+          {isCountUnavailable ? null : count === undefined ? (
             <EuiLoadingSpinner size="s" aria-label={CONVERSATION_QUEUE_COUNT_LOADING} />
           ) : (
-            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{badgeCount}</EuiBadge>
+            <EuiBadge color={CONVERSATION_CATEGORY_COLORS[briefingType]}>{count}</EuiBadge>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -204,6 +203,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
             onClickAction,
             onClickCard,
             onOpenChat,
+            canOpenInvestigationDetails,
             onClickRecommendedAction,
             chatHref: getChatHref?.(investigation.id),
             canManageEscalations,

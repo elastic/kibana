@@ -15,7 +15,7 @@ const buildAutomation = (overrides: Partial<Automation>): Automation => ({
   isEnabled: true,
   trigger: { rows: [{ kind: 'alert' }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: {},
   createdAt: '2026-10-01T00:00:00.000Z',
   updatedAt: '2026-10-01T00:00:00.000Z',
@@ -29,9 +29,27 @@ describe('toCloneRequestBody', () => {
       name: 'Triage',
       tags: ['oncall'],
       description: 'Triage alerts',
-      trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'weekly',
+            time: '07:00',
+            daysOfWeek: [1],
+            timezone: 'Europe/Berlin',
+          },
+        ],
+      },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completions: [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: '#oncall',
+          connectorId: 'saved-slack',
+        },
+      ],
+
       runtime: { dailyDispatchLimit: 5 },
     });
 
@@ -41,9 +59,27 @@ describe('toCloneRequestBody', () => {
       description: 'Triage alerts',
       isEnabled: false,
       automationType: 'custom',
-      trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'weekly',
+            time: '07:00',
+            daysOfWeek: [1],
+            timezone: 'Europe/Berlin',
+          },
+        ],
+      },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completions: [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: '#oncall',
+          connectorId: 'saved-slack',
+        },
+      ],
+
       runtime: { dailyDispatchLimit: 5 },
     });
   });

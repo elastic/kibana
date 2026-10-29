@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 
 /**
  * Minimal 40px toolbar header matching the Security alerts flyout pattern.
@@ -15,22 +15,26 @@ import { EuiFlexGroup, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
  */
 export function FlyoutToolbarHeader({
   children,
+  leftContent,
 }: {
   children: React.ReactNode;
+  leftContent?: React.ReactNode;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const edgePadding = `calc(${euiTheme.size.xs} + ${euiTheme.size.s})`;
+  const hasLeftContent = leftContent != null;
 
   return (
     <EuiFlyoutHeader
       hasBorder
       css={css`
         && {
-          padding: 0 calc(${euiTheme.size.xs} + ${euiTheme.size.s}) 0 0;
+          padding: 0 ${edgePadding} 0 ${hasLeftContent ? edgePadding : '0'};
         }
       `}
     >
       <EuiFlexGroup
-        justifyContent="flexEnd"
+        justifyContent={hasLeftContent ? 'spaceBetween' : 'flexEnd'}
         alignItems="center"
         responsive={false}
         gutterSize="xs"
@@ -38,7 +42,22 @@ export function FlyoutToolbarHeader({
           height: ${euiTheme.size.xxl};
         `}
       >
-        {children}
+        {hasLeftContent ? (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                {leftContent}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+                {children}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </>
+        ) : (
+          children
+        )}
       </EuiFlexGroup>
     </EuiFlyoutHeader>
   );

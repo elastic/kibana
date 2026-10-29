@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import {
+  createWorkspaceState,
+  deselectNode,
+  invertNodeSelection,
+  registerWorkspaceListeners,
+  selectAllNodes,
+  selectNeighborNodes,
+  toggleNodeSelection,
+  workspaceChanged,
+} from '../../state_management/workspace';
+import { createMockGraphStore } from '../../state_management/mocks';
 import { createWorkspace } from './graph_client_workspace';
 
 describe('graphui-workspace', function () {
@@ -16,6 +27,8 @@ describe('graphui-workspace', function () {
       //Setup logic here
       // fooResource={"foo":"bar"};
       init = function () {
+        const changeHandler = jest.fn();
+        const topologyChangeHandler = jest.fn();
         const callNodeProxy = function (indexName, query, responseHandler) {
           responseHandler(mockedResult);
         };
@@ -29,6 +42,8 @@ describe('graphui-workspace', function () {
               name: 'field2',
             },
           ],
+          changeHandler,
+          topologyChangeHandler,
           graphExploreProxy: callNodeProxy,
           exploreControls: {
             useSignificance: false,
@@ -42,6 +57,8 @@ describe('graphui-workspace', function () {
         const workspace = createWorkspace(options);
         return {
           workspace,
+          changeHandler,
+          topologyChangeHandler,
           //, get to(){}
         };
       };
@@ -50,6 +67,43 @@ describe('graphui-workspace', function () {
       const { workspace } = init();
       expect(workspace.nodes.length).toEqual(0);
     });
+    it('notifies topology changes separately from layout ticks', function () {
+      const { workspace, changeHandler, topologyChangeHandler } = init();
+      workspace.runLayout = jest.fn();
+
+      workspace.mergeGraph({
+        nodes: [{ field: 'field1', term: 'a', weight: 1, depth: 0 }],
+        edges: [],
+      });
+
+      expect(topologyChangeHandler).toHaveBeenCalledTimes(1);
+      expect(changeHandler).not.toHaveBeenCalled();
+      expect(workspace.runLayout).toHaveBeenCalledTimes(1);
+    });
+
+    it('initializes edge layout references before snapshotting topology changes', function () {
+      const { workspace, topologyChangeHandler } = init();
+      topologyChangeHandler.mockImplementation(() => createWorkspaceState(workspace));
+
+      try {
+        workspace.mergeGraph({
+          nodes: [
+            { field: 'field1', term: 'a', weight: 1, depth: 0 },
+            { field: 'field1', term: 'b', weight: 1, depth: 1 },
+          ],
+          edges: [{ source: 0, target: 1, weight: 1, doc_count: 5 }],
+        });
+
+        expect(topologyChangeHandler).toHaveBeenCalledTimes(1);
+        const snapshot = topologyChangeHandler.mock.results[0].value;
+        const edge = snapshot.edgesById[snapshot.edgeIds[0]];
+        expect(edge.topSourceId).toBe(workspace.nodes[0].id);
+        expect(edge.topTargetId).toBe(workspace.nodes[1].id);
+      } finally {
+        workspace.stopLayout();
+      }
+    });
+
     it('simpleSearch', function () {
       //Test that a graph is loaded from a free-text search
       const { workspace } = init();
@@ -205,6 +259,11 @@ describe('graphui-workspace', function () {
       workspace.simpleSearch('myquery', undefined, 2);
 
       expect(workspace.selectedNodes.length).toEqual(0);
+      const { store } = createMockGraphStore({
+        listeners: [registerWorkspaceListeners],
+        mockedDepsOverwrites: { getWorkspace: jest.fn(() => workspace) },
+      });
+      store.dispatch(workspaceChanged(createWorkspaceState(workspace)));
 
       const nodeA1 = workspace.getNode(workspace.makeNodeId('field1', 'a1'));
       expect(typeof nodeA1).toEqual('object');
@@ -216,24 +275,24 @@ describe('graphui-workspace', function () {
       expect(typeof nodeB2).toEqual('object');
 
       expect(workspace.selectedNodes.length).toEqual(0);
-      workspace.selectNode(nodeA1);
+      store.dispatch(toggleNodeSelection({ nodeId: nodeA1.id, replace: false }));
       expect(workspace.selectedNodes.length).toEqual(1);
-      workspace.selectInvert();
+      store.dispatch(invertNodeSelection());
       expect(workspace.selectedNodes.length).toEqual(3);
-      workspace.selectInvert();
+      store.dispatch(invertNodeSelection());
       expect(workspace.selectedNodes.length).toEqual(1);
-      workspace.deselectNode(nodeA1);
+      store.dispatch(deselectNode(nodeA1.id));
       expect(workspace.selectedNodes.length).toEqual(0);
-      workspace.selectAll();
+      store.dispatch(selectAllNodes());
       expect(workspace.selectedNodes.length).toEqual(4);
-      workspace.selectInvert();
+      store.dispatch(invertNodeSelection());
       expect(workspace.selectedNodes.length).toEqual(0);
 
-      workspace.selectNode(nodeA1);
+      store.dispatch(toggleNodeSelection({ nodeId: nodeA1.id, replace: false }));
       expect(workspace.selectedNodes.length).toEqual(1);
-      workspace.selectNeighbours();
+      store.dispatch(selectNeighborNodes());
       expect(workspace.selectedNodes.length).toEqual(2);
-      workspace.selectNeighbours();
+      store.dispatch(selectNeighborNodes());
       //Should have reached full extent of a1-a2 island.
       expect(workspace.selectedNodes.length).toEqual(2);
     });

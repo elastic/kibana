@@ -259,6 +259,11 @@ const PER_TYPE_FIXTURES: {
     },
     { action: 'create' }
   ),
+  bulkAttachments: makeUserActionSO(
+    'bulkAttachments',
+    { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
+    { action: 'delete' }
+  ),
 };
 
 // ----- Layer 1: doc-builder output ⊆ activity mapping (per-type) -----

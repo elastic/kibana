@@ -305,7 +305,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               <EuiText size="s" textAlign="right">
                 <EuiLink {...workflowManagementLinkProps} external={false}>
                   <FormattedMessage
-                    id="workflows.params.viewAllWorkflowsLinkText"
+                    id="workflowsUi.params.viewAllWorkflowsLinkText"
                     defaultMessage="View all workflows"
                   />
                   <EuiIcon type="external" size="s" aria-hidden={true} />
@@ -346,7 +346,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
               <EuiText size="s" textAlign="right">
                 <EuiLink {...workflowManagementLinkProps} external={false}>
                   <FormattedMessage
-                    id="workflows.params.viewAllWorkflowsLinkText"
+                    id="workflowsUi.params.viewAllWorkflowsLinkText"
                     defaultMessage="View all workflows"
                   />
                   <EuiIcon type="external" size="s" aria-hidden={true} />

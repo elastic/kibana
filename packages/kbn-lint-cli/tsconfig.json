@@ -18,5 +18,6 @@
     "@kbn/repo-info",
     "@kbn/dev-proc-runner",
     "@kbn/tooling-log",
+    "@kbn/dev-cli-errors",
   ]
 }

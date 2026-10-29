@@ -26,6 +26,8 @@ export interface ActionsClientProvider {
 import type {
   BoundInferenceClient,
   BoundOptions,
+  ChatCompleteOptions,
+  FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
 } from '@kbn/inference-common';
@@ -35,6 +37,7 @@ import type {
   AnonymizationPluginStart,
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
+import type { AiAnonymizationSettingsPluginSetup } from '@kbn/ai-anonymization-settings-plugin/server';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -42,6 +45,7 @@ import type { InferenceEndpoint } from './util/get_inference_endpoints';
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
   anonymization?: AnonymizationPluginSetup;
+  aiAnonymizationSettings?: AiAnonymizationSettingsPluginSetup;
 }
 
 export interface InferenceStartDependencies {
@@ -50,9 +54,34 @@ export interface InferenceStartDependencies {
 }
 
 /**
+ * Resolves the options to call a feature's top endpoint with, scoped to the given request.
+ */
+export type FeatureEndpointResolver = (
+  featureId: string,
+  request: KibanaRequest
+) => Promise<Pick<ChatCompleteOptions, 'connectorId' | 'temperature' | 'reasoning'> | undefined>;
+
+/**
+ * A {@link FeatureEndpointResolver} already scoped to a request.
+ */
+export type ScopedFeatureEndpointResolver = (
+  featureId: string
+) => ReturnType<FeatureEndpointResolver>;
+
+/**
+ * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`.
+ */
+export type InferenceServerClient = InferenceClient & { chatComplete: FeatureChatCompleteAPI };
+
+/**
  * Setup contract of the inference plugin.
  */
-export interface InferenceServerSetup {}
+export interface InferenceServerSetup {
+  /**
+   * Registers the resolver used by `chatComplete({ featureId })`. Only one resolver can be registered.
+   */
+  registerFeatureEndpointResolver: (resolver: FeatureEndpointResolver) => void;
+}
 
 /**
  * Options to create an inference client using the {@link InferenceServerStart.getClient} API.
@@ -90,7 +119,7 @@ export type InferenceClientCreateOptions =
  */
 export interface InferenceServerStart {
   /**
-   * Creates an {@link InferenceClient}, scoped to a request.
+   * Creates an {@link InferenceServerClient}, scoped to a request.
    *
    * @example
    * ```ts
@@ -98,6 +127,17 @@ export interface InferenceServerStart {
    *
    * const chatResponse = inferenceClient.chatComplete({
    *   connectorId: 'my-connector-id',
+   *   messages: [{ role: MessageRole.User, content: 'Do something' }],
+   * });
+   * ```
+   *
+   * Server features can pass a `featureId` instead of a `connectorId`. The feature's top model,
+   * and its `temperature` and `reasoning`, are then resolved from the model settings.
+   *
+   * @example
+   * ```ts
+   * const chatResponse = inferenceClient.chatComplete({
+   *   featureId: 'my-feature-id',
    *   messages: [{ role: MessageRole.User, content: 'Do something' }],
    * });
    * ```
@@ -122,7 +162,7 @@ export interface InferenceServerStart {
    */
   getClient: <T extends InferenceClientCreateOptions>(
     options: T
-  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+  ) => T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceServerClient;
 
   /**
    * Creates a langchain {@link InferenceChatModel} that will be using the inference framework
@@ -171,7 +211,9 @@ export interface InferenceServerStart {
    * {@link KibanaRequest}. This is useful for background tasks (e.g. alerting rule
    * executors) that have scoped clients but no HTTP request context.
    *
-   * Note: anonymization features are not available on clients created this way.
+   * Note: anonymization features are not available on clients created this way, and
+   * inference endpoints are always called in streaming mode because the per-space
+   * streaming setting cannot be read without a request.
    *
    * @param actionsClient - A pre-scoped actions client
    * @param esClient - A pre-scoped Elasticsearch client

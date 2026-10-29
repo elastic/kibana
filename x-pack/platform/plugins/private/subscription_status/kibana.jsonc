@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/subscription-status-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Shows the subscription status badge in the Kibana header",
+  "plugin": {
+    "id": "subscriptionStatus",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [],
+    "optionalPlugins": [
+      "cloud"
+    ]
+  }
+}

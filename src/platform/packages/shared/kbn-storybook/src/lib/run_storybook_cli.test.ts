@@ -13,8 +13,6 @@ import { buildStorybook } from './run_storybook_cli';
 
 jest.mock('@storybook/core-server', () => ({ build: jest.fn() }));
 jest.mock('@kbn/rspack-optimizer', () => ({ runSharedBuild: jest.fn() }));
-jest.mock('fix-esm', () => ({ require: jest.fn(), unregister: jest.fn() }));
-
 const buildMock = build as jest.MockedFunction<typeof build>;
 const runSharedBuildMock = runSharedBuild as jest.MockedFunction<typeof runSharedBuild>;
 

@@ -7,58 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timingSafeEqual } from 'crypto';
-
-import type { Headers } from '@kbn/core-http-server';
-import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import {
-  isUiamCredential,
-  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
-  deriveInternalCallerAttestation,
-} from '@kbn/core-security-server';
-
-/**
- * The credential an Elasticsearch client is being scoped with, plus where it came from, used to
- * decide whether the UIAM shared secret should be attached. See
- * {@link CoreUiamService.getElasticsearchClientAuthentication}.
- */
-export type UiamClientAuthenticationParams =
-  | {
-      /** Kibana minted or stored the credential itself, so nothing has to vouch for it. */
-      credentialSource: 'internal';
-      /** The credential that will be sent to Elasticsearch. */
-      credential: HTTPAuthorizationHeader;
-    }
-  | {
-      /**
-       * The credential is a user-created (external) UIAM API key. UIAM rejects external keys
-       * presented with client authentication, so the shared secret must never be attached to it.
-       * Consumers signal this by marking the fake request that carries the credential with
-       * `markExternalUiamCredential` from `@kbn/core-security-server`.
-       */
-      credentialSource: 'external';
-      /** The credential that will be sent to Elasticsearch. */
-      credential: HTTPAuthorizationHeader;
-    }
-  | {
-      /** The credential rode in over HTTP, so the request has to vouch for it. */
-      credentialSource: 'inbound';
-      /** The credential that will be sent to Elasticsearch. */
-      credential: HTTPAuthorizationHeader;
-      /**
-       * The client authentication already resolved for the credential, either relayed by the
-       * upstream caller or chosen by the authentication provider that produced the credential.
-       * Read from the same headers as the credential, not from the raw request: a provider may
-       * have set it without it ever riding in on the wire.
-       */
-      relayedClientAuthentication: string | string[] | undefined;
-      /**
-       * Raw inbound request headers, carrying the attestation that proves an attacker-reachable
-       * request nonetheless came from a trusted loopback caller. Nothing in here is trustworthy
-       * until the attestation has been verified.
-       */
-      requestHeaders: Headers;
-    };
+import type { UiamClientAuthenticationParams } from '@kbn/core-security-server';
+import { resolveUiamClientAuthentication } from '@kbn/core-security-server';
 
 /**
  * Core's UIAM service
@@ -86,49 +36,10 @@ export interface CoreUiamService {
   ): string | string[] | undefined;
 }
 
-/**
- * Constant-time string comparison used to validate the internal-caller attestation without leaking,
- * via timing, how many leading characters matched. Returns false (no throw) on a length mismatch,
- * so an attacker-controlled value of any length is handled safely.
- */
-function constantTimeEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
-}
-
-/**
- * Builds the core {@link CoreUiamService}.
- */
+/** Builds the core {@link CoreUiamService}. */
 export function createCoreUiamService(sharedSecret: string): CoreUiamService {
   return Object.freeze({
-    getElasticsearchClientAuthentication(params: UiamClientAuthenticationParams) {
-      if (!isUiamCredential(params.credential)) {
-        return;
-      }
-
-      if (params.credentialSource === 'external') {
-        return;
-      }
-
-      if (params.credentialSource === 'inbound') {
-        // The token may be bound to another client, so whatever already speaks for it is never
-        // replaced by Kibana's own secret. Checked ahead of the attestation so that, should a
-        // caller ever present both, the outcome is its own secret and never Kibana's.
-        if (params.relayedClientAuthentication !== undefined) {
-          return params.relayedClientAuthentication;
-        }
-
-        // The attestation is bound to the credential it rides with, so one captured from another
-        // request (or another credential) does not validate here.
-        const expected = deriveInternalCallerAttestation(sharedSecret, params.credential);
-        const presented = params.requestHeaders[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
-        if (typeof presented !== 'string' || !constantTimeEqual(presented, expected)) {
-          return;
-        }
-      }
-
-      return sharedSecret;
-    },
+    getElasticsearchClientAuthentication: (params: UiamClientAuthenticationParams) =>
+      resolveUiamClientAuthentication(sharedSecret, params),
   });
 }

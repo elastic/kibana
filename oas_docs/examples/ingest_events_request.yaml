@@ -1,0 +1,4 @@
+summary: Ingest a connector event.
+value:
+  eventType: order.created
+  orderId: '1'

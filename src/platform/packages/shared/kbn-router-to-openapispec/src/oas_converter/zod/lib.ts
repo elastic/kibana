@@ -203,7 +203,7 @@ const instanceofZodTypeLikeString = (_type: z.ZodTypeAny, allowMixedUnion: boole
     return true;
   }
 
-  // "string" covers both z.string() and z.iso.datetime(), z.email(), etc.
+  // "string" covers both z.string() and isoDateTime(), z.email(), etc.
   return defType === 'string';
 };
 
@@ -813,6 +813,24 @@ function jsonSchemaToOpenApi30(node: Record<string, unknown>): Record<string, un
     result.nullable = true;
   }
 
+  // Zod 4.5+ compacts simple nullable unions into a type array,
+  // e.g. `type: ['string', 'null']` — OAS 3.0 does not support type arrays.
+  if (Array.isArray(result.type)) {
+    const types = (result.type as unknown[]).filter((t) => t !== 'null');
+    const isNullable = types.length !== (result.type as unknown[]).length;
+    if (types.length === 1) {
+      result.type = types[0];
+    } else {
+      delete result.type;
+      if (types.length > 1) {
+        result.anyOf = types.map((t) => ({ type: t }));
+      }
+    }
+    if (isNullable) {
+      result.nullable = true;
+    }
+  }
+
   if (nullable) {
     result.nullable = true;
   }
@@ -851,6 +869,11 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
       const oasExtensions = normalizeOasMetaExtensions(zSchema, opts.env);
       if (oasExtensions) {
         (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
+      }
+
+      // `format: date-time` already documents the contract; the regex only bloats the OAS docs.
+      if ((js as any).format === 'date-time') {
+        delete (js as any).pattern;
       }
     },
   }) as Record<string, any>;

@@ -10,6 +10,17 @@ import { hostEntityDefinition } from '../../../../common/domain/definitions/host
 import { userEntityDefinition } from '../../../../common/domain/definitions/user';
 import { serviceEntityDefinition } from '../../../../common/domain/definitions/service';
 import { genericEntityDefinition } from '../../../../common/domain/definitions/generic';
+import type { ExtractionBlock } from '../../../../common/domain/definitions/entity_schema';
+import {
+  DYNAMIC_DEFINITION_FIXTURES,
+  hostDynamicFixture,
+  k8sPodDynamicFixture,
+  userShapedDynamicFixture,
+} from '../../../../common/domain/definitions/dynamic/__fixtures__/dynamic_definition_fixtures';
+import {
+  NO_IDENTITY_ATTRIBUTE_RULE,
+  SERVABLE_IDENTITY_RULE,
+} from '../../../../common/domain/definitions/dynamic/dynamic_definition_rules';
 import {
   EntityDefinitionRegistry,
   ENTITY_DEFINITION_TYPE_PATTERN,
@@ -17,22 +28,25 @@ import {
   type RegisterResult,
 } from '.';
 
+type TestDefinition = RegistrableEntityDefinition & { extraction: ExtractionBlock };
+
 const makeDefinition = (
   type: string,
   overrides: Partial<RegistrableEntityDefinition> = {}
-): RegistrableEntityDefinition => ({
+): TestDefinition => ({
   type,
   name: `Test '${type}' definition`,
-  fields: [
-    {
-      source: `${type}.name`,
-      destination: `${type}.name`,
-      retention: { operation: 'prefer_newest_value' },
-    },
-  ],
   identityField: { singleField: `${type}.name` },
-  indexPatterns: ['logs-*'],
   managedBy: { kind: 'plugin', id: 'testPlugin' },
+  extraction: {
+    fields: [
+      {
+        source: `${type}.name`,
+        destination: `${type}.name`,
+        retention: { operation: 'prefer_newest_value' },
+      },
+    ],
+  },
   ...overrides,
 });
 
@@ -75,22 +89,101 @@ describe('EntityDefinitionRegistry', () => {
 
     it('rejects a definition that fails the schema', () => {
       const definition = makeDefinition('bad_schema', {
-        indexPatterns: 'logs-*' as unknown as string[],
+        extraction: { fields: 'host.name' as unknown as ExtractionBlock['fields'] },
       });
 
       const result = registry.register(definition);
 
       expect(result.ok).toBe(false);
-      expectRejected('bad_schema', /failed schema validation: indexPatterns/);
+      expectRejected('bad_schema', /failed schema validation: extraction\.fields/);
     });
 
-    it.each(['Host', '1host', 'host..pod', 'host-', '_host', 'host pod', 'hôst', ''])(
-      'rejects type name %p that does not match the pattern',
-      (type) => {
-        expect(registry.register(makeDefinition(type)).ok).toBe(false);
-        expectRejected(type, /does not match pattern/);
-      }
-    );
+    // The two identity variants are told apart at runtime by key presence (`isSingleFieldIdentity`),
+    // and the registry keeps the object it was given, not the parsed copy. An identity carrying
+    // keys of both variants must be rejected outright: if the schema merely stripped the stray
+    // keys, the EUID helpers would read a `singleField` that was never validated.
+    describe('mixed identity variants', () => {
+      const ranking = { branches: [{ ranking: [[{ field: 'mixed.id' }]] }] };
+
+      it('rejects a calculated identity that also carries a single field', () => {
+        const { identityField } = hostEntityDefinition;
+        const result = registry.register({
+          ...hostEntityDefinition,
+          identityField: { ...identityField, singleField: 'host.*' },
+        });
+
+        expect(result.ok).toBe(false);
+        expectRejected('host', /failed schema validation: identityField/);
+      });
+
+      it('rejects a single-field identity that also carries a ranking', () => {
+        const result = registry.register(
+          makeDefinition('mixed', {
+            identityField: { singleField: 'mixed.name', euidRanking: ranking },
+          })
+        );
+
+        expect(result.ok).toBe(false);
+        expectRejected('mixed', /failed schema validation: identityField/);
+      });
+
+      it('rejects an unknown key inside identityField', () => {
+        const result = registry.register(
+          makeDefinition('typo', {
+            identityField: {
+              singleField: 'typo.name',
+              skipTypePrepend: true,
+              skipTypePrefix: true,
+            },
+          } as unknown as Partial<RegistrableEntityDefinition>)
+        );
+
+        expect(result.ok).toBe(false);
+        expectRejected('typo', /failed schema validation: identityField/);
+      });
+    });
+
+    it('accepts a definition with only the identity core', () => {
+      const { extraction, ...coreOnly } = makeDefinition('core_only');
+
+      expect(registry.register(coreOnly)).toEqual({ ok: true });
+      expect(registry.get('core_only')?.extraction).toBeUndefined();
+    });
+
+    it.each(['indexPatterns', 'filter'])('rejects the removed top-level key %p', (key) => {
+      const definition = { ...makeDefinition('removed_key'), [key]: [] };
+
+      expect(registry.register(definition).ok).toBe(false);
+      expectRejected('removed_key', new RegExp(`failed schema validation: .*${key}`));
+    });
+
+    it('rejects unknown keys in the extraction block', () => {
+      const base = makeDefinition('extra_extraction_key');
+      const definition = { ...base, extraction: { ...base.extraction, indexPatterns: [] } };
+
+      expect(registry.register(definition).ok).toBe(false);
+      expectRejected('extra_extraction_key', /failed schema validation: extraction.*indexPatterns/);
+    });
+
+    // `"` and `\` would break the double-quoted `<type>:` prefix the id compiler emits verbatim
+    // into ES|QL and Painless string literals, so the pattern must keep rejecting them. `'` is
+    // included for symmetry; it is simply outside the allowed character set.
+    it.each([
+      'Host',
+      '1host',
+      'host..pod',
+      'host-',
+      '_host',
+      'host pod',
+      'hôst',
+      '',
+      'a"b',
+      'a\\b',
+      "a'b",
+    ])('rejects type name %p that does not match the pattern', (type) => {
+      expect(registry.register(makeDefinition(type)).ok).toBe(false);
+      expectRejected(type, /does not match pattern/);
+    });
 
     it.each(['a', 'k8s.pod', 'aws_s3-bucket', 'a1.b2_c3-d4'])('accepts type name %p', (type) => {
       expect(ENTITY_DEFINITION_TYPE_PATTERN.test(type)).toBe(true);
@@ -110,7 +203,7 @@ describe('EntityDefinitionRegistry', () => {
       const mapping: Record<string, unknown> = { type: 'keyword' };
       mapping.self = mapping;
       const definition = makeDefinition('cyclic');
-      definition.fields = [{ ...definition.fields[0], mapping }];
+      definition.extraction.fields = [{ ...definition.extraction.fields[0], mapping }];
 
       let result: RegisterResult | undefined;
       expect(() => {
@@ -119,7 +212,7 @@ describe('EntityDefinitionRegistry', () => {
 
       expect(result).toEqual({
         ok: false,
-        reason: expect.stringContaining("circular reference at 'fields.0.mapping.self'"),
+        reason: expect.stringContaining("circular reference at 'extraction.fields.0.mapping.self'"),
       });
       expect(registry.get('cyclic')).toBeUndefined();
       expect(Object.isFrozen(definition)).toBe(false);
@@ -129,9 +222,9 @@ describe('EntityDefinitionRegistry', () => {
     it('accepts the same object referenced from two places and freezes it once', () => {
       const shared = { type: 'keyword' };
       const definition = makeDefinition('shared');
-      definition.fields = [
-        { ...definition.fields[0], mapping: shared },
-        { ...definition.fields[0], destination: 'other.field', mapping: shared },
+      definition.extraction.fields = [
+        { ...definition.extraction.fields[0], mapping: shared },
+        { ...definition.extraction.fields[0], destination: 'other.field', mapping: shared },
       ];
 
       expect(registry.register(definition).ok).toBe(true);
@@ -140,7 +233,7 @@ describe('EntityDefinitionRegistry', () => {
 
     it('turns an unexpected exception during validation into a rejection', () => {
       const definition = makeDefinition('throws');
-      Object.defineProperty(definition, 'fields', {
+      Object.defineProperty(definition.extraction, 'fields', {
         enumerable: true,
         get: () => {
           throw new Error('boom');
@@ -303,30 +396,30 @@ describe('EntityDefinitionRegistry', () => {
       expect(fromGet).toBe(input);
       expect(fromList).toBe(input);
       expect(Object.isFrozen(input)).toBe(true);
-      expect(Object.isFrozen(input.fields[0])).toBe(true);
+      expect(Object.isFrozen(input.extraction.fields[0])).toBe(true);
     });
 
     it('freezes nested values of a definition frozen only at the top level', () => {
       const input = Object.freeze(makeDefinition('top_frozen'));
       registry.register(input);
 
-      expect(Object.isFrozen(input.fields)).toBe(true);
-      expect(Object.isFrozen(input.fields[0])).toBe(true);
-      expect(Object.isFrozen(input.indexPatterns)).toBe(true);
+      expect(Object.isFrozen(input.extraction)).toBe(true);
+      expect(Object.isFrozen(input.extraction.fields)).toBe(true);
+      expect(Object.isFrozen(input.extraction.fields[0])).toBe(true);
     });
 
     it('prevents mutation of returned definitions, including nested values', () => {
       registry.register(makeDefinition('locked'));
-      const definition = registry.get('locked') as RegistrableEntityDefinition;
+      const definition = registry.get('locked') as TestDefinition;
 
       expect(() => {
         definition.name = 'changed';
       }).toThrow(TypeError);
       expect(() => {
-        definition.indexPatterns.push('other-*');
+        definition.extraction.fields.push(definition.extraction.fields[0]);
       }).toThrow(TypeError);
       expect(() => {
-        definition.fields[0].source = 'changed';
+        definition.extraction.fields[0].source = 'changed';
       }).toThrow(TypeError);
       expect(registry.get('locked')).toEqual(makeDefinition('locked'));
     });
@@ -397,6 +490,91 @@ describe('EntityDefinitionRegistry', () => {
         reason: 'type name is already registered',
       });
       expect(registry.get('host')).toBe(hostEntityDefinition);
+    });
+  });
+  // The registry parses with a schema derived from the unrefined object shape, so these prove the
+  // whole-definition rules are applied there too and not only by `entitySchema`.
+  describe('dynamic definitions', () => {
+    it.each(DYNAMIC_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
+      'registers the %s fixture',
+      (type, definition) => {
+        expect(registry.register(definition)).toEqual({ ok: true });
+        expect(registry.get(type)?.dynamic).toEqual(definition.dynamic);
+        expect(registry.rejected()).toEqual([]);
+      }
+    );
+
+    it('rejects the user-shaped definition with the servable identity rule', () => {
+      const result = registry.register(userShapedDynamicFixture);
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toContain(
+        `identityField.euidRanking.branches: ${SERVABLE_IDENTITY_RULE}:`
+      );
+      expect(registry.get('user')).toBeUndefined();
+    });
+
+    it('rejects a documentsFilter that is not the derived presence filter', () => {
+      const { identityField } = hostDynamicFixture;
+      const result = registry.register({
+        ...hostDynamicFixture,
+        identityField: {
+          ...identityField,
+          documentsFilter: { field: 'host.id', exists: true },
+        },
+      });
+
+      expect(result.ok === false && result.reason).toContain(
+        `identityField.documentsFilter: ${SERVABLE_IDENTITY_RULE}:`
+      );
+    });
+
+    it('rejects an identity carrying both variants rather than validating only the ranking', () => {
+      // `host.*` is not a literal field path, so the servable identity rule would reject it as a
+      // `singleField`; it must not slip past the rule by riding on a valid ranking.
+      const { identityField } = hostDynamicFixture;
+      const result = registry.register({
+        ...hostDynamicFixture,
+        identityField: { ...identityField, singleField: 'host.*' },
+      });
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.reason).toContain('identityField');
+      expect(registry.get('host')).toBeUndefined();
+    });
+
+    it('rejects an attribute that reads the identity field', () => {
+      const [source] = k8sPodDynamicFixture.dynamic?.sources ?? [];
+      const result = registry.register({
+        ...k8sPodDynamicFixture,
+        dynamic: { sources: [{ ...source, attributes: [{ name: 'uid', field: 'k8s.pod.uid' }] }] },
+      });
+
+      expect(result.ok === false && result.reason).toContain(
+        `dynamic.sources.0.attributes.0.field: ${NO_IDENTITY_ATTRIBUTE_RULE}:`
+      );
+    });
+
+    it('still rejects unknown keys alongside a dynamic block', () => {
+      const withStaleId = {
+        ...k8sPodDynamicFixture,
+        id: 'k8s.pod-default',
+      } as unknown as RegistrableEntityDefinition;
+
+      expect(registry.register(withStaleId).ok).toBe(false);
+    });
+
+    it('registers the built-ins', () => {
+      const builtIns: RegistrableEntityDefinition[] = [
+        userEntityDefinition,
+        hostEntityDefinition,
+        serviceEntityDefinition,
+        genericEntityDefinition,
+      ];
+
+      builtIns.forEach((definition) => {
+        expect(registry.register(definition)).toEqual({ ok: true });
+      });
     });
   });
 });

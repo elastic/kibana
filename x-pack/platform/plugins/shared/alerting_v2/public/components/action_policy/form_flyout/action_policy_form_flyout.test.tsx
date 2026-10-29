@@ -197,11 +197,22 @@ describe('ActionPolicyFormFlyout', () => {
     expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
   });
 
-  it('renders the inline simple workflow builder alongside the existing-workflow selector', () => {
+  it('keeps submit enabled and reveals the errors instead of saving an incomplete form', async () => {
+    const onSave = jest.fn();
+    renderFlyout({ onClose: jest.fn(), onSave });
+
+    const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+    expect(saveButton).toBeEnabled();
+    fireEvent.click(saveButton);
+
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+    expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('collapses the notification controls section by default', () => {
     renderFlyout({ onClose: jest.fn(), onSave: jest.fn() });
 
-    expect(screen.getByTestId('simpleWorkflowBuilder')).toBeInTheDocument();
-    expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
     expect(
       within(screen.getByTestId('actionPolicyFormSection-notificationControls'))
         .getByText('Notification controls')

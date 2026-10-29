@@ -13,6 +13,7 @@ describe('getCaseRoute', () => {
   const response = { ok: jest.fn() };
   const context = { cases: { getCasesClient: jest.fn().mockResolvedValue(casesClientMock) } };
   const sub = { unsubscribe: jest.fn() };
+  const incrementAttachmentTypeCounters = jest.fn();
 
   beforeEach(() => {
     casesClientMock.attachments.addFile.mockResolvedValue({ comments: [] } as never);
@@ -28,7 +29,7 @@ describe('getCaseRoute', () => {
     };
 
     // @ts-ignore
-    await postFileRoute.handler({ context, request, response });
+    await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
     expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -54,7 +55,7 @@ describe('getCaseRoute', () => {
     };
 
     // @ts-ignore
-    await postFileRoute.handler({ context, request, response });
+    await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
     expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -80,7 +81,7 @@ describe('getCaseRoute', () => {
     };
 
     // @ts-ignore
-    await postFileRoute.handler({ context, request, response });
+    await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
     expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -104,7 +105,7 @@ describe('getCaseRoute', () => {
     };
 
     // @ts-ignore
-    await postFileRoute.handler({ context, request, response });
+    await postFileRoute.handler({ context, request, response, incrementAttachmentTypeCounters });
 
     expect(casesClientMock.attachments.addFile).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -115,5 +116,35 @@ describe('getCaseRoute', () => {
     );
 
     expect(sub.unsubscribe).toHaveBeenCalled();
+  });
+
+  describe('attachment type counters', () => {
+    const request = {
+      body: { file: {} },
+      events: { aborted$: { subscribe: jest.fn().mockReturnValue(sub) } },
+      params: { case_id: 'bar' },
+    };
+
+    const callHandler = () =>
+      postFileRoute.handler({
+        context,
+        request,
+        response,
+        incrementAttachmentTypeCounters,
+      } as unknown as Parameters<typeof postFileRoute.handler>[0]);
+
+    it('counts the created file attachment', async () => {
+      await callHandler();
+
+      expect(incrementAttachmentTypeCounters).toHaveBeenCalledWith(['file']);
+    });
+
+    it('does not count the file attachment when the upload fails', async () => {
+      casesClientMock.attachments.addFile.mockRejectedValue(new Error('upload failed'));
+
+      await expect(callHandler()).rejects.toThrow();
+
+      expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
+    });
   });
 });

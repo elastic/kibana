@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import {
   EuiAvatar,
@@ -24,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import type { TimeRange } from '../hooks/use_automation_usage';
 import {
   statusLabels,
@@ -58,6 +60,7 @@ export const AutomationsToolbar = ({
   onRangeChange,
   onRefresh,
   onCreate,
+  createDisabledReason,
 }: {
   filters: AutomationFilters;
   options: AutomationFilterOptions;
@@ -72,6 +75,8 @@ export const AutomationsToolbar = ({
   onRangeChange: (range: TimeRange, label: string) => void;
   onRefresh: () => void;
   onCreate?: () => void;
+  /** Shows the create action disabled, with this reason, instead of hiding it. */
+  createDisabledReason?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null);
@@ -173,7 +178,32 @@ export const AutomationsToolbar = ({
           <EuiFlexItem grow={false}>
             <AutomationsTimeRangePicker onRangeChange={onRangeChange} onRefresh={onRefresh} />
           </EuiFlexItem>
-          {onCreate && (
+          {createDisabledReason && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={createDisabledReason}>
+                {isCompact ? (
+                  <EuiButtonIcon
+                    display="fill"
+                    iconType="plus"
+                    aria-label={listLabels.create}
+                    isDisabled
+                    data-test-subj="nightshiftAutomationsPageButton"
+                  />
+                ) : (
+                  <EuiButton
+                    data-test-subj="nightshiftAutomationsPageButton"
+                    fill
+                    size="s"
+                    iconType="plus"
+                    isDisabled
+                  >
+                    {listLabels.create}
+                  </EuiButton>
+                )}
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          {onCreate && !createDisabledReason && (
             <EuiFlexItem grow={false}>
               {isCompact ? (
                 <EuiToolTip content={listLabels.create} disableScreenReaderOutput>
@@ -183,6 +213,10 @@ export const AutomationsToolbar = ({
                     aria-label={listLabels.create}
                     onClick={onCreate}
                     data-test-subj="nightshiftAutomationsPageButton"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+                    })}
                   />
                 </EuiToolTip>
               ) : (
@@ -192,6 +226,10 @@ export const AutomationsToolbar = ({
                   size="s"
                   iconType="plus"
                   onClick={onCreate}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CREATE_AUTOMATION,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+                  })}
                 >
                   {listLabels.create}
                 </EuiButton>
@@ -215,6 +253,10 @@ export const AutomationsToolbar = ({
                   data-test-subj="nightshiftAutomationsPageButton"
                   size="xs"
                   onClick={onClearFilters}
+                  {...getEbtProps({
+                    action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_AUTOMATION_FILTERS,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+                  })}
                 >
                   {listLabels.clearFilters}
                 </EuiButtonEmpty>

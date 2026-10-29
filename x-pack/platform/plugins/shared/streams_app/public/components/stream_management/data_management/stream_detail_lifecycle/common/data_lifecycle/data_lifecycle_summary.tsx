@@ -125,10 +125,11 @@ export const DataLifecycleSummary = ({
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
 
-  // Readiness signal for tests: flips on every stats (re)fetch, not just the initial load.
+  // Readiness signal for tests: flips on every stats (re)fetch, not just the initial load. A preview
+  // stays active after save until the refreshed data replaces it, so it also counts as not ready.
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
   const statsReadinessTestSubj = `${prefix}dataLifecycleSummary-stats-${
-    loading ? 'loading' : 'loaded'
+    loading || isPreviewActive ? 'loading' : 'loaded'
   }`;
 
   // Only animate grid changes while the preview stays active between renders. Entering or leaving the

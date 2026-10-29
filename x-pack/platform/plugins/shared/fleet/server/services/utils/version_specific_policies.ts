@@ -24,7 +24,11 @@ import {
   AGENT_POLICY_VERSION_SEPARATOR,
   AGENTS_INDEX,
 } from '../../../common/constants';
-import { splitVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+import {
+  splitVersionSuffixFromPolicyId,
+  hasAgentVersionSuffix,
+  classifyPolicyId,
+} from '../../../common/services/version_specific_policies_utils';
 
 /** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
 const POLICY_BASE_ID_FIELD = 'policy_base_id';
@@ -35,7 +39,7 @@ const POLICY_BASE_ID_FIELD = 'policy_base_id';
  * with `search.allow_expensive_queries: false`.
  *
  * Mixed-version rollout note: an agent enrolled by a downlevel fleet-server after the last Kibana
- * startup backfill will have a versioned `policy_id` (e.g. `policy1#9.4`) but no `policy_base_id`
+ * setup backfill will have a versioned `policy_id` (e.g. `policy1#9.4`) but no `policy_base_id`
  * field. To still match such agents, pass the known `variantPolicyIds` (full ids, e.g.
  * `policy1#9.4`): agents with one of those exact `policy_id`s and no `policy_base_id` are matched
  * too. Exact terms only, so this stays compatible with `search.allow_expensive_queries: false`.
@@ -106,7 +110,7 @@ export async function getVariantAgentsKuery(
 /**
  * Returns the versioned policy ids (e.g. `"<parentId>#9.4"`) referenced by agents that have no
  * `policy_base_id`, grouped by parent (base) policy id. These agents were enrolled by a downlevel
- * fleet-server after the last startup backfill and cannot be located via `policy_base_id`; the
+ * fleet-server after the last setup backfill and cannot be located via `policy_base_id`; the
  * variant `.fleet-policies` document they reference may also already be gone.
  */
 export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
@@ -119,7 +123,7 @@ export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
   // Page through every distinct `policy_id` of agents lacking `policy_base_id` with a composite
   // aggregation, so discovery is not capped to the top-N buckets. Versioned ids are picked out
   // client-side (no `include` regex / wildcard query), keeping this compatible with
-  // `search.allow_expensive_queries: false`. After the startup backfill the set is tiny.
+  // `search.allow_expensive_queries: false`. After the setup backfill the set is tiny.
   do {
     signal?.throwIfAborted();
     const response: SearchResponse<
@@ -319,7 +323,8 @@ export async function reassignAgentsFromVersionSpecificPolicies(
  */
 export async function deleteVersionSpecificFleetServerPolicies(
   esClient: ElasticsearchClient,
-  parentPolicyId: string
+  parentPolicyId: string,
+  { keepPolicyIds = [] }: { keepPolicyIds?: string[] } = {}
 ): Promise<void> {
   await esClient.deleteByQuery({
     index: AGENT_POLICY_INDEX,
@@ -327,11 +332,11 @@ export async function deleteVersionSpecificFleetServerPolicies(
     // Match only the variant documents: `policy_base_id` is the base id for both the base and its
     // variants, so exclude the base document by `must_not policy_id: parentPolicyId`. Term-based
     // (no `prefix`), so it works with `search.allow_expensive_queries: false`. Every `.fleet-policies`
-    // document carries `policy_base_id` (written on deploy and backfilled at startup).
+    // document carries `policy_base_id` (written on deploy and backfilled by the Fleet setup task).
     query: {
       bool: {
         filter: [{ term: { [POLICY_BASE_ID_FIELD]: parentPolicyId } }],
-        must_not: [{ term: { policy_id: parentPolicyId } }],
+        must_not: [{ terms: { policy_id: [parentPolicyId, ...keepPolicyIds] } }],
       },
     },
     // Cleanup only; no reader needs the deletion visible synchronously, so avoid forcing a refresh.
@@ -419,7 +424,7 @@ export async function getAgentAssignedVersionsForPolicies(
 
   const variantIds = (policiesResponse.aggregations?.variant_policy_ids?.buckets ?? [])
     .map((b) => b.key)
-    .filter((id) => splitVersionSuffixFromPolicyId(id).version !== null);
+    .filter((id) => hasAgentVersionSuffix(id));
 
   if (variantIds.length === 0) {
     return result;
@@ -451,8 +456,9 @@ export async function getAgentAssignedVersionsForPolicies(
 
   const buckets = agentsResponse.aggregations?.agents_by_policy_id?.buckets ?? [];
   for (const { key } of buckets) {
-    const { baseId, version } = splitVersionSuffixFromPolicyId(key);
-    if (version === null) continue;
+    const { kind, baseId, version } = classifyPolicyId(key);
+    // Only agent versions have a variant to compile, not the sentinel.
+    if (kind !== 'agentVersion') continue;
     if (!result.has(baseId)) result.set(baseId, new Set());
     result.get(baseId)!.add(version);
   }

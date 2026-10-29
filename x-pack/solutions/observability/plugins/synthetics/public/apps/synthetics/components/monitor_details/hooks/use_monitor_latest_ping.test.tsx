@@ -9,7 +9,12 @@ import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as reactRedux from 'react-redux-v7';
 import { useMonitorLatestPing } from './use_monitor_latest_ping';
-import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+  MonitorTypeEnum,
+  type Ping,
+} from '../../../../../../common/runtime_types';
 import { getMonitorLastRunAction } from '../../../state';
 import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
@@ -148,6 +153,33 @@ describe('useMonitorLatestPing', () => {
       const { result } = renderHook(() => useMonitorLatestPing());
 
       expect(result.current.latestPing).toBe(ping);
+    });
+
+    it('accepts a location-less ping when the selected location is the Heartbeat placeholder', () => {
+      mockUseSelectedLocation.mockReturnValue({ label: HEARTBEAT_UNMAPPED_LOCATION_LABEL });
+      mockUseSelectedMonitor.mockReturnValue({ monitor: localMonitor });
+      const ping = {
+        monitor: { id: 'local-monitor-id' },
+      } as unknown as Ping;
+      mockLatestPingState.mockReturnValue({ data: ping, loading: false, loaded: true });
+
+      const { result } = renderHook(() => useMonitorLatestPing());
+
+      expect(result.current.latestPing).toBe(ping);
+    });
+
+    it('rejects a located ping when the selected location is the Heartbeat placeholder', () => {
+      mockUseSelectedLocation.mockReturnValue({ label: HEARTBEAT_UNMAPPED_LOCATION_LABEL });
+      mockUseSelectedMonitor.mockReturnValue({ monitor: localMonitor });
+      const ping = {
+        monitor: { id: 'local-monitor-id' },
+        observer: { geo: { name: 'US East' } },
+      } as unknown as Ping;
+      mockLatestPingState.mockReturnValue({ data: ping, loading: false, loaded: true });
+
+      const { result } = renderHook(() => useMonitorLatestPing());
+
+      expect(result.current.latestPing).toBeUndefined();
     });
 
     it('returns undefined latestPing when the Redux ping is for a different location', () => {

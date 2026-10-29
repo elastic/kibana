@@ -24,6 +24,9 @@ jest.mock('@kbn/react-query', () => {
   };
 });
 
+// Keep the per-test budget well clear of the 5000 ms `renderReactQueryHook` waits below.
+jest.setTimeout(30_000);
+
 describe('useGetEndpointDetails hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
     Parameters<typeof useGetEndpointDetails>[number],

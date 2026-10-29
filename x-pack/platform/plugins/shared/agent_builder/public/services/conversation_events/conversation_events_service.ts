@@ -25,7 +25,7 @@ export class ConversationEventsService {
    *
    * @param definition - The UI definition; the event type is taken from `definition.type`.
    * @throws Error if the type is already registered, contains the id delimiter, is reserved, or
-   *   shadows a built-in timeline event type.
+   *   shadows a built-in event type (timeline or activity).
    */
   register<TType extends string, TData>(
     definition: ConversationEventUIDefinition<TType, TData>

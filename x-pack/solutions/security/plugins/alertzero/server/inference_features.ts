@@ -9,47 +9,49 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import {
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 
 /**
  * Every endpoint below is a literal. `defaultInferenceEndpoints` stops at Claude 4.6 and GPT-5.4,
  * so no current-generation endpoint has a constant, and a constant would not prove the endpoint is
  * provisioned anyway. GA dates track `AGENT_BUILDER_RECOMMENDED_ENDPOINTS`, the list kept closest
- * to what EIS actually serves.
+ * to what EIS actually serves; endpoints Agent Builder does not recommend carry no date.
  *
- * Order is the fallback chain: a tier that loses its primary degrades to a still-current model on
- * the same rung rather than collapsing onto the cluster default.
+ * Each list is the product-recommended default for its tier, one model per vendor, so a tier that
+ * loses its primary degrades to a comparable model from another vendor rather than collapsing onto
+ * the cluster default.
  */
 
-// The fast tier takes the highest-volume and lowest-stakes calls we make — one per alert — so a
-// small model keeps the bill and the wall clock down. Same pairing Agent Builder uses for its fast
-// tier. Sonnet sits last so this degrades to a mid-tier model, never up to a frontier one: a
-// frontier recommendation here would silently bill the per-alert path at frontier rates.
-const FAST_RECOMMENDED_ENDPOINTS = [
-  '.google-gemini-3.5-flash-lite-chat_completion', // Gemini 3.5 Flash Lite, GA 2026-07-21
+// The efficient tier takes the highest-volume and lowest-stakes calls we make, so every model here
+// is small: a mid-size or frontier fallback would silently bill the high-volume path at those rates.
+const EFFICIENT_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
+  '.google-gemini-3.5-flash-lite-chat_completion', // Gemini 3.5 Flash Lite, GA 2026-07-21
+  '.openai-gpt-5.6-luna-chat_completion', // GPT-5.6 Luna
+];
+
+// The balanced tier covers calls where accuracy matters but which either run often (triaging every
+// alert) or loop over many tool rounds (diagnosing a rule), so frontier latency and cost would
+// multiply by the call or round count. A strong mid-size model is the right rung.
+const BALANCED_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
+  '.openai-gpt-5.6-terra-chat_completion', // GPT-5.6 Terra
+  '.google-gemini-3.6-flash-chat_completion', // Gemini 3.6 Flash
 ];
 
 // Attack Discovery reads a whole batch of alerts and rule creation drafts an ES|QL rule from a gap
-// description, both single-shot and both judged on the quality of one output, so they get the
-// frontier model.
-const REASONING_RECOMMENDED_ENDPOINTS = [
+// description, both single-pass and both judged on the quality of one output, so they get the
+// frontier model. Sonnet sits last as the one cross-rung fallback, so losing both frontier models
+// degrades quality rather than failing the run.
+const FRONTIER_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
-  '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
   '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
-];
-
-// Agentic work favours a strong mid-tier rather than the frontier model: a rule diagnosis runs
-// many tool rounds, and frontier latency and cost multiply by the round count.
-const AGENTIC_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
-  '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
-  '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
 ];
 
 /**
@@ -101,37 +103,37 @@ export const registerAlertZeroInferenceFeatures = (
   // the rows read cheapest to most expensive.
   const tiers = [
     {
-      featureId: ALERTZERO_FAST_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.alertzero.inferenceFeature.fastName', {
-        defaultMessage: 'Fast models',
+      featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.alertzero.inferenceFeature.efficientName', {
+        defaultMessage: 'Efficient models',
       }),
-      featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.fastDescription', {
+      featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.efficientDescription', {
         defaultMessage:
-          'Low latency, high volume, and lightweight judgment, such as triaging an alert or checking detection coverage.',
+          'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
       }),
-      recommendedEndpoints: FAST_RECOMMENDED_ENDPOINTS,
+      recommendedEndpoints: EFFICIENT_RECOMMENDED_ENDPOINTS,
     },
     {
-      featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.alertzero.inferenceFeature.reasoningName', {
-        defaultMessage: 'Reasoning models',
+      featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.alertzero.inferenceFeature.balancedName', {
+        defaultMessage: 'Balanced models',
       }),
-      featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.reasoningDescription', {
+      featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.balancedDescription', {
         defaultMessage:
-          'Deeper thinking for a complex, self-contained task answered in one shot, such as generating attack discoveries or drafting a detection rule.',
+          'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
       }),
-      recommendedEndpoints: REASONING_RECOMMENDED_ENDPOINTS,
+      recommendedEndpoints: BALANCED_RECOMMENDED_ENDPOINTS,
     },
     {
-      featureId: ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-      featureName: i18n.translate('xpack.alertzero.inferenceFeature.agenticName', {
-        defaultMessage: 'Agentic models',
+      featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.alertzero.inferenceFeature.frontierName', {
+        defaultMessage: 'Frontier models',
       }),
-      featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.agenticDescription', {
+      featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.frontierDescription', {
         defaultMessage:
-          'Multi-step work involving tools and iteration, where cost multiplies by the round count, such as diagnosing a noisy detection rule.',
+          'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
       }),
-      recommendedEndpoints: AGENTIC_RECOMMENDED_ENDPOINTS,
+      recommendedEndpoints: FRONTIER_RECOMMENDED_ENDPOINTS,
     },
   ];
 
@@ -141,8 +143,8 @@ export const registerAlertZeroInferenceFeatures = (
       taskType: 'chat_completion',
       isTechPreview: true,
       // The tiers are deliberately on different rungs, so letting the cluster-wide default win
-      // would collapse them onto one model and lose both the cost saving on the fast tier and the
-      // quality on the reasoning one. The hard escape hatch survives: `defaultConnectorOnly`
+      // would collapse them onto one model and lose both the cost saving on the efficient tier and
+      // the quality on the frontier one. The hard escape hatch survives: `defaultConnectorOnly`
       // short-circuits before feature resolution, so an operator who wants one model everywhere
       // still gets it.
       ignoreGlobalDefault: true,
@@ -152,5 +154,37 @@ export const registerAlertZeroInferenceFeatures = (
     if (!result.ok) {
       logger.warn(`Failed to register inference feature "${tier.featureId}": ${result.error}`);
     }
+  }
+
+  // Not a cost rung. Attack Discovery, alert triage, and the FP/TP judge read a model saved
+  // here and otherwise stay on their tier, so the row recommends nothing and ignores the
+  // global default. It is the only AlertZero row that lists template-required endpoints.
+  // The parent row is never written by the settings form and also recommends nothing, so
+  // an unset row resolves to no connector under onlyReturnConfigured and callers that
+  // list this id first fall through to their tier.
+  const templateModelsResult = register({
+    parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+    taskType: 'chat_completion',
+    isTechPreview: true,
+    ignoreGlobalDefault: true,
+    allowTemplateRequiredModels: true,
+    featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+    featureName: i18n.translate('xpack.alertzero.inferenceFeature.templateModelsName', {
+      defaultMessage: 'Cyber domain models',
+    }),
+    featureDescription: i18n.translate(
+      'xpack.alertzero.inferenceFeature.templateModelsDescription',
+      {
+        defaultMessage:
+          'OpenAI Daybreak models for Attack Discovery, alert triage, and the false-positive judge. A Daybreak endpoint requires a prompt template, so it is listed only here. A model saved here replaces the tier those calls use. Leave this empty to keep Attack Discovery and the judge on Frontier models and alert triage on Efficient models.',
+      }
+    ),
+    recommendedEndpoints: [],
+  });
+
+  if (!templateModelsResult.ok) {
+    logger.warn(
+      `Failed to register inference feature "${ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID}": ${templateModelsResult.error}`
+    );
   }
 };

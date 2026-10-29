@@ -35,6 +35,4 @@ fileGroups:
     - '**/*.ts'
     - src/languages/definitions/painless/autocomplete_definitions/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

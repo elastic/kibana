@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
+import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
 import { registerSubjectAttachmentTypes } from './subjects/attachments';
 import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
@@ -25,6 +27,22 @@ import type {
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
 } from './types';
+
+const LazyInvestigationCardComponent = React.lazy(async () => {
+  const { InvestigationCard } = await import(
+    './conversation_templates/templates/investigation/card'
+  );
+  return { default: InvestigationCard };
+});
+
+const LazyInvestigationCard: AgenticInvestigationsPublicPluginStart['InvestigationCard'] = (
+  props
+) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyInvestigationCardComponent, props)
+  );
 
 /**
  * Registers Impact workflow steps, the impact, subject, and hypotheses attachment UI, and the
@@ -66,13 +84,25 @@ export class AgenticInvestigationsPublicPlugin
     const { agentBuilder } = startDeps;
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
       if (this.escalationsEnabled) {
         registerEscalationConversationEventUiDefinitions({
           conversationEvents: agentBuilder.conversationEvents,
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder);
+      registerSubjectAttachmentTypes(agentBuilder, {
+        // The alert flyout renders shared alerting components that read core and their plugins
+        // from this context, so core is passed whole.
+        ...core,
+        share: startDeps.share,
+        data: startDeps.data,
+        dataViews: startDeps.dataViews,
+        expressions: startDeps.expressions,
+        spaces: startDeps.spaces,
+        unifiedDocViewer: startDeps.unifiedDocViewer,
+        charts: startDeps.charts,
+      });
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
@@ -81,6 +111,7 @@ export class AgenticInvestigationsPublicPlugin
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
+        getImpactEntityOpener: () => this.impactEntityOpener,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -90,6 +121,7 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactEntityOpener: (opener) => {
         this.impactEntityOpener = opener;
       },
+      InvestigationCard: LazyInvestigationCard,
     };
   }
 
