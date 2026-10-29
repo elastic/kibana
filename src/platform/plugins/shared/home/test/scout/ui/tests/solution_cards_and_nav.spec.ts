@@ -34,6 +34,7 @@ test.describe('Kibana chrome and solution cards', { tag: LOCAL_ONLY_TAGS }, () =
         await pageObjects.home.goto();
         await page.getByTestId(`homeSolutionPanel homeSolutionPanel_${solution}`).click();
         await expect(page).not.toHaveURL(/\/app\/home/);
+        await expect(pageObjects.home.homeApp).toBeHidden();
         // The app's own wrapper (nested in the chrome one) stays aria-busy until the app's mount() resolved.
         await expect(page.locator('.kbnAppWrapper[aria-busy]')).toHaveAttribute(
           'aria-busy',
@@ -64,7 +65,8 @@ test.describe('Kibana chrome and solution cards', { tag: LOCAL_ONLY_TAGS }, () =
 
     await test.step('global search', async () => {
       await page.keyboard.press('Escape');
-      await page.getByTestId(CHROME_SEARCH_BUTTON).click();
+      await expect(page.getByTestId('collapsibleNav')).toBeHidden();
+      await pageObjects.chrome.openSearch();
       await expect(page.getByTestId('globalSearchModal')).toBeVisible();
 
       const { violations } = await page.checkA11y({ include: A11Y_NAV_SELECTORS });
