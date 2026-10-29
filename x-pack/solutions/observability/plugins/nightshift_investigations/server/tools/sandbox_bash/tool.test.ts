@@ -357,6 +357,26 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     expect(writeFiles).toHaveBeenCalled();
   });
 
+  it('does not run the command when the cutoff cannot be read', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: telemetryCredentials,
+      readTelemetryNotAfter: jest.fn().mockRejectedValue(new Error('conversation lookup failed')),
+    });
+
+    const { results } = await run({
+      connector_id: 'nightshift-evals-telemetry',
+      command: 'curl "$CONNECTOR_CONFIG_URL"',
+    });
+
+    expect(runCommand).not.toHaveBeenCalled();
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: { message: 'Could not read the telemetry cutoff, so the command was not run.' },
+      },
+    ]);
+  });
+
   it('does not run the command when the cutoff proxy cannot be installed', async () => {
     const { run, runCommand, writeFiles } = setup({
       resolveConnectorCredentials: telemetryCredentials,

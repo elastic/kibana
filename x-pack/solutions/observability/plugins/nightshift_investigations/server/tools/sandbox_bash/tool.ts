@@ -108,8 +108,8 @@ export const createSandboxBashTool = ({
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   /**
    * Latest inclusive `@timestamp` this conversation's telemetry queries may return. Unset for
-   * investigations that do not bound telemetry. A thrown read is ignored so those investigations
-   * still run.
+   * investigations that do not bound telemetry. A thrown read does not run the command: the
+   * caller cannot tell a missing cutoff from a cutoff that failed to load.
    */
   readTelemetryNotAfter?: (
     request: KibanaRequest,
@@ -221,6 +221,16 @@ export const createSandboxBashTool = ({
               error instanceof Error ? error.name : 'Error'
             }`
           );
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: 'Could not read the telemetry cutoff, so the command was not run.',
+                },
+              },
+            ],
+          };
         }
         if (notAfter) {
           if (!isTelemetryNotAfter(notAfter)) {
