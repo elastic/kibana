@@ -28,9 +28,15 @@ export interface GetRuleChangeArgs {
   eventId: string;
 }
 
+export interface RuleChangeSnapshot {
+  ruleId: string;
+  snapshot: Record<string, unknown>;
+}
+
 export interface RuleChangesHistoryClientContract {
   listRuleChanges(args: ListRuleChangesArgs): Promise<ListRuleChangeHistoryResponse>;
   getRuleChange(args: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail>;
+  getRuleChangeSnapshot(args: GetRuleChangeArgs): Promise<RuleChangeSnapshot>;
 }
 
 @injectable()
@@ -78,6 +84,25 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
   }
 
   public async getRuleChange({ eventId }: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail> {
+    const document = await this.getRuleChangeDocument(eventId);
+
+    const ruleId = document.object.id;
+    const [previous, newest] = await Promise.all([
+      this.fetchPrevious(ruleId, document),
+      this.fetchNewest(ruleId),
+    ]);
+
+    return toDetail(document, previous, {
+      isCurrent: newest?.event.id === eventId,
+    });
+  }
+
+  public async getRuleChangeSnapshot({ eventId }: GetRuleChangeArgs): Promise<RuleChangeSnapshot> {
+    const document = await this.getRuleChangeDocument(eventId);
+    return { ruleId: document.object.id, snapshot: document.object.snapshot };
+  }
+
+  private async getRuleChangeDocument(eventId: string): Promise<ChangeHistoryDocument> {
     this.assertInitialized();
 
     // `eventId` is a UUID and already unique across objects and types, so the
@@ -92,15 +117,7 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
       });
     }
 
-    const ruleId = document.object.id;
-    const [previous, newest] = await Promise.all([
-      this.fetchPrevious(ruleId, document),
-      this.fetchNewest(ruleId),
-    ]);
-
-    return toDetail(document, previous, {
-      isCurrent: newest?.event.id === eventId,
-    });
+    return document;
   }
 
   private async fetchPrevious(

@@ -7,10 +7,12 @@
 
 import {
   listRuleChangeHistoryResponseSchema,
+  restoreRuleChangeBodySchema,
   ruleChangeHistoryDetailSchema,
 } from '@kbn/alerting-v2-schemas';
 import { LIST_RULE_CHANGE_HISTORY_RESPONSE } from './list_rule_change_history_oas_example';
 import { GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE } from './get_rule_change_history_event_oas_example';
+import { RESTORE_RULE_CHANGE_REQUEST } from './restore_rule_change_oas_example';
 
 describe('rule change history OAS example payloads', () => {
   it('keeps the list response example valid against listRuleChangeHistoryResponseSchema', () => {
@@ -23,5 +25,9 @@ describe('rule change history OAS example payloads', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse(GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE).success
     ).toBe(true);
+  });
+
+  it('keeps the restore request example valid against restoreRuleChangeBodySchema', () => {
+    expect(restoreRuleChangeBodySchema.safeParse(RESTORE_RULE_CHANGE_REQUEST).success).toBe(true);
   });
 });
