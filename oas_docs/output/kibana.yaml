@@ -189562,7 +189562,7 @@ components:
       description: Terms ranked by the last value of a field.
       properties:
         direction:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_visApiDirection'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_visTermsRankByCustomDirection'
         field:
           description: Numeric field to be used for the custom operation.
           type: string
