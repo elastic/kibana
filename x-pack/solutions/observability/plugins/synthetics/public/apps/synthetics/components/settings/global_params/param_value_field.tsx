@@ -15,7 +15,7 @@ import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
 import type { ParamFormData, ParamValueSourceType } from './add_param_form';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
-import { parseVaultReference } from './vault_reference';
+import { parseVaultReference } from '../../../../../../common/lib/vault_reference';
 import type { SecretConnectionStatus } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 

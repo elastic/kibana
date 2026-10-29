@@ -20,7 +20,7 @@ import { OptionalText } from '../components/optional_text';
 import { ParamValueField } from './param_value_field';
 import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import type { ListParamItem } from './params_list';
-import type { VaultReferenceParts } from './vault_reference';
+import type { VaultReferenceParts } from '../../../../../../common/lib/vault_reference';
 import { kibanaService } from '../../../../../utils/kibana_service';
 
 export type ParamValueSourceType = 'value' | 'vault';

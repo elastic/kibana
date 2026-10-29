@@ -42,7 +42,10 @@ import type { SyntheticsParamRequest } from '../../../../../../common/runtime_ty
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
 import type { ParamFormData } from './add_param_form';
-import { buildVaultReference, parseVaultReference } from './vault_reference';
+import {
+  buildVaultReference,
+  parseVaultReference,
+} from '../../../../../../common/lib/vault_reference';
 import {
   useHasSettingsHeaderAction,
   useRegisterSettingsHeaderAction,
