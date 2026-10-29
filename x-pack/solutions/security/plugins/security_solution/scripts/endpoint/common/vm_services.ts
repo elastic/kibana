@@ -22,17 +22,20 @@ export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile'
 
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
-const destroyVagrantMachine = async (vagrantCwd: string, log: ToolingLog): Promise<void> => {
-  // The install exec timeout should already have released `vagrant ssh`. Stay under the
-  // 10 minute enrolledEndpoint fixture: 3 × 30s plus two 2s pauses.
-  const maxAttempts = 3;
-
+// Defaults suit the creation path, where this clears a stale or absent VM before `vagrant up` --
+// a fast no-op kept under the 10 minute enrolledEndpoint fixture. Destroying a live VM is much
+// slower, so that caller raises the budget.
+const destroyVagrantMachine = async (
+  vagrantCwd: string,
+  log: ToolingLog,
+  { attemptTimeoutMs = 30_000, maxAttempts = 3 } = {}
+): Promise<void> => {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await execa.command('vagrant destroy -f', {
         env: { VAGRANT_CWD: vagrantCwd },
         stdio: ['inherit', 'pipe', 'pipe'],
-        timeout: 30_000,
+        timeout: attemptTimeoutMs,
       });
       return;
     } catch (error) {
@@ -526,7 +529,8 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    await destroyVagrantMachine(VAGRANT_CWD, log);
+    // A live VM teardown has been observed to outlast 60s, so give each attempt double that.
+    await destroyVagrantMachine(VAGRANT_CWD, log, { attemptTimeoutMs: 120_000, maxAttempts: 2 });
 
     log.debug(`VM [${name}] was destroyed`);
   };
