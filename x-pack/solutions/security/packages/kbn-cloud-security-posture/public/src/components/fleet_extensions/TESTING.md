@@ -791,7 +791,7 @@ pnpm test:jest your_component.test.tsx --verbose
 pnpm test:jest aws_credentials_form.test.tsx --no-coverage
 
 # Test all fleet extensions
-pnpm test:jest --testPathPattern='fleet_extensions' --watch
+pnpm test:jest --testPathPatterns='fleet_extensions' --watch
 
 # Debug test with verbose output
 pnpm test:jest component.test.tsx --no-coverage --verbose

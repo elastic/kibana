@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`EndzoneTooltipHeader should render endzone tooltip with value, if it is specified 1`] = `
 <Fragment>

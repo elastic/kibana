@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`IntegrationGroup will not display APM links when APM is unavailable 1`] = `
 <EuiFlexGroup

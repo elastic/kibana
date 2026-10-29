@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`APM API tests transactions/breakdown.spec.ts basic apm_8.0.0 Breakdown when data is loaded returns the transaction breakdown for a service 1`] = `
 Object {

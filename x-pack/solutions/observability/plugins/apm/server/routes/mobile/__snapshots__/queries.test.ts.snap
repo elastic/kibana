@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[
   `mobile filters queries getDeviceOSApp excludes crash documents when the error type is error 1`

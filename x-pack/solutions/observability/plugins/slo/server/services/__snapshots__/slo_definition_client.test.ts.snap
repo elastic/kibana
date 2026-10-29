@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SLODefinitionClient happy path fetches the SLO Definition from the remote summary index when a remoteName is specified 1`] = `
 Object {

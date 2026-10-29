@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the telemetry mapping 1`] = `
 {

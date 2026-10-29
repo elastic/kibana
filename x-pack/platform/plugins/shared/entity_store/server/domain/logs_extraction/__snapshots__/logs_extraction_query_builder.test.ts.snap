@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildLogsExtractionEsqlQuery generates the expected query for generic entity description 1`] = `
 "SET unmapped_fields=\\"nullify\\";

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ManageData hide dev tools and stack management links if unavailable 1`] = `
 <EuiPageTemplate.Section

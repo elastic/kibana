@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`APM API tests basic apm_8.0.0 Error groups detailed statistics when data is loaded returns the correct data 1`] = `
 Object {

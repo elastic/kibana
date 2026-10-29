@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`APM Transaction Duration Transform Generator adds the custom kql filter to the query 1`] = `
 Object {

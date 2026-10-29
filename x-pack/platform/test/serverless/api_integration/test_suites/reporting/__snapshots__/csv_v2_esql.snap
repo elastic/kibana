@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Reporting CSV Generation from ES|QL export from non-timebased data view csv from es|ql csv file matches 1`] = `
 "eon,epoch,era,period

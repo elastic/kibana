@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Vislib event responses dispatcher - for heatmap return valid data for a heatmap popover 1`] = `
 Object {

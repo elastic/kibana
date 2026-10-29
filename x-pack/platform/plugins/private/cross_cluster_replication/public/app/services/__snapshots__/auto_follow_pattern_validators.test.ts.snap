@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Auto-follow pattern validators validateAutoFollowPattern() returns empty object when autoFollowPattern is undefined 1`] = `Object {}`;
 

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Telemetry Schema Checks [src/platform/plugins/shared/telemetry/schema/kbn_packages.json] DYNAMIC_KEY usage requires human review 1`] = `Array []`;
 

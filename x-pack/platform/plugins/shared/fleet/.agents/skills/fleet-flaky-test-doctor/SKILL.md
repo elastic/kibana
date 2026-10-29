@@ -74,7 +74,7 @@ Identify the test type from the file path. Each type has different reproduction 
 | Test type | Path signature | Backlog clusters | Reproduction | Fix conventions ref |
 |---|---|---|---|---|
 | **FTR API integration** | `x-pack/platform/test/fleet_api_integration/apis/**` or `x-pack/solutions/security/test/fleet_api_integration/**` | F, G, J, K, L, N | Delegate to `fleet-ftr-testing`. Requires Docker. | `references/conventions-and-deletion.md` §FTR |
-| **Jest server integration** | `x-pack/platform/plugins/shared/fleet/server/integration_tests/**/*.test.ts` | A, B | `node scripts/jest_integration --testPathPattern=<path>` | `references/conventions-and-deletion.md` §Jest integration |
+| **Jest server integration** | `x-pack/platform/plugins/shared/fleet/server/integration_tests/**/*.test.ts` | A, B | `node scripts/jest_integration --testPathPatterns=<path>` | `references/conventions-and-deletion.md` §Jest integration |
 | **Jest unit** | `x-pack/platform/plugins/shared/fleet/{public,common,server}/**/*.test.{ts,tsx}` (excl. `integration_tests/`) | C, D, E | `pnpm exec jest <path>` | `references/conventions-and-deletion.md` §Jest unit |
 | **Scout Playwright** | `x-pack/platform/plugins/shared/fleet/test/scout/**` or cross-plugin Scout paths | H, I | Scout runner (see §Flaky Runner Support) | `references/conventions-and-deletion.md` §Scout |
 | **Cross-team** | Another team's path, labelled `Team:Fleet` | O | N/A | Route to handoff — not investigation |
@@ -383,7 +383,7 @@ The Buildkite flaky-test pipeline supports only FTR and Scout. Jest has **no CI 
 |---|---|---|
 | FTR API integration | ✅ `type: "ftrConfig"` | [ci-stats.kibana.dev/trigger_flaky_test_runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner) with `config.*.ts` path |
 | Scout Playwright | ✅ `type: "scoutConfig"` | Same UI, Scout config path |
-| Jest server integration | ❌ Not supported | `for i in {1..25}; do node scripts/jest_integration --testPathPattern=<path> && echo "PASS $i" || echo "FAIL $i"; done` |
+| Jest server integration | ❌ Not supported | `for i in {1..25}; do node scripts/jest_integration --testPathPatterns=<path> && echo "PASS $i" || echo "FAIL $i"; done` |
 | Jest unit | ❌ Not supported | `for i in {1..10}; do pnpm exec jest <path> && echo "PASS $i" || echo "FAIL $i"; done` |
 
 For jest: if it passes 9/10 or more runs locally after a long silence, that's sufficient evidence to unskip. If it consistently fails, it's a `fix` verdict, not `flaky-rerun`.

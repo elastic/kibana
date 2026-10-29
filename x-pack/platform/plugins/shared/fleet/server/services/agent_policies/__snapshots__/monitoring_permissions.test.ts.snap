@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getMonitoringPermissions With elastic agent package installed should return default logs permissions if only logs are enabled 1`] = `
 Object {

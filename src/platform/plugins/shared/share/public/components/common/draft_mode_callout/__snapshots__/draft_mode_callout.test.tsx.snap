@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DraftModeCallout Custom content case renders a callout with custom content when custom props are present 1`] = `
 <div

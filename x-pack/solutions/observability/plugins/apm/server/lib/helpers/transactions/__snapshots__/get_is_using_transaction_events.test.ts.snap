@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getIsUsingTransactionEvents with config xpack.apm.searchAggregatedTransactions: always should query for data when kuery is set 1`] = `
 Object {

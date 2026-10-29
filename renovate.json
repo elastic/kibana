@@ -1990,6 +1990,9 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@jest/environment-jsdom-abstract",
+        "@jest/expect",
+        "@jest/globals",
         "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
@@ -2001,7 +2004,6 @@
         "jest-canvas-mock",
         "jest-config",
         "jest-diff",
-        "jest-environment-jsdom",
         "jest-matcher-utils",
         "jest-mock",
         "jest-runtime",
@@ -2016,6 +2018,28 @@
       "addLabels": ["Team:Operations", "ci:bench-jest"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "description": "Jest 30.5 hooks process.getBuiltinModule, which breaks the native require of ESM-only @rspack/core in packages/kbn-rspack-optimizer/src/rspack_runtime.ts. Remove this cap once that loader works under Jest 30.5+.",
+      "matchDepNames": [
+        "@jest/console",
+        "@jest/environment-jsdom-abstract",
+        "@jest/expect",
+        "@jest/globals",
+        "@jest/reporters",
+        "@jest/transform",
+        "@jest/types",
+        "babel-jest",
+        "expect",
+        "jest",
+        "jest-config",
+        "jest-diff",
+        "jest-matcher-utils",
+        "jest-mock",
+        "jest-runtime",
+        "jest-snapshot"
+      ],
+      "allowedVersions": "<30.5.0"
     },
     {
       "groupName": "storybook",

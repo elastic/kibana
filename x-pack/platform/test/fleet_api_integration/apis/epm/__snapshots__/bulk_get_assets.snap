@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`EPM Endpoints Bulk get assets installs all assets when installing a package for the first time should get the assets based on the required objects 1`] = `
 Array [

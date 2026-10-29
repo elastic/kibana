@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`IntegrationLink component renders a disabled link when href is undefined 1`] = `
 <EuiFlexGroup

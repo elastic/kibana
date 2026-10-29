@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`suggestProcessingPipeline workflow no longer rejects pipelines based on aggregate 80% parse rate gate 1`] = `
 Object {

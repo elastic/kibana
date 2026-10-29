@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`FlexItemSetting component renders a null label if label/tooltip text not supplied 1`] = `
 <EuiFlexItem

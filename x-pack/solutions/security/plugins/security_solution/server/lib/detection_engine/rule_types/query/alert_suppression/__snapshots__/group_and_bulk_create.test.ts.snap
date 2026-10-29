@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`groupAndBulkCreate utils buildBucketHistoryFilter should create the expected query 1`] = `
 Array [

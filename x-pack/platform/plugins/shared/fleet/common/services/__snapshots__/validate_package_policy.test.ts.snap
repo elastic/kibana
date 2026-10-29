@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Fleet - validatePackagePolicy() works for packages with multiple policy templates (aka integrations) returns errors for invalid package policy 1`] = `
 Object {

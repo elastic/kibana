@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`GetPreviewData for 'APM Availability' indicator type builds the query for a set of groupings 1`] = `
 [MockFunction] {

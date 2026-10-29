@@ -415,7 +415,7 @@ describe('saved query route handler context', () => {
       const response = await context.find();
 
       expect(response.savedQueries).toEqual(
-        expect.objectContaining([
+        expect.arrayContaining([
           {
             attributes: {
               description: 'bar',
@@ -460,7 +460,7 @@ describe('saved query route handler context', () => {
         type: 'query',
       });
       expect(response.savedQueries).toEqual(
-        expect.objectContaining([
+        expect.arrayContaining([
           {
             attributes: {
               description: 'bar',

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 1`] = `
 [MockFunction] {

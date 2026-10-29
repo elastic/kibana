@@ -83,7 +83,7 @@ describe('actionTypeRegistry', () => {
       expect(actionTypeRegistry.has('my-connector-type')).toEqual(true);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toEqual(
-        expect.objectContaining([
+        expect.arrayContaining([
           {
             'actions:my-connector-type': {
               createTaskRunner: expect.any(Function),

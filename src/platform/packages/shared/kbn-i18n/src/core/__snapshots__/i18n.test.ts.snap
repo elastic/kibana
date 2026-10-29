@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`I18n engine translate should throw error if used format is not specified 2`] = `
 "[I18n] Error formatting the default message for: \\"d.e.f\\".

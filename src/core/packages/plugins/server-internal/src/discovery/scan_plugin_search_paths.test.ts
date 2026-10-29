@@ -161,7 +161,7 @@ describe('scanPluginSearchPaths', () => {
     expect(paths).toHaveLength(4);
 
     expect(paths).toEqual(
-      expect.objectContaining([
+      expect.arrayContaining([
         `${KIBANA_ROOT}/src/plugins/plugin_a`,
         `${KIBANA_ROOT}/src/plugins/sub1/plugin_b`,
         `${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`,

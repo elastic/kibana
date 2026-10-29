@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildCountQuery counts a ranked identity by evaluating the id and counting the id groups 1`] = `
 "SET unmapped_fields=\\"nullify\\";

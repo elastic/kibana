@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`riskScoreInlineToolHandler should modify additional context when entity store v2 is enabled 1`] = `
 "

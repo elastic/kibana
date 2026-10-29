@@ -831,7 +831,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     expect(mockEnrichment).toHaveBeenCalledWith(
-      expect.objectContaining([
+      expect.arrayContaining([
         expect.objectContaining({
           _id: expect.any(String),
           _index: 'myFakeSignalIndex',

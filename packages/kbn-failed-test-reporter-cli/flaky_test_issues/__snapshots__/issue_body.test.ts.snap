@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`refreshing a suite issue comments with the report's numbers for the suite, then how to skip it 1`] = `
 "This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:

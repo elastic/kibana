@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`PingListExpandedRow doesn't render list items if the body field is undefined 1`] = `
 <EuiFlexGroup

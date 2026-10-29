@@ -21,7 +21,7 @@ Cloud Security Posture integration components for Kibana Fleet.
 
 ```bash
 # Run all fleet extension tests
-pnpm test:jest --testPathPattern=fleet_extensions
+pnpm test:jest --testPathPatterns=fleet_extensions
 
 # Run specific test file
 pnpm test:jest path/to/test.test.tsx

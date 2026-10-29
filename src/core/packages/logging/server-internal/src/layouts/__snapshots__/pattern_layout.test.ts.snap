@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`\`format()\` correctly formats record with custom pattern. 1`] = `"mock-Some error stack-context-1-Some error stack"`;
 

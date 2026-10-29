@@ -328,7 +328,7 @@ async function getTestPathsWithSearchSource(configPath: string): Promise<string[
       })
     );
 
-    const results = await searchSource.getTestPaths(config.globalConfig, undefined, undefined);
+    const results = await searchSource.getTestPaths(config.globalConfig, config.projectConfig);
     return results.tests.map((t) => t.path);
   } catch (error) {
     // If Jest config fails to load, return empty array

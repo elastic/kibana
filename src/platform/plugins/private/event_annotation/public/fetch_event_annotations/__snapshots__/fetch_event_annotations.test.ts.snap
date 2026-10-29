@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getFetchEventAnnotations Manual annotations Sorts annotations by time, assigns correct timebuckets, filters out hidden and out of range annotations 1`] = `
 Array [

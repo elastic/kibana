@@ -157,7 +157,7 @@ Keep fixes simple — prefer the smallest change that resolves the bug. Stop and
 3. Verify:
    ```bash
    node scripts/jest <path/to/test.ts> --no-coverage
-   node scripts/jest --testPathPattern='<area-pattern>' --no-coverage
+   node scripts/jest --testPathPatterns='<area-pattern>' --no-coverage
    ```
 4. Iterate until the specific test for this bug is **green**:
    ```bash
@@ -213,7 +213,7 @@ Restart services for a clean environment — stale reproduction state produces f
 6. Run tests:
    ```bash
    node scripts/jest <path/to/test.ts> --no-coverage
-   node scripts/jest --testPathPattern='<area-pattern>' --no-coverage
+   node scripts/jest --testPathPatterns='<area-pattern>' --no-coverage
    ```
 
 | Condition | Verdict |

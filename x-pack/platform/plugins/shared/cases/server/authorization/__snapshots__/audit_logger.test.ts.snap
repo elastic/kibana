@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[
   `audit_logger log function event structure creates the correct audit event for operation: "assignCase" with an error and entity 1`

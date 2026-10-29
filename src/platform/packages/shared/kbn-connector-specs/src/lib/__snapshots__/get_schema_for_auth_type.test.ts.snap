@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getSchemaForAuthType() correctly returns schema for auth type definition when defaults and meta overrides are provided 1`] = `
 Object {

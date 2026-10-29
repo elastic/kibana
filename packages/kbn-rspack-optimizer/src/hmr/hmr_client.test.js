@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** @jest-environment jsdom */
+/** @jest-environment @kbn/jest/jsdom_environment */
 
 const Fs = require('fs');
 const Path = require('path');

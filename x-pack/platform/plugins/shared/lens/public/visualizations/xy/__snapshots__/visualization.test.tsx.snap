@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`xy_visualization #appendLayer adding an annotation layer adds a by-reference annotation layer 1`] = `
 Object {

@@ -240,24 +240,6 @@ describe('run.ts', () => {
 
       process.argv = originalArgv;
     });
-
-    it('should handle testPathPattern flag', () => {
-      const originalArgv = process.argv;
-      process.argv = ['node', 'script', '--testPathPattern', 'src/**/*.test.js'];
-
-      mockGetopts.mockReturnValue({
-        _: [],
-        testPathPattern: 'src/**/*.test.js',
-        verbose: false,
-        help: false,
-      });
-
-      const result = parseJestArguments();
-
-      expect(result.parsedArguments.testPathPattern).toBe('src/**/*.test.js');
-
-      process.argv = originalArgv;
-    });
   });
 
   describe('findConfigInDirectoryTree', () => {

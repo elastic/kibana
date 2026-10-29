@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`get_signals_template backwards compatibility mappings for version 45 should match snapshot 1`] = `
 Object {

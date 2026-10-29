@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildPreviousThresholdAlertRequest should generate a proper request when bucketByFields contains multiple fields 1`] = `
 Object {

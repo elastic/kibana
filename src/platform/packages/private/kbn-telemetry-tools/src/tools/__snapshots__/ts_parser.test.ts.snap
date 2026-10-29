@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`parseUsageCollection throws when \`makeUsageCollector\` argument is a function call 1`] = `
 "Error extracting collector in src/platform/packages/private/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/externally_defined_usage_collector/index.ts

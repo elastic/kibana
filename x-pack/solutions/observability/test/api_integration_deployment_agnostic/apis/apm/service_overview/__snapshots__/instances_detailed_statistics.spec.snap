@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Deployment-agnostic APM API integration tests APM service_overview Service Overview Instances detailed statistics when data is loaded fetching data with comparison returns the right data for current and previous periods 5`] = `
 Object {

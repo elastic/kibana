@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RiskScoreDataClient init success should initialize risk engine resources in the appropriate space 1`] = `
 Object {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildEsQuery should generate correct es query for rule with good query (as KQL), no optional filter and no total 1`] = `
 Object {

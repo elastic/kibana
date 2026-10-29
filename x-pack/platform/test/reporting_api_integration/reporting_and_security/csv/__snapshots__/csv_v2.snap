@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Reporting APIs CSV Generation from Saved Search ID export from non-timebased data view query stored in the saved search csv file matches 1`] = `
 "_id,_ignored,_index,_score,eon,epoch,era,period

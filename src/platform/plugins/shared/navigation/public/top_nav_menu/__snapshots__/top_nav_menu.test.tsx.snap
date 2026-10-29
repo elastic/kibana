@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`TopNavMenu when setMenuMountPoint is provided should render badges and search bar 1`] = `
 <div

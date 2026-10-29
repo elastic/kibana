@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`conditions_table ConditionsTable should render multi item table with and badge correctly 1`] = `
 <EuiFlexGroup

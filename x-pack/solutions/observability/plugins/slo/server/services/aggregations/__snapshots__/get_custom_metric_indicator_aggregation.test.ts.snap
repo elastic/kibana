@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`GetHistogramIndicatorAggregation should generate a aggregation for good events 1`] = `
 Object {

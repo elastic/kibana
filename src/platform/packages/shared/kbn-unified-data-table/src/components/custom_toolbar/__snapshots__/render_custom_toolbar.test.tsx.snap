@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`renderCustomToolbar should keep controls on one line when wrap is false 1`] = `
 <React.Fragment>

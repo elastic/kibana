@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`#batchSet Buffers are always clear of previously buffered changes: two requests, second only sends bar, not foo 1`] = `
 Array [

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`layeredXyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 1`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
 

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`renderBriefHtml renders the fixture brief 1`] = `
 "<style>.brief{max-width:736px;font:14px/1.5 var(--cc-font-family);color:var(--cc-color-text);font-variant-numeric:tabular-nums}

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Agent policies fleet_agent_policies GET /api/fleet/agent_policies should get a list of agent policies by kuery 1`] = `
 Object {

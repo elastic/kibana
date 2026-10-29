@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: .es-query 1`] = `
 Object {

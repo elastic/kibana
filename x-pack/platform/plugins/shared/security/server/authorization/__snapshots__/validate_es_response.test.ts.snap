@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`validateEsPrivilegeResponse fails validation when an action is malformed in the response 1`] = `"Invalid response received from Elasticsearch has_privilege endpoint. Error: Payload did not match expected action values"`;
 

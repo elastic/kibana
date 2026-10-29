@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is falsy and empty warnings array 1`] = `<div />`;
 

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`#get after a get for an unknown property, the property is not persisted 1`] = `
 "Unexpected \`IUiSettingsClient.get(\\"obscureProperty2\\")\` call on unrecognized configuration setting \\"obscureProperty2\\".
