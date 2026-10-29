@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { RestoreRuleChangeBody, RestoreRuleChangeParams } from '@kbn/alerting-v2-schemas';
+import type { RestoreRuleChangeParams, RestoreRuleChangeQuery } from '@kbn/alerting-v2-schemas';
 import type { RulesClient } from '../../lib/rules_client';
 import { createRuleChangesHistoryClientMock } from '../../lib/rule_changes_history/rule_changes_history_client.mock';
 import { createRouteDependencies } from '../test_utils';
@@ -28,15 +28,12 @@ const createMocks = () => {
   return { ctx, ruleChangesHistoryClient, rulesClient };
 };
 
-const buildRoute = (
-  body: NonNullable<RestoreRuleChangeBody> | undefined,
-  mocks: ReturnType<typeof createMocks>
-) =>
+const buildRoute = (query: RestoreRuleChangeQuery, mocks: ReturnType<typeof createMocks>) =>
   new RestoreRuleChangeRoute(
     mocks.ctx,
-    httpServerMock.createKibanaRequest<RestoreRuleChangeParams, unknown, RestoreRuleChangeBody>({
+    httpServerMock.createKibanaRequest<RestoreRuleChangeParams, RestoreRuleChangeQuery, unknown>({
       params: { change_id: 'event-1' },
-      body,
+      query,
     }),
     mocks.ruleChangesHistoryClient,
     mocks.rulesClient as unknown as RulesClient
@@ -46,7 +43,7 @@ describe('RestoreRuleChangeRoute', () => {
   it('restores the snapshot of the change onto its rule and returns the rule', async () => {
     const mocks = createMocks();
 
-    await buildRoute({ expected_version: 3 }, mocks).handle();
+    await buildRoute({ current_version: 3 }, mocks).handle();
 
     expect(mocks.ruleChangesHistoryClient.getRuleChangeSnapshot).toHaveBeenCalledWith({
       eventId: 'event-1',
@@ -54,18 +51,18 @@ describe('RestoreRuleChangeRoute', () => {
     expect(mocks.rulesClient.restoreRule).toHaveBeenCalledWith({
       id: 'rule-1',
       snapshot: { id: 'rule-1', metadata: { name: 'A' } },
-      expectedVersion: 3,
+      currentVersion: 3,
     });
     expect(mocks.ctx.response.ok).toHaveBeenCalledWith({ body: restoredRule });
   });
 
-  it('restores without a version guard when the body is empty', async () => {
+  it('restores without a version guard when current_version is omitted', async () => {
     const mocks = createMocks();
 
-    await buildRoute(undefined, mocks).handle();
+    await buildRoute({}, mocks).handle();
 
     expect(mocks.rulesClient.restoreRule).toHaveBeenCalledWith(
-      expect.objectContaining({ expectedVersion: undefined })
+      expect.objectContaining({ currentVersion: undefined })
     );
   });
 
@@ -75,7 +72,7 @@ describe('RestoreRuleChangeRoute', () => {
       Boom.notFound('Rule change with event id "event-1" not found')
     );
 
-    await buildRoute(undefined, mocks).handle();
+    await buildRoute({}, mocks).handle();
 
     expect(mocks.rulesClient.restoreRule).not.toHaveBeenCalled();
     expect(mocks.ctx.response.customError).toHaveBeenCalledWith(
@@ -87,7 +84,7 @@ describe('RestoreRuleChangeRoute', () => {
     const mocks = createMocks();
     mocks.rulesClient.restoreRule.mockRejectedValue(Boom.conflict('stale'));
 
-    await buildRoute({ expected_version: 1 }, mocks).handle();
+    await buildRoute({ current_version: 1 }, mocks).handle();
 
     expect(mocks.ctx.response.ok).not.toHaveBeenCalled();
     expect(mocks.ctx.response.customError).toHaveBeenCalledWith(

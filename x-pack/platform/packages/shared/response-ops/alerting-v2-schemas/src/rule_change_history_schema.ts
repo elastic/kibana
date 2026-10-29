@@ -63,26 +63,19 @@ export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistor
 export const restoreRuleChangeParamsSchema = getRuleChangeHistoryEventParamsSchema;
 export type RestoreRuleChangeParams = GetRuleChangeHistoryEventParams;
 
-/**
- * Body for `POST …/change_history/rules/{change_id}/_restore`. The body is
- * optional, so an empty POST (`null` payload) is accepted.
- */
-export const restoreRuleChangeBodySchema = lazySchema(() =>
+/** Query params for `POST …/change_history/rules/{change_id}/_restore`. */
+export const restoreRuleChangeQuerySchema = lazySchema(() =>
   z
     .object({
-      expected_version: z
-        .number()
-        .int()
-        .min(1)
+      current_version: queryIntSchema({ min: 1, max: Number.MAX_SAFE_INTEGER })
         .optional()
         .describe(
           'The rule version the caller last saw. When set, the restore is rejected with a conflict if the rule has changed since.'
         ),
     })
     .strict()
-    .nullish()
 );
-export type RestoreRuleChangeBody = z.infer<typeof restoreRuleChangeBodySchema>;
+export type RestoreRuleChangeQuery = z.infer<typeof restoreRuleChangeQuerySchema>;
 
 /**
  * Actor for a change-history row. Unattributed writes may carry an empty

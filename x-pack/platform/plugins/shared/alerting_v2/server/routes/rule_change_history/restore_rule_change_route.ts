@@ -9,11 +9,11 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import {
   errorResponseSchema,
-  restoreRuleChangeBodySchema,
   restoreRuleChangeParamsSchema,
+  restoreRuleChangeQuerySchema,
   ruleResponseSchema,
-  type RestoreRuleChangeBody,
   type RestoreRuleChangeParams,
+  type RestoreRuleChangeQuery,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import {
@@ -47,7 +47,7 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
   static schemas = {
     request: {
       params: restoreRuleChangeParamsSchema,
-      body: restoreRuleChangeBodySchema,
+      query: restoreRuleChangeQuerySchema,
     },
     response: {
       200: {
@@ -65,7 +65,7 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
       409: {
         body: () => errorResponseSchema,
         description:
-          'Indicates the rule changed since `expected_version`, was concurrently updated, or the snapshot changes immutable fields.',
+          'Indicates the rule changed since `current_version`, was concurrently updated, or the snapshot changes immutable fields.',
       },
     },
   };
@@ -77,8 +77,8 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       RestoreRuleChangeParams,
-      unknown,
-      RestoreRuleChangeBody
+      RestoreRuleChangeQuery,
+      unknown
     >,
     @inject(RuleChangesHistoryClientToken)
     private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract,
@@ -95,7 +95,7 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
     const rule = await this.rulesClient.restoreRule({
       id: ruleId,
       snapshot,
-      expectedVersion: this.request.body?.expected_version,
+      currentVersion: this.request.query.current_version,
     });
 
     return this.ctx.response.ok({ body: rule });

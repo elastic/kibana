@@ -10,7 +10,7 @@ import {
   getRuleChangeHistoryEventParamsSchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
-  restoreRuleChangeBodySchema,
+  restoreRuleChangeQuerySchema,
   ruleChangeHistoryDetailSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -372,13 +372,13 @@ describe('rule change history schemas', () => {
     });
   });
 
-  it('accepts an empty or versioned restore body and rejects unknown keys', () => {
-    expect(restoreRuleChangeBodySchema.safeParse(null).success).toBe(true);
-    expect(restoreRuleChangeBodySchema.safeParse(undefined).success).toBe(true);
-    expect(restoreRuleChangeBodySchema.parse({ expected_version: 3 })).toEqual({
-      expected_version: 3,
+  it('accepts an optional numeric current_version restore query and rejects unknown keys', () => {
+    expect(restoreRuleChangeQuerySchema.parse({})).toEqual({});
+    expect(restoreRuleChangeQuerySchema.parse({ current_version: '3' })).toEqual({
+      current_version: 3,
     });
-    expect(restoreRuleChangeBodySchema.safeParse({ expected_version: 0 }).success).toBe(false);
-    expect(restoreRuleChangeBodySchema.safeParse({ version: 3 }).success).toBe(false);
+    expect(restoreRuleChangeQuerySchema.safeParse({ current_version: '0' }).success).toBe(false);
+    expect(restoreRuleChangeQuerySchema.safeParse({ current_version: 'abc' }).success).toBe(false);
+    expect(restoreRuleChangeQuerySchema.safeParse({ version: '3' }).success).toBe(false);
   });
 });
