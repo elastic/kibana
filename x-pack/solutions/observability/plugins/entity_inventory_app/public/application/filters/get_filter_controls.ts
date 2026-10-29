@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../mock_inventory_api/types';
+import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
 
 export interface FilterControlsParams {
   types: EntityInventoryTypeDefinition[];
@@ -47,21 +47,24 @@ const getAttributeFilters = (typesInScope: EntityInventoryTypeDefinition[]): str
   return first ? first.filter((name) => others.every((names) => names.includes(name))) : [];
 };
 
-export const getFilterControls = ({
+export const getTypesInScope = ({
   types,
   pageCategory,
   selectedCategory,
   selectedType,
-}: FilterControlsParams): FilterControls => {
-  const typesOfCategory = getTypesOfCategory(types, pageCategory ?? selectedCategory);
-  const typesInScope = selectedType
+}: FilterControlsParams): EntityInventoryTypeDefinition[] =>
+  selectedType
     ? types.filter(({ type }) => type === selectedType)
-    : typesOfCategory;
+    : getTypesOfCategory(types, pageCategory ?? selectedCategory);
+
+export const getFilterControls = (params: FilterControlsParams): FilterControls => {
+  const { types, pageCategory, selectedCategory } = params;
+  const typesOfCategory = getTypesOfCategory(types, pageCategory ?? selectedCategory);
 
   return {
     categoryFilter: pageCategory ? undefined : getCategories(types),
     typeFilter: typesOfCategory.length > 1 ? typesOfCategory.map(({ type }) => type) : undefined,
-    attributeFilters: getAttributeFilters(typesInScope),
+    attributeFilters: getAttributeFilters(getTypesInScope(params)),
   };
 };
 

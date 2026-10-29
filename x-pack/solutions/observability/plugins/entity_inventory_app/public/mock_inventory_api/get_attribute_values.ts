@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EntityInventoryAttributeValuesParams } from '../inventory_api_types';
+
 const MOCK_ATTRIBUTE_VALUES: Record<string, string[]> = {
   'os.type': ['darwin', 'linux', 'windows'],
   'host.arch': ['amd64', 'arm64'],
@@ -15,5 +17,7 @@ const MOCK_ATTRIBUTE_VALUES: Record<string, string[]> = {
   'k8s.pod.phase': ['failed', 'pending', 'running'],
 };
 
-export const getEntityInventoryAttributeValues = async (attribute: string): Promise<string[]> =>
+export const getEntityInventoryAttributeValues = async ({
+  attribute,
+}: EntityInventoryAttributeValuesParams): Promise<string[]> =>
   MOCK_ATTRIBUTE_VALUES[attribute] ?? [];

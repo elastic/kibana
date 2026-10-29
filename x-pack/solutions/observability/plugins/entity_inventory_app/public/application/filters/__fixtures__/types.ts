@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../../mock_inventory_api/types';
+import type { EntityInventoryTypeDefinition } from '../../../inventory_api_types';
 
 export const typesFixture: EntityInventoryTypeDefinition[] = [
   {
     type: 'host',
+    name: 'Host',
     category: 'hosts',
     attributes: [
       { name: 'os.type', dimension: true },
@@ -19,6 +20,7 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
   },
   {
     type: 'k8s.deployment',
+    name: 'Deployment',
     category: 'kubernetes',
     attributes: [
       { name: 'k8s.cluster.name', dimension: true },
@@ -29,6 +31,7 @@ export const typesFixture: EntityInventoryTypeDefinition[] = [
   },
   {
     type: 'k8s.pod',
+    name: 'Pod',
     category: 'kubernetes',
     attributes: [
       { name: 'k8s.cluster.name', dimension: true },

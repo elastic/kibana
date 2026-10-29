@@ -12,6 +12,14 @@ export interface EntityInventoryTypeAttribute {
 
 export interface EntityInventoryTypeDefinition {
   type: string;
+  name: string;
   category?: string;
   attributes: EntityInventoryTypeAttribute[];
+}
+
+export interface EntityInventoryAttributeValuesParams {
+  attribute: string;
+  types: string[];
+  filters: Record<string, string[]>;
+  timeRange: { from: string; to: string };
 }

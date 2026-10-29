@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityInventoryTypeDefinition } from '../../mock_inventory_api/types';
+import type { EntityInventoryTypeDefinition } from '../../inventory_api_types';
 import { typesFixture as types } from './__fixtures__/types';
 import { getCategories, getFilterControls, normalizeSelection } from './get_filter_controls';
 
@@ -15,11 +15,9 @@ describe('getCategories', () => {
   });
 
   it('treats a type without a category as its own category', () => {
-    expect(getCategories([...types, { type: 'service', attributes: [] }])).toEqual([
-      'hosts',
-      'kubernetes',
-      'service',
-    ]);
+    expect(getCategories([...types, { type: 'service', name: 'Service', attributes: [] }])).toEqual(
+      ['hosts', 'kubernetes', 'service']
+    );
   });
 });
 
@@ -106,7 +104,11 @@ describe('getFilterControls', () => {
   it('shows the dimensions of a type without a category when it is selected as a category', () => {
     const withService: EntityInventoryTypeDefinition[] = [
       ...types,
-      { type: 'service', attributes: [{ name: 'service.environment', dimension: true }] },
+      {
+        type: 'service',
+        name: 'Service',
+        attributes: [{ name: 'service.environment', dimension: true }],
+      },
     ];
 
     expect(getFilterControls({ types: withService, selectedCategory: 'service' })).toEqual({
@@ -118,8 +120,18 @@ describe('getFilterControls', () => {
 
   it('shows no attribute filter when the types of a category share no dimension', () => {
     const unrelated: EntityInventoryTypeDefinition[] = [
-      { type: 'a', category: 'group', attributes: [{ name: 'a.name', dimension: true }] },
-      { type: 'b', category: 'group', attributes: [{ name: 'b.name', dimension: true }] },
+      {
+        type: 'a',
+        name: 'A',
+        category: 'group',
+        attributes: [{ name: 'a.name', dimension: true }],
+      },
+      {
+        type: 'b',
+        name: 'B',
+        category: 'group',
+        attributes: [{ name: 'b.name', dimension: true }],
+      },
     ];
 
     expect(getFilterControls({ types: unrelated, selectedCategory: 'group' })).toEqual({
