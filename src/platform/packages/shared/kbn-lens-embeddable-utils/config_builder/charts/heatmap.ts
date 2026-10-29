@@ -46,6 +46,7 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
       isXAxisTitleVisible: false,
       isYAxisLabelVisible: config.axisLabel?.yAxis ?? false,
       isYAxisTitleVisible: false,
+      ...(config.ySort ? { ySortPredicate: config.ySort } : {}),
     },
     legend: {
       isVisible: config.legend?.show ?? true,
