@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   DateRangePicker,
   type DateRangePickerOnChangeProps,
   type DateRangePickerProps,
   type DateRangePickerSettings,
+  type FirstDayOfWeek,
 } from '@kbn/date-range-picker';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import type { TimeRange } from '../hooks/use_automation_usage';
 import { listLabels } from './translations';
+import { useKibana } from '../../hooks/use_kibana';
 
 const PRESETS: NonNullable<DateRangePickerProps['presets']> = [
   {
@@ -112,6 +115,18 @@ export const AutomationsTimeRangePicker = ({
   const [isInvalid, setIsInvalid] = useState(false);
   const [settings, setSettings] = useState<DateRangePickerSettings>({ roundRelativeTime: false });
 
+  const { uiSettings } = useKibana().services;
+
+  const timeZone: string = uiSettings.get('dateFormat:tz');
+  const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+
+  const calendarOptions = useMemo(
+    () => ({
+      firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+    }),
+    [dayOfWeekSetting]
+  );
+
   const handleChange = ({
     start,
     end,
@@ -141,6 +156,8 @@ export const AutomationsTimeRangePicker = ({
       compressed
       width="auto"
       data-test-subj="automationsTimeRangePicker"
+      timeZone={timeZone}
+      calendarOptions={calendarOptions}
     />
   );
 };

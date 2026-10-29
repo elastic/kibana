@@ -17,6 +17,9 @@ const sharedDeploymentTags = [
   ...tags.serverless.security.complete,
 ];
 
+// Flyouts render in an EUI portal outside .kbnAppWrapper.
+const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
+
 test.describe('Ingest pipelines create flows', { tag: sharedDeploymentTags }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsIngestPipelinesUser();
@@ -47,5 +50,25 @@ test.describe('Ingest pipelines create flows', { tag: sharedDeploymentTags }, ()
     });
 
     expect(pipelinesList).toContain(testData.PIPELINE_CSV.name);
+  });
+
+  test('create form and add processor flyout have no a11y violations', async ({
+    page,
+    pageObjects,
+  }) => {
+    await test.step('create form', async () => {
+      await pageObjects.ingestPipelines.openCreateForm();
+      await expect(pageObjects.ingestPipelines.appTitle).toBeVisible();
+
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
+
+    await test.step('add processor flyout', async () => {
+      await pageObjects.ingestPipelines.openAddProcessorFlyout();
+
+      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+      expect(violations).toStrictEqual([]);
+    });
   });
 });

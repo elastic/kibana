@@ -46,7 +46,7 @@ export const LogsListContainer = () => {
     toasts,
     filteredRuleTypes: [],
   });
-  const { openCreateRuleModal, openSettingsFlyout } = useRulesPageActions();
+  const { openCreateRuleModal, navigateToSettings } = useRulesPageActions();
 
   const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
@@ -67,9 +67,9 @@ export const LogsListContainer = () => {
         authorizedToCreateAnyRules,
         canShowSettings,
         onCreateRule: openCreateRuleModal,
-        onOpenSettings: openSettingsFlyout,
+        onOpenSettings: navigateToSettings,
       }),
-    [authorizedToCreateAnyRules, canShowSettings, openCreateRuleModal, openSettingsFlyout]
+    [authorizedToCreateAnyRules, canShowSettings, openCreateRuleModal, navigateToSettings]
   );
 
   const classicLogsTabs = useMemo(
@@ -84,7 +84,7 @@ export const LogsListContainer = () => {
         shouldShowSettings={canShowSettings}
         showClassicBadge={showClassicBadge}
         docLink={docLink}
-        onOpenSettings={openSettingsFlyout}
+        onOpenSettings={navigateToSettings}
       />
     ) : (
       <RulesPageHeader
