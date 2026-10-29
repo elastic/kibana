@@ -186,7 +186,7 @@ const readInferenceFeatures = async (
  *
  * `pinWorkflowConnector` only moves `genAiSettings:defaultAIConnector`, and every alertzero tier
  * registers `ignoreGlobalDefault: true`: `diagnose_rule` (`connector-id-by-feature:
- * alertzero_agentic`) kept calling the tier's recommended claude-5-sonnet whatever the candidate
+ * alertzero_balanced`) kept calling the tier's recommended claude-5-sonnet whatever the candidate
  * was, and the agent's low-effort calls kept calling flash-lite. A saved Model Management entry
  * outranks `recommendedEndpoints`, so write one per feature.
  *

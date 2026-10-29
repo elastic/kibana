@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DIAGNOSE_STEP_ID,
   GEN_AI_DEFAULT_CONNECTOR_SETTING,
   INFERENCE_SETTINGS_ROUTE,
+  PINNED_INFERENCE_FEATURE_IDS,
 } from './constants';
 import type { RuleTuningVerdict } from './workflow_task';
 import {
@@ -191,6 +194,40 @@ const putBody = (request: jest.Mock) =>
     body: { features: StoredFeature[] };
   };
 
+const WORKFLOW_DEFINITIONS =
+  '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero';
+
+/** Every inference feature a workflow YAML resolves via `connector-id-by-feature` (scalar or list). */
+const tiersResolvedBy = (yamlFile: string): string[] => {
+  const yaml = readFileSync(join(__dirname, WORKFLOW_DEFINITIONS, yamlFile), 'utf8');
+  const tiers = new Set<string>();
+  for (const [, scalar, list] of yaml.matchAll(
+    /connector-id-by-feature:[ \t]*(\S+)?[ \t]*\n((?:[ \t]+- \S+\n)*)/g
+  )) {
+    if (scalar) tiers.add(scalar);
+    for (const [, item] of (list ?? '').matchAll(/- (\S+)/g)) tiers.add(item);
+  }
+  return [...tiers];
+};
+
+describe('PINNED_INFERENCE_FEATURE_IDS', () => {
+  // The tiers were renamed agentic/fast/reasoning -> efficient/balanced/frontier while this list
+  // kept the old ids: the pin read back fine, and the review kept calling claude-5-sonnet in
+  // every candidate cell. Derive the contract from the workflows so a rename fails here.
+  it.each(['rule_tuning_worker.yaml', 'rule_tuning_review.yaml'])(
+    'covers every tier %s resolves a model through',
+    (yamlFile) => {
+      expect(PINNED_INFERENCE_FEATURE_IDS).toEqual(
+        expect.arrayContaining(tiersResolvedBy(yamlFile))
+      );
+    }
+  );
+
+  it('finds the review tier, so the check above cannot pass vacuously', () => {
+    expect(tiersResolvedBy('rule_tuning_review.yaml').length).toBeGreaterThan(0);
+  });
+});
+
 describe('pinInferenceFeatures', () => {
   it('writes the eval connector onto every alertzero tier and agent-builder feature', async () => {
     const { kbnClient, request } = inferenceSettingsServer();
@@ -203,9 +240,9 @@ describe('pinInferenceFeatures', () => {
     expect(put.body.features).toEqual(
       expect.arrayContaining(
         [
-          'alertzero_agentic',
-          'alertzero_fast',
-          'alertzero_reasoning',
+          'alertzero_efficient',
+          'alertzero_balanced',
+          'alertzero_frontier',
           'agent_builder',
           'agent_builder_fast',
         ].map((feature_id) => ({ feature_id, endpoints: [{ id: eisConnector.id }] }))
@@ -218,7 +255,7 @@ describe('pinInferenceFeatures', () => {
       initial: [
         { feature_id: 'other_feature', endpoints: [{ id: 'keep-me' }] },
         {
-          feature_id: 'alertzero_agentic',
+          feature_id: 'alertzero_balanced',
           endpoints: [{ id: '.anthropic-claude-5-sonnet-chat_completion' }],
         },
       ],
@@ -231,16 +268,16 @@ describe('pinInferenceFeatures', () => {
       feature_id: 'other_feature',
       endpoints: [{ id: 'keep-me' }],
     });
-    expect(features.filter(({ feature_id: id }) => id === 'alertzero_agentic')).toEqual([
-      { feature_id: 'alertzero_agentic', endpoints: [{ id: eisConnector.id }] },
+    expect(features.filter(({ feature_id: id }) => id === 'alertzero_balanced')).toEqual([
+      { feature_id: 'alertzero_balanced', endpoints: [{ id: eisConnector.id }] },
     ]);
   });
 
   it('THROWS naming the feature when the read-back does not carry the connector', async () => {
-    const { kbnClient } = inferenceSettingsServer({ dropFromStored: ['alertzero_agentic'] });
+    const { kbnClient } = inferenceSettingsServer({ dropFromStored: ['alertzero_balanced'] });
 
     await expect(pinInferenceFeatures({ kbnClient, connector: eisConnector, log })).rejects.toThrow(
-      /did not stick for alertzero_agentic/
+      /did not stick for alertzero_balanced/
     );
   });
 
