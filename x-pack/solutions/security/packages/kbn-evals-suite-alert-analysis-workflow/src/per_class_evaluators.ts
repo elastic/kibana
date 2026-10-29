@@ -19,12 +19,7 @@ const NOT_APPLICABLE = {
   explanation: 'Example is not in the class this evaluator reports on.',
 };
 
-/**
- * Overall accuracy hides which class a model gets wrong: with mostly true/false positives in the
- * dataset, a model that never answers `inconclusive` still scores well. One evaluator per expected
- * class, scored only on examples of that class (N/A elsewhere), so each run's mean is that
- * class's accuracy.
- */
+/** Per-class accuracy: N/A outside the class, so the run mean is that class's accuracy. */
 const createPerClassAccuracy = (cls: Classification): Evaluator => ({
   name: `Accuracy:${cls}`,
   kind: 'CODE',
@@ -44,10 +39,7 @@ const createPerClassAccuracy = (cls: Classification): Evaluator => ({
 
 export const perClassAccuracyEvaluators: Evaluator[] = CLASSIFICATIONS.map(createPerClassAccuracy);
 
-/**
- * Guardrail for the dangerous error: a true positive classified false_positive would be closed as
- * benign. Scored only on true-positive examples, so the run mean is 1 minus that error rate.
- */
+/** Guardrail: a true positive classified false_positive would be closed as benign. */
 export const maliciousNotClosed: Evaluator = {
   name: 'MaliciousNotClosed',
   kind: 'CODE',

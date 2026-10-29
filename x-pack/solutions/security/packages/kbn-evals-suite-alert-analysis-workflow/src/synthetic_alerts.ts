@@ -22,18 +22,10 @@
  *   - Tier 3 (behavior, technique with legitimate uses, signed vendor process) → false_positive (Gate D)
  *   - Tier 4 (generic/threshold rule, benign signed process) → false_positive (Gate D)
  *
- * Two further groups probe where models separate, because every model scores 1.0 on the tier
- * examples above:
- *
- *   - Hard boundary cases: malicious activity that looks benign (a signed Microsoft binary used
- *     to download and run a payload, a low-severity rule on a high-precision technique) and one
- *     benign case that looks alarming. The labels follow the same gates; the surface cues point
- *     the other way.
- *   - Inconclusive cases (Gate F): alerts whose critical observable fields are entirely absent.
- *     The prompt reserves `inconclusive` for exactly this, so it is the only defensible label.
- *     Their docs go through `buildEvidenceFreeDoc`, which also drops the few noise fields the
- *     prompt renders as evidence (working directory, process hash, host OS, event dataset);
- *     otherwise the "no evidence" alert would still show a process hash and a working directory.
+ * The hard-boundary and inconclusive alerts are where models separate (every model scores 1.0
+ * on the tier examples). Inconclusive alerts (Gate F) carry no action, actor or parameters; they
+ * are built with `buildEvidenceFreeDoc`, which also drops the noise fields the prompt renders as
+ * evidence, so the alert is truly evidence-free.
  *
  * Each alert carries a base rule uuid here, but the spec overrides it with a per-run unique uuid
  * before indexing (see the task in the spec). That is what guarantees the workflow's per-rule
