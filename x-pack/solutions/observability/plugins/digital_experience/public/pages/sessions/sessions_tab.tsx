@@ -300,6 +300,8 @@ export function SessionsTab({
   }
   return (
     <>
+      {/* Clears the page header's tabs. */}
+      <EuiSpacer size="m" />
       <SessionsStatusCallout status={status} {...enableProps} />
       <SessionsList serviceName={serviceName} source={source} />
     </>
