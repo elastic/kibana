@@ -137,7 +137,9 @@ export const getCloudOnboardingDeploymentsHandler: FleetRequestHandler<
     internalSoClient,
     request.query
   );
-  const enriched = await enrichDeployments(internalSoClient, items);
+  const enriched = await enrichDeployments(internalSoClient, items, {
+    withAgentCount: fleetContext.authz.fleet.readAgents,
+  });
   return response.ok({
     body: { items: enriched.map(toResponseItem), total, page, perPage },
   });

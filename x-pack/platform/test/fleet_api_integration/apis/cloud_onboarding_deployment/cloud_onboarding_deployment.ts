@@ -717,6 +717,18 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.items[0].agentCount).to.equal(1);
         expect(body.items[0].servicesByMethod).to.eql({ agent_based: ['cloudtrail'] });
       });
+
+      it('leaves out the agent count for users who cannot read agents', async () => {
+        const user = testUsers.fleet_agent_policies_read_only;
+        const { body } = await supertestWithoutAuth
+          .get(BASE_URL)
+          .auth(user.username, user.password)
+          .query({ packageName: PACKAGE_NAME })
+          .expect(200);
+
+        expect(body.items).to.have.length(1);
+        expect(body.items[0]).not.to.have.property('agentCount');
+      });
     });
 
     describe('authorization', () => {

@@ -247,40 +247,39 @@ export const InstancesTable: React.FunctionComponent<{
                 />
               ),
           },
+          {
+            field: 'agentCount',
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.agentsColumn', {
+              defaultMessage: 'Agents',
+            }),
+            render: (agentCount: number | undefined, item: CloudOnboardingDeploymentListItem) => {
+              if (!agentCount) return EMPTY_CELL;
+              const agentPolicyIds = agentPolicyIdsByInstance.get(item.id) ?? [];
+              // Only agent-based agents: the Fleet agent list hides agentless ones unless an
+              // agentless resources toggle is on, so a managed instance would open an empty list.
+              // Their status badge opens the details of each agent instead.
+              if (!item.mechanisms.includes('agent_based') || agentPolicyIds.length === 0) {
+                return agentCount;
+              }
+              // Base ids with a fallback, like the agent count, so agents on version-specific
+              // policies (`<id>#9.3`) are listed too.
+              const kuery = buildPolicyBaseIdsWithFallbackKuery(
+                agentPolicyIds,
+                `${AGENTS_PREFIX}.policy_base_id`,
+                `${AGENTS_PREFIX}.policy_id`
+              );
+              return (
+                <EuiLink
+                  href={getHref('agent_list', { kuery })}
+                  data-test-subj="instanceAgentsLink"
+                >
+                  {agentCount}
+                </EuiLink>
+              );
+            },
+          },
         ]
       : []),
-    {
-      field: 'agentCount',
-      name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.agentsColumn', {
-        defaultMessage: 'Agents',
-      }),
-      render: (agentCount: number, item: CloudOnboardingDeploymentListItem) => {
-        if (agentCount === 0) return EMPTY_CELL;
-        const agentPolicyIds = agentPolicyIdsByInstance.get(item.id) ?? [];
-        // Only agent-based agents: the Fleet agent list hides agentless ones unless an
-        // agentless resources toggle is on, so a managed instance would open an empty list.
-        // Their status badge opens the details of each agent instead.
-        if (
-          !canReadAgents ||
-          !item.mechanisms.includes('agent_based') ||
-          agentPolicyIds.length === 0
-        ) {
-          return agentCount;
-        }
-        // Base ids with a fallback, like the agent count, so agents on version-specific
-        // policies (`<id>#9.3`) are listed too.
-        const kuery = buildPolicyBaseIdsWithFallbackKuery(
-          agentPolicyIds,
-          `${AGENTS_PREFIX}.policy_base_id`,
-          `${AGENTS_PREFIX}.policy_id`
-        );
-        return (
-          <EuiLink href={getHref('agent_list', { kuery })} data-test-subj="instanceAgentsLink">
-            {agentCount}
-          </EuiLink>
-        );
-      },
-    },
     ...(canDelete
       ? [
           {

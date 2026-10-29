@@ -77,6 +77,7 @@ describe('getServicesByMethod', () => {
 });
 
 describe('enrichDeployments', () => {
+  const WITH_AGENT_COUNT = { withAgentCount: true };
   const soClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
@@ -98,9 +99,11 @@ describe('enrichDeployments', () => {
   });
 
   it('adds the deployed package versions once per package and the agents of its policies', async () => {
-    const [item] = await enrichDeployments(soClient, [
-      makeDeployment({ packagePolicyIds: ['pp1', 'pp2', 'pp3'] }),
-    ]);
+    const [item] = await enrichDeployments(
+      soClient,
+      [makeDeployment({ packagePolicyIds: ['pp1', 'pp2', 'pp3'] })],
+      WITH_AGENT_COUNT
+    );
 
     expect(item.packages).toEqual([
       { name: 'aws', title: 'AWS', version: '8.11.0' },
@@ -111,16 +114,22 @@ describe('enrichDeployments', () => {
   });
 
   it('counts the agents of the stored agent policies of an agent-based deployment', async () => {
-    const [item] = await enrichDeployments(soClient, [
-      makeDeployment({ mechanisms: ['agent_based'], agentPolicyIds: ['ap2'] }),
-    ]);
+    const [item] = await enrichDeployments(
+      soClient,
+      [makeDeployment({ mechanisms: ['agent_based'], agentPolicyIds: ['ap2'] })],
+      WITH_AGENT_COUNT
+    );
 
     expect(item.packages).toEqual([]);
     expect(item.agentCount).toBe(2);
   });
 
   it('does not query policies for a deployment without any, like ECF-only', async () => {
-    const [item] = await enrichDeployments(soClient, [makeDeployment({ mechanisms: ['ecf'] })]);
+    const [item] = await enrichDeployments(
+      soClient,
+      [makeDeployment({ mechanisms: ['ecf'] })],
+      WITH_AGENT_COUNT
+    );
 
     expect(packagePolicyService.getByIDs).not.toHaveBeenCalled();
     expect(getAgentCountForAgentPolicies).not.toHaveBeenCalled();
@@ -128,9 +137,11 @@ describe('enrichDeployments', () => {
   });
 
   it('skips package policies that no longer exist', async () => {
-    const [item] = await enrichDeployments(soClient, [
-      makeDeployment({ packagePolicyIds: ['pp1', 'missing'] }),
-    ]);
+    const [item] = await enrichDeployments(
+      soClient,
+      [makeDeployment({ packagePolicyIds: ['pp1', 'missing'] })],
+      WITH_AGENT_COUNT
+    );
 
     expect(item.packages).toEqual([{ name: 'aws', title: 'AWS', version: '8.11.0' }]);
   });
@@ -142,12 +153,16 @@ describe('enrichDeployments', () => {
         ids.filter((id) => id !== 'other-space-policy').map((id) => ({ id } as any))
       );
 
-    const [item] = await enrichDeployments(soClient, [
-      makeDeployment({
-        mechanisms: ['agent_based'],
-        agentPolicyIds: ['ap2', 'other-space-policy'],
-      }),
-    ]);
+    const [item] = await enrichDeployments(
+      soClient,
+      [
+        makeDeployment({
+          mechanisms: ['agent_based'],
+          agentPolicyIds: ['ap2', 'other-space-policy'],
+        }),
+      ],
+      WITH_AGENT_COUNT
+    );
 
     expect(agentPolicyService.getByIds).toHaveBeenCalledWith(
       soClient,
@@ -156,5 +171,18 @@ describe('enrichDeployments', () => {
     );
     expect(getAgentCountForAgentPolicies).toHaveBeenCalledWith(expect.anything(), ['ap2']);
     expect(item.agentCount).toBe(2);
+  });
+
+  it('leaves out the agent count without permission to read agents', async () => {
+    const [item] = await enrichDeployments(
+      soClient,
+      [makeDeployment({ packagePolicyIds: ['pp1', 'pp2'] })],
+      { withAgentCount: false }
+    );
+
+    expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
+    expect(getAgentCountForAgentPolicies).not.toHaveBeenCalled();
+    expect(item).not.toHaveProperty('agentCount');
+    expect(item.packages).toHaveLength(2);
   });
 });

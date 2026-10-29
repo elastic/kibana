@@ -154,6 +154,6 @@ export interface CloudOnboardingDeploymentListItem extends CloudOnboardingDeploy
   packages: CloudOnboardingDeploymentPackage[];
   /** Service IDs by the delivery mechanism that deploys them. */
   servicesByMethod: Partial<Record<DeploymentMethod, string[]>>;
-  /** Agents enrolled in the deployment's agent policies. */
-  agentCount: number;
+  /** Agents enrolled in the deployment's agent policies. Left out without permission to read agents. */
+  agentCount?: number;
 }
