@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { ChangeHistoryAdapter } from '@kbn/change-history-ui';
+import { ruleKeys } from '../../../../hooks/query_key_factory';
 import { useRuleChangeHistoryModal } from './use_rule_change_history_modal';
 
 const mockOpenModal = jest.fn();
@@ -15,33 +17,57 @@ jest.mock('@kbn/change-history-ui', () => ({
   useChangeHistoryModal: () => ({ openModal: mockOpenModal, closeModal: jest.fn(), isOpen: false }),
 }));
 
-const mockProviderRenders: Array<{ ruleId: string; ruleName: string; analytics: unknown }> = [];
+const mockProviderRenders: Array<{
+  ruleId: string;
+  ruleName: string;
+  analytics: unknown;
+  canRestore?: boolean;
+  adapter: ChangeHistoryAdapter;
+}> = [];
 
 jest.mock('./rule_change_history_provider', () => ({
   RuleChangeHistoryProvider: (props: {
     ruleId: string;
     ruleName: string;
     analytics: unknown;
+    canRestore?: boolean;
+    adapter: ChangeHistoryAdapter;
     children: React.ReactNode;
   }) => {
     mockProviderRenders.push({
       ruleId: props.ruleId,
       ruleName: props.ruleName,
       analytics: props.analytics,
+      canRestore: props.canRestore,
+      adapter: props.adapter,
     });
     return <div data-test-subj="provider">{props.children}</div>;
   },
 }));
 
 const mockAnalyticsStub = { reportEvent: jest.fn() };
+const mockApiStub = { restoreRuleChange: jest.fn().mockResolvedValue({ id: 'a' }) };
 
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `CoreStart:${key}`,
-  useService: (token: unknown) => (token === 'CoreStart:analytics' ? mockAnalyticsStub : {}),
+  useService: (token: unknown) =>
+    token === 'CoreStart:analytics' ? mockAnalyticsStub : mockApiStub,
 }));
 
-const Harness = () => {
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+const mockInvalidateQueries = jest.fn();
+
+jest.mock('@kbn/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+}));
+
+const mockInvalidateRulesContentList = jest.fn();
+
+jest.mock('../../../../hooks/invalidate_rules_content_list', () => ({
+  invalidateRulesContentList: () => mockInvalidateRulesContentList(),
+}));
+
+const Harness = ({ canRestore }: { canRestore?: boolean }) => {
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({ canRestore });
 
   return (
     <>
@@ -61,6 +87,8 @@ const lastProviderRender = () => mockProviderRenders[mockProviderRenders.length 
 describe('useRuleChangeHistoryModal', () => {
   beforeEach(() => {
     mockOpenModal.mockClear();
+    mockInvalidateQueries.mockClear();
+    mockInvalidateRulesContentList.mockClear();
     mockProviderRenders.length = 0;
   });
 
@@ -109,5 +137,31 @@ describe('useRuleChangeHistoryModal', () => {
 
     expect(lastProviderRender().ruleId).toBe('a');
     expect(mockOpenModal).toHaveBeenCalledTimes(2);
+  });
+
+  it('disables restore by default and forwards canRestore to the provider', () => {
+    const { rerender } = render(<Harness />);
+
+    fireEvent.click(screen.getByTestId('openA'));
+    expect(lastProviderRender().canRestore).toBe(false);
+
+    rerender(<Harness canRestore />);
+    expect(lastProviderRender().canRestore).toBe(true);
+  });
+
+  it('refetches the rule list, tags and the restored rule after a restore', async () => {
+    render(<Harness canRestore />);
+
+    fireEvent.click(screen.getByTestId('openA'));
+    await lastProviderRender().adapter.restoreChange?.({ objectId: 'a', changeId: 'evt-1' });
+
+    expect(mockApiStub.restoreRuleChange).toHaveBeenCalledWith({
+      eventId: 'evt-1',
+      signal: undefined,
+    });
+    expect(mockInvalidateRulesContentList).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith(ruleKeys.lists());
+    expect(mockInvalidateQueries).toHaveBeenCalledWith(ruleKeys.allTags());
+    expect(mockInvalidateQueries).toHaveBeenCalledWith(ruleKeys.detail('a'));
   });
 });

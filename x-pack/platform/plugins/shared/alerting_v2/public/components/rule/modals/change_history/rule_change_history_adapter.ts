@@ -28,14 +28,20 @@ const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryList
   isCurrent: item.is_current,
 });
 
+export interface RuleChangeHistoryAdapterOptions {
+  /** Called with the rule id after a restore succeeds, e.g. to refetch rule queries. */
+  onRestored?: (ruleId: string) => void;
+}
+
 /**
  * Builds the {@link ChangeHistoryAdapter} for alerting v2 rules from
- * the HTTP read API. Maps the API DTOs to the change-history UI
+ * the HTTP API. Maps the API DTOs to the change-history UI
  * row/detail types, and adapts 1-based pagination (the package uses a
  * 0-based `page.index`; the API is 1-based).
  */
 export const createRuleChangeHistoryAdapter = (
-  api: RuleChangeHistoryApi
+  api: RuleChangeHistoryApi,
+  { onRestored }: RuleChangeHistoryAdapterOptions = {}
 ): ChangeHistoryAdapter => ({
   listChanges: async ({ objectId, page, signal }): Promise<ListChangeHistoryResult> => {
     const { items, total } = await api.listRuleChanges({
@@ -57,5 +63,9 @@ export const createRuleChangeHistoryAdapter = (
       snapshot,
       reason,
     };
+  },
+  restoreChange: async ({ objectId, changeId, signal }): Promise<void> => {
+    await api.restoreRuleChange({ eventId: changeId, signal });
+    onRestored?.(objectId);
   },
 });
