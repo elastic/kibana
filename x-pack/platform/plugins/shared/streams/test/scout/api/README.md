@@ -81,13 +81,24 @@ node scripts/playwright test --config x-pack/platform/plugins/shared/streams/tes
 - Nested field names
 - Multiple field definitions
 
-### Lifecycle Tests (`lifecycle/retention.spec.ts`)
+### Lifecycle Retention Tests (`streams/lifecycle_retention.spec.ts`)
 - Get lifecycle stats
 - Get lifecycle explain
 - Update retention settings
 - Inheritance from parent
 - Different time units (hours, days)
 - Clear custom retention
+
+### Failure Store and ILM Tests (`lifecycle/`)
+- Failure store on wired, classic and root streams: enable, disable, retention, inheritance
+- Disabling the failure store lifecycle (stateful) and its rejection on serverless
+- ILM stats, ILM policy upsert and policy usage (stateful)
+- Snapshot repositories (local `fs` repository and the Cloud default repository)
+
+### Doc Counts Tests (`data_quality/`)
+- Total and ingestion counts, including time ranges and single-stream queries
+- Degraded and failed document counts
+- Failure store documents folded into ingestion counts for privileged users only
 
 ## Writing New Tests
 

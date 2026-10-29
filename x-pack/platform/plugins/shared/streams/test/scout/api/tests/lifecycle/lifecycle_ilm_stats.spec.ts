@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { EsClient } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type ApiClientFixture, type EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { ApiClientFixture } from '@kbn/scout';
 import type { StreamsApiServicesFixture } from '../../fixtures';
 import { streamsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 import { wiredUpsertRequest } from '../../lib/streams';
 
-const PREFIX = 'logs.otel.lcilmstats';
-const POLICY_NAME = 'streams_lcilmstats_hotwarmdelete';
+const PREFIX = 'logs.otel.ilmstats';
+const POLICY_NAME = 'streams_ilmstats_hotwarmdelete';
 
 // ILM is not available on serverless.
 apiTest.describe('Lifecycle stats - ILM streams', { tag: tags.stateful.classic }, () => {

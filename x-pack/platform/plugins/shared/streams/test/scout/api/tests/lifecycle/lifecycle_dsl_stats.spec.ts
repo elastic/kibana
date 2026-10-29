@@ -11,7 +11,7 @@ import { streamsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 import { wiredUpsertRequest } from '../../lib/streams';
 
-const PREFIX = 'logs.otel.lcdsl';
+const PREFIX = 'logs.otel.dslstats';
 
 apiTest.describe('Lifecycle stats - DSL streams', { tag: tags.deploymentAgnostic }, () => {
   apiTest.afterEach(async ({ apiServices }) => {

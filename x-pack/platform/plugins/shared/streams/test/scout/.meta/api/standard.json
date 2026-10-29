@@ -1,5 +1,5 @@
 {
-  "sha1": "8e77d57f3865a5facfce79065b6f178ec50d9fdb",
+  "sha1": "baba7b601b49b25ff2f296cbd27a815ec2721610",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -191,7 +191,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
-        "line": 31,
+        "line": 36,
         "column": 5
       }
     },
@@ -211,7 +211,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
-        "line": 68,
+        "line": 73,
         "column": 33
       }
     },
@@ -231,7 +231,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
-        "line": 90,
+        "line": 95,
         "column": 11
       }
     },
@@ -251,7 +251,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
-        "line": 102,
+        "line": 107,
         "column": 70
       }
     },
@@ -573,7 +573,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
-        "line": 38,
+        "line": 37,
         "column": 11
       }
     },
@@ -587,7 +587,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
-        "line": 91,
+        "line": 90,
         "column": 32
       }
     },
@@ -601,7 +601,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
-        "line": 101,
+        "line": 100,
         "column": 16
       }
     },
@@ -615,7 +615,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
-        "line": 111,
+        "line": 110,
         "column": 16
       }
     },
@@ -629,7 +629,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_stats.spec.ts",
-        "line": 44,
+        "line": 42,
         "column": 16
       }
     },
@@ -643,7 +643,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_stats.spec.ts",
-        "line": 53,
+        "line": 51,
         "column": 39
       }
     },

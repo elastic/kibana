@@ -7,9 +7,14 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { FailureStore, RoutingStatus } from '@kbn/streams-schema';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
-import { Streams, emptyAssets } from '@kbn/streams-schema';
+import {
+  Streams,
+  emptyAssets,
+  type FailureStore,
+  type IngestStream,
+  type IngestUpsertRequest,
+  type RoutingStatus,
+} from '@kbn/streams-schema';
 import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
