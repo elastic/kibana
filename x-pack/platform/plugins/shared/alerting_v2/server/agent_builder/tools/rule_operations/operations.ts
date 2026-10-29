@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { isEqual, omit } from 'lodash';
+import { omit } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import {
   isSavedObjectErrorResult,
@@ -263,7 +263,25 @@ export const validateOperationSchema = lazySchema(() =>
     )
 );
 
-// ─── Discriminated union ──────────────────────────────────────────────────────
+// ─── Discriminated unions ─────────────────────────────────────────────────────
+
+/**
+ * Operations on the rule fields every rule shares. Rule builders generate the
+ * query, time field, grouping and recovery, so builder tools accept only these.
+ */
+export const ruleSettingsOperationSchema = lazySchema(() =>
+  z.discriminatedUnion('operation', [
+    setMetadataOperationSchema,
+    setKindOperationSchema,
+    setScheduleOperationSchema,
+    setNoDataOperationSchema,
+    setStateTransitionOperationSchema,
+    setDashboardsOperationSchema,
+    setRunbookOperationSchema,
+  ])
+);
+
+export type RuleSettingsOperation = z.infer<typeof ruleSettingsOperationSchema>;
 
 export const ruleOperationSchema = lazySchema(() =>
   z.discriminatedUnion('operation', [
@@ -352,7 +370,7 @@ export interface RuleOperationsResult {
  * Returns the column metadata so downstream operations (e.g. set_grouping)
  * can validate field references against actual query output.
  */
-async function validateEsqlQuery(
+export async function validateEsqlQuery(
   esClient: IScopedClusterClient,
   query: string
 ): Promise<EsqlColumn[]> {
@@ -375,28 +393,20 @@ const setArtifacts = (
 ): Partial<RuleAttachmentData> =>
   artifacts.length ? { ...data, artifacts } : omit(data, 'artifacts');
 
-/**
- * Builders generate the query and recovery, so replacing either one leaves a rule the builder can
- * no longer represent. Dropping `metadata.builder` also satisfies the write API, which rejects a
- * query change on a builder rule that still carries it.
- */
-const convertToCustomRule = (
-  data: Partial<RuleAttachmentData>,
-  warnings: string[]
-): Partial<RuleAttachmentData> => {
-  const builderType = data.metadata?.builder?.type;
-  if (!builderType) {
-    return data;
+/** Throws when the rule would fail the create API's request schema. */
+export const assertRuleReadyToSave = (data: Partial<RuleAttachmentData>): void => {
+  const result = createRuleDataSchema.safeParse(buildRulePayload(data));
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+      .join('\n');
+    throw new RuleOperationValidationError(`Rule is not ready to save:\n${issues}`);
   }
-  warnings.push(
-    `This rule was created with the "${builderType}" rule builder. Changing its query or recovery converts it to a custom ES|QL rule, so it can no longer be edited with the builder.`
-  );
-  return omit(data, 'metadata.builder');
 };
 
 // ─── Execution ────────────────────────────────────────────────────────────────
 
-const warnOnBackingIndices = (
+export const warnOnBackingIndices = (
   warnings: string[],
   esqlQuery: string,
   queryName: string,
@@ -531,15 +541,11 @@ export const executeRuleOperations = async (
             );
           }
         }
-        const isQueryChanged = !isEqual(op.query, next.query);
         next = {
           ...next,
           query: op.query,
           ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
         };
-        if (isQueryChanged) {
-          next = convertToCustomRule(next, warnings);
-        }
         break;
       }
 
@@ -552,11 +558,7 @@ export const executeRuleOperations = async (
             next.recovery?.strategy === recoveryStrategy.query ? next.recovery.query : undefined
           );
         }
-        const isRecoveryChanged = !isEqual(op.recovery, next.recovery);
         next = { ...next, recovery: op.recovery };
-        if (isRecoveryChanged) {
-          next = convertToCustomRule(next, warnings);
-        }
 
         // A recovering delay is inert under `manual` and the write API rejects
         // the pair, and no operation can remove a phase, so switching to manual
@@ -683,17 +685,9 @@ export const executeRuleOperations = async (
         break;
       }
 
-      case 'validate': {
-        const payload = buildRulePayload(next);
-        const result = createRuleDataSchema.safeParse(payload);
-        if (!result.success) {
-          const issues = result.error.issues
-            .map((i) => `${i.path.join('.')}: ${i.message}`)
-            .join('\n');
-          throw new RuleOperationValidationError(`Rule is not ready to save:\n${issues}`);
-        }
+      case 'validate':
+        assertRuleReadyToSave(next);
         break;
-      }
     }
   }
 

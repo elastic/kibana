@@ -309,8 +309,8 @@ Only \`kind: alert\` rules produce alerts. \`kind: signal\` rules write raw sign
 
 exports[`schema_to_skill_docs generateCustomRuleWhenToUse lists every registered rule builder before the custom rule fallback 1`] = `
 "Use only when no rule builder fits the request. Check these builders first:
-- \`draft_threshold_rule\` (Threshold): Use when the user wants to be alerted when a count, average, sum, min, max, distinct count, percentile or ratio of those over one index goes above, below, between or outside fixed values, optionally per host, service or other group.
-Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or when an attached rule has no builder type or its builder params cannot be parsed."
+- \`platform.alerting.draft_threshold_rule\` (Threshold): Use when the user wants to be alerted when a count, average, sum, min, max, distinct count, percentile or ratio of those over one index goes above, below, between or outside fixed values, optionally per host, service or other group.
+Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or to edit a custom ES|QL rule attachment. Rules authored with a builder are edited with the tools their attachment lists, not with this tool."
 `;
 
 exports[`schema_to_skill_docs generateDispatchFlowDoc matches the reviewed skill-doc snapshot 1`] = `

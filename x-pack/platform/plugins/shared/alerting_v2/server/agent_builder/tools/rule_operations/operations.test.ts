@@ -13,9 +13,11 @@ import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
+  assertRuleReadyToSave,
   executeRuleOperations as executeRuleOperationsImpl,
   RuleOperationValidationError,
   ruleOperationSchema,
+  ruleSettingsOperationSchema,
   type RuleOperation,
 } from './operations';
 
@@ -592,73 +594,47 @@ describe('executeRuleOperations', () => {
     });
   });
 
-  describe('builder rules', () => {
-    const query: RuleAttachmentData['query'] = {
-      base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu)',
-      breach: { segment: 'WHERE avg_cpu > 0.9' },
-    };
-    const recovery: NonNullable<RuleAttachmentData['recovery']> = {
-      strategy: 'condition',
-      segment: 'WHERE avg_cpu < 0.5',
-    };
-    const builderRule: Partial<RuleAttachmentData> = {
-      kind: 'alert',
-      metadata: { name: 'High CPU', builder: { type: 'threshold' } },
-      query,
-      recovery,
-    };
-    const conversionWarning = expect.stringContaining(
-      'This rule was created with the "threshold" rule builder.'
+  describe('ruleSettingsOperationSchema', () => {
+    it('accepts the operations every rule shares', () => {
+      expect(
+        ruleSettingsOperationSchema.safeParse({ operation: 'set_schedule', every: '1m' }).success
+      ).toBe(true);
+    });
+
+    it.each(['set_query', 'set_time_field', 'set_grouping', 'set_recovery', 'validate'])(
+      'rejects %s, which rule builders own or run for every call',
+      (operation) => {
+        expect(ruleSettingsOperationSchema.safeParse({ operation }).success).toBe(false);
+      }
     );
 
-    it('converts the rule to custom ES|QL when set_query changes the query', async () => {
-      const result = await executeRuleOperations(builderRule, [
-        {
-          operation: 'set_query',
-          query: { ...query, breach: { segment: 'WHERE avg_cpu > 0.8' } },
-        },
-      ]);
-
-      expect(result.data.metadata).toEqual({ name: 'High CPU' });
-      expect(result.warnings).toEqual([conversionWarning]);
-    });
-
-    it('converts the rule to custom ES|QL when set_recovery changes the recovery', async () => {
-      const result = await executeRuleOperations(builderRule, [
-        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
-      ]);
-
-      expect(result.data.metadata).toEqual({ name: 'High CPU' });
-      expect(result.warnings).toEqual([conversionWarning]);
-    });
-
-    it('keeps the builder when set_query and set_recovery resend the same values', async () => {
-      const result = await executeRuleOperations(builderRule, [
-        { operation: 'set_query', query },
-        { operation: 'set_recovery', recovery },
-      ]);
-
-      expect(result.data.metadata).toEqual(builderRule.metadata);
-      expect(result.warnings).toBeUndefined();
-    });
-
-    it('keeps the builder for operations that do not touch the query or recovery', async () => {
-      const result = await executeRuleOperations(builderRule, [
+    it('keeps metadata.builder when settings change', async () => {
+      const metadata = { name: 'High CPU', builder: { type: 'threshold' } };
+      const result = await executeRuleOperations({ kind: 'alert', metadata }, [
         { operation: 'set_schedule', every: '1m' },
+        { operation: 'set_metadata', tags: ['infra'] },
       ]);
 
-      expect(result.data.metadata).toEqual(builderRule.metadata);
-      expect(result.warnings).toBeUndefined();
+      expect(result.data.metadata).toEqual({ ...metadata, tags: ['infra'] });
+    });
+  });
+
+  describe('assertRuleReadyToSave', () => {
+    it('accepts a complete rule', () => {
+      expect(() =>
+        assertRuleReadyToSave({
+          kind: 'alert',
+          metadata: { name: 'High CPU' },
+          schedule: { every: '5m' },
+          query: { base: 'FROM metrics-* | WHERE cpu > 0.9' },
+        })
+      ).not.toThrow();
     });
 
-    it('warns once when both the query and the recovery change', async () => {
-      const result = await executeRuleOperations(builderRule, [
-        { operation: 'set_query', query: { base: 'FROM metrics-* | WHERE cpu > 0.9' } },
-        { operation: 'set_recovery', recovery: { strategy: 'no_breach' } },
-      ]);
-
-      expect(result.data.metadata).toEqual({ name: 'High CPU' });
-      expect(result.warnings).toEqual([conversionWarning]);
+    it('lists the issues for an incomplete rule', () => {
+      expect(() => assertRuleReadyToSave({ metadata: { name: 'High CPU' } })).toThrow(
+        /Rule is not ready to save:\n/
+      );
     });
   });
 

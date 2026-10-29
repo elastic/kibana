@@ -12,8 +12,10 @@ jest.mock('uuid', () => ({
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
+import { createAttachmentRecord } from '../rule_operations/rule_attachment.mock';
 import { draftCustomRuleTool } from './draft_custom_rule';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
@@ -81,7 +83,7 @@ describe('draftCustomRuleTool', () => {
 
   it('positions itself as the fallback for requests no rule builder fits', () => {
     expect(tool.description).toContain('Use only when no rule builder fits the request.');
-    expect(tool.description).toContain('`draft_threshold_rule` (Threshold)');
+    expect(tool.description).toContain('`platform.alerting.draft_threshold_rule` (Threshold)');
   });
 
   describe('handler', () => {
@@ -498,6 +500,8 @@ describe('draftCustomRuleTool', () => {
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        id: 'attachment-1',
+        type: RULE_ATTACHMENT_TYPE,
         versions: [
           {
             data: {
@@ -521,6 +525,51 @@ describe('draftCustomRuleTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
+    });
+
+    it('rejects a rule attachment authored with a rule builder', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue(
+        createAttachmentRecord({
+          data: {
+            kind: 'alert',
+            metadata: { name: 'High CPU', builder: { type: 'threshold' } },
+            query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu)' },
+          },
+        })
+      );
+
+      const result = await tool.handler(
+        {
+          ruleAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_query', query: { base: 'FROM metrics-* | LIMIT 1' } }],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ type: string; data: { message: string } }> };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('authored with the "threshold" rule builder');
+      expect(ctx.attachments.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects an attachment of another type', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue(
+        createAttachmentRecord({ type: 'platform.alerting.action_policy', data: {} })
+      );
+
+      const result = await tool.handler(
+        {
+          ruleAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Rule' }],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ type: string; data: { message: string } }> };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('not a rule attachment');
     });
 
     it('returns an error when attachment persistence fails', async () => {
@@ -577,6 +626,8 @@ describe('draftCustomRuleTool', () => {
     it('includes rule_id on unexpected errors when the rule is already persisted', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        id: 'attachment-1',
+        type: RULE_ATTACHMENT_TYPE,
         origin: 'rule-persisted-id',
         versions: [
           {
@@ -609,6 +660,8 @@ describe('draftCustomRuleTool', () => {
     it('includes rule_id on unexpected errors when the rule is only in memory', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        id: 'attachment-1',
+        type: RULE_ATTACHMENT_TYPE,
         versions: [
           {
             data: {

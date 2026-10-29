@@ -19,6 +19,7 @@ import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { RulesClient } from '../../lib/rules_client';
+import { getRuleAttachmentTools } from '../tools/rule_builders';
 
 interface CreateRuleAttachmentTypeOptions {
   logger: LoggerServiceContract;
@@ -114,15 +115,26 @@ export const createRuleAttachmentType = ({
     }
   },
 
-  format: (attachment) => ({
-    getRepresentation: () => ({
-      type: 'text',
-      value: formatRuleAttachmentDescription(attachment.id, attachment.data, attachment.origin),
-    }),
-  }),
+  format: (attachment) => {
+    const { guidance, tools } = getRuleAttachmentTools({
+      attachmentId: attachment.id,
+      data: attachment.data,
+      logger,
+    });
+    return {
+      getRepresentation: () => ({
+        type: 'text',
+        value: [
+          formatRuleAttachmentDescription(attachment.id, attachment.data, attachment.origin),
+          guidance,
+        ].join('\n'),
+      }),
+      getBoundedTools: () => tools,
+    };
+  },
 
   getAgentDescription: () =>
-    `A rule attachment represents a Universal Rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill.`,
+    `A rule attachment represents a Universal Rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. Each rule attachment names the tools that edit it: rules authored with a rule builder are edited through builder params, custom ES|QL rules through draft_custom_rule. To create, explain, or modify rules, load the rule-authoring skill.`,
 
   getTools: () => [],
 });

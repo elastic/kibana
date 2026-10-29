@@ -24,6 +24,7 @@ import {
   generateRuleOperationsDoc,
   generateRuleOperationsUsageList,
   generateCustomRuleWhenToUse,
+  generateRuleSettingsUsageList,
   generateRuleKindDoc,
   generateAlertLifecycleDoc,
   generateStateTransitionDoc,
@@ -389,11 +390,23 @@ describe('schema_to_skill_docs', () => {
       expect(generateCustomRuleWhenToUse()).toMatchSnapshot();
     });
 
-    it('names each registered builder tool', () => {
+    it('names each registered builder tool by its full id', () => {
       const doc = generateCustomRuleWhenToUse();
-      for (const { toolName } of Object.values(RULE_BUILDER_TYPES)) {
-        expect(doc).toContain(`\`${toolName}\``);
+      for (const { type } of Object.values(RULE_BUILDER_TYPES)) {
+        expect(doc).toContain(`\`platform.alerting.draft_${type}_rule\``);
       }
+    });
+  });
+
+  describe('generateRuleSettingsUsageList', () => {
+    it('lists only the operations every rule shares', () => {
+      const doc = generateRuleSettingsUsageList();
+
+      expect(doc).toContain('Use `set_metadata`');
+      expect(doc).toContain('Use `set_runbook`');
+      expect(doc).not.toContain('Use `set_query`');
+      expect(doc).not.toContain('Use `set_recovery`');
+      expect(doc).not.toContain('Use `validate`');
     });
   });
 

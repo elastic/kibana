@@ -13,9 +13,12 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import type { DraftCustomRuleToolDeps } from '../tools/draft_custom_rule';
 import { draftCustomRuleTool } from '../tools/draft_custom_rule';
+import { draftBuilderRuleTool } from '../tools/rule_builders';
 import {
+  generateRuleBuilderToolsList,
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateAlertLifecycleDoc,
@@ -91,11 +94,31 @@ When a user asks about existing rules:
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
 - To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
-- After attaching, use the returned \`attachment_id\` for subsequent ${
-      ALERTING_TOOL_IDS.draftCustomRule
-    } calls.
+- After attaching, edit the rule with the tools its attachment lists.
 
-## Composing and Modifying Rules
+## Choosing a Tool
+
+**New rules.** Prefer a rule builder: builders take structured params and generate the ES|QL for you. Pick the first builder whose description fits the request:
+${generateRuleBuilderToolsList()}
+
+Use \`${
+      ALERTING_TOOL_IDS.draftCustomRule
+    }\` only when no builder fits: the rule needs ES|QL no builder can express (joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), or the user supplies a raw ES|QL query.
+
+**Existing rule attachments.** Every rule attachment states which tools edit it. Use those tools; don't choose by yourself.
+- A rule authored with a builder is edited with its \`update_<builder>_rule_<id>\` tool, which patches builder params. Never edit its ES|QL. Only if the user asks for something the builder can't express, call its \`convert_to_custom_rule_<id>\` tool first, then edit it with \`${
+      ALERTING_TOOL_IDS.draftCustomRule
+    }\`.
+- A custom ES|QL rule is edited with \`${
+      ALERTING_TOOL_IDS.draftCustomRule
+    }\` and its \`ruleAttachmentId\`.
+- Attachment tools only appear on the turn after the attachment is created. To fix a rule you created earlier in the same turn, call the same draft tool again with its \`ruleAttachmentId\`.
+
+Builder tools take the shared settings (name, kind, schedule, no-data, state transition, dashboards, runbook) as a \`settings\` array. Its operations match the \`${
+      ALERTING_TOOL_IDS.draftCustomRule
+    }\` operations of the same name below. Builder tools validate the whole rule on every call.
+
+## Custom ES|QL Rules
 
 Build the request for ${
       ALERTING_TOOL_IDS.draftCustomRule
@@ -137,13 +160,11 @@ ${generateRuleOperationsDoc()}
 
 Always include \`{ operation: "validate" }\` as the **last operation** in the final ${
       ALERTING_TOOL_IDS.draftCustomRule
-    } call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again.
+    } call after all fields are set. This validates the accumulated rule against the API request schema and throws if the rule is not ready to save (missing required fields, invalid values, etc.). If validation fails, read the error issues, fix them with corrective operations, and retry with \`validate\` again. Builder tools validate on every call and don't take \`validate\`.
 
 ## Rendering Attachments
 
-After calling ${
-      ALERTING_TOOL_IDS.draftCustomRule
-    }, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
+After calling any rule tool, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
 
 \`\`\`
 <render_attachment id="<ruleAttachment.id>" version="<version>" />
@@ -155,9 +176,7 @@ This displays the interactive rule card with Preview and Create/Update buttons.
 
 ## Persistence
 
-The ${
-      ALERTING_TOOL_IDS.draftCustomRule
-    } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
+The rule tools only manage the **in-memory attachment** — they never write to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
 - **Create rule** — create a new universal alerting rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
@@ -167,9 +186,7 @@ Never attempt to create, update, delete, enable, or disable rules directly via A
 
 After composing or modifying a rule, always render it inline for user review:
 \`<render_attachment id="{attachmentId}" version="{version}"/>\`
-where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the ${
-      ALERTING_TOOL_IDS.draftCustomRule
-    } tool result.
+where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` from the tool result.
 
 ---
 
@@ -194,7 +211,7 @@ When the user asks whether a rule should notify, record events only, or about th
 When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [alert-lifecycle reference](./references/alert-lifecycle.md).
 
 ### Severity
-When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
+When the user specifies a severity (e.g. "make this a critical alert"), use the builder's severity params for a builder rule. For a custom ES|QL rule, add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ### Recovery Strategy
 When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, use \`set_recovery\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
@@ -204,5 +221,8 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [draftCustomRuleTool(deps)],
+    getInlineTools: () => [
+      draftCustomRuleTool(deps),
+      ...Object.values(RULE_BUILDER_TYPES).map((builder) => draftBuilderRuleTool(builder, deps)),
+    ],
   });

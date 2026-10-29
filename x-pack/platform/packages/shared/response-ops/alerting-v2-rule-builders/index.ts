@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-export type { BuilderRuleSource, BuiltRuleParts, RuleBuilderType } from './src/types';
+export type {
+  BuilderRuleSource,
+  BuiltRuleParts,
+  RuleBuilderDefinition,
+  RuleBuilderExample,
+  RuleBuilderParamsPatch,
+  RuleBuilderParamsSchema,
+  RuleBuilderType,
+} from './src/types';
+export { createParamsPatchSchema, defineRuleBuilder } from './src/define_rule_builder';
 export { RULE_BUILDER_TYPES, getRuleBuilderType } from './src/registry';
+export { applyParamsPatch, checkBuilderParams } from './src/builder_params';
+export type { BuilderParamsCheck } from './src/builder_params';
 export { splitQuery } from './src/split_query';
 export type { SplitConfidence, SplitResult } from './src/split_query';
 export { escapeField } from './src/shared/escape_esql_identifier';

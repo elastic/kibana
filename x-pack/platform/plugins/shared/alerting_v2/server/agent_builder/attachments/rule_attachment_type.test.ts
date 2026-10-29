@@ -15,6 +15,7 @@ import type {
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { thresholdRuleBuilderType } from '@kbn/alerting-v2-rule-builders';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RulesClient } from '../../lib/rules_client';
 import { createRuleAttachmentType } from './rule_attachment_type';
@@ -253,11 +254,10 @@ describe('createRuleAttachmentType', () => {
       ...(origin ? { origin } : {}),
     });
 
+    const formatContext = { request: {} as KibanaRequest, spaceId: 'default' };
+
     const formatValue = async (data: RuleAttachmentData, origin?: string): Promise<string> => {
-      const formatted = await definition.format(buildAttachment(data, origin), {
-        request: {} as KibanaRequest,
-        spaceId: 'default',
-      });
+      const formatted = await definition.format(buildAttachment(data, origin), formatContext);
       if (!formatted.getRepresentation) {
         throw new Error('expected format() to return getRepresentation');
       }
@@ -308,6 +308,43 @@ describe('createRuleAttachmentType', () => {
     it('shows unknown schedule when schedule.every is missing', async () => {
       const value = await formatValue({ ...baseRuleData, schedule: { every: '' } as never });
       expect(value).toContain('Schedule: unknown');
+    });
+
+    describe('rule tools', () => {
+      const [example] = thresholdRuleBuilderType.examples;
+      const thresholdRuleData: RuleAttachmentData = {
+        ...baseRuleData,
+        metadata: { name: 'High CPU', builder: { type: 'threshold' } },
+        ...thresholdRuleBuilderType.build(example.params, { kind: 'alert' }),
+      };
+
+      const getBoundedToolIds = async (data: RuleAttachmentData): Promise<string[]> => {
+        const formatted = await definition.format(buildAttachment(data), formatContext);
+        const tools = (await formatted.getBoundedTools?.()) ?? [];
+        return tools.map(({ id }) => id);
+      };
+
+      it('points custom ES|QL rules at draft_custom_rule without bound tools', async () => {
+        expect(await formatValue(baseRuleData)).toContain(
+          'Custom ES|QL rule. Edit it with `platform.alerting.draft_custom_rule`'
+        );
+        expect(await getBoundedToolIds(baseRuleData)).toEqual([]);
+      });
+
+      it('exposes the update and conversion tools for a builder rule', async () => {
+        expect(await getBoundedToolIds(thresholdRuleData)).toEqual([
+          'platform.alerting.update_threshold_rule_attach1',
+          'platform.alerting.convert_to_custom_rule_attach1',
+        ]);
+      });
+
+      it('names the tools and shows the current params for a builder rule', async () => {
+        const value = await formatValue(thresholdRuleData);
+
+        expect(value).toContain('Authored with the Threshold rule builder.');
+        expect(value).toContain('`platform.alerting.update_threshold_rule_attach1`');
+        expect(value).toContain(`Current Threshold params: ${JSON.stringify(example.params)}`);
+      });
     });
   });
 

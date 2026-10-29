@@ -10,6 +10,8 @@ import {
   ALERTING_TOOL_IDS,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
+import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
@@ -64,14 +66,36 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the draft custom rule inline tool', async () => {
+  it('exposes the draft custom rule tool and one draft tool per rule builder', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.draftCustomRule]);
+    expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.draftCustomRule,
+      ...Object.values(RULE_BUILDER_TYPES).map(
+        ({ type }) => `platform.alerting.draft_${type}_rule`
+      ),
+    ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageActionPolicy);
+  });
+
+  it('registers every inline tool in the Agent Builder allow list', async () => {
+    const skill = createRuleAuthoringSkill(createDeps());
+
+    const inlineTools = (await skill.getInlineTools?.()) ?? [];
+
+    for (const { id } of inlineTools) {
+      expect(isAllowedBuiltinTool(id)).toBe(true);
+    }
+  });
+
+  it('tells the agent to edit existing rules with the tools their attachment lists', () => {
+    const skill = createRuleAuthoringSkill(createDeps());
+
+    expect(skill.content).toContain('Every rule attachment states which tools edit it.');
+    expect(skill.content).toContain('platform.alerting.draft_threshold_rule');
   });
 
   it('defers notification and action policy setup to the action-policy-authoring skill', () => {

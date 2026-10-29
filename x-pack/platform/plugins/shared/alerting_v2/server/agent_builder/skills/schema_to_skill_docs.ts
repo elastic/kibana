@@ -34,8 +34,10 @@ import {
 } from '@kbn/workflows';
 import {
   ruleOperationSchema,
+  ruleSettingsOperationSchema,
   setStateTransitionOperationSchema,
-} from '../tools/draft_custom_rule/operations';
+} from '../tools/rule_operations/operations';
+import { getDraftBuilderRuleToolId } from '../tools/rule_builders/tool_ids';
 import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
 
 type JsonSchemaNode = Record<string, unknown>;
@@ -499,14 +501,28 @@ export const generateRuleOperationsUsageList = (): string =>
     schema: ruleOperationSchema,
   });
 
+/** Operation `.describe()` list for the `settings` input of rule builder tools. */
+export const generateRuleSettingsUsageList = (): string =>
+  generateOperationsUsageList({
+    title: 'Rule Settings Operations Schema Reference',
+    schema: ruleSettingsOperationSchema,
+  });
+
+/** Bullet list of every rule builder's draft tool and when to choose it. */
+export const generateRuleBuilderToolsList = (): string =>
+  Object.values(RULE_BUILDER_TYPES)
+    .map(
+      (builder) =>
+        `- \`${getDraftBuilderRuleToolId(builder)}\` (${builder.title}): ${builder.whenToUse}`
+    )
+    .join('\n');
+
 /** Positions `draft_custom_rule` as the fallback for requests no registered rule builder fits. */
 export const generateCustomRuleWhenToUse = (): string =>
   [
     'Use only when no rule builder fits the request. Check these builders first:',
-    ...Object.values(RULE_BUILDER_TYPES).map(
-      ({ toolName, title, whenToUse }) => `- \`${toolName}\` (${title}): ${whenToUse}`
-    ),
-    'Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or when an attached rule has no builder type or its builder params cannot be parsed.',
+    generateRuleBuilderToolsList(),
+    'Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or to edit a custom ES|QL rule attachment. Rules authored with a builder are edited with the tools their attachment lists, not with this tool.',
   ].join('\n');
 
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;

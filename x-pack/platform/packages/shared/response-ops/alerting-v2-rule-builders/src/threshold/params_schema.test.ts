@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { thresholdRuleBuilderType } from './definition';
 import { thresholdParamsSchema } from './params_schema';
+
+const { paramsPatchSchema: thresholdParamsPatchSchema } = thresholdRuleBuilderType;
 
 const minimalParams = {
   indexPattern: 'logs-*',
@@ -97,5 +100,41 @@ describe('thresholdParamsSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('threshold params patch schema', () => {
+  it('applies no defaults, so an empty patch stays empty', () => {
+    expect(thresholdParamsPatchSchema.parse({})).toEqual({});
+  });
+
+  it('keeps only the fields sent', () => {
+    expect(thresholdParamsPatchSchema.parse({ groupByFields: ['host.name'] })).toEqual({
+      groupByFields: ['host.name'],
+    });
+  });
+
+  it('accepts null to remove optional fields', () => {
+    expect(
+      thresholdParamsPatchSchema.parse({ filterQuery: null, recovery: null, severity: null })
+    ).toEqual({ filterQuery: null, recovery: null, severity: null });
+  });
+
+  it('rejects null for required and defaulted fields', () => {
+    expect(thresholdParamsPatchSchema.safeParse({ stats: null }).success).toBe(false);
+    expect(thresholdParamsPatchSchema.safeParse({ indexPattern: null }).success).toBe(false);
+    expect(thresholdParamsPatchSchema.safeParse({ groupByFields: null }).success).toBe(false);
+    expect(thresholdParamsPatchSchema.safeParse({ conditionOperator: null }).success).toBe(false);
+  });
+
+  it('applies the same bounds as the full schema', () => {
+    expect(thresholdParamsPatchSchema.safeParse({ stats: [] }).success).toBe(false);
+    expect(thresholdParamsPatchSchema.safeParse({ indexPattern: 'a'.repeat(1025) }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects unknown keys', () => {
+    expect(thresholdParamsPatchSchema.safeParse({ query: 'FROM logs-*' }).success).toBe(false);
   });
 });

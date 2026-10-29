@@ -20,11 +20,12 @@ const MAX_GROUP_BY_FIELDS = 10;
 
 const labelSchema = lazySchema(() => z.string().trim().min(1).max(MAX_LABEL_LENGTH));
 
-const conditionOperatorSchema = lazySchema(() =>
-  z
-    .enum(['AND', 'OR'])
-    .default('AND')
-    .describe('How multiple conditions are combined. Defaults to `AND`.')
+const conditionOperatorSchema = lazySchema(() => z.enum(['AND', 'OR']));
+
+const CONDITION_OPERATOR_DESCRIPTION = 'How multiple conditions are combined. Defaults to `AND`.';
+
+const defaultedConditionOperatorSchema = lazySchema(() =>
+  conditionOperatorSchema.default('AND').describe(CONDITION_OPERATOR_DESCRIPTION)
 );
 
 const statSchema = lazySchema(() =>
@@ -100,7 +101,7 @@ const recoverySchema = lazySchema(() =>
         .min(1)
         .max(MAX_CONDITIONS)
         .describe('Conditions that mark an active alert as recovered.'),
-      conditionOperator: conditionOperatorSchema,
+      conditionOperator: defaultedConditionOperatorSchema,
     })
     .strict()
 );
@@ -140,6 +141,29 @@ const severitySchema = lazySchema(() =>
     .strict()
 );
 
+const INDEX_PATTERN_DESCRIPTION = 'Index pattern or data stream to query, e.g. `logs-*`.';
+const TIME_FIELD_DESCRIPTION = 'Date field used for the lookback window, usually `@timestamp`.';
+const FILTER_QUERY_DESCRIPTION =
+  'Optional ES|QL boolean expression applied before aggregation, e.g. `service.name == "api"`.';
+const STATS_DESCRIPTION = 'Aggregations computed per group.';
+const EVALUATIONS_DESCRIPTION = 'Optional derived values computed from stats, in order.';
+const ALERT_CONDITIONS_DESCRIPTION = 'Conditions that must hold for a group to breach.';
+const GROUP_BY_FIELDS_DESCRIPTION =
+  'Fields to group by. Each group is evaluated and alerted on separately.';
+const RECOVERY_DESCRIPTION =
+  'Optional explicit recovery conditions. Only applies to `alert` rules.';
+const SEVERITY_DESCRIPTION = 'Optional severity. Only supported with exactly one alert condition.';
+
+const indexPatternSchema = lazySchema(() => z.string().trim().min(1).max(MAX_INDEX_PATTERN_LENGTH));
+const timeFieldSchema = lazySchema(() => z.string().trim().min(1).max(MAX_FIELD_NAME_LENGTH));
+const filterQuerySchema = lazySchema(() => z.string().trim().min(1).max(MAX_EXPRESSION_LENGTH));
+const statsSchema = lazySchema(() => z.array(statSchema).min(1).max(MAX_STATS));
+const evaluationsSchema = lazySchema(() => z.array(evaluationSchema).max(MAX_EVALUATIONS));
+const alertConditionsSchema = lazySchema(() => z.array(conditionSchema).min(1).max(MAX_CONDITIONS));
+const groupByFieldsSchema = lazySchema(() =>
+  z.array(z.string().trim().min(1).max(MAX_FIELD_NAME_LENGTH)).max(MAX_GROUP_BY_FIELDS)
+);
+
 /**
  * Agent-facing params for the threshold rule builder. Mirrors `ThresholdFormValues`
  * without the UI-only `id` fields.
@@ -147,50 +171,16 @@ const severitySchema = lazySchema(() =>
 export const thresholdParamsSchema = lazySchema(() =>
   z
     .object({
-      indexPattern: z
-        .string()
-        .trim()
-        .min(1)
-        .max(MAX_INDEX_PATTERN_LENGTH)
-        .describe('Index pattern or data stream to query, e.g. `logs-*`.'),
-      timeField: z
-        .string()
-        .trim()
-        .min(1)
-        .max(MAX_FIELD_NAME_LENGTH)
-        .describe('Date field used for the lookback window, usually `@timestamp`.'),
-      filterQuery: z
-        .string()
-        .trim()
-        .min(1)
-        .max(MAX_EXPRESSION_LENGTH)
-        .optional()
-        .describe(
-          'Optional ES|QL boolean expression applied before aggregation, e.g. `service.name == "api"`.'
-        ),
-      stats: z.array(statSchema).min(1).max(MAX_STATS).describe('Aggregations computed per group.'),
-      evaluations: z
-        .array(evaluationSchema)
-        .max(MAX_EVALUATIONS)
-        .default([])
-        .describe('Optional derived values computed from stats, in order.'),
-      alertConditions: z
-        .array(conditionSchema)
-        .min(1)
-        .max(MAX_CONDITIONS)
-        .describe('Conditions that must hold for a group to breach.'),
-      conditionOperator: conditionOperatorSchema,
-      groupByFields: z
-        .array(z.string().trim().min(1).max(MAX_FIELD_NAME_LENGTH))
-        .max(MAX_GROUP_BY_FIELDS)
-        .default([])
-        .describe('Fields to group by. Each group is evaluated and alerted on separately.'),
-      recovery: recoverySchema
-        .optional()
-        .describe('Optional explicit recovery conditions. Only applies to `alert` rules.'),
-      severity: severitySchema
-        .optional()
-        .describe('Optional severity. Only supported with exactly one alert condition.'),
+      indexPattern: indexPatternSchema.describe(INDEX_PATTERN_DESCRIPTION),
+      timeField: timeFieldSchema.describe(TIME_FIELD_DESCRIPTION),
+      filterQuery: filterQuerySchema.optional().describe(FILTER_QUERY_DESCRIPTION),
+      stats: statsSchema.describe(STATS_DESCRIPTION),
+      evaluations: evaluationsSchema.default([]).describe(EVALUATIONS_DESCRIPTION),
+      alertConditions: alertConditionsSchema.describe(ALERT_CONDITIONS_DESCRIPTION),
+      conditionOperator: defaultedConditionOperatorSchema,
+      groupByFields: groupByFieldsSchema.default([]).describe(GROUP_BY_FIELDS_DESCRIPTION),
+      recovery: recoverySchema.optional().describe(RECOVERY_DESCRIPTION),
+      severity: severitySchema.optional().describe(SEVERITY_DESCRIPTION),
     })
     .strict()
     .describe('Parameters for a threshold rule.')

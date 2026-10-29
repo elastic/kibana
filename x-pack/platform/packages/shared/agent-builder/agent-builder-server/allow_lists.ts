@@ -35,6 +35,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting
   `${internalNamespaces.platformAlerting}.draft_custom_rule`,
+  `${internalNamespaces.platformAlerting}.draft_threshold_rule`,
 
   // Proposals
   'platform.proposals.revise',

@@ -12,11 +12,13 @@ import {
   type Query,
 } from '@kbn/alerting-v2-schemas';
 import type { RuleBuilderType } from '../types';
+import { defineRuleBuilder } from '../define_rule_builder';
 import { splitQuery } from '../split_query';
 import type { AlertCondition, ThresholdFormValues } from './form_types';
 import { Comparator, getAvailableMetricLabels, reconcileAlertConditionMetrics } from './form_types';
 import type { ThresholdParams } from './params_schema';
 import { thresholdParamsSchema } from './params_schema';
+import { THRESHOLD_EXAMPLES } from './examples';
 import { fromThresholdFormState, toThresholdFormState } from './form_state';
 import { buildRecoveryBlock, buildThresholdEsql } from './build_esql';
 import { parseThresholdEsql } from './parse_esql';
@@ -70,47 +72,48 @@ const buildQuery = (esqlQuery: string, isAlert: boolean): Query => {
   return alertBlock ? { base, breach: { segment: alertBlock } } : { base };
 };
 
-export const thresholdRuleBuilderType: RuleBuilderType<ThresholdParams, ThresholdFormValues> = {
-  type: THRESHOLD_BUILDER_TYPE,
-  toolName: 'draft_threshold_rule',
-  title: 'Threshold',
-  summary:
-    'Aggregates documents from one index pattern (count, avg, sum, min, max, cardinality, p95, p99), optionally per group and with derived ratios, and alerts when the values cross fixed thresholds. Supports per-stat filters, a recovery condition and single or multi-level severity.',
-  whenToUse:
-    'Use when the user wants to be alerted when a count, average, sum, min, max, distinct count, percentile or ratio of those over one index goes above, below, between or outside fixed values, optionally per host, service or other group.',
-  paramsSchema: thresholdParamsSchema,
-  toFormState: toThresholdFormState,
-  fromFormState: fromThresholdFormState,
-  validate: validateThresholdParams,
-  build: (params, { kind }) => {
-    const isAlert = kind === 'alert';
-    const values = toThresholdFormState(params);
-    const recoverySegment = isAlert ? buildRecoveryBlock(values) : undefined;
+export const thresholdRuleBuilderType: RuleBuilderType<ThresholdParams, ThresholdFormValues> =
+  defineRuleBuilder<ThresholdParams, ThresholdFormValues>({
+    type: THRESHOLD_BUILDER_TYPE,
+    title: 'Threshold',
+    summary:
+      'Aggregates documents from one index pattern (count, avg, sum, min, max, cardinality, p95, p99), optionally per group and with derived ratios, and alerts when the values cross fixed thresholds. Supports per-stat filters, a recovery condition and single or multi-level severity.',
+    whenToUse:
+      'Use when the user wants to be alerted when a count, average, sum, min, max, distinct count, percentile or ratio of those over one index goes above, below, between or outside fixed values, optionally per host, service or other group.',
+    paramsSchema: thresholdParamsSchema,
+    examples: THRESHOLD_EXAMPLES,
+    toFormState: toThresholdFormState,
+    fromFormState: fromThresholdFormState,
+    validate: validateThresholdParams,
+    build: (params, { kind }) => {
+      const isAlert = kind === 'alert';
+      const values = toThresholdFormState(params);
+      const recoverySegment = isAlert ? buildRecoveryBlock(values) : undefined;
 
-    return {
-      query: buildQuery(buildThresholdEsql(values), isAlert),
-      time_field: values.timeField,
-      ...(values.groupByFields.length > 0 ? { grouping: { fields: values.groupByFields } } : {}),
-      ...(recoverySegment
-        ? { recovery: { strategy: recoveryStrategy.condition, segment: recoverySegment } }
-        : {}),
-    };
-  },
-  parse: ({ query, recovery, time_field: timeField }) => {
-    const values = parseThresholdEsql(
-      getBreachEsqlQuery(query),
-      getRecoverEsqlQuery(query, recovery)
-    );
-    if (!values) return null;
+      return {
+        query: buildQuery(buildThresholdEsql(values), isAlert),
+        time_field: values.timeField,
+        ...(values.groupByFields.length > 0 ? { grouping: { fields: values.groupByFields } } : {}),
+        ...(recoverySegment
+          ? { recovery: { strategy: recoveryStrategy.condition, segment: recoverySegment } }
+          : {}),
+      };
+    },
+    parse: ({ query, recovery, time_field: timeField }) => {
+      const values = parseThresholdEsql(
+        getBreachEsqlQuery(query),
+        getRecoverEsqlQuery(query, recovery)
+      );
+      if (!values) return null;
 
-    return fromThresholdFormState({
-      ...values,
-      ...(timeField ? { timeField } : {}),
-      alertConditions: reconcileAlertConditionMetrics(
-        values.alertConditions,
-        values.stats,
-        values.evaluations
-      ),
-    });
-  },
-};
+      return fromThresholdFormState({
+        ...values,
+        ...(timeField ? { timeField } : {}),
+        alertConditions: reconcileAlertConditionMetrics(
+          values.alertConditions,
+          values.stats,
+          values.evaluations
+        ),
+      });
+    },
+  });

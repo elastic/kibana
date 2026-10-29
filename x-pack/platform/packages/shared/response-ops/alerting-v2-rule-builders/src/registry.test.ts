@@ -15,12 +15,33 @@ describe('RULE_BUILDER_TYPES', () => {
     }
   });
 
-  it('gives every builder a unique draft tool name', () => {
-    const toolNames = Object.values(RULE_BUILDER_TYPES).map(({ toolName }) => toolName);
-
-    expect(new Set(toolNames).size).toBe(toolNames.length);
-    expect(toolNames.every((name) => /^draft_[a-z0-9_]+_rule$/.test(name))).toBe(true);
+  it('uses types that are safe to embed in tool ids', () => {
+    for (const { type } of Object.values(RULE_BUILDER_TYPES)) {
+      expect(type).toMatch(/^[a-z0-9]+(_[a-z0-9]+)*$/);
+    }
   });
+
+  describe.each(Object.values(RULE_BUILDER_TYPES).map((builder) => [builder.type, builder]))(
+    '%s examples',
+    (_type, builder) => {
+      it('has at least one example', () => {
+        expect(builder.examples.length).toBeGreaterThan(0);
+      });
+
+      it.each(builder.examples.map((example) => [example.description, example.params]))(
+        '"%s" is valid and round-trips through build and parse',
+        (_description, params) => {
+          expect(builder.paramsSchema.parse(params)).toEqual(params);
+          expect(builder.validate(params)).toEqual([]);
+          expect(builder.parse(builder.build(params, { kind: 'alert' }))).toEqual(params);
+        }
+      );
+
+      it('accepts an empty patch without filling in defaults', () => {
+        expect(builder.paramsPatchSchema.parse({})).toEqual({});
+      });
+    }
+  );
 });
 
 describe('getRuleBuilderType', () => {

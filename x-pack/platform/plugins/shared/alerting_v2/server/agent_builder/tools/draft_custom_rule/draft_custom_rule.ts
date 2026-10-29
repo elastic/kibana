@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  ALERTING_TOOL_IDS,
-  DASHBOARD_ARTIFACT_TYPE,
-  RUNBOOK_ARTIFACT_TYPE,
-} from '@kbn/alerting-v2-constants';
-import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import {
   ruleOperationSchema,
   executeRuleOperations,
   RuleOperationValidationError,
-} from './operations';
+} from '../rule_operations/operations';
+import {
+  assignRuleId,
+  loadRuleAttachment,
+  saveRuleAttachment,
+  summarizeRuleAttachment,
+} from '../rule_operations/rule_attachment';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import {
@@ -69,62 +68,32 @@ ${generateRuleOperationsUsageList()}`,
   ) => {
     let ruleId: string | undefined;
     try {
-      const currentAttachment = previousAttachmentId
-        ? attachments.getAttachmentRecord(previousAttachmentId)
-        : undefined;
+      const draft = loadRuleAttachment(attachments, previousAttachmentId);
+      ruleId = draft.origin;
 
-      const isNew = !currentAttachment;
-      const attachmentId = previousAttachmentId ?? uuidv4();
-
-      const currentData: Partial<RuleAttachmentData> =
-        currentAttachment?.versions.at(-1)?.data ?? {};
-      ruleId = currentAttachment?.origin;
+      const builderType = draft.data.metadata?.builder?.type;
+      if (builderType) {
+        throw new RuleOperationValidationError(
+          `Rule attachment "${draft.attachmentId}" was authored with the "${builderType}" rule builder, so this tool can't edit it. Use the tools its attachment lists.`
+        );
+      }
 
       const {
         data: updatedData,
         queryColumns,
         warnings,
-      } = await executeRuleOperations(currentData, operations, esClient, savedObjectsClient, {
-        isNew,
+      } = await executeRuleOperations(draft.data, operations, esClient, savedObjectsClient, {
+        isNew: draft.isNew,
       });
 
-      // Pre-assign a stable rule ID so that action policies can reference it
-      // via `rule.id` before the rule is persisted. The UI will use this ID
-      // when calling PUT /api/alerting/v2/rules/{id} (upsert).
-      if (isNew && !updatedData.id) {
-        updatedData.id = uuidv4();
-      }
+      const data = assignRuleId(draft, updatedData);
       // Prefer persisted origin; fall back to draft / pre-assigned id (also in tool result).
-      ruleId = ruleId ?? updatedData.id;
+      ruleId = ruleId ?? data.id;
 
-      const dashboards = (updatedData.artifacts ?? [])
-        .filter((artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE)
-        .map((artifact) => artifact.data.dashboard_id)
-        .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
-      const runbookAttached = (updatedData.artifacts ?? []).some(
-        (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
-      );
-
-      const attachmentInput = {
-        id: attachmentId,
-        type: RULE_ATTACHMENT_TYPE,
-        description: `Rule: ${updatedData.metadata?.name ?? attachmentId}`,
-        data: updatedData,
-      };
-
-      const attachment = isNew
-        ? await attachments.add(attachmentInput)
-        : await attachments.update(attachmentId, {
-            data: updatedData,
-            description: attachmentInput.description,
-          });
-
-      if (!attachment) {
-        throw new Error(`Failed to persist rule attachment "${attachmentId}".`);
-      }
+      const attachment = await saveRuleAttachment(attachments, draft, data);
 
       logger.debug({
-        message: () => (isNew ? 'Rule attachment created' : 'Rule attachment updated'),
+        message: () => (draft.isNew ? 'Rule attachment created' : 'Rule attachment updated'),
         labels: {
           space_id: spaceId,
           ...(ruleId != null ? { rule_id: ruleId } : {}),
@@ -137,20 +106,7 @@ ${generateRuleOperationsUsageList()}`,
             type: ToolResultType.other,
             tool_result_id: getToolResultId(),
             data: {
-              version: attachment.current_version ?? 1,
-              ruleAttachment: {
-                id: attachment.id,
-                ruleId: updatedData.id,
-                name: updatedData.metadata?.name,
-                kind: updatedData.kind,
-                schedule: updatedData.schedule,
-                query: updatedData.query,
-                time_field: updatedData.time_field,
-                recovery: updatedData.recovery,
-                no_data: updatedData.no_data,
-                ...(dashboards.length > 0 ? { dashboards } : {}),
-                ...(runbookAttached ? { runbookAttached: true } : {}),
-              },
+              ...summarizeRuleAttachment(attachment, data),
               ...(queryColumns ? { queryColumns } : {}),
               ...(warnings && warnings.length > 0 ? { warnings } : {}),
             },
