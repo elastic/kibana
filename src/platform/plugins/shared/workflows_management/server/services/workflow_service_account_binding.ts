@@ -9,6 +9,7 @@
 
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -36,6 +37,18 @@ export const ensureWorkflowServiceAccountMutationAuthorized = async (
   }
   return request;
 };
+
+/**
+ * Whether a write only switches a bound workflow off, leaving its definition, account and binding
+ * as they are. That withdraws the delegation, so it does not escalate anything.
+ */
+export const isBoundWorkflowDisableOnly = (
+  document: WorkflowProperties,
+  previous: WorkflowProperties
+): boolean =>
+  document.enabled === false &&
+  document.definition?.settings?.run_as === previous.definition?.settings?.run_as &&
+  isEqual(omit(document.definition, 'enabled'), omit(previous.definition, 'enabled'));
 
 export const withWorkflowBindingChange = async <T>({
   bindings,

@@ -60,6 +60,7 @@ import {
   ensureManagedOrphanUnchanged,
   ensureManagedWorkflowUpgradePreservesBinding,
   ensureWorkflowServiceAccountMutationAuthorized,
+  isBoundWorkflowDisableOnly,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
 import {
@@ -321,6 +322,16 @@ export class WorkflowCrudService {
       return write();
     }
     if (!accountId && !previous?.definition?.settings?.run_as) return write();
+    // A system actor, with no user behind its request, may switch a bound workflow off, such as a
+    // pause that no user started. Enabling or changing one still needs `manage_security`.
+    if (
+      previous &&
+      options?.request?.isFakeRequest &&
+      !this.deps.getCoreStart().security.authc.getCurrentUser(options.request) &&
+      isBoundWorkflowDisableOnly(document, previous)
+    ) {
+      return write();
+    }
     if (!bindings) throw new Error('Service account bindings are unavailable.');
     return withWorkflowBindingChange({
       getSpaceId: this.deps.getSpaceId,
