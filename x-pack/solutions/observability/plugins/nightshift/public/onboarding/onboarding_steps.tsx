@@ -24,7 +24,7 @@ export interface OnboardingStepState {
 
 const STEP_TITLES: Record<OnboardingStepId, string> = {
   enable: i18n.translate('xpack.nightshift.onboarding.steps.enable', {
-    defaultMessage: 'Enable Nightshift',
+    defaultMessage: 'Enable Elastic nightshift',
   }),
   connect: i18n.translate('xpack.nightshift.onboarding.steps.connect', {
     defaultMessage: 'Add data',
@@ -53,7 +53,13 @@ export function OnboardingStepsCard({
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingSteps">
       <EuiTitle size="xxs">
-        <h2>
+        <h2
+          css={css`
+            font-size: 15px;
+            line-height: 20px;
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
           {i18n.translate('xpack.nightshift.onboarding.getStartedTitle', {
             defaultMessage: 'Get started',
           })}

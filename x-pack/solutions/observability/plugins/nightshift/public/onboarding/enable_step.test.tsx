@@ -44,7 +44,14 @@ describe('OnboardingEnableStep', () => {
     const { fetch, addSuccess } = setup();
 
     expect(screen.getByTestId('nightshiftOnboardingEnableStep')).toHaveTextContent(
-      'installs its investigation agent in this space'
+      'One-time admin setup required for this space'
+    );
+    expect(screen.getByTestId('nightshiftOnboardingEnableStep')).toHaveTextContent(
+      'Grant the agent a nightshift_agent account with these privileges'
+    );
+    expect(screen.getByTestId('nightshiftOnboardingPrivilegesLink')).toHaveAttribute(
+      'href',
+      expect.stringContaining('accounts-and-roles')
     );
     fireEvent.click(screen.getByTestId('nightshiftOnboardingEnableButton'));
 

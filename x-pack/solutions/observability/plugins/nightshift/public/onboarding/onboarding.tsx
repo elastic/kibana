@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,7 @@ import {
   setNightshiftInvestigationIdParam,
 } from '../common/url_params';
 import { useKibana } from '../hooks/use_kibana';
+import { useCurrentUserName } from '../hooks/use_current_user_name';
 import { OnboardingIntroBanner } from './intro_banner';
 import {
   OnboardingStepsCard,
@@ -44,10 +46,10 @@ type StepOverride = 'connect' | 'investigate' | undefined;
 
 const HERO_TITLES: Record<OnboardingStepId, string> = {
   enable: i18n.translate('xpack.nightshift.onboarding.heroTitleEnable', {
-    defaultMessage: 'Meet Elastic Nightshift',
+    defaultMessage: 'Meet Elastic nightshift',
   }),
   connect: i18n.translate('xpack.nightshift.onboarding.heroTitle', {
-    defaultMessage: 'Meet Elastic Nightshift',
+    defaultMessage: 'Meet Elastic nightshift',
   }),
   investigate: i18n.translate('xpack.nightshift.onboarding.heroTitleInvestigate', {
     defaultMessage: 'Try first investigation',
@@ -56,6 +58,10 @@ const HERO_TITLES: Record<OnboardingStepId, string> = {
     defaultMessage: 'Create first automation',
   }),
 };
+
+const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.sectionTitle', {
+  defaultMessage: 'Enable Elastic nightshift',
+});
 
 const PROCEED_LABEL = i18n.translate('xpack.nightshift.onboarding.proceedButton', {
   defaultMessage: 'Proceed',
@@ -78,6 +84,7 @@ export function NightshiftOnboarding({
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
+  const greetingName = useCurrentUserName();
   const history = useHistory();
   const { search } = useLocation();
   const { data, isInitialLoading } = useOnboarding();
@@ -171,11 +178,6 @@ export function NightshiftOnboarding({
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: {
       status: isEnabled ? 'complete' : 'current',
-      hint: isEnabled
-        ? undefined
-        : i18n.translate('xpack.nightshift.onboarding.steps.enableHint', {
-            defaultMessage: 'One-time setup of this space',
-          }),
     },
     connect: {
       status: !isEnabled ? 'disabled' : step === 'connect' ? 'current' : 'complete',
@@ -188,7 +190,7 @@ export function NightshiftOnboarding({
               defaultMessage: 'Telemetry',
             })
           : i18n.translate('xpack.nightshift.onboarding.steps.additionalSourcesHint', {
-              defaultMessage: 'Additional sources',
+              defaultMessage: 'Other sources (optional)',
             }),
     },
     investigate: {
@@ -300,7 +302,7 @@ export function NightshiftOnboarding({
         padding-bottom: calc(${euiTheme.size.xxl} * 1.5);
       `}
     >
-      <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline />
+      <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline greetingName={greetingName} />
       <EuiSpacer size="l" />
       {(step === 'enable' || (step === 'connect' && !isConnected)) && (
         <>
@@ -312,7 +314,7 @@ export function NightshiftOnboarding({
         css={css`
           display: grid;
           grid-template-columns: minmax(0, 1fr) 280px;
-          gap: ${euiTheme.size.l};
+          gap: ${euiTheme.size.base};
           align-items: start;
         `}
       >
@@ -324,7 +326,13 @@ export function NightshiftOnboarding({
           {isInitialLoading ? (
             <EuiLoadingSpinner size="l" />
           ) : step === 'enable' ? (
-            <OnboardingEnableStep />
+            <>
+              <EuiTitle size="s">
+                <h3>{ENABLE_SECTION_TITLE}</h3>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <OnboardingEnableStep />
+            </>
           ) : step === 'connect' || !execution ? (
             <OnboardingConnectStep subStep={connectSubStep} />
           ) : step === 'investigate' || !latestInvestigation ? (
