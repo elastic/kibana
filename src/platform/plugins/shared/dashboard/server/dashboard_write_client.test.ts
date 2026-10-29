@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, ZodError } from '@kbn/zod';
 import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -16,6 +16,7 @@ import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
+import { TransformPanelsInError } from './api/transforms/in/transform_panels_in_error';
 import { getChangeHistoryClient } from './change_history/change_history_service';
 import type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
 import { DashboardValidationError } from './dashboard_validation_error';
@@ -141,15 +142,9 @@ describe('dashboard server client writes', () => {
         .catch((e) => e);
 
       expect(error).toBeInstanceOf(DashboardValidationError);
-      expect(error.issues).toEqual(
-        expect.arrayContaining([
-          { type: 'state', issue: expect.objectContaining({ path: ['title'] }) },
-          {
-            type: 'state',
-            issue: expect.objectContaining({ code: 'unrecognized_keys', keys: ['bogus'] }),
-          },
-        ])
-      );
+      expect(error.cause).toBeInstanceOf(ZodError);
+      expect(error.message).toContain('at title');
+      expect(error.message).toContain('Unrecognized key: "bogus"');
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 
@@ -175,9 +170,8 @@ describe('dashboard server client writes', () => {
         .catch((e) => e);
 
       expect(error).toBeInstanceOf(DashboardValidationError);
-      expect(error.issues).toEqual([
-        { type: 'panel', panelType: 'test_panel', message: expect.any(String) },
-      ]);
+      expect(error.cause).toBeInstanceOf(TransformPanelsInError);
+      expect(error.message).toContain('test_panel: ');
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
     });
 
@@ -276,9 +270,7 @@ describe('dashboard server client writes', () => {
         .catch((e) => e);
 
       expect(error).toBeInstanceOf(DashboardValidationError);
-      expect(error.issues).toEqual([
-        { type: 'id', issue: expect.objectContaining({ message: expect.any(String) }) },
-      ]);
+      expect(error.cause).toBeInstanceOf(ZodError);
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });

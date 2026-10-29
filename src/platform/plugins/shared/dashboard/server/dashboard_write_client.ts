@@ -27,12 +27,10 @@ const withPreSaveValidationErrors = async <T>(write: () => Promise<T>): Promise<
     return await write();
   } catch (e) {
     if (e instanceof TransformPanelsInError) {
-      throw new DashboardValidationError(
-        e.panelErrors.map(({ type, message }) => ({ type: 'panel', panelType: type, message }))
-      );
+      throw new DashboardValidationError(e);
     }
     if (e instanceof InvalidDashboardIdError) {
-      throw new DashboardValidationError(e.zodError.issues.map((issue) => ({ type: 'id', issue })));
+      throw new DashboardValidationError(e.zodError);
     }
     throw e;
   }
@@ -73,9 +71,7 @@ export const createDashboardWriteClient = (
       state
     );
     if (!result.success) {
-      throw new DashboardValidationError(
-        result.error.issues.map((issue) => ({ type: 'state', issue }))
-      );
+      throw new DashboardValidationError(result.error);
     }
     return result.data;
   };
