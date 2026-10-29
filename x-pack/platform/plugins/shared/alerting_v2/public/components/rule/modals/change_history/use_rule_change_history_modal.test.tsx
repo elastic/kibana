@@ -208,4 +208,21 @@ describe('useRuleChangeHistoryModal', () => {
       signal: undefined,
     });
   });
+
+  it('retitles the open modal with the restored rule name', async () => {
+    mockApiStub.restoreRuleChange.mockResolvedValueOnce({
+      id: 'a',
+      version: 4,
+      metadata: { name: 'Rule A before rename' },
+    });
+    render(<Harness canRestore />);
+
+    fireEvent.click(screen.getByTestId('openA'));
+    await act(() =>
+      lastProviderRender().adapter.restoreChange?.({ objectId: 'a', changeId: 'evt-1' })
+    );
+
+    expect(lastProviderRender().ruleName).toBe('Rule A before rename');
+    expect(mockOpenModal).toHaveBeenCalledTimes(1);
+  });
 });
