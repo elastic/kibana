@@ -24,6 +24,7 @@ module.exports = async ({ github, context }) => {
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: pr.number,
+    per_page: 100,
   });
   const existing = comments.find((c) => c.body && c.body.includes(MARKER));
 
