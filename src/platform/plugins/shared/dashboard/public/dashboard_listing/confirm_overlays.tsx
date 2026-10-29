@@ -43,7 +43,7 @@ export const confirmDiscardUnsavedChanges = (
     })
     .then((isConfirmed) => {
       if (isConfirmed) {
-        return discardCallback();
+        discardCallback();
       }
     });
 };
