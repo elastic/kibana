@@ -13,6 +13,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  OPEN_PROPOSAL_STATUSES,
   PROPOSALS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
   PROPOSAL_DISMISS_URL,
@@ -145,6 +146,7 @@ export const buildCanaryReportDoc = (timestamp: string) => ({
       'Regular reviews, clear communication, and a culture of caution help teams respond well ' +
       'when something unusual happens. No specific activity is described in this note.',
     language: 'en',
+    published_at: timestamp,
   },
   severity: { level: 'low', score: 10 },
   extracted: {
@@ -194,6 +196,7 @@ export const buildIocDumpReportDoc = (timestamp: string) => ({
       'over the past week. Defenders should block or monitor traffic from the listed addresses. ' +
       'No specific intrusion activity, tooling, or affected organization is described.',
     language: 'en',
+    published_at: timestamp,
   },
   severity: { level: 'medium', score: 40 },
   extracted: {
@@ -472,9 +475,6 @@ export const seedHuntData = async ({
 interface ProposalsListResponse {
   proposals: Array<{ id: string; status?: string }>;
 }
-
-/** Statuses the Worker's candidate query treats as an open Proposal (`OPEN_PROPOSAL_STATUSES`). */
-const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
 const listOpenProposals = async ({
   fetch,

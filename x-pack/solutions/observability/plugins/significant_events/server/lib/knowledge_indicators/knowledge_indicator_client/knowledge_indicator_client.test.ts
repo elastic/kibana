@@ -13,7 +13,9 @@ import {
 } from './knowledge_indicator_client';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import {
+  computeRevisionId,
   type StoredFeatureKnowledgeIndicator,
+  type StoredKnowledgeIndicator,
   type StoredQueryKnowledgeIndicator,
   type StoredTombstone,
 } from '../data_stream';
@@ -59,7 +61,7 @@ function createFeatureDoc(
   overrides: Partial<StoredFeatureKnowledgeIndicator> & { slug?: string } = {}
 ): StoredFeatureKnowledgeIndicator {
   const { slug = 'feat-1', ...rest } = overrides;
-  return {
+  const doc = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: featureUuid(slug),
     type: KI_TYPE_FEATURE,
@@ -75,7 +77,14 @@ function createFeatureDoc(
     },
     ...rest,
   };
+  return { revision_id: revisionIdOf(doc), ...doc };
 }
+
+const revisionIdOf = ({
+  id,
+  '@timestamp': timestamp,
+}: Pick<StoredKnowledgeIndicator, 'id' | '@timestamp'>): string =>
+  computeRevisionId({ id, timestamp });
 
 function createComputedFeatureDoc(): StoredFeatureKnowledgeIndicator {
   return createFeatureDoc({
@@ -131,6 +140,7 @@ function makeClient(depsOverrides: Partial<KnowledgeIndicatorClientDeps> = {}): 
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
     setRulesEnabled: jest.fn().mockResolvedValue(undefined),
     findExistingRuleIds: jest.fn().mockResolvedValue([]),
+    findRuleEnabledStates: jest.fn().mockResolvedValue(new Map()),
     findOwnedRuleIds: jest.fn().mockResolvedValue([]),
     findSourceIdsWithOwnedRules,
     findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
@@ -729,6 +739,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
       space: SPACE,
+      searchEmbeddingModelResolver: jest.fn().mockResolvedValue({ kind: 'sparse' }),
     };
     const rulesManagementClient = {
       createRule: jest.fn().mockResolvedValue(undefined),
@@ -741,6 +752,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
       setRulesEnabled: jest.fn().mockResolvedValue(undefined),
       findExistingRuleIds: jest.fn().mockResolvedValue([]),
+      findRuleEnabledStates: jest.fn().mockResolvedValue(new Map()),
       findOwnedRuleIds: jest.fn().mockResolvedValue([]),
       findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
       findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
@@ -761,6 +773,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       'source.id': string;
       type: typeof KI_TYPE_FEATURE | typeof KI_TYPE_QUERY;
       '@timestamp': string;
+      label?: string | null;
     }>
   ) => ({
     columns: [
@@ -768,20 +781,38 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       { name: 'source.id', type: 'keyword' },
       { name: 'type', type: 'keyword' },
       { name: '@timestamp', type: 'date' },
+      { name: 'label', type: 'keyword' },
     ],
-    values: rows.map((row) => [row.id, row['source.id'], row.type, row['@timestamp']]),
+    values: rows.map((row) => [
+      row.id,
+      row['source.id'],
+      row.type,
+      row['@timestamp'],
+      row.label === undefined ? 'semantic' : row.label,
+    ]),
   });
 
-  const rankRequest = (rankEsql: jest.Mock): { query: string; params: unknown[] } => {
-    const composerQuery = rankEsql.mock.calls[0][0].query as {
+  const latestRevisionResponse = (
+    docs: Array<StoredFeatureKnowledgeIndicator | StoredQueryKnowledgeIndicator>
+  ) => ({ hits: docs, esIds: [] });
+
+  const rankRequest = (
+    rankEsql: jest.Mock,
+    call: number = 0
+  ): { query: string; params: unknown[]; filter: unknown } => {
+    const { query: rawQuery, filter } = rankEsql.mock.calls[call][0];
+    const composerQuery = rawQuery as {
       toRequest: () => { query: string; params: unknown[] };
     };
-    return composerQuery.toRequest();
+    return { ...composerQuery.toRequest(), filter };
   };
+
+  const revisionIdPredicate = (docs: StoredKnowledgeIndicator[]): string =>
+    `revision_id IN (${docs.map((doc) => `"${doc.revision_id}"`).join(', ')})`;
 
   it('uses only feature fields when type is [feature]', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([createFeatureDoc()]));
 
     await client.findIndicators(SOURCE, 'checkout', {
       types: [KI_TYPE_FEATURE],
@@ -798,11 +829,12 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('EVAL _score = CASE');
     expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
     expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(`feature.slug`) LIKE "*checkout*", 3.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createQueryDoc({ id: 'q-1' })] });
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([createQueryDoc({ id: 'q-1' })]));
 
     await client.findIndicators(SOURCE, 'SELECT', {
       types: [KI_TYPE_QUERY],
@@ -815,12 +847,13 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('TO_LOWER(`query.features.id`) LIKE');
     expect(query).not.toContain('feature.type');
     expect(query).not.toContain('feature.subtype');
+    expect(query).not.toContain('feature.slug');
     expect(query).not.toContain('MV_CONCAT(TO_LOWER(tags)');
   });
 
   it('matches tags by substring, not exact element (recall parity with DSL wildcard)', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([createFeatureDoc()]));
 
     // Searching a partial tag token (e.g. `client`) must still surface features
     // whose tag *contains* it (e.g. `browser-client`), matching the pre-migration
@@ -841,7 +874,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 
   it('uses double keyword scores in hybrid search', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([createFeatureDoc()]));
 
     await client.findIndicators(SOURCE, 'checkout service', {
       types: [KI_TYPE_FEATURE],
@@ -856,7 +889,8 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 
   it('normalizes and thresholds semantic scores in ES|QL', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    const latest = createFeatureDoc();
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([latest]));
 
     await client.findIndicators(SOURCE, 'checkout service', {
       types: [KI_TYPE_FEATURE],
@@ -867,16 +901,23 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const request = rankRequest(rankEsql);
     expect(request.query).toContain('METADATA _score, _id, _index');
     expect(request.query).toContain('MATCH(search_embedding, ?q)');
-    expect(request.query).toContain('FUSE LINEAR WITH {"normalizer": "minmax"}');
+    expect(request.query).toContain(
+      'EVAL label = "semantic" | FUSE LINEAR WITH {"normalizer": "minmax"}'
+    );
     expect(request.query).toContain('WHERE _score >= 0.15');
-    expect(request.query).toContain('KEEP _id, _index, _score, id, `source.id`, type, @timestamp');
+    expect(request.query).toContain(
+      'KEEP _id, _index, _score, label, id, `source.id`, type, @timestamp'
+    );
     expect(request.query).toContain('SORT _score DESC | LIMIT 25');
     expect(request.params).toEqual([{ q: 'checkout service' }]);
+    expect(request.query).toContain(revisionIdPredicate([latest]));
+    expect(request.filter).toBeUndefined();
+    expect(request.query).not.toMatch(/(?<!revision_)id IN/);
   });
 
   it('thresholds the normalized semantic branch before hybrid RRF fusion', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([createFeatureDoc()]));
 
     await client.findIndicators(SOURCE, 'checkout service', {
       types: [KI_TYPE_FEATURE],
@@ -893,7 +934,11 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(linearFuse).toBeGreaterThan(-1);
     expect(threshold).toBeGreaterThan(linearFuse);
     expect(rrfFuse).toBeGreaterThan(threshold);
+    expect(request.query.match(/EVAL label = "semantic"/g)).toHaveLength(1);
     expect(request.query.match(/KEEP _id, _index, _score/g)).toHaveLength(2);
+    expect(request.query).toContain(
+      'FUSE RRF WITH {"rank_constant": 20} | SORT _score DESC | KEEP id, `source.id`, type, @timestamp, _score, label'
+    );
     expect(request.params).toEqual([{ q: 'checkout service' }]);
   });
 
@@ -904,11 +949,11 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const olderTs = '2026-01-01T00:00:00.000Z';
 
     // Phase 1: the authoritative latest revision for the group.
-    runEsql.mockResolvedValueOnce({
-      hits: [
+    runEsql.mockResolvedValueOnce(
+      latestRevisionResponse([
         createFeatureDoc({ id: 'feat-1', '@timestamp': latestTs, title: 'authoritative-latest' }),
-      ],
-    });
+      ])
+    );
 
     // Phase 2: ES|QL ranks several rows for the same group — two share the latest
     // timestamp (a tie) with different payloads, one is an older revision. The
@@ -936,9 +981,11 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
 
     // Phase 1 latest is newer than any matching ranked row below.
-    runEsql.mockResolvedValueOnce({
-      hits: [createFeatureDoc({ id: 'feat-1', '@timestamp': '2026-03-01T00:00:00.000Z' })],
-    });
+    runEsql.mockResolvedValueOnce(
+      latestRevisionResponse([
+        createFeatureDoc({ id: 'feat-1', '@timestamp': '2026-03-01T00:00:00.000Z' }),
+      ])
+    );
 
     // Only a stale revision matched the query — the group must not resurface.
     rankEsql.mockResolvedValueOnce(
@@ -963,7 +1010,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
   it('falls back from auto-resolved hybrid to keyword when semantic search fails', async () => {
     const { client, runEsql, rankEsql, logger } = makeClientWithRanker();
     const latest = createFeatureDoc();
-    runEsql.mockResolvedValue({ hits: [latest] });
+    runEsql.mockResolvedValue(latestRevisionResponse([latest]));
     rankEsql
       .mockRejectedValueOnce(new Error('inference endpoint unavailable'))
       .mockResolvedValueOnce(rankedResponse([latest]));
@@ -984,7 +1031,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
 
   it('propagates failures for an explicitly requested hybrid search', async () => {
     const { client, runEsql, rankEsql } = makeClientWithRanker();
-    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+    runEsql.mockResolvedValueOnce(latestRevisionResponse([createFeatureDoc()]));
     rankEsql.mockRejectedValueOnce(new Error('inference endpoint unavailable'));
 
     await expect(
@@ -995,12 +1042,92 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     ).rejects.toThrow('inference endpoint unavailable');
     expect(rankEsql).toHaveBeenCalledTimes(1);
   });
+
+  describe('minmax tie fallback', () => {
+    it('retries without the threshold when a keyword hit masks a tied semantic branch', async () => {
+      const { client, runEsql, rankEsql } = makeClientWithRanker();
+      const semanticOnly = createFeatureDoc({ id: 'feat-semantic' });
+      const keywordOnly = createFeatureDoc({ id: 'feat-keyword' });
+      runEsql.mockResolvedValue(latestRevisionResponse([semanticOnly, keywordOnly]));
+      rankEsql
+        .mockResolvedValueOnce(rankedResponse([{ ...keywordOnly, label: null }]))
+        .mockResolvedValueOnce(rankedResponse([semanticOnly, { ...keywordOnly, label: null }]));
+
+      const { hits } = await client.findIndicators(SOURCE, 'checkout', {
+        types: [KI_TYPE_FEATURE],
+        searchMode: 'hybrid',
+      });
+
+      expect(rankEsql).toHaveBeenCalledTimes(2);
+      expect(rankRequest(rankEsql, 0).query).toContain('WHERE _score >= 0.15');
+      const retryRequest = rankRequest(rankEsql, 1);
+      const retryQuery = retryRequest.query;
+      expect(retryQuery).toContain('WHERE _score >= 0 ');
+      expect(retryQuery).not.toContain('0.15');
+      expect(retryQuery).toContain(revisionIdPredicate([semanticOnly, keywordOnly]));
+      expect(retryRequest.filter).toBeUndefined();
+      expect(hits.map((hit) => hit.type === 'feature' && hit.feature.uuid)).toEqual([
+        'feat-semantic',
+        'feat-keyword',
+      ]);
+    });
+
+    it('does not retry when the fused page has a semantic-labeled row', async () => {
+      const { client, runEsql, rankEsql } = makeClientWithRanker();
+      const semantic = createFeatureDoc({ id: 'feat-semantic' });
+      const keywordOnly = createFeatureDoc({ id: 'feat-keyword' });
+      runEsql.mockResolvedValue(latestRevisionResponse([semantic, keywordOnly]));
+      rankEsql.mockResolvedValueOnce(rankedResponse([{ ...keywordOnly, label: null }, semantic]));
+
+      await client.findIndicators(SOURCE, 'checkout', {
+        types: [KI_TYPE_FEATURE],
+        searchMode: 'hybrid',
+      });
+
+      expect(rankEsql).toHaveBeenCalledTimes(1);
+    });
+
+    it('widens only the fused hybrid page to two rows for limit 1 and trims the result', async () => {
+      const { client, runEsql, rankEsql } = makeClientWithRanker();
+      const semantic = createFeatureDoc({ id: 'feat-semantic' });
+      const keywordOnly = createFeatureDoc({ id: 'feat-keyword' });
+      runEsql.mockResolvedValue(latestRevisionResponse([semantic, keywordOnly]));
+      rankEsql.mockResolvedValueOnce(rankedResponse([{ ...keywordOnly, label: null }, semantic]));
+
+      const { hits } = await client.findIndicators(SOURCE, 'checkout', {
+        types: [KI_TYPE_FEATURE],
+        searchMode: 'hybrid',
+        limit: 1,
+      });
+
+      expect(rankEsql).toHaveBeenCalledTimes(1);
+      const { query } = rankRequest(rankEsql);
+      expect(query.match(/\| LIMIT 1\b/g)).toHaveLength(3);
+      expect(query).toMatch(/FUSE RRF.*\| LIMIT 2$/);
+      expect(hits.map((hit) => hit.type === 'feature' && hit.feature.uuid)).toEqual([
+        'feat-keyword',
+      ]);
+    });
+
+    it('never retries in keyword mode', async () => {
+      const { client, runEsql, rankEsql } = makeClientWithRanker();
+      runEsql.mockResolvedValue(latestRevisionResponse([createFeatureDoc()]));
+      rankEsql.mockResolvedValueOnce({ columns: [], values: [] });
+
+      await client.findIndicators(SOURCE, 'checkout', {
+        types: [KI_TYPE_FEATURE],
+        searchMode: 'keyword',
+      });
+
+      expect(rankEsql).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 function createQueryDoc(
   overrides: Partial<StoredQueryKnowledgeIndicator> = {}
 ): StoredQueryKnowledgeIndicator {
-  return {
+  const doc = {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: 'query-1',
     type: KI_TYPE_QUERY,
@@ -1009,12 +1136,13 @@ function createQueryDoc(
     description: 'desc',
     query: {
       esql: 'FROM logs-app | WHERE error == true',
-      query_type: 'match',
+      query_type: 'match' as const,
       rule_backed: false,
       rule_id: 'rule-abc',
     },
     ...overrides,
   };
+  return { revision_id: revisionIdOf(doc), ...doc };
 }
 
 describe('KnowledgeIndicatorClient.keepAlivePersistentIndicators', () => {

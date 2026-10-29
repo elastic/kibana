@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
-import { getEntityId, getEntityIds } from '../common';
+import { ENTITY_GRID_QUERY_KEY, getEntityId, getEntityIds } from '../common';
 import { getPageEnrichers } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
@@ -90,7 +90,7 @@ const getEnrichKey = (
   chunk: readonly Row[]
 ) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'enrich',
     {

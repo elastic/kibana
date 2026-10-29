@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -29,15 +29,15 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import type {
   LifecycleDetection,
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { useFormatTimestamp } from '../../../common/format_timestamp';
-import { getChangePointLabel } from './change_point';
+import { getChangePointLabel } from '../../../common/change_point';
 import { getVerdictBadge } from './verdict';
+import { SkippedDetectionBadge } from './skipped_detection';
 import { ChangePointLensChart } from './change_point_lens_chart';
 import { EntityChip } from '../../../entity/entity_chip';
 import { EntityFlyout } from '../../../entity/entity_flyout';
@@ -46,12 +46,12 @@ import { TruncatableSummary } from '../../../common/truncatable_summary';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useImpactedServices } from '../../../hooks/use_impacted_services';
 import type { ResolvedImpactedService } from '../../../common/impacted_services';
-import { formatChatAttachmentDescription } from '../../../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
+import { useOpenDetectionInChat } from './use_open_detection_in_chat';
 
 export interface DetectionFlyoutProps {
   detection: LifecycleDetection;
@@ -68,7 +68,7 @@ export function DetectionFlyout({
 }: DetectionFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
-  const { share, agentBuilder } = useKibana().services;
+  const { share } = useKibana().services;
   const [selectedEntity, setSelectedEntity] = useState<ResolvedImpactedService | undefined>();
 
   const {
@@ -113,25 +113,7 @@ export function DetectionFlyout({
     });
   }, [detection, esqlQuery, share]);
 
-  const handleOpenInChat = useCallback(() => {
-    agentBuilder?.openChat({
-      newConversation: true,
-      autoSendInitialMessage: false,
-      initialMessage: i18n.translate('xpack.nightshift.detectionFlyout.chatPrompt', {
-        defaultMessage: 'Tell me about the {ruleName} detection',
-        values: { ruleName: title },
-      }),
-      attachments: [
-        {
-          id: detection.detection_id,
-          type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
-          origin: detection.detection_id,
-          description: formatChatAttachmentDescription('Detection', title),
-          data: detection,
-        },
-      ],
-    });
-  }, [agentBuilder, detection, title]);
+  const openInChat = useOpenDetectionInChat(detection);
 
   return (
     <>
@@ -142,7 +124,6 @@ export function DetectionFlyout({
         resizable
         aria-label={title}
         data-test-subj="nightshiftDetectionFlyout"
-        type="push"
         hasAnimation={false}
         closeButtonProps={{
           'data-test-subj': 'euiFlyoutCloseButton',
@@ -173,6 +154,11 @@ export function DetectionFlyout({
             {verdictBadge && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color={verdictBadge.color}>{verdictBadge.label}</EuiBadge>
+              </EuiFlexItem>
+            )}
+            {detection.skip && (
+              <EuiFlexItem grow={false}>
+                <SkippedDetectionBadge skip={detection.skip} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -333,7 +319,7 @@ export function DetectionFlyout({
           )}
         </EuiFlyoutBody>
 
-        {agentBuilder && (
+        {openInChat && (
           <EuiFlyoutFooter
             css={css`
               background: ${euiTheme.colors.backgroundBasePlain};
@@ -348,7 +334,7 @@ export function DetectionFlyout({
                   iconType="productAgent"
                   iconSide="left"
                   data-test-subj="nightshiftDetectionFlyoutChatButton"
-                  onClick={handleOpenInChat}
+                  onClick={openInChat}
                   {...getEbtProps({
                     action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
                     element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_FLYOUT,

@@ -44,7 +44,7 @@ export function hasNoResults$({
       }
     }),
     switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
-      const dataView = api.dataViews$?.value?.[0];
+      const dataView = api.dataSources$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
       if (!dataView || !rangeFilter || ignoreValidations) {
         return false;

@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
-import { ConversationMetaInfo } from '@kbn/agentic-investigations-common';
+import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
 import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigatingTypingDots } from './investigating_typing_dots';
@@ -220,7 +220,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                     overflow: hidden;
                   `}
                 >
-                  {summary}
+                  {toPlainSummary(summary)}
                 </p>
               </EuiText>
             </EuiFlexItem>
