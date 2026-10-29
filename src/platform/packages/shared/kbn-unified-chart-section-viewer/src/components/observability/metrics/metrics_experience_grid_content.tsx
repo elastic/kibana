@@ -18,8 +18,9 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { isHistogramHeatmapVisualization } from '@kbn/discover-utils';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
@@ -85,7 +86,8 @@ export const MetricsExperienceGridContent = ({
   const { whereStatements: loadedWhereStatements, userSource: loadedUserSource } =
     useEsqlQueryParts(loadedFetchParams?.query);
 
-  const { searchTerm, currentPage, onPageChange, profileId } = useMetricsExperienceState();
+  const { searchTerm, currentPage, onPageChange, profileId, gridSettings } =
+    useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -98,7 +100,8 @@ export const MetricsExperienceGridContent = ({
   }) ?? {};
 
   const { loading: histogramBoundsLoading, bounds: histogramBounds } = useFetchHistogramBounds({
-    enabled: isComponentVisible,
+    enabled:
+      isComponentVisible && isHistogramHeatmapVisualization(gridSettings.histogramVisualization),
     metricItems: currentPageFields,
     fetchParams: loadedFetchParams,
     services,
