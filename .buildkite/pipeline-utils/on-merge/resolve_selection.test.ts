@@ -15,6 +15,7 @@ import type { OnMergeSelectionDeps } from './resolve_selection.ts';
 import { resolveOnMergeSelection } from './resolve_selection.ts';
 import { STEP_KEYS } from '../ci-stats/pick_test_group_run_order/const.ts';
 import { SCOUT_STEP_KEYS } from '../scout/step_keys.ts';
+import { ON_MERGE_SELECTION_METADATA_KEY, fullSelection } from './selection.ts';
 
 const COMMIT = 'c'.repeat(40);
 const BASE = 'b'.repeat(40);
@@ -49,7 +50,7 @@ const createDeps = (overrides: Partial<OnMergeSelectionDeps> = {}): OnMergeSelec
     .fn()
     .mockResolvedValue({ before: BASE, activityType: 'merge_queue_merge' }),
   getMergeQueueBase: jest.fn().mockResolvedValue(null),
-  getPreviousFinishedBuild: jest.fn().mockResolvedValue(previousBuild()),
+  getPreviousFinishedBuilds: jest.fn().mockResolvedValue([previousBuild()]),
   git: {
     ensureCommit: jest.fn().mockReturnValue(true),
     isAncestor: jest.fn().mockReturnValue(true),
@@ -71,6 +72,19 @@ const allFull = (reason: string) => ({
   jestIntegration: { mode: 'full', reason },
   ftr: { mode: 'full', reason },
 });
+
+const selectiveBuild = (number: number, overrides: Partial<Build> = {}): Build =>
+  previousBuild({
+    number,
+    meta_data: {
+      ES_SNAPSHOT_MANIFEST_DEFAULT: MANIFEST,
+      [ON_MERGE_SELECTION_METADATA_KEY]: JSON.stringify({
+        ...fullSelection(COMMIT, 'unused'),
+        testTypes: allSelective,
+      }),
+    },
+    ...overrides,
+  });
 
 describe('resolveOnMergeSelection', () => {
   beforeEach(() => {
@@ -189,7 +203,7 @@ describe('resolveOnMergeSelection', () => {
   });
 
   it('keeps the base but runs in full without a previous finished build', async () => {
-    const deps = createDeps({ getPreviousFinishedBuild: jest.fn().mockResolvedValue(null) });
+    const deps = createDeps({ getPreviousFinishedBuilds: jest.fn().mockResolvedValue([]) });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       base: BASE,
       testTypes: allFull('no previous finished build'),
@@ -198,7 +212,7 @@ describe('resolveOnMergeSelection', () => {
 
   it('runs only the test types that failed in the previous build in full', async () => {
     const deps = createDeps({
-      getPreviousFinishedBuild: jest.fn().mockResolvedValue(
+      getPreviousFinishedBuilds: jest.fn().mockResolvedValue([
         previousBuild({
           jobs: [
             job('jest'),
@@ -206,8 +220,8 @@ describe('resolveOnMergeSelection', () => {
             job('scout_test_lane_2', { state: 'failed', soft_failed: true }),
             job('jest-integration', { state: 'failed', retried: true }),
           ],
-        })
-      ),
+        }),
+      ]),
     });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       testTypes: {
@@ -221,7 +235,7 @@ describe('resolveOnMergeSelection', () => {
     'runs a test type in full when its previous job was %s',
     async (state) => {
       const deps = createDeps({
-        getPreviousFinishedBuild: jest.fn().mockResolvedValue(
+        getPreviousFinishedBuilds: jest.fn().mockResolvedValue([
           previousBuild({
             jobs: [
               job('jest'),
@@ -229,8 +243,8 @@ describe('resolveOnMergeSelection', () => {
               job('scout_test_lane_1'),
               job('ftr_configs_0', { state }),
             ],
-          })
-        ),
+          }),
+        ]),
       });
       await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
         testTypes: {
@@ -246,9 +260,9 @@ describe('resolveOnMergeSelection', () => {
     const resolveWithFailedStep = (stepKey: string) =>
       resolveOnMergeSelection(
         createDeps({
-          getPreviousFinishedBuild: jest
+          getPreviousFinishedBuilds: jest
             .fn()
-            .mockResolvedValue(previousBuild({ jobs: [job(stepKey, { state: 'failed' })] })),
+            .mockResolvedValue([previousBuild({ jobs: [job(stepKey, { state: 'failed' })] })]),
         })
       );
 
@@ -257,6 +271,47 @@ describe('resolveOnMergeSelection', () => {
     });
     await expect(resolveWithFailedStep('build_scout_tests')).resolves.toMatchObject({
       testTypes: { ...allSelective, scout: full },
+    });
+  });
+
+  it('keeps a failure until the test type passes a full run', async () => {
+    const deps = createDeps({
+      getPreviousFinishedBuilds: jest
+        .fn()
+        .mockResolvedValue([
+          selectiveBuild(99),
+          previousBuild({ number: 98, jobs: [job('ftr_configs_0', { state: 'failed' })] }),
+        ]),
+    });
+    await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
+      testTypes: {
+        ...allSelective,
+        ftr: { mode: 'full', reason: 'did not pass in previous build #98' },
+      },
+    });
+  });
+
+  it('ignores failures before the last full run', async () => {
+    const deps = createDeps({
+      getPreviousFinishedBuilds: jest
+        .fn()
+        .mockResolvedValue([
+          selectiveBuild(99),
+          previousBuild({ number: 98 }),
+          previousBuild({ number: 97, jobs: [job('ftr_configs_0', { state: 'failed' })] }),
+        ]),
+    });
+    await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({ testTypes: allSelective });
+  });
+
+  it('runs in full when no recent build ran the test type in full', async () => {
+    const deps = createDeps({
+      getPreviousFinishedBuilds: jest
+        .fn()
+        .mockResolvedValue([selectiveBuild(99), selectiveBuild(98)]),
+    });
+    await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
+      testTypes: allFull('no full run in the last 2 finished builds'),
     });
   });
 
@@ -284,11 +339,11 @@ describe('resolveOnMergeSelection', () => {
   it('compares against a custom ES snapshot used by the previous build', async () => {
     const deps = createDeps({
       esSnapshotManifest: 'https://example.com/custom.json',
-      getPreviousFinishedBuild: jest
+      getPreviousFinishedBuilds: jest
         .fn()
-        .mockResolvedValue(
-          previousBuild({ env: { ES_SNAPSHOT_MANIFEST: 'https://example.com/custom.json' } })
-        ),
+        .mockResolvedValue([
+          previousBuild({ env: { ES_SNAPSHOT_MANIFEST: 'https://example.com/custom.json' } }),
+        ]),
     });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({ testTypes: allSelective });
   });

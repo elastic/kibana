@@ -13,7 +13,12 @@ import { STEP_KEYS } from '../ci-stats/pick_test_group_run_order/const.ts';
 import { FULL_SHA_PATTERN } from '../git.ts';
 import { SCOUT_STEP_KEYS } from '../scout/step_keys.ts';
 import type { OnMergeSelection, OnMergeTestType, OnMergeTestTypeDecision } from './selection.ts';
-import { ON_MERGE_TEST_TYPES, fullSelection } from './selection.ts';
+import {
+  ON_MERGE_SELECTION_METADATA_KEY,
+  ON_MERGE_TEST_TYPES,
+  fullSelection,
+  parseOnMergeSelection,
+} from './selection.ts';
 
 const MAX_COMMITS = 30;
 const NULL_SHA = /^0{40}$/;
@@ -53,7 +58,8 @@ export interface OnMergeSelectionDeps {
   esSnapshotManifest: string | undefined;
   findPushActivity(commit: string): Promise<{ before: string; activityType: string } | null>;
   getMergeQueueBase(commit: string): Promise<string | null>;
-  getPreviousFinishedBuild(buildNumber: number): Promise<Build | null>;
+  /** Finished builds before `buildNumber` on the same branch, newest first. */
+  getPreviousFinishedBuilds(buildNumber: number): Promise<Build[]>;
   git: {
     ensureCommit(commit: string): boolean;
     isAncestor(ancestor: string, commit: string): boolean;
@@ -98,22 +104,47 @@ const resolveBase = async ({
 const isUnprovenJob = (job: Job): boolean =>
   job.type === 'script' && !job.retried && !job.soft_failed && UNPROVEN_JOB_STATES.has(job.state);
 
-const decideTestType = (
-  testType: OnMergeTestType,
-  previousBuild: Build,
-  esSnapshotChanged: boolean
-): OnMergeTestTypeDecision => {
-  const unprovenInPreviousBuild = previousBuild.jobs?.some(
+const hasUnprovenJob = (build: Build, testType: OnMergeTestType): boolean =>
+  build.jobs?.some(
     (job) =>
       job.step_key && TEST_TYPE_STEP_KEY_MATCHERS[testType](job.step_key) && isUnprovenJob(job)
-  );
-  if (unprovenInPreviousBuild) {
-    return { mode: 'full', reason: `did not pass in previous build #${previousBuild.number}` };
+  ) ?? false;
+
+// Builds without a recorded selection ran every test type in full.
+const ranInFull = (build: Build, testType: OnMergeTestType): boolean =>
+  parseOnMergeSelection(build.meta_data?.[ON_MERGE_SELECTION_METADATA_KEY] ?? null)?.testTypes[
+    testType
+  ].mode !== 'selective';
+
+// A selective pass doesn't prove an earlier failure is fixed, so look back to the last full run.
+const checkPreviousBuilds = (
+  testType: OnMergeTestType,
+  previousBuilds: Build[]
+): OnMergeTestTypeDecision => {
+  for (const build of previousBuilds) {
+    if (hasUnprovenJob(build, testType)) {
+      return { mode: 'full', reason: `did not pass in previous build #${build.number}` };
+    }
+    if (ranInFull(build, testType)) {
+      return { mode: 'selective' };
+    }
   }
-  if (esSnapshotChanged && ES_DEPENDENT_TEST_TYPES.has(testType)) {
+  return {
+    mode: 'full',
+    reason: `no full run in the last ${previousBuilds.length} finished builds`,
+  };
+};
+
+const decideTestType = (
+  testType: OnMergeTestType,
+  previousBuilds: Build[],
+  esSnapshotChanged: boolean
+): OnMergeTestTypeDecision => {
+  const decision = checkPreviousBuilds(testType, previousBuilds);
+  if (decision.mode === 'selective' && esSnapshotChanged && ES_DEPENDENT_TEST_TYPES.has(testType)) {
     return { mode: 'full', reason: 'ES snapshot changed' };
   }
-  return { mode: 'selective' };
+  return decision;
 };
 
 /** Resolves the commit range an on-merge build covers and which test types may select tests from it. */
@@ -147,9 +178,11 @@ export const resolveOnMergeSelection = async (
     return fullSelection(commit, `range has ${commitCount} commits (max ${MAX_COMMITS})`);
   }
 
-  const previousBuild = await deps
-    .getPreviousFinishedBuild(deps.buildNumber)
-    .catch(logLookupError('Previous build'));
+  const previousBuilds =
+    (await deps
+      .getPreviousFinishedBuilds(deps.buildNumber)
+      .catch(logLookupError('Previous builds'))) ?? [];
+  const [previousBuild] = previousBuilds;
   if (!previousBuild) {
     return {
       ...fullSelection(commit, 'no previous finished build'),
@@ -167,7 +200,7 @@ export const resolveOnMergeSelection = async (
   const testTypes = Object.fromEntries(
     ON_MERGE_TEST_TYPES.map((testType) => [
       testType,
-      decideTestType(testType, previousBuild, esSnapshotChanged),
+      decideTestType(testType, previousBuilds, esSnapshotChanged),
     ])
   ) as OnMergeSelection['testTypes'];
 

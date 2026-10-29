@@ -15,7 +15,7 @@ import type { OnMergeSelectionDeps } from './resolve_selection.ts';
 
 const MAX_ACTIVITY_PAGES = 3;
 // Builds are listed newest first and include all jobs, so keep the page small.
-const PREVIOUS_BUILDS_PAGE_SIZE = 3;
+const PREVIOUS_BUILDS_PAGE_SIZE = 10;
 
 const gitSucceeds = (args: string[]): boolean => {
   try {
@@ -66,13 +66,13 @@ export const createDefaultOnMergeSelectionDeps = ({
     return build?.meta_data?.['merge-queue-merge-base'] || null;
   },
 
-  getPreviousFinishedBuild: async (buildNumber) => {
+  getPreviousFinishedBuilds: async (buildNumber) => {
     const builds = await bk.getFinishedBuildsForBranch(
       pipelineSlug,
       branch,
       PREVIOUS_BUILDS_PAGE_SIZE
     );
-    return builds.find(({ number }) => number < buildNumber) ?? null;
+    return builds.filter(({ number }) => number < buildNumber);
   },
 
   git: {
