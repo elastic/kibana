@@ -18,19 +18,29 @@ export interface UseScheduledRunMetadataArgs {
 
 const SCHEDULED_RUN_OF_LABEL = i18n.translate(
   'xpack.osquery.queryDetailsHeader.scheduledRunOfLabel',
-  { defaultMessage: 'Scheduled run of' }
+  {
+    defaultMessage: 'Scheduled run of',
+    description:
+      'Label in the scheduled query results page header, followed by the pack name, e.g. "Scheduled run of my-pack".',
+  }
 );
 
 const SCHEDULED_RUN_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.scheduledRunLabel', {
   defaultMessage: 'Scheduled run',
+  description:
+    'Label in the scheduled query results page header when the pack name is unavailable (pack deleted).',
 });
 
 const EXECUTION_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.executionLabel', {
   defaultMessage: 'Execution',
+  description:
+    'Label in the scheduled query results page header, followed by the execution number, e.g. "Execution #12".',
 });
 
 const ON_LABEL = i18n.translate('xpack.osquery.queryDetailsHeader.onLabel', {
   defaultMessage: 'on',
+  description:
+    'Label in the scheduled query results page header, followed by the date and time the scheduled query ran, e.g. "on 29 Oct 2026 12:00".',
 });
 
 /**

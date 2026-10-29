@@ -82,15 +82,33 @@ export const useExportResultsAction = ({
     [closeModal, exportResults, kuery, esFilters]
   );
 
-  return {
-    isExportEnabled,
-    isEmpty: total === 0,
-    isInitialLoading: total === undefined,
-    isExporting,
-    hasActiveFilters,
-    isModalOpen,
-    openModal,
-    closeModal,
-    handleExport,
-  };
+  const isEmpty = total === 0;
+  const isInitialLoading = total === undefined;
+
+  // Memoized so the results page's app menu (which depends on this object) stays stable between
+  // renders, e.g. while live results poll.
+  return useMemo(
+    () => ({
+      isExportEnabled,
+      isEmpty,
+      isInitialLoading,
+      isExporting,
+      hasActiveFilters,
+      isModalOpen,
+      openModal,
+      closeModal,
+      handleExport,
+    }),
+    [
+      closeModal,
+      handleExport,
+      hasActiveFilters,
+      isEmpty,
+      isExportEnabled,
+      isExporting,
+      isInitialLoading,
+      isModalOpen,
+      openModal,
+    ]
+  );
 };

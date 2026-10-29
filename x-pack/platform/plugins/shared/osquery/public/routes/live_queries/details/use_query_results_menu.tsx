@@ -311,14 +311,16 @@ export const useQueryResultsMenu = ({
           onClose={closeTagsFlyout}
         />
       )}
-      <AddToCaseActionBridge
-        openRef={openAddToCaseRef}
-        onReadyChange={setIsAddToCaseReady}
-        actionId={actionId}
-        agentIds={agentIds}
-        scheduleId={scheduleId}
-        executionCount={executionCount}
-      />
+      {hasCasesPermissions && (
+        <AddToCaseActionBridge
+          openRef={openAddToCaseRef}
+          onReadyChange={setIsAddToCaseReady}
+          actionId={actionId}
+          agentIds={agentIds}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
+        />
+      )}
     </>
   );
 

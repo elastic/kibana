@@ -19,6 +19,7 @@ import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { useOsqueryPageHeaderTitle } from './osquery_page_header_context';
 import { useAddIntegrationsMenuItem } from '../common/hooks/use_add_integrations_menu_item';
+import { useHistoryBack } from '../common/hooks/use_history_back';
 import { getHistoryFilters } from '../actions/history_filter_storage';
 
 enum Section {
@@ -147,12 +148,10 @@ export const MainNavigation = () => {
     ]
   );
 
+  const historyBack = useHistoryBack();
+
   const subpageHeader = useMemo(() => {
     const { pathname } = location;
-    const historyBack: AppHeaderBack = {
-      href: historyNavProps.href,
-      label: historyBackLabel,
-    };
     const packsBack: AppHeaderBack = {
       href: packsNavProps.href,
       label: packsBackLabel,
@@ -220,8 +219,7 @@ export const MainNavigation = () => {
 
     return null;
   }, [
-    historyBackLabel,
-    historyNavProps.href,
+    historyBack,
     isResultsRoute,
     location,
     packsBackLabel,

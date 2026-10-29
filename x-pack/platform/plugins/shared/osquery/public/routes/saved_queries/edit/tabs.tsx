@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiTabbedContent, EuiNotificationBadge, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
@@ -18,6 +19,14 @@ const euiTabbedContentCss = {
     paddingLeft: '8px',
   },
 };
+
+/** Panel variant (pack rows) keeps the tab strip on the page body color. */
+const panelTabbedContentCss = ({ euiTheme }: UseEuiTheme) => ({
+  'div.euiTabs': {
+    ...euiTabbedContentCss['div.euiTabs'],
+    background: euiTheme.colors.body,
+  },
+});
 
 interface ResultTabsProps {
   actionId: string;
@@ -112,7 +121,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
 
   const tabbedContent = (
     <EuiTabbedContent
-      css={euiTabbedContentCss}
+      css={hasPanel ? panelTabbedContentCss : euiTabbedContentCss}
       // TODO: extend the EuiTabbedContent component to support EuiTabs props
       // bottomBorder={false}
       tabs={tabs}

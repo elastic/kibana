@@ -280,13 +280,14 @@ describe('LiveQueryDetailsPage', () => {
       expect(screen.getByTestId('osqueryExportResultsButton')).toBeInTheDocument();
     });
 
-    it('disables Add to Case when the user lacks full case permissions', async () => {
+    it('disables Add to Case without loading the cases context when the user lacks full case permissions', async () => {
       setupKibana({ casePermissions: { read: false, update: true, push: true } });
 
       renderPage();
       await openAppMenuOverflow();
 
       expect(screen.getByTestId('query-details-add-to-case')).toBeDisabled();
+      expect(mockUseKibana().services.cases.ui.getCasesContext).not.toHaveBeenCalled();
     });
 
     it('hides Add tags entirely when the user lacks writeLiveQueries', async () => {
