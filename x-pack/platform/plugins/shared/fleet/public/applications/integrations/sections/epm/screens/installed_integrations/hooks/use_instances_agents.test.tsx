@@ -198,6 +198,22 @@ describe('useInstancesAgents', () => {
       await waitFor(() => expect(mockSendRequest).toHaveBeenCalledTimes(2));
       expect(truncated.result.current.agentsByInstance.get('mi')).toBeUndefined();
     });
+
+    it('adds no pending entry when the agents request failed', async () => {
+      mockUseAgents.mockReturnValue({
+        agents: [],
+        isTruncated: false,
+        isLoading: false,
+        error: new Error('agents failed'),
+      });
+
+      const { result } = renderUseInstancesAgents([
+        instance('mi', { packagePolicyIds: ['pp-aws'] }),
+      ]);
+
+      await waitFor(() => expect(mockSendRequest).toHaveBeenCalled());
+      expect(result.current.agentsByInstance.get('mi')).toBeUndefined();
+    });
   });
 
   it('does not query anything when disabled', () => {

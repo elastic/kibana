@@ -118,9 +118,9 @@ export function useInstancesAgents(
     }
 
     // A managed integration policy without its agentless agent is not deployed yet: Pending, as in
-    // the managed integrations table. Not while agents load, nor when they were cut short, since
-    // its agent may just not have been fetched.
-    if (!isAgentsLoading && !isTruncated) {
+    // the managed integrations table. Only after a complete, successful agent lookup: while agents
+    // load, when they were cut short or when the request failed, its agent may just be missing.
+    if (!isAgentsLoading && !isTruncated && !agentsError) {
       for (const [instanceId, { packagePolicies }] of policiesByInstance) {
         const instanceAgents = byInstance.get(instanceId) ?? [];
         for (const packagePolicy of packagePolicies) {
@@ -139,7 +139,7 @@ export function useInstancesAgents(
       }
     }
     return byInstance;
-  }, [agents, policiesByInstance, isAgentsLoading, isTruncated]);
+  }, [agents, policiesByInstance, isAgentsLoading, isTruncated, agentsError]);
 
   const agentPolicyIdsByInstance = useMemo(
     () =>
