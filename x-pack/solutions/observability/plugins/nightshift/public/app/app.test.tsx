@@ -184,6 +184,7 @@ describe('NightshiftApp', () => {
     refetchAll.mockClear();
     reportEvent.mockClear();
     scrollTo.mockClear();
+    window.localStorage.clear();
     mockUsePageReady.mockClear();
     mockUseKibana.mockReturnValue({
       services: {
@@ -386,6 +387,40 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     await waitFor(() => expect(scrollTo).toHaveBeenCalled());
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
+  });
+
+  describe('when the target section was closed', () => {
+    const closeCriticalSection = () => {
+      setSections({
+        sections: defaultSections({
+          critical: { investigations: [criticalInvestigation], total: 1 },
+        }),
+      });
+      window.localStorage.setItem(
+        'nightshift.investigations.collapsedSections:default',
+        JSON.stringify(['critical'])
+      );
+    };
+    const criticalToggle = () =>
+      screen.getByTestId('nightshiftInvestigationSectionToggle-critical');
+
+    it('opens it when its severity tile is clicked', async () => {
+      closeCriticalSection();
+      renderApp();
+      expect(criticalToggle()).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
+
+      await waitFor(() => expect(criticalToggle()).toHaveAttribute('aria-expanded', 'true'));
+    });
+
+    it('opens it when a ?severity= link points at it', async () => {
+      closeCriticalSection();
+
+      renderApp({ initialEntries: ['/?severity=critical'] });
+
+      await waitFor(() => expect(criticalToggle()).toHaveAttribute('aria-expanded', 'true'));
+    });
   });
 
   it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {

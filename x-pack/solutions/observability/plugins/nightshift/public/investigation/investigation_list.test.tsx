@@ -12,10 +12,12 @@ import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/co
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { InvestigationList } from './investigation_list';
 
+let mockBasePath = '';
+
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: { basePath: { get: () => '' } },
+      http: { basePath: { get: () => mockBasePath } },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -109,9 +111,7 @@ describe('InvestigationList', () => {
       makeSection('not-rated', { investigations: [investigation], total: 1 }),
     ]);
 
-    const titles = Array.from(document.querySelectorAll('[id$="-heading"]')).map(
-      (heading) => heading.textContent
-    );
+    const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
     expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
   });
 
@@ -145,5 +145,54 @@ describe('InvestigationList', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
     expect(expanded()).toEqual(['true', 'true', 'false']);
+  });
+
+  describe('remembering closed sections', () => {
+    const renderTwoSections = () =>
+      renderSections([
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('high', { investigations: [investigation], total: 1 }),
+      ]);
+    const isExpanded = (id: string) =>
+      screen
+        .getByTestId(`nightshiftInvestigationSectionToggle-${id}`)
+        .getAttribute('aria-expanded');
+
+    beforeEach(() => {
+      window.localStorage.clear();
+      mockBasePath = '';
+    });
+
+    afterAll(() => {
+      mockBasePath = '';
+    });
+
+    it('keeps a closed section closed when the list is mounted again', () => {
+      const { unmount } = renderTwoSections();
+      fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+      unmount();
+
+      renderTwoSections();
+
+      expect(isExpanded('critical')).toBe('false');
+      expect(isExpanded('high')).toBe('true');
+    });
+
+    it('remembers closed sections separately for each space', () => {
+      const { unmount } = renderTwoSections();
+      fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+      unmount();
+
+      mockBasePath = '/s/other-space';
+      const { unmount: unmountOtherSpace } = renderTwoSections();
+      expect(isExpanded('critical')).toBe('true');
+      fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-high'));
+      unmountOtherSpace();
+
+      mockBasePath = '';
+      renderTwoSections();
+      expect(isExpanded('critical')).toBe('false');
+      expect(isExpanded('high')).toBe('true');
+    });
   });
 });

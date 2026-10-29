@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiSkeletonText,
   EuiTitle,
   euiCanAnimate,
@@ -204,7 +205,7 @@ const SectionBlock = ({
 };
 
 const SectionHeading = ({
-  presentation: { id, title, severity, headingId },
+  presentation: { id, title, severity },
   total,
   showCount,
   isOpen,
@@ -227,8 +228,7 @@ const SectionHeading = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiTitle size="xxs">
-        {/* A heading cannot live inside the accordion's button, so this names the region instead. */}
-        <span id={headingId}>{title}</span>
+        <span>{title}</span>
       </EuiTitle>
     </EuiFlexItem>
     {showCount && (
@@ -479,6 +479,11 @@ export const InvestigationSection = ({
         }
       `}
     >
+      {/* A heading cannot live inside the accordion's button, so screen readers get this one, which
+          also names the region. */}
+      <EuiScreenReaderOnly>
+        <h2 id={presentation.headingId}>{presentation.title}</h2>
+      </EuiScreenReaderOnly>
       <SectionCard
         highlightColor={
           isHighlighted && presentation.severity != null
