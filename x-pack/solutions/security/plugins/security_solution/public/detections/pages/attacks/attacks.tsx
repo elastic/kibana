@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import type { DocLinks } from '@kbn/doc-links';
 import { SecurityAppHeader } from '../../../common/components/app_header';
@@ -60,6 +60,8 @@ export const AttacksPage = memo(() => {
     return (
       <SecuritySolutionPageWrapper>
         <SecurityAppHeader title={i18n.PAGE_TITLE} spacing="largeBleed" />
+        {/* POC: keep spinner off the header bottom edge while loading only */}
+        <EuiSpacer />
         <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiLoadingSpinner data-test-subj={ATTACKS_PAGE_LOADING_TEST_ID} size="xl" />
         </EuiFlexGroup>
