@@ -15,7 +15,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
-import { useDismissProposal } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
   useProposalImpactPills,
@@ -45,11 +44,6 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
-// Only the mutations are stubbed — everything else this module exports stays real.
-jest.mock('@kbn/proposals-plugin/public', () => ({
-  ...jest.requireActual('@kbn/proposals-plugin/public'),
-  useDismissProposal: jest.fn(),
-}));
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
 jest.mock('@kbn/agentic-investigations-plugin/public', () => {
@@ -137,7 +131,6 @@ const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseRunningSummary = useRunningSummary as jest.Mock;
 const mockUseProposalImpactPills = useProposalImpactPills as jest.Mock;
-const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
@@ -332,15 +325,12 @@ const renderPage = (
   return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page()) };
 };
 
-const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const setStatusMutate = jest.fn();
 const setStatusMutateAsync = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
   mockDropDecided.mockClear();
-  dismissMutateAsync.mockResolvedValue(undefined);
-  mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });

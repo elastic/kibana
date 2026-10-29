@@ -21,7 +21,7 @@ import {
   Impact,
   useEntityFilter,
 } from '@kbn/agentic-investigations-common';
-import { useDismissProposal, queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
+import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import {
   useAssignInvestigation,
   useSetInvestigationStatus,
@@ -29,7 +29,6 @@ import {
   impactPillsQueryKeys,
   useStatusSignal,
   useOpenInChat,
-  decisionErrorMessage,
   EscalationModalBoundary,
   LazyConnectedCloseInvestigationModal,
   LazyConnectedEscalationModal,
@@ -63,7 +62,6 @@ import {
 import { ProposalsTrendChartRow } from '../../components/proposals_trend_chart';
 import { WorkersRunningPanel } from '../../components/workers_running_panel';
 import { useRunningSummary } from '../../hooks/use_running_summary';
-import { DismissProposalModal } from '../../components/pending_proposals/dismiss_proposal_modal';
 import { InFlightProposalBadge } from './in_flight_proposal_badge';
 import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
@@ -76,7 +74,6 @@ import {
   useAlertZeroTelemetry,
   useReportErrorShown,
   useReportHomeOpened,
-  useReportToastError,
 } from '../../telemetry';
 
 const wrapScanFailureCallout = (callout: JSX.Element) => (
@@ -160,7 +157,6 @@ const ConversationsPageContent: React.FC = () => {
     void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
   });
 
-  const { mutateAsync: dismissDecision } = useDismissProposal();
   const dropDecided = useDropDecidedProposal(effectiveEntityFilter);
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
   const { reportEvent } = useAlertZeroTelemetry();
@@ -336,17 +332,6 @@ const ConversationsPageContent: React.FC = () => {
     buttonIconSize: 's',
   });
 
-  // Both decisions close on success only, and surface the refusal otherwise: an expired
-  // deadline or a proposal someone else already decided must not look like it landed.
-  const reportQueueToastError = useReportToastError('queue');
-  const onDecisionError = useMemo(
-    () => (err: unknown) => {
-      notifications?.toasts.addDanger(decisionErrorMessage(err));
-      reportQueueToastError(classifyError(err));
-    },
-    [notifications, reportQueueToastError]
-  );
-
   const renderCloseModal = useCallback(
     ({ investigation, onClose }: { investigation: Investigation; onClose: () => void }) => (
       <EscalationModalBoundary>
@@ -358,29 +343,6 @@ const ConversationsPageContent: React.FC = () => {
       </EscalationModalBoundary>
     ),
     [dropDecided]
-  );
-
-  const renderDismissModal = useCallback(
-    ({ recordId, onClose }: { recordId?: string | null; onClose: () => void }) => {
-      if (!recordId) return null;
-      return (
-        <DismissProposalModal
-          proposalId={recordId}
-          onClose={onClose}
-          onConfirm={async ({ dismissReason, rationale }) => {
-            try {
-              await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
-              void dropDecided(recordId);
-              onClose();
-            } catch (err) {
-              onDecisionError(err);
-              throw err;
-            }
-          }}
-        />
-      );
-    },
-    [dismissDecision, dropDecided, onDecisionError]
   );
 
   const renderEscalationModal = useCallback(
@@ -448,7 +410,6 @@ const ConversationsPageContent: React.FC = () => {
         investigation={actionInvestigation}
         onCloseAction={closeModal}
         renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
-        renderDismissModal={renderDismissModal}
         renderEscalationModal={renderEscalationModal}
       />
 
