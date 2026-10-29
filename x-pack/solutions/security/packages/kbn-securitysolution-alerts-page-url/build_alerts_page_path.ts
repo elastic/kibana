@@ -20,7 +20,7 @@ const URL_PARAM_KEY = {
 } as const;
 
 /** The tags analysts and workflows give an alert, as opposed to the rule's tags. */
-const ALERT_TAGS_FIELD = 'kibana.alert.workflow_tags';
+const WORKFLOW_TAGS_FIELD = 'kibana.alert.workflow_tags';
 
 /**
  * The most alert ids a page link carries. Each id adds about 67 bytes to the URL, and Kibana refuses
@@ -40,7 +40,7 @@ export const buildAlertsSelectionQuery = ({
   tags = [],
 }: AlertsSelection): estypes.QueryDslQueryContainer => {
   const byIds = { ids: { values: [...alertIds] } };
-  const byTags = { terms: { [ALERT_TAGS_FIELD]: [...tags] } };
+  const byTags = { terms: { [WORKFLOW_TAGS_FIELD]: [...tags] } };
   if (tags.length === 0) {
     return byIds;
   }
@@ -74,16 +74,41 @@ const ALL_STATUSES_PAGE_FILTER = encode(
   ])
 );
 
+const buildTagFilter = (tag: string): Filter => ({
+  meta: {
+    alias: null,
+    disabled: false,
+    negate: false,
+    type: 'phrase',
+    key: WORKFLOW_TAGS_FIELD,
+    params: { query: tag },
+  },
+  query: { match_phrase: { [WORKFLOW_TAGS_FIELD]: tag } },
+  $state: { store: FilterStateStore.APP_STATE },
+});
+
+const buildPagePath = (filter: Filter, createdAt: string, keepOpenForMs?: number): string =>
+  [
+    [URL_PARAM_KEY.filters, encode([filter])],
+    [URL_PARAM_KEY.timerange, buildPageTimerange(createdAt, keepOpenForMs)],
+    [URL_PARAM_KEY.pageFilter, ALL_STATUSES_PAGE_FILTER],
+  ]
+    .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodePageParam(value)}`)
+    .join('');
+
 /** The Alerts page path that shows the given alerts and the alerts carrying any of `tags`, in every status. */
 export const buildAlertsPagePath = (
   alertIds: readonly string[],
   createdAt: string,
   tags: readonly string[] = []
-): string =>
-  [
-    [URL_PARAM_KEY.filters, encode([buildSelectionFilter({ alertIds, tags })])],
-    [URL_PARAM_KEY.timerange, buildPageTimerange(createdAt)],
-    [URL_PARAM_KEY.pageFilter, ALL_STATUSES_PAGE_FILTER],
-  ]
-    .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodePageParam(value)}`)
-    .join('');
+): string => buildPagePath(buildSelectionFilter({ alertIds, tags }), createdAt);
+
+/**
+ * Same page as `buildAlertsPagePath`, filtered on one alert tag, so the link is the same size for any
+ * number of alerts. `keepOpenForMs` keeps the time range open for alerts that get the tag later.
+ */
+export const buildAlertsPageTagPath = (
+  tag: string,
+  createdAt: string,
+  keepOpenForMs?: number
+): string => buildPagePath(buildTagFilter(tag), createdAt, keepOpenForMs);

@@ -7,6 +7,7 @@
 
 export {
   buildAlertsPagePath,
+  buildAlertsPageTagPath,
   buildAlertsSelectionQuery,
   MAX_LINKED_ALERT_IDS,
 } from './build_alerts_page_path';
