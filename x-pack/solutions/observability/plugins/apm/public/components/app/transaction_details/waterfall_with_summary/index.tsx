@@ -47,11 +47,6 @@ interface Props<TSample extends {}> {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   selectedSample?: TSample | null;
-  // In controlled mode, the array position of the selected sample. When
-  // provided it drives the pagination index directly, so samples that share
-  // the same identifiers (e.g. paired `gen_ai.*` docs with identical
-  // traceId/transactionId) can still be navigated individually. Falls back to
-  // `indexOf(selectedSample)` when omitted.
   selectedSampleIndex?: number;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
