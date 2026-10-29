@@ -26,12 +26,21 @@ const removeRegistrant =
       ? registrants.filter((existing) => existing !== registrant)
       : registrants;
 
+/**
+ * Reads a component by id from its own keys only. An id is user-defined, so a plain lookup would
+ * read `constructor` or `toString` from `Object.prototype` and return that as the component.
+ */
+export const getComponentState = <TStats>(
+  record: ComponentRecord<TStats>,
+  id: string
+): StatsComponentState<TStats> | undefined => (Object.hasOwn(record, id) ? record[id] : undefined);
+
 const changeRegistrants = <TStats>(
   record: ComponentRecord<TStats>,
   id: string,
   update: RegistrantsUpdate
 ): ComponentRecord<TStats> => {
-  const current = record[id] ?? { registrants: [] };
+  const current = getComponentState(record, id) ?? { registrants: [] };
   const registrants = update(current.registrants);
   return registrants === current.registrants
     ? record
@@ -104,11 +113,11 @@ export const isRegistered = (
 ): boolean => {
   switch (ref.kind) {
     case 'destination': {
-      const state = components.destination[ref.id];
+      const state = getComponentState(components.destination, ref.id);
       return state !== undefined && hasRegistrants(state);
     }
     case 'processor': {
-      const state = components.processor[ref.id];
+      const state = getComponentState(components.processor, ref.id);
       return state !== undefined && hasRegistrants(state);
     }
     default:

@@ -90,6 +90,10 @@ const mapProcessorResult = (
     ? classify(toProcessorStats(result), hasProcessorData, result.error)
     : classify(EMPTY_PROCESSOR_STATS, hasProcessorData);
 
+/** An id is user-defined, so `constructor` must not be read from `Object.prototype` as a result. */
+const getOwnResult = <TResult>(results: Record<string, TResult>, id: string): TResult | undefined =>
+  Object.hasOwn(results, id) ? results[id] : undefined;
+
 /**
  * Converts the response to the view types. Only the requested components are mapped, so a
  * component that the response leaves out shows as no data, instead of as a missing entry.
@@ -104,10 +108,10 @@ export const mapStatsResponse = (
   for (const { kind, id } of requested) {
     switch (kind) {
       case 'destination':
-        destinations[id] = mapDestinationResult(components.destinations[id]);
+        destinations[id] = mapDestinationResult(getOwnResult(components.destinations, id));
         break;
       case 'processor':
-        processors[id] = mapProcessorResult(components.processors[id]);
+        processors[id] = mapProcessorResult(getOwnResult(components.processors, id));
         break;
       default:
         // A kind this UI does not know is dropped, so a new kind in the schema never breaks a node.
