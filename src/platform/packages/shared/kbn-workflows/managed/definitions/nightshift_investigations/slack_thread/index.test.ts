@@ -155,6 +155,8 @@ describe('Nightshift Slack thread workflow', () => {
         'run-as-mode': 'inherit',
         inputs: {
           investigation_id: '{{ steps.find_investigation.output.investigation_id }}',
+          // The post-round workflow reads this to keep a reply on the investigation's trees.
+          round_kind: 'follow_up',
         },
       },
     });

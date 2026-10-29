@@ -9,19 +9,30 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
-  prepareReinforcementTurn: jest.fn().mockResolvedValue({
-    message: 'turn prompt',
-    treeCount: 1,
-    turnKind: 'feedback_reinforcement',
-  }),
+  prepareReinforcementTurn: jest.fn(),
 }));
+
+const readTree = (id: string, slug: string) => ({
+  type: 'tool_call',
+  tool_call_id: id,
+  tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
+  params: { file_path: `/workspace/decision-trees/decision_tree_${slug}.md` },
+  results: [{ type: 'other', data: { content: 'tree' } }],
+});
 
 describe('decisionTreePrepareStepDefinition', () => {
   const logger = loggerMock.create();
   const request = httpServerMock.createKibanaRequest();
+  const conversationsGet = jest.fn();
+  const agentBuilder = {
+    conversations: {
+      getScopedClient: jest.fn().mockResolvedValue({ get: conversationsGet }),
+    },
+  };
 
   const createContext = (input: Record<string, unknown>) =>
     ({
@@ -40,64 +51,85 @@ describe('decisionTreePrepareStepDefinition', () => {
       stepType: 'nightshift.decisionTreePrepare',
     } as never);
 
-  const run = (input: Record<string, unknown>) =>
+  const run = (
+    input: Record<string, unknown>,
+    {
+      getTelemetryConnectorId = () => undefined,
+    }: {
+      getTelemetryConnectorId?: () => string | undefined | Promise<string | undefined>;
+    } = {}
+  ) =>
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId: () => undefined,
+      getTelemetryConnectorId,
+      getAgentBuilder: () => agentBuilder as never,
       logger,
     }).handler(createContext(input));
 
+  const investigatorRound = {
+    agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+    conversation_id: 'inv-1',
+    round_id: 'round-3',
+    round_kind: 'initial',
+  };
+  const skipped = {
+    output: { message: '', tree_count: 0, turn_kind: 'initial_investigation', skipped: true },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+      skipped: false,
+      message: 'turn prompt',
+      treeCount: 1,
+      turnKind: 'feedback_reinforcement',
+    });
+    conversationsGet.mockResolvedValue({ rounds: [] });
   });
 
   it('skips a round with no agent_id rather than trusting it', async () => {
-    const result = await run({ response: 'pool leak' });
-
+    await expect(run({ conversation_id: 'inv-1', round_kind: 'initial' })).resolves.toEqual(
+      skipped
+    );
     expect(prepareReinforcementTurn).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      output: { message: '', tree_count: 0, turn_kind: 'initial_investigation', skipped: true },
-    });
   });
 
   it('skips a round from another agent', async () => {
-    const result = await run({
-      response: 'pool leak',
-      agent_id: 'significant-events.investigation',
-    });
-
+    await expect(
+      run({ ...investigatorRound, agent_id: 'significant-events.investigation' })
+    ).resolves.toEqual(skipped);
     expect(prepareReinforcementTurn).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      output: { message: '', tree_count: 0, turn_kind: 'initial_investigation', skipped: true },
-    });
   });
 
+  it('fails when the round names no investigation', async () => {
+    await expect(run({ ...investigatorRound, conversation_id: '' })).rejects.toThrow(
+      /needs the conversation of the round/
+    );
+    expect(prepareReinforcementTurn).not.toHaveBeenCalled();
+  });
+
+  // Liquid renders a workflow_context entry the before-agent workflow left out as ''.
+  it.each(['', 'recovery'])(
+    'fails rather than guessing when the round kind is %p',
+    async (roundKind) => {
+      await expect(run({ ...investigatorRound, round_kind: roundKind })).rejects.toThrow(
+        /has no round kind/
+      );
+      expect(prepareReinforcementTurn).not.toHaveBeenCalled();
+    }
+  );
+
   it('resolves reinforcement connectors from the investigation conversation', async () => {
-    const context = createContext({
-      response: 'pool leak',
-      agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-      conversation_id: 'inv-orca',
-    });
     const getTelemetryConnectorId = jest.fn().mockResolvedValue('orca');
-    await decisionTreePrepareStepDefinition({ getTelemetryConnectorId, logger }).handler(context);
-    expect(getTelemetryConnectorId).toHaveBeenCalledWith(request, 'inv-orca');
+    await run(investigatorRound, { getTelemetryConnectorId });
+
+    expect(getTelemetryConnectorId).toHaveBeenCalledWith(request, 'inv-1');
     expect(prepareReinforcementTurn).toHaveBeenCalledWith(
       expect.objectContaining({ connectorNames: ['orca'] })
     );
   });
 
-  it('prepares a reinforcement turn for the Nightshift investigator', async () => {
-    const result = await run({
-      response: 'pool leak',
-      agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-    });
-
-    expect(prepareReinforcementTurn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        response: 'pool leak',
-        spaceId: 'space-1',
-      })
-    );
-    expect(result).toEqual({
+  it('prepares a first round from its own tree reads only', async () => {
+    await expect(run(investigatorRound)).resolves.toEqual({
       output: {
         message: 'turn prompt',
         tree_count: 1,
@@ -105,5 +137,44 @@ describe('decisionTreePrepareStepDefinition', () => {
         skipped: false,
       },
     });
+    expect(conversationsGet).not.toHaveBeenCalled();
+    expect(prepareReinforcementTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        roundKind: 'initial',
+        investigationId: 'inv-1',
+        earlierAccessedTreeIds: [],
+        spaceId: 'space-1',
+      })
+    );
+  });
+
+  it.each(['follow_up', 'alert_recovery'] as const)(
+    'hands a %s round the trees opened in the earlier rounds',
+    async (roundKind) => {
+      conversationsGet.mockResolvedValue({
+        rounds: [
+          { id: 'round-1', steps: [readTree('a', 'checkout-high-latency')] },
+          { id: 'round-2', steps: [] },
+          // The round being reinforced: its reads arrive through the hook's tool calls.
+          { id: 'round-3', steps: [readTree('b', 'payment-errors')] },
+        ],
+      });
+
+      await run({ ...investigatorRound, round_kind: roundKind });
+
+      expect(conversationsGet).toHaveBeenCalledWith('inv-1');
+      expect(prepareReinforcementTurn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roundKind,
+          earlierAccessedTreeIds: ['symptom:checkout-high-latency'],
+        })
+      );
+    }
+  );
+
+  it('skips a follow-up that has no tree to build on', async () => {
+    jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
+
+    await expect(run({ ...investigatorRound, round_kind: 'follow_up' })).resolves.toEqual(skipped);
   });
 });

@@ -142,7 +142,8 @@ export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
 export const NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  // 2: the round's workflow_context declares its kind (nightshift.round).
+  version: 2,
   billable: false,
   yamlTemplate: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
     renderBoundHookYaml({

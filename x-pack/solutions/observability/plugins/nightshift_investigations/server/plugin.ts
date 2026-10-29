@@ -71,6 +71,7 @@ import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/mem
 import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
+import { labelRoundStepDefinition } from './step_definitions/label_round';
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
@@ -516,7 +517,15 @@ export class NightshiftInvestigationsPlugin
                 ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
                     .connectorId
                 : this.ctx.config.get().sandbox?.telemetry_connector_id,
+            getAgentBuilder: () => this.agentBuilder,
             logger: this.logger.get('decision_trees'),
+            isEnabled: () => this.decisionTreesEnabled,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          labelRoundStepDefinition({
+            getRoundKind: (request, investigationId) =>
+              this.getInvestigationsClient(request).getActiveRoundKind(investigationId),
             isEnabled: () => this.decisionTreesEnabled,
           })
         );

@@ -43,6 +43,7 @@ interface ComposeOutput {
   model_context?: string;
   workflow_context: {
     'nightshift.semantic_memory.recall': { version: number; data: { recalled_ids: string[] } };
+    'nightshift.round'?: { version: number; data: { round_kind: string } };
   };
 }
 
@@ -110,10 +111,43 @@ describe('sandbox materialize workspace workflow, first execution', () => {
         version: 1,
         data: { recalled_ids: ['mem-1', 'mem-2'] },
       },
+      'nightshift.round': { version: 1, data: { round_kind: 'initial' } },
     });
   });
 
   it("composes the writers' own fragments into model context", () => {
+    expect(fixture.stepOutput<ComposeOutput>('compose_prompt')?.model_context).toContain(
+      '/workspace/memories/checkout.md'
+    );
+  });
+});
+
+describe('sandbox materialize workspace workflow, labelling the round', () => {
+  // Agent Builder hands this to the post-round workflow, which decides from it whether the round
+  // may seed a new decision tree.
+  it('carries the kind the run declared into the workflow_context', async () => {
+    const fixture = createNightshiftWorkflowFixture({ roundKind: 'alert_recovery' });
+
+    await fixture.runMaterialize(FIRST_EXECUTION_INPUTS);
+
+    expect(
+      fixture.stepOutput<ComposeOutput>('compose_prompt')?.workflow_context['nightshift.round']
+    ).toEqual({ version: 1, data: { round_kind: 'alert_recovery' } });
+  });
+
+  // A failed before-agent workflow aborts the round, so a label that cannot be read is left out
+  // and the post-round reinforcement fails on its own instead.
+  it('leaves the label out, and still runs the round, when it cannot be read', async () => {
+    const fixture = createNightshiftWorkflowFixture({
+      roundKind: new Error('Investigation run "exec-1" of "conv-1" declares no round_kind'),
+    });
+
+    await fixture.runMaterialize(FIRST_EXECUTION_INPUTS);
+
+    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    expect(
+      fixture.stepOutput<ComposeOutput>('compose_prompt')?.workflow_context
+    ).not.toHaveProperty(['nightshift.round']);
     expect(fixture.stepOutput<ComposeOutput>('compose_prompt')?.model_context).toContain(
       '/workspace/memories/checkout.md'
     );

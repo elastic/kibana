@@ -59,6 +59,16 @@ triggers:
                       type: array
                       items:
                         type: string
+            nightshift.round:
+              type: object
+              properties:
+                version:
+                  type: number
+                data:
+                  type: object
+                  properties:
+                    round_kind:
+                      type: string
         tool_calls:
           type: array
           description: >
@@ -146,9 +156,11 @@ steps:
   - name: prepare_turn
     type: nightshift.decisionTreePrepare
     with:
-      response: '{{ inputs.response }}'
       conversation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
       agent_id: '{{ inputs.agent_id }}'
+      # Written by the before-agent workflow, which reads it while the round's run is in progress.
+      round_kind: '{{ inputs.workflow_context["nightshift.round"].data.round_kind }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'

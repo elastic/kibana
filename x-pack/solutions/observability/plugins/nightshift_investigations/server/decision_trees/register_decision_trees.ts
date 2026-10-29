@@ -20,10 +20,11 @@ import {
   parseAccessedTreesMarker,
   type InvestigationToolCall,
 } from './accessed_trees';
+import type { InvestigationRoundKind } from '../client/round_kind';
 import { createLearningStore } from './learning_store';
 import { materializeDecisionTrees } from './materialize';
 import { createDecisionTreeStore } from './store';
-import { buildReinforcementPrompt } from './turn';
+import { buildReinforcementPrompt, turnKindForRound } from './turn';
 
 /**
  * Registers the dedicated decision-tree AI index with the Context Engine so it is a managed,
@@ -83,9 +84,15 @@ export const hydrateDecisionTreeWorkspace = async ({
  * Builds the closing message for a completed investigation round: the trees the agent may edit,
  * the learnings already on file, and the turn script for this phase. The round itself is handed
  * to the agent separately, as conversation history.
+ *
+ * A first round edits the trees it opened, or seeds a new one. A later round only edits the
+ * investigation's own trees: the ones opened in any of its rounds. With none, it is skipped,
+ * so a follow-up never seeds a tree from a recovery or a reply.
  */
 export const prepareReinforcementTurn = async ({
-  response,
+  roundKind,
+  investigationId,
+  earlierAccessedTreeIds = [],
   connectorNames,
   esClient,
   logger,
@@ -93,32 +100,52 @@ export const prepareReinforcementTurn = async ({
   signal,
   toolCalls = [],
 }: {
-  response: string;
+  roundKind: InvestigationRoundKind;
+  investigationId: string;
+  /** Trees the investigator opened in the investigation's earlier rounds. */
+  earlierAccessedTreeIds?: string[];
   connectorNames: string[];
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
-}): Promise<{ message: string; treeCount: number; turnKind: DecisionTreeTurnKind }> => {
+}): Promise<
+  | { skipped: false; message: string; treeCount: number; turnKind: DecisionTreeTurnKind }
+  | { skipped: true }
+> => {
+  const treeStore = createDecisionTreeStore({ esClient, logger, spaceId, signal });
+  const turnKind = turnKindForRound(roundKind);
+  const isFollowUp = turnKind === 'feedback_reinforcement';
   const [trees, learnings] = await Promise.all([
-    createDecisionTreeStore({ esClient, logger, spaceId, signal }).list(),
+    treeStore.list(),
     createLearningStore({ esClient, logger, spaceId, signal }).list(),
   ]);
 
-  const accessedIds = new Set(extractAccessedTreeIds(toolCalls));
-  const accessed = trees.filter(
-    (tree) => tree.status !== 'archived' && accessedIds.has(tree.tree_id)
+  const investigationTreeIds = new Set([
+    ...extractAccessedTreeIds(toolCalls),
+    ...(isFollowUp ? earlierAccessedTreeIds : []),
+  ]);
+  const editable = trees.filter(
+    (tree) => tree.status !== 'archived' && investigationTreeIds.has(tree.tree_id)
   );
-  const { message, turnKind } = buildReinforcementPrompt({
-    trees: accessed,
+  if (isFollowUp && editable.length === 0) {
+    logger.info(
+      `Skipped decision tree reinforcement for a ${roundKind} round of investigation "${investigationId}": it has no decision tree to build on`
+    );
+    return { skipped: true };
+  }
+
+  const message = buildReinforcementPrompt({
+    trees: editable,
     learnings,
     connectorNames,
-    response,
+    turnKind,
   });
   return {
-    message: [embedAccessedTreesMarker(accessed.map((tree) => tree.tree_id)), message].join('\n'),
-    treeCount: accessed.length,
+    skipped: false,
+    message: [embedAccessedTreesMarker(editable.map((tree) => tree.tree_id)), message].join('\n'),
+    treeCount: editable.length,
     turnKind,
   };
 };

@@ -87,6 +87,17 @@ steps:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
               prompt: '{{ inputs.prompt }}'
               agent_id: '{{ inputs.agent_id }}'
+      # Not a writer: it reads which kind of round is starting, for decision-tree reinforcement.
+      # It reads it now, while the run that started the round is still in progress, because
+      # the post-round workflow starts after the round in the background, when that run may be
+      # over. It never fails, and outputs nothing when it cannot tell.
+      - name: round_label
+        steps:
+          - name: label_round
+            type: nightshift.labelRound
+            with:
+              conversation_id: '{{ inputs.conversation_id }}'
+              agent_id: '{{ inputs.agent_id }}'
   - name: compose_prompt
     type: nightshift.composeHydrateNotifications
     if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
@@ -107,3 +118,4 @@ steps:
           completed: '${{ steps.hydrate_decision_trees.output != null }}'
       # ${{ }} preserves the array; Liquid `{{ }}` stringifies a one-item array.
       recalled_ids: '${{ steps.memory_materialize_to_sandbox.output.recalled_ids }}'
+      round_kind: '{{ steps.label_round.output.round_kind }}'
