@@ -17,6 +17,7 @@ import {
   SYSTEM_USER_ID,
 } from '@kbn/agent-builder-common';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
 import { AgentAvailabilityCache } from '../builtin/availability_cache';
@@ -35,11 +36,12 @@ export const createPersistedProviderFn = (opts: {
   hiddenByAgentId: Map<string, boolean>;
 }): AgentProviderFn<false> => {
   const availabilityCache = new AgentAvailabilityCache();
-  return ({ request, space }) => {
+  return ({ request, space, user }) => {
     return createPersistedProvider({
       ...opts,
       request,
       space,
+      user,
       availabilityCache,
     });
   };
@@ -61,9 +63,11 @@ const createPersistedProvider = async ({
   availabilityByAgentId,
   hiddenByAgentId,
   availabilityCache,
+  user,
 }: {
   space: string;
   request: KibanaRequest;
+  user?: UserIdAndName;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
@@ -79,6 +83,7 @@ const createPersistedProvider = async ({
     security,
     toolsService,
     space,
+    user,
   });
 
   return {

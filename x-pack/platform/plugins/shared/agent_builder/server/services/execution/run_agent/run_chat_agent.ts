@@ -140,6 +140,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     renderers,
     conversationClient,
     conversationAccess,
+    user,
   } = context;
   const storesConversation = conversationAccess === 'readWrite';
 
@@ -260,6 +261,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
+    user,
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
@@ -597,6 +599,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     try {
       await context.hooks.run(HookLifecycle.afterExecution, {
         request,
+        user,
         abortSignal,
         agentId,
         round,
