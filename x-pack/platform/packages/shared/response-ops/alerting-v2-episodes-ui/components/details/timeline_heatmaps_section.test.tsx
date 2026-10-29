@@ -92,15 +92,12 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
         { name: '@timestamp', type: 'date' },
         { name: 'episode.status', type: 'keyword' },
         { name: 'severity', type: 'keyword' },
+        { name: 'total_event_count', type: 'long' },
       ],
       values: [
-        ['2024-01-01T00:00:00.000Z', 'active', 'high'],
-        ['2024-01-01T00:01:00.000Z', 'active', 'high'],
+        ['2024-01-01T00:00:00.000Z', 'active', 'high', 5000],
+        ['2024-01-01T00:01:00.000Z', 'active', 'high', 5000],
       ],
-    };
-    const countResponse: ESQLSearchResponse = {
-      columns: [{ name: 'event_count', type: 'long' }],
-      values: [[5000]],
     };
     const statusPhasesResponse: ESQLSearchResponse = {
       columns: [
@@ -132,7 +129,6 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
     runEsqlAsyncSearchMock.mockImplementation(async ({ params: { query } }) => {
       if (query.includes('seg_end')) return statusPhasesResponse;
       if (query.includes('seg_start')) return severityPhasesResponse;
-      if (query.includes('event_count')) return countResponse;
       return eventsResponse;
     });
 

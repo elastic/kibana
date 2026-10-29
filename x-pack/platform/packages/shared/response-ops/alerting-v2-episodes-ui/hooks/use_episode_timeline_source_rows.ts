@@ -7,8 +7,8 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import { useFetchEpisodeEventsQuery } from './use_fetch_episode_events_query';
-import { useFetchEpisodeEventCountQuery } from './use_fetch_episode_event_count_query';
 import {
   useFetchEpisodeCollapsedEventsQuery,
   type EpisodeTimelineSeverityRow,
@@ -31,6 +31,8 @@ export interface EpisodeTimelineSourceRows {
   isError: boolean;
 }
 
+const EMPTY_EVENT_ROWS: EpisodeEventRow[] = [];
+
 /**
  * Returns an episode's status and severity rows for its timelines: every event,
  * or one collapsed row per status and per severity when the unbounded events
@@ -42,18 +44,14 @@ export const useEpisodeTimelineSourceRows = ({
   services,
 }: UseEpisodeTimelineSourceRowsOptions): EpisodeTimelineSourceRows => {
   const {
-    data: eventRows = [],
-    isLoading: isLoadingEventRows,
+    data: episodeEvents,
+    isLoading: isLoadingEvents,
     isError,
   } = useFetchEpisodeEventsQuery({ episodeId, services });
 
-  const { data: eventCount, isLoading: isLoadingEventCount } = useFetchEpisodeEventCountQuery({
-    episodeId,
-    services,
-  });
-
+  const eventRows = episodeEvents?.eventRows ?? EMPTY_EVENT_ROWS;
   const isTruncated =
-    !isLoadingEventRows && eventCount !== undefined && eventCount > eventRows.length;
+    episodeEvents !== undefined && episodeEvents.totalEventCount > eventRows.length;
 
   const { data: collapsedEvents, isInitialLoading: isLoadingCollapsedEvents } =
     useFetchEpisodeCollapsedEventsQuery({
@@ -70,7 +68,7 @@ export const useEpisodeTimelineSourceRows = ({
     severityRows: isCollapsed ? collapsedEvents.severityRows : eventRows,
     isCollapsed,
     collapsedEventLimit: isCollapsed ? eventRows.length : undefined,
-    isLoading: isLoadingEventRows || isLoadingEventCount || isLoadingCollapsedEvents,
+    isLoading: isLoadingEvents || isLoadingCollapsedEvents,
     isError,
   };
 };

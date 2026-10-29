@@ -13,14 +13,14 @@ import type {
   EpisodeCollapsedEvents,
   UseFetchEpisodeCollapsedEventsQueryOptions,
 } from './use_fetch_episode_collapsed_events_query';
+import type { EpisodeEvents } from './use_fetch_episode_events_query';
 import { createMockSpaces } from './test_utils';
 import { useEpisodeTimelineSourceRows } from './use_episode_timeline_source_rows';
 
 const mockUseFetchEvents = jest.fn<
-  { data: EpisodeEventRow[] | undefined; isLoading: boolean; isError: boolean },
+  { data: EpisodeEvents | undefined; isLoading: boolean; isError: boolean },
   []
 >();
-const mockUseFetchEventCount = jest.fn<{ data: number | undefined; isLoading: boolean }, []>();
 const mockUseFetchCollapsedEvents = jest.fn<
   { data: EpisodeCollapsedEvents | undefined; isInitialLoading: boolean },
   [UseFetchEpisodeCollapsedEventsQueryOptions]
@@ -28,9 +28,6 @@ const mockUseFetchCollapsedEvents = jest.fn<
 
 jest.mock('./use_fetch_episode_events_query', () => ({
   useFetchEpisodeEventsQuery: () => mockUseFetchEvents(),
-}));
-jest.mock('./use_fetch_episode_event_count_query', () => ({
-  useFetchEpisodeEventCountQuery: () => mockUseFetchEventCount(),
 }));
 jest.mock('./use_fetch_episode_collapsed_events_query', () => ({
   useFetchEpisodeCollapsedEventsQuery: (options: UseFetchEpisodeCollapsedEventsQueryOptions) =>
@@ -73,23 +70,24 @@ const collapsedEvents: EpisodeCollapsedEvents = {
 
 const mockSources = ({
   rows = eventRows,
-  isLoadingRows = false,
+  totalEventCount = rows.length,
+  isLoadingEvents = false,
   isError = false,
-  count = rows.length,
-  isLoadingCount = false,
   collapsed,
   isLoadingCollapsed = false,
 }: {
   rows?: EpisodeEventRow[];
-  isLoadingRows?: boolean;
+  totalEventCount?: number;
+  isLoadingEvents?: boolean;
   isError?: boolean;
-  count?: number;
-  isLoadingCount?: boolean;
   collapsed?: EpisodeCollapsedEvents;
   isLoadingCollapsed?: boolean;
 }) => {
-  mockUseFetchEvents.mockReturnValue({ data: rows, isLoading: isLoadingRows, isError });
-  mockUseFetchEventCount.mockReturnValue({ data: count, isLoading: isLoadingCount });
+  mockUseFetchEvents.mockReturnValue({
+    data: isLoadingEvents || isError ? undefined : { eventRows: rows, totalEventCount },
+    isLoading: isLoadingEvents,
+    isError,
+  });
   mockUseFetchCollapsedEvents.mockReturnValue({
     data: collapsed,
     isInitialLoading: isLoadingCollapsed,
@@ -123,7 +121,7 @@ describe('useEpisodeTimelineSourceRows', () => {
   });
 
   it('returns the collapsed rows and the row limit when the events query was truncated', () => {
-    mockSources({ count: 5000, collapsed: collapsedEvents });
+    mockSources({ totalEventCount: 5000, collapsed: collapsedEvents });
 
     const { result } = renderSourceRows();
 
@@ -141,7 +139,7 @@ describe('useEpisodeTimelineSourceRows', () => {
   });
 
   it('is loading and not yet collapsed while the collapsed rows load', () => {
-    mockSources({ count: 5000, isLoadingCollapsed: true });
+    mockSources({ totalEventCount: 5000, isLoadingCollapsed: true });
 
     const { result } = renderSourceRows();
 
@@ -151,7 +149,7 @@ describe('useEpisodeTimelineSourceRows', () => {
   });
 
   it('falls back to the truncated events without a limit when the collapsed rows are unavailable', () => {
-    mockSources({ count: 5000 });
+    mockSources({ totalEventCount: 5000 });
 
     const { result } = renderSourceRows();
 
@@ -162,7 +160,7 @@ describe('useEpisodeTimelineSourceRows', () => {
   });
 
   it('does not treat the episode as truncated while the events are loading', () => {
-    mockSources({ rows: [], isLoadingRows: true, count: 5000 });
+    mockSources({ isLoadingEvents: true });
 
     const { result } = renderSourceRows();
 
@@ -170,21 +168,17 @@ describe('useEpisodeTimelineSourceRows', () => {
       expect.objectContaining({ enabled: false })
     );
     expect(result.current.isLoading).toBe(true);
+    expect(result.current.statusRows).toEqual([]);
   });
 
-  it('is loading while the event count loads', () => {
-    mockSources({ isLoadingCount: true });
-
-    const { result } = renderSourceRows();
-
-    expect(result.current.isLoading).toBe(true);
-  });
-
-  it('forwards an events query error', () => {
-    mockSources({ rows: [], isError: true });
+  it('forwards an events query error without collapsing', () => {
+    mockSources({ isError: true });
 
     const { result } = renderSourceRows();
 
     expect(result.current.isError).toBe(true);
+    expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 });

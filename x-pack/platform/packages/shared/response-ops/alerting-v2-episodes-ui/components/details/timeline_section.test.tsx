@@ -12,7 +12,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-common-queries';
 import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import type { EpisodeEvents } from '../../hooks/use_fetch_episode_events_query';
 import type {
   EpisodeCollapsedEvents,
   UseFetchEpisodeCollapsedEventsQueryOptions,
@@ -21,15 +21,17 @@ import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episod
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 
-const mockUseFetchEventCount = jest.fn<{ data: number | undefined; isLoading: boolean }, []>();
+const mockUseFetchEvents = jest.fn<
+  { data: EpisodeEvents | undefined; isLoading: boolean; isError: boolean },
+  []
+>();
 const mockUseFetchCollapsedEvents = jest.fn<
   { data: EpisodeCollapsedEvents | undefined; isInitialLoading: boolean },
   [UseFetchEpisodeCollapsedEventsQueryOptions]
 >();
 
-jest.mock('../../hooks/use_fetch_episode_events_query');
-jest.mock('../../hooks/use_fetch_episode_event_count_query', () => ({
-  useFetchEpisodeEventCountQuery: () => mockUseFetchEventCount(),
+jest.mock('../../hooks/use_fetch_episode_events_query', () => ({
+  useFetchEpisodeEventsQuery: () => mockUseFetchEvents(),
 }));
 jest.mock('../../hooks/use_fetch_episode_collapsed_events_query', () => ({
   useFetchEpisodeCollapsedEventsQuery: (options: UseFetchEpisodeCollapsedEventsQueryOptions) =>
@@ -38,7 +40,6 @@ jest.mock('../../hooks/use_fetch_episode_collapsed_events_query', () => ({
 jest.mock('../../hooks/use_fetch_episode_actions_history_query');
 jest.mock('../../hooks/use_bulk_get_profiles');
 
-const mockUseFetchEvents = jest.mocked(useFetchEpisodeEventsQuery);
 const mockUseFetchActionsHistory = jest.mocked(useFetchEpisodeActionsHistoryQuery);
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfiles);
 
@@ -94,10 +95,14 @@ const renderSection = () => {
   );
 };
 
-const mockEvents = (eventRows: EpisodeEventRow[], isLoading = false, eventCount?: number) => {
-  mockUseFetchEvents.mockReturnValue({ data: eventRows, isLoading } as never);
-  mockUseFetchEventCount.mockReturnValue({ data: eventCount ?? eventRows.length, isLoading });
-};
+const mockEvents = (eventRows: EpisodeEventRow[], isLoading = false, totalEventCount?: number) =>
+  mockUseFetchEvents.mockReturnValue({
+    data: isLoading
+      ? undefined
+      : { eventRows, totalEventCount: totalEventCount ?? eventRows.length },
+    isLoading,
+    isError: false,
+  });
 
 const mockCollapsedEvents = (collapsedEvents?: EpisodeCollapsedEvents, isInitialLoading = false) =>
   mockUseFetchCollapsedEvents.mockReturnValue({ data: collapsedEvents, isInitialLoading });

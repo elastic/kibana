@@ -44,8 +44,9 @@ export interface BuildEpisodeEventsQueryOptions {
   limit?: number;
 }
 
-export interface EpisodeEventCountRow {
-  event_count: number;
+export interface EpisodeEventWithTotalCountRow extends EpisodeEventRow {
+  /** Number of events in the whole episode, including any cut off by the result limit. */
+  total_event_count: number;
 }
 
 const buildEpisodeEventsSource = (spaceId: string, episodeId: string) =>
@@ -87,13 +88,19 @@ export const buildEpisodeEventsQuery = (
 };
 
 /**
- * ES|QL query counting all events for a single alert episode, with the same
- * filters as the unbounded {@link buildEpisodeEventsQuery}.
+ * ES|QL query returning all events for a single alert episode, oldest first, each
+ * carrying the episode's total event count. The total is aggregated before the
+ * implicit result limit applies, so it exceeds the returned rows when they were cut off.
  */
-export const buildEpisodeEventCountQuery = (
+export const buildEpisodeEventsWithTotalCountQuery = (
   spaceId: string,
   episodeId: string
-): TypedEsqlQuery<EpisodeEventCountRow> =>
-  asTypedEsqlQuery<EpisodeEventCountRow>(
-    buildEpisodeEventsSource(spaceId, episodeId).pipe`STATS event_count = COUNT(*)`
+): TypedEsqlQuery<EpisodeEventWithTotalCountRow> =>
+  asTypedEsqlQuery<EpisodeEventWithTotalCountRow>(
+    // prettier-ignore
+    buildEpisodeEventsSource(spaceId, episodeId)
+      .pipe`INLINE STATS total_event_count = COUNT(*)`
+      .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
+      .sort([DEFAULT_TIME_FIELD, 'ASC'])
+      .keep(...ALERT_EPISODE_EVENT_FIELDS, 'total_event_count')
   );

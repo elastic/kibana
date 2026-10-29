@@ -60,12 +60,12 @@ export type {
 
 export {
   buildEpisodeEventsQuery,
-  buildEpisodeEventCountQuery,
+  buildEpisodeEventsWithTotalCountQuery,
   ALERT_EPISODE_EVENT_FIELDS,
 } from './episode_events_query';
 export type {
   EpisodeEventRow,
-  EpisodeEventCountRow,
+  EpisodeEventWithTotalCountRow,
   BuildEpisodeEventsQueryOptions,
 } from './episode_events_query';
 
