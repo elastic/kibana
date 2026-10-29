@@ -130,7 +130,7 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'pass' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'pass', path: 'secrets.password' }]);
     });
 
     it('should delete secret if type changed from remote es to kafka', async () => {
@@ -162,7 +162,7 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'token', path: 'secrets.service_token' }]);
     });
 
     it('should delete secret if secret is undefined in update', async () => {
@@ -195,7 +195,7 @@ describe('Outputs secrets', () => {
         esClient: esClientMock,
       });
 
-      expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token' }]);
+      expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token', path: 'secrets.ssl.key' }]);
     });
   });
 
