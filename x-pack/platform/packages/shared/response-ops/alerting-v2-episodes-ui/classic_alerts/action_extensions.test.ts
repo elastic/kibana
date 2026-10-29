@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { bulkUpdateAlertWorkflowStatus } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status';
 import { bulkUpdateAlertTags } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags';
 import { bulkUntrackAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_untrack_alerts';
@@ -17,6 +18,7 @@ import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { ClassicAlertActionContext } from './utils/map_alert';
 import { classicActionExtensions } from './action_extensions';
+import { executeCompositeAction } from '../actions/execute_composite_action';
 
 jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status');
 jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags');
@@ -253,16 +255,16 @@ describe('classicActionExtensions', () => {
   });
 
   describe('snooze extension', () => {
-    it('isCompatible returns true when instanceId and ruleId are present and not snoozed', () => {
+    it('isCompatible returns true when instanceId and ruleId are present', () => {
       expect(snoozeExtension.isCompatible(makeClassicEpisode('c1', 'open'))).toBe(true);
     });
 
-    it('isCompatible returns false when already snoozed', () => {
+    it('isCompatible returns true when already snoozed, so the snooze can be replaced', () => {
       const ep = makeClassicEpisode('c1', 'open', {
         last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
         snoozed_until: '2099-01-01T00:00:00.000Z',
       });
-      expect(snoozeExtension.isCompatible(ep)).toBe(false);
+      expect(snoozeExtension.isCompatible(ep)).toBe(true);
     });
 
     it('isCompatible returns false when instanceId is missing', () => {
@@ -330,6 +332,83 @@ describe('classicActionExtensions', () => {
 
       expect(result).toEqual({ succeeded: 1, failed: 1, errors: ['snooze failed'] });
     });
+
+    it('execute with an expiry forwards it alongside the conditions', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      await snoozeExtension.execute(episodes, http, {
+        snoozedUntil: '2099-01-01T00:00:00.000Z',
+        conditions: [{ type: 'severity_equals', value: 'critical' }],
+        conditionOperator: 'all',
+      });
+
+      expect(mockedSnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-1',
+        expiresAt: '2099-01-01T00:00:00.000Z',
+        conditions: [{ type: 'severity_equals', value: 'critical' }],
+        conditionOperator: 'all',
+      });
+    });
+
+    it('execute with conditions and no expiry snoozes without expires_at instead of muting', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      const result = await snoozeExtension.execute(episodes, http, {
+        snoozedUntil: null,
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'any',
+      });
+
+      expect(mockedBulkMute).not.toHaveBeenCalled();
+      expect(mockedSnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-1',
+        conditions: [{ type: 'field_change', field: 'host.name' }],
+        conditionOperator: 'any',
+      });
+      expect(result).toEqual({ succeeded: 1, failed: 0, errors: [] });
+    });
+
+    it('execute with an empty conditions list still mutes an indefinite snooze', async () => {
+      const episodes = [makeClassicEpisode('c1', 'open')];
+      await snoozeExtension.execute(episodes, http, { snoozedUntil: null, conditions: [] });
+
+      expect(mockedBulkMute).toHaveBeenCalled();
+      expect(mockedSnooze).not.toHaveBeenCalled();
+    });
+
+    it('a mixed selection snoozes the already-snoozed episode alongside the unsnoozed one', async () => {
+      const episodes = [
+        makeClassicEpisode('c1', 'open', { instanceId: 'inst-1' }),
+        makeClassicEpisode('c2', 'open', {
+          instanceId: 'inst-2',
+          last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozed_until: '2099-01-01T00:00:00.000Z',
+          snooze_conditions: [{ type: 'severity_change' }],
+        }),
+      ];
+
+      await executeCompositeAction({
+        episodes,
+        nativeExecute: async () => null,
+        extension: snoozeExtension,
+        extensionContext: { snoozedUntil: '2030-01-01T00:00:00.000Z' },
+        actionName: 'Snooze',
+        deps: { http, notifications: notificationServiceMock.createStartContract() },
+      });
+
+      expect(mockedSnooze.mock.calls.map(([{ instanceId }]) => instanceId)).toEqual([
+        'inst-1',
+        'inst-2',
+      ]);
+      expect(mockedSnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-2',
+        expiresAt: '2030-01-01T00:00:00.000Z',
+      });
+    });
   });
 
   describe('unsnooze extension', () => {
@@ -381,6 +460,41 @@ describe('classicActionExtensions', () => {
         id: 'r1',
         instanceId: 'inst-1',
       });
+      expect(result).toEqual({ succeeded: 1, failed: 0, errors: [] });
+    });
+
+    it('execute unsnoozes a condition-snoozed episode that has no expiry', async () => {
+      const ep = makeClassicEpisode('c1', 'open', {
+        last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        snoozed_until: null,
+        snooze_conditions: [{ type: 'severity_change' }],
+        instanceId: 'inst-1',
+        ruleId: 'r1',
+      });
+      const result = await unsnoozeExtension.execute([ep], http);
+
+      expect(mockedBulkUnmute).not.toHaveBeenCalled();
+      expect(mockedUnsnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-1',
+      });
+      expect(result).toEqual({ succeeded: 1, failed: 0, errors: [] });
+    });
+
+    it('execute counts a muted and condition-snoozed episode once', async () => {
+      const ep = makeClassicEpisode('c1', 'open', {
+        last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+        snoozed_until: null,
+        snooze_conditions: [{ type: 'severity_change' }],
+        is_muted: true,
+        instanceId: 'inst-1',
+        ruleId: 'r1',
+      });
+      const result = await unsnoozeExtension.execute([ep], http);
+
+      expect(mockedBulkUnmute).toHaveBeenCalled();
+      expect(mockedUnsnooze).toHaveBeenCalled();
       expect(result).toEqual({ succeeded: 1, failed: 0, errors: [] });
     });
 

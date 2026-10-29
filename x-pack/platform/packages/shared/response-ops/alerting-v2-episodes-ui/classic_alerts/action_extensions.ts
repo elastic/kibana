@@ -24,6 +24,9 @@ const getActionContext = (episode: {
   source_action_context?: unknown;
 }): ClassicAlertActionContext => episode.source_action_context as ClassicAlertActionContext;
 
+const hasSnoozedInstance = (ep: AlertEpisode): boolean =>
+  ep.snoozed_until != null || Boolean(ep.snooze_conditions?.length);
+
 const groupByIndex = (episodes: AlertEpisode[]): Array<{ index: string; ids: string[] }> => {
   const groups = new Map<string, string[]>();
   for (const ep of episodes) {
@@ -155,19 +158,19 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
     actionId: 'ALERTING_V2_SNOOZE_EPISODE',
     isCompatible: (ep) => {
       const ctx = getActionContext(ep);
-      return (
-        Boolean(ctx?.instanceId) &&
-        Boolean(ctx?.ruleId) &&
-        !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
-      );
+      return Boolean(ctx?.instanceId) && Boolean(ctx?.ruleId);
     },
     execute: async (eps, http, context) => {
       const snoozedUntil: string | null = context?.snoozedUntil ?? null;
+      const conditions = context?.conditions;
+      const conditionOperator = context?.conditionOperator;
       let succeeded = 0;
       let failed = 0;
       const errors: string[] = [];
 
-      if (snoozedUntil === null) {
+      // Only an expiry-less snooze with nothing to lift it is a plain mute; a
+      // conditions-only snooze still needs the snooze API to record them.
+      if (snoozedUntil === null && !conditions?.length) {
         const rules = groupByRule(eps);
         try {
           await bulkMuteAlerts({ http, rules });
@@ -194,7 +197,8 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
                   http,
                   id: ctx.ruleId,
                   instanceId: ctx.instanceId!,
-                  expiresAt: snoozedUntil,
+                  ...(snoozedUntil === null ? {} : { expiresAt: snoozedUntil }),
+                  ...(conditions?.length ? { conditions, conditionOperator } : {}),
                 });
                 succeeded++;
               } catch (e) {
@@ -225,13 +229,13 @@ export const classicActionExtensions: Array<EpisodeActionExtension<any>> = [
       const errors: string[] = [];
 
       const epsToUnmute = eps.filter((ep) => ep.is_muted === true);
-      const epsToUnsnooze = eps.filter((ep) => ep.snoozed_until != null);
+      const epsToUnsnooze = eps.filter(hasSnoozedInstance);
 
       let unmuteFailed = false;
 
       if (epsToUnmute.length > 0) {
         const rules = groupByRule(epsToUnmute);
-        const mutedOnlyCount = epsToUnmute.filter((ep) => ep.snoozed_until == null).length;
+        const mutedOnlyCount = epsToUnmute.filter((ep) => !hasSnoozedInstance(ep)).length;
         try {
           await bulkUnmuteAlerts({ http, rules });
           succeeded += mutedOnlyCount;

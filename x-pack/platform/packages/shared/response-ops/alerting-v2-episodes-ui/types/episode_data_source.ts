@@ -28,6 +28,7 @@ export interface EpisodeSearchField {
   esTypes: string[];
   searchable: boolean;
   aggregatable: boolean;
+  subType?: { nested?: { path: string } };
 }
 
 interface EpisodeDataSourceBaseParams {
@@ -59,6 +60,11 @@ export interface FetchSourceTagOptionsParams extends EpisodeDataSourceBaseParams
 
 export interface ResolveSourceRulesParams extends EpisodeDataSourceBaseParams {
   ids: string[];
+}
+
+export interface FetchSourceSearchFieldsParams extends EpisodeDataSourceBaseParams {
+  /** Narrows the fields to specific rule types. Defaults to every type the source covers. */
+  ruleTypeIds?: string[];
 }
 
 export interface EpisodeSourceKpis {
@@ -114,8 +120,15 @@ export interface EpisodeDataSource {
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
-  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
+  fetchSearchFields?: (params: FetchSourceSearchFieldsParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
+  /**
+   * Whether the source's backend can evaluate snooze conditions, which gates the
+   * condition based tab of the snooze modal. Defaults to `false` when omitted.
+   */
+  supportsConditionalSnooze?: boolean;
+  /** Rule types backing the given rows, read from the source's own action context. */
+  getRuleTypeIds?: (episodes: AlertEpisode[]) => string[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];
   getRuleDetailsHref?: (ruleId: string) => string | null;
