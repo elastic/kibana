@@ -16,7 +16,12 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { buildAlertsPagePath, MAX_LINKED_ALERT_IDS } from '@kbn/securitysolution-alerts-page-url';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
-import { ALERTS_PATH, APP_UI_ID, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import {
+  ALERTS_PATH,
+  APP_UI_ID,
+  DEFAULT_ALERTS_INDEX,
+  DEFAULT_DATA_VIEW_ID,
+} from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import {
@@ -122,7 +127,8 @@ export const createAlertsGroupRenderer = ({
               path: `${ALERTS_PATH}${buildAlertsPagePath(
                 ids,
                 createdAt ?? new Date().toISOString(),
-                tags
+                // The Alerts page opens on the Security default data view of the space.
+                { tags, dataViewId: `${DEFAULT_DATA_VIEW_ID}-${spaceId}` }
               )}`,
             }),
           };

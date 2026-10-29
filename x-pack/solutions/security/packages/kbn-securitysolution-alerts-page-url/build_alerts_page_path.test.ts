@@ -91,7 +91,7 @@ describe('buildAlertsPagePath', () => {
 
   it('filters by tag when the selection has only tags', () => {
     const [filter, ...rest] = decodeFilters(
-      buildAlertsPagePath([], '2026-09-01T00:00:00.000Z', ['az:proposal:p1'])
+      buildAlertsPagePath([], '2026-09-01T00:00:00.000Z', { tags: ['az:proposal:p1'] })
     );
 
     expect(rest).toHaveLength(0);
@@ -103,7 +103,7 @@ describe('buildAlertsPagePath', () => {
 
   it('applies ids and tags as one filter, so an alert matching either is shown', () => {
     const [filter, ...rest] = decodeFilters(
-      buildAlertsPagePath(['a'], '2026-09-01T00:00:00.000Z', ['az:proposal:p1'])
+      buildAlertsPagePath(['a'], '2026-09-01T00:00:00.000Z', { tags: ['az:proposal:p1'] })
     );
 
     expect(rest).toHaveLength(0);
@@ -114,9 +114,24 @@ describe('buildAlertsPagePath', () => {
   });
 
   it('keeps a tag-only link small, whatever the number of alerts carrying the tag', () => {
-    const path = buildAlertsPagePath([], '2026-09-01T00:00:00.000Z', [`az:proposal:${uuidv4()}`]);
+    const path = buildAlertsPagePath([], '2026-09-01T00:00:00.000Z', {
+      tags: [`az:proposal:${uuidv4()}`],
+    });
 
     expect(path.length).toBeLessThan(1500);
+  });
+
+  it('names the data view of the page in the filter when given one', () => {
+    const [filter] = decode(
+      new URLSearchParams(
+        buildAlertsPagePath(['a'], '2026-09-01T00:00:00.000Z', {
+          tags: ['az:proposal:p1'],
+          dataViewId: 'security-solution-default',
+        })
+      ).get('filters') ?? ''
+    ) as Array<{ meta: { index?: string } }>;
+
+    expect(filter.meta.index).toBe('security-solution-default');
   });
 });
 

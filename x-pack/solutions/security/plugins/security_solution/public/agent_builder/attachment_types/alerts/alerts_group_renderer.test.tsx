@@ -61,6 +61,19 @@ describe('createAlertsGroupRenderer', () => {
     expect(search).not.toHaveBeenCalled();
   });
 
+  it('names the Security default data view of the space in the link filter', async () => {
+    render(
+      <ul>
+        <Renderer attachments={[batch(['a', 'b'])]} />
+      </ul>
+    );
+
+    await screen.findByRole('link');
+    expect(getUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+      path: expect.stringContaining('index:security-solution-default'),
+    });
+  });
+
   it('counts the alerts without a link when there are too many ids for a URL', async () => {
     render(
       <ul>

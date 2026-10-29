@@ -58,8 +58,14 @@ const selectionAlias = ({ alertIds = [], tags = [] }: AlertsSelection): string =
 };
 
 // One filter, because the page combines separate filters with AND and a selection is ids OR tags.
-const buildSelectionFilter = (selection: AlertsSelection): Filter => ({
-  meta: { alias: selectionAlias(selection), negate: false, disabled: false, type: 'custom' },
+const buildSelectionFilter = (selection: AlertsSelection, dataViewId?: string): Filter => ({
+  meta: {
+    alias: selectionAlias(selection),
+    negate: false,
+    disabled: false,
+    type: 'custom',
+    ...(dataViewId ? { index: dataViewId } : {}),
+  },
   query: { bool: { filter: buildAlertsSelectionQuery(selection) } },
   $state: { store: FilterStateStore.APP_STATE },
 });
@@ -96,12 +102,16 @@ const buildPagePath = (filter: Filter, createdAt: string, keepOpenForMs?: number
     .map(([key, value], index) => `${index === 0 ? '?' : '&'}${key}=${encodePageParam(value)}`)
     .join('');
 
-/** The Alerts page path that shows the given alerts and the alerts carrying any of `tags`, in every status. */
+/**
+ * The Alerts page path that shows the given alerts and the alerts carrying any of `tags`, in every
+ * status. `dataViewId` is the page's data view: without it the filter bar warns that the filter does
+ * not apply, and drops it when `courier:ignoreFilterIfFieldNotInIndex` is on.
+ */
 export const buildAlertsPagePath = (
   alertIds: readonly string[],
   createdAt: string,
-  tags: readonly string[] = []
-): string => buildPagePath(buildSelectionFilter({ alertIds, tags }), createdAt);
+  { tags = [], dataViewId }: { tags?: readonly string[]; dataViewId?: string } = {}
+): string => buildPagePath(buildSelectionFilter({ alertIds, tags }, dataViewId), createdAt);
 
 /**
  * Same page as `buildAlertsPagePath`, filtered on one alert tag, so the link is the same size for any
