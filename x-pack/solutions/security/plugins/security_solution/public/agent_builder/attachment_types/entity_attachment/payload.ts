@@ -31,6 +31,13 @@ const pickEntityStoreId = (candidate: unknown): string | undefined => {
   return typeof raw === 'string' && raw.length > 0 ? raw : undefined;
 };
 
+const pickMode = (candidate: unknown): 'resolved' | undefined =>
+  candidate &&
+  typeof candidate === 'object' &&
+  (candidate as Record<string, unknown>).mode === 'resolved'
+    ? 'resolved'
+    : undefined;
+
 /**
  * Light structural check for the handful of fields `RiskSummaryMini`
  * actually reads. We keep this deliberately permissive (optional fields can
@@ -77,10 +84,12 @@ export const normaliseEntityAttachment = (
       .filter(isValidIdentifier)
       .map((candidate) => {
         const entityStoreId = pickEntityStoreId(candidate);
+        const mode = pickMode(candidate);
         return {
           identifierType: candidate.identifierType,
           identifier: candidate.identifier,
           ...(entityStoreId ? { entityStoreId } : {}),
+          ...(mode ? { mode } : {}),
         };
       });
     if (entities.length === 0) {
@@ -97,6 +106,7 @@ export const normaliseEntityAttachment = (
     const rawRiskStats = (data as { riskStats?: unknown }).riskStats;
     const rawResolutionRiskStats = (data as { resolutionRiskStats?: unknown }).resolutionRiskStats;
     const entityStoreId = pickEntityStoreId(data);
+    const mode = pickMode(data);
     return {
       isSingle: true,
       attachmentLabel,
@@ -105,6 +115,7 @@ export const normaliseEntityAttachment = (
           identifierType: data.identifierType,
           identifier: data.identifier,
           ...(entityStoreId ? { entityStoreId } : {}),
+          ...(mode ? { mode } : {}),
         },
       ],
       ...(isValidRiskStats(rawRiskStats) ? { riskStats: rawRiskStats } : {}),

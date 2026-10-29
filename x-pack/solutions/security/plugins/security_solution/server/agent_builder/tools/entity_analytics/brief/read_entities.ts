@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { min, orderBy, truncate, uniq } from 'lodash';
+import { orderBy, truncate } from 'lodash';
 import { unflattenObject } from '@kbn/object-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetCriticalityLevel, Entity, EntityRiskLevels } from '@kbn/entity-store/common';
@@ -13,11 +13,11 @@ import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
+import { mergeResolutionGroupValues } from '../../../../../common/entity_analytics/entity_store/resolution_group_values';
 import { getEntityType } from '../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
 import { fetchGroupMembers } from '../../../../lib/entity_analytics/entity_case_counts/fetch_group_member_ids';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
-import { getHigherCriticality } from '../../../../lib/entity_analytics/risk_score/maintainer/steps/resolution_modifiers';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './types';
 import { MAX_BRIEF_CANDIDATES } from './types';
@@ -122,28 +122,16 @@ export const withGroupValues = (
     return candidate;
   }
   const { record } = candidate;
-  const records = [record, ...members];
+  const { criticality, watchlists, firstSeen } = mergeResolutionGroupValues([record, ...members]);
   return {
     ...candidate,
     record: {
       ...record,
-      asset: {
-        ...record.asset,
-        criticality: records.reduce<AssetCriticalityLevel | null | undefined>(
-          (highest, { asset }) => getHigherCriticality(highest, asset?.criticality),
-          undefined
-        ),
-      },
+      asset: { ...record.asset, criticality: criticality as AssetCriticalityLevel | undefined },
       entity: {
         ...record.entity,
-        attributes: {
-          ...record.entity?.attributes,
-          watchlists: uniq(records.flatMap(({ entity }) => entity?.attributes?.watchlists ?? [])),
-        },
-        lifecycle: {
-          ...record.entity?.lifecycle,
-          first_seen: min(records.flatMap(({ entity }) => entity?.lifecycle?.first_seen ?? [])),
-        },
+        attributes: { ...record.entity?.attributes, watchlists },
+        lifecycle: { ...record.entity?.lifecycle, first_seen: firstSeen },
       },
     },
   };
@@ -199,6 +187,14 @@ export const getCandidateRisk = ({ id, record }: BriefCandidate): CandidateRisk 
     scoredId: record.entity?.id ?? id,
   };
 };
+
+/** The candidate as a `security.entity` identifier. A group's score belongs to the group, so it opens as the group. */
+export const toAttachmentIdentifier = (candidate: BriefCandidate) => ({
+  identifierType: candidate.type,
+  identifier: candidate.name,
+  entityStoreId: candidate.id,
+  ...(getCandidateRisk(candidate)?.of === 'resolution group' ? { mode: 'resolved' as const } : {}),
+});
 
 /** The record's entity type, or the EUID prefix when the record has none. */
 export const getBriefEntityType = (record: Entity, id: string): BriefEntityType => {

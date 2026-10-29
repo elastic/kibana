@@ -7,7 +7,7 @@
 
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { BriefCandidate } from './types';
-import { rankCandidates, withGroupValues } from './read_entities';
+import { rankCandidates, toAttachmentIdentifier, withGroupValues } from './read_entities';
 
 const candidate = (
   id: string,
@@ -91,5 +91,25 @@ describe('withGroupValues', () => {
     expect(record.asset?.criticality).toBe('high_impact');
     expect(record.entity?.attributes?.watchlists).toEqual(['privileged']);
     expect(record.entity?.lifecycle?.first_seen).toBe('2026-10-01T00:00:00.000Z');
+  });
+});
+
+describe('toAttachmentIdentifier', () => {
+  it('opens a scored resolution group as the group', () => {
+    const group = candidate('host:gold', ['riskMovers'], 13, {
+      risk: { calculated_score_norm: 83 },
+    });
+    expect(toAttachmentIdentifier(group)).toEqual({
+      identifierType: 'host',
+      identifier: 'host:gold',
+      entityStoreId: 'host:gold',
+      mode: 'resolved',
+    });
+  });
+
+  it('opens an entity scored on its own as a single entity', () => {
+    expect(toAttachmentIdentifier(candidate('host:solo', ['riskMovers'], 40))).not.toHaveProperty(
+      'mode'
+    );
   });
 });
