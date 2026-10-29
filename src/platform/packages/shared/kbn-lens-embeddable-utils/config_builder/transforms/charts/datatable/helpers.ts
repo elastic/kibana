@@ -15,6 +15,7 @@ import type {
 } from '@kbn/lens-common';
 
 import { ACCESSOR } from './constants';
+import type { DatatableConfig } from '../../../schema';
 import type { AllColoringTypes } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 import { getReversibleMappings } from '../utils';
@@ -29,6 +30,28 @@ const colorModeCompat = getReversibleMappings([
 type ApiColorTarget = 'value' | 'badge' | 'background' | 'progress_bar';
 
 type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none'>;
+
+type DistributivePick<T, K extends PropertyKey> = T extends unknown
+  ? Pick<T, Extract<keyof T, K>>
+  : never;
+
+type ProgressBarColumn = Extract<
+  NonNullable<DatatableConfig['metrics']>[number],
+  { apply_color_to: 'progress_bar' }
+>;
+
+/** The progress bar fields of an API metric or ES|QL row, one variant per fill mode. */
+export type ProgressBarProps = DistributivePick<
+  ProgressBarColumn,
+  'apply_color_to' | 'value_range' | 'alignment' | 'fill_mode' | 'color'
+>;
+
+export type ProgressBarFillProps = DistributivePick<ProgressBarProps, 'fill_mode' | 'color'>;
+
+export type PaletteFillColor = Extract<
+  ProgressBarProps,
+  { fill_mode: 'solid' | 'gradient' }
+>['color'];
 
 export const colorModeToApplyColorTo = (mode: ApiColorMode): ApiColorTarget =>
   colorModeCompat.toAPI(mode);

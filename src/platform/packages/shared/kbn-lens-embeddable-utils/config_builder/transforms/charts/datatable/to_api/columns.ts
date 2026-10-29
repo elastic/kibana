@@ -27,6 +27,7 @@ import {
   fromColorMappingLensStateToAPI,
 } from '../../../coloring';
 import { isAPIColumnOfBucketType, isAPIColumnOfMetricType } from '../../../columns/utils';
+import type { PaletteFillColor, ProgressBarFillProps, ProgressBarProps } from '../helpers';
 import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } from '../helpers';
 import { stripUndefined } from '../../utils';
 
@@ -56,25 +57,9 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
   });
 }
 
-type ProgressBarColumn = Extract<
-  NonNullable<DatatableConfigESQL['metrics']>[number],
-  { apply_color_to: 'progress_bar' }
->;
-
-type DistributivePick<T, K extends PropertyKey> = T extends unknown
-  ? Pick<T, Extract<keyof T, K>>
-  : never;
-
-type ProgressBarFillProps = DistributivePick<ProgressBarColumn, 'fill_mode' | 'color'>;
-
-type ProgressBarProps = Pick<ProgressBarColumn, 'apply_color_to' | 'value_range' | 'alignment'> &
-  ProgressBarFillProps;
-
-type PaletteFillColor = Extract<ProgressBarColumn, { fill_mode: 'solid' | 'gradient' }>['color'];
-
 function buildValueRange({
   valueRange,
-}: CellDecorationFillConfig): ProgressBarColumn['value_range'] {
+}: CellDecorationFillConfig): ProgressBarProps['value_range'] {
   // The editor always stores both custom bounds. Only a hand-edited range can miss one
   return valueRange?.mode === 'custom' &&
     valueRange.min !== undefined &&

@@ -17,6 +17,7 @@ import {
   isColorByValueColor,
   isLegacyColorPalette,
 } from '../../../coloring';
+import type { PaletteFillColor, ProgressBarProps } from '../helpers';
 import { getAccessorName, applyColorToToColorMode } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
@@ -28,12 +29,8 @@ type APIColumnConfig =
   | NonNullable<DatatableConfig['metrics']>[number]
   | NonNullable<DatatableConfig['rows']>[number];
 
-type ProgressBarConfig = Extract<APIColumnConfig, { apply_color_to: 'progress_bar' }>;
-
-type PaletteFillColor = Extract<ProgressBarConfig, { fill_mode: 'solid' | 'gradient' }>['color'];
-
 function buildValueRangeState(
-  valueRange: ProgressBarConfig['value_range']
+  valueRange: ProgressBarProps['value_range']
 ): CellDecorationValueRange {
   return valueRange.type === 'custom'
     ? { mode: 'custom', min: valueRange.min, max: valueRange.max }
@@ -55,7 +52,7 @@ function buildPaletteFillState(color: PaletteFillColor): Pick<ColumnState, 'pale
  * so no value from another fill mode is stored.
  */
 function buildProgressBarState(
-  config: ProgressBarConfig
+  config: ProgressBarProps
 ): Pick<ColumnState, 'colorMode' | 'fillStyle' | 'palette'> {
   const colorMode = applyColorToToColorMode(config.apply_color_to);
   const valueRange = buildValueRangeState(config.value_range);
