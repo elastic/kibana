@@ -1694,77 +1694,207 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
-  it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
-    const fleetServerHostWithSSL = {
+  describe('fleet server host ssl', () => {
+    const baseFleetServerHost = {
       name: 'default Fleet Server',
       id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
       is_default: true,
       host_urls: ['http://fleetserver:8220'],
       is_preconfigured: false,
-      ssl: {
-        certificate_authorities: ['/tmp/ssl/ca.crt'],
-        certificate: 'my-cert',
-        key: 'my-key',
-        es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
-        es_certificate: 'my-es-cert',
-        es_key: 'my-es-key',
-      },
     };
-    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue(fleetServerHostWithSSL);
-    mockedFetchRelatedSavedObjects.mockResolvedValue({
-      outputs: [
-        {
-          id: 'test-id',
-          is_default: true,
-          is_default_monitoring: true,
-          name: 'default',
-          type: 'elasticsearch',
-          hosts: ['http://127.0.0.1:9201'],
+    const policyOutput = {
+      id: 'test-id',
+      is_default: true,
+      is_default_monitoring: true,
+      name: 'default',
+      type: 'elasticsearch',
+      hosts: ['http://127.0.0.1:9201'],
+    } as Output;
+
+    async function getFleetServerPolicy(
+      fleetServerHost: any,
+      { withFleetServerInput = true, output = policyOutput, proxies = [] as any[] } = {}
+    ) {
+      mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue(fleetServerHost);
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [output],
+        proxies,
+        dataOutput: output,
+        monitoringOutput: output,
+        downloadSources: [
+          {
+            id: 'default-download-source-id',
+            is_default: true,
+            name: 'Default host',
+            host: 'http://default-registry.co',
+          },
+        ],
+        downloadSourceProxy: undefined,
+        fleetServerHost,
+      });
+      mockedGetPackageInfo.mockResolvedValue({
+        policy_templates: [
+          { name: 'fleet_server', inputs: [{ type: 'fleet-server', title: 'Fleet Server' }] },
+        ],
+        data_streams: [],
+      } as unknown as PackageInfo);
+      mockAgentPolicy({
+        package_policies: withFleetServerInput
+          ? [
+              {
+                id: 'fleet-server-package-policy',
+                name: 'fleet_server-1',
+                namespace: 'default',
+                enabled: true,
+                package: { name: 'fleet_server', version: '1.0.0', title: 'Fleet Server' },
+                inputs: [{ type: 'fleet-server', enabled: true, streams: [] }],
+                created_at: '',
+                updated_at: '',
+                created_by: '',
+                updated_by: '',
+                revision: 1,
+                policy_id: '',
+                policy_ids: [''],
+              },
+            ]
+          : [],
+      } as Partial<AgentPolicy>);
+
+      return getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+    }
+
+    const fleetServerInput = (agentPolicy: Awaited<ReturnType<typeof getFullAgentPolicy>>) =>
+      agentPolicy?.inputs.find((input) => input.type === 'fleet-server');
+
+    it('should keep the hosts of the policy output in the bootstrap output when fleet server host has es ssl options', async () => {
+      const agentPolicy = await getFleetServerPolicy({
+        ...baseFleetServerHost,
+        ssl: {
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+          key: 'my-key',
+          es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+          es_certificate: 'my-es-cert',
+          es_key: 'my-es-key',
         },
-      ],
-      proxies: [],
-      dataOutput: {
-        id: 'test-id',
-        is_default: true,
-        is_default_monitoring: true,
-        name: 'default',
-        type: 'elasticsearch',
-        hosts: ['http://127.0.0.1:9201'],
-      },
-      monitoringOutput: {
-        id: 'test-id',
-        is_default: true,
-        is_default_monitoring: true,
-        name: 'default',
-        type: 'elasticsearch',
-        hosts: ['http://127.0.0.1:9201'],
-      },
-      downloadSource: {
-        id: 'default-download-source-id',
-        is_default: true,
-        name: 'Default host',
-        host: 'http://default-registry.co',
-      },
-      downloadSourceProxy: undefined,
-      fleetServerHost: fleetServerHostWithSSL,
+      });
+
+      expect(agentPolicy?.outputs).toMatchObject({
+        default: {
+          hosts: ['http://127.0.0.1:9201'],
+          preset: 'balanced',
+          type: 'elasticsearch',
+        },
+        'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+          hosts: ['http://127.0.0.1:9201'],
+          preset: 'balanced',
+          ssl: {
+            certificate: 'my-es-cert',
+            certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+            key: 'my-es-key',
+          },
+          type: 'elasticsearch',
+        },
+      });
+      expect(fleetServerInput(agentPolicy)?.use_output).toEqual(
+        'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c'
+      );
     });
 
-    mockAgentPolicy({});
-    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
-    expect(agentPolicy?.outputs).toMatchObject({
-      default: {
-        hosts: ['http://127.0.0.1:9201'],
-        preset: 'balanced',
-        type: 'elasticsearch',
-      },
-      'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c': {
+    it('should not generate a bootstrap output when fleet server host has no es ssl options', async () => {
+      const agentPolicy = await getFleetServerPolicy({
+        ...baseFleetServerHost,
         ssl: {
+          agent_certificate_authorities: ['/tmp/ssl/agent-ca.crt'],
+          certificate_authorities: ['/tmp/ssl/ca.crt'],
+          certificate: 'my-cert',
+          key: 'my-key',
+          client_auth: 'required',
+        },
+      });
+
+      expect(Object.keys(agentPolicy?.outputs ?? {})).toEqual(['default']);
+      expect(fleetServerInput(agentPolicy)?.use_output).toEqual('default');
+      // the server side ssl options are still set on the input
+      expect(fleetServerInput(agentPolicy)?.ssl).toMatchObject({
+        certificate: 'my-cert',
+        client_authentication: 'required',
+      });
+    });
+
+    it('should not generate a bootstrap output for a policy without fleet server input', async () => {
+      const agentPolicy = await getFleetServerPolicy(
+        { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },
+        { withFleetServerInput: false }
+      );
+
+      expect(Object.keys(agentPolicy?.outputs ?? {})).toEqual(['default']);
+    });
+
+    it('should prefer the ssl options of the policy output and fill the missing ones from the host', async () => {
+      const agentPolicy = await getFleetServerPolicy(
+        {
+          ...baseFleetServerHost,
+          ssl: {
+            es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+            es_certificate: 'my-es-cert',
+            es_key: 'my-es-key',
+          },
+        },
+        {
+          output: {
+            ...policyOutput,
+            ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'], verification_mode: 'full' },
+          } as Output,
+        }
+      );
+
+      expect(
+        agentPolicy?.outputs['fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c']
+      ).toMatchObject({
+        hosts: ['http://127.0.0.1:9201'],
+        ssl: {
+          // set by the output, wins over the CA of the host
+          certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+          verification_mode: 'full',
+          // not set by the output, filled from the host
           certificate: 'my-es-cert',
-          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
           key: 'my-es-key',
         },
-        type: 'elasticsearch',
-      },
+      });
+    });
+
+    it('should add the CA of the proxy of the policy output to the CA of the host in the bootstrap output', async () => {
+      const agentPolicy = await getFleetServerPolicy(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+        },
+        {
+          output: { ...policyOutput, proxy_id: 'proxy-id' } as Output,
+          proxies: [
+            {
+              id: 'proxy-id',
+              name: 'proxy',
+              url: 'https://proxy.fr',
+              certificate_authorities: '/tmp/ssl/proxy-ca.crt',
+              is_preconfigured: false,
+            },
+          ],
+        }
+      );
+
+      expect(agentPolicy?.outputs.default).toMatchObject({
+        proxy_url: 'https://proxy.fr',
+        ssl: { certificate_authorities: ['/tmp/ssl/proxy-ca.crt'] },
+      });
+      expect(
+        agentPolicy?.outputs['fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c']
+      ).toMatchObject({
+        hosts: ['http://127.0.0.1:9201'],
+        proxy_url: 'https://proxy.fr',
+        ssl: { certificate_authorities: ['/tmp/ssl/es-ca.crt', '/tmp/ssl/proxy-ca.crt'] },
+      });
     });
   });
 
@@ -3285,6 +3415,311 @@ describe('generateFleetServerOutputSSLConfig', () => {
         },
         type: 'elasticsearch',
       },
+    });
+  });
+
+  it('should return undefined if there are no ES ssl fields', () => {
+    const res = generateFleetServerOutputSSLConfig({
+      ...baseFleetServerHost,
+      ssl: {
+        agent_certificate_authorities: ['/tmp/ssl/agent-ca.crt'],
+        certificate: 'my-cert',
+        key: 'my-key',
+        client_auth: 'required',
+      },
+      secrets: { ssl: { key: { id: 'my-key' } } },
+    });
+    expect(res).toEqual(undefined);
+  });
+
+  describe('with a base output', () => {
+    const fleetServerOutputId = 'fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c';
+    const baseOutput = {
+      type: 'elasticsearch',
+      hosts: ['https://es.co:9200'],
+      preset: 'balanced',
+    };
+
+    it('should keep the attributes of the base output and fill the missing ssl fields from the host', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'], es_certificate: 'my-es-cert' },
+        },
+        { ...baseOutput, ssl: { verification_mode: 'full' } } as any
+      );
+      expect(res).toEqual({
+        [fleetServerOutputId]: {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          preset: 'balanced',
+          ssl: {
+            certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+            certificate: 'my-es-cert',
+            verification_mode: 'full',
+          },
+        },
+      });
+    });
+
+    it('should prefer the ssl fields of the base output over the ones of the host', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] } },
+        { ...baseOutput, ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'] } } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+      });
+    });
+
+    it('should use the certificate and the key of the host if the base output sets none of them', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate: 'my-es-cert', es_key: 'my-es-key' },
+        },
+        { ...baseOutput, ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'] } } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+        certificate: 'my-es-cert',
+        key: 'my-es-key',
+      });
+    });
+
+    it('should use the ES secret key of the host if the base output sets no certificate nor key', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate: 'my-es-cert' },
+          secrets: { ssl: { es_key: { id: 'my-es-key' } } },
+        },
+        baseOutput as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({ certificate: 'my-es-cert' });
+      expect(res?.[fleetServerOutputId].secrets).toEqual({ ssl: { key: { id: 'my-es-key' } } });
+    });
+
+    it.each([
+      ['certificate', { certificate: 'output-cert' }, undefined],
+      ['key', { key: 'output-key' }, undefined],
+      ['passphrase', { key_passphrase: 'output-pass' }, undefined],
+      ['passphrase path', { key_passphrase_path: '/tmp/ssl/pass' }, undefined],
+      ['secret key', {}, { ssl: { key: { id: 'output-secret-key' } } }],
+    ])(
+      'should take the whole certificate, key and passphrase group from the base output if it sets the %s',
+      (_name, outputSsl, outputSecrets) => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate: 'my-es-cert', es_key: 'my-es-key' },
+            secrets: { ssl: { es_key: { id: 'my-es-secret-key' } } },
+          },
+          {
+            ...baseOutput,
+            ...(Object.keys(outputSsl).length > 0 ? { ssl: outputSsl } : {}),
+            ...(outputSecrets ? { secrets: outputSecrets } : {}),
+          } as any
+        );
+        const bootstrapOutput = res?.[fleetServerOutputId];
+        // nothing of the host's certificate and key is used
+        expect(bootstrapOutput?.ssl ?? {}).toEqual(outputSsl);
+        expect(bootstrapOutput?.secrets).toEqual(outputSecrets);
+      }
+    );
+
+    it('should still fill the CA from the host if the base output sets the client certificate', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'], es_certificate: 'my-es-cert' },
+        },
+        { ...baseOutput, ssl: { certificate: 'output-cert', key: 'output-key' } } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        certificate: 'output-cert',
+        key: 'output-key',
+      });
+    });
+
+    it('should move the dotted ssl keys of the base output (Advanced YAML) into ssl and treat them as set by the output', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'], es_certificate: 'my-es-cert' },
+        },
+        {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          'ssl.certificate': 'output-cert',
+          'ssl.certificate_authorities': ['/tmp/ssl/output-ca.crt'],
+          'ssl.key': 'output-key',
+          'ssl.ca_trusted_fingerprint': 'abcdef',
+        } as any
+      );
+      expect(res).toEqual({
+        [fleetServerOutputId]: {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          ssl: {
+            certificate: 'output-cert',
+            certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+            key: 'output-key',
+            ca_trusted_fingerprint: 'abcdef',
+          },
+        },
+      });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.certificate']);
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.key']);
+    });
+
+    it('should not use the ES secret key of the host if the base output has a dotted plain ssl.key', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, secrets: { ssl: { es_key: { id: 'my-es-key' } } } },
+        {
+          type: 'elasticsearch',
+          hosts: ['https://es.co:9200'],
+          'ssl.certificate': 'output-cert',
+          'ssl.key': 'output-key',
+        } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate: 'output-cert',
+        key: 'output-key',
+      });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty('secrets');
+    });
+
+    it('should prefer the nested ssl keys of the base output over the dotted ones', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },
+        {
+          type: 'elasticsearch',
+          'ssl.verification_mode': 'none',
+          ssl: { verification_mode: 'full' },
+        } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate: 'my-es-cert',
+        verification_mode: 'full',
+      });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.verification_mode']);
+    });
+
+    describe('with a proxy', () => {
+      const proxy = {
+        id: 'proxy-id',
+        name: 'proxy',
+        url: 'https://proxy.fr',
+        certificate_authorities: '/tmp/ssl/proxy-ca.crt',
+      } as any;
+
+      it('should add the CA of the proxy to the CA of the host if the output sets no CA', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+          // as built by transformOutputToFullPolicyOutput: the proxy CA is the only one of the list
+          {
+            ...baseOutput,
+            proxy_url: 'https://proxy.fr',
+            ssl: { certificate_authorities: ['/tmp/ssl/proxy-ca.crt'] },
+          } as any,
+          proxy
+        );
+        expect(res?.[fleetServerOutputId].ssl).toEqual({
+          certificate_authorities: ['/tmp/ssl/es-ca.crt', '/tmp/ssl/proxy-ca.crt'],
+        });
+        expect(res?.[fleetServerOutputId].proxy_url).toEqual('https://proxy.fr');
+      });
+
+      it('should add the CA of the proxy to the CA of the output instead of the one of the host', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+          {
+            ...baseOutput,
+            ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt', '/tmp/ssl/proxy-ca.crt'] },
+          } as any,
+          proxy
+        );
+        expect(res?.[fleetServerOutputId].ssl).toEqual({
+          certificate_authorities: ['/tmp/ssl/output-ca.crt', '/tmp/ssl/proxy-ca.crt'],
+        });
+      });
+
+      it('should keep the certificate and the key of the proxy, as they are set by the output', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: {
+              es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+              es_certificate: 'my-es-cert',
+              es_key: 'my-es-key',
+            },
+          },
+          // the certificate and the key of the proxy take the ssl.certificate/ssl.key of the output
+          {
+            ...baseOutput,
+            ssl: {
+              certificate_authorities: ['/tmp/ssl/proxy-ca.crt'],
+              certificate: 'proxy-cert',
+              key: 'proxy-key',
+            },
+          } as any,
+          { ...proxy, certificate: 'proxy-cert', certificate_key: 'proxy-key' }
+        );
+        expect(res?.[fleetServerOutputId].ssl).toEqual({
+          certificate_authorities: ['/tmp/ssl/es-ca.crt', '/tmp/ssl/proxy-ca.crt'],
+          certificate: 'proxy-cert',
+          key: 'proxy-key',
+        });
+      });
+
+      it('should not add the CA of the proxy if the base output is not an elasticsearch output', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+          { type: 'logstash', hosts: ['logstash.co:5044'] } as any,
+          proxy
+        );
+        expect(res).toEqual({
+          [fleetServerOutputId]: {
+            type: 'elasticsearch',
+            ssl: { certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+        });
+      });
+
+      it('should not add the CA of the proxy twice if the proxy has none', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+          baseOutput as any,
+          { ...proxy, certificate_authorities: undefined }
+        );
+        expect(res?.[fleetServerOutputId].ssl).toEqual({
+          certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+        });
+      });
+    });
+
+    it('should only contain the ES ssl fields if the base output is not an elasticsearch output', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },
+        { type: 'logstash', hosts: ['logstash.co:5044'] } as any
+      );
+      expect(res).toEqual({
+        [fleetServerOutputId]: { type: 'elasticsearch', ssl: { certificate: 'my-es-cert' } },
+      });
     });
   });
 });
