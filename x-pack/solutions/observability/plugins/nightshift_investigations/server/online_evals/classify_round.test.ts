@@ -16,6 +16,11 @@ const setHypotheses = (hypotheses: Array<{ candidate: string; status: string }>)
   params: { hypotheses: hypotheses.map((hypothesis) => ({ confidence: 0.8, ...hypothesis })) },
 });
 
+const failedSetHypotheses = (hypotheses: Array<{ candidate: string; status: string }>) => ({
+  ...setHypotheses(hypotheses),
+  results: [{ type: 'error', data: { message: 'Failed to store hypotheses' } }],
+});
+
 const round = (
   id: string,
   startedAt: string,
@@ -130,6 +135,36 @@ describe('classifyInvestigationRun', () => {
           setHypotheses([{ candidate: 'Bad deploy of payments', status: 'confirmed' }]),
         ])
       ).toEqual(expect.objectContaining({ rootCauseChanged: false }));
+    });
+
+    it('ignores a failed hypotheses call in the round, since it stored nothing', () => {
+      expect(
+        classifyFollowUp([
+          setHypotheses([{ candidate: 'Expired TLS certificate', status: 'confirmed' }]),
+          failedSetHypotheses([{ candidate: 'Bad deploy of payments', status: 'confirmed' }]),
+        ])
+      ).toEqual(expect.objectContaining({ rootCauseChanged: true }));
+    });
+
+    it('treats a round whose only hypotheses call failed as no new root cause', () => {
+      expect(
+        classifyFollowUp([
+          failedSetHypotheses([{ candidate: 'Expired TLS certificate', status: 'confirmed' }]),
+        ])
+      ).toEqual(expect.objectContaining({ rootCauseChanged: false }));
+    });
+
+    it('compares against the last stored hypotheses, skipping an earlier failed call', () => {
+      const failed = round('round-2', BEFORE_RUN, [
+        failedSetHypotheses([{ candidate: 'Expired TLS certificate', status: 'confirmed' }]),
+      ]);
+
+      expect(
+        classifyFollowUp(
+          [setHypotheses([{ candidate: 'Expired TLS certificate', status: 'confirmed' }])],
+          [initial, failed]
+        )
+      ).toEqual(expect.objectContaining({ rootCauseChanged: true }));
     });
 
     it('compares against the last round that recorded hypotheses, skipping rounds that did not', () => {

@@ -7,7 +7,7 @@
 
 import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
 import { ALERT_RECOVERED_FOLLOW_UP } from '../client/investigations_client';
-import type { RawRoundStep } from '../investigation_round/round_loader';
+import { extractResultSummary, type RawRoundStep } from '../investigation_round/round_loader';
 
 export type OnlineEvalsRoundKind = 'initial' | 'follow_up' | 'alert_recovery';
 
@@ -33,13 +33,19 @@ const normalizeCandidate = (candidate: string): string =>
   candidate.replace(/\s+/g, ' ').trim().toLowerCase();
 
 /**
- * Root causes the round's last `set_hypotheses` call confirmed, or `undefined` when the round
- * didn't call it. Each call replaces the whole list, so only the last one counts.
+ * Root causes the round's last successful `set_hypotheses` call confirmed, or `undefined` when the
+ * round recorded none. Each call replaces the whole list, so only the last one counts. A failed
+ * call stored nothing, so it's skipped.
  */
 const getConfirmedRootCauses = (round: ClassifiableRound): Set<string> | undefined => {
   const lastCall = [...round.steps]
     .reverse()
-    .find(({ type, tool_id: toolId }) => type === 'tool_call' && toolId === SET_HYPOTHESES_TOOL_ID);
+    .find(
+      ({ type, tool_id: toolId, results }) =>
+        type === 'tool_call' &&
+        toolId === SET_HYPOTHESES_TOOL_ID &&
+        !extractResultSummary(results).isError
+    );
   if (!lastCall) {
     return undefined;
   }
