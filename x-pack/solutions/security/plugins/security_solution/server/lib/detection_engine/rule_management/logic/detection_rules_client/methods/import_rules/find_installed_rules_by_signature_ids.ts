@@ -11,6 +11,7 @@ import type {
   RuleResponse,
   RuleSignatureId,
 } from '../../../../../../../../common/api/detection_engine';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import { internalRuleToAPIResponse } from '../../converters/internal_rule_to_api_response';
 import { findRules } from '../../../search/find_rules';
 
@@ -31,27 +32,28 @@ export const findInstalledRulesBySignatureIds = async ({
 }: {
   rulesClient: RulesClient;
   ruleIds: RuleSignatureId[];
-}): Promise<Record<string, RuleResponse>> => {
-  if (ruleIds.length === 0) return {};
+}): Promise<Record<string, RuleResponse>> =>
+  withSecuritySpan('findInstalledRulesBySignatureIds', async () => {
+    if (ruleIds.length === 0) return {};
 
-  const filter = `alert.attributes.params.ruleId: (${ruleIds
-    .map((id) => `"${escapeQuotes(id)}"`)
-    .join(' OR ')})`;
+    const filter = `alert.attributes.params.ruleId: (${ruleIds
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' OR ')})`;
 
-  const { data } = await findRules({
-    rulesClient,
-    filter,
-    page: 1,
-    perPage: ruleIds.length,
-    fields: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
+    const { data } = await findRules({
+      rulesClient,
+      filter,
+      page: 1,
+      perPage: ruleIds.length,
+      fields: undefined,
+      sortField: undefined,
+      sortOrder: undefined,
+    });
+
+    const installedRulesById: Record<string, RuleResponse> = {};
+    for (const rule of data) {
+      const response = internalRuleToAPIResponse(rule);
+      installedRulesById[response.rule_id] = response;
+    }
+    return installedRulesById;
   });
-
-  const installedRulesById: Record<string, RuleResponse> = {};
-  for (const rule of data) {
-    const response = internalRuleToAPIResponse(rule);
-    installedRulesById[response.rule_id] = response;
-  }
-  return installedRulesById;
-};

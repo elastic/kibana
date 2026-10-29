@@ -11,6 +11,7 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsBulkDeleteResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
@@ -66,10 +67,18 @@ export const deleteExceptionListItemByList = async ({
   listId,
   savedObjectsClient,
   namespaceType,
-}: DeleteExceptionListItemByListOptions): Promise<void> => {
-  const ids = await getExceptionListItemIds({ listId, namespaceType, savedObjectsClient });
-  await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
-};
+}: DeleteExceptionListItemByListOptions): Promise<void> =>
+  withSpan(
+    {
+      labels: { listId, namespaceType },
+      name: 'deleteExceptionListItemByList',
+      type: 'lists',
+    },
+    async () => {
+      const ids = await getExceptionListItemIds({ listId, namespaceType, savedObjectsClient });
+      await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+    }
+  );
 
 /**
  * Deletes all exception list items belonging to a single list, one page

@@ -37,71 +37,60 @@ export const importExceptionLists = async ({
   listsChunks: ImportExceptionListSchemaDecoded[][];
   savedObjectsClient: SavedObjectsClientContract;
   user: string;
-}): Promise<ImportDataResponse> => {
-  let importExceptionListsResponse: ImportResponse[] = [];
+}): Promise<ImportDataResponse> =>
+  withSpan({ name: 'importExceptionLists', type: 'lists' }, async () => {
+    let importExceptionListsResponse: ImportResponse[] = [];
 
-  for await (const listChunk of listsChunks) {
-    // sort by namespaceType
-    const [agnosticLists, nonAgnosticLists] = sortListsImportsByNamespace(listChunk);
+    for await (const listChunk of listsChunks) {
+      // sort by namespaceType
+      const [agnosticLists, nonAgnosticLists] = sortListsImportsByNamespace(listChunk);
 
-    // Gather lists referenced by items
-    // Dictionary of found lists
-    const foundLists = await getAllListTypes(
-      agnosticLists.map((list) => ({ listId: list.list_id, namespaceType: list.namespace_type })),
-      nonAgnosticLists.map((list) => ({
-        listId: list.list_id,
-        namespaceType: list.namespace_type,
-      })),
-      savedObjectsClient
-    );
+      // Gather lists referenced by items
+      // Dictionary of found lists
+      const foundLists = await getAllListTypes(
+        agnosticLists.map((list) => ({ listId: list.list_id, namespaceType: list.namespace_type })),
+        nonAgnosticLists.map((list) => ({
+          listId: list.list_id,
+          namespaceType: list.namespace_type,
+        })),
+        savedObjectsClient
+      );
 
-    // Figure out what lists to bulk create/update
-    const { errors, listItemsToDelete, listsToCreate, listsToUpdate } =
-      sortExceptionListsToUpdateOrCreate({
-        existingLists: foundLists,
-        generateNewListId,
-        isOverwrite,
-        lists: listChunk,
-        user,
+      // Figure out what lists to bulk create/update
+      const { errors, listItemsToDelete, listsToCreate, listsToUpdate } =
+        sortExceptionListsToUpdateOrCreate({
+          existingLists: foundLists,
+          generateNewListId,
+          isOverwrite,
+          lists: listChunk,
+          user,
+        });
+
+      // lists to bulk create/update
+      const bulkCreateResponse = await bulkCreateImportedLists({
+        listsToCreate,
+        savedObjectsClient,
+      });
+      // lists that are to be updated where overwrite is true, need to have
+      // existing items removed. By selecting to overwrite, user selects to
+      // overwrite entire list + items
+      await deleteListItemsToBeOverwritten({
+        listsOfItemsToDelete: listItemsToDelete,
+        savedObjectsClient,
       });
 
-    // lists to bulk create/update
-    const bulkCreateResponse = await withSpan(
-      { name: 'importExceptionLists.bulkCreateImportedLists', type: 'lists' },
-      () =>
-        bulkCreateImportedLists({
-          listsToCreate,
-          savedObjectsClient,
-        })
-    );
-    await withSpan(
-      { name: 'importExceptionLists.deleteListItemsToBeOverwritten', type: 'lists' },
-      () =>
-        // lists that are to be updated where overwrite is true, need to have
-        // existing items removed. By selecting to overwrite, user selects to
-        // overwrite entire list + items
-        deleteListItemsToBeOverwritten({
-          listsOfItemsToDelete: listItemsToDelete,
-          savedObjectsClient,
-        })
-    );
+      const bulkUpdateResponse = await bulkUpdateImportedLists({
+        listsToUpdate,
+        savedObjectsClient,
+      });
 
-    const bulkUpdateResponse = await withSpan(
-      { name: 'importExceptionLists.bulkUpdateImportedLists', type: 'lists' },
-      () =>
-        bulkUpdateImportedLists({
-          listsToUpdate,
-          savedObjectsClient,
-        })
-    );
+      importExceptionListsResponse = [
+        ...importExceptionListsResponse,
+        ...bulkCreateResponse,
+        ...bulkUpdateResponse,
+        ...errors,
+      ];
+    }
 
-    importExceptionListsResponse = [
-      ...importExceptionListsResponse,
-      ...bulkCreateResponse,
-      ...bulkUpdateResponse,
-      ...errors,
-    ];
-  }
-
-  return sortImportResponses(importExceptionListsResponse);
-};
+    return sortImportResponses(importExceptionListsResponse);
+  });

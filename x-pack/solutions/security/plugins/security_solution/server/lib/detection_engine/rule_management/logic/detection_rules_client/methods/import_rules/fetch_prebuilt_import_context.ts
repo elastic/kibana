@@ -8,6 +8,7 @@
 import type { RuleToImport } from '../../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 
 export interface PrebuiltImportContext {
   /** Prebuilt asset for the imported `(rule_id, version)`. */
@@ -22,27 +23,28 @@ export const fetchPrebuiltImportContext = async ({
 }: {
   rules: RuleToImport[];
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
-}): Promise<PrebuiltImportContext> => {
-  const ruleIds = rules.map((r) => r.rule_id);
-  const ruleVersions = rules.flatMap((r) =>
-    r.version == null ? [] : [{ rule_id: r.rule_id, version: r.version }]
-  );
+}): Promise<PrebuiltImportContext> =>
+  withSecuritySpan('fetchPrebuiltImportContext', async () => {
+    const ruleIds = rules.map((r) => r.rule_id);
+    const ruleVersions = rules.flatMap((r) =>
+      r.version == null ? [] : [{ rule_id: r.rule_id, version: r.version }]
+    );
 
-  const [latestAssets, deprecatedAssets, matchingAssets] = await Promise.all([
-    ruleAssetsClient.fetchLatestVersions({ ruleIds }),
-    ruleAssetsClient.fetchDeprecatedRules(ruleIds),
-    ruleAssetsClient.fetchAssetsByVersion(ruleVersions).then((r) => r.assets),
-  ]);
+    const [latestAssets, deprecatedAssets, matchingAssets] = await Promise.all([
+      ruleAssetsClient.fetchLatestVersions({ ruleIds }),
+      ruleAssetsClient.fetchDeprecatedRules(ruleIds),
+      ruleAssetsClient.fetchAssetsByVersion(ruleVersions).then((r) => r.assets),
+    ]);
 
-  const matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset> = {};
-  for (const asset of matchingAssets) {
-    matchingAssetsByRuleId[asset.rule_id] = asset;
-  }
+    const matchingAssetsByRuleId: Record<string, PrebuiltRuleAsset> = {};
+    for (const asset of matchingAssets) {
+      matchingAssetsByRuleId[asset.rule_id] = asset;
+    }
 
-  const availableRuleAssetIds = new Set<string>([
-    ...latestAssets.map((s) => s.rule_id),
-    ...deprecatedAssets.map((s) => s.rule_id),
-  ]);
+    const availableRuleAssetIds = new Set<string>([
+      ...latestAssets.map((s) => s.rule_id),
+      ...deprecatedAssets.map((s) => s.rule_id),
+    ]);
 
-  return { matchingAssetsByRuleId, availableRuleAssetIds };
-};
+    return { matchingAssetsByRuleId, availableRuleAssetIds };
+  });

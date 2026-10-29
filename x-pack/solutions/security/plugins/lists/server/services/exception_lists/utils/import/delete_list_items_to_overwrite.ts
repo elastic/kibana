@@ -24,20 +24,13 @@ export const deleteListItemsToBeOverwritten = async ({
 }: {
   listsOfItemsToDelete: Array<[string, NamespaceType]>;
   savedObjectsClient: SavedObjectsClientContract;
-}): Promise<void> => {
-  for await (const list of listsOfItemsToDelete) {
-    await withSpan(
-      {
-        labels: { listId: list[0], namespaceType: list[1] },
-        name: 'exceptionItems.deleteForOverwrite.list',
-        type: 'lists',
-      },
-      () =>
-        deleteExceptionListItemByList({
-          listId: list[0],
-          namespaceType: list[1],
-          savedObjectsClient,
-        })
-    );
-  }
-};
+}): Promise<void> =>
+  withSpan({ name: 'deleteListItemsToBeOverwritten', type: 'lists' }, async () => {
+    for await (const list of listsOfItemsToDelete) {
+      await deleteExceptionListItemByList({
+        listId: list[0],
+        namespaceType: list[1],
+        savedObjectsClient,
+      });
+    }
+  });

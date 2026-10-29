@@ -11,7 +11,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleToImport } from '../../../../../../../../common/api/detection_engine';
 import type { MlAuthz } from '../../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { withSecuritySpan } from '../../../../../../../utils/with_security_span';
 import { createRuleImportErrorObject } from './errors';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 import { fetchPrebuiltImportContext } from './fetch_prebuilt_import_context';
@@ -58,39 +57,25 @@ export async function importRules({
 
   try {
     // Step 1: Fetch data
-    const [existingExceptionLists, prebuiltContext, existingRules] = await withSecuritySpan(
-      'importRules.fetchImportContext',
-      () =>
-        Promise.all([
-          withSecuritySpan('importRules.fetchImportContext.getReferencedExceptionLists', () =>
-            getReferencedExceptionLists({ rules, savedObjectsClient })
-          ),
-          withSecuritySpan('importRules.fetchImportContext.fetchPrebuiltImportContext', () =>
-            fetchPrebuiltImportContext({ rules, ruleAssetsClient: prebuiltRuleAssetClient })
-          ),
-          withSecuritySpan('importRules.fetchImportContext.findInstalledRulesBySignatureIds', () =>
-            findInstalledRulesBySignatureIds({
-              rulesClient,
-              ruleIds: rules.map((r) => r.rule_id),
-            })
-          ),
-        ])
-    );
+    const [existingExceptionLists, prebuiltContext, existingRules] = await Promise.all([
+      getReferencedExceptionLists({ rules, savedObjectsClient }),
+      fetchPrebuiltImportContext({ rules, ruleAssetsClient: prebuiltRuleAssetClient }),
+      findInstalledRulesBySignatureIds({
+        rulesClient,
+        ruleIds: rules.map((r) => r.rule_id),
+      }),
+    ]);
 
     // Step 2: Validate
-    const { importableRules, errors: validationErrors } = await withSecuritySpan(
-      'importRules.validateRulesToImport',
-      () =>
-        validateRulesToImport({
-          rules,
-          existingRules,
-          existingExceptionLists,
-          deps: {
-            mlAuthz,
-            prebuiltContext,
-          },
-        })
-    );
+    const { importableRules, errors: validationErrors } = await validateRulesToImport({
+      rules,
+      existingRules,
+      existingExceptionLists,
+      deps: {
+        mlAuthz,
+        prebuiltContext,
+      },
+    });
     errors.push(...validationErrors);
 
     if (importableRules.length > 0) {

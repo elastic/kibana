@@ -13,6 +13,7 @@ import type {
   ImportExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import type { RuleFromImportStream } from './utils';
 
@@ -32,8 +33,9 @@ export const createPromiseFromRuleImportStream = ({
 }: {
   objectLimit: number;
   stream: Readable;
-}): Promise<RuleImportStreamResult[]> => {
-  const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
+}): Promise<RuleImportStreamResult[]> =>
+  withSecuritySpan('createPromiseFromRuleImportStream', async () => {
+    const readAllStream = createRulesAndExceptionsStreamFromNdJson(objectLimit);
 
-  return createPromiseFromStreams<RuleImportStreamResult[]>([stream, ...readAllStream]);
-};
+    return createPromiseFromStreams<RuleImportStreamResult[]>([stream, ...readAllStream]);
+  });
