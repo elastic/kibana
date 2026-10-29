@@ -315,7 +315,7 @@ describe('Inference Settings API', () => {
                 endpoints: [
                   {
                     id: 'openai-gpt-5.4',
-                    parameters: { reasoning: { effort: 'high' }, temperature: 0.2 },
+                    parameters: { reasoning: { effort: 'high' } },
                   },
                 ],
               },
@@ -331,19 +331,6 @@ describe('Inference Settings API', () => {
               {
                 feature_id: 'agent_builder',
                 endpoints: [{ id: 'openai-gpt-5.4', parameters: { reasoning: { effort: 'max' } } }],
-              },
-            ],
-          },
-        });
-      });
-
-      it('should reject a temperature out of range', () => {
-        mockRouter.shouldThrow({
-          body: {
-            features: [
-              {
-                feature_id: 'agent_builder',
-                endpoints: [{ id: 'openai-gpt-5.4', parameters: { temperature: 3 } }],
               },
             ],
           },

@@ -53,10 +53,10 @@ describe('inference settings saved object type', () => {
       ).not.toThrow();
     });
 
-    it('accepts an endpoint with reasoning effort and temperature', () => {
+    it('accepts an endpoint with reasoning effort', () => {
       const attributes = withEndpoint({
         id: 'openai-gpt-5.4',
-        parameters: { reasoning: { effort: 'high' }, temperature: 0.2 },
+        parameters: { reasoning: { effort: 'high' } },
       });
 
       expect(inferenceSettingsSchemaV2.validate(attributes)).toEqual(attributes);
@@ -74,22 +74,6 @@ describe('inference settings saved object type', () => {
       expect(() =>
         inferenceSettingsSchemaV2.validate(
           withEndpoint({ id: 'openai-gpt-5.4', parameters: { reasoning: { effort: 'max' } } })
-        )
-      ).toThrow();
-    });
-
-    it('rejects a temperature above 2', () => {
-      expect(() =>
-        inferenceSettingsSchemaV2.validate(
-          withEndpoint({ id: 'openai-gpt-5.4', parameters: { temperature: 3 } })
-        )
-      ).toThrow();
-    });
-
-    it('rejects a negative temperature', () => {
-      expect(() =>
-        inferenceSettingsSchemaV2.validate(
-          withEndpoint({ id: 'openai-gpt-5.4', parameters: { temperature: -1 } })
         )
       ).toThrow();
     });

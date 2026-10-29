@@ -70,7 +70,7 @@ export const SAMPLE_FEATURES = {
     endpoints: [
       {
         id: '.endpoint-a',
-        parameters: { reasoning: { effort: 'high' }, temperature: 0.2 },
+        parameters: { reasoning: { effort: 'high' } },
       },
     ],
   },

@@ -30,7 +30,6 @@ export const inferenceSettingsSchemaV2 = schema.object({
                   ),
                 })
               ),
-              temperature: schema.maybe(schema.number({ min: 0, max: 2 })),
             })
           ),
         }),

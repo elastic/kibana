@@ -169,7 +169,7 @@ describe('useModelSettingsForm', () => {
               endpoints: [
                 {
                   id: 'endpoint-a',
-                  parameters: { reasoning: { effort: 'high' }, temperature: 0.5 },
+                  parameters: { reasoning: { effort: 'high' } },
                 },
                 { id: 'endpoint-b' },
               ],
@@ -196,7 +196,7 @@ describe('useModelSettingsForm', () => {
           {
             feature_id: 'child_1',
             endpoints: [
-              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' }, temperature: 0.5 } },
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
               { id: 'endpoint-b' },
             ],
           },
@@ -222,7 +222,7 @@ describe('useModelSettingsForm', () => {
             feature_id: 'child_1',
             endpoints: [
               { id: 'endpoint-b' },
-              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' }, temperature: 0.5 } },
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'high' } } },
               { id: 'ep-new' },
             ],
           },

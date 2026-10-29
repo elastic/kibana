@@ -253,25 +253,5 @@ describe('Inference Settings utils', () => {
         validateEndpointParameters(withEffort('openai-gpt-5.4', 'high'), getConnectorById, logger)
       ).rejects.toThrow('Elasticsearch unavailable');
     });
-
-    it('does not check a stored temperature against the connector', async () => {
-      const getConnectorById = jest.fn();
-
-      await expect(
-        validateEndpointParameters(
-          {
-            features: [
-              {
-                feature_id: 'agent_builder',
-                endpoints: [{ id: 'a' }, { id: 'b', parameters: { temperature: 0.2 } }],
-              },
-            ],
-          },
-          getConnectorById,
-          logger
-        )
-      ).resolves.toEqual([]);
-      expect(getConnectorById).not.toHaveBeenCalled();
-    });
   });
 });

@@ -43,7 +43,6 @@ export interface InferenceEndpointSetting {
   id: string;
   parameters?: {
     reasoning?: Pick<ChatCompletionReasoning, 'effort'>;
-    temperature?: number;
   };
 }
 

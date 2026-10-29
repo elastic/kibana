@@ -588,7 +588,7 @@ describe('getForFeature', () => {
     });
 
     it('returns the stored parent SO override parameters for a child', async () => {
-      const storedParameters = { reasoning: { effort: 'high' as const }, temperature: 0.2 };
+      const storedParameters = { reasoning: { effort: 'high' as const } };
       registry.register(createValidFeature({ featureId: 'parent' }));
       registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
       const result = await getForFeature(
