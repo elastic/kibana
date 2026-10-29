@@ -8,7 +8,6 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
-  significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   severitySchema,
   MAX_ID_LENGTH,
@@ -19,7 +18,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
@@ -457,18 +456,20 @@ const eventsUpdateRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: z.object({
-      status: z.literal('active', {
-        error:
-          'status must be "active". To mark a significant event inactive, use the deactivate action.',
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
       }),
-      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    }),
-  }),
+      body: z.object({
+        status: z.literal('active', {
+          error:
+            'status must be "active". To mark a significant event inactive, use the deactivate action.',
+        }),
+        assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
