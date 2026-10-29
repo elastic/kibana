@@ -172,6 +172,7 @@ export { isInvestigationSeverity } from './investigations/severity';
 export { isInvestigationTitlePending } from './investigations/title';
 export {
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
   MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
   investigationRunFailedEventSchema,
 } from './investigations/run_failure';

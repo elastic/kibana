@@ -208,7 +208,7 @@ export class NotificationRoutingClient {
 
   async selectTerminalPhase(
     executionId: string,
-    phase: 'completed' | 'failed'
+    phase: 'completed' | 'failed' | 'timed_out'
   ): Promise<NotificationRouting> {
     return this.write((current) => {
       const execution = current.executions.find(({ id }) => id === executionId);
@@ -225,6 +225,23 @@ export class NotificationRoutingClient {
         ),
       };
     });
+  }
+
+  /** Claims terminal lifecycle emission once, independently of Slack delivery receipts. */
+  async claimTerminalLifecycle(
+    executionId: string,
+    phase: Exclude<NotificationPhase, 'started'>,
+    claimId: string
+  ): Promise<boolean> {
+    const routing = await this.write((current) => ({
+      ...current,
+      executions: current.executions.map((entry) =>
+        entry.id === executionId && entry.terminal_phase === phase && !entry.lifecycle_claim_id
+          ? { ...entry, lifecycle_claim_id: claimId }
+          : entry
+      ),
+    }));
+    return routing.executions.find(({ id }) => id === executionId)?.lifecycle_claim_id === claimId;
   }
 
   async claim(

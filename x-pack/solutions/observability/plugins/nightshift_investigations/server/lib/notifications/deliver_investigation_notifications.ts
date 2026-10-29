@@ -105,7 +105,14 @@ export const getStartedMessageTs = (
   routing: NotificationRouting,
   executionId: string,
   destination: NotificationDestination
-): string | undefined => getSentMessageTs(routing, executionId, destination, 'started');
+): string | undefined =>
+  routing.attempts.find(
+    (attempt) =>
+      attempt.execution_id === executionId &&
+      attempt.destination_id === destination.id &&
+      attempt.phase === 'started' &&
+      attempt.status === 'sent'
+  )?.message_ts;
 
 const prepareDestinationDelivery = (
   {
@@ -124,7 +131,8 @@ const prepareDestinationDelivery = (
     destination.thread?.thread_ts ||
     (typeof explicitParent === 'string' && explicitParent) ||
     undefined;
-  const createsRoot = (phase === 'started' || phase === 'failed') && !threadTs;
+  const createsRoot =
+    (phase === 'started' || phase === 'failed' || phase === 'timed_out') && !threadTs;
   const uncertainRoot =
     !threadTs &&
     routing.attempts.some(
@@ -296,7 +304,7 @@ const deliverToDestination = async (
  * Delivers one lifecycle phase for an investigation workflow execution and returns its persisted
  * sent, failed, and unconfirmed counts, including attempts encountered on replay.
  *
- * Started and failed phases initialize the execution's participants without changing an existing
+ * Started and unsuccessful phases initialize the execution's participants without changing an existing
  * snapshot; terminal phases select one outcome before posting or emitting lifecycle events.
  *
  * Resolves Actions once, then reads current routing for each destination, skips existing attempts,
@@ -326,10 +334,15 @@ export const deliverInvestigationNotifications = async (
   if (signal.aborted || !(await routingClient.isActive())) {
     return countAttempts(existingRouting, executionId, phase);
   }
-  if (!existingRouting && notificationDestinations.length === 0 && phase !== 'failed') {
+  if (
+    !existingRouting &&
+    notificationDestinations.length === 0 &&
+    phase !== 'failed' &&
+    phase !== 'timed_out'
+  ) {
     return countAttempts(existingRouting, executionId, phase);
   }
-  if (phase === 'failed') {
+  if (phase === 'failed' || phase === 'timed_out') {
     await routingClient.initialize(executionId, workflowId, notificationDestinations);
   }
   const routing =
@@ -343,8 +356,13 @@ export const deliverInvestigationNotifications = async (
   if (phase !== 'started' && execution.terminal_phase !== phase) {
     return countAttempts(routing, executionId, phase);
   }
-  if (phase !== 'started' && !signal.aborted) {
-    await params.onTerminalPhaseSelected?.();
+  if (
+    phase !== 'started' &&
+    !signal.aborted &&
+    params.onTerminalPhaseSelected &&
+    (await routingClient.claimTerminalLifecycle(executionId, phase, randomUUID()))
+  ) {
+    await params.onTerminalPhaseSelected();
   }
   const hasEligibleDestinations = execution.destination_ids.some(
     (id) => !hasDeliveryAttempt(routing, executionId, id, phase)

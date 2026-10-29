@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { types } from '@kbn/storage-adapter';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { defineInvestigationAttachment } from '@kbn/agentic-investigations-plugin/server';
 import { investigationNotificationDestinationSchema } from '../../../common';
 
 export const NOTIFICATION_ROUTING_ATTACHMENT_TYPE = 'nightshift.notification_routing';
-export const notificationPhaseSchema = z.enum(['started', 'completed', 'failed']);
+export const notificationPhaseSchema = lazySchema(() =>
+  z.enum(['started', 'completed', 'failed', 'timed_out'])
+);
 const identifier = z.string().min(1).max(500);
 const messageId = z.string().min(1).max(100);
 const timestamp = z.string().min(1).max(64);
@@ -31,35 +33,38 @@ export const notificationAttemptSchema = z.strictObject({
   error: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 
-export const notificationRoutingSchema = z.strictObject({
-  id: identifier,
-  spaceId: identifier,
-  conversationId: identifier,
-  investigationId: identifier,
-  destinations: z.array(
-    investigationNotificationDestinationSchema
-      .omit({ automation_id: true, automation_name: true })
-      .extend({
+export const notificationRoutingSchema = lazySchema(() =>
+  z.strictObject({
+    id: identifier,
+    spaceId: identifier,
+    conversationId: identifier,
+    investigationId: identifier,
+    destinations: z.array(
+      investigationNotificationDestinationSchema
+        .omit({ automation_id: true, automation_name: true })
+        .extend({
+          id: identifier,
+          automations: z.array(
+            z.strictObject({
+              id: z.string().max(500).optional(),
+              name: z.string().max(500).optional(),
+            })
+          ),
+          thread: z.strictObject({ channel: identifier, thread_ts: messageId }).optional(),
+        })
+    ),
+    executions: z.array(
+      z.strictObject({
         id: identifier,
-        automations: z.array(
-          z.strictObject({
-            id: z.string().max(500).optional(),
-            name: z.string().max(500).optional(),
-          })
-        ),
-        thread: z.strictObject({ channel: identifier, thread_ts: messageId }).optional(),
+        workflow_id: identifier,
+        destination_ids: z.array(identifier),
+        terminal_phase: z.enum(['completed', 'failed', 'timed_out']).optional(),
+        lifecycle_claim_id: z.string().max(100).optional(),
       })
-  ),
-  executions: z.array(
-    z.strictObject({
-      id: identifier,
-      workflow_id: identifier,
-      destination_ids: z.array(identifier),
-      terminal_phase: z.enum(['completed', 'failed']).optional(),
-    })
-  ),
-  attempts: z.array(notificationAttemptSchema),
-});
+    ),
+    attempts: z.array(notificationAttemptSchema),
+  })
+);
 
 export type NotificationPhase = z.infer<typeof notificationPhaseSchema>;
 export type NotificationAttempt = z.infer<typeof notificationAttemptSchema>;
