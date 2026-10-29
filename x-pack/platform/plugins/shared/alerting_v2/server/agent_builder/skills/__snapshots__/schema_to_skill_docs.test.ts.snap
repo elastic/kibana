@@ -127,7 +127,7 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
 {
   \\"type\\": \\"object\\",
   \\"title\\": \\"Alerting v2 notification group\\",
-  \\"description\\": \\"Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alerts.\\",
+  \\"description\\": \\"Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alerts. A test notification sent from an action policy has the same shape, with synthetic alerts and placeholder rules, and runs as a workflow test run: \`execution.isTestRun\` is \`true\`.\\",
   \\"properties\\": {
     \\"id\\": {
       \\"type\\": \\"string\\",
@@ -256,6 +256,16 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
 - Alert iteration: \`{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}\`
 - Rule metadata: \`{{ inputs.payload.rules[alert.rule_id].name }}\`
 - Alert details link: \`{{ alert.alert_url }}\` (absolute URL; include it in every notification)
+
+### Test notifications (\`execution.isTestRun\`)
+
+\\"Send test notification\\" on an action policy runs its destination workflows as workflow
+test runs, with a payload of the same shape built from synthetic alerts and placeholder rules.
+Ids are prefixed with \`test-\`, and \`alert.alert_url\` points to an alert that does not exist.
+
+- Detect a test with \`{{ execution.isTestRun }}\` (\`true\` for test runs, \`false\` otherwise).
+- Guard steps that act on alerts or page people, for example
+  \`{% if execution.isTestRun %}[TEST] {% endif %}\` in a message, or an \`if\` step condition.
 
 ### \`data\` (dynamic query columns)
 

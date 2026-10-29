@@ -48,7 +48,7 @@ const alertingV2NotificationGroup: JsonSchema = {
   type: 'object',
   title: 'Alerting v2 notification group',
   description:
-    'Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alerts.',
+    'Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alerts. A test notification sent from an action policy has the same shape, with synthetic alerts and placeholder rules, and runs as a workflow test run: `execution.isTestRun` is `true`.',
   properties: {
     id: {
       type: 'string',
