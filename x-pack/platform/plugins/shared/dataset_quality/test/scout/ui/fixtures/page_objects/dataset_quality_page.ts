@@ -9,7 +9,12 @@ import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import rison from '@kbn/rison';
 
-import { DATA_QUALITY_APP_PATH, DATA_QUALITY_URL_STATE_KEY, TABLE_COLUMNS } from '../constants';
+import {
+  DATA_QUALITY_APP_PATH,
+  DATA_QUALITY_URL_STATE_KEY,
+  STATS_LOAD_TIMEOUT_MS,
+  TABLE_COLUMNS,
+} from '../constants';
 import { normalizeCellText, normalizeHeaderText, selectOptionByText } from './table_text';
 
 interface ListPageState {
@@ -38,8 +43,8 @@ export class DatasetQualityPage {
   readonly showInactiveDatasetsSwitch;
 
   constructor(private readonly page: ScoutPage) {
-    this.table = page.testSubj.locator('datasetQualityTable');
-    this.searchInput = page.testSubj.locator('datasetQualityFilterBarFieldSearch');
+    this.table = page.getByTestId('datasetQualityTable');
+    this.searchInput = page.getByTestId('datasetQualityFilterBarFieldSearch');
     // EUI renders `noItemsMessage` both in the visible empty row and in the table's
     // screen-reader-only <caption>, so the prompt's test subject matches twice. Scope to
     // the row: it is the copy a user sees, and the caption copy is a 1px offscreen element
@@ -47,7 +52,7 @@ export class DatasetQualityPage {
     this.noDataEmptyState = this.table.locator(
       'tbody [data-test-subj="datasetQualityTableNoData"]'
     );
-    this.noPrivilegesEmptyState = page.testSubj.locator('datasetQualityNoPrivilegesEmptyState');
+    this.noPrivilegesEmptyState = page.getByTestId('datasetQualityNoPrivilegesEmptyState');
     // These switches expose no dedicated test subject, so they are matched by the
     // accessible name EUI renders from their aria-label.
     this.showFullDatasetNamesSwitch = page.getByRole('switch', {
@@ -78,10 +83,10 @@ export class DatasetQualityPage {
   async waitUntilPrivilegesResolved(): Promise<void> {
     // Same budget as the table's stats wait: a privilege-scoped user on a busy cluster can
     // take longer than the 10s default to get through the two privilege-bearing requests.
-    await expect(this.page.testSubj.locator('datasetQualityPage')).toHaveAttribute(
+    await expect(this.page.getByTestId('datasetQualityPage')).toHaveAttribute(
       'data-privileges-resolved',
       'true',
-      { timeout: 30_000 }
+      { timeout: STATS_LOAD_TIMEOUT_MS }
     );
   }
 
@@ -97,8 +102,10 @@ export class DatasetQualityPage {
     // privilege-scoped user on a busy cluster can take longer than the default 10s.
     await this.page
       .locator('.euiBasicTable-loading')
-      .waitFor({ state: 'detached', timeout: 30_000 });
+      .waitFor({ state: 'detached', timeout: STATS_LOAD_TIMEOUT_MS });
     await expect(this.table.locator('.euiSkeletonRectangle')).toHaveCount(0);
+    // A failed stats request unmounts the table, which the two checks above would miss.
+    await expect(this.table).toBeVisible();
   }
 
   /**
@@ -147,19 +154,17 @@ export class DatasetQualityPage {
   async getEstimatedDataKpi(): Promise<string> {
     await this.waitUntilSummaryPanelLoaded();
     return (
-      await this.page.testSubj.locator('datasetQualityDatasetHealthKpi-Estimated Data').innerText()
+      await this.page.getByTestId('datasetQualityDatasetHealthKpi-Estimated Data').innerText()
     ).trim();
   }
 
   async getTableHeaderTexts(): Promise<string[]> {
     await this.waitUntilTableLoaded();
-    return (await this.table.locator('thead th, thead td').allInnerTexts()).map(
-      normalizeHeaderText
-    );
+    return (await this.table.getByRole('columnheader').allInnerTexts()).map(normalizeHeaderText);
   }
 
   getRows() {
-    return this.table.locator('tbody tr');
+    return this.table.getByTestId('datasetQualityTableRow');
   }
 
   /**
@@ -173,7 +178,7 @@ export class DatasetQualityPage {
 
     return Promise.all(
       rows.map(async (row) => {
-        const cells = await row.locator('td').allInnerTexts();
+        const cells = await row.getByRole('cell').allInnerTexts();
         return headers.reduce<Record<string, string>>((record, header, index) => {
           record[header] = normalizeCellText(cells[index] ?? '');
           return record;
@@ -197,7 +202,7 @@ export class DatasetQualityPage {
    * than silently retrying.
    */
   async sortBy(column: string, direction: 'ascending' | 'descending'): Promise<void> {
-    const header = this.table.locator('thead th', { hasText: column });
+    const header = this.table.getByRole('columnheader').filter({ hasText: column });
 
     for (let click = 0; click < 2; click++) {
       if ((await header.getAttribute('aria-sort')) === direction) {
@@ -282,7 +287,7 @@ export class DatasetQualityPage {
   }
 
   getTypesFilter() {
-    return this.page.testSubj.locator('datasetQualityFilterTypeSelectableButton');
+    return this.page.getByTestId('datasetQualityFilterTypeSelectableButton');
   }
 
   getInsufficientPrivilegesBadge(dataset: string) {
@@ -309,8 +314,6 @@ export class DatasetQualityPage {
 
   /** Scoped to the row: each row also renders a details link that would otherwise match. */
   getOpenInDiscoverLink(dataset: string) {
-    return this.getRowByDataset(dataset).locator(
-      '[data-test-subj="datasetQualityLogsExplorerLinkLink"]'
-    );
+    return this.getRowByDataset(dataset).getByTestId('datasetQualityLogsExplorerLinkLink');
   }
 }

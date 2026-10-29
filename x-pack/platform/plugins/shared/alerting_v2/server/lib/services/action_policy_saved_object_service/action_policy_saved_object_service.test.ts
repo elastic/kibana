@@ -532,6 +532,36 @@ describe('ActionPolicySavedObjectService', () => {
       });
     });
 
+    it('scopes the PIT finder to the given space ids', async () => {
+      mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
+        async *find() {},
+        close: mockClose,
+      } as any);
+
+      await service.findAllDecrypted({
+        filter: { enabled: true },
+        spaceIds: ['default', 'space-a'],
+      });
+
+      expect(
+        mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith({
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        namespaces: ['default', 'space-a'],
+        perPage: 1000,
+        filter: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
+      });
+    });
+
+    it('returns no policies without opening a PIT finder when spaceIds is empty', async () => {
+      const result = await service.findAllDecrypted({ spaceIds: [] });
+
+      expect(result).toEqual([]);
+      expect(
+        mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser
+      ).not.toHaveBeenCalled();
+    });
+
     it('returns attributes and namespaces for successful documents', async () => {
       mockEncryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser.mockResolvedValue({
         async *find() {
