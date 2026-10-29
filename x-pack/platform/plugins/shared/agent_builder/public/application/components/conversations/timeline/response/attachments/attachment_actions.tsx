@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -55,33 +55,30 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     (buttons.length === 1 ? buttons[0] : undefined);
   const menuButtons = buttons.filter((button) => button !== mainButton);
 
-  const menu = useMemo(
-    () => (
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            items: menuButtons.map(
-              (button): EuiContextMenuPanelItemDescriptor => ({
-                name: button.label,
-                icon: button.icon,
-                disabled: button.disabled,
-                toolTipContent: button.disabled ? button.disabledReason : undefined,
-                href: button.href,
-                target: button.href && button.openInNewTab ? '_blank' : undefined,
-                rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-                onClick: () => {
-                  closePopover();
-                  button.handler();
-                },
-              })
-            ),
-          },
-        ]}
-      />
-    ),
-    [menuButtons, closePopover]
+  const menu = (
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={[
+        {
+          id: 0,
+          items: menuButtons.map(
+            (button): EuiContextMenuPanelItemDescriptor => ({
+              name: button.label,
+              icon: button.icon,
+              disabled: button.disabled,
+              toolTipContent: button.disabled ? button.disabledReason : undefined,
+              href: button.href,
+              target: button.href && button.openInNewTab ? '_blank' : undefined,
+              rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
+              onClick: () => {
+                closePopover();
+                button.handler();
+              },
+            })
+          ),
+        },
+      ]}
+    />
   );
 
   const popoverProps = {
