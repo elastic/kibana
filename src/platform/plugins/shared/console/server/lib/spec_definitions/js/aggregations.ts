@@ -620,6 +620,250 @@ const rules = {
       },
       fields: ['{field}'],
     },
+    weighted_avg: {
+      __template: {
+        value: { field: '' },
+        weight: { field: '' },
+      },
+      value: {
+        field: '{field}',
+        missing: 0,
+        script: {
+          // populated by a global rule
+        },
+      },
+      weight: {
+        field: '{field}',
+        missing: 0,
+        script: {
+          // populated by a global rule
+        },
+      },
+      format: '',
+    },
+    median_absolute_deviation: {
+      __template: { field: '' },
+      field: '{field}',
+      compression: 1000,
+      missing: 0,
+      script: {
+        // populated by a global rule
+      },
+    },
+    string_stats: {
+      __template: { field: '' },
+      field: '{field}',
+      show_distribution: { __one_of: [true, false] },
+      missing: '',
+      script: {
+        // populated by a global rule
+      },
+    },
+    rate: {
+      __template: {},
+      field: '{field}',
+      unit: {
+        __one_of: ['second', 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'],
+      },
+      mode: { __one_of: ['sum', 'value_count'] },
+      script: {
+        // populated by a global rule
+      },
+    },
+    top_metrics: {
+      __template: {
+        metrics: { field: '' },
+        sort: { field: 'desc' },
+      },
+      metrics: [{ field: '{field}' }],
+      sort: {
+        __scope_link: 'search.sort',
+      },
+      size: 1,
+    },
+    geo_centroid: {
+      __template: { field: '' },
+      field: '{field}',
+    },
+    geo_line: {
+      __template: {
+        point: { field: '' },
+        sort: { field: '' },
+      },
+      point: { field: '{field}' },
+      sort: { field: '{field}' },
+      include_sort: { __one_of: [true, false] },
+      sort_order: { __one_of: ['asc', 'desc'] },
+      size: 10000,
+    },
+    auto_date_histogram: {
+      __template: {
+        field: 'date',
+        buckets: 10,
+      },
+      field: '{field}',
+      buckets: 10,
+      format: 'yyyy-MM-dd',
+      time_zone: '00:00',
+      minimum_interval: {
+        __one_of: ['year', 'month', 'day', 'hour', 'minute', 'second'],
+      },
+      missing: '',
+    },
+    variable_width_histogram: {
+      __template: {
+        field: '',
+        buckets: 10,
+      },
+      field: '{field}',
+      buckets: 10,
+      shard_size: 100,
+      initial_buffer: 1000,
+    },
+    rare_terms: {
+      __template: { field: '' },
+      field: '{field}',
+      max_doc_count: 1,
+      precision: 0.001,
+      include: '.*',
+      exclude: '.*',
+      missing: '',
+    },
+    multi_terms: {
+      __template: {
+        terms: [{ field: '' }, { field: '' }],
+      },
+      terms: [{ field: '{field}', missing: '' }],
+      size: 10,
+      shard_size: 10,
+      min_doc_count: 1,
+      shard_min_doc_count: 1,
+      show_term_doc_count_error: { __one_of: [true, false] },
+      order: {
+        __template: {
+          _count: 'desc',
+        },
+        _key: { __one_of: ['asc', 'desc'] },
+        _count: { __one_of: ['asc', 'desc'] },
+        '*': { __one_of: ['asc', 'desc'] },
+      },
+      collect_mode: { __one_of: ['depth_first', 'breadth_first'] },
+    },
+    categorize_text: {
+      __template: { field: '' },
+      field: '{field}',
+      max_unique_tokens: 50,
+      max_matched_tokens: 5,
+      similarity_threshold: 50,
+      categorization_filters: [],
+      size: 10,
+      shard_size: 10,
+      min_doc_count: 1,
+      shard_min_doc_count: 1,
+    },
+    random_sampler: {
+      __template: { probability: 0.1 },
+      probability: 0.1,
+      seed: 0,
+      shard_seed: 0,
+    },
+    parent: {
+      __template: { type: '' },
+      type: '',
+    },
+    moving_percentiles: {
+      __template: {
+        buckets_path: '',
+        window: 10,
+      },
+      buckets_path: '',
+      window: 10,
+      shift: 0,
+      format: '',
+      gap_policy,
+    },
+    normalize: {
+      __template: {
+        buckets_path: '',
+        method: 'percent_of_sum',
+      },
+      buckets_path: '',
+      method: {
+        __one_of: ['rescale_0_1', 'rescale_0_100', 'percent_of_sum', 'mean', 'z-score', 'softmax'],
+      },
+      format: '',
+    },
+    bucket_count_ks_test: {
+      __template: {
+        buckets_path: '',
+      },
+      buckets_path: '',
+      alternative: {
+        __one_of: ['less', 'greater', 'two_sided'],
+      },
+      sampling_method: { __one_of: ['upper_tail', 'uniform', 'lower_tail'] },
+    },
+    bucket_correlation: {
+      __template: {
+        buckets_path: '',
+        function: {},
+      },
+      buckets_path: '',
+      function: {
+        count_correlation: {
+          indicator: {
+            expectations: [],
+            doc_count: 0,
+          },
+        },
+      },
+    },
+    cartesian_bounds: field_metric,
+    cartesian_centroid: field_metric,
+    line: {
+      __template: {
+        point: { field: '' },
+        sort: { field: '' },
+      },
+      point: { field: '{field}' },
+      sort: { field: '{field}' },
+      include_sort: { __one_of: [true, false] },
+      sort_order: { __one_of: ['asc', 'desc'] },
+      size: 10000,
+    },
+    time_series: {
+      __template: {},
+      size: 10000,
+      keyed: { __one_of: [true, false] },
+    },
+    frequent_item_sets: {
+      __template: {
+        fields: [{ field: '' }],
+      },
+      fields: [{ field: '{field}', include: '.*', exclude: '.*' }],
+      minimum_set_size: 1,
+      minimum_support: 0.1,
+      size: 10,
+      filter: { __scope_link: 'GLOBAL.query' },
+    },
+    change_point: {
+      __template: {
+        buckets_path: '',
+      },
+      buckets_path: '',
+      format: '',
+      gap_policy,
+    },
+    inference: {
+      __template: {
+        model_id: '',
+        buckets_path: {},
+      },
+      model_id: '',
+      buckets_path: {},
+      inference_config: {},
+      gap_policy,
+    },
   },
 };
 const { terms, histogram, date_histogram } = rules['*'];
