@@ -88,31 +88,39 @@ export class TimeToVisualizePageObject extends FtrService {
       });
     }
 
-    const hasSaveAsNew = await this.testSubjects.exists('saveAsNewCheckbox');
-    if (hasSaveAsNew && saveAsNew !== undefined) {
+    const hasSaveAsNew =
+      saveAsNew !== undefined && (await this.testSubjects.waitForExists('saveAsNewCheckbox'));
+    if (hasSaveAsNew) {
       const state = saveAsNew ? 'check' : 'uncheck';
       this.log.debug('save as new checkbox exists. Setting its state to', state);
       await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
     }
 
-    const hasDashboardSelector = await this.testSubjects.exists('add-to-dashboard-options');
-    if (hasDashboardSelector && addToDashboard !== undefined) {
+    const hasDashboardSelector =
+      addToDashboard !== undefined &&
+      (await this.testSubjects.waitForExists('add-to-dashboard-options'));
+    if (hasDashboardSelector) {
       let option: DashboardPickerOption = 'add-to-library-option';
       if (addToDashboard) {
         option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
       }
       this.log.debug('save modal dashboard selector, choosing option:', option);
       const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
+      // clicking the label of a still-disabled input is silently dropped, so wait out each re-render
+      await dashboardSelector.findByCssSelector(`input[id="${option}"]:enabled`);
       const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
       await label.click();
+      await dashboardSelector.findByCssSelector(`input[id="${option}"]:checked`);
 
       if (dashboardId) {
         await this.selectDashboard(dashboardId);
       }
     }
 
-    const hasSaveToLibrary = await this.testSubjects.exists('add-to-library-checkbox');
-    if (hasSaveToLibrary && saveToLibrary !== undefined) {
+    const hasSaveToLibrary =
+      saveToLibrary !== undefined &&
+      (await this.testSubjects.waitForExists('add-to-library-checkbox'));
+    if (hasSaveToLibrary) {
       const libraryCheckbox = await this.find.byCssSelector('#add-to-library-checkbox');
       const isChecked = await libraryCheckbox.isSelected();
       const needsClick = isChecked !== saveToLibrary;
@@ -126,8 +134,10 @@ export class TimeToVisualizePageObject extends FtrService {
       }
     }
 
-    const hasRedirectToOrigin = await this.testSubjects.exists('returnToOriginModeSwitch');
-    if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
+    const hasRedirectToOrigin =
+      redirectToOrigin !== undefined &&
+      (await this.testSubjects.waitForExists('returnToOriginModeSwitch'));
+    if (hasRedirectToOrigin) {
       const state = redirectToOrigin ? 'check' : 'uncheck';
       this.log.debug('redirect to origin checkbox exists. Setting its state to', state);
       await this.testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
