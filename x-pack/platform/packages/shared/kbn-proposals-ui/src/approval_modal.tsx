@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
@@ -38,6 +39,8 @@ export interface ApprovalModalProps {
   /** See `ApprovalContentProps.onReopen`. */
   onReopen?: () => Promise<void>;
   isReopening?: boolean;
+  /** See `ApprovalContentProps.basePath`. */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -66,6 +69,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     currentActorName,
     onReopen,
     isReopening,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -90,6 +94,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           onDismiss={onDismiss}
           onReopen={onReopen}
           isReopening={isReopening}
+          basePath={basePath}
         />
       </EuiModal>
     );

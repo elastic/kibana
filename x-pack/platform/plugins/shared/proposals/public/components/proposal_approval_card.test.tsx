@@ -197,6 +197,7 @@ const capabilitiesFor = (canDecide: boolean) =>
       application: {
         capabilities: { proposals: { decideProposals: canDecide } },
       },
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
     },
   } as unknown as ReturnType<typeof useKibana>);
 

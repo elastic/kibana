@@ -34,6 +34,7 @@ export interface ProposedActionsSlotProps {
 interface ProposedActionRowProps {
   proposal: ProposalWithMetadata;
   onDecisionError: (err: unknown) => void;
+  basePath: CoreStart['http']['basePath'];
 }
 
 /**
@@ -41,7 +42,7 @@ interface ProposedActionRowProps {
  * own proposal id — are called a fixed number of times per render, rather than a variable number
  * inside the list's `.map`.
  */
-const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps) => {
+const ProposedActionRow = ({ proposal, onDecisionError, basePath }: ProposedActionRowProps) => {
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
     useProposalDecision(proposal.id);
 
@@ -76,6 +77,7 @@ const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps
       }}
       isReopening={isReopening}
       currentActorName={currentActorName}
+      basePath={basePath}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />
   );
@@ -91,7 +93,7 @@ const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps
  */
 export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps) => {
   const {
-    services: { notifications },
+    services: { http, notifications },
   } = useKibana<CoreStart>();
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useConversationProposals(conversationId);
@@ -137,6 +139,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
               key={proposal.rootProposalId ?? proposal.id}
               proposal={proposal}
               onDecisionError={onDecisionError}
+              basePath={http.basePath}
             />
           ))}
         </ProposedActionsList>

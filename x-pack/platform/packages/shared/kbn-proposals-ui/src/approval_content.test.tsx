@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { IBasePath } from '@kbn/core-http-browser';
 import moment from 'moment';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
@@ -267,6 +268,24 @@ describe('ApprovalContent', () => {
     const link = screen.getByRole('link', { name: /the runbook/ });
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+  });
+
+  it('resolves in-app links in the comment against the base path, so they survive server.basePath', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn${path}`,
+    } as unknown as IBasePath;
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+      basePath,
+    });
+    expect(screen.getByRole('link', { name: /Noisy rule/ })).toHaveAttribute(
+      'href',
+      '/kbn/app/security/rules/id/abc'
+    );
   });
 
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
