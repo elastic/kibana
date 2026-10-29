@@ -6,8 +6,9 @@
  */
 
 import { Liquid } from 'liquidjs';
+import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
 
-const liquid = new Liquid();
+const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
 
 const ROW_LOOP = /\{%-?\s*for\s+(\w+)\s+in\s+rows\b/g;
 

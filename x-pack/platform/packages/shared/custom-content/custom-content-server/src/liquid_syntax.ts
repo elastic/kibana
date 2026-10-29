@@ -6,8 +6,9 @@
  */
 
 import { Liquid } from 'liquidjs';
+import { CUSTOM_CONTENT_LIQUID_OPTIONS } from '@kbn/custom-content-common';
 
-const liquid = new Liquid();
+const liquid = new Liquid(CUSTOM_CONTENT_LIQUID_OPTIONS);
 
 /** The reason a template does not parse as Liquid, or undefined when it does. */
 export const getLiquidSyntaxError = (template: string): string | undefined => {
