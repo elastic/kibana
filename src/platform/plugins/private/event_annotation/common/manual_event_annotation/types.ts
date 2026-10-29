@@ -37,6 +37,7 @@ export type ManualRangeEventAnnotationRow = {
   id: string;
   time: string;
   endTime: string;
+  textField?: string;
   type: 'range';
 } & RangeStyleProps;
 

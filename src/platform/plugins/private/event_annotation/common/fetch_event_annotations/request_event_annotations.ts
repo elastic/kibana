@@ -18,14 +18,16 @@ import type {
 } from '@kbn/data-plugin/common';
 import { parseEsInterval } from '@kbn/data-plugin/common';
 
-import type { ExecutionContext } from '@kbn/expressions-plugin/common';
+import type { ExecutionContext, Datatable } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
 import { roundDateToESInterval } from '@elastic/charts';
 import type { Adapters } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import { handleRequest } from './handle_request';
+import { mergeAnnotationDatatables, toEsqlAnnotationDatatable } from './esql_annotations';
 import {
   ANNOTATIONS_PER_BUCKET,
   getCalculatedInterval,
@@ -37,6 +39,7 @@ import {
   wrapRowsInDatatable,
 } from './utils';
 import type { ManualEventAnnotationOutput } from '../manual_event_annotation/types';
+import type { EsqlEventAnnotationOutput } from '../esql_event_annotation';
 import type { QueryPointEventAnnotationOutput } from '../query_point_event_annotation/types';
 import type { FetchEventAnnotationsArgs, FetchEventAnnotationsStartDependencies } from './types';
 
@@ -62,7 +65,7 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
-const emptyDatatable = { rows: [], columns: [], type: 'datatable' };
+const emptyDatatable: Datatable = { rows: [], columns: [], type: 'datatable' };
 
 export const requestEventAnnotations = (
   input: ExpressionValueSearchContext | null,
@@ -79,15 +82,65 @@ export const requestEventAnnotations = (
     if (!input?.timeRange || !args.groups) {
       return emptyDatatable;
     }
-    const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
+    const timeRange = input.timeRange;
+    const { aggs, dataViews, searchSource, esql, getNow, uiSettings } =
+      await getStartDependencies();
 
     const interval = getCalculatedInterval(uiSettings, args.interval, input?.timeRange);
     if (!interval) {
       return emptyDatatable;
     }
 
+    const esqlAnnotations = args.groups.flatMap((group) =>
+      group.annotations.filter(
+        (annotation): annotation is EsqlEventAnnotationOutput =>
+          annotation.type === 'esql_event_annotation' && !annotation.isHidden
+      )
+    );
+    const timezone = getTimeZone(uiSettings);
+    const esqlTables = await Promise.all(
+      esqlAnnotations.map(async (annotation) => {
+        const { datatable } = await esql(
+          {
+            query: annotation.query,
+            timeZone: timezone,
+            kibanaQueryContext: { timeRange, esqlVariables: input.esqlVariables },
+            approximation: input.isApproximate,
+            projectRouting: input.projectRouting,
+            dropNullColumns: false,
+            columnMetadata: true,
+            includeExecutionMetadata: true,
+          },
+          {
+            abortSignal,
+            sessionId: getSearchSessionId(),
+            executionContext: getExecutionContext(),
+            includeDataTable: true,
+            inspector: {
+              adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+              title: i18n.translate(
+                'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
+                {
+                  defaultMessage: 'Annotations',
+                }
+              ),
+              description: i18n.translate('eventAnnotation.esqlAnnotation.inspectorDescription', {
+                defaultMessage: 'This request fetches annotation events using ES|QL.',
+              }),
+            },
+          }
+        );
+        if (!datatable) throw new Error('The ES|QL annotation request did not return a datatable.');
+        return toEsqlAnnotationDatatable({ annotation, datatable, interval, timezone, timeRange });
+      })
+    );
+
     const uniqueDataViewsToLoad = args.groups
-      .map((g) => g.dataView.value)
+      .flatMap((g) =>
+        g.annotations.some((a) => a.type === 'query_point_event_annotation') && g.dataView
+          ? [g.dataView.value]
+          : []
+      )
       .reduce<DataViewSpec[]>((acc, current) => {
         if (acc.find((el) => el.id === current.id)) return acc;
         return [...acc, current];
@@ -106,9 +159,12 @@ export const requestEventAnnotations = (
       ? convertManualToDatatableRows(manualGroups[0], interval, getTimeZone(uiSettings))
       : [];
     if (!queryGroups.length) {
-      return manualAnnotationDatatableRows.length
+      const manualTable = manualAnnotationDatatableRows.length
         ? wrapRowsInDatatable(manualAnnotationDatatableRows)
         : emptyDatatable;
+      return esqlTables.length
+        ? mergeAnnotationDatatables([manualTable, ...esqlTables])
+        : manualTable;
     }
 
     const createEsaggsSingleRequest = async ({
@@ -165,11 +221,14 @@ export const requestEventAnnotations = (
       }))
     );
 
-    return postprocessAnnotations(
+    const legacyTable = postprocessAnnotations(
       esaggsResponses,
       allQueryAnnotationsConfigs,
       manualAnnotationDatatableRows
     );
+    return esqlTables.length
+      ? mergeAnnotationDatatables([legacyTable, ...esqlTables])
+      : legacyTable;
   });
 };
 
@@ -319,6 +378,7 @@ function regroupForRequestOptimization(
   const outputGroups = groups
     .map((g) => {
       return g.annotations.reduce<Record<string, ManualGroup | QueryGroup>>((acc, current) => {
+        if (current.type === 'esql_event_annotation') return acc;
         if (isManualAnnotation(current)) {
           if (!isInRange(current, input?.timeRange)) {
             return acc;
@@ -329,14 +389,15 @@ function regroupForRequestOptimization(
           (acc.manual as ManualGroup).annotations.push(current);
           return acc;
         } else {
-          const dataView = loadedDataViews.find((dv) => dv.id === g.dataView.value.id)!;
+          const dataView = loadedDataViews.find((dv) => dv.id === g.dataView?.value.id);
+          if (!dataView) throw new Error('A data view is required for query-based annotations.');
 
           const timeField =
             current.timeField ??
             (dataView.timeFieldName ||
               dataView.fields.find((field) => field.type === 'date' && field.displayName)?.name);
 
-          const key = `${g.dataView.value.id}-${timeField}-${Boolean(g.ignoreGlobalFilters)}`;
+          const key = `${dataView.id}-${timeField}-${Boolean(g.ignoreGlobalFilters)}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
             let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])];

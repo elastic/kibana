@@ -16,6 +16,7 @@ import {
   eventAnnotationGroup,
   manualRangeEventAnnotation,
   queryPointEventAnnotation,
+  esqlEventAnnotation,
 } from '../common';
 import { setupSavedObjects } from './saved_objects';
 import { EventAnnotationGroupStorage } from './content_management';
@@ -39,6 +40,7 @@ export class EventAnnotationServerPlugin implements Plugin<object, object> {
     dependencies.expressions.registerFunction(manualPointEventAnnotation);
     dependencies.expressions.registerFunction(manualRangeEventAnnotation);
     dependencies.expressions.registerFunction(queryPointEventAnnotation);
+    dependencies.expressions.registerFunction(esqlEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
 
     setupSavedObjects(core);

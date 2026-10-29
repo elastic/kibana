@@ -143,24 +143,151 @@ describe('Event Annotation Service', () => {
     jest.clearAllMocks();
   });
 
+  describe('toFetchExpression', () => {
+    it('does not load a data view for manual or ES|QL annotation groups', () => {
+      const [expression] = eventAnnotationService.toFetchExpression({
+        interval: '1h',
+        groups: [
+          {
+            indexPatternId: 'unused-data-view',
+            ignoreGlobalFilters: false,
+            annotations: [
+              annotationResolveMocks[0],
+              {
+                id: 'deployments',
+                type: 'esql',
+                query: { esql: 'FROM deployments | KEEP time' },
+                timeColumn: 'time',
+                key: { type: 'point_in_time' },
+                label: 'Deployments',
+              },
+            ],
+          },
+        ],
+      });
+      expect(expression.chain[1].arguments.groups).toEqual([
+        expect.objectContaining({
+          chain: [
+            expect.objectContaining({
+              function: 'event_annotation_group',
+              arguments: expect.objectContaining({ dataView: [] }),
+            }),
+          ],
+        }),
+      ]);
+    });
+
+    it('keeps data-view loading for DSL query annotations', () => {
+      const [expression] = eventAnnotationService.toFetchExpression({
+        interval: '1h',
+        groups: [
+          {
+            indexPatternId: 'data-view',
+            ignoreGlobalFilters: false,
+            annotations: [annotationResolveMocks[1]],
+          },
+        ],
+      });
+      expect(expression.chain[1].arguments.groups).toEqual([
+        expect.objectContaining({
+          chain: [
+            expect.objectContaining({
+              arguments: expect.objectContaining({
+                dataView: [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'indexPatternLoad',
+                        arguments: { id: ['data-view'], includeFields: [false] },
+                      },
+                    ],
+                  },
+                ],
+              }),
+            }),
+          ],
+        }),
+      ]);
+    });
+  });
+
   describe('toExpression', () => {
     it('should work for an empty list', () => {
       expect(eventAnnotationService.toExpression([])).toEqual([]);
     });
 
-    it('rejects ES|QL configs instead of treating them as manual annotations', () => {
-      expect(() =>
+    it('serializes ES|QL annotations with result bindings and point appearance', () => {
+      expect(
         eventAnnotationService.toExpression([
           {
             id: 'deployments',
             type: 'esql',
-            query: { esql: 'FROM deployments | KEEP time' },
+            query: { esql: 'FROM deployments | KEEP time, version' },
             timeColumn: 'time',
+            textColumn: 'version',
+            extraColumns: ['version'],
             key: { type: 'point_in_time' },
             label: 'Deployments',
+            lineStyle: 'dashed',
+            lineWidth: 3,
+            textVisibility: true,
           },
         ])
-      ).toThrow('ES|QL annotations are not supported by the legacy annotation expression.');
+      ).toEqual([
+        {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'esql_event_annotation',
+              arguments: {
+                id: ['deployments'],
+                query: ['FROM deployments | KEEP time, version'],
+                timeColumn: ['time'],
+                endTimeColumn: [],
+                textColumn: ['version'],
+                extraColumns: ['version'],
+                label: ['Deployments'],
+                color: ['auto'],
+                isHidden: [false],
+                lineStyle: ['dashed'],
+                lineWidth: [3],
+                icon: ['triangle'],
+                textVisibility: [true],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('serializes ES|QL range annotations without point-only styling', () => {
+      const [expression] = eventAnnotationService.toExpression([
+        {
+          id: 'maintenance',
+          type: 'esql',
+          query: { esql: 'FROM maintenance | KEEP start, end' },
+          timeColumn: 'start',
+          endTimeColumn: 'end',
+          key: { type: 'range' },
+          label: 'Maintenance',
+          outside: true,
+        },
+      ]);
+      expect(expression.chain[0].arguments).toEqual({
+        id: ['maintenance'],
+        query: ['FROM maintenance | KEEP start, end'],
+        timeColumn: ['start'],
+        endTimeColumn: ['end'],
+        textColumn: [],
+        extraColumns: [],
+        label: ['Maintenance'],
+        color: ['auto'],
+        isHidden: [false],
+        outside: [true],
+      });
     });
 
     it('should process manual point annotations', () => {
