@@ -317,7 +317,7 @@ const rules = {
       pre_offset: '1d',
       post_offset: '1d',
       format: 'yyyy-MM-dd',
-      time_zone: '00:00',
+      time_zone: '+00:00',
       missing: '',
       calendar_interval: {
         __one_of: [
@@ -704,7 +704,7 @@ const rules = {
       field: '{field}',
       buckets: 10,
       format: 'yyyy-MM-dd',
-      time_zone: '00:00',
+      time_zone: '+00:00',
       minimum_interval: {
         __one_of: ['year', 'month', 'day', 'hour', 'minute', 'second'],
       },
