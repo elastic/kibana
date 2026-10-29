@@ -51,7 +51,7 @@ const evidenceField = (files: boolean) =>
     files
       ? ' A tool result that was too long to be shown in full says where its full output is: when you want to chart or quote its numbers, read that file first, and use a description only if the numbers are not in it.'
       : ''
-  } A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact and one per hypothesis, and none for a dismissed hypothesis.`;
+  } A chart has a title that says what it measures and the time window, a time x axis with ISO 8601 timestamps (or a category axis), at most about 30 points, and an annotation where the problem began when known. At most one chart for the impact and one per hypothesis, and none for a dismissed hypothesis. Give references so a reader can check each observation: the query the agent ran that produced it, copied exactly as written in its command with its time filter, and an http(s) link only when a tool result returned that exact URL, never one you construct. One or two per observation, the query that decided it, and none when there is neither. Keep links out of the description.`;
 
 const FINAL_RECORD = (files: boolean) => `${ROLE}
 

@@ -19,10 +19,13 @@ import {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_REFERENCE_URL_LENGTH,
+  MAX_EVIDENCE_REFERENCES,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
+  type EvidenceReference,
   type InvestigationEvidence,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
@@ -69,9 +72,16 @@ export const findingsOutputSchema = lazySchema(() => {
       .array(z.object({ x: z.string(), x_end: z.string().optional(), label: z.string() }))
       .optional(),
   });
+  // Flat so every provider accepts it: a reference is a `query`, or a `url` with an optional label.
+  const referenceSchema = z.object({
+    query: z.string().optional(),
+    url: z.string().optional(),
+    label: z.string().optional(),
+  });
   const evidenceSchema = z.object({
     description: z.string().optional(),
     chart: chartSchema.optional(),
+    references: z.array(referenceSchema).optional(),
   });
   const hypothesisSchema = z.object({
     candidate: z.string().min(1),
@@ -144,6 +154,32 @@ export const entityIdFor = (name: string): string =>
         .slice(0, 12)}`;
 
 /**
+ * The references the stores accept: a query copied as written, or an http(s) link. Anything else
+ * is dropped, so one bad reference does not cost the evidence it belongs to.
+ */
+const limitReferences = (raw: RawEvidence['references']): EvidenceReference[] => {
+  const references: EvidenceReference[] = [];
+  for (const { query, url, label } of raw ?? []) {
+    const text = query?.trim();
+    const link = url?.trim();
+    const name = label?.trim();
+    if (text) {
+      references.push({ query: truncate(text, MAX_EVIDENCE_TEXT_LENGTH) });
+    } else if (
+      link &&
+      link.length <= MAX_EVIDENCE_REFERENCE_URL_LENGTH &&
+      /^https?:\/\//i.test(link)
+    ) {
+      references.push({
+        url: link,
+        ...(name ? { label: truncate(name, MAX_EVIDENCE_SHORT_TEXT_LENGTH) } : {}),
+      });
+    }
+  }
+  return references.slice(0, MAX_EVIDENCE_REFERENCES);
+};
+
+/**
  * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
  * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
  * dropped and the description is kept.
@@ -193,12 +229,14 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
             : {}),
         }
       : undefined;
+  const references = limitReferences(raw.references);
   const parsed = investigationEvidenceSchema.safeParse({
     ...(description ? { description } : {}),
     ...(chart ? { chart } : {}),
+    ...(references.length ? { references } : {}),
   });
   if (parsed.success && (parsed.data.description || parsed.data.chart)) return parsed.data;
-  return description ? { description } : undefined;
+  return description ? { description, ...(references.length ? { references } : {}) } : undefined;
 };
 
 /** A parsed record with its evidence trimmed to what the stores accept. */
@@ -217,11 +255,17 @@ export type FindingsRecord = Omit<
 
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
 export const limitFindings = (output: FindingsOutput): FindingsRecord => {
-  const impactEvidence = output.impact_evidence
-    ? limitEvidence(output.impact_evidence)
-    : output.impact_evidence;
+  // The fields that carry evidence are rebuilt below, so the raw ones are not spread back in.
+  const {
+    impact_evidence: rawImpactEvidence,
+    impact_entities: rawEntities,
+    proposals: rawProposals,
+    hypotheses: rawHypotheses,
+    ...rest
+  } = output;
+  const impactEvidence = rawImpactEvidence ? limitEvidence(rawImpactEvidence) : rawImpactEvidence;
   return {
-    ...output,
+    ...rest,
     impact_evidence: impactEvidence,
     summary: truncate(output.summary, MAX_METADATA_TEXT_LENGTH),
     ...(output.verdict !== undefined
@@ -230,9 +274,9 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
     ...(output.impact_summary !== undefined
       ? { impact_summary: truncate(output.impact_summary, MAX_EVIDENCE_TEXT_LENGTH) }
       : {}),
-    ...(output.impact_entities !== undefined
+    ...(rawEntities !== undefined
       ? {
-          impact_entities: output.impact_entities
+          impact_entities: rawEntities
             .slice(0, MAX_IMPACT_TOOL_ENTITIES)
             .map(({ name, type, evidence }) => {
               const kept = evidence ? limitEvidence(evidence) : undefined;
@@ -244,9 +288,9 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
             }),
         }
       : {}),
-    ...(output.proposals !== undefined
+    ...(rawProposals !== undefined
       ? {
-          proposals: output.proposals
+          proposals: rawProposals
             .slice(0, MAX_PROPOSALS)
             .map(({ title, comment, impact, confidence }) => ({
               title: truncate(title.trim(), MAX_TITLE_LENGTH),
@@ -259,7 +303,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
             })),
         }
       : {}),
-    hypotheses: output.hypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
+    hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
       const kept = (evidence ?? [])
         .map(limitEvidence)
         .filter((item): item is InvestigationEvidence => item !== undefined)
@@ -286,6 +330,19 @@ const EVIDENCE_JSON_SCHEMA = {
       type: 'string',
       description:
         'Markdown: what was observed and why it matters, only what a chart does not already show.',
+    },
+    references: {
+      type: 'array',
+      description:
+        'Where the observation came from, so a reader can check it: a query you actually ran, copied exactly as written with its time filter, or an http(s) link a tool returned. Give either query, or url with an optional short label. Never invent a link.',
+      items: {
+        type: 'object',
+        properties: {
+          query: { type: 'string' },
+          url: { type: 'string' },
+          label: { type: 'string' },
+        },
+      },
     },
     chart: {
       type: 'object',
