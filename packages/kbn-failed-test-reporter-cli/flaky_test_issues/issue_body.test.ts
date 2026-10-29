@@ -20,7 +20,7 @@ import {
   type RecordedFlakySuiteIssueMetadata,
 } from './issue_body';
 import { groupIntoSuites } from './suites';
-import { flakyReport, flakyTest, pipelineStats, SUITE_PATH } from './test_fixtures';
+import { buildIds, flakyReport, flakyTest, pipelineStats, SUITE_PATH } from './test_fixtures';
 
 const singleTestReport = () => {
   const report = flakyReport(
@@ -120,11 +120,10 @@ const multiTestReport = () => {
         {
           key: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
           message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
-          failuresCount: 20,
           buildsCount: 20,
           byPipeline: [
-            { pipeline: 'kibana-on-merge', failuresCount: 12 },
-            { pipeline: 'kibana-pull-request', failuresCount: 8 },
+            { pipeline: 'kibana-on-merge', buildsCount: 12, buildIds: buildIds('merge', 12) },
+            { pipeline: 'kibana-pull-request', buildsCount: 8, buildIds: buildIds('pr', 8) },
           ],
           branches: ['main', 'someone:fix-it', 'other:thing'],
           targets: ['stateful-classic', 'serverless-security_complete'],
@@ -148,9 +147,15 @@ const multiTestReport = () => {
         {
           key: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe',
           message: 'Error: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b',
-          failuresCount: 3,
           buildsCount: 3,
-          byPipeline: [{ pipeline: 'kibana-on-merge', failuresCount: 3 }],
+          // two of these builds also failed test a
+          byPipeline: [
+            {
+              pipeline: 'kibana-on-merge',
+              buildsCount: 3,
+              buildIds: ['merge-1', 'merge-2', 'merge-13'],
+            },
+          ],
           branches: ['9.2'],
           targets: ['stateful-classic'],
           firstFailedAt: new Date('2026-09-01T00:00:00.000Z'),
@@ -161,9 +166,8 @@ const multiTestReport = () => {
         {
           key: 'TimeoutError: page.waitForSelector: Timeout Nms exceeded.',
           message: 'TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.',
-          failuresCount: 1,
           buildsCount: 1,
-          byPipeline: [{ pipeline: 'kibana-on-merge', failuresCount: 1 }],
+          byPipeline: [{ pipeline: 'kibana-on-merge', buildsCount: 1, buildIds: ['merge-20'] }],
           branches: ['main'],
           targets: ['unknown'],
           firstFailedAt: new Date('2026-09-07T06:12:00.000Z'),
@@ -184,9 +188,10 @@ const multiTestReport = () => {
         {
           key: 'TypeError: Cannot read properties of undefined',
           message: 'TypeError: Cannot read properties of undefined',
-          failuresCount: 5,
           buildsCount: 2,
-          byPipeline: [{ pipeline: 'kibana-pull-request', failuresCount: 5 }],
+          byPipeline: [
+            { pipeline: 'kibana-pull-request', buildsCount: 2, buildIds: buildIds('pr', 2) },
+          ],
           branches: ['someone:wip', 'pull/1234/head'],
           targets: ['stateful-classic'],
           firstFailedAt: new Date('2026-09-08T00:00:00.000Z'),
@@ -395,19 +400,19 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain('#### Failures by Branch');
   });
 
-  it("lists the suite's distinct errors merged across tests, most failures first, each collapsed under its share", () => {
+  it("lists the suite's distinct errors merged across tests, most builds first, each collapsed under its build count", () => {
     const { suite, report } = multiTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
     expect(body).toContain('#### Failures by Error Message\n\n2 distinct errors:\n\n<details>');
-    // 23 of 24 failures; builds are not summed across tests
+    // 20 builds of test a and 3 of test b, two of which are a's: a build failing both counts once
     expect(body).toContain(
-      '<summary><b>96% of failures</b> (23 across 2 tests) · ' +
+      '<summary><b>21 builds</b> · ' +
         '<code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>'
     );
     expect(body).toContain(
       [
         '| **Tests** | *does not keep a hidden histogram after visiting Dashboard*, *reverts breakdown, interval, and visibility on a saved session* |',
-        '| **Pipelines** | `kibana-on-merge` (15), `kibana-pull-request` (8) |',
+        '| **Pipelines** | `kibana-on-merge` (13), `kibana-pull-request` (8) |',
         '| **Branches** | `main`, `9.2`, 2 PRs |',
         '| **Targets** | `serverless-security_complete`, `stateful-classic` |',
         '| **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |',
@@ -417,9 +422,9 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain(
       '</summary>\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```\n\n| Field | Value |'
     );
-    // a single-test error keeps its build count; an unknown target is not a target
+    // an unknown target is not a target
     expect(body).toContain(
-      '<summary><b>4% of failures</b> (1 in 1 build) · ' +
+      '<summary><b>1 build</b> · ' +
         '<code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>'
     );
     expect(body).toContain(
@@ -445,7 +450,7 @@ describe('renderFlakySuiteIssueBody', () => {
       flakyTest({
         errors: [
           { ...flakyTest().errors[0], branches: ['a:x'] },
-          { ...flakyTest().errors[0], key: 'other', failuresCount: 2, branches: ['pull/7/head'] },
+          { ...flakyTest().errors[0], key: 'other', branches: ['pull/7/head'] },
         ],
       }),
     ]);
@@ -477,7 +482,6 @@ describe('renderFlakySuiteIssueBody', () => {
     const errors = Array.from({ length: 6 }, (_, index) => ({
       ...flakyTest().errors[0],
       key: `k${index}`,
-      failuresCount: 10 - index,
     }));
     const report = flakyReport([flakyTest({ errors })]);
     const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });
