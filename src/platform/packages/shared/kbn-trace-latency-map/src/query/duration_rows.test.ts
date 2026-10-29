@@ -48,4 +48,27 @@ describe('latency map rows', () => {
       })
     ).toEqual({ min: 1, p90: 2, p95: 3, p99: 4, max: 5, spans: 6 });
   });
+
+  describe('a range under a microsecond', () => {
+    // OTel spans of 100 to 900 ns: the rows must follow them, not stop at 1µs.
+    const sub: DurationStats = { min: 0.1, p90: 0.7, p95: 0.8, p99: 0.9, max: 1.2, spans: 100 };
+
+    it('starts at the fastest span and ends at the p99', () => {
+      expect(rowToDurationUs(0, sub)).toBeCloseTo(0.1);
+      expect(rowToDurationUs(LATENCY_MAP_INNER_ROWS, sub)).toBeCloseTo(0.9);
+    });
+
+    it('keeps the bounds of the first row under the p99, where its spans are', () => {
+      expect(rowToDurationUs(1, sub)).toBeGreaterThan(0.1);
+      expect(rowToDurationUs(1, sub)).toBeLessThan(0.9);
+    });
+
+    it.each([0.1, 0.25, 0.6, 0.89])('round-trips %s µs', (durationUs) => {
+      expect(rowToDurationUs(durationUsToRow(durationUs, sub), sub)).toBeCloseTo(durationUs, 6);
+    });
+
+    it('gives the top row a height, up to the slowest span', () => {
+      expect(rowToDurationUs(LATENCY_MAP_INNER_ROWS + 1, sub)).toBeGreaterThan(sub.max);
+    });
+  });
 });

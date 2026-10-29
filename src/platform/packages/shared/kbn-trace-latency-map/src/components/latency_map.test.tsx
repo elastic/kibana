@@ -334,6 +334,29 @@ describe('LatencyMap', () => {
       expect(onSelectionCommit).not.toHaveBeenCalled();
     });
 
+    it('treats a click in "failed only" mode as a click on the failed spans', async () => {
+      const onCellClick = jest.fn();
+      renderMap({ onCellClick });
+      await waitForChart();
+      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      await waitFor(() =>
+        expect(mockChart.heatmap.data.some((datum: { spans: number }) => datum.spans === 10)).toBe(
+          true
+        )
+      );
+
+      act(() => mockChart.settings.onElementClick([[chartCell(3, 5), {}]]));
+      // 10 of the 40 spans failed: the cell is those 10, and the selection is about failures.
+      expect(onCellClick).toHaveBeenCalledWith(
+        expect.objectContaining({ spans: 10, failed: 10, failedOnly: true })
+      );
+
+      // A cell without failures is empty in this mode.
+      onCellClick.mockClear();
+      act(() => mockChart.settings.onElementClick([[chartCell(4, 5), {}]]));
+      expect(onCellClick).not.toHaveBeenCalled();
+    });
+
     it('selects the slowest 1% and 5% across the whole range', async () => {
       const { onSelectionCommit } = renderMap();
       await waitForChart();
@@ -476,6 +499,25 @@ describe('LatencyMap', () => {
       expect(screen.getByRole('button', { name: /^Filter \(\d+\)$/ })).toBeInTheDocument();
     });
 
+    it('counts a selection that does not follow the cells over its own bounds, as an estimate', async () => {
+      // The map was resized after the selection was made: its start is in the middle of column 3.
+      const shifted = {
+        ...selection,
+        from: new Date(timeAt(3) + timeGrid.binMs / 2).toISOString(),
+      };
+      renderMap({ selection: shifted });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      // Half of the 40 spans of column 3, and the 20 of column 4.
+      expect(summary).toHaveTextContent('~40 spans');
+    });
+
+    it('does not call the count of a selection on the cell edges an estimate', async () => {
+      renderMap({ selection });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent('60 spans');
+      expect(summary).not.toHaveTextContent('~60');
+    });
+
     it('narrows to the failed spans when the switch goes on, keeping the region', async () => {
       const { onSelectionCommit } = renderMap({ selection });
       await screen.findByTestId('traceLatencyMapSelectionBar');
@@ -559,6 +601,30 @@ describe('LatencyMap', () => {
       expect(mockChart.heatmap.highlightedData).toEqual(
         rangeToHighlight({ x0: 3, x1: 5, y0: 5, y1: 6 }, timeGrid)
       );
+    });
+
+    it('drops the cursor when the map gets other columns, so that it cannot point past the new edge', async () => {
+      const view = renderMap();
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      expect(screen.getByTestId('traceLatencyMapCellDetails')).toBeInTheDocument();
+
+      // A longer range: other columns.
+      view.rerender(
+        <LatencyMap
+          source={{ timeRange: { from: source.timeRange.from, to: '2026-10-26T14:00:00.000Z' } }}
+          runEsql={view.runEsql}
+          onSelectionCommit={view.onSelectionCommit}
+          timeZone="UTC"
+        />
+      );
+      await waitFor(() =>
+        expect(screen.queryByTestId('traceLatencyMapCellDetails')).not.toBeInTheDocument()
+      );
+      // Enter then has no cursor to commit.
+      press(await getLayer(), 'Enter');
+      expect(view.onSelectionCommit).not.toHaveBeenCalled();
     });
 
     it('clears the selection on Escape, only when there is one', async () => {

@@ -48,6 +48,7 @@ describe('latency map queries', () => {
       fromMs: Date.parse(source.timeRange.from),
       binMs: 60_000,
       bins: 60,
+      endMs: Date.parse(source.timeRange.to),
     });
     const query = buildLatencyGridQuery(source, stats, timeGrid);
     expect(query).toContain(`TO_LONG(@timestamp) - ${timeGrid.fromMs}`);

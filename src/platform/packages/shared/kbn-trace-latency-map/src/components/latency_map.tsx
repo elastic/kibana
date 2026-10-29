@@ -31,7 +31,7 @@ import type {
 import { LATENCY_MAP_INNER_ROWS, durationUsToRow, rowToDurationUs } from '../query/duration_rows';
 import { getMapSource } from '../query/latency_map_query';
 import { getCellKey } from '../query/parse';
-import { isSameRange } from '../geometry/cell_range';
+import { clampRange, isSameRange } from '../geometry/cell_range';
 import type { Cell, CellRange } from '../geometry/cell_range';
 import { LAYOUT, getTimeBinsForWidth } from '../geometry/layout';
 import { createMapGeometry } from '../geometry/map_geometry';
@@ -44,6 +44,7 @@ import { endGesture, moveGesture, startGesture } from '../selection/gesture';
 import type { Gesture } from '../selection/gesture';
 import { getKeyboardRange, reduceKeyboard } from '../selection/keyboard';
 import type { KeyboardState } from '../selection/keyboard';
+import { getSelectionCounts } from '../selection/counts';
 import { selectionToEsqlCondition } from '../selection/to_esql';
 import { CellDetails } from './cell_details';
 import { LatencyHeatmap } from './latency_heatmap';
@@ -186,6 +187,15 @@ export function LatencyMap({
   const [keyboard, setKeyboard] = useState<KeyboardState>();
   const [hoverCell, setHoverCell] = useState<Cell>();
 
+  // A new grid (the map resized, or its range changed) puts cells elsewhere: a cursor, an anchor or
+  // a move in progress would point at cells that are no longer there, or past the new edge.
+  const gridKey = timeGrid ? `${timeGrid.fromMs}:${timeGrid.binMs}:${timeGrid.bins}` : undefined;
+  useEffect(() => {
+    setKeyboard(undefined);
+    setDraft(undefined);
+    gestureRef.current = undefined;
+  }, [gridKey]);
+
   const committedRange = useMemo(
     () => (geometry && selection ? geometry.selectionToRange(selection) : undefined),
     [geometry, selection]
@@ -198,39 +208,34 @@ export function LatencyMap({
     (cell: Cell) => {
       const counts = grid?.cells.get(getCellKey(cell.xi, cell.yi, grid.bins));
       const fromMs = timeGrid!.fromMs + cell.xi * timeGrid!.binMs;
+      const failed = counts?.failed ?? 0;
       return {
         fromMs,
         toMs: fromMs + timeGrid!.binMs,
         minDurationUs: rowToDurationUs(cell.yi, stats!),
         maxDurationUs: rowToDurationUs(cell.yi + 1, stats!),
-        spans: counts?.spans ?? 0,
-        failed: counts?.failed ?? 0,
+        // With "failed only" the map shows the failed spans alone, and so does the cell.
+        spans: failedOnly ? failed : counts?.spans ?? 0,
+        failed,
       };
     },
-    [grid, timeGrid, stats]
+    [grid, timeGrid, stats, failedOnly]
   );
 
-  const selectedCounts = useMemo(() => {
-    if (!grid || !committedRange || !selection) return { spans: 0, failed: 0 };
-    let spans = 0;
-    let failed = 0;
-    grid.cells.forEach((cell) => {
-      if (
-        cell.xi >= committedRange.x0 &&
-        cell.xi < committedRange.x1 &&
-        cell.yi >= committedRange.y0 &&
-        cell.yi < committedRange.y1
-      ) {
-        spans += cell.spans;
-        failed += cell.failed;
-      }
-    });
-    // A selection about failures selects the failed spans only.
-    return selection.failedOnly ? { spans: failed, failed: 0 } : { spans, failed };
-  }, [grid, committedRange, selection]);
+  // Over the selection's own bounds, which the host's condition uses, not over the cells it was
+  // snapped to: after a resize those are not the same spans.
+  const selectedCounts = useMemo(
+    () =>
+      grid && timeGrid && stats && selection
+        ? getSelectionCounts({ grid, timeGrid, stats, selection })
+        : { spans: 0, failed: 0, estimated: false },
+    [grid, timeGrid, stats, selection]
+  );
 
-  const commitRange = (range: CellRange) => {
-    if (!geometry || (selection && committedRange && isSameRange(range, committedRange))) return;
+  const commitRange = (requested: CellRange) => {
+    if (!geometry) return;
+    const range = clampRange(requested, geometry.bins, geometry.rows);
+    if (selection && committedRange && isSameRange(range, committedRange)) return;
     commit(geometry.rangeToSelection(range, failedOnly));
   };
 
@@ -239,7 +244,10 @@ export function LatencyMap({
     const details = describeCell(cell);
     if (details.spans <= 0) return;
     onCellClick({
-      ...geometry.rangeToSelection({ x0: cell.xi, x1: cell.xi + 1, y0: cell.yi, y1: cell.yi + 1 }),
+      ...geometry.rangeToSelection(
+        { x0: cell.xi, x1: cell.xi + 1, y0: cell.yi, y1: cell.yi + 1 },
+        failedOnly
+      ),
       spans: details.spans,
       failed: details.failed,
     });
@@ -517,7 +525,7 @@ export function LatencyMap({
             spans={selectedCounts.spans}
             failed={selectedCounts.failed}
             unit={unit}
-            sampled={sampled}
+            sampled={sampled || selectedCounts.estimated}
             timeZone={timeZone}
             onClear={() => commit(undefined)}
             actions={renderSelectionActions?.(

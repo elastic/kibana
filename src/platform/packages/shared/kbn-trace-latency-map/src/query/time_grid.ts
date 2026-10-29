@@ -16,11 +16,13 @@ export interface TimeGrid {
   binMs: number;
   /** Columns. The last one may reach past the range, where there are no spans. */
   bins: number;
+  /** The end of the range itself: the grid may reach past it, a selection must not. */
+  endMs: number;
 }
 
 export function getTimeGrid(from: string, to: string, targetBins: number): TimeGrid {
   const fromMs = Date.parse(from);
   const rangeMs = Math.max(1, Date.parse(to) - fromMs);
   const binMs = Math.max(1, Math.ceil(rangeMs / Math.max(1, targetBins)));
-  return { fromMs, binMs, bins: Math.ceil(rangeMs / binMs) };
+  return { fromMs, binMs, bins: Math.ceil(rangeMs / binMs), endMs: fromMs + rangeMs };
 }

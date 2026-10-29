@@ -131,4 +131,20 @@ describe('createMapGeometry', () => {
     // The corners are still there to grab.
     expect(findHandle({ x: rect.x0, y: rect.y0 }, handles, rect)).toBe('tl');
   });
+
+  it('ends a selection at the end of the range, not at the end of the padded last column', () => {
+    // 70 columns of 51,429 ms cover 30 ms more than the hour.
+    const padded = getTimeGrid('2026-10-26T10:00:00.000Z', '2026-10-26T11:00:00.000Z', 70);
+    expect(padded.bins * padded.binMs).toBeGreaterThan(padded.endMs - padded.fromMs);
+    const geometryOf70 = createMapGeometry({
+      plot: { left: 0, top: 0, colWidth: 8, rowHeight: 8 },
+      timeGrid: padded,
+      stats,
+    });
+    const last = geometryOf70.rangeToSelection({ x0: 69, x1: 70, y0: 0, y1: 24 });
+    expect(last.to).toBe('2026-10-26T11:00:00.000Z');
+    // A column inside the range is not cut.
+    const first = geometryOf70.rangeToSelection({ x0: 0, x1: 1, y0: 0, y1: 24 });
+    expect(Date.parse(first.to) - Date.parse(first.from)).toBe(padded.binMs);
+  });
 });

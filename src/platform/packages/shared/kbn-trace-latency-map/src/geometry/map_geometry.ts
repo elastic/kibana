@@ -81,7 +81,7 @@ export function createMapGeometry({
   timeGrid: TimeGrid;
   stats: DurationStats;
 }): MapGeometry {
-  const { bins, fromMs, binMs } = timeGrid;
+  const { bins, fromMs, binMs, endMs } = timeGrid;
   const rows = LATENCY_MAP_ROWS;
   const { left: plotLeft, top: plotTop, colWidth, rowHeight } = plot;
   const plotRight = plotLeft + bins * colWidth;
@@ -129,7 +129,8 @@ export function createMapGeometry({
     }),
     rangeToSelection: (range, failedOnly) => ({
       from: new Date(fromMs + range.x0 * binMs).toISOString(),
-      to: new Date(fromMs + range.x1 * binMs).toISOString(),
+      // Never past the range: the last column may reach beyond it, where the map read no spans.
+      to: new Date(Math.min(fromMs + range.x1 * binMs, endMs)).toISOString(),
       // The bottom row reads everything below it too, as the query puts the fastest spans in it.
       minDurationUs: range.y0 <= 0 ? 0 : rowToDurationUs(range.y0, stats),
       maxDurationUs: rowToDurationUs(range.y1, stats),

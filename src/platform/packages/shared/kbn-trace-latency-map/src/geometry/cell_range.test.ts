@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extendRange, moveRange, rangeFromCells, resizeRange } from './cell_range';
+import { clampRange, extendRange, moveRange, rangeFromCells, resizeRange } from './cell_range';
 
 describe('cell ranges', () => {
   const range = { x0: 2, x1: 5, y0: 3, y1: 6 };
@@ -60,6 +60,33 @@ describe('cell ranges', () => {
       x1: 3,
       y0: 3,
       y1: 4,
+    });
+  });
+
+  it('clamps a range that points past the grid, as a cursor kept from a wider map does', () => {
+    // Column 80 of a map that now has 40.
+    expect(clampRange({ x0: 80, x1: 81, y0: 3, y1: 4 }, 40, 24)).toEqual({
+      x0: 39,
+      x1: 40,
+      y0: 3,
+      y1: 4,
+    });
+    expect(clampRange({ x0: -5, x1: 999, y0: -1, y1: 999 }, 40, 24)).toEqual({
+      x0: 0,
+      x1: 40,
+      y0: 0,
+      y1: 24,
+    });
+  });
+
+  it('leaves a range inside the grid as it is, a cell wide at least', () => {
+    const inside = { x0: 2, x1: 5, y0: 3, y1: 6 };
+    expect(clampRange(inside, 40, 24)).toEqual(inside);
+    expect(clampRange({ x0: 5, x1: 5, y0: 6, y1: 6 }, 40, 24)).toEqual({
+      x0: 5,
+      x1: 6,
+      y0: 6,
+      y1: 7,
     });
   });
 });

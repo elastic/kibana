@@ -95,3 +95,15 @@ export function extendRange(
 
 export const isSameRange = (a: CellRange, b: CellRange) =>
   a.x0 === b.x0 && a.x1 === b.x1 && a.y0 === b.y0 && a.y1 === b.y1;
+
+/** A range inside the grid, a cell wide at least. Whatever made it, a selection stays on the map. */
+export const clampRange = (range: CellRange, bins: number, rows: number): CellRange => {
+  const x0 = clamp(range.x0, 0, bins - 1);
+  const y0 = clamp(range.y0, 0, rows - 1);
+  return {
+    x0,
+    x1: clamp(range.x1, x0 + 1, bins),
+    y0,
+    y1: clamp(range.y1, y0 + 1, rows),
+  };
+};
