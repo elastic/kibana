@@ -21,6 +21,7 @@ import {
   formatDay,
   formatFailedBuilds,
   formatFullFailureMessage,
+  formatPercent,
   FRAMEWORK_LABELS,
   inlineCode,
   isPullRequestRef,
@@ -585,12 +586,14 @@ const formatErrorPipelines = (byPipeline: Map<string, Set<string>>): string => {
 };
 
 /**
- * One error, collapsed under its failed builds and its first line; inside, the full message,
- * then where it was seen.
+ * One error, collapsed under its share of the suite's failed builds and its first line; inside,
+ * the full message, then where it was seen.
  */
-const errorSection = (suite: FlakySuite, error: SuiteError): string => {
+const errorSection = (suite: FlakySuite, error: SuiteError, failedBuilds: number): string => {
+  const builds = errorBuilds(error);
+  const share = formatPercent(failedBuilds > 0 ? builds / failedBuilds : 0);
   const summary =
-    `<b>${plural(errorBuilds(error), 'build')}</b> · ` +
+    `<b>${share} of failed builds</b> (${builds} of ${failedBuilds}) · ` +
     `<code>${escapeHtml(errorTitle(error.message))}</code> · ` +
     formatDateRange(error.firstFailedAt, error.lastFailedAt);
   const targets = [...error.targets].filter((target) => target !== UNKNOWN_TARGET_MODE).sort();
@@ -648,7 +651,13 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
   if (errors.length === 0) {
     return ['#### Failures by Error Message', leftOut].join('\n\n');
   }
-  const shown = errors.slice(0, MAX_ERRORS).map((error) => errorSection(suite, error));
+  // A build that hit two errors counts once, so the shares can add up to more than 100%
+  const failedBuilds = new Set(
+    errors.flatMap((error) => [...error.byPipeline.values()].flatMap((builds) => [...builds]))
+  ).size;
+  const shown = errors
+    .slice(0, MAX_ERRORS)
+    .map((error) => errorSection(suite, error, failedBuilds));
   const rest = errors.length - shown.length;
   return [
     '#### Failures by Error Message',

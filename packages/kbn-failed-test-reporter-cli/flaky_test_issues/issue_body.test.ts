@@ -167,7 +167,8 @@ const multiTestReport = () => {
           key: 'TimeoutError: page.waitForSelector: Timeout Nms exceeded.',
           message: 'TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.',
           buildsCount: 1,
-          byPipeline: [{ pipeline: 'kibana-on-merge', buildsCount: 1, buildIds: ['merge-20'] }],
+          // a build in which b also failed with the error above
+          byPipeline: [{ pipeline: 'kibana-on-merge', buildsCount: 1, buildIds: ['merge-13'] }],
           branches: ['main'],
           targets: ['unknown'],
           firstFailedAt: new Date('2026-09-07T06:12:00.000Z'),
@@ -400,13 +401,13 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain('#### Failures by Branch');
   });
 
-  it("lists the suite's distinct errors merged across tests, most builds first, each collapsed under its build count", () => {
+  it("lists the suite's distinct errors merged across tests, most builds first, each collapsed under its share of failed builds", () => {
     const { suite, report } = multiTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
     expect(body).toContain('#### Failures by Error Message\n\n2 distinct errors:\n\n<details>');
     // 20 builds of test a and 3 of test b, two of which are a's: a build failing both counts once
     expect(body).toContain(
-      '<summary><b>21 builds</b> · ' +
+      '<summary><b>100% of failed builds</b> (21 of 21) · ' +
         '<code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>'
     );
     expect(body).toContain(
@@ -422,9 +423,10 @@ describe('renderFlakySuiteIssueBody', () => {
     expect(body).toContain(
       '</summary>\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```\n\n| Field | Value |'
     );
-    // an unknown target is not a target
+    // its one build also hit the first error, so the shares add up to more than 100%; an unknown
+    // target is not a target
     expect(body).toContain(
-      '<summary><b>1 build</b> · ' +
+      '<summary><b>5% of failed builds</b> (1 of 21) · ' +
         '<code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>'
     );
     expect(body).toContain(

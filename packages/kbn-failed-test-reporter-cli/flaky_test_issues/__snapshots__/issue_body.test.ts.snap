@@ -12,7 +12,7 @@ exports[`refreshing a suite issue comments with the report's numbers for the sui
 1 distinct error:
 
 <details>
-<summary><b>49 builds</b> · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
+<summary><b>100% of failed builds</b> (49 of 49) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
 \`\`\`text
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
@@ -82,7 +82,7 @@ Latest run on \`main\` was skipped (2026-09-09).
 2 distinct errors:
 
 <details>
-<summary><b>21 builds</b> · <code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>
+<summary><b>100% of failed builds</b> (21 of 21) · <code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>
 
 \`\`\`text
 Error: expect(locator).toBeVisible() failed
@@ -103,7 +103,7 @@ from b
 </details>
 
 <details>
-<summary><b>1 build</b> · <code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>
+<summary><b>5% of failed builds</b> (1 of 21) · <code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>
 
 \`\`\`text
 TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
@@ -165,7 +165,7 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 1 distinct error:
 
 <details>
-<summary><b>49 builds</b> · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
+<summary><b>100% of failed builds</b> (49 of 49) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
 \`\`\`text
 Error: Timed out 30000ms waiting for expect(locator).toBeVisible()
