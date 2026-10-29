@@ -33,6 +33,9 @@ export const getCypressBaseConfig = (
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
       pageLoadTimeout: 60000,
+      // Teardown tasks destroy a real VM in CI, which outlives Cypress' 60s `taskTimeout` default.
+      // Sized above the destroy's own 242s bound, so that bound is what reports a stuck VM.
+      taskTimeout: 300000,
 
       retries: {
         runMode: 1,
