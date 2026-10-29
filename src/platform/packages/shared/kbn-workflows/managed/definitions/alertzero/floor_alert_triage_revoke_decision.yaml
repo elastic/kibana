@@ -1,0 +1,52 @@
+version: "1"
+name: Alert Triage revoke decision
+description: >
+  Takes back a triage decision. Deletes the decision so the sweep stops matching it, then puts back
+  the alerts it acted on: an approved decision's alerts are reopened, and a dismissal's alerts go
+  back to the backlog. Only alerts that carry the decision's tag are touched.
+
+  Run it by hand from the workflows API with the decision id, `fp-decision-<hash>` or
+  `fp-dismissal-<hash>`, which the alerts carry in their `az:closed_by_decision:<id>` and
+  `az:skipped_by_decision:<id>` tags. It is safe to run again: a run that reports `failures` leaves
+  the tag on the alerts it could not put back.
+enabled: true
+tags:
+  - security
+  - alertzero
+  - alert-triage
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        decision_id:
+          type: string
+          pattern: "^fp-(decision|dismissal)-[0-9a-f]{16}$"
+          description: Id of the decision to take back.
+      required:
+        - decision_id
+
+outputs:
+  - name: status
+    type: string
+  - name: alerts_reopened
+    type: number
+  - name: alerts_released
+    type: number
+  - name: failures
+    type: number
+
+steps:
+  - name: revoke_decision
+    type: alertzero.triage.revokeFpDecision
+    with:
+      decision_id: "{{ inputs.decision_id }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      status: "{{ steps.revoke_decision.output.status }}"
+      alerts_reopened: "${{ steps.revoke_decision.output.alerts_reopened }}"
+      alerts_released: "${{ steps.revoke_decision.output.alerts_released }}"
+      failures: "${{ steps.revoke_decision.output.failures }}"

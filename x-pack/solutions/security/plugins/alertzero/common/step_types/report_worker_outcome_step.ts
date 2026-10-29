@@ -51,6 +51,7 @@ export const REPORT_WORKER_OUTCOME_EVENTS = [
   'worker_run_completed',
   'alert_triage_batch_classified',
   'alert_triage_batch_grouped',
+  'alert_triage_decisions_matched',
   'alert_triage_closure_resolved',
   'rule_tuning_review_completed',
   'rule_coverage_review_completed',
@@ -237,6 +238,23 @@ const alertTriageBatchGroupedInputSchema = lazySchema(() =>
   })
 );
 
+const alertTriageDecisionsMatchedInputSchema = lazySchema(() =>
+  z.strictObject({
+    event: z.literal('alert_triage_decisions_matched'),
+    candidates: count('Open, untriaged alerts the sweep checked against the decisions'),
+    capped: count('Matches left for the normal path by a decision daily cap'),
+    close_failures: count('Decisions whose alerts could not all be closed'),
+    closed: count('Alerts closed by a decision'),
+    decisions_matched: count('Distinct decisions that matched at least one alert'),
+    excluded_by_severity: count('Alerts of a matched pattern kept with a human by their severity'),
+    match_failed: flag('Whether the match failed, in which case every alert goes to analysis'),
+    skipped: count('Alerts a dismissed pattern kept out of analysis'),
+    tag_failures: count('Decisions whose alerts could not be tagged'),
+    would_close: count('Alerts an approved decision matched'),
+    would_skip: count('Alerts a dismissed pattern matched'),
+  })
+);
+
 const alertTriageClosureResolvedInputSchema = lazySchema(() =>
   z.strictObject({
     event: z.literal('alert_triage_closure_resolved'),
@@ -353,6 +371,7 @@ export const reportWorkerOutcomeStepInputSchema = lazySchema(() =>
     workerRunCompletedInputSchema,
     alertTriageBatchClassifiedInputSchema,
     alertTriageBatchGroupedInputSchema,
+    alertTriageDecisionsMatchedInputSchema,
     alertTriageClosureResolvedInputSchema,
     ruleTuningReviewCompletedInputSchema,
     ruleCoverageReviewCompletedInputSchema,

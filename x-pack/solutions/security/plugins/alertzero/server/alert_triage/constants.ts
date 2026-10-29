@@ -55,6 +55,7 @@ export const TRIAGE_STRICT_KEY_TAG_PREFIX = 'az:triage_strict_key:';
 export const TRIAGE_WIDE_KEY_TAG_PREFIX = 'az:triage_wide_key:';
 
 /** Verdict tags written by the batch's classification. Any of them means the alert is done. */
+export const VERDICT_INCONCLUSIVE_TAG = 'az:inconclusive';
 export const VERDICT_TAGS = ['az:true_positive', 'az:false_positive', 'az:inconclusive'] as const;
 
 export const OPEN_ALERT_STATUSES = ['open', 'acknowledged'] as const;
@@ -109,3 +110,32 @@ export const GROUPED_PROPOSAL_LIST_HEADS_TERMS = 10_000;
 
 /** Feature flag that turns Alert Triage grouping off: every batch then mints its own proposal. */
 export const TRIAGE_GROUPING_FLAG = 'alertzero.triageGrouping';
+
+/**
+ * Decisions in the sweep. In `shadow` a matching alert is only tagged, and still goes through
+ * analysis. In `on` an approved match is closed and a dismissed match is kept out of analysis.
+ * `off` is the kill switch. The default is `shadow`, so nothing is closed until a deployment is
+ * switched on explicitly.
+ */
+export const TRIAGE_DECISION_AUTO_CLOSE_FLAG = 'alertzero.triageDecisionAutoClose';
+export type DecisionAutoCloseMode = 'off' | 'shadow' | 'on';
+export const TRIAGE_WOULD_CLOSE_TAG_PREFIX = 'az:would_close:';
+export const TRIAGE_WOULD_SKIP_TAG_PREFIX = 'az:would_skip:';
+/** Added before an alert is closed by a decision, so revoke can find exactly those alerts. */
+export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
+/** Added with `az:inconclusive` to an alert a dismissed pattern kept out of analysis. */
+export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
+/**
+ * Notes one sweep writes at most. Each note is one call and takes about a second, 20 at a time, so
+ * this bounds the step to about a minute. Alerts past it are still closed or skipped, without a note.
+ */
+export const DECISION_NOTES_PER_SWEEP = 1000;
+/** Notes written in parallel. The batch workflow writes its verdict notes at the same width. */
+export const NOTE_CONCURRENCY = 20;
+/** Pages of 10,000 alerts a revoke puts back at most. Run it again for more. */
+export const MAX_REVOKE_PAGES = 10;
+/** Most alerts one decision may close in 24 hours. A starting value, to size from shadow data. */
+export const DECISION_DAILY_CLOSE_CAP = 500;
+
+/** Severities a decision may close. High and critical stay with a human unless a deployment opts in. */
+export const DECISION_AUTO_CLOSE_SEVERITIES: readonly string[] = ['low', 'medium'];

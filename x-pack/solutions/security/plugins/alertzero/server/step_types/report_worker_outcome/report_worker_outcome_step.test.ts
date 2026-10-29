@@ -554,6 +554,16 @@ describe('alertzero.reportWorkerOutcome step', () => {
         },
       ],
       [
+        ALERTZERO_TELEMETRY_EVENTS.AlertTriageDecisionsMatched,
+        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+        {
+          candidates: '120',
+          event: 'alert_triage_decisions_matched',
+          match_failed: 'false',
+          would_close: 30,
+        },
+      ],
+      [
         ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
         SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
         {

@@ -11,17 +11,22 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ALERT_FETCH_LIMIT,
+  TAG_CHUNK_SIZE,
   ALERT_SEVERITIES,
   BATCH_ALERT_CAP,
   OPEN_ALERT_STATUSES,
   RULE_FETCH_LIMIT,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
+  TRIAGE_WOULD_CLOSE_TAG_PREFIX,
+  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
+  TRIAGE_WOULD_SKIP_TAG_PREFIX,
   VERDICT_TAGS,
   type AlertSeverity,
 } from '../../alert_triage/constants';
-import { getDetection } from '../../alert_triage/pattern_key';
+import { PATTERN_KEY_SOURCE_FIELDS, getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
+import type { MatchCandidate } from '../../alert_triage/fp_decisions';
 import type { TriageAlert } from '../../alert_triage/types';
 
 type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
@@ -30,6 +35,8 @@ type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 // security_solution constants.
 const SIGNALS_SEARCH_PATH = '/api/detection_engine/signals/search';
 const SIGNALS_TAGS_PATH = '/api/detection_engine/signals/tags';
+const SIGNALS_STATUS_PATH = '/api/detection_engine/signals/status';
+const NOTE_PATH = '/api/note';
 
 const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
 
@@ -337,6 +344,126 @@ export const tagAlerts =
     }
   };
 
+/**
+ * Closes alerts as false positives, the reason the closure action records. Throws unless every
+ * alert was updated: a close that was only partly applied must not be reported as done.
+ */
+export const closeAlertsAsFalsePositive = (api: KibanaApi, alertIds: readonly string[]) =>
+  updateAlertStatus(api, alertIds, { status: 'closed', reason: 'false_positive' });
+
+/** Reopens alerts, in the chunks the status route takes. Throws unless every alert was updated. */
+export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): Promise<void> => {
+  for (let from = 0; from < alertIds.length; from += TAG_CHUNK_SIZE) {
+    await updateAlertStatus(api, alertIds.slice(from, from + TAG_CHUNK_SIZE), { status: 'open' });
+  }
+};
+
+/** The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back. */
+export const findAlertIdsByTag = async (
+  { callKibanaApi }: KibanaApi,
+  tag: string
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: ALERT_FETCH_LIMIT,
+      _source: false,
+      query: { bool: { filter: [{ term: { [ALERT_FIELDS.tags]: tag } }] } },
+    },
+  });
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+const updateAlertStatus = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[],
+  change: { status: 'open' | 'closed'; reason?: 'false_positive' }
+): Promise<void> => {
+  const { body } = await callKibanaApi<{
+    updated?: number;
+    version_conflicts?: number;
+    failures?: unknown[];
+  }>({
+    method: 'POST',
+    path: SIGNALS_STATUS_PATH,
+    body: { signal_ids: alertIds, ...change },
+  });
+  const failureCount = body.failures?.length ?? 0;
+  if (failureCount > 0 || (body.updated ?? 0) < alertIds.length) {
+    throw new Error(
+      `Setting ${alertIds.length} alert(s) to ${change.status} was not fully applied (updated: ${
+        body.updated ?? 0
+      }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
+    );
+  }
+};
+
+/**
+ * Writes the same note on each alert, `concurrency` at a time, because the notes route takes one
+ * note per call. Never throws: returns the ids that did not get a note.
+ */
+export const writeAlertNotes = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[],
+  note: string,
+  concurrency: number
+): Promise<string[]> => {
+  const failed: string[] = [];
+  for (let from = 0; from < alertIds.length; from += concurrency) {
+    const ids = alertIds.slice(from, from + concurrency);
+    const results = await Promise.allSettled(
+      ids.map((eventId) =>
+        callKibanaApi({
+          method: 'PATCH',
+          path: NOTE_PATH,
+          body: { note: { eventId, timelineId: '', note } },
+        })
+      )
+    );
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') failed.push(ids[index]);
+    });
+  }
+  return failed;
+};
+
+/**
+ * Alerts one decision closed in the last 24 hours, for its daily cap. shortcut: it relies on
+ * `kibana.alert.workflow_status_updated_at`, which every closed alert carries; if a mapping lacks
+ * it the count is 0 and only the per-sweep cap applies. Upgrade to a stored counter if that matters.
+ */
+export const countClosedByDecision = async (
+  { callKibanaApi }: KibanaApi,
+  decisionId: string,
+  since: number
+): Promise<number> => {
+  const { body } = await callKibanaApi<{ hits?: { total?: { value?: number } | number } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { [ALERT_FIELDS.tags]: `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${decisionId}` },
+            },
+            {
+              range: {
+                'kibana.alert.workflow_status_updated_at': { gte: new Date(since).toISOString() },
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  const total = body.hits?.total;
+  return typeof total === 'number' ? total : total?.value ?? 0;
+};
+
 /** One count query, no writes: open alerts older than the look-back that were never triaged. */
 export const countAgedOutAlerts = async (
   { callKibanaApi }: KibanaApi,
@@ -446,6 +573,131 @@ export const readKeyHistory = async (
   return {
     falsePositive: buckets.falsePositive?.doc_count ?? 0,
     truePositive: buckets.truePositive?.doc_count ?? 0,
+  };
+};
+
+/** Keys per search, so the `terms` clauses stay far below the default clause limit. */
+const BLOCKED_KEYS_CHUNK = 500;
+
+/**
+ * The strict key tags among `keyTags` that some alert carries together with a verdict tag other
+ * than false positive. Every alert counts, with no time limit: the consistency rule is about
+ * every earlier verdict of the key. A failed read throws, so no decision is written on a guess.
+ */
+export const findKeyTagsWithVerdicts = async (
+  { callKibanaApi }: KibanaApi,
+  keyTags: readonly string[],
+  verdictTags: readonly string[]
+): Promise<Set<string>> => {
+  const found = new Set<string>();
+  for (let from = 0; from < keyTags.length; from += BLOCKED_KEYS_CHUNK) {
+    const chunk = keyTags.slice(from, from + BLOCKED_KEYS_CHUNK);
+    const { body } = await callKibanaApi<{
+      aggregations?: { keys?: { buckets?: Array<{ key: string }> } };
+    }>({
+      method: 'POST',
+      path: SIGNALS_SEARCH_PATH,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { terms: { [ALERT_FIELDS.tags]: chunk } },
+              { terms: { [ALERT_FIELDS.tags]: [...verdictTags] } },
+            ],
+          },
+        },
+        // `include` keeps only the key tags: the matching alerts carry other tags as well.
+        aggs: {
+          keys: { terms: { field: ALERT_FIELDS.tags, include: chunk, size: chunk.length } },
+        },
+      },
+    });
+    const buckets = body.aggregations?.keys?.buckets;
+    if (buckets === undefined) throw new Error('Key verdicts missing from the search response');
+    for (const { key } of buckets) found.add(key);
+  }
+  return found;
+};
+
+/** Breaks ties between alerts of one timestamp, so a `search_after` cursor never skips one. */
+const ALERT_UUID_FIELD = 'kibana.alert.uuid';
+
+/** The status code of an Elasticsearch or Kibana client error, whichever shape the client used. */
+export const statusCodeOf = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { statusCode, meta } = error as { statusCode?: unknown; meta?: { statusCode?: unknown } };
+  const code = statusCode ?? meta?.statusCode;
+  return typeof code === 'number' ? code : undefined;
+};
+
+export interface DecisionCandidatesPage {
+  candidates: MatchCandidate[];
+  /** The cursor of the next page. Absent on the last page. */
+  after?: unknown[];
+}
+
+/**
+ * One page of the open, untriaged alerts of the look-back that a decision may match, oldest first,
+ * so the alerts closest to ageing out are matched first. They are the alerts the planner would
+ * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
+ * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
+ * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next.
+ */
+export const fetchDecisionCandidates = async (
+  { callKibanaApi }: KibanaApi,
+  analysisTagPrefix: string,
+  windowStart: number,
+  filters: TriageFilters,
+  {
+    after,
+    includeTaggedByShadow = false,
+  }: { after?: unknown[]; includeTaggedByShadow?: boolean } = {}
+): Promise<DecisionCandidatesPage> => {
+  const { body } = await callKibanaApi<{
+    hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: ALERT_FETCH_LIMIT,
+      _source: [...PATTERN_KEY_SOURCE_FIELDS, SEVERITY_FIELD],
+      sort: [{ [ALERT_FIELDS.timestamp]: 'asc' }, { [ALERT_UUID_FIELD]: 'asc' }],
+      ...(after ? { search_after: after } : {}),
+      query: {
+        bool: {
+          filter: [
+            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+            { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
+            ...severityFilter(filters.minSeverity),
+          ],
+          must_not: [
+            ...UNTRIAGED_MUST_NOT(analysisTagPrefix),
+            // In `on` the alerts shadow tagged are the ones to close, so they stay in.
+            ...(includeTaggedByShadow
+              ? []
+              : [
+                  { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
+                  { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+                ]),
+            ...excludedByFilters(filters),
+          ],
+        },
+      },
+    },
+  });
+  const hits = body.hits?.hits ?? [];
+  const last = hits[hits.length - 1]?.sort;
+  return {
+    candidates: hits.map(({ _id, _source = {} }) => {
+      const severity = readField(_source, SEVERITY_FIELD);
+      return {
+        id: _id,
+        doc: expandDottedKeys(_source),
+        ...(typeof severity === 'string' ? { severity } : {}),
+      };
+    }),
+    ...(hits.length === ALERT_FETCH_LIMIT && last ? { after: last } : {}),
   };
 };
 
