@@ -36,6 +36,7 @@ export const DashboardLinkDestinationPicker = ({
   onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
+  const [searchInput, setSearchInput] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
 
   const getDashboardItem = useCallback((dashboard: DashboardItem) => {
@@ -78,7 +79,7 @@ export const DashboardLinkDestinationPicker = ({
     const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) => {
       return getDashboardItem(dashboard);
     });
-    return dashboardOptions;
+    return { search: searchString, options: dashboardOptions };
   }, [searchString, parentDashboardId, getDashboardItem]);
 
   const debouncedSetSearch = useMemo(
@@ -88,6 +89,9 @@ export const DashboardLinkDestinationPicker = ({
       }, 250),
     [setSearchString]
   );
+
+  /** The rendered options are stale until the list fetched for the current search string arrives */
+  const isLoading = loadingDashboardList || dashboardList?.search !== searchInput;
 
   const renderOption = useCallback(
     (option: DashboardComboBoxOption, searchValue: string, contentClassName: string) => {
@@ -118,12 +122,13 @@ export const DashboardLinkDestinationPicker = ({
       async
       fullWidth
       className={'linksDashboardPicker'}
-      isLoading={loadingDashboardList}
+      isLoading={isLoading}
       aria-label={DashboardLinkStrings.getDashboardPickerAriaLabel()}
       placeholder={DashboardLinkStrings.getDashboardPickerPlaceholder()}
       singleSelection={{ asPlainText: true }}
-      options={dashboardList}
+      options={dashboardList?.options}
       onSearchChange={(searchValue) => {
+        setSearchInput(searchValue);
         debouncedSetSearch(searchValue);
       }}
       renderOption={renderOption}
