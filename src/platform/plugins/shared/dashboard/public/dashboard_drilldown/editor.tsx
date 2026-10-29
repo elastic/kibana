@@ -80,35 +80,33 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
 
     let canceled = false;
     setIsLoadingInitialDashboard(true);
-    findService
-      .findById(initialDashboardId)
-      .then((result) => {
-        if (canceled) {
-          return;
-        }
-        setIsLoadingInitialDashboard(false);
-        // handle case when destination dashboard no longer exists
-        if (result.status === 'error') {
-          setError(
-            result.notFound
-              ? i18n.translate('dashboard.drilldown.errorDestinationDashboardIsMissing', {
-                  defaultMessage:
-                    "Destination dashboard (''{dashboardId}'') no longer exists. Choose another dashboard.",
-                  values: {
-                    dashboardId: initialDashboardId,
-                  },
-                })
-              : result.error.message
-          );
-          props.onChange({ ...props.state, dashboard_id: undefined });
-          return;
-        }
+    findService.findById(initialDashboardId).then((result) => {
+      if (canceled) {
+        return;
+      }
+      setIsLoadingInitialDashboard(false);
+      // handle case when destination dashboard no longer exists
+      if (result.status === 'error') {
+        setError(
+          result.notFound
+            ? i18n.translate('dashboard.drilldown.errorDestinationDashboardIsMissing', {
+                defaultMessage:
+                  "Destination dashboard (''{dashboardId}'') no longer exists. Choose another dashboard.",
+                values: {
+                  dashboardId: initialDashboardId,
+                },
+              })
+            : result.error.message
+        );
+        props.onChange({ ...props.state, dashboard_id: undefined });
+        return;
+      }
 
-        setSelectedOption({
-          value: initialDashboardId,
-          label: result.attributes.title,
-        });
+      setSelectedOption({
+        value: initialDashboardId,
+        label: result.attributes.title,
       });
+    });
 
     return () => {
       canceled = true;
