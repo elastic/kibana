@@ -42,7 +42,6 @@ import { VAULT_REFERENCE_CONTENT_REGEX } from '../../../common/lib/vault_referen
 // character outside [A-Za-z0-9+.-].
 const VAULT_TOKEN_SOURCE = '(^|[^A-Za-z0-9+.\\-])vault://([A-Za-z0-9._~%@/#\\-]*)';
 
-
 interface VaultReference {
   connection?: string;
   path: string;

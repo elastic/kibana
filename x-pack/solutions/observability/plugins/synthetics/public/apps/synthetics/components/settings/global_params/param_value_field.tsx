@@ -127,7 +127,8 @@ const VaultSourceFields = () => {
   }, [http, getValues, setValue, attempt]);
 
   // A stored connection stays selectable even when the list lacks it (still loading or gone).
-  const names = selected && !connections.includes(selected) ? [...connections, selected] : connections;
+  const names =
+    selected && !connections.includes(selected) ? [...connections, selected] : connections;
   const connectionError = errors?.source?.connection?.message;
 
   return (
