@@ -172,6 +172,20 @@ describe('xml codec: unions, alternatives and bare values', () => {
             { type: 'object', properties: { b: { type: 'string' } } },
           ],
         },
+        Nested: {
+          type: 'object',
+          xml: { name: 'Wrapper' },
+          oneOf: [
+            {
+              type: 'object',
+              properties: { item: { type: 'object', properties: { a: { type: 'string' } } } },
+            },
+            {
+              type: 'object',
+              properties: { item: { type: 'object', properties: { b: { type: 'string' } } } },
+            },
+          ],
+        },
       },
     },
   };
@@ -193,6 +207,23 @@ describe('xml codec: unions, alternatives and bare values', () => {
         alternatives
       )
     ).toEqual({ value: { a: '1', b: '2' } });
+  });
+
+  it('keeps the fields union members share a property for', () => {
+    expect(
+      fromXml(
+        '<Wrapper><item><a>1</a></item></Wrapper>',
+        { $ref: '#/components/schemas/Nested' },
+        alternatives
+      )
+    ).toEqual({ value: { item: { a: '1' } } });
+    expect(
+      fromXml(
+        '<Wrapper><item><a>1</a><b>2</b></item></Wrapper>',
+        { $ref: '#/components/schemas/Nested' },
+        alternatives
+      )
+    ).toEqual({ value: { item: { a: '1', b: '2' } } });
   });
 
   it('tells bare scalar values from XML text', () => {

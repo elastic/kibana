@@ -282,4 +282,54 @@ describe('serving XML and host-addressed APIs', () => {
     expect(fixture.rejectedResponses).toEqual([]);
     expect(fixture.calls.flatMap(({ responseViolations }) => responseViolations)).toEqual([]);
   });
+
+  it('requires a scalar XML request to be a document, though a response may be a bare value', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [
+        {
+          openapi: '3.0.3',
+          info: { title: 'Storage', version: '1' },
+          servers: [{ url: 'https://storage.example.com' }],
+          paths: {
+            '/{bucket}': {
+              put: {
+                operationId: 'PutBucketLocation',
+                parameters: [
+                  { name: 'bucket', in: 'path', required: true, schema: { type: 'string' } },
+                ],
+                requestBody: {
+                  content: {
+                    'application/xml': {
+                      schema: {
+                        type: 'string',
+                        enum: ['us-west-2'],
+                        xml: { name: 'LocationConstraint' },
+                      },
+                    },
+                  },
+                },
+                responses: { '200': { description: 'ok' } },
+              },
+            },
+          },
+        },
+      ],
+    });
+    const request = (body: string) =>
+      fetch('https://storage.example.com/logs', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/xml' },
+        body,
+      });
+
+    const document = await request('<LocationConstraint>us-west-2</LocationConstraint>');
+    const bare = await request('us-west-2');
+
+    expect(document.status).toBe(200);
+    expect(calls[0].requestViolations).toEqual([]);
+    expect(bare.status).toBe(422);
+    expect(calls[1].requestViolations).toEqual([
+      expect.objectContaining({ code: 'xml', path: ['body'] }),
+    ]);
+  });
 });

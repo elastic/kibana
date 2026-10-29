@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { merge } from 'lodash';
 import { Parser } from 'xml2js';
 import { getAtPointer, refToPointer } from '../openapi/json_pointer';
 import { isRecord } from '../openapi/schema_walk';
@@ -156,8 +157,8 @@ const createCodec = (document: OpenApiDocument) => {
     const variants = unionVariants(target);
     if (variants.length > 0) {
       // A union has the members the element has; all are kept, so validation can see a union
-      // that sets more than one.
-      return Object.assign({}, ...variants.map((variant) => decodeStructure(element, variant)));
+      // that sets more than one. Merged deeply, as variants can share a property.
+      return merge({}, ...variants.map((variant) => decodeStructure(element, variant)));
     }
     return isObject(target) ? decodeStructure(element, target) : decodeScalar(element.text, target);
   }

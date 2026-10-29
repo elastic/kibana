@@ -84,11 +84,15 @@ export const validateContent = (
   if (!canValidate(mediaType) && !isXmlMediaType(mediaType)) {
     return [];
   }
-  // XML documents are read as the value their schema describes; fixtures may give it directly.
+  // XML documents are read as the value their schema describes. Fixtures may give a scalar
+  // response directly, but a request is on the wire and has to be a document.
   const xml =
     isXmlMediaType(mediaType) &&
     typeof body === 'string' &&
-    !isBareXmlValue(body, content.schema?.schema, operation.spec.document)
+    !(
+      direction === 'response' &&
+      isBareXmlValue(body, content.schema?.schema, operation.spec.document)
+    )
       ? fromXml(body, content.schema?.schema, operation.spec.document)
       : undefined;
   if (xml && 'error' in xml) {
