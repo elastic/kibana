@@ -81,8 +81,8 @@ const fits = (event: OnlineEvalScoreEvent): boolean =>
   Buffer.byteLength(JSON.stringify(event), 'utf8') <= MAX_SCORE_EVENT_BYTES;
 
 /**
- * Drops explanations, then scores, from the end until the event fits. Server-side events aren't
- * retried, so an oversized one would only delay the events queued behind it.
+ * Drops explanations, then scores, from the end until the event fits or no scores are left.
+ * Server-side batches aren't retried, so an oversized event could lose the batch it's sent in.
  */
 const fitToSizeLimit = (event: OnlineEvalScoreEvent): OnlineEvalScoreEvent => {
   const scores = [...event.scores];
