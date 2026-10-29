@@ -1328,8 +1328,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           },
           version,
         });
-      } catch (error) {
-        failedPolicies.push({ packagePolicy: packagePolicyUpdate, error });
+      } catch (caughtError) {
+        const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
+        logger.warn(
+          `Preparing update to package policy [${packagePolicyUpdate.id}] failed: [${error.name}] ${error.message}`
+        );
+
+        failedPolicies.push({
+          packagePolicy: packagePolicyUpdate,
+          error,
+        });
       }
     });
 
@@ -1406,6 +1414,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           (failedPolicy) => failedPolicy.packagePolicy.id === policy.id
         );
         if (!hasAlreadyFailed) {
+          logger.warn(
+            `Saving update to package policy [${policy.id}] failed: ${policy.error.message}`
+          );
           failedPolicies.push({
             packagePolicy: packagePolicyUpdates.find((p) => p.id === policy.id)!,
             error: policy.error,

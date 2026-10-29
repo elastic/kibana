@@ -43,7 +43,7 @@ export const IGNORE_FILE_GLOBS = [
   'src/platform/packages/shared/kbn-utility-types/test-d/**/*',
   'Dockerfile*',
   'vars/*',
-  'src/platform/packages/shared/kbn-test/jest-preset.js',
+  'src/platform/packages/shared/kbn-jest/jest-preset.js',
   'src/platform/packages/shared/kbn-test/*/jest-preset.js',
   'src/platform/test/package/Vagrantfile',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',

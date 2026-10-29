@@ -157,7 +157,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  describe('lens smokescreen tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/299196
+  describe.skip('lens smokescreen tests', () => {
     let termTranslator: (term: string, field?: string, values?: number) => string;
 
     before(async () => {

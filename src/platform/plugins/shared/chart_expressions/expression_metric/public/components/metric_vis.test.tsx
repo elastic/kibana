@@ -492,6 +492,37 @@ describe('MetricVisComponent', function () {
     });
   });
 
+  it.each([undefined, minPriceColumnId])(
+    'should display N/A without calculating palette bounds for empty data with max %s',
+    async (max) => {
+      mockGetColorForValue.mockClear();
+      await renderChart({
+        data: { ...table, rows: [] },
+        config: {
+          dimensions: { metric: basePriceColumnId, max },
+          metric: {
+            ...defaultMetricParams,
+            palette: {
+              type: 'palette',
+              name: 'custom',
+              params: {
+                range: 'percent',
+                colors: ['#54B399', '#E7664C'],
+                gradient: false,
+                stops: [],
+                rangeMin: 0,
+                rangeMax: 100,
+              },
+            },
+          },
+        },
+      });
+
+      expect(screen.getByText('N/A')).toBeInTheDocument();
+      expect(mockGetColorForValue).not.toHaveBeenCalled();
+    }
+  );
+
   it('should convert null values to NaN', async () => {
     const metricId = faker.lorem.word();
 

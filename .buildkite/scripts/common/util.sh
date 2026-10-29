@@ -3,6 +3,7 @@
 SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 source "${SCRIPTS_COMMON_DIR}/gcs_tmp_artifacts.sh"
+source "${SCRIPTS_COMMON_DIR}/docker_registry.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return

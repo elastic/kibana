@@ -14,6 +14,7 @@ import { USER } from '../../../services/ml/security_common';
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const retry = getService('retry');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
 
@@ -48,6 +49,19 @@ export default ({ getService }: FtrProviderContext) => {
   async function runMapRequest(space: string, expectedStatusCode: number, jobId: string) {
     const { body, status } = await supertest
       .get(`/s/${space}/internal/ml/data_frame/analytics/map/${jobId}`)
+      .auth(
+        USER.ML_VIEWER_ALL_SPACES,
+        ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
+      )
+      .set(getCommonRequestHeader('1'));
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
+
+    return body;
+  }
+
+  async function runMessagesRequest(space: string, expectedStatusCode: number, jobId: string) {
+    const { body, status } = await supertest
+      .get(`/s/${space}/internal/ml/data_frame/analytics/${jobId}/messages`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
@@ -207,6 +221,30 @@ export default ({ getService }: FtrProviderContext) => {
           `Expected 0 map elements, got ${body.elements.length}`
         );
         expect(body.details).to.eql({});
+      });
+    });
+
+    describe('GetDataFrameAnalyticsMessages with spaces', () => {
+      it('should list messages for a job in the same space', async () => {
+        await retry.tryForTime(5000, async () => {
+          const body = await runMessagesRequest(idSpace1, 200, jobIdSpace1);
+
+          expect(body.length).to.be.greaterThan(0);
+          body.forEach((message: { job_id: string }) => {
+            expect(message.job_id).to.eql(jobIdSpace1);
+          });
+        });
+      });
+
+      it('should not list messages for a job in a different space', async () => {
+        // wait until the messages exist so an empty result is not just due to timing
+        await retry.tryForTime(5000, async () => {
+          const body = await runMessagesRequest(idSpace1, 200, jobIdSpace1);
+          expect(body.length).to.be.greaterThan(0);
+        });
+
+        const body = await runMessagesRequest(idSpace2, 200, jobIdSpace1);
+        expect(body).to.eql([]);
       });
     });
   });

@@ -31,9 +31,9 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { getESQueryForLogRateAnalysis } from './helpers/log_rate_analysis_query';
 function getDataTimeRange(
   timeRange: { gte: string; lte?: string },
-  window: WindowSchema
+  window: WindowSchema | undefined
 ): TimeRange {
-  const windowDurationInMs = window.longWindow.value * 60 * 60 * 1000;
+  const windowDurationInMs = window ? window.longWindow.value * 60 * 60 * 1000 : 0;
   return {
     from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
     to: timeRange.lte ? new Date(timeRange.lte) : new Date(),

@@ -26,10 +26,12 @@ post:
             agents:
               oneOf:
                 - type: string
+                  maxLength: 500000
                   description: KQL query string, leave empty to action all agents
                 - type: array
                   items:
                     type: string
+                    maxLength: 512
                   description: list of agent IDs
             revoke:
               type: boolean

@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const retry = getService('retry');
 
   const findResultsWithApi = async (t: string): Promise<GlobalSearchResult[]> => {
     return browser.executeAsync(async (term, cb) => {
@@ -31,6 +32,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('GlobalSearch providers', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
+      await retry.waitForWithTimeout('window._coreProvider to be initialized', 60_000, () =>
+        browser.execute(() => Boolean(window._coreProvider?.start))
+      );
     });
 
     describe('SavedObject provider', function () {

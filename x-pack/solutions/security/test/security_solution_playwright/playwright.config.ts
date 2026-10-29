@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { existsSync } from 'fs';
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
-import dotenv from 'dotenv';
 
 (globalThis as any).ReadableStream = PolyfillReadableStream;
 
-dotenv.config({ path: path.resolve(__dirname, './.env') });
+const dotEnvPath = path.resolve(__dirname, './.env');
+if (existsSync(dotEnvPath)) {
+  process.loadEnvFile(dotEnvPath);
+}
 
 export default defineConfig({
   timeout: 60000,

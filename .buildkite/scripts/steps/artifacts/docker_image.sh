@@ -21,8 +21,10 @@ fi
 echo "--- Clean up cached images"
 clean_cached_images
 
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+# node scripts/build always names the image kibana-ci/kibana-serverless, PR pipelines push it to kibana-serverless-pr
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
+KIBANA_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless)"
+export KIBANA_IMAGE="$KIBANA_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
 echo "Checking manifest for $KIBANA_IMAGE"
@@ -49,13 +51,13 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  docker rmi "$KIBANA_IMAGE"
+  docker rmi "$BUILD_OUTPUT_IMAGE" || true
   docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
+  docker tag "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE-amd64"
 
-  docker rmi "$KIBANA_IMAGE"
+  docker rmi "$BUILD_OUTPUT_IMAGE" || true
   docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
+  docker tag "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE-arm64"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
@@ -70,10 +72,10 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
     docker manifest create \
-      "$KIBANA_BASE_IMAGE:latest" \
+      "$KIBANA_PUSH_REPOSITORY:latest" \
       --amend "$KIBANA_IMAGE-arm64" \
       --amend "$KIBANA_IMAGE-amd64"
-    docker manifest push "$KIBANA_BASE_IMAGE:latest"
+    docker manifest push "$KIBANA_PUSH_REPOSITORY:latest"
   fi
 
   echo "--- Build dependencies report"

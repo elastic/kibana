@@ -95,6 +95,9 @@ export async function cleanupIndexTemplatePipelinesStep(context: InstallContext)
           indexAssets,
           transformAssets,
           indexTemplatesAndPipelines,
+          // Rollback of a partial install deletes the same assets the uninstall path does, so
+          // it makes the same trust decision about the transform destination indices.
+          installSource: context.installSource,
         },
         esClient
       );

@@ -52,59 +52,65 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
 
     const eqlSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setEql,
         isSelected: isEqlRule(ruleType),
       }),
-      [ruleType, setEql]
+      [ruleType, setEql, isUpdateView]
     );
 
     const querySelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setQuery,
         isSelected: isQueryRule(ruleType),
       }),
-      [ruleType, setQuery]
+      [ruleType, setQuery, isUpdateView]
     );
 
     const mlSelectableConfig = useMemo(
       () => ({
-        isDisabled: !hasValidLicense || !isMlAdmin,
+        isDisabled: isUpdateView || !hasValidLicense || !isMlAdmin,
         onClick: setMl,
         isSelected: isMlRule(ruleType),
       }),
-      [ruleType, setMl, hasValidLicense, isMlAdmin]
+      [ruleType, setMl, hasValidLicense, isMlAdmin, isUpdateView]
     );
 
     const thresholdSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setThreshold,
         isSelected: isThresholdRule(ruleType),
       }),
-      [ruleType, setThreshold]
+      [ruleType, setThreshold, isUpdateView]
     );
 
     const threatMatchSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setThreatMatch,
         isSelected: isThreatMatchRule(ruleType),
       }),
-      [ruleType, setThreatMatch]
+      [ruleType, setThreatMatch, isUpdateView]
     );
 
     const newTermsSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setNewTerms,
         isSelected: isNewTermsRule(ruleType),
       }),
-      [ruleType, setNewTerms]
+      [ruleType, setNewTerms, isUpdateView]
     );
 
     const esqlSelectableConfig = useMemo(
       () => ({
+        isDisabled: isUpdateView,
         onClick: setEsql,
         isSelected: isEsqlRule(ruleType),
       }),
-      [ruleType, setEsql]
+      [ruleType, setEsql, isUpdateView]
     );
 
     return (

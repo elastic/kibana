@@ -12,6 +12,47 @@ import type { PrivilegesService } from '@kbn/security-authorization-core';
 
 import { serializePrivileges } from './privileges_serializer';
 
+/**
+ * Upper bound, in URL-encoded bytes, for the privilege names sent in a single delete request.
+ */
+export const DELETE_PRIVILEGES_BATCH_MAX_BYTES = 2048;
+
+// Separator the client puts between names once it encodes the path (`,` becomes `%2C`).
+const ENCODED_NAME_SEPARATOR_BYTES = encodeURIComponent(',').length;
+
+// Names go in the URL path, and Elasticsearch rejects request lines over
+// `http.max_initial_line_length` (4 KB by default). Feature IDs have no length limit, so we
+// budget by encoded bytes instead of by name count. A name that blows the budget on its own
+// still gets its own batch, which fails the same way a single-name delete would.
+const batchPrivilegeNames = (names: string[]): string[][] => {
+  const batches: string[][] = [];
+  let currentBatch: string[] = [];
+  let currentBatchBytes = 0;
+
+  for (const name of names) {
+    const nameBytes = encodeURIComponent(name).length;
+    const bytesWithName =
+      currentBatch.length === 0
+        ? nameBytes
+        : currentBatchBytes + ENCODED_NAME_SEPARATOR_BYTES + nameBytes;
+
+    if (currentBatch.length > 0 && bytesWithName > DELETE_PRIVILEGES_BATCH_MAX_BYTES) {
+      batches.push(currentBatch);
+      currentBatch = [name];
+      currentBatchBytes = nameBytes;
+    } else {
+      currentBatch.push(name);
+      currentBatchBytes = bytesWithName;
+    }
+  }
+
+  if (currentBatch.length > 0) {
+    batches.push(currentBatch);
+  }
+
+  return batches;
+};
+
 export async function registerPrivilegesWithCluster(
   logger: Logger,
   privileges: PrivilegesService,
@@ -68,17 +109,18 @@ export async function registerPrivilegesWithCluster(
     }
 
     const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
-    for (const privilegeToDelete of privilegesToDelete) {
-      logger.debug(
-        `Deleting Kibana Privilege ${privilegeToDelete} from Elasticsearch for ${application}`
-      );
+    for (const batch of batchPrivilegeNames(privilegesToDelete)) {
+      const names = batch.join(', ');
+      logger.debug(`Deleting Kibana Privileges ${names} from Elasticsearch for ${application}`);
       try {
-        await clusterClient.asInternalUser.security.deletePrivileges({
-          application,
-          name: privilegeToDelete,
-        });
+        // A 404 means none of these privileges exist anymore, usually because another Kibana
+        // instance deleted them first. That's the state we want, so it isn't an error.
+        await clusterClient.asInternalUser.security.deletePrivileges(
+          { application, name: batch },
+          { ignore: [404] }
+        );
       } catch (err) {
-        logger.error(`Error deleting Kibana Privilege ${privilegeToDelete}`);
+        logger.error(`Error deleting Kibana Privileges ${names}`);
         throw err;
       }
     }
