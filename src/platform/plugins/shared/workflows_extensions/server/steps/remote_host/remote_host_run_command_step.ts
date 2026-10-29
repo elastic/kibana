@@ -9,7 +9,7 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { ExecutionError } from '@kbn/workflows/server';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { ConnectorCallContext } from './execute_in_connector';
 import type { RemoteHostJobStatus } from './remote_host_job';
 import {
