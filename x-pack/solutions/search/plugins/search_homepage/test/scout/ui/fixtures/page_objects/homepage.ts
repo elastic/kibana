@@ -36,9 +36,6 @@ export class Homepage {
   public readonly dataCardDocuments;
   public readonly dataCardTotalSize;
   public readonly dataCardTotalIndicesValue;
-  public readonly dataCardDocumentsValue;
-  public readonly dashboardsCardTotalValue;
-  public readonly apiKeysCardTotalValue;
 
   // Add data / Build in your IDE
   public readonly addDataDevToolsLink;
@@ -74,11 +71,6 @@ export class Homepage {
     this.dataCardDocuments = this.page.getByTestId('homePageDataCard-documents');
     this.dataCardTotalSize = this.page.getByTestId('homePageDataCard-totalSize');
     this.dataCardTotalIndicesValue = this.page.getByTestId('homePageDataCard-totalIndices-value');
-    this.dataCardDocumentsValue = this.page.getByTestId('homePageDataCard-documents-value');
-    this.dashboardsCardTotalValue = this.page.getByTestId(
-      'homePageDashboardsCard-dashboardsTotal-value'
-    );
-    this.apiKeysCardTotalValue = this.page.getByTestId('homePageApiKeysCard-apiKeysTotal-value');
 
     this.addDataDevToolsLink = this.page.getByTestId('addDataDevToolsLink');
     this.viewPromptButton = this.page.getByTestId('viewPromptButton');

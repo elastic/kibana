@@ -14,7 +14,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
 export interface ElasticsearchHomeStartDependencies {
-  agentBuilder: AgentBuilderPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   share: SharePluginStart;
   cloud?: CloudStart;
 }

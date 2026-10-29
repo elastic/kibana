@@ -19,7 +19,8 @@ describe('ChatWithYourDataSection', () => {
   const renderSection = ({
     config = {},
     canShowAgentBuilder = true,
-  }: { config?: object; canShowAgentBuilder?: boolean } = {}) => {
+    isAgentBuilderEnabled = true,
+  }: { config?: object; canShowAgentBuilder?: boolean; isAgentBuilderEnabled?: boolean } = {}) => {
     const application = applicationServiceMock.createStartContract();
     application.capabilities = {
       ...application.capabilities,
@@ -27,7 +28,7 @@ describe('ChatWithYourDataSection', () => {
     };
 
     return renderWithHomeContext(<ChatWithYourDataSection />, {
-      services: { agentBuilder, application },
+      services: { agentBuilder: isAgentBuilderEnabled ? agentBuilder : undefined, application },
       config,
     });
   };
@@ -67,6 +68,13 @@ describe('ChatWithYourDataSection', () => {
     expect(await screen.findByTestId('viewPromptButton')).toBeInTheDocument();
     expect(screen.queryByTestId('openElasticAgentButton')).not.toBeInTheDocument();
     expect(agentBuilder.getAgentBuilderAccess).not.toHaveBeenCalled();
+  });
+
+  it('withholds the agent when Agent Builder is disabled', async () => {
+    renderSection({ isAgentBuilderEnabled: false });
+
+    expect(await screen.findByTestId('viewPromptButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('openElasticAgentButton')).not.toBeInTheDocument();
   });
 
   it('withholds the agent without the license Agent Builder requires', async () => {

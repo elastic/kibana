@@ -319,6 +319,30 @@ describe('HomePage', () => {
     });
   });
 
+  describe('the stat values', () => {
+    it('formats each count the deployment reports', () => {
+      mockUseDeploymentStats.mockReturnValue({
+        stats: {
+          ...stats,
+          indicesCount: 7,
+          documentsCount: 12345,
+          dashboardsCount: 2,
+          apiKeysCount: 4,
+        },
+        isLoading: false,
+      });
+
+      renderHomePage();
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices-value')).toHaveTextContent('7');
+      expect(screen.getByTestId('homePageDataCard-documents-value')).toHaveTextContent('12,345');
+      expect(screen.getByTestId('homePageDashboardsCard-dashboardsTotal-value')).toHaveTextContent(
+        '2'
+      );
+      expect(screen.getByTestId('homePageApiKeysCard-apiKeysTotal-value')).toHaveTextContent('4');
+    });
+  });
+
   describe('while the stats load', () => {
     it('shows the header and one loading indicator in place of the rest of the page', () => {
       mockUseDeploymentStats.mockReturnValue({ stats, isLoading: true });

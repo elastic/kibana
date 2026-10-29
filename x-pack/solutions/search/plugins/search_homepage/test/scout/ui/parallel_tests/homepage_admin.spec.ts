@@ -33,24 +33,6 @@ test.describe(
       await expect(homepage.documentationLink).toHaveText(/Learn more about Elasticsearch/);
     });
 
-    test('renders the deployment stats in the stat cards', async ({ page, pageObjects }) => {
-      await mockDeploymentStats(page, {
-        indicesCount: 7,
-        documentsCount: 12345,
-        storeSizeBytes: 1536,
-        dashboardsCount: 2,
-        apiKeysCount: 4,
-        expiringApiKeysCount: 1,
-      });
-      await pageObjects.homepage.goto();
-
-      const { homepage } = pageObjects;
-      await expect(homepage.dataCardTotalIndicesValue).toHaveText('7');
-      await expect(homepage.dataCardDocumentsValue).toHaveText('12,345');
-      await expect(homepage.dashboardsCardTotalValue).toHaveText('2');
-      await expect(homepage.apiKeysCardTotalValue).toHaveText('4');
-    });
-
     test('directs an empty deployment to getting started from the banner', async ({
       page,
       pageObjects,

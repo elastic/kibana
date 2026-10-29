@@ -414,6 +414,21 @@ describe('fetchIndexStats', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('fetch index sizes'));
     });
 
+    it('reports a null size when index stats answers with failed shards', async () => {
+      client.asCurrentUser.indices.stats.mockResolvedValue({
+        _shards: { total: 2, successful: 1, failed: 1 },
+        _all: {},
+      } as IndicesStatsResponse);
+      mockResolvedIndices(['products']);
+      mockDocumentCount(20);
+
+      const result = await getStatefulIndexStats();
+
+      expect(result.dataPanelAccess).toEqual(FULL_ACCESS);
+      expect(result.storeSizeBytes).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 shards failed'));
+    });
+
     it('keeps the panel but reports a null index count when the indices lookup fails', async () => {
       client.asCurrentUser.indices.resolveIndex.mockRejectedValue(new Error('resolve down'));
       mockStatefulIndexSizes({ products: 100 });

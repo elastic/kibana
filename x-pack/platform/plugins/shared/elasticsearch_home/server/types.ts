@@ -9,6 +9,6 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface ElasticsearchHomeServerSetupDependencies {
-  agentBuilder: AgentBuilderPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
 }
