@@ -185,7 +185,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               (await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')) !==
               'createAlert'
             ) {
-              await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
+              await testSubjects.click('opsgenie-subActionSelect-create-alert');
             }
             expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
               'createAlert'
