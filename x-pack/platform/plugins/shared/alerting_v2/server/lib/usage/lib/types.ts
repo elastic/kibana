@@ -81,12 +81,12 @@ export interface PercentilesAggregation {
 }
 
 /** Flat aggregations over dispatcher events. */
+export interface DispatcherActionBucket extends TermsBucket {
+  alert_count: ValueAggregation;
+  action_group_count: ValueAggregation;
+}
 export interface DispatcherEventStatsAggregations {
-  by_action: {
-    buckets: Array<
-      TermsBucket & { alert_count: ValueAggregation; action_group_count: ValueAggregation }
-    >;
-  };
+  by_action: { buckets: DispatcherActionBucket[] };
   dispatched: {
     doc_count: number;
     unique_alerts: ValueAggregation;
