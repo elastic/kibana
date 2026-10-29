@@ -812,7 +812,7 @@ to one rule is a **shared routing tag on both sides**:
 - The rule's \`metadata.routing_tags\` must contain a tag that uniquely identifies it.
 - The policy's \`matcher.tags\` must contain that same tag.
 
-The policy attachment's \`link_action_policy_to_rule\` tool writes that tag onto both attachments.
+\`platform.alerting.link_action_policy_to_rule\` (or the policy attachment's \`link_action_policy_to_rule\` tool) writes that tag onto both attachments.
 
 ## Steps
 
@@ -828,7 +828,7 @@ Call \`manage_action_policy\` with these operations in order. Do not set matcher
 
 ### 2. Link the policy to the rule
 
-Call the policy attachment's \`link_action_policy_to_rule\` tool with \`ruleAttachmentId\` from the rule.
+Call \`platform.alerting.link_action_policy_to_rule\` with \`actionPolicyAttachmentId\` from the policy draft and \`ruleAttachmentId\` from the rule, or call the policy attachment's \`link_action_policy_to_rule\` tool with \`ruleAttachmentId\`.
 
 ### 3. Validate
 

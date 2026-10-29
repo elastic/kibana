@@ -13,6 +13,7 @@ import {
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import { linkRuleToActionPolicySkillTool } from '../tools/link_routing_tag';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
@@ -203,6 +204,8 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
-    getInlineTools: () => [manageRuleTool(deps)],
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To link this rule to an action policy already in the conversation, call \`${
+      ALERTING_TOOL_IDS.linkRuleToActionPolicy
+    }\` with the rule attachment and the policy attachment, or use the rule attachment's \`link_rule_to_action_policy\` tool.`,
+    getInlineTools: () => [manageRuleTool(deps), linkRuleToActionPolicySkillTool(deps)],
   });

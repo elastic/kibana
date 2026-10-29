@@ -16,8 +16,14 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
-import { linkActionPolicyToRuleTool } from './link_action_policy_to_rule';
-import { linkRuleToActionPolicyTool } from './link_rule_to_action_policy';
+import {
+  linkActionPolicyToRuleSkillTool,
+  linkActionPolicyToRuleTool,
+} from './link_action_policy_to_rule';
+import {
+  linkRuleToActionPolicySkillTool,
+  linkRuleToActionPolicyTool,
+} from './link_rule_to_action_policy';
 import { linkRoutingTag, type LinkRoutingTagResult } from './link_routing_tag';
 
 const createLogger = (): jest.Mocked<
@@ -378,6 +384,46 @@ describe('link routing tag tools', () => {
     expect(tool.description).toContain('rule_saved');
     expect(tool.description).toContain('{ruleAttachment.id}');
     expect(Object.keys(tool.schema.shape)).toEqual(['ruleAttachmentId', 'tag']);
+  });
+
+  it('puts the rule first on the rule-authoring skill tool', () => {
+    const tool = linkRuleToActionPolicySkillTool(deps);
+
+    expect(tool.id).toBe('platform.alerting.link_rule_to_action_policy');
+    expect(tool.excludeFromMcp).toBe(true);
+    expect(tool.description).toContain('rule_saved');
+    expect(Object.keys(tool.schema.shape)).toEqual([
+      'ruleAttachmentId',
+      'actionPolicyAttachmentId',
+      'tag',
+    ]);
+  });
+
+  it('puts the action policy first on the action-policy-authoring skill tool', () => {
+    const tool = linkActionPolicyToRuleSkillTool(deps);
+
+    expect(tool.id).toBe('platform.alerting.link_action_policy_to_rule');
+    expect(tool.excludeFromMcp).toBe(true);
+    expect(tool.description).toContain('rule_saved');
+    expect(Object.keys(tool.schema.shape)).toEqual([
+      'actionPolicyAttachmentId',
+      'ruleAttachmentId',
+      'tag',
+    ]);
+  });
+
+  it('links through the action policy skill tool', async () => {
+    const ctx = createContext();
+    const tool = linkActionPolicyToRuleSkillTool(deps);
+
+    const result = await tool.handler(
+      { actionPolicyAttachmentId: 'policy-1', ruleAttachmentId: 'rule-1' },
+      ctx
+    );
+
+    expect(resultData(result as Awaited<ReturnType<typeof link>>).routing_tag).toBe(
+      'notify-high-cpu-prod'
+    );
   });
 
   it('links through the rule-bound tool', async () => {

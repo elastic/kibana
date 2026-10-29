@@ -12,6 +12,7 @@ import {
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
+import { linkActionPolicyToRuleSkillTool } from '../tools/link_routing_tag';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import {
@@ -139,7 +140,9 @@ For a new policy, start with \`set_metadata\` (name required), then \`set_destin
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use the policy attachment's \`link_action_policy_to_rule\` tool. The \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, call \`${
+      ALERTING_TOOL_IDS.linkActionPolicyToRule
+    }\` with this policy attachment and the rule attachment, or use the policy attachment's \`link_action_policy_to_rule\` tool. The \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
 
 ${generateActionPolicyOperationsDoc()}
 
@@ -250,5 +253,5 @@ When the user asks how a notification gets from a rule firing to email/Slack, co
 
 ### Workflow Dispatch Payload
 When choosing Liquid variables for a notification workflow, including query-specific \`alert.data.*\` fields, consult the [workflow-dispatch-payload reference](./references/workflow-dispatch-payload.md).`,
-    getInlineTools: () => [manageActionPolicyTool(deps)],
+    getInlineTools: () => [manageActionPolicyTool(deps), linkActionPolicyToRuleSkillTool(deps)],
   });

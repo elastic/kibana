@@ -6,10 +6,12 @@
  */
 
 export {
+  linkActionPolicyToRuleSkillTool,
   linkActionPolicyToRuleTool,
   linkActionPolicyToRuleToolId,
 } from './link_action_policy_to_rule';
 export {
+  linkRuleToActionPolicySkillTool,
   linkRuleToActionPolicyTool,
   linkRuleToActionPolicyToolId,
 } from './link_rule_to_action_policy';

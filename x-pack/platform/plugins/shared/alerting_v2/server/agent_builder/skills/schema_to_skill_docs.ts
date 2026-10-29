@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_AUTHORING_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_TOOL_IDS,
+  RULE_KIND_LABELS,
+} from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -1019,7 +1023,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     "- The rule's `metadata.routing_tags` must contain a tag that uniquely identifies it.",
     "- The policy's `matcher.tags` must contain that same tag.",
     '',
-    "The policy attachment's `link_action_policy_to_rule` tool writes that tag onto both attachments.",
+    `\`${ALERTING_TOOL_IDS.linkActionPolicyToRule}\` (or the policy attachment's \`link_action_policy_to_rule\` tool) writes that tag onto both attachments.`,
     '',
     '## Steps',
     '',
@@ -1035,7 +1039,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '',
     '### 2. Link the policy to the rule',
     '',
-    "Call the policy attachment's `link_action_policy_to_rule` tool with `ruleAttachmentId` from the rule.",
+    `Call \`${ALERTING_TOOL_IDS.linkActionPolicyToRule}\` with \`actionPolicyAttachmentId\` from the policy draft and \`ruleAttachmentId\` from the rule, or call the policy attachment's \`link_action_policy_to_rule\` tool with \`ruleAttachmentId\`.`,
     '',
     '### 3. Validate',
     '',
