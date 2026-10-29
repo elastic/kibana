@@ -13,7 +13,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 8277
+  alertzero: 9130
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 3166
   contentManagement: 6737
-  contextEngine: 3172
+  contextEngine: 3495
   contextEngineAgentBuilder: 2553
   controls: 4166
   core: 320
