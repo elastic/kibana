@@ -96,6 +96,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     http: services.http,
     application: services.application,
     getDatasets: () => getDatasets(services.http),
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
