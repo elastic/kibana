@@ -148,6 +148,51 @@ describe('generateDashboardTool handler', () => {
     });
   });
 
+  it('returns each panel title in the summary', async () => {
+    mockRetrieveLatestVersion.mockReturnValue(undefined);
+    const grid = { x: 0, y: 0, w: 24, h: 10 };
+    mockExecuteDashboardUpsert.mockResolvedValue({
+      dashboardData: {
+        ...generatedDashboard,
+        panels: [
+          { id: 'errors', type: 'vis', config: { title: 'Errors over time' }, grid },
+          { id: 'note', type: 'markdown', config: { content: '# Note' }, grid },
+          {
+            id: 'breakdowns',
+            title: 'Breakdowns',
+            collapsed: false,
+            grid: { y: 10 },
+            panels: [{ id: 'hosts', type: 'vis', config: { title: 'Top hosts' }, grid }],
+          },
+        ],
+      },
+      created: [],
+      updated: [],
+      removed: [],
+      failures: [],
+      panelAuthoringNotes: [],
+    });
+
+    const { results } = await callHandler();
+
+    expect(results[0]).toMatchObject({
+      type: ToolResultType.dashboard,
+      data: {
+        dashboard: {
+          panels: [
+            { id: 'errors', type: 'vis', title: 'Errors over time' },
+            { id: 'note', type: 'markdown', title: undefined },
+            {
+              id: 'breakdowns',
+              title: 'Breakdowns',
+              panels: [{ id: 'hosts', type: 'vis', title: 'Top hosts' }],
+            },
+          ],
+        },
+      },
+    });
+  });
+
   it.each([
     [
       'a new dashboard is missing its metadata',
