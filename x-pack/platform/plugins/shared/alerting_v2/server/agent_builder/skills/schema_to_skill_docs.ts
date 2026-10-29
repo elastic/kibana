@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_AUTHORING_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_TOOL_IDS,
+  RULE_KIND_LABELS,
+} from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -27,7 +31,6 @@ import {
   POLICY_MATCHER_TAG_MAX_LENGTH,
   MAX_KQL_LENGTH,
 } from '@kbn/alerting-v2-schemas';
-import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
@@ -37,7 +40,6 @@ import {
   ruleSettingsOperationSchema,
   setStateTransitionOperationSchema,
 } from '../tools/rule_operations/operations';
-import { getDraftBuilderRuleToolId } from '../tools/rule_builders/tool_ids';
 import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
 
 type JsonSchemaNode = Record<string, unknown>;
@@ -508,22 +510,12 @@ export const generateRuleSettingsUsageList = (): string =>
     schema: ruleSettingsOperationSchema,
   });
 
-/** Bullet list of every rule builder's draft tool and when to choose it. */
-export const generateRuleBuilderToolsList = (): string =>
-  Object.values(RULE_BUILDER_TYPES)
-    .map(
-      (builder) =>
-        `- \`${getDraftBuilderRuleToolId(builder)}\` (${builder.title}): ${builder.whenToUse}`
-    )
-    .join('\n');
+/** When `draft_custom_rule` is the right choice over every rule builder. */
+export const CUSTOM_RULE_WHEN_TO_USE =
+  'Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or to edit a custom ES|QL rule attachment. Rules authored with a builder are edited with the tools their attachment lists, not with this tool.';
 
 /** Positions `draft_custom_rule` as the fallback for requests no registered rule builder fits. */
-export const generateCustomRuleWhenToUse = (): string =>
-  [
-    'Use only when no rule builder fits the request. Check these builders first:',
-    generateRuleBuilderToolsList(),
-    'Choose this tool when the rule needs ES|QL that no builder can express (e.g. joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), when the user supplies a raw ES|QL query, or to edit a custom ES|QL rule attachment. Rules authored with a builder are edited with the tools their attachment lists, not with this tool.',
-  ].join('\n');
+export const DRAFT_CUSTOM_RULE_WHEN_TO_USE = `Use only when no rule builder fits the request. Call \`${ALERTING_TOOL_IDS.listRuleBuilders}\` to check the rule builders first.\n${CUSTOM_RULE_WHEN_TO_USE}`;
 
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 

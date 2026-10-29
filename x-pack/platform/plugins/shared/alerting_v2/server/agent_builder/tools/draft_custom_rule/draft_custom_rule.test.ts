@@ -83,7 +83,7 @@ describe('draftCustomRuleTool', () => {
 
   it('positions itself as the fallback for requests no rule builder fits', () => {
     expect(tool.description).toContain('Use only when no rule builder fits the request.');
-    expect(tool.description).toContain('`platform.alerting.draft_threshold_rule` (Threshold)');
+    expect(tool.description).toContain('`platform.alerting.list_rule_builders`');
   });
 
   describe('handler', () => {

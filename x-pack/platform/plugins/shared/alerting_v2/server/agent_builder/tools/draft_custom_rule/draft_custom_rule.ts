@@ -25,7 +25,7 @@ import {
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import {
-  generateCustomRuleWhenToUse,
+  DRAFT_CUSTOM_RULE_WHEN_TO_USE,
   generateRuleOperationsUsageList,
 } from '../../skills/schema_to_skill_docs';
 
@@ -52,7 +52,7 @@ export const draftCustomRuleTool = ({
   type: ToolType.builtin,
   description: `Create or update a custom ES|QL alerting V2 rule in the conversation.
 
-${generateCustomRuleWhenToUse()}
+${DRAFT_CUSTOM_RULE_WHEN_TO_USE}
 
 This tool only mutates the rule attachment shown in the conversation. It does
 NOT create or modify the underlying Alerting V2 rule (saved object) — for that,

@@ -66,13 +66,14 @@ describe('createRuleAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes the draft custom rule tool and one draft tool per rule builder', async () => {
+  it('exposes the builder list, the draft custom rule tool and one draft tool per rule builder', async () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
     expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.listRuleBuilders,
       ALERTING_TOOL_IDS.draftCustomRule,
       ...Object.values(RULE_BUILDER_TYPES).map(
         ({ type }) => `platform.alerting.draft_${type}_rule`
@@ -91,11 +92,15 @@ describe('createRuleAuthoringSkill', () => {
     }
   });
 
-  it('tells the agent to edit existing rules with the tools their attachment lists', () => {
+  it('leaves builder tools to the builder list and the rule attachments', () => {
     const skill = createRuleAuthoringSkill(createDeps());
 
-    expect(skill.content).toContain('Every rule attachment states which tools edit it.');
-    expect(skill.content).toContain('platform.alerting.draft_threshold_rule');
+    expect(skill.content).toContain('Call `platform.alerting.list_rule_builders`');
+    expect(skill.content).toContain('Every rule attachment lists the tools that edit it.');
+    for (const { type } of Object.values(RULE_BUILDER_TYPES)) {
+      expect(skill.content).not.toContain(`draft_${type}_rule`);
+      expect(skill.content).not.toContain(`update_${type}_rule`);
+    }
   });
 
   it('defers notification and action policy setup to the action-policy-authoring skill', () => {

@@ -16,9 +16,8 @@ import {
 import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import type { DraftCustomRuleToolDeps } from '../tools/draft_custom_rule';
 import { draftCustomRuleTool } from '../tools/draft_custom_rule';
-import { draftBuilderRuleTool } from '../tools/rule_builders';
+import { draftBuilderRuleTool, listRuleBuildersTool } from '../tools/rule_builders';
 import {
-  generateRuleBuilderToolsList,
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateAlertLifecycleDoc,
@@ -96,19 +95,18 @@ When a user asks about existing rules:
 - To inspect or edit a saved rule, attach it with \`platform.core.sml_attach\` using the \`entry_id\` from the search result.
 - After attaching, edit the rule with the tools its attachment lists.
 
-## Choosing a Tool
+## Choosing a Rule
 
-**New rules.** Prefer a rule builder: builders take structured params and generate the ES|QL for you. Pick the first builder whose description fits the request:
-${generateRuleBuilderToolsList()}
+**New rules.** Prefer a rule builder: builders take structured params and generate the ES|QL for you. Call \`${
+      ALERTING_TOOL_IDS.listRuleBuilders
+    }\` to see each builder, when to use it and the tool that drafts it, then draft the rule with the first builder that fits the request.
 
 Use \`${
       ALERTING_TOOL_IDS.draftCustomRule
     }\` only when no builder fits: the rule needs ES|QL no builder can express (joins, LOOKUP JOIN, multi-stage EVAL/STATS, custom severity CASE logic), or the user supplies a raw ES|QL query.
 
-**Existing rule attachments.** Every rule attachment states which tools edit it. Use those tools; don't choose by yourself.
-- A rule authored with a builder is edited with its \`update_<builder>_rule_<id>\` tool, which patches builder params. Never edit its ES|QL. Only if the user asks for something the builder can't express, call its \`convert_to_custom_rule_<id>\` tool first, then edit it with \`${
-      ALERTING_TOOL_IDS.draftCustomRule
-    }\`.
+**Existing rule attachments.** Every rule attachment lists the tools that edit it. Use those tools; don't choose by yourself.
+- A rule authored with a builder is edited through builder params. Never edit its ES|QL; convert it to a custom ES|QL rule only when the user asks for something the builder can't express.
 - A custom ES|QL rule is edited with \`${
       ALERTING_TOOL_IDS.draftCustomRule
     }\` and its \`ruleAttachmentId\`.
@@ -222,6 +220,7 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
     getInlineTools: () => [
+      listRuleBuildersTool(),
       draftCustomRuleTool(deps),
       ...Object.values(RULE_BUILDER_TYPES).map((builder) => draftBuilderRuleTool(builder, deps)),
     ],

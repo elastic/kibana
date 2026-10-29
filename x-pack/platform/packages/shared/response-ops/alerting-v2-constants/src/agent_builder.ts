@@ -16,6 +16,7 @@ const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
  */
 export const ALERTING_TOOL_IDS = {
   draftCustomRule: alertingTool('draft_custom_rule'),
+  listRuleBuilders: alertingTool('list_rule_builders'),
   manageActionPolicy: alertingTool('manage_action_policy'),
 } as const;
 

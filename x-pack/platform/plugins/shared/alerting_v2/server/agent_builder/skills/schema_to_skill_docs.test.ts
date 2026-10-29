@@ -11,7 +11,6 @@ import {
   MATCHER_CONTEXT_FIELDS,
   POLICY_MATCHER_TAGS_MAX,
 } from '@kbn/alerting-v2-schemas';
-import { RULE_BUILDER_TYPES } from '@kbn/alerting-v2-rule-builders';
 import type {
   ActionPolicyWorkflowPayload,
   ActionPolicyWorkflowPayloadAlert,
@@ -23,7 +22,8 @@ import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateRuleOperationsUsageList,
-  generateCustomRuleWhenToUse,
+  CUSTOM_RULE_WHEN_TO_USE,
+  DRAFT_CUSTOM_RULE_WHEN_TO_USE,
   generateRuleSettingsUsageList,
   generateRuleKindDoc,
   generateAlertLifecycleDoc,
@@ -385,16 +385,12 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
-  describe('generateCustomRuleWhenToUse', () => {
-    it('lists every registered rule builder before the custom rule fallback', () => {
-      expect(generateCustomRuleWhenToUse()).toMatchSnapshot();
-    });
-
-    it('names each registered builder tool by its full id', () => {
-      const doc = generateCustomRuleWhenToUse();
-      for (const { type } of Object.values(RULE_BUILDER_TYPES)) {
-        expect(doc).toContain(`\`platform.alerting.draft_${type}_rule\``);
-      }
+  describe('DRAFT_CUSTOM_RULE_WHEN_TO_USE', () => {
+    it('points to the rule builder list before the custom rule fallback', () => {
+      expect(DRAFT_CUSTOM_RULE_WHEN_TO_USE).toContain(
+        'Call `platform.alerting.list_rule_builders` to check the rule builders first.'
+      );
+      expect(DRAFT_CUSTOM_RULE_WHEN_TO_USE).toContain(CUSTOM_RULE_WHEN_TO_USE);
     });
   });
 
@@ -914,7 +910,6 @@ describe('schema_to_skill_docs', () => {
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
       ['draft_custom_rule operation .describe()', generateRuleOperationsDoc],
       ['draft_custom_rule operation usage list', generateRuleOperationsUsageList],
-      ['draft_custom_rule when-to-use from the rule builder registry', generateCustomRuleWhenToUse],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
       ['generateEnumTable (alert status from spec)', generateAlertLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
