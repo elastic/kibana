@@ -26,6 +26,7 @@ import type {
   ThemeName,
   UiSettingsParams,
   UiSettingsScope,
+  UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
 import type { UiSettingsConfigType } from './ui_settings_config';
 import { uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
@@ -80,7 +81,7 @@ export class UiSettingsService
     takeUntil(this.stop$),
     share({ resetOnRefCountZero: false })
   );
-  private readonly sharedPollReads = new InflightReads<Record<string, unknown>>();
+  private readonly sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
   private internalSavedObjectsClient?: SavedObjectsClientContract;
   private readonly pollClients = new Map<string, SavedObjectsClientContract>();
 

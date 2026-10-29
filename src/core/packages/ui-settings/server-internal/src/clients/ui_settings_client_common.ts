@@ -78,13 +78,15 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       return merge(of(undefined), this.pollTicks$).pipe(
         exhaustMap((tick) =>
           defer(async () => {
-            const userProvided = await this.readForPoll(tick, ownReadSucceeded);
+            const userProvided = ownReadSucceeded
+              ? await this.readSharedPoll(key, tick)
+              : await this.readOwnPoll(key);
             ownReadSucceeded = true;
             return userProvided;
           }).pipe(
             map((userProvided) => this.staticValue<T>(key, userProvided)),
             catchError((error) => {
-              this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
+              this.log.debug(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
               return EMPTY;
             })
           )
@@ -94,19 +96,40 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     });
   }
 
-  private async readForPoll(
-    tick: number | undefined,
-    ownReadSucceeded: boolean
-  ): Promise<UserProvided> {
-    const sharedPollReads = this.sharedPollReads;
-    const getPollClient = this.getPollClient;
-    const attributes =
-      ownReadSucceeded && sharedPollReads && getPollClient
-        ? sharedPollReads.run(`${this.type}:${this.namespace}:${tick}`, () =>
-            this.read({ ignoreErrors: false, savedObjectsClient: getPollClient() })
-          )
-        : this.read({ ignoreErrors: false });
-    return this.applyOverrides(this.onReadHook(await attributes));
+  private async readOwnPoll(key: string): Promise<UserProvided> {
+    try {
+      return this.applyOverrides(this.onReadHook(await this.read({ ignoreErrors: false })));
+    } catch (error) {
+      this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
+      throw error;
+    }
+  }
+
+  /** Validates and logs once per shared read, so subscribers don't repeat the same warnings. */
+  private async readSharedPoll(key: string, tick: number | undefined): Promise<UserProvided> {
+    const { sharedPollReads, getPollClient } = this;
+    if (!sharedPollReads || !getPollClient) {
+      return this.readOwnPoll(key);
+    }
+
+    const userProvided = await sharedPollReads.run(
+      `${this.type}:${this.namespace}:${tick}`,
+      async () => {
+        try {
+          const attributes = await this.read({
+            ignoreErrors: false,
+            savedObjectsClient: getPollClient(),
+          });
+          return this.onReadHook(attributes);
+        } catch (error) {
+          this.log.warn(
+            `[UiSettings] get$ skipped a poll of ${this.type} for namespace=${this.namespace}: ${error}`
+          );
+          throw error;
+        }
+      }
+    );
+    return this.applyOverrides(userProvided);
   }
 
   async getUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {

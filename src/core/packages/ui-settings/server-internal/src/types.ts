@@ -13,7 +13,7 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { InflightReads } from './inflight_reads';
@@ -49,7 +49,7 @@ export interface UiSettingsServiceOptions {
   /** Shared poll clock for `get$` */
   pollTicks$?: Observable<number>;
   /** In-flight `get$` reads shared across clients on this node */
-  sharedPollReads?: InflightReads<Record<string, unknown>>;
+  sharedPollReads?: InflightReads<Record<string, UserProvidedValues>>;
   /** Saved objects client used for shared `get$` polls */
   getPollClient?: () => SavedObjectsClientContract;
 }

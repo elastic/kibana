@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { GET_OBSERVABLE_POLL_INTERVAL } from './ui_settings_client_common';
 import { UiSettingsClient } from './ui_settings_client';
 import { UiSettingsGlobalClient } from './ui_settings_global_client';
@@ -35,7 +35,7 @@ interface SetupOptions {
   overrides?: Record<string, unknown>;
   namespace?: string;
   pollTicks$?: Observable<number>;
-  sharedPollReads?: InflightReads<Record<string, unknown>>;
+  sharedPollReads?: InflightReads<Record<string, UserProvidedValues>>;
   sharedUserProvidedCache?: NamespacedCache<Record<string, unknown>>;
   type?: 'config' | 'config-global';
   savedObjectsClient?: MockedSavedObjectsClient;
@@ -84,7 +84,7 @@ describe('UiSettingsClient.get$', () => {
       overrides = {},
       namespace = 'default',
       pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share()),
-      sharedPollReads = new InflightReads<Record<string, unknown>>(),
+      sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>(),
       sharedUserProvidedCache,
       type = TYPE,
       savedObjectsClient = savedObjectsClientMock.create(),
@@ -228,11 +228,55 @@ describe('UiSettingsClient.get$', () => {
     );
   });
 
+  it('warns once per shared read, not once per subscriber', async () => {
+    const clearLogs = () => {
+      jest.mocked(logger.warn).mockClear();
+      jest.mocked(logger.debug).mockClear();
+    };
+    const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
+    const sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
+    const pollClient = savedObjectsClientMock.create();
+    const invalidDoc = { type: TYPE, id: ID, references: [], attributes: { [KEY]: 123 } };
+    pollClient.get.mockResolvedValue(invalidDoc);
+    const subscribers = Array.from({ length: 5 }, () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockResolvedValue(invalidDoc);
+      return watch<string>(
+        setup({
+          pollTicks$,
+          sharedPollReads,
+          savedObjectsClient,
+          pollClient,
+          preserveSavedObjectsMock: true,
+        }).uiSettings.get$(KEY)
+      );
+    });
+    await jest.advanceTimersByTimeAsync(0);
+    expect(subscribers.map(({ values }) => values)).toEqual(
+      Array.from({ length: 5 }, () => ['from-default'])
+    );
+
+    clearLogs();
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(pollClient.get).toHaveBeenCalledTimes(1);
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual([
+      expect.stringContaining('Ignore invalid UiSettings value'),
+    ]);
+
+    clearLogs();
+    pollClient.get.mockRejectedValue(new Error('boom'));
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(pollClient.get).toHaveBeenCalledTimes(2);
+    const { warn, debug } = loggingSystemMock.collect(logger);
+    expect(warn.flat()).toEqual([expect.stringContaining('skipped a poll')]);
+    expect(debug.flat().filter((line) => String(line).includes('skipped a poll'))).toHaveLength(5);
+  });
+
   it('starts a subscription after set() at the new value while a shared pre-write read is in flight', async () => {
     let stored = 'before';
     let holdNextRead = false;
     const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
     const savedObjectsClient = savedObjectsClientMock.create();
     const slowReadMs = 5_000;
     savedObjectsClient.get.mockImplementation(() => {
@@ -294,7 +338,7 @@ describe('UiSettingsClient.get$', () => {
     let stored = 'before';
     let holdNextRead = false;
     const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
     const savedObjectsClient = savedObjectsClientMock.create();
     const slowReadMs = GET_OBSERVABLE_POLL_INTERVAL * 1.5;
     savedObjectsClient.get.mockImplementation(() => {
@@ -334,7 +378,7 @@ describe('UiSettingsClient.get$', () => {
 
   it('reads once per tick for many subscriptions on one space, plus one first read each', async () => {
     const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
     const savedObjectsClient = savedObjectsClientMock.create();
     const subscriberCount = 4;
     const clients = Array.from(
@@ -451,7 +495,7 @@ describe('UiSettingsClient.get$', () => {
   it('keeps emitting from the poll client after the subscriber client fails, and a later subscriber is unaffected', async () => {
     let stored = 'one';
     const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
     const pollClient = savedObjectsClientMock.create();
     pollClient.get.mockImplementation(async () => ({
       type: TYPE,
@@ -551,7 +595,7 @@ describe('UiSettingsClient.get$', () => {
   it('switches to the shared poll client after Elasticsearch is available again', async () => {
     let stored = 'one';
     const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
-    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const sharedPollReads = new InflightReads<Record<string, UserProvidedValues>>();
     const pollClient = savedObjectsClientMock.create();
     pollClient.get.mockImplementation(async () => ({
       type: TYPE,
