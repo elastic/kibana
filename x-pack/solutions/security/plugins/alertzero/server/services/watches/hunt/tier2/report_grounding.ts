@@ -53,11 +53,14 @@ const toWords = (value: string): string =>
  * fragments does not.
  */
 export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean => {
-  const haystack = toWords(text);
+  // Padding every side with a space makes matches whole words: `successful` must not
+  // match inside `successfully`.
+  const haystack = ` ${toWords(text)} `;
   const segments = quote
     .split(/\.\.\.|…/)
     .map(toWords)
-    .filter((segment) => segment.length > 0);
+    .filter((segment) => segment.length > 0)
+    .map((segment) => ` ${segment} `);
   if (segments.length === 0) {
     return false;
   }
@@ -74,7 +77,8 @@ export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean =>
     if (at === -1) {
       return false;
     }
-    searchFrom = at + segment.length;
+    // Resume on the closing space so the next segment can share it.
+    searchFrom = at + segment.length - 1;
   }
   return true;
 };

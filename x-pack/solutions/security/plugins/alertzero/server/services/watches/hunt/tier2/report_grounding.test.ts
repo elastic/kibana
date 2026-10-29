@@ -81,6 +81,12 @@ describe('isEvidenceQuoteGrounded', () => {
   it('rejects a quote with one word changed', () => {
     expect(isEvidenceQuoteGrounded('called sts.AssumeRole into escalated-group', text)).toBe(false);
   });
+
+  it('rejects a quote word that only matches part of a report word', () => {
+    const report = 'The login was successfully blocked.';
+    expect(isEvidenceQuoteGrounded('The login was successful.', report)).toBe(false);
+    expect(isEvidenceQuoteGrounded('ogin was successfully', report)).toBe(false);
+  });
 });
 
 describe('assertEsqlGroundedInReport', () => {
