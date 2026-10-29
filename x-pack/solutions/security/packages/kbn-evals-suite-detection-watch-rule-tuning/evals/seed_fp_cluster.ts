@@ -11,7 +11,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License.
  */
 
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ALERTS_INDEX } from '../src/constants';
@@ -455,6 +455,9 @@ const baseAlert = (
   at?: Date
 ) => ({
   '@timestamp': (at ?? new Date()).toISOString(),
+  // The harvest builds each alert id from CONCAT(@timestamp, "|", kibana.alert.uuid);
+  // without it CONCAT yields null, alert_ids is empty and the review child is rejected.
+  'kibana.alert.uuid': randomUUID(),
   'kibana.alert.rule.uuid': ruleUuid,
   'kibana.alert.rule.name': ruleName,
   'kibana.alert.rule.rule_id': ruleId,
@@ -568,7 +571,8 @@ export const seedRuleAndFpAlerts = async (
   const bulkResp = await esClient.bulk({
     index: ALERTS_INDEX,
     refresh: 'wait_for',
-    operations: docs.flatMap((d) => [{ index: {} }, d]),
+    // The review tags alerts by document id, so _id must equal kibana.alert.uuid.
+    operations: docs.flatMap((d) => [{ index: { _id: d['kibana.alert.uuid'] } }, d]),
   });
   const failed = bulkResp.items?.filter((i) => i.index?.error) ?? [];
   if (bulkResp.errors || failed.length > 0) {
