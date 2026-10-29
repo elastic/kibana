@@ -621,7 +621,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Make copying a value in the document viewer stop using CSV escaping [#295837]({{kib-pull}}295837).
 * Improve text formatting in cell popovers [#276594]({{kib-pull}}276594).
 * Sort {{esql}} results by timestamp by default [#255532]({{kib-pull}}255532).
-* Support `??` parameters in PromQL [#281486]({{kib-pull}}281486).
 * Persist whether a Discover session tab uses {{esql}} approximation [#282776]({{kib-pull}}282776).
 * Update the height of the {{esql}} editor after an LLM inserts content [#279712]({{kib-pull}}279712).
 * Add the Discover sessions API as a public, generally available API. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
@@ -660,7 +659,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add the `filters` setting on a logger in `kibana.yml` to filter log records by metadata fields [#268372]({{kib-pull}}268372).
 * Add the `i18n.detectBrowserLocale` setting. Set it to `false` to stop {{kib}} from choosing the interface language from the browser's language preferences while users can still pick their own language [#295756]({{kib-pull}}295756).
 * Enable the pt-BR locale [#291123]({{kib-pull}}291123).
-* Remember the last space you visited on {{ech}} and Serverless [#281118]({{kib-pull}}281118).
+* Add a **Remember last selected space** option to the **Spaces preferences** modal, so {{kib}} opens the last space you visited when you log in on {{ech}} and Serverless [#281118]({{kib-pull}}281118).
 * Add the `process.memory.heap.limit` OpenTelemetry metric, which reports the V8 heap size limit in bytes [#295414]({{kib-pull}}295414).
 * Require an OAuth client created in the same {{kib}} space for MCP URLs in custom spaces [#294709]({{kib-pull}}294709).
 * Add `user.full_name` and `user.email`, when available, to audit logs [#287148]({{kib-pull}}287148), [#286616]({{kib-pull}}286616).
@@ -740,7 +739,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix rule API key rotation to write the full document [#288644]({{kib-pull}}288644).
 * Limit the concurrency of alerts-as-data resource installation to cap peak heap usage [#287643]({{kib-pull}}287643).
 * Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
-* Fix the rule type picker not matching partial words in the create-rule template search [#287961]({{kib-pull}}287961).
+* Fix the **Template** tab search in the create rule flow not matching partial words in template names and tags [#287961]({{kib-pull}}287961).
 * Fix the **Disk Usage** rule to ignore frozen nodes [#278374]({{kib-pull}}278374).
 * Fix cross-space writes when you update tags in the rule registry [#285874]({{kib-pull}}285874).
 * Fix task and connector failures that aren't `Error` objects being logged as `[object Object]` [#276782]({{kib-pull}}276782).
@@ -815,7 +814,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the {{fleet}} integration sync task running intensive searches when no follower index exists [#285526]({{kib-pull}}285526).
 * Fix bundled packages matching by name when the package registry is unreachable [#285279]({{kib-pull}}285279).
 * Fix the policy matching for the {{fleet}} server, tag checkbox list, agent policy filter, and `hasChanged()` in proxy configuration [#281195]({{kib-pull}}281195), [#281092]({{kib-pull}}281092), [#279874]({{kib-pull}}279874), [#281059]({{kib-pull}}281059).
-* Fix the `add_integration_to_policy` route by moving it from {{fleet}} to the Integrations app [#281493]({{kib-pull}}281493), [#281028]({{kib-pull}}281028).
+* Fix the `add_integration_to_policy` route by moving it from {{fleet}} to the Integrations app [#281493]({{kib-pull}}281493).
 * Fix the managed OTLP API key privilege clamping and default OpenTelemetry metrics data streams to the `time_series` index mode [#281261]({{kib-pull}}281261), [#281295]({{kib-pull}}281295).
 * Fix `expiration` not being passed in `POST /enrollment_api_keys` to the security APIs [#281324]({{kib-pull}}281324).
 
@@ -913,7 +912,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the data frame analytics results explorer not updating when the job ID changes [#284964]({{kib-pull}}284964).
 * Fix file upload analysis for large NDJSON files [#284960]({{kib-pull}}284960).
 * Fix permissions for trained model testing, and the trained model ID check [#282002]({{kib-pull}}282002), [#280511]({{kib-pull}}280511).
-* Fix special tokens in prompts causing AI features to fail or crash, and fix empty text content blocks for Claude models [#283177]({{kib-pull}}283177), [#281546]({{kib-pull}}281546).
+* Fix special tokens in prompts causing AI features to fail or crash, and fix empty text content blocks for Claude models [#283177]({{kib-pull}}283177).
 * Fix the **Apply annotation to series** checkbox [#279875]({{kib-pull}}279875).
 * Fix the **Sort by** and **Order** selections being lost in the single metric viewer when you open the settings for a second split field [#294604]({{kib-pull}}294604).
 * Fix tool schemas for Google Vertex AI {{infer}} endpoints [#284810]({{kib-pull}}284810).
@@ -1025,6 +1024,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix `ApiKey` credentials being forwarded with the wrong scheme [#297713]({{kib-pull}}297713).
 % * Pass the selected project routing to the data visualizer chart [#286647]({{kib-pull}}286647).
 % * Fix the event rate chart in the anomaly detection wizard [#286639]({{kib-pull}}286639).
+
+% Removed from 9.6.0: rolled back before BC1 (revert #283183, rollback #284281) and not re-added.
+% * Support `??` parameters in PromQL [#281486]({{kib-pull}}281486).
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
 % * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
