@@ -20,7 +20,7 @@ import {
   setDefaultIndexInSpace,
   spaceUrl,
   withHuntHeaders,
-} from '../../../scout_alertzero/api/fixtures';
+} from '../../../../scout_alertzero/api/fixtures';
 
 const RUN = Date.now();
 const LINKED_ALIAS = 'linked_local_project';
