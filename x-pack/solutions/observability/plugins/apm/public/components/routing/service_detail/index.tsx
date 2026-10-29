@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
@@ -229,29 +229,31 @@ export const serviceDetailRoute = {
         children: {
           '/services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: z.object({
-              query: z
-                .object({
-                  comparisonEnabled: toBooleanFromString,
-                  showCriticalPath: toBooleanFromString,
-                })
-                .merge(z.object({ transactionName: z.string().optional() }))
-                .merge(
-                  z.object({
-                    traceId: z.string().optional(),
-                    transactionId: z.string().optional(),
-                    sampleIndex: z.coerce.number().optional(),
-                    flyoutDetailTab: z.string().optional(),
-                    sampleRangeTo: z.coerce.number().optional(),
-                    sampleRangeFrom: z.coerce.number().optional(),
-                    page: z.coerce.number().optional(),
-                    pageSize: z.coerce.number().optional(),
-                    sortField: z.string().optional(),
-                    sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            params: lazySchema(() =>
+              z.object({
+                query: z
+                  .object({
+                    comparisonEnabled: toBooleanFromString,
+                    showCriticalPath: toBooleanFromString,
                   })
-                )
-                .merge(offsetSchema),
-            }),
+                  .merge(z.object({ transactionName: z.string().optional() }))
+                  .merge(
+                    z.object({
+                      traceId: z.string().optional(),
+                      transactionId: z.string().optional(),
+                      sampleIndex: z.coerce.number().optional(),
+                      flyoutDetailTab: z.string().optional(),
+                      sampleRangeTo: z.coerce.number().optional(),
+                      sampleRangeFrom: z.coerce.number().optional(),
+                      page: z.coerce.number().optional(),
+                      pageSize: z.coerce.number().optional(),
+                      sortField: z.string().optional(),
+                      sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                    })
+                  )
+                  .merge(offsetSchema),
+              })
+            ),
             defaults: {
               query: {
                 showCriticalPath: '',
