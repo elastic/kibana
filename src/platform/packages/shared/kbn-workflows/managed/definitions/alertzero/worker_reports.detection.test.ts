@@ -639,7 +639,39 @@ describe('Rule Coverage outcome reports', () => {
     const steps = topLevelSteps(ALERTZERO_COVERAGE_WORKER_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_worker_run_completed');
 
-    describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
+    describeReportStep(
+      steps,
+      'report_worker_run_completed',
+      'worker_run_completed',
+      'emit_search_failure'
+    );
+
+    // A failed dependency check ends the run before `report_worker_run_completed`, so the
+    // blocked run is reported on its own, right before the run fails.
+    describeReportStep(
+      steps,
+      'report_worker_blocked',
+      'worker_run_completed',
+      'fail_context_engine_unavailable'
+    );
+
+    it.each([
+      [
+        'Context Engine is unavailable',
+        { check_context_engine: { error: { message: 'HTTP 404' } } },
+        true,
+      ],
+      ['AlertZero is unavailable', { check_alertzero: { error: { message: 'HTTP 503' } } }, true],
+      [
+        'both checks pass',
+        { check_context_engine: { output: {} }, check_alertzero: { output: {} } },
+        false,
+      ],
+    ])('reports a blocked run when %s: %s', (_case, checks, reported) => {
+      expect(evalGuard(stepNamed(steps, 'report_worker_blocked'), { steps: checks })).toBe(
+        reported
+      );
+    });
 
     const MAX_OPEN_CHECKS = 100;
     const BATCH_SIZE = 5;
@@ -1048,7 +1080,7 @@ describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
     [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 33],
     [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 35],
-    [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
+    [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 7],
     [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 7],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);

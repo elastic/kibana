@@ -8,6 +8,15 @@
 import { parse } from 'yaml';
 import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import type { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_WATCH_URL_TEMPLATE,
+  API_VERSIONS,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
+} from '@kbn/alertzero-common';
+import {
+  AI_INDEX_API_VERSION,
+  AI_INDEX_BY_ID_PATH,
+} from '@kbn/context-engine-plugin/common/constants';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -94,6 +103,7 @@ const resolveExpression = (expression: unknown, context: Record<string, unknown>
 interface NestedStep {
   name: string;
   type: string;
+  status?: string;
   if?: string;
   condition?: string;
   expression?: string;
@@ -246,11 +256,9 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // The sweep reports read failures as flags instead of failing. Dropping them would
-    // make a failed sweep indistinguishable from an empty queue.
     it('echoes the sweep counts and failure flags as its own output', () => {
       const emit = flattenSteps(worker.steps as unknown as NestedStep[]).find(
-        ({ type }) => type === 'workflow.output'
+        ({ name }) => name === 'emit_result'
       );
       const declared = (worker.outputs as Array<{ name: string }>).map(({ name }) => name);
       const sweepOutput = {
@@ -267,6 +275,18 @@ describe('detection rule workflows', () => {
       for (const [key, value] of Object.entries(sweepOutput)) {
         expect(resolveExpression(emit?.with?.[key], context)).toBe(value);
       }
+    });
+
+    // A failed sweep (a failed dependency check or gap search) must fail this run too.
+    // The sweep runs synchronously and a failed child fails the step, so the step must
+    // not continue on failure.
+    it('fails the run when the sweep fails', () => {
+      const run = flattenSteps(worker.steps as unknown as NestedStep[]).find(
+        ({ name }) => name === 'run_rule_coverage'
+      );
+
+      expect(run?.type).toBe('workflow.execute');
+      expect(run?.['on-failure']).toBeUndefined();
     });
   });
 
@@ -2138,6 +2158,108 @@ describe('detection rule workflows', () => {
         expect(search['on-failure']).toEqual({ continue: true });
       });
 
+      // The first gap write creates the index, so a project with no hunt report yet has
+      // none. A missing index is an empty queue. Any other read failure fails the run.
+      it('reads a missing indicator index as an empty queue', () => {
+        const search = withOf('search_pending_indicators');
+
+        expect(search.ignore_unavailable).toBe(true);
+        expect(search.allow_no_indices).toBe(true);
+      });
+
+      // The dependency checks run before anything else, so a failed check starts no review,
+      // opens no investigation and calls no model.
+      it('checks its dependencies, reports a blocked run, then fails, before any other step', () => {
+        const names = sweepSteps.map(({ name }) => name);
+
+        expect(names.slice(0, 6)).toEqual([
+          'check_context_engine',
+          'check_alertzero',
+          'report_worker_blocked',
+          'fail_context_engine_unavailable',
+          'fail_alertzero_unavailable',
+          'list_active_reviews',
+        ]);
+      });
+
+      // Reviews record decisions through Context Engine. With it off, a decided gap stays
+      // pending and every sweep reviews it again.
+      it('fails when Context Engine is unavailable', () => {
+        const check = step('check_context_engine');
+        const failure = step('fail_context_engine_unavailable');
+
+        expect(check.type).toBe('kibana.request');
+        expect(check.with?.method).toBe('GET');
+        // Built from Context Engine's own route constants, so a moved route fails this test.
+        expect(check.with?.path).toBe(
+          `/s/{{ workflow.spaceId }}${AI_INDEX_BY_ID_PATH.replace(
+            '{aiIndexId}',
+            '{{ inputs.ai_index_id | default: consts.ai_index_id }}'
+          )}`
+        );
+        expect(check.with?.headers).toEqual({ 'elastic-api-version': AI_INDEX_API_VERSION });
+        expect(check['on-failure']).toEqual({ continue: true });
+        expect(failure.type).toBe('workflow.fail');
+        expect(failure.if).toBe('${{ steps.check_context_engine.error != null }}');
+        expect(String(failure.with?.message)).toContain('contextEngine:enabled');
+      });
+
+      // Reviews open investigations and proposals. The AlertZero route answers 404, 403 or
+      // 503 from the same checks the AlertZero UI and API use (`withAlertZeroEnabled`).
+      it('fails when AlertZero or its dependencies are unavailable', () => {
+        const check = step('check_alertzero');
+        const failure = step('fail_alertzero_unavailable');
+
+        expect(check.type).toBe('kibana.request');
+        expect(check.with?.method).toBe('GET');
+        // Built from AlertZero's own route constants, so a moved route fails this test.
+        expect(check.with?.path).toBe(
+          `/s/{{ workflow.spaceId }}${ALERTZERO_WATCH_URL_TEMPLATE.replace(
+            '{watchId}',
+            SYSTEM_SECURITY_WATCH_DETECTION_ID
+          )}`
+        );
+        expect(check.with?.headers).toEqual({ 'elastic-api-version': API_VERSIONS.internal.v1 });
+        expect(check['on-failure']).toEqual({ continue: true });
+        expect(failure.type).toBe('workflow.fail');
+        expect(failure.if).toBe('${{ steps.check_alertzero.error != null }}');
+        expect(String(failure.with?.message)).toContain('steps.check_alertzero.error.message');
+      });
+
+      it('reports a blocked run only when a dependency check fails', () => {
+        const report = step('report_worker_blocked');
+
+        expect(report.if).toBe(
+          '${{ steps.check_context_engine.error != null or steps.check_alertzero.error != null }}'
+        );
+        expect(report.with).toEqual({
+          event: 'worker_run_completed',
+          run_outcome: 'blocked_precondition',
+          degraded_reason: 'dependency_unavailable',
+        });
+      });
+
+      // The search continues on failure so the outcome is still reported, then the run
+      // ends as failed. A completed run with zero pending then always means an empty queue.
+      it('fails the run after reporting the outcome when the search fails', () => {
+        const names = sweepSteps.map(({ name }) => name);
+        const failure = step('emit_search_failure');
+        const outputs = (sweep.outputs as Array<{ name: string }>).map(({ name }) => name);
+
+        expect(failure.type).toBe('workflow.output');
+        expect(failure.status).toBe('failed');
+        expect(failure.if).toBe('${{ steps.search_pending_indicators.error != null }}');
+        expect(names.indexOf('report_worker_run_completed')).toBeLessThan(
+          names.indexOf('emit_search_failure')
+        );
+        expect(names.indexOf('emit_search_failure')).toBeLessThan(names.indexOf('emit_result'));
+        expect(Object.keys(failure.with ?? {})).toEqual(['message', ...outputs]);
+        expect(failure.with?.search_failed).toBe(true);
+        expect(String(failure.with?.message)).toContain(
+          'steps.search_pending_indicators.error.message'
+        );
+      });
+
       // All spaces share one indicator index. The sweep and the review filter on the same field.
       it('scopes the sweep search and the review read to the current space', () => {
         const spaceFilter = { term: { 'attributes.space_id': '{{ workflow.spaceId }}' } };
@@ -2254,8 +2376,7 @@ describe('detection rule workflows', () => {
         );
       });
 
-      // A sweep that reports zero pending because a read failed is not an empty queue,
-      // so each failed read is reported separately.
+      // Each failed read is reported separately. A failed lookup does not fail the run.
       it('reports the queue and each failed read separately', () => {
         const emit = withOf('emit_result') as Record<string, string>;
         const outputs = (sweep.outputs as Array<{ name: string }>).map(({ name }) => name);
