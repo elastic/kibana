@@ -39,13 +39,30 @@ node scripts/evals run --suite agent-builder-visualizations
 
 Seed examples live in `evals/visualization_creation/datasets/`, one file per data source, concatenated by `datasets/index.ts` (~21 prompts):
 
-- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked), a two-series time series scored on ES|QL only, metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus one Vega-Lite scatter
-- **ecommerce** (`kibana_sample_data_ecommerce`): metric (including a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields
+- **logs** (`kibana_sample_data_logs`): xy (bar/line/horizontal/stacked), a two-series time series scored on ES|QL only, metric (single and per-OS tiles via `breakdown_by`), gauge, pie, tag_cloud, data_table, heatmap, treemap, a line split by response code via `breakdown_by`, plus a Vega-Lite scatter and a layered Vega-Lite time series (bars and a line)
+- **ecommerce** (`kibana_sample_data_ecommerce`): metric (an order count, revenue, and a primary + secondary metric), pie, xy over `order_date` + numeric revenue/quantity fields, and a Vega-Lite single number. The source has no `@timestamp`, so every gold filters `order_date` with the time-picker params
+- **flights** (`kibana_sample_data_flights`): a pie by carrier, filtered on its `timestamp` field
 - **host metrics** (synthtrace Beats load fixture): multi-series load averages on `metrics-system.load-default`
 - **edits** (`datasets/edits.ts`, run as its own dataset by `visualization_edit.spec.ts`): two-turn conversations where the first turn creates a chart and the second changes it (make it horizontal, split by response code, switch to a pie, add a second series). The gold describes the chart after the edit; only that chart is scored, and the trajectory sees both turns.
 - **refusals** (`datasets/negatives.ts`, run as its own dataset by `visualization_refusal.spec.ts`): a missing index, a missing field, and an ambiguous request. The missing-index case doubles as a canary: if positive evaluators ever score it, they have stopped discriminating.
 
 Each positive example carries a partial Lens Config API gold (`config`): chart `type`, layer type / column roles, and ground-truth ES|QL nested in `data_source.query`. Examples are built with the factories in `datasets/factories.ts` (`xyExample`, `metricExample`, `partitionExample`, …) over the query builders `categoricalQuery`, `timeSeriesQuery`, and `totalsQuery`, so adding an example is one call and every gold query follows the same idiom by construction. Every example carries `metadata.chartFamily` (set by its factory), `metadata.dataSource` (set per dataset file), and, when the gold pins Config API surface beyond basic column roles, `metadata.configFeatures` (`breakdown_by`, `secondary_metric`, `multi_series`), so golden-cluster results can be sliced by chart family or data source instead of only by suite average.
+
+### Custom content
+
+`evals/custom_content/custom_content.spec.ts` runs its own dataset (`evals/custom_content/datasets/custom_content.ts`) through `evaluateCustomContentDataset` (`src/custom_content/`), separate from the Lens/Vega evaluators above, which do not apply to an HTML panel. The create_visualization tool result deliberately carries neither the template nor the height, so the task reads the panel back from the conversation's visualization attachment (first and latest stored version) and the evaluators score that. The examples are status cards, a funnel, a flow, a top-5 ranking, KPI cards, a user-supplied query, two static panels (banner, legend) and four two-turn edits (style and data, on a data panel and a static one). Every prompt says "custom panel" so the agent does not pick Lens or Vega.
+
+- **Custom Content Template** (`CODE`) — the stored template is present, parses as Liquid, has no `<script>` tag, is within the 500 KB limit, and any declared height is within 200–1200.
+- **Custom Content Data** (`CODE`) — a static example ends with no query and a data example ends with one. A stray query on a static panel scores 0 (the generator always returns a query, so a data-free request can produce a `ROW` literal).
+- **ES|QL Execution Validity** (`CODE`, shared) — the stored query parses and runs.
+- **Custom Content Query Contents** (`CODE`) — the final query contains the expected text (a user-supplied query verbatim, or a grouping kept across a data edit); case and whitespace are ignored.
+- **Custom Content Row Limit** (`CODE`) — with a declared limit the query ends with exactly it; otherwise only the chart default `LIMIT 10`, which truncates a board or diagram, is rejected.
+- **Custom Content Row Order** (`CODE`) — runs the query and checks that a text column lists the expected labels (whole words, ignoring case), as rows, in the requested order (a funnel sorted by value or returned as one wide row scores 0).
+- **Custom Content Template Columns** (`CODE`) — every `row["…"]` / `max["…"]` the template reads is a column the query returns. Templates that read columns with dot access (`row.col`) are not checked and are reported as skipped.
+- **Custom Content Edit** (`CODE`) — the follow-up stored a new version of the same panel, compared with the panel as it stood after the first turn; a style edit changed the template and kept the query, a data edit changed the query. A follow-up that called no tool (`no-follow-up-tool-call`) or that created a new panel instead of editing the first scores 0.
+- **Trace-based** (shared) — tokens, latency and tool-call counts from the agent's OTel trace, as above. There is no Trajectory evaluator here: the agent can store a custom panel with `create_visualization` or with `generate_dashboard`, so there is no single expected tool path to compare.
+
+Run only this spec with `node scripts/evals run --suite agent-builder-visualizations --grep "Custom Content"`.
 
 ### What a gold `config` can assert
 
@@ -73,7 +90,7 @@ Column resolution follows one alias hop inside `STATS` and `EVAL`, tolerates `.k
 
 **Gold queries follow the agent's idiom** (see `agent-builder-visualizations-server/shared/esql_instructions.ts`):
 
-- **Categorical / metric** golds include the raw-`@timestamp` time filter (`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`).
+- **Categorical / metric** golds on `@timestamp` omit the time filter, because Kibana applies the time range to `@timestamp` on its own. Golds on any other date field include it (for example `WHERE order_date >= ?_tstart AND order_date < ?_tend`).
 - **`@timestamp` time-series** golds use `TBUCKET(100, ?_tstart, ?_tend)` and omit the timestamp `WHERE`. The bounds size the buckets; Kibana binds them when the chart renders. An extra `@timestamp` WHERE is still accepted and stripped before equivalence scoring. `BUCKET(@timestamp, <count>, ?_tstart, ?_tend)` remains equivalent.
 - **Other date fields** (for example `order_date`) stay on `BUCKET(<time field>, 100, ?_tstart, ?_tend)`. `TBUCKET` only buckets `@timestamp`.
 

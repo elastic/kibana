@@ -14,6 +14,7 @@ import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
+import { useReportToastError } from '../../telemetry';
 import {
   ensureWorkerServiceAccounts,
   type CoreServiceAccounts,
@@ -35,8 +36,11 @@ export const useEnableWorkers = (
   onSavingChange?: (saving: boolean) => void
 ) => {
   const queryClient = useQueryClient();
-  const { services } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts }>();
+  const { services } = useKibana<
+    CoreStart & { serviceAccounts?: CoreServiceAccounts; isServerless?: boolean }
+  >();
   const [isSaving, setIsSaving] = useState(false);
+  const reportShown = useReportToastError('onboarding');
 
   const handleEnableAndContinue = async () => {
     // Filter against the cached workers list so skill-gated workers absent from
@@ -61,7 +65,8 @@ export const useEnableWorkers = (
     const accounts = await ensureWorkerServiceAccounts(
       services.http!,
       services.serviceAccounts,
-      needsAccount
+      needsAccount,
+      { isServerless: services.isServerless ?? false }
     );
     const accountFailures = needsAccount.flatMap((id) => {
       const account = accounts.get(id);
@@ -111,7 +116,7 @@ export const useEnableWorkers = (
     results.forEach((result) => {
       if (result.status === 'rejected') {
         hadFailure = true;
-        notifyWorkerUpdateError(services.notifications!.toasts, result.reason);
+        notifyWorkerUpdateError(services.notifications!.toasts, result.reason, reportShown);
       } else {
         hadSuccess = true;
       }
@@ -133,6 +138,7 @@ export const useEnableWorkers = (
         // workers refetch with partially-committed state cannot transition to
         // ConversationsPage before the user has had a chance to retry or leave.
         services.notifications!.toasts.addWarning(PARTIAL_SUCCESS_WARNING);
+        reportShown('partial_failure');
       } else {
         // Total failure: nothing was committed server-side, so it is safe to release
         // the save lock and let a subsequent worker enable transition normally.

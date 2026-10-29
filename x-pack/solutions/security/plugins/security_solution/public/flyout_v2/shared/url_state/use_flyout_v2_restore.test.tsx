@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import { encode } from '@kbn/rison';
-import { openDescriptorAsStart, useFlyoutV2RestoreFromUrl } from './use_flyout_v2_restore';
+import { useFlyoutV2RestoreFromUrl } from './use_flyout_v2_restore';
 import { FLYOUT_V2_URL_PARAM, FLYOUT_V2_TIMELINE_URL_PARAM } from './flyout_v2_url_param';
 import type { FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import { useFlyoutApi } from '../../use_flyout_api';
@@ -172,6 +172,226 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       entityId: 'host:web-01',
       scopeId: 'agent-builder-entity-card',
       origin: FLYOUT_ORIGIN.AI_CHAT_ENTITY_ATTACHMENT,
+    });
+  });
+
+  it('restores a child entity flyout in resolved mode when the descriptor carries it', () => {
+    renderRestore(
+      buildUrl([
+        { kind: 'rule', ruleId: 'rule-1' },
+        {
+          kind: 'user',
+          userName: 'alice',
+          entityId: 'user:alice',
+          scopeId: 'entities-table',
+          mode: 'resolved',
+        },
+      ])
+    );
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openUserFlyoutAsChild).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userName: 'alice',
+        entityId: 'user:alice',
+        scopeId: 'entities-table',
+        mode: 'resolved',
+      })
+    );
+  });
+
+  it('restores an entity flyout in resolved mode when the descriptor carries it', () => {
+    const { history } = renderRestore('/');
+
+    act(() => {
+      history.push(
+        buildUrl([
+          {
+            kind: 'user',
+            userName: 'alice',
+            entityId: 'user:alice',
+            scopeId: 'entities-table',
+            mode: 'resolved',
+          },
+        ])
+      );
+      jest.runAllTimers();
+    });
+
+    expect(mockFlyoutApi.openUserFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ userName: 'alice', entityId: 'user:alice', mode: 'resolved' })
+    );
+  });
+
+  describe('resolved-mode entity tools', () => {
+    const restoreTool = (
+      kind:
+        | 'entityAnomalyInsights'
+        | 'entityAlertsInsights'
+        | 'entityMisconfigurationInsights'
+        | 'entityVulnerabilityInsights'
+    ) => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind,
+              entityType: 'host',
+              value: 'my-host',
+              entityId: 'host:my-host',
+              mode: 'resolved',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+    };
+    const resolvedTool = expect.objectContaining({
+      value: 'my-host',
+      entityId: 'host:my-host',
+      mode: 'resolved',
+    });
+    const resolvedHost = expect.objectContaining({
+      hostName: 'my-host',
+      entityId: 'host:my-host',
+      mode: 'resolved',
+    });
+
+    it('restores entityAnomalyInsights in resolved mode and reopens the host in resolved mode', () => {
+      restoreTool('entityAnomalyInsights');
+      expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(resolvedTool);
+      act(() => {
+        mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0].onOpenEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
+    });
+
+    it('restores entityAlertsInsights in resolved mode and reopens the host in resolved mode', () => {
+      restoreTool('entityAlertsInsights');
+      expect(mockFlyoutApi.openEntityAlertsInsights).toHaveBeenCalledWith(resolvedTool);
+      act(() => {
+        mockFlyoutApi.openEntityAlertsInsights.mock.calls[0][0].onShowEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
+    });
+
+    it('restores the originating scope of entityAnomalyInsights', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityAnomalyInsights',
+              entityType: 'host',
+              value: 'my-host',
+              entityId: 'host:my-host',
+              scopeId: 'entity-analytics-new-entities-table-7d',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+        expect.objectContaining({
+          value: 'my-host',
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        })
+      );
+    });
+
+    it('opens the child entity flyout from a restored entityAnomalyInsights with its scope', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityAnomalyInsights',
+              entityType: 'host',
+              value: 'my-host',
+              entityId: 'host:my-host',
+              scopeId: 'entity-analytics-new-entities-table-7d',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      act(() => {
+        mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0].onOpenEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        })
+      );
+    });
+
+    it('restores the originating scope of entityAlertsInsights', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityAlertsInsights',
+              entityType: 'host',
+              value: 'my-host',
+              entityId: 'host:my-host',
+              scopeId: 'entities-table',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      expect(mockFlyoutApi.openEntityAlertsInsights).toHaveBeenCalledWith(
+        expect.objectContaining({ value: 'my-host', scopeId: 'entities-table' })
+      );
+    });
+
+    it('restores entityMisconfigurationInsights in resolved mode and reopens the host in resolved mode', () => {
+      restoreTool('entityMisconfigurationInsights');
+      expect(mockFlyoutApi.openEntityMisconfigurationInsights).toHaveBeenCalledWith(resolvedTool);
+      act(() => {
+        mockFlyoutApi.openEntityMisconfigurationInsights.mock.calls[0][0].onShowEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
+    });
+
+    it('restores entityVulnerabilityInsights in resolved mode and reopens the host in resolved mode', () => {
+      restoreTool('entityVulnerabilityInsights');
+      expect(mockFlyoutApi.openEntityVulnerabilityInsights).toHaveBeenCalledWith(resolvedTool);
+      act(() => {
+        mockFlyoutApi.openEntityVulnerabilityInsights.mock.calls[0][0].onShowHost();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
+    });
+
+    it('restores entityResolution in resolved mode and reopens the host in resolved mode', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityResolution',
+              entityId: 'host:my-host',
+              entityType: 'host',
+              entityName: 'my-host',
+              scopeId: 'entities-table',
+              mode: 'resolved',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'host:my-host', mode: 'resolved' })
+      );
+      act(() => {
+        mockFlyoutApi.openEntityResolution.mock.calls[0][0].onShowEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
     });
   });
 
@@ -433,61 +653,6 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       documentId: 'doc-1',
       indexName: '.siem-signals-*',
       origin: FLYOUT_ORIGIN.URL_RESTORE,
-    });
-  });
-
-  it('forwards an origin flyout size for an attack, document, or rule opened as start', () => {
-    openDescriptorAsStart(
-      { kind: 'attack', attackId: 'atk-1', indexName: '.alerts-*' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 'm' }
-    );
-    openDescriptorAsStart(
-      { kind: 'document', documentId: 'alert-1', indexName: '.alerts-*' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 640 }
-    );
-    openDescriptorAsStart(
-      { kind: 'documentFromPattern', documentId: 'alert-2', indexName: '.alerts-*' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 640 }
-    );
-    openDescriptorAsStart(
-      { kind: 'rule', ruleId: 'rule-1' },
-      {},
-      mockFlyoutApi,
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 's' }
-    );
-
-    expect(mockFlyoutApi.openAttackFlyout).toHaveBeenCalledWith({
-      attackId: 'atk-1',
-      indexName: '.alerts-*',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 'm',
-    });
-    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).toHaveBeenCalledWith({
-      documentId: 'alert-1',
-      indexName: '.alerts-*',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 640,
-    });
-    expect(mockFlyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
-      documentId: 'alert-2',
-      indexName: '.alerts-*',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 640,
-    });
-    expect(mockFlyoutApi.openRuleFlyout).toHaveBeenCalledWith({
-      ruleId: 'rule-1',
-      origin: FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      originFlyoutSize: 's',
     });
   });
 

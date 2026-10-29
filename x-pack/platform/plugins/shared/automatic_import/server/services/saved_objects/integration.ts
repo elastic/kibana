@@ -36,7 +36,7 @@ export const integrationSavedObjectType: SavedObjectsType = {
     },
   },
   management: {
-    icon: 'integration',
+    icon: 'package',
     importableAndExportable: true,
     getTitle(obj) {
       return obj.attributes.metadata?.title ?? obj.attributes.integration_id;

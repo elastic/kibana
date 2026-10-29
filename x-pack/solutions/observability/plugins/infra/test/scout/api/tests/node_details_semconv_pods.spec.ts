@@ -18,6 +18,7 @@ import { apiTest, generatePodsData, generateSemconvPodsData, testData } from '..
 
 const POD_WITH_LIMITS = testData.SEMCONV_PODS[0];
 const POD_WITHOUT_LIMITS = testData.SEMCONV_PODS[1];
+const POD_WITH_MULTIPLE_INTERFACES = testData.SEMCONV_PODS[2];
 const SEMCONV_CPU_WITH_LIMIT = 0.46;
 const SEMCONV_CPU_WITHOUT_LIMIT = 0.32;
 const SEMCONV_MEMORY_WITH_LIMIT = 0.55;
@@ -142,6 +143,35 @@ apiTest.describe(
         ?.series.find((series) => series.id === 'rx');
       expect(overviewRx?.data.some((point) => (point.value ?? 0) > 0)).toBe(true);
     });
+
+    apiTest(
+      'sums network traffic across interfaces for an OpenTelemetry pod',
+      async ({ apiClient }) => {
+        const response = await fetchNodeDetails(
+          apiClient,
+          requestFor(
+            POD_WITH_MULTIPLE_INTERFACES.uid,
+            ['podOverview', 'podNetworkTraffic'],
+            'semconv'
+          )
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const { metrics } = response.body as NodeDetailsMetricDataResponse;
+        const expectedNetworkRate =
+          SEMCONV_NETWORK_BYTES_PER_SEC * (POD_WITH_MULTIPLE_INTERFACES.interfaces?.length ?? 1);
+
+        const network = metrics.find((metric) => metric.id === 'podNetworkTraffic');
+        expect(network?.series.map((series) => series.id).sort()).toStrictEqual(['rx', 'tx']);
+        // podNetworkTraffic RX ends with invert-posonly so the chart draws receive below zero.
+        expect(lastNonZeroSeries(network, 'rx')).toBeCloseTo(-expectedNetworkRate, 2);
+        expect(lastNonZeroSeries(network, 'tx')).toBeCloseTo(expectedNetworkRate, 2);
+
+        const overview = metrics.find((metric) => metric.id === 'podOverview');
+        expect(lastNonZeroSeries(overview, 'rx')).toBeCloseTo(expectedNetworkRate, 2);
+        expect(lastNonZeroSeries(overview, 'tx')).toBeCloseTo(expectedNetworkRate, 2);
+      }
+    );
 
     apiTest('falls back to node utilization when a limit is absent', async ({ apiClient }) => {
       const response = await fetchNodeDetails(

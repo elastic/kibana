@@ -15,8 +15,6 @@ import type {
   Subject,
 } from './types';
 
-type IdentitySubject = Extract<Subject, { kind: 'user' | 'service' }>;
-
 const sentenceCase = (value: string): string =>
   value.length === 0 ? value : `${value[0].toUpperCase()}${value.slice(1)}`;
 
@@ -48,12 +46,6 @@ export const describeProcess = (selector: ProcessSelector): string => {
     return `\`${selector.processName}\` (\`${selector.entityId}\`)`;
   }
   return `\`${selector.processName}\``;
-};
-
-/** e.g. `high_impact` -> `high impact`; the level an identity proposal would set, when it carries one. */
-const criticalityLevelText = (actionInput: Record<string, unknown>): string | undefined => {
-  const level = actionInput.criticality_level;
-  return typeof level === 'string' ? level.replace(/_/g, ' ') : undefined;
 };
 
 /** e.g. `Hunt Watch confirmed *Hunt: PowerShell (T1059.001) [ti-repor]* on WIN-ANALYST01`, no trailing period. */
@@ -140,12 +132,6 @@ const buildActionRationale = ({
   subject: Subject;
 }): string => {
   const name = entry.name.trim().toLowerCase();
-  if (subject.kind === 'user' || subject.kind === 'service') {
-    if (name.startsWith('set asset criticality')) {
-      return `Raising its asset criticality lifts its risk score and flags it on the ${subject.kind} entity page while its credentials are reviewed`;
-    }
-    return `This action responds to the ${subject.kind} directly`;
-  }
   if (subject.kind === 'process') {
     if (name.startsWith('kill')) {
       return 'Killing it stops execution immediately';
@@ -175,34 +161,13 @@ const buildHuntContextLine = (state: CurrentRunState): string | undefined => {
   return parts.length > 0 ? addPeriod(parts.join('; ')) : undefined;
 };
 
-const buildIdentityActionLine = ({
-  entry,
-  subject,
-  actionInput,
-}: {
-  entry: ActionCatalogEntry;
-  subject: IdentitySubject;
-  actionInput: Record<string, unknown>;
-}): string => {
-  const name = sentenceCase(entry.name.trim());
-  const level = actionInput.criticality_level;
-  return typeof level === 'string'
-    ? `**Action:** ${name} for ${subject.kind} **${subject.value}** to ${level}.`
-    : `**Action:** ${name} for ${subject.kind} **${subject.value}**.`;
-};
-
 const buildActionLine = ({
   entry,
   subject,
-  actionInput,
 }: {
   entry: ActionCatalogEntry;
   subject: Subject;
-  actionInput: Record<string, unknown>;
 }): string => {
-  if (subject.kind === 'user' || subject.kind === 'service') {
-    return buildIdentityActionLine({ entry, subject, actionInput });
-  }
   const name = sentenceCase(entry.name.trim());
   if (subject.kind === 'process') {
     const verb = stripTrailingWord(name, 'process') ?? name;
@@ -219,26 +184,18 @@ const buildActionLine = ({
 /**
  * Verb-first Proposal title so two actions on the same host (or two processes on the same
  * host) read as distinct, not duplicates. Plain text: the queue row and attachment card
- * truncate with ellipsis, so informative words come first. Identity titles name the level
- * when the action sets one (`Mark user dev-user high impact`).
+ * truncate with ellipsis, so informative words come first.
  */
 export const buildProposalTitle = ({
   entry,
   subject,
-  actionInput,
 }: {
   entry: ActionCatalogEntry;
   subject: Subject;
-  actionInput: Record<string, unknown>;
 }): string => {
   const name = sentenceCase(entry.name.trim());
   let title: string;
-  if (subject.kind === 'user' || subject.kind === 'service') {
-    const level = criticalityLevelText(actionInput);
-    title = level
-      ? `Mark ${subject.kind} ${subject.value} ${level}`
-      : `${name} for ${subject.kind} ${subject.value}`;
-  } else if (subject.kind === 'process') {
+  if (subject.kind === 'process') {
     const verb = stripTrailingWord(name, 'process') ?? name;
     title = `${verb} ${describeProcessForTitle(subject.processSelector)} on ${subject.host.name}`;
   } else if (isHostAction(name)) {
@@ -262,9 +219,6 @@ const buildEvidenceLines = (
       ];
     case 'host':
       return [huntConfirmedText(state, subject.host), evidenceSummaryText(state)];
-    case 'user':
-    case 'service':
-      return [huntConfirmedText(state), evidenceSummaryText(state)];
   }
 };
 
@@ -276,17 +230,15 @@ export const buildProposalComment = ({
   entry,
   subject,
   state,
-  actionInput,
   ruleLine,
 }: {
   entry: ActionCatalogEntry;
   subject: Subject;
   state: CurrentRunState;
-  actionInput: Record<string, unknown>;
   /** The selection rule that chose this action; rendered as the first Why bullet when present. */
   ruleLine?: string;
 }): string => {
-  const actionLine = buildActionLine({ entry, subject, actionInput });
+  const actionLine = buildActionLine({ entry, subject });
   const whyLines = [
     ruleLine,
     ...buildEvidenceLines(state, subject),

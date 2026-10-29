@@ -20,7 +20,7 @@ import {
 } from '@kbn/fleet-plugin/public';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getOnboardingSessionKey } from '../../onboarding_session_storage';
+import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 
 export interface UseOnboardingSOResult {
   /** Creates the SO (best-effort). Returns the new deployment id, or null on failure. */

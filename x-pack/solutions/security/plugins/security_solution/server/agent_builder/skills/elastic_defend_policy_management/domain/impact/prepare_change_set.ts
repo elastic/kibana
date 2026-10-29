@@ -9,25 +9,18 @@ import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { diffPolicyConfig } from '../diff_policy_config';
 import * as fieldRegistry from '../field_registry';
 import { normalize } from '../normalize_policy_config';
+import type { RansomwareLinuxContext } from './expand_change_set';
 import { expandChangeSet } from './expand_change_set';
 import type {
   AssessPolicyChangeParams,
   PreparedPolicyChangeAssessment,
   PolicyChangeSideEffect,
 } from './policy_change_operation';
-import {
-  POLICY_CHANGE_PREPARATION_ERROR_CODE,
-  PolicyChangePreparationError,
-  nonWritablePathMessage,
-} from './policy_change_operation';
 
 const toDerivedSideEffect = (path: string, from: unknown, to: unknown): PolicyChangeSideEffect => {
   const entry = fieldRegistry.getFieldRegistryEntry(path);
   if (entry === undefined) {
-    throw new PolicyChangePreparationError(
-      POLICY_CHANGE_PREPARATION_ERROR_CODE.non_writable_path,
-      nonWritablePathMessage(path)
-    );
+    throw new Error(`Derived policy change has no field registry entry: ${path}`);
   }
 
   return {
@@ -47,9 +40,10 @@ const toDerivedSideEffect = (path: string, from: unknown, to: unknown): PolicyCh
 
 export const prepareChangeSet = (
   params: AssessPolicyChangeParams,
-  currentConfig: PolicyConfig
+  currentConfig: PolicyConfig,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): PreparedPolicyChangeAssessment => {
-  const prepared = expandChangeSet(params.changes, currentConfig);
+  const prepared = expandChangeSet(params.changes, currentConfig, ransomwareLinuxContext);
   const normalizedDiff = diffPolicyConfig(
     normalize(currentConfig),
     normalize(prepared.proposedConfig)

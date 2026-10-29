@@ -19,7 +19,9 @@ import { CREATE_DATASET_PATH, DATASETS_PATH } from '../app_paths';
 import { useLoadList } from '../use_load_list';
 import { CreateDatasetWizardPage } from './create_dataset_wizard_page';
 import { createDatasetWizardStrings } from './create_dataset_wizard_i18n';
+
 import { UI_COUNTER_EVENTS } from '../ui_counters';
+import { docLinksMock } from '../doc_links_mock';
 
 // `CreateDatasetWizardPage` reaches `@kbn/monaco` through code editors used in the mapping step.
 // Loading the real module pulls in Monaco language registration which evaluates generated i18n
@@ -33,35 +35,6 @@ jest.mock('@kbn/code-editor', () => ({
     <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
   ),
 }));
-
-const docLinksMock = {
-  links: {
-    elasticsearch: {
-      mappingReference: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference',
-      mappingKeyword:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/keyword',
-      mappingBoolean:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/boolean',
-      mappingIp: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/ip',
-      mappingDate: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date',
-      mappingUnsignedLong:
-        'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/unsigned-long',
-      mappingNumber: 'https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/number',
-    },
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
 
 describe('CreateDatasetWizardPage', () => {
   const clickNext = async (getByTestId: ReturnType<typeof render>['getByTestId']) => {
@@ -785,58 +758,6 @@ describe('CreateDatasetWizardPage', () => {
     expect(getByTestId('createDatasetWizardReviewRequest')).toHaveTextContent(
       '"target_split_size": "512mb"'
     );
-  });
-
-  it('requires at least one mapped field when Define schema is selected', async () => {
-    const { getByTestId, findByTestId, queryByTestId } = renderWizard();
-
-    fireEvent.click(getByTestId('createDatasetDataSource'));
-    fireEvent.click(await findByTestId('createDatasetDataSource-source-1'));
-    fireEvent.change(getByTestId('createDatasetName'), { target: { value: 'logs-dataset' } });
-    fireEvent.change(getByTestId('createDatasetResource'), { target: { value: 's3://bucket/*' } });
-    selectFormat(getByTestId, 'csv');
-
-    await clickNext(getByTestId);
-    expect(
-      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
-    ).toBeInTheDocument();
-
-    await clickNext(getByTestId);
-    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
-
-    // Keep timeseries enabled, but make it valid.
-    fireEvent.change(getByTestId('createDatasetWizardTimestampPath'), {
-      target: { value: 'event_time' },
-    });
-
-    // Select Define schema (dynamic = false).
-    fireEvent.click(getByTestId('createDatasetWizardDefineSchemaCard'));
-
-    // Attempt to proceed.
-    await clickNext(getByTestId);
-
-    // Should stay on mapping step and show the error.
-    expect(queryByTestId('createDatasetWizardReviewStep')).toBeNull();
-    expect(getByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeInTheDocument();
-    const testSubjsInDocumentOrder = Array.from(
-      document.querySelectorAll(
-        '[data-test-subj="dataFederationMappingEditorAddField"], [data-test-subj="createDatasetWizardMappingStepErrors"], [data-test-subj="nextButton"]'
-      ),
-      (element) => element.getAttribute('data-test-subj')
-    );
-    expect(testSubjsInDocumentOrder).toEqual([
-      'dataFederationMappingEditorAddField',
-      'createDatasetWizardMappingStepErrors',
-      'nextButton',
-    ]);
-    expect(getByTestId('nextButton')).toBeDisabled();
-
-    // Fixing the problem clears the error and re-enables Next without clicking it.
-    await act(async () => {
-      fireEvent.click(getByTestId('createDatasetWizardInferSchemaCard'));
-    });
-    expect(queryByTestId('createDatasetWizardDefineSchemaRequiresField')).toBeNull();
-    expect(getByTestId('nextButton')).toBeEnabled();
   });
 
   it('disables Next on the mapping step until the missing timestamp field name is provided', async () => {

@@ -45,6 +45,10 @@ interface ScheduleEveryAggregationResult {
   };
 }
 
+interface TemplateCountsAggregationResult {
+  template_counts?: { buckets: Array<{ key: string; doc_count: number }> };
+}
+
 interface MatchCountAggregationResult {
   match_count: { value: number };
 }
@@ -174,6 +178,7 @@ export interface RulesSavedObjectServiceContract {
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
   findTags(params?: FindTagsParams): Promise<string[]>;
+  countByTemplateIds(templateIds: string[]): Promise<Record<string, number>>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
 
@@ -578,5 +583,39 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     const aggs = result.aggregations as { tags?: { buckets: Array<{ key: string }> } } | undefined;
 
     return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
+  }
+
+  /**
+   * Counts the rules in the current space that were created from each of the given
+   * rule templates. Templates with no rules are omitted from the result. `templateIds`
+   * must be distinct.
+   *
+   * The terms aggregation is limited to the requested ids with an exact-value
+   * `include`, so its cost scales with the number of ids and not with the number
+   * of templates that have rules.
+   */
+  public async countByTemplateIds(templateIds: string[]): Promise<Record<string, number>> {
+    if (templateIds.length === 0) {
+      return {};
+    }
+
+    const result = await this.client.find<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      aggs: {
+        template_counts: {
+          terms: {
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
+            size: templateIds.length,
+            include: templateIds,
+          },
+        },
+      },
+    });
+
+    const aggs = result.aggregations as TemplateCountsAggregationResult | undefined;
+    const buckets = aggs?.template_counts?.buckets ?? [];
+
+    return Object.fromEntries(buckets.map(({ key, doc_count: count }) => [key, count]));
   }
 }

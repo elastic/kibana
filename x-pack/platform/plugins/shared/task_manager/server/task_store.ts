@@ -48,7 +48,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
 import type { Result } from './lib/result_type';
-import { asOk, asErr, unwrap } from './lib/result_type';
+import { asOk, asErr } from './lib/result_type';
 import type { ExecutionContextRunner } from './lib/execution_context';
 import { getExecutionContextRunner } from './lib/execution_context';
 
@@ -72,7 +72,7 @@ import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';
-import { BulkUpdateError, MsearchError } from './lib/errors';
+import { BulkUpdateError, MsearchError, getUnreadableTaskError } from './lib/errors';
 import { TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME } from './saved_objects';
 import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
@@ -188,6 +188,14 @@ const getCredentialConflict = (id: string): SavedObjectErrorResult => ({
       `Task "${id}" has a credential and can't be overwritten. Remove it and schedule it again.`
     )
   ).output.payload,
+});
+
+const getWriteErrorResult = (id: string, error: Error): SavedObjectErrorResult => ({
+  id,
+  type: 'task',
+  error: SavedObjectsErrorHelpers.isSavedObjectsClientError(error)
+    ? error.output.payload
+    : { error: 'Internal Server Error', message: error.message, statusCode: 500 },
 });
 
 /**
@@ -432,6 +440,7 @@ export class TaskStore {
       return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
         ...(options?.onEsKey === true ? { onEsKey: true } : {}),
         ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        ...(options?.refreshApiKey !== undefined ? { refreshApiKey: options.refreshApiKey } : {}),
         onApiKeyCreated: (target) => createdTargets.push(target),
       });
     } catch (e) {
@@ -1038,8 +1047,9 @@ export class TaskStore {
     const { invalidationTargets } = regenerateResult;
 
     // Docs rejected during local validation never reach `bulkUpdate`, so they get no entry in the
-    // bulk response; track them here so their regenerated keys are still invalidated below.
-    const omittedDocIds: string[] = [];
+    // bulk response; give them an error result so they're reported, and their regenerated keys
+    // invalidated, like any other task that fails to update.
+    const omittedDocResults: SavedObjectErrorResult[] = [];
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -1085,7 +1095,11 @@ export class TaskStore {
           this.logger.error(
             `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
           );
-          omittedDocIds.push(doc.id);
+          omittedDocResults.push({
+            id: doc.id,
+            type: 'task',
+            error: { error: 'Bad Request', message: e.message, statusCode: 400 },
+          });
         }
         return acc;
       },
@@ -1103,41 +1117,45 @@ export class TaskStore {
       (object) => !plainRepositoryObjects.includes(object)
     );
 
-    let updatedSavedObjects: Awaited<
-      ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
-    >['saved_objects'];
-    try {
-      const [soClientResult, plainRepositoryResult] = await Promise.all([
-        soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
-          refresh: false,
-        }),
-        plainRepositoryObjects.length
-          ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-              plainRepositoryObjects,
-              { refresh: false }
-            )
-          : { saved_objects: [] },
-      ]);
-      updatedSavedObjects = [
-        ...soClientResult.saved_objects,
-        ...plainRepositoryResult.saved_objects,
-      ];
-    } catch (e) {
+    const [soClientWrite, plainRepositoryWrite] = await Promise.allSettled([
+      soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
+        refresh: false,
+      }),
+      plainRepositoryObjects.length
+        ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+            plainRepositoryObjects,
+            { refresh: false }
+          )
+        : { saved_objects: [] },
+    ]);
+    const writes = [
+      { objects: soClientObjects, write: soClientWrite },
+      { objects: plainRepositoryObjects, write: plainRepositoryWrite },
+    ];
+
+    const writeErrors = writes.flatMap(({ write }) =>
+      write.status === 'rejected' ? [write.reason] : []
+    );
+    writeErrors.forEach((e) => this.errors$.next(e));
+    const hasPersistedWrite = writes.some(
+      ({ objects, write }) => objects.length > 0 && write.status === 'fulfilled'
+    );
+    if (writeErrors.length && !hasPersistedWrite) {
       await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
-      this.errors$.next(e);
-      throw e;
+      throw writeErrors[0];
     }
+
+    // A failed write fails only its own tasks, so the other write's results are kept.
+    const updatedSavedObjects = [
+      ...writes.flatMap(({ objects, write }) =>
+        write.status === 'fulfilled'
+          ? write.value.saved_objects
+          : objects.map(({ id }) => getWriteErrorResult(id, write.reason))
+      ),
+      ...omittedDocResults,
+    ];
 
     const allInvalidationTargets: InvalidationTarget[] = [];
-
-    for (const omittedDocId of omittedDocIds) {
-      // Same as the error-result branch below: the regenerated key never made it onto the task,
-      // but an omitted doc has no bulk response entry, so it has to be queued explicitly.
-      const granted = apiKeySOFieldsMap.get(omittedDocId);
-      if (granted) {
-        allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
-      }
-    }
 
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (isSavedObjectErrorResult(updatedSavedObject)) {
@@ -1324,13 +1342,22 @@ export class TaskStore {
   }
 
   private async _bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
-    const taskInstances = await this._bulkGet(taskIds);
+    const result = await this.bulkGetTaskSavedObjects(taskIds);
+
+    // Unlike bulkGet, a task that can't be read fails the whole removal: deleting it would leave
+    // its API keys referenced by nothing, and never invalidated.
+    const tasks: ConcreteTaskInstance[] = [];
+    result.saved_objects.forEach((task) => {
+      if (!isSavedObjectErrorResult(task)) {
+        tasks.push(savedObjectToConcreteTaskInstance(task));
+      }
+    });
+    const taskInstances = await this.bulkGetAndMergeTasksWithDecryptedApiKey(tasks);
     const allInvalidationTargets: InvalidationTarget[] = [];
 
     taskInstances.forEach((taskInstance) => {
-      const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (docHasEncryptedApiKey(unwrappedTaskInstance)) {
-        const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(unwrappedTaskInstance);
+      if (docHasEncryptedApiKey(taskInstance)) {
+        const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
         allInvalidationTargets.push(...targets);
       }
     });
@@ -1492,24 +1519,46 @@ export class TaskStore {
     });
   }
 
-  private async _bulkGet(ids: string[]): Promise<BulkGetResult> {
-    let result;
+  private async bulkGetTaskSavedObjects(ids: string[]) {
     try {
-      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+      return await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
         ids.map((id) => ({ type: 'task', id }))
       );
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  private async _bulkGet(ids: string[]): Promise<BulkGetResult> {
+    const result = await this.bulkGetTaskSavedObjects(ids);
 
     const tasks: ConcreteTaskInstance[] = [];
+    const taskErrors = new Map<string, SavedObjectError>();
     result.saved_objects.forEach((task) => {
       if (!isSavedObjectErrorResult(task)) {
-        tasks.push(savedObjectToConcreteTaskInstance(task));
+        try {
+          tasks.push(savedObjectToConcreteTaskInstance(task));
+        } catch (e) {
+          taskErrors.set(task.id, getUnreadableTaskError(e.message));
+        }
       }
     });
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(tasks);
+
+    let tasksWithDecryptedApiKeys = tasks;
+    try {
+      tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(tasks);
+    } catch (e) {
+      this.errors$.next(e);
+      const decryptionError: SavedObjectError = {
+        error: 'Internal Server Error',
+        message: `Unable to decrypt the task's API keys: ${e.message}`,
+        statusCode: 500,
+      };
+      tasks
+        .filter((task) => task.apiKey || task.uiamApiKey)
+        .forEach((task) => taskErrors.set(task.id, decryptionError));
+    }
 
     const taskMap = new Map();
     tasksWithDecryptedApiKeys.forEach((task) => taskMap.set(task.id, task));
@@ -1517,6 +1566,10 @@ export class TaskStore {
     return result.saved_objects.map((task) => {
       if (isSavedObjectErrorResult(task)) {
         return asErr({ id: task.id, type: task.type, error: task.error });
+      }
+      const error = taskErrors.get(task.id);
+      if (error) {
+        return asErr({ id: task.id, type: task.type, error });
       }
       return asOk(taskMap.get(task.id));
     });
@@ -1613,14 +1666,20 @@ export class TaskStore {
     }));
     const searches = queries.flatMap((query) => [{}, query]);
 
-    const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
-      {
-        index: this.index,
-        ignore_unavailable: true,
-        searches,
-      },
-      { retryOnTimeout: false }
-    );
+    let result: estypes.MsearchResponse<SavedObjectsRawDoc['_source']>;
+    try {
+      result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          searches,
+        },
+        { retryOnTimeout: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);

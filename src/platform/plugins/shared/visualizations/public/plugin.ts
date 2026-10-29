@@ -357,9 +357,13 @@ export class VisualizationsPlugin
     const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
+    const visualizeLibraryTitle = i18n.translate('visualizations.listingPageTitle', {
+      defaultMessage: 'Visualize library',
+    });
+
     core.application.register({
       id: VisualizeConstants.APP_ID,
-      title: 'Visualize library',
+      title: visualizeLibraryTitle,
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -466,7 +470,7 @@ export class VisualizationsPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize library',
+        title: visualizeLibraryTitle,
         description: i18n.translate('visualizations.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
@@ -529,7 +533,7 @@ export class VisualizationsPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'Visualize library',
+      name: visualizeLibraryTitle,
     });
 
     return {

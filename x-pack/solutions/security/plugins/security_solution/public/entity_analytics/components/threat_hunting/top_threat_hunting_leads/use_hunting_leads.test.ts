@@ -16,6 +16,9 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 jest.mock('@kbn/react-query');
 jest.mock('../../../api/api');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({ services: { telemetry: { reportEvent: jest.fn() } } }),
+}));
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseMutation = useMutation as jest.Mock;
@@ -25,6 +28,10 @@ const mockUseAppToasts = useAppToasts as jest.Mock;
 
 const mockFetchLeads = jest.fn();
 const mockGenerateLeads = jest.fn();
+const mockFetchLeadGenerationStatus = jest.fn();
+const leadsContext = (id: string) => ({
+  child: { type: 'security_solution', name: 'entity_analytics:threat_hunting_leads', id },
+});
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockInvalidateQueries = jest.fn();
@@ -32,10 +39,11 @@ const mockInvalidateQueries = jest.fn();
 describe('useHuntingLeads', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchLeadGenerationStatus.mockResolvedValue({ isEnabled: false });
     mockUseEntityAnalyticsRoutes.mockReturnValue({
       fetchLeads: mockFetchLeads,
       generateLeads: mockGenerateLeads,
-      fetchLeadGenerationStatus: jest.fn().mockResolvedValue({ isEnabled: false }),
+      fetchLeadGenerationStatus: mockFetchLeadGenerationStatus,
       enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
       disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
       fetchLeadGenerationPrivileges: jest
@@ -96,7 +104,61 @@ describe('useHuntingLeads', () => {
         sortOrder: 'desc',
         status: 'active',
       },
+      context: leadsContext('leads_list'),
     });
+  });
+
+  it('calls fetchLeadGenerationStatus with the leads_generation_status execution context', async () => {
+    let capturedQueryFn: ((context: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
+    let queryCallCount = 0;
+    mockUseQuery.mockImplementation(
+      (config: { queryFn?: (ctx: { signal?: AbortSignal }) => Promise<unknown> }) => {
+        queryCallCount++;
+        // useQuery call order: 1=privileges, 2=fetchLeads, 3=fetchLeadGenerationStatus
+        if (queryCallCount === 3) {
+          capturedQueryFn = config.queryFn;
+        }
+        return { data: undefined, isLoading: false, refetch: jest.fn() };
+      }
+    );
+
+    renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(capturedQueryFn).toBeDefined();
+    const mockSignal = new AbortController().signal;
+    await act(async () => {
+      await capturedQueryFn?.({ signal: mockSignal });
+    });
+
+    expect(mockFetchLeadGenerationStatus).toHaveBeenCalledWith({
+      signal: mockSignal,
+      context: leadsContext('leads_generation_status'),
+    });
+  });
+
+  it('calls generateLeads with the leads_generate execution context', async () => {
+    let capturedMutationFn: (() => Promise<unknown>) | undefined;
+    mockUseMutation.mockImplementation((config: { mutationFn?: () => Promise<unknown> }) => {
+      // The first useMutation call is the generate mutation.
+      capturedMutationFn = capturedMutationFn ?? config.mutationFn;
+      return { mutate: jest.fn(), isLoading: false };
+    });
+    // Reject so the mutation exits before the completion polling loop starts.
+    mockGenerateLeads.mockRejectedValue(new Error('stop before polling'));
+
+    renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(capturedMutationFn).toBeDefined();
+    await act(async () => {
+      await expect(capturedMutationFn?.()).rejects.toThrow('stop before polling');
+    });
+
+    expect(mockGenerateLeads).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: { connectorId: 'test-connector-id' },
+        context: leadsContext('leads_generate'),
+      })
+    );
   });
 
   it('returns empty leads array when data is undefined', () => {

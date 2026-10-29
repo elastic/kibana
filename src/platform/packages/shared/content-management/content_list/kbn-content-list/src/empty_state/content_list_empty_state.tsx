@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { isValidElement } from 'react';
 import type { ReactNode } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +23,8 @@ export interface ContentListEmptyStatePrimaryAction {
 
 export interface ContentListEmptyStateProps {
   iconType?: string;
+  /** Custom icon, such as an `EuiIllustration`. */
+  icon?: ReactNode;
   title?: ReactNode;
   body?: ReactNode;
   primaryAction?: ContentListEmptyStatePrimaryAction;
@@ -37,7 +39,8 @@ export interface ContentListEmptyStateProps {
  * as `emptyState` when you need custom copy or actions.
  */
 export const ContentListEmptyState = ({
-  iconType = 'documents',
+  iconType,
+  icon,
   title,
   body,
   primaryAction,
@@ -66,7 +69,7 @@ export const ContentListEmptyState = ({
   const actions = primaryAction ? (
     <>
       <EuiButton
-        fill
+        color="text"
         iconType={primaryAction.iconType ?? 'plusCircle'}
         onClick={primaryAction.onClick}
         disabled={primaryAction.disabled}
@@ -89,11 +92,12 @@ export const ContentListEmptyState = ({
   // `<h2>` so this empty state can co-exist with a page-level `<h1>` (e.g.,
   // the page title rendered by `KibanaContentListPage`). Consumers that need a
   // different level can pass a fully formed `title` ReactNode.
-  const titleNode = isPrimitive(resolvedTitle) ? <h2>{resolvedTitle}</h2> : <>{resolvedTitle}</>;
+  const titleNode = isValidElement(resolvedTitle) ? resolvedTitle : <h2>{resolvedTitle}</h2>;
   const bodyNode = isPrimitive(resolvedBody) ? <p>{resolvedBody}</p> : <>{resolvedBody}</>;
 
   return (
     <EuiEmptyPrompt
+      icon={icon}
       iconType={iconType}
       title={titleNode}
       body={bodyNode}

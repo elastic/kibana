@@ -7,7 +7,7 @@
 
 export const ENRICHMENT_URL_STATE_KEY = 'pageState';
 
-export const CANVAS_URL_STATE_KEY = 'canvasState';
+export const CANVAS_URL_STATE_KEY = 'mapState';
 
 export const TABLE_URL_STATE_KEY = 'table';
 

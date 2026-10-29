@@ -14,10 +14,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
 import { useStartServices } from '../../hooks';
 import { AgentDetailsIntegration } from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integration';
-import {
-  getInputUnitsByPackage,
-  getOutputUnitsByPackage,
-} from '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/input_status_utils';
+import { getComponentAlertLevel } from './component_alert_level';
+
+export { getComponentAlertLevel };
+export type { ComponentAlertLevel } from './component_alert_level';
 
 export interface AgentlessComponentHealthProps {
   /** Display name used in the callout text. */
@@ -29,27 +29,6 @@ export interface AgentlessComponentHealthProps {
   /** Set to false when the caller already shows its own failure callout. */
   showCallout?: boolean;
 }
-
-export type ComponentAlertLevel = 'failed' | 'degraded' | null;
-
-/** Worst unit status among the inputs/outputs of the given package policy. */
-export const getComponentAlertLevel = (
-  agent: Agent,
-  packagePolicy: PackagePolicy
-): ComponentAlertLevel => {
-  const { components } = agent;
-  if (!components) return null;
-  const units = packagePolicy.inputs.flatMap((input) => {
-    const inputId = input.id ?? packagePolicy.id;
-    return [
-      ...getInputUnitsByPackage(components, inputId),
-      ...getOutputUnitsByPackage(components, inputId),
-    ];
-  });
-  if (units.some((u) => u.status === 'FAILED')) return 'failed';
-  if (units.some((u) => u.status === 'DEGRADED')) return 'degraded';
-  return null;
-};
 
 /**
  * Component-level health (failed/degraded callout + per-integration breakdown) of a

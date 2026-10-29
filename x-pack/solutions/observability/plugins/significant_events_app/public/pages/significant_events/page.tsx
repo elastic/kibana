@@ -14,11 +14,11 @@ import {
   type NightshiftSettingsLocatorParams,
 } from '@kbn/nightshift-shared';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
+import { isValidSignificantEventsTab } from './significant_events_tabs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
-import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
@@ -30,31 +30,12 @@ import {
   SignificantEventsAppLoading,
   SignificantEventsAppPageTemplate,
 } from '../../components/page_template';
-import {
-  KnowledgeIndicatorsTable,
-  KiGenerationProvider,
-} from './components/knowledge_indicators_table';
 import { SignificantEventsPageProvider } from './context/significant_events_page_context';
-import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
-import { StreamsView } from './components/streams_view/streams_view';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { PausedActivityCallout } from './components/paused_activity_callout';
 import { RunLimitsBanner } from './components/run_limits_banner';
-
-const significantEventsTabs = [
-  'streams',
-  'knowledge_indicators',
-  'queries',
-  'detections',
-  SIGNIFICANT_EVENTS_TAB,
-] as const;
-type SignificantEventsTabId = (typeof significantEventsTabs)[number];
-
-function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
-  return significantEventsTabs.includes(value as SignificantEventsTabId);
-}
 
 export function SignificantEventsPage() {
   const {
@@ -69,7 +50,6 @@ export function SignificantEventsPage() {
         capabilities: { nightshift },
       },
       chrome,
-      notifications: { toasts },
     },
     dependencies: {
       start: { share },
@@ -86,15 +66,6 @@ export function SignificantEventsPage() {
     isError: isMaintenanceStatusError,
     status: maintenanceStatus,
   } = useBlocksNewActivity();
-
-  const onOnboardingFailed = useCallback(
-    (error: string) => {
-      toasts.addError(getFormattedError(new Error(error)), {
-        title: ONBOARDING_FAILURE_TITLE,
-      });
-    },
-    [toasts]
-  );
 
   const pageTitle = i18n.translate('xpack.significantEventsApp.pageHeaderTitle', {
     defaultMessage: 'Nightshift Management',
@@ -144,22 +115,6 @@ export function SignificantEventsPage() {
 
   const allTabs = useMemo(
     () => [
-      {
-        id: 'streams',
-        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
-          defaultMessage: 'Streams',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'streams' } }),
-        isSelected: tab === 'streams',
-      },
-      {
-        id: 'knowledge_indicators',
-        label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
-          defaultMessage: 'Knowledge Indicators',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
-        isSelected: tab === 'knowledge_indicators',
-      },
       {
         id: 'queries',
         label: i18n.translate('xpack.significantEventsApp.queriesTab', {
@@ -212,7 +167,7 @@ export function SignificantEventsPage() {
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'queries' } }} />;
   }
 
   return (
@@ -285,13 +240,7 @@ export function SignificantEventsPage() {
             </>
           )}
           {!isBlocked && <RunLimitsBanner />}
-          {canShow && (
-            <KiGenerationProvider onFailed={onOnboardingFailed}>
-              {tab === 'streams' && <StreamsView />}
-              {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-              {tab === 'queries' && <QueriesTable />}
-            </KiGenerationProvider>
-          )}
+          {canShow && tab === 'queries' && <QueriesTable />}
           {tab === 'detections' && <DetectionsTab />}
           {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
         </SignificantEventsAppPageTemplate.Body>

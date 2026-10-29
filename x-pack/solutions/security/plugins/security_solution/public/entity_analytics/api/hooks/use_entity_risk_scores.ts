@@ -11,6 +11,7 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { useRiskScore, type RiskScoreState } from './use_risk_score';
 import { useResolutionGroup } from '../../components/entity_resolution/hooks/use_resolution_group';
 import { getEntityId } from '../../components/entity_resolution/helpers';
+import { useNewEntityAnalyticsPage } from '../../hooks/use_new_entity_analytics_page';
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
@@ -30,6 +31,12 @@ export interface EntityRiskScoresState<T extends EntityType> {
 /**
  * Fetches an entity's base and resolution-group risk scores in parallel, with one
  * `refetch` that refreshes both queries.
+ *
+ * How the resolution score's target is found depends on the new entity analytics page flag:
+ * - flag off: the group and its target are discovered through `useResolutionGroup`, and the
+ *   target's resolution score is fetched whenever the entity belongs to a group;
+ * - flag on: the legacy lookup is skipped; only the group view (`isGroupView`) fetches the
+ *   resolution score, and `entityId` is the target.
  */
 export const useEntityRiskScores = <T extends EntityType>(
   entityType: T,
@@ -40,9 +47,16 @@ export const useEntityRiskScores = <T extends EntityType>(
      * queries so slow logs and APM traces can attribute the queries to the calling page/panel.
      */
     executionContext?: KibanaExecutionContext;
+    /**
+     * True when the caller renders a resolution group for `entityId` (alias records were loaded for
+     * it), which only happens with the new entity analytics page flag on. Defaults to false.
+     */
+    isGroupView?: boolean;
   }
 ): EntityRiskScoresState<T> => {
   const executionContext = options?.executionContext;
+  const isGroupView = options?.isGroupView ?? false;
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
   const baseFilterQuery = useMemo(
     () =>
       entityId
@@ -64,15 +78,21 @@ export const useEntityRiskScores = <T extends EntityType>(
     executionContext,
   });
 
+  // Legacy (flag off) path: discover the group and its target through the resolution API.
   const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
-    enabled: Boolean(entityId),
+    enabled: !isNewEntityAnalyticsPage && Boolean(entityId),
     executionContext,
   });
-  const hasResolutionGroup = (resolutionGroup?.group_size ?? 0) > 1;
-  const resolutionTargetEntityId = useMemo(
+  const legacyHasResolutionGroup = (resolutionGroup?.group_size ?? 0) > 1;
+  const legacyTargetEntityId = useMemo(
     () => (resolutionGroup?.target ? getEntityId(resolutionGroup.target) : undefined),
     [resolutionGroup?.target]
   );
+
+  // The group view is opened on the target itself, so its id keys the resolution score. Outside
+  // the group view, fall back to the legacy lookup (which yields nothing when the flag is on).
+  const hasResolutionGroup = isGroupView || legacyHasResolutionGroup;
+  const resolutionTargetEntityId = isGroupView ? entityId : legacyTargetEntityId;
   const shouldFetchResolution = hasResolutionGroup && Boolean(resolutionTargetEntityId);
   const resolutionFilterQuery = useMemo(
     () =>

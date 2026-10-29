@@ -129,6 +129,9 @@ import {
 
 import {
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsEsFilter,
@@ -172,6 +175,7 @@ import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 import { isAgentlessEnabled } from './utils/agentless';
+import { isSentinelPolicyVersionEnabled } from './utils/sentinel_policy_version';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
@@ -1715,6 +1719,39 @@ class AgentPolicyService {
       const { policiesWithSingleAP: packagePoliciesToDelete, policiesWithMultipleAP } =
         this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
+      if (policiesWithMultipleAP.length > 0) {
+        const { updatedPolicies, failedPolicies } = await packagePolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          policiesWithMultipleAP.map((policy) => {
+            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+            return {
+              ...policy,
+              policy_id: newPolicyIds[0],
+              policy_ids: newPolicyIds,
+            };
+          })
+        );
+
+        if (failedPolicies.length > 0) {
+          const failures = failedPolicies
+            .map(({ packagePolicy, error }) => `[${packagePolicy.id}]: ${error.message}`)
+            .join(', ');
+          logger.error(
+            `Failed to remove agent policy [${id}] from shared package policies ${failures}`
+          );
+          throw new FleetError(
+            `Cannot delete agent policy [${id}]: failed to remove it from shared package policies ${failures}`
+          );
+        }
+
+        logger.debug(
+          `Updated package policies with multiple agent policies with ids ${(updatedPolicies ?? [])
+            .map((policy) => policy.id)
+            .join(', ')}`
+        );
+      }
+
       if (packagePoliciesToDelete.length > 0) {
         await packagePolicyService.delete(
           soClient,
@@ -1727,26 +1764,6 @@ class AgentPolicyService {
         );
         logger.debug(
           `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
-            .map((policy) => policy.id)
-            .join(', ')}`
-        );
-      }
-
-      if (policiesWithMultipleAP.length > 0) {
-        await packagePolicyService.bulkUpdate(
-          soClient,
-          esClient,
-          policiesWithMultipleAP.map((policy) => {
-            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
-            return {
-              ...policy,
-              policy_id: newPolicyIds[0],
-              policy_ids: newPolicyIds,
-            };
-          })
-        );
-        logger.debug(
-          `Updated package policies with multiple agent policies with ids ${policiesWithMultipleAP
             .map((policy) => policy.id)
             .join(', ')}`
         );
@@ -1917,6 +1934,7 @@ class AgentPolicyService {
         // `options.agentVersions` explicitly).
         const enableVersionSpecificPolicies =
           appContextService.getExperimentalFeatures().enableVersionSpecificPolicies;
+        const enableSentinelPolicyVersion = await isSentinelPolicyVersionEnabled();
         let versionSpecificBoundedSet: string[] = [];
         let agentVersionsByPolicy = new Map<string, Set<string>>();
         if (enableVersionSpecificPolicies && !options?.agentVersions) {
@@ -1953,6 +1971,18 @@ class AgentPolicyService {
 
           if (!options?.agentVersions) {
             fleetServerPolicies.push(fleetServerPolicy);
+            if (enableSentinelPolicyVersion && hasSentinelVersionPolicy(policy)) {
+              // Same content as the base doc, under the `#sentinel` id. The base doc is kept for
+              // agents that were not reassigned yet (newly enrolled, or enrolled by an older fleet-server).
+              const sentinelPolicyId = getSentinelVersionPolicyId(fullPolicy.id);
+              fleetServerPolicies.push({
+                ...fleetServerPolicy,
+                policy_id: sentinelPolicyId,
+                data: { ...fleetServerPolicy.data, id: sentinelPolicyId },
+                // fleet-server picks its own policy by `default_fleet_server`, which must stay the base doc
+                default_fleet_server: false,
+              });
+            }
           }
           if (enableVersionSpecificPolicies && policy.has_agent_version_conditions) {
             // Task path: caller supplies exact versions to deploy (suppresses base doc write above).
@@ -2123,7 +2153,7 @@ class AgentPolicyService {
         if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
           const versionSpecificAgentPolicyIds = fleetServerPolicies
             .map((fsp) => fsp.policy_id)
-            .filter((id) => hasVersionSuffix(id));
+            .filter((id) => hasAgentVersionSuffix(id));
           await scheduleReassignAgentsToVersionSpecificPoliciesTask(
             appContextService.getTaskManagerStart()!,
             versionSpecificAgentPolicyIds

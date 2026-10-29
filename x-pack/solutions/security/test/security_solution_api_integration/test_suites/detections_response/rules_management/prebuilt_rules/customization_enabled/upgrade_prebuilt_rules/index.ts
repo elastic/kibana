@@ -13,5 +13,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./bulk_upgrade_all_prebuilt_rules'));
     loadTestFile(require.resolve('./bulk_upgrade_selected_prebuilt_rules'));
     loadTestFile(require.resolve('./upgrade_single_prebuilt_rule'));
+    loadTestFile(require.resolve('./ignore_system_managed_tags'));
   });
 };

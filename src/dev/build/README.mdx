@@ -30,17 +30,17 @@ NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
 
 ## Distribution defaults
 
-`lib/distribution_defaults.ts` defines package-owned defaults. Existing
-variants have no defaults, so the build emits no `config_defaults` directory
-and retains the existing configuration and Node option behavior.
+`lib/distribution_defaults.ts` defines package-owned defaults. `CreateDistributionDefaults` writes configured defaults into `config_defaults` in each platform build. Existing variants have no defaults, so the task emits no directory.
 
-`CreateDistributionDefaults` writes configured defaults into `config_defaults`.
-Kibana loads its `kibana.yml` before user configuration, including custom
-`--config`, `KBN_CONFIG_PATHS`, and `KBN_PATH_CONF` files. All POSIX launchers
-source `bin/kibana_env`, which applies package-owned Node options before user
-`node.options`, followed by inherited `NODE_OPTIONS`. Later options override
-earlier defaults. Environment paths resolve relative to the installation root
-so archives remain relocatable.
+## Building the FIPS provider
+
+Standard Linux x64 and arm64 archives, RPMs, and Debian packages bundle the OpenSSL FIPS provider in `node/fips`. `BundleFipsProvider` builds it from checksum-pinned sources using Docker and Buildx for the target architecture. Source and toolchain versions are defined in `lib/fips_config.ts`. macOS, Windows, cloud, and serverless builds skip this task.
+
+Use `--skip-fips-provider` to skip building and bundling the provider. For an archive-only build without Docker:
+
+```shell
+node scripts/build --skip-os-packages --skip-fips-provider
+```
 
 ## Structure
 
