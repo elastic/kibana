@@ -8,7 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { copyToClipboard, type EuiFlyoutMenuCustomAction } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const getFlyoutShareUrlAriaLabel = (): string =>
   i18n.translate('xpack.nightshift.flyout.shareUrlAriaLabel', {

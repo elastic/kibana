@@ -11,13 +11,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useFetchInvestigations, type FetchInvestigationsParams } from './use_fetch_investigations';
 import { useInvestigationSections } from './use_investigation_sections';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 jest.mock('./use_fetch_investigations', () => ({
   ...jest.requireActual('./use_fetch_investigations'),
   useFetchInvestigations: jest.fn(),
 }));
-jest.mock('./use_kibana');
+jest.mock('../../hooks/use_kibana');
 
 const mockUseFetchInvestigations = useFetchInvestigations as jest.MockedFunction<
   typeof useFetchInvestigations

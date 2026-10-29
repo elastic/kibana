@@ -12,13 +12,13 @@ import type {
   InvestigationSummary,
   ListInvestigationsResponse,
 } from '@kbn/agentic-investigations-plugin/common';
-import { isHttpClientError } from '../common/http_error';
+import { isHttpClientError } from '../../common/http_error';
 import {
   MAX_SHARED_INVESTIGATIONS,
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_URL,
-} from '../common/shared_investigations_api';
-import { useKibana } from './use_kibana';
+} from './shared_investigations_api';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 

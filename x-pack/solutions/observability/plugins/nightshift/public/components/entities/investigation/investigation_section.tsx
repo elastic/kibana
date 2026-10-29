@@ -24,14 +24,14 @@ import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { getSeverityLabel } from '@kbn/significant-events-schema';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { RETRY_BUTTON_LABEL } from '../common/messages';
-import { SEVERITY_DOT_COLOR } from '../common/severity';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { RETRY_BUTTON_LABEL } from '../../../common/messages';
+import { SEVERITY_DOT_COLOR } from '../../../common/severity';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
-} from '../hooks/use_investigation_sections';
-import { useKibana } from '../hooks/use_kibana';
+} from '../../../data/investigations/use_investigation_sections';
+import { useKibana } from '../../../hooks/use_kibana';
 import { InvestigationCardActions } from './investigation_card_actions';
 
 export interface InvestigationSectionProps {

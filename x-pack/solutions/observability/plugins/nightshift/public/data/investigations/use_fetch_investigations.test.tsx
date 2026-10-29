@@ -10,9 +10,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { getInvestigationsNextPageParam, useFetchInvestigations } from './use_fetch_investigations';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
-jest.mock('./use_kibana');
+jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const httpGet = jest.fn();

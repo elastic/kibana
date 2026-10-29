@@ -31,15 +31,15 @@ import {
   KI_FEATURE_ATTACHMENT_TYPE,
 } from '@kbn/significant-events-plugin/common';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { useKibana } from '../hooks/use_kibana';
-import { formatChatAttachmentDescription } from '../chat/chat_attachment_description';
+import { useKibana } from '../../../hooks/use_kibana';
+import { formatChatAttachmentDescription } from '../../../chat/chat_attachment_description';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
-import { FlyoutSectionTitle } from '../common/flyout_section_title';
-import { TruncatableSummary } from '../common/truncatable_summary';
+} from '../../../common/ebt_constants';
+import { FlyoutSectionTitle } from '../../ui/flyout_section_title';
+import { TruncatableSummary } from '../../ui/truncatable_summary';
 
 export interface EntityFlyoutProps {
   feature: Feature;

@@ -8,10 +8,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useStartInvestigation } from '../hooks/use_start_investigation';
+import { useStartInvestigation } from '../data/investigations/use_start_investigation';
 import { StartInvestigationPanel } from './start_investigation_panel';
 
-jest.mock('../hooks/use_start_investigation');
+jest.mock('../data/investigations/use_start_investigation');
 
 const mockUseStartInvestigation = useStartInvestigation as jest.Mock;
 const startInvestigation = jest.fn();

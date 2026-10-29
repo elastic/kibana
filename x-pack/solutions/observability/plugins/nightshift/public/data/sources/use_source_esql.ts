@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface SourceEsqlResult {
   esql: string | undefined;

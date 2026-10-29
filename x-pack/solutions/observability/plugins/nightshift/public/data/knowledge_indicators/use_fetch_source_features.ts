@@ -9,7 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import { isComputedFeature, type Feature } from '@kbn/significant-events-schema';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 const NO_FEATURES: Feature[] = [];
 const NO_SOURCE_IDS: string[] = [];

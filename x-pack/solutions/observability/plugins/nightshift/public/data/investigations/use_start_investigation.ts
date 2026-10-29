@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from './use_fetch_investigations';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 const START_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.startInvestigation.successToastTitle',

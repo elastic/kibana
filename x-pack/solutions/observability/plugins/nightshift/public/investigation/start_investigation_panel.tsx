@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { isMac } from '@kbn/shared-ux-utility';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { useStartInvestigation } from '../hooks/use_start_investigation';
+import { useStartInvestigation } from '../data/investigations/use_start_investigation';
 
 export const START_INVESTIGATION_PANEL_ID = 'nightshiftStartInvestigationPanel';
 

@@ -22,7 +22,7 @@ jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
   useOpenInChat: () => ({ getChatHref, openChat }),
 }));
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       notifications: { toasts: { addSuccess } },

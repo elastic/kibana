@@ -20,12 +20,12 @@ import {
   getInvestigationWorkflowStatusLabel,
   isInvestigationInvestigated,
   isInvestigationTerminalFailure,
-} from '../common/investigation_progress_status';
+} from '../../../common/investigation_progress_status';
 import {
   getInvestigationStatusLabel,
   isEventInvestigated,
-} from '../components/entities/significant_event/significant_event_status';
-import { nightshiftReducedMotionStyles } from '../common/transition';
+} from '../significant_event/significant_event_status';
+import { nightshiftReducedMotionStyles } from '../../../common/transition';
 
 // Staggered offsets so the dots pulse in sequence (typing-indicator effect).
 const INVESTIGATING_DOT_DELAYS_MS = [0, 160, 320] as const;

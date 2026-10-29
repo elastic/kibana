@@ -10,10 +10,10 @@ import { useQuery, type QueryClient, type UseQueryResult } from '@kbn/react-quer
 import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useKibana } from './use_kibana';
-import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
-import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../data/query_keys';
-import { hasInvestigationsToPoll } from '../data/significant_events/investigation_state';
+import { useKibana } from '../../hooks/use_kibana';
+import { NIGHTSHIFT_LANDING_SEVERITIES } from '../../common/constants';
+import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../query_keys';
+import { hasInvestigationsToPoll } from './investigation_state';
 
 /**
  * The paginated envelope the events endpoint returns, flattened across the pages we

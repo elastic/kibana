@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../../hooks/use_fetch_significant_events';
+import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../significant_events/use_fetch_significant_events';
 import {
   DETECTION_ENTITIES_QUERY_KEY,
   DETECTION_OVERVIEW_QUERY_KEY,

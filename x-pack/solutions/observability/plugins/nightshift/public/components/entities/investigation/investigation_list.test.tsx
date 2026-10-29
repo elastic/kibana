@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
+import type { InvestigationSectionState } from '../../../data/investigations/use_investigation_sections';
 import { InvestigationList } from './investigation_list';
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       agenticInvestigations: {

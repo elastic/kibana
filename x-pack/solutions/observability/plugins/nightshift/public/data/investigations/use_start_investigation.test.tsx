@@ -9,10 +9,10 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from './use_fetch_investigations';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStartInvestigation } from './use_start_investigation';
 
-jest.mock('./use_kibana');
+jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const investigationsFetch = jest.fn();

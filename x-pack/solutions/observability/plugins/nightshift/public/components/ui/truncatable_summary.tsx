@@ -9,8 +9,8 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { InvestigationFormattedText } from '../investigation/investigation_formatted_text';
-import { nightshiftOpacityTransition } from './transition';
+import { InvestigationFormattedText } from './investigation_formatted_text';
+import { nightshiftOpacityTransition } from '../../common/transition';
 
 const DEFAULT_MAX_SUMMARY_LENGTH = 300;
 

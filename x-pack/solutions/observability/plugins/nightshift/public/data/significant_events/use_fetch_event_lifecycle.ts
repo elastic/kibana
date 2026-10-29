@@ -7,8 +7,8 @@
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { EventLifecycleResponse } from '@kbn/significant-events-schema';
-import { useKibana } from './use_kibana';
-import { EVENT_LIFECYCLE_QUERY_KEY } from '../data/query_keys';
+import { useKibana } from '../../hooks/use_kibana';
+import { EVENT_LIFECYCLE_QUERY_KEY } from '../query_keys';
 
 // Keeps the flyout fresh while it stays open during a live incident.
 const REFETCH_INTERVAL_MS = 60_000;

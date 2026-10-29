@@ -11,7 +11,7 @@ import type {
   SignificantEventsSortOrder,
 } from '@kbn/significant-events-plugin/common';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
-import { applyPendingInvestigationCompletions } from '../../hooks/use_fetch_significant_events';
+import { applyPendingInvestigationCompletions } from './use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { significantEventsListQueryKey } from '../query_keys';
 import { hasInvestigationsToPoll } from './investigation_state';

@@ -22,10 +22,10 @@ import { useOpenInChat } from '@kbn/agentic-investigations-plugin/public';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { getFlyoutShareUrlAriaLabel } from '../common/flyout_share_url_button';
-import { buildNightshiftInvestigationFlyoutShareUrl } from '../common/url_params';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { useKibana } from '../hooks/use_kibana';
+import { getFlyoutShareUrlAriaLabel } from '../../ui/flyout_share_url_button';
+import { buildNightshiftInvestigationFlyoutShareUrl } from '../../../common/url_params';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const copyLinkLabel = i18n.translate('xpack.nightshift.investigations.cardCopyLinkLabel', {
   defaultMessage: 'Copy link',

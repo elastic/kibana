@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { SignificantEventsAvailabilityResponse } from '@kbn/significant-events-plugin/common';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const NIGHTSHIFT_AVAILABILITY_QUERY_KEY = ['nightshift.significantEventsAvailability'];
 

@@ -15,8 +15,8 @@ import type {
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
-} from '../common/shared_investigations_api';
-import { useKibana } from './use_kibana';
+} from './shared_investigations_api';
+import { useKibana } from '../../hooks/use_kibana';
 import {
   NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
   useFetchInvestigations,

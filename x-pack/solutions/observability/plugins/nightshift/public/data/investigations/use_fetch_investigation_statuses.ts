@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATION_STATUSES_QUERY_KEY = [
   'nightshift.investigationStatuses',

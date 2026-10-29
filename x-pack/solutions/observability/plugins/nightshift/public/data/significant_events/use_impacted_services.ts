@@ -11,8 +11,8 @@ import {
   getImpactedServiceSourceIds,
   resolveImpactedServices,
   type ResolvedImpactedService,
-} from '../common/impacted_services';
-import { useFetchSourceFeatures } from './use_fetch_source_features';
+} from '../../common/impacted_services';
+import { useFetchSourceFeatures } from '../knowledge_indicators/use_fetch_source_features';
 
 export interface ImpactedServicesResult {
   services: ResolvedImpactedService[];

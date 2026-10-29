@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 const FIND_RULES_PATH = '/internal/alerting/rules/_find';
 const MAX_RULES = 1000;
