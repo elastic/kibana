@@ -11,6 +11,7 @@ import {
   OTHER_BUCKET_ESQL_LITERAL,
   buildOtherBucketLabelFragment,
   buildOtherBucketNamedFlagFragment,
+  buildOtherBucketOutputParts,
   buildOuterTopNOtherRemap,
 } from './build_outer_top_n_other_remap';
 
@@ -63,5 +64,42 @@ describe('buildOtherBucketLabelFragment', () => {
     expect(buildOtherBucketLabelFragment({ groupExpr: 'clientip', keyAlias: 'key_clientip' })).toBe(
       `clientip = COALESCE(TO_STRING(key_clientip), ${OTHER_BUCKET_ESQL_LITERAL})`
     );
+  });
+});
+
+describe('buildOtherBucketOutputParts', () => {
+  it('caps rows after sorting Other last for the single Top values shape', () => {
+    expect(
+      buildOtherBucketOutputParts({
+        groupExpr: 'host.keyword',
+        keyAlias: 'key_host_keyword',
+        flagAlias: 'named_host_keyword',
+        sortClause: '`AVG(bytes)` DESC, key_host_keyword ASC',
+        limit: 4,
+      })
+    ).toEqual([
+      'EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG)',
+      'SORT named_host_keyword DESC, `AVG(bytes)` DESC, key_host_keyword ASC',
+      'LIMIT 4',
+      `EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), ${OTHER_BUCKET_ESQL_LITERAL})`,
+      'DROP named_host_keyword, key_host_keyword',
+    ]);
+  });
+
+  it('keeps every group and drops rank columns for the nested and time-series shapes', () => {
+    expect(
+      buildOtherBucketOutputParts({
+        groupExpr: 'geo.src',
+        keyAlias: 'key_geo_src',
+        flagAlias: 'named_geo_src',
+        sortClause: 'rank_geo_src DESC, key_geo_src ASC, `AVG(bytes)` DESC',
+        dropAliases: ['rank_geo_src'],
+      })
+    ).toEqual([
+      'EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG)',
+      'SORT named_geo_src DESC, rank_geo_src DESC, key_geo_src ASC, `AVG(bytes)` DESC',
+      `EVAL geo.src = COALESCE(TO_STRING(key_geo_src), ${OTHER_BUCKET_ESQL_LITERAL})`,
+      'DROP named_geo_src, key_geo_src, rank_geo_src',
+    ]);
   });
 });

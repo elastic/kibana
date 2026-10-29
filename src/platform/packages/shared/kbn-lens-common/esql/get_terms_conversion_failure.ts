@@ -27,8 +27,9 @@ export interface TermsConversionContext {
   /** Number of terms buckets on the layer, including this column. */
   termsBucketCount: number;
   /**
-   * When true, `otherBucket` on this column can be expressed (outer-eligible single Top values
-   * today; nested outer / time-series Other land in follow-ups). Defaults to false.
+   * When true, `otherBucket` on this column can be expressed: the column is the first bucket, so
+   * its Other is one bucket rather than one per parent bucket, and no bucket sits between it and
+   * an inner Top values. Defaults to false.
    */
   supportsOtherBucket?: boolean;
 }
