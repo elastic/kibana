@@ -21,6 +21,8 @@ const sharedDeploymentTags = [
 // The details flyout renders in an EUI portal outside .kbnAppWrapper.
 const A11Y_SELECTORS = ['.kbnAppWrapper', '[data-euiportal="true"]'];
 
+const MISSING_CUSTOM_PIPELINE_NAME = 'home-and-list-missing@custom';
+
 test.describe('Ingest pipelines home and list', { tag: sharedDeploymentTags }, () => {
   test.beforeAll(async ({ esClient }) => {
     await esClient.ingest.putPipeline({
@@ -72,6 +74,30 @@ test.describe('Ingest pipelines home and list', { tag: sharedDeploymentTags }, (
 
     const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
     expect(violations).toStrictEqual([]);
+  });
+
+  test('shows management actions in the list and details flyout', async ({ pageObjects }) => {
+    const { ingestPipelines } = pageObjects;
+
+    await ingestPipelines.searchPipelineList(testData.TEST_PIPELINE_NAME);
+    await expect(ingestPipelines.createPipelineDropdown).toBeVisible();
+    await expect(
+      ingestPipelines.pipelineRowSelectionCheckbox(testData.TEST_PIPELINE_NAME)
+    ).toBeVisible();
+    await expect(ingestPipelines.pipelineRowEditAction(testData.TEST_PIPELINE_NAME)).toBeVisible();
+
+    await ingestPipelines.openPipelineDetailsByName(testData.TEST_PIPELINE_NAME);
+    await expect(ingestPipelines.detailsPanelFooter).toBeVisible();
+    await expect(ingestPipelines.editPipelineButton).toBeVisible();
+  });
+
+  test('offers to create a missing custom pipeline', async ({ pageObjects }) => {
+    const { ingestPipelines } = pageObjects;
+
+    await ingestPipelines.openPipelineFlyoutFromUrl(MISSING_CUSTOM_PIPELINE_NAME);
+
+    await expect(ingestPipelines.missingCustomPipelineCallout).toBeVisible();
+    await expect(ingestPipelines.createCustomPipelineButton).toBeVisible();
   });
 
   test('shows the empty state when there are no pipelines', async ({ page, pageObjects }) => {

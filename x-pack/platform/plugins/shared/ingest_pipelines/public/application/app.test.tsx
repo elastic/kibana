@@ -20,18 +20,34 @@ jest.mock('../shared_imports', () => ({
 
 jest.mock('./sections', () => ({
   PipelinesList: () => <div data-test-subj="pipelinesList" />,
-  PipelinesCreate: () => null,
-  PipelinesEdit: () => null,
-  PipelinesClone: () => null,
-  PipelinesCreateFromCsv: () => null,
-  ManageProcessors: () => null,
+  PipelinesCreate: () => <div data-test-subj="pipelinesCreate" />,
+  PipelinesEdit: () => <div data-test-subj="pipelinesEdit" />,
+  PipelinesClone: () => <div data-test-subj="pipelinesClone" />,
+  PipelinesCreateFromCsv: () => <div data-test-subj="pipelinesCreateFromCsv" />,
+  ManageProcessors: () => <div data-test-subj="manageProcessors" />,
 }));
 
-const renderApp = ({ canRead, canManage }: { canRead: boolean; canManage: boolean }) => {
+const MANAGEMENT_ROUTES = [
+  { path: '/create', testSubj: 'pipelinesCreate' },
+  { path: '/edit/my-pipeline', testSubj: 'pipelinesEdit' },
+  { path: '/create/my-pipeline', testSubj: 'pipelinesClone' },
+  { path: '/csv_create', testSubj: 'pipelinesCreateFromCsv' },
+  { path: '/manage_processors', testSubj: 'manageProcessors' },
+] as const;
+
+const renderApp = ({
+  canRead,
+  canManage,
+  path = '/',
+}: {
+  canRead: boolean;
+  canManage: boolean;
+  path?: string;
+}) => {
   mockUseKibana.mockReturnValue({
     services: {
-      history: createMemoryHistory({ initialEntries: ['/'] }),
-      config: { enableManageProcessors: false, canRead, canManage },
+      history: createMemoryHistory({ initialEntries: [path] }),
+      config: { enableManageProcessors: true, canRead, canManage },
     },
   });
 
@@ -50,6 +66,16 @@ describe('App', () => {
       expect(screen.getByTestId('pipelinesList')).toBeInTheDocument();
       expect(screen.queryByText('Cluster privileges required')).not.toBeInTheDocument();
     });
+
+    it.each(MANAGEMENT_ROUTES)(
+      'SHOULD render the $testSubj route at $path',
+      ({ path, testSubj }) => {
+        renderApp({ canRead: true, canManage: true, path });
+
+        expect(screen.getByTestId(testSubj)).toBeInTheDocument();
+        expect(screen.queryByTestId('pipelinesList')).not.toBeInTheDocument();
+      }
+    );
   });
 
   describe('WHEN the user can only read pipelines', () => {
@@ -59,6 +85,16 @@ describe('App', () => {
       expect(screen.getByTestId('pipelinesList')).toBeInTheDocument();
       expect(screen.queryByText('Cluster privileges required')).not.toBeInTheDocument();
     });
+
+    it.each(MANAGEMENT_ROUTES)(
+      'SHOULD fall back to the pipelines list instead of $testSubj at $path',
+      ({ path, testSubj }) => {
+        renderApp({ canRead: true, canManage: false, path });
+
+        expect(screen.getByTestId('pipelinesList')).toBeInTheDocument();
+        expect(screen.queryByTestId(testSubj)).not.toBeInTheDocument();
+      }
+    );
   });
 
   describe('WHEN the user can neither read nor manage pipelines', () => {
