@@ -101,28 +101,34 @@ export const DashboardListingPage = ({
       dataService.query,
       kbnUrlStateStorage
     );
+
+    return () => {
+      stopSyncingQueryServiceStateWithUrl();
+    };
+  }, [kbnUrlStateStorage]);
+
+  useEffect(() => {
+    if (!title) return;
+
     let canceled = false;
-    if (title) {
-      findService
-        .findByTitle(title)
-        .then((result) => {
-          if (canceled || !result) return;
-          redirectTo({
-            destination: 'dashboard',
-            id: result.id,
-            useReplace: true,
-          });
-        })
-        .catch(() => {
-          // show the listing filtered by title if the dashboard can not be looked up
+    findService
+      .findByTitle(title)
+      .then((result) => {
+        if (canceled || !result) return;
+        redirectTo({
+          destination: 'dashboard',
+          id: result.id,
+          useReplace: true,
         });
-    }
+      })
+      .catch(() => {
+        // show the listing filtered by title if the dashboard can not be looked up
+      });
 
     return () => {
       canceled = true;
-      stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, redirectTo, kbnUrlStateStorage]);
+  }, [title, redirectTo]);
 
   if (showNoDataPage === undefined) {
     return null;
