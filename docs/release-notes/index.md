@@ -767,13 +767,11 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the attachment input pill border color [#282279]({{kib-pull}}282279).
 * Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard truncating {{esql}} results [#282026]({{kib-pull}}282026).
 * Fix Anthropic stream parsing and retries of empty responses [#281616]({{kib-pull}}281616).
-* Fix Anthropic `chat_completion` endpoints for Agent Builder and Attack Discovery [#281179]({{kib-pull}}281179).
 * Fix a conversation being overwritten when it is created automatically [#280189]({{kib-pull}}280189).
 * Fix agent execution tasks scheduled with an API key stopping when the original key is rotated, by using an independent cloned API key [#282965]({{kib-pull}}282965).
 * Fix cases tools being registered in Serverless project types and in Elasticsearch solution spaces where the Cases feature isn't available [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
 * Fix attachment-producing tools appearing in the MCP server [#291274]({{kib-pull}}291274).
 * Fix the update-ID flow for the PagerDuty MCP connector to match the new PagerDuty MCP tool surface [#295823]({{kib-pull}}295823).
-* Preserve `$defs` when Agent Builder converts tool schemas [#295880]({{kib-pull}}295880).
 
 **Alerting and cases**:
 * Fix a large alerting v2 alerts list overloading the browser and causing freezing, reloading, or lag [#297528]({{kib-pull}}297528).
@@ -991,6 +989,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the **Sort by** and **Order** selections being lost in the single metric viewer when you open the settings for a second split field [#294604]({{kib-pull}}294604).
 * Fix tool schemas for Google Vertex AI {{infer}} endpoints [#284810]({{kib-pull}}284810).
 * Fix the data recognizer calling the recognize API three times on page load [#293067]({{kib-pull}}293067).
+* Preserve `$defs` when converting tool schemas [#295880]({{kib-pull}}295880).
+* Fix Anthropic `chat_completion` endpoints for Agent Builder and Attack Discovery [#281179]({{kib-pull}}281179).
 
 **Workflows**:
 * Preserve YAML formatting and comments in generated workflow edits [#288075]({{kib-pull}}288075).
