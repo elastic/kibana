@@ -293,7 +293,7 @@ function collectFunctionalGroups(
     for (const group of groups) {
       if (!group.names.length) continue;
 
-      const key = `ftr_configs_${configCounter++}`;
+      const key = `${STEP_KEYS.FTR_CONFIG_PREFIX}${configCounter++}`;
       const isSingle = group.names.length === 1;
       const sortBy = isSingle ? group.names[0] : ++groupCounter;
       const title = isSingle ? group.names[0] : `FTR Configs #${sortBy}`;

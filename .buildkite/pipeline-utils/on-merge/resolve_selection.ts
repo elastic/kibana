@@ -10,6 +10,7 @@
 import type { Build } from '../buildkite/types/build.ts';
 import type { Job } from '../buildkite/types/job.ts';
 import { STEP_KEYS } from '../ci-stats/pick_test_group_run_order/const.ts';
+import { SCOUT_STEP_KEYS } from '../scout/step_keys.ts';
 import type { OnMergeSelection, OnMergeTestType, OnMergeTestTypeDecision } from './selection.ts';
 import { ON_MERGE_TEST_TYPES, fullSelection } from './selection.ts';
 
@@ -33,17 +34,16 @@ const UNPROVEN_JOB_STATES: ReadonlySet<string> = new Set([
 ]);
 
 // The picker and the Scout builder upload the test jobs: if they failed, those jobs never existed.
-const PICK_TEST_GROUP_RUN_ORDER_STEP_KEY = 'pick_test_group_run_order';
-const SCOUT_BUILDER_STEP_KEY = 'build_scout_tests';
-
 const TEST_TYPE_STEP_KEY_MATCHERS: Record<OnMergeTestType, (stepKey: string) => boolean> = {
-  scout: (stepKey) => stepKey === SCOUT_BUILDER_STEP_KEY || stepKey.startsWith('scout_test_lane_'),
+  scout: (stepKey) =>
+    stepKey === SCOUT_STEP_KEYS.BUILDER || stepKey.startsWith(SCOUT_STEP_KEYS.LANE_PREFIX),
   jestUnit: (stepKey) =>
-    stepKey === PICK_TEST_GROUP_RUN_ORDER_STEP_KEY || stepKey === STEP_KEYS.JEST_UNIT,
+    stepKey === STEP_KEYS.PICK_TEST_GROUP_RUN_ORDER || stepKey === STEP_KEYS.JEST_UNIT,
   jestIntegration: (stepKey) =>
-    stepKey === PICK_TEST_GROUP_RUN_ORDER_STEP_KEY || stepKey === STEP_KEYS.JEST_INTEGRATION,
+    stepKey === STEP_KEYS.PICK_TEST_GROUP_RUN_ORDER || stepKey === STEP_KEYS.JEST_INTEGRATION,
   ftr: (stepKey) =>
-    stepKey === PICK_TEST_GROUP_RUN_ORDER_STEP_KEY || /^ftr_configs_\d+$/.test(stepKey),
+    stepKey === STEP_KEYS.PICK_TEST_GROUP_RUN_ORDER ||
+    stepKey.startsWith(STEP_KEYS.FTR_CONFIG_PREFIX),
 };
 
 export interface OnMergeSelectionDeps {

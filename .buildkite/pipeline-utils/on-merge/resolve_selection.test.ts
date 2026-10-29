@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Fs from 'fs';
+import Path from 'path';
 import type { Build } from '../buildkite/types/build.ts';
 import type { Job } from '../buildkite/types/job.ts';
 import type { OnMergeSelectionDeps } from './resolve_selection.ts';
 import { resolveOnMergeSelection } from './resolve_selection.ts';
+import { STEP_KEYS } from '../ci-stats/pick_test_group_run_order/const.ts';
+import { SCOUT_STEP_KEYS } from '../scout/step_keys.ts';
 
 const COMMIT = 'c'.repeat(40);
 const BASE = 'b'.repeat(40);
@@ -254,6 +258,15 @@ describe('resolveOnMergeSelection', () => {
     await expect(resolveWithFailedStep('build_scout_tests')).resolves.toMatchObject({
       testTypes: { ...allSelective, scout: full },
     });
+  });
+
+  it('matches the step keys declared in on_merge.yml', () => {
+    const pipeline = Fs.readFileSync(
+      Path.resolve(__dirname, '../../pipelines/on_merge.yml'),
+      'utf8'
+    );
+    expect(pipeline).toContain(`key: ${STEP_KEYS.PICK_TEST_GROUP_RUN_ORDER}`);
+    expect(pipeline).toContain(`key: ${SCOUT_STEP_KEYS.BUILDER}`);
   });
 
   it('runs ES-dependent test types in full when the ES snapshot changed', async () => {
