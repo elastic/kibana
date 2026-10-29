@@ -21,6 +21,14 @@ const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
 };
 
+const INVESTIGATIONS_V2_ALERT_ROLE: KibanaRole = {
+  ...INVESTIGATIONS_WRITE_ROLE,
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.rule-events'], privileges: ['read'] }],
+  },
+};
+
 const START_PATH = 'internal/nightshift/investigations';
 
 apiTest.describe(
@@ -125,7 +133,7 @@ apiTest.describe(
           },
         });
         try {
-          const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+          const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_V2_ALERT_ROLE);
           const response = await startInvestigation(apiClient, cookieHeader, {
             subject: { type: 'alert', ids: [episodeId] },
           });
