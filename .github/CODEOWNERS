@@ -66,6 +66,7 @@ packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-alerting-v2 @elastic/rna-project-team
+packages/kbn-eslint-plugin-compat @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-i18n @elastic/kibana-operations
@@ -1414,7 +1415,6 @@ x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/significant_events @elastic/nightshift
-x-pack/solutions/observability/plugins/significant_events_app @elastic/nightshift
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team
@@ -1498,6 +1498,7 @@ x-pack/solutions/security/packages/side-nav @elastic/security-investigations
 x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
+x-pack/solutions/security/packages/timeline-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
@@ -2039,6 +2040,13 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-signals-logs-team
 
+# Digital Experience (RUM)
+/src/platform/packages/shared/kbn-synthtrace-client/src/lib/edot_browser/ @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/lib/otel/otel_synthtrace_es_client* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/digital_experience_* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/digital_experience_apps* @elastic/obs-signals-rum-team
+/src/platform/packages/shared/kbn-synthtrace/src/scenarios/helpers/classic_rum_page_loads* @elastic/obs-signals-rum-team
+
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
 /x-pack/solutions/observability/test/serverless/functional/test_suites @elastic/observability-ui
 
@@ -2129,7 +2137,6 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-dashboards
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-dashboards
-/x-pack/platform/test/functional/apps/maps/ @elastic/kibana-dashboards
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-dashboards
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-dashboards
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-dashboards
@@ -2806,9 +2813,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-discover
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-dashboards
-/x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/index_lifecycle_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-discover
 /src/platform/test/functional/services/management @elastic/search-ml-ux
@@ -2819,16 +2824,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /src/platform/test/functional/page_objects/console_page.ts @elastic/kibana-management
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-discover
-/x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/rollup_job/ @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/**/grok_debugger.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/helpers.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/home.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/index_lifecycle_management.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/ingest_node_pipelines.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 
 ## Kibana Cases
 
@@ -3211,7 +3207,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @e
 src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/test/scout_alertzero @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout_alertzero @elastic/security-investigations @elastic/security-detection-engineering
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/alertzero @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_hunt_watch @elastic/security-investigations

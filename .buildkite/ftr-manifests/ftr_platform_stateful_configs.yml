@@ -220,8 +220,6 @@ enabled:
       testChannels: ['ci-batch-3h']
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
-  - x-pack/platform/test/functional/apps/maps/group1/config.ts
-  - x-pack/platform/test/functional/apps/maps/group6/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group1/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group2/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/group3/config.ts
@@ -306,6 +304,7 @@ enabled:
   - x-pack/performance/journeys_e2e/many_series_chart_dashboard.ts
   - x-pack/performance/journeys_e2e/many_series_chart_line_dashboard.ts
   - x-pack/performance/journeys_e2e/metrics_experience_grid.ts
+  - x-pack/performance/journeys_e2e/million_points_chart_dashboard.ts
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts

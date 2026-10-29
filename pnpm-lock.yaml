@@ -3538,6 +3538,9 @@ importers:
       '@kbn/securitysolution-t-grid':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-t-grid
+      '@kbn/securitysolution-timeline-common':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-common
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -3733,9 +3736,6 @@ importers:
       '@kbn/siem-readiness':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/siem-readiness
-      '@kbn/significant-events-app-plugin':
-        specifier: workspace:*
-        version: link:x-pack/solutions/observability/plugins/significant_events_app
       '@kbn/significant-events-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/significant_events
@@ -4742,8 +4742,8 @@ importers:
         specifier: 4.104.0
         version: 4.104.0(ws@8.22.0)(zod@4.6.5)
       openpgp:
-        specifier: 5.11.3
-        version: 5.11.3
+        specifier: 6.3.1
+        version: 6.3.1
       ora:
         specifier: 4.1.1
         version: 4.1.1
@@ -4988,8 +4988,8 @@ importers:
         specifier: 3.11.0
         version: 3.11.0
       uuid:
-        specifier: 14.0.2
-        version: 14.0.2
+        specifier: 14.0.3
+        version: 14.0.3
       vega:
         specifier: 6.2.0
         version: 6.2.0
@@ -5504,6 +5504,9 @@ importers:
       '@kbn/eslint-plugin-alerting-v2':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-alerting-v2
+      '@kbn/eslint-plugin-compat':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-compat
       '@kbn/eslint-plugin-disable':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-disable
@@ -7012,6 +7015,8 @@ importers:
   packages/kbn-eslint-config: {}
 
   packages/kbn-eslint-plugin-alerting-v2: {}
+
+  packages/kbn-eslint-plugin-compat: {}
 
   packages/kbn-eslint-plugin-disable: {}
 
@@ -9719,8 +9724,6 @@ importers:
 
   x-pack/solutions/observability/plugins/significant_events: {}
 
-  x-pack/solutions/observability/plugins/significant_events_app: {}
-
   x-pack/solutions/observability/plugins/slo: {}
 
   x-pack/solutions/observability/plugins/synthetics: {}
@@ -9886,6 +9889,8 @@ importers:
   x-pack/solutions/security/packages/storybook/config: {}
 
   x-pack/solutions/security/packages/test-api-clients: {}
+
+  x-pack/solutions/security/packages/timeline-common: {}
 
   x-pack/solutions/security/packages/upselling: {}
 
@@ -16051,9 +16056,6 @@ packages:
   asn1.js@4.10.1:
     resolution: {integrity: sha512-p32cOF5q0Zqs9uBiONKYLm6BClCoBCM5O9JfeUSlnQLBTxYdTK+pW+nXflm8UkKd2UYlEbYz5qEi0JuZR9ckSw==}
 
-  asn1.js@5.4.1:
-    resolution: {integrity: sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==}
-
   asn1@0.2.6:
     resolution: {integrity: sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==}
 
@@ -18745,8 +18747,8 @@ packages:
     resolution: {integrity: sha512-KSuV3ur4gf2KqMNoZx3nXNVhqCkn42GuTYCX4tXPEwf0MjpFQmNMiN6m7dXaUXgIoivL6/65agoUMg4RLS0Vbg==}
     engines: {node: '>=10'}
 
-  follow-redirects@1.16.1:
-    resolution: {integrity: sha512-FNvFGzoMLWmE6Yj9spb/zjd7yiNCHiAW9/Tg9CXrQ8wuu32HtlJOwWO11OJafl5FfY3DxTdQ0vj42zU1kvv5jg==}
+  follow-redirects@1.16.2:
+    resolution: {integrity: sha512-/kVP2U8z596Ia0gwFrwyIeo74ta5aVmSeU1FfAUMAmcEP5EP7zydmag3SLiN64NaRKef3lxsq7i/g7ltJQDGow==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -21723,10 +21725,14 @@ packages:
     resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}
     hasBin: true
 
-  openpgp@5.11.3:
-    resolution: {integrity: sha512-jXOPfIteBUQ2zSmRG4+Y6PNntIIDEAvoM/lOYCnvpXAByJEruzrHQZWE/0CGOKHbubwUuty2HoPHsqBzyKHOpA==}
-    engines: {node: '>= 8.0.0'}
-    deprecated: This version is deprecated and will no longer receive security patches. Please refer to https://github.com/openpgpjs/openpgpjs/wiki/Updating-from-previous-versions for details on how to upgrade to a newer supported version.
+  openpgp@6.3.1:
+    resolution: {integrity: sha512-7oSPvmlKPojxFoyelT5DWPIAVmqWZh4qU/5pO6bdoShEtRpCw9Sye9IXUQj6EFM3XpgGssqccAr705YtTcLNQw==}
+    engines: {node: '>= 18.0.0', typescript: '>= 5.0.0'}
+    peerDependencies:
+      '@openpgp/web-stream-tools': ~0.3.0
+    peerDependenciesMeta:
+      '@openpgp/web-stream-tools':
+        optional: true
 
   opentracing@0.14.7:
     resolution: {integrity: sha512-vz9iS7MJ5+Bp1URw8Khvdyw1H/hGvzHWlKQ7eRrQojSCDL1/SrWfrY9QebLw97n2deyRtzHRC3MkQfVNUCo91Q==}
@@ -24164,8 +24170,8 @@ packages:
     resolution: {integrity: sha512-gAQ9qrUN/UCypHtGFbbe7Rc/f9bzO88IwrG8TDo/aMKAApKyD6E3W4Cm0EfhfBb6Z6SKt59tTCTfD+n1xmAvMg==}
     engines: {node: '>=16.0.0'}
 
-  systeminformation@5.33.15:
-    resolution: {integrity: sha512-s5RloL0F7xhN0ZjfHtLGnbf7EW74EI0N8NFL+1xR7Oxz9QA33obNZsl7lyfnJOhN04E/kGFPoJPlvY7TZ5fzmw==}
+  systeminformation@5.33.16:
+    resolution: {integrity: sha512-R+Lh69IJXfJj6bfyH1In5cIR9FTr4hBS39YvlZHZjsK1p9cuELPq7hplZZIb56ZESMMb+DzdKqqE6Iomi01Mvg==}
     engines: {node: '>=10.0.0'}
     os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
     hasBin: true
@@ -24865,8 +24871,8 @@ packages:
     resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
-  uuid@14.0.2:
-    resolution: {integrity: sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==}
+  uuid@14.0.3:
+    resolution: {integrity: sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==}
     hasBin: true
 
   uuid@8.3.2:
@@ -27180,7 +27186,7 @@ snapshots:
       react-redux: 9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1)
       ts-debounce: 4.0.0
       utility-types: 3.11.0
-      uuid: 14.0.2
+      uuid: 14.0.3
     transitivePeerDependencies:
       - '@types/react'
       - redux
@@ -27382,7 +27388,7 @@ snapshots:
       unist-util-visit: 2.0.3
       url-parse: 1.5.10
       use-sync-external-store: 1.7.0(react@18.2.0)
-      uuid: 14.0.2
+      uuid: 14.0.3
       vfile: 4.2.1
 
   '@elastic/filesaver@1.1.2': {}
@@ -29647,7 +29653,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/instrumentation': 0.223.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
-      systeminformation: 5.33.15
+      systeminformation: 5.33.16
     transitivePeerDependencies:
       - supports-color
 
@@ -32881,13 +32887,6 @@ snapshots:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
 
-  asn1.js@5.4.1:
-    dependencies:
-      bn.js: 4.12.5
-      inherits: 2.0.4
-      minimalistic-assert: 1.0.1
-      safer-buffer: 2.1.2
-
   asn1@0.2.6:
     dependencies:
       safer-buffer: 2.1.2
@@ -32965,7 +32964,7 @@ snapshots:
 
   axios@1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
-      follow-redirects: 1.16.1(debug@4.4.3(supports-color@10.2.2))
+      follow-redirects: 1.16.2(debug@4.4.3(supports-color@10.2.2))
       form-data: 4.0.6
       https-proxy-agent: 5.0.1(supports-color@10.2.2)
       proxy-from-env: 2.1.0
@@ -34329,7 +34328,7 @@ snapshots:
       proxy-from-env: 1.0.0
       request-progress: 3.0.0
       supports-color: 8.1.1
-      systeminformation: 5.33.15
+      systeminformation: 5.33.16
       tmp: 0.2.7
       tree-kill: 1.2.2
       tslib: 1.14.1
@@ -36091,7 +36090,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  follow-redirects@1.16.1(debug@4.4.3(supports-color@10.2.2)):
+  follow-redirects@1.16.2(debug@4.4.3(supports-color@10.2.2)):
     optionalDependencies:
       debug: 4.4.3(supports-color@10.2.2)
 
@@ -36949,7 +36948,7 @@ snapshots:
   http-proxy@1.18.1(debug@4.4.3(supports-color@10.2.2)):
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.16.1(debug@4.4.3(supports-color@10.2.2))
+      follow-redirects: 1.16.2(debug@4.4.3(supports-color@10.2.2))
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -39824,9 +39823,7 @@ snapshots:
 
   opener@1.5.2: {}
 
-  openpgp@5.11.3:
-    dependencies:
-      asn1.js: 5.4.1
+  openpgp@6.3.1: {}
 
   opentracing@0.14.7: {}
 
@@ -42717,7 +42714,7 @@ snapshots:
 
   sync-message-port@1.2.0: {}
 
-  systeminformation@5.33.15: {}
+  systeminformation@5.33.16: {}
 
   tabbable@5.3.3: {}
 
@@ -43451,7 +43448,7 @@ snapshots:
 
   uuid@11.1.1: {}
 
-  uuid@14.0.2: {}
+  uuid@14.0.3: {}
 
   uuid@8.3.2: {}
 
