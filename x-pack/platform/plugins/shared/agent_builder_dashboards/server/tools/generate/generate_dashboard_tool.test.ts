@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -83,7 +84,7 @@ const keepRequestedLayout = async ({
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (
-  dashboardAttachmentId?: string,
+  dashboardId?: string,
   layout?: string,
   upsert: Record<string, unknown> = {}
 ) => {
@@ -101,7 +102,7 @@ const callHandler = async (
     esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
@@ -143,6 +144,51 @@ describe('generateDashboardTool handler', () => {
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: { ...generatedDashboard, time_range: { from: 'now-7d', to: 'now' } },
         origin,
+      },
+    });
+  });
+
+  it('returns each panel title in the summary', async () => {
+    mockRetrieveLatestVersion.mockReturnValue(undefined);
+    const grid = { x: 0, y: 0, w: 24, h: 10 };
+    mockExecuteDashboardUpsert.mockResolvedValue({
+      dashboardData: {
+        ...generatedDashboard,
+        panels: [
+          { id: 'errors', type: 'vis', config: { title: 'Errors over time' }, grid },
+          { id: 'note', type: 'markdown', config: { content: '# Note' }, grid },
+          {
+            id: 'breakdowns',
+            title: 'Breakdowns',
+            collapsed: false,
+            grid: { y: 10 },
+            panels: [{ id: 'hosts', type: 'vis', config: { title: 'Top hosts' }, grid }],
+          },
+        ],
+      },
+      created: [],
+      updated: [],
+      removed: [],
+      failures: [],
+      panelAuthoringNotes: [],
+    });
+
+    const { results } = await callHandler();
+
+    expect(results[0]).toMatchObject({
+      type: ToolResultType.dashboard,
+      data: {
+        dashboard: {
+          panels: [
+            { id: 'errors', type: 'vis', title: 'Errors over time' },
+            { id: 'note', type: 'markdown', title: undefined },
+            {
+              id: 'breakdowns',
+              title: 'Breakdowns',
+              panels: [{ id: 'hosts', type: 'vis', title: 'Top hosts' }],
+            },
+          ],
+        },
       },
     });
   });
@@ -389,5 +435,66 @@ describe('generateDashboardTool handler', () => {
         },
       });
     });
+  });
+});
+
+describe('generateDashboardTool descriptions', () => {
+  const tool = generateDashboardTool({ getDashboardValidator: jest.fn() });
+
+  interface DescribedNode {
+    description?: string;
+  }
+  const { properties } = z.toJSONSchema(tool.schema, { io: 'input' }) as unknown as {
+    properties: {
+      panels: DescribedNode & { items: { properties: { content: DescribedNode } } };
+      sections: DescribedNode;
+      controls: DescribedNode;
+      description: DescribedNode;
+    };
+  };
+
+  it('keeps the tool description within the 1,024 characters function-calling APIs accept', () => {
+    expect(tool.description.length).toBeLessThanOrEqual(1024);
+    expect(tool.description).toContain("Each field's description says how to use it well");
+    expect(tool.description).toContain('Pass that id as `dashboardId`');
+  });
+
+  it('says that changes apply one by one and failures are listed', () => {
+    expect(tool.description).toContain('Changes are applied one by one');
+    expect(tool.description).toContain('resend only the failed ones');
+  });
+
+  it('says which panels to add and which panel kind to pick', () => {
+    expect(properties.panels.description).toContain('summary metrics');
+    expect(properties.panels.description).toContain('Pick the first panel kind that fits');
+    expect(properties.panels.description).toContain('chartType is required for a new Lens panel');
+  });
+
+  it('says how to edit a panel and which panels cannot be edited', () => {
+    const { description } = properties.panels.items.properties.content;
+    expect(description).toContain('Prefer an edit to removing and re-adding the panel');
+    expect(description).toContain('Non-ES|QL Lens panels');
+    expect(description).toContain('Do not edit by-reference panels');
+    expect(description).toContain('can only be moved, removed, or replaced with a new panel');
+  });
+
+  it('says when to use sections and how to order them', () => {
+    expect(properties.sections.description).toContain('roughly 6 or more visualization panels');
+    expect(properties.sections.description).toContain('summary metrics, then trends');
+  });
+
+  it('says which controls to add on a new dashboard', () => {
+    expect(properties.controls.description).toContain('3-5 options_list_control dropdowns');
+    expect(properties.controls.description).toContain('cannot back one');
+  });
+
+  it('says which controls are left out without a failure', () => {
+    expect(properties.controls.description).toContain(
+      'silently, unless `user_requested` is true or it replaces an existing control'
+    );
+  });
+
+  it('asks for a description on a new dashboard', () => {
+    expect(properties.description.description).toContain('Set it when creating a dashboard');
   });
 });
