@@ -510,6 +510,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Prefix the subject of emails that Elastic Cloud trial deployments send through the built-in Elastic email service with `[Elastic Cloud Trial]` [#276705]({{kib-pull}}276705).
 * Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
 * Add threshold type and percentage support to anomaly detection job health rules [#272076]({{kib-pull}}272076).
+* Redesign the alerting v2 rule form into four steps: build your query, set your schedule, choose your outcome, and set your execution behaviors [#283528]({{kib-pull}}283528).
 
 **Connectivity**:
 * Add the Microsoft Teams inbound event triggers, which start a workflow when a channel message or chat message is posted, when a channel or chat is created, or when a member is added to a team [#297619]({{kib-pull}}297619).
@@ -649,6 +650,8 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Support `??` parameters in PromQL [#281486]({{kib-pull}}281486).
 * Persist whether a Discover session tab uses {{esql}} approximation [#282776]({{kib-pull}}282776).
 * Update the height of the {{esql}} editor after an LLM inserts content [#279712]({{kib-pull}}279712).
+* Add the Discover sessions API as a public, generally available API. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
+* Show an indicator in Discover when approximation is applied to an {{esql}} query [#291464]({{kib-pull}}291464).
 
 **{{product.observability}} solution**:
 For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -783,6 +786,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772).
 * Fix duplicate field definitions, field definition identity, and field definition references in the cases field library [#282060]({{kib-pull}}282060), [#282770]({{kib-pull}}282770), [#282450]({{kib-pull}}282450), [#280493]({{kib-pull}}280493).
 * Fix the case header showing no reporter name by falling back to the email address [#282504]({{kib-pull}}282504).
+* Fix the `FormatDate` mustache lambda rejecting epoch-millisecond values that arrive as strings, for example from nested templates that use the `x` format [#277391]({{kib-pull}}277391).
 
 **Connectivity**:
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
