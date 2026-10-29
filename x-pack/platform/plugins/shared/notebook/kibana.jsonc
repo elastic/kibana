@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/notebook-plugin",
+  "owner": ["@elastic/kibana-dashboards"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Reactive ES|QL notebooks where query cells feed charts and only affected cells re-run.",
+  "plugin": {
+    "id": "notebook",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "notebook"],
+    "requiredPlugins": ["data", "esql", "features", "lens"],
+    "optionalPlugins": []
+  }
+}

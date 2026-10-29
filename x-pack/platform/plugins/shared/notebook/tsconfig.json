@@ -1,0 +1,32 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/core-saved-objects-server",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/datemath",
+    "@kbn/es-query",
+    "@kbn/esql",
+    "@kbn/esql-utils",
+    "@kbn/expressions-plugin",
+    "@kbn/features-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/lens-common",
+    "@kbn/lens-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/shared-ux-router",
+    "@kbn/ui-callout",
+    "@kbn/visualization-utils"
+  ],
+  "exclude": ["target/**/*"]
+}

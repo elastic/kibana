@@ -989,6 +989,7 @@
     "@kbn/nightshift-sources-plugin": "workspace:*",
     "@kbn/no-data-page-plugin": "workspace:*",
     "@kbn/node-libs-browser-webpack-plugin": "workspace:*",
+    "@kbn/notebook-plugin": "workspace:*",
     "@kbn/notification-center-plugin": "workspace:*",
     "@kbn/notifications-plugin": "workspace:*",
     "@kbn/object-utils": "workspace:*",

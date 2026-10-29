@@ -1505,6 +1505,7 @@ packages:
   - 'x-pack/platform/plugins/shared/maintenance_windows'
   - 'x-pack/platform/plugins/shared/maps'
   - 'x-pack/platform/plugins/shared/ml'
+  - 'x-pack/platform/plugins/shared/notebook'
   - 'x-pack/platform/plugins/shared/notification_center'
   - 'x-pack/platform/plugins/shared/notifications'
   - 'x-pack/platform/plugins/shared/observability_ai_assistant'

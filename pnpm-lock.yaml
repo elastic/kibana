@@ -2894,6 +2894,9 @@ importers:
       '@kbn/node-libs-browser-webpack-plugin':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin
+      '@kbn/notebook-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/notebook
       '@kbn/notification-center-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/notification_center
@@ -6947,9 +6950,9 @@ importers:
 
   examples/preboot_example: {}
 
-  examples/pubsub_example: {}
-
   examples/pubsub-example-topic: {}
+
+  examples/pubsub_example: {}
 
   examples/resizable_layout_examples: {}
 
@@ -9498,6 +9501,8 @@ importers:
   x-pack/platform/plugins/shared/maps: {}
 
   x-pack/platform/plugins/shared/ml: {}
+
+  x-pack/platform/plugins/shared/notebook: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 
