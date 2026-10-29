@@ -51,7 +51,6 @@ import {
 } from '../../common/attachments';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField, getIDsAndIndicesAsArrays } from '../../common/utils';
-import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
   injectAttachmentSOAttributesFromRefs,
@@ -60,7 +59,6 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type {
   AlertsAttachedToCaseArgs,
-  AttachmentsAttachedToCaseArgs,
   BulkCreateAttachments,
   BulkUpdateAttachmentArgs,
   CreateAttachmentArgs,
@@ -272,43 +270,6 @@ export class AttachmentService {
     const unifiedCount = response.aggregations?.unifiedAlerts?.value ?? 0;
 
     return legacyCount + unifiedCount;
-  }
-
-  /**
-   * Executes the aggregations against a type of attachment attached to a case.
-   */
-  public async executeCaseAggregations<Agg extends AggregationResponse = AggregationResponse>({
-    caseId,
-    filter,
-    aggregations,
-    attachmentType,
-  }: AttachmentsAttachedToCaseArgs): Promise<Agg | undefined> {
-    try {
-      this.context.log.debug(`Attempting to aggregate for case id ${caseId}`);
-      const attachmentFilter = buildFilter({
-        filters: attachmentType,
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
-
-      const combinedFilter = combineFilters([attachmentFilter, filter]);
-
-      const response = await this.context.unsecuredSavedObjectsClient.find<unknown, Agg>({
-        type: [CASE_COMMENT_SAVED_OBJECT, CASE_ATTACHMENT_SAVED_OBJECT],
-        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-        page: 1,
-        perPage: 1,
-        sortField: defaultSortField,
-        aggs: aggregations,
-        filter: combinedFilter,
-      });
-
-      return response.aggregations;
-    } catch (error) {
-      this.context.log.error(`Error while executing aggregation for case id ${caseId}: ${error}`);
-      throw error;
-    }
   }
 
   /**
@@ -688,14 +649,18 @@ export class AttachmentService {
     savedObjectId,
     updatedAttributes,
     options,
+    savedObjectType,
   }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributesV2>> {
     try {
       this.context.log.debug(`Attempting to UPDATE attachment ${savedObjectId}`);
 
-      const [soType] = await resolveAttachmentSavedObjectTypes(
-        this.context.unsecuredSavedObjectsClient,
-        [savedObjectId]
-      );
+      const soType =
+        savedObjectType ??
+        (
+          await resolveAttachmentSavedObjectTypes(this.context.unsecuredSavedObjectsClient, [
+            savedObjectId,
+          ])
+        )[0];
       if (soType === null) {
         throw Boom.notFound(`Attachment ${savedObjectId} not found`);
       }

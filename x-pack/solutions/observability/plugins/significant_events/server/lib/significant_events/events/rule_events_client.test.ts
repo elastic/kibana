@@ -933,8 +933,12 @@ describe('RuleEventsClient', () => {
       );
 
       expect(await client.findEventDeactivations('event-1')).toEqual([
-        { episode_id: 'episode-1', reason: 'Known noise' },
-        { episode_id: 'episode-2', reason: '' },
+        {
+          '@timestamp': '2026-10-28T12:48:35.184Z',
+          episode_id: 'episode-1',
+          reason: 'Known noise',
+        },
+        { '@timestamp': '2026-10-28T15:00:00.000Z', episode_id: 'episode-2', reason: '' },
       ]);
     });
 
