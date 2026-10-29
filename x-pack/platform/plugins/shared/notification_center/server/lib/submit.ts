@@ -95,7 +95,6 @@ export class NotificationSubmitService {
     @inject(CoreStart('featureFlags')) private readonly featureFlags: FeatureFlagsStart
   ) {}
 
-  /** Build the `notification_id` from the type's registry `kind`, then validate and write. */
   public submit(
     { namespace, type, kind }: NotificationTypeTarget,
     input: NotificationSubmitPayload

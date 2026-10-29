@@ -17,7 +17,6 @@ import { registerNotificationUserStorage } from '../storage/user_storage';
 import { ScopedUserStorage } from '../tokens';
 
 export const bindServices = ({ bind }: ContainerModuleLoadOptions): void => {
-  // `Request` only resolves inside a request scope, so read state is request-scoped with it.
   bind(ScopedUserStorage)
     .toResolvedValue(
       (userStorage, request) => userStorage.asScoped(request),

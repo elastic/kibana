@@ -22,7 +22,6 @@ const content = {
   description: 'Your endpoint model is deprecated.',
 };
 
-// Core's `Setup` token is intentionally untyped; each plugin narrows it to its own contract.
 const getSetupContract = (container: Container) =>
   container.get(Setup) as NotificationCenterPluginSetup;
 
@@ -51,7 +50,6 @@ describe('bindContract', () => {
     );
   });
 
-  // Producers capture `submit` during setup, but the write path needs start-stage services.
   it('defers resolving the submit service until the plugin has started', async () => {
     const { container, submit } = createContainer();
     const contract = getSetupContract(container);

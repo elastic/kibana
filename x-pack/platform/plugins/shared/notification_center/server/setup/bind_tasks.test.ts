@@ -86,7 +86,6 @@ describe('bindTasks', () => {
 
     const { signal } = new AbortController();
     const runner = taskDefinition(registerTaskDefinitions).createTaskRunner({ signal });
-    // `inject` holds the resolution until the plugin has started.
     expect(cleanup.run).not.toHaveBeenCalled();
 
     start(container);

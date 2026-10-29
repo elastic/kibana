@@ -25,10 +25,6 @@ import {
 import { bindRoutes } from './bind_routes';
 import { bindServices } from './bind_services';
 
-/**
- * Stands in for the request scope core forks per request: the same plugin bindings plus the
- * request and response factory that `Request` and `Response` resolve to.
- */
 const createRequestScope = () => {
   const container = new Container();
   const { featureFlags } = coreMock.createStart();
@@ -72,8 +68,7 @@ describe('bindRoutes', () => {
     }
   });
 
-  // Core resolves the bound class inside the request scope, so an unbound dependency or a
-  // forgotten `@injectable()` only surfaces when the route is constructed.
+  // An unbound dependency or a missing `@injectable()` only surfaces on construction.
   it('constructs every route handler from the request scope', () => {
     const container = createRequestScope();
 

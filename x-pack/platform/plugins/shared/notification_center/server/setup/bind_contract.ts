@@ -19,8 +19,7 @@ import type {
 
 export const bindContract = ({ bind }: KibanaContainerModuleLoadOptions): void => {
   bind(Setup).toDynamicValue(({ inject }) => {
-    // Producers hold on to `submit` from the setup stage, but the write path needs start services;
-    // `inject` defers resolving them until the plugin has started.
+    // Producers capture `submit` at setup; `inject` defers the start-stage services it needs.
     const submit = inject<
       SubmitNotificationResult,
       [NotificationTypeTarget, NotificationSubmitPayload],

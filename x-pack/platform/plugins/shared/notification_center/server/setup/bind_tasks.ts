@@ -31,8 +31,7 @@ import { NotificationCleanupService } from '../cleanup_task/cleanup_expired_noti
 
 export const bindTasks = ({ bind }: KibanaContainerModuleLoadOptions): void => {
   bind(OnSetup).toDynamicValue(({ get, inject }) => {
-    // Task Manager needs the definition at setup, but the runner resolves the cleanup service on
-    // the first run; `inject` holds that resolution until the plugin has started.
+    // Task Manager needs the definition at setup; `inject` defers the service to the first run.
     const run = inject<void, [AbortSignal], [NotificationCleanupService]>(
       NotificationCleanupService,
       (cleanup, signal) => cleanup.run(signal)
