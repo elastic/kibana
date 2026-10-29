@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyActionsCell } from './action_policy_actions_cell';
@@ -29,12 +29,13 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   ...overrides,
 });
 
-const renderCell = (canWrite: boolean) =>
+const renderCell = (canWrite: boolean, canSendTestNotification = false) =>
   render(
     <I18nProvider>
       <ActionPolicyActionsCell
         policy={createPolicy()}
         canWrite={canWrite}
+        canSendTestNotification={canSendTestNotification}
         onViewDetails={jest.fn()}
         onEdit={jest.fn()}
         onClone={jest.fn()}
@@ -77,6 +78,23 @@ describe('ActionPolicyActionsCell', () => {
 
       expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
+    });
+
+    it('renders a menu that only offers to send a test notification', () => {
+      renderCell(false, true);
+
+      expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByLabelText('More actions'));
+      expect(screen.getByTestId('sendTestNotificationActionPolicy-policy-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('viewDetailsActionPolicy-policy-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneActionPolicy-policy-1')).not.toBeInTheDocument();
+    });
+
+    it('renders no menu when the license is not valid', () => {
+      mockIsLicenseValid = false;
+      renderCell(false, true);
+
       expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     });
   });

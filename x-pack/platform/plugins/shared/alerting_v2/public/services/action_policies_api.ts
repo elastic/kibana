@@ -10,6 +10,10 @@ import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import { buildPath } from '@kbn/core-http-browser';
 import type {
+  ActionPolicyTestPreviewBody,
+  ActionPolicyTestPreviewResponse,
+  ActionPolicyTestSendBody,
+  ActionPolicyTestSendResponse,
   BulkResponse,
   CreateActionPolicyData,
   ActionPolicyResponse,
@@ -17,7 +21,11 @@ import type {
   FindActionPoliciesResponse,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_PREVIEW_API_PATH,
+  ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+} from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
@@ -135,6 +143,20 @@ export class ActionPoliciesApi {
     return this.http.post<BulkResponse>(
       `${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk_update_api_key`,
       { body: JSON.stringify({ ids }) }
+    );
+  }
+
+  public async previewTestNotification(id: string, body: ActionPolicyTestPreviewBody = {}) {
+    return this.http.post<ActionPolicyTestPreviewResponse>(
+      buildPath(ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_PREVIEW_API_PATH, { id }),
+      { body: JSON.stringify(body) }
+    );
+  }
+
+  public async sendTestNotification(id: string, body: ActionPolicyTestSendBody) {
+    return this.http.post<ActionPolicyTestSendResponse>(
+      buildPath(ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_API_PATH, { id }),
+      { body: JSON.stringify(body) }
     );
   }
 

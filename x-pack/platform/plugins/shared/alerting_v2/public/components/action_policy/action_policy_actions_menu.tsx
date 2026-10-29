@@ -25,6 +25,8 @@ interface Props {
   onSnooze?: (id: string, snoozedUntil: string) => void;
   onCancelSnooze?: (id: string) => void;
   isSnoozeLoading?: boolean;
+  canWrite?: boolean;
+  canSendTestNotification?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -42,6 +44,8 @@ export const ActionPolicyActionsMenu = ({
   onSnooze,
   onCancelSnooze,
   isSnoozeLoading = false,
+  canWrite = true,
+  canSendTestNotification = false,
   'data-test-subj': dataTestSubj,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -63,7 +67,13 @@ export const ActionPolicyActionsMenu = ({
     onCancelSnooze,
     isSnoozeLoading,
     closeMenu: closePopover,
+    canWrite,
+    canSendTestNotification,
   });
+
+  if (panels.length === 0) {
+    return <>{modal}</>;
+  }
 
   return (
     <>

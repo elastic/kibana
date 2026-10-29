@@ -174,6 +174,46 @@ describe('useActionPolicyMenu', () => {
     }
   });
 
+  describe('send test notification', () => {
+    const SEND_TEST = 'sendTestNotificationActionPolicy-policy-1';
+
+    it('offers the item to users who can read action policies', () => {
+      const { result } = renderMenuHook({ canSendTestNotification: true });
+
+      expect(findItem(getItems(result), SEND_TEST)).toBeDefined();
+    });
+
+    it('hides the item without the read capability or a valid license', () => {
+      expect(findItem(getItems(renderMenuHook().result), SEND_TEST)).toBeUndefined();
+
+      mockIsLicenseValid = false;
+      const { result } = renderMenuHook({ canSendTestNotification: true });
+      expect(findItem(getItems(result), SEND_TEST)).toBeUndefined();
+    });
+
+    it('is the only item offered to users who cannot write', () => {
+      const { result } = renderMenuHook({
+        canWrite: false,
+        canSendTestNotification: true,
+        onEdit: jest.fn(),
+        onEnable: jest.fn(),
+        onDisable: jest.fn(),
+        onSnooze: jest.fn(),
+        onCancelSnooze: jest.fn(),
+      });
+
+      expect(
+        getItems(result).map((item) => 'data-test-subj' in item && item['data-test-subj'])
+      ).toEqual([SEND_TEST]);
+    });
+
+    it('returns no panel when no item is available', () => {
+      const { result } = renderMenuHook({ canWrite: false });
+
+      expect(result.current.panels).toEqual([]);
+    });
+  });
+
   it('keeps the same panels across renders when its inputs do not change', () => {
     const { result, rerender } = renderMenuHook();
     const first = result.current.panels;

@@ -85,7 +85,9 @@ export const ActionPolicyDetailsFlyout = ({
   size = 'm',
 }: Props) => {
   const settings = useService(CoreStart('settings'));
-  const canReadRules = useService(UserCapabilities).canRead('rules');
+  const userCapabilities = useService(UserCapabilities);
+  const canReadRules = userCapabilities.canRead('rules');
+  const canReadActionPolicies = userCapabilities.canRead('actionPolicies');
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
@@ -123,6 +125,9 @@ export const ActionPolicyDetailsFlyout = ({
     onUpdateApiKey,
     isStateLoading,
     isSnoozeLoading,
+    canWrite,
+    canSendTestNotification: canReadActionPolicies,
+    flyoutHistoryKey: HISTORY_KEY,
   });
 
   return (
@@ -339,16 +344,14 @@ export const ActionPolicyDetailsFlyout = ({
         </Body>
 
         <Footer>
-          {canWrite && (
-            <Footer.PrimaryActionMenu
-              label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
-                defaultMessage: 'Take action',
-              })}
-              aria-label={ACTION_POLICY_MENU_ARIA_LABEL}
-              panels={takeActionPanels}
-              data-test-subj="detailsFlyoutTakeActionButton"
-            />
-          )}
+          <Footer.PrimaryActionMenu
+            label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.takeAction', {
+              defaultMessage: 'Take action',
+            })}
+            aria-label={ACTION_POLICY_MENU_ARIA_LABEL}
+            panels={takeActionPanels}
+            data-test-subj="detailsFlyoutTakeActionButton"
+          />
         </Footer>
       </FlyoutTemplate>
       {isAffectedRulesOpen && (
@@ -359,7 +362,7 @@ export const ActionPolicyDetailsFlyout = ({
           onClose={() => setIsAffectedRulesOpen(false)}
         />
       )}
-      {canWrite && takeActionModal}
+      {takeActionModal}
     </>
   );
 };

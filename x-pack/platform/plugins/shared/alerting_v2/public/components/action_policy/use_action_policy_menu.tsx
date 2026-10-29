@@ -16,6 +16,8 @@ import { formatSnoozeFullDate } from './format_snooze_date';
 import { useIsSnoozed } from './use_is_snoozed';
 import { ActionPolicySnoozeModal } from './action_policy_snooze_modal';
 import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from './labels';
+import { SendTestNotificationFlyout } from './send_test_notification/send_test_notification_flyout';
+import { SEND_TEST_NOTIFICATION } from './send_test_notification/translations';
 import { useIsActionPoliciesLicenseValid } from '../../hooks/use_is_action_policies_license_valid';
 
 export const ACTION_POLICY_MENU_ARIA_LABEL = i18n.translate(
@@ -38,11 +40,21 @@ export interface UseActionPolicyMenuParams {
   isSnoozeLoading?: boolean;
   /** Called before an item's action runs. Omit it when the menu closes itself on item click. */
   closeMenu?: () => void;
+  /** Whether the write actions are offered. Defaults to `true`. */
+  canWrite?: boolean;
+  /** Whether the user can read action policies, which is enough to send a test notification. */
+  canSendTestNotification?: boolean;
+  /** History key of the flyout the menu lives in, shared with the test notification flyout. */
+  flyoutHistoryKey?: symbol;
 }
 
 export interface UseActionPolicyMenuResult {
+  /** Empty when no action is available to the user. */
   panels: FlyoutFooterMenuPanel[];
-  /** The snooze modal, or `null` while it is closed. Render it outside the menu's popover. */
+  /**
+   * The snooze modal or the test notification flyout, or `null` while both are closed. Render it
+   * outside the menu's popover.
+   */
   modal: ReactNode;
 }
 
@@ -60,16 +72,20 @@ export const useActionPolicyMenu = ({
   onCancelSnooze,
   isSnoozeLoading = false,
   closeMenu,
+  canWrite = true,
+  canSendTestNotification = false,
+  flyoutHistoryKey,
 }: UseActionPolicyMenuParams): UseActionPolicyMenuResult => {
   const { euiTheme } = useEuiTheme();
   const isLicenseValid = useIsActionPoliciesLicenseValid();
   const [isSnoozeModalOpen, setIsSnoozeModalOpen] = useState(false);
+  const [isSendTestNotificationOpen, setIsSendTestNotificationOpen] = useState(false);
   const snoozedActive = useIsSnoozed(policy.snoozed_until);
 
   const panels = useMemo((): FlyoutFooterMenuPanel[] => {
     const licenseTooltip = isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE;
     const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
-    const canSnooze = onSnooze != null && onCancelSnooze != null && policy.enabled;
+    const canSnooze = canWrite && onSnooze != null && onCancelSnooze != null && policy.enabled;
 
     const group1: FlyoutFooterMenuItem[] = [];
     if (onViewDetails) {
@@ -85,7 +101,7 @@ export const useActionPolicyMenu = ({
         },
       });
     }
-    if (onEdit) {
+    if (canWrite && onEdit) {
       group1.push({
         name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit', {
           defaultMessage: 'Edit',
@@ -97,6 +113,17 @@ export const useActionPolicyMenu = ({
         onClick: () => {
           closeMenu?.();
           onEdit(policy.id);
+        },
+      });
+    }
+    if (canSendTestNotification && isLicenseValid) {
+      group1.push({
+        name: SEND_TEST_NOTIFICATION,
+        icon: 'send',
+        'data-test-subj': `sendTestNotificationActionPolicy-${policy.id}`,
+        onClick: () => {
+          closeMenu?.();
+          setIsSendTestNotificationOpen(true);
         },
       });
     }
@@ -132,20 +159,22 @@ export const useActionPolicyMenu = ({
         });
       }
     }
-    group2.push({
-      name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.clone', {
-        defaultMessage: 'Clone',
-      }),
-      icon: 'copy',
-      disabled: !isLicenseValid,
-      toolTipContent: licenseTooltip,
-      'data-test-subj': `cloneActionPolicy-${policy.id}`,
-      onClick: () => {
-        closeMenu?.();
-        onClone(policy);
-      },
-    });
-    if (onEnable != null && onDisable != null) {
+    if (canWrite) {
+      group2.push({
+        name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.clone', {
+          defaultMessage: 'Clone',
+        }),
+        icon: 'copy',
+        disabled: !isLicenseValid,
+        toolTipContent: licenseTooltip,
+        'data-test-subj': `cloneActionPolicy-${policy.id}`,
+        onClick: () => {
+          closeMenu?.();
+          onClone(policy);
+        },
+      });
+    }
+    if (canWrite && onEnable != null && onDisable != null) {
       group2.push({
         name: policy.enabled
           ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.disable', {
@@ -168,20 +197,23 @@ export const useActionPolicyMenu = ({
         },
       });
     }
-    group2.push({
-      name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.updateApiKey', {
-        defaultMessage: 'Update API key',
-      }),
-      icon: 'key',
-      'data-test-subj': `updateApiKeyActionPolicy-${policy.id}`,
-      onClick: () => {
-        closeMenu?.();
-        onUpdateApiKey(policy.id);
-      },
-    });
+    if (canWrite) {
+      group2.push({
+        name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.updateApiKey', {
+          defaultMessage: 'Update API key',
+        }),
+        icon: 'key',
+        'data-test-subj': `updateApiKeyActionPolicy-${policy.id}`,
+        onClick: () => {
+          closeMenu?.();
+          onUpdateApiKey(policy.id);
+        },
+      });
+    }
 
-    const group3: FlyoutFooterMenuItem[] = [
-      {
+    const group3: FlyoutFooterMenuItem[] = [];
+    if (canWrite) {
+      group3.push({
         name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.delete', {
           defaultMessage: 'Delete',
         }),
@@ -194,8 +226,8 @@ export const useActionPolicyMenu = ({
           closeMenu?.();
           onDelete(policy);
         },
-      },
-    ];
+      });
+    }
 
     const items = [group1, group2, group3]
       .filter((group) => group.length > 0)
@@ -207,7 +239,7 @@ export const useActionPolicyMenu = ({
         []
       );
 
-    return [{ id: 0, items }];
+    return items.length > 0 ? [{ id: 0, items }] : [];
   }, [
     policy,
     onViewDetails,
@@ -223,9 +255,19 @@ export const useActionPolicyMenu = ({
     isSnoozeLoading,
     snoozedActive,
     closeMenu,
+    canWrite,
+    canSendTestNotification,
     isLicenseValid,
     euiTheme.colors.textDanger,
   ]);
+
+  const sendTestNotificationFlyout = isSendTestNotificationOpen ? (
+    <SendTestNotificationFlyout
+      policy={policy}
+      historyKey={flyoutHistoryKey}
+      onClose={() => setIsSendTestNotificationOpen(false)}
+    />
+  ) : null;
 
   const modal = isSnoozeModalOpen ? (
     <ActionPolicySnoozeModal
@@ -235,7 +277,9 @@ export const useActionPolicyMenu = ({
       }}
       onCancel={() => setIsSnoozeModalOpen(false)}
     />
-  ) : null;
+  ) : (
+    sendTestNotificationFlyout
+  );
 
   return { panels, modal };
 };
