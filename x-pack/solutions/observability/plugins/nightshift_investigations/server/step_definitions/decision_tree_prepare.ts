@@ -17,6 +17,7 @@ import {
   type InvestigationToolCall,
 } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
+import { followUpVerdictInputsSchema } from '../round_verdict/follow_up_verdict';
 import { withToolResults } from '../investigation_round';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
@@ -49,13 +50,7 @@ export const decisionTreePrepareStepDefinition = ({
         .optional()
         .describe('The investigation (conversation) the round belongs to.'),
       round_id: z.string().max(1024).optional().describe('The completed round.'),
-      round_kind: z
-        .string()
-        .max(64)
-        .optional()
-        .describe(
-          'The kind of round (initial, follow_up, or alert_recovery), labelled when it started.'
-        ),
+      ...followUpVerdictInputsSchema,
       agent_id: z
         .string()
         .max(1024)
@@ -67,6 +62,11 @@ export const decisionTreePrepareStepDefinition = ({
       tool_results: toolResultsSchema.describe(
         'Results of the investigator tool calls, keyed by tool_call_id.'
       ),
+      learning: z
+        .string()
+        .max(4_096)
+        .optional()
+        .describe('From nightshift.classifyFollowUp: what a human taught the investigator.'),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
@@ -74,6 +74,9 @@ export const decisionTreePrepareStepDefinition = ({
       turn_kind: z
         .enum(['initial_investigation', 'feedback_reinforcement'])
         .describe('Whether this round seeds the trees or follows up on them.'),
+      offer_learning_tools: z
+        .boolean()
+        .describe('Whether the reinforcement agent may record learnings this turn.'),
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
     }),
     handler: async (context) => {
@@ -84,12 +87,17 @@ export const decisionTreePrepareStepDefinition = ({
         agent_id: agentId,
         tool_calls: toolCalls,
         tool_results: toolResults,
+        is_feedback: isFeedback,
+        causal_confirmed: causalConfirmed,
+        causal_summary: causalSummary,
+        learning,
       } = context.input;
       const skippedOutput = {
         output: {
           message: '',
           tree_count: 0,
           turn_kind: 'initial_investigation' as const,
+          offer_learning_tools: false,
           skipped: true,
         },
       };
@@ -141,6 +149,13 @@ export const decisionTreePrepareStepDefinition = ({
         logger,
         spaceId,
         toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
+        verdict: {
+          // Unset means the verdict step did not run, which counts as no verdict.
+          isFeedback: isFeedback === true,
+          causalConfirmed: isFeedback === true && causalConfirmed === true,
+          causalSummary: causalSummary ?? '',
+          learning: learning ?? '',
+        },
       });
       if (turn.skipped) {
         return skippedOutput;
@@ -151,6 +166,7 @@ export const decisionTreePrepareStepDefinition = ({
           message: turn.message,
           tree_count: turn.treeCount,
           turn_kind: turn.turnKind,
+          offer_learning_tools: turn.offerLearningTools,
           skipped: false,
         },
       };

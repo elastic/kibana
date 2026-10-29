@@ -12,6 +12,7 @@ import {
 } from '@kbn/nightshift-decision-trees';
 import type { DecisionTreeTurnKind, LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { InvestigationRoundKind } from '../client/round_kind';
+import { NO_VERDICT, type RoundVerdict } from '../round_verdict/classify';
 import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools';
 import type { DecisionTreeSummary } from './store';
 import { workspacePathForTree } from './materialize';
@@ -29,17 +30,18 @@ export const buildReinforcementPrompt = ({
   learnings,
   connectorNames,
   turnKind,
+  verdict = NO_VERDICT,
 }: {
   trees: DecisionTreeSummary[];
   learnings: LearningRecord[];
   connectorNames: string[];
   turnKind: DecisionTreeTurnKind;
+  verdict?: Pick<RoundVerdict, 'isFeedback' | 'causalConfirmed' | 'causalSummary' | 'learning'>;
 }): string => {
+  const isFollowUp = turnKind === 'feedback_reinforcement';
   const script = selectTurnScript({
     turnKind,
-    // Nothing tells yet whether a follow-up confirmed the root cause, so a follow-up extends the
-    // tree and never reinforces a path as causal.
-    causalConfirmed: false,
+    causalConfirmed: verdict.causalConfirmed,
     // Callers pass only the trees this investigation used, never every tree in the index.
     hasExistingTrees: trees.length > 0,
     tools: DECISION_TREE_PROMPT_TOOLS,
@@ -67,6 +69,9 @@ export const buildReinforcementPrompt = ({
       .filter((learning) => learning.kind === 'remediation')
       .map((learning) => `${learning.tree_id}: ${learning.content}`),
     connectorNames,
+    ...(isFollowUp && verdict.isFeedback && verdict.causalSummary
+      ? { verdict: { causalSummary: verdict.causalSummary, learning: verdict.learning } }
+      : {}),
     script,
   });
 };

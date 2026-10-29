@@ -2071,6 +2071,55 @@ describe('optimizeMemory', () => {
     expect(store.upsert).not.toHaveBeenCalled();
   });
 
+  describe('on a follow-up', () => {
+    const optimize = (verdict: Parameters<typeof optimizeMemory>[0]['verdict']) => {
+      const store = createStore({
+        get: jest.fn().mockImplementation(async (id: string) => page(id)),
+      });
+      const proposeLabels = jest
+        .fn()
+        .mockResolvedValue({ useful: ['memory_a'], harmful: ['memory_b'] });
+      return optimizeMemory({
+        store,
+        recalledIds: ['memory_a', 'memory_b'],
+        proposeLabels,
+        proposeExtractions: jest.fn().mockResolvedValue({ extractions: [] }),
+        userMessage: 'It was the flagd rollout.',
+        assistantMessage: 'Confirmed.',
+        toolCalls: [],
+        logger: loggerMock.create(),
+        verdict,
+      }).then(() => ({ store, transcript: proposeLabels.mock.calls[0][0].transcript as string }));
+    };
+
+    it('keeps the helpful labels when the follow-up proved the cause', async () => {
+      const { store, transcript } = await optimize({
+        isFeedback: true,
+        causalConfirmed: true,
+        causalSummary: 'The flagd rollout caused it.',
+      });
+
+      expect(transcript).toContain('The follow-up proved the root cause.');
+      expect(store.applyCounterUpdates).toHaveBeenCalledWith([
+        { id: 'memory_a', addImp: 1, addConv: 1 },
+      ]);
+    });
+
+    it('drops the helpful labels, and keeps the harmful ones, when it proved nothing', async () => {
+      const { store, transcript } = await optimize({
+        isFeedback: true,
+        causalConfirmed: false,
+        causalSummary: 'Errors stopped while the rollout was still running.',
+      });
+
+      expect(transcript).toContain('A recalled memory that supported the contradicted cause is harmful.');
+      expect(store.applyCounterUpdates).toHaveBeenCalledWith([
+        { id: 'memory_a', addImp: 1, addConv: 0 },
+      ]);
+      expect(store.archive).toHaveBeenCalledWith('memory_b', 'harmful');
+    });
+  });
+
   it('critiques from tool-call parameters but does not extract without tool results', async () => {
     const store = createStore({
       get: jest.fn().mockImplementation(async (id: string) => page(id)),

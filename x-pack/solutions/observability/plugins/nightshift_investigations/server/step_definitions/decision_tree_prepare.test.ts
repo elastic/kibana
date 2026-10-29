@@ -72,7 +72,13 @@ describe('decisionTreePrepareStepDefinition', () => {
     round_kind: 'initial',
   };
   const skipped = {
-    output: { message: '', tree_count: 0, turn_kind: 'initial_investigation', skipped: true },
+    output: {
+      message: '',
+      tree_count: 0,
+      turn_kind: 'initial_investigation',
+      offer_learning_tools: false,
+      skipped: true,
+    },
   };
 
   beforeEach(() => {
@@ -82,6 +88,7 @@ describe('decisionTreePrepareStepDefinition', () => {
       message: 'turn prompt',
       treeCount: 1,
       turnKind: 'feedback_reinforcement',
+      offerLearningTools: true,
     });
     conversationsGet.mockResolvedValue({ rounds: [] });
   });
@@ -134,6 +141,7 @@ describe('decisionTreePrepareStepDefinition', () => {
         message: 'turn prompt',
         tree_count: 1,
         turn_kind: 'feedback_reinforcement',
+        offer_learning_tools: true,
         skipped: false,
       },
     });
@@ -144,6 +152,38 @@ describe('decisionTreePrepareStepDefinition', () => {
         investigationId: 'inv-1',
         earlierAccessedTreeIds: [],
         spaceId: 'space-1',
+      })
+    );
+  });
+
+  it('hands the verdict on the round to the turn', async () => {
+    await run({
+      ...investigatorRound,
+      round_kind: 'follow_up',
+      is_feedback: true,
+      causal_confirmed: true,
+      causal_summary: 'The deploy caused it.',
+      learning: 'Check deploys first.',
+    });
+
+    expect(prepareReinforcementTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        verdict: {
+          isFeedback: true,
+          causalConfirmed: true,
+          causalSummary: 'The deploy caused it.',
+          learning: 'Check deploys first.',
+        },
+      })
+    );
+  });
+
+  it('reads a missing verdict as no verdict, and never as a confirmation', async () => {
+    await run({ ...investigatorRound, round_kind: 'follow_up', causal_confirmed: true });
+
+    expect(prepareReinforcementTurn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        verdict: { isFeedback: false, causalConfirmed: false, causalSummary: '', learning: '' },
       })
     );
   });

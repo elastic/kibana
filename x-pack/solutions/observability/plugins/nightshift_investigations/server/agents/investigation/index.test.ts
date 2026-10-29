@@ -28,6 +28,8 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ];
 
+const RECORD_RECOVERY_OUTCOME_TOOL_ID = 'nightshift_record_recovery_outcome';
+
 const INVESTIGATION_TOOL_IDS = [
   'agentic_investigations.set_impact',
   'agentic_investigations.set_hypotheses',
@@ -73,6 +75,7 @@ describe('Nightshift investigation agent type', () => {
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
       ...INVESTIGATION_TOOL_IDS,
+      RECORD_RECOVERY_OUTCOME_TOOL_ID,
       PROPOSALS_CREATE_TOOL_ID,
       ...SANDBOX_TOOL_IDS,
     ]);
@@ -161,6 +164,7 @@ describe('Nightshift investigation agent type', () => {
     ]);
     expect(base.tools?.[0]?.tool_ids).toEqual([
       ...INVESTIGATION_TOOL_IDS,
+      RECORD_RECOVERY_OUTCOME_TOOL_ID,
       PROPOSALS_CREATE_TOOL_ID,
     ]);
   });
@@ -188,7 +192,8 @@ describe('Nightshift investigation agent type', () => {
       })
     );
 
-    expect(base.tools?.[0]?.tool_ids).toEqual([]);
+    // Its own tool, so it needs no plugin.
+    expect(base.tools?.[0]?.tool_ids).toEqual([RECORD_RECOVERY_OUTCOME_TOOL_ID]);
   });
 
   it('instructs the agent to record its findings with the investigation tools', async () => {

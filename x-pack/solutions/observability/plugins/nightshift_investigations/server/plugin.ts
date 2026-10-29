@@ -72,6 +72,13 @@ import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { labelRoundStepDefinition } from './step_definitions/label_round';
+import { classifyFollowUpStepDefinition } from './step_definitions/classify_follow_up';
+import { createRecordRecoveryOutcomeTool } from './tools/record_recovery_outcome_tool';
+import { createLlmCausalCheck } from './round_verdict';
+import {
+  createInvestigationMemoryTelemetry,
+  createOptimizeModel,
+} from './lib/create_optimize_model';
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
 import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
@@ -285,6 +292,7 @@ export class NightshiftInvestigationsPlugin
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       };
+      plugins.agentBuilder.tools.register(createRecordRecoveryOutcomeTool());
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
         telemetryConfig: config.sandbox,
@@ -522,11 +530,42 @@ export class NightshiftInvestigationsPlugin
             isEnabled: () => this.decisionTreesEnabled,
           })
         );
+        // Cortex and Memory read the round's kind and verdict as well as the trees.
+        const learnsFromRounds = () =>
+          this.cortexEnabled || this.memoryEnabled || this.decisionTreesEnabled;
         plugins.workflowsExtensions.registerStepDefinition(
           labelRoundStepDefinition({
             getRoundKind: (request, investigationId) =>
               this.getInvestigationsClient(request).getActiveRoundKind(investigationId),
-            isEnabled: () => this.decisionTreesEnabled,
+            isEnabled: learnsFromRounds,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          classifyFollowUpStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            createCausalCheck: async ({
+              request,
+              requestedConnectorId,
+              roundConnectorId,
+              interactionId,
+              signal,
+            }) => {
+              const model = await createOptimizeModel({
+                request,
+                requestedConnectorId,
+                roundConnectorId,
+                agentBuilder: this.agentBuilder,
+                inference: this.inference,
+                savedObjects: this.savedObjects,
+                uiSettings: this.uiSettings,
+                telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
+                logger: this.logger.get('round_verdict'),
+              });
+              return model
+                ? createLlmCausalCheck({ inferenceClient: model.inferenceClient, signal })
+                : undefined;
+            },
+            isEnabled: learnsFromRounds,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(

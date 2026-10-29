@@ -150,6 +150,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_record_tool_learning',
   'nightshift_record_remediation',
 
+  // Nightshift – Investigations
+  'nightshift_record_recovery_outcome',
+
   // Platform – Agentic Investigations
   `${internalNamespaces.agenticInvestigations}.set_impact`,
   `${internalNamespaces.agenticInvestigations}.set_hypotheses`,

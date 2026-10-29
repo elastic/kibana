@@ -82,14 +82,14 @@ describe('decisionTreeReinforceStepDefinition', () => {
     ]);
   });
 
-  it('withholds the learning tools on an initial investigation', async () => {
-    await run({ turn_kind: 'initial_investigation' });
+  it('withholds the learning tools unless the prepared turn offers them', async () => {
+    await run({ turn_kind: 'feedback_reinforcement' });
 
     expect(runAgent.mock.calls[0][0].agentParams.configurationOverrides).toBeUndefined();
   });
 
-  it('adds the learning tools on a follow-up turn', async () => {
-    await run({ turn_kind: 'feedback_reinforcement' });
+  it('adds the learning tools when the prepared turn offers them', async () => {
+    await run({ turn_kind: 'feedback_reinforcement', offer_learning_tools: true });
 
     expect(runAgent.mock.calls[0][0].agentParams.configurationOverrides).toEqual({
       tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }],

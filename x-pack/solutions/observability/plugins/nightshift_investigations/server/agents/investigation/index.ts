@@ -32,6 +32,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
+import { RECORD_RECOVERY_OUTCOME_TOOL_ID } from '../../round_verdict/recovery_outcome';
 
 export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
@@ -153,6 +154,7 @@ export type NightshiftAgentTypeOptions = Omit<
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
+  agentToolIds = [],
   sandboxEnabled,
   cortexEnabled,
   memoryEnabled = false,
@@ -164,6 +166,8 @@ export const buildNightshiftAgentConfiguration = ({
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
+  /** Tools only this agent type gets. */
+  agentToolIds?: readonly string[];
 }): AgentTypeDefinition['baseConfiguration'] => {
   const configurationFor = ({
     materializeWorkflowId,
@@ -176,6 +180,7 @@ export const buildNightshiftAgentConfiguration = ({
         {
           tool_ids: [
             ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+            ...agentToolIds,
             ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
             ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
           ],
@@ -243,6 +248,8 @@ export const getInvestigationAgentType = ({
   avatar_icon: 'logoElastic',
   baseConfiguration: buildNightshiftAgentConfiguration({
     ...options,
+    // Only investigations get alert recoveries.
+    agentToolIds: [RECORD_RECOVERY_OUTCOME_TOOL_ID],
     instructions: fillContextInstructions({
       includeCortex: options.sandboxEnabled && options.cortexEnabled,
       includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,

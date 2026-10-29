@@ -13,6 +13,7 @@ import type {
   InvestigationAlertSnapshot,
   V2AlertSnapshot,
 } from '../../common';
+import { RECORD_RECOVERY_OUTCOME_TOOL_ID } from '../round_verdict/recovery_outcome';
 
 /**
  * The investigation workflow prompts the agent with `{{ inputs.message }}`, so this string is
@@ -286,5 +287,6 @@ export function buildAlertRecoveredFollowUpMessage({
     '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
     '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. Lower the confidence of or dismiss hypotheses contradicted by the evidence.',
     "3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved, and update the investigation's hypotheses accordingly.",
+    `4. Finally, call ${RECORD_RECOVERY_OUTCOME_TOOL_ID} once with that verdict, what resolved the alert, and the outcome of every hypothesis that existed before this round.`,
   ].join('\n');
 }

@@ -29,6 +29,7 @@ import {
   type MemoryOptimizeSummary,
 } from './optimize';
 import { createMemoryPageStore, type MemoryPageStore } from './page_store';
+import type { FollowUpVerdict } from '../round_verdict/follow_up_verdict';
 
 /** Registers the AI index so Context Engine manages it; the backing index is created on first write. */
 export const registerMemoryAiIndex = (
@@ -147,6 +148,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId,
   roundConnectorId,
   interactionId,
+  verdict,
 }: {
   request: KibanaRequest;
   agentId?: string;
@@ -168,6 +170,7 @@ export const runMemoryOptimize = async ({
   requestedConnectorId?: string;
   roundConnectorId?: string;
   interactionId: string;
+  verdict?: FollowUpVerdict;
 }): Promise<MemoryOptimizeSummary | undefined> => {
   logger.debug(
     `Memory optimize wiring space=${spaceId} agent=${agentId} ` +
@@ -224,5 +227,6 @@ export const runMemoryOptimize = async ({
     conversationId,
     logger,
     signal,
+    verdict,
   });
 };

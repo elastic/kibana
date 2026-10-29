@@ -49,7 +49,11 @@ export const decisionTreeReinforceStepDefinition = ({
         .describe('Turn message from nightshift.decisionTreePrepare.'),
       turn_kind: z
         .enum(['initial_investigation', 'feedback_reinforcement'])
-        .describe('Turn kind from nightshift.decisionTreePrepare. Picks the tool set.'),
+        .describe('Turn kind from nightshift.decisionTreePrepare.'),
+      offer_learning_tools: z
+        .boolean()
+        .optional()
+        .describe('From nightshift.decisionTreePrepare: offer the learning tools this turn.'),
       connector_id: z
         .string()
         .max(MAX_KEYWORD_LENGTH)
@@ -80,7 +84,7 @@ export const decisionTreeReinforceStepDefinition = ({
         round_id: roundId,
         round_index: roundIndex,
         message,
-        turn_kind: turnKind,
+        offer_learning_tools: offerLearningTools,
         connector_id: connectorId,
         tool_calls: toolCalls,
         tool_results: toolResults,
@@ -115,11 +119,11 @@ export const decisionTreeReinforceStepDefinition = ({
         round,
         now,
       });
-      // Matches Deductive: an initial investigation only edits files; learnings need a follow-up.
-      const configurationOverrides =
-        turnKind === 'feedback_reinforcement'
-          ? { tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }] }
-          : undefined;
+      // Matches Deductive: learnings come from feedback, so only a follow-up that gave some
+      // records them.
+      const configurationOverrides = offerLearningTools
+        ? { tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }] }
+        : undefined;
 
       // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
       const { result } = await agentBuilder.agents.runAgent({

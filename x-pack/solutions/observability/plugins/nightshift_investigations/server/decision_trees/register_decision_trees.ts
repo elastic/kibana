@@ -21,6 +21,7 @@ import {
   type InvestigationToolCall,
 } from './accessed_trees';
 import type { InvestigationRoundKind } from '../client/round_kind';
+import { NO_VERDICT, type RoundVerdict } from '../round_verdict/classify';
 import { createLearningStore } from './learning_store';
 import { materializeDecisionTrees } from './materialize';
 import { createDecisionTreeStore } from './store';
@@ -99,6 +100,7 @@ export const prepareReinforcementTurn = async ({
   spaceId,
   signal,
   toolCalls = [],
+  verdict = NO_VERDICT,
 }: {
   roundKind: InvestigationRoundKind;
   investigationId: string;
@@ -110,8 +112,17 @@ export const prepareReinforcementTurn = async ({
   spaceId: string;
   signal?: AbortSignal;
   toolCalls?: InvestigationToolCall[];
+  /** What the round said about the earlier root cause, from nightshift.classifyFollowUp. */
+  verdict?: Pick<RoundVerdict, 'isFeedback' | 'causalConfirmed' | 'causalSummary' | 'learning'>;
 }): Promise<
-  | { skipped: false; message: string; treeCount: number; turnKind: DecisionTreeTurnKind }
+  | {
+      skipped: false;
+      message: string;
+      treeCount: number;
+      turnKind: DecisionTreeTurnKind;
+      /** Learnings come from feedback: a follow-up that said nothing has none to record. */
+      offerLearningTools: boolean;
+    }
   | { skipped: true }
 > => {
   const treeStore = createDecisionTreeStore({ esClient, logger, spaceId, signal });
@@ -141,11 +152,13 @@ export const prepareReinforcementTurn = async ({
     learnings,
     connectorNames,
     turnKind,
+    verdict,
   });
   return {
     skipped: false,
     message: [embedAccessedTreesMarker(editable.map((tree) => tree.tree_id)), message].join('\n'),
     treeCount: editable.length,
     turnKind,
+    offerLearningTools: isFollowUp && verdict.isFeedback,
   };
 };
