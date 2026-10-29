@@ -29,7 +29,7 @@ import { Console } from '../../console';
 interface ManagedConsole
   extends Pick<
     ConsoleRegistrationInterface,
-    'consoleProps' | 'pageTitle' | 'PageBodyComponent' | 'HeaderActionsComponent'
+    'consoleProps' | 'pageTitle' | 'docLink' | 'PageBodyComponent' | 'HeaderActionsComponent'
   > {
   client: RegisteredConsoleClient;
   console: JSX.Element; // actual console component
@@ -283,6 +283,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       const managedConsole: ManagedConsole = {
         PageBodyComponent: undefined,
         pageTitle: undefined,
+        docLink: undefined,
         HeaderActionsComponent: undefined,
         ...otherRegisterProps,
         client: {
@@ -402,8 +403,8 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
                 key={visibleConsole.client.id}
               />
             }
-            isHidden={!visibleConsole}
             pageTitle={visibleConsole.pageTitle}
+            docLink={visibleConsole.docLink}
             body={
               visibleConsole.PageBodyComponent && (
                 <visibleConsole.PageBodyComponent meta={visibleConsoleMeta} />

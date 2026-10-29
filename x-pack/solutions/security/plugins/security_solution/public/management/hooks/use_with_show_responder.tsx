@@ -9,6 +9,7 @@ import React, { useCallback, useRef } from 'react';
 import type { ConsoleApi, ConsoleProps } from '../components/console/types';
 import { type SupportedHostOsType } from '../../../common/endpoint/constants';
 import { useLicense } from '../../common/hooks/use_license';
+import { useKibana } from '../../common/lib/kibana';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
 import {
   type ResponseActionAgentType,
@@ -52,6 +53,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
+  const { docLinks } = useKibana().services;
   const consoleApi = useRef<ConsoleApi>();
   const pendingInputCommand = useRef<string | undefined>();
 
@@ -126,6 +128,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             pageTitle: RESPONDER_PAGE_TITLE,
+            docLink: docLinks.links.securitySolution.responseActions,
             HeaderActionsComponent: endpointPrivileges.canReadActionsLogManagement
               ? ResponseActionsHistoryAppMenu
               : undefined,
@@ -143,6 +146,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, consoleManager, applyPendingInputCommand]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager, applyPendingInputCommand, docLinks]
   );
 };

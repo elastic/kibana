@@ -28,7 +28,6 @@ jest.mock('../../../../../../common/components/app_header/use_add_integrations_m
 
 const defaultProps: ConsolePageOverlayProps = {
   console: <div data-test-subj="fakeConsole" />,
-  isHidden: false,
   onHide: jest.fn(),
   pageTitle: 'Response console',
 };
@@ -96,14 +95,6 @@ describe('ConsolePageOverlay', () => {
     expect(onHide).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render the header when hidden, but keeps the console mounted', () => {
-    renderOverlay({ isHidden: true });
-
-    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
-    expect(screen.getByTestId('fakeConsole')).toBeInTheDocument();
-  });
-
   it('renders the primary action contributed via the `menu` prop', async () => {
     const run = jest.fn();
     renderOverlay({
@@ -124,13 +115,14 @@ describe('ConsolePageOverlay', () => {
     expect(run).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the Documentation menu item when a `docLink` is resolvable', async () => {
-    renderOverlay();
+  it('renders the Documentation menu item with the `docLink` from the registration', async () => {
+    renderOverlay({ docLink: 'https://example.com/response-actions' });
     await openAppMenuOverflow();
 
-    expect(
-      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+      'href',
+      'https://example.com/response-actions'
+    );
   });
 
   it.each([

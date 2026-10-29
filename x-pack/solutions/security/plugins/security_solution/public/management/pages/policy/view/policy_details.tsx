@@ -20,9 +20,10 @@ import { policyDetails, agentStatusSummary, apiError } from '../store/policy_det
 import { usePolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { getPoliciesPath } from '../../../common/routing';
-import { useAppUrl, useKibana } from '../../../../common/lib/kibana';
-import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { useKibana } from '../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../common/constants';
+import type { AppHeaderBackLink } from '../../../hooks/use_app_header_back';
+import { useAppHeaderBack } from '../../../hooks/use_app_header_back';
 
 const POLICIES_LIST_LABEL = i18n.translate(
   'xpack.securitySolution.policyDetails.policiesBackLabel',
@@ -40,7 +41,7 @@ const POLICY_DETAILS_ERROR_TITLE = i18n.translate(
  */
 const PolicyDetailsLoaded = React.memo<{
   policyItem: MaybeImmutable<PolicyData>;
-  back: AppHeaderBack;
+  back: AppHeaderBack | undefined;
   docLink: string;
 }>(({ policyItem, back, docLink }) => {
   const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
@@ -101,7 +102,6 @@ PolicyDetailsLoaded.displayName = 'PolicyDetailsLoaded';
 
 export const PolicyDetails = React.memo(() => {
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
-  const { getAppUrl } = useAppUrl();
   const {
     services: { docLinks },
   } = useKibana();
@@ -111,22 +111,14 @@ export const PolicyDetails = React.memo(() => {
 
   // The IA parent (`Policies`) unless the route state carries an explicit satellite origin (e.g.
   // opened from the Endpoints list or from Fleet). Tab switches keep that state.
-  const backLink = routeState?.backLink;
-  const policyListPath = useMemo(() => getPoliciesPath(), []);
-  const policyListNavigateOptions = useMemo(() => ({ path: policyListPath }), [policyListPath]);
-  const backAppId = backLink?.navigateTo[0] ?? APP_UI_ID;
-  const backNavigateOptions = backLink ? backLink.navigateTo[1] : policyListNavigateOptions;
-  const backPath = backNavigateOptions?.path;
-  const backOnClick = useNavigateToAppEventHandler(backAppId, backNavigateOptions);
-
-  const back: AppHeaderBack = useMemo(
+  const policiesBackLink = useMemo<AppHeaderBackLink>(
     () => ({
-      href: backLink?.href ?? getAppUrl({ appId: backAppId, path: backPath }),
-      label: backLink?.label ?? POLICIES_LIST_LABEL,
-      onClick: backOnClick,
+      label: POLICIES_LIST_LABEL,
+      navigateTo: [APP_UI_ID, { path: getPoliciesPath() }],
     }),
-    [backLink, getAppUrl, backAppId, backPath, backOnClick]
+    []
   );
+  const back = useAppHeaderBack(routeState?.backLink ?? policiesBackLink);
 
   if (policyApiError || !policyItem) {
     return (

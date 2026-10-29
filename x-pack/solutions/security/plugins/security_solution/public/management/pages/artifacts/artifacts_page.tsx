@@ -9,7 +9,7 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { DocLinks } from '@kbn/doc-links';
@@ -18,12 +18,13 @@ import { AdministrationListPage } from '../../components/administration_list_pag
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAppUrl, useHttp, useKibana } from '../../../common/lib/kibana';
-import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { NoPrivilegesPage } from '../../../common/components/no_privileges';
 import { useHostIsolationExceptionsAccess } from '../../hooks/artifacts/use_host_isolation_exceptions_access';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { AdministrationSubTab } from '../../types';
 import { useMemoizedRouteState } from '../../common/hooks';
+import type { AppHeaderBackLink } from '../../hooks/use_app_header_back';
+import { useAppHeaderBack } from '../../hooks/use_app_header_back';
 import type { ListPageRouteState } from '../../../../common/endpoint/types';
 import {
   getEndpointExceptionsListPath,
@@ -54,6 +55,12 @@ import {
 const ARTIFACTS_PAGE_TITLE = i18n.translate('xpack.securitySolution.artifacts.pageTitle', {
   defaultMessage: 'Artifacts',
 });
+
+/** Back label used when the origin's route state carries no label of its own. */
+const BACK_BUTTON_FALLBACK_LABEL = i18n.translate(
+  'xpack.securitySolution.artifacts.backButtonDefaultLabel',
+  { defaultMessage: 'the previous page' }
+);
 
 const TAB_PAGE_NAMES: Partial<Record<AdministrationSubTab, SecurityPageName>> = {
   [AdministrationSubTab.endpointExceptions]: SecurityPageName.endpointExceptions,
@@ -267,28 +274,20 @@ export const ArtifactsPage = memo(() => {
     [activeTab, docLinks.links.securitySolution]
   );
 
-  // When this page is opened from a policy's artifact empty-state "Manage" action, the route
-  // state carries a back target to that policy. `useMemoizedRouteState` keeps it around across
+  // When this page is opened from another page with a back target in the route state (eg. a
+  // policy's artifact empty-state "Manage" action), `useMemoizedRouteState` keeps it around across
   // tab switches, which drop `location.state` (same-origin hrefs navigate like plain links).
   const memoizedRouteState = useMemoizedRouteState(location.state);
-  const backNavigateTo = memoizedRouteState?.onBackButtonNavigateTo;
-  const backOnClick = useNavigateToAppEventHandler(backNavigateTo?.[0] ?? '', backNavigateTo?.[1]);
-  const back: AppHeaderBack | undefined = useMemo(() => {
-    if (!backNavigateTo) {
-      return undefined;
-    }
-    return {
-      href:
-        memoizedRouteState?.backButtonUrl ??
-        getAppUrl({ appId: backNavigateTo[0], path: backNavigateTo[1]?.path }),
-      label:
-        memoizedRouteState?.backButtonLabel ??
-        i18n.translate('xpack.securitySolution.artifacts.backButtonDefaultLabel', {
-          defaultMessage: 'policy',
-        }),
-      onClick: backOnClick,
-    };
-  }, [backNavigateTo, memoizedRouteState, getAppUrl, backOnClick]);
+  const backLink = useMemo<AppHeaderBackLink | undefined>(
+    () =>
+      memoizedRouteState && {
+        navigateTo: memoizedRouteState.onBackButtonNavigateTo,
+        href: memoizedRouteState.backButtonUrl,
+        label: memoizedRouteState.backButtonLabel ?? BACK_BUTTON_FALLBACK_LABEL,
+      },
+    [memoizedRouteState]
+  );
+  const back = useAppHeaderBack(backLink);
 
   return (
     <AdministrationListPage

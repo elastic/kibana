@@ -26,6 +26,9 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    */
   pageTitle?: string;
 
+  /** Documentation URL for the console overlay header's app menu. */
+  docLink?: string;
+
   /**
    * An optional component that will be rendered in the Responder page overlay, above the Console area
    */

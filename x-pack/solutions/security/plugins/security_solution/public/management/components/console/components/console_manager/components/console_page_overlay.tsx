@@ -7,6 +7,7 @@
 
 import type { KeyboardEventHandler, MouseEvent, ReactNode } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AppHeaderView } from '@kbn/app-header';
@@ -35,10 +36,11 @@ const BACK_FALLBACK_LABEL = i18n.translate(
 
 export interface ConsolePageOverlayProps {
   console: ReactNode;
-  isHidden: boolean;
   onHide: () => void;
   /** Plain-string title rendered by the overlay's `AppHeaderView`. */
   pageTitle?: string;
+  /** Documentation URL for the header's app menu. */
+  docLink?: string;
   /** Rendered below the header, above the console (eg. host banners/callouts). */
   body?: ReactNode;
   /** Structured app menu config contributed by the registrant (eg. "Response actions history"). */
@@ -46,13 +48,14 @@ export interface ConsolePageOverlayProps {
 }
 
 /**
- * Resolves the console overlay's back target: the URL of the page the console was opened over (so
+ * Resolves the console overlay's back target: the URL of the page the console is shown over (so
  * the back button literally navigates back to it, like any other link), and - best effort - a label
  * naming that page.
  *
- * The href is the real browser URL (not the Security app's router-relative pathname), captured once
- * when the overlay is shown, which already includes whatever base path/app segment the current page
- * lives under - whether that's the Security app or another app such as Discover.
+ * The href is the real browser URL (not the Security app's router-relative pathname), which already
+ * includes whatever base path/app segment the current page lives under - whether that's the
+ * Security app or another app such as Discover. It is re-read on every router location change, so it
+ * stays in sync with the label while the overlay is open (a pathname change hides the overlay).
  *
  * The label is resolved through the Security link registry for the page the console was opened from
  * (works for any page: Endpoints, Alerts, Cases, etc., via `useRouteSpy()` + `useGetLinkInfo()`).
@@ -65,18 +68,11 @@ const useConsoleOverlayBackTarget = (
 ): { href: string; label: string; onClick: (ev: MouseEvent) => void } => {
   const [{ pageName }] = useRouteSpy();
   const getLinkInfo = useGetLinkInfo();
+  // Subscribes to router location changes so `href` below is re-read from the browser URL.
+  useLocation();
 
-  const label = useMemo(
-    () => getLinkInfo(pageName)?.title ?? BACK_FALLBACK_LABEL,
-    [getLinkInfo, pageName]
-  );
-
-  // Captured once, on mount: `ConsolePageOverlay` is only ever mounted while its console is the
-  // visible one (see `ConsoleManager`), so this is the URL of the page the console was opened over.
-  const href = useMemo(
-    () => `${window.location.pathname}${window.location.search}${window.location.hash}`,
-    []
-  );
+  const label = getLinkInfo(pageName)?.title ?? BACK_FALLBACK_LABEL;
+  const href = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 
   const onClick = useCallback(
     (ev: MouseEvent) => {
@@ -90,7 +86,7 @@ const useConsoleOverlayBackTarget = (
 };
 
 export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
-  ({ console, onHide, isHidden, body, pageTitle, menu }) => {
+  ({ console, onHide, body, pageTitle, docLink, menu }) => {
     const getTestId = useTestIdGenerator('consolePageOverlay');
     const { services } = useKibana();
     const addIntegrationsMenuItem = useAddIntegrationsMenuItem();
@@ -113,7 +109,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
     // expandable flyout, in which case `PageOverlay` falls back to its static z-index.
     const dynamicZIndex = useUnmanagedFlyoutZIndex({
       id: CONSOLE_OVERLAY_UNMANAGED_FLYOUT_ID,
-      active: !isHidden,
+      active: true,
     });
 
     const headerMenu = useMemo<AppMenuConfig>(() => {
@@ -131,7 +127,6 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
 
     return (
       <PageOverlay
-        isHidden={isHidden}
         data-test-subj="consolePageOverlay"
         onHide={onHide}
         paddingSize="l"
@@ -147,36 +142,34 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
           ref={rootRef}
           onKeyDown={handleKeyDown}
         >
-          {!isHidden && (
-            <EuiFlexItem grow={false} data-test-subj={getTestId('headerContainer')}>
-              {/*
-                Deliberately `AppHeaderView`, not `AppHeader`: the console overlays a page that
-                already renders its own inline `AppHeader`. `AppHeader` claims the chrome-owned
-                inline-header slot (`chrome.inlineAppHeader`), which is last-owner-wins - a second
-                claim here would silently take over that slot, and since this overlay unmounts on
-                hide, its `unregister()` would then clear the slot entirely, leaving the underlying
-                page's still-mounted `AppHeader` registration orphaned (see
-                `useInlineAppHeader`/`chrome_api.tsx`). `AppHeaderView` never claims that slot, so
-                closing the console cannot affect the page underneath.
+          <EuiFlexItem grow={false} data-test-subj={getTestId('headerContainer')}>
+            {/*
+              Deliberately `AppHeaderView`, not `AppHeader`: the console overlays a page that
+              already renders its own inline `AppHeader`. `AppHeader` claims the chrome-owned
+              inline-header slot (`chrome.inlineAppHeader`), which is last-owner-wins - a second
+              claim here would silently take over that slot, and since this overlay unmounts on
+              hide, its `unregister()` would then clear the slot entirely, leaving the underlying
+              page's still-mounted `AppHeader` registration orphaned (see
+              `useInlineAppHeader`/`chrome_api.tsx`). `AppHeaderView` never claims that slot, so
+              closing the console cannot affect the page underneath.
 
-                `largeBleed` matches `PageOverlay`'s 24px padding, so the header spans the full
-                overlay width while the console content keeps its previous inset (overlay padding
-                plus `PageLayout`'s panel padding).
+              `largeBleed` matches `PageOverlay`'s 24px padding, so the header spans the full
+              overlay width while the console content keeps its previous inset (overlay padding
+              plus `PageLayout`'s panel padding).
 
-                `chrome.withProvider`: the console can also render inside a system flyout's own
-                React root (eg. Discover → alert → Respond), which has no Chrome context.
-              */}
-              {services.chrome.withProvider(
-                <AppHeaderView
-                  title={pageTitle}
-                  back={back}
-                  menu={headerMenu}
-                  docLink={services.docLinks.links.securitySolution.responseActions}
-                  spacing="largeBleed"
-                />
-              )}
-            </EuiFlexItem>
-          )}
+              `chrome.withProvider`: the console can also render inside a system flyout's own
+              React root (eg. Discover → alert → Respond), which has no Chrome context.
+            */}
+            {services.chrome.withProvider(
+              <AppHeaderView
+                title={pageTitle}
+                back={back}
+                menu={headerMenu}
+                docLink={docLink}
+                spacing="largeBleed"
+              />
+            )}
+          </EuiFlexItem>
 
           <EuiFlexItem grow style={{ minHeight: 0 }}>
             <PageLayout pageBody={body} data-test-subj={getTestId('layout')}>

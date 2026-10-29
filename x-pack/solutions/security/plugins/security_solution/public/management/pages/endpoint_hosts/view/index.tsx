@@ -34,9 +34,9 @@ import type {
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { AppHeaderBack } from '@kbn/app-header';
 import { isPolicyOutOfDate } from '../utils';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
+import { useAppHeaderBack } from '../../../hooks/use_app_header_back';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
@@ -451,20 +451,7 @@ export const EndpointList = () => {
 
   // Satellite-origin back link: only shown when the route was entered with an explicit back
   // link in route state (e.g. navigated here from the Policy list's endpoint count link).
-  const handleAppHeaderBackClick = useNavigateToAppEventHandler(
-    ...(routeState.backLink?.navigateTo ?? [APP_UI_ID])
-  );
-  const appHeaderBack: AppHeaderBack | undefined = useMemo(() => {
-    if (!routeState.backLink) {
-      return undefined;
-    }
-    const { href, label, navigateTo } = routeState.backLink;
-    return {
-      href: href ?? getAppUrl({ appId: navigateTo[0], path: navigateTo[1]?.path }),
-      label,
-      onClick: handleAppHeaderBackClick,
-    };
-  }, [routeState.backLink, getAppUrl, handleAppHeaderBackClick]);
+  const appHeaderBack = useAppHeaderBack(routeState.backLink);
 
   const onRefresh = useCallback(() => {
     if (autoRefreshInterval <= 0) {
