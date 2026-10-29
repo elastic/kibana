@@ -34,6 +34,7 @@ import { AiIndexDetailPanelEmptyState } from '../ai_index_detail/ai_index_detail
 interface ConnectorsTabProps {
   selectedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
+  disabled?: boolean;
 }
 
 interface ConnectorsTabContentProps {
@@ -47,6 +48,7 @@ interface ConnectorsTabContentProps {
   createConnectorButton: React.ReactNode;
   canCreateConnector: boolean;
   canReadConnectors: boolean;
+  disabled: boolean;
 }
 
 const ConnectorsTabContent = ({
@@ -60,6 +62,7 @@ const ConnectorsTabContent = ({
   createConnectorButton,
   canCreateConnector,
   canReadConnectors,
+  disabled,
 }: ConnectorsTabContentProps) => {
   if (isError) {
     return (
@@ -131,7 +134,7 @@ const ConnectorsTabContent = ({
           sortMatchesBy="startsWith"
           selectedOptions={[]}
           isClearable={false}
-          isDisabled={!canReadConnectors}
+          isDisabled={!canReadConnectors || disabled}
           noSuggestions={showEmptyPrompt}
           aria-label={i18n.translate('xpack.contextEngine.sourcePicker.connectors.comboAriaLabel', {
             defaultMessage: 'Select a connector',
@@ -179,7 +182,11 @@ const ConnectorsTabContent = ({
   );
 };
 
-export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabProps) => {
+export const ConnectorsTab = ({
+  selectedConnectorIds,
+  onToggle,
+  disabled = false,
+}: ConnectorsTabProps) => {
   const [isCreateFlyoutOpen, { on: openCreateFlyout, off: closeCreateFlyout }] = useBoolean(false);
   const [searchValue, setSearchValue] = useState('');
   const [hasFocused, setHasFocused] = useState(false);
@@ -282,6 +289,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
       <EuiButtonEmpty
         iconType="plusCircle"
         onClick={openCreateFlyout}
+        isDisabled={disabled}
         data-test-subj="contextCreateConnectorButton"
         {...getEbtProps({
           element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
@@ -308,6 +316,7 @@ export const ConnectorsTab = ({ selectedConnectorIds, onToggle }: ConnectorsTabP
         createConnectorButton={createConnectorButton}
         canCreateConnector={canCreateConnector}
         canReadConnectors={canReadConnectors}
+        disabled={disabled}
       />
       {createConnectorFlyout}
     </>

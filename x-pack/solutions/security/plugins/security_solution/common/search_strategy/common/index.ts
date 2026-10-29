@@ -10,10 +10,10 @@ export type {
   SortField,
   TimerangeInput,
   PaginationInputPaginated,
-  CursorType,
   TotalValue,
 } from '@kbn/timelines-plugin/common';
-export { Direction } from '@kbn/timelines-plugin/common';
+export type { CursorType } from '@kbn/securitysolution-timeline-common';
+export { Direction } from '@kbn/securitysolution-timeline-common';
 
 export type Maybe<T> = T | null;
 
