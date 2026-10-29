@@ -64,10 +64,8 @@ const RevisionStatus = ({
 
 const RevisionDetails = ({
   revision,
-  assessmentNote,
 }: {
   revision: SignificantEventResponse;
-  assessmentNote: string | undefined;
 }): React.ReactElement => (
   <>
     {revision.severity ? (
@@ -78,9 +76,9 @@ const RevisionDetails = ({
         })}
       </EuiText>
     ) : null}
-    {assessmentNote ? (
+    {revision.assessment_note ? (
       <EuiText size="xs" color="subdued">
-        {assessmentNote}
+        {revision.assessment_note}
       </EuiText>
     ) : null}
     {revision.workflow_execution_id ? (
@@ -97,13 +95,13 @@ const RevisionDetails = ({
 const getRevisionStatusLabel = ({
   previousStatus,
   status,
-  hasDeactivation,
+  wasDeactivated,
 }: {
   previousStatus: SignificantEventResponse['status'];
   status: SignificantEventResponse['status'];
-  hasDeactivation: boolean;
+  wasDeactivated: boolean;
 }): string => {
-  if (hasDeactivation) {
+  if (wasDeactivated) {
     return i18n.translate('xpack.nightshift.flyout.timelineDeactivatedLabel', {
       defaultMessage: 'Significant event deactivated',
     });
@@ -154,9 +152,8 @@ export const EventTimeline = ({
     );
   }
 
-  const revisions = [...data.events].sort(
-    (first, second) => Date.parse(first['@timestamp']) - Date.parse(second['@timestamp'])
-  );
+  const revisions = data.events;
+
   const items: Array<{ timestamp: string; item: EuiTimelineItemProps }> = data.detections.map(
     (detection) => ({
       timestamp: detection['@timestamp'],
@@ -224,10 +221,7 @@ export const EventTimeline = ({
                   })}
                   revision={raisedRevision}
                 />
-                <RevisionDetails
-                  revision={raisedRevision}
-                  assessmentNote={raisedRevision.assessment_note}
-                />
+                <RevisionDetails revision={raisedRevision} />
               </>
             ) : (
               <EuiText size="xs" color="subdued">
@@ -249,11 +243,6 @@ export const EventTimeline = ({
   items.push(
     ...revisions.slice(1).map((revision, index) => {
       const previousRevision = revisions[index];
-      const becameInactive =
-        previousRevision.status !== 'inactive' && revision.status === 'inactive';
-      const deactivation = becameInactive
-        ? data.deactivations?.find(({ episode_id: episodeId }) => episodeId === revision.episode_id)
-        : undefined;
       return {
         timestamp: revision['@timestamp'],
         item: {
@@ -266,14 +255,11 @@ export const EventTimeline = ({
                   label={getRevisionStatusLabel({
                     previousStatus: previousRevision.status,
                     status: revision.status,
-                    hasDeactivation: deactivation !== undefined,
+                    wasDeactivated: revision.deactivated === true,
                   })}
                   revision={revision}
                 />
-                <RevisionDetails
-                  revision={revision}
-                  assessmentNote={deactivation?.reason || revision.assessment_note}
-                />
+                <RevisionDetails revision={revision} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">

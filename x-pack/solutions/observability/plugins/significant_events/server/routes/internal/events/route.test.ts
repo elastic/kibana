@@ -400,38 +400,31 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
 });
 
 describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations', () => {
-  it('returns the operator deactivations of the event with the versions', async () => {
-    const deactivations = [{ episode_id: 'episode-1', reason: 'Known noise' }];
+  const versions = [
+    { event_id: 'event-1', status: 'active', episode_id: 'episode-1', assessment_note: 'Original' },
+    { event_id: 'event-1', status: 'inactive', episode_id: 'episode-1', assessment_note: 'Copied' },
+    { event_id: 'event-1', status: 'active', episode_id: 'episode-2', assessment_note: 'Reopened' },
+  ];
 
+  const getLifecycleEvents = async ({
+    deactivations,
+    includeSkipped = false,
+    hits = versions,
+  }: {
+    deactivations: Array<{ episode_id: string; reason: string }>;
+    includeSkipped?: boolean;
+    hits?: Array<Record<string, unknown>>;
+  }) => {
     const response = await lifecycleRoute.handler({
-      params: { path: { id: 'event-1' } },
+      params: {
+        path: { id: 'event-1' },
+        ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
+      },
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
-          findByEventId: jest.fn().mockResolvedValue({ hits: [{ event_id: 'event-1' }] }),
-          findEventDeactivations: jest.fn().mockResolvedValue(deactivations),
-        }),
-        getDetectionClient: () => ({
-          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
-        }),
-      }),
-      server: {},
-    } as never);
-
-    expect(response.deactivations).toEqual(deactivations);
-  });
-
-  it('returns the deactivations together with the skipped detections', async () => {
-    const deactivations = [{ episode_id: 'episode-1', reason: 'Known noise' }];
-
-    const response = await lifecycleRoute.handler({
-      params: { path: { id: 'event-1' }, query: { include_skipped: 'true' as const } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getEventSearchClient: () => ({
-          findByEventId: jest.fn().mockResolvedValue({ hits: [{ event_id: 'event-1' }] }),
+          findByEventId: jest.fn().mockResolvedValue({ hits }),
           findEventDeactivations: jest.fn().mockResolvedValue(deactivations),
         }),
         getDetectionClient: () => ({
@@ -441,8 +434,54 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations'
       }),
       server: {},
     } as never);
+    return response.events;
+  };
 
-    expect(response.deactivations).toEqual(deactivations);
+  it.each([false, true])(
+    'marks the deactivated version and carries the operator reason as its note (include_skipped: %s)',
+    async (includeSkipped) => {
+      const events = await getLifecycleEvents({
+        deactivations: [{ episode_id: 'episode-1', reason: 'Known noise' }],
+        includeSkipped,
+      });
+
+      expect(events).toEqual([
+        versions[0],
+        { ...versions[1], deactivated: true, assessment_note: 'Known noise' },
+        versions[2],
+      ]);
+    }
+  );
+
+  it('marks a deactivation without a reason and keeps the copied note', async () => {
+    const events = await getLifecycleEvents({
+      deactivations: [{ episode_id: 'episode-1', reason: '' }],
+    });
+
+    expect(events[1]).toEqual({ ...versions[1], deactivated: true });
+  });
+
+  it('marks only the version that became inactive in the deactivated episode', async () => {
+    const noEpisode = { event_id: 'event-1', status: 'inactive' };
+    const stillInactive = { ...versions[1], assessment_note: 'Still inactive' };
+    const hits = [versions[0], versions[1], stillInactive, noEpisode];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [
+        { episode_id: 'episode-1', reason: 'Known noise' },
+        { episode_id: 'unknown-episode', reason: 'Ignored' },
+      ],
+    });
+
+    expect(events.map(({ deactivated }) => deactivated)).toEqual([
+      undefined,
+      true,
+      undefined,
+      undefined,
+    ]);
+    expect(events[2]).toEqual(stillInactive);
+    expect(events[3]).toEqual(noEpisode);
   });
 });
 

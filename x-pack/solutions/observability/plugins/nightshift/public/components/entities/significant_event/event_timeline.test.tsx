@@ -93,35 +93,24 @@ describe('EventTimeline', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(4);
   });
 
-  it('shows an operator deactivation reason and a subsequent reopen in the version timeline', () => {
+  it('labels a deactivated version with its note and a subsequent reopen', () => {
     renderTimeline({
       ...lifecycle,
       events: [
-        {
-          ...event,
-          '@timestamp': event.created_at,
-          episode_id: 'episode-1',
-          assessment_note: 'Original assessment note',
-        },
+        { ...event, '@timestamp': event.created_at },
         {
           ...event,
           '@timestamp': '2026-07-10T13:00:00Z',
           status: 'inactive',
-          episode_id: 'episode-1',
-          assessment_note: 'Copied assessment note',
+          deactivated: true,
+          assessment_note: 'Known noise',
         },
-        {
-          ...event,
-          '@timestamp': '2026-07-10T14:00:00Z',
-          episode_id: 'episode-2',
-        },
+        { ...event, '@timestamp': '2026-07-10T14:00:00Z' },
       ],
-      deactivations: [{ episode_id: 'episode-1', reason: 'Known noise' }],
     });
 
     expect(screen.getByText('Significant event deactivated')).toBeInTheDocument();
     expect(screen.getByText('Known noise')).toBeInTheDocument();
-    expect(screen.queryByText('Copied assessment note')).not.toBeInTheDocument();
     expect(screen.getByText('Significant event reopened')).toBeInTheDocument();
   });
 

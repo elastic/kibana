@@ -94,11 +94,19 @@ interface EventDeactivation {
   reason: string;
 }
 
+/** An event version as the lifecycle lists it. */
+interface LifecycleEvent extends SignificantEventResponse {
+  /**
+   * Set on the version an operator deactivation produced. That version only copies the previous
+   * note, so when the operator gave a reason, `assessment_note` carries it instead.
+   */
+  deactivated?: true;
+}
+
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  events: SignificantEventResponse[];
-  /** Operator deactivations of the event. A deactivation's version only copies the previous note. */
-  deactivations?: EventDeactivation[];
+  /** Event versions, oldest first. */
+  events: LifecycleEvent[];
   /** Set when the event has more skipped detections than the response carries. */
   skipped_truncated?: boolean;
 }
@@ -109,6 +117,7 @@ export type {
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,
+  LifecycleEvent,
   EventLifecycleResponse,
   EventDeactivation,
 };
