@@ -331,6 +331,7 @@ apiTest.describe(
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     let editorHeaders: Record<string, string>;
+    let editorCookieHeaders: Record<string, string>;
     let connectorIds: {
       webhook: string;
       email: string;
@@ -351,9 +352,12 @@ apiTest.describe(
         responseType: 'json',
       });
 
-    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+    apiTest.beforeAll(async ({ requestAuth, samlAuth, apiServices }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
+      // `enable_default_alerting` is an internal route, so call it with a session cookie.
+      const { cookieHeader } = await samlAuth.asInteractiveUser('editor');
+      editorCookieHeaders = mergeSyntheticsApiHeaders(cookieHeader);
 
       await apiServices.alerting.cleanup.deleteRulesByTags(['SYNTHETICS_DEFAULT_ALERT']);
 
@@ -441,7 +445,7 @@ apiTest.describe(
           expect(settingsRes).toHaveStatusCode(200);
 
           const response = await apiClient.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING, {
-            headers: editorHeaders,
+            headers: editorCookieHeaders,
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);
@@ -481,7 +485,7 @@ apiTest.describe(
           expect(settingsRes).toHaveStatusCode(200);
 
           const response = await apiClient.put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING, {
-            headers: editorHeaders,
+            headers: editorCookieHeaders,
             responseType: 'json',
           });
           expect(response).toHaveStatusCode(200);

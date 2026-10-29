@@ -9,15 +9,15 @@ import moment from 'moment-timezone';
 import { expect } from '@kbn/scout-oblt/api';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
-import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
+import { apiTest } from '../../../common/fixtures';
 import {
   addTestMonitor,
   buildExpectedErrorLink,
   clearActionIndex,
   createCustomStatusRule,
-  createStatusRuleTestEnv,
   makeSummaries,
   runAndSearchActiveStatusAlerts,
+  createStatusRuleTestEnv,
   setupStatusRuleTestEnv,
   teardownStatusRuleTestEnv,
   waitForActionDocuments,
@@ -30,200 +30,36 @@ const SLOW_TEST_TIMEOUT_MS = 240_000;
  * Ported from FTR
  * `x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/synthetics/custom_status_rule.ts`.
  *
- * Covers `numberOfChecks` window custom status rules with `groupBy: 'none'`
- * (location threshold = 1, and location threshold > 1 with both default and
- * `firstUp` recovery strategies).
+ * Covers a `numberOfChecks` window custom status rule with `groupBy: 'none'`,
+ * location threshold > 1 and the default recovery strategy.
  */
 apiTest.describe(
-  'SyntheticsCustomStatusRule — numberOfChecks ungrouped',
+  'SyntheticsCustomStatusRule — numberOfChecks ungrouped, 2 down locations',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    const env = createStatusRuleTestEnv('checks-ungrouped');
-    const createdMonitorIds: string[] = [];
-    let kibanaBaseUrl: string;
+    const env = createStatusRuleTestEnv('checks-ungrouped-two-locations');
 
     apiTest.beforeAll(
-      async ({ requestAuth, apiClient, apiServices, esClient, config, samlAuth }) => {
-        kibanaBaseUrl = config.hosts.kibana;
-        const { apiKeyHeader } = await requestAuth.getApiKey('editor');
-        const editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
-        await setupStatusRuleTestEnv({
-          env,
+      async ({ requestAuth, samlAuth, apiClient, apiServices, esClient, config }) => {
+        await setupStatusRuleTestEnv(env, {
+          requestAuth,
+          samlAuth,
           apiClient,
           apiServices,
           esClient,
-          samlAuth,
-          editorHeaders,
+          config,
         });
       }
     );
 
-    apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
-      await teardownStatusRuleTestEnv({
-        env,
-        apiServices,
-        esClient,
-        kbnClient,
-        monitorIds: createdMonitorIds,
-      });
+    apiTest.afterAll(async ({ apiClient, apiServices, esClient }) => {
+      await teardownStatusRuleTestEnv(env, { apiClient, apiServices, esClient });
     });
 
     apiTest(
-      'numberOfChecks - location threshold = 1 - ungrouped - 1 down location',
+      'numberOfChecks - location threshold > 1 - ungrouped - 2 down locations',
       async ({ apiClient, apiServices, esClient }) => {
         apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
-        await clearActionIndex(esClient, env.alertActionIndex);
-
-        let ruleId = '';
-        let monitor: EncryptedSyntheticsSavedMonitor;
-
-        await apiTest.step(
-          'creates a monitor and custom rule with 1 location threshold ungrouped',
-          async () => {
-            monitor = await addTestMonitor(
-              apiClient,
-              env.editorHeaders,
-              `Monitor check based at ${moment().format('LLL')} ungrouped`
-            );
-            expect(monitor.id).toBeDefined();
-            createdMonitorIds.push(monitor.id);
-
-            const params: StatusRuleParams = {
-              condition: {
-                locationsThreshold: 1,
-                window: {
-                  numberOfChecks: 5,
-                },
-                groupBy: 'none',
-                downThreshold: 5,
-              },
-              monitorIds: [monitor.id],
-            };
-            const rule = await createCustomStatusRule({
-              apiServices,
-              env,
-              params,
-              name: 'Status based on number of checks',
-            });
-            ruleId = rule.id;
-            expect(rule.params).toStrictEqual(params);
-          }
-        );
-
-        await apiTest.step('triggers down for ungrouped', async () => {
-          const docs = await makeSummaries({
-            esClient,
-            monitor,
-            downChecks: 5,
-          });
-
-          const response = await waitForStatusAlert({
-            esClient,
-            apiServices,
-            ruleId,
-            filters: [
-              { term: { 'kibana.alert.status': 'active' } },
-              { term: { 'monitor.id': monitor.id } },
-              { range: { '@timestamp': { gte: docs[0]['@timestamp'] } } },
-            ],
-          });
-
-          const alert = response.hits.hits[0]?._source;
-          expect(alert?.['kibana.alert.status']).toBe('active');
-          expect(alert?.['kibana.alert.reason']).toBe(
-            `Monitor "${monitor.name}" is down 5 times from Dev Service. Alert when down 5 times out of the last 5 checks from at least 1 location.`
-          );
-
-          const downResponse = await waitForActionDocuments({
-            esClient,
-            indexName: env.alertActionIndex,
-            filters: [{ term: { 'monitor.id': monitor.id } }],
-          });
-          const actionDoc = downResponse.hits.hits[0]?._source;
-          expect(actionDoc?.reason).toBe(
-            `Monitor "${monitor.name}" is down 5 times from Dev Service. Alert when down 5 times out of the last 5 checks from at least 1 location.`
-          );
-          expect(actionDoc?.locationNames).toBe('Dev Service');
-          expect(actionDoc?.linkMessage).toBe(
-            buildExpectedErrorLink(kibanaBaseUrl, monitor.id, 'dev')
-          );
-          expect(actionDoc?.locationId).toBe('dev');
-        });
-
-        await apiTest.step('triggers recovered alert', async () => {
-          const upDocs = await makeSummaries({
-            esClient,
-            monitor,
-            upChecks: 1,
-          });
-          const response = await waitForStatusAlert({
-            esClient,
-            apiServices,
-            ruleId,
-            filters: [
-              { term: { 'kibana.alert.status': 'recovered' } },
-              { term: { 'monitor.id': monitor.id } },
-              { range: { '@timestamp': { gte: upDocs[0]['@timestamp'] } } },
-            ],
-          });
-          expect(response.hits.hits[0]?._source?.['kibana.alert.status']).toBe('recovered');
-
-          const recoveredResponse = await waitForActionDocuments({
-            esClient,
-            indexName: env.alertActionIndex,
-            filters: [{ term: { 'monitor.id': monitor.id } }, { term: { status: 'recovered' } }],
-          });
-          const actionDoc = recoveredResponse.hits.hits[0]?._source;
-          expect(actionDoc?.reason).toBe(
-            `Monitor "${monitor.name}" from Dev Service is recovered. Alert when 5 out of the last 5 checks are down from at least 1 location.`
-          );
-          expect(actionDoc?.locationNames).toBe('Dev Service');
-          expect(actionDoc?.linkMessage).toBe(
-            buildExpectedErrorLink(kibanaBaseUrl, monitor.id, 'dev')
-          );
-          expect(actionDoc?.locationId).toBe('dev');
-          expect(actionDoc?.recoveryReason).toMatch(
-            /the monitor is now up again\. It ran successfully at /
-          );
-          expect(actionDoc?.recoveryStatus).toBe('is now up');
-        });
-      }
-    );
-
-    const ungroupedLocationThresholdCases = [
-      {
-        title: 'numberOfChecks - location threshold > 1 - ungrouped - 2 down locations',
-        numberOfChecks: 1,
-        ruleName: 'When down from 2 locations',
-        monitorTitleSuffix: '',
-        conditionExtra: {},
-        firstDownCountLabel: '1 time',
-        secondDownCountLabel: '1 time',
-      },
-      {
-        title:
-          'numberOfChecks - location threshold > 1 - ungrouped - 2 down locations - recoveryStrategy: firstUp',
-        numberOfChecks: 5,
-        ruleName: 'When down from 2 locations - recoveryStrategy: firstUp',
-        monitorTitleSuffix: ' - recoveryStrategy: firstUp',
-        conditionExtra: { recoveryStrategy: 'firstUp' as const },
-        firstDownCountLabel: '2 times',
-        secondDownCountLabel: '3 times',
-      },
-    ];
-
-    for (const {
-      title,
-      numberOfChecks,
-      ruleName,
-      monitorTitleSuffix,
-      conditionExtra,
-      firstDownCountLabel,
-      secondDownCountLabel,
-    } of ungroupedLocationThresholdCases) {
-      apiTest(title, async ({ apiClient, apiServices, esClient }) => {
-        apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
-        await clearActionIndex(esClient, env.alertActionIndex);
         let ruleId = '';
         let monitor: EncryptedSyntheticsSavedMonitor;
 
@@ -233,22 +69,19 @@ apiTest.describe(
             monitor = await addTestMonitor(
               apiClient,
               env.editorHeaders,
-              `Monitor location based at ${moment().format(
-                'LT'
-              )} ungrouped 2 locations${monitorTitleSuffix}`
+              `Monitor location based at ${moment().format('LT')} ungrouped 2 locations`
             );
             expect(monitor.id).toBeDefined();
-            createdMonitorIds.push(monitor.id);
+            env.monitorIds.push(monitor.id);
 
             const params: StatusRuleParams = {
               condition: {
                 locationsThreshold: 2,
                 window: {
-                  numberOfChecks,
+                  numberOfChecks: 1,
                 },
                 groupBy: 'none',
                 downThreshold: 1,
-                ...conditionExtra,
               },
               monitorIds: [monitor.id],
             };
@@ -256,7 +89,7 @@ apiTest.describe(
               apiServices,
               env,
               params,
-              name: ruleName,
+              name: 'When down from 2 locations',
             });
             ruleId = rule.id;
             expect(rule.params).toStrictEqual(params);
@@ -316,7 +149,7 @@ apiTest.describe(
             const alert = response.hits.hits[0]?._source;
             expect(alert?.['kibana.alert.status']).toBe('active');
             expect(alert?.['kibana.alert.reason']).toBe(
-              `Monitor "${monitor.name}" is down ${firstDownCountLabel} from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last ${numberOfChecks} checks from at least 2 locations.`
+              `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
             );
 
             const downResponse = await waitForActionDocuments({
@@ -326,11 +159,11 @@ apiTest.describe(
             });
             const actionDoc = downResponse.hits.hits[0]?._source;
             expect(actionDoc?.reason).toBe(
-              `Monitor "${monitor.name}" is down ${firstDownCountLabel} from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last ${numberOfChecks} checks from at least 2 locations.`
+              `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
             );
             expect(actionDoc?.locationNames).toBe('Dev Service and Dev Service 2');
             expect(actionDoc?.linkMessage).toBe(
-              buildExpectedErrorLink(kibanaBaseUrl, monitor.id, 'dev')
+              buildExpectedErrorLink(env.kibanaBaseUrl, monitor.id, 'dev')
             );
             expect(actionDoc?.locationId).toBe('dev and dev2');
           }
@@ -363,11 +196,11 @@ apiTest.describe(
           });
           const actionDoc = recoveryResponse.hits.hits[0]?._source;
           expect(actionDoc?.reason).toBe(
-            `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last ${numberOfChecks} checks are down from at least 2 locations.`
+            `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
           );
           expect(actionDoc?.locationNames).toBe('Dev Service and Dev Service 2');
           expect(actionDoc?.linkMessage).toBe(
-            buildExpectedErrorLink(kibanaBaseUrl, monitor.id, 'dev')
+            buildExpectedErrorLink(env.kibanaBaseUrl, monitor.id, 'dev')
           );
           expect(actionDoc?.locationId).toBe('dev and dev2');
         });
@@ -393,7 +226,7 @@ apiTest.describe(
           const alert = response.hits.hits[0]?._source;
           expect(alert?.['kibana.alert.status']).toBe('active');
           expect(alert?.['kibana.alert.reason']).toBe(
-            `Monitor "${monitor.name}" is down ${secondDownCountLabel} from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last ${numberOfChecks} checks from at least 2 locations.`
+            `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
           );
 
           const downResponse = await waitForActionDocuments({
@@ -403,11 +236,11 @@ apiTest.describe(
           });
           const alertActionDoc = downResponse.hits.hits[0]?._source;
           expect(alertActionDoc?.reason).toBe(
-            `Monitor "${monitor.name}" is down ${secondDownCountLabel} from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last ${numberOfChecks} checks from at least 2 locations.`
+            `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
           );
           expect(alertActionDoc?.locationNames).toBe('Dev Service and Dev Service 2');
           expect(alertActionDoc?.linkMessage).toBe(
-            buildExpectedErrorLink(kibanaBaseUrl, monitor.id, 'dev')
+            buildExpectedErrorLink(env.kibanaBaseUrl, monitor.id, 'dev')
           );
           expect(alertActionDoc?.locationId).toBe('dev and dev2');
         });
@@ -441,11 +274,11 @@ apiTest.describe(
             });
             const alertActionDoc = recoveryResponse.hits.hits[0]?._source;
             expect(alertActionDoc?.reason).toBe(
-              `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last ${numberOfChecks} checks are down from at least 2 locations.`
+              `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
             );
             expect(alertActionDoc?.locationNames).toBe('Dev Service and Dev Service 2');
             expect(alertActionDoc?.linkMessage).toBe(
-              buildExpectedErrorLink(kibanaBaseUrl, monitor.id, 'dev')
+              buildExpectedErrorLink(env.kibanaBaseUrl, monitor.id, 'dev')
             );
             expect(alertActionDoc?.locationId).toBe('dev and dev2');
             expect(alertActionDoc?.recoveryReason).toMatch(
@@ -454,7 +287,7 @@ apiTest.describe(
             expect(alertActionDoc?.recoveryStatus).toBe('is now up');
           }
         );
-      });
-    }
+      }
+    );
   }
 );

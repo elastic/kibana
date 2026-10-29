@@ -7,20 +7,29 @@
 
 import { randomUUID } from 'crypto';
 import moment from 'moment';
-import type { ApiClientFixture, EsClient, KbnClient, SamlAuth } from '@kbn/scout-oblt';
+import type {
+  ApiClientFixture,
+  EsClient,
+  RequestAuthFixture,
+  SamlAuth,
+  ScoutTestConfig,
+} from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import {
-  KIBANA_HEADERS,
+  mergeSyntheticsApiHeaders,
   SYNTHETICS_ALERTS_INDEX,
   SYNTHETICS_API_URLS,
-  SYNTHETICS_MONITOR_SO_TYPES,
   type SyntheticsAlertDoc,
   type SyntheticsApiServicesFixture,
 } from '../../../common/fixtures';
-import { enableSynthetics, saveMonitorInternal } from '../../../common/fixtures/monitors';
+import {
+  deleteMonitors,
+  enableSynthetics,
+  saveMonitorInternal,
+} from '../../../common/fixtures/monitors';
 import { delay, tryForTime } from '../../../common/fixtures/retry';
 
 export const SYNTHETICS_DOCS_INDEX = 'synthetics-http-default';
@@ -46,44 +55,60 @@ export interface SyntheticsAlertActionDoc {
 export interface StatusRuleTestEnv {
   readonly alertActionIndex: string;
   readonly ruleTag: string;
+  /** Monitors created by the suite; deleted through the monitors API in teardown. */
+  readonly monitorIds: string[];
   actionId: string;
+  kibanaBaseUrl: string;
+  /** Editor API key headers, for public `api/*` routes. */
   editorHeaders: Record<string, string>;
+  /** Editor session cookie headers, for `internal/*` routes. */
+  editorCookieHeaders: Record<string, string>;
 }
 
-/**
- * Creates a suite-isolated index connector and index for custom status rule
- * action verification.
- */
 export function createStatusRuleTestEnv(suiteSlug: string): StatusRuleTestEnv {
   const runId = randomUUID().slice(0, 8);
   return {
     alertActionIndex: `alert-action-synthetics-${suiteSlug}-${runId}`,
     ruleTag: `scout-synthetics-${suiteSlug}-${runId}`,
+    monitorIds: [],
     actionId: '',
+    kibanaBaseUrl: '',
     editorHeaders: {},
+    editorCookieHeaders: {},
   };
 }
 
-export async function setupStatusRuleTestEnv({
-  env,
-  apiClient,
-  apiServices,
-  esClient,
-  samlAuth,
-  editorHeaders,
-}: {
-  env: StatusRuleTestEnv;
-  apiClient: ApiClientFixture;
-  apiServices: SyntheticsApiServicesFixture;
-  esClient: EsClient;
-  samlAuth: SamlAuth;
-  editorHeaders: Record<string, string>;
-}) {
-  env.editorHeaders = editorHeaders;
+/**
+ * Enables Synthetics and creates a suite-isolated index connector and index for
+ * custom status rule action verification. Call from the suite's `beforeAll`.
+ */
+export async function setupStatusRuleTestEnv(
+  env: StatusRuleTestEnv,
+  {
+    requestAuth,
+    samlAuth,
+    apiClient,
+    apiServices,
+    esClient,
+    config,
+  }: {
+    requestAuth: RequestAuthFixture;
+    samlAuth: SamlAuth;
+    apiClient: ApiClientFixture;
+    apiServices: SyntheticsApiServicesFixture;
+    esClient: EsClient;
+    config: ScoutTestConfig;
+  }
+) {
+  env.kibanaBaseUrl = config.hosts.kibana;
+  const { apiKeyHeader } = await requestAuth.getApiKey('editor');
+  env.editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
+  const { cookieHeader: editorCookie } = await samlAuth.asInteractiveUser('editor');
+  env.editorCookieHeaders = mergeSyntheticsApiHeaders(editorCookie);
 
   // Enabling creates a nested service API key, which fails under API-key auth.
   const { cookieHeader: adminCookie } = await samlAuth.asInteractiveUser('admin');
-  await enableSynthetics(apiClient, { ...KIBANA_HEADERS, ...adminCookie });
+  await enableSynthetics(apiClient, mergeSyntheticsApiHeaders(adminCookie));
 
   await esClient.indices.create({
     index: env.alertActionIndex,
@@ -113,44 +138,49 @@ export async function setupStatusRuleTestEnv({
   env.actionId = connector.id as string;
 }
 
-export async function teardownStatusRuleTestEnv({
-  env,
-  apiServices,
-  esClient,
-  kbnClient,
-  monitorIds,
-}: {
-  env: StatusRuleTestEnv;
-  apiServices: SyntheticsApiServicesFixture;
-  esClient: EsClient;
-  kbnClient: KbnClient;
-  monitorIds: string[];
-}) {
+/**
+ * Deletes the suite's rules, connector, action index and the monitors it created
+ * (through the monitors API) along with their documents. Call from `afterAll`.
+ */
+export async function teardownStatusRuleTestEnv(
+  env: StatusRuleTestEnv,
+  {
+    apiClient,
+    apiServices,
+    esClient,
+  }: {
+    apiClient: ApiClientFixture;
+    apiServices: SyntheticsApiServicesFixture;
+    esClient: EsClient;
+  }
+) {
   await apiServices.alerting.cleanup.deleteRulesByTags([env.ruleTag]);
   if (env.actionId) {
     await apiServices.alerting.connectors.delete(env.actionId);
   }
-  await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
   await esClient.indices.delete({
     index: env.alertActionIndex,
     ignore_unavailable: true,
   });
-  if (monitorIds.length > 0) {
-    await esClient.deleteByQuery({
-      index: `${SYNTHETICS_DOCS_INDEX}*`,
-      query: { terms: { 'monitor.id': monitorIds } },
-      conflicts: 'proceed',
-      refresh: true,
-      ignore_unavailable: true,
-    });
-    await esClient.deleteByQuery({
-      index: SYNTHETICS_ALERTS_INDEX,
-      query: { terms: { 'monitor.id': monitorIds } },
-      conflicts: 'proceed',
-      refresh: true,
-      ignore_unavailable: true,
-    });
+  const { monitorIds } = env;
+  if (monitorIds.length === 0) {
+    return;
   }
+  await deleteMonitors(apiClient, env.editorHeaders, monitorIds, { ignoreErrors: true });
+  await esClient.deleteByQuery({
+    index: `${SYNTHETICS_DOCS_INDEX}*`,
+    query: { terms: { 'monitor.id': monitorIds } },
+    conflicts: 'proceed',
+    refresh: true,
+    ignore_unavailable: true,
+  });
+  await esClient.deleteByQuery({
+    index: SYNTHETICS_ALERTS_INDEX,
+    query: { terms: { 'monitor.id': monitorIds } },
+    conflicts: 'proceed',
+    refresh: true,
+    ignore_unavailable: true,
+  });
 }
 
 export async function clearActionIndex(esClient: EsClient, alertActionIndex: string) {
@@ -499,14 +529,14 @@ export async function ageOutOldestDownCheck({
 
 export async function waitUntilMonitorLocationsPending({
   apiClient,
-  editorHeaders,
+  cookieHeaders,
   monitorId,
   condition,
   expectedLocationCount = 2,
   timeoutMs = 120_000,
 }: {
   apiClient: ApiClientFixture;
-  editorHeaders: Record<string, string>;
+  cookieHeaders: Record<string, string>;
   monitorId: string;
   condition: StatusRuleParams['condition'];
   expectedLocationCount?: number;
@@ -516,7 +546,7 @@ export async function waitUntilMonitorLocationsPending({
     timeoutMs,
     async () => {
       const res = await apiClient.post(SYNTHETICS_API_URLS.INSPECT_STATUS_RULE, {
-        headers: editorHeaders,
+        headers: cookieHeaders,
         body: {
           monitorIds: [monitorId],
           condition,

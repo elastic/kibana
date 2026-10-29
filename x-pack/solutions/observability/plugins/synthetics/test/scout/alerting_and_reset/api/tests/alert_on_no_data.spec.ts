@@ -9,12 +9,12 @@ import moment from 'moment-timezone';
 import { expect } from '@kbn/scout-oblt/api';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
-import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
+import { apiTest } from '../../../common/fixtures';
 import {
   addTestMonitor,
   createCustomStatusRule,
-  createStatusRuleTestEnv,
   makeSummaries,
+  createStatusRuleTestEnv,
   setupStatusRuleTestEnv,
   teardownStatusRuleTestEnv,
   waitForActionDocuments,
@@ -38,29 +38,22 @@ apiTest.describe(
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     const env = createStatusRuleTestEnv('alert-on-no-data');
-    const createdMonitorIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices, esClient, samlAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKey('editor');
-      const editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader);
-      await setupStatusRuleTestEnv({
-        env,
-        apiClient,
-        apiServices,
-        esClient,
-        samlAuth,
-        editorHeaders,
-      });
-    });
+    apiTest.beforeAll(
+      async ({ requestAuth, samlAuth, apiClient, apiServices, esClient, config }) => {
+        await setupStatusRuleTestEnv(env, {
+          requestAuth,
+          samlAuth,
+          apiClient,
+          apiServices,
+          esClient,
+          config,
+        });
+      }
+    );
 
-    apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
-      await teardownStatusRuleTestEnv({
-        env,
-        apiServices,
-        esClient,
-        kbnClient,
-        monitorIds: createdMonitorIds,
-      });
+    apiTest.afterAll(async ({ apiClient, apiServices, esClient }) => {
+      await teardownStatusRuleTestEnv(env, { apiClient, apiServices, esClient });
     });
 
     apiTest(
@@ -88,7 +81,7 @@ apiTest.describe(
             `Monitor check based at ${moment().format('LLL')}`
           );
           expect(monitor.id).toBeDefined();
-          createdMonitorIds.push(monitor.id);
+          env.monitorIds.push(monitor.id);
           const params: StatusRuleParams = {
             condition,
             monitorIds: [monitor.id],
@@ -107,7 +100,7 @@ apiTest.describe(
         await apiTest.step('triggers 1 pending alert per location', async () => {
           await waitUntilMonitorLocationsPending({
             apiClient,
-            editorHeaders: env.editorHeaders,
+            cookieHeaders: env.editorCookieHeaders,
             monitorId: monitor.id,
             condition,
             expectedLocationCount: 2,
