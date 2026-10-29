@@ -474,18 +474,8 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Document template fields in the cases-analytics skill for Agent Builder [#291716]({{kib-pull}}291716).
 
 **Alerting and cases**:
-* Add the `POST /api/alerting/v2/rules/_bulk_create` API to create up to 100 {{kib}} alerting v2 rules in one request [#288950]({{kib-pull}}288950).
-* Add the Create Alert Event API to ingest external alert events into alerting v2 [#270769]({{kib-pull}}270769).
-* Add an **Update API key** action, for one rule or in bulk, that regenerates the API key a rule uses to query your data [#281337]({{kib-pull}}281337).
-* Add a **View change history** option to the alerting v2 rule details menu and rule row actions to browse previous versions of a rule [#284942]({{kib-pull}}284942).
-* Show alerting v1 rules and alerting v2 rules on the same page [#289314]({{kib-pull}}289314).
-* Add severity configuration to the alerting v2 threshold rule builder [#288657]({{kib-pull}}288657).
-* Add **Create** and **AI Agent** options to the empty state of the alerting v2 action policy page [#285856]({{kib-pull}}285856).
-* Add a channel selector to the Slack action in the alerting v2 rule form, with the option to enter a channel that is not in the list [#278778]({{kib-pull}}278778).
-* Use the Slack v2 connector for new Slack actions in the alerting v2 rule form [#278451]({{kib-pull}}278451).
+* Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows, so to turn it off, for example because you don't have a Workflows license, set `alerting:v2:enabled` to `false` [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
 * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
-* Add an Agent Builder attachment for alerting v2 rules [#285472]({{kib-pull}}285472).
-* Add an Agent Builder attachment for alerting v2 episodes, with automatic attachment [#285275]({{kib-pull}}285275).
 * Add a public API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add a public API to discover the extended fields (`extended_fields`) that you can apply to a case, for a given owner and optional template [#279684]({{kib-pull}}279684).
 * Expand template defaults on the server when you create a case [#280143]({{kib-pull}}280143).
@@ -497,7 +487,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Prefix the subject of emails that Elastic Cloud trial deployments send through the built-in Elastic email service with `[Elastic Cloud Trial]` [#276705]({{kib-pull}}276705).
 * Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
 * Add threshold type and percentage support to anomaly detection job health rules [#272076]({{kib-pull}}272076).
-* Redesign the alerting v2 rule form into four steps: build your query, set your schedule, choose your outcome, and set your execution behaviors [#283528]({{kib-pull}}283528).
 
 **Connectivity**:
 * Add the Microsoft Teams inbound event triggers, which start a workflow when a channel message or chat message is posted, when a channel or chat is created, or when a member is added to a team [#297619]({{kib-pull}}297619).
@@ -740,7 +729,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the update-ID flow for the PagerDuty MCP connector to match the new PagerDuty MCP tool surface [#295823]({{kib-pull}}295823).
 
 **Alerting and cases**:
-* Fix a large alerting v2 alerts list overloading the browser and causing freezing, reloading, or lag [#297528]({{kib-pull}}297528).
 * Fix a rule running again for the same occurrence when Task Manager claims it before its `runAt` time [#297486]({{kib-pull}}297486).
 * Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents a completed run from being recorded [#295415]({{kib-pull}}295415).
 * Fix a request to run a rule immediately, or a schedule change, being discarded when it arrives while the rule is finishing a run [#293492]({{kib-pull}}293492).
@@ -752,12 +740,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix a memory regression caused by oversized screenshot viewports [#289062]({{kib-pull}}289062).
 * Fix rule API key rotation to write the full document [#288644]({{kib-pull}}288644).
 * Limit the concurrency of alerts-as-data resource installation to cap peak heap usage [#287643]({{kib-pull}}287643).
-* Add `auto_expand_replicas` to the `.rule-events` and `.alert-actions` data streams [#287544]({{kib-pull}}287544).
 * Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
-* Fix bulk-disabling alerting v2 rules marking them as disabled while their background tasks keep running [#281468]({{kib-pull}}281468).
-* Fix removing all tags from an alerting v2 rule not saving [#288962]({{kib-pull}}288962).
-* Fix the alerting v2 query sandbox timestamp not changing from the first selected option [#281854]({{kib-pull}}281854).
-* Mark the alerting v2 privileges as experimental in the **Roles** page [#288163]({{kib-pull}}288163).
 * Fix the rule type picker not matching partial words in the create-rule template search [#287961]({{kib-pull}}287961).
 * Fix the **Disk Usage** rule to ignore frozen nodes [#278374]({{kib-pull}}278374).
 * Fix cross-space writes when you update tags in the rule registry [#285874]({{kib-pull}}285874).
@@ -1043,6 +1026,26 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix `ApiKey` credentials being forwarded with the wrong scheme [#297713]({{kib-pull}}297713).
 % * Pass the selected project routing to the data visualizer chart [#286647]({{kib-pull}}286647).
 % * Fix the event rate chart in the anomaly detection wizard [#286639]({{kib-pull}}286639).
+
+% Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
+% * Add the `POST /api/alerting/v2/rules/_bulk_create` API to create up to 100 {{kib}} alerting v2 rules in one request [#288950]({{kib-pull}}288950).
+% * Add the Create Alert Event API to ingest external alert events into alerting v2 [#270769]({{kib-pull}}270769).
+% * Add an **Update API key** action, for one rule or in bulk, that regenerates the API key a rule uses to query your data [#281337]({{kib-pull}}281337).
+% * Add a **View change history** option to the alerting v2 rule details menu and rule row actions to browse previous versions of a rule [#284942]({{kib-pull}}284942).
+% * Show alerting v1 rules and alerting v2 rules on the same page [#289314]({{kib-pull}}289314).
+% * Add severity configuration to the alerting v2 threshold rule builder [#288657]({{kib-pull}}288657).
+% * Add **Create** and **AI Agent** options to the empty state of the alerting v2 action policy page [#285856]({{kib-pull}}285856).
+% * Add a channel selector to the Slack action in the alerting v2 rule form, with the option to enter a channel that is not in the list [#278778]({{kib-pull}}278778).
+% * Use the Slack v2 connector for new Slack actions in the alerting v2 rule form [#278451]({{kib-pull}}278451).
+% * Add an Agent Builder attachment for alerting v2 rules [#285472]({{kib-pull}}285472).
+% * Add an Agent Builder attachment for alerting v2 episodes, with automatic attachment [#285275]({{kib-pull}}285275).
+% * Redesign the alerting v2 rule form into four steps: build your query, set your schedule, choose your outcome, and set your execution behaviors [#283528]({{kib-pull}}283528).
+% * Fix a large alerting v2 alerts list overloading the browser and causing freezing, reloading, or lag [#297528]({{kib-pull}}297528).
+% * Add `auto_expand_replicas` to the `.rule-events` and `.alert-actions` data streams [#287544]({{kib-pull}}287544).
+% * Fix bulk-disabling alerting v2 rules marking them as disabled while their background tasks keep running [#281468]({{kib-pull}}281468).
+% * Fix removing all tags from an alerting v2 rule not saving [#288962]({{kib-pull}}288962).
+% * Fix the alerting v2 query sandbox timestamp not changing from the first selected option [#281854]({{kib-pull}}281854).
+% * Mark the alerting v2 privileges as experimental in the **Roles** page [#288163]({{kib-pull}}288163).
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
