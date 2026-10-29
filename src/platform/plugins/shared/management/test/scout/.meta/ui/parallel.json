@@ -1,5 +1,5 @@
 {
-  "sha1": "2912059093413b2d13d4043b631770ccea98d75e",
+  "sha1": "bf4eea94087cc3d00c5080a6036684fc331feedd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,55 +7,55 @@
     {
       "id": "a85e30db18dd980-231d31d916345e0",
       "title": "Stack Management — data section transform_user sees only transform in the data section",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 14,
-        "column": 24
+        "line": 10,
+        "column": 1
       }
     },
     {
       "id": "a85e30db18dd980-062ac9da8baab63",
       "title": "Stack Management — data section manage_ilm sees index_lifecycle_management in the data section",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 11
       }
     },
     {
       "id": "a85e30db18dd980-1b731d7876730e0",
       "title": "Stack Management — data section ccr_user sees cross_cluster_replication and the full cluster:manage data section",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 9
       }
     },
     {
       "id": "a85e30db18dd980-63340f362f8cde5",
       "title": "Stack Management — data section index_management_user sees index_management, esql_views, and transform in the data section",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 120,
+        "line": 121,
         "column": 16
       }
     },
@@ -90,41 +90,41 @@
     {
       "id": "bad08ef0cbf2e37-6fecfa373f1b9b3",
       "title": "Stack Management — ingest, security, and stack sections logstash_read_user sees only the ingest section with pipelines",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 14,
-        "column": 24
+        "line": 10,
+        "column": 1
       }
     },
     {
       "id": "bad08ef0cbf2e37-b4abddae2c2f331",
       "title": "Stack Management — ingest, security, and stack sections manage_security sees only the security section with all five links",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 9
       }
     },
     {
       "id": "bad08ef0cbf2e37-d579dbac266af75",
       "title": "Stack Management — ingest, security, and stack sections cluster:manage surfaces ingest, data (incl. remote_clusters) and stack (license_management) sections",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 12
       }
     }

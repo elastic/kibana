@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 import { SecurityAppHeader } from '../../common/components/app_header';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
+import { useNewEntityAnalyticsPage } from '../hooks/use_new_entity_analytics_page';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
@@ -41,12 +41,9 @@ export interface EntityAnalyticsHomeHeaderProps {
 export const EntityAnalyticsHomeHeader = React.memo(
   ({ onStartTour }: EntityAnalyticsHomeHeaderProps) => {
     const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-    const { docLinks, featureFlags } = useKibana().services;
+    const { docLinks } = useKibana().services;
     // The new page's route drops the template padding that `largeBleed` reaches out of.
-    const isNewHomePageEnabled = featureFlags.useBooleanValue(
-      USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
-      false
-    );
+    const isNewHomePageEnabled = useNewEntityAnalyticsPage();
 
     const menu = useMemo<AppHeaderMenu>(
       () => ({

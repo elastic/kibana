@@ -52,7 +52,7 @@ export async function update(
     });
 
     if (myComment == null) {
-      throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
+      throw Boom.notFound(`This attachment ${queryCommentId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
@@ -73,7 +73,7 @@ export async function update(
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
       throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
+        `This attachment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
       );
     }
 

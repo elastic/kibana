@@ -13,6 +13,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
@@ -97,9 +98,11 @@ export const useRiskMoversCount = ({
     }
   );
 
-  const isMissingIndex =
-    (error as SecurityAppError | undefined)?.message?.includes('Unknown index') ?? false;
-  const filteredError = isMissingIndex ? undefined : (error as SecurityAppError | undefined);
+  const queryMissingIndex = isMissingIndexError(error);
+  const inputsMissingIndex = isMissingIndexError(indexError);
+  const isMissingIndex = queryMissingIndex || inputsMissingIndex;
+  const filteredError = queryMissingIndex ? undefined : error;
+  const filteredIndexError = inputsMissingIndex ? undefined : indexError;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -111,7 +114,7 @@ export const useRiskMoversCount = ({
       defaultMessage: 'There was an error loading risk movers data',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? indexError
+    isTimedOut ? undefined : filteredError ?? filteredIndexError
   );
 
   return {
@@ -124,6 +127,6 @@ export const useRiskMoversCount = ({
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
     isTimedOut,
-    error: filteredError ?? indexError,
+    error: filteredError ?? filteredIndexError,
   };
 };

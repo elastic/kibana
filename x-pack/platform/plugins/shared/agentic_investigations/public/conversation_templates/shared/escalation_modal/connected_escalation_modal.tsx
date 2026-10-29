@@ -108,18 +108,19 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
 
     const existingEscalations = existingEscalationsData?.results ?? [];
 
-    const escalations = (escalationsData?.results ?? []).map((e) => {
-      const linkedInvestigations = e.metadata?.linked_investigations;
-      const linked = Array.isArray(linkedInvestigations) ? linkedInvestigations : [];
-      return {
-        id: e.id,
-        title: e.title,
-        linkedInvestigationCount: linked.length,
-        alreadyLinked: linked.includes(conversationId),
-        // patchMetadata requires owner access; update_access_control uses the same gate.
-        canManage: e.permissions.update_access_control,
-      };
-    });
+    const escalations = (escalationsData?.results ?? [])
+      .filter((escalation) => escalation.can_link)
+      .map((e) => {
+        const linkedInvestigations = e.metadata?.linked_investigations;
+        const linked = Array.isArray(linkedInvestigations) ? linkedInvestigations : [];
+        return {
+          id: e.id,
+          title: e.title,
+          linkedInvestigationCount: linked.length,
+          alreadyLinked: linked.includes(conversationId),
+          canManage: true,
+        };
+      });
 
     return (
       <EuiModal

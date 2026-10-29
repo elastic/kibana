@@ -15,7 +15,7 @@ import {
   stopEntityTypes,
   uninstallAllEntityTypes,
 } from '../../../common/fixtures/helpers';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
+import { FF_ENABLE_ENTITY_STORE_V2, FF_DUAL_PROCESS_ENABLED } from '../../../../../common';
 import {
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
@@ -26,7 +26,7 @@ const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
 apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, kbnClient, apiServices }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -35,10 +35,22 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+    // This suite asserts the generic single-process engine defaults (e.g.
+    // maxLogsPerWindowCapBehavior), not priority/non-priority specific behavior.
+    await apiServices.core.settings({
+      'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
+    });
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
     await uninstallAllEntityTypes(apiClient, defaultHeaders);
+  });
+
+  apiTest.afterAll(async ({ apiServices }) => {
+    // Only `null` removes the override, see per_process_config.spec.ts.
+    await apiServices.core.settings({
+      'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
+    });
   });
 
   apiTest(

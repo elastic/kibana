@@ -6,11 +6,11 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
-    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`::KEYWORD
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL AND (((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")) OR (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\") OR ((service.name IS NOT NULL AND service.name != \\"\\")))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -62,6 +62,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
      _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
      entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
     | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL user_euid = CASE(((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")), user_euid), host_euid = CASE((host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\"), host_euid), service_euid = CASE(((service.name IS NOT NULL AND service.name != \\"\\")), service_euid)
     | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
       COALESCE(user_euid, host_euid, service_euid),
       COALESCE(host_euid, service_euid, user_euid)),
@@ -239,11 +240,11 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
-    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
+    | EVAL _ea_entity_id = \`kibana.alert.entity.id\`::KEYWORD
     | KEEP _ea_entity_id, \`kibana.alert.severity\`
   )
   (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL
+    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NULL AND (((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")) OR (host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\") OR ((service.name IS NOT NULL AND service.name != \\"\\")))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -295,6 +296,7 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
      _src_entity_source = COALESCE(CASE(_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\", _src_entity_source0), CASE(_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\", _src_entity_source1), CASE(_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\", _src_entity_source2)),
      entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == \\"\\", NULL, _src_entity_source)
     | EVAL service_euid = CONCAT(\\"service:\\", TO_STRING(service.name))
+    | EVAL user_euid = CASE(((event.outcome IS NULL OR event.outcome != \\"failure\\") AND (user.email IS NOT NULL AND user.email != \\"\\" OR user.id IS NOT NULL AND user.id != \\"\\" OR user.name IS NOT NULL AND user.name != \\"\\")), user_euid), host_euid = CASE((host.id IS NOT NULL AND host.id != \\"\\" OR host.name IS NOT NULL AND host.name != \\"\\" OR host.hostname IS NOT NULL AND host.hostname != \\"\\"), host_euid), service_euid = CASE(((service.name IS NOT NULL AND service.name != \\"\\")), service_euid)
     | EVAL _ea_entity_id = MV_DEDUPE(MV_APPEND(MV_APPEND(
       COALESCE(user_euid, host_euid, service_euid),
       COALESCE(host_euid, service_euid, user_euid)),

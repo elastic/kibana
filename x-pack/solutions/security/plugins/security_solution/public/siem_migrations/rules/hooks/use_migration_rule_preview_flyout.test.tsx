@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import { SiemMigrationStatus } from '../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { migrationRules } from '../__mocks__/migration_rules';
+import { getMigrationRules } from '../api';
 import { useMigrationRuleDetailsFlyout } from './use_migration_rule_preview_flyout';
 
+jest.mock('../api');
 jest.mock('../components/rule_details_flyout', () => ({
   MigrationRuleDetailsFlyout: (props: { children: React.ReactNode }) => (
     <div data-test-subj="migration-rule-details-flyout">{props.children}</div>
@@ -21,36 +24,45 @@ jest.mock('../components/rule_details_flyout', () => ({
 describe('useMigrationRuleDetailsFlyout', () => {
   const mockRule = migrationRules[0];
 
-  const mockGetMigrationRuleData = jest.fn(() => ({
-    migrationRule: mockRule,
-    matchedPrebuiltRule: undefined,
-  }));
   const mockRuleActionsFactory = jest.fn(() => <div>{'Rule Actions'}</div>);
   const mockExtraTabsFactory = jest.fn(() => []);
+  const defaultParams = {
+    migrationId: 'migration-1',
+    getMatchedPrebuiltRule: () => undefined,
+    ruleActionsFactory: mockRuleActionsFactory,
+  };
+
+  /** Stored migration rules returned by the API when fetching by ids */
+  const mockStoredRules = (storedRules: RuleMigrationRule[]) => {
+    (getMigrationRules as jest.Mock).mockImplementation(
+      async ({ filters }: { filters?: { ids?: string[] } }) => {
+        const data = storedRules.filter((rule) => filters?.ids?.includes(rule.id));
+        return { data, total: data.length };
+      }
+    );
+  };
+
+  beforeEach(() => {
+    mockStoredRules(migrationRules);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return undefined flyout initially', () => {
-    const { result } = renderHook(() =>
-      useMigrationRuleDetailsFlyout({
-        migrationRules,
-        getMigrationRuleData: mockGetMigrationRuleData,
-        ruleActionsFactory: mockRuleActionsFactory,
-      })
+    const { result } = renderHook(
+      () => useMigrationRuleDetailsFlyout({ ...defaultParams, migrationRules }),
+      { wrapper: TestProviders }
     );
 
     expect(result.current.migrationRuleDetailsFlyout).toBeUndefined();
   });
 
   it('should open the flyout when openMigrationRuleDetails is called', () => {
-    const { result } = renderHook(() =>
-      useMigrationRuleDetailsFlyout({
-        migrationRules,
-        getMigrationRuleData: mockGetMigrationRuleData,
-        ruleActionsFactory: mockRuleActionsFactory,
-      })
+    const { result } = renderHook(
+      () => useMigrationRuleDetailsFlyout({ ...defaultParams, migrationRules }),
+      { wrapper: TestProviders }
     );
 
     act(() => {
@@ -58,17 +70,13 @@ describe('useMigrationRuleDetailsFlyout', () => {
     });
 
     expect(result.current.migrationRuleDetailsFlyout).toBeDefined();
-    expect(mockGetMigrationRuleData).toHaveBeenCalledWith('1');
     expect(mockRuleActionsFactory).toHaveBeenCalledWith(mockRule, expect.any(Function));
   });
 
   it('should close the flyout when closeMigrationRuleDetails is called', () => {
-    const { result } = renderHook(() =>
-      useMigrationRuleDetailsFlyout({
-        migrationRules,
-        getMigrationRuleData: mockGetMigrationRuleData,
-        ruleActionsFactory: mockRuleActionsFactory,
-      })
+    const { result } = renderHook(
+      () => useMigrationRuleDetailsFlyout({ ...defaultParams, migrationRules }),
+      { wrapper: TestProviders }
     );
 
     act(() => {
@@ -85,13 +93,14 @@ describe('useMigrationRuleDetailsFlyout', () => {
   });
 
   it('should call extraTabsFactory if provided', () => {
-    const { result } = renderHook(() =>
-      useMigrationRuleDetailsFlyout({
-        migrationRules,
-        getMigrationRuleData: mockGetMigrationRuleData,
-        ruleActionsFactory: mockRuleActionsFactory,
-        extraTabsFactory: mockExtraTabsFactory,
-      })
+    const { result } = renderHook(
+      () =>
+        useMigrationRuleDetailsFlyout({
+          ...defaultParams,
+          migrationRules,
+          extraTabsFactory: mockExtraTabsFactory,
+        }),
+      { wrapper: TestProviders }
     );
 
     act(() => {
@@ -117,19 +126,13 @@ describe('useMigrationRuleDetailsFlyout', () => {
       completedRule('3'),
     ];
 
-    const getRuleDataFor = (rules: RuleMigrationRule[]) => (ruleId: string) => ({
-      migrationRule: rules.find((rule) => rule.id === ruleId),
-      matchedPrebuiltRule: undefined,
-    });
-
-    const renderNavigationHook = (rules = threeRules, dataSource = threeRules) =>
-      renderHook(() =>
-        useMigrationRuleDetailsFlyout({
-          migrationRules: rules,
-          getMigrationRuleData: getRuleDataFor(dataSource),
-          ruleActionsFactory: mockRuleActionsFactory,
-        })
+    const renderNavigationHook = (rules = threeRules, storedRules = threeRules) => {
+      mockStoredRules(storedRules);
+      return renderHook(
+        () => useMigrationRuleDetailsFlyout({ ...defaultParams, migrationRules: rules }),
+        { wrapper: TestProviders }
       );
+    };
 
     it('should expose the opened rule id so consumers can highlight it', () => {
       const { result } = renderNavigationHook();
@@ -227,11 +230,14 @@ describe('useMigrationRuleDetailsFlyout', () => {
       expect(result.current.openedMigrationRuleId).toBe('3');
     });
 
-    it('should disable navigation in both directions when the opened rule is not in the loaded page', () => {
+    it('should disable navigation in both directions when the opened rule is not in the loaded page', async () => {
       const { result } = renderNavigationHook([threeRules[1], threeRules[2]]);
 
       act(() => {
         result.current.openMigrationRuleDetails(threeRules[0]);
+      });
+      await waitFor(() => {
+        expect(result.current.openedMigrationRuleId).toBe('1');
       });
 
       expect(result.current.navigation).toEqual(

@@ -21,6 +21,7 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
@@ -129,9 +130,8 @@ export const useAlertBasedTiles = ({
     }
   );
 
-  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-    ? undefined
-    : (error as SecurityAppError | undefined);
+  const filteredError = isMissingIndexError(error) ? undefined : error;
+  const filteredIndexError = isMissingIndexError(indexError) ? undefined : indexError;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -143,7 +143,7 @@ export const useAlertBasedTiles = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    isTimedOut ? undefined : filteredError ?? indexError
+    isTimedOut ? undefined : filteredError ?? filteredIndexError
   );
 
   return {
@@ -160,7 +160,7 @@ export const useAlertBasedTiles = ({
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
-    error: filteredError ?? indexError,
+    error: filteredError ?? filteredIndexError,
     isTimedOut,
   };
 };

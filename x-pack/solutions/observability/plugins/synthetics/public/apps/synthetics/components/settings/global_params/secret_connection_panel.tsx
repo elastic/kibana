@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -34,16 +34,25 @@ import {
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
+  HashiCorpVaultConfig,
+  HashiCorpVaultSecrets,
+  SecretConnectionStatus,
+  SecretConnectionTestResult,
   SecretProviderType,
   VaultAuthMethod,
-  SecretConnectionStatus,
 } from '../../../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
+import { testSecretConnection } from '../../../state/settings/api';
 
 // Selectable secret-provider backends. Only HashiCorp Vault is implemented today;
 // adding a provider means adding an option here and a matching field section below.
@@ -98,6 +107,27 @@ const toForm = (c: SecretConnectionStatus): FormState => ({
   hasSecret: c.hasSecret ?? false,
 });
 
+/** Splits the form into the non-secret config and the secrets for the active auth method. */
+const toConnectionPayload = (
+  form: FormState
+): { config: HashiCorpVaultConfig; secrets: HashiCorpVaultSecrets } => {
+  const isToken = form.authMethod === 'token';
+  return {
+    config: {
+      address: form.address.trim(),
+      authMethod: form.authMethod,
+      namespace: form.namespace.trim() || undefined,
+      kvMount: form.kvMount.trim() || undefined,
+      tlsSkipVerify: form.tlsSkipVerify,
+      ...(!isToken && { roleId: form.roleId.trim() }),
+    },
+    // Blank = keep the stored value (handled server-side).
+    secrets: isToken
+      ? { token: form.token || undefined }
+      : { secretId: form.secretId || undefined },
+  };
+};
+
 export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
   const canManage = (application?.capabilities.uptime.canManageSecretConnections ??
@@ -106,12 +136,27 @@ export const SecretConnectionPanel = () => {
   const [connections, setConnections] = useState<SecretConnectionStatus[]>([]);
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<SecretConnectionTestResult | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
 
-  const closeFlyout = () => setEditing(null);
+  // Bumped whenever the form changes or the flyout closes, so a pending test's response
+  // (made against the old values) is dropped instead of shown.
+  const testRequestId = useRef(0);
+
+  const invalidateTest = () => {
+    testRequestId.current += 1;
+    setTesting(false);
+    setTestResult(null);
+  };
+
+  const closeFlyout = () => {
+    invalidateTest();
+    setEditing(null);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -129,34 +174,43 @@ export const SecretConnectionPanel = () => {
   }, [load]);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    // A field change invalidates any prior or pending test result.
+    invalidateTest();
     setEditing((f) => (f ? { ...f, [key]: value } : f));
+  };
+
+  const onTest = async () => {
+    if (!editing) return;
+    setTesting(true);
+    setTestResult(null);
+    testRequestId.current += 1;
+    const requestId = testRequestId.current;
+    try {
+      const result = await testSecretConnection({
+        // Existing connection: let the server fall back to the stored secret
+        // when the secret field is left blank.
+        name: editing.isNew ? undefined : editing.name.trim(),
+        type: editing.type,
+        ...toConnectionPayload(editing),
+      });
+      if (requestId === testRequestId.current) setTestResult(result);
+    } catch (e) {
+      if (requestId === testRequestId.current) {
+        setTestResult({ ok: false, message: (e as Error)?.message ?? 'Test failed' });
+      }
+    } finally {
+      if (requestId === testRequestId.current) setTesting(false);
+    }
   };
 
   const onSave = async () => {
     if (!editing) return;
     setSaving(true);
     try {
-      // Provider-specific, non-secret settings.
-      const config: Record<string, unknown> = {
-        address: editing.address.trim(),
-        authMethod: editing.authMethod,
-        namespace: editing.namespace.trim() || undefined,
-        kvMount: editing.kvMount.trim() || undefined,
-        tlsSkipVerify: editing.tlsSkipVerify,
-      };
-      // Provider-specific secrets. Blank = keep the stored value (handled server-side).
-      const secrets: Record<string, unknown> = {};
-      if (editing.authMethod === 'token') {
-        if (editing.token) secrets.token = editing.token;
-      } else {
-        config.roleId = editing.roleId.trim();
-        if (editing.secretId) secrets.secretId = editing.secretId;
-      }
       const body = {
         name: editing.name.trim(),
         type: editing.type,
-        config,
-        secrets,
+        ...toConnectionPayload(editing),
       };
       await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);
@@ -208,7 +262,10 @@ export const SecretConnectionPanel = () => {
           description: EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
-          onClick: (c: SecretConnectionStatus) => setEditing(toForm(c)),
+          onClick: (c: SecretConnectionStatus) => {
+            setTestResult(null);
+            setEditing(toForm(c));
+          },
           enabled: () => canManage,
         },
         {
@@ -275,7 +332,10 @@ export const SecretConnectionPanel = () => {
               iconType="plusCircle"
               data-test-subj="syntheticsVaultAddConnection"
               isDisabled={!canManage || !!editing}
-              onClick={() => setEditing(blankForm())}
+              onClick={() => {
+                setTestResult(null);
+                setEditing(blankForm());
+              }}
             >
               {ADD_LABEL}
             </EuiButton>
@@ -426,10 +486,24 @@ export const SecretConnectionPanel = () => {
                     onChange={(e) => set('tlsSkipVerify', e.target.checked)}
                   />
                 </EuiFormRow>
+                {testResult && (
+                  <>
+                    <EuiSpacer size="l" />
+                    {testResult.ok ? (
+                      <KbnSuccessCallout size="s" title={testResult.message} />
+                    ) : (
+                      <KbnDangerCallout size="s" title={testResult.message} />
+                    )}
+                  </>
+                )}
                 <EuiSpacer size="l" />
                 <KbnWarningCallout size="s" title={ACCESS_NOTE_TITLE}>
                   {ACCESS_NOTE}
                 </KbnWarningCallout>
+                <EuiSpacer size="m" />
+                <KbnInfoCallout size="s" title={TEST_NOTE_TITLE}>
+                  {TEST_NOTE}
+                </KbnInfoCallout>
               </EuiForm>
             </EuiFlyoutBody>
             <EuiFlyoutFooter>
@@ -445,15 +519,30 @@ export const SecretConnectionPanel = () => {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    data-test-subj="syntheticsVaultSaveConnection"
-                    isLoading={saving}
-                    isDisabled={!editing.name || !editing.address}
-                    onClick={onSave}
-                  >
-                    {SAVE_LABEL}
-                  </EuiButton>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="syntheticsVaultTestConnection"
+                        iconType="plugs"
+                        isLoading={testing}
+                        isDisabled={!editing.address}
+                        onClick={onTest}
+                      >
+                        {TEST_LABEL}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        data-test-subj="syntheticsVaultSaveConnection"
+                        isLoading={saving}
+                        isDisabled={!editing.name || !editing.address}
+                        onClick={onSave}
+                      >
+                        {SAVE_LABEL}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutFooter>
@@ -556,12 +645,22 @@ const SAVE_LABEL = i18n.translate('xpack.synthetics.secretConnection.save', {
 const CANCEL_LABEL = i18n.translate('xpack.synthetics.secretConnection.cancel', {
   defaultMessage: 'Cancel',
 });
+const TEST_LABEL = i18n.translate('xpack.synthetics.secretConnection.test', {
+  defaultMessage: 'Test connection',
+});
 const ACCESS_NOTE_TITLE = i18n.translate('xpack.synthetics.secretConnection.accessNoteTitle', {
   defaultMessage: 'Use a dedicated, least-privilege credential',
 });
 const ACCESS_NOTE = i18n.translate('xpack.synthetics.secretConnection.accessNote', {
   defaultMessage:
     'Anyone who can edit monitors or global parameters in this space can reference any secret this credential can read. Use a token or AppRole that can only read the paths your monitors need.',
+});
+const TEST_NOTE_TITLE = i18n.translate('xpack.synthetics.secretConnection.testNoteTitle', {
+  defaultMessage: 'Testing runs from Kibana',
+});
+const TEST_NOTE = i18n.translate('xpack.synthetics.secretConnection.testNote', {
+  defaultMessage:
+    'Test connection checks that Kibana can reach and authenticate with Vault. At runtime, Heartbeat resolves secrets from the private location’s network, so make sure it can reach this address too.',
 });
 const SAVED_TOAST = i18n.translate('xpack.synthetics.secretConnection.savedToast', {
   defaultMessage: 'Vault connection saved',

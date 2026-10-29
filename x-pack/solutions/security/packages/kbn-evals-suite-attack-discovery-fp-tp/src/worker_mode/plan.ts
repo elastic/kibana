@@ -91,6 +91,13 @@ export const resolveWorkerModeExample = ({
 export const createWorkerModeSuffix = (now: Date = new Date()): string =>
   `w${now.getTime().toString(36)}${randomBytes(2).toString('hex')}`;
 
+/** Host and user shared by every set of one attack. Alert and event ids stay per set. */
+export interface WorkerModeHostUser {
+  readonly hostId: string;
+  readonly hostName: string;
+  readonly userName: string;
+}
+
 export interface WorkerModeSeedPlan {
   readonly space: string;
   readonly exampleId: string;
@@ -104,8 +111,16 @@ export interface WorkerModeSeedPlan {
   readonly events: ReadonlyArray<{ index: string; id: string }>;
   readonly eventOperations: unknown[];
   readonly entities: readonly FpTpEntityCrudRequest[];
-  /** `host.id` of every seeded alert and event. Unique per run: raw events are read by it across all namespaces. */
+  /**
+   * `host.id` of every seeded alert and event. A set that reuses another set's host
+   * keeps that id; raw events are read by it across all namespaces.
+   */
   readonly hostIds: readonly string[];
+  /**
+   * True when this set reuses a host and user that another set already stored.
+   * Failure cleanup then removes only this set's alerts and events.
+   */
+  readonly sharesHostUser: boolean;
   readonly seededAt: string;
   readonly lastAlertAt: string;
   readonly firstEventAt?: string;
@@ -127,6 +142,79 @@ const hostIdOf = (source: Record<string, unknown>): string | undefined => {
   return typeof host?.id === 'string' ? host.id : undefined;
 };
 
+const hostUserOf = (source: Record<string, unknown>): WorkerModeHostUser | undefined => {
+  const host = source.host as { id?: unknown; name?: unknown } | undefined;
+  const user = source.user as { name?: unknown } | undefined;
+  if (
+    typeof host?.id !== 'string' ||
+    host.id.length === 0 ||
+    typeof host.name !== 'string' ||
+    host.name.length === 0 ||
+    typeof user?.name !== 'string' ||
+    user.name.length === 0
+  ) {
+    return undefined;
+  }
+  return { hostId: host.id, hostName: host.name, userName: user.name };
+};
+
+/** The one host and user these alerts share. Throws when they name more than one. */
+export const hostUserFromAlerts = (
+  alerts: ReadonlyArray<{ source: Record<string, unknown> }>
+): WorkerModeHostUser => {
+  const found = new Map<string, WorkerModeHostUser>();
+  for (const { source } of alerts) {
+    const hostUser = hostUserOf(source);
+    if (hostUser === undefined) {
+      throw new Error('Every seeded alert needs a host.id, host.name, and user.name');
+    }
+    found.set(`${hostUser.hostId}\0${hostUser.hostName}\0${hostUser.userName}`, hostUser);
+  }
+  if (found.size !== 1) {
+    throw new Error(
+      `A shared host and user seed needs exactly one host and one user, found ${found.size}`
+    );
+  }
+  const [hostUser] = found.values();
+  return hostUser;
+};
+
+const replaceStrings = <T>(value: T, pairs: ReadonlyArray<readonly [string, string]>): T => {
+  const ordered = pairs
+    .filter(([from, to]) => from !== to && from.length > 0)
+    .sort(([left], [right]) => right.length - left.length);
+  const walk = (current: unknown): unknown => {
+    if (typeof current === 'string') {
+      return ordered.reduce((text, [from, to]) => text.split(from).join(to), current);
+    }
+    if (Array.isArray(current)) {
+      return current.map((item) => walk(item));
+    }
+    if (typeof current === 'object' && current !== null) {
+      return Object.fromEntries(Object.entries(current).map(([key, item]) => [key, walk(item)]));
+    }
+    return current;
+  };
+  return walk(value) as T;
+};
+
+/**
+ * Rewrites a freshly built set onto an existing host and user. Alert and event ids,
+ * which are digests of this set's own run marker, stay. Entities are dropped: the
+ * first set already stored them for this host.
+ */
+const withSharedHostUser = (world: FpTpWorld, hostUser: WorkerModeHostUser): FpTpWorld => {
+  const own = hostUserFromAlerts(world.alerts);
+  return {
+    ...replaceStrings(world, [
+      [own.hostId, hostUser.hostId],
+      [own.hostName, hostUser.hostName],
+      [own.userName, hostUser.userName],
+    ]),
+    entities: [],
+  };
+};
+
 /**
  * Builds what one worker-mode seed writes: the example's alerts, raw events and
  * entities under a fresh run marker, without its authored attack, so the AD Worker
@@ -138,11 +226,14 @@ export const buildWorkerModePlan = ({
   exampleId,
   now = new Date(),
   suffix = createWorkerModeSuffix(now),
+  hostUser,
 }: {
   space: string;
   exampleId: string;
   now?: Date;
   suffix?: string;
+  /** Reuse this host and user instead of the ones this set's run marker would create. */
+  hostUser?: WorkerModeHostUser;
 }): WorkerModeSeedPlan => {
   assertWorkerModeSpace(space);
   const example = WORKER_MODE_EXAMPLES.find(({ id }) => id === exampleId);
@@ -166,13 +257,14 @@ export const buildWorkerModePlan = ({
       source: { ...alert.source, 'kibana.space_ids': [space] },
     })),
   };
+  const indexed = hostUser === undefined ? world : withSharedHostUser(world, hostUser);
 
   const alertsIndex = fpTpAlertsIndexForSpace(space);
-  const eventTimes = world.events.map(({ source }) => timestampOf(source));
-  const alertTimes = world.alerts.map(({ source }) => timestampOf(source));
+  const eventTimes = indexed.events.map(({ source }) => timestampOf(source));
+  const alertTimes = indexed.alerts.map(({ source }) => timestampOf(source));
   const firstEventMs = eventTimes.length > 0 ? Math.min(...eventTimes) : undefined;
   const hostIds = new Set(
-    [...world.alerts, ...world.events]
+    [...indexed.alerts, ...indexed.events]
       .map(({ source }) => hostIdOf(source))
       .filter((id): id is string => id !== undefined)
   );
@@ -185,19 +277,20 @@ export const buildWorkerModePlan = ({
     runMarker: toRunMarker(suffix),
     alertsIndex,
     entityReadAlias: fpTpEntityReadAliasForSpace(space),
-    alertIds: world.alerts.map(({ id }) => id),
+    alertIds: indexed.alerts.map(({ id }) => id),
     // Bulk `create`, never `index`: a leftover id fails loudly instead of being overwritten.
-    alertOperations: world.alerts.flatMap((alert) => [
+    alertOperations: indexed.alerts.flatMap((alert) => [
       { create: { _index: alertsIndex, _id: alert.id } },
       alert.source,
     ]),
-    events: world.events.map(({ index, id }) => ({ index, id })),
-    eventOperations: world.events.flatMap((event) => [
+    events: indexed.events.map(({ index, id }) => ({ index, id })),
+    eventOperations: indexed.events.flatMap((event) => [
       { create: { _index: event.index, _id: event.id } },
       event.source,
     ]),
-    entities: world.entities.map(toEntityCrudRequest),
+    entities: indexed.entities.map(toEntityCrudRequest),
     hostIds: [...hostIds],
+    sharesHostUser: hostUser !== undefined,
     seededAt: now.toISOString(),
     lastAlertAt: new Date(Math.max(...alertTimes)).toISOString(),
     firstEventAt: firstEventMs === undefined ? undefined : new Date(firstEventMs).toISOString(),
@@ -206,7 +299,7 @@ export const buildWorkerModePlan = ({
     windowDeadline: new Date(
       (firstEventMs ?? Math.min(...alertTimes)) + FP_TP_RAW_EVENT_WINDOW_MS
     ).toISOString(),
-    world,
+    world: indexed,
   };
 };
 

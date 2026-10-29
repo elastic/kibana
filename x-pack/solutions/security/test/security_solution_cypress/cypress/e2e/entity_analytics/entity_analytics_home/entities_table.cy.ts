@@ -45,7 +45,11 @@ describe(
     tags: ['@ess'],
     env: {
       ftrConfig: {
-        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
+        kbnServerArgs: [
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+          // These specs assert the legacy home page. The route now defaults to the new page.
+          '--feature_flags.overrides.securitySolution.useNewEntityAnalyticsPage=false',
+        ],
       },
     },
   },

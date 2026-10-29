@@ -24,6 +24,9 @@ settings:
 triggers:
 __WORKER_TRIGGERS__
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Continuous Threat Hunt worker"
   worker_settings:
     settingsVersion: __WORKER_SETTINGS_VERSION__
     autonomy: "__WORKER_AUTONOMY_LEVEL__"
@@ -219,6 +222,7 @@ steps:
           workflow-id: system-alertzero-journal-note
           run-as-mode: inherit
           inputs:
+            author_name: "{{ consts.author_name }}"
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             message: |-
               {% if steps.resolve_run_outcome.output.outcome == 'completed' -%}
