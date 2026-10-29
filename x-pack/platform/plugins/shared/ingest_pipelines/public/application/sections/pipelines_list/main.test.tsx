@@ -20,8 +20,6 @@ import type { PipelineTable } from './table';
 import type { SectionLoading, useKibana } from '../../../shared_imports';
 
 const mockUseKibana = jest.fn();
-const mockUsePipelinesPrivileges = jest.fn();
-
 type MockServices = ReturnType<typeof useKibana>['services'];
 type DeepPartialMockServices = DeepPartial<MockServices>;
 
@@ -38,6 +36,8 @@ const createMockServices = (overrides: DeepPartialMockServices = {}): DeepPartia
   },
   config: {
     enableManageProcessors: false,
+    canManage: true,
+    canRead: true,
   },
   application: {
     capabilities: {
@@ -76,11 +76,6 @@ jest.mock('../../../shared_imports', () => ({
   SectionLoading: ({ children }: ComponentProps<typeof SectionLoading>) => (
     <div data-test-subj="sectionLoading">{children}</div>
   ),
-}));
-
-jest.mock('../../hooks', () => ({
-  ...jest.requireActual('../../hooks'),
-  usePipelinesPrivileges: () => mockUsePipelinesPrivileges(),
 }));
 
 jest.mock('./empty_list', () => ({
@@ -175,7 +170,6 @@ const renderPipelinesList = (path: string, services: DeepPartialMockServices) =>
 describe('PipelinesList section', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUsePipelinesPrivileges.mockReturnValue({ canRead: true, canManage: true });
   });
 
   describe('WHEN mounting the PipelinesList route', () => {
@@ -319,7 +313,7 @@ describe('PipelinesList section', () => {
               data: [{ name: 'p1', description: '', processors: [], on_failure: [] }],
             },
             {
-              config: { enableManageProcessors: true },
+              config: { enableManageProcessors: true, canManage: true, canRead: true },
               application: {
                 capabilities: {
                   ingest_pipelines: { manage: true, manageProcessors: true },
@@ -342,7 +336,7 @@ describe('PipelinesList section', () => {
               data: [{ name: 'p1', description: '', processors: [], on_failure: [] }],
             },
             {
-              config: { enableManageProcessors: true },
+              config: { enableManageProcessors: true, canManage: true, canRead: true },
             }
           );
 
@@ -362,12 +356,17 @@ describe('PipelinesList section', () => {
       });
 
       describe('AND WHEN the user can only read pipelines', () => {
-        beforeEach(() => {
-          mockUsePipelinesPrivileges.mockReturnValue({ canRead: true, canManage: false });
-        });
-
         it('SHOULD render the list without the create pipeline action', () => {
-          renderPipelinesList('/', services);
+          const readOnlyServices = createServicesWithLoadPipelines(
+            {
+              data: mockPipelines,
+            },
+            {
+              config: { enableManageProcessors: false, canManage: false, canRead: true },
+            }
+          );
+
+          renderPipelinesList('/', readOnlyServices);
 
           expect(screen.getByTestId('pipelineTable')).toBeInTheDocument();
           expect(screen.queryByTestId('createPipelineDropdown')).not.toBeInTheDocument();
@@ -379,7 +378,7 @@ describe('PipelinesList section', () => {
               data: mockPipelines,
             },
             {
-              config: { enableManageProcessors: true },
+              config: { enableManageProcessors: true, canManage: false, canRead: true },
               application: {
                 capabilities: {
                   ingest_pipelines: { manage: false, manageProcessors: true },

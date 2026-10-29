@@ -26,8 +26,6 @@ import {
   getManageProcessorsPath,
 } from '../../services/navigation';
 import { ingestPipelinesListTitle } from '../../components';
-import { usePipelinesPrivileges } from '../../hooks';
-
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
 import { PipelineDeleteModal } from './delete_modal';
@@ -73,7 +71,17 @@ const getPipelineNameFromLocation = (location: Location) => {
 };
 
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
-  const { services } = useKibana();
+  const {
+    services: {
+      config: { canManage, enableManageProcessors },
+      api,
+      application,
+      metric,
+      breadcrumbs,
+      consolePlugin,
+      documentation,
+    },
+  } = useKibana();
 
   const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
 
@@ -81,16 +89,15 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
 
   const [pipelinesToDelete, setPipelinesToDelete] = useState<Pipeline[]>([]);
 
-  const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
+  const { data, isLoading, error, resendRequest } = api.useLoadPipelines();
 
   const hasManageProcessorsPrivileges =
-    services.application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manageProcessors] === true;
-  const { canManage } = usePipelinesPrivileges();
+    application.capabilities[PLUGIN_ID]?.[APP_CAPABILITIES.manageProcessors] === true;
   // Track component loaded
   useEffect(() => {
-    services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
-    services.breadcrumbs.setBreadcrumbs('home');
-  }, [services.metric, services.breadcrumbs]);
+    metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
+    breadcrumbs.setBreadcrumbs('home');
+  }, [metric, breadcrumbs]);
 
   const goToEditPipeline = (pipelineName: string) => {
     // this double encoding (+1 in getEditPath) is a
@@ -159,7 +166,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
       },
     };
 
-    if (canManage && services.config.enableManageProcessors && hasManageProcessorsPrivileges) {
+    if (canManage && enableManageProcessors && hasManageProcessorsPrivileges) {
       menu.items = [
         {
           id: 'manageProcessors',
@@ -264,16 +271,14 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         title={ingestPipelinesListTitle}
         description={listDescription}
         menu={menu}
-        docLink={services.documentation.getIngestNodeUrl()}
+        docLink={documentation.getIngestNodeUrl()}
         spacing="bleed"
       />
 
       <EuiSpacer size="l" />
 
       {body}
-      {services.consolePlugin?.EmbeddableConsole ? (
-        <services.consolePlugin.EmbeddableConsole />
-      ) : null}
+      {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
     </>
   );
 };

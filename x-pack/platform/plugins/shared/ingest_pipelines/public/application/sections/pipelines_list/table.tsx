@@ -36,8 +36,6 @@ import {
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
-import { usePipelinesPrivileges } from '../../hooks';
-
 export interface Props {
   pipelines: Pipeline[];
   onReloadClick: () => void;
@@ -118,7 +116,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onDeletePipelineClick,
   openFlyout,
 }) => {
-  const { canManage } = usePipelinesPrivileges();
   const editActionText = i18n.translate('xpack.ingestPipelines.list.table.editActionDescription', {
     defaultMessage: 'Edit this pipeline',
   });
@@ -134,7 +131,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const [queryText, setQueryText] = useState<string>('');
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
 
-  const { history } = useKibana().services;
+  const {
+    history,
+    config: { canManage },
+  } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const filterButtonRef = useRef<HTMLButtonElement>(null);

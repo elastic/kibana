@@ -13,17 +13,20 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { Pipeline } from '../../../../common/types';
 import { PipelineTable } from './table';
 
-const mockUsePipelinesPrivileges = jest.fn();
+const mockUseKibana = jest.fn();
 
 jest.mock('../../../shared_imports', () => ({
   ...jest.requireActual('../../../shared_imports'),
-  useKibana: () => ({ services: { history: createMemoryHistory() } }),
+  useKibana: () => mockUseKibana(),
 }));
 
-jest.mock('../../hooks', () => ({
-  ...jest.requireActual('../../hooks'),
-  usePipelinesPrivileges: () => mockUsePipelinesPrivileges(),
-}));
+const mockPrivileges = ({ canRead, canManage }: { canRead: boolean; canManage: boolean }) =>
+  mockUseKibana.mockReturnValue({
+    services: {
+      history: createMemoryHistory(),
+      config: { enableManageProcessors: false, canRead, canManage },
+    },
+  });
 
 const EDIT_ACTION_LABEL = 'Edit this pipeline';
 
@@ -53,7 +56,7 @@ describe('PipelineTable', () => {
 
   describe('WHEN the user can manage pipelines', () => {
     beforeEach(() => {
-      mockUsePipelinesPrivileges.mockReturnValue({ canRead: true, canManage: true });
+      mockPrivileges({ canRead: true, canManage: true });
     });
 
     it('SHOULD render row selection and pipeline actions', () => {
@@ -66,7 +69,7 @@ describe('PipelineTable', () => {
 
   describe('WHEN the user can only read pipelines', () => {
     beforeEach(() => {
-      mockUsePipelinesPrivileges.mockReturnValue({ canRead: true, canManage: false });
+      mockPrivileges({ canRead: true, canManage: false });
     });
 
     it('SHOULD not render row selection or pipeline actions', () => {

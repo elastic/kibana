@@ -15,16 +15,18 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../../shared_imports';
 import { getCreateFromCsvPath, getCreatePath } from '../../services/navigation';
-import { usePipelinesPrivileges } from '../../hooks';
-
 export const EmptyList: FunctionComponent = () => {
-  const { services } = useKibana();
+  const {
+    services: {
+      config: { canManage },
+      documentation,
+    },
+  } = useKibana();
   const history = useHistory() as ScopedHistory;
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const { canManage } = usePipelinesPrivileges();
 
   const learnMoreLink = (
-    <EuiLink href={services.documentation.getIngestNodeUrl()} target="_blank" external>
+    <EuiLink href={documentation.getIngestNodeUrl()} target="_blank" external>
       {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptDocumentionLink', {
         defaultMessage: 'Learn more',
       })}

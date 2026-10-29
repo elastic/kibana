@@ -24,11 +24,13 @@ import {
   ManageProcessors,
 } from './sections';
 import { ROUTES } from './services/navigation';
-import { usePipelinesPrivileges } from './hooks';
 
 export const AppWithoutRouter = () => {
-  const { services } = useKibana();
-  const { canManage } = usePipelinesPrivileges();
+  const {
+    services: {
+      config: { canManage, enableManageProcessors },
+    },
+  } = useKibana();
   return (
     <Routes>
       <Route exact path={ROUTES.list} component={PipelinesList} />
@@ -36,7 +38,7 @@ export const AppWithoutRouter = () => {
       {canManage && <Route exact path={ROUTES.create} component={PipelinesCreate} />}
       {canManage && <Route exact path={ROUTES.edit} component={PipelinesEdit} />}
       {canManage && <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />}
-      {canManage && services.config.enableManageProcessors && (
+      {canManage && enableManageProcessors && (
         <Route exact path={ROUTES.manageProcessors} component={ManageProcessors} />
       )}
       {/* Catch all */}
@@ -46,8 +48,10 @@ export const AppWithoutRouter = () => {
 };
 
 export const App: FunctionComponent = () => {
-  const { canRead } = usePipelinesPrivileges();
-  const { history } = useKibana().services;
+  const {
+    history,
+    config: { canRead },
+  } = useKibana().services;
 
   if (!canRead) {
     return (
