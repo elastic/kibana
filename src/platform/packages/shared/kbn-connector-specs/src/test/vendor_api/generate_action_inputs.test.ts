@@ -70,6 +70,33 @@ describe('generateActionInputs', () => {
     ]);
   });
 
+  it('drops the default of whatever holds an enum, so each value is sent', async () => {
+    const { inputs } = await generateActionInputs({
+      input: z.object({
+        states: z
+          .array(z.enum(['a', 'b', 'c']))
+          .max(1)
+          .default(['a']),
+      }),
+    });
+
+    expect(inputs).toEqual(
+      expect.arrayContaining([{ states: ['a'] }, { states: ['b'] }, { states: ['c'] }])
+    );
+  });
+
+  it('generates each enum of a union, not only those of its first member', async () => {
+    const { inputs } = await generateActionInputs({
+      input: z.object({
+        state: z.union([z.enum(['a', 'b']), z.enum(['c', 'd'])]),
+      }),
+    });
+
+    expect(inputs).toEqual(
+      expect.arrayContaining([{ state: 'a' }, { state: 'b' }, { state: 'c' }, { state: 'd' }])
+    );
+  });
+
   it('generates an unbounded input once and at the default upper bound', async () => {
     const { inputs } = await generateActionInputs({ input: z.object({ id: z.string() }) });
 

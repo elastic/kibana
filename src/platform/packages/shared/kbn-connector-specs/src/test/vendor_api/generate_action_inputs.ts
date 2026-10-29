@@ -55,9 +55,51 @@ const widestEnum = (node: unknown): number => {
   return Math.max(own, ...Object.values(node).map(widestEnum));
 };
 
+const UNION_KEYS = ['anyOf', 'oneOf'] as const;
+
+/** The members of a union that have an `enum` somewhere in them, which a sample has to choose. */
+const enumBranches = (union: unknown): unknown[] =>
+  Array.isArray(union) ? union.filter((branch) => widestEnum(branch) > 0) : [];
+
+/** The most members with an `enum` that any one union in a schema has. */
+const widestUnion = (node: unknown): number => {
+  if (Array.isArray(node)) {
+    return Math.max(0, ...node.map(widestUnion));
+  }
+  if (!isPlainObject(node)) {
+    return 0;
+  }
+  const own = Math.max(0, ...UNION_KEYS.map((key) => enumBranches(node[key]).length));
+  return Math.max(own, ...Object.values(node).map(widestUnion));
+};
+
 /**
- * Narrows every `enum` to its value at `index`, or its last one when it has fewer, dropping the
- * `default` and `examples` the sampler would prefer.
+ * Narrows every union that has `enum`s in its members to the one at `index`, or its last one when
+ * it has fewer, since the sampler always takes a union's first member.
+ */
+const pickBranches = (node: unknown, index: number): unknown => {
+  if (Array.isArray(node)) {
+    return node.map((child) => pickBranches(child, index));
+  }
+  if (!isPlainObject(node)) {
+    return node;
+  }
+  const picked: Record<string, unknown> = Object.fromEntries(
+    Object.entries(node).map(([key, child]) => [key, pickBranches(child, index)])
+  );
+  for (const key of UNION_KEYS) {
+    const branches = enumBranches(picked[key]);
+    if (branches.length > 0) {
+      picked[key] = [branches[Math.min(index, branches.length - 1)]];
+    }
+  }
+  return picked;
+};
+
+/**
+ * Narrows every `enum` to its value at `index`, or its last one when it has fewer. The `default`
+ * and `examples` the sampler would prefer are dropped from it and from everything that holds it,
+ * such as an array of enum values with a default.
  */
 const pickEnumValues = (node: unknown, index: number): unknown => {
   if (Array.isArray(node)) {
@@ -70,24 +112,34 @@ const pickEnumValues = (node: unknown, index: number): unknown => {
   const children = Object.fromEntries(
     Object.entries(rest).map(([key, child]) => [key, pickEnumValues(child, index)])
   );
-  if (!Array.isArray(values) || values.length === 0) {
+  const holdsEnum = Array.isArray(values) ? values.length > 0 : widestEnum(children) > 0;
+  if (!holdsEnum) {
     return values === undefined ? children : { ...children, enum: values };
   }
   const narrowed = Object.fromEntries(
     Object.entries(children).filter(([key]) => key !== 'default' && key !== 'examples')
   );
-  return { ...narrowed, enum: [values[Math.min(index, values.length - 1)]] };
+  return Array.isArray(values)
+    ? { ...narrowed, enum: [values[Math.min(index, values.length - 1)]] }
+    : narrowed;
 };
+
+/** Each enum value once, in every member of a union that has enums, so the vendor sees them all. */
+const enumSamplingsOf = (schema: JsonSchema): Sampling[] =>
+  Array.from({ length: Math.max(1, widestUnion(schema)) }).flatMap((_, branch) => {
+    const branched = pickBranches(schema, branch);
+    return Array.from({ length: widestEnum(branched) }, (__, index) => ({
+      variant: 'enum' as const,
+      schema: pickEnumValues(branched, index) as JsonSchema,
+      options: { optional: 'all' as const },
+    }));
+  });
 
 const samplingsOf = (schema: JsonSchema): Sampling[] => [
   { variant: 'required', schema, options: { optional: 'required' } },
   { variant: 'all', schema, options: { optional: 'all' } },
   { variant: 'boundary', schema, options: { optional: 'all', boundary: true } },
-  ...Array.from({ length: widestEnum(schema) }, (_, index) => ({
-    variant: 'enum' as const,
-    schema: pickEnumValues(schema, index) as JsonSchema,
-    options: { optional: 'all' as const },
-  })),
+  ...enumSamplingsOf(schema),
 ];
 
 /** Merges an override into a sampled input: objects key by key, other values replaced. */
