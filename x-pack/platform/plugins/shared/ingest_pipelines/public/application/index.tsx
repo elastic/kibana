@@ -24,10 +24,6 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { KibanaContextProvider, KibanaRenderContextProvider } from '../shared_imports';
 import type { Config, ILicense } from '../types';
 
-import { API_BASE_PATH } from '../../common/constants';
-
-import { AuthorizationProvider } from '../shared_imports';
-
 import { App } from './app';
 import type {
   DocumentationService,
@@ -69,14 +65,9 @@ export const renderApp = (
 ) => {
   render(
     <KibanaRenderContextProvider {...coreServices}>
-      <AuthorizationProvider
-        privilegesEndpoint={`${API_BASE_PATH}/privileges/ingest_pipelines`}
-        httpClient={coreServices.http}
-      >
-        <KibanaContextProvider services={services}>
-          <App />
-        </KibanaContextProvider>
-      </AuthorizationProvider>
+      <KibanaContextProvider services={services}>
+        <App />
+      </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element
   );

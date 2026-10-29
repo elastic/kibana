@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 import {
   API_BASE_PATH,
-  APP_CLUSTER_REQUIRED_PRIVILEGES,
+  APP_CLUSTER_REQUIRED_PRIVILEGE,
   PARSE_CSV_MAX_FILE_BYTES,
 } from '../../../common/constants';
 import type { FieldCopyAction } from '../../../common/types';
@@ -55,7 +55,7 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
         await contxt.core
       ).elasticsearch.client.asCurrentUser.security.hasPrivileges({
         // same as privs for ingest pipelines management
-        cluster: APP_CLUSTER_REQUIRED_PRIVILEGES,
+        cluster: [APP_CLUSTER_REQUIRED_PRIVILEGE],
       });
       if (!privResult.has_all_requested) {
         return res.unauthorized();

@@ -118,11 +118,10 @@ export const BARCHART_FILTER_OUT_BUTTON = getDataTestSubjectSelector('tiBarchart
 
 /* Miscellaneous */
 
-export const DEFAULT_LAYOUT_TITLE = getDataTestSubjectSelector('tiDefaultPageLayoutTitle');
+export const DEFAULT_LAYOUT_TITLE = getDataTestSubjectSelector('appHeaderTitle');
 export const BREADCRUMBS = getDataTestSubjectSelector('breadcrumbs');
 export const LEADING_BREADCRUMB = getDataTestSubjectSelector('breadcrumb first');
 export const ENDING_BREADCRUMB = getDataTestSubjectSelector('breadcrumb last');
-export const FILTERS_GLOBAL_CONTAINER = getDataTestSubjectSelector('filters-global-container');
 export const TIME_RANGE_PICKER = getDataTestSubjectSelector('superDatePickerToggleQuickMenuButton');
 export const QUERY_INPUT = getDataTestSubjectSelector('queryInput');
 export const EMPTY_STATE = getDataTestSubjectSelector('tiIndicatorsTableEmptyState');
