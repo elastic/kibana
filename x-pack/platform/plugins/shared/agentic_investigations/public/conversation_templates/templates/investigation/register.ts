@@ -7,15 +7,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { ConversationTemplateBriefCardRenderProps } from '@kbn/agent-builder-browser';
 import {
   registerAgenticInvestigationTemplateUI,
   type CloseInvestigationModalRenderProps,
   type EscalationModalRenderProps,
+  type OverviewSlotRenderProps,
+  type LiveStateSlotRenderProps,
+  type SeveritySlotRenderProps,
+  type TitleSlotRenderProps,
 } from '@kbn/agentic-investigations-common';
-import { INVESTIGATION_TEMPLATE_ID } from '../../../../common';
+import { INVESTIGATION_TEMPLATE_ID, isInvestigationTitlePending } from '../../../../common';
 import { EscalationModalBoundary } from '../../shared/escalation_modal/escalation_modal_boundary';
-import { ProposedActionsBoundary } from '../../shared/proposed_actions/proposed_actions_boundary';
+import {
+  ProposedActionsBoundary,
+  ProposedActionsCountBoundary,
+} from '../../shared/proposed_actions/proposed_actions_boundary';
 import { getSharedInvestigationsQueryClient } from '../../../shared_query_client';
+import { NEW_INVESTIGATION_TITLE } from './translations';
+import { copyLink } from '../../shared/copy_link';
 import type { TemplateDefinition } from '../../registry/types';
 
 const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
@@ -23,17 +33,28 @@ const INVESTIGATION_TEMPLATE_NAME = i18n.translate(
   { defaultMessage: 'Investigation' }
 );
 
-/** The `investigation` template: status, close, escalation, and proposed actions. */
+const OVERVIEW_LOADING_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.overview.loading',
+  { defaultMessage: 'Loading investigation…' }
+);
+
+/**
+ * The `investigation` template: status, close, escalation, proposed actions, and the overview,
+ * live state, title, and brief card from the query API.
+ */
 export const investigationTemplate: TemplateDefinition = {
   templateId: INVESTIGATION_TEMPLATE_ID,
   register: ({
     templateId,
+    core,
     startDeps,
     services,
     escalationsEnabled,
     makeLazyWithProviders,
+    groupedAttachments,
     renderAssignees,
     renderStatus,
+    getImpactEntityOpener,
   }) => {
     const { agentBuilder, proposals } = startDeps;
 
@@ -63,33 +84,100 @@ export const investigationTemplate: TemplateDefinition = {
     // Shares `getSharedInvestigationsQueryClient()` with a solution's queue page rather than
     // creating its own — see https://github.com/elastic/kibana/pull/292946#discussion_r4092473937.
     // Both read and decide the same proposals; an isolated client here would let a decision made
-    // in one leave the other showing it as still pending.
-    const LazyProposedActionsSlot = React.lazy(async () => {
-      const [
-        { KibanaContextProvider },
-        { QueryClientProvider },
-        { ProposedActionsSlot },
-        queryClient,
-      ] = await Promise.all([
-        import('@kbn/kibana-react-plugin/public'),
-        import('@kbn/react-query'),
-        import('../../shared/proposed_actions/proposed_actions_slot'),
-        getSharedInvestigationsQueryClient(),
-      ]);
+    // in one leave the other showing it as still pending. The overview, the header's running state,
+    // and the brief cards share it too: a flyout and its header poll one investigation query.
+    const makeLazyWithSharedClient = <P extends object>(
+      getComponent: () => Promise<React.ComponentType<P>>
+    ): React.LazyExoticComponent<React.ComponentType<P>> =>
+      React.lazy(async () => {
+        const [{ KibanaContextProvider }, { QueryClientProvider }, Component, queryClient] =
+          await Promise.all([
+            import('@kbn/kibana-react-plugin/public'),
+            import('@kbn/react-query'),
+            getComponent(),
+            getSharedInvestigationsQueryClient(),
+          ]);
 
-      const WrappedSlot: React.FC<React.ComponentProps<typeof ProposedActionsSlot>> = (props) =>
-        React.createElement(
-          KibanaContextProvider,
-          { services },
+        const Wrapped: React.FC<P> = (props) =>
           React.createElement(
-            QueryClientProvider,
-            { client: queryClient },
-            React.createElement(ProposedActionsSlot, props)
-          )
-        );
+            KibanaContextProvider,
+            { services },
+            React.createElement(
+              QueryClientProvider,
+              { client: queryClient },
+              React.createElement(Component, props)
+            )
+          );
 
-      return { default: WrappedSlot };
+        return { default: Wrapped };
+      });
+
+    const LazyProposedActionsSlot = makeLazyWithSharedClient(async () => {
+      const { ProposedActionsSlot } = await import(
+        '../../shared/proposed_actions/proposed_actions_slot'
+      );
+      return ProposedActionsSlot;
     });
+
+    const LazyProposedActionsCount = makeLazyWithSharedClient(async () => {
+      const { ProposedActionsCount } = await import(
+        '../../shared/proposed_actions/proposed_actions_count'
+      );
+      return ProposedActionsCount;
+    });
+
+    const LazyInvestigationOverview = makeLazyWithSharedClient<OverviewSlotRenderProps>(
+      async () => {
+        const { InvestigationOverview } = await import('./flyout/overview_tab');
+        const Overview: React.FC<OverviewSlotRenderProps> = (props) =>
+          React.createElement(InvestigationOverview, {
+            ...props,
+            onOpenEntity: getImpactEntityOpener(),
+          });
+        return Overview;
+      }
+    );
+
+    const LazyInvestigationLiveState = makeLazyWithSharedClient<LiveStateSlotRenderProps>(
+      async () => {
+        const { InvestigationLiveState } = await import('./flyout/live_state');
+        return InvestigationLiveState;
+      }
+    );
+
+    const LazySeverityPicker = makeLazyWithSharedClient<SeveritySlotRenderProps>(async () => {
+      const { ConnectedSeverityPicker } = await import(
+        '../../shared/connected_severity/connected_severity_picker'
+      );
+      return ConnectedSeverityPicker;
+    });
+
+    const LazyInvestigationTitle = makeLazyWithSharedClient<TitleSlotRenderProps>(async () => {
+      const { InvestigationTitle } = await import('./flyout/header_title');
+      return InvestigationTitle;
+    });
+
+    const LazyInvestigationBriefCard =
+      makeLazyWithSharedClient<ConversationTemplateBriefCardRenderProps>(async () => {
+        const [{ InvestigationBriefCard }, { createInvestigationCardsLoader }] = await Promise.all([
+          import('./brief_card'),
+          import('../../../investigations/investigation_cards_loader'),
+        ]);
+        // Created once, with the chunk: every card shares it, so one tick of cards is one request.
+        const loader = createInvestigationCardsLoader(core.http);
+        const BriefCard: React.FC<ConversationTemplateBriefCardRenderProps> = (props) =>
+          React.createElement(InvestigationBriefCard, { ...props, loader });
+        return BriefCard;
+      });
+
+    const InvestigationBriefCardWithFallback: React.FC<ConversationTemplateBriefCardRenderProps> = (
+      props
+    ) =>
+      React.createElement(
+        React.Suspense,
+        { fallback: null },
+        React.createElement(LazyInvestigationBriefCard, props)
+      );
 
     const LazyConnectedCloseInvestigationModal =
       makeLazyWithProviders<CloseInvestigationModalRenderProps>(async () => {
@@ -118,12 +206,47 @@ export const investigationTemplate: TemplateDefinition = {
     registerAgenticInvestigationTemplateUI({
       conversationTemplates: agentBuilder.conversationTemplates,
       templateId,
+      groupedAttachments,
       name: INVESTIGATION_TEMPLATE_NAME,
       icon: 'magnifyExclamation',
       renderAssignees,
       // The toggle itself disables when the user may not change the status.
       renderStatus,
+      // The picker itself shows a read-only badge when the user may not change the severity.
+      renderSeverity: (props) =>
+        React.createElement(
+          EscalationModalBoundary,
+          null,
+          React.createElement(LazySeverityPicker, props)
+        ),
       renderCloseInvestigationModal,
+      renderOverview: (props) =>
+        React.createElement(
+          EscalationModalBoundary,
+          { loadingLabel: OVERVIEW_LOADING_LABEL },
+          React.createElement(LazyInvestigationOverview, props)
+        ),
+      renderLiveState: (props) =>
+        React.createElement(
+          React.Suspense,
+          { fallback: null },
+          React.createElement(LazyInvestigationLiveState, props)
+        ),
+      // Agent Builder titles an investigation on its first round. While the title chunk loads, an
+      // untitled one shows the generic title rather than Agent Builder's placeholder.
+      renderTitle: (props) =>
+        React.createElement(
+          React.Suspense,
+          {
+            fallback: isInvestigationTitlePending(props.title)
+              ? NEW_INVESTIGATION_TITLE
+              : props.title,
+          },
+          React.createElement(LazyInvestigationTitle, props)
+        ),
+      briefCard: InvestigationBriefCardWithFallback,
+      // The flyout's Copy link button confirms success itself; only a failure needs a toast.
+      onCopyLink: (url) => copyLink(core.notifications.toasts, url),
       // Without escalations the footer has no "Open escalation" button.
       renderEscalationModal: escalationsEnabled
         ? (props) =>
@@ -148,6 +271,14 @@ export const investigationTemplate: TemplateDefinition = {
               ProposedActionsBoundary,
               null,
               React.createElement(LazyProposedActionsSlot, props)
+            )
+        : undefined,
+      renderProposedActionsCount: proposals
+        ? (props) =>
+            React.createElement(
+              ProposedActionsCountBoundary,
+              null,
+              React.createElement(LazyProposedActionsCount, props)
             )
         : undefined,
     });

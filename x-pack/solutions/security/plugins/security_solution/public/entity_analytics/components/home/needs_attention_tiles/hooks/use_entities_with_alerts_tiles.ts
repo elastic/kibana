@@ -11,30 +11,36 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
-import type { TimeRange } from '../../use_time_range_param';
 import { EMPTY_ENTITY_IDS } from '../data';
 import {
-  getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../entities_grid/common';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 interface AlertBasedTilesResult {
-  alertsCount: number;
-  alertsEntityIds: string[];
+  severeAlertsCount: number;
+  severeAlertsEntityIds: string[];
   watchlistedCount: number;
   watchlistedEntityIds: string[];
 }
 
+const EMPTY_RESULT: AlertBasedTilesResult = {
+  severeAlertsCount: 0,
+  severeAlertsEntityIds: [],
+  watchlistedCount: 0,
+  watchlistedEntityIds: [],
+};
+
 export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBasedTilesResult => {
   const row = raw.values?.[0];
-  if (!row)
-    return { alertsCount: 0, alertsEntityIds: [], watchlistedCount: 0, watchlistedEntityIds: [] };
+  if (!row) return EMPTY_RESULT;
 
   const col = (name: string) => raw.columns?.findIndex((c) => c.name === name) ?? -1;
   const toIds = (idx: number): string[] => {
@@ -44,25 +50,25 @@ export const parseAlertBasedTilesResponse = (raw: ESQLSearchResponse): AlertBase
     if (typeof v === 'string' && v) return [v];
     return [];
   };
+  const toCount = (idx: number): number => {
+    const v = idx < 0 ? undefined : row[idx];
+    return typeof v === 'number' ? v : 0;
+  };
 
   return {
-    alertsCount:
-      typeof row[col('alerts_count')] === 'number' ? (row[col('alerts_count')] as number) : 0,
-    alertsEntityIds: toIds(col('alerts_entity_ids')),
-    watchlistedCount:
-      typeof row[col('watchlisted_count')] === 'number'
-        ? (row[col('watchlisted_count')] as number)
-        : 0,
+    severeAlertsCount: toCount(col('severe_alerts_count')),
+    severeAlertsEntityIds: toIds(col('severe_alerts_entity_ids')),
+    watchlistedCount: toCount(col('watchlisted_count')),
     watchlistedEntityIds: toIds(col('watchlisted_entity_ids')),
   };
 };
 
 /**
- * Runs a single alerts query that produces counts and entity ID lists for both the
- * "entities with alerts" tile and the "watchlisted entities with alerts" tile.
+ * Runs a single alerts query that produces counts and entity ID lists for the severely
+ * alerting and the watchlisted & alerting tiles.
  *
- * Running one query rather than two avoids executing the EUID pipeline twice, which
- * is expensive at high alert volumes. See buildAlertBasedTilesQuery for query details.
+ * Running one query rather than one per tile avoids executing the EUID pipeline several
+ * times, which is expensive at high alert volumes. See buildAlertBasedTilesQuery for details.
  */
 export const useAlertBasedTiles = ({
   spaceId,
@@ -76,53 +82,50 @@ export const useAlertBasedTiles = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const euidApi = useEntityStoreEuidApi();
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
+  } = useTileQueryInputs(spaceId, entityFilters);
 
-  const isEnabled =
-    !skip && !isIndexLoading && Boolean(euidApi) && Boolean(resolvedIndex?.indexName);
+  const isEnabled = !skip && !isIndexLoading && Boolean(resolvedIndex?.indexName);
 
   const query = useMemo(() => {
-    if (!resolvedIndex?.indexName || !euidApi) return null;
+    if (!resolvedIndex?.indexName) return null;
     return buildAlertBasedTilesQuery(
-      euidApi.euid,
       resolvedIndex.indexName,
       spaceId,
       timeRange,
-      getEntityFilterESQL(entityFilters)
+      entityFilterClauses
     );
-  }, [euidApi, resolvedIndex?.indexName, spaceId, timeRange, entityFilters]);
+  }, [resolvedIndex?.indexName, spaceId, timeRange, entityFilterClauses]);
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
     ['alertBasedTiles', query],
     async ({ signal }) => {
-      if (!query)
-        return {
-          alertsCount: 0,
-          alertsEntityIds: [],
-          watchlistedCount: 0,
-          watchlistedEntityIds: [],
-        };
-      const raw = await lastValueFrom(
-        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+      if (!query) return EMPTY_RESULT;
+      const raw = await runWithTileTimeout(signal, (tileSignal) =>
+        lastValueFrom(
+          data.search.search(
+            { params: { query } },
+            { abortSignal: tileSignal, strategy: 'esql_async' }
+          )
+        )
       );
       return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
     },
     {
       enabled: isEnabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -130,23 +133,34 @@ export const useAlertBasedTiles = ({
     ? undefined
     : (error as SecurityAppError | undefined);
 
+  // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
+  // timed-out refetch does not leave the last count on show as if it were current.
+  const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
+  const shownResult = isTimedOut ? undefined : queryResult;
+
+  // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    filteredError ?? indexError
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
-    alertsCount: queryResult?.alertsCount ?? 0,
-    alertsEntityIds: isFetching
+    severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
+    severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
-    watchlistedCount: queryResult?.watchlistedCount ?? 0,
+      : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
+    watchlistedCount: shownResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isIndexLoading || isLoading || isFetching,
+      : shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+    // A query that can never run (no index, failed inputs) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
+    isTimedOut,
   };
 };

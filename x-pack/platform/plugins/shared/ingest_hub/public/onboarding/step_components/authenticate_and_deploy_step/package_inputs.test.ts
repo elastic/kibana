@@ -11,6 +11,7 @@ import { buildDeployGroups } from './deploy_groups';
 import {
   buildIacIntegrations,
   buildPackageInputs,
+  buildPackageVars,
   buildStreamVars,
   toSOServiceVars,
 } from './package_inputs';
@@ -19,7 +20,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: ['test_service'],
     packageName: 'aws',
@@ -414,6 +414,51 @@ describe('toSOServiceVars', () => {
     expect(result.ec2.namespace).toBe('prod');
     expect(result['ec2__dup-1'].namespace).toBe('staging');
   });
+
+  describe('typing the vars', () => {
+    // A service with a multi-value var: the raw draft is a comma-separated string.
+    const service = makeService({
+      id: 'aws_billing',
+      packageName: 'aws_billing',
+      dataStreams: ['billing'],
+      inputs: ['aws-s3'],
+      varDefsByInput: {
+        'aws-s3': {
+          tags: { name: 'tags', type: 'text', show_user: true, multi: true } as any,
+        },
+      },
+    });
+    const servicesMap = new Map([['aws_billing', service]]);
+    const vars = (tags: string): ServiceVars => ({
+      enabledDataStreams: ['billing'],
+      varsByDataStream: {
+        billing: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { tags } } },
+      },
+    });
+    const tagsOf = (result: Record<string, unknown>, instanceId: string) =>
+      (result[instanceId] as ServiceVars).varsByDataStream.billing.varsByInput['aws-s3'].tags;
+
+    it('splits a multi-value var of an original', () => {
+      const result = toSOServiceVars({ aws_billing: vars('a, b') }, servicesMap);
+
+      expect(tagsOf(result, 'aws_billing')).toEqual(['a', 'b']);
+    });
+
+    it('types a duplicate like its service, which the instance id alone does not find', () => {
+      const result = toSOServiceVars(
+        { aws_billing: vars('a, b'), 'aws_billing__dup-1': vars('c, d') },
+        servicesMap
+      );
+
+      expect(tagsOf(result, 'aws_billing__dup-1')).toEqual(['c', 'd']);
+    });
+
+    it('passes the vars of an instance of an unknown service through unchanged', () => {
+      const result = toSOServiceVars({ 'other__dup-1': vars('c, d') }, servicesMap);
+
+      expect(tagsOf(result, 'other__dup-1')).toBe('c, d');
+    });
+  });
 });
 
 describe('buildPackageInputs', () => {
@@ -535,5 +580,167 @@ describe('buildStreamVars — collect_s3_logs', () => {
       'aws-s3'
     );
     expect(out.collect_s3_logs).toBe(false);
+  });
+});
+
+describe('buildPackageVars — stored secret refs', () => {
+  const PKG_VARS = new Set([
+    'default_region',
+    'access_key_id',
+    'secret_access_key',
+    'session_token',
+  ]);
+  const refs = new Map([
+    ['access_key_id', { isSecretRef: true as const, id: 'ref-akid' }],
+    ['secret_access_key', { isSecretRef: true as const, id: 'ref-secret' }],
+  ]);
+
+  it('sends typed keys as plain values', () => {
+    expect(
+      buildPackageVars('us-east-1', { access_key_id: 'AKID', secret_access_key: 'S' }, PKG_VARS)
+    ).toEqual({ default_region: 'us-east-1', access_key_id: 'AKID', secret_access_key: 'S' });
+  });
+
+  it('sends the stored refs back when no keys were typed, so Fleet keeps the secrets', () => {
+    expect(buildPackageVars('us-east-1', undefined, PKG_VARS, undefined, refs)).toEqual({
+      default_region: 'us-east-1',
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+  });
+
+  describe('stored credentials are replaced as a set', () => {
+    it('uses the typed values when every stored credential is replaced', () => {
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' },
+          PKG_VARS,
+          undefined,
+          refs
+        )
+      ).toEqual({ access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' });
+    });
+
+    it('keeps the stored refs when only one stored credential was typed (no mismatched pair)', () => {
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: '' },
+          PKG_VARS,
+          undefined,
+          refs
+        )
+      ).toEqual({
+        access_key_id: { isSecretRef: true, id: 'ref-akid' },
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      });
+    });
+
+    it('keeps a typed value for a credential that has no stored ref', () => {
+      // Only the secret access key is stored as a secret; the access key id is a plain var.
+      const onlySecretRef = new Map([
+        ['secret_access_key', { isSecretRef: true as const, id: 'ref-secret' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: '' },
+          PKG_VARS,
+          undefined,
+          onlySecretRef
+        )
+      ).toEqual({
+        access_key_id: 'NEW-AKID',
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      });
+    });
+
+    it('applies to agent-based temporary keys: all three must be replaced together', () => {
+      const tempRefs = new Map([
+        ...refs,
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          undefined,
+          PKG_VARS,
+          {
+            method: 'temporary_keys',
+            access_key_id: 'NEW-AKID',
+            secret_access_key: 'NEW-SECRET',
+            session_token: '',
+          },
+          tempRefs
+        )
+      ).toEqual({
+        access_key_id: { isSecretRef: true, id: 'ref-akid' },
+        secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+        session_token: { isSecretRef: true, id: 'ref-token' },
+      });
+    });
+
+    it('does not let a stored session token block typed static keys', () => {
+      const withToken = new Map([
+        ...refs,
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ]);
+      expect(
+        buildPackageVars(
+          '',
+          { access_key_id: 'NEW-AKID', secret_access_key: 'NEW-SECRET' },
+          PKG_VARS,
+          undefined,
+          withToken
+        )
+      ).toEqual({
+        access_key_id: 'NEW-AKID',
+        secret_access_key: 'NEW-SECRET',
+        session_token: { isSecretRef: true, id: 'ref-token' },
+      });
+    });
+  });
+
+  it('only emits credential vars the package declares', () => {
+    expect(
+      buildPackageVars('', undefined, new Set(['secret_access_key']), undefined, refs)
+    ).toEqual({ secret_access_key: { isSecretRef: true, id: 'ref-secret' } });
+  });
+
+  it('keeps stored refs for agent-based static and temporary keys', () => {
+    const tempRefs = new Map([
+      ...refs,
+      ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+    ]);
+    expect(
+      buildPackageVars(
+        '',
+        undefined,
+        PKG_VARS,
+        { method: 'temporary_keys', access_key_id: '', secret_access_key: '', session_token: '' },
+        tempRefs
+      )
+    ).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+      session_token: { isSecretRef: true, id: 'ref-token' },
+    });
+  });
+
+  it('does not touch assume_role or shared credential vars', () => {
+    expect(
+      buildPackageVars(
+        '',
+        undefined,
+        new Set(['role_arn', 'secret_access_key']),
+        { method: 'assume_role', role_arn: 'arn:aws:iam::1:role/r' },
+        undefined
+      )
+    ).toEqual({ role_arn: 'arn:aws:iam::1:role/r' });
+  });
+
+  it('returns undefined when nothing is sent', () => {
+    expect(buildPackageVars('', undefined, PKG_VARS)).toBeUndefined();
   });
 });

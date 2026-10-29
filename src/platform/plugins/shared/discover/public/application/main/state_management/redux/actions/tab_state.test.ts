@@ -27,6 +27,7 @@ import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { EsqlSource } from '@kbn/data-source';
 import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
+import * as resolveDataViewModule from '../../utils/resolve_data_view';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -35,7 +36,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
-import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
+import { getTabDataView, selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 import {
   ProfileStateType,
@@ -113,6 +114,11 @@ const clearActiveDataSourceProfileState = ({
 };
 
 describe('tab_state actions', () => {
+  const docViewerState = {
+    selectedTabId: 'doc_view_example',
+    tabsState: { doc_view_example: { clickCount: 2 } },
+  };
+
   describe('setExpandedDoc', () => {
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
 
@@ -150,6 +156,63 @@ describe('tab_state actions', () => {
 
       expect(tab.expandedDoc).toBeUndefined();
       expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
+    it('should clear the shareable doc viewer state when the flyout is closed', async () => {
+      const { internalState, tabId } = await setup();
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { docViewerState } })
+      );
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState.docViewerState).toBeUndefined();
+    });
+
+    it('should clear the shareable doc viewer state when switching to another document', async () => {
+      const { internalState, tabId } = await setup();
+      const otherDoc = buildDataTableRecord(esHitsMock[1], dataViewMockWithTimeField);
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { docViewerState } })
+      );
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc: otherDoc }));
+
+      const { appState } = selectTab(internalState.getState(), tabId);
+
+      expect(appState.expandedDoc).toEqual({ id: '2', index: 'i' });
+      expect(appState.docViewerState).toBeUndefined();
+    });
+
+    it('should keep the shareable doc viewer state when a shared document resolves with its routing', async () => {
+      const { internalState, tabId } = await setup();
+      const routedDoc = buildDataTableRecord(
+        { ...esHitsMock[0], _routing: 'shard-a' },
+        dataViewMockWithTimeField
+      );
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      // A shared link may reference a routed document without its routing.
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { expandedDoc: { id: '1', index: 'i' }, docViewerState },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({ tabId, expandedDoc: routedDoc })
+      );
+
+      const { appState } = selectTab(internalState.getState(), tabId);
+
+      expect(appState.expandedDoc).toEqual({ id: '1', index: 'i', routing: 'shard-a' });
+      expect(appState.docViewerState).toEqual(docViewerState);
     });
 
     it('should not write a reference for cascade owned flyouts', async () => {
@@ -258,6 +321,80 @@ describe('tab_state actions', () => {
       );
 
       expect(selectTab(internalState.getState(), tabId).appState).toBe(initialAppState);
+    });
+  });
+
+  describe('setDocViewerShareableState', () => {
+    const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
+
+    const setDataViewQuery = (
+      internalState: Awaited<ReturnType<typeof setup>>['internalState'],
+      tabId: string
+    ) => {
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { query: '', language: 'kuery' } },
+        })
+      );
+    };
+
+    it('writes the shareable state and replaces URL history while a document is expanded', async () => {
+      const { internalState, services, stateStorageContainer, tabId } = await setup();
+
+      setDataViewQuery(internalState, tabId);
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      stateStorageContainer.kbnUrlControls.flush();
+
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+      const historyLength = services.history.length;
+
+      await internalState.dispatch(
+        internalStateActions.setDocViewerShareableState({ tabId, docViewerState })
+      );
+
+      const currentTab = selectTab(internalState.getState(), tabId);
+      const persistedAppState = stateStorageContainer.get<DiscoverAppState>(APP_STATE_URL_KEY);
+
+      expect(currentTab.appState.docViewerState).toEqual(docViewerState);
+      expect(persistedAppState).toEqual(currentTab.appState);
+      expect(setUrlStateSpy).toHaveBeenCalledWith(APP_STATE_URL_KEY, currentTab.appState, {
+        replace: true,
+      });
+      expect(services.history.length).toBe(historyLength);
+      expect(services.history.action).toBe('REPLACE');
+    });
+
+    it('does not write shareable state when no document reference is expanded', async () => {
+      const { internalState, stateStorageContainer, tabId } = await setup();
+      const setUrlStateSpy = jest.spyOn(stateStorageContainer, 'set');
+
+      await internalState.dispatch(
+        internalStateActions.setDocViewerShareableState({ tabId, docViewerState })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState.docViewerState).toBeUndefined();
+      expect(setUrlStateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateAppState', () => {
+    it('should drop the shareable doc viewer state when the expanded doc reference is removed', async () => {
+      const { internalState, tabId } = await setup();
+
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { expandedDoc: { id: '1', index: 'i' }, docViewerState },
+        })
+      );
+      internalState.dispatch(
+        internalStateActions.updateAppState({ tabId, appState: { expandedDoc: undefined } })
+      );
+
+      expect(selectTab(internalState.getState(), tabId).appState).not.toHaveProperty(
+        'docViewerState'
+      );
     });
   });
 
@@ -1236,6 +1373,7 @@ describe('tab_state actions', () => {
     const resolveSpy = jest
       .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
       .mockResolvedValue(resolved);
+    const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
 
     await toolkit.initializeTabs();
     toolkit.internalState.dispatch(
@@ -1250,10 +1388,54 @@ describe('tab_state actions', () => {
     expect(selectTab(toolkit.internalState.getState(), tabId).appState.query).toEqual({
       esql: openingQuery,
     });
+    expect(resolveSpy).toHaveBeenCalledTimes(1);
     expect(resolveSpy).toHaveBeenCalledWith(expect.objectContaining({ esql: openingQuery }));
-    expect(
-      selectTabRuntimeState(toolkit.runtimeStateManager, tabId).currentDataView$.getValue()
-    ).toBe(resolved.dataView);
+    // The profile provides the query, so no data view is loaded to derive it.
+    expect(loadDataViewSpy).not.toHaveBeenCalled();
+    expect(getTabDataView(selectTabRuntimeState(toolkit.runtimeStateManager, tabId))).toBe(
+      resolved.dataView
+    );
     resolveSpy.mockRestore();
+    loadDataViewSpy.mockRestore();
+  });
+
+  it('opens a saved ES|QL tab without loading a data view', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMockWithTimeField],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewMockWithTimeField,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | LIMIT 10' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+    });
+    const resolved = await createResolvedMockEsqlSource();
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(resolved);
+    const loadDataViewSpy = jest.spyOn(resolveDataViewModule, 'loadAndResolveDataView');
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [persistedTab],
+      }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+
+    expect(loadDataViewSpy).not.toHaveBeenCalled();
+    expect(resolveSpy).toHaveBeenCalledTimes(1);
+    expect(
+      selectTabRuntimeState(
+        toolkit.runtimeStateManager,
+        persistedTab.id
+      ).currentDataSource$.getValue()
+    ).toBe(resolved.esqlSource);
+    resolveSpy.mockRestore();
+    loadDataViewSpy.mockRestore();
   });
 });

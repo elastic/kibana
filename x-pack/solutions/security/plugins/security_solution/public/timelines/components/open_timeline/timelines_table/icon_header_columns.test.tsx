@@ -8,7 +8,7 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { TimelinesTableProps } from '.';
@@ -35,6 +35,21 @@ describe('#getActionsColumns', () => {
     );
 
     expect(wrapper.find('[data-test-subj="pinned-event-header-icon"]').exists()).toBe(true);
+  });
+
+  test.each([
+    ['pinned-event-header-icon', 'Pinned events'],
+    ['notes-count-header-icon', 'Notes'],
+    ['favorites-header-icon', 'Favorites'],
+  ])('it gives the %s header a distinct accessible name', (testSubj, label) => {
+    render(
+      <TestProvidersComponent>
+        <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
+      </TestProvidersComponent>
+    );
+
+    // The EUI test-env EuiIcon stub renders aria-label as text content
+    expect(screen.getByTestId(testSubj)).toHaveTextContent(label);
   });
 
   test('it renders the expected pinned events count', () => {
@@ -187,6 +202,14 @@ describe('getSuperTimelineQueryTypeColumn', () => {
   const column = getSuperTimelineQueryTypeColumn();
   const renderCell = (savedSearchId: string | null | undefined, row: Partial<OpenTimelineResult>) =>
     column.render!(savedSearchId, row as OpenTimelineResult);
+
+  it('gives the header icon a distinct accessible name', () => {
+    render(<>{column.name}</>);
+    // The EUI test-env EuiIcon stub renders aria-label as text content
+    expect(screen.getByTestId('super-timeline-query-type-header-icon')).toHaveTextContent(
+      'Super Timeline query merging'
+    );
+  });
 
   it('renders the ES|QL info icon when savedSearchId is set', () => {
     const node = renderCell('some-saved-search-id', { savedSearchId: 'some-saved-search-id' });

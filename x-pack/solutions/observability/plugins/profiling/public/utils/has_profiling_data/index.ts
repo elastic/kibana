@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { ProfilingSchemasStatus } from '@kbn/profiling-utils';
 
-export const hasProfilingData = (status?: ProfilingStatus): boolean =>
+/** Whether there is profiling data the app can show. Unlike `hasUsableProfilingData`, Universal
+ * Profiling data counts even when its setup is incomplete, so the app stays usable for it. */
+export const hasProfilingData = (status?: ProfilingSchemasStatus): boolean =>
   status?.isEnabled === true && (status.otel.hasData || status.universalProfiling.hasData);

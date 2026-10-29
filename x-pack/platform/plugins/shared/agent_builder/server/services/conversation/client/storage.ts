@@ -19,7 +19,8 @@ import type {
   ConversationOrigin,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
-import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue, UserPrincipalType } from '@kbn/agent-builder-common';
+import type { ConversationRoundFeedback } from '@kbn/agent-builder-common';
 import type {
   ConversationPinnedByEntry,
   ConversationReadByEntry,
@@ -34,6 +35,7 @@ const storageSettings = {
     properties: {
       user_id: types.keyword({}),
       user_name: types.keyword({}),
+      user_type: types.keyword({}),
       agent_id: types.keyword({}),
       space: types.keyword({}),
       title: types.text({
@@ -46,19 +48,7 @@ const storageSettings = {
       updated_at: types.date({}),
       conversation_rounds: types.object({
         dynamic: false,
-        properties: {
-          feedback: types.object({
-            dynamic: false,
-            properties: {
-              vote: types.keyword({}),
-              chips: types.keyword({}),
-              comment: types.text({}),
-              submitted_at: types.date({}),
-              connector_id: types.keyword({}),
-              model: types.keyword({}),
-            },
-          }),
-        },
+        properties: {},
       }),
       events: types.nested({
         properties: {
@@ -140,6 +130,7 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      feedback: types.object({ dynamic: false, properties: {} }),
       metadata: types.flattened({}),
       template_id: types.keyword({}),
       template_version: types.long({}),
@@ -158,6 +149,7 @@ export interface PersistentConversationParentLink {
 export interface ConversationProperties {
   user_id?: string;
   user_name: string;
+  user_type?: UserPrincipalType;
   agent_id: string;
   space: string;
   title: string;
@@ -181,6 +173,7 @@ export interface ConversationProperties {
   access_control?: Optional<ConversationAccessControl, 'entries'>;
   parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
+  feedback?: Record<string, ConversationRoundFeedback>;
   metadata?: Record<string, SerializedMetadataValue>;
   template_id?: string;
   template_version?: number;

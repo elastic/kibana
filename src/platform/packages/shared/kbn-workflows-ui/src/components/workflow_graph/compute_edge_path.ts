@@ -54,8 +54,8 @@ export interface ComputeEdgePathInput {
   /**
    * True on the failure edge from a fallback-lane owner to its lane head. Routes
    * the edge with `buildFailureLanePath` (trunk + across + drop) rather than the
-   * fork bus or smooth-step. The spine edge carries no flag and uses dagre
-   * waypoints (translated by reconcileEdgePoints) or smooth-step.
+   * fork bus or smooth-step. The spine edge carries no flag and uses
+   * smooth-step.
    */
   readonly isFailure?: boolean;
 }

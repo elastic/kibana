@@ -61,11 +61,14 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/navigation-plugin'
   - '@kbn/scout-security'
+  - '@kbn/deeplinks-security'
 tags:
   - plugin
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts

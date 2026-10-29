@@ -10,6 +10,7 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -17,6 +18,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
+import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
@@ -24,10 +26,6 @@ import type { ExperimentalFeatures } from '../../../common/experimental_features
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import {
-  createAlertSummaryRows,
-  createAlertsSummaryRows,
-} from './attachment_summary_drilldown/create_details_drilldown';
 
 /**
  * Extension of UnknownAttachment that includes an optional attachmentLabel field in the data property
@@ -66,8 +64,7 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
 
 /**
  * Registers the baseline attachment UI definitions:
- *   - `security.alert` — label, icon, and the attachment summary drill-down. The drill-down is
- *     lazy behind a click, so this stays eager: the summary reads labels on first paint.
+ *   - `security.alert` — label and icon.
  *   - `security.alerts` — label + icon. A batch names a set of alerts and no flyout shows a set.
  *
  * The rich `security.entity` renderer (card/table + Canvas) is installed via the separate
@@ -76,20 +73,11 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
  */
 export const registerAttachmentUiDefinitions = ({
   attachments,
-  resolveSecurityCanvasContext,
-  getSpaceId,
-  data,
 }: {
   attachments: AttachmentServiceStartContract;
-  resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
-  getSpaceId: () => Promise<string>;
-  data: DataPublicPluginStart;
 }) => {
   attachments.addAttachmentType<UnknownAttachmentWithLabel>(ALERT_ATTACHMENT_CONFIG.type, {
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
-    renderConversationDetailsContent: createAlertSummaryRows({
-      resolveSecurityCanvasContext,
-    }),
   });
 
   attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
@@ -105,11 +93,6 @@ export const registerAttachmentUiDefinitions = ({
           : ALERTS_DEFAULT_LABEL;
       },
       getIcon: () => 'bell',
-      renderConversationDetailsContent: createAlertsSummaryRows({
-        resolveSecurityCanvasContext,
-        getSpaceId,
-        search: data.search.search,
-      }),
     }
   );
 };
@@ -167,6 +150,22 @@ export const registerInvestigationIocsAttachment = ({
  * `security.search_entities`), which are gated on `entityAnalyticsEntityStoreV2`, so non-V2
  * environments never exercise this renderer even though it's registered unconditionally.
  */
+/**
+ * The impact entity opener links into Security entity flyouts, so it is registered only in
+ * Security solution spaces. If the active space can't be resolved, fall back to registering.
+ */
+const isSecuritySolutionSpace = async (spaces?: SpacesPluginStart): Promise<boolean> => {
+  if (!spaces) {
+    return true;
+  }
+  try {
+    const { solution } = await spaces.getActiveSpace();
+    return solution === 'security';
+  } catch {
+    return true;
+  }
+};
+
 export const registerEntityAttachment = ({
   attachments,
   application,
@@ -176,6 +175,9 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
+  rendering,
+  spaces,
+  registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -185,7 +187,26 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
+  rendering: CoreStart['rendering'];
+  spaces?: SpacesPluginStart;
+  registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
+  if (registerImpactEntityOpener) {
+    void isSecuritySolutionSpace(spaces).then((isSecuritySpace) => {
+      if (!isSecuritySpace) {
+        return;
+      }
+      registerImpactEntityOpener((entity) => {
+        void import(
+          /* webpackChunkName: "security_impact_entity_flyout" */
+          './open_impact_entity_flyout'
+        ).then(({ openImpactEntityFlyout }) =>
+          openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+        );
+      });
+    });
+  }
+
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
     './entity_attachment'
@@ -397,6 +418,26 @@ export const registerEntityRiskScoreHistoryAttachment = ({
       })
     );
   });
+};
+
+/**
+ * Registers the `security.siem_migration.rule_migration_items` attachment renderer (chip label only).
+ * No rich renderer needed — the attachment label is pre-built by the client.
+ */
+export const registerSiemMigrationRuleItemsAttachment = (
+  attachments: AttachmentServiceStartContract
+): void => {
+  attachments.addAttachmentType<UnknownAttachmentWithLabel>(
+    SecurityAgentBuilderAttachments.ruleMigrationItems,
+    {
+      getLabel: (attachment) =>
+        attachment?.data?.attachmentLabel ??
+        i18n.translate('xpack.securitySolution.agentBuilder.ruleMigrationItemsAttachment.label', {
+          defaultMessage: 'Migration Rules',
+        }),
+      getIcon: () => 'productAgent',
+    }
+  );
 };
 
 /**

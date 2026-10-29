@@ -10,7 +10,9 @@ import type {
   HuntCoordinatorCoreResult,
   HuntCoordinatorTier2SkipReason,
 } from '../hunt_coordinator';
+import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
+import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
 /**
@@ -67,14 +69,27 @@ const TIER2_TARGET_SOURCE_LABELS: Record<Tier2TargetSource, string> = {
   actionable: 'process telemetry',
 };
 
-const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
+const describeTier2Skip = (
+  reason: HuntCoordinatorTier2SkipReason,
+  unavailableTiers: readonly HuntModelTier[] = []
+): string => {
+  const missingTier2Tiers = unavailableTiers.filter((tier) => TIER2_MODEL_TIERS.includes(tier));
   switch (reason) {
     case 'configured_never':
       return 'Tier 2 behavior hunting was turned off for this run.';
     case 'no_environment_hits':
       return 'Tier 2 behavior hunting was skipped because Tier 1 found no environment hits and this run only escalates to Tier 2 on a hit.';
     case 'no_inference':
-      return 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
+      if (missingTier2Tiers.length > 0) {
+        return `Tier 2 behavior hunting was skipped because no model was available for the ${describeModelTiers(
+          missingTier2Tiers
+        )}.`;
+      }
+      // Both Tier 2 tiers resolved, so the Efficient tier is what was missing: it chooses the
+      // dataset to hunt when nothing else points at one.
+      return unavailableTiers.includes('efficient')
+        ? 'Tier 2 behavior hunting was skipped because the Efficient tier had no model to choose where to hunt.'
+        : 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
     case 'no_tier2_targets':
       return 'Tier 2 behavior hunting was skipped because no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry.';
     case 'no_report_text':
@@ -83,6 +98,8 @@ const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
       return 'Tier 2 behavior hunting was skipped because the report exposed nothing to search for.';
     case 'tier2_failed':
       return 'Tier 2 behavior hunting failed before it could finish.';
+    case 'extraction_pending':
+      return 'Tier 2 behavior hunting was skipped because the report has not been enriched yet.';
     case 'report_not_found':
     case 'scope_blocked':
       return '';
@@ -123,7 +140,7 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   const { tier2 } = result;
   if (!tier2) {
     if (result.tier2_skipped_reason) {
-      const skip = describeTier2Skip(result.tier2_skipped_reason);
+      const skip = describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers);
       lines.push(
         result.tier2_skipped_reason === 'tier2_failed' ? `${skip} ${result.message}` : skip
       );
@@ -166,11 +183,16 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   return lines;
 };
 
-const describeTier1 = (tier1: HuntForThreatResult): string[] => {
+const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string[] => {
   const lines: string[] = ['**Tier 1: indicator and technique search**'];
   if (tier1.status === 'no_searchable_terms') {
     lines.push(
-      'Tier 1 had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
+      excludedIocCount > 0
+        ? `Tier 1 had nothing to search: no eligible indicators remained (${plural(
+            excludedIocCount,
+            'indicator'
+          )} excluded by adjudication) and the report exposed no searchable techniques.`
+        : 'Tier 1 had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
     );
     return lines;
   }
@@ -244,6 +266,10 @@ const describeSearch = (result: HuntCoordinatorCoreResult): string[] => {
       ? `- **Indicators (${iocs.length}):** ${describeIocs(iocs)}`
       : '- **Indicators:** none searchable'
   );
+  const excludedCount = result.excluded_report_iocs?.count ?? 0;
+  if (excludedCount > 0) {
+    lines.push(`- **Not searched (adjudicated out):** ${plural(excludedCount, 'indicator')}`);
+  }
   const techniques = tier1.resolved_techniques;
   lines.push(
     techniques.length > 0
@@ -260,7 +286,11 @@ const describeSearch = (result: HuntCoordinatorCoreResult): string[] => {
  */
 const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
   if (result.completeness === 'complete') return [];
-  const gaps = [...(result.tier1.incomplete ?? []), ...(result.tier2?.incomplete ?? [])];
+  const gaps = [
+    ...(result.incomplete ?? []),
+    ...(result.tier1.incomplete ?? []),
+    ...(result.tier2?.incomplete ?? []),
+  ];
   const seen = new Set<string>();
   const lines: string[] = [
     result.completeness === 'incomplete_retryable'
@@ -300,6 +330,12 @@ const describeOutcome = (
       summary: `Hunt Watch could not hunt ${report}: the report is not visible in this space, so nothing was searched.`,
     };
   }
+  if (result.tier2_skipped_reason === 'extraction_pending') {
+    return {
+      heading: 'Hunt Watch did not hunt this report yet',
+      summary: `Hunt Watch did not hunt ${report}: the report has not been enriched yet, so nothing was searched. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.`,
+    };
+  }
   if (!result.completed_successfully && !result.has_confirmed_hit) {
     return {
       heading: 'Hunt Watch did not complete the hunt',
@@ -321,7 +357,7 @@ const describeOutcome = (
         ? 'Tier 2 derived behaviors from the report text but none matched live activity.'
         : 'Tier 2 derived no executable behaviors from the report text.'
       : result.tier2_skipped_reason
-      ? describeTier2Skip(result.tier2_skipped_reason)
+      ? describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers)
       : '';
     return {
       heading: 'Hunt Watch confirmed a hit',
@@ -351,6 +387,9 @@ export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => 
   }
   if (result.tier2_skipped_reason === 'report_not_found') {
     return 'hunt failed, the report is not visible in this space';
+  }
+  if (result.tier2_skipped_reason === 'extraction_pending') {
+    return 'hunt skipped, the report has not been enriched yet';
   }
   const { tier1, tier2 } = result;
   const tier1Part =
@@ -391,11 +430,13 @@ export const buildHuntNarrative = (
   const { heading, summary } = describeOutcome(result, ctx);
   const blocks: string[] = [`### ${heading}`, summary];
   const terminal =
-    result.status === 'blocked' || result.tier2_skipped_reason === 'report_not_found';
+    result.status === 'blocked' ||
+    result.tier2_skipped_reason === 'report_not_found' ||
+    result.tier2_skipped_reason === 'extraction_pending';
   if (!terminal) {
     blocks.push(describeCoverage(result).join('\n'));
     blocks.push(describeSearch(result).join('\n'));
-    blocks.push(describeTier1(result.tier1).join('\n'));
+    blocks.push(describeTier1(result.tier1, result.excluded_report_iocs?.count ?? 0).join('\n'));
     blocks.push(describeTier2(result).join('\n'));
   }
   blocks.push(`_Hunt run ${code(result.run_id)}._`);

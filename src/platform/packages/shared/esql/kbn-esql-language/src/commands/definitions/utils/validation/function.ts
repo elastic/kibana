@@ -41,6 +41,7 @@ import type {
   SupportedDataType,
 } from '../../types';
 import { resolveArgumentTypes } from '../expressions';
+import { applyTimeSeriesAggregateArgTypes } from '../time_series_aggregate_args';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
 
@@ -92,9 +93,15 @@ class FunctionValidator {
     const resolved = resolveArgumentTypes(this.fn.args, {
       columns: this.context.columns,
       unmappedFieldsStrategy: this.context.unmappedFieldsStrategy,
+      isTimeseriesSource: this.context.isTimeseriesSource === true,
     });
 
-    this.argTypes = resolved.argTypes;
+    this.argTypes = applyTimeSeriesAggregateArgTypes(
+      this.fn.args,
+      resolved.argTypes,
+      this.context.isTimeseriesSource === true,
+      this.definition?.type
+    );
     this.argLiteralsMask = resolved.literalMask;
   }
 

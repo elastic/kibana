@@ -108,15 +108,17 @@ export class ActionsService {
       );
       return undefined;
     }
-    const { name, description, category, impact, approvalPolicy } = parsed.data;
+    const { name, description, category, impact, approvalPolicy, subject } = parsed.data;
     const inputSchema = this.readInputSchema(definition);
+    const subjects = subject === undefined || Array.isArray(subject) ? subject : [subject];
     return {
       workflowId,
       name,
       ...(description !== undefined && { description }),
       ...(category !== undefined && { category }),
       ...(impact !== undefined && { impact }),
-      ...(approvalPolicy !== undefined && { approvalPolicy }),
+      approvalPolicy,
+      ...(subjects !== undefined && { subjects }),
       ...(inputSchema !== undefined && { inputSchema }),
     };
   }

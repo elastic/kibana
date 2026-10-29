@@ -21,7 +21,7 @@ import {
   useEuiMinBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -30,6 +30,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import {
   getGroupAction,
@@ -37,6 +38,10 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
+import {
+  isEpisodeActionStateLoaded,
+  withEpisodeActionState,
+} from '@kbn/alerting-v2-episodes-ui/utils/with_episode_action_state';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -55,14 +60,18 @@ import { AlertEpisodeTimelineSection } from '@kbn/alerting-v2-episodes-ui/compon
 import { useAlertAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { useAlertingLocators } from '../../application/locator_context';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
-  filterEpisodeActionsByPrivilege,
-  EPISODE_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_episode_actions_by_privilege';
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '../../utils/discover_href_for_alert';
+import {
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '../../utils/filter_alert_actions_by_privilege';
 import { getEpisodeHeaderBadges } from './utils/get_episode_header_badges';
 import { getEpisodeHeaderMenu } from './utils/get_episode_header_menu';
 import {
@@ -76,20 +85,31 @@ interface EpisodeRouteParams {
   episodeId: string;
 }
 
+export interface EpisodeDetailsPageProps {
+  /** A stable host hook supplying additional declarative header items for the current episode. */
+  useAdditionalEpisodeDetailsHeaderMenuItems?: (
+    episode: AlertEpisode | undefined
+  ) => NonNullable<AppHeaderMenu['items']>;
+}
+
+const useEmptyHeaderMenuItems = (): NonNullable<AppHeaderMenu['items']> => [];
+
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
-export function EpisodeDetailsPage() {
+export function EpisodeDetailsPage({
+  useAdditionalEpisodeDetailsHeaderMenuItems = useEmptyHeaderMenuItems,
+}: EpisodeDetailsPageProps = {}) {
   const { euiTheme } = useEuiTheme();
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
-  const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const { services } = useKibana<AlertsKibanaServices>();
   const { episodesLocators, rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? EPISODE_ACTIONS_PRIVILEGE.all
-    : EPISODE_ACTIONS_PRIVILEGE.read;
+    ? ALERT_ACTIONS_PRIVILEGE.all
+    : ALERT_ACTIONS_PRIVILEGE.read;
   const { data, http, spaces } = services;
 
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -99,28 +119,35 @@ export function EpisodeDetailsPage() {
   const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
 
   const {
-    data: episode,
+    data: episodeEvents,
     isLoading: isLoadingEpisode,
     isError: isEpisodeError,
+    isDataLoading: isLoadingEpisodeData,
   } = useFetchEpisodeQuery({
     episodeId,
     services: { data, spaces },
   });
 
-  const ruleId = episode?.['rule.id'];
-  const groupHash = episode?.group_hash;
+  const ruleId = episodeEvents?.['rule.id'];
+  const groupHash = episodeEvents?.group_hash;
 
   const { ruleState } = useFetchRule({ id: ruleId, http });
 
-  const { data: episodeActionsMap } = useFetchEpisodeActions({
+  const episodeActionsQuery = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
     services: { expressions: services.expressions, spaces: services.spaces },
   });
+  const { data: episodeActionsMap } = episodeActionsQuery;
 
-  const { data: groupActionsMap } = useFetchGroupActions({
+  const groupActionsQuery = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
     services: { expressions: services.expressions, spaces: services.spaces },
   });
+  const { data: groupActionsMap } = groupActionsQuery;
+  // The actions depend on the action state, so they wait for it to load.
+  const isActionStateLoaded =
+    isEpisodeActionStateLoaded(episodeActionsQuery) &&
+    (!groupHash || isEpisodeActionStateLoaded(groupActionsQuery));
 
   const { isFlapping } = useEpisodeFlapping({
     episodeId,
@@ -129,6 +156,10 @@ export function EpisodeDetailsPage() {
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? getGroupAction(groupActionsMap, ruleId, groupHash) : undefined;
+  const episode = useMemo(
+    () => withEpisodeActionState(episodeEvents, episodeAction, groupAction),
+    [episodeEvents, episodeAction, groupAction]
+  );
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
@@ -140,8 +171,10 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
+  // The attachment is added once per alert and doesn't update, so it waits for
+  // the action state and the data.
   useAlertAutoAttach(
-    episode,
+    isActionStateLoaded && !isLoadingEpisodeData ? episode : undefined,
     {
       ruleName: episodeRuleName,
       groupingFields,
@@ -201,7 +234,7 @@ export function EpisodeDetailsPage() {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterEpisodeActionsByPrivilege(
+      filterAlertActionsByPrivilege(
         createEpisodeActions({
           http: services.http,
           overlays: services.overlays,
@@ -216,12 +249,27 @@ export function EpisodeDetailsPage() {
           isRuleAvailable: (selectedRuleId) =>
             isRuleLoaded(ruleState) && ruleState.rule.id === selectedRuleId,
           getDiscoverHref: ({ episodeIsoTimestamp: ts }) =>
-            getDiscoverHrefForRuleAndEpisodeTimestamp({
+            getDiscoverHrefForRuleAndAlertTimestamp({
               share: services.share,
               capabilities: services.application.capabilities,
               uiSettings: services.uiSettings,
               ruleEsql: showRuleDependentUi ? getBreachEsqlQuery(ruleState.rule.query) : undefined,
-              episodeIsoTimestamp: ts,
+              alertIsoTimestamp: ts,
+            }),
+          getAlertEventsHistoryHref: ({ episodeId: selectedEpisodeId, episodeStart, spaceId }) =>
+            getDiscoverHrefForAlertEventsHistory({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              episodeId: selectedEpisodeId,
+              episodeStart,
+              spaceId,
+            }),
+          isAlertEventsHistoryAvailable: () =>
+            canOpenDiscover({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
             }),
         }),
         alertsCapability
@@ -229,13 +277,16 @@ export function EpisodeDetailsPage() {
     [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
   );
 
-  const applicableActions = useMemo(
-    () =>
-      episode
-        ? episodeActions.filter((action) => action.isCompatible({ episodes: [episode] }))
-        : [],
-    [episodeActions, episode]
-  );
+  const applicableActions = useMemo(() => {
+    if (!episode || !isActionStateLoaded) {
+      return [];
+    }
+    const episodes = [episode];
+    return episodeActions.filter(
+      (action) =>
+        action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+    );
+  }, [episodeActions, episode, isActionStateLoaded]);
 
   const headerTabs = useMemo(
     () =>
@@ -260,15 +311,15 @@ export function EpisodeDetailsPage() {
     [episode, episodeAction, groupAction, isFlapping]
   );
 
-  const headerMenu = useMemo(
-    () =>
-      getEpisodeHeaderMenu({
-        actions: applicableActions,
-        episode,
-        onSuccess: invalidateEpisodeQueries,
-      }),
-    [applicableActions, episode, invalidateEpisodeQueries]
-  );
+  const additionalHeaderMenuItems = useAdditionalEpisodeDetailsHeaderMenuItems(episode);
+  const headerMenu = useMemo(() => {
+    const menu = getEpisodeHeaderMenu({
+      actions: applicableActions,
+      episode,
+      onSuccess: invalidateEpisodeQueries,
+    });
+    return { ...menu, items: [...additionalHeaderMenuItems, ...(menu.items ?? [])] };
+  }, [applicableActions, episode, invalidateEpisodeQueries, additionalHeaderMenuItems]);
 
   const episodesListHref = episodesLocators.useUrl({});
   const getRuleDetailsHref = useCallback(
@@ -419,6 +470,7 @@ export function EpisodeDetailsPage() {
         menu={headerMenu}
         tabs={headerTabs}
         spacing="bleed"
+        docLink={services.docLinks.links.alerting.investigateAlertEpisodes}
       />
       {isLoading ? (
         <KibanaPageTemplate.Section grow>
@@ -467,6 +519,7 @@ export function EpisodeDetailsPage() {
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
+                    seriesId={episode ? episode.series_id ?? null : undefined}
                     groupHash={groupHash}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -27,7 +27,7 @@ import {
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
 } from './tool_ids';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 
 // Reuse the endpoint's request body schema and add the path param, so the tool input
 // stays in lockstep with the API model (no schema drift). `.extend` on a lazySchema
@@ -35,26 +35,28 @@ import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skil
 // unbounded-input DoS) — a deliberate divergence from the unbounded API model.
 // `langsmith_options` is omitted — it is not agent-facing. `retry` and `selection` are
 // REPROCESS-only; their descriptions say so to keep the model from populating them on START.
-const schema = StartRuleMigrationRequestBody.extend({
-  migration_id: NonEmptyString.describe('The id of the rule migration to start or reprocess.'),
-  retry: RuleMigrationRetryFilter.optional().describe(
-    'REPROCESS only — omit for START/RESUME. "failed" retries only failed rules; "not_fully_translated" retries partial + untranslatable rules; "selected" retries a specific subset (pair with selection.ids).'
-  ),
-  selection: z
-    .object({
-      ids: z
-        .array(NonEmptyString)
-        .min(1)
-        .max(200)
-        .describe(
-          'REPROCESS only, paired with retry: "selected". The rule item ids to reprocess. Omit for START/RESUME.'
-        ),
-    })
-    .optional()
-    .describe(
-      `REPROCESS only, paired with retry: "selected". Omit for START/RESUME. Resolve rule titles to ids via ${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}.`
+const schema = lazySchema(() =>
+  StartRuleMigrationRequestBody.extend({
+    migration_id: NonEmptyString.describe('The id of the rule migration to start or reprocess.'),
+    retry: RuleMigrationRetryFilter.optional().describe(
+      'REPROCESS only — omit for START/RESUME. "failed" retries only failed rules; "not_fully_translated" retries partial + untranslatable rules; "selected" retries a specific subset (pair with selection.ids).'
     ),
-}).omit({ langsmith_options: true });
+    selection: z
+      .object({
+        ids: z
+          .array(NonEmptyString)
+          .min(1)
+          .max(200)
+          .describe(
+            'REPROCESS only, paired with retry: "selected". The rule item ids to reprocess. Omit for START/RESUME.'
+          ),
+      })
+      .optional()
+      .describe(
+        `REPROCESS only, paired with retry: "selected". Omit for START/RESUME. Resolve rule titles to ids via ${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}.`
+      ),
+  }).omit({ langsmith_options: true })
+);
 
 export const startRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -79,7 +81,7 @@ export const startRuleMigrationTool = (
 
 Resolves the inference endpoint (AI connector) via ${platformCoreTools.listInferenceEndpoints} first.
 
-See the ${RULE_MIGRATION_SKILLS.START} skill for the START vs REPROCESS vs RESUME decision policy.`,
+See the ${RULE_MIGRATION_SKILLS.START.id} skill for the START vs REPROCESS vs RESUME decision policy.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {

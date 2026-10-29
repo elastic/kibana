@@ -21,6 +21,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
+import { useChangeHistoryModal } from '@kbn/change-history-ui';
 import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -29,7 +30,12 @@ import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_ov
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import type { DashboardRedirect } from '../types';
-import { coreServices, shareService, dataService } from '../../services/kibana_services';
+import {
+  coreServices,
+  shareService,
+  dataService,
+  searchSessionsManagementService,
+} from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { getDashboardAccessControlState } from '../../utils/get_dashboard_access_control_state';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -49,6 +55,8 @@ export const useDashboardMenuItems = ({
   const isMounted = useMountedState();
   const accessControlClient = getAccessControlClient();
   const appId = useObservable(coreServices.application.currentAppId$);
+
+  const { openModal } = useChangeHistoryModal();
 
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -302,7 +310,7 @@ export const useDashboardMenuItems = ({
         iconType: 'backgroundTask',
         testId: 'openBackgroundSearchFlyoutButton',
         run: () =>
-          dataService.search.showSearchSessionsFlyout({
+          searchSessionsManagementService?.openFlyout({
             appId: appId!,
             trackingProps: { openedFrom: 'background search button' },
           }),
@@ -351,6 +359,16 @@ export const useDashboardMenuItems = ({
         run: (params) => openSettingsFlyout(dashboardApi, params?.returnFocus),
       } as AppMenuItemType,
 
+      history: {
+        order: 7,
+        // an unsaved dashboard has no persisted history, so there is nothing to list or restore
+        disableButton: disableTopNav || !lastSavedId,
+        id: 'dashboard-history',
+        testId: 'dashboardHistoryMenuItem',
+        iconType: 'clock',
+        run: openModal,
+        label: topNavStrings.history.label,
+      },
       // Action items
       edit: {
         label: topNavStrings.edit.label,
@@ -416,6 +434,7 @@ export const useDashboardMenuItems = ({
     resetChangesMenuItem,
     exportItems,
     viewMode,
+    openModal,
   ]);
 
   /**
@@ -444,7 +463,11 @@ export const useDashboardMenuItems = ({
       items.push(resetChangesMenuItem);
     }
 
-    if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
+    if (
+      storeSearchSession &&
+      searchSessionsManagementService &&
+      dataService.search.isBackgroundSearchEnabled
+    ) {
       items.push(menuItems.backgroundSearch);
     }
 
@@ -479,6 +502,7 @@ export const useDashboardMenuItems = ({
       menuItems.add,
       menuItems.switchToViewMode,
       menuItems.settings,
+      menuItems.history,
     ];
 
     if (shareAction) {
@@ -491,7 +515,11 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.export);
     }
 
-    if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
+    if (
+      storeSearchSession &&
+      searchSessionsManagementService &&
+      dataService.search.isBackgroundSearchEnabled
+    ) {
       items.push(menuItems.backgroundSearch);
     }
 
@@ -509,6 +537,7 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.save,
     menuItems.add,
+    menuItems.history,
     hasExportMenuItems,
     historyConfig,
     shareAction,

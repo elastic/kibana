@@ -1,9 +1,23 @@
 {
-  "sha1": "6b2d63d2443d001db241a56ea876647d8a373e78",
+  "sha1": "17f1a837cc8c04f1ec0cc0e0dcc5e6ab1bd803a1",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "eb2db8f66b0ef76-0e4666c4e2b44c6",
+      "title": "Agent Builder — ai.conversation.updated workflow trigger runs on matching writes to conversations of the subscribed template only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversation_updated_trigger_api.spec.ts",
+        "line": 161,
+        "column": 19
+      }
+    },
     {
       "id": "82fdabaac554eba-15831800091ed82",
       "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
@@ -100,6 +114,118 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_access_control_api.spec.ts",
         "line": 1401,
         "column": 11
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-9c47b323030ee8d",
+      "title": "Agent Builder — conversation activity events creating a conversation records conversation_created",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-2cb02a536c08047",
+      "title": "Agent Builder — conversation activity events renaming records title_updated, and a same-title rename records nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 81,
+        "column": 14
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-9288320c13ea82c",
+      "title": "Agent Builder — conversation activity events sharing records participants_added, publishing records visibility_updated and participants_removed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 113,
+        "column": 20
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-c943b67378b6da4",
+      "title": "Agent Builder — conversation activity events adding an attachment records attachment_added, an activity event that is also a timeline event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 176,
+        "column": 30
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-7cbd6d593f600be",
+      "title": "Agent Builder — conversation activity events applying a template and patching metadata record metadata_updated with the changed fields only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 198,
+        "column": 7
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-0274b37bb3cecb5",
+      "title": "Agent Builder — conversation activity events activity events keep the conversation readable and stay out of rounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 263,
+        "column": 90
+      }
+    },
+    {
+      "id": "1713bd6c7f2cbfc-18e1cb165dbea90",
+      "title": "Agent Builder — conversation activity events activity event types cannot be added through the events API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_activity_events_api.spec.ts",
+        "line": 274,
+        "column": 25
       }
     },
     {
@@ -276,6 +402,20 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_add_events_api.spec.ts",
         "line": 207,
         "column": 97
+      }
+    },
+    {
+      "id": "9e297ef1603b21d-92055caccf0c54e",
+      "title": "Agent Builder — conversation ownership with API keys an API key owns the same conversations as its owner once the owner has logged in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_api_key_ownership_api.spec.ts",
+        "line": 119,
+        "column": 30
       }
     },
     {
@@ -711,8 +851,8 @@
       }
     },
     {
-      "id": "cabba4228e0458f-8d46479da760ad0",
-      "title": "Agent Builder — conversations events persistence newly created conversations are stored events-native (schema_version + empty events on _source, matched by GET)",
+      "id": "cabba4228e0458f-74f321b799b8eb4",
+      "title": "Agent Builder — conversations events persistence newly created conversations are stored events-native (schema_version + the creation activity on _source, matched by GET)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -722,7 +862,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_events_persistence_api.spec.ts",
-        "line": 62,
+        "line": 66,
         "column": 56
       }
     },
@@ -738,8 +878,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_events_persistence_api.spec.ts",
-        "line": 89,
-        "column": 15
+        "line": 79,
+        "column": 27
       }
     },
     {

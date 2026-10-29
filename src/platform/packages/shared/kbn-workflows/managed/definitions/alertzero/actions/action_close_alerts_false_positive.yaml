@@ -42,6 +42,9 @@ triggers:
           properties:
             alertIds:
               type: array
+              # Grouped proposals grow by revision. `revise()` validates the merged input against
+              # this schema, so the limit also makes the server refuse an oversized revision.
+              maxItems: 1000
               items:
                 type: string
               description: Alert _id values to close.
@@ -86,7 +89,8 @@ steps:
   # `conflicts: proceed` lets close_alerts finish without throwing even when it
   # updates fewer alerts than requested (including zero) — e.g. version conflicts
   # or ids no longer matching. The proposal gate that runs this action only checks
-  # steps.execute_action.error == blank, not closed_count, so an incomplete close
+  # whether its execute step (execute_as_approver / execute_as_worker) errored,
+  # not closed_count, so an incomplete close
   # would otherwise be reported as a full success and the Investigation closed
   # while some alerts remain open. Fail loud instead so that check catches it.
   - name: fail_incomplete_close

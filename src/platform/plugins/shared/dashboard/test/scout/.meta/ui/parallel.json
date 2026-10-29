@@ -1,5 +1,5 @@
 {
-  "sha1": "4953513a31b138aa21abf89d18a5beb815029c8c",
+  "sha1": "67e1f9a73059e13afb31489bbded4ff8a6e68560",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -85,8 +85,8 @@
       }
     },
     {
-      "id": "785b8429bf26d7a-c42a06054aa8eea",
-      "title": "No data views: try ES|QL from dashboard creates a new ES|QL dashboard from the no-data prompt",
+      "id": "31ccac69c1e0eda-0a1bc65e6a03637",
+      "title": "Dashboard embed top menu does not show the edit button when show-top-menu is false",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -99,9 +99,48 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_embed_top_menu.spec.ts",
+        "line": 34,
+        "column": 51
+      }
+    },
+    {
+      "id": "31ccac69c1e0eda-593e7dddf068d59",
+      "title": "Dashboard embed top menu shows the edit button when show-top-menu is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_embed_top_menu.spec.ts",
+        "line": 41,
+        "column": 5
+      }
+    },
+    {
+      "id": "785b8429bf26d7a-c42a06054aa8eea",
+      "title": "No data views: try ES|QL from dashboard creates a new ES|QL dashboard from the no-data prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
-        "line": 24,
-        "column": 35
+        "line": 36,
+        "column": 33
       }
     },
     {
@@ -368,7 +407,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/empty_dashboard.spec.ts",
-        "line": 21,
+        "line": 23,
         "column": 51
       }
     },

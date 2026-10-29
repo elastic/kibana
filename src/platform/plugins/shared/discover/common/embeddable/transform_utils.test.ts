@@ -690,6 +690,13 @@ describe('search embeddable transform utils', () => {
   });
 
   describe('fromStoredTableSettings', () => {
+    it.each([1, 9])('raises sample size %s to the API minimum of 10', (sampleSize) => {
+      const storedState = { sampleSize };
+
+      expect(fromStoredTableSettings(storedState)).toEqual({ sample_size: 10 });
+      expect(storedState.sampleSize).toBe(sampleSize);
+    });
+
     it('converts stored state with all fields to panel overrides', () => {
       const storedState: StoredSearchEmbeddableState = {
         sort: [['@timestamp', 'desc']],
@@ -1262,6 +1269,34 @@ describe('search embeddable transform utils', () => {
 
       expect(state.attributes.tabs[0].attributes.tabTypeState).toEqual(storedMetricsTabTypeState);
       expect(state.attributes).not.toHaveProperty('tabTypeState');
+      expect(fromStoredSearchEmbeddableByValue(state)).toEqual(apiState);
+    });
+
+    it('round-trips histogram visualization for a by-value metrics panel', () => {
+      const apiState: DiscoverSessionEmbeddableByValueState = {
+        title: 'Metrics panel',
+        description: '',
+        tabs: [
+          {
+            type: DiscoverTabType.Metrics,
+            dimensions: ['host.name'],
+            search_term: 'cpu',
+            counter_aggregation: 'max',
+            gauge_aggregation: 'avg',
+            histogram_percentile: 'p99',
+            histogram_visualization: 'lnsHeatmap',
+            column_order: [],
+            sort: [],
+            data_source: { type: AS_CODE_ESQL_DATA_SOURCE_TYPE, query: 'TS metrics-*' },
+          },
+        ],
+      };
+
+      const { state } = toStoredSearchEmbeddableByValue(apiState);
+
+      expect(state.attributes.tabs[0].attributes.tabTypeState).toMatchObject({
+        histogramVisualization: 'lnsHeatmap',
+      });
       expect(fromStoredSearchEmbeddableByValue(state)).toEqual(apiState);
     });
 

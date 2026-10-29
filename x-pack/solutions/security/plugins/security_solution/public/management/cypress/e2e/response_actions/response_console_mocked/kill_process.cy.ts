@@ -53,7 +53,7 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         killProcessRequestResponse = responseBody;
       }, 'kill-process');
       submitCommand();
-      cy.contains('Action pending.').should('exist');
+      cy.contains('kill-process is pending').should('exist');
       cy.wait('@kill-process').then(() => {
         sendActionResponse(killProcessRequestResponse, {
           responseCode: 'ra_kill-process_success_done',

@@ -8,10 +8,24 @@
 import React, { Suspense, lazy } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiSkeletonText } from '@elastic/eui';
-import type { ConversationTemplateServiceStartContract } from '@kbn/agent-builder-browser';
+import type {
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateServiceStartContract,
+} from '@kbn/agent-builder-browser';
+import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import { ConversationTitle } from './conversation_title';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderSeverity,
+  RenderLinkedInvestigations,
+  RenderOverview,
+  RenderLiveState,
+  RenderTitle,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The slot contents are loaded on demand: registration runs during every consuming plugin's
@@ -46,6 +60,7 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
   /** Solution-owned conversation template id. Agent Builder throws if it is already registered. */
   templateId: string;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Localized template display name, shown in Agent Builder's title badge. */
   name: string;
   icon?: IconType;
@@ -66,6 +81,8 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * needs Kibana HTTP hooks unavailable in this package.
    */
   renderProposedActions?: import('./slots').OverviewSlotProps['renderProposedActions'];
+  /** Count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: import('./slots').OverviewSlotProps['renderProposedActionsCount'];
   /**
    * When provided, the header renders an interactive assignee picker instead of the read-only
    * avatar stack. Supplied by the caller so the picker can use HTTP hooks and Kibana context
@@ -78,10 +95,40 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderStatus?: RenderStatus;
   /**
+   * When provided, the header renders an interactive severity picker beside status and
+   * assignees. Supplied by the caller so the picker can use HTTP hooks unavailable here.
+   */
+  renderSeverity?: RenderSeverity;
+  /**
    * When provided, the "Close investigation" footer action renders a confirmation modal.
    * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
+  /**
+   * When provided, replaces the overview tab body so the caller can add sections from data it
+   * fetches. See `RenderOverview`.
+   */
+  renderOverview?: RenderOverview;
+  /**
+   * When provided, the header shows the investigation's live state (severity, running indicator)
+   * next to its age. See `RenderLiveState`.
+   */
+  renderLiveState?: RenderLiveState;
+  /**
+   * When provided, renders the header's title, also while the header loads. See `RenderTitle`.
+   */
+  renderTitle?: RenderTitle;
+  /**
+   * Card Agent Builder renders for conversations on this template. Must be self-contained; see
+   * `ConversationTemplateUIDefinition.briefCard`.
+   */
+  briefCard?: React.ComponentType<ConversationTemplateBriefCardRenderProps>;
+  /**
+   * Called by the in-chat flyout's "Copy link" button with the conversation's Agent Builder URL,
+   * which Agent Builder builds. Supplied by the caller, which does the copying. Returns whether it was copied: the button's tooltip confirms success, so the
+   * caller only reports a failure.
+   */
+  onCopyLink: (url: string) => boolean;
 }
 
 /**
@@ -94,26 +141,36 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
 export const registerAgenticInvestigationTemplateUI = ({
   conversationTemplates,
   templateId,
+  groupedAttachments,
   name,
   icon,
   renderEscalationModal,
   wrapEscalationButton,
   renderProposedActions,
+  renderProposedActionsCount,
   renderAssignees,
   renderStatus,
+  renderSeverity,
   renderCloseInvestigationModal,
+  renderOverview,
+  renderLiveState,
+  renderTitle,
+  briefCard,
+  onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
   const [overviewTabId] = getInvestigationTabIds(templateId);
 
-  conversationTemplates.registerTab(overviewTabId, ({ attachmentsService }) => ({
+  conversationTemplates.registerTab(overviewTabId, () => ({
     label: DETAILS_FLYOUT_LABELS.tabs.overview,
     content: function OverviewTabContent({ conversation }) {
       return (
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyOverviewSlot
             conversation={conversation}
-            attachmentsService={attachmentsService}
+            groupedAttachments={groupedAttachments}
             renderProposedActions={renderProposedActions}
+            renderOverview={renderOverview}
+            renderProposedActionsCount={renderProposedActionsCount}
           />
         </Suspense>
       );
@@ -122,20 +179,44 @@ export const registerAgenticInvestigationTemplateUI = ({
 
   conversationTemplates.registerTemplateUIDefinition(
     templateId,
-    ({ openFullscreenConversation }) => ({
+    ({ openFullscreenConversation, getConversationUrl }) => ({
       name,
       icon,
       tabs: [overviewTabId],
+      ...(briefCard && { briefCard }),
       detailsFlyout: {
+        trailingActions: ({ conversation }) => [
+          getCopyLinkFlyoutAction(() =>
+            onCopyLink(
+              getConversationUrl({
+                conversationId: conversation.id,
+                agentId: conversation.agent_id,
+                openDetails: true,
+              })
+            )
+          ),
+        ],
         header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
           return (
             // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
             // collapse to nothing while the slot's chunk loads.
-            <Suspense fallback={<ConversationTitle title={conversation.title} />}>
+            <Suspense
+              fallback={
+                <ConversationTitle
+                  title={
+                    renderTitle?.({ conversationId: conversation.id, title: conversation.title }) ??
+                    conversation.title
+                  }
+                />
+              }
+            >
               <LazyHeaderSlot
                 conversation={conversation}
                 renderAssignees={renderAssignees}
                 renderStatus={renderStatus}
+                renderSeverity={renderSeverity}
+                renderLiveState={renderLiveState}
+                renderTitle={renderTitle}
                 refetchConversation={refetchConversation}
               />
             </Suspense>
@@ -149,11 +230,13 @@ export const registerAgenticInvestigationTemplateUI = ({
                 conversation={conversation}
                 // Full screen rather than the sidebar: the chat is the investigation's own record,
                 // so it gets the whole page instead of a panel beside the flyout that opened it.
+                // The conversation list is collapsed so the investigation's chat gets the width.
                 onOpenChat={() =>
                   openFullscreenConversation({
                     conversationId: conversation.id,
                     agentId: conversation.agent_id,
                     openDetails: true,
+                    collapseSidebar: true,
                   })
                 }
                 onOpenEscalation={renderEscalationModal}
@@ -176,6 +259,7 @@ export interface RegisterEscalationTemplateUIOptions {
   conversationTemplates: ConversationTemplateServiceStartContract;
   /** Escalation template id (typically `'escalation'`). Agent Builder throws on duplicate. */
   templateId: string;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /** Localized template display name. */
   name: string;
   icon?: IconType;
@@ -194,6 +278,16 @@ export interface RegisterEscalationTemplateUIOptions {
    * Supplied by the caller so the list can use Kibana HTTP hooks unavailable in this package.
    */
   renderLinkedInvestigations?: RenderLinkedInvestigations;
+  /**
+   * When provided, the header renders it beside the title, e.g. a spinner while the escalation's
+   * attachments sync. Supplied by the caller so it can use Kibana HTTP hooks and toasts.
+   */
+  renderSyncIndicator?: RenderSyncIndicator;
+  /**
+   * Called by the flyout's "Copy link" button with the conversation's Agent Builder URL.
+   * See `RegisterAgenticInvestigationTemplateUIOptions.onCopyLink`.
+   */
+  onCopyLink: (url: string) => boolean;
 }
 
 /** Returns the tab ids registered by the escalation template. */
@@ -204,9 +298,9 @@ export const getEscalationTabIds = (templateId: string): readonly string[] => [
 /**
  * Registers the escalation conversation details flyout UI.
  *
- * The flyout shows a header (title, status, assignees) and — when `renderLinkedInvestigations`
- * is supplied — an overview tab listing the linked investigations. With a single tab Agent Builder
- * hides the tab bar, so the list reads as the flyout body.
+ * The flyout shows a header (title, status, assignees) and an overview tab with the summary, the
+ * grouped attachments and — when `renderLinkedInvestigations` is supplied — the linked
+ * investigations. With a single tab Agent Builder hides the tab bar, so it reads as the body.
  *
  * Call once from the plugin's `start`, **after** `registerAgenticInvestigationTemplateUI`.
  * Agent Builder throws if the template id is already registered.
@@ -214,11 +308,14 @@ export const getEscalationTabIds = (templateId: string): readonly string[] => [
 export const registerEscalationTemplateUI = ({
   conversationTemplates,
   templateId,
+  groupedAttachments,
   name,
   icon,
   renderAssignees,
   renderStatus,
   renderLinkedInvestigations,
+  renderSyncIndicator,
+  onCopyLink,
 }: RegisterEscalationTemplateUIOptions): void => {
   const [overviewTabId] = getEscalationTabIds(templateId);
 
@@ -229,6 +326,7 @@ export const registerEscalationTemplateUI = ({
         <Suspense fallback={<EuiSkeletonText lines={3} />}>
           <LazyEscalationOverviewSlot
             conversation={conversation}
+            groupedAttachments={groupedAttachments}
             renderLinkedInvestigations={renderLinkedInvestigations}
             onOpenInvestigation={({ conversationId, agentId }) =>
               openFullscreenConversation({ conversationId, agentId, openDetails: true })
@@ -239,11 +337,22 @@ export const registerEscalationTemplateUI = ({
     },
   }));
 
-  conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
+  conversationTemplates.registerTemplateUIDefinition(templateId, ({ getConversationUrl }) => ({
     name,
     icon,
     tabs: [overviewTabId],
     detailsFlyout: {
+      trailingActions: ({ conversation }) => [
+        getCopyLinkFlyoutAction(() =>
+          onCopyLink(
+            getConversationUrl({
+              conversationId: conversation.id,
+              agentId: conversation.agent_id,
+              openDetails: true,
+            })
+          )
+        ),
+      ],
       header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
         return (
           <Suspense fallback={<ConversationTitle title={conversation.title} />}>
@@ -251,6 +360,7 @@ export const registerEscalationTemplateUI = ({
               conversation={conversation}
               renderAssignees={renderAssignees}
               renderStatus={renderStatus}
+              renderSyncIndicator={renderSyncIndicator}
               refetchConversation={refetchConversation}
             />
           </Suspense>

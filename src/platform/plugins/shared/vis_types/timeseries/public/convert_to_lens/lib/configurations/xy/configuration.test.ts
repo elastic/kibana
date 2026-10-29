@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { XYLayerConfig } from '@kbn/lens-common';
 import { createPanel } from '../../__mocks__';
 import { getConfigurationForTopN, getConfigurationForTimeseries } from './configuration';
 
@@ -33,6 +34,16 @@ describe('getConfigurationForTimeseries', () => {
       yLeftScale: 'linear',
       yRightScale: 'linear',
     });
+  });
+
+  test('should pin a solid area fill when there is a area layer', () => {
+    const layers: XYLayerConfig[] = [
+      { layerId: 'layer-1', layerType: 'data', accessors: ['column-1'], seriesType: 'area' },
+    ];
+
+    expect(getConfigurationForTimeseries(createPanel(), layers)).toEqual(
+      expect.objectContaining({ areaFill: 'solid' })
+    );
   });
 });
 

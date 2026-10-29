@@ -8,24 +8,18 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
-import { withToolResults } from './cortex_optimize';
-import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
-const MAX_ROUND_TEXT_LENGTH = 65_536;
-
-/**
- * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
- * investigation, but it should not leave a task hanging on a stuck inference call either.
- */
+/** Bounds the non-blocking post-round optimizer so a stuck inference call cannot hang a task. */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
 export const memoryOptimizeStepDefinition = ({
@@ -33,7 +27,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference,
   getSavedObjects,
   getUiSettings,
-  getMemoryEsClient,
   logger,
   isEnabled,
   telemetry,
@@ -42,7 +35,6 @@ export const memoryOptimizeStepDefinition = ({
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
-  getMemoryEsClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isEnabled?: () => boolean;
   telemetry: NightshiftTelemetryClient;
@@ -55,25 +47,12 @@ export const memoryOptimizeStepDefinition = ({
       'Labels recalled Semantic Memory pages from a completed investigation round and ' +
       'extracts durable customer-environment facts into the Semantic Memory index.',
     inputSchema: z.object({
-      prompt: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe("The assistant's final response for the round."),
+      ...investigationRoundInputsSchema,
       agent_id: z
         .string()
         .max(1024)
         .optional()
         .describe('Supported agent policy selector; never used as a storage boundary.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Lets the optimizer see what the investigator queried.'
-      ),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
-      ),
       recalled_ids: z
         .array(z.string().max(2_000))
         .max(100)
@@ -97,16 +76,6 @@ export const memoryOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
-      conversation_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Agent Builder conversation id for telemetry correlation.'),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Completed Agent Builder round id for telemetry correlation.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
@@ -118,15 +87,14 @@ export const memoryOptimizeStepDefinition = ({
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
-      // Same policy as materialize: Memory is only for the Nightshift investigator.
-      if (context.input.agent_id?.trim() !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      // Same policy as materialize: Memory is only for the Nightshift knowledge agents.
+      if (!usesKnowledge(context.input.agent_id)) {
         context.logger.info('Skipped memory optimize for missing or unsupported agent');
         return { output: { status: 'ok' as const, skipped: true } };
       }
 
       const workflowContext = context.contextManager.getContext();
-      // Workflow execution authorization is the capability boundary. Storage tenancy always comes
-      // from the trusted execution context; no workflow input can select another Space.
+      // Storage tenancy comes from the trusted execution context; no input can select another Space.
       const { spaceId } = workflowContext.workflow;
       const workflowExecutionId = workflowContext.execution.id;
       const sandboxId = context.input.sandbox_id?.trim() ? context.input.sandbox_id : undefined;
@@ -155,8 +123,9 @@ export const memoryOptimizeStepDefinition = ({
               ),
               conversationId: context.input.conversation_id,
               roundId: context.input.round_id,
+              roundIndex: context.input.round_index,
               recalledIds: context.input.recalled_ids ?? [],
-              esClient: await getMemoryEsClient(),
+              esClient: context.contextManager.getScopedEsClient(),
               spaceId,
               signal,
               logger,
@@ -201,9 +170,9 @@ export const memoryOptimizeStepDefinition = ({
         );
       }
 
-      if (!summary && context.input.agent_id === NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
+      if (!summary) {
         telemetry.reportSemanticMemoryOptimized({
-          agent_id: context.input.agent_id,
+          agent_id: context.input.agent_id ?? 'unknown',
           ...(context.input.conversation_id
             ? { conversation_id: context.input.conversation_id }
             : {}),

@@ -23,16 +23,6 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  */
 export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
 
-/**
- * Gates whether `EventService.getClient()` (Significant Events) returns the `.rule-events`-backed
- * `RuleEventsClient` instead of the legacy `EventClient`. Read-only; the dual-write to
- * `.rule-events` is unconditional and independent of this flag. Falls back to `false` so reads
- * keep hitting the legacy events data stream until the read migration (nightshift-program#1515)
- * is validated and rolled out.
- */
-export const SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ =
-  'nightshift.significant_events.use_rule_events_read';
-
 /** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
 
@@ -88,14 +78,21 @@ export {
 } from './src/sources/view_name';
 
 export {
+  MAX_NIGHTSHIFT_SOURCE_SLUGS,
   MAX_SOURCE_DESCRIPTION_LENGTH,
   MAX_SOURCE_ESQL_LENGTH,
   MAX_SOURCE_TAG_LENGTH,
   MAX_SOURCE_TAGS,
   MAX_SOURCE_TITLE_LENGTH,
+  MAX_SOURCES_PER_PAGE,
   createSourceRequestSchema,
+  nightshiftSourceSlugField,
+  nightshiftSourceSlugSchema,
+  nightshiftSourceSlugsField,
+  nightshiftSourceSlugsSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
+  validateSourceQueryRequestSchema,
   type CreateSourceRequest,
   type DeleteSourceResponse,
   type ListSourcesResponse,
@@ -105,12 +102,20 @@ export {
   type SourceMutationResponse,
   type SourceWithHealth,
   type UpdateSourceRequest,
+  type ValidateSourceQueryRequest,
+  type ValidateSourceQueryResponse,
 } from './src/sources/schema';
 
+export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/source_type';
+
 export {
+  analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
+  type ISourceReadTargets,
+  type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
 export {
@@ -123,3 +128,11 @@ export {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
 } from './src/nightshift_usage_ids';
+
+export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  SETTINGS_TAB_IDS,
+  type NightshiftSettingsLocatorParams,
+  type SettingsTabId,
+} from './src/settings';

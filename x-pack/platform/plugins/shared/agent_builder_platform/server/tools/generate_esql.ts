@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import {
@@ -12,10 +13,11 @@ import {
   GenerateEsqlNoDataError,
   setDefaultEsqlCacheKey,
 } from '@kbn/agent-builder-genai-utils';
-import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { toHashedId, type DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
 const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   try {
@@ -28,61 +30,71 @@ const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   }
 };
 
-const nlToEsqlToolSchema = z.object({
-  query: z.string().describe('A natural language query to generate an ES|QL query from.'),
-  index: z
-    .string()
-    .optional()
-    .describe('(optional) Index, index-pattern, or ES|QL view to query. '),
-  context: z
-    .string()
-    .optional()
-    .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
-  execute_query: z
-    .boolean()
-    .default(true)
-    .describe(
-      '(optional) If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.'
-    ),
-  disable_named_params: z
-    .boolean()
-    .default(false)
-    .describe(
-      '(optional) If true, disables the instruction to use named parameters (?_tstart, ?_tend) for time range filtering. Defaults to false.'
-    ),
-  time_range: z
-    .object({
-      from: z
-        .string()
-        .describe(
-          'Start of the time range in Elasticsearch-compatible date format - Date Math or ISO 8601,, e.g. "now-24h" or "2026-01-01T00:00:00Z"'
-        ),
-      to: z
-        .string()
-        .describe(
-          'End of the time range in Elasticsearch-compatible date format - Date Math or ISO 8601,, e.g. "now" or "2026-01-31T23:59:59Z"'
-        ),
-    })
-    .optional()
-    .describe(
-      '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
-    ),
-});
+const createNlToEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    query: z.string().describe('A natural language query to generate an ES|QL query from.'),
+    index: z
+      .string()
+      .optional()
+      .describe('(optional) Index, index-pattern, or ES|QL view to query. '),
+    context: z
+      .string()
+      .optional()
+      .describe('(optional) Additional context that could be useful to generate the ES|QL query'),
+    execute_query: z
+      .boolean()
+      .default(true)
+      .describe(
+        '(optional) If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.'
+      ),
+    disable_named_params: z
+      .boolean()
+      .default(false)
+      .describe(
+        '(optional) If true, disables the instruction to use named parameters (?_tstart, ?_tend) for time range filtering. Defaults to false.'
+      ),
+    time_range: z
+      .object({
+        from: z
+          .string()
+          .describe(
+            'Start of the time range in Elasticsearch-compatible date format - Date Math or ISO 8601,, e.g. "now-24h" or "2026-01-01T00:00:00Z"'
+          ),
+        to: z
+          .string()
+          .describe(
+            'End of the time range in Elasticsearch-compatible date format - Date Math or ISO 8601,, e.g. "now" or "2026-01-31T23:59:59Z"'
+          ),
+      })
+      .optional()
+      .describe(
+        '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
+      ),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+type NlToEsqlToolSchema = ReturnType<typeof createNlToEsqlToolSchema>;
 
 export const generateEsqlTool = ({
   organizationId,
 }: {
   /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
   organizationId?: string;
-} = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+} = {}): DynamicSchemaBuiltinToolDefinition<NlToEsqlToolSchema> => {
   if (organizationId) {
     setDefaultEsqlCacheKey(toHashedId(organizationId));
   }
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description:
-      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    description: `Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+
+## Writing the \`query\`
+
+Describe the data and the result to return, and whether it is over time (such as for a line chart) or a single value per group, not how to compute it: leave out ES|QL or PromQL syntax, functions, formulas, range selectors such as [5m] and steps, unless the user provided them.
+
+Set the time range with \`time_range\` rather than describing it in \`query\`, unless \`disable_named_params\` is true: \`time_range\` only provides the ?_tstart and ?_tend parameters, so without them, describe the time range in \`query\`.`,
     annotations: {
       title: 'Generate ES|QL',
       readOnlyHint: true,
@@ -90,7 +102,8 @@ export const generateEsqlTool = ({
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: nlToEsqlToolSchema,
+    getSchema: async (schemaContext) =>
+      createNlToEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
       {
         query: nlQuery,
@@ -99,6 +112,7 @@ export const generateEsqlTool = ({
         execute_query: executeQuery = true,
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
+        include_frozen: includeFrozen,
       },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
@@ -113,8 +127,10 @@ export const generateEsqlTool = ({
         timeRange,
         includeDatasets: true,
         includeViews: true,
+        includeFrozen,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });

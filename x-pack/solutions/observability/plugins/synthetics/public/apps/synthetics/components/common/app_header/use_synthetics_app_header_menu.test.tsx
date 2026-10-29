@@ -161,12 +161,23 @@ describe('useSyntheticsAppHeaderMenu', () => {
     );
   });
 
-  it('omits Create monitor when the listing is empty', () => {
+  it('shows Create monitor when the listing is empty', () => {
     mockMonitorList.data.absoluteTotal = 0;
     mockOverviewStatus.allConfigs = [];
 
     const { result } = renderMenuHook({ showCreateMonitor: true });
-    expect(result.current.menu.primaryActionItem).toBeUndefined();
+    expect(result.current.menu.primaryActionItem).toEqual(
+      expect.objectContaining({
+        id: 'createMonitor',
+        testId: 'syntheticsAddMonitorBtn',
+      })
+    );
+    expect(findItem(result.current.menu.items, 'alerts')).toEqual(
+      expect.objectContaining({
+        disableButton: true,
+        tooltipContent: 'Create a monitor to set up alerts and rules.',
+      })
+    );
   });
 
   it('surfaces Diagnostics alongside Settings when the page asks for it', () => {

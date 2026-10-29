@@ -72,7 +72,11 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
 
     expect(collectorId).toBeDefined();
 
-    await apiServices.fleet.package_policies.delete(collectorId!);
+    // On cloud both policies hang off the cloud-managed `policy-elastic-agent-on-cloud`, which Fleet refuses to modify without `force`.
+    const deleteRes = await apiServices.fleet.package_policies.delete(collectorId!, {
+      force: true,
+    });
+    expect(deleteRes.status).toBe(200);
 
     const adminRes = await apiClient.get(esResourcesEndpoint);
     const adminStatus = adminRes.body;
@@ -97,7 +101,10 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
 
       expect(symbolizerId).toBeDefined();
 
-      await apiServices.fleet.package_policies.delete(symbolizerId!);
+      const deleteRes = await apiServices.fleet.package_policies.delete(symbolizerId!, {
+        force: true,
+      });
+      expect(deleteRes.status).toBe(200);
 
       await waitForExpectedHasSetup(apiClient);
 

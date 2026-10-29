@@ -71,7 +71,8 @@ export const createReactFieldFormatter = (
   fieldName: string = '',
   fieldFormatMap?: FieldFormatMap,
   hasColorRules: boolean = false,
-  dataView?: DataView
+  dataView?: DataView,
+  isInteractive: boolean = true
 ) => {
   const { fieldFormat, fieldType, shouldSkipFormatting } = getFieldFormatAndType(
     fieldName,
@@ -85,7 +86,7 @@ export const createReactFieldFormatter = (
       return DISPLAY_EMPTY_VALUE;
     }
     return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
-      ? fieldFormat.convertToReact(value)
+      ? fieldFormat.convertToReact(value, { isInteractive })
       : String(value);
   };
 };

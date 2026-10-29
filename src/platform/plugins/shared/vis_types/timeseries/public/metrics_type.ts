@@ -92,7 +92,7 @@ async function getUsedIndexPatterns(params: VisParams): Promise<DataView[]> {
   return resolvedIndexPatterns;
 }
 
-export const TSVB_ICON = 'visVisualBuilder';
+export const TSVB_ICON = 'productTSVB';
 export const TSVB_TITLE = i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', {
   defaultMessage: 'TSVB',
 });

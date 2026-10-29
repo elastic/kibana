@@ -8,7 +8,6 @@
  */
 
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { internalStateSlice } from '../internal_state';
 import { selectTabRuntimeState } from '../runtime_state';
 import { selectTab } from '../selectors';
@@ -25,6 +24,7 @@ import {
 import { setDataSource, setDataView } from './tab_state_data_view';
 import { updateTabs } from './tabs';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
+import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
 import type { DiscoverAppState } from '../types';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
 
@@ -68,7 +68,7 @@ export const resetDiscoverSession = createInternalStateAsyncThunk(
           const query = searchSource.getField('query');
           let dataView = searchSource.getField('index');
 
-          if (isOfAggregateQueryType(query) && query.esql.trim() !== '') {
+          if (isNonEmptyEsqlQuery(query)) {
             const previousSource = tabRuntimeState.currentDataSource$.getValue();
             // Same variables and time range the tab is restored with, as in initializeSingleTab.
             const esqlVariables = extractEsqlVariables(parseControlGroupJson(tab.controlGroupJson));

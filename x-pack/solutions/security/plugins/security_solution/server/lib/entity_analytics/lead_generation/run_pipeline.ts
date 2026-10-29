@@ -35,6 +35,7 @@ import type { Lead as SynthesizedLead, LeadEntity } from './types';
 export interface RunPipelineParams {
   readonly listEntities: () => Promise<LeadEntity[]>;
   readonly esClient: ElasticsearchClient;
+  readonly internalEsClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
   readonly riskScoreDataClient: RiskScoreDataClient;
@@ -66,6 +67,7 @@ const shouldRunLLMSynthesis = (
 export const runLeadGenerationPipeline = async ({
   listEntities,
   esClient,
+  internalEsClient,
   logger,
   spaceId,
   riskScoreDataClient,
@@ -168,7 +170,7 @@ export const runLeadGenerationPipeline = async ({
   }
   logger.info(`[LeadGeneration][Telemetry] Attach related entities: ${Date.now() - attachStart}ms`);
 
-  const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
+  const leadDataClient = createLeadDataClient({ esClient, internalEsClient, logger, spaceId });
 
   const exploratoryLeads = await buildExploratoryLeads(exploratoryCandidates, {
     chatModel,

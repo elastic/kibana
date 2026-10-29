@@ -143,8 +143,7 @@ export const transform = (rule: PartialRule<RuleParams>): RuleResponse | null =>
 };
 
 export const getTupleDuplicateErrorsAndUniqueRules = (
-  rules: PromiseFromStreams[],
-  isOverwrite: boolean
+  rules: PromiseFromStreams[]
 ): [BulkError[], PromiseFromStreams[]] => {
   const { errors, rulesAcc } = rules.reduce(
     (acc, parsedRule) => {
@@ -152,7 +151,7 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
         acc.rulesAcc.set(uuidv4(), parsedRule);
       } else {
         const { rule_id: ruleId } = parsedRule;
-        if (acc.rulesAcc.has(ruleId) && !isOverwrite) {
+        if (acc.rulesAcc.has(ruleId)) {
           acc.errors.set(
             uuidv4(),
             createBulkErrorObject({

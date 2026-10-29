@@ -13,19 +13,19 @@ import {
 } from '../../../../common/constants';
 import type { attachmentDomainV2 } from '../../../../common/types/domain';
 import {
-  UnifiedAttachmentPutRequestRt,
-  type UnifiedAttachmentPutRequest,
+  UnifiedAttachmentPutRouteRequestSchema,
+  type UnifiedAttachmentPutRouteRequest,
 } from '../../../../common/types/api/attachment/v2';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { createIoTsRouteValidation } from '../utils';
+import { createZodRouteValidation, throwIfFileAttachment } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
 
 export const putAttachmentRoute = createCasesRoute<
   { case_id: string; id: string },
   unknown,
-  UnifiedAttachmentPutRequest
+  UnifiedAttachmentPutRouteRequest
 >({
   method: 'put',
   path: CASE_ATTACHMENT_DETAILS_URL,
@@ -35,17 +35,19 @@ export const putAttachmentRoute = createCasesRoute<
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
       id: schema.string({ maxLength: MAX_ATTACHMENT_ID_LENGTH }),
     }),
-    body: createIoTsRouteValidation(UnifiedAttachmentPutRequestRt),
+    body: createZodRouteValidation(UnifiedAttachmentPutRouteRequestSchema),
   },
   routerOptions: {
-    // TODO(security-team#15572): flip to 'public' once this API is ready to ship.
-    access: 'internal',
+    access: 'public',
+    availability: { stability: 'tech_preview', since: '9.6.0' },
     summary: `Replace a case attachment`,
     tags: ['oas-tag:cases'],
     description: 'You cannot change the attachment type or the owner of an attachment.',
   },
   handler: async ({ context, request, response }) => {
     try {
+      throwIfFileAttachment(request.body);
+
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       const { case_id: caseID, id } = request.params;

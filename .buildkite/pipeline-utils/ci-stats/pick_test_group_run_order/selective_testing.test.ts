@@ -36,6 +36,22 @@ const context = (
 });
 
 describe('filterJestIntegrationConfigsByAffected', () => {
+  it('keeps package-selected configs while comparing Moon integration selection', () => {
+    const configs = [
+      'affected/one/jest.integration.config.js',
+      'affected/two/jest.integration.config.js',
+    ];
+    const result = filterJestIntegrationConfigsByAffected(
+      configs,
+      context(['affected/'], ['affected/one/example.test.ts']),
+      {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set([configs[0]]),
+      }
+    );
+    expect(result).toEqual(configs);
+  });
+
   it('drops unaffected configs but re-adds always-run configs', () => {
     const configs = [
       'always/jest.integration.config.js',
@@ -91,6 +107,63 @@ describe('filterJestUnitConfigsByAffected', () => {
     jest.restoreAllMocks();
   });
 
+  it('keeps package-selected configs while comparing Moon unit selection', () => {
+    const configs = ['affected/one/jest.config.js', 'affected/two/jest.config.js'];
+    const result = filterJestUnitConfigsByAffected(
+      configs,
+      context(['affected/'], ['affected/one/example.test.ts']),
+      {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set([configs[0]]),
+      }
+    );
+    expect(result).toEqual(configs);
+  });
+
+  it('logs Moon-only configs without changing package selection', () => {
+    const configs = [
+      'affected/jest.config.js',
+      'other/jest.config.js',
+      'nested/jest.config.js||shard=1/2',
+    ];
+    const result = filterJestUnitConfigsByAffected(configs, context(['nested/']), {
+      modeledConfigs: new Set(['affected/jest.config.js', 'other/jest.config.js']),
+      affectedConfigs: new Set(['affected/jest.config.js']),
+    });
+
+    expect(result).toEqual(['nested/jest.config.js||shard=1/2']);
+  });
+
+  it('keeps package-selected configs when Moon misses a modeled config', () => {
+    const configs = ['modeled/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(configs, context(['modeled/']), {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set(),
+      })
+    ).toEqual(configs);
+  });
+
+  it('does not select unmodeled configs when no package has a Jest-relevant change', () => {
+    const configs = ['modeled/jest.config.js', 'nested/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(configs, context([]), {
+        modeledConfigs: new Set(['modeled/jest.config.js']),
+        affectedConfigs: new Set(),
+      })
+    ).toEqual([]);
+  });
+
+  it('keeps critical changes as a full Jest run even when Moon finds no affected task', () => {
+    const configs = ['affected/jest.config.js', 'other/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(configs, context([], ['CRITICAL_UNIT']), {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set(),
+      })
+    ).toEqual(configs);
+  });
+
   it('logs critical matches, including glob matches, without including unrelated changes', () => {
     const log = jest.spyOn(console, 'log').mockImplementation(() => {});
     const configs = ['other/jest.config.js'];
@@ -142,9 +215,9 @@ describe('filterJestUnitConfigsByAffected', () => {
 });
 
 describe('resolveSelectiveTestingContext', () => {
-  it('uses the same changed files for package detection and critical-file checks', async () => {
+  it('passes Scout paths through to package selection', async () => {
     jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set(['affected/']));
-    const changedFiles = ['affected/index.ts'];
+    const changedFiles = ['affected/test/scout/ui/example.spec.ts'];
 
     const result = await resolveSelectiveTestingContext(changedFiles);
 
@@ -153,5 +226,39 @@ describe('resolveSelectiveTestingContext', () => {
       expect.objectContaining({ changedFiles, includeDownstream: true })
     );
     expect(result?.changedFiles).toBe(changedFiles);
+  });
+
+  it('passes documentation ignore patterns to getAffectedPackages', async () => {
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set());
+
+    await resolveSelectiveTestingContext(['src/core/README.md']);
+
+    expect(getAffectedPackages).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        ignorePatterns: expect.arrayContaining(['**/README*', '**/*.md', '**/CHANGELOG*']),
+      })
+    );
+  });
+
+  it('yields an empty affected-packages set for documentation-only changes', async () => {
+    // getAffectedPackages returns empty because all files are filtered by ignorePatterns.
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set());
+
+    const result = await resolveSelectiveTestingContext(['src/core/README.md', 'docs/guide.md']);
+
+    expect(result).not.toBeNull();
+    expect(result?.affectedPackages.size).toBe(0);
+  });
+
+  it('retains the source package when docs are mixed with source changes', async () => {
+    jest.mocked(getAffectedPackages).mockResolvedValueOnce(new Set(['src/core/']));
+
+    const result = await resolveSelectiveTestingContext([
+      'src/core/server/index.ts',
+      'src/core/README.md',
+    ]);
+
+    expect(result?.affectedPackages).toContain('src/core/');
   });
 });

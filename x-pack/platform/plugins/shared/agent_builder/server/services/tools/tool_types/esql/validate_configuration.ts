@@ -77,7 +77,7 @@ export const validateConfig = async (configuration: EsqlToolConfig) => {
 
   if (validationResult.errors.length > 0) {
     const message = `Validation error: \n${validationResult.errors
-      .map((error) => ('text' in error ? error.text : ''))
+      .map((error) => ('text' in error ? error.text : error.message))
       .join('\n')}`;
     throw createBadRequestError(message);
   }

@@ -16,6 +16,7 @@ export { getESQLTimeField } from './utils/get_time_field';
 export {
   getESQLSourceInfo,
   clearESQLSourceInfoCache,
+  ESQL_SOURCE_INFO_CACHE_TTL,
   buildEsqlSourceCacheKey,
 } from './utils/get_source_info';
 export type { ESQLSourceInfo, ESQLSourceInfoColumn } from './utils/get_source_info';
@@ -24,6 +25,7 @@ export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  hasAggregatingCommand,
   hasTransformationalCommand,
   parseTimeFieldFromESQLQuery,
   prettifyQuery,
@@ -57,7 +59,6 @@ export {
 export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
-  splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
@@ -84,12 +85,14 @@ export {
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { getEsqlInspectorStats } from './utils/get_esql_inspector_stats';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
@@ -111,16 +114,20 @@ export {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
   EsqlViewsClientError,
+  getViewEsqlQuery,
+  MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
+  MAX_ESQL_VIEW_NAME_LENGTH,
+  MAX_ESQL_VIEW_QUERY_LENGTH,
+  validateEsqlViewName,
+  type EsqlViewNameValidationError,
   type EsqlViewsClient,
-} from './utils/esql_views_client';
-export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
+} from './utils/views';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
-export { resolveViewColumnToIndexField } from './utils/resolve_view_column_to_index_field';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
