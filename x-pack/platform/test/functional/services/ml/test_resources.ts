@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { ProvidedType } from '@kbn/test';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
@@ -31,6 +32,7 @@ export function MachineLearningTestResourcesProvider(
   { getService }: FtrProviderContext,
   mlApi: MlApi
 ) {
+  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -502,50 +504,56 @@ export function MachineLearningTestResourcesProvider(
       await this.assertSavedObjectExistsById(id, SavedObjectType.DASHBOARD);
     },
 
-    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType, space?: string) {
+    async deleteMlSavedObjectByJobId(jobId: string, jobType: JobType) {
       const savedObjectId = `${jobType}-${jobId}`;
-      await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true, space);
+      await this.deleteMlSavedObjects(SavedObjectType.ML_JOB, (id) => id === savedObjectId);
     },
 
-    async cleanMLSavedObjects(additionalSpaces: string[] = []) {
-      // clean default space
+    async cleanMLSavedObjects() {
       await this.cleanMLJobSavedObjects();
       await this.cleanMLTrainedModelsSavedObjects();
-
-      for (const space of additionalSpaces) {
-        await this.cleanMLJobSavedObjects(space);
-        await this.cleanMLTrainedModelsSavedObjects(space);
-      }
     },
 
-    async cleanMLJobSavedObjects(space?: string) {
+    async cleanMLJobSavedObjects() {
       log.debug('Deleting ML job saved objects ...');
-      const savedObjectIds = await this.getSavedObjectIdsByType(SavedObjectType.ML_JOB);
-      for (const id of savedObjectIds) {
-        await this.deleteSavedObjectById(id, SavedObjectType.ML_JOB, true);
-      }
+      await this.deleteMlSavedObjects(SavedObjectType.ML_JOB);
       log.debug('> ML job saved objects deleted.');
     },
 
-    async cleanMLTrainedModelsSavedObjects(space?: string) {
+    async cleanMLTrainedModelsSavedObjects() {
       log.debug('Deleting ML trained model saved objects ...');
-      const savedObjectIds = await this.getSavedObjectIdsByType(
+      await this.deleteMlSavedObjects(
         SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-        space
+        (id) => mlApi.isInternalModelId(id) === false
       );
-      for (const id of savedObjectIds) {
-        if (mlApi.isInternalModelId(id)) {
-          log.debug(`> Skipping internal ${id}`);
-          continue;
-        }
-        await this.deleteSavedObjectById(
-          id,
-          SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-          true,
-          space
-        );
-      }
       log.debug('> ML trained model saved objects deleted.');
+    },
+
+    // ML job and trained model saved objects are hidden from the saved objects HTTP APIs,
+    // so they are deleted directly from the saved objects index, across all spaces.
+    async deleteMlSavedObjects(
+      objectType: SavedObjectType,
+      shouldDelete: (id: string) => boolean = () => true
+    ) {
+      const { hits } = await es.search({
+        index: MAIN_SAVED_OBJECT_INDEX,
+        size: 10000,
+        _source: false,
+        query: { term: { type: objectType } },
+      });
+      const docIds = hits.hits
+        .map(({ _id }) => _id!)
+        .filter((docId) => shouldDelete(docId.replace(`${objectType}:`, '')));
+
+      if (docIds.length === 0) {
+        return;
+      }
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: docIds.map((docId) => ({
+          delete: { _index: MAIN_SAVED_OBJECT_INDEX, _id: docId },
+        })),
+      });
     },
 
     async setupFleet() {

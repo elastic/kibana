@@ -218,6 +218,15 @@ export const proposalSchema = z.object({
 
   /** Gating execution to resume. Absent when no workflow is waiting. */
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * Stamped by `releaseGate` — the approve and dismiss routes — before it
+   * resumes the gate, and refused by `revise()` from then on: the gate adopts
+   * the chain head before it writes the decision, so a revision landing in
+   * between would be what the approval executes. Absent on a gate resumed
+   * through any other surface and on every auto-approval, so it says nothing
+   * about who decided or how.
+   */
+  gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
   createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
   createdBy: proposalUserSchema.optional(),
@@ -439,6 +448,16 @@ export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
 export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status'>): boolean =>
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
+
+/**
+ * The action failed and its retry does not exist yet. Poll until the original is superseded.
+ */
+export const isAwaitingRetry = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>
+): boolean =>
+  proposal.decision === 'approved' &&
+  proposal.status === 'failed' &&
+  proposal.supersededBy === undefined;
 
 /** Settled by a deadline rather than a person.
  * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
