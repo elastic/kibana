@@ -20,6 +20,7 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
+import type { DataStream } from '../../../common';
 import { API_BASE_PATH, MAX_DATA_RETENTION } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers/setup_environment';
@@ -1779,6 +1780,27 @@ describe('Data Streams tab', () => {
           },
         });
 
+      const userDataStream = createDataStreamPayload({ name: 'my-logs' });
+
+      const renderDeepLinkToManagedDataStream = async (
+        dataStreams: DataStream[] = [managedDataStream, userDataStream]
+      ) => {
+        httpRequestsMockHelpers.setLoadDataStreamsResponse(dataStreams);
+        httpRequestsMockHelpers.setLoadDataStreamResponse(
+          managedDataStream.name,
+          managedDataStream
+        );
+
+        await renderHome(httpSetup, {
+          initialEntries: ['/data_streams/managed-data-stream?isDeepLink=true'],
+          appServicesContext: {
+            url: urlServiceMock,
+            config: { showManagedDataStreamsByDefault: false },
+          },
+        });
+        await screen.findByTestId('dataStreamTable');
+      };
+
       test('hides managed data streams until the "managed" filter is turned on', async () => {
         httpRequestsMockHelpers.setLoadDataStreamsResponse([
           managedDataStream,
@@ -1848,26 +1870,65 @@ describe('Data Streams tab', () => {
       });
 
       test('turning on the "managed" filter for a deep link does not persist it', async () => {
-        const userDataStream = createDataStreamPayload({ name: 'my-logs' });
-        httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, userDataStream]);
-        httpRequestsMockHelpers.setLoadDataStreamResponse(
-          managedDataStream.name,
-          managedDataStream
-        );
-
-        await renderHome(httpSetup, {
-          initialEntries: ['/data_streams/managed-data-stream?isDeepLink=true'],
-          appServicesContext: {
-            url: urlServiceMock,
-            config: { showManagedDataStreamsByDefault: false },
-          },
-        });
-        await screen.findByTestId('dataStreamTable');
+        await renderDeepLinkToManagedDataStream();
 
         await waitFor(() => {
           expect(getTableCellsValues('dataStreamTable')).toHaveLength(1);
         });
         expect(localStorage.getItem(SHOW_MANAGED_DATA_STREAMS)).toBe('false');
+      });
+
+      test('toggling the "hidden" filter after a deep link does not persist the "managed" filter', async () => {
+        const hiddenDataStream = createDataStreamPayload({
+          name: 'managed-data-stream-hidden',
+          hidden: true,
+        });
+        await renderDeepLinkToManagedDataStream([
+          managedDataStream,
+          hiddenDataStream,
+          userDataStream,
+        ]);
+
+        await waitFor(() => {
+          expect(getTableCellsValues('dataStreamTable')).toHaveLength(1);
+        });
+
+        await createDataStreamTabActions().toggleViewFilterAt(1);
+
+        await waitFor(() => {
+          expect(getTableCellsValues('dataStreamTable')).toHaveLength(2);
+        });
+        expect(localStorage.getItem(SHOW_MANAGED_DATA_STREAMS)).toBe('false');
+      });
+
+      test('the "managed" filter can be turned off after a deep link and stays off on reload', async () => {
+        await renderDeepLinkToManagedDataStream();
+
+        await waitFor(() => {
+          expect(getTableCellsValues('dataStreamTable')).toHaveLength(1);
+        });
+
+        const actions = createDataStreamTabActions();
+        await actions.toggleViewFilterAt(0);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('dataStreamTable')).toHaveTextContent(
+            '1 managed or hidden data stream is not shown.'
+          );
+        });
+
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([
+          managedDataStream,
+          createDataStreamPayload({ name: 'managed-data-stream-2', _meta: { managed: true } }),
+          userDataStream,
+        ]);
+        actions.clickReloadButton();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('dataStreamTable')).toHaveTextContent(
+            '2 managed or hidden data streams are not shown.'
+          );
+        });
       });
 
       test('shows an empty table, not the empty prompt, when only managed data streams exist', async () => {
@@ -1940,21 +2001,7 @@ describe('Data Streams tab', () => {
       });
 
       test('deep-linking to a managed data stream turns on the "managed" filter', async () => {
-        const userDataStream = createDataStreamPayload({ name: 'my-logs' });
-        httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, userDataStream]);
-        httpRequestsMockHelpers.setLoadDataStreamResponse(
-          managedDataStream.name,
-          managedDataStream
-        );
-
-        await renderHome(httpSetup, {
-          initialEntries: ['/data_streams/managed-data-stream?isDeepLink=true'],
-          appServicesContext: {
-            url: urlServiceMock,
-            config: { showManagedDataStreamsByDefault: false },
-          },
-        });
-        await screen.findByTestId('dataStreamTable');
+        await renderDeepLinkToManagedDataStream();
 
         await waitFor(() => {
           expect(getTableCellsValues('dataStreamTable')).toEqual([
@@ -2068,6 +2115,49 @@ describe('Data Streams tab', () => {
             'Delete',
           ],
         ]);
+      });
+    });
+
+    test('the "hidden" filter can be turned off after a deep link and stays off on reload', async () => {
+      const hiddenDataStream = createDataStreamPayload({
+        name: 'hidden-data-stream',
+        hidden: true,
+      });
+      const userDataStream = createDataStreamPayload({ name: 'my-logs' });
+
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream, userDataStream]);
+      httpRequestsMockHelpers.setLoadDataStreamResponse(hiddenDataStream.name, hiddenDataStream);
+
+      await renderHome(httpSetup, {
+        initialEntries: ['/data_streams/hidden-data-stream?isDeepLink=true'],
+        appServicesContext: { url: urlServiceMock },
+      });
+      await screen.findByTestId('dataStreamTable');
+
+      await waitFor(() => {
+        expect(getTableCellsValues('dataStreamTable')).toHaveLength(1);
+      });
+
+      const actions = createDataStreamTabActions();
+      await actions.toggleViewFilterAt(1);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataStreamTable')).toHaveTextContent(
+          '1 managed or hidden data stream is not shown.'
+        );
+      });
+
+      httpRequestsMockHelpers.setLoadDataStreamsResponse([
+        hiddenDataStream,
+        createDataStreamPayload({ name: 'hidden-data-stream-2', hidden: true }),
+        userDataStream,
+      ]);
+      actions.clickReloadButton();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataStreamTable')).toHaveTextContent(
+          '2 managed or hidden data streams are not shown.'
+        );
       });
     });
 

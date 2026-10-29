@@ -124,10 +124,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     },
   });
 
-  // Only explicit user changes are persisted; filters turned on for a deep link are not.
+  // Only explicit user changes to the managed filter are persisted; filters turned on for a deep link are not.
   const handleViewFilterChange = (nextFilters: Filters<DataStreamFilterName>) => {
+    if (nextFilters.managed.checked !== filters.managed.checked) {
+      setShowManagedDataStreams(nextFilters.managed.checked === 'on');
+    }
     setFilters(nextFilters);
-    setShowManagedDataStreams(nextFilters.managed.checked === 'on');
   };
 
   const selectedDataStream = dataStreams?.find(({ name }) => name === decodedDataStreamName);
