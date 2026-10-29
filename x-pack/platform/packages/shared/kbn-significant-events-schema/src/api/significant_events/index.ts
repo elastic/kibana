@@ -20,7 +20,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
 import type { ChangePointType, DetectionSkip } from '../../significant_events/detections';
-import type { SignificantEventResponse } from '../../significant_events/events';
+import type { EventDeactivation, SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
   p_value: number;
@@ -43,6 +43,8 @@ type QueryWithOccurrences = StreamQuery & {
     type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
+  /** Enabled state of the backing alerting rule, omitted when lookup fails. */
+  rule_enabled?: boolean;
 };
 
 interface QueryOccurrencesResponse {
@@ -98,4 +100,5 @@ export type {
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,
   EventLifecycleResponse,
+  EventDeactivation,
 };

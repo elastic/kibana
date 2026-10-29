@@ -63,7 +63,7 @@ export interface RelatedAttachmentsContext {
   request: KibanaRequest;
   /** The attachments of this type being deleted. */
   attachments: readonly AttachmentDeleteTarget[];
-  /** The case's attachments that are not being deleted. */
+  /** The case's attachments of the declared `readTypes` that are not being deleted. */
   remainingAttachments: readonly AttachmentDeleteTarget[];
 }
 
@@ -84,6 +84,12 @@ export type GetRelatedAttachments = (
   context: RelatedAttachmentsContext
 ) => Promise<RelatedAttachmentIds[]>;
 
+export interface RelatedAttachmentsDefinition {
+  /** The attachment types `get` reads from the case; only those are loaded for it. */
+  readTypes: readonly string[];
+  get: GetRelatedAttachments;
+}
+
 export interface UnifiedAttachmentType
   extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
   id: string;
@@ -95,7 +101,7 @@ export interface UnifiedAttachmentType
    */
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
-  getRelatedAttachments?: GetRelatedAttachments;
+  relatedAttachments?: RelatedAttachmentsDefinition;
 }
 
 export interface UnifiedAttachmentTypeSetup
@@ -108,7 +114,7 @@ export interface UnifiedAttachmentTypeSetup
   schema: z.ZodType;
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
-  getRelatedAttachments?: GetRelatedAttachments;
+  relatedAttachments?: RelatedAttachmentsDefinition;
 }
 
 export interface AttachmentFramework {

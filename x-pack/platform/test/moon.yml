@@ -129,7 +129,6 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/datemath'
   - '@kbn/response-ops-rule-params'
-  - '@kbn/serverless-common-settings'
   - '@kbn/core-saved-objects-import-export-server-internal'
   - '@kbn/core-chrome-browser'
   - '@kbn/licensing-types'
@@ -159,6 +158,7 @@ tags:
   - dev
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - index.d.ts

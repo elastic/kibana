@@ -154,9 +154,16 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 
+  it('rejects a daily dispatch limit of zero and accepts removing the limit', () => {
+    const parseLimit = (dailyDispatchLimit: number | null) =>
+      params.parse({ path: { id: 'automation-1' }, body: { runtime: { dailyDispatchLimit } } });
+    expect(() => parseLimit(0)).toThrow();
+    expect(parseLimit(null).body.runtime).toEqual({ dailyDispatchLimit: null });
+  });
+
   it('rejects a Slack trigger row with no filters', () => {
     expect(() => parseRows([{ kind: 'slack', event: 'message' }])).toThrow(
-      'at least one of channels, users or messageFilter'
+      'at least one of channels, users, bots or messageFilter'
     );
   });
 

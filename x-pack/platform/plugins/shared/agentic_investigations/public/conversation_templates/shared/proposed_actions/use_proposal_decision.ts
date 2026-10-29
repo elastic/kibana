@@ -15,6 +15,8 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
+  useReopenProposal,
 } from '@kbn/proposals-plugin/public';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useCurrentUserProfile } from '../../../user_profiles';
@@ -26,6 +28,9 @@ export interface ProposalDecision {
   currentActorName?: string;
   approve: (actionInput: ApproveProposalRequest['actionInput']) => Promise<unknown>;
   dismiss: (params: DeclineParams) => Promise<unknown>;
+  /** Marks a to-do proposal that was marked as applied as not applied. */
+  reopen: () => Promise<unknown>;
+  isReopening: boolean;
 }
 
 /**
@@ -38,6 +43,8 @@ export const useProposalDecision = (proposalId: string): ProposalDecision => {
   } = useKibana<CoreStart>();
   const { mutateAsync: approveProposal } = useApproveProposal();
   const { mutateAsync: dismissProposal } = useDismissProposal();
+  const { mutateAsync: reopenProposal } = useReopenProposal();
+  const isReopening = useIsReopeningProposal(proposalId);
   const isApproving = useIsApprovingProposal(proposalId);
   const isDeclining = useIsDecliningProposal(proposalId);
   const { data: currentUserProfile } = useCurrentUserProfile();
@@ -53,11 +60,18 @@ export const useProposalDecision = (proposalId: string): ProposalDecision => {
     [dismissProposal, proposalId]
   );
 
+  const reopen = useCallback(
+    () => reopenProposal({ id: proposalId }),
+    [reopenProposal, proposalId]
+  );
+
   return {
     readOnly: application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] !== true,
     isSubmitting: isApproving ? 'applying' : isDeclining ? 'declining' : undefined,
     currentActorName: currentUserProfile ? getUserDisplayName(currentUserProfile.user) : undefined,
     approve,
     dismiss,
+    reopen,
+    isReopening,
   };
 };
