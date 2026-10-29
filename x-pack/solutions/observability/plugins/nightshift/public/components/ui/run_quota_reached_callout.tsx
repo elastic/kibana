@@ -57,6 +57,7 @@ export const RunQuotaReachedBanner = ({
     isBlocked ||
     !data ||
     !isRunQuotaReached({
+      group,
       enabled: data.enabled,
       limit: data.limits[group],
       count: data.counts[group],

@@ -48,7 +48,11 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import type { AutomationBudget } from '../types';
+import type {
+  AutomationBudget,
+  InvestigationQuotaCallback,
+  InvestigationQuotaResult,
+} from '../types';
 import type {
   AlertInvestigationContext,
   InvestigationAlertSnapshot,
@@ -70,9 +74,11 @@ import {
 } from './build_investigation_message';
 import {
   InvestigationNotFoundError,
+  InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
+import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
   findInvestigationConversation,
   findInvestigationConversations,
@@ -330,7 +336,7 @@ export interface NightshiftInvestigationsClientDeps {
   /** Installs the assistant agent wherever the investigation agent is installed. */
   assistantEnabled?: boolean;
   telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
-  getGlobalInvestigationBudget?: (spaceId: string) => Promise<AutomationBudget>;
+  investigationQuotaCallback?: InvestigationQuotaCallback;
   inference?: InferenceServerStart;
   savedObjects?: CoreStart['savedObjects'];
   uiSettings?: CoreStart['uiSettings'];
@@ -349,7 +355,7 @@ export class NightshiftInvestigationsClient {
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly assistantEnabled: boolean;
   private readonly telemetryConfig: NightshiftInvestigationsConfig['sandbox'];
-  private readonly getGlobalInvestigationBudget?: (spaceId: string) => Promise<AutomationBudget>;
+  private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
   private readonly uiSettings?: CoreStart['uiSettings'];
@@ -367,7 +373,7 @@ export class NightshiftInvestigationsClient {
     this.agentAvailability = deps.agentAvailability;
     this.assistantEnabled = deps.assistantEnabled ?? false;
     this.telemetryConfig = deps.telemetryConfig;
-    this.getGlobalInvestigationBudget = deps.getGlobalInvestigationBudget;
+    this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.inference = deps.inference;
     this.savedObjects = deps.savedObjects;
     this.uiSettings = deps.uiSettings;
@@ -504,8 +510,7 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    const globalBudget =
-      trigger_type === 'automatic' ? await this.getGlobalInvestigationBudget?.(spaceId) : undefined;
+    const globalBudget = this.createGlobalBudget();
     const { id: investigationId, recorded } = await this.resolveInvestigation({
       conversations,
       agenticInvestigations,
@@ -691,14 +696,35 @@ export class NightshiftInvestigationsClient {
     );
   }
 
+  private createGlobalBudget(): AutomationBudget {
+    let release: InvestigationQuotaResult['release'];
+    return {
+      consume: async () => {
+        const result = await evaluateInvestigationQuota({
+          callback: this.investigationQuotaCallback,
+          logger: this.logger,
+        });
+        if (!result.allowed) {
+          throw new InvestigationQuotaDeniedError();
+        }
+        release = result.release;
+      },
+      release: async () => {
+        const pending = release;
+        release = undefined;
+        await pending?.();
+      },
+    };
+  }
+
   /**
-   * Charges the automation budget, then the global budget. A global denial releases the automation
+   * Charges the automation budget, then the global quota. A global denial releases the automation
    * budget, so a denied start never uses up the automation limit.
    */
   private async assertQuotaForNewInvestigation(
     triggerType: StartInvestigationRequest['trigger_type'],
-    automationBudget?: AutomationBudget,
-    globalBudget?: AutomationBudget
+    automationBudget: AutomationBudget | undefined,
+    globalBudget: AutomationBudget
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
@@ -706,7 +732,7 @@ export class NightshiftInvestigationsClient {
       case 'automatic': {
         await automationBudget?.consume();
         try {
-          await globalBudget?.consume();
+          await globalBudget.consume();
         } catch (error) {
           await this.releaseBudget(automationBudget);
           throw error;

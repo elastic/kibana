@@ -7,12 +7,29 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import {
+  consumeRunQuota,
+  createRunQuotaInternalRepository,
+  releaseRunQuota,
+} from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
+jest.mock('./lib/run_quotas', () => ({
+  consumeRunQuota: jest.fn(),
+  createRunQuotaInternalRepository: jest.fn(),
+  releaseRunQuota: jest.fn(),
+  dayKey: jest.fn(() => '2026-10-29'),
+  resolveDailyWindow: jest.fn(),
+}));
+
 jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
+
+const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
+const releaseRunQuotaMock = jest.mocked(releaseRunQuota);
+const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
 
@@ -23,9 +40,11 @@ const createCoreSetup = () => {
 };
 
 const createSetupDeps = ({
+  registerInvestigationQuota,
   onSourceChange = jest.fn(),
   workflowsExtensions,
 }: {
+  registerInvestigationQuota?: jest.Mock;
   onSourceChange?: jest.Mock;
   workflowsExtensions?: {
     registerStepDefinition: jest.Mock;
@@ -35,12 +54,16 @@ const createSetupDeps = ({
 } = {}) =>
   ({
     nightshiftSources: { onSourceChange },
+    ...(registerInvestigationQuota
+      ? { nightshiftInvestigations: { registerInvestigationQuota } }
+      : {}),
     ...(workflowsExtensions ? { workflowsExtensions } : {}),
   } as unknown as SignificantEventsPluginSetupDependencies);
 
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    consumeRunQuotaMock.mockResolvedValue({ allowed: true });
   });
 
   it('supports the investigations plugin being absent', () => {
@@ -79,6 +102,58 @@ describe('SignificantEventsPlugin setup', () => {
     expect(
       core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
     ).toEqual([detectionsDataStream, knowledgeIndicatorsDataStream]);
+  });
+
+  it('registers a callback without accessing start services', () => {
+    const registerInvestigationQuota = jest.fn();
+    const plugin = createPlugin();
+
+    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
+
+    expect(registerInvestigationQuota).toHaveBeenCalledWith(expect.any(Function));
+    expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
+  });
+
+  it('reports unavailable start services when the callback is invoked too early', async () => {
+    const registerInvestigationQuota = jest.fn();
+    const plugin = createPlugin();
+    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
+    const [callback] = registerInvestigationQuota.mock.calls[0];
+
+    await expect(callback()).rejects.toThrow('Significant Events start services are unavailable');
+    expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
+  });
+
+  it('consumes the investigation quota with the existing internal repository when invoked', async () => {
+    const registerInvestigationQuota = jest.fn();
+    const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
+    createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
+    const plugin = createPlugin();
+    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
+    const server = plugin.server;
+    if (!server) {
+      throw new Error('Expected Significant Events server');
+    }
+    server.core = coreMock.createStart();
+    const [callback] = registerInvestigationQuota.mock.calls[0];
+
+    const result = await callback();
+
+    expect(result).toEqual({ allowed: true, release: expect.any(Function) });
+    expect(createRunQuotaInternalRepositoryMock).toHaveBeenCalledWith(server);
+    expect(consumeRunQuotaMock).toHaveBeenCalledWith({
+      internalRepository,
+      group: 'investigation',
+      date: '2026-10-29',
+    });
+
+    await result.release();
+
+    expect(releaseRunQuotaMock).toHaveBeenCalledWith({
+      internalRepository,
+      group: 'investigation',
+      date: '2026-10-29',
+    });
   });
 });
 

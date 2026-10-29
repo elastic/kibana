@@ -50,7 +50,7 @@ export const getExhaustedRunQuotaGroups = ({
   'enabled' | 'limits' | 'counts' | 'groups'
 >): RunQuotaGroup[] =>
   groups.filter((group) =>
-    isRunQuotaReached({ enabled, limit: limits[group], count: counts[group] })
+    isRunQuotaReached({ group, enabled, limit: limits[group], count: counts[group] })
   );
 
 export const getRunQuotaSettingsTab = (

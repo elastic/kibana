@@ -34,12 +34,22 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
+export interface InvestigationQuotaResult {
+  allowed: boolean;
+  /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
+  release?: () => Promise<void>;
+}
+
+export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
+
 export interface AutomationBudget {
   consume: () => Promise<void>;
   release: () => Promise<void>;
 }
 
-export type NightshiftInvestigationsServerSetup = Record<string, never>;
+export interface NightshiftInvestigationsServerSetup {
+  registerInvestigationQuota: (callback: InvestigationQuotaCallback) => void;
+}
 
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;

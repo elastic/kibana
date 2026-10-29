@@ -119,6 +119,9 @@ describe('Significant Events run quota routes', () => {
   it('accepts only non-empty bounded settings updates', () => {
     expect(putRoute.params.safeParse({ body: { enabled: true } }).success).toBe(true);
     expect(putRoute.params.safeParse({ body: { limits: { detection: 0 } } }).success).toBe(true);
+    expect(putRoute.params.safeParse({ body: { limits: { investigation: null } } }).success).toBe(
+      true
+    );
     expect(putRoute.params.safeParse({ body: { activateLimits: { detection: 15 } } }).success).toBe(
       true
     );
@@ -137,6 +140,7 @@ describe('Significant Events run quota routes', () => {
       { limits: { detection: -1 } },
       { limits: { detection: 10_001 } },
       { limits: { detection: 1.5 } },
+      { limits: { investigation: 0 } },
       { limits: { memory: 1 } },
       { activateLimits: {} },
       { activateLimits: { detection: 0 } },
@@ -248,6 +252,27 @@ describe('Significant Events run quota routes', () => {
         timezone: 'UTC',
       },
       canManage: true,
+    });
+  });
+
+  it('stores an unlimited investigation limit as zero and leaves an omitted one untouched', async () => {
+    jest.mocked(patchRunQuotaSettings).mockResolvedValue(defaultSettings);
+    mockLedgerCounts({ detection: 0, investigation: 0, ki_extraction: 0 });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { limits: { investigation: null } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      limits: { investigation: 0 },
+    });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { limits: { detection: 5 } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      limits: { detection: 5 },
     });
   });
 

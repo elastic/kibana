@@ -17,11 +17,12 @@ import type { RunQuotaSavedObjectsRepository } from './repository';
 export const consumeRunQuota = async ({
   internalRepository,
   group,
+  date = dayKey(resolveDailyWindow()),
 }: {
   internalRepository: RunQuotaSavedObjectsRepository;
   group: RunQuotaGroup;
+  date?: string;
 }): Promise<RunQuotaConsumeResponse> => {
-  const date = dayKey(resolveDailyWindow());
   const settings = await readRunQuotaSettings(internalRepository);
   const limit = settings.limits[group];
 
@@ -30,7 +31,7 @@ export const consumeRunQuota = async ({
     date,
     group,
     mutation: (ledger) => {
-      if (isRunQuotaReached({ enabled: settings.enabled, limit, count: ledger.count })) {
+      if (isRunQuotaReached({ group, enabled: settings.enabled, limit, count: ledger.count })) {
         return { result: { allowed: false } };
       }
 
@@ -41,3 +42,22 @@ export const consumeRunQuota = async ({
     },
   });
 };
+
+export const releaseRunQuota = async ({
+  internalRepository,
+  group,
+  date,
+}: {
+  internalRepository: RunQuotaSavedObjectsRepository;
+  group: RunQuotaGroup;
+  date: string;
+}): Promise<void> =>
+  mutateRunQuotaLedger<void>({
+    internalRepository,
+    date,
+    group,
+    mutation: (ledger) =>
+      ledger.count > 0
+        ? { attributes: { count: ledger.count - 1 }, result: undefined }
+        : { result: undefined },
+  });

@@ -53,15 +53,15 @@ apiTest.describe(
       apiClient: ApiClientFixture,
       desired: {
         enabled?: boolean;
-        limits?: Partial<Record<RunQuotaGroup, number>>;
+        limits?: Partial<Record<RunQuotaGroup, number | null>>;
       }
     ): Promise<RunQuotaSnapshot> => {
       const current = await readSnapshot(apiClient);
       const limits = Object.fromEntries(
         Object.entries(desired.limits ?? {}).filter(
-          ([group, limit]) => current.limits[group as RunQuotaGroup] !== limit
+          ([group, limit]) => current.limits[group as RunQuotaGroup] !== (limit ?? 0)
         )
-      ) as Partial<Record<RunQuotaGroup, number>>;
+      ) as Partial<Record<RunQuotaGroup, number | null>>;
       const body = {
         ...(desired.enabled !== undefined && desired.enabled !== current.enabled
           ? { enabled: desired.enabled }
@@ -167,7 +167,7 @@ apiTest.describe(
         if (before.counts.investigation === 0) {
           await updateSettings(apiClient, {
             enabled: false,
-            limits: { investigation: 0 },
+            limits: { investigation: null },
           });
           await consumeAllowed(apiClient, { group: 'investigation' });
           before = await readSnapshot(apiClient);

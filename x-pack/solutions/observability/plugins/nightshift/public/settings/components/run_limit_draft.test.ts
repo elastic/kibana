@@ -30,7 +30,7 @@ describe('run quota drafts', () => {
         enabled: false,
         limits: {
           detection: 0,
-          investigation: 0,
+          investigation: 3,
           ki_extraction: 0,
         },
       },
@@ -38,7 +38,7 @@ describe('run quota drafts', () => {
         enabled: false,
         limits: {
           detection: 0,
-          investigation: 0,
+          investigation: 3,
           ki_extraction: 0,
         },
         restoreLimits: response.limits,
@@ -73,8 +73,21 @@ describe('run quota drafts', () => {
     state.draft.limits.investigation = 0;
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
-      limits: { investigation: 0 },
+      limits: { investigation: null },
     });
+  });
+
+  it('changes the investigation limit without touching the global enabled flag', () => {
+    let state = setRunLimitEnabled(createRunQuotaDraftState(response), 'investigation', false);
+
+    expect(state.draft.enabled).toBe(false);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: null } });
+
+    state = setRunLimitEnabled(state, 'investigation', true);
+    state.draft.limits.investigation = 5;
+
+    expect(state.draft.enabled).toBe(false);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: 5 } });
   });
 
   it('builds an atomic activation for legacy globally disabled settings', () => {

@@ -18,7 +18,6 @@ import { getCortexAvailabilityRoute } from './get_cortex_availability';
 import { getSandboxConnectorsRoute } from './get_sandbox_connectors';
 import { getSandboxConnectorTypesRoute } from './get_sandbox_connector_types';
 import { customContextRoutes } from './custom_context';
-import { getInvestigationLimitRoute, updateInvestigationLimitRoute } from './investigation_limit';
 import { onboardingRoutes } from './onboarding';
 import { getDecisionTreesAvailabilityRoute } from './get_decision_trees_availability';
 import { listDecisionTreesRoute } from './list_decision_trees';
@@ -73,8 +72,6 @@ export const nightshiftInvestigationsRouteRepository = {
   ...updateAutomationRoute,
   ...deleteAutomationRoute,
   ...listAutomationRunsRoute,
-  ...getInvestigationLimitRoute,
-  ...updateInvestigationLimitRoute,
   ...getMemoryAvailabilityRoute,
   ...listMemoryPagesRoute,
   ...getMemoryPageRoute,

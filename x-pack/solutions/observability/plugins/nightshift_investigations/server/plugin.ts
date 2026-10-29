@@ -106,15 +106,9 @@ import {
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
-  nightshiftInvestigationLimitSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_LIMIT_SO_TYPE,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
-import {
-  createGlobalInvestigationBudget,
-  readInvestigationLimit,
-} from './lib/investigation_limit/global_investigation_budget';
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import {
   createListSandboxConnectors,
@@ -122,6 +116,7 @@ import {
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import type {
+  InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
   NightshiftInvestigationsSetupDeps,
@@ -169,6 +164,7 @@ export class NightshiftInvestigationsPlugin
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
   private memoryEnabled = false;
+  private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
 
@@ -228,7 +224,6 @@ export class NightshiftInvestigationsPlugin
 
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
-    core.savedObjects.registerType(nightshiftInvestigationLimitSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
 
     const customContextClient = createCustomContextClient({
@@ -615,7 +610,14 @@ export class NightshiftInvestigationsPlugin
       );
     }
 
-    return {};
+    return {
+      registerInvestigationQuota: (callback) => {
+        if (this.investigationQuotaCallback) {
+          throw new Error('Investigation quota callback is already registered');
+        }
+        this.investigationQuotaCallback = callback;
+      },
+    };
   }
 
   start(
@@ -736,10 +738,7 @@ export class NightshiftInvestigationsPlugin
       agenticInvestigations: this.agenticInvestigations,
       agentAvailability: this.getInvestigationAvailability(),
       assistantEnabled: this.assistantEnabled,
-      getGlobalInvestigationBudget: async (budgetSpaceId) => {
-        const soClient = this.getAutomationsSoClient(request, budgetSpaceId);
-        return createGlobalInvestigationBudget(soClient, await readInvestigationLimit(soClient));
-      },
+      investigationQuotaCallback: this.investigationQuotaCallback,
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
@@ -858,11 +857,7 @@ export class NightshiftInvestigationsPlugin
     return this.savedObjects
       .getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [
-          NIGHTSHIFT_AUTOMATION_SO_TYPE,
-          NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
-          NIGHTSHIFT_INVESTIGATION_LIMIT_SO_TYPE,
-        ],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE, NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE],
       })
       .asScopedToNamespace(spaceId);
   };

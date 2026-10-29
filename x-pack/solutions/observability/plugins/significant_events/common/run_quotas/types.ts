@@ -25,14 +25,16 @@ export interface RunQuotaSettings {
 }
 
 export const isRunQuotaReached = ({
+  group,
   enabled,
   limit,
   count,
 }: {
+  group: RunQuotaGroup;
   enabled: boolean;
   limit: number;
   count: number;
-}): boolean => enabled && limit > MIN_RUN_LIMIT && count >= limit;
+}): boolean => (group === 'investigation' || enabled) && limit > MIN_RUN_LIMIT && count >= limit;
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,
@@ -53,10 +55,24 @@ export interface RunQuotasResponse {
   canManage: boolean;
 }
 
-export type RunQuotaSettingsUpdate =
+export type RunQuotaSettingsPatch =
   | {
       enabled?: boolean;
       limits?: Partial<Record<RunQuotaGroup, number>>;
+      activateLimits?: never;
+    }
+  | {
+      activateLimits: Partial<Record<RunQuotaGroup, number>>;
+      enabled?: never;
+      limits?: never;
+    };
+
+export type RunQuotaSettingsUpdate =
+  | {
+      enabled?: boolean;
+      limits?: Partial<Record<Exclude<RunQuotaGroup, 'investigation'>, number>> & {
+        investigation?: number | null;
+      };
       activateLimits?: never;
     }
   | {
