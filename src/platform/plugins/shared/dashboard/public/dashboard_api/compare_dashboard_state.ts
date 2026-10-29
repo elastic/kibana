@@ -17,6 +17,7 @@ import deepEqual from 'fast-deep-equal';
 import { getLayoutChanges } from './layout_manager/are_layouts_equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { approximationComparators } from './approximation_manager';
+import { logger } from '../services/logger';
 import { getProjectRoutingComparators } from './project_routing_manager';
 import { diffDashboardSettings } from './settings_manager';
 import { getUnifiedSearchComparators } from './unified_search_manager';
@@ -82,7 +83,9 @@ const diffLayout = (
         ? !child.compareSerializedState(baselinePanel, currentPanel)
         : !deepEqual(baselinePanel, currentPanel);
     } catch (error) {
-      console.warn(`Unable to compare serialized state for dashboard panel "${panelId}".`, error);
+      logger.warn(`Unable to compare serialized state for dashboard panel "${panelId}".`, {
+        error,
+      });
       // A failed comparison cannot establish equality.
       return true;
     }
