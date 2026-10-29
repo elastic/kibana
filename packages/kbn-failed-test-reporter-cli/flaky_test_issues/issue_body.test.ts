@@ -338,6 +338,27 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
+  it('marks a branch flaky when any test is flaky there, with the worst test counts', () => {
+    const report = flakyReport([
+      // the most failed builds on main, but below the rate threshold
+      flakyTest({
+        testId: 'a',
+        byBranch: [{ branch: 'main', builds: 200, failedBuilds: 4, buildFailRate: 4 / 200 }],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'another test',
+        byBranch: [{ branch: 'main', builds: 50, failedBuilds: 3, buildFailRate: 3 / 50 }],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('| another test | **`main` 6% (3 / 50)** |');
+    expect(body).toContain('| `main` | 🔴 Flaky | 4 / 200 (**2%**) |  |');
+  });
+
   it('dates a failure without a recorded build, for reports written before it was', () => {
     const report = flakyReport([
       flakyTest({

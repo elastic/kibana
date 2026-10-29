@@ -403,16 +403,19 @@ const failuresCells = ({ worst, latest }: WorstFailures<BuildCounts>): string[] 
 const BRANCH_STATUSES = ['flaky', 'failing', 'skipped', 'clean'] as const;
 type BranchStatus = (typeof BRANCH_STATUSES)[number];
 
-/** Flaky when the worst test clears the report's thresholds there, as in the tests table. */
-const branchStatus = (
-  worst: BuildCounts,
-  thresholds: BranchThresholds,
-  skip?: BranchSkip
-): BranchStatus => {
+/** Branches where any test of the suite clears the report's thresholds, as in the tests table. */
+const flakyBranches = (suite: FlakySuite, thresholds: BranchThresholds): Set<string> =>
+  new Set(
+    suite.tests.flatMap((test) =>
+      test.byBranch.filter((stats) => isFlakyBranch(stats, thresholds)).map(({ branch }) => branch)
+    )
+  );
+
+const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): BranchStatus => {
   if (skip) {
     return 'skipped';
   }
-  if (isFlakyBranch(worst, thresholds)) {
+  if (flaky) {
     return 'flaky';
   }
   return worst.failedBuilds > 0 ? 'failing' : 'clean';
@@ -462,13 +465,16 @@ const isMainOrVersionBranch = (branch: string): boolean =>
 /** Whether the suite is flaky, fails, is skipped or is clean on `main` and each version branch. */
 const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
   const skipped = branchSkips(suite);
+  const flaky = flakyBranches(suite, thresholds);
+  // The counts shown are the worst test's, the status covers every test
   const branches = worstPerKey(
     suite,
     (test) => test.byBranch.filter(({ branch }) => isMainOrVersionBranch(branch)),
     (stats) => stats.branch
   ).map((row) => {
-    const skip = skipped.get(row.worst.branch);
-    return { row, skip, status: branchStatus(row.worst, thresholds, skip) };
+    const { branch } = row.worst;
+    const skip = skipped.get(branch);
+    return { row, skip, status: branchStatus(row.worst, flaky.has(branch), skip) };
   });
   if (branches.length === 0) {
     return undefined;
