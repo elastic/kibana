@@ -75,12 +75,18 @@ const generateDashboardSchema = lazySchema(() =>
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;
 
+const getConfigTitle = (config: unknown): string | undefined =>
+  typeof config === 'object' && config !== null && 'title' in config
+    ? asString(config.title)
+    : undefined;
+
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call. Grids let it report where the layout step put panels.
+ * heavy payload into a follow-up tool call. Panel titles let it tell panels apart when their ids
+ * do not describe them, and grids let it report where the layout step put panels.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -102,6 +108,7 @@ const summarizeDashboard = (
         panels: widget.panels.map((panel) => ({
           type: panel.type,
           id: panel.id,
+          title: getConfigTitle(panel.config),
           grid: panel.grid,
           authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
@@ -110,6 +117,7 @@ const summarizeDashboard = (
     return {
       type: widget.type,
       id: widget.id,
+      title: getConfigTitle(widget.config),
       grid: widget.grid,
       authoring_note: authoringNotesByPanelId.get(widget.id),
     };
@@ -117,10 +125,7 @@ const summarizeDashboard = (
   controls: (dashboardData.pinned_panels ?? []).map(({ id, type, config }) => ({
     id: asString(id),
     type: asString(type),
-    title:
-      typeof config === 'object' && config !== null && 'title' in config
-        ? asString(config.title)
-        : undefined,
+    title: getConfigTitle(config),
   })),
 });
 
