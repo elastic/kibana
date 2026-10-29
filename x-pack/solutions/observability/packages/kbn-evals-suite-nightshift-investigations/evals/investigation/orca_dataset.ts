@@ -16,10 +16,10 @@ import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
 export const ORCA_RELEASE = {
-  id: 'd5b95e5b-0806-57d8-abcc-332526be51ea',
-  name: 'nightshift/orca-sampled50-v2',
+  id: 'eeffbc6e-664b-50d1-9c5f-c195a39ed235',
+  name: 'nightshift/orca-sampled50-v3',
   examples: 50,
-  sha256: '64c2bee81a86dd64f5a06dd2bd470170554f00d1db39f0f8cf10c15706fd6004',
+  sha256: '6e47ae50da1fa0ce60f8de5dcbb90e887b74bd937711c6bc23fa997369000803',
 } as const;
 
 const examplesSchema = lazySchema(() =>

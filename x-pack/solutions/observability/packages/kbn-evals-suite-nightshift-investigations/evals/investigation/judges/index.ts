@@ -350,7 +350,10 @@ const stringList = (value: unknown): string[] | undefined =>
   Array.isArray(value) && value.every((item) => typeof item === 'string') ? value : undefined;
 
 const isOrcaControl = (metadata: InvestigationExample['metadata']): boolean =>
-  metadata.control === true || metadata.task_type === 'control';
+  metadata.control === true ||
+  metadata.task_type === 'control' ||
+  metadata.no_incident === true ||
+  metadata.section === 'control';
 
 /** A default severity alone is not a report. */
 const reportHasFindings = (report: InvestigationTaskOutput['structured_report']): boolean =>
@@ -439,12 +442,18 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
     getModel: getModelFactory(deps.evaluationConnector),
     evaluate: async ({ output, expected, metadata }) => {
       const flags = stringList(metadata.plausible_flags);
+      if (isOrcaControl(metadata)) {
+        return {
+          score: null,
+          label: 'n/a',
+          explanation: 'Hallucination applies to an incident, not a control.',
+        };
+      }
       if (!flags) {
         return {
           score: null,
           label: 'n/a',
-          explanation:
-            'Hallucination needs the example plausible flag set, which may be empty for a control.',
+          explanation: 'Hallucination needs the example plausible flag set.',
         };
       }
       if (!reportHasFindings(output.structured_report)) {

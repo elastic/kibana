@@ -232,4 +232,54 @@ describe('ORCA scores', () => {
     });
     expect(result).toMatchObject({ score: 1, label: 'hallucinated' });
   });
+
+  it('keeps accuracy and hallucination n/a for a no-incident control with an empty flag set', async () => {
+    const { deps, prompt } = judgeReturning({
+      named_flags: ['cartFailure'],
+      named_causes: ['cartFailure'],
+      incident_inside_quiet_window: true,
+      reasoning: 'Unused for the set scores.',
+    });
+    const metadata = { case_id: 'checkout', no_incident: true, plausible_flags: [] as string[] };
+    const input = { ...example, metadata, output: output() };
+    const accuracy = await evaluator(deps, ORCA_RCA_ACCURACY_EVALUATOR).evaluate(input);
+    const hallucination = await evaluator(deps, ORCA_HALLUCINATION_EVALUATOR).evaluate(input);
+    const control = await evaluator(deps, ORCA_CONTROL_EVALUATOR).evaluate({
+      ...input,
+      output: output({ structured_report: undefined }),
+    });
+    expect(accuracy).toMatchObject({ score: null, label: 'n/a' });
+    expect(hallucination).toMatchObject({ score: null, label: 'n/a' });
+    expect(control).toMatchObject({ score: 1, label: 'pass' });
+    expect(prompt).not.toHaveBeenCalled();
+  });
+
+  it('scores a section control and still leaves the set scores n/a when the flag set is empty', async () => {
+    const { deps, prompt } = judgeReturning({
+      named_flags: ['cartFailure'],
+      named_causes: ['cartFailure'],
+      incident_inside_quiet_window: false,
+      reasoning: 'No incident in the window.',
+    });
+    const metadata = {
+      case_id: 'checkout',
+      section: 'control',
+      plausible_flags: [] as string[],
+      quiet_window: { start: null, end: '2026-04-19T14:01:51.404Z' },
+    };
+    const scored = { ...example, metadata, output: output({ structured_report: undefined }) };
+    const control = await evaluator(deps, ORCA_CONTROL_EVALUATOR).evaluate(scored);
+    const accuracy = await evaluator(deps, ORCA_RCA_ACCURACY_EVALUATOR).evaluate({
+      ...scored,
+      output: output(),
+    });
+    const hallucination = await evaluator(deps, ORCA_HALLUCINATION_EVALUATOR).evaluate({
+      ...scored,
+      output: output(),
+    });
+    expect(control).toMatchObject({ score: 1, label: 'pass' });
+    expect(accuracy).toMatchObject({ score: null, label: 'n/a' });
+    expect(hallucination).toMatchObject({ score: null, label: 'n/a' });
+    expect(prompt).not.toHaveBeenCalled();
+  });
 });
