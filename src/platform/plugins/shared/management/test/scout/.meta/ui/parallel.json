@@ -1,5 +1,5 @@
 {
-  "sha1": "ff924a25246f2de08b60e9d115df1d8091c3f862",
+  "sha1": "445ac39720a3fc7b5ef145c75fb046227865e37c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -57,6 +57,42 @@
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
         "line": 120,
         "column": 16
+      }
+    },
+    {
+      "id": "e89ee8c469beedd-39128efa5e18248",
+      "title": "Stack Management — disabled apps redirects disabled apps to the management landing page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/disabled_apps_redirect.spec.ts",
+        "line": 51,
+        "column": 11
+      }
+    },
+    {
+      "id": "b9ec1123147d3a4-20404b63871159b",
+      "title": "Stack Management — cards landing page renders the cards landing page and opens Index Management from its card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/landing_page_cards.spec.ts",
+        "line": 26,
+        "column": 7
       }
     },
     {

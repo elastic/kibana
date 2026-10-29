@@ -8,6 +8,10 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
+export {
+  normalizeConnectorFeatureIds,
+  resolveConnectorIdFromFeatures,
+} from './lib/resolve_connector_id_from_features';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { SearchInferenceEndpointsPlugin } = await import('./plugin');
@@ -18,6 +22,9 @@ export type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
   InferenceFeatureConfig,
+  RecommendedEndpoint,
+  RecommendedEndpointInput,
+  RegisteredInferenceFeature,
   RegisterResult,
   InferenceFeatureRegistryContract,
   InferenceFeatureRegistryStartContract,

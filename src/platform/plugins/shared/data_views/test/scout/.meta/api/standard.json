@@ -1,5 +1,5 @@
 {
-  "sha1": "0717ad2078c0628b70952de74b168cf60eb5c5b7",
+  "sha1": "a0a74b67fa01d01d4c03bf83991c6b2637420d4e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -165,8 +165,8 @@
       }
     },
     {
-      "id": "6a1a7d28753a6bb-6d001d5905a8b59",
-      "title": "POST api/data_views/data_view - main (data view api) can add runtime fields",
+      "id": "6a1a7d28753a6bb-4364e7cbe8fb3cc",
+      "title": "POST api/data_views/data_view - main (data view api) can create a data view matching an index with a non-ASCII name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -185,6 +185,26 @@
       }
     },
     {
+      "id": "6a1a7d28753a6bb-6d001d5905a8b59",
+      "title": "POST api/data_views/data_view - main (data view api) can add runtime fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
+        "line": 281,
+        "column": 19
+      }
+    },
+    {
       "id": "6a1a7d28753a6bb-141dc05495cc6ee",
       "title": "POST api/data_views/data_view - main (data view api) can specify optional typeMeta attribute when creating a data view",
       "expectedStatus": "passed",
@@ -200,7 +220,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 268,
+        "line": 307,
         "column": 14
       }
     },
@@ -220,7 +240,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 288,
+        "line": 327,
         "column": 14
       }
     },
@@ -240,8 +260,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 318,
-        "column": 6
+        "line": 356,
+        "column": 25
       }
     },
     {
@@ -260,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/crud_create_main.spec.ts",
-        "line": 353,
-        "column": 23
+        "line": 392,
+        "column": 32
       }
     },
     {
@@ -2684,8 +2704,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache_max_age.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 49,
+        "column": 58
       }
     },
     {

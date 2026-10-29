@@ -36,7 +36,7 @@ interface YamlStep {
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
   'agent-id'?: string;
-  'connector-id-by-feature'?: string;
+  'connector-id-by-feature'?: string | string[];
   'create-conversation'?: boolean;
   'plugin-id'?: string;
   'aggregate-by'?: string;
@@ -525,7 +525,40 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_alerts')?.with?.ignore_unavailable).toBeUndefined();
     });
 
-    it.each(['load_entities', 'load_events'] as const)(
+    it.each([
+      'load_attack_discovery',
+      'load_alerts',
+      'load_entities',
+      'load_events_by_host_id',
+      'load_events_by_host_name',
+    ] as const)('projects %s so the template payload stays inside the gateway cap', (name) => {
+      expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
+    });
+
+    it('returns the entity fields the entity_role check reads', () => {
+      expect(stepIn('load_entities')?.with?._source).toEqual(
+        expect.arrayContaining([
+          'entity.sub_type',
+          'entity.name',
+          'asset.environment',
+          'asset.name',
+          'asset.model',
+          'asset.owner',
+          'asset.vendor',
+        ])
+      );
+    });
+
+    it('keeps the alert fields the workflow expressions read', () => {
+      expect(stepIn('load_alerts')?.with?._source).toEqual(
+        expect.arrayContaining(['host.id', 'user.name', 'kibana.alert.original_time'])
+      );
+      expect(stepIn('load_attack_discovery')?.with?._source).toEqual(
+        expect.arrayContaining(['@timestamp', 'kibana.alert.attack_discovery.alert_ids'])
+      );
+    });
+
+    it.each(['load_entities', 'load_events_by_host_id', 'load_events_by_host_name'] as const)(
       'continues when optional source %s fails',
       (name) => {
         expect(stepIn(name)?.['on-failure']?.continue).toBe(true);
@@ -546,8 +579,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
-    it('routes the agent through the AlertZero frontier feature', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_frontier');
+    it('prefers a saved template-row model, then the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
     });
 
     it('uses the thin agent', () => {
@@ -622,6 +658,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         };
       };
 
+      expect((analyze?.with?.schema as { required: string[] }).required).not.toContain('claims');
+
       expect(schema.properties.claims.properties.alert_link.properties.field.enum).toEqual([
         'user.name',
         'user.id',
@@ -632,6 +670,122 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
         'agent.id',
         'source.ip',
       ]);
+    });
+  });
+
+  describe('the raw-event window', () => {
+    const render = (field: 'events_from' | 'events_to', context: Record<string, unknown>): string =>
+      createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn('count_alerts')?.with?.[field]),
+        context
+      );
+
+    const alertsContext = (
+      earliest: string | undefined,
+      latest: string | undefined,
+      discoveryAt: string
+    ) => ({
+      steps: {
+        load_alerts: {
+          output: {
+            aggregations: {
+              earliest_original_time: { value_as_string: earliest },
+              latest_original_time: { value_as_string: latest },
+            },
+          },
+        },
+        load_attack_discovery: {
+          output: { hits: { hits: [{ _source: { '@timestamp': discoveryAt } }] } },
+        },
+      },
+    });
+
+    it('returns the earliest cited alert original time as the window start', () => {
+      expect(
+        render(
+          'events_from',
+          alertsContext(
+            '2026-10-14T03:22:00.000Z',
+            '2026-10-14T17:42:00.000Z',
+            '2026-10-14T21:00:02.000Z'
+          )
+        )
+      ).toBe('2026-10-14T03:22:00.000Z');
+    });
+
+    it('returns the latest cited alert original time as the window end', () => {
+      expect(
+        render(
+          'events_to',
+          alertsContext(
+            '2026-10-14T03:22:00.000Z',
+            '2026-10-14T17:42:00.000Z',
+            '2026-10-14T21:00:02.000Z'
+          )
+        )
+      ).toBe('2026-10-14T17:42:00.000Z');
+    });
+
+    it('returns the discovery timestamp when the alerts have no original time', () => {
+      expect(
+        render('events_from', alertsContext(undefined, undefined, '2026-10-14T21:00:02.000Z'))
+      ).toBe('2026-10-14T21:00:02.000Z');
+    });
+
+    it('searches host.id when the cited alerts have one', () => {
+      expect(stepIn('load_events_by_host_id')?.if).toBe(
+        '${{ (steps.count_alerts.output.host_ids | size) > 0 }}'
+      );
+    });
+
+    it('searches host.name only when the cited alerts have no host.id', () => {
+      expect(stepIn('load_events_by_host_name')?.if).toBe(
+        '${{ (steps.count_alerts.output.host_ids | size) == 0 }}'
+      );
+    });
+
+    it('applies the alert window as date math on the host.id search', () => {
+      expect(JSON.stringify(stepIn('load_events_by_host_id')?.with?.query)).toContain(
+        '{{ steps.count_alerts.output.events_from }}||-2h'
+      );
+    });
+
+    it('applies the alert window as date math on the host.name search', () => {
+      expect(JSON.stringify(stepIn('load_events_by_host_name')?.with?.query)).toContain(
+        '{{ steps.count_alerts.output.events_to }}||+2h'
+      );
+    });
+
+    it('tells the agent the window follows the cited alerts', () => {
+      expect(String(stepIn('analyze')?.with?.message)).toContain(
+        'Raw events from 2 hours before the earliest cited alert to 2 hours after the latest'
+      );
+    });
+
+    const hitsExpression = String(stepIn('load_events')?.with?.hits)
+      .replace(/^\$\{\{/, '')
+      .replace(/\}\}$/, '')
+      .trim();
+
+    it('returns the host.id hits when that search ran', () => {
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
+          steps: {
+            load_events_by_host_id: { output: { hits: { total: { value: 3 }, hits: [] } } },
+            load_events_by_host_name: { output: { hits: { total: { value: 9 }, hits: [] } } },
+          },
+        })
+      ).toEqual({ total: { value: 3 }, hits: [] });
+    });
+
+    it('returns the host.name hits when the host.id search was skipped', () => {
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(hitsExpression, {
+          steps: {
+            load_events_by_host_name: { output: { hits: { total: { value: 2 }, hits: [] } } },
+          },
+        })
+      ).toEqual({ total: { value: 2 }, hits: [] });
     });
   });
 
@@ -747,6 +901,8 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       ).toEqual([
         'require_supported_verdict',
         'block_truncated_clear',
+        'check_claim_grounding',
+        'block_ungrounded_claims',
         'keep_model_writeup',
         'emit_result',
       ]);
@@ -800,6 +956,177 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       const payload = stepIn('emit_result')?.with?.payload as { rationale_markdown?: string };
 
       expect(payload.rationale_markdown).toBe(stepIn('emit_result')?.with?.rationale_markdown);
+    });
+  });
+
+  describe('ungrounded world claims', () => {
+    const engine = createWorkflowLiquidEngine();
+
+    const groundingContext = ({
+      world,
+      eventIds,
+      entityIds,
+      verdict,
+    }: {
+      world?: Array<{ source: string; id: string }>;
+      eventIds: string[];
+      entityIds: string[];
+      verdict: string;
+    }) => ({
+      consts: { no_rows: [] as unknown[] },
+      steps: {
+        analyze: {
+          output: {
+            structured_output: {
+              ...(world === undefined ? {} : { claims: { world } }),
+            },
+          },
+        },
+        load_events: {
+          output: { hits: { hits: eventIds.map((id) => ({ _id: id })) } },
+        },
+        load_entities: {
+          output: {
+            hits: { hits: entityIds.map((id) => ({ _source: { entity: { id } } })) },
+          },
+        },
+        block_truncated_clear: {
+          output: { verdict, summary_markdown: 'Model summary.' },
+        },
+      },
+    });
+
+    const downgraded = (context: Record<string, unknown>): string =>
+      engine.parseAndRenderSync(String(stepIn('check_claim_grounding')?.with?.downgraded), context);
+
+    it('returns false when the cited raw-event id is in the hits', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'raw_event', id: 'event-1' }],
+            eventIds: ['event-1'],
+            entityIds: [],
+            verdict: 'true_positive',
+          })
+        )
+      ).toBe('false');
+    });
+
+    it('returns true when a true positive cites a raw-event id that was not returned', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'raw_event', id: 'copied-from-the-alert' }],
+            eventIds: [],
+            entityIds: [],
+            verdict: 'true_positive',
+          })
+        )
+      ).toBe('true');
+    });
+
+    const realEntityContext = (citedId: string, verdict: string) => {
+      const context = groundingContext({
+        world: [{ source: 'entity_store', id: citedId }],
+        eventIds: ['event-1'],
+        entityIds: [],
+        verdict,
+      });
+      (context.steps.load_entities.output.hits as { hits: unknown[] }).hits = [
+        { _id: 'cc6e7258465a02d8e5f9389f2e020dc4', _source: { entity: { id: 'host:host-1' } } },
+      ];
+      return context;
+    };
+
+    it('returns false when a true positive cites an entity hit by its entity.id', () => {
+      expect(downgraded(realEntityContext('host:host-1', 'true_positive'))).toBe('false');
+    });
+
+    it('returns false when a true positive cites an entity hit by its document _id', () => {
+      expect(
+        downgraded(realEntityContext('cc6e7258465a02d8e5f9389f2e020dc4', 'true_positive'))
+      ).toBe('false');
+    });
+
+    it('returns true when a true positive cites an entity id that matches neither', () => {
+      expect(downgraded(realEntityContext('host:invented', 'true_positive'))).toBe('true');
+    });
+
+    it('returns true when a false positive cites an entity id that was not returned', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'entity_store', id: 'missing-entity' }],
+            eventIds: ['event-1'],
+            entityIds: ['entity-1'],
+            verdict: 'false_positive',
+          })
+        )
+      ).toBe('true');
+    });
+
+    it('returns false when the model cited no world claims', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            eventIds: [],
+            entityIds: [],
+            verdict: 'true_positive',
+          })
+        )
+      ).toBe('false');
+    });
+
+    it('returns false when the verdict is already inconclusive', () => {
+      expect(
+        downgraded(
+          groundingContext({
+            world: [{ source: 'raw_event', id: 'copied-from-the-alert' }],
+            eventIds: [],
+            entityIds: [],
+            verdict: 'inconclusive',
+          })
+        )
+      ).toBe('false');
+    });
+
+    it('returns inconclusive when the grounding check downgrades the verdict', () => {
+      expect(
+        engine.parseAndRenderSync(String(stepIn('block_ungrounded_claims')?.with?.verdict), {
+          steps: {
+            check_claim_grounding: { output: { downgraded: 'true' } },
+            block_truncated_clear: { output: { verdict: 'true_positive' } },
+          },
+        })
+      ).toBe('inconclusive');
+    });
+
+    it('returns the ungrounded summary when the grounding check downgrades the verdict', () => {
+      expect(
+        engine.parseAndRenderSync(
+          String(stepIn('block_ungrounded_claims')?.with?.summary_markdown),
+          {
+            steps: {
+              check_claim_grounding: { output: { downgraded: 'true' } },
+              block_truncated_clear: { output: { summary_markdown: 'Model summary.' } },
+            },
+          }
+        )
+      ).toBe('A cited world-check id is not in the evidence, so this cannot be classified.');
+    });
+
+    it('returns the model summary when every cited id was returned', () => {
+      expect(
+        engine.parseAndRenderSync(
+          String(stepIn('block_ungrounded_claims')?.with?.summary_markdown),
+          {
+            steps: {
+              check_claim_grounding: { output: { downgraded: 'false' } },
+              block_truncated_clear: { output: { summary_markdown: 'Model summary.' } },
+            },
+          }
+        )
+      ).toBe('Model summary.');
     });
   });
 });

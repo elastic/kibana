@@ -24,12 +24,14 @@ import {
   formatPercent,
   FRAMEWORK_LABELS,
   inlineCode,
+  isFlakyBranch,
   isPullRequestRef,
   KIBANA_BLOB_URL,
   plural,
   table,
   targetEnvironment,
   testsTable,
+  type BranchThresholds,
 } from './markdown';
 import type { FlakySuite } from './suites';
 
@@ -264,21 +266,26 @@ const titleCategory = (
 };
 
 /**
- * `Flaky Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a suite
- * title. Display only; issues are matched on their metadata, never on the title.
+ * `<Adjective> Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a
+ * suite title. Display only; issues are matched on their metadata, never on the title.
  */
-export const flakySuiteIssueTitle = (
+export const suiteIssueTitle = (
+  adjective: 'Flaky' | 'Failing',
   suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
 ): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const category = titleCategory(suite.framework, suite.configCategory);
-  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short}${
+  const lead = `${adjective} ${FRAMEWORK_LABELS[suite.framework].short}${
     category ? ` ${category}` : ''
   } suite: `;
   // Nested describe blocks can join into a subject longer than GitHub accepts for a title
   const room = MAX_TITLE_LENGTH - lead.length;
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
 };
+
+export const flakySuiteIssueTitle = (
+  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
+): string => suiteIssueTitle('Flaky', suite);
 
 /** `Skipped on \`main\` since 2026-09-09.` when the latest run of the worst test was a skip. */
 const skippedNote = (suite: FlakySuite): string | undefined => {
@@ -379,31 +386,54 @@ interface BranchSkip {
 }
 
 /**
- * `🔴 \`main\` | 49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |`
- * for a clean row, or `⏭️` with when it last ran for a skipped one. Reports written before the
- * build was recorded get the time alone.
+ * `49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `0 / 58 |` for a clean row.
+ * Reports written before the build was recorded get the time alone.
  */
-const failuresRow = (
-  label: string,
-  { worst, latest }: WorstFailures<BuildCounts>,
-  skip?: BranchSkip
-): string[] => {
-  const failure = latest
+const failuresCells = ({ worst, latest }: WorstFailures<BuildCounts>): string[] => [
+  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
+  latest
     ? formatBuildLink(
         { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
         latest.lastFailedAt
       )
-    : undefined;
-  const skipped = skip
-    ? skip.lastRanAt
-      ? `skipped, last ran ${formatDay(skip.lastRanAt)}`
-      : 'skipped in every run'
-    : undefined;
-  return [
-    `${skip ? '⏭️' : worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
-    worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
-    [failure, skipped].filter((part) => part !== undefined).join(' · '),
-  ];
+    : '',
+];
+
+/** What the suite does on a branch, in the order the branch table lists them. */
+const BRANCH_STATUSES = ['flaky', 'failing', 'skipped', 'clean'] as const;
+type BranchStatus = (typeof BRANCH_STATUSES)[number];
+
+/** Branches where any test of the suite clears the report's thresholds, as in the tests table. */
+const flakyBranches = (suite: FlakySuite, thresholds: BranchThresholds): Set<string> =>
+  new Set(
+    suite.tests.flatMap((test) =>
+      test.byBranch.filter((stats) => isFlakyBranch(stats, thresholds)).map(({ branch }) => branch)
+    )
+  );
+
+const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): BranchStatus => {
+  if (skip) {
+    return 'skipped';
+  }
+  if (flaky) {
+    return 'flaky';
+  }
+  return worst.failedBuilds > 0 ? 'failing' : 'clean';
+};
+
+const branchStatusLabel = (status: BranchStatus, skip?: BranchSkip): string => {
+  switch (status) {
+    case 'flaky':
+      return '🔴 Flaky';
+    case 'failing':
+      return '🟠 Some failures';
+    case 'skipped':
+      return skip?.lastRanAt
+        ? `⏭️ Skipped, last ran ${formatDay(skip.lastRanAt)}`
+        : '⏭️ Skipped in every run';
+    case 'clean':
+      return '✅ No failures';
+  }
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
@@ -428,26 +458,38 @@ const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {
   );
 };
 
-/** Which branches the suite fails on, is skipped on and is clean on, at a glance. */
-const failuresByBranch = (suite: FlakySuite): string | undefined => {
+/** `main` or a version branch like `9.4`; feature and pull request branches are not. */
+const isMainOrVersionBranch = (branch: string): boolean =>
+  branch === 'main' || /^\d+\.\d+$/.test(branch);
+
+/** Whether the suite is flaky, fails, is skipped or is clean on `main` and each version branch. */
+const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
   const skipped = branchSkips(suite);
-  const group = ({ worst }: WorstFailures<BuildCounts & { branch: string }>): number =>
-    skipped.has(worst.branch) ? 1 : worst.failedBuilds > 0 ? 0 : 2;
+  const flaky = flakyBranches(suite, thresholds);
+  // The counts shown are the worst test's, the status covers every test
   const branches = worstPerKey(
     suite,
-    (test) => test.byBranch,
+    (test) => test.byBranch.filter(({ branch }) => isMainOrVersionBranch(branch)),
     (stats) => stats.branch
-  ).sort((a, b) => group(a) - group(b));
+  ).map((row) => {
+    const { branch } = row.worst;
+    const skip = skipped.get(branch);
+    return { row, skip, status: branchStatus(row.worst, flaky.has(branch), skip) };
+  });
   if (branches.length === 0) {
     return undefined;
   }
-  const rows = branches.map((row) =>
-    failuresRow(inlineCode(row.worst.branch), row, skipped.get(row.worst.branch))
-  );
+  const rows = branches
+    .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
+    .map(({ row, skip, status }) => [
+      inlineCode(row.worst.branch),
+      branchStatusLabel(status, skip),
+      ...failuresCells(row),
+    ]);
   return [
-    '#### Failures by Branch',
+    '#### Status by Branch',
     '',
-    table(['Branch', 'Failed builds', 'Sample failure'], rows),
+    table(['Branch', 'Status', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 
@@ -468,10 +510,11 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
   if (targets.length === 0) {
     return undefined;
   }
-  const rows = targets.map((row) => {
-    const [target, ...rest] = failuresRow(inlineCode(row.worst.mode), row);
-    return [target, targetEnvironment(row.worst), ...rest];
-  });
+  const rows = targets.map((row) => [
+    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(row.worst.mode)}`,
+    targetEnvironment(row.worst),
+    ...failuresCells(row),
+  ]);
   return [
     '#### Failures by Target',
     '',
@@ -716,7 +759,7 @@ const reportSections = (suite: FlakySuite, report: FlakyTestReport): Array<strin
 
 const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
   failuresByErrorMessage(suite),
-  failuresByBranch(suite),
+  statusByBranch(suite, report),
   failuresByTarget(suite),
   failuresByPipeline(suite, report),
 ];
@@ -758,17 +801,14 @@ export const refreshFlakySuiteIssueMetadata = (
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 
-const SKIP_TIP =
+export const SKIP_TIP =
   '> [!TIP]\n' +
   "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
   'to `/skip` it, or skip the test case manually.';
 
 /**
  * The comment of a refresh that found new failures: this report's numbers for the suite, as the
- * body keeps the ones it was filed with, then how to skip it. In elastic/kibana a `kibanamachine`
- * comment runs the failed-test alert of elastic/kibana-operations `triage/` (a Slack message for
- * teams opted in to existing-failure alerts), which reads the report count from the body's
- * metadata, so the metadata is updated first.
+ * body keeps the ones it was filed with, then how to skip it.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,

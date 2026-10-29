@@ -1,0 +1,176 @@
+{
+  "sha1": "b9bba22a52e6f4eae98900116d33ef5de25a3bd0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "e8f6d3c738719c6-8cf1f3cf6c6d663",
+      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 57,
+        "column": 5
+      }
+    },
+    {
+      "id": "e8f6d3c738719c6-a0554bccd589a70",
+      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_crud.spec.ts",
+        "line": 108,
+        "column": 40
+      }
+    },
+    {
+      "id": "ca90eb46c808715-c6dcf15528a3e01",
+      "title": "Action Policies - read/write privileges editor sees every write affordance",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 27,
+        "column": 6
+      }
+    },
+    {
+      "id": "ca90eb46c808715-5993a4bf6be8200",
+      "title": "Action Policies - read/write privileges read-only user cannot access write affordances",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 38,
+        "column": 11
+      }
+    },
+    {
+      "id": "ca90eb46c808715-1c84e85eee0a8b0",
+      "title": "Action Policies - read/write privileges read-only user is blocked from the edit route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policies_privileges.spec.ts",
+        "line": 54,
+        "column": 98
+      }
+    },
+    {
+      "id": "da62bfa2a2aafb2-624163cd0374a5d",
+      "title": "Action Policies - affected rules navigates from the details flyout to the affected rules and back",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 36,
+        "column": 44
+      }
+    },
+    {
+      "id": "da62bfa2a2aafb2-3f409768cd06e1b",
+      "title": "Action Policies - affected rules hides the link from users who cannot read rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_affected_rules.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "fef2892633c85b5-73105c6e4a9d4df",
+      "title": "Action policy attachment canvas in Agent Builder renders the policy definition for a proposed policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 160,
+        "column": 22
+      }
+    },
+    {
+      "id": "fef2892633c85b5-e79fe8ff8a4bb24",
+      "title": "Action policy attachment canvas in Agent Builder Create policy persists the policy and switches to persisted actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 175,
+        "column": 11
+      }
+    },
+    {
+      "id": "fef2892633c85b5-dd860bd5197522f",
+      "title": "Action policy attachment canvas in Agent Builder View in Policies opens the persisted policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 208,
+        "column": 18
+      }
+    },
+    {
+      "id": "fef2892633c85b5-1d20d0eba541076",
+      "title": "Action policy attachment canvas in Agent Builder closes and reopens the canvas without losing its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
+        "line": 220,
+        "column": 83
+      }
+    }
+  ]
+}
