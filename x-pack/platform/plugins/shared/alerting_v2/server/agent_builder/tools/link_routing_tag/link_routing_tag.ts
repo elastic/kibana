@@ -30,7 +30,8 @@ const ATTACHMENT_ID_MAX_LENGTH = 256;
 export const LINK_ROUTING_TAG_RESULT_GUIDANCE = `After it returns, render both attachments with the ids and versions from the result:
 <render_attachment id="{ruleAttachment.id}" version="{ruleAttachment.version}"/>
 <render_attachment id="{actionPolicyAttachment.id}" version="{actionPolicyAttachment.version}"/>
-When rule_saved is false, name routing_tag and state both that the rule is unsaved and that the policy matches no alerts until the rule carrying that tag is saved. Do not block the policy on saving the rule.`;
+When rule_saved is false, name routing_tag and state both that the rule is unsaved and that the policy matches no alerts until the rule carrying that tag is saved. Do not block the policy on saving the rule.
+When other_matcher_tags is present, the policy kept those matcher tags, so rules carrying any of them also match it. Name them and ask whether to drop them with set_matcher.`;
 
 /** Expected linker failures. Callers return these as tool errors without a warn log. */
 export class LinkRoutingTagError extends Error {
@@ -146,6 +147,7 @@ export interface LinkRoutingTagResult {
     policyId?: string;
     matcher_tags: string[];
   };
+  other_matcher_tags?: string[];
 }
 
 /**
@@ -257,6 +259,7 @@ export const linkRoutingTag = async (
     }
 
     const ruleSaved = rule.origin != null;
+    const otherMatcherTags = nextMatcherTags.filter((matcherTag) => matcherTag !== routingTag);
     const result: LinkRoutingTagResult = {
       routing_tag: routingTag,
       rule_saved: ruleSaved,
@@ -273,6 +276,7 @@ export const linkRoutingTag = async (
         ...(nextPolicyData.id != null ? { policyId: nextPolicyData.id } : {}),
         matcher_tags: nextMatcherTags,
       },
+      ...(otherMatcherTags.length > 0 ? { other_matcher_tags: otherMatcherTags } : {}),
     };
 
     logger.debug({

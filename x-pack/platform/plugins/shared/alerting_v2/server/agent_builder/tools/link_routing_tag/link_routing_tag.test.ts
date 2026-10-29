@@ -165,6 +165,7 @@ describe('linkRoutingTag', () => {
       policyId: 'policy-origin',
       matcher_tags: ['sre', 'notify-high-cpu-prod'],
     });
+    expect(data.other_matcher_tags).toEqual(['sre']);
     expect(updatedData(ctx, 'rule-1')?.metadata).toEqual({
       name: 'High CPU Prod',
       tags: ['prod'],
@@ -200,6 +201,7 @@ describe('linkRoutingTag', () => {
     expect(data).not.toHaveProperty('matches_before_rule_saved');
     expect(data.ruleAttachment.routing_tags).toEqual(['sre', 'page-oncall']);
     expect(data.actionPolicyAttachment.matcher_tags).toEqual(['page-oncall']);
+    expect(data).not.toHaveProperty('other_matcher_tags');
   });
 
   it('returns the current versions without saving when the tag is already on both sides', async () => {

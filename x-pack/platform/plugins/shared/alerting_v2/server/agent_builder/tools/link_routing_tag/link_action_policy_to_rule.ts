@@ -19,7 +19,7 @@ import {
   type LinkRoutingTagToolDeps,
 } from './link_routing_tag';
 
-const LINK_ACTION_POLICY_TO_RULE_USAGE = `Use when notifications for one specific rule should match that rule instead of every alert in the space. Do not set matcher.tags or routing_tags by hand for this link, and do not call set_matcher on this policy after it. Only alert rules can be linked. Omit tag to derive notify-<rule-name>. Updates conversation attachments only and does not save the policy or the rule.
+const LINK_ACTION_POLICY_TO_RULE_USAGE = `Use when notifications for one specific rule should match that rule instead of every alert in the space. Existing matcher tags on the policy are kept, so the policy only matches this rule alone when it had no matcher tags before. Do not set matcher.tags or routing_tags by hand for this link, and do not call set_matcher on this policy after it. Only alert rules can be linked. Omit tag to derive notify-<rule-name>. Updates conversation attachments only and does not save the policy or the rule.
 
 ${LINK_ROUTING_TAG_RESULT_GUIDANCE}`;
 
