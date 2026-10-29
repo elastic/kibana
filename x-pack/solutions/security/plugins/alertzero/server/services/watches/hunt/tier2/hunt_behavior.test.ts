@@ -12,8 +12,13 @@ import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { HuntBehaviorModels } from '../types';
 import { huntBehavior } from './hunt_behavior';
+import {
+  HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS,
+  HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS,
+} from '../common/hunt_prompt_templates';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
 import { buildMitreCatalog } from './mitre_catalog';
+import { getSearchedTechniqueIds } from './searched_technique_ids';
 import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
 
 /**
@@ -119,6 +124,38 @@ describe('huntBehavior', () => {
     jest.clearAllMocks();
     generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: T1566_ESQL });
     executeEsqlMock.mockResolvedValue({ columns: [], values: [] });
+  });
+
+  it('clamps extraction template variables to the gateway bounds', async () => {
+    const chatComplete = jest.fn().mockResolvedValue({ content: '{"candidates":[]}' });
+    const extraction = {
+      chatModel: { withStructuredOutput: jest.fn() },
+      inferenceClient: { chatComplete },
+      connector: {
+        connectorId: 'daybreak',
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      },
+    } as unknown as ScopedModel;
+    const esql = {
+      chatModel: { withStructuredOutput: jest.fn() },
+      inferenceClient: { chatComplete: jest.fn() },
+      connector: { connectorId: 'frontier', metadata: {} },
+    } as unknown as ScopedModel;
+
+    await huntBehavior({ extraction, esql }, logger, {
+      text: 'A'.repeat(HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS + 50),
+      article_context: {
+        sample_events: ['E'.repeat(HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS)],
+      },
+    });
+
+    const variables = chatComplete.mock.calls[0][0].template.variables;
+    expect(variables.report_text).toHaveLength(HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS);
+    expect(variables.environment_context.length).toBeLessThanOrEqual(
+      HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS
+    );
+    expect(variables.environment_context).toContain('E');
+    expect(chatComplete.mock.calls[0][0].template.id).toBe('.hunt-behavior-extraction');
   });
 
   it('returns no_behaviors_found when LLM extracts nothing', async () => {
@@ -1477,6 +1514,56 @@ describe('huntBehavior', () => {
       expect(result.indexed_behaviors.some((b) => b.technique_id === sibling?.technique_id)).toBe(
         true
       );
+    });
+
+    describe('when the survivor did not search the shared artifacts', () => {
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      // 22 behaviors: the first 3 share an artifact set and collapse to one survivor, and the
+      // other 19 are distinct. 20 survivors fill the budget, which leaves the 2 siblings to be
+      // settled on what their survivor did.
+      const buildSiblingCandidates = () =>
+        [...enterpriseCatalog.techniqueById.keys()].slice(0, 22).map((technique_id, index) => ({
+          technique_id,
+          evidence_quote: index < 3 ? sharedQuote : 'evidence',
+          llm_confidence: 0.5 + index * 0.01,
+        }));
+
+      const siblingParams = { text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] };
+
+      beforeEach(() => {
+        generateEsqlMock.mockResolvedValue({ query: COVERING_ESQL });
+      });
+
+      it('records generation_budget, not collapsed, when every execute fails', async () => {
+        executeEsqlMock.mockRejectedValue(new Error('verification_exception'));
+
+        const result = await huntBehavior(
+          buildMockModel(buildSiblingCandidates()),
+          logger,
+          { ...executeParams, ...siblingParams },
+          esClient
+        );
+
+        expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+        expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(2);
+        expect(result.incomplete?.filter((i) => i.reason === 'execute_failed')).toHaveLength(20);
+        // Nothing searched the siblings' artifacts, so none of the 22 is reported as searched.
+        expect(getSearchedTechniqueIds(result)).toEqual([]);
+      });
+
+      it('records generation_budget, not collapsed, when nothing could execute', async () => {
+        const result = await huntBehavior(
+          buildMockModel(buildSiblingCandidates()),
+          logger,
+          { text: siblingParams.text, iocs: siblingParams.iocs, allowed_indices: ['logs-aws.*'] },
+          esClient
+        );
+
+        expect(executeEsqlMock).not.toHaveBeenCalled();
+        expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+        expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(2);
+        expect(getSearchedTechniqueIds(result)).toEqual([]);
+      });
     });
 
     it('does not mark siblings collapsed when their survivor is cut by the generation budget', async () => {

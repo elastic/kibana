@@ -251,16 +251,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const anomalyPrivilegesQuery = useAnomalyPrivileges();
   const {
     detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
+    timelinePrivileges: { read: canReadTimeline },
   } = useUserPrivileges();
-  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
-    useAlertsPrivileges();
+  // `hasAlertsRead` needs both the Security > Alerts feature privilege and read on the alerts
+  // index; `hasIndexRead` is null until the index privileges are known.
+  const {
+    hasIndexRead: hasAlertsIndexRead,
+    hasAlertsRead,
+    loading: isAlertsPrivilegesLoading,
+  } = useAlertsPrivileges();
   const { cases } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+
+  // Index read without `hasAlertsRead` can only mean the Alerts feature privilege is missing. When
+  // the index privilege is missing too, the callout already lists the index.
+  const alertsFeatureMissing = hasAlertsIndexRead === true && hasAlertsRead === false;
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
     isError: alertsPrivilegesError != null,
-    canRead: hasAlertsIndexRead ?? undefined,
+    canRead: hasAlertsIndexRead == null ? undefined : hasAlertsRead,
   });
   const risk = getReadAccess({
     isLoading: riskEngineReadPrivileges.isLoading,
@@ -308,6 +318,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           entityEnginePrivileges={entityEnginePrivilegesQuery.data}
           anomalyPrivileges={anomalyPrivilegesQuery.data}
           alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          alertsFeatureMissing={alertsFeatureMissing}
           id="entity-analytics-home"
         />
       </div>
@@ -324,15 +335,19 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
         </>
       ) : (
-        <EntityAnalyticsNewHomePageContent readAccess={readAccess} />
+        <EntityAnalyticsNewHomePageContent
+          readAccess={readAccess}
+          canReadTimeline={canReadTimeline}
+        />
       )}
     </>
   );
 };
 
-const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = ({
-  readAccess,
-}) => {
+const EntityAnalyticsNewHomePageContent: React.FC<{
+  readAccess: ReadAccess;
+  canReadTimeline: boolean;
+}> = ({ readAccess, canReadTimeline }) => {
   const spaceId = useSpaceId();
   const {
     dataView,
@@ -440,25 +455,27 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   const rowActions = useMemo<RowActions>(
     () => ({
-      onInvestigateInTimeline: (row) => {
-        const entity = getRowEntity(row);
-        if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
-        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
-          euidApi.getBuiltInEntityDefinition(entity.entityType),
-          row
-        );
-        if (kqlFilter) {
-          investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
-          return;
-        }
-        const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
-        const dataProviders = createDataProviders({
-          contextId: scopeId,
-          field,
-          values: entity.entityName,
-        });
-        if (dataProviders?.length) investigateInTimeline({ dataProviders });
-      },
+      onInvestigateInTimeline: canReadTimeline
+        ? (row) => {
+            const entity = getRowEntity(row);
+            if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
+            const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+              euidApi.getBuiltInEntityDefinition(entity.entityType),
+              row
+            );
+            if (kqlFilter) {
+              investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
+              return;
+            }
+            const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
+            const dataProviders = createDataProviders({
+              contextId: scopeId,
+              field,
+              values: entity.entityName,
+            });
+            if (dataProviders?.length) investigateInTimeline({ dataProviders });
+          }
+        : undefined,
       onOpenEntityGraph: (row) => {
         const entity = getRowEntity(row);
         if (!entity) return;
@@ -504,6 +521,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     }),
     [
       agentBuilder,
+      canReadTimeline,
       euidApi,
       investigateInTimeline,
       isAgentChatExperienceEnabled,
