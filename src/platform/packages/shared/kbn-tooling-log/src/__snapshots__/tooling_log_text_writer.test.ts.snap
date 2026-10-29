@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`formats %s patterns and indents multi-line messages correctly 1`] = `
 "         │ [32msucc[39m foo bar

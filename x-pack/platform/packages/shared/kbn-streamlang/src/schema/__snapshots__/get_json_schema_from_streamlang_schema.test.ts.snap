@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getJsonSchemaFromStreamlangSchema generates a valid JSON Schema from the streamlang DSL schema 1`] = `
 Object {

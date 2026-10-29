@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`#deserializeFeaturePrivilege throws error when deserializing feature_.privilege-1 1`] = `"Feature privilege 'feature_.privilege-1' didn't match pattern"`;
 

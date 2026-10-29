@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildCombinedKqlQuery should generate correct es query for no selected groups, no kql 1`] = `""`;
 

@@ -124,8 +124,8 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   if (!parsedArguments.config) {
     testFiles = parsedArguments._.map((p: any) => resolve(currentWorkingDirectory, p.toString()));
 
-    if (parsedArguments.testPathPattern) {
-      testFiles.push(parsedArguments.testPathPattern);
+    if (parsedArguments.testPathPatterns) {
+      testFiles.push(...[parsedArguments.testPathPatterns].flat());
     }
 
     resolvedConfigPath = discoverJestConfig(testFiles, currentWorkingDirectory, configName, log);
@@ -300,7 +300,7 @@ export function discoverJestConfig(
       );
     } else {
       log.error(
-        `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, a --testPathPattern argument pointing to a file/directory or a --config argument pointing to one of the many ${configName} files in the repository`
+        `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, a --testPathPatterns argument pointing to a file/directory or a --config argument pointing to one of the many ${configName} files in the repository`
       );
     }
     process.exit(1);

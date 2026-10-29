@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`NetworkTopCountries Table Component rendering it renders the IP Details NetworkTopCountries table 1`] = `
 .c0 {

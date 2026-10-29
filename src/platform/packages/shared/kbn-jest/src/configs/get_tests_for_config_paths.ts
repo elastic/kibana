@@ -44,7 +44,7 @@ export async function getTestsForConfigPaths(
         })
       );
 
-      const results = await searchSource.getTestPaths(config.globalConfig, undefined, undefined);
+      const results = await searchSource.getTestPaths(config.globalConfig, config.projectConfig);
 
       return {
         path,

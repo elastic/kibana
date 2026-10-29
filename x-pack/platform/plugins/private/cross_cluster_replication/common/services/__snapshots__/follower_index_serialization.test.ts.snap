@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`[CCR] follower index serialization deserializeFollowerIndex() deserializes Elasticsearch follower index object 1`] = `
 Object {

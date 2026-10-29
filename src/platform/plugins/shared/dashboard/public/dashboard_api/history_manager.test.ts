@@ -78,7 +78,7 @@ const pushStateChange = async (
 ) => {
   setup.stateRef.current = { ...setup.initialState, title };
   setup.anyStateChange$.next();
-  await waitFor(() => expect(setup.getState).toBeCalled());
+  await waitFor(() => expect(setup.getState).toHaveBeenCalled());
 };
 
 describe('initializeHistoryManager', () => {
@@ -179,7 +179,7 @@ describe('initializeHistoryManager', () => {
         redo: true,
       });
       await setup.api.undo();
-      expect(setup.setState).toBeCalledWith(setup.initialState);
+      expect(setup.setState).toHaveBeenCalledWith(setup.initialState);
       setup.cleanup();
     });
 
@@ -203,9 +203,9 @@ describe('initializeHistoryManager', () => {
       const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       await setup.api.undo();
-      expect(setup.setState).toBeCalledWith(setup.initialState);
+      expect(setup.setState).toHaveBeenCalledWith(setup.initialState);
       await setup.api.redo();
-      expect(setup.setState).toBeCalledWith({ ...setup.initialState, title: 'Change 1' });
+      expect(setup.setState).toHaveBeenCalledWith({ ...setup.initialState, title: 'Change 1' });
       setup.cleanup();
     });
   });

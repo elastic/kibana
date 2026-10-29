@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Summary Transform Generator for 'Timeslices' and 'CalendarAligned' SLO generates the correct transform for a 7 days SLO 1`] = `
 Object {

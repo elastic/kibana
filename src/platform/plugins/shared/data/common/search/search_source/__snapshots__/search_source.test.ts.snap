@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SearchSource #setField() / #flatten computed fields handling includes queries in the "filter" clause by default 1`] = `
 Object {

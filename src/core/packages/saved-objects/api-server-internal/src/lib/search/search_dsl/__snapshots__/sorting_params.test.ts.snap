@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`searchDsl/getSortParams sort with direction sortField is non-root multi-field with multiple types returns correct params 1`] = `"Unable to sort multiple types by field title.raw, not a root property"`;
 

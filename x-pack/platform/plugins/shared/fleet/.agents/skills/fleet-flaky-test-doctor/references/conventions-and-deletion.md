@@ -40,7 +40,7 @@
 
 **Location:** `x-pack/platform/plugins/shared/fleet/server/integration_tests/**/*.test.ts`
 
-**Run:** `node scripts/jest_integration --testPathPattern=<path>`
+**Run:** `node scripts/jest_integration --testPathPatterns=<path>`
 
 Spins up its own real ES + Kibana. No Docker, no FTR config. Slower than jest unit tests.
 
@@ -153,7 +153,7 @@ For FTR and Scout tests only (jest is not supported by the CI flaky runner):
 ```bash
 # Jest server integration
 for i in {1..25}; do
-  node scripts/jest_integration --testPathPattern=<path> \
+  node scripts/jest_integration --testPathPatterns=<path> \
     && echo "PASS $i" || { echo "FAIL $i"; break; }
 done
 

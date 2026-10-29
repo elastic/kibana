@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Cloud plugin config Serverless config Fails on invalid project_type 1`] = `
 "[serverless.project_type]: types that failed validation:

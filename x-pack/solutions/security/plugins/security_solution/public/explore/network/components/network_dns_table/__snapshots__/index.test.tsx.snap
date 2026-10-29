@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
 .c1 .siemSubtitle__item {

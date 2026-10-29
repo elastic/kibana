@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DefaultEditorAgg component should init with the default set of props 1`] = `
 <eui-drag-drop-context

@@ -245,7 +245,7 @@ describe('validateMetadataUpdate', () => {
         summary: 'x'.repeat(30), // exceeds max_length
         score: -5, // below min
       })
-    ).toThrowError(
+    ).toThrow(
       // All three violations should be in the message
       expect.objectContaining({
         message: expect.stringMatching(/severity.*summary.*score|score.*summary.*severity/s),

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`entities grid query builders count builds the count query with entity filters and no search 1`] = `
 "FROM entities-latest-default

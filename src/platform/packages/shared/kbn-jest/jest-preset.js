@@ -100,7 +100,14 @@ module.exports = {
   ],
 
   // The test environment that will be used for testing
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: '@kbn/jest/jsdom_environment',
+
+  testEnvironmentOptions: {
+    // Jest 30's globals cleanup reads every accessor on Node's globals in jest-util < 30.5, and
+    // Node 24's webstream getters (e.g. `WritableStreamDefaultWriter.prototype.closed`) return
+    // rejected promises when read that way, crashing in-band runs with an unhandled rejection.
+    globalsCleanup: 'off',
+  },
 
   // The glob patterns Jest uses to detect test files
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],

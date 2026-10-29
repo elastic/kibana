@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Reporting APIs Generate CSV from SearchSource _id field is a big integer passes through the value without mutation 1`] = `
 "\\"_id\\",\\"_ignored\\",\\"_index\\",\\"_score\\",\\"message_type\\",timestamp

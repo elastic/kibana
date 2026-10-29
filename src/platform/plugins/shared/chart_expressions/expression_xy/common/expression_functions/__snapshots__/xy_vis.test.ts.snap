@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`xyVis it should throw error if addTimeMarker applied for not time chart 1`] = `"Only time charts can have current time marker"`;
 

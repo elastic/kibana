@@ -55,7 +55,7 @@ if echo "$TEST_FILE" | grep -q "fleet_api_integration"; then
     | sed 's/^/    (security mirror) /' || true
 elif echo "$TEST_FILE" | grep -q "server/integration_tests"; then
   echo "  Type: Jest server integration"
-  echo "  Run: node scripts/jest_integration --testPathPattern='$TEST_FILE'"
+  echo "  Run: node scripts/jest_integration --testPathPatterns='$TEST_FILE'"
 elif echo "$TEST_FILE" | grep -q "test/scout"; then
   echo "  Type: Scout Playwright"
   echo "  Run: Scout runner (see fleet-ftr-testing skill for Scout equivalent)"

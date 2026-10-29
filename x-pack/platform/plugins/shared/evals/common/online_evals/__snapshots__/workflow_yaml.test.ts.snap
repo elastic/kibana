@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[
   `online eval workflow yaml builds a workflow yaml snapshot and validates against WorkflowSchema 1`

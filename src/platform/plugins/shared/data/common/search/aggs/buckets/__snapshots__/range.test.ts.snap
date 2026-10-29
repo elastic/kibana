@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Range Agg RangeKey fully closed range should correctly stringify field 1`] = `"from:0,to:100"`;
 

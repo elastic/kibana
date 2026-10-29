@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`apm_user deprecation roles mapped to a removed role logs a deprecation when a role was found that maps to the removed apm_user role 1`] = `
 Array [

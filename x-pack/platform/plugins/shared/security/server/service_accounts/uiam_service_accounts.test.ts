@@ -498,7 +498,7 @@ describe('UiamServiceAccounts', () => {
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toThrowError('upstream exploded');
+      ).rejects.toThrow('upstream exploded');
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to create service account [nightshift-relay]')
       );
@@ -1165,7 +1165,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       it('rejects when the exchange response contains an empty token', async () => {
@@ -1173,7 +1173,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       // The token carries the account's roles, so an account that fills UIAM's role limits with
@@ -1198,7 +1198,7 @@ describe('UiamServiceAccounts', () => {
 
         await expect(
           serviceAccounts.createFakeRequest({ serviceAccountId: 'service-account-id' })
-        ).rejects.toThrowError('Error occurred during service account token exchange');
+        ).rejects.toThrow('Error occurred during service account token exchange');
       });
 
       it.each([408, 429, 500, 502, 503, 504])(

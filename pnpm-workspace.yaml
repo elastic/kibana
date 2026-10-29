@@ -40,6 +40,7 @@ allowBuilds:
   'playwright-chromium': false # browsers installed explicitly in bootstrap
   'protobufjs': false # prints a version-scheme warning
   'puppeteer': false # browser download skipped via .puppeteerrc
+  'unrs-resolver': false # Jest 30 resolver; platform binding ships as an optional dependency
 
 # @elastic/esql suite versions, referenced via `catalog:` below (replaces the
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in

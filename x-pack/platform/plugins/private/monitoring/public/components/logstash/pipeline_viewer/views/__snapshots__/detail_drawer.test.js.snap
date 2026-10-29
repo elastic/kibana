@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
 <EuiFlyout

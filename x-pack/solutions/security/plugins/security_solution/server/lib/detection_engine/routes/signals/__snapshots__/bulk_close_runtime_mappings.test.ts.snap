@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildSourceReadingRuntimeField produces a stable script for a scalar runtime field type 1`] = `
 Object {

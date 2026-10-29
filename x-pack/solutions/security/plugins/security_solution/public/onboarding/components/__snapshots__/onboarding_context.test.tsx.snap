@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`OnboardingContextProvider config when all requirements are met should return all topics config correctly 1`] = `
 Map {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Footer multiple features, multiple layers: locked should show pagination controls, features count, and layer select 1`] = `
 <Fragment>

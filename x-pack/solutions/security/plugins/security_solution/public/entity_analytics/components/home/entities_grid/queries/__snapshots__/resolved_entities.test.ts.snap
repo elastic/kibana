@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildResolvedEntityFilterOverridesQuery compares the resolved entity with its main entity on the filters, and keeps those that differ 1`] = `
 "FROM entities-latest-default

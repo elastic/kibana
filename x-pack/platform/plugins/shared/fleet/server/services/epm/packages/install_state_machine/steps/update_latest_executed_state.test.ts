@@ -88,7 +88,7 @@ describe('updateLatestExecutedState', () => {
     });
 
     expect(soClient.update.mock.calls).toEqual(
-      expect.objectContaining([
+      expect.arrayContaining([
         [
           'epm-packages',
           'xyz',

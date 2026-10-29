@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb button content correctly 1`] = `
 <div>

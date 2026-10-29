@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Integration sync queries buildPrivilegedSearchBody constructs the correct search body for a single matcher 1`] = `
 Object {

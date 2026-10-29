@@ -46,7 +46,7 @@
     "testMatch",
     "testNamePattern",
     "testPathIgnorePatterns",
-    "testPathPattern",
+    "testPathPatterns",
     "testRegex",
     "testResultsProcessor",
     "testRunner",
@@ -55,7 +55,8 @@
     "transform",
     "transformIgnorePatterns",
     "unmockedModulePathPatterns",
-    "watchPathIgnorePatterns"
+    "watchPathIgnorePatterns",
+    "workerGracefulExitTimeout"
   ],
   "boolean": [
     "all",
@@ -67,6 +68,7 @@
     "clearCache",
     "clearMocks",
     "collectCoverage",
+    "collectTests",
     "color",
     "colors",
     "coverage",
@@ -78,7 +80,6 @@
     "findRelatedTests",
     "forceExit",
     "help",
-    "init",
     "injectGlobals",
     "json",
     "lastCommit",
@@ -104,6 +105,7 @@
     "useStderr",
     "verbose",
     "version",
+    "waitForUnhandledRejections",
     "watch",
     "watchAll",
     "watchman",

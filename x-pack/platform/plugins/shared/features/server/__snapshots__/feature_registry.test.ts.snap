@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`FeatureRegistry Kibana Features prevents features from being registered with a catalogue entry of "" 1`] = `"[catalogue.0]: Does not satisfy regexp /^[a-zA-Z0-9:_-]+$/"`;
 

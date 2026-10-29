@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"2022-08-30T15:23:23.721Z","to":"2022-08-30T15:38:28.171Z"},"kuery":""} 1`] = `
 Object {

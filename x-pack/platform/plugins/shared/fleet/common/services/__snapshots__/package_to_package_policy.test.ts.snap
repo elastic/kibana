@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Fleet - packageToPackagePolicy packageToPackagePolicy returns package policy with multiple policy templates (aka has integrations 1`] = `
 Object {

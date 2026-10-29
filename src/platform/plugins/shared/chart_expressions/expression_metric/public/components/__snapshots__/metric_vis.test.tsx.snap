@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`MetricVisComponent coloring by palette percent-based should set correct data bounds with breakdown-by and max dimension 1`] = `
 Array [

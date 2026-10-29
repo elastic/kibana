@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`setupMode SetupModeBadge internal collection should render each product consistently 1`] = `
 <EuiBadge

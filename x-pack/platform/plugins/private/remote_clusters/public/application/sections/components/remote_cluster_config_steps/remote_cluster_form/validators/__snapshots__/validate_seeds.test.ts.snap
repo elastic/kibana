@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`validateSeeds rejects empty seeds when there's no input 1`] = `
 <Memo(MemoizedFormattedMessage)

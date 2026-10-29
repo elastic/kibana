@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`fieldStatsUtils buildSearchParams() should work correctly for aggregations and a data view time field 1`] = `
 Object {

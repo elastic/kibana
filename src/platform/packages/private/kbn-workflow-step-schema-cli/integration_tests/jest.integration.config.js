@@ -10,7 +10,7 @@
 module.exports = {
   // This test boots ES + all-solutions Kibana and makes HTTP calls to Kibana's routes
   // (see `waitForSchemaRoute`). The `jest_integration` preset inherits `testEnvironment:
-  // 'jest-environment-jsdom'` from the base preset and installs an XHR-backed `fetch`
+  // '@kbn/jest/jsdom_environment'` from the base preset and installs an XHR-backed `fetch`
   // (polyfills.jsdom.js -> whatwg-fetch). jsdom's document origin is `http://localhost`
   // (no port), so any XHR to `http://localhost:<kibanaPort>` is cross-origin and is
   // rejected with "Cross origin http://localhost forbidden" — causing an opaque timeout.

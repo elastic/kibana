@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`source editor geo_grid_source should not allow editing multiple metrics for heatmap 1`] = `
 <Fragment>

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`event_kind_filters createEventKindFilter query structure snapshots should generate expected query structure with multiple modules 1`] = `
 Object {

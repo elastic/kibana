@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`getEuidPainlessEvaluation snapshots per entity type generates the expected Painless script for generic 1`] = `"if (doc.containsKey('entity.id') && doc['entity.id'].size() > 0 && doc['entity.id'].value != null && doc['entity.id'].value != \\"\\") { return doc['entity.id'].value; } return null;"`;
 

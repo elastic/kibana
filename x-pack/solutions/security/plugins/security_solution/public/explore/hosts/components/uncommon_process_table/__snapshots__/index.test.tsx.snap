@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Uncommon Process Table Component rendering it renders the default Uncommon process table 1`] = `
 .c1 .siemSubtitle__item {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/decorators/bar_decorator.js <BarSeriesDecorator /> should render and match a snapshot 1`] = `
 <BarSeries

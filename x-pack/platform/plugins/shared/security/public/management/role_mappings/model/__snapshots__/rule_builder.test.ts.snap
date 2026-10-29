@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`generateRulesFromRaw "field" does not support a value of ()=>null 1`] = `"Invalid value type for field. Expected one of null, string, number, or boolean, but found function ()."`;
 

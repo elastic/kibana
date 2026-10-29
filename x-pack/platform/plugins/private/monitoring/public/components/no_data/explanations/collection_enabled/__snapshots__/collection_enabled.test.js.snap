@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collection.enabled setting 1`] = `
 Array [

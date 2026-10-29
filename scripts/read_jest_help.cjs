@@ -50,43 +50,40 @@ run(
     /** @type {{ string: string[], boolean: string[], alias: Record<string, string> }} */
     const flags = { string: [], boolean: [], alias: {} };
 
-    /** @type {string | undefined} */
-    let currentFlag;
+    /** @type {string[] | undefined} long names of the flag being parsed, e.g. `--testEnvironment, --env` */
+    let currentFlags;
 
     for (const line of lines) {
-      const flagMatch = line.match(/^\s+(?:-(\w), )?--(\w+)\s+/);
-      const typeMatch = line.match(/\[(boolean|string|array|number|choices: [^\]]+)\]/);
+      const flagMatch = line.match(/^\s+(?:-(\w), )?--(\w+)(?:, --(\w+))?\s+/);
+      // `[choices: ...]` may wrap across lines, so only match its opening
+      const typeMatch = line.match(/\[(boolean|string|array|number|choices:)/);
 
-      if (flagMatch && currentFlag) {
-        throw createFailError(`unable to determine type for flag [${currentFlag}]`);
+      if (flagMatch && currentFlags) {
+        throw createFailError(`unable to determine type for flag [${currentFlags[0]}]`);
       }
 
       if (flagMatch) {
-        currentFlag = flagMatch[2];
+        currentFlags = flagMatch[3] ? [flagMatch[2], flagMatch[3]] : [flagMatch[2]];
         if (flagMatch[1]) {
           flags.alias[flagMatch[1]] = flagMatch[2];
         }
       }
 
-      if (currentFlag && typeMatch) {
+      if (currentFlags && typeMatch) {
         switch (typeMatch[1]) {
           case 'string':
           case 'array':
           case 'number':
-            flags.string.push(currentFlag);
+          case 'choices:':
+            flags.string.push(...currentFlags);
             break;
           case 'boolean':
-            flags.boolean.push(currentFlag);
+            flags.boolean.push(...currentFlags);
             break;
           default:
-            if (typeMatch[1].startsWith('choices: ')) {
-              flags.string.push(currentFlag);
-              break;
-            }
-
             throw createFailError(`unexpected flag type [${typeMatch[1]}]`);
         }
-        currentFlag = undefined;
+        currentFlags = undefined;
       }
     }
 

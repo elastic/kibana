@@ -373,7 +373,7 @@ export const runJestContract = () => {
       const hasExplicitTargets =
         flags._.length > 0 ||
         hasArgFlag(rawArgs, '--config') ||
-        hasArgFlag(rawArgs, '--testPathPattern') ||
+        hasArgFlag(rawArgs, '--testPathPatterns') ||
         hasArgFlag(rawArgs, '--findRelatedTests') ||
         hasArgFlag(rawArgs, '--runTestsByPath');
 

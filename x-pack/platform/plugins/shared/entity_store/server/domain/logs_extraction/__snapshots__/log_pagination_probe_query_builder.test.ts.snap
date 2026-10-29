@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`buildLogPaginationCursorProbeEsql samples, sorts ASC, limits to the scaled sample size, then aggregates MAX(timestamp) and COUNT(*) 1`] = `
 "SET unmapped_fields=\\"nullify\\";

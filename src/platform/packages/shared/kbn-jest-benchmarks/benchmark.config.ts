@@ -37,7 +37,7 @@ const config: InitialBenchConfig = {
     ),
     createBenchmark(
       'alerting-plugin-test',
-      'x-pack/platform/plugins/shared/alerting/jest.config.js --testPathPattern x-pack/platform/plugins/shared/alerting/server/plugin.test.ts',
+      'x-pack/platform/plugins/shared/alerting/jest.config.js --testPathPatterns x-pack/platform/plugins/shared/alerting/server/plugin.test.ts',
       1
     ),
     createBenchmark('streams-full', 'x-pack/platform/plugins/shared/streams/jest.config.js', 1),

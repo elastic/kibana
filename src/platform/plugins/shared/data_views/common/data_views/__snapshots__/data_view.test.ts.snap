@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`IndexPattern addRuntimeField and removeRuntimeField add and remove composite runtime field as new fields 1`] = `
 Object {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for UPN cross-field 1`] = `
 "SET unmapped_fields=\\"nullify\\";

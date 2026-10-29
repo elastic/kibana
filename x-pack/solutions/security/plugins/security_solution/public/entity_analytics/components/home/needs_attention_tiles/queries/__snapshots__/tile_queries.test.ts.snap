@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`needs attention tile queries over 24h without entity filters builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`parses data containing exception 1`] = `"[o.e.n.Node] [qEfPPg8] starting ..."`;
 

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`transpile - Streamlang DSL to ES|QL) should handle not conditions 1`] = `
 "  | EVAL \`attributes.not_flag\` = CASE(NOT COALESCE(\`attributes.status\` == \\"active\\", FALSE), \\"not-active\\", \`attributes.not_flag\`)

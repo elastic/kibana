@@ -6,7 +6,7 @@
  */
 
 /**
- * @jest-environment jsdom
+ * @jest-environment @kbn/jest/jsdom_environment
  */
 // The sanitiser the card runs the brief through, DOMPurify, needs a DOM.
 
