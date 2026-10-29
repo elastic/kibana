@@ -12,6 +12,7 @@ import {
   type ExecutableTool,
   createErrorResult,
 } from '@kbn/agent-builder-server';
+import { omitNullForOptionalParams } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { toDynamicToolEvent, type ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
@@ -67,7 +68,7 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
     }
 
     const innerSchema = await tool.getSchema();
-    const validation = innerSchema.safeParse(params);
+    const validation = innerSchema.safeParse(omitNullForOptionalParams(innerSchema, params));
     if (!validation.success) {
       return {
         results: [createErrorResult(invalidParamsMessage({ toolId, error: validation.error }))],

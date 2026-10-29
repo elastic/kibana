@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { editableToolTypes, toAutoApprovedApis } from '@kbn/agent-builder-common';
+import { omitNullForOptionalParams } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { RouteDependencies } from './types';
 import { autoApprovedApisSchema } from './approvals_schema';
 import { getHandlerWrapper } from './wrap_handler';
@@ -497,7 +498,8 @@ export function registerToolsRoutes({
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
         const toolSchema = await tool.getSchema();
-        const validation = toolSchema.safeParse(toolParams);
+        const normalizedParams = omitNullForOptionalParams(toolSchema, toolParams);
+        const validation = toolSchema.safeParse(normalizedParams);
         if (validation.error) {
           return response.badRequest({
             body: {
@@ -508,7 +510,7 @@ export function registerToolsRoutes({
 
         const toolResult = await registry.execute({
           toolId: id,
-          toolParams,
+          toolParams: normalizedParams,
           source: 'user',
           defaultConnectorId,
           ...(approvals?.auto_approved_apis

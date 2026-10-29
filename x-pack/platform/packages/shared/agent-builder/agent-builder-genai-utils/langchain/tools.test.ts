@@ -317,10 +317,22 @@ describe('toolToLangchain - null optional parameters', () => {
 
   it('does not change the JSON schema exposed to the model', async () => {
     const tool = createNullTestTool();
-    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addReasoningParam: true,
+    });
+    const expectedSchema = z.object({
+      _reasoning: z
+        .string()
+        .optional()
+        .describe('Brief reasoning of why you are calling this tool'),
+      ...schema.shape,
+    });
 
     expect(z.toJSONSchema(langchainTool.schema as z.ZodType, { io: 'input' })).toEqual(
-      z.toJSONSchema(schema, { io: 'input' })
+      z.toJSONSchema(expectedSchema, { io: 'input' })
     );
   });
 });

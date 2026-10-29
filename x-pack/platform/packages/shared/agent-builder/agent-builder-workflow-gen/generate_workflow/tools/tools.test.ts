@@ -283,6 +283,34 @@ describe('dispatchToolCall', () => {
     expect(result.message.error).toMatch(/unknown tool/i);
   });
 
+  it('treats null for optional args as omitted (strict function calling sends null)', async () => {
+    mockLookupStepDefinitions.mockResolvedValue({ count: 0 } as any);
+
+    const result = await dispatchToolCall(
+      { yaml: '' },
+      {
+        toolCallId: 't1',
+        toolName: 'get_step_definitions',
+        args: { stepType: null, search: 'console' },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(mockLookupStepDefinitions).toHaveBeenCalledWith({ search: 'console' }, baseDeps);
+  });
+
+  it('still rejects null for a required arg', async () => {
+    const result = await dispatchToolCall(
+      { yaml: '' },
+      { toolCallId: 't1', toolName: 'set_yaml', args: { yaml: null } },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(false);
+    expect(result.message.error).toMatch(/invalid arguments for set_yaml/i);
+  });
+
   it('rejects args that fail schema validation without invoking the handler', async () => {
     // set_yaml requires `args.yaml: string` — missing it would crash the
     // handler if dispatch didn't validate first.

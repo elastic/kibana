@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { tool } from '@langchain/core/tools';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ToolCall } from '@kbn/agent-builder-genai-utils/langchain';
+import { omitNullForOptionalParams } from '@kbn/agent-builder-genai-utils/tools/utils';
 import {
   insertStep,
   modifyStep,
@@ -267,7 +268,9 @@ export const dispatchToolCall = async (
   if (!definition) {
     return { message: { success: false, error: `Unknown tool: ${call.toolName}` } };
   }
-  const parsed = definition.schema.safeParse(call.args);
+  const parsed = definition.schema.safeParse(
+    omitNullForOptionalParams(definition.schema, call.args)
+  );
   if (!parsed.success) {
     return {
       message: {

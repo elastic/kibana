@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -17,6 +17,33 @@ const getObjectShape = (schema: unknown): Record<string, z.ZodType> | undefined 
   const { shape } = schema;
   return isRecord(shape) ? (shape as Record<string, z.ZodType>) : undefined;
 };
+
+// A field with async refinements makes the sync `safeParse` throw. Treat it as accepting `null`
+// so the key is kept and normal validation reports the real outcome.
+const acceptsNull = (field: z.ZodType): boolean => {
+  try {
+    return field.safeParse(null).success;
+  } catch {
+    return true;
+  }
+};
+
+/**
+ * Shape-level counterpart of `omitNullForOptionalParams`, for validators that run before our code
+ * (e.g. the MCP SDK validating `inputSchema`): wraps each optional field that rejects `null` so
+ * `null` is read as `undefined`. Other fields are returned as is.
+ */
+export const allowNullForOptionalFields = (
+  shape: Record<string, z.ZodType>
+): Record<string, z.ZodType> =>
+  Object.fromEntries(
+    Object.entries(shape).map(([key, field]) => [
+      key,
+      field.isOptional() && !acceptsNull(field)
+        ? z.preprocess((value) => (value === null ? undefined : value), field)
+        : field,
+    ])
+  );
 
 /**
  * Some models (e.g. OpenAI with strict function calling) send `null` for every optional
@@ -38,7 +65,7 @@ export const omitNullForOptionalParams = <T>(schema: z.ZodType, params: T): T =>
 
   const nullKeys = Object.keys(params).filter((key) => {
     const field = shape[key];
-    return params[key] === null && field && field.isOptional() && !field.safeParse(null).success;
+    return params[key] === null && field && field.isOptional() && !acceptsNull(field);
   });
   if (nullKeys.length === 0) {
     return params;

@@ -111,6 +111,21 @@ describe('execute_dynamic_tool', () => {
     expect(isDynamicToolRunReturn(result)).toBe(true);
   });
 
+  it('drops null optional params before dispatching to the inner tool', async () => {
+    await execute({ tool_id: inner.id, params: { query: 'x', limit: null } });
+
+    expect(inner.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ toolParams: { query: 'x' } })
+    );
+  });
+
+  it('still rejects a null required param', async () => {
+    const result = await execute({ tool_id: inner.id, params: { query: null } });
+
+    expect(inner.execute).not.toHaveBeenCalled();
+    expect(errorMessages(result)[0]).toContain('query:');
+  });
+
   it('does not tag the error returns: nothing was dispatched, so nothing is attributed', async () => {
     const invalid = await execute({ tool_id: inner.id, params: { limit: 'five' } });
     const unknown = await execute({ tool_id: 'nope', params: {} });

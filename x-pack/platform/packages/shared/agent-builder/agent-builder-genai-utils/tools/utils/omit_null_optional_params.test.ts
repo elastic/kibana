@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { omitNullForOptionalParams } from './omit_null_optional_params';
+import { allowNullForOptionalFields, omitNullForOptionalParams } from './omit_null_optional_params';
 
 describe('omitNullForOptionalParams', () => {
   const schema = z.object({
@@ -69,10 +69,61 @@ describe('omitNullForOptionalParams', () => {
     expect(omitNullForOptionalParams(schema, params)).toBe(params);
   });
 
+  it('keeps the key instead of throwing when the field has an async refinement', () => {
+    const asyncSchema = z.object({
+      checked: z
+        .string()
+        .nullable()
+        .refine(async () => true)
+        .optional(),
+    });
+    const params = { checked: null };
+
+    // the sync probe throws here: null passes the type check and reaches the async refinement
+    expect(() => asyncSchema.shape.checked.safeParse(null)).toThrow();
+    expect(() => omitNullForOptionalParams(asyncSchema, params)).not.toThrow();
+    expect(omitNullForOptionalParams(asyncSchema, params)).toEqual({ checked: null });
+  });
+
   it('returns non-object params and non-object schemas as is', () => {
     expect(omitNullForOptionalParams(schema, null)).toBeNull();
     expect(omitNullForOptionalParams(schema, ['a'])).toEqual(['a']);
     const params = { a: null };
     expect(omitNullForOptionalParams(z.string(), params)).toBe(params);
+  });
+});
+
+describe('allowNullForOptionalFields', () => {
+  const schema = z.object({
+    required: z.string(),
+    optional: z.array(z.string()).describe('some items').optional(),
+    nullable: z.string().nullable(),
+    nullish: z.string().nullish(),
+  });
+  const wrapped = z.object(allowNullForOptionalFields(schema.shape));
+
+  it('accepts null for optional fields and yields undefined', () => {
+    const result = wrapped.safeParse({ required: 'a', nullable: null, optional: null });
+    expect(result.success).toBe(true);
+    expect(result.data).toEqual({ required: 'a', nullable: null });
+    expect(result.data).not.toHaveProperty('optional', null);
+  });
+
+  it('still rejects null for required fields', () => {
+    expect(wrapped.safeParse({ required: null, nullable: null }).success).toBe(false);
+  });
+
+  it('keeps null for fields that accept null', () => {
+    expect(wrapped.parse({ required: 'a', nullable: null, nullish: null })).toEqual({
+      required: 'a',
+      nullable: null,
+      nullish: null,
+    });
+  });
+
+  it('leaves the input JSON schema identical', () => {
+    expect(z.toJSONSchema(wrapped, { io: 'input' })).toEqual(
+      z.toJSONSchema(schema, { io: 'input' })
+    );
   });
 });

@@ -10,6 +10,7 @@ import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
+import { allowNullForOptionalFields } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
@@ -144,7 +145,7 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
               idMapping.get(tool.id) ?? tool.id,
               {
                 description: tool.description,
-                inputSchema: toolSchema.shape,
+                inputSchema: allowNullForOptionalFields(toolSchema.shape),
                 annotations: tool.annotations,
               },
               async (args: { [x: string]: any }) => {

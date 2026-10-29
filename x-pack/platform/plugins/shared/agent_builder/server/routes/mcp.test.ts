@@ -176,7 +176,11 @@ describe('MCP route — registerTool arguments', () => {
     const annotatedTool = createMockTool('platform.core.list_indices', {
       annotations: mockAnnotations,
     });
-    const unannotatedTool = createMockTool('platform.core.search');
+    const unannotatedTool = createMockTool('platform.core.search', {
+      getSchema: jest
+        .fn()
+        .mockResolvedValue(z.object({ query: z.string(), types: z.array(z.string()).optional() })),
+    });
     const excludedTool = createMockTool('platform.core.execute_connector_sub_action', {
       annotations: mockAnnotations,
       excludeFromMcp: true,
@@ -250,6 +254,53 @@ describe('MCP route — registerTool arguments', () => {
     const [, config, callback] = unannotatedCall!;
     expect(config.annotations).toBeUndefined();
     expect(typeof callback).toBe('function');
+  });
+
+  it('registers an input schema that the real SDK accepts null optional args for, without changing the advertised JSON schema', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+    const [, { inputSchema }] = mockRegisterTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_search'
+    )!;
+
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
+    const { Client } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/client/index.js')
+    >('@modelcontextprotocol/sdk/client/index.js');
+    const { InMemoryTransport } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/inMemory.js')
+    >('@modelcontextprotocol/sdk/inMemory.js');
+
+    const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
+    const handler = jest
+      .fn()
+      .mockResolvedValue({ content: [{ type: 'text' as const, text: 'ok' }] });
+    server.registerTool('platform_core_search', { description: 'd', inputSchema }, handler);
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    const client = new Client({ name: 'test-client', version: '0.0.1' });
+    await client.connect(clientTransport);
+
+    const result = await client.callTool({
+      name: 'platform_core_search',
+      arguments: { query: 'x', types: null },
+    });
+    const { tools } = await client.listTools();
+
+    expect(result.isError).toBeFalsy();
+    expect(handler.mock.calls[0][0]).toEqual({ query: 'x' });
+    expect(tools[0].inputSchema).toEqual({
+      $schema: 'http://json-schema.org/draft-07/schema#',
+      type: 'object',
+      properties: {
+        query: { type: 'string' },
+        types: { type: 'array', items: { type: 'string' } },
+      },
+      required: ['query'],
+    });
+    await client.close();
+    await server.close();
   });
 
   it('excludes tools with excludeFromMcp: true', async () => {

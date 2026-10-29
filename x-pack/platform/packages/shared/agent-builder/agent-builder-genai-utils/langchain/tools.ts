@@ -195,7 +195,8 @@ export const toolToLangchain = async ({
   // LangChain validates the input against the schema before our handler runs, and rejects the
   // `null` some models send for unused optional args. Normalize the input ahead of that parse
   // rather than changing the schema, so the JSON schema sent to the model stays untouched.
-  // `invoke` delegates to `call`, so this covers both entry points.
+  // Relies on StructuredTool.invoke delegating to this.call (@langchain/core 1.3.0), so this
+  // covers both entry points.
   const originalCall = langchainTool.call.bind(langchainTool);
   langchainTool.call = (arg, configArg, tags) => {
     if (isToolCallInput(arg)) {
