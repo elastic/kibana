@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useQueryClient } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 import { invalidateRulesContentList } from '../../../../hooks/invalidate_rules_content_list';
 import { ruleKeys } from '../../../../hooks/query_key_factory';
@@ -52,6 +53,7 @@ export const useRuleChangeHistoryModal = ({
 }: UseRuleChangeHistoryModalOptions = {}): UseRuleChangeHistoryModalResult => {
   const api = useService(RuleChangeHistoryApi);
   const analytics = useService(CoreStart('analytics'));
+  const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
   const [target, setTarget] = useState<RuleChangeHistoryTarget | null>(null);
   const adapter = createRuleChangeHistoryAdapter(api, {
@@ -59,6 +61,12 @@ export const useRuleChangeHistoryModal = ({
     onRestored: (rule) => {
       // Keeps the open modal's conflict guard at the version the restore produced.
       setTarget((current) => current && { ...current, version: rule.version });
+      toasts.addSuccess(
+        i18n.translate('xpack.alertingV2.ruleChangeHistory.restoreSuccessToast', {
+          defaultMessage: 'Rule "{ruleName}" restored as version {version}',
+          values: { ruleName: rule.metadata.name, version: rule.version },
+        })
+      );
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.allTags());
