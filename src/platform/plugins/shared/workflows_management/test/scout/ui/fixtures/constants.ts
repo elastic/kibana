@@ -12,6 +12,13 @@
  * Tune these in one place when environment speed changes.
  */
 
+/**
+ * Timeout for the YAML editor to become visible. Its subject lives inside the lazily loaded
+ * Monaco chunk (`code-editor-entry`), so this has to cover a cold bundle download rather than
+ * an interaction — the same budget Scout gives app readiness in `gotoApp`.
+ */
+export const EDITOR_READY_TIMEOUT = 30_000;
+
 /** Timeout for a simple workflow execution to complete (e.g. console steps). */
 export const EXECUTION_TIMEOUT = 30_000;
 
