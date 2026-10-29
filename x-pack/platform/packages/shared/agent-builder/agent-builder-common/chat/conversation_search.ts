@@ -64,6 +64,12 @@ export interface ConversationSearchOptions {
    * ```
    */
   filter?: string | KueryNode;
+  /**
+   * Restricts the results to these conversation ids, on top of `filter` and access control.
+   * Lets a caller combine an externally resolved id set (for example from a side index) with
+   * Agent Builder's access checks. An empty array matches no conversations; at most 1000 ids.
+   */
+  ids?: string[];
   sort?: ConversationSearchSort;
   agentId?: string;
   page?: number;
@@ -93,6 +99,10 @@ export interface ConversationCountOptions {
    * KQL filter over the same fields as {@link ConversationSearchOptions.filter}.
    */
   filter?: string | KueryNode;
+  /**
+   * Restricts the count to these conversation ids, as in {@link ConversationSearchOptions.ids}.
+   */
+  ids?: string[];
   agentId?: string;
   /**
    * 1 or 2 fields to bucket the matching conversations by. With 2 fields, each bucket is one

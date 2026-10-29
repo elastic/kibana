@@ -53,6 +53,15 @@ describe('buildSearchQuery', () => {
     });
   });
 
+  it('appends the ids clause after the compiled filter', () => {
+    const compiledFilter = { term: { status: 'completed' } };
+    const idsFilter = { ids: { values: ['conv-1', 'conv-2'] } };
+
+    expect(buildSearchQuery({ baseFilters, compiledFilter, idsFilter, titleMatch: [] })).toEqual({
+      bool: { filter: [...baseFilters, compiledFilter, idsFilter], must: [] },
+    });
+  });
+
   it('puts the title match in the must clause', () => {
     const titleMatch = buildTitleMatch('anything');
 

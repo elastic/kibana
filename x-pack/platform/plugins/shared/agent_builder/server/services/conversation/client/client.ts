@@ -674,13 +674,16 @@ class ConversationClientImpl implements ConversationClient {
     const {
       query,
       filter,
+      ids,
       sort,
       agentId,
       page = 1,
       perPage = MAX_CONVERSATION_SEARCH_PER_PAGE,
     } = options;
 
+    // Validate caller input before resolving access, so bad requests never reach Elasticsearch.
     const compiledFilter = compileConversationFilter(filter);
+    const idsFilter = ids ? buildConversationIdsFilter(ids) : undefined;
 
     const agentIds = await this.resolveAccessibleAgentIds(agentId);
     if (agentIds.length === 0) {
@@ -700,6 +703,7 @@ class ConversationClientImpl implements ConversationClient {
       query: buildSearchQuery({
         baseFilters: this.buildBaseFilters(agentIds),
         compiledFilter,
+        idsFilter,
         titleMatch,
       }),
     });
@@ -708,10 +712,11 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async count(options: ConversationCountOptions = {}): Promise<ConversationCountResult> {
-    const { query, filter, agentId, groupBy, missing, size } = options;
+    const { query, filter, ids, agentId, groupBy, missing, size } = options;
 
     // Validate caller input before resolving access, so bad requests never reach Elasticsearch.
     const compiledFilter = compileConversationFilter(filter);
+    const idsFilter = ids ? buildConversationIdsFilter(ids) : undefined;
     const aggregation = buildCountAggregation({ groupBy, missing, size });
 
     const agentIds = await this.resolveAccessibleAgentIds(agentId);
@@ -726,6 +731,7 @@ class ConversationClientImpl implements ConversationClient {
       query: buildSearchQuery({
         baseFilters: this.buildBaseFilters(agentIds),
         compiledFilter,
+        idsFilter,
         titleMatch: buildTitleMatch(query),
       }),
       ...(aggregation ? { aggs: aggregation.aggs } : {}),

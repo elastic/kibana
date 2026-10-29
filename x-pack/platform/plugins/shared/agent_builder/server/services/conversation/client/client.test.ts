@@ -681,6 +681,53 @@ describe('ConversationClient', () => {
       expect(searchFilter).toEqual(listFilter);
     });
 
+    it('restricts to the given ids with a single ids clause after the access filters', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({
+        filter: 'status: completed',
+        ids: ['conversation-1', 'conversation-2'],
+      });
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray[filterArray.length - 1]).toEqual({
+        ids: { values: ['conversation-1', 'conversation-2'] },
+      });
+      // Space scoping, read access, the sub-agent exclusion, the KQL filter, then the ids clause.
+      expect(filterArray).toHaveLength(5);
+    });
+
+    it('sends an ids clause matching nothing for an empty ids array', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ ids: [] });
+
+      const filterArray: unknown[] = mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray).toContainEqual({ ids: { values: [] } });
+    });
+
+    it('omits the ids clause when ids is not set', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.search({ query: 'anything' });
+
+      const filterArray: Array<Record<string, unknown>> =
+        mockEsClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filterArray.some((clause) => 'ids' in clause)).toBe(false);
+    });
+
+    it('rejects more ids than the maximum before touching Elasticsearch', async () => {
+      const ids = Array.from(
+        { length: CONVERSATION_BULK_GET_MAX_IDS + 1 },
+        (_, index) => `conversation-${index}`
+      );
+
+      await expect(client.search({ ids })).rejects.toThrow(/Too many conversation ids/);
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
+    });
+
     it('never sends a pinned filter', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
 
@@ -903,10 +950,15 @@ describe('ConversationClient', () => {
       expect(request).not.toHaveProperty('_source');
     });
 
-    it('builds the same query as search for the same filter, query, and agent', async () => {
+    it('builds the same query as search for the same filter, query, ids, and agent', async () => {
       agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
       mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
-      const options = { query: 'payment', filter: 'status: completed', agentId: 'agent-2' };
+      const options = {
+        query: 'payment',
+        filter: 'status: completed',
+        ids: ['conversation-1', 'conversation-2'],
+        agentId: 'agent-2',
+      };
 
       await client.search(options);
       const searchQuery = mockEsClient.search.mock.calls[0][0].query;
@@ -918,7 +970,22 @@ describe('ConversationClient', () => {
 
       expect(countQuery).toEqual(searchQuery);
       expect(countQuery.bool.must).toHaveLength(1);
-      expect(countQuery.bool.filter).toHaveLength(4);
+      expect(countQuery.bool.filter).toHaveLength(5);
+      expect(countQuery.bool.filter[4]).toEqual({
+        ids: { values: ['conversation-1', 'conversation-2'] },
+      });
+    });
+
+    it('rejects more ids than the maximum before touching Elasticsearch', async () => {
+      const ids = Array.from(
+        { length: CONVERSATION_BULK_GET_MAX_IDS + 1 },
+        (_, index) => `conversation-${index}`
+      );
+
+      await expect(client.count({ ids })).rejects.toThrow(/Too many conversation ids/);
+
+      expect(agentRegistry.getIds).not.toHaveBeenCalled();
+      expect(mockEsClient.search).not.toHaveBeenCalled();
     });
 
     it('returns the exact total, beyond the 10000 result window', async () => {

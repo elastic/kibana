@@ -55,20 +55,27 @@ export const buildTitleMatch = (query: string | undefined): QueryDslQueryContain
  *
  * @param baseFilters - Space scoping and read-access clauses from the client.
  * @param compiledFilter - The caller's KQL filter, already compiled; omitted when absent.
+ * @param idsFilter - The caller's conversation ids clause; omitted when absent.
  * @param titleMatch - Clauses from {@link buildTitleMatch}.
- * @returns A `bool` query with access and filter clauses in `filter` and the title match in `must`.
+ * @returns A `bool` query with access, filter, and ids clauses in `filter` and the title match in `must`.
  */
 export const buildSearchQuery = ({
   baseFilters,
   compiledFilter,
+  idsFilter,
   titleMatch,
 }: {
   baseFilters: QueryDslQueryContainer[];
   compiledFilter: QueryDslQueryContainer | undefined;
+  idsFilter?: QueryDslQueryContainer;
   titleMatch: QueryDslQueryContainer[];
 }): QueryDslQueryContainer => ({
   bool: {
-    filter: [...baseFilters, ...(compiledFilter ? [compiledFilter] : [])],
+    filter: [
+      ...baseFilters,
+      ...(compiledFilter ? [compiledFilter] : []),
+      ...(idsFilter ? [idsFilter] : []),
+    ],
     must: titleMatch,
   },
 });
