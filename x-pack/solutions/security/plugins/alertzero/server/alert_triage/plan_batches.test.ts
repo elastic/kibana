@@ -237,5 +237,61 @@ describe('planBatches', () => {
       );
       expect(result.plannedCost).toBeLessThanOrEqual(30);
     });
+
+    describe('rules that override the alert name (Elastic Defend)', () => {
+      const defend = (detection: string, overrides = {}) =>
+        makeAlert({ ruleId: 'endpoint-rule', ruleName: detection, detection, ...overrides });
+
+      it('plans one batch per detection of a rule, titled after that detection', () => {
+        const result = plan({
+          pending: [defend('malware'), defend('malware'), defend('memory'), makeAlert()],
+        });
+
+        expect(
+          result.batches.map(({ ruleId, ruleName, alerts }) => [ruleId, ruleName, alerts.length])
+        ).toEqual(
+          expect.arrayContaining([
+            ['endpoint-rule', 'malware', 2],
+            ['endpoint-rule', 'memory', 1],
+            ['rule-a', 'Rule A', 1],
+          ])
+        );
+        expect(result.batches).toHaveLength(3);
+      });
+
+      it('keeps the alerts of a rule without an override in one batch', () => {
+        const result = plan({ pending: makeAlerts(3) });
+
+        expect(result.batches).toHaveLength(1);
+      });
+
+      it('does not let a live batch for one detection block another detection of the rule', () => {
+        const result = plan({
+          pending: [defend('memory')],
+          claimed: [
+            defend('malware', {
+              tags: [TRIAGE_PENDING_TAG, `${TRIAGE_EXEC_TAG_PREFIX}exec-1`],
+            }),
+          ],
+          liveExecutionIds: new Set(['exec-1']),
+        });
+
+        expect(result.batches.map(({ ruleName }) => ruleName)).toEqual(['memory']);
+      });
+
+      it('still blocks the detection that has the live batch', () => {
+        const result = plan({
+          pending: [defend('malware')],
+          claimed: [
+            defend('malware', {
+              tags: [TRIAGE_PENDING_TAG, `${TRIAGE_EXEC_TAG_PREFIX}exec-1`],
+            }),
+          ],
+          liveExecutionIds: new Set(['exec-1']),
+        });
+
+        expect(result.batches).toEqual([]);
+      });
+    });
   });
 });

@@ -81,8 +81,8 @@ const manageCapabilities = {
 };
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
-const scrollIntoView = jest.fn();
-Element.prototype.scrollIntoView = scrollIntoView;
+const scrollTo = jest.fn();
+Element.prototype.scrollTo = scrollTo;
 
 function makeSection(
   id: InvestigationSectionState['id'],
@@ -183,14 +183,16 @@ describe('NightshiftApp', () => {
   beforeEach(() => {
     refetchAll.mockClear();
     reportEvent.mockClear();
-    scrollIntoView.mockClear();
+    scrollTo.mockClear();
     mockUsePageReady.mockClear();
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
+        http: { basePath: { get: () => '' } },
         application: {
           capabilities: { nightshift: manageCapabilities },
-          getUrlForApp: () => '/app/significant_events/significant_events',
+          getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
+            `/app/${appId}${path ?? ''}`,
         },
         nightshiftInvestigations: { investigationsClient: {} },
         agenticInvestigations: { InvestigationCard },
@@ -211,6 +213,10 @@ describe('NightshiftApp', () => {
   it('renders investigations and reports the page ready metrics', () => {
     renderApp();
 
+    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toHaveAttribute(
+      'href',
+      '/app/nightshift/detections/events'
+    );
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
     expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(
@@ -235,7 +241,8 @@ describe('NightshiftApp', () => {
         analytics,
         application: {
           capabilities: { nightshift: manageCapabilities },
-          getUrlForApp: () => '/app/significant_events/significant_events',
+          getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
+            `/app/${appId}${path ?? ''}`,
         },
         notifications: { toasts: { addSuccess: jest.fn() } },
       },
@@ -364,10 +371,10 @@ describe('NightshiftApp', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
-    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('scrolls to a severity section from its tile', () => {
+  it('scrolls to a severity section from its tile', async () => {
     setSections({
       sections: defaultSections({
         critical: { investigations: [criticalInvestigation], total: 1 },
@@ -377,11 +384,38 @@ describe('NightshiftApp', () => {
     renderApp();
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
   });
 
-  it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {
+  it.each([
+    ['its severity tile is clicked', undefined],
+    ['a ?severity= link points at it', '/?severity=critical'],
+  ])('opens a closed section when %s', async (_how, link) => {
+    setSections({
+      sections: defaultSections({
+        critical: { investigations: [criticalInvestigation], total: 1 },
+      }),
+    });
+    window.localStorage.setItem(
+      'nightshift.investigations.collapsedSections:default',
+      JSON.stringify(['critical'])
+    );
+
+    renderApp(link ? { initialEntries: [link] } : undefined);
+    if (!link) {
+      fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
+    }
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationSectionToggle-critical')).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    );
+  });
+
+  it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {
     setSections({
       sections: defaultSections({ critical: { error: new Error('boom') } }),
     });
@@ -390,7 +424,7 @@ describe('NightshiftApp', () => {
 
     expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
   });
 
   it('does not show a count of zero on the tiles before the sections have loaded', () => {

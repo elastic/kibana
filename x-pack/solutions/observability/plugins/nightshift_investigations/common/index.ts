@@ -8,6 +8,8 @@
 import type { Severity } from '@kbn/significant-events-schema';
 import type { InvestigationTriggerType } from './workflows/triggers';
 
+export { telemetryTargetNameSchema } from './telemetry_targets';
+
 export type { Severity } from '@kbn/significant-events-schema';
 
 export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
@@ -75,6 +77,7 @@ export interface StartInvestigationRequest {
   source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
+  telemetry_target?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
@@ -167,22 +170,13 @@ export {
 } from './locators';
 
 export {
-  SANDBOX_SECRETS_API_PATH,
-  SANDBOX_SECRET_KEY_REGEX,
-  MAX_SANDBOX_SECRET_KEY_LENGTH,
-  MIN_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRET_VALUE_LENGTH,
-  MAX_SANDBOX_SECRETS,
-  MAX_SANDBOX_SECRETS_VERSION_LENGTH,
-  validateSandboxSecretKey,
-  validateSandboxSecretValue,
-  hasSandboxSecretValueLineBreak,
-  type SandboxSecretEntry,
-  type GetSandboxSecretsResponse,
-  type PutSandboxSecretsRequest,
-  type PutSandboxSecretsResponse,
-} from './sandbox_secrets';
-
+  SANDBOX_CONNECTORS_API_PATH,
+  SANDBOX_CONNECTOR_TYPES_API_PATH,
+  type SandboxConnector,
+  type GetSandboxConnectorsResponse,
+  type SandboxConnectorType,
+  type GetSandboxConnectorTypesResponse,
+} from './sandbox_connectors';
 export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
@@ -210,6 +204,7 @@ export {
   type OnboardingSuggestionsStatus,
   type OnboardingSuggestionsExecution,
   type GetOnboardingResponse,
+  type EnableOnboardingResponse,
   type StartOnboardingSuggestionsResponse,
 } from './onboarding';
 
