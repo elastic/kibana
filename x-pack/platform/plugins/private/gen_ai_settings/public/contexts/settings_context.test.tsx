@@ -17,6 +17,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { Subject } from 'rxjs';
 
+const createGlobalClientMock = () => ({
+  getUpdate$: () => new Subject(),
+  getUpdateErrors$: () => new Subject(),
+  isOverridden: () => false,
+  isCustom: () => false,
+  set: jest.fn(),
+  getAll: jest.fn().mockReturnValue({}),
+});
+
 describe('settings_context', () => {
   const setupSettingsContext = () => {
     const queryClient = new QueryClient({
@@ -40,6 +49,7 @@ describe('settings_context', () => {
               },
             },
             settings: {
+              globalClient: createGlobalClientMock(),
               client: {
                 getUpdate$: () => updateSubject,
                 getUpdateErrors$: () => new Subject(),
@@ -331,6 +341,7 @@ describe('settings_context', () => {
                   },
                 },
                 settings: {
+                  globalClient: createGlobalClientMock(),
                   client: {
                     getUpdate$: () => new Subject(),
                     getUpdateErrors$: () => new Subject(),
@@ -403,6 +414,7 @@ describe('settings_context', () => {
                   },
                 },
                 settings: {
+                  globalClient: createGlobalClientMock(),
                   client: {
                     getUpdateErrors$: () => new Subject(),
                     isOverridden: () => false,
@@ -435,6 +447,7 @@ describe('settings_context', () => {
                 },
               },
               settings: {
+                globalClient: createGlobalClientMock(),
                 client: {
                   getUpdate$: () => new Subject(),
                   getUpdateErrors$: () => new Subject(),
@@ -473,6 +486,7 @@ describe('settings_context', () => {
                 },
               },
               settings: {
+                globalClient: createGlobalClientMock(),
                 client: {
                   getUpdate$: () => new Subject(),
                   getUpdateErrors$: () => new Subject(),

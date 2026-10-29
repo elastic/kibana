@@ -19,6 +19,7 @@ import {
   createCollectorFetch,
 } from './telemetry_management_collector';
 import type { IUiSettingsClient } from '@kbn/core/server';
+import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -33,10 +34,19 @@ describe('telemetry_application_usage_collector', () => {
 
   const uiSettingsClient = uiSettingsServiceMock.createClient();
   const getUiSettingsClient = jest.fn((): IUiSettingsClient | undefined => uiSettingsClient);
+  const globalUiSettingsClient = uiSettingsServiceMock.createClient();
+  globalUiSettingsClient.getUserProvided.mockResolvedValue({});
+  const getGlobalUiSettingsClient = jest.fn(
+    (): IUiSettingsClient | undefined => globalUiSettingsClient
+  );
   const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() => {
-    registerManagementUsageCollector(usageCollectionMock, getUiSettingsClient);
+    registerManagementUsageCollector(
+      usageCollectionMock,
+      getUiSettingsClient,
+      getGlobalUiSettingsClient
+    );
   });
 
   test('registered collector is set', () => {
@@ -104,6 +114,29 @@ describe('createCollectorFetch', () => {
       const result = await fetchFunction();
       expect(result).toBe(undefined);
       expect(getUiSettingsClient).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports global settings from the global client instead of the space client', async () => {
+      const uiSettingsClient = uiSettingsServiceMock.createClient();
+      const globalUiSettingsClient = uiSettingsServiceMock.createClient();
+      uiSettingsClient.getUserProvided.mockResolvedValue({
+        [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: { userValue: false },
+        item1: { userValue: 'test' },
+      });
+      globalUiSettingsClient.getUserProvided.mockResolvedValue({
+        [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: { userValue: true },
+      });
+      uiSettingsClient.isSensitive.mockReturnValue(false);
+      globalUiSettingsClient.isSensitive.mockReturnValue(false);
+      const fetchFunction = createCollectorFetch(
+        () => uiSettingsClient,
+        () => globalUiSettingsClient
+      );
+      const result = await fetchFunction();
+      expect(result).toEqual({
+        item1: 'test',
+        [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: true,
+      });
     });
 
     it('returns all user changed settings', async () => {
