@@ -187,6 +187,221 @@ describe('diffDashboardStates', () => {
       } as DashboardPanel);
     const ignoreConfig = { compareSerializedState: () => true };
 
+    describe('layout identity', () => {
+      const pinnedPanel = (
+        title = 'Host',
+        id?: string
+      ): NonNullable<DashboardState['pinned_panels']>[number] => ({
+        ...(id !== undefined && { id }),
+        type: 'options_list_control',
+        width: 'medium',
+        config: { title },
+      });
+
+      type LayoutCase = [
+        string,
+        (title: string) => Partial<DashboardState>,
+        'panels' | 'pinned_panels'
+      ];
+
+      const idlessLayouts: LayoutCase[] = [
+        ['panel', (title) => ({ panels: [lensPanel({ config: { title } })] }), 'panels'],
+        [
+          'section and child',
+          (title) => ({
+            panels: [
+              {
+                title: 'Logs',
+                collapsed: false,
+                grid: { y: 0 },
+                panels: [lensPanel({ config: { title } })],
+              },
+            ],
+          }),
+          'panels',
+        ],
+        [
+          'pinned panel',
+          (title) => ({ panels: [], pinned_panels: [pinnedPanel(title)] }),
+          'pinned_panels',
+        ],
+      ];
+
+      it.each(idlessLayouts)('compares identical ID-less %s layouts without mutation', (_, layout) => {
+        const baseline = state(layout('Count'));
+        const current = state(layout('Count'));
+        const originalBaseline = JSON.stringify(baseline);
+        const originalCurrent = JSON.stringify(current);
+
+        expect(diffDashboardStates(baseline, baseline)).toStrictEqual({});
+        expect(diffDashboardStates(baseline, current)).toStrictEqual({});
+        expect(JSON.stringify(baseline)).toBe(originalBaseline);
+        expect(JSON.stringify(current)).toBe(originalCurrent);
+      });
+
+      it.each(idlessLayouts)('detects config changes in an ID-less %s', (_, layout, key) => {
+        const baseline = state(layout('Count'));
+        const current = state(layout('Errors'));
+
+        const diff = diffDashboardStates(baseline, current);
+
+        expect(diff).toStrictEqual({ [key]: current[key] });
+        expect(diff[key]).toBe(current[key]);
+      });
+
+      const explicitLayouts: LayoutCase[] = [
+        ['panel', (id) => ({ panels: [lensPanel({ id })] }), 'panels'],
+        [
+          'section',
+          (id) => ({ panels: [{ ...section(false), id, panels: [lensPanel()] }] }),
+          'panels',
+        ],
+        [
+          'section child',
+          (id) => ({ panels: [{ ...section(false), panels: [lensPanel({ id })] }] }),
+          'panels',
+        ],
+        [
+          'pinned panel',
+          (id) => ({ panels: [], pinned_panels: [pinnedPanel('Host', id)] }),
+          'pinned_panels',
+        ],
+      ];
+
+      it.each(explicitLayouts)('treats different explicit %s IDs as a change', (_, layout, key) => {
+        const baseline = state(layout('first'));
+        const current = state(layout('second'));
+
+        expect(diffDashboardStates(baseline, current)).toStrictEqual({ [key]: current[key] });
+      });
+
+      const collidingLayouts: LayoutCase[] = [
+        [
+          'panel',
+          (title) => ({
+            panels: [lensPanel({ config: { title } }), lensPanel({ id: '__comparison:panel:0' })],
+          }),
+          'panels',
+        ],
+        [
+          'section child',
+          (title) => ({
+            panels: [
+              {
+                title: 'Logs',
+                collapsed: false,
+                grid: { y: 0 },
+                panels: [
+                  lensPanel({ config: { title } }),
+                  lensPanel({ id: '__comparison:panel:0:0' }),
+                ],
+              },
+            ],
+          }),
+          'panels',
+        ],
+        [
+          'pinned panel',
+          (title) => ({
+            panels: [],
+            pinned_panels: [pinnedPanel(title), pinnedPanel('Host', '__comparison:pinned:0')],
+          }),
+          'pinned_panels',
+        ],
+      ];
+
+      it.each(collidingLayouts)('avoids collisions with explicit %s IDs', (_, layout, key) => {
+        const baseline = state(layout('Count'));
+        const current = state(layout('Errors'));
+
+        expect(diffDashboardStates(baseline, state(layout('Count')))).toStrictEqual({});
+        expect(diffDashboardStates(baseline, current)).toStrictEqual({ [key]: current[key] });
+      });
+
+      it('does not use a live comparator for a generated panel ID', () => {
+        const baseline = state({ panels: [lensPanel({ config: { title: 'Count' } })] });
+        const current = state({ panels: [lensPanel({ config: { title: 'Errors' } })] });
+        const compareSerializedState = jest.fn(() => true);
+
+        expect(
+          diffDashboardStates(baseline, current, {
+            '__comparison:panel:0': { type: 'lens', compareSerializedState },
+          })
+        ).toStrictEqual({ panels: current.panels });
+        expect(compareSerializedState).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('comparator failures', () => {
+      beforeEach(() => {
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      it('continues comparing pinned panels when a panel comparator throws', () => {
+        const baseline = state({
+          panels: [lensPanel({ id: 'panel-1' })],
+          pinned_panels: [{ id: 'control-1', type: 'options_list_control', config: { title: 'Host' } }],
+        });
+        const current = state({
+          panels: [lensPanel({ id: 'panel-1' })],
+          pinned_panels: [
+            { id: 'control-1', type: 'options_list_control', config: { title: 'Updated host' } },
+          ],
+        });
+        const error = new Error('Cannot compare panel state');
+        const comparePinnedPanel = jest.fn(() => false);
+
+        expect(
+          diffDashboardStates(baseline, current, {
+            'panel-1': {
+              type: 'lens',
+              compareSerializedState: () => {
+                throw error;
+              },
+            },
+            'control-1': {
+              type: 'options_list_control',
+              compareSerializedState: comparePinnedPanel,
+            },
+          })
+        ).toStrictEqual({ panels: current.panels, pinned_panels: current.pinned_panels });
+        expect(comparePinnedPanel).toHaveBeenCalledWith({ title: 'Host' }, { title: 'Updated host' });
+        expect(console.warn).toHaveBeenCalledWith(
+          'Unable to compare serialized state for dashboard panel "panel-1".',
+          error
+        );
+      });
+
+      it('returns pinned panels when their comparator throws', () => {
+        const baseline = state({
+          pinned_panels: [{ id: 'control-1', type: 'options_list_control', config: {} }],
+        });
+        const current = state({
+          pinned_panels: [{ id: 'control-1', type: 'options_list_control', config: {} }],
+        });
+        const error = new Error('Cannot compare control state');
+
+        expect(
+          diffDashboardStates(baseline, current, {
+            'control-1': {
+              type: 'options_list_control',
+              compareSerializedState: () => {
+                throw error;
+              },
+            },
+          })
+        ).toStrictEqual({ pinned_panels: current.pinned_panels });
+        expect(console.warn).toHaveBeenCalledWith(
+          'Unable to compare serialized state for dashboard panel "control-1".',
+          error
+        );
+      });
+    });
+
     it('returns the panels when a panel type changes', () => {
       const current = state({ panels: [lensPanel({ id: 'panel-1', type: 'visualization' })] });
 
