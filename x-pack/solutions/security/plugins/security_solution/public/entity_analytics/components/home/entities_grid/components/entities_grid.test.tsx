@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { EuiDataGridProps } from '@elastic/eui';
 import { TestProviders } from '../../../../../common/mock';
 import type { Row } from '../common';
+import { RISK_SCORE_NORM_FIELD } from '../common';
 import { INDIVIDUAL_ROWS_COLUMNS, RESOLVED_ROWS_COLUMNS } from '../grid_columns';
 import { useEntityGridData } from '../hooks/use_entity_grid_data';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
@@ -25,6 +27,23 @@ jest.mock('../hooks/use_entity_analytics_url_state', () => ({
   ...jest.requireActual('../hooks/use_entity_analytics_url_state'),
   useEntityAnalyticsUrlState: jest.fn(),
 }));
+
+const mockEuiDataGrid = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const EuiDataGrid = actual.EuiDataGrid;
+  return {
+    ...actual,
+    EuiDataGrid: (props: EuiDataGridProps) => {
+      mockEuiDataGrid(props);
+      return <EuiDataGrid {...props} />;
+    },
+  };
+});
+
+const getLastDataGridSorting = () =>
+  mockEuiDataGrid.mock.calls.at(-1)?.[0]?.sorting as EuiDataGridProps['sorting'];
 
 const GROUP: Row = { 'entity.id': 'host:a', 'entity.name': 'alpha', group_size: 3 };
 const SINGLE_ENTITY: Row = { 'entity.id': 'host:b', 'entity.name': 'beta', group_size: 1 };
@@ -226,6 +245,15 @@ describe('EntitiesGrid', () => {
       screen.queryByRole('button', { name: 'Investigate in timeline' })
     ).not.toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: 'Open entity graph' }).length).toBeGreaterThan(0);
+  });
+
+  it('resets to the default sort when the user unsorts a column', () => {
+    const onSortChange = jest.fn();
+    renderGrid({ onSortChange });
+
+    getLastDataGridSorting()?.onSort?.([]);
+
+    expect(onSortChange).toHaveBeenCalledWith(RISK_SCORE_NORM_FIELD, 'desc');
   });
 
   it('says in the toolbar how many rows it shows when the view has more', () => {
