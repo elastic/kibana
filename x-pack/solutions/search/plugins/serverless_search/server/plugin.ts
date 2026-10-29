@@ -14,6 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
@@ -29,12 +30,14 @@ import type {
 import { registerConnectorsRoutes } from './routes/connectors_routes';
 import { registerMappingRoutes } from './routes/mapping_routes';
 import { registerIngestPipelineRoutes } from './routes/ingest_pipeline_routes';
+import { registerWebCrawlersRoutes } from './routes/web_crawlers_routes';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
   logger: Logger;
   router: IRouter;
   getSecurity: () => Promise<SecurityPluginStart>;
+  getFleet: () => Promise<FleetStartContract | undefined>;
 }
 
 export class ServerlessSearchPlugin
@@ -89,6 +92,10 @@ export class ServerlessSearchPlugin
         const [, { security }] = await getStartServices();
         return security;
       },
+      getFleet: async () => {
+        const [, { fleet }] = await getStartServices();
+        return fleet;
+      },
     };
 
     registerApiKeyRoutes(dependencies);
@@ -96,6 +103,7 @@ export class ServerlessSearchPlugin
     registerIndicesRoutes(dependencies);
     registerMappingRoutes(dependencies);
     registerIngestPipelineRoutes(dependencies);
+    registerWebCrawlersRoutes(dependencies);
 
     features.registerElasticsearchFeature({
       id: 'serverlessSearch',

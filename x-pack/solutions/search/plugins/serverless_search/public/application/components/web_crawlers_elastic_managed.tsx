@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { LEARN_MORE_LABEL, WEB_CRAWLERS_LABEL } from '../../../common/i18n_string';
 import { useKibanaServices } from '../hooks/use_kibana';
-import { ElasticManagedWebCrawlersEmptyPrompt } from './web_crawlers/elastic_managed_web_crawlers_empty_prompt';
+import { ElasticManagedWebCrawlers } from './web_crawlers/elastic_managed_web_crawlers';
 
 export const WebCrawlersElasticManaged = () => {
   const { console: consolePlugin } = useKibanaServices();
@@ -49,7 +49,7 @@ export const WebCrawlersElasticManaged = () => {
         </EuiText>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth color="subdued">
-        <ElasticManagedWebCrawlersEmptyPrompt />
+        <ElasticManagedWebCrawlers />
       </EuiPageTemplate.Section>
       {embeddableConsole}
     </EuiPageTemplate>

@@ -6,6 +6,7 @@
  */
 
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
@@ -17,6 +18,7 @@ export interface ServerlessSearchPluginStart {}
 
 export interface StartDependencies {
   dataViews: DataViewsServerPluginStart;
+  fleet?: FleetStartContract;
   security: SecurityPluginStart;
 }
 export interface SetupDependencies {
