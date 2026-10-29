@@ -162,6 +162,35 @@ export const MAX_THRESHOLD_ARIA_LABEL = i18n.translate(
   }
 );
 
+export const DEPRECATION_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutTitle',
+  {
+    defaultMessage: 'Alert analysis workflow is being removed',
+  }
+);
+
+export const DEPRECATION_CALLOUT_BODY = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutBody',
+  {
+    defaultMessage:
+      'An upcoming release removes the alert analysis workflow. The AlertZero Triage Worker replaces it. Check out AlertZero to set up alert triage.',
+  }
+);
+
+export const DEPRECATION_CALLOUT_GO_TO_ALERTZERO = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutGoToAlertZero',
+  {
+    defaultMessage: 'Go to AlertZero',
+  }
+);
+
+export const DEPRECATION_CALLOUT_ENABLE_ALERTZERO = i18n.translate(
+  'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutEnableAlertZero',
+  {
+    defaultMessage: 'Enable AlertZero',
+  }
+);
+
 export const TAG_PREFIX_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.tagPrefixAriaLabel',
   {
