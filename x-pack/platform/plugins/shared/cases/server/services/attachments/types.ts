@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type {
   Logger,
   SavedObject,
@@ -147,11 +146,6 @@ export type AlertsAttachedToCaseArgs = AttachedToCaseArgs & {
    */
   originOnly?: boolean;
 };
-
-export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
-  attachmentType: AttachmentType;
-  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
-}
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
   savedObjectIds: string[];
