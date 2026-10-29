@@ -53,10 +53,6 @@ const knowledgeLabel = i18n.translate('xpack.nightshift.knowledgeLinkLabel', {
   defaultMessage: 'Knowledge',
 });
 
-const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkLabel', {
-  defaultMessage: 'Sandbox secrets',
-});
-
 const settingsEbtProps = getEbtProps({
   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SETTINGS,
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
@@ -103,8 +99,6 @@ export interface NightshiftAppHeaderProps {
   knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
   settingsHref?: string;
-  /** Shows the sandbox secrets menu item when set (landing page only). */
-  onSandboxSecretsClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
   automationsHref?: string;
   onDetectionsClick?: () => void | Promise<void>;
@@ -121,7 +115,6 @@ export function NightshiftAppHeader({
   knowledgeHref,
   onSettingsClick,
   settingsHref,
-  onSandboxSecretsClick,
   onAutomationsClick,
   automationsHref,
   onDetectionsClick,
@@ -134,7 +127,7 @@ export function NightshiftAppHeader({
   const menu = useMemo<AppMenuConfig>(
     () => ({
       items: [
-        // Landing: Automations and Detections buttons; Knowledge, Settings, Sandbox Secrets in overflow.
+        // Landing: Automations and Detections buttons; Settings in overflow.
         ...(isLandingPage && onAutomationsClick && automationsHref
           ? [
               {
@@ -165,7 +158,8 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        ...(isLandingPage && onKnowledgeClick && knowledgeHref
+        // Landing and Detections: Knowledge in overflow.
+        ...((isLandingPage || isDetectionPage) && onKnowledgeClick && knowledgeHref
           ? [
               {
                 id: 'nightshiftKnowledge',
@@ -193,18 +187,6 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: true,
-              },
-            ]
-          : []),
-        ...(isLandingPage && onSandboxSecretsClick
-          ? [
-              {
-                id: 'nightshiftSandboxSecrets',
-                label: sandboxSecretsLabel,
-                iconType: 'lock',
-                run: () => onSandboxSecretsClick(),
-                testId: 'nightshiftSandboxSecretsLink',
                 overflow: true,
               },
             ]
@@ -254,7 +236,6 @@ export function NightshiftAppHeader({
       onAutomationsClick,
       onDetectionsClick,
       onKnowledgeClick,
-      onSandboxSecretsClick,
       onSourcesClick,
       onSettingsClick,
       settingsHref,

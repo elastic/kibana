@@ -168,6 +168,64 @@ describe('unisolateHostTool', () => {
       expect(mockResponseActionsClient.release).not.toHaveBeenCalled();
     });
 
+    it('reports product_feature_disabled when the deployment omits the response-actions feature', async () => {
+      // `canUnIsolateHost` has no license conjunction, so on serverless
+      // Essentials (feature off, license always Enterprise) the product
+      // configuration is the only non-role explanation for the refusal.
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canUnIsolateHost: false }));
+      mockEndpointAppContextService.getProductFeaturesService = jest.fn(
+        () =>
+          ({ isEnabled: () => false } as unknown as ReturnType<
+            EndpointAppContextService['getProductFeaturesService']
+          >)
+      ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+      const mockResponseActionsClient = { release: jest.fn() };
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.error).toBe('product_feature_disabled');
+      expect(data.privilege).toBe('canUnIsolateHost');
+      expect(data.productFeature).toBe('endpoint_response_actions');
+      expect(mockResponseActionsClient.release).not.toHaveBeenCalled();
+    });
+
+    it('reports insufficient_privileges when host isolation is enabled but the role lacks release', async () => {
+      // Essentials-shaped: release registers under `endpointHostIsolation`, so this is a role gap.
+      mockEndpointAppContextService.getEndpointAuthz = jest
+        .fn()
+        .mockResolvedValue(getEndpointAuthzInitialStateMock({ canUnIsolateHost: false }));
+      mockEndpointAppContextService.getProductFeaturesService = jest.fn(
+        () =>
+          ({
+            isEnabled: (key: string) => key === 'endpoint_host_isolation',
+          } as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>)
+      ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+      const mockResponseActionsClient = { release: jest.fn() };
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      const data = results[0].data as Record<string, unknown>;
+      expect(data.error).toBe('insufficient_privileges');
+      expect(data.privilege).toBe('canUnIsolateHost');
+      expect(data.message as string).toContain('Ask an administrator');
+      expect(mockResponseActionsClient.release).not.toHaveBeenCalled();
+    });
+
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({ agents: [] }),
