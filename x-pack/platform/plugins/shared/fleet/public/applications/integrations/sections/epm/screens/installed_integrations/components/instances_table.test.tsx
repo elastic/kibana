@@ -421,12 +421,13 @@ describe('InstancesTable', () => {
       expect(screen.queryByTestId('instancesAgentsTruncated')).not.toBeInTheDocument();
     });
 
-    it('shows the agent count without a link to users who cannot read agents', () => {
+    it('hides the agent count from users who cannot read agents', () => {
       mockUseAuthz.mockReturnValue(authzWith());
       renderTable([makeInstance({ mechanisms: ['agent_based'] })]);
 
+      expect(screen.queryByText('Agents')).not.toBeInTheDocument();
       expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
-      expect(screen.getByText('5')).toBeInTheDocument();
+      expect(screen.queryByText('5')).not.toBeInTheDocument();
     });
 
     it('shows a dash instead of a link without agents', () => {

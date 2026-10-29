@@ -18,7 +18,8 @@ import {
 } from '../../detail/policies/components/agentless_table_adapters';
 
 interface InstanceAgentFlyoutProps {
-  agent: Agent;
+  /** Undefined for a managed integration whose agentless agent is not enrolled yet. */
+  agent?: Agent;
   /** The agent policy the agent is enrolled in, without a version suffix. */
   agentPolicyId: string;
   packagePolicy: PackagePolicy;
@@ -49,6 +50,8 @@ const AgentlessStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> =
     // package is always set for agentless policies (createAgentlessPolicy).
     packageInfo={{ name: packagePolicy.package!.name, version: packagePolicy.package!.version }}
     selectedInput={getSelectedInput(packagePolicy)}
+    // Needed, with the package policy, for the health of each component. Only the id is used.
+    agentPolicy={{ id: agentPolicyId } as AgentPolicy}
     packagePolicy={packagePolicy}
     connectors={getConnectorsFromPackagePolicy(packagePolicy)}
   />
@@ -59,13 +62,15 @@ const AgentBasedStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> 
   agentPolicyId,
   packagePolicy,
   onClose,
-}) => (
-  <AgentlessStatusDetailsFlyout
-    onClose={onClose}
-    policyName={packagePolicy.package?.title ?? packagePolicy.name}
-    agent={agent}
-    // Only the id is used, for the agent policy link.
-    agentPolicy={{ id: agentPolicyId } as AgentPolicy}
-    packagePolicy={packagePolicy}
-  />
-);
+}) =>
+  // Only managed integrations can be pending: an agent-based entry always has its agent.
+  agent ? (
+    <AgentlessStatusDetailsFlyout
+      onClose={onClose}
+      policyName={packagePolicy.package?.title ?? packagePolicy.name}
+      agent={agent}
+      // Only the id is used, for the agent policy link.
+      agentPolicy={{ id: agentPolicyId } as AgentPolicy}
+      packagePolicy={packagePolicy}
+    />
+  ) : null;

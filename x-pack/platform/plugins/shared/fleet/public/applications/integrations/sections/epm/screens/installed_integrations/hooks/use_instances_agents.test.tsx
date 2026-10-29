@@ -94,7 +94,7 @@ describe('useInstancesAgents', () => {
 
     await waitFor(() => expect(result.current.agentsByInstance.get('mi')).toHaveLength(1));
     const [miAgent] = result.current.agentsByInstance.get('mi')!;
-    expect(miAgent.agent.id).toBe('a1');
+    expect(miAgent.agent?.id).toBe('a1');
     expect(miAgent.agentPolicyId).toBe('agentless-2');
     expect(miAgent.packagePolicy?.id).toBe('pp-bedrock');
 
@@ -105,7 +105,7 @@ describe('useInstancesAgents', () => {
     expect(result.current.agentPolicyIdsByInstance.get('agent')).toEqual(['user-policy']);
 
     const [agentBasedAgent] = result.current.agentsByInstance.get('agent')!;
-    expect(agentBasedAgent.agent.id).toBe('a2');
+    expect(agentBasedAgent.agent?.id).toBe('a2');
     expect(agentBasedAgent.packagePolicy?.id).toBe('pp-agent');
   });
 
@@ -133,6 +133,87 @@ describe('useInstancesAgents', () => {
     const { result } = renderUseInstancesAgents([instance('mi')]);
 
     expect(result.current.isTruncated).toBe(true);
+  });
+
+  describe('pending managed integrations', () => {
+    beforeEach(() => {
+      mockSendRequest.mockResolvedValue({
+        items: [
+          { id: 'pp-aws', policy_ids: ['agentless-1'], supports_agentless: true },
+          { id: 'pp-bedrock', policy_ids: ['agentless-2'], supports_agentless: true },
+          { id: 'pp-agent', policy_ids: ['user-policy'], supports_agentless: false },
+        ],
+      });
+    });
+
+    it('adds a pending entry for a managed integration policy without its agent', async () => {
+      mockUseAgents.mockReturnValue({
+        agents: [{ id: 'a1', policy_id: 'agentless-1' }],
+        isTruncated: false,
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderUseInstancesAgents([
+        instance('mi', { packagePolicyIds: ['pp-aws', 'pp-bedrock'] }),
+      ]);
+
+      await waitFor(() => expect(result.current.agentsByInstance.get('mi')).toHaveLength(2));
+      const [enrolled, pending] = result.current.agentsByInstance.get('mi')!;
+      expect(enrolled.agent?.id).toBe('a1');
+      expect(pending.agent).toBeUndefined();
+      expect(pending.agentPolicyId).toBe('agentless-2');
+      expect(pending.packagePolicy?.id).toBe('pp-bedrock');
+    });
+
+    it('adds no pending entry for an agent-based policy without agents', async () => {
+      const { result } = renderUseInstancesAgents([
+        instance('agent', { mechanisms: ['agent_based'], packagePolicyIds: ['pp-agent'] }),
+      ]);
+
+      await waitFor(() => expect(mockSendRequest).toHaveBeenCalled());
+      expect(result.current.agentsByInstance.get('agent')).toBeUndefined();
+    });
+
+    it('adds no pending entry while the agents load, or when they were cut short', async () => {
+      mockUseAgents.mockReturnValue({
+        agents: [],
+        isTruncated: false,
+        isLoading: true,
+        error: null,
+      });
+      const loading = renderUseInstancesAgents([instance('mi', { packagePolicyIds: ['pp-aws'] })]);
+      await waitFor(() => expect(mockSendRequest).toHaveBeenCalled());
+      expect(loading.result.current.agentsByInstance.get('mi')).toBeUndefined();
+
+      mockUseAgents.mockReturnValue({
+        agents: [],
+        isTruncated: true,
+        isLoading: false,
+        error: null,
+      });
+      const truncated = renderUseInstancesAgents([
+        instance('mi', { packagePolicyIds: ['pp-aws'] }),
+      ]);
+      await waitFor(() => expect(mockSendRequest).toHaveBeenCalledTimes(2));
+      expect(truncated.result.current.agentsByInstance.get('mi')).toBeUndefined();
+    });
+
+    it('adds no pending entry when the agents request failed', async () => {
+      mockUseAgents.mockReturnValue({
+        agents: [],
+        isTruncated: false,
+        isLoading: false,
+        error: new Error('agents failed'),
+      });
+
+      const { result } = renderUseInstancesAgents([
+        instance('mi', { packagePolicyIds: ['pp-aws'] }),
+      ]);
+
+      await waitFor(() => expect(mockSendRequest).toHaveBeenCalled());
+      expect(result.current.agentsByInstance.get('mi')).toBeUndefined();
+    });
   });
 
   it('does not query anything when disabled', () => {

@@ -444,13 +444,15 @@ const CloudOnboardingDeploymentListItemSchema = CloudOnboardingDeploymentItemSch
     },
     { meta: { description: 'Service IDs by the delivery mechanism that deploys them.' } }
   ),
-  agentCount: schema.number({
-    min: 0,
-    meta: {
-      description:
-        'Number of agents enrolled in the deployment instance agent policies. Only agent policies in the current space are counted.',
-    },
-  }),
+  agentCount: schema.maybe(
+    schema.number({
+      min: 0,
+      meta: {
+        description:
+          'Number of agents enrolled in the deployment instance agent policies. Only agent policies in the current space are counted. Omitted without permission to read agents.',
+      },
+    })
+  ),
 });
 
 export const GetCloudOnboardingDeploymentsRequestSchema = {

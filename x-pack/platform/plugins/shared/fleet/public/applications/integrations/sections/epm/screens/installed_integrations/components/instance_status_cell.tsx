@@ -13,7 +13,8 @@ import type { Agent } from '../../../../../../../../common/types';
 import { AgentStatusBadge } from '../../../../../../../components';
 import type { InstanceAgent } from '../hooks/use_instances_agents';
 
-// Lower first: the badge shows the agent that most needs attention.
+// Lower first: the badge shows the agent that most needs attention. A managed integration whose
+// agent is not enrolled yet (no agent: Pending) ranks with agents that are still starting.
 const STATUS_ORDER: Partial<Record<Agent['status'] & string, number>> = {
   error: 0,
   degraded: 0,
@@ -23,11 +24,14 @@ const STATUS_ORDER: Partial<Record<Agent['status'] & string, number>> = {
   unenrolling: 2,
   online: 3,
 };
-const statusRank = (agent: Agent) => (agent.status && STATUS_ORDER[agent.status]) ?? 4;
+const PENDING_RANK = 2;
+const statusRank = (agent?: Agent) =>
+  agent ? (agent.status && STATUS_ORDER[agent.status]) ?? 4 : PENDING_RANK;
 
 /**
  * The status badge of one agent, the one that most needs attention, followed by a count of the
- * other agents. The badge opens the agent status flyout when the agent's package policy is known.
+ * other agents. A managed integration whose agentless agent is not enrolled yet shows Pending. The
+ * badge opens the status flyout when the package policy is known.
  */
 export const InstanceStatusCell: React.FunctionComponent<{
   agents: InstanceAgent[];

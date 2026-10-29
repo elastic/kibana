@@ -47,11 +47,13 @@ export function getServicesByMethod(
  * Adds what the list needs from the deployments' policies: the deployed package versions and the
  * number of enrolled agents. A policy that no longer exists, or is not in the space of `soClient`,
  * is skipped. Agent policy ids are client-supplied, so they are resolved through `soClient` before
- * the agent count, which is not space scoped, is queried.
+ * the agent count, which is not space scoped, is queried. Without `withAgentCount` (no permission to
+ * read agents, like the agent policy APIs) the agent count is left out.
  */
 export async function enrichDeployments(
   soClient: SavedObjectsClientContract,
-  deployments: CloudOnboardingDeployment[]
+  deployments: CloudOnboardingDeployment[],
+  { withAgentCount }: { withAgentCount: boolean }
 ): Promise<CloudOnboardingDeploymentListItem[]> {
   const packagePolicyIds = [...new Set(deployments.flatMap((d) => d.packagePolicyIds ?? []))];
   const packagePolicies = packagePolicyIds.length
@@ -68,7 +70,9 @@ export async function enrichDeployments(
     ]),
   ];
 
-  const requestedAgentPolicyIds = [...new Set(deployments.flatMap(agentPolicyIdsOf))];
+  const requestedAgentPolicyIds = withAgentCount
+    ? [...new Set(deployments.flatMap(agentPolicyIdsOf))]
+    : [];
   const agentPolicies = requestedAgentPolicyIds.length
     ? await agentPolicyService.getByIds(soClient, requestedAgentPolicyIds, { ignoreMissing: true })
     : [];
@@ -91,10 +95,14 @@ export async function enrichDeployments(
       ...deployment,
       packages: [...packages.values()],
       servicesByMethod: getServicesByMethod(deployment),
-      agentCount: agentPolicyIdsOf(deployment).reduce(
-        (sum, id) => sum + (accessibleAgentPolicyIds.has(id) ? agentCounts[id] ?? 0 : 0),
-        0
-      ),
+      ...(withAgentCount
+        ? {
+            agentCount: agentPolicyIdsOf(deployment).reduce(
+              (sum, id) => sum + (accessibleAgentPolicyIds.has(id) ? agentCounts[id] ?? 0 : 0),
+              0
+            ),
+          }
+        : {}),
     };
   });
 }

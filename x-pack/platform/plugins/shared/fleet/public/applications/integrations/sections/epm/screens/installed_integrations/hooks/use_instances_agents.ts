@@ -23,9 +23,12 @@ import { sendRequestForRq, useAgentsForPolicyIds } from '../../../../../../../ho
 
 const REFRESH_INTERVAL_MS = 30000;
 
-/** An agent of an instance, with the instance package policy it runs, if one was found. */
+/**
+ * An agent of an instance, with the instance package policy it runs, if one was found. Without an
+ * agent, it stands for a managed integration whose agentless agent is not enrolled yet (Pending).
+ */
 export interface InstanceAgent {
-  agent: Agent;
+  agent?: Agent;
   /** The agent policy the agent is enrolled in, without a version suffix. */
   agentPolicyId: string;
   packagePolicy?: PackagePolicy;
@@ -113,8 +116,30 @@ export function useInstancesAgents(
         ]);
       }
     }
+
+    // A managed integration policy without its agentless agent is not deployed yet: Pending, as in
+    // the managed integrations table. Only after a complete, successful agent lookup: while agents
+    // load, when they were cut short or when the request failed, its agent may just be missing.
+    if (!isAgentsLoading && !isTruncated && !agentsError) {
+      for (const [instanceId, { packagePolicies }] of policiesByInstance) {
+        const instanceAgents = byInstance.get(instanceId) ?? [];
+        for (const packagePolicy of packagePolicies) {
+          // Agentless package policies have a single agent policy.
+          const agentPolicyId = packagePolicy.policy_ids[0];
+          if (
+            !packagePolicy.supports_agentless ||
+            !agentPolicyId ||
+            instanceAgents.some((instanceAgent) => instanceAgent.agentPolicyId === agentPolicyId)
+          ) {
+            continue;
+          }
+          instanceAgents.push({ agentPolicyId, packagePolicy });
+        }
+        if (instanceAgents.length) byInstance.set(instanceId, instanceAgents);
+      }
+    }
     return byInstance;
-  }, [agents, policiesByInstance]);
+  }, [agents, policiesByInstance, isAgentsLoading, isTruncated, agentsError]);
 
   const agentPolicyIdsByInstance = useMemo(
     () =>
