@@ -94,4 +94,40 @@ describe('retryTransientErrors', () => {
     );
     expect(esCallMock).toHaveBeenCalledTimes(2);
   });
+
+  it('retries with additionalRetryMessages', async () => {
+    const error = new Error('version_conflict_engine_exception: document already exists');
+    const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
+    expect(
+      await retryTransientEsErrors(esCallMock, {
+        additionalRetryMessages: ['version_conflict_engine_exception'],
+      })
+    ).toEqual('success');
+    expect(esCallMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a message that was not opted into', async () => {
+    const error = new Error('version_conflict_engine_exception: document already exists');
+    const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
+    await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
+    expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the additional retry options across subsequent attempts', async () => {
+    let attempt = 0;
+    const esCallMock = jest.fn(async () => {
+      attempt++;
+      if (attempt < 3) {
+        throw new Error('version_conflict_engine_exception: document already exists');
+      }
+      return 'success';
+    });
+
+    expect(
+      await retryTransientEsErrors(esCallMock, {
+        additionalRetryMessages: ['version_conflict_engine_exception'],
+      })
+    ).toEqual('success');
+    expect(esCallMock).toHaveBeenCalledTimes(3);
+  });
 });
