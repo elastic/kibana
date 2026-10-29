@@ -25,7 +25,7 @@ import type {
 import { parseMaxAge, toMaxAgeHours } from '../../common/validation';
 import { formatCostRange, formatSize, getVcuRangeText } from './cost_format';
 import { formatPhaseBoost } from './format';
-import { useShowsEstimates } from '../prototype/estimates_setting';
+import { useShowsEstimates } from '../prototype/prototype_settings';
 import { PERIOD_LABELS } from './profiles/period_labels';
 
 interface DataStreamTimelineProps {
@@ -105,8 +105,9 @@ export const usePeriodColors = (): Record<
  * A data streams profile's periods along the age of data, like the Streams lifecycle timeline: each
  * period's name and data in its bar, optionally with its search cost in a tooltip, and the ages
  * between them below.
- * Recent and Standard are as long as their max ages allow, and a Standard period that ends where
- * Recent does is left out. Background has no end, so it gets the length of the period before it.
+ * Recent and Standard are as long as their max ages allow, so a Recent period that ends at 0, or a
+ * Standard period that ends where Recent does, is left out. Background has no end, so it gets the
+ * length of the period before it, or all of the timeline without one.
  * Each keeps a minimum width, so its text doesn't truncate too soon.
  */
 export const DataStreamTimeline = ({
@@ -125,7 +126,7 @@ export const DataStreamTimeline = ({
   const weights: Record<DataStreamPeriod, number> = {
     recent: recentHours,
     standard: standardHours,
-    background: standardHours > 0 ? standardHours : recentHours,
+    background: standardHours || recentHours || 1,
   };
   const periods = PERIODS.filter((period) => weights[period] > 0);
   // Each period is as long as its share of the timeline, but no narrower than its text needs.
@@ -249,7 +250,7 @@ export const DataStreamTimeline = ({
             marginBlockStart: euiTheme.size.xs,
           }}
         >
-          {periods.map((period) => (
+          {periods.map((period, index) => (
             <div key={period}>
               <div
                 css={{
@@ -263,7 +264,8 @@ export const DataStreamTimeline = ({
                 // Each age sits centered under its tick.
                 css={{ display: 'inline-block', transform: 'translateX(-50%)' }}
               >
-                {tickLabels[period]}
+                {/* The first period starts at 0, whichever it is. */}
+                {index === 0 ? tickLabels.recent : tickLabels[period]}
               </EuiText>
             </div>
           ))}

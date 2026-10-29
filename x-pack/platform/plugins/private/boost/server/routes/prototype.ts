@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  BOOST_PROTOTYPE_SETTINGS_API_PATH,
   BOOST_RESTORE_API_PATH,
   BOOST_SAMPLE_DATA_API_PATH,
   BOOST_SAMPLE_DATA_SAVED_OBJECT_ID,
   BOOST_SAVED_OBJECT_TYPE,
   MANAGE_BOOST_PRIVILEGE,
+  READ_BOOST_PRIVILEGE,
 } from '../../common/constants';
 import { getState, resetState } from '../lib/boost_store';
+import {
+  getPrototypeSettings,
+  resetPrototypeSettings,
+  updatePrototypeSettings,
+} from '../prototype/prototype_settings';
 import { ensureSampleConfig } from '../prototype/sample_config';
 import { ensureSampleData } from '../prototype/sample_data';
 import { getRequestClients } from './request_clients';
@@ -45,6 +53,11 @@ const getSeededVersion = async (
     throw error;
   }
 };
+
+const prototypeSettingsBodySchema = schema.object({
+  shows_estimates: schema.maybe(schema.boolean()),
+  allows_multiple_targets: schema.maybe(schema.boolean()),
+});
 
 const markSampleDataSeeded = async (client: SavedObjectsClientContract): Promise<void> => {
   await client.create(
@@ -82,8 +95,33 @@ export const registerPrototypeRoutes = (router: IRouter) => {
     }
   );
 
-  // Resets the boost configuration to the sample profiles and rules, and re-creates any missing
-  // sample data.
+  // The prototype menu's switches, which everyone shares, and which change what everyone sees.
+  router.get(
+    {
+      path: BOOST_PROTOTYPE_SETTINGS_API_PATH,
+      security: { authz: { requiredPrivileges: [READ_BOOST_PRIVILEGE] } },
+      validate: false,
+    },
+    async (context, _request, response) => {
+      const { savedObjectsClient } = await getRequestClients(context);
+      return response.ok({ body: await getPrototypeSettings(savedObjectsClient) });
+    }
+  );
+
+  router.put(
+    {
+      path: BOOST_PROTOTYPE_SETTINGS_API_PATH,
+      security: { authz: { requiredPrivileges: [MANAGE_BOOST_PRIVILEGE] } },
+      validate: { body: prototypeSettingsBodySchema },
+    },
+    async (context, { body }, response) => {
+      const { savedObjectsClient } = await getRequestClients(context);
+      return response.ok({ body: await updatePrototypeSettings(savedObjectsClient, body) });
+    }
+  );
+
+  // Resets the boost configuration to the sample profiles and rules, and the prototype menu's
+  // switches, and re-creates any missing sample data.
   router.post(
     {
       path: BOOST_RESTORE_API_PATH,
@@ -94,6 +132,7 @@ export const registerPrototypeRoutes = (router: IRouter) => {
       const { savedObjectsClient, esClient } = await getRequestClients(context);
 
       await resetState(savedObjectsClient);
+      await resetPrototypeSettings(savedObjectsClient);
       const created = await ensureSampleData(esClient);
       await ensureSampleConfig(savedObjectsClient);
       await markSampleDataSeeded(savedObjectsClient);

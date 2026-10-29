@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType, BoostRule } from '../../../common/types';
 import type { DetailsListItem } from '../details/details_list';
 import { formatDataSourceCount } from '../format';
-import { getAllUnmatchedLabel } from './rule_matches';
 
 export const TARGETS_LABEL = i18n.translate('xpack.boost.ruleDetails.targets', {
   defaultMessage: 'Targets',
@@ -23,11 +22,11 @@ export const PRIORITY_LABEL = i18n.translate('xpack.boost.ruleDetails.priority',
 });
 
 /**
- * What a rule targets, as the rule form opens it: what a default rule applies to, a pattern, or
- * how many names were selected.
+ * What a rule targets, as the rule form opens it: a pattern, such as a default rule's `*`, or how
+ * many names were selected.
  */
 export const getRuleTargets = (
-  { is_builtin: isDefaultRule, index_patterns: patterns }: BoostRule,
+  { index_patterns: patterns }: BoostRule,
   type: BoostProfileType | undefined,
   dataSources: readonly BoostDataSource[]
 ): NonNullable<ReactNode> => {
@@ -37,9 +36,7 @@ export const getRuleTargets = (
     patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern));
 
   // One element, so the label and pattern stay inline in a flex box, such as a table cell.
-  return isDefaultRule ? (
-    getAllUnmatchedLabel(type)
-  ) : isPattern ? (
+  return isPattern ? (
     <span>
       {i18n.translate('xpack.boost.ruleDetails.patternTarget', {
         defaultMessage: 'Index pattern',

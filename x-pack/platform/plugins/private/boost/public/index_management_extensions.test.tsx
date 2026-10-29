@@ -20,7 +20,12 @@ import type {
   IndexOverviewCard,
 } from '@kbn/index-management-shared-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { BOOST_EXPLAIN_API_PATH, BOOST_STATE_API_PATH } from '../common/constants';
+import {
+  BOOST_EXPLAIN_API_PATH,
+  BOOST_PROTOTYPE_SETTINGS_API_PATH,
+  BOOST_STATE_API_PATH,
+} from '../common/constants';
+import { DEFAULT_PROTOTYPE_SETTINGS } from '../common/prototype_settings';
 import { BUILTIN_PROFILES, DEFAULT_RULE_PROFILES, createDefaultRules } from '../common/presets';
 import { getMatchingRules } from '../common/resolution';
 import type { BoostProfile, BoostRule, BoostState } from '../common/types';
@@ -82,6 +87,9 @@ const setup = ({ canEdit = true } = {}) => {
   core.http.get.mockImplementation((async (path: string) => {
     if (path === BOOST_STATE_API_PATH) {
       return state;
+    }
+    if (path === BOOST_PROTOTYPE_SETTINGS_API_PATH) {
+      return DEFAULT_PROTOTYPE_SETTINGS;
     }
     const name = decodeURIComponent(path.slice(BOOST_EXPLAIN_API_PATH.length + 1));
     if (name === 'missing') {
@@ -192,7 +200,9 @@ describe('Index Management extensions', () => {
         '/app/management/data/boost/profiles/storefront-search'
       );
       // Every part comes from one request.
-      expect(core.http.get).toHaveBeenCalledTimes(1);
+      expect(
+        core.http.get.mock.calls.filter(([path]) => String(path).startsWith(BOOST_EXPLAIN_API_PATH))
+      ).toHaveLength(1);
 
       const editRule = within(screen.getByTestId('actions')).getByTestId('boostIndexCardEditRule');
       expect(editRule).toHaveTextContent('Edit rule');
@@ -250,7 +260,7 @@ describe('Index Management extensions', () => {
           /^1.*storefront-coreApplied.*storefront-search.*10.*Selected 1 index$/
         ),
         expect.stringMatching(
-          /^2.*_default-indicesDefault.*_performantManaged.*-1.*All unmatched indices$/
+          /^2.*_default-indicesDefault.*_performantManaged.*-1.*Index pattern \*$/
         ),
       ]);
       const profile = screen.getByTestId('boostIndexTabProfile');
@@ -274,7 +284,7 @@ describe('Index Management extensions', () => {
 
       const rule = await screen.findByTestId('boostIndexTabRule');
       expect(rule).toHaveTextContent('_default-data-streams');
-      expect(rule).toHaveTextContent('TargetsAll unmatched data streams');
+      expect(rule).toHaveTextContent('TargetsIndex pattern *');
       expect(rule).toHaveTextContent('Priority-1');
       expect(rule).toHaveTextContent('Data streamlogs-app');
       const profile = screen.getByTestId('boostIndexTabProfile');

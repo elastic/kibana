@@ -23,7 +23,8 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
 import { i18n } from '@kbn/i18n';
 import { BOOST_RESTORE_API_PATH } from '../../common/constants';
-import { setShowsEstimates, useShowsEstimates } from './estimates_setting';
+import type { PrototypeSettings } from '../../common/prototype_settings';
+import { setPrototypeSettings, usePrototypeSettings } from './prototype_settings';
 
 interface PrototypeMenuProps {
   http: HttpStart;
@@ -42,8 +43,18 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const showsEstimates = useShowsEstimates();
+  const { shows_estimates: showsEstimates, allows_multiple_targets: allowsMultipleTargets } =
+    usePrototypeSettings();
   const { euiTheme } = useEuiTheme();
+
+  const changeSettings = (changes: Partial<PrototypeSettings>) =>
+    setPrototypeSettings(changes).catch((error) =>
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.boost.prototype.settingsErrorTitle', {
+          defaultMessage: 'Unable to change prototype settings',
+        }),
+      })
+    );
 
   const onConfirmRestore = async () => {
     setIsRestoring(true);
@@ -86,16 +97,27 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
         }
       >
         <EuiPopoverTitle paddingSize="m">{PROTOTYPE_MENU_LABEL}</EuiPopoverTitle>
-        {/* Each tester's own view, kept in their browser, unlike the shared prototype data. */}
-        <div css={{ padding: euiTheme.size.base }}>
+        {/* Shared by everyone testing the prototype, like its data, and off once it's restored. */}
+        <div css={{ display: 'grid', gap: euiTheme.size.m, padding: euiTheme.size.base }}>
           <EuiSwitch
             compressed
             label={i18n.translate('xpack.boost.prototype.showEstimates', {
               defaultMessage: 'Show cost and VCU estimates',
             })}
             checked={showsEstimates}
-            onChange={({ target: { checked } }) => setShowsEstimates(checked)}
+            onChange={({ target: { checked } }) => changeSettings({ shows_estimates: checked })}
             data-test-subj="boostShowEstimatesSwitch"
+          />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.boost.prototype.allowMultipleTargets', {
+              defaultMessage: 'Select multiple targets per rule',
+            })}
+            checked={allowsMultipleTargets}
+            onChange={({ target: { checked } }) =>
+              changeSettings({ allows_multiple_targets: checked })
+            }
+            data-test-subj="boostAllowMultipleTargetsSwitch"
           />
         </div>
         <EuiHorizontalRule margin="none" />
@@ -138,7 +160,7 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
           <p>
             {i18n.translate('xpack.boost.prototype.restoreModalBody', {
               defaultMessage:
-                'This discards all boost changes, restores the sample boost profiles and rules, and re-creates any missing sample indices and data streams. It affects everyone using this deployment. The page reloads afterward.',
+                'This discards all boost changes, restores the sample boost profiles and rules, turns off the prototype settings, and re-creates any missing sample indices and data streams. It affects everyone using this deployment. The page reloads afterward.',
             })}
           </p>
         </EuiConfirmModal>

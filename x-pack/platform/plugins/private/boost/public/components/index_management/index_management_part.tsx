@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { loadPrototypeSettings } from '../../prototype/prototype_settings';
 import type { BoostServices } from '../../types';
 import { BoostIndexDetails } from './boost_tab';
 import { DataStreamBoostDetail, EditDataStreamRule } from './data_stream_details';
@@ -74,10 +75,16 @@ const Part = ({
 };
 
 /** One part of an index's or data stream's boost, with the boost app's services and data. */
-export const IndexManagementPartView = ({ services, ...props }: IndexManagementPartProps) => (
-  <KibanaContextProvider services={services}>
-    <QueryClientProvider client={queryClient}>
-      <Part {...props} />
-    </QueryClientProvider>
-  </KibanaContextProvider>
-);
+export const IndexManagementPartView = ({ services, ...props }: IndexManagementPartProps) => {
+  useEffect(() => {
+    void loadPrototypeSettings(services.http);
+  }, [services.http]);
+
+  return (
+    <KibanaContextProvider services={services}>
+      <QueryClientProvider client={queryClient}>
+        <Part {...props} />
+      </QueryClientProvider>
+    </KibanaContextProvider>
+  );
+};

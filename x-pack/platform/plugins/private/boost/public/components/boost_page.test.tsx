@@ -125,6 +125,64 @@ describe('Project defaults', () => {
     expect(screen.getByTestId('boostProjectDefaultSize-data_streams')).toHaveTextContent('3 GB');
   });
 
+  it('lists what a default matches from its count, with what other rules outrank it for', async () => {
+    const state = createState();
+    mockState = {
+      ...state,
+      rules: [
+        ...state.rules,
+        {
+          name: 'products-rule',
+          index_patterns: ['products'],
+          boost_profile: '_on-demand',
+          priority: 0,
+          is_builtin: false,
+        },
+      ],
+      data_sources: [
+        ...state.data_sources,
+        { name: 'synonyms', type: 'index', size_in_bytes: 1e9 },
+        { name: '.synonyms-archive', type: 'index', size_in_bytes: 0, hidden: true },
+      ],
+    };
+    renderPage();
+
+    const count = screen.getByTestId('boostProjectDefaultCount-indices');
+    expect(count).toHaveTextContent('2 indices');
+    expect(screen.getByTestId('boostProjectDefaultSize-indices')).toHaveTextContent('1 GB');
+    expect(count).toHaveAccessibleName('2 indices. Show what the default for indices matches');
+    await userEvent.click(count);
+
+    const popover = within(screen.getByRole('dialog'));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Using index pattern *');
+    expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('3 matches, 1 outranked');
+    expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
+    // Like the other lists, it leaves hidden ones out, saying how many last, though they're counted.
+    expect(popover.queryByText('.synonyms-archive')).not.toBeInTheDocument();
+    expect(popover.getByTestId('boostRuleMatchesMoreHidden')).toHaveTextContent(
+      /^\+1 hidden index$/
+    );
+    await userEvent.keyboard('{Escape}');
+
+    // The rules table counts the storage of what each rule applies to.
+    const defaultRow = screen.getByRole('row', { name: /_default-indices/ });
+    expect(defaultRow).toHaveTextContent('1 GB');
+  });
+
+  it('says which default rule each default sets, on its card and in its flyout', async () => {
+    renderPage();
+
+    await userEvent.hover(screen.getByTestId('boostProjectDefaultRuleTip-indices'));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Sets the boost profile of the default rule "_default-indices", which applies to every index no other rule targets.'
+    );
+
+    await userEvent.click(screen.getByTestId('boostEditProjectDefault-data_streams'));
+    expect(screen.getByTestId('boostProjectDefaultRuleNote')).toHaveTextContent(
+      'Changes the boost profile of the default rule "_default-data-streams", which applies to every data stream no other rule targets.'
+    );
+  });
+
   it('shows a custom default as its profile, with a link to its details', () => {
     mockState = createState({ ...DEFAULT_RULE_PROFILES, indices_profile: catalogSearch.name }, [
       catalogSearch,

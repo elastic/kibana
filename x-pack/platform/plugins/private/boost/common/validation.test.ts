@@ -56,9 +56,11 @@ describe('getBoostRangeError', () => {
 });
 
 describe('getMaxAgeError', () => {
-  it('requires a whole number of at least one', () => {
+  it('requires a whole number, which can be 0 to skip the period, as in Elasticsearch', () => {
     expect(getMaxAgeError(undefined)).toBe('required');
-    expect(getMaxAgeError({ value: 0, unit: 'h' })).toBe('out_of_range');
+    expect(getMaxAgeError({ value: 0, unit: 'h' })).toBeUndefined();
+    expect(getMaxAgeError({ value: 0, unit: 'd' }, { value: 0, unit: 'h' })).toBeUndefined();
+    expect(getMaxAgeError({ value: -1, unit: 'h' })).toBe('out_of_range');
     expect(getMaxAgeError({ value: 1.5, unit: 'd' })).toBe('out_of_range');
   });
 

@@ -32,7 +32,7 @@ export interface RuleDraftErrors {
   pattern?: IndexPatternError;
   /** Set by the form when a valid pattern matches nothing, which needs the data sources to check. */
   patternMatches?: 'none';
-  picked?: 'required';
+  picked?: 'required' | 'too_many';
   /** Set by the form to the name of a rule the draft would tie with, which Elasticsearch rejects. */
   conflictsWith?: string;
 }
@@ -89,15 +89,32 @@ export const normalizePriority = (value: string): string => {
 export const getDraftPatterns = ({ mode, pattern, picked }: RuleDraft): string[] =>
   mode === 'pattern' ? [pattern.trim()] : picked;
 
-/** Returns only the errors that apply to the draft's target mode. */
+const getPickedError = (
+  { mode, picked }: RuleDraft,
+  allowsMultipleTargets: boolean
+): RuleDraftErrors['picked'] => {
+  if (mode !== 'pick') {
+    return undefined;
+  }
+  if (picked.length === 0) {
+    return 'required';
+  }
+  return picked.length > 1 && !allowsMultipleTargets ? 'too_many' : undefined;
+};
+
+/**
+ * Returns only the errors that apply to the draft's target mode. Elasticsearch takes one target per
+ * rule, so a draft can only select several when the prototype allows it.
+ */
 export const getRuleDraftErrors = (
   draft: RuleDraft,
-  takenNames: readonly string[]
+  takenNames: readonly string[],
+  allowsMultipleTargets = false
 ): RuleDraftErrors => ({
   name: getRuleNameError(draft.name, takenNames),
   profile: draft.profileName ? undefined : 'required',
   pattern: draft.mode === 'pattern' ? getIndexPatternError(draft.pattern.trim()) : undefined,
-  picked: draft.mode === 'pick' && draft.picked.length === 0 ? 'required' : undefined,
+  picked: getPickedError(draft, allowsMultipleTargets),
 });
 
 export const hasRuleDraftErrors = (errors: RuleDraftErrors): boolean =>

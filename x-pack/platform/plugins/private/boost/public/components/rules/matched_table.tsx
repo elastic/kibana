@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { ClassNames } from '@emotion/react';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
+  Comparators,
+  EuiBasicTable,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiInMemoryTable,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -36,10 +39,10 @@ import { DetailsLink } from '../details_link';
 import { DetailsSection } from '../details/details_page';
 import { TableCount } from '../details/table_count';
 import { useTablePage } from '../use_table_page';
-import { useShowsEstimates } from '../../prototype/estimates_setting';
+import { useShowsEstimates } from '../../prototype/prototype_settings';
 import { EmptyCell } from '../empty_cell';
 import { formatDataSourceCount, formatMaxAge } from '../format';
-import { ShowHiddenSwitch } from '../hidden_data';
+import { ShowHiddenSwitch, formatHiddenNotShown } from '../hidden_data';
 import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
@@ -84,6 +87,22 @@ interface MatchedRow extends BoostDataSource {
   /** How long it keeps data, in hours, or infinite when indefinitely. */
   retentionHours?: number;
 }
+
+/**
+ * The table's last row while hidden matches are left out, saying how many in their place. It has no
+ * values to sort by.
+ */
+type HiddenNoteRow = { [Key in keyof MatchedRow]?: undefined } & { hiddenNotShown: number };
+
+type TableRow = MatchedRow | HiddenNoteRow;
+
+const isHiddenNoteRow = (row: TableRow): row is HiddenNoteRow => 'hiddenNotShown' in row;
+
+/** A column's render for the matches, which leaves the hidden note's cell empty. */
+const forMatches =
+  <Value,>(render: (value: Value, row: MatchedRow) => ReactNode) =>
+  (value: Value, row: TableRow): ReactNode =>
+    isHiddenNoteRow(row) ? null : render(value, row);
 
 const getRetentionHours = (lifecycle: BoostDataLifecycle | undefined): number | undefined => {
   if (!lifecycle?.enabled) {
@@ -247,7 +266,7 @@ interface MatchedTableProps {
  * applies to instead are struck through, with that rule in a column that only shows when there are
  * any. A search box filters them by name, and a filter group by whether the rule applies to them,
  * with how many of the search results each would show. Hidden matches are left out until a switch
- * beside the filters shows them.
+ * beside the filters shows them, with a last row saying how many until then, however it's sorted.
  */
 export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTableProps) => {
   const { euiTheme } = useEuiTheme();
@@ -261,6 +280,10 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
   const [includesHidden, setIncludesHidden] = useState(false);
+  const [sort, setSort] = useState<Required<Criteria<TableRow>>['sort']>({
+    field: 'name',
+    direction: 'asc',
+  });
   const isDataStreams = type === 'data_streams';
 
   const rows = useMemo(
@@ -304,11 +327,25 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
     items.length === 0 &&
     searchedAll.some((dataSource) => dataSource.hidden && isShownByStatus(dataSource));
 
-  // A new search or filter starts again at the first page.
-  const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<MatchedRow>(
+  // How many hidden matches the switch would add, which the last row says until it's on.
+  const hiddenNotShown = includesHidden
+    ? 0
+    : searchedAll.filter((dataSource) => dataSource.hidden && isShownByStatus(dataSource)).length;
+
+  // A new search or filter starts again at the first page, as does a new sort.
+  const { pageIndex, pageSize, pagination, onTableChange } = useTablePage<TableRow>(
     `${query}|${status}|${includesHidden}`,
     items.length
   );
+  // Sorted as EUI's in-memory tables sort, which put matches without a value last either way.
+  const sorted = [...items].sort(
+    Comparators.property(sort.field, Comparators.default(sort.direction))
+  );
+  const pageRows: TableRow[] = sorted.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+  // The note follows the last match, on the last page. It isn't counted in the pages.
+  if (hiddenNotShown > 0 && pageRows.length > 0 && (pageIndex + 1) * pageSize >= sorted.length) {
+    pageRows.push({ hiddenNotShown });
+  }
 
   const searchLabel = isDataStreams
     ? i18n.translate('xpack.boost.matchedTable.searchDataStreams', {
@@ -318,7 +355,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
         defaultMessage: 'Search indices',
       });
 
-  const columns: Array<EuiBasicTableColumn<MatchedRow>> = [
+  const columns: Array<EuiBasicTableColumn<TableRow>> = [
     {
       field: 'name',
       name: isDataStreams
@@ -327,14 +364,20 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
           })
         : i18n.translate('xpack.boost.matchedTable.indexColumn', { defaultMessage: 'Index' }),
       sortable: true,
-      render: (name: string, { type: dataSourceType, outrankedBy, hidden }: MatchedRow) => (
-        <TargetName
-          name={name}
-          supersededBy={outrankedBy}
-          linkedAs={dataSourceType}
-          isHidden={hidden}
-        />
-      ),
+      render: (name: string, row: TableRow) =>
+        isHiddenNoteRow(row) ? (
+          // In the disabled color, as in the other lists.
+          <span css={{ color: euiTheme.colors.textDisabled }}>
+            {formatHiddenNotShown(type, row.hiddenNotShown)}
+          </span>
+        ) : (
+          <TargetName
+            name={name}
+            supersededBy={row.outrankedBy}
+            linkedAs={row.type}
+            isHidden={row.hidden}
+          />
+        ),
     },
     // Only when a higher-ranked rule applies to any of the matches instead, which it names. Like
     // the columns below, matches without a value sort last, whichever the direction.
@@ -344,12 +387,13 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             field: 'outrankedBy',
             name: OUTRANKED_BY_NAME,
             sortable: true,
-            render: (outrankedBy?: string) =>
+            render: forMatches((outrankedBy?: string) =>
               outrankedBy ? (
                 <DetailsLink kind="rule" name={outrankedBy} data-test-subj="boostSupersedingRule" />
               ) : (
                 <EmptyCell />
-              ),
+              )
+            ),
           },
         ]
       : []),
@@ -362,8 +406,9 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             }),
             width: '10em',
             sortable: true,
-            render: (_hours: number | undefined, { lifecycle }: MatchedRow) =>
-              renderRetention(lifecycle),
+            render: forMatches((_hours: number | undefined, { lifecycle }: MatchedRow) =>
+              renderRetention(lifecycle)
+            ),
           },
         ]
       : []),
@@ -375,7 +420,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       width: '9em',
       sortable: true,
       dataType: 'number',
-      render: formatSize,
+      render: forMatches(formatSize),
     },
     // Each size's bar, in a column of its own beside the right-aligned sizes, when the table is wide
     // enough to spare it.
@@ -385,9 +430,14 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             name: SIZE_BAR_NAME,
             // The bar's width, and the cell's padding on either side.
             width: `calc(${SIZE_BAR_WIDTH} + ${euiTheme.size.base})`,
-            render: ({ size_in_bytes: bytes, outrankedBy }: MatchedRow) => (
-              <SizeBar bytes={bytes} maxBytes={maxBytes} isOutranked={outrankedBy !== undefined} />
-            ),
+            render: (row: TableRow) =>
+              isHiddenNoteRow(row) ? null : (
+                <SizeBar
+                  bytes={row.size_in_bytes}
+                  maxBytes={maxBytes}
+                  isOutranked={row.outrankedBy !== undefined}
+                />
+              ),
           },
         ]
       : []),
@@ -400,7 +450,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             width: '12em',
             sortable: true,
             dataType: 'number' as const,
-            render: renderCost,
+            render: forMatches(renderCost),
           },
           {
             field: 'peakVcus',
@@ -408,7 +458,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             width: '12em',
             sortable: true,
             dataType: 'number' as const,
-            render: renderCost,
+            render: forMatches(renderCost),
           },
         ]
       : []),
@@ -497,38 +547,59 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
         </>
       )}
       <div ref={setTableWrapper}>
-        <EuiInMemoryTable
-          tableCaption={i18n.translate('xpack.boost.matchedTable.caption', {
-            defaultMessage: 'Indices or data streams this rule matches',
-          })}
-          items={items}
-          columns={columns}
-          sorting={{ sort: { field: 'name', direction: 'asc' } }}
-          // The page is tracked here, for the count above the table.
-          pagination={pagination}
-          onTableChange={onTableChange}
-          noItemsMessage={
-            matched.length === 0
-              ? i18n.translate('xpack.boost.matchedTable.noMatches', {
-                  defaultMessage: 'This rule matches nothing yet.',
-                })
-              : hasOnlyHidden
-              ? isDataStreams
-                ? i18n.translate('xpack.boost.matchedTable.onlyHiddenDataStreams', {
-                    defaultMessage: 'Only hidden data streams match. Show hidden to see them.',
-                  })
-                : i18n.translate('xpack.boost.matchedTable.onlyHiddenIndices', {
-                    defaultMessage: 'Only hidden indices match. Show hidden to see them.',
-                  })
-              : isDataStreams
-              ? i18n.translate('xpack.boost.matchedTable.noDataStreamsFound', {
-                  defaultMessage: 'No data streams match your search or filter.',
-                })
-              : i18n.translate('xpack.boost.matchedTable.noIndicesFound', {
-                  defaultMessage: 'No indices match your search or filter.',
-                })
-          }
-        />
+        {/* The hidden note's row is shaded, setting it apart from the matches. The table adds a
+            row's class to its own, while its styles would replace the table's. */}
+        <ClassNames>
+          {({ css: toClassName }) => (
+            <EuiBasicTable
+              tableCaption={i18n.translate('xpack.boost.matchedTable.caption', {
+                defaultMessage: 'Indices or data streams this rule matches',
+              })}
+              items={pageRows}
+              columns={columns}
+              rowProps={(row) =>
+                isHiddenNoteRow(row)
+                  ? {
+                      className: toClassName({
+                        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                      }),
+                      'data-test-subj': 'boostMatchedHiddenNotShown',
+                    }
+                  : {}
+              }
+              // The sort and page are tracked here, for the count above the table and the last row.
+              sorting={{ sort }}
+              pagination={pagination}
+              onChange={(criteria: Criteria<TableRow>) => {
+                if (criteria.sort) {
+                  setSort(criteria.sort);
+                }
+                onTableChange(criteria);
+              }}
+              noItemsMessage={
+                matched.length === 0
+                  ? i18n.translate('xpack.boost.matchedTable.noMatches', {
+                      defaultMessage: 'This rule matches nothing yet.',
+                    })
+                  : hasOnlyHidden
+                  ? isDataStreams
+                    ? i18n.translate('xpack.boost.matchedTable.onlyHiddenDataStreams', {
+                        defaultMessage: 'Only hidden data streams match. Show hidden to see them.',
+                      })
+                    : i18n.translate('xpack.boost.matchedTable.onlyHiddenIndices', {
+                        defaultMessage: 'Only hidden indices match. Show hidden to see them.',
+                      })
+                  : isDataStreams
+                  ? i18n.translate('xpack.boost.matchedTable.noDataStreamsFound', {
+                      defaultMessage: 'No data streams match your search or filter.',
+                    })
+                  : i18n.translate('xpack.boost.matchedTable.noIndicesFound', {
+                      defaultMessage: 'No indices match your search or filter.',
+                    })
+              }
+            />
+          )}
+        </ClassNames>
       </div>
     </DetailsSection>
   );

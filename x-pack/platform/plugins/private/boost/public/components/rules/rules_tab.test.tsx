@@ -81,6 +81,8 @@ const renderTab = (path: string) =>
             { name: 'products', type: 'index', size_in_bytes: 0 },
             { name: 'users', type: 'index', size_in_bytes: 0 },
             { name: 'archives-2024', type: 'index', size_in_bytes: 0 },
+            // No custom rule matches it, so the default rule applies.
+            { name: 'synonyms', type: 'index', size_in_bytes: 0 },
           ]}
           canEdit
         />
@@ -189,21 +191,24 @@ describe('RulesTab matches', () => {
     return within(row);
   };
 
-  it('sorts default rules as applying to the most', async () => {
+  it('sorts default rules by what they apply to, like the others', async () => {
     renderTab('/rules');
-    const isDefaultRow = (row: HTMLElement) => within(row).queryByText('Default') !== null;
-    const getDefaultRowPositions = () =>
+    const getCounts = () =>
       screen
         .getAllByRole('row')
         .slice(1)
-        .flatMap((row, index) => (isDefaultRow(row) ? [index] : []));
-    const rowCount = screen.getAllByRole('row').length - 1;
+        .map((row) => {
+          const count =
+            within(row).queryByTestId('boostRuleMatches') ??
+            within(row).getByTestId('boostRuleNoMatches');
+          return parseInt(count.textContent ?? '', 10);
+        });
 
     await userEvent.click(screen.getByRole('button', { name: /Applies to/ }));
-    expect(getDefaultRowPositions()).toEqual([rowCount - 2, rowCount - 1]);
+    expect(getCounts()).toEqual([0, 0, 1, 1, 1, 1]);
 
     await userEvent.click(screen.getByRole('button', { name: /Applies to/ }));
-    expect(getDefaultRowPositions()).toEqual([0, 1]);
+    expect(getCounts()).toEqual([1, 1, 1, 1, 0, 0]);
   });
 
   it('counts what a rule applies to, and lists what it matches with what a higher-ranked rule takes', async () => {
@@ -254,14 +259,23 @@ describe('RulesTab matches', () => {
     await userEvent.click(getRow('products-first').getByTestId('boostRuleMatches'));
 
     expect(screen.getByRole('dialog')).not.toHaveTextContent('Using index pattern');
+    // It selects one index, which the title says.
+    expect(screen.getByRole('dialog')).toHaveTextContent('Using selected index');
+    expect(screen.getByRole('dialog')).not.toHaveTextContent('Using selected indices');
   });
 
-  it('describes default rules without counting or listing what they match', () => {
+  it('counts what a default rule applies to, and lists everything it matches with what other rules take', async () => {
     renderTab('/rules');
 
     const defaults = getRow('_default-indices');
-    expect(defaults.getByText('All unmatched indices')).toBeInTheDocument();
-    expect(defaults.queryByTestId('boostRuleMatches')).not.toBeInTheDocument();
+    expect(defaults.getByTestId('boostRuleMatches')).toHaveTextContent('1 index');
+    await userEvent.click(defaults.getByTestId('boostRuleMatches'));
+
+    const popover = within(screen.getByRole('dialog'));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Using index pattern *');
+    expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('4 matches, 3 outranked');
+    expect(popover.getAllByTestId('boostSupersededTarget')).toHaveLength(3);
+    expect(popover.getByText('synonyms')).not.toHaveAttribute('data-test-subj');
   });
 
   it("doesn't link a count for a rule that matches nothing", () => {

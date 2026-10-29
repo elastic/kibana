@@ -10,10 +10,12 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { PrototypeMenu } from './prototype_menu';
+import { loadPrototypeSettings } from './prototype_settings';
 import { resetNewNavBadge } from './reset_new_nav_badge';
 
 /** Renders the prototype menu into a global header slot and returns an unmount function. */
 export const mountPrototypeMenu = (element: HTMLElement, core: CoreStart): (() => void) => {
+  void loadPrototypeSettings(core.http);
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <PrototypeMenu

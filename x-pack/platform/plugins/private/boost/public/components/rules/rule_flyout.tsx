@@ -49,6 +49,7 @@ import type {
 } from '../../../common/types';
 import { estimateRuleCost } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
+import { useAllowsMultipleTargets } from '../../prototype/prototype_settings';
 import { PROVISIONING_NOTE } from '../../translations';
 import { getCopyName } from '../copy_name';
 import { CostEstimate } from '../cost_estimate';
@@ -61,7 +62,7 @@ import { HiddenBadge } from '../hidden_data';
 import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
-import { PROFILE_TYPE_LABELS } from '../format';
+import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import type { RuleDraft, RuleDraftErrors } from './rule_draft';
 import {
   createEmptyRuleDraft,
@@ -75,9 +76,9 @@ import {
 import {
   INDEX_PATTERN_ERROR_MESSAGES,
   PATTERN_NO_MATCHES_MESSAGES,
-  PICKED_REQUIRED_MESSAGES,
   PROFILE_REQUIRED_MESSAGE,
   RULE_NAME_ERROR_MESSAGES,
+  getPickedErrorMessage,
   getPriorityConflictMessage,
 } from './rule_messages';
 
@@ -124,6 +125,24 @@ const PICK_LABELS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
+// Elasticsearch takes one target per rule, which the rule selects unless the prototype allows more.
+const PICK_ONE_LABELS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.pickIndexMode', {
+    defaultMessage: 'Select index',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.pickDataStreamMode', {
+    defaultMessage: 'Select data stream',
+  }),
+};
+
+// Names the list to select one from.
+const SINGLE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.indexLabel', { defaultMessage: 'Index' }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamLabel', {
+    defaultMessage: 'Data stream',
+  }),
+};
+
 // The tallest the pattern's matches and the list to select from grow, so both modes match.
 const PREVIEW_MAX_HEIGHT = 320;
 
@@ -167,6 +186,15 @@ const TARGETS_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
   }),
 };
 
+const SINGLE_TARGET_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.indexAppliesToDescription', {
+    defaultMessage: 'Provide an index pattern or manually select an index.',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamAppliesToDescription', {
+    defaultMessage: 'Provide an index pattern or manually select a data stream.',
+  }),
+};
+
 /** Passed to each option's renderer through EUI's `data`, which keeps it out of the page's HTML. */
 interface PickOptionData {
   /** A higher-ranked rule that keeps the data source if this rule targets it. */
@@ -205,6 +233,7 @@ export const RuleFlyout = ({
   const { euiTheme } = useEuiTheme();
   const { notifications } = useBoostServices();
   const { data: state } = useBoostState();
+  const allowsMultipleTargets = useAllowsMultipleTargets();
   const titleId = useGeneratedHtmlId();
   const profileTitleId = useGeneratedHtmlId();
   const modeIdPrefix = useGeneratedHtmlId({ prefix: 'ruleTargetMode' });
@@ -260,7 +289,12 @@ export const RuleFlyout = ({
   const targetType = type ?? 'indices';
   // The rule being edited is replaced by the draft when previewing what the draft would apply to.
   const otherRules = rules.filter(({ name }) => name !== rule?.name);
-  const draftErrors = getRuleDraftErrors(draft, isEditing ? [] : rules.map(({ name }) => name));
+  const draftErrors = getRuleDraftErrors(
+    draft,
+    isEditing ? [] : rules.map(({ name }) => name),
+    allowsMultipleTargets
+  );
+  const pickLabels = allowsMultipleTargets ? PICK_LABELS : PICK_ONE_LABELS;
   const updateDraft = (changes: Partial<RuleDraft>) => setDraft({ ...draft, ...changes });
 
   const typedDataSources = dataSources
@@ -525,7 +559,7 @@ export const RuleFlyout = ({
             defaultMessage: 'Index pattern',
           }),
         },
-        { id: `${modeIdPrefix}-pick`, label: PICK_LABELS[targetType] },
+        { id: `${modeIdPrefix}-pick`, label: pickLabels[targetType] },
       ]}
       isDisabled={isSaving || !type}
       data-test-subj="boostRuleTargetMode"
@@ -538,7 +572,10 @@ export const RuleFlyout = ({
     : visibleErrors.patternMatches && type
     ? PATTERN_NO_MATCHES_MESSAGES[type]
     : undefined;
-  const pickedError = visibleErrors.picked && type ? PICKED_REQUIRED_MESSAGES[type] : undefined;
+  const pickedError =
+    visibleErrors.picked && type
+      ? getPickedErrorMessage(visibleErrors.picked, type, allowsMultipleTargets)
+      : undefined;
 
   const patternRow = (
     <EuiFormRow
@@ -753,7 +790,11 @@ export const RuleFlyout = ({
                 label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
                   defaultMessage: 'Targets',
                 })}
-                helpText={TARGETS_HELP_TEXTS[targetType]}
+                helpText={
+                  (allowsMultipleTargets ? TARGETS_HELP_TEXTS : SINGLE_TARGET_HELP_TEXTS)[
+                    targetType
+                  ]
+                }
                 fullWidth
               >
                 {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
@@ -803,13 +844,20 @@ export const RuleFlyout = ({
           ) : (
             <EuiFormRow
               display="rowCompressed"
-              label={PROFILE_TYPE_LABELS[targetType]}
+              label={
+                allowsMultipleTargets
+                  ? PROFILE_TYPE_LABELS[targetType]
+                  : SINGLE_TYPE_LABELS[targetType]
+              }
               isInvalid={Boolean(pickedError)}
               error={pickedError}
               fullWidth
             >
               <EuiSelectable
-                aria-label={PICK_LABELS[targetType]}
+                aria-label={pickLabels[targetType]}
+                // Selecting one replaces what's selected, so a rule saved with several, while the
+                // prototype allowed it, keeps one.
+                singleSelection={!allowsMultipleTargets}
                 searchable
                 searchProps={{
                   compressed: true,
@@ -865,9 +913,10 @@ export const RuleFlyout = ({
                     <EuiSpacer size="s" />
                     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
                       {/* How many are selected, of all the list shows, as the pattern's tab of
-                        every data source counts them. Off until a profile is selected, as in the
-                        pattern's matches, and the switch only while there's something hidden to
-                        show, unless it's on already. */}
+                        every data source counts them, or just how many it shows when the rule
+                        selects one. Off until a profile is selected, as in the pattern's matches,
+                        and the switch only while there's something hidden to show, unless it's on
+                        already. */}
                       <TargetListHeader
                         includesHidden={includesHidden}
                         onIncludesHiddenChange={setIncludesHidden}
@@ -878,7 +927,9 @@ export const RuleFlyout = ({
                           color={type ? 'subdued' : euiTheme.colors.textDisabled}
                           data-test-subj="boostRulePickedCount"
                         >
-                          {PICKED_COUNT_FORMATS[targetType](draft.picked.length, pickableCount)}
+                          {allowsMultipleTargets
+                            ? PICKED_COUNT_FORMATS[targetType](draft.picked.length, pickableCount)
+                            : formatDataSourceCount(targetType, pickableCount)}
                         </EuiText>
                       </TargetListHeader>
                       {/* Padding rather than the list's own, which it would count in its width. */}

@@ -46,6 +46,13 @@ describe('rule drafts', () => {
     );
   });
 
+  it('only selects several targets when the prototype allows it', () => {
+    const picking = { ...validDraft, mode: 'pick' as const, picked: ['products', 'synonyms'] };
+
+    expect(getRuleDraftErrors(picking, []).picked).toBe('too_many');
+    expect(getRuleDraftErrors(picking, [], true).picked).toBeUndefined();
+  });
+
   it("corrects a priority it can't use rather than rejecting it", () => {
     expect(hasRuleDraftErrors(getRuleDraftErrors({ ...validDraft, priority: '-1' }, []))).toBe(
       false

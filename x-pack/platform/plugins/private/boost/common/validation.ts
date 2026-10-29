@@ -140,7 +140,7 @@ export const toMaxAgeHours = ({ value, unit }: MaxAge): number => value * HOURS_
 
 /**
  * Validates a period's max age: a whole number of days or hours, up to the maximum, that isn't
- * shorter than the period before it.
+ * shorter than the period before it. It can be 0, as in Elasticsearch, which skips the period.
  */
 export const getMaxAgeError = (
   maxAge: MaxAge | undefined,
@@ -151,7 +151,7 @@ export const getMaxAgeError = (
   }
   if (
     !Number.isInteger(maxAge.value) ||
-    maxAge.value < 1 ||
+    maxAge.value < 0 ||
     toMaxAgeHours(maxAge) > MAX_AGE_MAX_HOURS
   ) {
     return 'out_of_range';

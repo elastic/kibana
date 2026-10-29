@@ -21,65 +21,86 @@ const PERIODS: readonly DataStreamPeriod[] = ['recent', 'standard', 'background'
 const SKIPPED_LABEL = i18n.translate('xpack.boost.phaseCards.skipped', {
   defaultMessage: 'Skipped',
 });
-const SKIPPED_REASON = i18n.translate('xpack.boost.phaseCards.skippedReason', {
-  defaultMessage:
-    "It's skipped: its max age is no later than the recent max age, so it never holds data and has no part in the timeline.",
-});
+const SKIPPED_REASONS: Readonly<Record<'recent' | 'standard', string>> = {
+  recent: i18n.translate('xpack.boost.phaseCards.recentSkippedReason', {
+    defaultMessage:
+      "It's skipped: its max age is 0, so it never holds data and has no part in the timeline.",
+  }),
+  standard: i18n.translate('xpack.boost.phaseCards.skippedReason', {
+    defaultMessage:
+      "It's skipped: its max age is no later than the recent max age, so it never holds data and has no part in the timeline.",
+  }),
+};
 
 const toHours = (maxAge: string | undefined): number => {
   const parsed = parseMaxAge(maxAge);
   return parsed ? toMaxAgeHours(parsed) : 0;
 };
 
+const getUpToAgeText = (age: string): string =>
+  i18n.translate('xpack.boost.phaseCards.recentAge', {
+    defaultMessage: 'Data up to {age} old',
+    values: { age },
+  });
+
 /** The ages of the data in each phase, as the timeline lays them out. */
 const getAgeTexts = (
   profile: DataStreamsBoostProfile,
-  isStandardSkipped: boolean
+  skipped: Readonly<Record<'recent' | 'standard', boolean>>
 ): Record<DataStreamPeriod, string> => {
   const recentAge = formatMaxAge(profile.recent.max_age) ?? '—';
   const standardAge = formatMaxAge(profile.standard.max_age) ?? '—';
   return {
-    recent: i18n.translate('xpack.boost.phaseCards.recentAge', {
-      defaultMessage: 'Data up to {age} old',
-      values: { age: recentAge },
-    }),
-    standard: i18n.translate('xpack.boost.phaseCards.standardAge', {
-      defaultMessage: 'Data {from}–{to} old',
-      values: { from: recentAge, to: standardAge },
-    }),
-    // Without a standard phase, background data starts where recent data ends.
-    background: i18n.translate('xpack.boost.phaseCards.backgroundAge', {
-      defaultMessage: 'Data older than {age}',
-      values: { age: isStandardSkipped ? recentAge : standardAge },
-    }),
+    recent: getUpToAgeText(recentAge),
+    // Without a recent phase, standard data starts at 0.
+    standard: skipped.recent
+      ? getUpToAgeText(standardAge)
+      : i18n.translate('xpack.boost.phaseCards.standardAge', {
+          defaultMessage: 'Data {from}–{to} old',
+          values: { from: recentAge, to: standardAge },
+        }),
+    // Without a standard phase, background data starts where recent data ends, and without
+    // either, it's all the data.
+    background:
+      skipped.recent && skipped.standard
+        ? i18n.translate('xpack.boost.phaseCards.allDataAge', { defaultMessage: 'All data' })
+        : i18n.translate('xpack.boost.phaseCards.backgroundAge', {
+            defaultMessage: 'Data older than {age}',
+            values: { age: skipped.standard ? recentAge : standardAge },
+          }),
   };
 };
 
 /**
  * A data streams profile's phases, newest data first like the timeline, in the same list as the
  * page's other settings and usage: each with the swatch of its timeline color, its boost, and the
- * ages of its data below, as a usage value has its share below. A standard phase that ends where
- * the recent one does never holds data, so it's disabled, saying it's skipped in place of its ages,
- * and why in its tooltip.
+ * ages of its data below, as a usage value has its share below. A recent phase that ends at 0, or
+ * a standard phase that ends where the recent one does, never holds data, so it's disabled, saying
+ * it's skipped in place of its ages, and why in its tooltip.
  */
 export const PhaseList = ({ profile }: { profile: DataStreamsBoostProfile }) => {
   const { euiTheme } = useEuiTheme();
   const colors = usePeriodColors();
-  const isStandardSkipped = toHours(profile.standard.max_age) <= toHours(profile.recent.max_age);
-  const ageTexts = getAgeTexts(profile, isStandardSkipped);
+  const recentHours = toHours(profile.recent.max_age);
+  const skipped = {
+    recent: recentHours === 0,
+    standard: toHours(profile.standard.max_age) <= recentHours,
+  };
+  const ageTexts = getAgeTexts(profile, skipped);
 
   return (
     <div data-test-subj="boostProfilePeriods">
       <DetailsList
         items={PERIODS.map((period) => {
           const { min_boost: minBoost, max_boost: maxBoost } = profile[period];
-          const isSkipped = period === 'standard' && isStandardSkipped;
+          const isSkipped = period !== 'background' && skipped[period];
           return {
             title: PERIOD_LABELS[period].title,
             // A skipped phase's tooltip also says why it's skipped.
-            tip: isSkipped
-              ? `${PERIOD_LABELS[period].description} ${SKIPPED_REASON}`
-              : PERIOD_LABELS[period].description,
+            tip:
+              period !== 'background' && isSkipped
+                ? `${PERIOD_LABELS[period].description} ${SKIPPED_REASONS[period]}`
+                : PERIOD_LABELS[period].description,
             isDisabled: isSkipped,
             // The phase's color in the timeline, which leaves it out when skipped.
             // A dot in the phase's timeline color, which the timeline leaves out when skipped.

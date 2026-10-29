@@ -37,6 +37,19 @@ export const formatHiddenNotShown = (type: BoostProfileType | undefined, count: 
         values: { count },
       });
 
+/** How many hidden indices or data streams follow a list that leaves them out, such as "+3 hidden indices". */
+export const formatMoreHidden = (type: BoostProfileType | undefined, count: number): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.boost.hiddenData.moreHiddenDataStreams', {
+        defaultMessage:
+          '+{count, plural, one {# hidden data stream} other {# hidden data streams}}',
+        values: { count },
+      })
+    : i18n.translate('xpack.boost.hiddenData.moreHiddenIndices', {
+        defaultMessage: '+{count, plural, one {# hidden index} other {# hidden indices}}',
+        values: { count },
+      });
+
 interface ShowHiddenSwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;

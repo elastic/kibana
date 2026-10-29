@@ -69,7 +69,7 @@ export const MAX_AGE_ERROR_MESSAGES: Readonly<Record<MaxAgeError, string>> = {
     defaultMessage: 'Enter an age.',
   }),
   out_of_range: i18n.translate('xpack.boost.profileForm.maxAgeOutOfRange', {
-    defaultMessage: 'Enter a whole number of at least 1, up to {max} days.',
+    defaultMessage: 'Enter a whole number from 0 up to {max} days.',
     values: { max: MAX_AGE_MAX_DAYS.toLocaleString(i18n.getLocale()) },
   }),
   below_previous_period: i18n.translate('xpack.boost.profileForm.maxAgeBelowRecent', {

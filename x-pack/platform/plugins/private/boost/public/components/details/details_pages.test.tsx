@@ -22,7 +22,7 @@ import {
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { estimateDataSourceVcuRange } from '../../../common/vcu_estimate';
-import { setShowsEstimates } from '../../prototype/estimates_setting';
+import { setPrototypeSettings } from '../../prototype/prototype_settings';
 import { formatCost, roundVcus } from '../cost_format';
 import { ProfileDetailsPage } from '../profiles/profile_details_page';
 import { RuleDetailsPage } from '../rules/rule_details_page';
@@ -125,6 +125,18 @@ const clicks: BoostProfile = {
   background: { min_boost: 0, max_boost: 1 },
 };
 
+// A max age of 0 skips a phase, as in Elasticsearch.
+const standardOnly: BoostProfile = {
+  ...clicks,
+  name: 'standard-only',
+  recent: { ...clicks.recent, max_age: '0d' },
+};
+const backgroundOnly: BoostProfile = {
+  ...standardOnly,
+  name: 'background-only',
+  standard: { ...clicks.standard, max_age: '0h' },
+};
+
 const customRule = (
   name: string,
   patterns: string[],
@@ -140,7 +152,7 @@ const customRule = (
 
 const mockState: BoostState = {
   settings: { default_profiles: DEFAULT_RULE_PROFILES },
-  profiles: [...BUILTIN_PROFILES, catalogSearch, clicks],
+  profiles: [...BUILTIN_PROFILES, catalogSearch, clicks, standardOnly, backgroundOnly],
   rules: [
     customRule('catalog-first', ['catalog-fall'], BUILTIN_INDICES_PROFILE_NAMES.on_demand, 5),
     customRule('catalogs', ['catalog-*'], 'catalog-search', 1),
@@ -186,8 +198,8 @@ const renderAt = (path: string) =>
 
 const getHeader = () => within(screen.getByTestId('mockAppHeader'));
 
-// Each tester's estimates setting stays in their browser, so it's turned back off after each test.
-afterEach(() => setShowsEstimates(false));
+// The prototype's settings outlast each test, so estimates are turned back off after each one.
+afterEach(() => setPrototypeSettings({ shows_estimates: false }));
 
 describe('ProfileDetailsPage', () => {
   it("shows an indices profile's settings, the rules using it, and what it applies to", () => {
@@ -291,6 +303,26 @@ describe('ProfileDetailsPage', () => {
     expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
       'Data older than 1 day'
     );
+  });
+
+  it('marks a recent phase with a max age of 0 as skipped, and the standard phase as starting at 0', () => {
+    renderAt('/profiles/standard-only');
+
+    expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent('Skipped');
+    expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent(
+      'Data up to 7 days old'
+    );
+    expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent(
+      'Data older than 7 days'
+    );
+  });
+
+  it('boosts all data in the background phase when the others end at 0', () => {
+    renderAt('/profiles/background-only');
+
+    expect(screen.getByTestId('boostProfilePhase-recent')).toHaveTextContent('Skipped');
+    expect(screen.getByTestId('boostProfilePhase-standard')).toHaveTextContent('Skipped');
+    expect(screen.getByTestId('boostProfilePhase-background')).toHaveTextContent('All data');
   });
 
   it("shows each phase's boost and the ages of its data", () => {
@@ -489,10 +521,19 @@ describe('RuleDetailsPage', () => {
     // The rule applies to the hidden index all the same.
     expect(screen.getByTestId('boostRuleUsage')).toHaveTextContent('Applies to2 indices');
     expect(matched.queryByText('.catalog-archive')).not.toBeInTheDocument();
+    // The last row says how many are left out, which the count above doesn't include.
     expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–3 of 3 indices');
+    const getLastRow = () => matched.getAllByRole('row').at(-1);
+    expect(getLastRow()).toHaveTextContent('1 hidden index not shown');
+    // However the table is sorted.
+    await userEvent.click(matched.getByRole('button', { name: /^Index/ }));
+    expect(getLastRow()).toHaveTextContent('1 hidden index not shown');
+    await userEvent.click(matched.getByRole('button', { name: /Storage size/ }));
+    expect(getLastRow()).toHaveTextContent('1 hidden index not shown');
 
     await userEvent.click(matched.getByTestId('boostMatchedShowHidden'));
 
+    expect(matched.queryByTestId('boostMatchedHiddenNotShown')).not.toBeInTheDocument();
     const row = matched.getByText('.catalog-archive').closest('tr') as HTMLElement;
     expect(within(row).getByTestId('boostHiddenBadge')).toHaveTextContent('Hidden');
     expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–4 of 4 indices');
@@ -537,7 +578,7 @@ describe('RuleDetailsPage', () => {
   });
 
   it('estimates the search cost of each match the rule applies to, at rest and at peak', () => {
-    setShowsEstimates(true);
+    void setPrototypeSettings({ shows_estimates: true });
     renderAt('/rules/catalogs');
 
     // The rule's search cost at rest and at peak are each shown as a share of the project's.
@@ -611,7 +652,7 @@ describe('RuleDetailsPage', () => {
 
     // The same color as the badge in the rules list, not the header's hollow default.
     expect(getHeader().getByText('Default')).toHaveAttribute('data-color', 'default');
-    expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('All unmatched indices');
+    expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('Index pattern *');
     expect(getHeader().getByRole('button', { name: 'Edit rule' })).toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Duplicate' })).not.toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();

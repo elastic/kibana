@@ -45,9 +45,9 @@ export const SAMPLE_RULES: readonly BoostRuleInput[] = [
     priority: 10,
   },
   {
-    // A picked list rather than a pattern.
-    name: 'storefront-core',
-    index_patterns: ['products', 'synonyms'],
+    // A selected index rather than a pattern. Elasticsearch takes one per rule.
+    name: 'storefront-products',
+    index_patterns: ['products'],
     boost_profile: 'storefront-search',
     priority: 10,
   },

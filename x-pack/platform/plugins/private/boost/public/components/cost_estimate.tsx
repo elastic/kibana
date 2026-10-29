@@ -8,10 +8,11 @@
 import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiNotificationBadge,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
@@ -23,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
 import { COST_DISCLAIMER, formatCost, formatSize, getVcusText, roundVcus } from './cost_format';
-import { useShowsEstimates } from '../prototype/estimates_setting';
+import { useShowsEstimates } from '../prototype/prototype_settings';
 import { DataStreamTimeline } from './data_stream_timeline';
 import { formatDataSourceCount } from './format';
 
@@ -253,14 +254,14 @@ const EstimateContent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {/* How many it covers, and how much data, as on the project default panels. */}
-          <EuiFlexGroup gutterSize="s" responsive={false} aria-live="polite">
-            <EuiNotificationBadge color="subdued" size="s" data-test-subj="boostCostEstimateCount">
+          <EuiBadgeGroup gutterSize="s" aria-live="polite">
+            <EuiBadge color="hollow" data-test-subj="boostCostEstimateCount">
               {formatDataSourceCount(type, dataSourceCount)}
-            </EuiNotificationBadge>
-            <EuiNotificationBadge color="subdued" size="s" data-test-subj="boostCostEstimateSize">
+            </EuiBadge>
+            <EuiBadge color="hollow" data-test-subj="boostCostEstimateSize">
               {formatSize(sizeInBytes)}
-            </EuiNotificationBadge>
-          </EuiFlexGroup>
+            </EuiBadge>
+          </EuiBadgeGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       {showsCost && (

@@ -46,7 +46,7 @@ const BOOST_RANGE_MESSAGES: Record<BoostRangeError, string> = {
 
 const MAX_AGE_MESSAGES: Record<MaxAgeError, string> = {
   required: 'max_age is required, in whole days or hours (for example 7d or 12h)',
-  out_of_range: `max_age must be a whole number of days or hours, from 1h up to ${MAX_AGE_MAX_DAYS}d`,
+  out_of_range: `max_age must be a whole number of days or hours, from 0 up to ${MAX_AGE_MAX_DAYS}d`,
   below_previous_period: "max_age must not be shorter than the previous period's max_age",
 };
 

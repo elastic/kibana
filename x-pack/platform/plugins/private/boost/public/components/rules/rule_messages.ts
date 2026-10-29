@@ -66,7 +66,7 @@ export const getPriorityConflictMessage = (type: BoostProfileType, ruleName: str
         values: { ruleName },
       });
 
-export const PICKED_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
+const PICKED_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.ruleForm.pickedIndicesRequired', {
     defaultMessage: 'Select at least one index.',
   }),
@@ -74,3 +74,33 @@ export const PICKED_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>
     defaultMessage: 'Select at least one data stream.',
   }),
 };
+
+const PICKED_ONE_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.pickedIndexRequired', {
+    defaultMessage: 'Select an index.',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.pickedDataStreamRequired', {
+    defaultMessage: 'Select a data stream.',
+  }),
+};
+
+const PICKED_TOO_MANY_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.pickedIndicesTooMany', {
+    defaultMessage: 'Select only one index.',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.pickedDataStreamsTooMany', {
+    defaultMessage: 'Select only one data stream.',
+  }),
+};
+
+/** The error for what's selected, whether the rule can select one target or several. */
+export const getPickedErrorMessage = (
+  error: 'required' | 'too_many',
+  type: BoostProfileType,
+  allowsMultipleTargets: boolean
+): string =>
+  error === 'too_many'
+    ? PICKED_TOO_MANY_MESSAGES[type]
+    : allowsMultipleTargets
+    ? PICKED_REQUIRED_MESSAGES[type]
+    : PICKED_ONE_REQUIRED_MESSAGES[type];

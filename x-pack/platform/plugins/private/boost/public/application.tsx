@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { BoostPage } from './components/boost_page';
+import { loadPrototypeSettings } from './prototype/prototype_settings';
 import { ProfileDetailsPage } from './components/profiles/profile_details_page';
 import { RuleDetailsPage } from './components/rules/rule_details_page';
 import type { BoostServices, BoostStartDependencies } from './types';
@@ -56,6 +57,7 @@ export const renderApp = (
   deps: BoostStartDependencies,
   params: ManagementAppMountParams
 ) => {
+  void loadPrototypeSettings(core.http);
   ReactDOM.render(<BoostApp core={core} deps={deps} params={params} />, params.element);
 
   return () => {

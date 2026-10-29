@@ -18,6 +18,7 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
+import { formatSize } from '../cost_format';
 import { DetailsLink } from '../details_link';
 import { TableCount } from '../details/table_count';
 import { useTablePage } from '../use_table_page';
@@ -27,7 +28,12 @@ import { RuleFlyout } from './rule_flyout';
 import { RuleMatches } from './rule_matches';
 import { DEFAULT_BADGE_LABEL } from '../badge_labels';
 
-export type RuleRow = BoostRule & RuleCoverage & { profileType?: BoostProfileType };
+export type RuleRow = BoostRule &
+  RuleCoverage & {
+    profileType?: BoostProfileType;
+    /** The storage of what the rule applies to, after higher-ranked rules. */
+    appliedSize: number;
+  };
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
 
@@ -85,17 +91,29 @@ export const RulesTable = ({
   const rows = useMemo<RuleRow[]>(() => {
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
     const coverage = getRuleCoverage(dataSources, rules, profiles);
-    return rules.map((rule) => ({
-      ...rule,
-      profileType: profileTypes.get(rule.boost_profile),
-      ...(coverage.get(rule.name) ?? {
+    const sizes = new Map(dataSources.map(({ name, size_in_bytes: bytes }) => [name, bytes]));
+    return rules.map((rule) => {
+      const ruleCoverage = coverage.get(rule.name) ?? {
         matches: 0,
         matchedNames: [],
         appliesTo: 0,
         supersededBy: new Map(),
-      }),
-    }));
+      };
+      const { matchedNames, supersededBy } = ruleCoverage;
+      return {
+        ...rule,
+        profileType: profileTypes.get(rule.boost_profile),
+        ...ruleCoverage,
+        appliedSize: matchedNames
+          .filter((name) => !supersededBy.has(name))
+          .reduce((total, name) => total + (sizes.get(name) ?? 0), 0),
+      };
+    });
   }, [rules, profiles, dataSources]);
+  const hiddenNames = useMemo(
+    () => new Set(dataSources.filter(({ hidden }) => hidden).map(({ name }) => name)),
+    [dataSources]
+  );
 
   // Wide enough for up to three icon buttons (two primary actions plus the "All actions" menu).
   const actionsColumn: EuiTableActionsColumnType<RuleRow> = {
@@ -210,30 +228,30 @@ export const RulesTable = ({
       name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
         defaultMessage: 'Applies to',
       }),
-      // Fits "All unmatched data streams" on one line.
       width: '17em',
-      // A default rule applies to everything no other rule matches, so it sorts as applying to the
-      // most, whatever is left over for it today.
-      sortable: ({ appliesTo, is_builtin: isBuiltin }: RuleRow) =>
-        isBuiltin ? Number.POSITIVE_INFINITY : appliesTo,
+      sortable: true,
       render: (
         appliesTo: number,
-        {
-          index_patterns: patterns,
-          profileType,
-          is_builtin: isBuiltin,
-          matches,
-          matchedNames,
-          supersededBy,
-        }: RuleRow
+        { index_patterns: patterns, profileType, matches, matchedNames, supersededBy }: RuleRow
       ) => (
         <RuleMatches
           patterns={patterns}
           type={profileType}
-          isDefaultRule={isBuiltin}
           coverage={{ matches, matchedNames, appliesTo, supersededBy }}
+          hiddenNames={hiddenNames}
         />
       ),
+    },
+    {
+      // The storage of what it applies to, as the project defaults show beside their counts.
+      field: 'appliedSize',
+      name: i18n.translate('xpack.boost.rulesTab.storageSizeColumn', {
+        defaultMessage: 'Storage size',
+      }),
+      width: '9em',
+      sortable: true,
+      dataType: 'number',
+      render: formatSize,
     },
     ...(canEdit ? [actionsColumn] : []),
   ];

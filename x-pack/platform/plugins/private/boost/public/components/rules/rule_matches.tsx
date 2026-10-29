@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -22,40 +23,44 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
+import { formatMoreHidden } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
-
-/** What a default rule applies to: everything of its type that no other rule matches. */
-export const getAllUnmatchedLabel = (type: BoostProfileType | undefined): string =>
-  type === 'data_streams'
-    ? i18n.translate('xpack.boost.ruleMatches.allUnmatchedDataStreams', {
-        defaultMessage: 'All unmatched data streams',
-      })
-    : i18n.translate('xpack.boost.ruleMatches.allUnmatchedIndices', {
-        defaultMessage: 'All unmatched indices',
-      });
 
 interface RuleMatchesProps {
   patterns: readonly string[];
   type?: BoostProfileType;
-  isDefaultRule: boolean;
   coverage: RuleCoverage;
+  /** The names of hidden indices and data streams, which the list leaves out, ending with how many. */
+  hiddenNames?: ReadonlySet<string>;
 }
 
+// Whether the rule selects one target or several.
+const SELECTED_TITLES: Readonly<Record<BoostProfileType, { one: string; other: string }>> = {
+  indices: {
+    one: i18n.translate('xpack.boost.ruleMatches.selectedIndexTitle', {
+      defaultMessage: 'Using selected index',
+    }),
+    other: i18n.translate('xpack.boost.ruleMatches.selectedIndicesTitle', {
+      defaultMessage: 'Using selected indices',
+    }),
+  },
+  data_streams: {
+    one: i18n.translate('xpack.boost.ruleMatches.selectedDataStreamTitle', {
+      defaultMessage: 'Using selected data stream',
+    }),
+    other: i18n.translate('xpack.boost.ruleMatches.selectedDataStreamsTitle', {
+      defaultMessage: 'Using selected data streams',
+    }),
+  },
+};
+
 /**
- * How many data sources a rule matches, as a link to the list, which shows any that a higher-ranked
- * rule applies to instead. Default rules match whatever no other rule does, which can be most of a
- * project, so they say so rather than count it.
+ * How many data sources a rule applies to, as a link to the list of what it matches, which shows
+ * any that a higher-ranked rule applies to instead.
  */
-export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMatchesProps) => {
+export const RuleMatches = ({ patterns, type, coverage, hiddenNames }: RuleMatchesProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (isDefaultRule) {
-    return (
-      <EuiTextColor color={euiTheme.colors.textDisabled} data-test-subj="boostRuleUnmatched">
-        {getAllUnmatchedLabel(type)}
-      </EuiTextColor>
-    );
-  }
   if (coverage.matches === 0) {
     return (
       <EuiTextColor color={euiTheme.colors.textDisabled} data-test-subj="boostRuleNoMatches">
@@ -63,19 +68,37 @@ export const RuleMatches = ({ patterns, type, isDefaultRule, coverage }: RuleMat
       </EuiTextColor>
     );
   }
-  return <MatchesPopover patterns={patterns} type={type} coverage={coverage} />;
+  return (
+    <MatchesPopover patterns={patterns} type={type} coverage={coverage} hiddenNames={hiddenNames} />
+  );
 };
 
-type MatchesPopoverProps = Omit<RuleMatchesProps, 'isDefaultRule'>;
+interface MatchesPopoverProps extends RuleMatchesProps {
+  /** The button that opens the list, in place of a link counting what the rule applies to. */
+  renderButton?: (button: { onClick: () => void; isOpen: boolean }) => ReactElement;
+}
 
-const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
+/**
+ * The list of what a rule matches, opened from a count of what it applies to, which notes what
+ * higher-ranked rules take instead. Like the other lists, it leaves hidden matches out, ending with
+ * how many, though the counts include them.
+ */
+export const MatchesPopover = ({
+  patterns,
+  type,
+  coverage,
+  hiddenNames,
+  renderButton,
+}: MatchesPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
   const [isOpen, setIsOpen] = useState(false);
   const { matches, matchedNames, appliesTo, supersededBy } = coverage;
   const outranked = matches - appliesTo;
+  const toggle = () => setIsOpen(!isOpen);
 
-  // The title says how the rule chooses what it matches; the link already says how many.
+  // The title says how the rule chooses what it matches, such as a default rule's `*`; the link
+  // already says how many.
   const [pattern] = patterns;
   const hasPattern = patterns.length === 1 && pattern.includes('*');
   const title = hasPattern
@@ -83,13 +106,9 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
         defaultMessage: 'Using index pattern {pattern}',
         values: { pattern },
       })
-    : type === 'data_streams'
-    ? i18n.translate('xpack.boost.ruleMatches.selectedDataStreamsTitle', {
-        defaultMessage: 'Using selected data streams',
-      })
-    : i18n.translate('xpack.boost.ruleMatches.selectedIndicesTitle', {
-        defaultMessage: 'Using selected indices',
-      });
+    : SELECTED_TITLES[type ?? 'indices'][patterns.length === 1 ? 'one' : 'other'];
+  const shownNames = matchedNames.filter((name) => !hiddenNames?.has(name));
+  const hiddenCount = matchedNames.length - shownNames.length;
 
   return (
     <EuiPopover
@@ -102,13 +121,11 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
       button={
         // What the rule applies to. The list shows everything it matches, with what higher-ranked
         // rules take struck through.
-        <EuiLink
-          onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen}
-          data-test-subj="boostRuleMatches"
-        >
-          {formatDataSourceCount(type, appliesTo)}
-        </EuiLink>
+        renderButton?.({ onClick: toggle, isOpen }) ?? (
+          <EuiLink onClick={toggle} aria-expanded={isOpen} data-test-subj="boostRuleMatches">
+            {formatDataSourceCount(type, appliesTo)}
+          </EuiLink>
+        )
       }
     >
       <EuiPopoverTitle paddingSize="s">
@@ -155,7 +172,7 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
         `}
       >
         <ul css={{ display: 'grid', gap: euiTheme.size.s }}>
-          {matchedNames.map((name) => {
+          {shownNames.map((name) => {
             const supersedingRule = supersededBy.get(name);
             return (
               // A row with any higher-ranked rule on the right.
@@ -177,6 +194,14 @@ const MatchesPopover = ({ patterns, type, coverage }: MatchesPopoverProps) => {
               </li>
             );
           })}
+          {hiddenCount > 0 && (
+            <li
+              css={{ color: euiTheme.colors.textDisabled }}
+              data-test-subj="boostRuleMatchesMoreHidden"
+            >
+              {formatMoreHidden(type, hiddenCount)}
+            </li>
+          )}
         </ul>
       </div>
     </EuiPopover>

@@ -15,7 +15,7 @@ import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
 import { estimateDataSourcesVcuRange, estimateProjectVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
-import { useShowsEstimates } from '../../prototype/estimates_setting';
+import { useShowsEstimates } from '../../prototype/prototype_settings';
 import { AgeTimeline } from '../age_timeline';
 import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
 import {

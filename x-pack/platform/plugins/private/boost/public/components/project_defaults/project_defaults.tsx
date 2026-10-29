@@ -8,12 +8,14 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiNotificationBadge,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -25,12 +27,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_PROFILE_KEYS, DEFAULT_RULE_NAMES } from '../../../common/presets';
-import { getAppliedRules } from '../../../common/resolution';
+import type { RuleCoverage } from '../../../common/resolution';
+import { getRuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType, BoostState } from '../../../common/types';
 import { formatSize } from '../cost_format';
 import { getProfileDetailsPath } from '../details_link';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { DEFAULT_PRESET_OPTIONS } from '../preset_options';
+import { MatchesPopover } from '../rules/rule_matches';
 import { ProjectDefaultFlyout } from './project_default_flyout';
 
 const PROFILE_TYPES: readonly BoostProfileType[] = ['indices', 'data_streams'];
@@ -40,6 +44,20 @@ const TYPE_ICONS: Readonly<Record<BoostProfileType, string>> = {
   indices: 'table',
   data_streams: 'productStreamsClassic',
 };
+
+// Each default is its type's default boost rule, as the rules table lists it.
+const getDefaultRuleTip = (type: BoostProfileType, ruleName: string): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.boost.projectDefaults.dataStreamsRuleTip', {
+        defaultMessage:
+          'Sets the boost profile of the default rule "{ruleName}", which applies to every data stream no other rule targets.',
+        values: { ruleName },
+      })
+    : i18n.translate('xpack.boost.projectDefaults.indicesRuleTip', {
+        defaultMessage:
+          'Sets the boost profile of the default rule "{ruleName}", which applies to every index no other rule targets.',
+        values: { ruleName },
+      });
 
 const CUSTOM_PROFILE_DESCRIPTION = i18n.translate('xpack.boost.projectDefaults.customProfile', {
   defaultMessage: 'Using a selected custom boost profile.',
@@ -58,7 +76,8 @@ interface ProjectDefaultsProps {
 export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
   const [editedType, setEditedType] = useState<BoostProfileType>();
   const { settings, rules, profiles, data_sources: dataSources } = state;
-  const appliedRules = getAppliedRules(dataSources, rules, profiles);
+  const coverage = getRuleCoverage(dataSources, rules, profiles);
+  const hiddenNames = new Set(dataSources.filter(({ hidden }) => hidden).map(({ name }) => name));
 
   return (
     <section data-test-subj="boostProjectDefaults">
@@ -73,16 +92,33 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
       <EuiFlexGroup gutterSize="l">
         {PROFILE_TYPES.map((type) => {
           const ruleName = DEFAULT_RULE_NAMES[type];
-          const applied = dataSources.filter(
-            ({ name }) => appliedRules.get(name)?.name === ruleName
-          );
+          const rule = rules.find(({ name }) => name === ruleName);
+          const ruleCoverage = coverage.get(ruleName);
+          // A default rule matches everything of its type, so what it applies to is what it matches
+          // that no higher-ranked rule takes.
+          const appliedSize = dataSources
+            .filter(
+              ({ name }) =>
+                ruleCoverage?.matchedNames.includes(name) && !ruleCoverage.supersededBy.has(name)
+            )
+            .reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
           return (
             <EuiFlexItem key={type}>
               <ProjectDefaultPanel
                 type={type}
+                ruleName={ruleName}
+                patterns={rule?.index_patterns ?? []}
                 profileName={settings.default_profiles[DEFAULT_PROFILE_KEYS[type]]}
-                appliedCount={applied.length}
-                appliedSize={applied.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0)}
+                coverage={
+                  ruleCoverage ?? {
+                    matches: 0,
+                    matchedNames: [],
+                    appliesTo: 0,
+                    supersededBy: new Map(),
+                  }
+                }
+                appliedSize={appliedSize}
+                hiddenNames={hiddenNames}
                 onEdit={canEdit ? () => setEditedType(type) : undefined}
               />
             </EuiFlexItem>
@@ -99,10 +135,14 @@ export const ProjectDefaults = ({ state, canEdit }: ProjectDefaultsProps) => {
 
 interface ProjectDefaultPanelProps {
   type: BoostProfileType;
+  /** The default boost rule the default sets the profile of. */
+  ruleName: string;
+  patterns: readonly string[];
   profileName: string;
-  /** How many indices or data streams the default applies to, and their data. */
-  appliedCount: number;
+  /** What the default rule matches, and what it applies to after other rules, with its data. */
+  coverage: RuleCoverage;
   appliedSize: number;
+  hiddenNames: ReadonlySet<string>;
   /** Opens the editor; omitted when the user can't edit. */
   onEdit?: () => void;
 }
@@ -110,9 +150,12 @@ interface ProjectDefaultPanelProps {
 /** One project default as a stat: its choice, what that means, and what it applies to. */
 const ProjectDefaultPanel = ({
   type,
+  ruleName,
+  patterns,
   profileName,
-  appliedCount,
+  coverage,
   appliedSize,
+  hiddenNames,
   onEdit,
 }: ProjectDefaultPanelProps) => {
   const { euiTheme } = useEuiTheme();
@@ -168,7 +211,19 @@ const ProjectDefaultPanel = ({
                   gap: euiTheme.size.s,
                 }}
               >
-                <span>{PROFILE_TYPE_LABELS[type]}</span>
+                <span css={{ ...inlineCss, gap: euiTheme.size.xs }}>
+                  {PROFILE_TYPE_LABELS[type]}
+                  <EuiIconTip
+                    type="info"
+                    color="subdued"
+                    content={getDefaultRuleTip(type, ruleName)}
+                    aria-label={i18n.translate('xpack.boost.projectDefaults.ruleTipLabel', {
+                      defaultMessage: 'About the default for {type}',
+                      values: { type: PROFILE_TYPE_LABELS[type].toLowerCase() },
+                    })}
+                    anchorProps={{ 'data-test-subj': `boostProjectDefaultRuleTip-${type}` }}
+                  />
+                </span>
                 {onEdit && (
                   <EuiButton
                     size="s"
@@ -214,24 +269,43 @@ const ProjectDefaultPanel = ({
             <EuiText size="s" color="subdued">
               <p>{preset ? preset.description : CUSTOM_PROFILE_DESCRIPTION}</p>
             </EuiText>
-            {/* What the default applies to: how many, and how much data. */}
+            {/* What the default applies to: how many, which opens the list of what it matches and
+                what other rules outrank it for, as the rules table does, and how much data. */}
             <EuiSpacer size="s" />
-            <span css={inlineCss}>
-              <EuiNotificationBadge
-                color="subdued"
-                size="s"
-                data-test-subj={`boostProjectDefaultCount-${type}`}
-              >
-                {formatDataSourceCount(type, appliedCount)}
-              </EuiNotificationBadge>
-              <EuiNotificationBadge
-                color="subdued"
-                size="s"
-                data-test-subj={`boostProjectDefaultSize-${type}`}
-              >
+            <EuiBadgeGroup gutterSize="s">
+              {coverage.matches > 0 ? (
+                <MatchesPopover
+                  patterns={patterns}
+                  type={type}
+                  coverage={coverage}
+                  hiddenNames={hiddenNames}
+                  renderButton={({ onClick }) => (
+                    <EuiBadge
+                      color="hollow"
+                      onClick={onClick}
+                      // The label replaces the count for screen readers, so it says it too.
+                      onClickAriaLabel={i18n.translate('xpack.boost.projectDefaults.showMatches', {
+                        defaultMessage: '{count}. Show what the default for {type} matches',
+                        values: {
+                          count: formatDataSourceCount(type, coverage.appliesTo),
+                          type: PROFILE_TYPE_LABELS[type].toLowerCase(),
+                        },
+                      })}
+                      data-test-subj={`boostProjectDefaultCount-${type}`}
+                    >
+                      {formatDataSourceCount(type, coverage.appliesTo)}
+                    </EuiBadge>
+                  )}
+                />
+              ) : (
+                <EuiBadge color="hollow" data-test-subj={`boostProjectDefaultCount-${type}`}>
+                  {formatDataSourceCount(type, 0)}
+                </EuiBadge>
+              )}
+              <EuiBadge color="hollow" data-test-subj={`boostProjectDefaultSize-${type}`}>
                 {formatSize(appliedSize)}
-              </EuiNotificationBadge>
-            </span>
+              </EuiBadge>
+            </EuiBadgeGroup>
           </EuiStat>
         </EuiFlexItem>
       </EuiFlexGroup>

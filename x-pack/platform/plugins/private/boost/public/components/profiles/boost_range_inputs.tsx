@@ -195,7 +195,8 @@ export const BoostRangeInputs = ({
               fullWidth
               value={maxAge.value}
               onChange={({ target: { value } }) => maxAge.onChange(value)}
-              min={1}
+              // 0 skips the phase.
+              min={0}
               step={1}
               append={
                 <MaxAgeUnitButton

@@ -18,7 +18,7 @@ import {
 } from '../../../common/presets';
 import type { BoostDataSource, BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { RuleFlyout } from './rule_flyout';
-import { setShowsEstimates } from '../../prototype/estimates_setting';
+import { setPrototypeSettings } from '../../prototype/prototype_settings';
 
 const customProfile = (name: string): BoostProfile => ({
   name,
@@ -232,10 +232,10 @@ describe('RuleFlyout estimate', () => {
   const getEstimate = () => screen.queryByTestId('boostCostEstimate');
   const getPattern = () => screen.getByTestId('boostRulePattern');
 
-  // Estimates are off until a tester turns them on, and each tester's setting stays in their
-  // browser, so it's turned back off after each test.
-  beforeEach(() => setShowsEstimates(true));
-  afterEach(() => setShowsEstimates(false));
+  // Estimates are off until someone turns them on, and the prototype's settings outlast each test,
+  // so they're turned back off after each one.
+  beforeEach(() => setPrototypeSettings({ shows_estimates: true }));
+  afterEach(() => setPrototypeSettings({ shows_estimates: false }));
 
   it("estimates the rule's targets", () => {
     renderFlyout();
@@ -294,7 +294,7 @@ describe('RuleFlyout estimate', () => {
     });
 
     it("shows a period's boost without its cost while estimates are off", async () => {
-      setShowsEstimates(false);
+      void setPrototypeSettings({ shows_estimates: false });
       renderFlyout(logsRule);
 
       // What the rule applies to stays, without its cost.
@@ -777,7 +777,7 @@ describe('RuleFlyout superseded targets', () => {
   it('only notes the data sources in the list that a higher-ranked rule keeps', async () => {
     renderNewRule();
 
-    await userEvent.click(screen.getByText('Select indices'));
+    await userEvent.click(screen.getByText('Select index'));
 
     const picker = within(screen.getByTestId('boostRulePicker'));
     expect(picker.getByRole('option', { name: /catalog-fall/ })).toHaveTextContent(
@@ -790,7 +790,7 @@ describe('RuleFlyout superseded targets', () => {
 
   it('strikes through data sources in the list that a higher-ranked rule keeps, until this rule outranks it', async () => {
     renderNewRule();
-    await userEvent.click(screen.getByText('Select indices'));
+    await userEvent.click(screen.getByText('Select index'));
     const getOption = (name: RegExp) =>
       within(screen.getByTestId('boostRulePicker')).getByRole('option', { name });
 
@@ -810,7 +810,7 @@ describe('RuleFlyout superseded targets', () => {
   it('explains a higher-ranked rule when its data source in the list is hovered', async () => {
     renderNewRule();
 
-    await userEvent.click(screen.getByText('Select indices'));
+    await userEvent.click(screen.getByText('Select index'));
     const option = within(screen.getByTestId('boostRulePicker')).getByRole('option', {
       name: /catalog-fall/,
     });
@@ -821,16 +821,73 @@ describe('RuleFlyout superseded targets', () => {
     );
   });
 
-  it('counts what is selected', async () => {
+  it('counts what the list shows', async () => {
     renderNewRule();
+
+    await userEvent.click(screen.getByText('Select index'));
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('2 indices');
+  });
+});
+
+describe('RuleFlyout selected targets', () => {
+  const getOption = (name: RegExp) =>
+    within(screen.getByTestId('boostRulePicker')).getByRole('option', { name });
+  const save = () => userEvent.click(screen.getByTestId('boostRuleSave'));
+
+  beforeEach(() => mutation.mutate.mockClear());
+  // The prototype's settings outlast each test, so they're turned back off after each one.
+  afterEach(() => setPrototypeSettings({ allows_multiple_targets: false }));
+
+  it('selects one index, as Elasticsearch takes one per rule', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
+    await userEvent.type(screen.getByTestId('boostRuleName'), 'one-index');
+    await userEvent.click(screen.getByText('Select index'));
+
+    // Selecting another replaces it.
+    await userEvent.click(getOption(/products/));
+    await userEvent.click(getOption(/catalog-fall/));
+
+    await save();
+    expect(mutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ index_patterns: ['catalog-fall'] }),
+      expect.anything()
+    );
+  });
+
+  it('asks to keep one of the targets a rule selected while the prototype allowed several', async () => {
+    renderFlyout({ ...rule, index_patterns: ['catalog-fall', 'products'], priority: 2 });
+
+    await save();
+    expect(screen.getByText('Select only one index.')).toBeInTheDocument();
+    expect(mutation.mutate).not.toHaveBeenCalled();
+
+    // Unselecting one keeps the other.
+    await userEvent.click(getOption(/catalog-fall/));
+    await save();
+    expect(mutation.mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ index_patterns: ['products'] }),
+      expect.anything()
+    );
+  });
+
+  it('selects several, and counts them, when the prototype allows it', async () => {
+    void setPrototypeSettings({ allows_multiple_targets: true });
+    render(
+      <IntlProvider locale="en">
+        <RuleFlyout initialProfileName="zeta-search" onClose={jest.fn()} />
+      </IntlProvider>
+    );
 
     await userEvent.click(screen.getByText('Select indices'));
     expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 2 indices');
 
-    await userEvent.click(
-      within(screen.getByTestId('boostRulePicker')).getByRole('option', { name: /products/ })
-    );
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 1 of 2 indices');
+    await userEvent.click(getOption(/products/));
+    await userEvent.click(getOption(/catalog-fall/));
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 2 of 2 indices');
   });
 });
 
@@ -906,14 +963,14 @@ describe('RuleFlyout hidden data sources', () => {
 
   it('leaves hidden data sources out of the list to select from until shown, except selected ones', async () => {
     renderNewRule();
-    await userEvent.click(screen.getByText('Select indices'));
+    await userEvent.click(screen.getByText('Select index'));
     const picker = within(screen.getByTestId('boostRulePicker'));
     expect(picker.queryByRole('option', { name: /\.catalog-archive/ })).not.toBeInTheDocument();
     // It counts what it lists.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 2 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('2 indices');
 
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 0 of 3 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('3 indices');
     const option = picker.getByRole('option', { name: /\.catalog-archive/ });
     expect(within(option).getByTestId('boostHiddenBadge')).toBeInTheDocument();
     await userEvent.click(option);
@@ -922,6 +979,6 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
     expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
     // Still listed, so still counted.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('Selected 1 of 3 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('3 indices');
   });
 });
