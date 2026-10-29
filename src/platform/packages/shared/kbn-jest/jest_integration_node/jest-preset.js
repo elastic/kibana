@@ -28,20 +28,20 @@ module.exports = {
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',
   ],
   setupFilesAfterEnv: [
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/after_env.integration.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/after_env.integration.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.moment_timezone.js',
   ],
   reporters: [
     'default',
     [
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
+      '<rootDir>/src/platform/packages/shared/kbn-jest/src/junit_reporter',
       {
         rootDirectory: '.',
         reportName: 'Jest Integration Tests',
       },
     ],
     [
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+      '<rootDir>/src/platform/packages/shared/kbn-jest/src/ci_stats_jest_reporter.ts',
       {
         testGroupType: 'Jest Integration Tests',
       },

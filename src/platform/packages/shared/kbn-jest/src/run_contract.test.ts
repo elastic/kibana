@@ -29,7 +29,7 @@ jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/repo',
 }));
 
-jest.mock('../../jest-preset', () => ({
+jest.mock('../jest-preset', () => ({
   testMatch: ['**/*.test.ts'],
 }));
 

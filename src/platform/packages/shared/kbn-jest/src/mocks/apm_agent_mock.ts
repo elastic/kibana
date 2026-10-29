@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Agent, Transaction } from 'elastic-apm-node';
+type Agent = import('elastic-apm-node').Agent;
+type Transaction = import('elastic-apm-node').Transaction;
 
 const transaction: jest.Mocked<Transaction> = {
   addLabels: jest.fn().mockReturnValue(true),

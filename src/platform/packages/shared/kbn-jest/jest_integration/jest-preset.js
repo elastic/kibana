@@ -18,12 +18,12 @@ module.exports = {
   ),
   setupFilesAfterEnv: [
     ...preset.setupFilesAfterEnv,
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/after_env.integration.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/after_env.integration.js',
   ],
   reporters: [
     'default',
     [
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
+      '<rootDir>/src/platform/packages/shared/kbn-jest/src/junit_reporter',
       {
         rootDirectory: '.',
         reportName: 'Jest Integration Tests',
@@ -32,7 +32,7 @@ module.exports = {
     ...(process.env.TEST_GROUP_TYPE_INTEGRATION
       ? [
           [
-            '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+            '<rootDir>/src/platform/packages/shared/kbn-jest/src/ci_stats_jest_reporter.ts',
             {
               testGroupType: process.env.TEST_GROUP_TYPE_INTEGRATION,
             },

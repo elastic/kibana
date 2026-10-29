@@ -1163,6 +1163,8 @@
       "@kbn/io-ts-utils/*": ["./src/platform/packages/shared/kbn-io-ts-utils/*"],
       "@kbn/ipynb": ["./x-pack/solutions/search/packages/kbn-ipynb"],
       "@kbn/ipynb/*": ["./x-pack/solutions/search/packages/kbn-ipynb/*"],
+      "@kbn/jest": ["./src/platform/packages/shared/kbn-jest"],
+      "@kbn/jest/*": ["./src/platform/packages/shared/kbn-jest/*"],
       "@kbn/jest-serializers": ["./src/platform/packages/private/kbn-jest-serializers"],
       "@kbn/jest-serializers/*": ["./src/platform/packages/private/kbn-jest-serializers/*"],
       "@kbn/journeys": ["./src/platform/packages/private/kbn-journeys"],
