@@ -213,7 +213,9 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
     );
   }
   if (!data) return null;
-  const assigned = data.connectors.filter(({ id }) => agent.assignedIds.includes(id));
+  const assigned = data.connectors.filter(
+    ({ id }) => agent.assignedIds.includes(id) && !data.telemetry_connector_ids.includes(id)
+  );
   if (assigned.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="nightshiftSandboxConnectorsEmpty">
