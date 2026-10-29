@@ -97,11 +97,12 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
               { name: 'episode.id', type: 'keyword' },
               { name: 'severity', type: 'keyword' },
               { name: 'seg_start', type: 'date' },
+              { name: 'seg_end', type: 'date' },
               { name: 'event_count', type: 'long' },
             ],
             values: [
-              ['ep-1', 'critical', '2024-01-01T12:00:00.000Z', 10],
-              ['ep-1', 'high', '2024-01-01T00:00:00.000Z', 4992],
+              ['ep-1', 'critical', '2024-01-01T12:00:00.000Z', '2024-01-01T12:10:00.000Z', 10],
+              ['ep-1', 'high', '2024-01-01T00:00:00.000Z', '2024-01-02T00:00:00.000Z', 4992],
             ],
           }
     );

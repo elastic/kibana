@@ -45,7 +45,6 @@ export interface BuildEpisodeEventsQueryOptions {
 }
 
 export interface EpisodeEventWithTotalCountRow extends EpisodeEventRow {
-  /** Number of events in the whole episode, including any cut off by the result limit. */
   total_event_count: number;
 }
 

@@ -138,6 +138,41 @@ describe('useEpisodeTimelineSourceRows', () => {
     });
   });
 
+  describe('when the cluster result limit is changed from the default', () => {
+    const buildRows = (count: number): EpisodeEventRow[] =>
+      Array.from({ length: count }, (_, index) => ({
+        ...eventRows[0],
+        '@timestamp': new Date(Date.UTC(2024, 0, 1) + index * 60_000).toISOString(),
+      }));
+
+    it('shows every event without collapsing once a raised limit fits the whole episode', () => {
+      // 1404 events would be cut off at the default 1000, but fit under a limit of 2000.
+      const rows = buildRows(1404);
+      mockSources({ rows, totalEventCount: 1404, collapsed: collapsedEvents });
+
+      const { result } = renderSourceRows();
+
+      expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+      expect(result.current.statusRows).toBe(rows);
+      expect(result.current.isCollapsed).toBe(false);
+      expect(result.current.collapsedEventLimit).toBeUndefined();
+    });
+
+    it.each([
+      ['raised', 2000],
+      ['lowered', 500],
+    ])('reports a %s limit of %d as the collapsed event limit', (_label, limit) => {
+      mockSources({ rows: buildRows(limit), totalEventCount: 5000, collapsed: collapsedEvents });
+
+      const { result } = renderSourceRows();
+
+      expect(result.current.isCollapsed).toBe(true);
+      expect(result.current.collapsedEventLimit).toBe(limit);
+    });
+  });
+
   it('is loading and not yet collapsed while the collapsed rows load', () => {
     mockSources({ totalEventCount: 5000, isLoadingCollapsed: true });
 

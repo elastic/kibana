@@ -39,6 +39,7 @@ export interface AlertSeverityPhaseRow {
   'episode.id': string;
   severity: string | null;
   seg_start: string;
+  seg_end: string;
   /** Number of events merged into this severity phase. */
   event_count: number;
 }
@@ -48,7 +49,6 @@ export interface BuildAlertPhasesQueryOptions {
   ruleId?: string;
   /** Restricts the events to one space. */
   spaceId?: string;
-  /** The exact alerts being drawn (from `buildAlertSelectionQuery`). */
   alertIds: string[];
   /** Display window (epoch ms) — segments are drawn within it. Omit to cover each alert's whole lifetime. */
   window?: {
@@ -106,10 +106,11 @@ export const buildCollapsedSeverityPhasesQuery = (
 ): TypedEsqlQuery<AlertSeverityPhaseRow> =>
   asTypedEsqlQuery<AlertSeverityPhaseRow>(
     buildAlertEventsSource(options)
-      .pipe`STATS seg_start = MIN(@timestamp), event_count = COUNT(*) BY episode.id, severity`.keep(
+      .pipe`STATS seg_start = MIN(@timestamp), seg_end = MAX(@timestamp), event_count = COUNT(*) BY episode.id, severity`.keep(
       'episode.id',
       'severity',
       'seg_start',
+      'seg_end',
       'event_count'
     )
   );

@@ -85,10 +85,12 @@ describe('buildCollapsedSeverityPhasesQuery', () => {
     expect(queryString).not.toContain('@timestamp >=');
   });
 
-  it('aggregates first occurrence and event count per severity', () => {
-    expect(queryString).toContain('seg_start = MIN(@timestamp), event_count = COUNT(*)');
+  it('aggregates start/end and event count per severity', () => {
+    expect(queryString).toContain(
+      'seg_start = MIN(@timestamp), seg_end = MAX(@timestamp), event_count = COUNT(*)'
+    );
     expect(queryString).toContain('BY episode.id, severity');
-    expect(queryString).toContain('KEEP `episode.id`, severity, seg_start, event_count');
+    expect(queryString).toContain('KEEP `episode.id`, severity, seg_start, seg_end, event_count');
   });
 
   it('scopes to the space and omits the rule filter for an alert without a rule', () => {

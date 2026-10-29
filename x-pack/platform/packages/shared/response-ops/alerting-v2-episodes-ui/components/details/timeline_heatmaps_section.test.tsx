@@ -115,16 +115,17 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
         { name: 'episode.id', type: 'keyword' },
         { name: 'severity', type: 'keyword' },
         { name: 'seg_start', type: 'date' },
+        { name: 'seg_end', type: 'date' },
         { name: 'event_count', type: 'long' },
       ],
       values: [
-        ['ep-1', 'high', '2024-01-01T00:00:00.000Z', 3000],
-        ['ep-1', 'critical', '2024-01-01T02:00:00.000Z', 2000],
+        ['ep-1', 'high', '2024-01-01T00:00:00.000Z', '2024-01-02T00:00:00.000Z', 3000],
+        ['ep-1', 'critical', '2024-01-01T02:00:00.000Z', '2024-01-02T01:00:00.000Z', 2000],
       ],
     };
     runEsqlAsyncSearchMock.mockImplementation(async ({ params: { query } }) => {
-      if (query.includes('seg_end')) return statusPhasesResponse;
-      if (query.includes('seg_start')) return severityPhasesResponse;
+      if (query.includes('BY episode.id, episode.status')) return statusPhasesResponse;
+      if (query.includes('BY episode.id, severity')) return severityPhasesResponse;
       return eventsResponse;
     });
 
