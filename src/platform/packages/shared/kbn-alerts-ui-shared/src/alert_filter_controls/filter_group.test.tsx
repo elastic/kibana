@@ -192,11 +192,13 @@ describe(' Filter Group Component ', () => {
 
       expect(popoverPanel).toHaveAttribute('aria-modal', 'false');
       expect(popoverPanel).not.toHaveFocus();
-      expect(
-        screen
-          .getAllByRole('status')
-          .some(({ textContent }) => textContent === 'Save pending changes')
-      ).toBe(true);
+      await waitFor(() => {
+        expect(
+          screen
+            .getAllByRole('status')
+            .some(({ textContent }) => textContent === 'Save pending changes')
+        ).toBe(true);
+      });
     });
 
     it('should open flyout when clicked on ADD', async () => {
