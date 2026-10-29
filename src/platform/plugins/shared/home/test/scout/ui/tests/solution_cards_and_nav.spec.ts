@@ -13,7 +13,6 @@ import { expect } from '@kbn/scout/ui';
 // ECH renders a different set of solution cards and the new side navigation, so these only apply locally.
 const LOCAL_ONLY_TAGS = ['@local-stateful-classic'];
 const SOLUTION_IDS = ['kibana', 'enterpriseSearch', 'observability', 'securitySolution'];
-const CHROME_SEARCH_BUTTON = 'kbnChromeHeader-searchButton';
 // The side navigation and the search modal render outside .kbnAppWrapper.
 const A11Y_NAV_SELECTORS = ['[data-test-subj="collapsibleNav"]', '[data-euiportal="true"]'];
 
