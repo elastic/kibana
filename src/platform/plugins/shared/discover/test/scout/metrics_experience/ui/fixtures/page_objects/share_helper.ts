@@ -30,6 +30,11 @@ export function createShareHelper(page: ScoutPage): ShareHelper {
     copyUrlButton,
 
     openShareModal: async () => {
+      // The project header renders share as a title action that is revealed on header hover.
+      const appHeader = page.testSubj.locator('appHeader');
+      if (await appHeader.isVisible()) {
+        await appHeader.hover();
+      }
       await shareButton.click();
       await expect(modal).toBeVisible();
     },
