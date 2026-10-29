@@ -41,7 +41,8 @@ export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 
 /**
  * One row of the Service settings step as of the last deploy: an original service
- * (`instanceId === serviceId`) or a duplicate of one (`<serviceId>__dup-<n>`).
+ * (`instanceId === serviceId`) or a duplicate of one (`<serviceId>__dup-<n>`). Not the same as an
+ * instance on Installed integrations, which is the whole onboarding session (deployment).
  */
 export interface CloudOnboardingInstance {
   instanceId: string;

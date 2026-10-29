@@ -12,18 +12,18 @@ import { i18n } from '@kbn/i18n';
 
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
 import type { PanelPackage } from '../types';
-import { useViewInstances } from '../hooks/use_url_filters';
+import { useViewOnboardingInstances } from '../hooks/use_url_filters';
 
-import { InstancesTable } from './instances_table';
+import { OnboardingInstancesTable } from './onboarding_instances_table';
 import { PackagePanelTitle } from './package_panel_title';
 import { ResizablePanel } from './resizable_panel';
 
-export const InstancesPanel: React.FunctionComponent<{
+export const OnboardingInstancesPanel: React.FunctionComponent<{
   installedPackage: PanelPackage;
-  instances: CloudOnboardingDeploymentListItem[];
+  onboardingInstances: CloudOnboardingDeploymentListItem[];
   isLoading?: boolean;
-}> = ({ installedPackage, instances, isLoading = false }) => {
-  const { addViewInstances } = useViewInstances();
+}> = ({ installedPackage, onboardingInstances, isLoading = false }) => {
+  const { addViewOnboardingInstances } = useViewOnboardingInstances();
   const paddingStyles = useEuiPaddingCSS();
 
   return (
@@ -39,14 +39,14 @@ export const InstancesPanel: React.FunctionComponent<{
       }
       content={
         <div css={[paddingStyles.s]}>
-          <InstancesTable
-            instances={instances}
+          <OnboardingInstancesTable
+            onboardingInstances={onboardingInstances}
             packageName={installedPackage.name}
             isLoading={isLoading}
           />
         </div>
       }
-      onClose={() => addViewInstances('')}
+      onClose={() => addViewOnboardingInstances('')}
     />
   );
 };

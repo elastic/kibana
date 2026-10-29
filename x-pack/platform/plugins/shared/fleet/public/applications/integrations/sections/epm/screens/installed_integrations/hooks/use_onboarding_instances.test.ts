@@ -13,7 +13,7 @@ import {
   useStartServices,
 } from '../../../../../../../hooks';
 
-import { useInstances } from './use_instances';
+import { useOnboardingInstances } from './use_onboarding_instances';
 
 jest.mock('../../../../../../../hooks', () => ({
   useAuthz: jest.fn(),
@@ -23,9 +23,9 @@ jest.mock('../../../../../../../hooks', () => ({
 
 const mockQuery = useGetAllCloudOnboardingDeploymentsQuery as jest.Mock;
 
-const instance = (id: string, packageNames?: string[]) => ({ id, packageNames });
+const onboardingInstance = (id: string, packageNames?: string[]) => ({ id, packageNames });
 
-describe('useInstances', () => {
+describe('useOnboardingInstances', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useStartServices as jest.Mock).mockReturnValue({
@@ -46,7 +46,11 @@ describe('useInstances', () => {
   it('groups the instances under every package they cover', () => {
     mockQuery.mockReturnValue({
       data: {
-        items: [instance('a', ['aws']), instance('b', ['aws', 'aws_bedrock']), instance('c')],
+        items: [
+          onboardingInstance('a', ['aws']),
+          onboardingInstance('b', ['aws', 'aws_bedrock']),
+          onboardingInstance('c'),
+        ],
         total: 3,
         isTruncated: false,
       },
@@ -55,11 +59,16 @@ describe('useInstances', () => {
       refetch: jest.fn(),
     });
 
-    const { result } = renderHook(() => useInstances());
+    const { result } = renderHook(() => useOnboardingInstances());
 
-    expect(result.current.instancesByPackage.get('aws')?.map((i) => i.id)).toEqual(['a', 'b']);
-    expect(result.current.instancesByPackage.get('aws_bedrock')?.map((i) => i.id)).toEqual(['b']);
-    expect(result.current.instancesByPackage.size).toBe(2);
+    expect(result.current.onboardingInstancesByPackage.get('aws')?.map((i) => i.id)).toEqual([
+      'a',
+      'b',
+    ]);
+    expect(
+      result.current.onboardingInstancesByPackage.get('aws_bedrock')?.map((i) => i.id)
+    ).toEqual(['b']);
+    expect(result.current.onboardingInstancesByPackage.size).toBe(2);
   });
 
   it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])(
@@ -67,7 +76,10 @@ describe('useInstances', () => {
     (packageName) => {
       mockQuery.mockReturnValue({
         data: {
-          items: [instance('a', [packageName]), instance('b', [packageName, 'aws'])],
+          items: [
+            onboardingInstance('a', [packageName]),
+            onboardingInstance('b', [packageName, 'aws']),
+          ],
           total: 2,
           isTruncated: false,
         },
@@ -76,25 +88,26 @@ describe('useInstances', () => {
         refetch: jest.fn(),
       });
 
-      const { result } = renderHook(() => useInstances());
+      const { result } = renderHook(() => useOnboardingInstances());
 
-      expect(result.current.instancesByPackage.get(packageName)?.map((i) => i.id)).toEqual([
-        'a',
+      expect(
+        result.current.onboardingInstancesByPackage.get(packageName)?.map((i) => i.id)
+      ).toEqual(['a', 'b']);
+      expect(result.current.onboardingInstancesByPackage.get('aws')?.map((i) => i.id)).toEqual([
         'b',
       ]);
-      expect(result.current.instancesByPackage.get('aws')?.map((i) => i.id)).toEqual(['b']);
     }
   );
 
   it('reports when there were too many instances to load them all', () => {
     mockQuery.mockReturnValue({
-      data: { items: [instance('a', ['aws'])], total: 2500, isTruncated: true },
+      data: { items: [onboardingInstance('a', ['aws'])], total: 2500, isTruncated: true },
       isLoading: false,
       isError: false,
       refetch: jest.fn(),
     });
 
-    const { result } = renderHook(() => useInstances());
+    const { result } = renderHook(() => useOnboardingInstances());
 
     expect(result.current.isTruncated).toBe(true);
   });
@@ -103,10 +116,10 @@ describe('useInstances', () => {
     const refetch = jest.fn();
     mockQuery.mockReturnValue({ data: undefined, isLoading: false, isError: true, refetch });
 
-    const { result } = renderHook(() => useInstances());
+    const { result } = renderHook(() => useOnboardingInstances());
 
     expect(result.current.isError).toBe(true);
-    expect(result.current.instancesByPackage.size).toBe(0);
+    expect(result.current.onboardingInstancesByPackage.size).toBe(0);
     result.current.refetch();
     expect(refetch).toHaveBeenCalled();
   });
@@ -116,7 +129,7 @@ describe('useInstances', () => {
       featureFlags: { useBooleanValue: () => false },
     });
 
-    renderHook(() => useInstances());
+    renderHook(() => useOnboardingInstances());
 
     expect(mockQuery).toHaveBeenCalledWith({ provider: 'aws' }, { enabled: false });
   });

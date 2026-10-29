@@ -20,14 +20,18 @@ import {
 
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
-import { useUrlFilters, useViewInstances, useViewPolicies } from './hooks/use_url_filters';
+import {
+  useUrlFilters,
+  useViewOnboardingInstances,
+  useViewPolicies,
+} from './hooks/use_url_filters';
 import { InstalledIntegrationsSearchBar } from './components/installed_integrations_search_bar';
 import type { InstalledPackageUIPackageListItem, PanelPackage } from './types';
 import { useInstalledIntegrationsActions } from './hooks/use_installed_integrations_actions';
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
-import { InstancesPanel } from './components/instances_panel';
-import { useInstances } from './hooks/use_instances';
+import { OnboardingInstancesPanel } from './components/onboarding_instances_panel';
+import { useOnboardingInstances } from './hooks/use_onboarding_instances';
 
 const InstalledIntegrationsPageContent: React.FunctionComponent<{
   prereleaseIntegrationsEnabled: boolean;
@@ -35,15 +39,15 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   // State management
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
-  const { selectedPackageViewInstances } = useViewInstances();
+  const { selectedPackageViewOnboardingInstances } = useViewOnboardingInstances();
   const {
-    isEnabled: isInstancesEnabled,
-    isLoading: isInstancesLoading,
-    instancesByPackage,
-    isError: isInstancesError,
-    isTruncated: isInstancesTruncated,
-    refetch: refetchInstances,
-  } = useInstances();
+    isEnabled: isOnboardingInstancesEnabled,
+    isLoading: isOnboardingInstancesLoading,
+    onboardingInstancesByPackage,
+    isError: isOnboardingInstancesError,
+    isTruncated: isOnboardingInstancesTruncated,
+    refetch: refetchOnboardingInstances,
+  } = useOnboardingInstances();
   const pagination = useUrlPagination();
   const { upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations } =
     useInstalledIntegrationsActions();
@@ -73,51 +77,62 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
     [selectedPackageViewPolicies, installedPackages]
   );
 
-  const instancesItemOnPage = useMemo(
+  const onboardingInstancesItemOnPage = useMemo(
     () =>
-      selectedPackageViewInstances
-        ? installedPackages.find((item) => item.name === selectedPackageViewInstances)
+      selectedPackageViewOnboardingInstances
+        ? installedPackages.find((item) => item.name === selectedPackageViewOnboardingInstances)
         : undefined,
-    [selectedPackageViewInstances, installedPackages]
+    [selectedPackageViewOnboardingInstances, installedPackages]
   );
   // A link from outside, like Finish in the AWS onboarding flow, can name a package that is not on
   // the current page of the table: read its title and icon from the package itself. The instances
   // come from the full list either way.
-  const { data: instancesPackageInfo, isError: isInstancesPackageInfoError } =
-    useGetPackageInfoByKeyQuery(selectedPackageViewInstances ?? '', undefined, undefined, {
-      enabled: isInstancesEnabled && !!selectedPackageViewInstances && !instancesItemOnPage,
-    });
-  const instancesSelectedItem: PanelPackage | undefined = useMemo(() => {
+  const { data: onboardingInstancesPackageInfo, isError: isOnboardingInstancesPackageInfoError } =
+    useGetPackageInfoByKeyQuery(
+      selectedPackageViewOnboardingInstances ?? '',
+      undefined,
+      undefined,
+      {
+        enabled:
+          isOnboardingInstancesEnabled &&
+          !!selectedPackageViewOnboardingInstances &&
+          !onboardingInstancesItemOnPage,
+      }
+    );
+  const onboardingInstancesSelectedItem: PanelPackage | undefined = useMemo(() => {
     // Without instances (flag off, or no access) a link to them opens nothing.
-    if (!isInstancesEnabled || !selectedPackageViewInstances) return;
-    if (instancesItemOnPage) return instancesItemOnPage;
-    const item = instancesPackageInfo?.item;
-    if (item?.name === selectedPackageViewInstances) {
+    if (!isOnboardingInstancesEnabled || !selectedPackageViewOnboardingInstances) return;
+    if (onboardingInstancesItemOnPage) return onboardingInstancesItemOnPage;
+    const item = onboardingInstancesPackageInfo?.item;
+    if (item?.name === selectedPackageViewOnboardingInstances) {
       return { name: item.name, title: item.title, version: item.version, icons: item.icons };
     }
     // The package info is only for the title: without it, still show the instances, named after
     // the package (its icon falls back to a logo for the package name, or a generic icon).
-    if (isInstancesPackageInfoError) {
+    if (isOnboardingInstancesPackageInfoError) {
       return {
-        name: selectedPackageViewInstances,
-        title: selectedPackageViewInstances,
+        name: selectedPackageViewOnboardingInstances,
+        title: selectedPackageViewOnboardingInstances,
         version: '',
       };
     }
   }, [
-    isInstancesEnabled,
-    instancesItemOnPage,
-    instancesPackageInfo,
-    isInstancesPackageInfoError,
-    selectedPackageViewInstances,
+    isOnboardingInstancesEnabled,
+    onboardingInstancesItemOnPage,
+    onboardingInstancesPackageInfo,
+    isOnboardingInstancesPackageInfoError,
+    selectedPackageViewOnboardingInstances,
   ]);
 
-  const instanceCounts = useMemo(
+  const onboardingInstanceCounts = useMemo(
     () =>
       new Map(
-        [...instancesByPackage].map(([packageName, instances]) => [packageName, instances.length])
+        [...onboardingInstancesByPackage].map(([packageName, onboardingInstances]) => [
+          packageName,
+          onboardingInstances.length,
+        ])
       ),
-    [instancesByPackage]
+    [onboardingInstancesByPackage]
   );
 
   if (isInitialLoading) {
@@ -139,7 +154,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
           selectedItems={selectedItems}
         />
         <EuiSpacer size="l" />
-        {isInstancesError ? (
+        {isOnboardingInstancesError ? (
           <>
             <EuiCallOut
               announceOnMount
@@ -154,7 +169,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
               <EuiButton
                 size="s"
                 color="warning"
-                onClick={() => refetchInstances()}
+                onClick={() => refetchOnboardingInstances()}
                 data-test-subj="instancesRetry"
               >
                 <FormattedMessage
@@ -166,7 +181,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
             <EuiSpacer size="m" />
           </>
         ) : null}
-        {isInstancesTruncated ? (
+        {isOnboardingInstancesTruncated ? (
           <>
             <EuiCallOut
               announceOnMount
@@ -189,17 +204,19 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
           isLoading={isInitialLoading || isLoading}
           installedPackages={installedPackages}
           selection={{ selectedItems, setSelectedItems }}
-          instanceCounts={instanceCounts}
+          onboardingInstanceCounts={onboardingInstanceCounts}
         />
       </div>
       {viewPoliciesSelectedItem ? (
         <PackagePoliciesPanel installedPackage={viewPoliciesSelectedItem} />
       ) : null}
-      {instancesSelectedItem ? (
-        <InstancesPanel
-          installedPackage={instancesSelectedItem}
-          instances={instancesByPackage.get(instancesSelectedItem.name) ?? []}
-          isLoading={isInstancesLoading}
+      {onboardingInstancesSelectedItem ? (
+        <OnboardingInstancesPanel
+          installedPackage={onboardingInstancesSelectedItem}
+          onboardingInstances={
+            onboardingInstancesByPackage.get(onboardingInstancesSelectedItem.name) ?? []
+          }
+          isLoading={isOnboardingInstancesLoading}
         />
       ) : null}
     </>

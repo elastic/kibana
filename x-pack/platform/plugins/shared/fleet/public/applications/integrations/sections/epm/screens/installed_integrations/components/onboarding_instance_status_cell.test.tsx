@@ -10,9 +10,9 @@ import { screen, act } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { Agent, PackagePolicy } from '../../../../../../../../common/types';
-import type { InstanceAgent } from '../hooks/use_instances_agents';
+import type { OnboardingInstanceAgent } from '../hooks/use_onboarding_instances_agents';
 
-import { InstanceStatusCell } from './instance_status_cell';
+import { OnboardingInstanceStatusCell } from './onboarding_instance_status_cell';
 
 jest.mock('../../../../../../../components', () => ({
   ...jest.requireActual('../../../../../../../components'),
@@ -34,20 +34,20 @@ jest.mock('../../../../../../../components', () => ({
     ),
 }));
 
-const instanceAgent = (
+const onboardingInstanceAgent = (
   id: string,
   status: Agent['status'] = 'online',
   withPackagePolicy = true
-): InstanceAgent => ({
+): OnboardingInstanceAgent => ({
   agent: { id, status } as Agent,
   agentPolicyId: 'ap1',
   packagePolicy: withPackagePolicy ? ({ id: 'pp1' } as PackagePolicy) : undefined,
 });
 
-describe('InstanceStatusCell', () => {
-  const render = (agents: InstanceAgent[], onOpen = jest.fn()) =>
+describe('OnboardingInstanceStatusCell', () => {
+  const render = (agents: OnboardingInstanceAgent[], onOpen = jest.fn()) =>
     createIntegrationsTestRendererMock().render(
-      <InstanceStatusCell agents={agents} onOpen={onOpen} />
+      <OnboardingInstanceStatusCell agents={agents} onOpen={onOpen} />
     );
 
   it('shows a dash without agents', () => {
@@ -56,16 +56,16 @@ describe('InstanceStatusCell', () => {
   });
 
   it('shows the badge of a single agent', () => {
-    render([instanceAgent('a')]);
+    render([onboardingInstanceAgent('a')]);
     expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('a:online');
     expect(screen.queryByTestId('instanceAgentStatusMore')).not.toBeInTheDocument();
   });
 
   it('shows one badge, for the agent that most needs attention, and counts the others', () => {
     render([
-      instanceAgent('a', 'online'),
-      instanceAgent('b', 'offline'),
-      instanceAgent('c', 'degraded'),
+      onboardingInstanceAgent('a', 'online'),
+      onboardingInstanceAgent('b', 'offline'),
+      onboardingInstanceAgent('c', 'degraded'),
     ]);
 
     expect(screen.getAllByTestId('instanceAgentStatus')).toHaveLength(1);
@@ -75,7 +75,7 @@ describe('InstanceStatusCell', () => {
 
   it('opens the status of the shown agent', async () => {
     const onOpen = jest.fn();
-    const agents = [instanceAgent('a', 'online'), instanceAgent('b', 'error')];
+    const agents = [onboardingInstanceAgent('a', 'online'), onboardingInstanceAgent('b', 'error')];
     render(agents, onOpen);
 
     await act(async () => {
@@ -86,13 +86,13 @@ describe('InstanceStatusCell', () => {
   });
 
   it('does not make the badge clickable when the package policy is unknown', () => {
-    render([instanceAgent('a', 'online', false)]);
+    render([onboardingInstanceAgent('a', 'online', false)]);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.getByTestId('instanceAgentStatus')).toBeInTheDocument();
   });
 
   describe('a managed integration not deployed yet', () => {
-    const pending: InstanceAgent = {
+    const pending: OnboardingInstanceAgent = {
       agentPolicyId: 'agentless-1',
       packagePolicy: { id: 'pp1', supports_agentless: true } as PackagePolicy,
     };
@@ -109,11 +109,11 @@ describe('InstanceStatusCell', () => {
     });
 
     it('ranks after unhealthy agents and before healthy ones', () => {
-      const { unmount } = render([instanceAgent('a', 'online'), pending]);
+      const { unmount } = render([onboardingInstanceAgent('a', 'online'), pending]);
       expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('Pending');
       unmount();
 
-      render([pending, instanceAgent('b', 'error')]);
+      render([pending, onboardingInstanceAgent('b', 'error')]);
       expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('b:error');
     });
   });

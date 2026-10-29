@@ -36,16 +36,16 @@ import {
   ONBOARDING_AWS_PATH,
 } from '../../../../../../../services/aws_onboarding_override';
 
-import { useInstancesAgents } from '../hooks/use_instances_agents';
-import type { InstanceAgent } from '../hooks/use_instances_agents';
+import { useOnboardingInstancesAgents } from '../hooks/use_onboarding_instances_agents';
+import type { OnboardingInstanceAgent } from '../hooks/use_onboarding_instances_agents';
 
-import { DeleteInstanceModal } from './delete_instance_modal';
-import { InstanceAgentFlyout } from './instance_agent_flyout';
-import { InstanceStatusCell } from './instance_status_cell';
+import { DeleteOnboardingInstanceModal } from './delete_onboarding_instance_modal';
+import { OnboardingInstanceAgentFlyout } from './onboarding_instance_agent_flyout';
+import { OnboardingInstanceStatusCell } from './onboarding_instance_status_cell';
 
 const EMPTY_CELL = '-';
 
-const getInstanceName = (item: CloudOnboardingDeploymentListItem) =>
+const getOnboardingInstanceName = (item: CloudOnboardingDeploymentListItem) =>
   item.integrationName || item.deploymentName || item.id;
 
 const DEPLOYMENT_METHOD_LABELS: Record<DeploymentMethod, string> = {
@@ -100,12 +100,12 @@ const SlashSeparatedValues: React.FunctionComponent<{
   );
 };
 
-export const InstancesTable: React.FunctionComponent<{
-  instances: CloudOnboardingDeploymentListItem[];
+export const OnboardingInstancesTable: React.FunctionComponent<{
+  onboardingInstances: CloudOnboardingDeploymentListItem[];
   /** The package being viewed, whose deployed version the Version column shows. */
   packageName: string;
   isLoading?: boolean;
-}> = ({ instances, packageName, isLoading = false }) => {
+}> = ({ onboardingInstances, packageName, isLoading = false }) => {
   const { application, notifications } = useStartServices();
   const authz = useAuthz();
   const { getHref } = useLink();
@@ -113,13 +113,13 @@ export const InstancesTable: React.FunctionComponent<{
   const canDelete = authz.fleet.allAgentPolicies || authz.integrations.all;
   const canReadAgents = authz.fleet.readAgents;
   const {
-    agentsByInstance,
-    agentPolicyIdsByInstance,
+    agentsByOnboardingInstance,
+    agentPolicyIdsByOnboardingInstance,
     isTruncated: isAgentsTruncated,
     isLoading: isAgentsLoading,
     error: agentsError,
-  } = useInstancesAgents(instances, { enabled: canReadAgents });
-  const [flyoutAgent, setFlyoutAgent] = useState<InstanceAgent | null>(null);
+  } = useOnboardingInstancesAgents(onboardingInstances, { enabled: canReadAgents });
+  const [flyoutAgent, setFlyoutAgent] = useState<OnboardingInstanceAgent | null>(null);
 
   useEffect(() => {
     if (!agentsError) return;
@@ -130,26 +130,26 @@ export const InstancesTable: React.FunctionComponent<{
     });
   }, [agentsError, notifications.toasts]);
   const queryClient = useQueryClient();
-  const [instanceToDelete, setInstanceToDelete] =
+  const [onboardingInstanceToDelete, setOnboardingInstanceToDelete] =
     useState<CloudOnboardingDeploymentListItem | null>(null);
 
-  const deleteInstance = useCallback(
-    async (instance: CloudOnboardingDeploymentListItem) => {
+  const deleteOnboardingInstance = useCallback(
+    async (onboardingInstance: CloudOnboardingDeploymentListItem) => {
       try {
-        await sendDeleteCloudOnboardingDeployment(instance.id);
+        await sendDeleteCloudOnboardingDeployment(onboardingInstance.id);
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.deleteSuccess', {
-            defaultMessage: 'Deleted instance {instanceName}',
-            values: { instanceName: getInstanceName(instance) },
+            defaultMessage: 'Deleted instance {onboardingInstanceName}',
+            values: { onboardingInstanceName: getOnboardingInstanceName(onboardingInstance) },
           })
         );
-        setInstanceToDelete(null);
+        setOnboardingInstanceToDelete(null);
         await queryClient.invalidateQueries({ queryKey: ['cloud_onboarding_deployments'] });
       } catch (error) {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.deleteError', {
-            defaultMessage: 'Could not delete instance {instanceName}',
-            values: { instanceName: getInstanceName(instance) },
+            defaultMessage: 'Could not delete instance {onboardingInstanceName}',
+            values: { onboardingInstanceName: getOnboardingInstanceName(onboardingInstance) },
           }),
         });
       }
@@ -158,7 +158,7 @@ export const InstancesTable: React.FunctionComponent<{
   );
 
   // No `newSession` state: `deploymentId` makes the onboarding app hydrate from that session.
-  const openInstance = useCallback(
+  const openOnboardingInstance = useCallback(
     (deploymentId: string) => {
       application.navigateToApp(ONBOARDING_APP_ID, {
         path: `${ONBOARDING_AWS_PATH}?deploymentId=${encodeURIComponent(deploymentId)}`,
@@ -174,8 +174,8 @@ export const InstancesTable: React.FunctionComponent<{
         defaultMessage: 'Instance',
       }),
       render: (_: unknown, item: CloudOnboardingDeploymentListItem) => (
-        <EuiLink onClick={() => openInstance(item.id)} data-test-subj="instanceLink">
-          {getInstanceName(item)}
+        <EuiLink onClick={() => openOnboardingInstance(item.id)} data-test-subj="instanceLink">
+          {getOnboardingInstanceName(item)}
         </EuiLink>
       ),
     },
@@ -241,8 +241,8 @@ export const InstancesTable: React.FunctionComponent<{
               isAgentsLoading ? (
                 <EuiLoadingSpinner size="s" />
               ) : (
-                <InstanceStatusCell
-                  agents={agentsByInstance.get(item.id) ?? []}
+                <OnboardingInstanceStatusCell
+                  agents={agentsByOnboardingInstance.get(item.id) ?? []}
                   onOpen={setFlyoutAgent}
                 />
               ),
@@ -254,7 +254,7 @@ export const InstancesTable: React.FunctionComponent<{
             }),
             render: (agentCount: number | undefined, item: CloudOnboardingDeploymentListItem) => {
               if (!agentCount) return EMPTY_CELL;
-              const agentPolicyIds = agentPolicyIdsByInstance.get(item.id) ?? [];
+              const agentPolicyIds = agentPolicyIdsByOnboardingInstance.get(item.id) ?? [];
               // Only agent-based agents: the Fleet agent list hides agentless ones unless an
               // agentless resources toggle is on, so a managed instance would open an empty list.
               // Their status badge opens the details of each agent instead.
@@ -299,7 +299,8 @@ export const InstancesTable: React.FunctionComponent<{
                 icon: 'trash' as const,
                 type: 'icon' as const,
                 color: 'danger' as const,
-                onClick: (item: CloudOnboardingDeploymentListItem) => setInstanceToDelete(item),
+                onClick: (item: CloudOnboardingDeploymentListItem) =>
+                  setOnboardingInstanceToDelete(item),
                 'data-test-subj': 'deleteInstanceAction',
               },
             ],
@@ -330,7 +331,7 @@ export const InstancesTable: React.FunctionComponent<{
         </>
       ) : null}
       <EuiBasicTable
-        items={instances}
+        items={onboardingInstances}
         loading={isLoading}
         itemId="id"
         columns={columns}
@@ -343,18 +344,18 @@ export const InstancesTable: React.FunctionComponent<{
         rowProps={{ 'data-test-subj': 'instancesTableRow' }}
       />
       {flyoutAgent?.packagePolicy ? (
-        <InstanceAgentFlyout
+        <OnboardingInstanceAgentFlyout
           agent={flyoutAgent.agent}
           agentPolicyId={flyoutAgent.agentPolicyId}
           packagePolicy={flyoutAgent.packagePolicy}
           onClose={() => setFlyoutAgent(null)}
         />
       ) : null}
-      {instanceToDelete ? (
-        <DeleteInstanceModal
-          instanceName={getInstanceName(instanceToDelete)}
-          onClose={() => setInstanceToDelete(null)}
-          onConfirm={() => deleteInstance(instanceToDelete)}
+      {onboardingInstanceToDelete ? (
+        <DeleteOnboardingInstanceModal
+          onboardingInstanceName={getOnboardingInstanceName(onboardingInstanceToDelete)}
+          onClose={() => setOnboardingInstanceToDelete(null)}
+          onConfirm={() => deleteOnboardingInstance(onboardingInstanceToDelete)}
         />
       ) : null}
     </>

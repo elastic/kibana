@@ -11,8 +11,8 @@ import { screen } from '@testing-library/react';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks';
 
-import { useViewInstances } from './hooks/use_url_filters';
-import { useInstances } from './hooks/use_instances';
+import { useViewOnboardingInstances } from './hooks/use_url_filters';
+import { useOnboardingInstances } from './hooks/use_onboarding_instances';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
 import type { PanelPackage } from './types';
 
@@ -30,9 +30,9 @@ jest.mock('../../../../../../hooks', () => ({
 jest.mock('./hooks/use_url_filters', () => ({
   useUrlFilters: jest.fn(() => ({})),
   useViewPolicies: jest.fn(() => ({ selectedPackageViewPolicies: undefined })),
-  useViewInstances: jest.fn(),
+  useViewOnboardingInstances: jest.fn(),
 }));
-jest.mock('./hooks/use_instances', () => ({ useInstances: jest.fn() }));
+jest.mock('./hooks/use_onboarding_instances', () => ({ useOnboardingInstances: jest.fn() }));
 jest.mock('./hooks/use_installed_integrations', () => ({ useInstalledIntegrations: jest.fn() }));
 jest.mock('./hooks/use_installed_integrations_actions', () => ({
   useInstalledIntegrationsActions: jest.fn(() => ({
@@ -48,24 +48,24 @@ jest.mock('./components/installed_integrations_search_bar', () => ({
   InstalledIntegrationsSearchBar: () => null,
 }));
 jest.mock('./components/package_policies_panel', () => ({ PackagePoliciesPanel: () => null }));
-jest.mock('./components/instances_panel', () => ({
-  InstancesPanel: ({
+jest.mock('./components/onboarding_instances_panel', () => ({
+  OnboardingInstancesPanel: ({
     installedPackage,
-    instances,
+    onboardingInstances,
     isLoading,
   }: {
     installedPackage: PanelPackage;
-    instances: unknown[];
+    onboardingInstances: unknown[];
     isLoading?: boolean;
   }) => (
     <div data-test-subj="instancesPanel">
-      {installedPackage.title} ({instances.length}){isLoading ? ' loading' : ''}
+      {installedPackage.title} ({onboardingInstances.length}){isLoading ? ' loading' : ''}
     </div>
   ),
 }));
 
-const mockUseViewInstances = useViewInstances as jest.Mock;
-const mockUseInstances = useInstances as jest.Mock;
+const mockUseViewOnboardingInstances = useViewOnboardingInstances as jest.Mock;
+const mockUseOnboardingInstances = useOnboardingInstances as jest.Mock;
 const mockUseInstalledIntegrations = useInstalledIntegrations as jest.Mock;
 const mockUseGetPackageInfo = useGetPackageInfoByKeyQuery as jest.Mock;
 
@@ -80,11 +80,13 @@ const installedPackage = (name: string, title: string) => ({
 describe('InstalledIntegrationsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: undefined });
-    mockUseInstances.mockReturnValue({
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: undefined,
+    });
+    mockUseOnboardingInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map([['aws_bedrock', [{ id: 'd1' }, { id: 'd2' }]]]),
+      onboardingInstancesByPackage: new Map([['aws_bedrock', [{ id: 'd1' }, { id: 'd2' }]]]),
       isError: false,
       isTruncated: false,
       refetch: jest.fn(),
@@ -107,15 +109,17 @@ describe('InstalledIntegrationsPage', () => {
     );
 
   it('opens the instances of a package on the current page without fetching it', () => {
-    mockUseInstances.mockReturnValue({
+    mockUseOnboardingInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map([['aws', [{ id: 'd1' }]]]),
+      onboardingInstancesByPackage: new Map([['aws', [{ id: 'd1' }]]]),
       isError: false,
       isTruncated: false,
       refetch: jest.fn(),
     });
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws' });
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: 'aws',
+    });
     render();
 
     expect(screen.getByTestId('instancesPanel')).toHaveTextContent('AWS (1)');
@@ -125,7 +129,9 @@ describe('InstalledIntegrationsPage', () => {
   });
 
   it('opens the instances of a package that is not on the current page', () => {
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws_bedrock' });
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: 'aws_bedrock',
+    });
     mockUseGetPackageInfo.mockReturnValue({
       data: { item: { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '2.2.0', icons: [] } },
     });
@@ -138,14 +144,18 @@ describe('InstalledIntegrationsPage', () => {
   });
 
   it('waits for the package before opening a panel for a package off the current page', () => {
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws_bedrock' });
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: 'aws_bedrock',
+    });
     render();
 
     expect(screen.queryByTestId('instancesPanel')).not.toBeInTheDocument();
   });
 
   it('still opens the instances, named after the package, when the package cannot be read', () => {
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws_bedrock' });
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: 'aws_bedrock',
+    });
     mockUseGetPackageInfo.mockReturnValue({ data: undefined, isError: true });
     render();
 
@@ -153,30 +163,34 @@ describe('InstalledIntegrationsPage', () => {
   });
 
   it('passes the loading state of the instances to the panel', () => {
-    mockUseInstances.mockReturnValue({
+    mockUseOnboardingInstances.mockReturnValue({
       isEnabled: true,
       isLoading: true,
-      instancesByPackage: new Map(),
+      onboardingInstancesByPackage: new Map(),
       isError: false,
       isTruncated: false,
       refetch: jest.fn(),
     });
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws' });
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: 'aws',
+    });
     render();
 
     expect(screen.getByTestId('instancesPanel')).toHaveTextContent('AWS (0) loading');
   });
 
   it('opens no panel and fetches nothing when instances are not enabled', () => {
-    mockUseInstances.mockReturnValue({
+    mockUseOnboardingInstances.mockReturnValue({
       isEnabled: false,
       isLoading: false,
-      instancesByPackage: new Map(),
+      onboardingInstancesByPackage: new Map(),
       isError: false,
       isTruncated: false,
       refetch: jest.fn(),
     });
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws_bedrock' });
+    mockUseViewOnboardingInstances.mockReturnValue({
+      selectedPackageViewOnboardingInstances: 'aws_bedrock',
+    });
     render();
 
     expect(screen.queryByTestId('instancesPanel')).not.toBeInTheDocument();
@@ -195,10 +209,10 @@ describe('InstalledIntegrationsPage', () => {
   });
 
   it('warns when the instances could not be loaded', () => {
-    mockUseInstances.mockReturnValue({
+    mockUseOnboardingInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map(),
+      onboardingInstancesByPackage: new Map(),
       isError: true,
       isTruncated: false,
       refetch: jest.fn(),
@@ -209,10 +223,10 @@ describe('InstalledIntegrationsPage', () => {
   });
 
   it('warns when there were too many instances to load them all', () => {
-    mockUseInstances.mockReturnValue({
+    mockUseOnboardingInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map(),
+      onboardingInstancesByPackage: new Map(),
       isError: false,
       isTruncated: true,
       refetch: jest.fn(),

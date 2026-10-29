@@ -27,7 +27,7 @@ const REFRESH_INTERVAL_MS = 30000;
  * An agent of an instance, with the instance package policy it runs, if one was found. Without an
  * agent, it stands for a managed integration whose agentless agent is not enrolled yet (Pending).
  */
-export interface InstanceAgent {
+export interface OnboardingInstanceAgent {
   agent?: Agent;
   /** The agent policy the agent is enrolled in, without a version suffix. */
   agentPolicyId: string;
@@ -40,13 +40,19 @@ export interface InstanceAgent {
  * those enrolled in its agent policies: the agent-based ones it stores, and the agent policies of
  * its package policies (the agentless agent policies of managed integrations).
  */
-export function useInstancesAgents(
-  instances: CloudOnboardingDeploymentListItem[],
+export function useOnboardingInstancesAgents(
+  onboardingInstances: CloudOnboardingDeploymentListItem[],
   { enabled }: { enabled: boolean }
 ) {
   const packagePolicyIds = useMemo(
-    () => [...new Set(instances.flatMap((instance) => instance.packagePolicyIds ?? []))],
-    [instances]
+    () => [
+      ...new Set(
+        onboardingInstances.flatMap(
+          (onboardingInstance) => onboardingInstance.packagePolicyIds ?? []
+        )
+      ),
+    ],
+    [onboardingInstances]
   );
   const {
     data: packagePoliciesData,
@@ -64,30 +70,30 @@ export function useInstancesAgents(
     { enabled: enabled && packagePolicyIds.length > 0 }
   );
 
-  const policiesByInstance = useMemo(() => {
+  const policiesByOnboardingInstance = useMemo(() => {
     const packagePolicyById = new Map(
       (packagePoliciesData?.items ?? []).map((policy) => [policy.id, policy])
     );
     return new Map(
-      instances.map((instance) => {
-        const packagePolicies = (instance.packagePolicyIds ?? []).flatMap((id) => {
+      onboardingInstances.map((onboardingInstance) => {
+        const packagePolicies = (onboardingInstance.packagePolicyIds ?? []).flatMap((id) => {
           const policy = packagePolicyById.get(id);
           return policy ? [policy] : [];
         });
         const agentPolicyIds = [
           ...new Set([
-            ...(instance.agentPolicyIds ?? []),
+            ...(onboardingInstance.agentPolicyIds ?? []),
             ...packagePolicies.flatMap((policy) => policy.policy_ids),
           ]),
         ];
-        return [instance.id, { packagePolicies, agentPolicyIds }];
+        return [onboardingInstance.id, { packagePolicies, agentPolicyIds }];
       })
     );
-  }, [instances, packagePoliciesData]);
+  }, [onboardingInstances, packagePoliciesData]);
 
   const allAgentPolicyIds = useMemo(
-    () => [...new Set([...policiesByInstance.values()].flatMap((p) => p.agentPolicyIds))],
-    [policiesByInstance]
+    () => [...new Set([...policiesByOnboardingInstance.values()].flatMap((p) => p.agentPolicyIds))],
+    [policiesByOnboardingInstance]
   );
   // Waits for the package policies, so the agentless agent policies are part of the first query.
   const {
@@ -100,18 +106,21 @@ export function useInstancesAgents(
     refetchInterval: REFRESH_INTERVAL_MS,
   });
 
-  const agentsByInstance = useMemo(() => {
-    const byInstance = new Map<string, InstanceAgent[]>();
+  const agentsByOnboardingInstance = useMemo(() => {
+    const byOnboardingInstance = new Map<string, OnboardingInstanceAgent[]>();
     for (const agent of agents) {
       if (!agent.policy_id) continue;
       const agentPolicyId = removeVersionSuffixFromPolicyId(agent.policy_id);
-      for (const [instanceId, { packagePolicies, agentPolicyIds }] of policiesByInstance) {
+      for (const [
+        onboardingInstanceId,
+        { packagePolicies, agentPolicyIds },
+      ] of policiesByOnboardingInstance) {
         if (!agentPolicyIds.includes(agentPolicyId)) continue;
         const packagePolicy = packagePolicies.find((policy) =>
           policy.policy_ids.includes(agentPolicyId)
         );
-        byInstance.set(instanceId, [
-          ...(byInstance.get(instanceId) ?? []),
+        byOnboardingInstance.set(onboardingInstanceId, [
+          ...(byOnboardingInstance.get(onboardingInstanceId) ?? []),
           { agent, agentPolicyId, packagePolicy },
         ]);
       }
@@ -121,40 +130,43 @@ export function useInstancesAgents(
     // the managed integrations table. Only after a complete, successful agent lookup: while agents
     // load, when they were cut short or when the request failed, its agent may just be missing.
     if (!isAgentsLoading && !isTruncated && !agentsError) {
-      for (const [instanceId, { packagePolicies }] of policiesByInstance) {
-        const instanceAgents = byInstance.get(instanceId) ?? [];
+      for (const [onboardingInstanceId, { packagePolicies }] of policiesByOnboardingInstance) {
+        const onboardingInstanceAgents = byOnboardingInstance.get(onboardingInstanceId) ?? [];
         for (const packagePolicy of packagePolicies) {
           // Agentless package policies have a single agent policy.
           const agentPolicyId = packagePolicy.policy_ids[0];
           if (
             !packagePolicy.supports_agentless ||
             !agentPolicyId ||
-            instanceAgents.some((instanceAgent) => instanceAgent.agentPolicyId === agentPolicyId)
+            onboardingInstanceAgents.some(
+              (onboardingInstanceAgent) => onboardingInstanceAgent.agentPolicyId === agentPolicyId
+            )
           ) {
             continue;
           }
-          instanceAgents.push({ agentPolicyId, packagePolicy });
+          onboardingInstanceAgents.push({ agentPolicyId, packagePolicy });
         }
-        if (instanceAgents.length) byInstance.set(instanceId, instanceAgents);
+        if (onboardingInstanceAgents.length)
+          byOnboardingInstance.set(onboardingInstanceId, onboardingInstanceAgents);
       }
     }
-    return byInstance;
-  }, [agents, policiesByInstance, isAgentsLoading, isTruncated, agentsError]);
+    return byOnboardingInstance;
+  }, [agents, policiesByOnboardingInstance, isAgentsLoading, isTruncated, agentsError]);
 
-  const agentPolicyIdsByInstance = useMemo(
+  const agentPolicyIdsByOnboardingInstance = useMemo(
     () =>
       new Map(
-        [...policiesByInstance].map(([instanceId, { agentPolicyIds }]) => [
-          instanceId,
+        [...policiesByOnboardingInstance].map(([onboardingInstanceId, { agentPolicyIds }]) => [
+          onboardingInstanceId,
           agentPolicyIds,
         ])
       ),
-    [policiesByInstance]
+    [policiesByOnboardingInstance]
   );
 
   return {
-    agentsByInstance,
-    agentPolicyIdsByInstance,
+    agentsByOnboardingInstance,
+    agentPolicyIdsByOnboardingInstance,
     /** True when not every agent was fetched, so some instances may miss agents. */
     isTruncated,
     isLoading: enabled && (isPackagePoliciesLoading || isAgentsLoading),

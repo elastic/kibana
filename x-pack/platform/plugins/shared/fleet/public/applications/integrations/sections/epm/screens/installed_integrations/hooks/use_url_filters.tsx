@@ -116,12 +116,12 @@ export function useUrlFilters(): InstalledIntegrationsFilter {
   }, [urlParams]);
 }
 
-export function useViewInstances() {
+export function useViewOnboardingInstances() {
   const { toUrlParams, urlParams } = useUrlParams();
   const history = useHistory();
 
   // Opening one drawer closes the other, so both params are always dropped before setting one.
-  const addViewInstances = useCallback(
+  const addViewOnboardingInstances = useCallback(
     (packageName: string) => {
       history.push({
         search: toUrlParams(
@@ -138,14 +138,14 @@ export function useViewInstances() {
     [urlParams, toUrlParams, history]
   );
 
-  const selectedPackageViewInstances = useMemo(() => {
+  const selectedPackageViewOnboardingInstances = useMemo(() => {
     if (typeof urlParams.viewInstances === 'string') {
       return urlParams.viewInstances;
     }
   }, [urlParams]);
 
   return {
-    addViewInstances,
-    selectedPackageViewInstances,
+    addViewOnboardingInstances,
+    selectedPackageViewOnboardingInstances,
   };
 }

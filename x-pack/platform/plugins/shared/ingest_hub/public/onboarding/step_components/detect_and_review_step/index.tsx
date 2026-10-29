@@ -75,7 +75,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
   // Finish opens Installed integrations with the instances of a deployed package, where this
   // session is listed: the main `aws` package when the session covers it, else the first one. The
   // session is listed under every package it covers.
-  const instancesPackageName = useMemo(() => {
+  const onboardingInstancesPackageName = useMemo(() => {
     const packageNames = new Set(
       selectedServiceIds.flatMap((id) => {
         const packageName = awsServicesMap?.get(id)?.packageName;
@@ -87,7 +87,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
       : [...packageNames][0];
   }, [selectedServiceIds, awsServicesMap]);
   const [installedAppPath, installedPath] = pagePathGetters.integrations_installed({
-    viewInstances: instancesPackageName,
+    viewInstances: onboardingInstancesPackageName,
   });
   const finishHref = services.http.basePath.prepend(`${installedAppPath}${installedPath}`);
 

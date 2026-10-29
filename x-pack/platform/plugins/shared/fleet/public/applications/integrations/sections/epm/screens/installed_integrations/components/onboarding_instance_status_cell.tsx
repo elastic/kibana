@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Agent } from '../../../../../../../../common/types';
 import { AgentStatusBadge } from '../../../../../../../components';
-import type { InstanceAgent } from '../hooks/use_instances_agents';
+import type { OnboardingInstanceAgent } from '../hooks/use_onboarding_instances_agents';
 
 // Lower first: the badge shows the agent that most needs attention. A managed integration whose
 // agent is not enrolled yet (no agent: Pending) ranks with agents that are still starting.
@@ -33,9 +33,9 @@ const statusRank = (agent?: Agent) =>
  * other agents. A managed integration whose agentless agent is not enrolled yet shows Pending. The
  * badge opens the status flyout when the package policy is known.
  */
-export const InstanceStatusCell: React.FunctionComponent<{
-  agents: InstanceAgent[];
-  onOpen: (instanceAgent: InstanceAgent) => void;
+export const OnboardingInstanceStatusCell: React.FunctionComponent<{
+  agents: OnboardingInstanceAgent[];
+  onOpen: (onboardingInstanceAgent: OnboardingInstanceAgent) => void;
 }> = ({ agents, onOpen }) => {
   if (agents.length === 0) return <>-</>;
 

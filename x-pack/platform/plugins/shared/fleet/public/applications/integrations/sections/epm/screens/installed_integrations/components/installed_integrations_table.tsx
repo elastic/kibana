@@ -25,7 +25,7 @@ import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useViewInstances, useViewPolicies } from '../hooks/use_url_filters';
+import { useViewOnboardingInstances, useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
@@ -68,21 +68,21 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
   };
   /** Number of instances (onboarding sessions) per package name. */
-  instanceCounts?: ReadonlyMap<string, number>;
+  onboardingInstanceCounts?: ReadonlyMap<string, number>;
 }> = ({
   installedPackages,
   total,
   isLoading,
   pagination,
   selection,
-  instanceCounts = EMPTY_COUNTS,
+  onboardingInstanceCounts = EMPTY_COUNTS,
 }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
-  const { addViewInstances } = useViewInstances();
-  const hasInstances = [...instanceCounts.values()].some((count) => count > 0);
+  const { addViewOnboardingInstances } = useViewOnboardingInstances();
+  const hasOnboardingInstances = [...onboardingInstanceCounts.values()].some((count) => count > 0);
   const {
     actions: {
       bulkUninstallIntegrationsWithConfirmModal,
@@ -158,7 +158,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               }
             ),
             // Room for long names next to the Instances column, which only shows with instances.
-            ...(hasInstances ? { width: '340px' } : {}),
+            ...(hasOnboardingInstances ? { width: '340px' } : {}),
             render: (item: PackageListItem) => {
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
@@ -322,7 +322,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               return policiesLink;
             },
           },
-          ...(hasInstances
+          ...(hasOnboardingInstances
             ? [
                 {
                   name: i18n.translate(
@@ -333,10 +333,10 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   ),
                   width: '160px',
                   render: (item: InstalledPackageUIPackageListItem) => {
-                    const count = instanceCounts.get(item.name) ?? 0;
+                    const count = onboardingInstanceCounts.get(item.name) ?? 0;
                     return count > 0 ? (
                       <EuiLink
-                        onClick={() => addViewInstances(item.name)}
+                        onClick={() => addViewOnboardingInstances(item.name)}
                         data-test-subj={`installedIntegrationsTable.instancesLink.${item.name}`}
                       >
                         {count}

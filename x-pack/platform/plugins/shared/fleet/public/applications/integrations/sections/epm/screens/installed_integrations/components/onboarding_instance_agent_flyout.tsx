@@ -17,7 +17,7 @@ import {
   getSelectedInput,
 } from '../../detail/policies/components/agentless_table_adapters';
 
-interface InstanceAgentFlyoutProps {
+interface OnboardingInstanceAgentFlyoutProps {
   /** Undefined for a managed integration whose agentless agent is not enrolled yet. */
   agent?: Agent;
   /** The agent policy the agent is enrolled in, without a version suffix. */
@@ -31,14 +31,16 @@ interface InstanceAgentFlyoutProps {
  * integration policy, as the managed integrations table opens it, and the component health of the
  * agent for an agent-based policy, as the AWS onboarding flow opens it.
  */
-export const InstanceAgentFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = (props) =>
+export const OnboardingInstanceAgentFlyout: React.FunctionComponent<
+  OnboardingInstanceAgentFlyoutProps
+> = (props) =>
   props.packagePolicy.supports_agentless ? (
     <AgentlessStatusFlyout {...props} />
   ) : (
     <AgentBasedStatusFlyout {...props} />
   );
 
-const AgentlessStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = ({
+const AgentlessStatusFlyout: React.FunctionComponent<OnboardingInstanceAgentFlyoutProps> = ({
   agentPolicyId,
   packagePolicy,
   onClose,
@@ -57,7 +59,7 @@ const AgentlessStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> =
   />
 );
 
-const AgentBasedStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = ({
+const AgentBasedStatusFlyout: React.FunctionComponent<OnboardingInstanceAgentFlyoutProps> = ({
   agent,
   agentPolicyId,
   packagePolicy,

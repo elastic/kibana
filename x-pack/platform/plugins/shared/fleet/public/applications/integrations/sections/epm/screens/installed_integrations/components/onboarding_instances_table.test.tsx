@@ -11,7 +11,7 @@ import { screen, act, within, waitFor } from '@testing-library/react';
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
 
-import { InstancesTable } from './instances_table';
+import { OnboardingInstancesTable } from './onboarding_instances_table';
 
 const mockNavigateToApp = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -34,25 +34,28 @@ jest.mock('../../../../../../../hooks', () => {
   };
 });
 
-jest.mock('./instance_agent_flyout', () => ({
-  InstanceAgentFlyout: (props: { agentPolicyId: string; packagePolicy: { name: string } }) => (
+jest.mock('./onboarding_instance_agent_flyout', () => ({
+  OnboardingInstanceAgentFlyout: (props: {
+    agentPolicyId: string;
+    packagePolicy: { name: string };
+  }) => (
     <div data-test-subj="instanceAgentFlyout">
       {props.agentPolicyId} {props.packagePolicy.name}
     </div>
   ),
 }));
 
-jest.mock('../hooks/use_instances_agents', () => ({
-  useInstancesAgents: jest.fn(),
+jest.mock('../hooks/use_onboarding_instances_agents', () => ({
+  useOnboardingInstancesAgents: jest.fn(),
 }));
 
 import { sendDeleteCloudOnboardingDeployment, useAuthz } from '../../../../../../../hooks';
-import { useInstancesAgents } from '../hooks/use_instances_agents';
+import { useOnboardingInstancesAgents } from '../hooks/use_onboarding_instances_agents';
 
 const mockUseAuthz = useAuthz as jest.Mock;
 const mockSendDelete = sendDeleteCloudOnboardingDeployment as jest.Mock;
 
-const mockUseInstancesAgents = useInstancesAgents as jest.Mock;
+const mockUseOnboardingInstancesAgents = useOnboardingInstancesAgents as jest.Mock;
 
 const authzWith = ({
   allAgentPolicies = false,
@@ -63,7 +66,7 @@ const authzWith = ({
   integrations: { all: allIntegrations },
 });
 
-const makeInstance = (
+const makeOnboardingInstance = (
   overrides: Partial<CloudOnboardingDeploymentListItem> = {}
 ): CloudOnboardingDeploymentListItem => ({
   id: 'deployment-1',
@@ -90,26 +93,35 @@ const makeInstance = (
   ...overrides,
 });
 
-describe('InstancesTable', () => {
-  const renderTable = (instances: CloudOnboardingDeploymentListItem[], packageName = 'aws') =>
+describe('OnboardingInstancesTable', () => {
+  const renderTable = (
+    onboardingInstances: CloudOnboardingDeploymentListItem[],
+    packageName = 'aws'
+  ) =>
     createIntegrationsTestRendererMock().render(
-      <InstancesTable instances={instances} packageName={packageName} />
+      <OnboardingInstancesTable
+        onboardingInstances={onboardingInstances}
+        packageName={packageName}
+      />
     );
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseAuthz.mockReturnValue(authzWith({ allAgentPolicies: true }));
     mockSendDelete.mockResolvedValue({ id: 'deployment-1' });
-    mockUseInstancesAgents.mockReturnValue({
-      agentsByInstance: new Map(),
-      agentPolicyIdsByInstance: new Map(),
+    mockUseOnboardingInstancesAgents.mockReturnValue({
+      agentsByOnboardingInstance: new Map(),
+      agentPolicyIdsByOnboardingInstance: new Map(),
       isLoading: false,
       error: null,
     });
   });
 
   it('renders one row per instance with its name, user and agents', () => {
-    renderTable([makeInstance(), makeInstance({ id: 'deployment-2', integrationName: 'Two' })]);
+    renderTable([
+      makeOnboardingInstance(),
+      makeOnboardingInstance({ id: 'deployment-2', integrationName: 'Two' }),
+    ]);
 
     expect(screen.getAllByTestId('instancesTableRow')).toHaveLength(2);
     expect(screen.getByText('AWS-collection-1')).toBeInTheDocument();
@@ -119,8 +131,8 @@ describe('InstancesTable', () => {
 
   it('falls back to the deployment name, then the id, without an integration name', () => {
     renderTable([
-      makeInstance({ integrationName: undefined, deploymentName: 'stack-name' }),
-      makeInstance({ id: 'deployment-2', integrationName: undefined }),
+      makeOnboardingInstance({ integrationName: undefined, deploymentName: 'stack-name' }),
+      makeOnboardingInstance({ id: 'deployment-2', integrationName: undefined }),
     ]);
 
     expect(screen.getByText('stack-name')).toBeInTheDocument();
@@ -128,7 +140,7 @@ describe('InstancesTable', () => {
   });
 
   it('shows a service count per deployment method', () => {
-    renderTable([makeInstance()]);
+    renderTable([makeOnboardingInstance()]);
 
     const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getByText('2')).toBeInTheDocument();
@@ -136,7 +148,7 @@ describe('InstancesTable', () => {
   });
 
   it('shows the service titles by method in a tooltip', async () => {
-    renderTable([makeInstance()]);
+    renderTable([makeOnboardingInstance()]);
 
     const row = screen.getByTestId('instancesTableRow');
     await act(async () => {
@@ -149,7 +161,7 @@ describe('InstancesTable', () => {
   });
 
   it('shows the version of the package being viewed', () => {
-    renderTable([makeInstance()], 'aws_bedrock');
+    renderTable([makeOnboardingInstance()], 'aws_bedrock');
 
     const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getByText('1.2.0')).toBeInTheDocument();
@@ -157,7 +169,7 @@ describe('InstancesTable', () => {
   });
 
   it('shows the version of another package of the instance when that one is viewed', () => {
-    renderTable([makeInstance()], 'aws');
+    renderTable([makeOnboardingInstance()], 'aws');
 
     const row = screen.getByTestId('instancesTableRow');
     expect(within(row).getByText('8.11.0')).toBeInTheDocument();
@@ -165,7 +177,7 @@ describe('InstancesTable', () => {
   });
 
   it('shows a dash when the instance has no policy of the package being viewed', () => {
-    renderTable([makeInstance({ packages: [] })], 'aws');
+    renderTable([makeOnboardingInstance({ packages: [] })], 'aws');
 
     const row = screen.getByTestId('instancesTableRow');
     expect(within(row).queryByText('8.11.0')).not.toBeInTheDocument();
@@ -178,7 +190,7 @@ describe('InstancesTable', () => {
   ])('names up to 3 of %i services in a tooltip and counts the rest', async (count, tooltip) => {
     const ids = ['a', 'b', 'c', 'd', 'e', 'f'].slice(0, count);
     renderTable([
-      makeInstance({
+      makeOnboardingInstance({
         services: ids,
         serviceNames: Object.fromEntries(ids.map((id) => [id, id.toUpperCase()])),
         servicesByMethod: { ecf: ids },
@@ -195,7 +207,7 @@ describe('InstancesTable', () => {
 
   it('shows dashes where an instance has no policies, like an ECF-only instance', () => {
     renderTable([
-      makeInstance({
+      makeOnboardingInstance({
         mechanisms: ['ecf'],
         packages: [],
         servicesByMethod: { ecf: ['elb_logs'] },
@@ -210,7 +222,7 @@ describe('InstancesTable', () => {
   });
 
   it('opens the instance in the onboarding app without starting a new session', async () => {
-    renderTable([makeInstance()]);
+    renderTable([makeOnboardingInstance()]);
 
     await act(async () => {
       screen.getByTestId('instanceLink').click();
@@ -234,20 +246,20 @@ describe('InstancesTable', () => {
       ['integrations', { allIntegrations: true }],
     ])('is offered with write access to %s', (_, access) => {
       mockUseAuthz.mockReturnValue(authzWith(access));
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(screen.getByTestId('deleteInstanceAction')).toBeInTheDocument();
     });
 
     it('is not offered without write access', () => {
       mockUseAuthz.mockReturnValue(authzWith());
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(screen.queryByTestId('deleteInstanceAction')).not.toBeInTheDocument();
     });
 
     it('asks for confirmation and explains what is kept', async () => {
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       const modal = await openDeleteModal();
 
@@ -259,7 +271,7 @@ describe('InstancesTable', () => {
     });
 
     it('does nothing when cancelled', async () => {
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
       const modal = await openDeleteModal();
 
       await act(async () => {
@@ -271,7 +283,7 @@ describe('InstancesTable', () => {
     });
 
     it('deletes the instance on confirm and closes the modal', async () => {
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
       const modal = await openDeleteModal();
 
       await act(async () => {
@@ -288,7 +300,7 @@ describe('InstancesTable', () => {
     it('shows an error and keeps the modal open when the delete fails', async () => {
       const error = new Error('boom');
       mockSendDelete.mockRejectedValue(error);
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
       const modal = await openDeleteModal();
 
       await act(async () => {
@@ -313,8 +325,8 @@ describe('InstancesTable', () => {
 
     beforeEach(() => {
       mockUseAuthz.mockReturnValue(authzWith({ readAgents: true }));
-      mockUseInstancesAgents.mockReturnValue({
-        agentsByInstance: new Map([
+      mockUseOnboardingInstancesAgents.mockReturnValue({
+        agentsByOnboardingInstance: new Map([
           [
             'deployment-1',
             [
@@ -326,30 +338,36 @@ describe('InstancesTable', () => {
             ],
           ],
         ]),
-        agentPolicyIdsByInstance: new Map([['deployment-1', ['agentless-1', 'agentless-2']]]),
+        agentPolicyIdsByOnboardingInstance: new Map([
+          ['deployment-1', ['agentless-1', 'agentless-2']],
+        ]),
         isLoading: false,
         error: null,
       });
     });
 
     it('is shown to users who can read agents', () => {
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(screen.getByText('Status')).toBeInTheDocument();
       expect(screen.getByTestId('instanceAgentStatus')).toBeInTheDocument();
-      expect(mockUseInstancesAgents).toHaveBeenCalledWith(expect.any(Array), { enabled: true });
+      expect(mockUseOnboardingInstancesAgents).toHaveBeenCalledWith(expect.any(Array), {
+        enabled: true,
+      });
     });
 
     it('is hidden from users who cannot read agents', () => {
       mockUseAuthz.mockReturnValue(authzWith());
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(screen.queryByText('Status')).not.toBeInTheDocument();
-      expect(mockUseInstancesAgents).toHaveBeenCalledWith(expect.any(Array), { enabled: false });
+      expect(mockUseOnboardingInstancesAgents).toHaveBeenCalledWith(expect.any(Array), {
+        enabled: false,
+      });
     });
 
     it('opens the status flyout of the shown agent', async () => {
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       await act(async () => {
         screen.getByTestId('instanceAgentStatus').click();
@@ -360,13 +378,13 @@ describe('InstancesTable', () => {
 
     it('reports an agent loading error', () => {
       const error = new Error('boom');
-      mockUseInstancesAgents.mockReturnValue({
-        agentsByInstance: new Map(),
-        agentPolicyIdsByInstance: new Map(),
+      mockUseOnboardingInstancesAgents.mockReturnValue({
+        agentsByOnboardingInstance: new Map(),
+        agentPolicyIdsByOnboardingInstance: new Map(),
         isLoading: false,
         error,
       });
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(mockAddError).toHaveBeenCalledWith(error, {
         title: 'Could not load the agent status of the instances',
@@ -374,7 +392,7 @@ describe('InstancesTable', () => {
     });
 
     it('links the agent count of an agent-based instance to the Fleet agent list of its agent policies', () => {
-      renderTable([makeInstance({ mechanisms: ['agent_based'] })]);
+      renderTable([makeOnboardingInstance({ mechanisms: ['agent_based'] })]);
 
       const link = screen.getByTestId('instanceAgentsLink');
       expect(link).toHaveTextContent('5');
@@ -384,34 +402,34 @@ describe('InstancesTable', () => {
     });
 
     it('shows the agent count of a managed instance without a link, since Fleet hides agentless agents', () => {
-      renderTable([makeInstance({ mechanisms: ['managed_integration'] })]);
+      renderTable([makeOnboardingInstance({ mechanisms: ['managed_integration'] })]);
 
       expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
       expect(screen.getByText('5')).toBeInTheDocument();
     });
 
     it('warns when not every agent could be loaded', () => {
-      mockUseInstancesAgents.mockReturnValue({
-        agentsByInstance: new Map(),
-        agentPolicyIdsByInstance: new Map(),
+      mockUseOnboardingInstancesAgents.mockReturnValue({
+        agentsByOnboardingInstance: new Map(),
+        agentPolicyIdsByOnboardingInstance: new Map(),
         isTruncated: true,
         isLoading: false,
         error: null,
       });
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(screen.getByTestId('instancesAgentsTruncated')).toBeInTheDocument();
     });
 
     it('does not warn when every agent was loaded', () => {
-      renderTable([makeInstance()]);
+      renderTable([makeOnboardingInstance()]);
 
       expect(screen.queryByTestId('instancesAgentsTruncated')).not.toBeInTheDocument();
     });
 
     it('hides the agent count from users who cannot read agents', () => {
       mockUseAuthz.mockReturnValue(authzWith());
-      renderTable([makeInstance({ mechanisms: ['agent_based'] })]);
+      renderTable([makeOnboardingInstance({ mechanisms: ['agent_based'] })]);
 
       expect(screen.queryByText('Agents')).not.toBeInTheDocument();
       expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
@@ -419,7 +437,7 @@ describe('InstancesTable', () => {
     });
 
     it('shows a dash instead of a link without agents', () => {
-      renderTable([makeInstance({ agentCount: 0 })]);
+      renderTable([makeOnboardingInstance({ agentCount: 0 })]);
 
       expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
     });

@@ -11,7 +11,7 @@ import { screen } from '@testing-library/react';
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../../../../common/types';
 
-import { InstanceAgentFlyout } from './instance_agent_flyout';
+import { OnboardingInstanceAgentFlyout } from './onboarding_instance_agent_flyout';
 
 jest.mock('../../../../../../../components', () => ({
   ...jest.requireActual('../../../../../../../components'),
@@ -55,10 +55,10 @@ const packagePolicy = (supportsAgentless: boolean) =>
     inputs: [],
   } as unknown as PackagePolicy);
 
-describe('InstanceAgentFlyout', () => {
+describe('OnboardingInstanceAgentFlyout', () => {
   const render = (supportsAgentless: boolean) =>
     createIntegrationsTestRendererMock().render(
-      <InstanceAgentFlyout
+      <OnboardingInstanceAgentFlyout
         agent={{ id: 'agent-1', status: 'degraded' } as Agent}
         agentPolicyId="ap1"
         packagePolicy={packagePolicy(supportsAgentless)}
@@ -87,7 +87,7 @@ describe('InstanceAgentFlyout', () => {
 
   it('opens the managed integration status of a managed integration not deployed yet', () => {
     createIntegrationsTestRendererMock().render(
-      <InstanceAgentFlyout
+      <OnboardingInstanceAgentFlyout
         agentPolicyId="ap1"
         packagePolicy={packagePolicy(true)}
         onClose={jest.fn()}

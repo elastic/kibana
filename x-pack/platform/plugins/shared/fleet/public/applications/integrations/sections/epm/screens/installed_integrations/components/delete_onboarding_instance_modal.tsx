@@ -10,11 +10,11 @@ import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const DeleteInstanceModal: React.FunctionComponent<{
-  instanceName: string;
+export const DeleteOnboardingInstanceModal: React.FunctionComponent<{
+  onboardingInstanceName: string;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-}> = ({ instanceName, onClose, onConfirm }) => {
+}> = ({ onboardingInstanceName, onClose, onConfirm }) => {
   const [isLoading, setIsLoading] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -23,8 +23,8 @@ export const DeleteInstanceModal: React.FunctionComponent<{
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
       title={i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.deleteModal.title', {
-        defaultMessage: 'Delete instance {instanceName}?',
-        values: { instanceName },
+        defaultMessage: 'Delete instance {onboardingInstanceName}?',
+        values: { onboardingInstanceName },
       })}
       cancelButtonText={i18n.translate(
         'xpack.fleet.epmInstalledIntegrations.instances.deleteModal.cancel',
