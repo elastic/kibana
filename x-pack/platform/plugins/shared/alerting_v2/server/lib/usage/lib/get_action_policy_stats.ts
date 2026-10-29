@@ -91,6 +91,8 @@ export async function getActionPolicyStats(
         },
       },
       // `disabled` = !enabled; `snoozed` = enabled and snoozedUntil > now; `enabled` otherwise.
+      // An unparseable snoozedUntil counts as `enabled`: a script exception would fail the whole
+      // query and drop every action policy stat, not just this one.
       ap_status: {
         type: 'keyword',
         script: {
@@ -104,10 +106,14 @@ export async function getActionPolicyStats(
             }
             def snoozedUntil = ap['snoozedUntil'];
             if (snoozedUntil != null) {
-              long snoozedUntilMs = ZonedDateTime.parse(snoozedUntil).toInstant().toEpochMilli();
-              if (snoozedUntilMs > params.now) {
-                emit('snoozed');
-                return;
+              try {
+                long snoozedUntilMs = ZonedDateTime.parse(snoozedUntil).toInstant().toEpochMilli();
+                if (snoozedUntilMs > params.now) {
+                  emit('snoozed');
+                  return;
+                }
+              } catch (Exception e) {
+                // fall through to 'enabled'
               }
             }
             emit('enabled');

@@ -215,6 +215,17 @@ describe('getActionPolicyStats', () => {
       expect(status.script.source).toContain('snoozedUntilMs > params.now');
     });
 
+    it('counts a policy with an unparseable snoozedUntil as enabled instead of failing the query', async () => {
+      mockSearchResponse({});
+
+      await getActionPolicyStats(esClient);
+
+      const { ap_status: status } = getRuntimeMappings();
+      expect(status.script.source).toMatch(
+        /try \{\s*long snoozedUntilMs = ZonedDateTime\.parse\(snoozedUntil\)[\s\S]*\} catch \(Exception e\) \{[\s\S]*emit\('enabled'\)/
+      );
+    });
+
     it('counts a policy without grouping as per_alert', async () => {
       mockSearchResponse({});
 
