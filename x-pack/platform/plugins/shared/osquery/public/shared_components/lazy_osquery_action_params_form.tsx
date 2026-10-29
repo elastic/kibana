@@ -13,9 +13,8 @@ import { ExperimentalFeaturesService } from '../common/experimental_features_ser
 
 const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
 
-export const getLazyOsqueryResponseActionTypeForm =
-  // eslint-disable-next-line react/display-name
-  () => (props: OsqueryResponseActionsParamsFormProps) => {
+export const getLazyOsqueryResponseActionTypeForm = () =>
+  function LazyOsqueryResponseActionTypeForm(props: OsqueryResponseActionsParamsFormProps) {
     const { onError, defaultValues, onChange } = props;
 
     return (
