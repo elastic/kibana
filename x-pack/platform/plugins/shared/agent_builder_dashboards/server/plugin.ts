@@ -47,9 +47,10 @@ export class AgentBuilderDashboardsPlugin
     setupDeps: AgentBuilderDashboardsSetupDependencies
   ): AgentBuilderDashboardsPluginSetup {
     // Read dashboards the way the Dashboard app loads them, so unconvertible panels are kept.
-    const getDashboardClient = async (): Promise<Pick<DashboardPluginStart['client'], 'read'>> => {
+    const getDashboardClient = async (): Promise<DashboardPluginStart['client']> => {
       const [, { dashboard }] = await coreSetup.getStartServices();
       return {
+        ...dashboard.client,
         read: (savedObjectsClient, id) =>
           dashboard.client.read(savedObjectsClient, id, { isDashboardAppRequest: true }),
       };

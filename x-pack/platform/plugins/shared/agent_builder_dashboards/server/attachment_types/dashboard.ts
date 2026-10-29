@@ -23,7 +23,7 @@ import type { Logger } from '@kbn/core/server';
 
 interface CreateDashboardAttachmentTypeOptions {
   logger: Logger;
-  getDashboardClient: () => Promise<Pick<DashboardPluginStart['client'], 'read'>>;
+  getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
 
 const normalizeDashboardAttachmentData = (
