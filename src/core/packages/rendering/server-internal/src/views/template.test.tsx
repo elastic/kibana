@@ -31,10 +31,23 @@ const render = (metadata: RenderingMetadata) =>
   load(renderToStaticMarkup(<Template metadata={metadata} />));
 
 describe('Template (boot splash)', () => {
-  it('renders the default Logo SVG inside .kbnLoaderWrap', () => {
+  it('renders <elastic-loader-ring> for the default splash', () => {
     const $ = render(baseMetadata);
-    expect($('#kbn_loading_message .kbnLoaderWrap > svg.kbnLoader')).toHaveLength(1);
+    const ring = $('#kbn_loading_message .kbnLoaderWrap > elastic-loader-ring');
+    expect(ring).toHaveLength(1);
+    expect(ring.attr('size')).toBe('120');
+    expect(ring.attr('mode')).toBe('sweep');
+    expect(ring.attr('data-test-subj')).toBe('kbnLoadingElasticRing');
     expect($('#kbn_loading_message .kbnLoaderWrap > img')).toHaveLength(0);
+  });
+
+  it('loads the loader-ring script before bootstrap', () => {
+    const $ = render(baseMetadata);
+    const scripts = $('script[src]')
+      .map((_, el) => $(el).attr('src'))
+      .get();
+    expect(scripts).toContain('/ui/loader_ring.js');
+    expect(scripts.indexOf('/ui/loader_ring.js')).toBeLessThan(scripts.indexOf('/bootstrap.js'));
   });
 
   it('renders the custom-branded <img> inside .kbnLoaderWrap when configured', () => {
@@ -43,47 +56,48 @@ describe('Template (boot splash)', () => {
       customBranding: { logo: 'https://example.test/custom.svg' },
     });
     expect($('#kbn_loading_message .kbnLoaderWrap > img')).toHaveLength(1);
-    expect($('#kbn_loading_message .kbnLoaderWrap > svg')).toHaveLength(0);
+    expect($('#kbn_loading_message .kbnLoaderWrap > elastic-loader-ring')).toHaveLength(0);
   });
 
-  // Regression test for the inconsistency flagged in
-  // https://github.com/elastic/kibana/pull/272444#discussion (gsoldevila):
-  // before this fix the custom-branding <img> was hard-coded to 64×64
-  // while the default Logo had shrunk to 40×40, so the two splash
-  // variants rendered at different sizes. Both must now match
-  // <EuiLoadingElastic size="xxl"> (40px on Borealis base) — enforced
-  // here on the inline attrs *and* in legacy_styles.css via a single
-  // `.kbnLoaderWrap > svg, .kbnLoaderWrap > img` rule.
-  it('renders default and custom-branded splash logos at the same 40×40 box', () => {
+  it('renders default and custom-branded splash logos at the same 120×120 box', () => {
     const $default = render(baseMetadata);
     const $custom = render({
       ...baseMetadata,
       customBranding: { logo: 'https://example.test/custom.svg' },
     });
 
-    const defaultSvg = $default('#kbn_loading_message .kbnLoaderWrap > svg');
+    const ring = $default('#kbn_loading_message .kbnLoaderWrap > elastic-loader-ring');
     const customImg = $custom('#kbn_loading_message .kbnLoaderWrap > img');
 
-    expect(defaultSvg.attr('width')).toBe('32'); // SVG viewBox is 32; CSS scales it.
-    expect(defaultSvg.attr('viewBox')).toBe('0 0 32 32');
-    expect(customImg.attr('width')).toBe('40');
-    expect(customImg.attr('height')).toBe('40');
+    expect(ring.attr('size')).toBe('120');
+    expect(customImg.attr('width')).toBe('120');
+    expect(customImg.attr('height')).toBe('120');
   });
 
-  it('wraps the loader with role="progressbar" so it matches <EuiLoadingElastic />', () => {
+  it('omits the progress bar for the default ring splash', () => {
     const $ = render(baseMetadata);
-    const wrap = $('#kbn_loading_message .kbnLoaderWrap');
-    expect(wrap.attr('role')).toBe('progressbar');
-    expect(wrap.attr('aria-label')).toBe('Loading Elastic');
+    expect($('#kbn_loading_message .kbnProgress')).toHaveLength(0);
+  });
+
+  it('keeps the progress bar for custom-branded splash logos', () => {
+    const $ = render({
+      ...baseMetadata,
+      customBranding: { logo: 'https://example.test/custom.svg' },
+    });
+    expect($('#kbn_loading_message .kbnProgress')).toHaveLength(1);
+  });
+
+  it('uses the static Logo SVG on the legacy browser error screen', () => {
+    const $ = render(baseMetadata);
+    expect($('#kbn_legacy_browser_error > svg.kbnLoader')).toHaveLength(1);
   });
 
   describe('splash color mode', () => {
     // Select only the inline splash <style> (the block that defines the loader
-    // colors, identified by `.kbnProgress`) rather than every <style> in the
-    // head, so the assertions validate the splash rules specifically.
+    // mark colour) rather than every <style> in the head.
     const getSplashCss = ($: ReturnType<typeof render>) =>
       $('head style')
-        .filter((_i, el) => $(el).text().includes('.kbnProgress'))
+        .filter((_i, el) => $(el).text().includes('--elastic-loader-ring-mark'))
         .text();
 
     it('inlines a single set of splash colors for an explicit dark mode', () => {
@@ -96,27 +110,22 @@ describe('Template (boot splash)', () => {
     it('inlines both variants behind a media query for system mode so the splash has no flash', () => {
       const $ = render({ ...baseMetadata, darkMode: 'system' });
       const css = getSplashCss($);
-      // light defaults applied at first paint, dark applied via the CSS engine (no JS, no flash)
-      expect(css).toContain('background-color: #ECF1F9;'); // light default page background
+      expect(css).toContain('background-color: #ECF1F9;');
       expect(css).toContain('@media (prefers-color-scheme: dark)');
-      expect(css).toContain('background-color: #07101F;'); // dark override page background
-      // the old JS-based system theme bootstrap must no longer be injected
+      expect(css).toContain('background-color: #07101F;');
       expect($('head script[src*="bootstrap_system_theme"]')).toHaveLength(0);
     });
 
     it('uses the theme-specific palette for a non-borealis theme in system mode', () => {
-      // The old bootstrap script was hard-coded to the borealis palette regardless
-      // of theme; resolving colors from `getThemeStyles(themeName)` means a
-      // non-borealis theme now gets its own splash colors.
       const $ = render({
         ...baseMetadata,
         darkMode: 'system',
         injectedMetadata: { theme: { name: 'amsterdam' } },
       } as unknown as RenderingMetadata);
       const css = getSplashCss($);
-      expect(css).toContain('background-color: #F8FAFD;'); // amsterdam light default
+      expect(css).toContain('background-color: #F8FAFD;');
       expect(css).toContain('@media (prefers-color-scheme: dark)');
-      expect(css).toContain('background-color: #141519;'); // amsterdam dark override
+      expect(css).toContain('background-color: #141519;');
     });
   });
 });

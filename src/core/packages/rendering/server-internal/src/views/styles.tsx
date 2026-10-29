@@ -36,6 +36,8 @@ interface SplashColors {
   progressBefore: string;
   errorTitleText: string;
   errorButtonText: string;
+  /** Centre mark fill — handoff default `#1C1E23`, flipped for dark mode. */
+  loaderMark: string;
 }
 
 const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashColors } => {
@@ -49,6 +51,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
         progressBefore: '#0B64DD', // colors.primary
         errorTitleText: '#111C2C', // colors.textHeading
         errorButtonText: '#FFFFFF', // colors.textInverse
+        loaderMark: '#1C1E23', // handoff static mark fill
       },
       dark: {
         // keep in sync with updateRootBackground in src/core/packages/theme/browser-internal/src/theme_service.ts
@@ -58,6 +61,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
         progressBefore: '#61A2FF',
         errorTitleText: '#E3E8F2', // colors.textHeading
         errorButtonText: '#07101F', // colors.textInverse
+        loaderMark: '#E3E8F2',
       },
     };
   }
@@ -70,6 +74,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
       progressBefore: '#006DE4',
       errorTitleText: '#1a1c21',
       errorButtonText: '#FFFFFF',
+      loaderMark: '#1C1E23',
     },
     dark: {
       pageBackground: '#141519',
@@ -78,6 +83,7 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
       progressBefore: '#1BA9F5',
       errorTitleText: '#DFE5EF',
       errorButtonText: '#FFFFFF',
+      loaderMark: '#DFE5EF',
     },
   };
 };
@@ -85,10 +91,15 @@ const getThemeStyles = (theme: ThemeName): { light: SplashColors; dark: SplashCo
 const splashRules = (colors: SplashColors) => `
           html {
             background-color: ${colors.pageBackground};
+            --elastic-loader-ring-mark: ${colors.loaderMark};
           }
 
           .kbnWelcomeText {
             color: ${colors.welcomeText};
+          }
+
+          .kbnLoaderMark {
+            fill: ${colors.loaderMark};
           }
 
           .kbnProgress {

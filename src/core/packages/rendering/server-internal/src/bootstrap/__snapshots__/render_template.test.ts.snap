@@ -55,6 +55,16 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   // window.onload, this avoids blocking on font/favicon downloads before
   // starting bundle loads.
   (function () {
+    // Quiet window for the loader-ring CE: hold before *executing* Kibana
+    // bundles so requestAnimationFrame isn't starved by main-thread parse.
+    // Bundles are still prefetched immediately so network overlaps the quiet window.
+    var SPLASH_QUIET_MS = 2200;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var quietMs = reduceMotion ? 0 : SPLASH_QUIET_MS;
+    var bundleUrls = [
+      '/js-1','/js-2'
+    ];
+
     function failure(event) {
       var failedTarget = event && event.target ? event.target : {};
       if (window.console) {
@@ -151,19 +161,79 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       });
     }
 
-    performance.mark('kbnLoad', {
-      detail: 'load_started',
-    })
+    function flattenUrls(urls, out) {
+      urls.forEach(function (url) {
+        if (typeof url !== 'string') {
+          flattenUrls(url, out);
+        } else {
+          out.push(url);
+        }
+      });
+      return out;
+    }
 
-    load([
-      '/js-1','/js-2'
-    ], async function () {
-      // RSPack progressive loading: wait for async plugin chunks to load
-      if (window.__kbnPluginsLoaded) {
-        await window.__kbnPluginsLoaded;
+    // Warm the HTTP cache during the quiet window without executing scripts.
+    function prefetch(urls) {
+      flattenUrls(urls, []).forEach(function (url) {
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = url.slice(-4) === '.css' ? 'style' : 'script';
+        link.href = url;
+        document.head.appendChild(link);
+      });
+    }
+
+    // Fade is 250ms; full settle is ~600ms but the splash is mostly gone by then.
+    var SPLASH_EXIT_MS = 260;
+
+    function startBundleLoad() {
+      performance.mark('kbnLoad', {
+        detail: 'load_started',
+      });
+
+      load(bundleUrls, async function () {
+        // RSPack progressive loading: wait for async plugin chunks to load
+        if (window.__kbnPluginsLoaded) {
+          await window.__kbnPluginsLoaded;
+        }
+        __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
+      });
+    }
+
+    function fadeRing(ring) {
+      if (ring && typeof ring.exit === 'function') {
+        ring.exit();
+      } else if (ring) {
+        ring.loading = false;
+        ring.setAttribute('exiting', '');
       }
-      __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
-    });
+    }
+
+    function fadeMark(ring) {
+      if (ring && typeof ring.exitMark === 'function') {
+        ring.exitMark();
+      } else if (ring) {
+        ring.setAttribute('exiting-mark', '');
+      }
+    }
+
+    // Ring fades first, then the centre mark, then bundles execute — so the
+    // hitchy parse phase lands on an empty splash rather than mid-animation.
+    function exitSplashThenLoad() {
+      var ring = document.querySelector('elastic-loader-ring');
+      var step = reduceMotion ? 0 : SPLASH_EXIT_MS;
+      fadeRing(ring);
+      setTimeout(function () {
+        fadeMark(ring);
+        setTimeout(startBundleLoad, step);
+      }, step);
+    }
+
+    prefetch(bundleUrls);
+
+    // Let the loader ring animate on a quiet main thread before Kibana
+    // bundles start parsing (which starves requestAnimationFrame).
+    setTimeout(exitSplashThenLoad, quietMs);
   })();
 }
   "
@@ -224,6 +294,16 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   // window.onload, this avoids blocking on font/favicon downloads before
   // starting bundle loads.
   (function () {
+    // Quiet window for the loader-ring CE: hold before *executing* Kibana
+    // bundles so requestAnimationFrame isn't starved by main-thread parse.
+    // Bundles are still prefetched immediately so network overlaps the quiet window.
+    var SPLASH_QUIET_MS = 2200;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var quietMs = reduceMotion ? 0 : SPLASH_QUIET_MS;
+    var bundleUrls = [
+      '/js-1','/js-2'
+    ];
+
     function failure(event) {
       var failedTarget = event && event.target ? event.target : {};
       if (window.console) {
@@ -320,19 +400,79 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       });
     }
 
-    performance.mark('kbnLoad', {
-      detail: 'load_started',
-    })
+    function flattenUrls(urls, out) {
+      urls.forEach(function (url) {
+        if (typeof url !== 'string') {
+          flattenUrls(url, out);
+        } else {
+          out.push(url);
+        }
+      });
+      return out;
+    }
 
-    load([
-      '/js-1','/js-2'
-    ], async function () {
-      // RSPack progressive loading: wait for async plugin chunks to load
-      if (window.__kbnPluginsLoaded) {
-        await window.__kbnPluginsLoaded;
+    // Warm the HTTP cache during the quiet window without executing scripts.
+    function prefetch(urls) {
+      flattenUrls(urls, []).forEach(function (url) {
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = url.slice(-4) === '.css' ? 'style' : 'script';
+        link.href = url;
+        document.head.appendChild(link);
+      });
+    }
+
+    // Fade is 250ms; full settle is ~600ms but the splash is mostly gone by then.
+    var SPLASH_EXIT_MS = 260;
+
+    function startBundleLoad() {
+      performance.mark('kbnLoad', {
+        detail: 'load_started',
+      });
+
+      load(bundleUrls, async function () {
+        // RSPack progressive loading: wait for async plugin chunks to load
+        if (window.__kbnPluginsLoaded) {
+          await window.__kbnPluginsLoaded;
+        }
+        __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
+      });
+    }
+
+    function fadeRing(ring) {
+      if (ring && typeof ring.exit === 'function') {
+        ring.exit();
+      } else if (ring) {
+        ring.loading = false;
+        ring.setAttribute('exiting', '');
       }
-      __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
-    });
+    }
+
+    function fadeMark(ring) {
+      if (ring && typeof ring.exitMark === 'function') {
+        ring.exitMark();
+      } else if (ring) {
+        ring.setAttribute('exiting-mark', '');
+      }
+    }
+
+    // Ring fades first, then the centre mark, then bundles execute — so the
+    // hitchy parse phase lands on an empty splash rather than mid-animation.
+    function exitSplashThenLoad() {
+      var ring = document.querySelector('elastic-loader-ring');
+      var step = reduceMotion ? 0 : SPLASH_EXIT_MS;
+      fadeRing(ring);
+      setTimeout(function () {
+        fadeMark(ring);
+        setTimeout(startBundleLoad, step);
+      }, step);
+    }
+
+    prefetch(bundleUrls);
+
+    // Let the loader ring animate on a quiet main thread before Kibana
+    // bundles start parsing (which starves requestAnimationFrame).
+    setTimeout(exitSplashThenLoad, quietMs);
   })();
 }
   "

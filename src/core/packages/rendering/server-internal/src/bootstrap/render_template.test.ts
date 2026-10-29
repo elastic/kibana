@@ -70,6 +70,16 @@ function createElement(tagName: string): ElementDouble {
 /** Executes the generated bootstrap script against the markup it expects from views/template.tsx. */
 async function runBootstrap(params = mockParams()) {
   const loadingMessage = createElement('div');
+  loadingMessage.classList = {
+    _classes: new Set<string>(),
+    add(name: string) {
+      this._classes.add(name);
+    },
+    contains(name: string) {
+      return this._classes.has(name);
+    },
+  };
+  loadingMessage.querySelector = () => null;
   const errorMessages = {
     errorMessageTitle: 'Elastic did not load properly',
     errorMessageText: 'Please reload this page.',
@@ -83,6 +93,8 @@ async function runBootstrap(params = mockParams()) {
     '[data-error-message-reload]': { dataset: errorMessages },
     'head meta[name="add-styles-here"]': createElement('meta'),
     'head meta[name="add-scripts-here"]': createElement('meta'),
+    // Bootstrap fades the ring via CE.exit(); absent in unit markup is fine.
+    'elastic-loader-ring': null,
   };
   const document = {
     head: createElement('head'),
@@ -106,6 +118,12 @@ async function runBootstrap(params = mockParams()) {
     console: { log: jest.fn(), error: consoleError },
     performance: { mark: jest.fn() },
     location: { reload: jest.fn() },
+    matchMedia: () => ({ matches: false }),
+    // Bootstrap delays bundle load for a quiet splash window; run immediately in tests.
+    setTimeout: (fn: () => void) => {
+      fn();
+      return 0;
+    },
   };
   window.window = window;
 
@@ -143,9 +161,13 @@ describe('renderTemplate', () => {
     test('injects the dependencies and shows the loading message', async () => {
       const { loadingMessage, consoleError, injectedAssets } = await runBootstrap();
 
-      expect(injectedAssets.map(({ tagName, src }) => [tagName, src])).toEqual([
-        ['SCRIPT', '/js-1'],
-        ['SCRIPT', '/js-2'],
+      expect(
+        injectedAssets.map(({ tagName, rel, as, href, src }) => [tagName, rel, as, href, src])
+      ).toEqual([
+        ['LINK', 'preload', 'script', '/js-1', undefined],
+        ['LINK', 'preload', 'script', '/js-2', undefined],
+        ['SCRIPT', undefined, undefined, undefined, '/js-1'],
+        ['SCRIPT', undefined, undefined, undefined, '/js-2'],
       ]);
       expect(loadingMessage.style.display).toBe('flex');
       expect(consoleError).not.toHaveBeenCalled();
@@ -156,7 +178,8 @@ describe('renderTemplate', () => {
       const { document, loadingMessage, consoleError, injectedAssets, failToLoad } =
         await runBootstrap();
 
-      failToLoad(injectedAssets[1]);
+      // [0]/[1] are preloads; [2]/[3] are the executed script tags
+      failToLoad(injectedAssets[3]);
 
       expect(consoleError).toHaveBeenCalledTimes(1);
       expect(consoleError).toHaveBeenCalledWith('Kibana bootstrap failed: could not load /js-2');
@@ -183,11 +206,16 @@ describe('renderTemplate', () => {
         jsDependencyPaths: ['/style-1.css', '/js-1'],
       });
 
-      expect(injectedAssets.map(({ tagName, href, src }) => [tagName, href, src])).toEqual([
-        ['LINK', '/style-1.css', undefined],
-        ['SCRIPT', undefined, '/js-1'],
+      expect(
+        injectedAssets.map(({ tagName, rel, href, src }) => [tagName, rel, href, src])
+      ).toEqual([
+        ['LINK', 'preload', '/style-1.css', undefined],
+        ['LINK', 'preload', '/js-1', undefined],
+        ['LINK', 'stylesheet', '/style-1.css', undefined],
+        ['SCRIPT', undefined, undefined, '/js-1'],
       ]);
-      failToLoad(injectedAssets[0]);
+      // [0]/[1] are preloads; [2] is the executed stylesheet
+      failToLoad(injectedAssets[2]);
 
       expect(consoleError).toHaveBeenCalledTimes(1);
       expect(consoleError).toHaveBeenCalledWith(
