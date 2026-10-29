@@ -51,7 +51,7 @@ export class EntityInventoryAppPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(coreStart, pluginsStart.observabilityShared, params);
+        return renderApp(coreStart, pluginsStart, params);
       },
     });
 

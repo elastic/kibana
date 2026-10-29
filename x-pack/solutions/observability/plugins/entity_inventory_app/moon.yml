@@ -23,12 +23,18 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/observability-shared-plugin'
   - '@kbn/app-header'
-  - '@kbn/shared-ux-router'
+  - '@kbn/typed-react-router-config'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/share-plugin'
+  - '@kbn/ebt-click'
+  - '@kbn/i18n-react'
+  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod
   - group-observability
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
