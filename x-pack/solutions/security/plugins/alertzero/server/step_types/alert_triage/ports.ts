@@ -6,6 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -19,6 +20,7 @@ import {
   VERDICT_TAGS,
   type AlertSeverity,
 } from '../../alert_triage/constants';
+import { getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
 import type { TriageAlert } from '../../alert_triage/types';
 
@@ -48,6 +50,9 @@ const ALERT_FIELDS = {
   status: 'kibana.alert.workflow_status',
   tags: 'kibana.alert.workflow_tags',
   timestamp: '@timestamp',
+  nameOverride: 'kibana.alert.rule.rule_name_override',
+  defendRuleId: 'rule.id',
+  eventCode: 'event.code',
 } as const;
 
 const readField = (source: Record<string, unknown>, field: string): unknown => {
@@ -71,10 +76,12 @@ interface AlertHit {
 const toTriageAlert = ({ _id, _source = {} }: AlertHit): TriageAlert => {
   const tags = readField(_source, ALERT_FIELDS.tags);
   const timestamp = readField(_source, ALERT_FIELDS.timestamp);
+  const detection = getDetection(_source);
   return {
     id: _id,
     ruleId: String(readField(_source, ALERT_FIELDS.ruleId) ?? ''),
     ruleName: String(readField(_source, ALERT_FIELDS.ruleName) ?? ''),
+    ...(detection ? { detection } : {}),
     riskScore: Number(readField(_source, ALERT_FIELDS.riskScore) ?? 0),
     timestamp: typeof timestamp === 'number' ? timestamp : Date.parse(String(timestamp)) || 0,
     status: String(readField(_source, ALERT_FIELDS.status) ?? ''),
@@ -293,25 +300,40 @@ interface UpdateByQueryResult {
   failures?: unknown[];
 }
 
+const TAG_ATTEMPTS = 3;
+const VERSION_CONFLICT_STATUS = 409;
+
 /**
  * Throws unless the whole update was applied: a claim or release that was only partly stored would
- * otherwise be reported as done, and the next sweep could plan the same alerts again.
+ * otherwise be reported as done, and the next sweep could plan the same alerts again. The route
+ * answers 409 when another writer changed an alert between its search and its write (a batch
+ * tagging a verdict, the rule engine, an analyst). Adding or removing a tag is idempotent, so the
+ * call is repeated: the search runs again and sees the current version.
  */
 export const tagAlerts =
   ({ callKibanaApi }: KibanaApi): SweepPorts['tagAlerts'] =>
   async ({ alertIds, add, remove }) => {
-    const { body } = await callKibanaApi<UpdateByQueryResult>({
-      method: 'POST',
-      path: SIGNALS_TAGS_PATH,
-      body: { ids: alertIds, tags: { tags_to_add: add, tags_to_remove: remove } },
-    });
-    const failureCount = body.failures?.length ?? 0;
-    if (body.timed_out === true || failureCount > 0) {
-      throw new Error(
-        `Tagging ${alertIds.length} alert(s) was not fully applied (timed_out: ${
-          body.timed_out === true
-        }, failures: ${failureCount})`
-      );
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const { body } = await callKibanaApi<UpdateByQueryResult>({
+          method: 'POST',
+          path: SIGNALS_TAGS_PATH,
+          body: { ids: alertIds, tags: { tags_to_add: add, tags_to_remove: remove } },
+        });
+        const failureCount = body.failures?.length ?? 0;
+        if (body.timed_out === true || failureCount > 0) {
+          throw new Error(
+            `Tagging ${alertIds.length} alert(s) was not fully applied (timed_out: ${
+              body.timed_out === true
+            }, failures: ${failureCount})`
+          );
+        }
+        return;
+      } catch (error) {
+        const conflict =
+          error instanceof KibanaApiCallError && error.status === VERSION_CONFLICT_STATUS;
+        if (!conflict || attempt >= TAG_ATTEMPTS) throw error;
+      }
     }
   };
 
@@ -366,16 +388,83 @@ const expandDottedKeys = (source: Record<string, unknown>): Record<string, unkno
   }, {});
 
 /** Loads a batch's alert documents by id, as `{ _id, _index, ...source }` for Alert Analysis. */
+export interface KeyHistory {
+  falsePositive: number;
+  truePositive: number;
+}
+
+/**
+ * How earlier alerts of the same pattern were judged: the false positives and true positives in the
+ * period, whatever their status. `excludeIds` are the alerts of the proposal itself, which already
+ * carry their verdict tag.
+ */
+export const readKeyHistory = async (
+  { callKibanaApi }: KibanaApi,
+  {
+    strictKeyTags,
+    excludeIds,
+    since,
+  }: { strictKeyTags: readonly string[]; excludeIds: readonly string[]; since: number }
+): Promise<KeyHistory> => {
+  const { body } = await callKibanaApi<{
+    aggregations?: {
+      verdicts?: { buckets?: Record<string, { doc_count?: number }> };
+    };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { [ALERT_FIELDS.tags]: [...strictKeyTags] } },
+            { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(since).toISOString() } } },
+          ],
+          must_not: [{ ids: { values: [...excludeIds] } }],
+        },
+      },
+      aggs: {
+        verdicts: {
+          filters: {
+            filters: {
+              // Expiry and a failed closure swap `az:false_positive` for `az:inconclusive` and keep
+              // `az:model_fp`, so the model's earlier judgement is still counted. An alert with both
+              // tags matches once.
+              falsePositive: {
+                terms: { [ALERT_FIELDS.tags]: ['az:false_positive', 'az:model_fp'] },
+              },
+              truePositive: { term: { [ALERT_FIELDS.tags]: 'az:true_positive' } },
+            },
+          },
+        },
+      },
+    },
+  });
+  const buckets = body.aggregations?.verdicts?.buckets;
+  if (buckets === undefined) throw new Error('Key history missing from the search response');
+  return {
+    falsePositive: buckets.falsePositive?.doc_count ?? 0,
+    truePositive: buckets.truePositive?.doc_count ?? 0,
+  };
+};
+
+/** With `fields`, only those `_source` paths are returned, which keeps a read of many alerts small. */
 export const loadAlertsByIds = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[]
+  alertIds: readonly string[],
+  fields?: readonly string[]
 ): Promise<LoadedAlerts> => {
   const { body } = await callKibanaApi<{
     hits?: { hits?: Array<AlertHit & { _index?: string }> };
   }>({
     method: 'POST',
     path: SIGNALS_SEARCH_PATH,
-    body: { size: alertIds.length, query: { ids: { values: alertIds } } },
+    body: {
+      size: alertIds.length,
+      query: { ids: { values: alertIds } },
+      ...(fields && { _source: fields }),
+    },
   });
   const hits = body.hits?.hits ?? [];
   const found = new Set(hits.map(({ _id }) => _id));
@@ -387,4 +476,55 @@ export const loadAlertsByIds = async (
     })),
     missingAlertIds: alertIds.filter((id) => !found.has(id)),
   };
+};
+
+const SEARCH_RESULT_LIMIT = 10_000;
+
+/**
+ * Open alerts that still carry `az:false_positive` and belong to a proposal: they carry its
+ * `az:proposal` tag or are in `ids`. Alerts in `excludeIds` are left out. With `modelMarkerOnly`
+ * it finds alerts of any status that carry `az:model_fp` instead.
+ */
+export const findLeftoverFalsePositiveIds = async (
+  { callKibanaApi }: KibanaApi,
+  {
+    proposalTag,
+    ids,
+    excludeIds,
+    modelMarkerOnly = false,
+  }: {
+    proposalTag?: string;
+    ids: readonly string[];
+    excludeIds: readonly string[];
+    modelMarkerOnly?: boolean;
+  }
+): Promise<string[]> => {
+  const should = [
+    ...(proposalTag ? [{ term: { [ALERT_FIELDS.tags]: proposalTag } }] : []),
+    ...(ids.length > 0 ? [{ ids: { values: [...ids] } }] : []),
+  ];
+  const { body } = await callKibanaApi<{ hits?: { hits?: Array<{ _id: string }> } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: SEARCH_RESULT_LIMIT,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            ...(modelMarkerOnly
+              ? [{ term: { [ALERT_FIELDS.tags]: 'az:model_fp' } }]
+              : [
+                  { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+                  { term: { [ALERT_FIELDS.tags]: 'az:false_positive' } },
+                ]),
+          ],
+          should,
+          minimum_should_match: 1,
+          must_not: [{ ids: { values: [...excludeIds] } }],
+        },
+      },
+    },
+  });
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
 };

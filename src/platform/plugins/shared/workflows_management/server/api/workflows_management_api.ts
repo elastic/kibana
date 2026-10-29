@@ -72,6 +72,7 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
@@ -95,7 +96,11 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
-import { getWorkflowDeleteOperation } from '../services/workflow_access_control';
+import {
+  EPHEMERAL_WORKFLOW_ID,
+  getWorkflowDeleteOperation,
+  INTERNAL_TEST_WORKFLOW_ID,
+} from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -105,8 +110,6 @@ import type {
 } from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
-
-const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
 
 const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
@@ -863,7 +866,7 @@ export class WorkflowsManagementApi {
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
 
     return {
-      id: params.workflowId ?? 'ephemeral-workflow',
+      id: params.workflowId ?? EPHEMERAL_WORKFLOW_ID,
       name: params.name ?? workflowJson.name,
       enabled: workflowJson.enabled,
       definition: workflowJson.definition,
@@ -1147,6 +1150,16 @@ export class WorkflowsManagementApi {
     );
   }
 
+  /** Workflow ids the caller can read, or `undefined` when no workflow is hidden from them. */
+  public async getReadableWorkflowIds(
+    spaceId: string,
+    request: KibanaRequest,
+    options: { includeManaged: boolean }
+  ): Promise<string[] | undefined> {
+    const access = await this.workflowsService.getAccessControl();
+    return access.readableWorkflowIds(spaceId, request, options);
+  }
+
   public async getWorkflowExecution(
     workflowExecutionId: string,
     spaceId: string,
@@ -1399,6 +1412,7 @@ export class WorkflowsManagementApi {
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     await this.assertExecutionAccess(executionId, spaceId, 'execute', request);
     const channel = options?.channel;
+    let claimReleased: boolean | undefined;
     try {
       const stepExecutionId =
         options?.stepExecutionId ??
@@ -1412,14 +1426,16 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const claimed = await this.workflowsService.markStepAsResponded(
+      // Resolved before claiming so a lookup failure cannot strand the claim.
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const claim = await this.workflowsService.markStepAsResponded(
         stepExecutionId,
         executionId,
         request,
         channel,
         spaceId
       );
-      if (!claimed) {
+      if (!claim) {
         throw new WorkflowExecutionInvalidStatusError(
           executionId,
           'already responded to or no longer waiting for input',
@@ -1427,12 +1443,19 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-      const result = await workflowsExecutionEngine.resumeWorkflowExecution(
-        executionId,
-        spaceId,
-        input,
-        request
+      const result = await withHitlClaim(
+        {
+          workflowsService: this.workflowsService,
+          logger: this.logger,
+          executionId,
+          stepExecutionId,
+          claim,
+          spaceId,
+          onRelease: (released) => {
+            claimReleased = released;
+          },
+        },
+        () => workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request)
       );
       this.audit?.logExecutionResumed(request, {
         executionId,
@@ -1441,7 +1464,7 @@ export class WorkflowsManagementApi {
       });
       return result;
     } catch (error) {
-      this.audit?.logExecutionResumed(request, { executionId, channel, error });
+      this.audit?.logExecutionResumed(request, { executionId, channel, error, claimReleased });
       throw error;
     }
   }
