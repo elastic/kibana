@@ -30,14 +30,21 @@ const findActionPoliciesSchema = lazySchema(() =>
       .describe(
         '(optional) Keywords to match against the policy name, such as a name, matcher, or destination. Omit to list all policies.'
       ),
-    page: z.number().int().min(1).optional().describe('(optional) The page to return. Defaults to 1.'),
+    page: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe('(optional) The page to return. Defaults to 1.'),
     perPage: z
       .number()
       .int()
       .min(1)
       .max(MAX_PER_PAGE)
       .optional()
-      .describe(`(optional) Policies per page, up to ${MAX_PER_PAGE}. Defaults to ${DEFAULT_PER_PAGE}.`),
+      .describe(
+        `(optional) Policies per page, up to ${MAX_PER_PAGE}. Defaults to ${DEFAULT_PER_PAGE}.`
+      ),
   })
 );
 
