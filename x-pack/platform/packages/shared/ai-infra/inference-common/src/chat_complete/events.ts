@@ -51,11 +51,7 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        * Tool calls from the LLM
        */
       toolCalls: ToolCallOfToolOptions<TToolOptions>[];
-      /**
-       * Reason why the model stopped generating, as reported by the provider
-       * (e.g. `stop`, `tool_calls`, `length`, `content_filter`).
-       * Absent when the provider does not report it.
-       */
+      /** Provider-reported finish reason (e.g. `content_filter`); absent if not reported. */
       finish_reason?: string;
     }
   >;
@@ -121,11 +117,7 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * Optional metadata attached by inference runtime.
      */
     metadata?: AnonymizationResponseMetadata;
-    /**
-     * Reason why the model stopped generating, as reported by the provider on
-     * this chunk (e.g. `stop`, `tool_calls`, `length`, `content_filter`).
-     * Only present on the final chunk of a stream.
-     */
+    /** Provider-reported finish reason; only present on the final chunk of a stream. */
     finish_reason?: string;
   }
 >;
