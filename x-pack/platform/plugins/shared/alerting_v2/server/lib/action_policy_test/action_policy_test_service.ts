@@ -232,7 +232,7 @@ export class ActionPolicyTestService {
 
   private async canRunWorkflows(): Promise<boolean> {
     const kibana = WORKFLOW_RUN_PRIVILEGES.map((privilege) =>
-      this.security.authz.actions.api.actionFromRouteTag(privilege)
+      this.security.authz.actions.api.get(privilege)
     );
     const { hasAllRequested } = await this.security.authz
       .checkPrivilegesWithRequest(this.request)

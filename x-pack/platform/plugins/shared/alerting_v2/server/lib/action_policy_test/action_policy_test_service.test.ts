@@ -99,6 +99,7 @@ const setup = ({
     licenseService,
     ebtService,
     auditLogger,
+    security,
   };
 };
 
@@ -136,7 +137,7 @@ describe('ActionPolicyTestService', () => {
     });
 
     it('describes the destinations the user can run', async () => {
-      const { service, workflowsManagement, request } = setup();
+      const { service, workflowsManagement, request, security } = setup();
       workflowsManagement.getWorkflowsByIds.mockResolvedValue([
         createWorkflow({ id: 'workflow-1', name: 'Slack', enabled: false }),
         createWorkflow({
@@ -148,6 +149,8 @@ describe('ActionPolicyTestService', () => {
 
       const { destinations } = await service.preview({ policyId: 'policy-1' });
 
+      expect(security.authz.actions.api.get).toHaveBeenCalledWith('workflowsManagement:read');
+      expect(security.authz.actions.api.get).toHaveBeenCalledWith('workflowsManagement:execute');
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(
         ['workflow-1', 'workflow-2'],
         SPACE_ID,
