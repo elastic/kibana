@@ -46,7 +46,7 @@ describe('createNavigationTree', () => {
     expect(watchesIndex).toBeGreaterThan(escalationsIndex);
   });
 
-  it('keeps context engine at the top before the AlertZero entries in classic chat experience, with no agent builder link', async () => {
+  it('keeps context engine after Workflows when AlertZero is on in classic chat experience, with no agent builder link', async () => {
     const { body } = (await createNavigationTree(
       createServices(),
       AIChatExperience.Classic,
@@ -60,8 +60,11 @@ describe('createNavigationTree', () => {
       icon: 'tableSparkles',
       link: 'context_engine',
     });
-    expect(contextEngineIndex).toBe(0);
-    expect(body[1].link).toBe(alertZeroLink());
+    expect(body[0].link).toBe(alertZeroLink());
+    expect(contextEngineIndex).toBeGreaterThan(
+      body.findIndex((item) => item.link === alertZeroLink(SecurityPageName.alertZeroWatches))
+    );
+    expect(body[contextEngineIndex + 1].id).toBe(SecurityPageName.attackDiscovery);
     expect(agentBuilderNode).toBeUndefined();
   });
 
