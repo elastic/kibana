@@ -447,17 +447,17 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 **Elastic Agent Builder**:
 * Turn on the Agent Builder tools that describe and run {{es}} and {{kib}} APIs by default, so agents can look up an API's parameters and call it on your behalf. Discovering APIs now has its own advanced setting [#291541]({{kib-pull}}291541).
 * Paste an image into the Agent Builder chat input to give an agent visual context, then ask follow-up questions about it [#293756]({{kib-pull}}293756).
+* Show inline attachments as cards in the events timeline [#293080]({{kib-pull}}293080).
 * Add a conversation sharing option that lets you manage private and public access to a conversation [#286645]({{kib-pull}}286645).
 * Show the conversation title on the left and a **Read-only** indicator on read-only conversations [#286860]({{kib-pull}}286860).
-* Add an experimental `POST /api/chat/message` endpoint that sends a message to an agent and returns its text answer and conversation ID [#294516]({{kib-pull}}294516).
-* Make agents aware of the Elastic deployment they run in, including the deployment type, {{stack}} version or Serverless project type, space solution view, and license [#294878]({{kib-pull}}294878).
 * Set an agent as the default agent for a space [#284512]({{kib-pull}}284512).
+* Add an experimental `POST /api/chat/message` endpoint that sends a message to an agent and returns its text answer and conversation ID [#294516]({{kib-pull}}294516).
+* Add streaming support to the agent-to-agent (A2A) endpoint [#287763]({{kib-pull}}287763).
+* Add the Elastic Agent Builder connectors capability as a technical preview, no longer gated behind the experimental features setting [#286620]({{kib-pull}}286620).
+* Make agents aware of the Elastic deployment they run in, including the deployment type, {{stack}} version or Serverless project type, space solution view, and license [#294878]({{kib-pull}}294878).
 * Add a space setting to include frozen tier data by default in built-in tools [#299437]({{kib-pull}}299437).
 * Add an `include_frozen` parameter to built-in tools and an **Include frozen tier data** option to custom {{esql}} and index search tools [#297481]({{kib-pull}}297481).
 * Support {{esql}} views in Agent Builder tools [#293685]({{kib-pull}}293685).
-* Show inline attachments as cards in the events timeline [#293080]({{kib-pull}}293080).
-* Add the Elastic Agent Builder connectors capability as a technical preview, no longer gated behind the experimental features setting [#286620]({{kib-pull}}286620).
-* Add streaming support to the agent-to-agent (A2A) endpoint [#287763]({{kib-pull}}287763).
 * Add MCP tool annotations, such as `readOnlyHint` and `destructiveHint`, to the tools that the Agent Builder MCP server exposes [#284764]({{kib-pull}}284764).
 * Include OpenTelemetry user attributes (`user.id`, `user.name`, and `user.hash`) in conversation traces, following the Gen AI tracing privacy settings [#282858]({{kib-pull}}282858).
 * Apply the Agent Builder tracing Gen AI privacy settings per space [#290750]({{kib-pull}}290750).
@@ -465,13 +465,14 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Report tool errors in traces [#277689]({{kib-pull}}277689).
 * Show skill names instead of skill IDs in the UI [#278065]({{kib-pull}}278065).
 * Pick time ranges for the `create_visualization` tool from the minimum and maximum of the dataset [#287090]({{kib-pull}}287090).
+* Document template fields in the cases-analytics skill for Agent Builder [#291716]({{kib-pull}}291716).
 * Add the built-in anomaly detection skills, which help agents query anomaly results with {{esql}}, troubleshoot anomaly detection jobs, and manage jobs [#270306]({{kib-pull}}270306).
 * Add guidance for anomaly charts, the anomaly swim lane, and the single metric viewer to the anomaly detection skills [#284519]({{kib-pull}}284519).
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
-* Document template fields in the cases-analytics skill for Agent Builder [#291716]({{kib-pull}}291716).
 
 **Alerting and cases**:
 * Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows, so to turn it off, for example because you don't have a Workflows license, set `alerting:v2:enabled` to `false` [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
+* Add support for recurring maintenance windows and scheduled reports on the last day of the month [#288008]({{kib-pull}}288008).
 * Add a public API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add a public API to discover the extended fields (`extended_fields`) that you can apply to a case, for a given owner and optional template [#279684]({{kib-pull}}279684).
 * Expand template defaults on the server when you create a case [#280143]({{kib-pull}}280143).
@@ -479,7 +480,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Polish the Cases UI. The cases list moves its filters to a second row, comments and attachments can collapse and expand, the attributes panel stays in place and can be resized as you scroll the activity, and template fields share one edit mode [#282197]({{kib-pull}}282197).
 * Add limits to case templates: up to 200 templates per owner, 200 fields per template, and 30,000 characters per template definition. The field library editor also validates field definitions and default values before you save [#281650]({{kib-pull}}281650).
 * Store the username, full name, and email of case assignees on the case and in the cases analytics index. {{kib}} fills them in when you create or update a case and does not backfill existing cases. To turn this off, set `xpack.cases.assigneeIdentity.enabled` to `false` [#281579]({{kib-pull}}281579).
-* Add support for recurring maintenance windows and scheduled reports on the last day of the month [#288008]({{kib-pull}}288008).
 * Prefix the subject of emails that Elastic Cloud trial deployments send through the built-in Elastic email service with `[Elastic Cloud Trial]` [#276705]({{kib-pull}}276705).
 * Use fixed subject and message content when you run the email connector through its HTTP route, which is meant to test that {{kib}} can send an email [#288664]({{kib-pull}}288664).
 * Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
@@ -488,56 +488,56 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 **Connectivity**:
 * Add the Microsoft Teams inbound event triggers, which start a workflow when a channel message or chat message is posted, when a channel or chat is created, or when a member is added to a team [#297619]({{kib-pull}}297619).
 * Add the ServiceNow inbound event triggers, which start a workflow when an incident is created, updated, or resolved, when a comment or work note is added, or when a change approval changes state [#296750]({{kib-pull}}296750).
-* Add the Azure SQL connector [#294876]({{kib-pull}}294876).
-* Add the GitLab REST API connector [#292140]({{kib-pull}}292140).
 * Add send actions to the Microsoft Teams connector [#287946]({{kib-pull}}287946).
 * Add write actions to the ServiceNow connector [#283817]({{kib-pull}}283817).
 * Add write actions to the GitHub connector [#283473]({{kib-pull}}283473).
 * Add eight write actions to the Gmail connector: `listLabels`, `modifyLabels`, `markAsRead`, `markAsUnread`, `trashMessage`, `untrashMessage`, `sendMessage`, and `replyMessage`. These actions require OAuth 2.0 authorization code authentication with the `gmail.modify` scope [#284912]({{kib-pull}}284912).
 * Add 14 write actions to the Jira Cloud connector to create and update issues, post comments, transition statuses, assign users, manage attachments, and more [#284910]({{kib-pull}}284910).
-* Add the Databricks v2 connector [#280518]({{kib-pull}}280518).
-* Add the Monday.com v2 connector [#279558]({{kib-pull}}279558).
-* Add the SolarWinds Platform connector [#295471]({{kib-pull}}295471).
+* Add the Azure SQL connector [#294876]({{kib-pull}}294876).
 * Add the Azure Functions connector [#293758]({{kib-pull}}293758).
-* Add the ThreatQ connector for intelligence searches and triage updates [#291383]({{kib-pull}}291383).
 * Add the Azure AKS connector [#289161]({{kib-pull}}289161).
-* Add the Amazon EKS connector [#289144]({{kib-pull}}289144).
-* Add the Google Kubernetes Engine connector [#289111]({{kib-pull}}289111).
-* Add the Bitbucket Cloud connector [#288824]({{kib-pull}}288824).
-* Add the external {{es}} connector [#288447]({{kib-pull}}288447).
-* Add the MISP connector [#286746]({{kib-pull}}286746).
-* Add the Google Threat Intelligence connector [#285533]({{kib-pull}}285533).
-* Add the Google Docs connector, which enables agents to read documents as Markdown and apply batch updates [#285260]({{kib-pull}}285260).
-* Add the URLScan.io connector [#284125]({{kib-pull}}284125).
-* Add the Google Cloud Secret Manager connector [#284100]({{kib-pull}}284100).
-* Add the UniFi connector for Network and Protect, and make it available in workflows [#283915]({{kib-pull}}283915), [#283925]({{kib-pull}}283925).
-* Add the Google Cloud IAM connector [#283471]({{kib-pull}}283471).
-* Add the Okta connector [#283353]({{kib-pull}}283353).
-* Add the Zabbix connector [#282937]({{kib-pull}}282937).
-* Add the OpenSearch and Amazon OpenSearch Service connector [#282554]({{kib-pull}}282554).
-* Add the Google Cloud Monitoring connector [#282428]({{kib-pull}}282428).
-* Add the Prometheus connector, which expands and renames the Prometheus Alertmanager connector [#282364]({{kib-pull}}282364), [#282238]({{kib-pull}}282238).
 * Add the Azure Monitor connector [#282353]({{kib-pull}}282353).
+* Add the Amazon EKS connector [#289144]({{kib-pull}}289144).
 * Add the Amazon CloudWatch connector [#282281]({{kib-pull}}282281).
 * Add the AWS X-Ray connector [#282264]({{kib-pull}}282264).
-* Add the Jenkins connector [#281935]({{kib-pull}}281935).
-* Add the Buildkite connector [#281927]({{kib-pull}}281927).
-* Add the Dynatrace connector [#281816]({{kib-pull}}281816).
+* Add the OpenSearch and Amazon OpenSearch Service connector [#282554]({{kib-pull}}282554).
+* Add the Google Kubernetes Engine connector [#289111]({{kib-pull}}289111).
+* Add the Google Cloud Secret Manager connector [#284100]({{kib-pull}}284100).
+* Add the Google Cloud IAM connector [#283471]({{kib-pull}}283471).
+* Add the Google Cloud Monitoring connector [#282428]({{kib-pull}}282428).
+* Add the Prometheus connector, which expands and renames the Prometheus Alertmanager connector [#282364]({{kib-pull}}282364), [#282238]({{kib-pull}}282238).
 * Add the Datadog connector [#281810]({{kib-pull}}281810).
-* Add the PostHog connector [#281149]({{kib-pull}}281149).
+* Add the Dynatrace connector [#281816]({{kib-pull}}281816).
 * Add the New Relic connector [#281144]({{kib-pull}}281144).
-* Add the Rootly connector [#281142]({{kib-pull}}281142).
 * Add the Grafana connector [#281141]({{kib-pull}}281141).
 * Add the Sentry connector [#281136]({{kib-pull}}281136).
-* Add the Ansible Control Server connector for AWX and Controller jobs, and make it available in workflows [#280115]({{kib-pull}}280115), [#297437]({{kib-pull}}297437).
+* Add the PostHog connector [#281149]({{kib-pull}}281149).
+* Add the Rootly connector [#281142]({{kib-pull}}281142).
+* Add the Zabbix connector [#282937]({{kib-pull}}282937).
+* Add the SolarWinds Platform connector [#295471]({{kib-pull}}295471).
+* Add the Kubernetes connector as a technical preview to read and modify cluster resources through the Kubernetes REST API, and make it available in workflows [#275922]({{kib-pull}}275922), [#280854]({{kib-pull}}280854).
 * Add the Argo CD connector for GitOps application management [#280074]({{kib-pull}}280074).
+* Add the Ansible Control Server connector for AWX and Controller jobs, and make it available in workflows [#280115]({{kib-pull}}280115), [#297437]({{kib-pull}}297437).
+* Add the Jenkins connector [#281935]({{kib-pull}}281935).
+* Add the Buildkite connector [#281927]({{kib-pull}}281927).
+* Add the ThreatQ connector for intelligence searches and triage updates [#291383]({{kib-pull}}291383).
+* Add the MISP connector [#286746]({{kib-pull}}286746).
+* Add the Google Threat Intelligence connector [#285533]({{kib-pull}}285533).
+* Add the URLScan.io connector [#284125]({{kib-pull}}284125).
+* Add the Censys connector [#274568]({{kib-pull}}274568).
 * Add the Sublime Security connector as a technical preview to search flagged email, retrieve verdicts, and quarantine, trash, or restore message groups [#279707]({{kib-pull}}279707).
+* Add the Okta connector [#283353]({{kib-pull}}283353).
+* Add the UniFi connector for Network and Protect, and make it available in workflows [#283915]({{kib-pull}}283915), [#283925]({{kib-pull}}283925).
+* Add the GitLab REST API connector [#292140]({{kib-pull}}292140).
+* Add the Bitbucket Cloud connector [#288824]({{kib-pull}}288824).
+* Add the Databricks v2 connector [#280518]({{kib-pull}}280518).
+* Add the Monday.com v2 connector [#279558]({{kib-pull}}279558).
+* Add the external {{es}} connector [#288447]({{kib-pull}}288447).
 * Add the MongoDB connector with the `find`, `aggregate`, `count`, and `listCollections` actions available as Agent Builder tools [#279607]({{kib-pull}}279607).
 * Add the GraphQL connector [#279501]({{kib-pull}}279501).
 * Add the Trello connector, which enables agents to search and browse boards, lists, and cards, create and update cards, and post comments [#277890]({{kib-pull}}277890).
-* Add the Kubernetes connector as a technical preview to read and modify cluster resources through the Kubernetes REST API, and make it available in workflows [#275922]({{kib-pull}}275922), [#280854]({{kib-pull}}280854).
 * Add the Workday connector [#275226]({{kib-pull}}275226).
-* Add the Censys connector [#274568]({{kib-pull}}274568).
+* Add the Google Docs connector, which enables agents to read documents as Markdown and apply batch updates [#285260]({{kib-pull}}285260).
 
 **Dashboards and Visualizations**:
 * Add undo and redo to dashboards, with toolbar buttons and the `Cmd+Z` or `Ctrl+Z` and `Cmd+Y` or `Ctrl+Y` shortcuts [#277103]({{kib-pull}}277103).
@@ -548,6 +548,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Enable the **Enhance** dashboard action [#292666]({{kib-pull}}292666).
 * Capture a screenshot of the dashboard when you select **Enhance this dashboard** [#288432]({{kib-pull}}288432).
 * Support adding a visualization that is already in the conversation to a dashboard by its attachment ID in the dashboard generation tool [#290219]({{kib-pull}}290219).
+* Rename the built-in Agent Builder dashboards skill ID from `dashboard-management` to `dashboards`. Custom agents that list `dashboard-management` no longer load that skill, and a custom skill with the ID `dashboards` is shadowed by the built-in skill [#294574]({{kib-pull}}294574).
 * Add an **Import dashboard** action to the dashboard listing page, and show why a JSON file was rejected when an import fails [#289891]({{kib-pull}}289891), [#298913]({{kib-pull}}298913).
 * Add an **Export JSON** panel action [#273427]({{kib-pull}}273427).
 * Filter the dashboards and links list routes by tag names [#278874]({{kib-pull}}278874).
@@ -556,27 +557,26 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add multiple layers, including annotation and reference line layers, to XY charts that use {{esql}} queries [#285350]({{kib-pull}}285350).
 * Add a gradient fill option to area charts. New area charts use the gradient fill by default, and existing charts keep the solid fill [#277546]({{kib-pull}}277546), [#297161]({{kib-pull}}297161).
 * Add a **Progress bar** cell display option to tables [#272407]({{kib-pull}}272407).
+* Display `(null)` values as `-` in Discover and table visualizations [#290109]({{kib-pull}}290109).
 * Add an option to show the secondary metric name in a tooltip on metric charts [#292090]({{kib-pull}}292090).
 * Add line wrapping for large axis tick labels in categorical XY charts [#282701]({{kib-pull}}282701).
 * Change the default legend size to **Auto**, and always show the **Auto** option in the legend size list. Existing charts that used the default or the **Medium** legend size now use **Auto**, so their layout can change [#298233]({{kib-pull}}298233), [#296832]({{kib-pull}}296832).
-* Display `(null)` values as `-` in Discover and table visualizations [#290109]({{kib-pull}}290109).
+* Increase the default value of the `histogram:barTarget` advanced setting to `100` [#294650]({{kib-pull}}294650).
 * Support {{esql}} variables in Vega visualizations [#285778]({{kib-pull}}285778).
 * Support filtering by {{esql}} views on dashboards [#293464]({{kib-pull}}293464).
 * Highlight only the matched part of a metric name in search results [#284603]({{kib-pull}}284603).
-* Add a **Cancel** button for loading dashboards, and cancel in-progress searches when you leave a dashboard [#283781]({{kib-pull}}283781), [#281168]({{kib-pull}}281168).
+* Add a **Cancel** button for loading dashboards, and cancel in-progress searches when you leave a dashboard or Discover, so {{es}} stops running them [#283781]({{kib-pull}}283781), [#281168]({{kib-pull}}281168), [#287949]({{kib-pull}}287949).
 * Show a notice in the options list popover when results are partial because of a timeout or a document limit, rename the **Ignore timeout for results** setting to **Always load all results**, and apply the document limit when you search inside a control [#283726]({{kib-pull}}283726).
-* Increase the default value of the `histogram:barTarget` advanced setting to `100` [#294650]({{kib-pull}}294650).
-* Rename the built-in Agent Builder dashboards skill ID from `dashboard-management` to `dashboards`. Custom agents that list `dashboard-management` no longer load that skill, and a custom skill with the ID `dashboards` is shadowed by the built-in skill [#294574]({{kib-pull}}294574).
 
 **Data ingestion and {{fleet}}**:
 * Add a **Restart** action for {{agent}}, available from the agent details page, the agent list, and the bulk actions menu, with API support [#293784]({{kib-pull}}293784).
+* Add the `policy_namespace` field to agent status change events [#287194]({{kib-pull}}287194).
 * Add a **Rotate uninstall token** button to the agent policy tamper protection settings and the `POST /api/fleet/uninstall_tokens/{agentPolicyId}/rotate` API [#278923]({{kib-pull}}278923).
 * Add support for multiple download sources in {{fleet}}-managed agent policies, and for preconfigured agent binary download sources in `kibana.yml` [#290101]({{kib-pull}}290101), [#283454]({{kib-pull}}283454).
 * Add the `agent.features.include_tags_in_events` agent policy advanced setting, which includes agent tags in the logs, metrics, and traces that {{fleet}}-managed agents collect [#300052]({{kib-pull}}300052).
 * Group integration packages that share a group identifier into a single collection tile in the integrations catalog [#287372]({{kib-pull}}287372), [#283107]({{kib-pull}}283107).
 * Open the **Add integration** page when you select an integration tile that has something to configure [#299010]({{kib-pull}}299010).
-* Hide integrations that aren't FIPS compatible from the integrations catalog, and prevent installing them or creating policies for them, when {{kib}} runs in FIPS mode [#294706]({{kib-pull}}294706).
-* Add the `policy_namespace` field to agent status change events [#287194]({{kib-pull}}287194).
+* When {{kib}} runs in FIPS mode, hide integrations that aren't FIPS compatible from the integrations catalog, and return a `400` error when you install them or create policies for them unless the API request sets `force: true` [#294706]({{kib-pull}}294706).
 * Limit the cluster privileges that integration packages can request for agent API keys to `monitor` [#286084]({{kib-pull}}286084).
 * Support package spec version 3.7 [#298093]({{kib-pull}}298093).
 * Add the `allow_outdated_version` flag to the package registry install endpoints, so you can install a pinned package version that is older than the latest [#280316]({{kib-pull}}280316).
@@ -584,6 +584,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 
 **Data management**:
 * Add an **{{esql}} Views** management page to create, edit, preview, and delete {{esql}} views. To use the page, you need the `read_view_metadata` index privilege [#297834]({{kib-pull}}297834).
+* Show lifecycle information in Index Management for hidden and system indices [#282137]({{kib-pull}}282137).
 
 **Developer tools**:
 * Generate request body autocomplete rules in Console from the {{es}} specification [#278510]({{kib-pull}}278510).
@@ -593,11 +594,14 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 **Discover**:
 * Make {{esql}} the default query mode when you open Discover [#297980]({{kib-pull}}297980).
 * Add the `discover:defaultEsqlQuery` advanced setting to override the default {{esql}} query [#281319]({{kib-pull}}281319).
-* Add a **JSON** view mode to the Discover results table [#289802]({{kib-pull}}289802).
-* Replace the view mode tabs with a toolbar dropdown selector [#282141]({{kib-pull}}282141).
+* Add a sort by the time field to the initial {{esql}} query when the data view has a time field [#255532]({{kib-pull}}255532).
 * Show a more prominent **Search** button in {{esql}} mode when the query differs from the query that produced the displayed results [#296621]({{kib-pull}}296621).
 * Show recommended query cards on the {{esql}} empty state page [#294685]({{kib-pull}}294685).
 * Show a new Discover tab as an empty page until you run a query [#289032]({{kib-pull}}289032).
+* Persist whether a Discover session tab uses {{esql}} approximation [#282776]({{kib-pull}}282776).
+* Show an indicator in Discover when approximation is applied to an {{esql}} query [#291464]({{kib-pull}}291464).
+* Add a **JSON** view mode to the Discover results table [#289802]({{kib-pull}}289802).
+* Replace the view mode tabs with a toolbar dropdown selector [#282141]({{kib-pull}}282141).
 * Add a **Find similar values** button to the Discover table that analyzes the pattern of a single document, and add it to the Discover summary column in Observability [#249110]({{kib-pull}}249110), [#297525]({{kib-pull}}297525).
 * Make the Discover table **Summary** column optional [#283538]({{kib-pull}}283538).
 * Reorder the selected fields from the sidebar, with mouse or keyboard [#296098]({{kib-pull}}296098).
@@ -605,26 +609,21 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Highlight matching results in the document viewer when you use the `HIGHLIGHT` command [#290050]({{kib-pull}}290050).
 * Support deep links to the document viewer from the Discover embeddable, nested group-by grids, and other places that link to a document [#289202]({{kib-pull}}289202), [#288942]({{kib-pull}}288942), [#282175]({{kib-pull}}282175).
 * Remove pagination from the **Table** tab of the document viewer, so all fields appear in one scrollable and searchable list [#286231]({{kib-pull}}286231).
+* Make copying a value in the document viewer stop using CSV escaping [#295837]({{kib-pull}}295837).
+* Improve text formatting in cell popovers [#276594]({{kib-pull}}276594).
 * Add an optional Numeral.js format pattern to the **Color / Badge** field formatter for number fields [#298099]({{kib-pull}}298099).
 * Add an `{{risonValue}}` URL template variable for links that contain rison values [#282587]({{kib-pull}}282587).
-* Increase the default value of the `search:timeout` advanced setting from 10 minutes to 20 minutes [#297511]({{kib-pull}}297511).
-* Show tailored layouts for your data in the Classic view with solution profiles [#296406]({{kib-pull}}296406).
-* Create a view from Discover and from dashboards [#294468]({{kib-pull}}294468).
 * Create data views with up to 10,000 matching indices in the index preview, up from 100 [#285899]({{kib-pull}}285899).
 * Add the data views API in `/api/data_views/v2`, which follows REST conventions [#298114]({{kib-pull}}298114).
 * Show a better message when a data view has a time field that doesn't exist [#297060]({{kib-pull}}297060).
-* Cancel in-progress async searches when you leave Discover or Dashboards while a search is loading [#287949]({{kib-pull}}287949).
+* Create a view from Discover and from dashboards [#294468]({{kib-pull}}294468).
 * Turn off the time picker for KQL and Lucene queries in Discover and Dashboards when no time field is configured [#286858]({{kib-pull}}286858).
-* Allow renaming a Discover session from the header title [#295364]({{kib-pull}}295364).
-* Improve how Discover calculates the histogram so it can show more buckets [#292319]({{kib-pull}}292319).
-* Make copying a value in the document viewer stop using CSV escaping [#295837]({{kib-pull}}295837).
-* Improve text formatting in cell popovers [#276594]({{kib-pull}}276594).
-* Add a sort by the time field to the initial {{esql}} query when the data view has a time field [#255532]({{kib-pull}}255532).
-* Persist whether a Discover session tab uses {{esql}} approximation [#282776]({{kib-pull}}282776).
-* Expand the {{esql}} editor to fit a long query when you paste one or when AI inserts one [#279712]({{kib-pull}}279712).
-* Add the Discover sessions API as a public, generally available API. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
-* Show an indicator in Discover when approximation is applied to an {{esql}} query [#291464]({{kib-pull}}291464).
 * Stop rounding relative time ranges, such as **Last 15 minutes**, by default in the time range selector. You can turn rounding on again in the time range selector settings [#280105]({{kib-pull}}280105).
+* Increase the default value of the `search:timeout` advanced setting from 10 minutes to 20 minutes [#297511]({{kib-pull}}297511).
+* Improve how Discover calculates the histogram so it can show more buckets [#292319]({{kib-pull}}292319).
+* Show tailored layouts for your data in the Classic view with solution profiles [#296406]({{kib-pull}}296406).
+* Allow renaming a Discover session from the header title [#295364]({{kib-pull}}295364).
+* Add the Discover sessions API as a public, generally available API. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
 
 **{{product.observability}} solution**:
 For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -639,34 +638,36 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add a field to the Outlook native connector that syncs all mail folders [#291396]({{kib-pull}}291396).
 * Add personal access token authentication fields to the Confluence Data Center and Jira Data Center connectors, for when password-based basic auth is disabled [#284332]({{kib-pull}}284332), [#284331]({{kib-pull}}284331).
 * Update the Microsoft Teams content connector to application-only authentication with a client secret or a certificate, and remove username and password authentication [#287028]({{kib-pull}}287028).
-* Add a **Display options** control to the **Connectors** list that hides deprecated connectors by default [#289130]({{kib-pull}}289130).
 * Clarify that Salesforce document level security applies per object type, not per record [#297728]({{kib-pull}}297728).
+* Add an **Expand role members** toggle for compact document-level security to ServiceNow connectors, and an **Expand site group members** toggle to SharePoint Online connectors, in {{fleet}} [#288071]({{kib-pull}}288071), [#288070]({{kib-pull}}288070).
+* Add a **Display options** control to the **Connectors** list that hides deprecated connectors by default [#289130]({{kib-pull}}289130).
 * Add a toggle to the **Manage Region Preferences** modal to remove a custom region policy and return to the default of allowing all regions [#282769]({{kib-pull}}282769).
 * Add a dismissible warning to the {{infer-cap}} model flyout when a model isn't available in the locations that region preferences allow [#286932]({{kib-pull}}286932).
 * Use the region names that {{es}} sends with each endpoint in the **Regions** list [#287211]({{kib-pull}}287211).
 * Redesign the **Region preferences** modal. Before you save, the **Confirm region selection** modal shows the complete list of selected locations and the indexes and pipelines that still use endpoints that the policy would block, so you can review the conflict and ignore those errors [#287605]({{kib-pull}}287605), [#285264]({{kib-pull}}285264), [#289906]({{kib-pull}}289906).
 * Return a `400` error when a query rule, ruleset, or synonyms set ID in an API path contains characters other than letters, numbers, `_`, and `-`, or is longer than 512 characters [#276710]({{kib-pull}}276710).
-* Add an **Expand role members** toggle for compact document-level security to ServiceNow connectors, and an **Expand site group members** toggle to SharePoint Online connectors, in {{fleet}} [#288071]({{kib-pull}}288071), [#288070]({{kib-pull}}288070).
 
 **{{esql}} editor**:
 * Redesign the {{esql}} editor. The time picker moves to the right, the visor stays visible at the top in Discover, the sources dropdown no longer appears in KQL mode in the visor, and a stop button appears while AI generates a query [#267922]({{kib-pull}}267922).
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
+* Expand the {{esql}} editor to fit a long query when you paste one or when AI inserts one [#279712]({{kib-pull}}279712).
 
 **{{kib}} platform**:
 * Disallow code generation from strings in Node.js by default, which hardens {{kib}} against code injection. Code that builds functions from strings at run time, such as `eval`, now fails unless an administrator sets the `KBN_DISALLOW_CODE_GEN_FROM_STRINGS` environment variable to `false` [#278233]({{kib-pull}}278233).
+* Add the `frame-src` CSP directive, with default allowed origins for Elastic-owned domains and embedded video providers, and the optional `media_src` CSP configuration key [#281884]({{kib-pull}}281884), [#281412]({{kib-pull}}281412).
 * Add a certificate identity field, for strong identity verification, to cross-cluster API keys in API key management [#275610]({{kib-pull}}275610).
 * Add the `filters` setting on a logger in `kibana.yml` to filter log records by metadata fields [#268372]({{kib-pull}}268372).
+* Add `user.full_name` and `user.email`, when available, to audit logs [#287148]({{kib-pull}}287148), [#286616]({{kib-pull}}286616).
+* Add the `process.memory.heap.limit` OpenTelemetry metric, which reports the V8 heap size limit in bytes [#295414]({{kib-pull}}295414).
 * Add the `i18n.detectBrowserLocale` setting. Set it to `false` to stop {{kib}} from choosing the interface language from the browser's language preferences while each person can still choose their own language [#295756]({{kib-pull}}295756).
 * Add the Brazilian Portuguese (`pt-BR`) locale, which you can set with `i18n.locale` [#291123]({{kib-pull}}291123).
 * Add a **Remember last selected space** option to the **Spaces preferences** modal, so {{kib}} opens the last space you visited when you log in on {{ech}} and Serverless [#281118]({{kib-pull}}281118).
-* Add the `process.memory.heap.limit` OpenTelemetry metric, which reports the V8 heap size limit in bytes [#295414]({{kib-pull}}295414).
-* Add `user.full_name` and `user.email`, when available, to audit logs [#287148]({{kib-pull}}287148), [#286616]({{kib-pull}}286616).
-* Add the `frame-src` CSP directive, with default allowed origins for Elastic-owned domains and embedded video providers, and the optional `media_src` CSP configuration key [#281884]({{kib-pull}}281884), [#281412]({{kib-pull}}281412).
 
 **Machine learning and {{infer}}**:
 * Add support for non-streaming interaction with inference endpoints, and a space-aware `genAISettings:inferenceStreaming` setting that defaults to `true` [#297712]({{kib-pull}}297712).
 * Install the Elastic product documentation when the server starts, and add the product documentation tool to the default Elastic agent tools, when the Elastic {{infer-cap}} Service is available [#275476]({{kib-pull}}275476).
 * Add reasoning effort controls (**Low**, **Medium**, and **High**) to the **Add endpoint** modal of the Elastic {{infer-cap}} Service for chat completion endpoints [#270869]({{kib-pull}}270869).
+* Support `list` fields when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
 * Add sort options and a result count to the Elastic {{infer-cap}} Service models page [#296875]({{kib-pull}}296875).
 * Add empty states to the Elastic {{infer-cap}} Service page for self-managed clusters without Cloud Connect, for when the service is turned off in Cloud Connect, and for when the service is unavailable on {{ecloud}} and Serverless [#296239]({{kib-pull}}296239).
 * Add a **Region** filter, a **Model type** filter in place of the **LLM**, **Embedding**, and **Rerank** buttons, and **Display options** to show or hide preview, end-of-life, and region-blocked models, which are hidden by default on the Elastic {{infer-cap}} Service models page [#295536]({{kib-pull}}295536), [#292132]({{kib-pull}}292132), [#291222]({{kib-pull}}291222).
@@ -676,140 +677,141 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Show data retention and the geographies and regions where {{infer}} traffic can be restricted in the model flyout [#295238]({{kib-pull}}295238), [#293331]({{kib-pull}}293331).
 * Add a **Restricted regions** badge to the Elastic {{infer-cap}} Service page header [#290635]({{kib-pull}}290635).
 * Simplify the deprecation and end-of-life notices on model cards, badges, and feature settings, with consistent `YYYY-MM-DD` dates [#298474]({{kib-pull}}298474).
-* Support `list` fields when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
 * Add a sparkline chart to the **Summary** column of change point detection [#286173]({{kib-pull}}286173).
 
 **Workflows**:
-* Open the **Workflow** tab when the agent proposes a fix from the **Executions** tab, where the editor is read-only, so you can accept or decline the proposal [#296145]({{kib-pull}}296145).
-* Make the read-only graph view generally available [#295453]({{kib-pull}}295453).
 * Enable the Workflow Template Library by default where Workflows is available [#294738]({{kib-pull}}294738).
+* Show an agent-first empty state on the **Workflows** list and the create page [#277119]({{kib-pull}}277119).
+* Make the read-only graph view generally available [#295453]({{kib-pull}}295453).
+* Show `on-failure` fallback steps as nodes with dashed failure edges in the workflow graph view [#292447]({{kib-pull}}292447).
+* Show a read-only pill for managed workflows and historical executions, and replace the **Add integrations** menu entry with an **Add connectors** link [#283093]({{kib-pull}}283093).
 * Show the **Executions** view by default [#294543]({{kib-pull}}294543).
+* Add managed data views for workflow executions and step executions in each space, so you can explore workflow execution data in Discover and Visualizations. {{kib}} now creates the execution indices as hidden indices [#284860]({{kib-pull}}284860).
+* Record why an inbound webhook did not start a workflow [#296099]({{kib-pull}}296099).
+* Add a **Fix with AI Agent** quick fix to validation errors [#288475]({{kib-pull}}288475).
+* Open the **Workflow** tab when the agent proposes a fix from the **Executions** tab, where the editor is read-only, so you can accept or decline the proposal [#296145]({{kib-pull}}296145).
 * Show a YAML and graph preview in the `workflow.yaml` attachment canvas [#294767]({{kib-pull}}294767).
+* Allow `if` on all step types [#279210]({{kib-pull}}279210).
+* Render templated wait durations and step timeouts [#293448]({{kib-pull}}293448).
+* Run each `foreach` item as its own step [#290950]({{kib-pull}}290950).
 * Deliver human-in-the-loop requests through HTTP, Microsoft Teams, ServiceNow comments, Slack v2, and email [#296205]({{kib-pull}}296205), [#296204]({{kib-pull}}296204), [#296203]({{kib-pull}}296203), [#294500]({{kib-pull}}294500), [#294498]({{kib-pull}}294498).
 * Add a post-execution workflow hook (`configuration.post_execution_workflow_ids`) to agents, so a workflow can react when an agent finishes an execution [#289635]({{kib-pull}}289635).
 * Add a public-conversation option to the `ai.agent` workflow step [#280364]({{kib-pull}}280364).
-* Allow `if` on all step types [#279210]({{kib-pull}}279210).
-* Show an agent-first empty state on the **Workflows** list and the create page [#277119]({{kib-pull}}277119).
-* Add a **Fix with AI Agent** quick fix to validation errors [#288475]({{kib-pull}}288475).
-* Render templated wait durations and step timeouts [#293448]({{kib-pull}}293448).
-* Run each `foreach` item as its own step [#290950]({{kib-pull}}290950).
-* Add managed data views for workflow executions and step executions in each space, so you can explore workflow execution data in Discover and Visualizations. {{kib}} now creates the execution indices as hidden indices [#284860]({{kib-pull}}284860).
-* Show a read-only pill for managed workflows and historical executions, and replace the **Add integrations** menu entry with an **Add connectors** link [#283093]({{kib-pull}}283093).
-* Show `on-failure` fallback steps as nodes with dashed failure edges in the workflow graph view [#292447]({{kib-pull}}292447).
-* Record why an inbound webhook did not start a workflow [#296099]({{kib-pull}}296099).
 
 ### Fixes [kibana-9.6.0-fixes]
 
 **Elastic Agent Builder**:
-* Fix chat image upload when you don't have superuser rights [#299455]({{kib-pull}}299455).
 * Fix tools hanging or timing out when they query data streams that span the frozen tier, by excluding frozen tier indices by default [#292349]({{kib-pull}}292349).
 * Fix {{esql}} queries failing with a security exception on {{es}} 9.4 when cross-cluster search patterns are configured but the cluster doesn't have the remote cluster client role, and fix the error when the remote cluster role isn't set [#281609]({{kib-pull}}281609), [#295560]({{kib-pull}}295560).
 * Fix {{esql}} query generation when you have no permission to read the mappings of one of the indices [#293286]({{kib-pull}}293286).
 * Fix the `execute_esql` tool refusing to run queries that the `generate_esql` tool didn't produce [#300045]({{kib-pull}}300045).
 * Fix MCP tool arguments that `additionalProperties` defines being stripped before execution [#287815]({{kib-pull}}287815).
-* Fix chat completion streams not ending on cancellation, and cap their duration [#285119]({{kib-pull}}285119).
-* Fix the research agent repeatedly asking clarifying questions that you already answered [#284800]({{kib-pull}}284800).
-* Fix chat errors when the connection drops while the agent is still running, for example because of a proxy timeout. The chat now reconnects and keeps streaming the response [#293095]({{kib-pull}}293095).
-* Fix the **Abort chat request?** confirmation appearing when you leave a chat that is still running. The run continues in the background, so the prompt no longer appears [#292572]({{kib-pull}}292572).
-* Fix the copy button on a user message to say **Copy prompt** instead of **Copy response** [#286131]({{kib-pull}}286131).
-* Fix the attachment input pill border color [#282279]({{kib-pull}}282279).
-* Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard truncating {{esql}} results [#282026]({{kib-pull}}282026).
-* Fix Anthropic stream parsing and retries of empty responses [#281616]({{kib-pull}}281616).
-* Fix a conversation being overwritten when it is created automatically [#280189]({{kib-pull}}280189).
-* Fix cases tools being registered in Serverless project types and in Elasticsearch solution spaces where the Cases feature isn't available [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
 * Fix attachment-producing tools appearing in the MCP server [#291274]({{kib-pull}}291274).
 * Fix the PagerDuty MCP connector to work with the new consolidated `browse_*` and `manage_*` tools that PagerDuty provides [#295823]({{kib-pull}}295823).
+* Fix cases tools being registered in Serverless project types and in Elasticsearch solution spaces where the Cases feature isn't available [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
+* Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard truncating {{esql}} results [#282026]({{kib-pull}}282026).
+* Fix chat image upload when you don't have superuser rights [#299455]({{kib-pull}}299455).
+* Fix chat completion streams not ending on cancellation, and cap their duration [#285119]({{kib-pull}}285119).
+* Fix chat errors when the connection drops while the agent is still running, for example because of a proxy timeout. The chat now reconnects and keeps streaming the response [#293095]({{kib-pull}}293095).
+* Fix the **Abort chat request?** confirmation appearing when you leave a chat that is still running. The run continues in the background, so the prompt no longer appears [#292572]({{kib-pull}}292572).
+* Fix a conversation being overwritten when it is created automatically [#280189]({{kib-pull}}280189).
+* Fix the research agent repeatedly asking clarifying questions that you already answered [#284800]({{kib-pull}}284800).
+* Fix the copy button on a user message to say **Copy prompt** instead of **Copy response** [#286131]({{kib-pull}}286131).
+* Fix the attachment input pill border color [#282279]({{kib-pull}}282279).
+* Fix Anthropic stream parsing and retries of empty responses [#281616]({{kib-pull}}281616).
 
 **Alerting and cases**:
 * Fix a rule running again for the same occurrence when Task Manager claims it before its `runAt` time [#297486]({{kib-pull}}297486).
 * Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents a completed run from being recorded [#295415]({{kib-pull}}295415).
 * Fix a request to run a rule immediately, or a schedule change, being discarded when it arrives while the rule is finishing a run [#293492]({{kib-pull}}293492).
 * Fix duplicate alert documents after a rule run saves its alerts but stops before Task Manager saves the task state, for example after a crash or a timeout [#293521]({{kib-pull}}293521).
-* Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
-* Fix the **Read only** badge appearing on the case templates pages for users who have read access to Cases and the case templates management privilege [#291719]({{kib-pull}}291719).
-* Fix an error that broke the **Tracking containment** rule editor when you select a data view [#289778]({{kib-pull}}289778).
-* Fix out-of-memory failures when Reporting generates wide PNG and PDF reports, by sizing the screenshot to the dashboard width instead of the browser window width [#289062]({{kib-pull}}289062).
+* Fix task and connector failures that aren't `Error` objects being logged as `[object Object]` [#276782]({{kib-pull}}276782).
 * Fix high peak memory use at startup and during rule execution on deployments with many alerts-as-data resources, by limiting how many resources install at once [#287643]({{kib-pull}}287643).
-* Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
+* Fix an error that broke the **Tracking containment** rule editor when you select a data view [#289778]({{kib-pull}}289778).
 * Fix the **Template** tab search in the create rule flow not matching partial words in template names and tags [#287961]({{kib-pull}}287961).
 * Fix the **Disk Usage** rule to ignore frozen nodes [#278374]({{kib-pull}}278374).
+* Fix the `FormatDate` mustache lambda rejecting epoch-millisecond values that arrive as strings, for example from nested templates that use the `x` format [#277391]({{kib-pull}}277391).
+* Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
 * Fix updating alert tags in one space also changing alerts in other spaces [#285874]({{kib-pull}}285874).
-* Fix task and connector failures that aren't `Error` objects being logged as `[object Object]` [#276782]({{kib-pull}}276782).
+* Fix out-of-memory failures when Reporting generates wide PNG and PDF reports, by sizing the screenshot to the dashboard width instead of the browser window width [#289062]({{kib-pull}}289062).
+* Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
+* Fix the **Read only** badge appearing on the case templates pages for users who have read access to Cases and the case templates management privilege [#291719]({{kib-pull}}291719).
 * Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185).
 * Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576).
 * Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772).
 * Fix duplicate field definitions, field definition identity, and field definition references in the cases field library [#282060]({{kib-pull}}282060), [#282770]({{kib-pull}}282770), [#282450]({{kib-pull}}282450), [#280493]({{kib-pull}}280493).
 * Fix the case header showing no reporter name by falling back to the email address [#282504]({{kib-pull}}282504).
-* Fix the `FormatDate` mustache lambda rejecting epoch-millisecond values that arrive as strings, for example from nested templates that use the `x` format [#277391]({{kib-pull}}277391).
 
 **Connectivity**:
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
 
 **Dashboards and Visualizations**:
 * Fix the Dashboards API dropping {{esql}} panels whose color mapping assigns colors to `boolean`, `null`, multi-value, or open-ended range values [#298850]({{kib-pull}}298850).
+* Fix visualizations created or updated through the Visualizations API, so terms columns ranked by a custom `last_value` metric keep their sort field, `showArrayValues` and `multi_value` apply the right defaults, trendline breakdowns rank by their own metric, histogram `granularity` keeps the target bar count, `duration` formats keep `decimals` and `compact` unless `to` is `auto-approximate`, terms keep `parentFormat`, `format`, and numeric include and exclude values, and annotation layers and ad hoc data views keep their data view and custom name [#292378]({{kib-pull}}292378), [#292864]({{kib-pull}}292864), [#283159]({{kib-pull}}283159), [#283058]({{kib-pull}}283058), [#282815]({{kib-pull}}282815), [#282760]({{kib-pull}}282760), [#282752]({{kib-pull}}282752), [#281079]({{kib-pull}}281079), [#280546]({{kib-pull}}280546).
+* Fix the dashboards list endpoint to return results sorted by `updated_at` in descending order, and fix the dashboards listing page failing to load when the `savedObjects:listingLimit` advanced setting is greater than `1000` [#282363]({{kib-pull}}282363), [#282100]({{kib-pull}}282100).
+* Fix by-reference panels that are missing their `savedObjectRef` reference being removed when the dashboard loads [#285476]({{kib-pull}}285476).
 * Fix the dashboard top menu and **Edit** button not appearing in embedded dashboards when `show-top-menu=true` is set [#299599]({{kib-pull}}299599).
+* Fix a fake modal appearing when you save a dashboard for the first time [#289342]({{kib-pull}}289342).
+* Fix **Save and return** appearing instead of **Save** when you create a visualization [#295245]({{kib-pull}}295245).
+* Fix the unsaved changes dot on the dashboard **Save** button opening the save dialog twice when you select it [#293087]({{kib-pull}}293087).
+* Fix dashboard user activity logs recording a `null` time range when the dashboard doesn't store its time range [#279883]({{kib-pull}}279883).
+* Fix the dashboards list tag filter when a tag name contains an ampersand [#297231]({{kib-pull}}297231).
+* Fix the **Go to URL** drilldown not replacing `{{event.values.[0]}}` in the name [#290363]({{kib-pull}}290363).
+* Fix sibling panels not blurring during inline editing on dashboards that have no controls [#288939]({{kib-pull}}288939).
+* Fix the close button of the time slider covering only the top quarter of the panel [#287441]({{kib-pull}}287441).
+* Fix missing icons on dashboards [#285425]({{kib-pull}}285425).
+* Fix the `labs:dashboard:deferBelowFold` setting so panels that aren't visible wait to load until you scroll to them [#284004]({{kib-pull}}284004).
+* Fix a stuck loading state in maps after you reset the state [#281558]({{kib-pull}}281558).
+* Fix the **Fast mode** toggle for Basic and Platinum licenses by turning it off [#279903]({{kib-pull}}279903).
+* Fix the filter pill showing **filter value is invalid or incomplete** for empty string values [#290383]({{kib-pull}}290383).
+* Fix the **Update filter** button being unreachable when the filter editor is taller than the screen [#289163]({{kib-pull}}289163).
+* Fix ad hoc data view IDs colliding when you duplicate a panel that uses a form-based ad hoc data view and then change the data view [#281786]({{kib-pull}}281786).
+* Fix duration metrics with different units on the same axis plotting on different scales in multi-series XY charts [#289007]({{kib-pull}}289007).
+* Fix the value text color of metric charts to use the default text color when the value is out of range [#280816]({{kib-pull}}280816).
+* Fix formulas with many KQL or Lucene filters being rejected for exceeding the expression length limit [#290314]({{kib-pull}}290314).
 * Fix metric background trendlines for {{esql}} queries that use `EVAL` to alias or overwrite a time-bucket column, rename the source time field before aggregation, use multiple piped `STATS` commands, use `FORK`, or use `TBUCKET(...)` [#297591]({{kib-pull}}297591), [#294577]({{kib-pull}}294577), [#287819]({{kib-pull}}287819), [#284839]({{kib-pull}}284839).
 * Fix {{esql}} metric panels crashing on empty results when dynamic coloring uses a maximum dimension [#297429]({{kib-pull}}297429).
 * Fix an invalid-column error when you add a **Maximum value** dimension to an {{esql}} metric visualization [#296545]({{kib-pull}}296545).
-* Fix **Save and return** appearing instead of **Save** when you create a visualization [#295245]({{kib-pull}}295245).
-* Fix the **Go to URL** drilldown not replacing `{{event.values.[0]}}` in the name [#290363]({{kib-pull}}290363).
-* Fix the filter pill showing **filter value is invalid or incomplete** for empty string values [#290383]({{kib-pull}}290383).
-* Fix the **Update filter** button being unreachable when the filter editor is taller than the screen [#289163]({{kib-pull}}289163).
-* Fix a fake modal appearing when you save a dashboard for the first time [#289342]({{kib-pull}}289342).
-* Fix duration metrics with different units on the same axis plotting on different scales in multi-series XY charts [#289007]({{kib-pull}}289007).
 * Fix date buckets from {{esql}} queries stopping behaving as time after you save and reload a visualization, which affected the heatmap time scale and sort, chart-switch suggestions, XY current-time and partial-data markers, and dimension drag and drop [#289058]({{kib-pull}}289058).
 * Fix {{esql}} variable controls for fields (`??field`) losing their control variable when you save a visualization through the API [#288785]({{kib-pull}}288785).
-* Fix visualizations created or updated through the Visualizations API, so terms columns ranked by a custom `last_value` metric keep their sort field, `showArrayValues` and `multi_value` apply the right defaults, trendline breakdowns rank by their own metric, histogram `granularity` keeps the target bar count, `duration` formats keep `decimals` and `compact`, terms keep `parentFormat`, `format`, and numeric include and exclude values, and annotation layers and ad hoc data views keep their data view and custom name [#292378]({{kib-pull}}292378), [#292864]({{kib-pull}}292864), [#283159]({{kib-pull}}283159), [#283058]({{kib-pull}}283058), [#282815]({{kib-pull}}282815), [#282760]({{kib-pull}}282760), [#282752]({{kib-pull}}282752), [#281079]({{kib-pull}}281079), [#280546]({{kib-pull}}280546).
-* Fix sibling panels not blurring during inline editing on dashboards that have no controls [#288939]({{kib-pull}}288939).
-* Fix the close button of the time slider covering only the top quarter of the panel [#287441]({{kib-pull}}287441).
-* Fix by-reference panels that are missing their `savedObjectRef` reference being removed when the dashboard loads [#285476]({{kib-pull}}285476).
-* Fix missing icons on dashboards [#285425]({{kib-pull}}285425).
-* Fix the `labs:dashboard:deferBelowFold` setting so panels that aren't visible wait to load until you scroll to them [#284004]({{kib-pull}}284004).
-* Fix the dashboards list endpoint to return results sorted by `updated_at` in descending order, and fix the dashboards listing page failing to load when the `savedObjects:listingLimit` advanced setting is greater than `1000` [#282363]({{kib-pull}}282363), [#282100]({{kib-pull}}282100).
-* Fix ad hoc data view IDs colliding when you duplicate a panel that uses a form-based ad hoc data view and then change the data view [#281786]({{kib-pull}}281786).
-* Fix a stuck loading state in maps after you reset the state [#281558]({{kib-pull}}281558).
-* Fix the value text color of metric charts to use the default text color when the value is out of range [#280816]({{kib-pull}}280816).
-* Fix {{esql}} time filtering for Vega visualizations to follow the visualization time filter behavior [#280070]({{kib-pull}}280070).
-* Fix the **Fast mode** toggle for Basic and Platinum licenses by turning it off [#279903]({{kib-pull}}279903).
-* Fix dashboard user activity logs recording a `null` time range when the dashboard doesn't store its time range [#279883]({{kib-pull}}279883).
-* Fix the dashboards list tag filter when a tag name contains an ampersand [#297231]({{kib-pull}}297231).
-* Fix the unsaved changes dot on the dashboard **Save** button opening the save dialog twice when you select it [#293087]({{kib-pull}}293087).
-* Fix formulas with many KQL or Lucene filters being rejected for exceeding the expression length limit [#290314]({{kib-pull}}290314).
 * Fix converting date histograms that use **Drop partial intervals** to {{esql}} [#296078]({{kib-pull}}296078).
+* Fix {{esql}} time filtering for Vega visualizations to follow the visualization time filter behavior [#280070]({{kib-pull}}280070).
 
 **Data ingestion and {{fleet}}**:
-* Fix deleting a package policy waiting on a full, synchronous agent policy deploy [#282580]({{kib-pull}}282580).
-* Fix the version-specific policy message showing in the **Agents** list for agents that meet the integration version requirements [#287504]({{kib-pull}}287504).
-* Fix agentless policies that use dynamic dataset streams, including Okta, Active Directory, and Microsoft Entra ID Entity Analytics, incorrectly showing `0` throughput [#286758]({{kib-pull}}286758).
-* Fix false-positive errors when you delete an OpenTelemetry input policy with a shared dataset, and policies that fail on a non-string agent condition [#291679]({{kib-pull}}291679), [#290497]({{kib-pull}}290497).
-* Fix the ingest pipeline details flyout hiding the **Edit pipeline** button when a processor contains a long value [#291000]({{kib-pull}}291000).
-* Fix the managed integrations API so `PUT /api/fleet/managed_integrations/{id}` no longer returns `404` for agentless policies created before the agent policy and package policy shared an ID [#287011]({{kib-pull}}287011).
-* Fix agentless policies, including policy filters, queries, deletion, orphan cleanup, and component health in the enrollment flyout [#299039]({{kib-pull}}299039), [#296087]({{kib-pull}}296087), [#294970]({{kib-pull}}294970), [#293142]({{kib-pull}}293142), [#290181]({{kib-pull}}290181), [#287571]({{kib-pull}}287571), [#283434]({{kib-pull}}283434), [#295107]({{kib-pull}}295107).
-* Fix integration upgrades, installs, and policy edits for packages with variable groups, custom analyzers, version-specific agent conditions, secrets, transforms, ML models, dashboard assets, and index templates [#296354]({{kib-pull}}296354), [#294439]({{kib-pull}}294439), [#294411]({{kib-pull}}294411), [#291813]({{kib-pull}}291813), [#291648]({{kib-pull}}291648), [#290145]({{kib-pull}}290145), [#289596]({{kib-pull}}289596), [#288966]({{kib-pull}}288966), [#288902]({{kib-pull}}288902), [#288379]({{kib-pull}}288379), [#287642]({{kib-pull}}287642), [#287389]({{kib-pull}}287389), [#287095]({{kib-pull}}287095), [#285581]({{kib-pull}}285581), [#284818]({{kib-pull}}284818), [#284710]({{kib-pull}}284710), [#282213]({{kib-pull}}282213).
+* Fix integration upgrades, installs, and policy edits for packages with variable groups, custom analyzers, version-specific agent conditions, secrets, transforms, ML models, dashboard assets, and index templates [#296354]({{kib-pull}}296354), [#294439]({{kib-pull}}294439), [#294411]({{kib-pull}}294411), [#291813]({{kib-pull}}291813), [#291648]({{kib-pull}}291648), [#290145]({{kib-pull}}290145), [#288902]({{kib-pull}}288902), [#288379]({{kib-pull}}288379), [#287642]({{kib-pull}}287642), [#287389]({{kib-pull}}287389), [#287095]({{kib-pull}}287095), [#284818]({{kib-pull}}284818), [#284710]({{kib-pull}}284710), [#282213]({{kib-pull}}282213).
 * Install transforms from uploaded packages with the privileges of the user who installs the package instead of the {{kib}} internal user, and fail the install with a `403` error when {{kib}} can't grant them [#297771]({{kib-pull}}297771).
 * Fix integration policy validation, including `data_stream.dataset` values that use an agent variable placeholder such as `${env.NAME}`, dataset names for integration packages, whitespace-only namespaces, comment-only YAML settings, and the output hosts limit, which is now `100` [#295496]({{kib-pull}}295496), [#287557]({{kib-pull}}287557), [#286385]({{kib-pull}}286385), [#288430]({{kib-pull}}288430), [#282397]({{kib-pull}}282397).
-* Fix the {{fleet}} output flyout freezing when thousands of agent policies use the default output, speed up fetching outputs, and remove the proxy setting from Kafka outputs [#291972]({{kib-pull}}291972), [#287113]({{kib-pull}}287113), [#282313]({{kib-pull}}282313).
-* Fix the **Agent policies** page failing or timing out for agent policies with thousands of integration policies [#297979]({{kib-pull}}297979).
-* Fix agent actions and tasks, including bulk upgrades, agent upgrade requests hanging when the product versions API stops responding, the agent status change task, enrollment API key invalidation, and orphan agents [#282829]({{kib-pull}}282829), [#292788]({{kib-pull}}292788), [#292736]({{kib-pull}}292736), [#286324]({{kib-pull}}286324), [#287252]({{kib-pull}}287252), [#283071]({{kib-pull}}283071).
-* Fix {{fleet}} agent API handlers so they respect spaces, deployment of policies in non-default spaces, and the **Expired** status of enrollment tokens [#284936]({{kib-pull}}284936), [#293010]({{kib-pull}}293010), [#284280]({{kib-pull}}284280).
+* Fix {{fleet}} blocking a package policy save when every enrolled agent is incompatible with the package version, including agents that report a pre-release version. {{fleet}} shows a warning instead of blocking the save [#289596]({{kib-pull}}289596).
+* Fix package policy space assignments becoming stale after you move an agent policy to another {{kib}} space [#288966]({{kib-pull}}288966).
+* Fix Fleet wrapping a Kafka **Dynamic topic** multi-field format string such as `%{[data_stream.type]}-%{[data_stream.namespace]}`, which produced an invalid topic expression [#285581]({{kib-pull}}285581).
+* Fix the ingest pipeline details flyout hiding the **Edit pipeline** button when a processor contains a long value [#291000]({{kib-pull}}291000).
 * Fix integration icons rendering black after SVG sanitization [#293176]({{kib-pull}}293176).
 * Fix uploading an integration package being rejected with `429 Too Many Requests` when no other upload happened [#295479]({{kib-pull}}295479).
-* Fix the agent list so managed integrations don't appear on versioned policies, and agents sort by host correctly [#289394]({{kib-pull}}289394), [#286383]({{kib-pull}}286383).
-* Fix the {{fleet}} agent CSV export failing with a `parsing_exception` error when `xpack.reporting.csv.scroll.strategy: scroll` is configured [#286119]({{kib-pull}}286119).
-* Fix the agent policy YAML download failing with `Unresolved alias` when a policy reuses an object by reference [#280669]({{kib-pull}}280669).
-* Fix the offline agent CPU and memory metrics tooltip, the Linux aarch64 install command indentation, long policy names in the **Assign to new policy** combobox, the order of policies in the **Assign new agent policy** modal, and the YAML field code editor border [#286386]({{kib-pull}}286386), [#286353]({{kib-pull}}286353), [#286381]({{kib-pull}}286381), [#296067]({{kib-pull}}296067), [#286360]({{kib-pull}}286360).
-* Fix the {{fleet}} integration sync task running intensive searches when no follower index exists [#285526]({{kib-pull}}285526).
 * Fix bundled packages matching by name when the package registry is unreachable [#285279]({{kib-pull}}285279).
+* Fix the {{fleet}} integration sync task running intensive searches when no follower index exists [#285526]({{kib-pull}}285526).
+* Fix deleting a package policy waiting on a full, synchronous agent policy deploy [#282580]({{kib-pull}}282580).
+* Fix false-positive errors when you delete an OpenTelemetry input policy with a shared dataset, and policies that fail on a non-string agent condition [#291679]({{kib-pull}}291679), [#290497]({{kib-pull}}290497).
+* Fix agentless policies that use dynamic dataset streams, including Okta, Active Directory, and Microsoft Entra ID Entity Analytics, incorrectly showing `0` throughput [#286758]({{kib-pull}}286758).
+* Fix agentless policies, including policy filters, queries, deletion, orphan cleanup, and component health in the enrollment flyout [#299039]({{kib-pull}}299039), [#296087]({{kib-pull}}296087), [#294970]({{kib-pull}}294970), [#293142]({{kib-pull}}293142), [#290181]({{kib-pull}}290181), [#287571]({{kib-pull}}287571), [#283434]({{kib-pull}}283434), [#295107]({{kib-pull}}295107).
+* Fix the managed integrations API so `PUT /api/fleet/managed_integrations/{id}` no longer returns `404` for agentless policies created before the agent policy and package policy shared an ID [#287011]({{kib-pull}}287011).
+* Fix the agent list so managed integrations don't appear on versioned policies, and agents sort by host correctly [#289394]({{kib-pull}}289394), [#286383]({{kib-pull}}286383).
+* Fix the version-specific policy message showing in the **Agents** list for agents that meet the integration version requirements [#287504]({{kib-pull}}287504).
 * Fix version-specific agent policies not matching in the agent policy filter and in the check for Fleet Servers, and fix adding and removing agent tags from the tag list [#281195]({{kib-pull}}281195), [#281092]({{kib-pull}}281092), [#279874]({{kib-pull}}279874).
+* Fix the {{fleet}} output flyout freezing when thousands of agent policies use the default output, speed up fetching outputs, and remove the proxy setting from Kafka outputs [#291972]({{kib-pull}}291972), [#287113]({{kib-pull}}287113), [#282313]({{kib-pull}}282313).
+* Fix the **Agent policies** page failing or timing out for agent policies with thousands of integration policies [#297979]({{kib-pull}}297979).
+* Fix the agent policy YAML download failing with `Unresolved alias` when a policy reuses an object by reference [#280669]({{kib-pull}}280669).
+* Fix agent actions and tasks, including bulk upgrades, agent upgrade requests hanging when the product versions API stops responding, the agent status change task, enrollment API key invalidation, and orphan agents [#282829]({{kib-pull}}282829), [#292788]({{kib-pull}}292788), [#292736]({{kib-pull}}292736), [#286324]({{kib-pull}}286324), [#287252]({{kib-pull}}287252), [#283071]({{kib-pull}}283071).
+* Fix {{fleet}} agent API handlers so they respect spaces, deployment of policies in non-default spaces, and the **Expired** status of enrollment tokens [#284936]({{kib-pull}}284936), [#293010]({{kib-pull}}293010), [#284280]({{kib-pull}}284280).
+* Fix the {{fleet}} agent CSV export failing with a `parsing_exception` error when `xpack.reporting.csv.scroll.strategy: scroll` is configured [#286119]({{kib-pull}}286119).
+* Fix the offline agent CPU and memory metrics tooltip, the Linux aarch64 install command indentation, long policy names in the **Assign to new policy** combobox, the order of policies in the **Assign new agent policy** modal, and the YAML field code editor border [#286386]({{kib-pull}}286386), [#286353]({{kib-pull}}286353), [#286381]({{kib-pull}}286381), [#296067]({{kib-pull}}296067), [#286360]({{kib-pull}}286360).
 * Fix the managed OTLP API key privilege clamping and default OpenTelemetry metrics data streams to the `time_series` index mode [#281261]({{kib-pull}}281261), [#281295]({{kib-pull}}281295).
 * Fix `expiration` not being passed in `POST /enrollment_api_keys` to the security APIs [#281324]({{kib-pull}}281324).
 
 **Data management**:
 * Fix editing or cloning an index template moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` [#290171]({{kib-pull}}290171).
 * Fix the data streams list and details flyout reporting **Standard** for time series data streams [#290169]({{kib-pull}}290169).
-* Fix transform actions failing with a generic `500` error when the {{es}} request timed out or failed at the transport level [#287592]({{kib-pull}}287592).
-* Show lifecycle information in Index Management for hidden and system indices [#282137]({{kib-pull}}282137).
 * Fix lifecycle settings in Index Management appearing as effective for lookup-mode indices and data streams [#292309]({{kib-pull}}292309).
+* Fix transform actions failing with a generic `500` error when the {{es}} request timed out or failed at the transport level [#287592]({{kib-pull}}287592).
 * Fix deleting snapshots failing on long-running deletions of up to 30 minutes, and a snapshot that no longer exists blocking the deletion of others in the same request [#290071]({{kib-pull}}290071).
 
 **Developer tools**:
@@ -819,23 +821,22 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Console body autocomplete, including the priority of explicit field rules over same-name global rules, boolean and numeric suggestions that were inserted as quoted strings, suggestions after closed triple-quoted string values, suggestions inside non-query triple-quoted strings, and triggers, template insertion, and completion ranges [#286703]({{kib-pull}}286703), [#286699]({{kib-pull}}286699), [#286695]({{kib-pull}}286695), [#282424]({{kib-pull}}282424), [#284530]({{kib-pull}}284530).
 
 **Discover**:
+* Fix displaying an invalid time range that the URL provides [#290358]({{kib-pull}}290358).
+* Fix labels in the time range selector, including custom presets that come from the **Quick ranges** setting, and add a `(rounded)` suffix to rounded relative time ranges. You can no longer delete quick ranges that you configure in **{{stack-manage-app}}** [#289066]({{kib-pull}}289066), [#283527]({{kib-pull}}283527).
+* Fix CSV exports covering a different time window than Discover showed for relative time ranges [#278305]({{kib-pull}}278305).
+* Fix the histogram breakdown button with an invalid breakdown field [#298832]({{kib-pull}}298832).
 * Fix runtime field preview issues, runtime scripts not being preserved when you change a field to composite, and the runtime field editor ignoring **Save** while the preview updates [#299810]({{kib-pull}}299810), [#299025]({{kib-pull}}299025), [#294753]({{kib-pull}}294753).
 * Fix field formatter relative URLs when {{kib}} uses a base path [#299116]({{kib-pull}}299116).
-* Fix the histogram breakdown button with an invalid breakdown field [#298832]({{kib-pull}}298832).
-* Fix `STATS` aggregations in time series queries, `STATS ... BY` with a previously aggregated field, and columns that `BY` creates [#297978]({{kib-pull}}297978), [#290259]({{kib-pull}}290259), [#295730]({{kib-pull}}295730).
-* Fix a background search rename or a search session expiration extension being silently reverted by a concurrent status update [#296401]({{kib-pull}}296401).
-* Fix creating two ad hoc data views that share the same custom ID [#292738]({{kib-pull}}292738).
-* Fix displaying an invalid time range that the URL provides [#290358]({{kib-pull}}290358).
-* Fix exiting inline editing mode of a Discover embeddable on a dashboard when a search error occurs [#289918]({{kib-pull}}289918).
-* Fix labels in the time range selector, including custom presets that come from the **Quick ranges** setting, and add a `(rounded)` suffix to rounded relative time ranges. You can no longer delete quick ranges that you configure in **{{stack-manage-app}}** [#289066]({{kib-pull}}289066), [#283527]({{kib-pull}}283527).
-* Fix `MV_CONTAINS`, invalid casts when filtering, autocomplete for nested function expressions, and PromQL variables, columns, and `TS_INFO` and `METRICS_INFO` columns in {{esql}} [#288972]({{kib-pull}}288972), [#287416]({{kib-pull}}287416), [#284277]({{kib-pull}}284277), [#281437]({{kib-pull}}281437), [#280538]({{kib-pull}}280538), [#280524]({{kib-pull}}280524).
-* Fix filter actions appearing in the data table for values that were ignored because they exceed `ignore_above` [#287807]({{kib-pull}}287807).
-* Fix search highlighting corrupting markers when the search term is a substring of a marker [#283345]({{kib-pull}}283345).
 * Fix field formatters, including `alwaysShowSign` on values that round to zero, percent format with `fractional: false` rendering `NaN`, the Short Dots transform dropping single-character segments, the Base64 Decode transform, the Date Nanos formatter ignoring `dateFormat` for numeric values, Geo point DMS output near zero coordinates, and highlighting when a string formatter applies case transforms [#282919]({{kib-pull}}282919), [#282915]({{kib-pull}}282915), [#281930]({{kib-pull}}281930), [#281366]({{kib-pull}}281366), [#281343]({{kib-pull}}281343), [#281336]({{kib-pull}}281336), [#281098]({{kib-pull}}281098).
 * Fix server-side date formatting ignoring changes to the time zone or date format, and fix null dates showing `-` instead of `(null)` in server-generated CSV exports [#282501]({{kib-pull}}282501), [#281367]({{kib-pull}}281367).
+* Fix `STATS` aggregations in time series queries, `STATS ... BY` with a previously aggregated field, and columns that `BY` creates [#297978]({{kib-pull}}297978), [#290259]({{kib-pull}}290259), [#295730]({{kib-pull}}295730).
 * Fix the cascade drilldown for time series queries by converting them to `FROM` [#280580]({{kib-pull}}280580).
 * Fix the cascade UI appearing for more than one breakdown, regardless of a filter after the breakdown [#291115]({{kib-pull}}291115).
-* Fix CSV exports covering a different time window than Discover showed for relative time ranges [#278305]({{kib-pull}}278305).
+* Fix a background search rename or a search session expiration extension being silently reverted by a concurrent status update [#296401]({{kib-pull}}296401).
+* Fix creating two ad hoc data views that share the same custom ID [#292738]({{kib-pull}}292738).
+* Fix exiting inline editing mode of a Discover embeddable on a dashboard when a search error occurs [#289918]({{kib-pull}}289918).
+* Fix filter actions appearing in the data table for values that were ignored because they exceed `ignore_above` [#287807]({{kib-pull}}287807).
+* Fix search highlighting corrupting markers when the search term is a substring of a marker [#283345]({{kib-pull}}283345).
 * Fix focusing a pinned or unpinned cell in the document viewer table [#220097]({{kib-pull}}220097).
 
 **{{product.observability}} solution**:
@@ -856,90 +857,91 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the region count text in the **Manage region preferences** modal not expanding or collapsing the zone when you select it, and the modal shrinking when you dismiss the model availability notice [#280253]({{kib-pull}}280253), [#280242]({{kib-pull}}280242).
 
 **{{esql}} editor**:
+* Fix `MV_CONTAINS`, invalid casts when filtering, autocomplete for nested function expressions, and PromQL variables, columns, and `TS_INFO` and `METRICS_INFO` columns in {{esql}} [#288972]({{kib-pull}}288972), [#287416]({{kib-pull}}287416), [#284277]({{kib-pull}}284277), [#281437]({{kib-pull}}281437), [#280538]({{kib-pull}}280538), [#280524]({{kib-pull}}280524).
 
 **{{kib}} platform**:
 * Fix the date range picker ignoring time zone and day-of-week settings [#299851]({{kib-pull}}299851).
-* Fix the **Ingest your data** section appearing on the Analytics overview for roles that can't add data [#297717]({{kib-pull}}297717).
-* Fix the OpenTelemetry process resource including CLI arguments, which now records how many arguments were present instead [#295796]({{kib-pull}}295796).
-* Fix duplicate user profile activations during page rendering for requests that use basic credentials, which could log `version_conflict_engine_exception` errors [#291066]({{kib-pull}}291066).
-* Fix Search apps, such as Search Home, Getting Started, and Playground, appearing in Observability spaces through global search and direct URLs [#290553]({{kib-pull}}290553).
-* Fix an inert **Activate user** action appearing in the deactivated-user callout for read-only security roles [#289801]({{kib-pull}}289801).
-* Fix settings pages failing to load when a stored UI setting has an invalid value [#288350]({{kib-pull}}288350).
-* Fix {{kib}} crashing when it can't write audit logs, by reporting a degraded state and turning the audit logger off on a mid-write failure or a misconfigured file appender [#287360]({{kib-pull}}287360), [#282347]({{kib-pull}}282347).
 * Fix the date range picker rejecting {{es}} date math that combines rounding with a further offset, such as `now/y+3M` [#287010]({{kib-pull}}287010).
-* Fix unexpected logouts after {{kib}} refreshes an expired access token [#286038]({{kib-pull}}286038).
-* Fix audit log records omitting the client IP address for requests over HTTP/2 [#285344]({{kib-pull}}285344).
-* Fix PKI sessions being invalidated when in-flight requests are cancelled over HTTP/2, which ended the session. This affects deployments that set `server.protocol: http2`, which is the default when TLS is turned on [#285153]({{kib-pull}}285153).
-* Fix navigating away from the role management and the create and edit space screens with unsaved changes [#283525]({{kib-pull}}283525), [#283513]({{kib-pull}}283513).
-* Fix API keys appearing on more than one page, or not at all, when you page through the API keys list [#296117]({{kib-pull}}296117), [#294059]({{kib-pull}}294059).
+* Fix the **Ingest your data** section appearing on the Analytics overview for roles that can't add data [#297717]({{kib-pull}}297717).
+* Fix Search apps, such as Search Home, Getting Started, and Playground, appearing in Observability spaces through global search and direct URLs [#290553]({{kib-pull}}290553).
 * Fix the space switcher disappearing from the {{kib}} header when the request that loads the current space fails, by retrying the request [#294584]({{kib-pull}}294584).
+* Fix settings pages failing to load when a stored UI setting has an invalid value [#288350]({{kib-pull}}288350).
 * Fix the saved object type label to use **data views** instead of **index patterns** [#297621]({{kib-pull}}297621).
-* Fix file pickers across {{kib}} lacking an accessible name, so screen reader users can identify their purpose [#293281]({{kib-pull}}293281).
 * Fix the flash of light on the boot splash screen in system color mode [#276724]({{kib-pull}}276724).
+* Fix file pickers across {{kib}} lacking an accessible name, so screen reader users can identify their purpose [#293281]({{kib-pull}}293281).
+* Fix navigating away from the role management and the create and edit space screens with unsaved changes [#283525]({{kib-pull}}283525), [#283513]({{kib-pull}}283513).
+* Fix duplicate user profile activations during page rendering for requests that use basic credentials, which could log `version_conflict_engine_exception` errors [#291066]({{kib-pull}}291066).
+* Fix unexpected logouts after {{kib}} refreshes an expired access token [#286038]({{kib-pull}}286038).
+* Fix PKI sessions being invalidated when in-flight requests are cancelled over HTTP/2, which ended the session. This affects deployments that set `server.protocol: http2`, which is the default when TLS is turned on [#285153]({{kib-pull}}285153).
+* Fix an inert **Activate user** action appearing in the deactivated-user callout for read-only security roles [#289801]({{kib-pull}}289801).
+* Fix API keys appearing on more than one page, or not at all, when you page through the API keys list [#296117]({{kib-pull}}296117), [#294059]({{kib-pull}}294059).
+* Fix {{kib}} crashing when it can't write audit logs, by reporting a degraded state and turning the audit logger off on a mid-write failure or a misconfigured file appender [#287360]({{kib-pull}}287360), [#282347]({{kib-pull}}282347).
+* Fix audit log records omitting the client IP address for requests over HTTP/2 [#285344]({{kib-pull}}285344).
+* Fix the OpenTelemetry process resource including CLI arguments, which now records how many arguments were present instead [#295796]({{kib-pull}}295796).
 
 **Machine learning and {{infer}}**:
 * Fix token usage tracking for chat completions that are retried [#282747]({{kib-pull}}282747).
-* Fix the {{esql}} field statistics table staying empty when the query or time range changes while statistics are loading [#298642]({{kib-pull}}298642).
-* Fix the index data visualizer not showing the anomaly detection and data frame analytics job creation cards when you open the page from a link to a data view or Discover session [#298432]({{kib-pull}}298432).
-* Fix data frame analytics audit messages being readable from a space where the job doesn't exist [#297821]({{kib-pull}}297821).
-* Fix the sparkline in the expansion popover [#295734]({{kib-pull}}295734).
-* Fix workflow auto-complete suggesting only connectors. It now also suggests {{infer}} endpoints that you set in feature settings [#292431]({{kib-pull}}292431).
-* Fix a restrictive default LLM check failing legacy AI connector configurations when the underlying {{infer}} endpoint matches the LLM call [#293855]({{kib-pull}}293855).
-* Fix the field statistics flyout closing while you inspect a field in the anomaly detection job wizard [#292297]({{kib-pull}}292297).
-* Fix change-point sparklines in search embeddables [#291478]({{kib-pull}}291478).
-* Fix excessive resource use when a request sends a very large detector list to the job estimation APIs, by limiting the list size [#291203]({{kib-pull}}291203).
+* Fix legacy AI connector configurations failing the restricted default LLM check when the call uses the {{infer}} endpoint that the default connector relies on. Agent Builder now also uses feature-specific settings that an administrator configured before it uses the default connector [#293855]({{kib-pull}}293855).
 * Fix LLM model resolution failing when you don't have the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533), [#290457]({{kib-pull}}290457).
-* Fix the product documentation installer shutting {{kib}} down when it downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
-* Fix adding a geo job chart from Anomaly Explorer to a case staying in the loading state [#289363]({{kib-pull}}289363).
 * Fix chat completion calls that use a non-default model succeeding when `genAiSettings:defaultAIConnectorOnly` is on. They now fail with a 400 error [#288107]({{kib-pull}}288107).
-* Fix streams that never close from blocking the {{kib}} event loop [#286849]({{kib-pull}}286849).
-* Fix the data frame analytics results explorer not updating when the job ID changes [#284964]({{kib-pull}}284964).
-* Fix file upload analysis for large NDJSON files [#284960]({{kib-pull}}284960).
-* Fix permissions for trained model testing, and the trained model ID check [#282002]({{kib-pull}}282002), [#280511]({{kib-pull}}280511).
 * Fix special tokens in prompts causing AI features to fail or crash, and fix empty text content blocks for Claude models [#283177]({{kib-pull}}283177).
-* Fix the **Apply annotation to series** checkbox [#279875]({{kib-pull}}279875).
-* Fix the **Sort by** and **Order** selections being lost in the single metric viewer when you open the settings for a second split field [#294604]({{kib-pull}}294604).
+* Fix streams that never close from blocking the {{kib}} event loop [#286849]({{kib-pull}}286849).
 * Fix tool schemas for Google Vertex AI {{infer}} endpoints [#284810]({{kib-pull}}284810).
-* Fix the data recognizer calling the recognize API three times on page load [#293067]({{kib-pull}}293067).
 * Fix tools that reuse a shared schema failing because `$defs` was dropped when converting tool schemas [#295880]({{kib-pull}}295880).
 * Fix Anthropic `chat_completion` endpoints for Agent Builder and Attack Discovery [#281179]({{kib-pull}}281179).
+* Fix workflow auto-complete suggesting only connectors. It now also suggests {{infer}} endpoints that you set in feature settings [#292431]({{kib-pull}}292431).
+* Fix the product documentation installer shutting {{kib}} down when it downloads a corrupt or incomplete artifact [#291142]({{kib-pull}}291142).
+* Fix the index data visualizer not showing the anomaly detection and data frame analytics job creation cards when you open the page from a link to a data view or Discover session [#298432]({{kib-pull}}298432).
+* Fix data frame analytics audit messages being readable from a space where the job doesn't exist [#297821]({{kib-pull}}297821).
+* Fix the field statistics flyout closing while you inspect a field in the anomaly detection job wizard [#292297]({{kib-pull}}292297).
+* Fix adding a geo job chart from Anomaly Explorer to a case staying in the loading state [#289363]({{kib-pull}}289363).
+* Fix excessive resource use when a request sends a very large detector list to the job estimation APIs, by limiting the list size [#291203]({{kib-pull}}291203).
+* Fix the data frame analytics results explorer not updating when the job ID changes [#284964]({{kib-pull}}284964).
+* Fix the **Apply annotation to series** checkbox [#279875]({{kib-pull}}279875).
+* Fix the **Sort by** and **Order** selections being lost in the single metric viewer when you open the settings for a second split field [#294604]({{kib-pull}}294604).
+* Fix the data recognizer calling the recognize API three times on page load [#293067]({{kib-pull}}293067).
+* Fix the sparkline in the expansion popover [#295734]({{kib-pull}}295734).
+* Fix change-point sparklines in search embeddables [#291478]({{kib-pull}}291478).
+* Fix the {{esql}} field statistics table staying empty when the query or time range changes while statistics are loading [#298642]({{kib-pull}}298642).
+* Fix file upload analysis for large NDJSON files [#284960]({{kib-pull}}284960).
+* Fix permissions for trained model testing, and the trained model ID check [#282002]({{kib-pull}}282002), [#280511]({{kib-pull}}280511).
 
 **Workflows**:
 * Fix YAML comments and formatting being stripped when an agent edits a workflow [#288075]({{kib-pull}}288075).
-* Fix step and connector icons being hard to read in dark mode, and render values in the `waitForInput` step [#277617]({{kib-pull}}277617), [#276414]({{kib-pull}}276414).
 * Fix the **Workflows** editor flagging valid Liquid map lookups with a variable key, such as `{{ inputs.payload.rules[ep.rule_id].name }}`, as invalid [#289418]({{kib-pull}}289418).
-* Fix the **Test workflow** modal flagging required inputs that have defaults as missing [#299799]({{kib-pull}}299799).
-* Fix the HTTP code and error that Workflows returns for IDs that are hidden from you [#299475]({{kib-pull}}299475).
-* Fix the execution tree for retry attempts, the fallback scope, propagated step errors, nested steps in a selected iteration, the selected execution step, and the execution tree reflecting the run instead of the YAML [#299074]({{kib-pull}}299074), [#299019]({{kib-pull}}299019), [#290782]({{kib-pull}}290782), [#290915]({{kib-pull}}290915), [#290781]({{kib-pull}}290781).
-* Fix the `run` step ignoring default values when the provided values are falsy [#299064]({{kib-pull}}299064).
-* Fix execution filter options disappearing when one execution index is missing, and the **Waiting** labels in the executions filter [#298697]({{kib-pull}}298697), [#285345]({{kib-pull}}285345).
-* Fix a retried execution create that already landed being reported as failed [#297308]({{kib-pull}}297308).
-* Fix overlapping parent runners when child workflows finish at the same time, and fail an execution when its resume task can't be scheduled [#290913]({{kib-pull}}290913), [#293658]({{kib-pull}}293658).
 * Fix false variable validation errors in the YAML editor, and `foreach` collection types that Workflows can't prove [#295421]({{kib-pull}}295421), [#283360]({{kib-pull}}283360).
-* Fix execution log writes blocking the next step [#293892]({{kib-pull}}293892).
+* Fix the actions menu and editing shortcuts showing in read-only mode of the workflow editor, and the graph view controls and settings [#289510]({{kib-pull}}289510), [#289079]({{kib-pull}}289079).
+* Fix step and connector icons being hard to read in dark mode, and render values in the `waitForInput` step [#277617]({{kib-pull}}277617), [#276414]({{kib-pull}}276414).
+* Fix the broken email connector icon [#287419]({{kib-pull}}287419).
+* Fix AI diffs on resumed conversations and duplicate workflow attachments [#286167]({{kib-pull}}286167).
+* Fix the execution tree for retry attempts, the fallback scope, propagated step errors, nested steps in a selected iteration, the selected execution step, and the execution tree reflecting the run instead of the YAML [#299074]({{kib-pull}}299074), [#299019]({{kib-pull}}299019), [#290782]({{kib-pull}}290782), [#290915]({{kib-pull}}290915), [#290781]({{kib-pull}}290781).
+* Fix the execution highlight in graph view for branching workflows, and an overlap in the graph layout [#281696]({{kib-pull}}281696), [#281304]({{kib-pull}}281304), [#297799]({{kib-pull}}297799).
+* Fix execution filter options disappearing when one execution index is missing, and the **Waiting** labels in the executions filter [#298697]({{kib-pull}}298697), [#285345]({{kib-pull}}285345).
 * Fix unsaved workflow tests appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
 * Fix large workflow executions failing to open or showing only their first 1,000 steps. {{kib}} now loads steps separately, loads up to 10,000 automatically, and shows **Show more** when more remain [#292678]({{kib-pull}}292678), [#288622]({{kib-pull}}288622).
-* Fix `on-failure` handling on human-in-the-loop and `workflow.execute` steps [#291974]({{kib-pull}}291974).
-* Fix `{{ now }}` not being formatted in generated {{es}} documents [#291211]({{kib-pull}}291211).
 * Fix the execution flyout, including human-in-the-loop resume and nested run links, re-running opening the inputs modal, the **Executions** button closing the open flyout, canceling a running execution, and re-running a test execution when the workflow is turned off [#290910]({{kib-pull}}290910), [#290872]({{kib-pull}}290872), [#290779]({{kib-pull}}290779), [#290778]({{kib-pull}}290778), [#290780]({{kib-pull}}290780).
-* Fix `data.map` reusing the rendering context [#290833]({{kib-pull}}290833).
+* Fix a crash in trigger execution details [#282920]({{kib-pull}}282920).
+* Fix the **Test workflow** modal flagging required inputs that have defaults as missing [#299799]({{kib-pull}}299799).
+* Fix the `run` step ignoring default values when the provided values are falsy [#299064]({{kib-pull}}299064).
+* Fix a retried execution create that already landed being reported as failed [#297308]({{kib-pull}}297308).
+* Fix overlapping parent runners when child workflows finish at the same time, and fail an execution when its resume task can't be scheduled [#290913]({{kib-pull}}290913), [#293658]({{kib-pull}}293658).
+* Fix execution log writes blocking the next step [#293892]({{kib-pull}}293892).
+* Fix `on-failure` handling on human-in-the-loop and `workflow.execute` steps [#291974]({{kib-pull}}291974).
+* Fix version conflicts on execution and step document updates by retrying [#283735]({{kib-pull}}283735).
 * Fix execution indices turning yellow on single-node clusters [#290445]({{kib-pull}}290445).
-* Fix the output of `elasticsearch.index.exist` [#289580]({{kib-pull}}289580).
-* Fix the actions menu and editing shortcuts showing in read-only mode of the workflow editor, and the graph view controls and settings [#289510]({{kib-pull}}289510), [#289079]({{kib-pull}}289079).
-* Fix Base64 decoding of binary data, and upload the decoded data through `kibana.request` multipart form data [#288952]({{kib-pull}}288952).
-* Fix the workflow scheduler using the wrong space after updates, and the scheduled runner running leftover ticks for disabled workflows [#287988]({{kib-pull}}287988), [#287986]({{kib-pull}}287986).
-* Fix the broken email connector icon [#287419]({{kib-pull}}287419).
 * Fix `variables` from the context override not merging in a single step run [#287347]({{kib-pull}}287347).
+* Fix input validation corrupting caller-provided values that contain Liquid-like text. Provided values stay literal unless they use the explicit `${{ ... }}` whole-expression form [#280311]({{kib-pull}}280311).
+* Fix `data.map` reusing the rendering context [#290833]({{kib-pull}}290833).
+* Fix `{{ now }}` not being formatted in generated {{es}} documents [#291211]({{kib-pull}}291211).
+* Fix the output of `elasticsearch.index.exist` [#289580]({{kib-pull}}289580).
+* Fix Base64 decoding of binary data, and upload the decoded data through `kibana.request` multipart form data [#288952]({{kib-pull}}288952).
+* Fix HTTP connector paths dropping inline query parameters [#282162]({{kib-pull}}282162).
+* Fix custom steps failing with HTTP `404` when {{kib}} uses a server base path [#283101]({{kib-pull}}283101).
+* Fix the HTTP code and error that Workflows returns for IDs that are hidden from you [#299475]({{kib-pull}}299475).
+* Fix the workflow scheduler using the wrong space after updates, and the scheduled runner running leftover ticks for disabled workflows [#287988]({{kib-pull}}287988), [#287986]({{kib-pull}}287986).
 * Fix turned-off pre-execution workflows disappearing from settings [#286826]({{kib-pull}}286826).
-* Fix AI diffs on resumed conversations and duplicate workflow attachments [#286167]({{kib-pull}}286167).
 * Fix legacy workflow inputs missing from tool schemas [#285149]({{kib-pull}}285149).
 * Fix executing a workflow requiring the `read` privilege [#284822]({{kib-pull}}284822).
-* Fix version conflicts on execution and step document updates by retrying [#283735]({{kib-pull}}283735).
-* Fix custom steps failing with HTTP `404` when {{kib}} uses a server base path [#283101]({{kib-pull}}283101).
-* Fix a crash in trigger execution details [#282920]({{kib-pull}}282920).
-* Fix HTTP connector paths dropping inline query parameters [#282162]({{kib-pull}}282162).
-* Fix the execution highlight in graph view for branching workflows, and an overlap in the graph layout [#281696]({{kib-pull}}281696), [#281304]({{kib-pull}}281304), [#297799]({{kib-pull}}297799).
-* Fix input validation corrupting caller-provided values that contain Liquid-like text. Provided values stay literal unless they use the explicit `${{ ... }}` whole-expression form [#280311]({{kib-pull}}280311).
 
 % !!DEFERRED!! The following entries are not in build candidate 9.6.0-87116d76 (Kibana commit fe9184e8eead). Re-check them against the next build candidate.
 % * Fix the metric background trendline for {{esql}} queries that use `EVAL` to alias or overwrite a time-bucket column [#299104]({{kib-pull}}299104).
