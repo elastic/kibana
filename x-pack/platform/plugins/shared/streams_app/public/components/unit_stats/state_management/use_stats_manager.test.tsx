@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, render, renderHook } from '@testing-library/react';
 import { STATS_FIXTURE_RESPONSES } from '../../../services/unit_stats_client/fixture_unit_stats_client';
-import { STATS_BATCH_DEBOUNCE_MS } from './constants';
+import { STATS_BATCH_DEBOUNCE_MS, STATS_POLL_INTERVAL_MS } from './constants';
 import type { ProcessingNodeRef } from '../../../services/unit_graph';
 import {
   StatsManagerProvider,
@@ -22,12 +22,24 @@ import {
 // The route client is the only thing that is faked. The provider, the stats client and the
 // machine are the real ones.
 const mockFetch = jest.fn();
+const mockAddDanger = jest.fn();
 
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    dependencies: { start: { streams: { streamsRepositoryClient: { fetch: mockFetch } } } },
-  }),
-}));
+jest.mock('../../../hooks/use_kibana', () => {
+  // One object for every call, so a render does not hand the provider new toasts each time.
+  const kibana = {
+    core: {
+      notifications: { toasts: { addDanger: (...args: unknown[]) => mockAddDanger(...args) } },
+    },
+    dependencies: {
+      start: {
+        streams: {
+          streamsRepositoryClient: { fetch: (...args: unknown[]) => mockFetch(...args) },
+        },
+      },
+    },
+  };
+  return { useKibana: () => kibana };
+});
 
 const UNIT_ID = 'unit-under-test';
 
@@ -45,6 +57,7 @@ const signalOfCall = (call: number): AbortSignal => mockFetch.mock.calls[call][1
 beforeEach(() => {
   jest.useFakeTimers();
   mockFetch.mockReset();
+  mockAddDanger.mockReset();
   mockFetch.mockResolvedValue(STATS_FIXTURE_RESPONSES.data);
 });
 
@@ -191,6 +204,38 @@ describe('renders', () => {
     await advance(0);
 
     expect(renders.count).toBeGreaterThan(rendersAfterFirstResult);
+  });
+});
+
+describe('the failure toast', () => {
+  it('tells the user when stats fail to load, with the reason', async () => {
+    mockFetch.mockRejectedValue(new Error('Service Unavailable'));
+    renderHook(() => useDestinationStats('es-prod'), { wrapper });
+
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+
+    expect(mockAddDanger).toHaveBeenCalledTimes(1);
+    expect(mockAddDanger).toHaveBeenCalledWith({
+      title: 'Could not load stream stats',
+      text: 'The numbers on the map may be out of date. Service Unavailable',
+    });
+  });
+
+  it('tells the user once while a poll keeps failing', async () => {
+    mockFetch.mockRejectedValue(new Error('Service Unavailable'));
+    renderHook(() => useDestinationStats('es-prod'), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <StatsManagerProvider unitId={UNIT_ID} pollIntervalMs={STATS_POLL_INTERVAL_MS}>
+          {children}
+        </StatsManagerProvider>
+      ),
+    });
+
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+    await advance(STATS_POLL_INTERVAL_MS * 2);
+
+    expect(mockFetch.mock.calls.length).toBeGreaterThan(1);
+    expect(mockAddDanger).toHaveBeenCalledTimes(1);
   });
 });
 

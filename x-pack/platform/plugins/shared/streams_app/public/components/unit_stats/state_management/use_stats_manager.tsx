@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { NEVER } from 'rxjs';
@@ -27,6 +28,36 @@ const StatsManagerContext = createActorContext(statsManagerMachine);
 
 const DEFAULT_WINDOW: StatsWindow = { kind: 'default' };
 const getDefaultWindow = (): StatsWindow => DEFAULT_WINDOW;
+
+/**
+ * Tells the user once when stats stop loading. The manager emits only the first failure of a run,
+ * so a poll that keeps failing does not raise a toast every time.
+ */
+const StatsFailureToast = () => {
+  const actorRef = StatsManagerContext.useActorRef();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
+
+  useEffect(() => {
+    const subscription = actorRef.on('stats.fetchFailed', ({ reason }) => {
+      toasts.addDanger({
+        title: i18n.translate('xpack.streams.stats.fetchFailedTitle', {
+          defaultMessage: 'Could not load stream stats',
+        }),
+        text: i18n.translate('xpack.streams.stats.fetchFailedText', {
+          defaultMessage: 'The numbers on the map may be out of date. {reason}',
+          values: { reason },
+        }),
+      });
+    });
+    return () => subscription.unsubscribe();
+  }, [actorRef, toasts]);
+
+  return null;
+};
 
 export interface StatsManagerProviderProps {
   /** The unit that the stats are for. A different unit needs a new provider, so key it by the unit. */
@@ -65,6 +96,7 @@ export const StatsManagerProvider = ({
 
   return (
     <StatsManagerContext.Provider logic={logic} options={{ input: { getWindow, pollIntervalMs } }}>
+      <StatsFailureToast />
       {children}
     </StatsManagerContext.Provider>
   );
