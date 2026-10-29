@@ -13,6 +13,12 @@ export const COMMON_HEADERS = {
   'elastic-api-version': '1',
 } as const;
 
+/** For the public routes, e.g. the Agent Builder, Workflows and detection-engine APIs. */
+export const PUBLIC_HEADERS = {
+  'kbn-xsrf': 'scout',
+  'elastic-api-version': '2023-10-31',
+} as const;
+
 export const PROPOSALS_MANAGE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { proposals: ['all'] }, spaces: ['*'] }],
