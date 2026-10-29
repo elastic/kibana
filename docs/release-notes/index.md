@@ -445,11 +445,11 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 ### Features and enhancements [kibana-9.6.0-features-enhancements]
 
 **Elastic Agent Builder**:
-* Turn on the Agent Builder tools that describe and run {{es}} and {{kib}} APIs by default, so agents can look up an API's parameters and call it on your behalf. Discovering APIs now has its own advanced setting [#291541]({{kib-pull}}291541).
 * Paste an image into the Agent Builder chat input to give an agent visual context, then ask follow-up questions about it [#293756]({{kib-pull}}293756).
 * Show inline attachments as cards in the events timeline [#293080]({{kib-pull}}293080).
 * Add a conversation sharing option that lets you manage private and public access to a conversation [#286645]({{kib-pull}}286645).
 * Show the conversation title on the left and a **Read-only** indicator on read-only conversations [#286860]({{kib-pull}}286860).
+* Turn on the Agent Builder tools that describe and run {{es}} and {{kib}} APIs by default, so agents can look up an API's parameters and call it on your behalf. Discovering APIs now has its own advanced setting [#291541]({{kib-pull}}291541).
 * Set an agent as the default agent for a space [#284512]({{kib-pull}}284512).
 * Add an experimental `POST /api/chat/message` endpoint that sends a message to an agent and returns its text answer and conversation ID [#294516]({{kib-pull}}294516).
 * Add streaming support to the agent-to-agent (A2A) endpoint [#287763]({{kib-pull}}287763).
@@ -541,12 +541,11 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 
 **Dashboards and Visualizations**:
 * Add undo and redo to dashboards, with toolbar buttons and the `Cmd+Z` or `Ctrl+Z` and `Cmd+Y` or `Ctrl+Y` shortcuts [#277103]({{kib-pull}}277103).
+* Add an **Enhance** action to dashboards in edit mode. It opens an Agent Builder conversation with your dashboard and a screenshot of it attached, so an agent can improve the dashboard's text, layout, and chart presentation. The action appears when Agent Builder is available, you can edit the dashboard, and at least one panel uses an {{esql}} query [#292666]({{kib-pull}}292666), [#288432]({{kib-pull}}288432).
 * Add custom content panels with your own HTML and CSS to dashboards, and render them inside Agent Builder conversations [#286439]({{kib-pull}}286439), [#289506]({{kib-pull}}289506).
 * Add a preview to **Refine with chat** for custom content panels [#289541]({{kib-pull}}289541).
 * Allow internal links to Discover and Dashboards in custom content panels [#294981]({{kib-pull}}294981).
 * Add an **Inspect** option to custom panels that use an {{esql}} query [#299446]({{kib-pull}}299446).
-* Enable the **Enhance** dashboard action [#292666]({{kib-pull}}292666).
-* Capture a screenshot of the dashboard when you select **Enhance this dashboard** [#288432]({{kib-pull}}288432).
 * Support adding a visualization that is already in the conversation to a dashboard by its attachment ID in the dashboard generation tool [#290219]({{kib-pull}}290219).
 * Rename the built-in Agent Builder dashboards skill ID from `dashboard-management` to `dashboards`. Custom agents that list `dashboard-management` no longer load that skill, and a custom skill with the ID `dashboards` is shadowed by the built-in skill [#294574]({{kib-pull}}294574).
 * Add an **Import dashboard** action to the dashboard listing page, and show why a JSON file was rejected when an import fails [#289891]({{kib-pull}}289891), [#298913]({{kib-pull}}298913).
@@ -664,10 +663,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add a **Remember last selected space** option to the **Spaces preferences** modal, so {{kib}} opens the last space you visited when you log in on {{ech}} and Serverless [#281118]({{kib-pull}}281118).
 
 **Machine learning and {{infer}}**:
-* Add support for non-streaming interaction with inference endpoints, and a space-aware `genAISettings:inferenceStreaming` setting that defaults to `true` [#297712]({{kib-pull}}297712).
-* Install the Elastic product documentation when the server starts, and add the product documentation tool to the default Elastic agent tools, when the Elastic {{infer-cap}} Service is available [#275476]({{kib-pull}}275476).
-* Add reasoning effort controls (**Low**, **Medium**, and **High**) to the **Add endpoint** modal of the Elastic {{infer-cap}} Service for chat completion endpoints [#270869]({{kib-pull}}270869).
-* Support `list` fields when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
 * Add sort options and a result count to the Elastic {{infer-cap}} Service models page [#296875]({{kib-pull}}296875).
 * Add empty states to the Elastic {{infer-cap}} Service page for self-managed clusters without Cloud Connect, for when the service is turned off in Cloud Connect, and for when the service is unavailable on {{ecloud}} and Serverless [#296239]({{kib-pull}}296239).
 * Add a **Region** filter, a **Model type** filter in place of the **LLM**, **Embedding**, and **Rerank** buttons, and **Display options** to show or hide preview, end-of-life, and region-blocked models, which are hidden by default on the Elastic {{infer-cap}} Service models page [#295536]({{kib-pull}}295536), [#292132]({{kib-pull}}292132), [#291222]({{kib-pull}}291222).
@@ -677,6 +672,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Show data retention and the geographies and regions where {{infer}} traffic can be restricted in the model flyout [#295238]({{kib-pull}}295238), [#293331]({{kib-pull}}293331).
 * Add a **Restricted regions** badge to the Elastic {{infer-cap}} Service page header [#290635]({{kib-pull}}290635).
 * Simplify the deprecation and end-of-life notices on model cards, badges, and feature settings, with consistent `YYYY-MM-DD` dates [#298474]({{kib-pull}}298474).
+* Add support for non-streaming interaction with inference endpoints, and a space-aware `genAISettings:inferenceStreaming` setting that defaults to `true` [#297712]({{kib-pull}}297712).
+* Install the Elastic product documentation when the server starts, and add the product documentation tool to the default Elastic agent tools, when the Elastic {{infer-cap}} Service is available [#275476]({{kib-pull}}275476).
+* Add reasoning effort controls (**Low**, **Medium**, and **High**) to the **Add endpoint** modal of the Elastic {{infer-cap}} Service for chat completion endpoints [#270869]({{kib-pull}}270869).
+* Support `list` fields when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
 * Add a sparkline chart to the **Summary** column of change point detection [#286173]({{kib-pull}}286173).
 
 **Workflows**:
