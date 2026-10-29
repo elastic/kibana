@@ -12,7 +12,9 @@ import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/management-settings-ids';
 import {
   getNightshiftBoundKiContinuousOnboardingWorkflowId,
+  getNightshiftBoundCleanupWorkflowId,
   getNightshiftBoundKiSyncWorkflowId,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
@@ -51,6 +53,7 @@ const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
@@ -235,17 +238,22 @@ export const createServiceAccountSetupService = ({
         enabled: true,
       });
     }
-    // A new sync is installed off, and a paused space keeps the scheduled ones off until Resume.
-    // The sync runs whenever the space is not paused; continuous onboarding also needs its setting
-    // on.
+    // A new sync or cleanup is installed off, and a paused space keeps the scheduled ones off until
+    // Resume. They run whenever the space is not paused; continuous onboarding also needs its
+    // setting on.
     if ((await maintenanceService.getState({ request })) !== 'paused') {
-      await setEnabled({
-        management: workflowsManagement,
-        request,
-        spaceId,
-        workflowId: getNightshiftBoundKiSyncWorkflowId(spaceId),
-        enabled: true,
-      });
+      for (const workflowId of [
+        getNightshiftBoundKiSyncWorkflowId(spaceId),
+        getNightshiftBoundCleanupWorkflowId(spaceId),
+      ]) {
+        await setEnabled({
+          management: workflowsManagement,
+          request,
+          spaceId,
+          workflowId,
+          enabled: true,
+        });
+      }
       if (
         await uiSettingsClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
       ) {
@@ -305,6 +313,7 @@ export const createServiceAccountSetupService = ({
     await onboardingClient.stopEntryPointRuns({ request });
     for (const workflowId of [
       getNightshiftBoundKiSyncWorkflowId(spaceId),
+      getNightshiftBoundCleanupWorkflowId(spaceId),
       getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
       getNightshiftBoundDiscoveryWorkflowId(spaceId),

@@ -8,7 +8,10 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import { getNightshiftBoundKiSyncWorkflowId } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundCleanupWorkflowId,
+  getNightshiftBoundKiSyncWorkflowId,
+} from '@kbn/workflows/managed';
 import type {
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
@@ -691,13 +694,19 @@ export const createSignificantEventsMaintenanceService = ({
               remainingWorkflows.push(workflow);
             }
           }
-          // The sync runs whenever the space is set up and not paused, so Resume also turns it back
-          // on when it was disabled outside a pause. A missing one is the setup's to install.
-          const sync = { id: getNightshiftBoundKiSyncWorkflowId(spaceId), spaceId };
-          if (!recordedWorkflows.some((workflow) => targetKey(workflow) === targetKey(sync))) {
+          // The sync and the cleanup run whenever the space is set up and not paused, so Resume
+          // also turns them back on when they were disabled outside a pause. A missing one is the
+          // setup's to install.
+          for (const alwaysOn of [
+            { id: getNightshiftBoundKiSyncWorkflowId(spaceId), spaceId },
+            { id: getNightshiftBoundCleanupWorkflowId(spaceId), spaceId },
+          ]) {
+            if (recordedWorkflows.some((workflow) => targetKey(workflow) === targetKey(alwaysOn))) {
+              continue;
+            }
             const outcome = await reEnableWorkflow({
               mgmt,
-              workflow: sync,
+              workflow: alwaysOn,
               request,
               failures,
               reportMissing: false,
@@ -705,7 +714,7 @@ export const createSignificantEventsMaintenanceService = ({
             if (outcome === 'toggled') {
               workflowsToggled += 1;
             } else if (outcome === 'failed') {
-              remainingWorkflows.push(sync);
+              remainingWorkflows.push(alwaysOn);
             }
           }
         } else {

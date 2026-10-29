@@ -102,10 +102,6 @@ import {
   type ContinuousOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
 import {
-  createCleanupWorkflowService,
-  type CleanupWorkflowService,
-} from './lib/workflows/cleanup_workflow';
-import {
   createSignificantEventsScheduledWorkflowsService,
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
@@ -457,7 +453,6 @@ export class SignificantEventsPlugin
     }
 
     let continuousOnboardingWorkflowService: ContinuousOnboardingWorkflowService | undefined;
-    let cleanupWorkflowService: CleanupWorkflowService | undefined;
     let significantEventsScheduledWorkflowsService:
       | SignificantEventsScheduledWorkflowsService
       | undefined;
@@ -482,16 +477,6 @@ export class SignificantEventsPlugin
 
     if (plugins.workflowsManagement && plugins.workflowsExtensions) {
       const { management: managementApi } = plugins.workflowsManagement;
-      const getManagedWorkflowsClient = async () => {
-        const [, pluginsStart] = await core.getStartServices();
-        if (!pluginsStart.workflowsExtensions) {
-          throw new Error('Workflows extensions are not available');
-        }
-        return pluginsStart.workflowsExtensions.initManagedWorkflowsClient(
-          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
-        );
-      };
-
       if (streamsKIsOnboardingClient) {
         continuousOnboardingWorkflowService = createContinuousOnboardingWorkflowService({
           logger: this.logger,
@@ -500,12 +485,6 @@ export class SignificantEventsPlugin
           server: this.server,
         });
       }
-
-      cleanupWorkflowService = createCleanupWorkflowService({
-        logger: this.logger,
-        managementApi: plugins.workflowsManagement.management,
-        getManagedWorkflowsClient,
-      });
 
       // TODO: remove with the legacy default-space cleanup.
       // https://github.com/elastic/kibana/issues/294271
@@ -588,7 +567,6 @@ export class SignificantEventsPlugin
         telemetry: telemetryClient,
         getScopedClients: this.getScopedClients,
         continuousOnboardingWorkflowService,
-        cleanupWorkflowService,
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
