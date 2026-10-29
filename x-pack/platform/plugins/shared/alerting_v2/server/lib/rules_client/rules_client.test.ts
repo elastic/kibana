@@ -2093,6 +2093,15 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
     });
 
+    it('compares expected_version against the reported version of a rule without a stored counter', async () => {
+      const client = createClient();
+      mockExistingRule({ version: undefined });
+
+      await client.restoreRule({ id: 'rule-id-1', snapshot, expectedVersion: 1 });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
+    });
+
     it('throws RULE_VERSION_CONFLICT when expected_version is stale', async () => {
       const client = createClient();
       mockExistingRule();

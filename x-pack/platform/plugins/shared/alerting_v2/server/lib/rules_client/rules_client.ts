@@ -54,6 +54,7 @@ import {
   getRuleVersionConflictMessage,
   type RuleValidationContext,
 } from '../errors/rule_error_messages';
+import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
 import {
   bulkScheduleRuleExecutorTasks,
   ensureRuleExecutorTaskScheduled,
@@ -1981,7 +1982,10 @@ export class RulesClient {
       references: existingReferences,
     } = await this.getExistingRule(id);
 
-    if (expectedVersion !== undefined && expectedVersion !== existingAttrs.version) {
+    if (
+      expectedVersion !== undefined &&
+      expectedVersion !== (existingAttrs.version ?? RULE_VERSION_FALLBACK)
+    ) {
       throw Boom.conflict(getRuleVersionConflictMessage(id), {
         code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
         details: { rule_id: id },
