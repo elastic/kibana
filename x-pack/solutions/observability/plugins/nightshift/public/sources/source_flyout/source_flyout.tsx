@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiResizableContainer,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -50,6 +51,8 @@ interface SourceFormValues {
   description: string;
   tags: string[];
   esql: string;
+  /** Only sent when creating. An existing source is enabled or disabled from the table. */
+  enabled: boolean;
 }
 
 interface SourceFlyoutProps {
@@ -81,6 +84,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
         description: source?.description ?? '',
         tags: source?.tags ?? [],
         esql: source?.esql ?? '',
+        enabled: true,
       },
     });
 
@@ -97,7 +101,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   });
   const canSave = isQueryUnchanged || queryValidation.status === 'valid';
 
-  const persist = async ({ title, description, tags, esql }: SourceFormValues) => {
+  const persist = async ({ title, description, tags, esql, enabled }: SourceFormValues) => {
     const body = {
       title,
       description: description.trim() === '' ? undefined : description,
@@ -108,7 +112,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
       if (source) {
         await updateSource.mutateAsync({ sourceId: source.id, body });
       } else {
-        await createSource.mutateAsync(body);
+        await createSource.mutateAsync({ ...body, enabled });
       }
       onClose();
     } catch (error) {
@@ -328,6 +332,22 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                  {!source && (
+                    <Controller
+                      name="enabled"
+                      control={control}
+                      render={({ field }) => (
+                        <EuiFormRow helpText={field.value ? ENABLED_HELP_TEXT : DISABLED_HELP_TEXT}>
+                          <EuiSwitch
+                            data-test-subj="significantEventsAppSourceFlyoutEnabledSwitch"
+                            label={ENABLED_LABEL}
+                            checked={field.value}
+                            onChange={(event) => field.onChange(event.target.checked)}
+                          />
+                        </EuiFormRow>
+                      )}
+                    />
+                  )}
                 </EuiForm>
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
@@ -436,6 +456,20 @@ const NO_INDEX_WARNING = i18n.translate('xpack.nightshift.sources.flyout.noIndex
 
 const RUN_QUERY_LABEL = i18n.translate('xpack.nightshift.sources.flyout.runQueryLabel', {
   defaultMessage: 'Run query',
+});
+
+const ENABLED_LABEL = i18n.translate('xpack.nightshift.sources.flyout.enabledLabel', {
+  defaultMessage: 'Enabled',
+});
+
+const ENABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.enabledHelpText', {
+  defaultMessage:
+    'Onboarding starts as soon as the source is created, so Nightshift can learn its knowledge indicators and watch it for significant events.',
+});
+
+const DISABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.disabledHelpText', {
+  defaultMessage:
+    'The source is created but nothing runs on it. Turn it on from the Sources table to start onboarding it.',
 });
 
 const CANCEL_LABEL = i18n.translate('xpack.nightshift.sources.flyout.cancelLabel', {

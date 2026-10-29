@@ -22,6 +22,7 @@ import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockHttp = { put: jest.fn(), get: jest.fn() };
 const mockUserProfile = { getCurrent: jest.fn(), bulkGet: jest.fn(), suggest: jest.fn() };
+const profilesPath = (id: string) => `/internal/workflows/${id}/access_control/_profiles`;
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
@@ -31,7 +32,7 @@ describe('WorkflowAccessControlModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUserProfile.getCurrent.mockResolvedValue({ uid: 'owner', user: { username: 'owner' } });
-    mockUserProfile.bulkGet.mockResolvedValue([]);
+    mockHttp.get.mockResolvedValue([]);
     mockUserProfile.suggest.mockResolvedValue([]);
   });
 
@@ -104,6 +105,29 @@ describe('WorkflowAccessControlModal', () => {
       body: JSON.stringify(savedAccess.access_control),
     });
     expect(store.getState().detail.workflow?.owner_id).toBe('owner');
+  });
+
+  it('resolves the owner name through the workflow route, not the gated bulk profile API', async () => {
+    mockUserProfile.getCurrent.mockResolvedValue({ uid: 'admin', user: { username: 'admin' } });
+    mockHttp.get.mockResolvedValue([
+      { uid: 'owner', enabled: true, user: { username: 'jdoe', full_name: 'Jane Doe' }, data: {} },
+    ]);
+    const workflow = createMockWorkflowDetailDto({
+      owner_id: 'owner',
+      access_control: { access_mode: 'private', entries: [] },
+      permissions: { read: true, edit: true, execute: true, manage: true },
+    });
+    render(
+      <TestWrapper>
+        <EuiProvider>
+          <WorkflowAccessControlModal workflow={workflow} onClose={jest.fn()} />
+        </EuiProvider>
+      </TestWrapper>
+    );
+
+    expect(await screen.findByText('Jane Doe')).toBeInTheDocument();
+    expect(mockHttp.get).toHaveBeenCalledWith(profilesPath(workflow.id));
+    expect(mockUserProfile.bulkGet).not.toHaveBeenCalled();
   });
 
   it('lets an administrator without a profile find users', async () => {
@@ -211,7 +235,10 @@ describe('WorkflowAccessControlModal', () => {
         `/internal/workflows/${workflow.id}/access_control`,
         { body: JSON.stringify(savedAccess) }
       );
-      expect(mockHttp.get).not.toHaveBeenCalled();
+      // Only the profile lookup reads from the server; saving must not reload the workflow.
+      expect(mockHttp.get.mock.calls.every(([path]) => path === profilesPath(workflow.id))).toBe(
+        true
+      );
       expect(store.getState().detail.workflow).toEqual({ ...workflow, ...savedMetadata });
       expect(store.getState().detail.yamlString).toBe('name: unsaved changes');
     }
