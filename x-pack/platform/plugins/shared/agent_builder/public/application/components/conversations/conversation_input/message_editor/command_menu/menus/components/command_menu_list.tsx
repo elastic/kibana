@@ -180,7 +180,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
     const activeHighlightStyles = css`
       ${getRowSelector(activeIndex)} {
         background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
-        border-radius: ${euiTheme.border.radius.small};
+        border-radius: ${euiTheme.border.radius.control};
       }
     `;
 
