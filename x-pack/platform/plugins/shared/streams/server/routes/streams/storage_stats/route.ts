@@ -7,7 +7,7 @@
 
 import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import {
@@ -125,9 +125,11 @@ const storageStatsForStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: statsStreamNamesBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: statsStreamNamesBodySchema,
+    })
+  ),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamStorageStat[]> => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
@@ -57,9 +57,11 @@ const degradedDocCountsForStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: statsStreamNamesBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: statsStreamNamesBodySchema,
+    })
+  ),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -112,9 +114,11 @@ const totalDocCountsForStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: statsStreamNamesBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: statsStreamNamesBodySchema,
+    })
+  ),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
 
@@ -170,9 +174,11 @@ const failedDocCountsForStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: statsStreamNamesTimeRangeBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: statsStreamNamesTimeRangeBodySchema,
+    })
+  ),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const { start, end, streams } = params.body;
@@ -228,9 +234,11 @@ const ingestionDocCountsForStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    body: statsStreamNamesTimeRangeBodySchema,
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: statsStreamNamesTimeRangeBodySchema,
+    })
+  ),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const { start, end, streams } = params.body;
