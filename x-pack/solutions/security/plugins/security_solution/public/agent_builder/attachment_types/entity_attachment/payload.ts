@@ -96,7 +96,8 @@ export const normaliseEntityAttachment = (
       return null;
     }
     return {
-      isSingle: entities.length === 1,
+      // A group is shown as a table row even when alone: the card and its Preview handle only single entities.
+      isSingle: entities.length === 1 && !entities[0].mode,
       attachmentLabel,
       entities,
     };

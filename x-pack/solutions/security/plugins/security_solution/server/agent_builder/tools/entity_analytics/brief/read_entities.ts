@@ -193,7 +193,9 @@ export const toAttachmentIdentifier = (candidate: BriefCandidate) => ({
   identifierType: candidate.type,
   identifier: candidate.name,
   entityStoreId: candidate.id,
-  ...(getCandidateRisk(candidate)?.of === 'resolution group' ? { mode: 'resolved' as const } : {}),
+  ...((candidate.members?.length ?? 0) > 0 || getCandidateRisk(candidate)?.of === 'resolution group'
+    ? { mode: 'resolved' as const }
+    : {}),
 });
 
 /** The record's entity type, or the EUID prefix when the record has none. */

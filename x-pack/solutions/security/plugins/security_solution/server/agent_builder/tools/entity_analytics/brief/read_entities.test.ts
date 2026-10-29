@@ -95,7 +95,9 @@ describe('withGroupValues', () => {
 });
 
 describe('toAttachmentIdentifier', () => {
-  it('opens a scored resolution group as the group', () => {
+  const member = { id: 'host:alias', record: { entity: { id: 'host:alias' } } };
+
+  it('opens a group with a resolution score as the group', () => {
     const group = candidate('host:gold', ['riskMovers'], 13, {
       risk: { calculated_score_norm: 83 },
     });
@@ -107,9 +109,18 @@ describe('toAttachmentIdentifier', () => {
     });
   });
 
-  it('opens an entity scored on its own as a single entity', () => {
+  it('opens a group without a resolution score as the group', () => {
+    expect(
+      toAttachmentIdentifier({ ...candidate('host:gold', ['watchlisted'], 13), members: [member] })
+    ).toHaveProperty('mode', 'resolved');
+  });
+
+  it('opens an entity with no members and no group score as a single entity', () => {
     expect(toAttachmentIdentifier(candidate('host:solo', ['riskMovers'], 40))).not.toHaveProperty(
       'mode'
     );
+    expect(
+      toAttachmentIdentifier({ ...candidate('host:solo', ['riskMovers'], 40), members: [] })
+    ).not.toHaveProperty('mode');
   });
 });

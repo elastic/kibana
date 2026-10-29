@@ -100,6 +100,23 @@ describe('normaliseEntityAttachment', () => {
     expect(result?.entities[1]).not.toHaveProperty('mode');
   });
 
+  it('keeps a single resolution group in the list, not as a single entity', () => {
+    const result = normaliseEntityAttachment(
+      buildAttachment({
+        entities: [
+          {
+            identifierType: 'host',
+            identifier: 'gold',
+            entityStoreId: 'host:gold',
+            mode: 'resolved',
+          },
+        ],
+      })
+    );
+    expect(result?.isSingle).toBe(false);
+    expect(result?.entities).toHaveLength(1);
+  });
+
   it('accepts multi-entity payload with entities array', () => {
     const result = normaliseEntityAttachment(
       buildAttachment({
