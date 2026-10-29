@@ -252,35 +252,6 @@ describe('prepareConversation', () => {
       ]);
     });
 
-    it('leaves the attachment types out, and says the notices are off, when includeAttachmentNotices is false', async () => {
-      mockContext.attachmentStateManager = createAttachmentStateManager([], {
-        getTypeDefinition: (type: string) => ({
-          id: type,
-          validate: (input: unknown) => ({ valid: true as const, data: input }),
-          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
-        }),
-      });
-      mockAttachmentsService.getTypeDefinition.mockReturnValue({
-        id: 'text',
-        validate: jest.fn(),
-        format: jest.fn(),
-        getAgentDescription: () => 'A text attachment type',
-      });
-
-      const result = await prepareConversation({
-        previousRounds: [],
-        nextInput: {
-          message: 'I uploaded a note',
-          attachments: [{ id: 'note-1', type: 'text', data: { content: 'hello' } }],
-        },
-        context: mockContext,
-        includeAttachmentNotices: false,
-      });
-
-      expect(result.attachmentTypes).toEqual([]);
-      expect(result.includeAttachmentNotices).toBe(false);
-    });
-
     it('treats same ID as a new version of an existing attachment', async () => {
       const existing: VersionedAttachment = {
         id: 'a-1',

@@ -57,7 +57,7 @@ describe('registerFindingsRecorder', () => {
 
     const abort = new AbortController();
     const handler = await definition.getHandler({
-      conversation: { id: 'c1', access: 'readWrite' },
+      conversation: { id: 'c1' },
       request,
       abortSignal: abort.signal,
       input: { message: 'Why is checkout failing?' },
@@ -76,7 +76,7 @@ describe('registerFindingsRecorder', () => {
     const { registerCycleHook, coordinator } = setup();
     const [definition] = registerCycleHook.mock.calls[0];
     const handler = await definition.getHandler({
-      conversation: { id: 'c1', access: 'readWrite' },
+      conversation: { id: 'c1' },
       request,
       abortSignal: new AbortController().signal,
       services: services('custom-connector'),
@@ -96,7 +96,7 @@ describe('registerFindingsRecorder', () => {
     const { registerCycleHook, coordinator } = setup();
     const [definition] = registerCycleHook.mock.calls[0];
     const handler = await definition.getHandler({
-      conversation: { id: 'c1', access: 'readWrite' },
+      conversation: { id: 'c1' },
       request,
       abortSignal: new AbortController().signal,
       services: {
@@ -125,20 +125,6 @@ describe('registerFindingsRecorder', () => {
     await expect(
       definition.getHandler({
         conversation: {},
-        request,
-        abortSignal: new AbortController().signal,
-        services: services(),
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it('sits the cycle hook out when the run is read-only', async () => {
-    const { registerCycleHook } = setup();
-
-    const [definition] = registerCycleHook.mock.calls[0];
-    await expect(
-      definition.getHandler({
-        conversation: { id: 'c1', access: 'readOnly' },
         request,
         abortSignal: new AbortController().signal,
         services: services(),

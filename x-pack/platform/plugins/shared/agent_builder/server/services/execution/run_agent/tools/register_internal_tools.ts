@@ -71,8 +71,6 @@ export interface RegisterInternalToolsParams {
    * gates `run_subagent` / `send_message` / `sleep`.
    */
   agentConfiguration: AgentConfiguration;
-  /** A raw agent gets none of the internal tools, only the tools it selects explicitly. */
-  rawAgent?: boolean;
 }
 
 /**
@@ -94,7 +92,6 @@ export const registerInternalTools = async ({
   subagentTracker,
   conversationExists,
   agentConfiguration,
-  rawAgent = false,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -120,10 +117,6 @@ export const registerInternalTools = async ({
   // Sub-agent spawning is reserved for top-level, non-standalone runs
   const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone && !parentExecutionId;
   const interactive = interactivity.enabled;
-
-  if (rawAgent) {
-    return;
-  }
 
   const tools: Array<InternalBuiltinToolDefinition<any>> = [];
 

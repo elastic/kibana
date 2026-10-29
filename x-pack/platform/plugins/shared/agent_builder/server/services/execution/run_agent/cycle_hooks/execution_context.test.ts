@@ -52,12 +52,6 @@ const build = (timeline: ProcessedTimelineEvent[], resumedRoundId?: string) => {
 };
 
 describe('buildCycleHookExecutionContext', () => {
-  it('tells the hook whether the run may change the conversation', () => {
-    const { execution } = build([]);
-
-    expect(execution.conversation.access).toBe(createAgentHandlerContextMock().conversationAccess);
-  });
-
   it('exposes the timeline before this run, and one summary per ended execution', () => {
     const timeline = processed([
       ...completedRoundTimeline('r1', T0),

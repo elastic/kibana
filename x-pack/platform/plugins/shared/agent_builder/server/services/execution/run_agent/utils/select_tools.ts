@@ -39,7 +39,6 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
-  rawAgent = false,
   aiIndexCatalog,
   aiIndicesEnabled,
   attachmentsService,
@@ -54,8 +53,6 @@ export const selectTools = async ({
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
-  /** A raw agent gets only the tools it selects explicitly, which leaves out the attachment tools. */
-  rawAgent?: boolean;
   aiIndexCatalog?: AiIndexCatalogEntry[];
   aiIndicesEnabled: boolean;
   spaceId: string;
@@ -63,32 +60,24 @@ export const selectTools = async ({
 }): Promise<SelectToolsResult> => {
   const formatContext: AttachmentFormatContext = { request, spaceId };
 
-  const includeAttachmentTools = !rawAgent;
-
   // create tool selection for attachments types
   const attachmentTypes = conversation.attachmentTypes.map((type) => type.type);
-  const attachmentToolIds = includeAttachmentTools
-    ? getToolsForAttachmentTypes(attachmentTypes, attachmentsService)
-    : [];
+  const attachmentToolIds = getToolsForAttachmentTypes(attachmentTypes, attachmentsService);
   const attachmentToolSelection: ToolSelection = {
     tool_ids: attachmentToolIds,
   };
 
-  const versionedAttachmentBoundTools = includeAttachmentTools
-    ? await getVersionedAttachmentBoundTools({
-        attachmentStateManager: conversation.attachmentStateManager,
-        attachmentsService,
-        formatContext,
-      })
-    : [];
+  const versionedAttachmentBoundTools = await getVersionedAttachmentBoundTools({
+    attachmentStateManager: conversation.attachmentStateManager,
+    attachmentsService,
+    formatContext,
+  });
 
-  const versionedAttachmentTools = includeAttachmentTools
-    ? createVersionedAttachmentTools({
-        attachmentsService,
-        formatContext,
-        runner,
-      })
-    : [];
+  const versionedAttachmentTools = createVersionedAttachmentTools({
+    attachmentsService,
+    formatContext,
+    runner,
+  });
 
   // The read tools come from the `ki-retrieval` skill, which carries the guidance for using them.
   // Memory tools have no skill of their own, so they stay static.

@@ -15,14 +15,11 @@ import { resolveAiIndexCatalog } from './resolve_ai_index_catalog';
 export const resolveConfiguration = async (
   configuration: AgentConfiguration,
   {
-    rawSystemPrompt = false,
     aiIndicesEnabled,
     request,
     resolver,
     logger,
   }: {
-    /** The system prompt is exactly the instructions, without Agent Builder's own sections. */
-    rawSystemPrompt?: boolean;
     aiIndicesEnabled: boolean;
     request: KibanaRequest;
     resolver?: AiIndexResolver;
@@ -31,7 +28,6 @@ export const resolveConfiguration = async (
 ): Promise<ResolvedConfiguration> => {
   const base: ResolvedConfiguration = {
     instructions: configuration.instructions ?? '',
-    rawSystemPrompt,
     aiIndices: configuration.ai_indices ?? [],
   };
 

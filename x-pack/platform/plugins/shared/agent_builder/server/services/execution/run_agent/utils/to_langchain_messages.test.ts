@@ -30,7 +30,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
-import { prepareMessages, groupToolCallSteps, noticeRendererFor } from './to_langchain_messages';
+import { prepareMessages, groupToolCallSteps } from './to_langchain_messages';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -1319,43 +1319,6 @@ describe('prepareMessages', () => {
   });
 
   describe('with attachment events', () => {
-    describe('for an agent that cannot act on attachments', () => {
-      const withStandaloneEvents = (includeAttachmentNotices?: boolean) =>
-        ({
-          timeline: [
-            attachmentEventFixture({ id: 'before-first-round' }),
-            ...timelineFromRounds([
-              { id: 'r1', input: makeRoundInput('Q1'), response: { message: 'A1' } },
-            ]),
-            attachmentEventFixture({ id: 'between-rounds', kind: 'updated', version: 2 }),
-          ],
-          nextInput: makeRoundInput('Q2'),
-          attachmentTypes: [{ type: 'text', description: 'Plain text' }],
-          attachmentStateManager: createAttachmentStateManager([], {
-            getTypeDefinition: () => undefined,
-          }),
-          ...(includeAttachmentNotices === undefined ? {} : { includeAttachmentNotices }),
-        } as ProcessedConversation);
-
-      it('shows the events written between rounds by default', async () => {
-        const messages = await prepareMessages({ conversation: withStandaloneEvents() });
-
-        const rendered = JSON.stringify(messages.map((m) => m.content));
-        expect(rendered.match(/<conversation_event/g)).toHaveLength(2);
-      });
-
-      it('leaves them out, and the history is just the conversation', async () => {
-        const messages = await prepareMessages({ conversation: withStandaloneEvents(false) });
-
-        expect(JSON.stringify(messages.map((m) => m.content))).not.toContain('conversation_event');
-        expect(messages.map((m) => String(m.content))).toEqual([
-          expect.stringContaining('Q1'),
-          expect.stringContaining('A1'),
-          expect.stringContaining('Q2'),
-        ]);
-      });
-    });
-
     it('renders a legacy message exactly as before, and its unmarked events not at all', async () => {
       const legacyTimeline = [
         ...timelineFromRounds([
@@ -1995,27 +1958,5 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(result[3].content).toContain('LLM &lt;boom&gt;');
       expect(result[4].content).toContain('third');
     });
-  });
-});
-
-describe('noticeRendererFor', () => {
-  const events = [attachmentEventFixture({ id: 'e1' })];
-  const conversation = {
-    attachmentTypes: [{ type: 'text', description: 'A text attachment' }],
-    describeAttachmentType: () => 'A text attachment',
-  };
-
-  it('renders the attachment events and the type instructions by default', () => {
-    const rendered = noticeRendererFor(conversation).render(events);
-
-    expect(rendered).toContain('<conversation_event type="attachment_added"');
-    expect(rendered).toContain('ATTACHMENT TYPES');
-  });
-
-  it('renders neither for an agent that cannot act on attachments', () => {
-    const notices = noticeRendererFor({ ...conversation, includeAttachmentNotices: false });
-
-    expect(notices.render(events)).toBe('');
-    expect(notices.typeInstructions(['text'])).toBe('');
   });
 });

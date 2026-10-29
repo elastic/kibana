@@ -53,20 +53,11 @@ import {
   type RoundAttachmentPlacement,
 } from './attachment_placement';
 
-/** For an agent that cannot act on attachments: no events and no type instructions. */
-const NO_NOTICES: AttachmentNoticeRenderer = { render: () => '', typeInstructions: () => '' };
-
 /** The notice renderer of one prompt build; per-type instructions are given once across it. */
 export const noticeRendererFor = (
-  conversation: Pick<
-    ProcessedConversation,
-    'attachmentTypes' | 'describeAttachmentType' | 'includeAttachmentNotices'
-  >,
+  conversation: Pick<ProcessedConversation, 'attachmentTypes' | 'describeAttachmentType'>,
   { withTypeInstructions = true }: { withTypeInstructions?: boolean } = {}
 ): AttachmentNoticeRenderer => {
-  if (conversation.includeAttachmentNotices === false) {
-    return NO_NOTICES;
-  }
   const renderer = createAttachmentNoticeRenderer({
     describeType: (type) =>
       conversation.describeAttachmentType
@@ -154,11 +145,6 @@ export const prepareMessages = async ({
       continue;
     }
     if (isTimelineStandaloneEvent(entry)) {
-      // An agent that cannot act on attachments is not told what happened to them, whoever did it.
-      // A custom event is meant for the agent, so it stays.
-      if (conversation.includeAttachmentNotices === false && isAttachmentEvent(entry.event)) {
-        continue;
-      }
       messages.push(standaloneEventToLangchain(entry.event, notices));
       continue;
     }

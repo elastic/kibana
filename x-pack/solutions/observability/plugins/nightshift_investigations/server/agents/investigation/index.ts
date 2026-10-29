@@ -124,8 +124,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent lists only its own tools. Agent Builder strips the rest (internal
- * tools, attachment tools, generic prompt) because the agent is on its raw agent allow list.
+ * With `standalone`, the agent lists only its own tools. Agent Builder's own prompt and internal
+ * tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
