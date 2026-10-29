@@ -19,8 +19,10 @@ import {
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   getNightshiftBoundDiscoveryWorkflowId,
+  getNightshiftBoundInvestigationCompletedWorkflowId,
   getNightshiftBoundKiOnboardingWorkflowId,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   getNightshiftBoundScheduledDetectionWorkflowId,
   getNightshiftBoundScheduledReviewWorkflowId,
   getNightshiftBoundSourceReconciliationWorkflowId,
@@ -54,6 +56,7 @@ const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
@@ -224,10 +227,11 @@ export const createServiceAccountSetupService = ({
     });
     // An installed workflow keeps its state, so the ones `_disable` switched off are switched back
     // on here. The manually started ones are always on in a set-up space: the routes that start
-    // onboarding are blocked while the space is paused.
+    // onboarding are blocked while the space is paused. So is the investigation write-back.
     for (const workflowId of [
       getNightshiftBoundKiOnboardingWorkflowId(spaceId),
       getNightshiftBoundDiscoveryWorkflowId(spaceId),
+      getNightshiftBoundInvestigationCompletedWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
     ]) {
       await setEnabled({
@@ -300,6 +304,7 @@ export const createServiceAccountSetupService = ({
     for (const workflowId of [
       getNightshiftBoundKiOnboardingWorkflowId(spaceId),
       getNightshiftBoundDiscoveryWorkflowId(spaceId),
+      getNightshiftBoundInvestigationCompletedWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
     ]) {
       await setEnabled({
@@ -319,6 +324,7 @@ export const createServiceAccountSetupService = ({
       getNightshiftBoundDiscoveryWorkflowId(spaceId),
       getNightshiftBoundScheduledDetectionWorkflowId(spaceId),
       getNightshiftBoundScheduledReviewWorkflowId(spaceId),
+      getNightshiftBoundInvestigationCompletedWorkflowId(spaceId),
     ]) {
       await waitForNoRuns({ management: workflowsManagement, request, spaceId, workflowId });
     }

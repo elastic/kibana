@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-  type ManagedWorkflowId,
-  type TemplatedManagedWorkflowId,
-} from '@kbn/workflows/managed';
+import type { ManagedWorkflowId, TemplatedManagedWorkflowId } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { GLOBAL_CORE_WORKFLOW_IDS } from '../../maintenance/managed_workflow_targets';
@@ -24,10 +20,6 @@ const WORKFLOWS_TO_INSTALL: Array<{
     workflowId,
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   })),
-  {
-    workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-  },
 ];
 
 export const installWorkflows = async ({ client }: { client: PluginScopedManagedWorkflowsApi }) => {

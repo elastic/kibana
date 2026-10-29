@@ -2,6 +2,8 @@ version: '1'
 name: Significant Events Investigation Completed
 description: Attaches completed or failed Nightshift investigations to their Significant Event.
 enabled: true
+settings:
+  run_as: __SERVICE_ACCOUNT_ID__
 tags:
   - observability
   - streams

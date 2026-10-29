@@ -9,6 +9,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
@@ -17,7 +18,6 @@ import {
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -45,15 +45,17 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Manually started workflows bound to a service account and installed per space, as
- * `${id}-${spaceId}`, by the space's setup. Pausing cancels their executions but does not disable
- * them: the KI onboarding and discovery entry points are only started by routes that are blocked
- * while the space is paused, and source reconciliation keeps applying source changes, which leaves rules off
- * while the space is paused.
+ * Workflows bound to a service account and installed per space, as `${id}-${spaceId}`, by the
+ * space's setup. Pausing cancels their executions but does not disable them: the KI onboarding and
+ * discovery entry points are only started by routes that are blocked while the space is paused,
+ * source reconciliation keeps applying source changes, which leaves rules off while the space is
+ * paused, and the investigation write-back, triggered by an investigation finishing, just attaches
+ * it to its event and starts no new background work.
  */
 export const PER_SPACE_BOUND_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
@@ -80,10 +82,7 @@ export const SCHEDULED_MAINTENANCE_WORKFLOW_IDS = [
 ] as const;
 
 /** Workflows installed once at the global scope (`spaceId: '*'`). */
-export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
-  ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-] as const;
+export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [...GLOBAL_CORE_WORKFLOW_IDS] as const;
 
 /**
  * Pre-per-space continuous onboarding workflows of the default space. Removed at startup and
@@ -103,7 +102,6 @@ export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
  */
 export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 ] as const;
 
@@ -126,9 +124,7 @@ const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =
  * Targets whose `enabled` flag is toggled by pause/resume. Only the per-space scheduled
  * documents of the given spaces: the global workflows (`*`) belong to every space, so
  * pausing one space must not turn them off. The manual ones are started by routes that are
- * blocked while their space is paused. The only event-triggered one,
- * `INVESTIGATION_COMPLETED`, just attaches a finished investigation to its event and starts
- * no new background work, so it is safe to leave enabled.
+ * blocked while their space is paused.
  */
 export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
   ...scheduledTargetsFor(spaceIds),
