@@ -10,6 +10,7 @@ import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/com
 import { useKibana } from '../hooks/use_kibana';
 import { SourceCard } from './source_card';
 import { ConnectorCountBadge } from './connector_count_badge';
+import { getConnectorTypeIcon } from './connector_type_icon';
 
 /**
  * One of the deployment's telemetry connectors, configured as a telemetry target of the sandbox.
@@ -28,7 +29,7 @@ export function TelemetryConnectorCard({
   return (
     <SourceCard
       connected
-      icon={model?.iconClass ?? 'plugs'}
+      icon={getConnectorTypeIcon(connector.connector_type_id, registry)}
       title={connector.name}
       description={model?.actionTypeTitle ?? connector.connector_type_id}
       badge={

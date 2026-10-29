@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,39 +24,59 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiShadow,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { useConnectorsByType, type ConnectorTypeGroup } from './use_connectors_by_type';
-import { useAgentConnectors } from './use_agent_connectors';
+import { noAgentPermissionReason, useAgentConnectors } from './use_agent_connectors';
 import { useAddConnectorFlyout } from './use_add_connector_flyout';
-import { useEditConnector } from './use_edit_connector';
-import { useDeleteConnector } from './use_delete_connector';
 import { getSourceCardItem } from './source_card_item';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
-import { ConnectorList } from './connector_list';
 
 const noPermissionReason = i18n.translate('xpack.nightshift.addConnectorFlyout.noPermission', {
   defaultMessage: 'You need permission to create connectors and to edit the investigation agent.',
 });
 
-const connectLabel = i18n.translate('xpack.nightshift.addConnectorFlyout.connectButton', {
-  defaultMessage: 'Connect',
+const createLabel = i18n.translate('xpack.nightshift.addConnectorFlyout.createButton', {
+  defaultMessage: 'Create connector',
 });
 
 export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.ReactElement {
   const { application, triggersActionsUi } = useKibana().services;
   const { groups, isLoading, error, typesError, refetch } = useConnectorsByType();
-  const { canEditAgent } = useAgentConnectors();
+  const { assignedIds, assign, unassign, canEditAgent, isUpdating } = useAgentConnectors();
   const { openAdd, addFlyout } = useAddConnectorFlyout();
-  const { canEdit, openEdit, editFlyout } = useEditConnector();
-  const { requestDelete, confirmModal } = useDeleteConnector();
+  const [search, setSearch] = useState('');
   const titleId = useGeneratedHtmlId({ prefix: 'nightshiftAddConnectorFlyout' });
 
   const canCreate = application.capabilities.actions?.save === true && canEditAgent;
-  const canDelete = application.capabilities.actions?.delete === true;
+  const query = search.trim().toLowerCase();
+
+  const shown = useMemo(
+    () =>
+      groups.map((group) => {
+        if (!query) return group;
+        const item = triggersActionsUi
+          ? getSourceCardItem({
+              actionType: group.actionType,
+              actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+            })
+          : undefined;
+        const typeMatches = (item?.name ?? group.actionType.name).toLowerCase().includes(query);
+        return {
+          ...group,
+          connectors: typeMatches
+            ? group.connectors
+            : group.connectors.filter(({ name }) => name.toLowerCase().includes(query)),
+        };
+      }),
+    [groups, query, triggersActionsUi]
+  );
 
   return (
     <>
@@ -73,6 +96,19 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
+          <EuiFieldSearch
+            fullWidth
+            placeholder={i18n.translate('xpack.nightshift.addConnectorFlyout.searchPlaceholder', {
+              defaultMessage: 'Search',
+            })}
+            aria-label={i18n.translate('xpack.nightshift.addConnectorFlyout.searchLabel', {
+              defaultMessage: 'Search connectors',
+            })}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            data-test-subj="nightshiftAddConnectorFlyoutSearch"
+          />
+          <EuiSpacer size="m" />
           {isLoading ? (
             <EuiLoadingSpinner size="m" />
           ) : error ? (
@@ -89,7 +125,7 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
             />
           ) : triggersActionsUi ? (
             <EuiFlexGroup direction="column" gutterSize="s">
-              {groups.map((group) => {
+              {shown.map((group) => {
                 const enabledCheck = checkActionTypeEnabled(group.actionType);
                 return (
                   <EuiFlexItem key={group.actionType.id} grow={false}>
@@ -107,10 +143,13 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
                           : enabledCheck.message
                       }
                       onCreate={() => openAdd(group.actionType.id)}
-                      canOpenDetails={canEdit}
-                      onOpenDetails={openEdit}
-                      canDelete={canDelete}
-                      onDelete={requestDelete}
+                      assignedIds={assignedIds}
+                      isSearching={query.length > 0}
+                      canToggle={canEditAgent}
+                      isUpdating={isUpdating}
+                      onToggle={(connector, enable) =>
+                        enable ? assign(connector) : unassign(connector)
+                      }
                     />
                   </EuiFlexItem>
                 );
@@ -120,8 +159,6 @@ export function AddConnectorFlyout({ onClose }: { onClose: () => void }): React.
         </EuiFlyoutBody>
       </EuiFlyout>
       {addFlyout}
-      {editFlyout}
-      {confirmModal}
     </>
   );
 }
@@ -131,30 +168,37 @@ function ConnectorTypeRow({
   item,
   createDisabledReason,
   onCreate,
-  canOpenDetails,
-  onOpenDetails,
-  canDelete,
-  onDelete,
+  assignedIds,
+  canToggle,
+  isUpdating,
+  onToggle,
+  isSearching,
 }: {
   group: ConnectorTypeGroup;
   item: ReturnType<typeof getSourceCardItem>;
   createDisabledReason?: string;
   onCreate: () => void;
-} & Pick<
-  React.ComponentProps<typeof ConnectorList>,
-  'canOpenDetails' | 'onOpenDetails' | 'canDelete' | 'onDelete'
->): React.ReactElement {
+  assignedIds: string[];
+  canToggle: boolean;
+  isUpdating: boolean;
+  onToggle: (connector: SandboxConnector, enable: boolean) => void;
+  isSearching: boolean;
+}): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  const plateShadow = useEuiShadow('xs');
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftConnectorType' });
-  const connectButton = (
+  const hasConnectors = connectors.length > 0;
+
+  const createButton = (
     <EuiButton
       size="s"
-      iconType="plugs"
+      iconType="plus"
       isDisabled={createDisabledReason !== undefined}
       onClick={onCreate}
-      aria-label={`${connectLabel} ${item.name}`}
-      data-test-subj={`${actionType.id}-connect`}
+      aria-label={`${createLabel}: ${item.name}`}
+      data-test-subj={`${actionType.id}-create`}
     >
-      {connectLabel}
+      {createLabel}
     </EuiButton>
   );
 
@@ -162,10 +206,27 @@ function ConnectorTypeRow({
     <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj={`${actionType.id}-row`}>
       <EuiAccordion
         id={accordionId}
+        arrowDisplay="left"
+        isDisabled={!hasConnectors}
+        forceState={isSearching && hasConnectors ? 'open' : undefined}
         buttonContent={
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={item.iconClass} size="l" aria-hidden={true} />
+              <div
+                aria-hidden={true}
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 40px;
+                  height: 40px;
+                  border-radius: ${euiTheme.size.s};
+                  background: ${euiTheme.colors.backgroundBasePlain};
+                  ${plateShadow}
+                `}
+              >
+                <EuiIcon type={item.iconClass} size="m" aria-hidden={true} />
+              </div>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
@@ -173,8 +234,7 @@ function ConnectorTypeRow({
               </EuiText>
               <EuiText size="xs" color="subdued" data-test-subj={`${actionType.id}-count`}>
                 {i18n.translate('xpack.nightshift.addConnectorFlyout.connectorCount', {
-                  defaultMessage:
-                    '{count, plural, =0 {No connectors} one {# connector} other {# connectors}}',
+                  defaultMessage: '{count, plural, one {# connector} other {# connectors}}',
                   values: { count: connectors.length },
                 })}
               </EuiText>
@@ -184,33 +244,86 @@ function ConnectorTypeRow({
         buttonProps={{ 'data-test-subj': `${actionType.id}-toggle` }}
         extraAction={
           createDisabledReason === undefined ? (
-            connectButton
+            createButton
           ) : (
             <EuiToolTip position="top" content={createDisabledReason}>
-              {connectButton}
+              {createButton}
             </EuiToolTip>
           )
         }
       >
-        <EuiSpacer size="s" />
-        {connectors.length > 0 ? (
-          <ConnectorList
-            connectors={connectors}
-            canOpenDetails={canOpenDetails}
-            onOpenDetails={onOpenDetails}
-            canDelete={canDelete}
-            onDelete={onDelete}
-            data-test-subj={`${actionType.id}-connectors`}
-          />
-        ) : (
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.nightshift.addConnectorFlyout.noConnectors', {
-                defaultMessage: 'No {type} connectors in this space yet.',
-                values: { type: item.name },
+        {hasConnectors && (
+          <>
+            <EuiSpacer size="s" />
+            <ul
+              css={css`
+                list-style: none;
+                margin: 0;
+                padding: 0;
+              `}
+              data-test-subj={`${actionType.id}-connectors`}
+            >
+              {connectors.map((connector) => {
+                const isEnabled = assignedIds.includes(connector.id);
+                const toggle = isEnabled ? (
+                  <EuiButtonEmpty
+                    size="s"
+                    color="success"
+                    iconType="check"
+                    isDisabled={!canToggle || isUpdating}
+                    onClick={() => onToggle(connector, false)}
+                    aria-label={i18n.translate(
+                      'xpack.nightshift.addConnectorFlyout.disableAction',
+                      { defaultMessage: 'Disable {name}', values: { name: connector.name } }
+                    )}
+                    data-test-subj={`nightshiftConnectorEnabled-${connector.id}`}
+                  >
+                    {i18n.translate('xpack.nightshift.addConnectorFlyout.enabledLabel', {
+                      defaultMessage: 'Enabled',
+                    })}
+                  </EuiButtonEmpty>
+                ) : (
+                  <EuiButtonEmpty
+                    size="s"
+                    isDisabled={!canToggle || isUpdating}
+                    onClick={() => onToggle(connector, true)}
+                    aria-label={i18n.translate('xpack.nightshift.addConnectorFlyout.enableAction', {
+                      defaultMessage: 'Enable {name}',
+                      values: { name: connector.name },
+                    })}
+                    data-test-subj={`nightshiftConnectorEnable-${connector.id}`}
+                  >
+                    {i18n.translate('xpack.nightshift.addConnectorFlyout.enableLabel', {
+                      defaultMessage: 'Enable',
+                    })}
+                  </EuiButtonEmpty>
+                );
+                return (
+                  <li
+                    key={connector.id}
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      gap: ${euiTheme.size.s};
+                      padding: ${euiTheme.size.xs} 0 ${euiTheme.size.xs} ${euiTheme.size.l};
+                      border-top: ${euiTheme.border.thin};
+                    `}
+                    data-test-subj={`nightshiftConnectorRow-${connector.id}`}
+                  >
+                    <EuiText size="s">{connector.name}</EuiText>
+                    {canToggle ? (
+                      toggle
+                    ) : (
+                      <EuiToolTip position="top" content={noAgentPermissionReason}>
+                        {toggle}
+                      </EuiToolTip>
+                    )}
+                  </li>
+                );
               })}
-            </p>
-          </EuiText>
+            </ul>
+          </>
         )}
       </EuiAccordion>
     </EuiPanel>

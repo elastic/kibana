@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector';
 import { AddConnectorFlyout } from './add_connector_flyout';
 import {
   actionType,
@@ -18,16 +17,12 @@ import {
 } from './test_utils';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector', () => ({
-  fetchConnector: jest.fn(),
-}));
-const mockFetchConnector = fetchConnector as jest.Mock;
 
 const types = [actionType('.http'), actionType('.github')];
 const connectors = [
   sandboxConnector('telemetry', { is_preconfigured: true }),
-  sandboxConnector('h1'),
-  sandboxConnector('h2'),
+  sandboxConnector('h1', { name: 'acme-sre' }),
+  sandboxConnector('h2', { name: 'acme-payments' }),
 ];
 
 const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
@@ -38,7 +33,6 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
     telemetryConnectorIds: ['telemetry'],
     ...options,
   });
-  mockFetchConnector.mockResolvedValue({ id: 'h2', actionTypeId: '.http', name: 'Connector h2' });
   const onClose = jest.fn();
   renderWithProviders(<AddConnectorFlyout onClose={onClose} />);
   return { ...services, onClose };
@@ -50,21 +44,18 @@ describe('AddConnectorFlyout', () => {
 
     expect(await screen.findByTestId('.http-row')).toHaveTextContent('Type .http');
     expect(screen.getByTestId('.http-count')).toHaveTextContent('2 connectors');
-    expect(screen.getByTestId('.github-count')).toHaveTextContent('No connectors');
-    expect(screen.getByTestId('.github-row')).toHaveTextContent('No Type .github connectors');
+    expect(screen.getByTestId('.github-count')).toHaveTextContent('0 connectors');
+    expect(screen.queryByTestId('nightshiftConnectorRow-telemetry')).not.toBeInTheDocument();
   });
 
-  it('shows the connectors of a type, the assigned ones ticked, and assigns a ticked one', async () => {
+  it('shows the enabled connectors as such and enables another one', async () => {
     const { agents } = setup();
     fireEvent.click(await screen.findByTestId('.http-toggle'));
 
-    await waitFor(() =>
-      expect(screen.getByTestId('nightshiftConnectorListToggle-h1')).toBeChecked()
-    );
-    expect(screen.getByTestId('nightshiftConnectorListToggle-h2')).not.toBeChecked();
-    expect(screen.queryByTestId('nightshiftConnectorListItem-telemetry')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('nightshiftConnectorEnabled-h1')).toHaveTextContent('Enabled');
+    expect(screen.getByTestId('nightshiftConnectorEnable-h2')).toHaveTextContent('Enable');
 
-    fireEvent.click(screen.getByTestId('nightshiftConnectorListToggle-h2'));
+    fireEvent.click(screen.getByTestId('nightshiftConnectorEnable-h2'));
 
     await waitFor(() =>
       expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
@@ -72,16 +63,53 @@ describe('AddConnectorFlyout', () => {
         connectorId: 'h2',
       })
     );
-    await waitFor(() =>
-      expect(screen.getByTestId('nightshiftConnectorListToggle-h2')).toBeChecked()
-    );
+    expect(await screen.findByTestId('nightshiftConnectorEnabled-h2')).toBeInTheDocument();
   });
 
-  it('creates a connector of the type from Connect and assigns it to the agent', async () => {
-    const { getAddConnectorFlyout, agents } = setup();
-    await waitFor(() => expect(screen.getByTestId('.github-connect')).toBeEnabled());
+  it('disables an enabled connector from its Enabled link', async () => {
+    const { agents } = setup();
+    fireEvent.click(await screen.findByTestId('.http-toggle'));
 
-    fireEvent.click(screen.getByTestId('.github-connect'));
+    fireEvent.click(await screen.findByTestId('nightshiftConnectorEnabled-h1'));
+
+    await waitFor(() =>
+      expect(agents.removeConnectorFromAgent).toHaveBeenCalledWith({
+        agentId: 'nightshift.investigation',
+        connectorId: 'h1',
+      })
+    );
+    expect(await screen.findByTestId('nightshiftConnectorEnable-h1')).toBeInTheDocument();
+  });
+
+  it('filters by connector name, counting the matches', async () => {
+    setup();
+    await screen.findByTestId('.http-row');
+
+    fireEvent.change(screen.getByTestId('nightshiftAddConnectorFlyoutSearch'), {
+      target: { value: 'payments' },
+    });
+
+    expect(screen.getByTestId('.http-count')).toHaveTextContent('1 connector');
+    expect(screen.getByTestId('nightshiftConnectorRow-h2')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftConnectorRow-h1')).not.toBeInTheDocument();
+  });
+
+  it('keeps every connector of a type whose name matches the search', async () => {
+    setup();
+    await screen.findByTestId('.http-row');
+
+    fireEvent.change(screen.getByTestId('nightshiftAddConnectorFlyoutSearch'), {
+      target: { value: '.http' },
+    });
+
+    expect(screen.getByTestId('.http-count')).toHaveTextContent('2 connectors');
+  });
+
+  it('creates a connector of the type and assigns it to the agent', async () => {
+    const { getAddConnectorFlyout, agents } = setup();
+    await waitFor(() => expect(screen.getByTestId('.github-create')).toBeEnabled());
+
+    fireEvent.click(screen.getByTestId('.github-create'));
 
     expect(await screen.findByTestId('addConnectorFlyoutStub')).toBeInTheDocument();
     const props = (getAddConnectorFlyout.mock.calls as unknown as Array<[unknown]>)[0][0] as {
@@ -99,22 +127,17 @@ describe('AddConnectorFlyout', () => {
     expect(screen.getByTestId('nightshiftAddConnectorFlyout')).toBeInTheDocument();
   });
 
-  it('opens the connector details in the edit flyout', async () => {
-    const { getEditConnectorFlyout } = setup();
-    fireEvent.click(await screen.findByTestId('.http-toggle'));
-
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorListOpenDetails-h2'));
-
-    expect(await screen.findByTestId('editConnectorFlyoutStub')).toBeInTheDocument();
-    expect(getEditConnectorFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ connector: expect.objectContaining({ id: 'h2' }) })
-    );
-  });
-
-  it('locks Connect without permission to create connectors', async () => {
+  it('locks Create connector without permission to create connectors', async () => {
     setup({ capabilities: { show: true, save: false, delete: true } });
 
-    expect(await screen.findByTestId('.github-connect')).toBeDisabled();
+    expect(await screen.findByTestId('.github-create')).toBeDisabled();
+  });
+
+  it('locks Enable when the user cannot edit the agent', async () => {
+    setup({ canUpdateAgent: false });
+    fireEvent.click(await screen.findByTestId('.http-toggle'));
+
+    expect(await screen.findByTestId('nightshiftConnectorEnable-h2')).toBeDisabled();
   });
 
   it('shows an error with a retry when the connector types cannot be loaded', async () => {

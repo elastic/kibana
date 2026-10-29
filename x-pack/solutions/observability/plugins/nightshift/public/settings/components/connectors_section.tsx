@@ -34,7 +34,7 @@ export function ConnectorsSection(): React.ReactElement {
           <EuiSpacer size="m" />
           <EuiButton
             size="s"
-            iconType="plusCircle"
+            iconType="plus"
             onClick={() => setIsAdding(true)}
             data-test-subj="nightshiftAddConnectorButton"
           >
