@@ -50055,7 +50055,7 @@ paths:
                       type: object
                       properties:
                         agentCount:
-                          description: Number of agents enrolled in the deployment instance agent policies. Only agent policies in the current space are counted.
+                          description: Number of agents enrolled in the deployment instance agent policies. Only agent policies in the current space are counted. Omitted without permission to read agents.
                           minimum: 0
                           type: number
                         agentPolicyIds:
@@ -50307,7 +50307,6 @@ paths:
                         - attemptCount
                         - packages
                         - servicesByMethod
-                        - agentCount
                     maxItems: 100
                     type: array
                   page:
