@@ -184986,29 +184986,6 @@ components:
         - panel
         - range_from
         - range_to
-    Kibana_HTTP_APIs_valueDisplay:
-      additionalProperties: false
-      description: Configure the visibility and the format of the values rendered on each chart partition section
-      type: object
-      properties:
-        mode:
-          anyOf:
-            - enum:
-                - absolute
-              type: string
-            - enum:
-                - percentage
-              type: string
-          description: How to format values when visible.
-        percent_decimals:
-          default: 2
-          description: Decimal places for percentage display (0-10)
-          maximum: 10
-          minimum: 0
-          type: number
-        visible:
-          description: Show metric values on the chart
-          type: boolean
     Kibana_HTTP_APIs_visApiConfig:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricChart'
