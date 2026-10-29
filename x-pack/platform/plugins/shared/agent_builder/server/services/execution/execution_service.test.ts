@@ -1102,7 +1102,9 @@ describe('AgentExecutionService', () => {
     });
 
     it("validates the agent's inference feature model when the agent declares one", async () => {
-      agentRegistry.get.mockResolvedValueOnce(
+      // Persistent: creating the conversation reads the agent for use access before its model is
+      // resolved.
+      agentRegistry.get.mockResolvedValue(
         createMockedInternalAgent({
           id: 'agent-1',
           configuration: { tools: [], inference_feature_id: 'my_feature' },
