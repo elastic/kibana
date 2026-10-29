@@ -107,7 +107,20 @@ export class DashboardPageLinks extends FtrService {
     const label = await radioOption.findByCssSelector('label[for="dashboardLink"]');
     await label.click();
 
-    await this.comboBox.set('links--linkEditor--dashboardLink--comboBox', destination);
+    // Results from the picker's debounced refetch can replace the clicked option before React commits it.
+    await this.retry.tryForTime(
+      30_000,
+      async () => {
+        await this.comboBox.set('links--linkEditor--dashboardLink--comboBox', destination);
+        const picker = await this.testSubjects.find('links--linkEditor--dashboardLink--comboBox');
+        expect(await this.comboBox.isOptionSelected(picker, destination)).to.be(true);
+      },
+      {
+        description: `select "${destination}" as the link destination`,
+        retryDelay: 1000,
+      }
+    );
+
     if (linkLabel) {
       await this.testSubjects.setValue('links--linkEditor--linkLabel--input', linkLabel);
     }
