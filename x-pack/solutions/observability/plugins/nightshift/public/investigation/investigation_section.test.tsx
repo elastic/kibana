@@ -192,9 +192,12 @@ describe('InvestigationSection', () => {
     expect(
       screen.getByTestId('nightshiftInvestigationSectionRetry-critical').closest('[inert]')
     ).not.toBeNull();
+    const errorBadge = screen.getByTestId('nightshiftInvestigationSectionError-critical');
+    expect(errorBadge.closest('[inert]')).toBeNull();
+    // It takes the count's place beside the title, inside the header toggle.
     expect(
-      screen.getByTestId('nightshiftInvestigationSectionError-critical').closest('[inert]')
-    ).toBeNull();
+      screen.getByTestId('nightshiftInvestigationSectionToggle-critical').contains(errorBadge)
+    ).toBe(true);
   });
 
   it('flags a failed refresh in the header and keeps the count of the rows it still shows', () => {

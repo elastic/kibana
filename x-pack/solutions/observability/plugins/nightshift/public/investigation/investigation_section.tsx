@@ -185,36 +185,44 @@ const SectionBodyInset = ({
 };
 
 const SectionHeading = ({
-  presentation: { id, title, severity, headingId },
+  presentation,
   total,
   showCount,
+  errorBadge,
 }: {
   presentation: SectionPresentation;
   total: number;
   showCount: boolean;
-}): React.ReactElement => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
-        <h2 id={headingId}>{title}</h2>
-      </EuiTitle>
-    </EuiFlexItem>
-    {showCount && (
+  /** Shown beside the count, in the header, so it stays visible while the section is collapsed. */
+  errorBadge?: React.ReactNode;
+}): React.ReactElement => {
+  const { id, title, severity, headingId } = presentation;
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiBadge
-          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
-          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
-        >
-          {total}
-        </EuiBadge>
+        <EuiTitle size="xs">
+          <h2 id={headingId}>{title}</h2>
+        </EuiTitle>
       </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
+      {showCount && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+            data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
+          >
+            {total}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {errorBadge != null && <EuiFlexItem grow={false}>{errorBadge}</EuiFlexItem>}
+    </EuiFlexGroup>
+  );
+};
 
 /**
- * Sits in the accordion header, outside the collapsible body, so a failed request stays visible
- * while the section is collapsed and is never mistaken for an empty section.
+ * Sits in the accordion header next to the title, outside the collapsible body, so a failed
+ * request stays visible while the section is collapsed and is never mistaken for an empty section.
  */
 const SectionErrorBadge = ({
   presentation: { id },
@@ -480,18 +488,25 @@ export const InvestigationSection = ({
           // makes the arrow the keyboard control and keeps the whole header clickable.
           buttonElement="div"
           buttonContent={
-            // A count is only meaningful once rows loaded: a failed first load has nothing to count.
-            <SectionHeading presentation={presentation} total={total} showCount={view === 'rows'} />
+            <SectionHeading
+              presentation={presentation}
+              total={total}
+              // A count is only meaningful once rows loaded: a failed first load has nothing to count.
+              showCount={view === 'rows'}
+              errorBadge={
+                error != null && view !== 'loading' ? (
+                  <SectionErrorBadge
+                    presentation={presentation}
+                    isUnloadable={view === 'unloadable'}
+                  />
+                ) : undefined
+              }
+            />
           }
           buttonProps={{
             paddingSize: 'm',
             'data-test-subj': `nightshiftInvestigationSectionToggle-${id}`,
           }}
-          extraAction={
-            error != null && view !== 'loading' ? (
-              <SectionErrorBadge presentation={presentation} isUnloadable={view === 'unloadable'} />
-            ) : undefined
-          }
           arrowDisplay="left"
           paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}
