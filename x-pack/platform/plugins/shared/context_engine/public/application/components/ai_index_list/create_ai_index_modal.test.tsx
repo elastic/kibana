@@ -140,6 +140,52 @@ describe('CreateAiIndexModal', () => {
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
   });
 
+  it('surfaces a server conflict as an error toast', async () => {
+    const services = coreMock.createStart();
+    services.http.post.mockRejectedValue({
+      body: { statusCode: 409, message: "AI index 'support-ticket-triage' already exists" },
+    });
+
+    renderWithProviders(services);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(services.notifications.toasts.addError).toHaveBeenCalled();
+    });
+    expect(services.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('does not call onClose while a create request is in progress', async () => {
+    const services = coreMock.createStart();
+    let resolvePost: (value: object) => void = () => {};
+    services.http.post.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePost = resolve;
+        })
+    );
+    const onClose = jest.fn();
+
+    renderWithProviders(services, onClose);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contextCreateAiIndexModalCancelButton')).toBeDisabled();
+    });
+
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalCancelButton'));
+    expect(onClose).not.toHaveBeenCalled();
+
+    resolvePost({});
+    await waitFor(() => {
+      expect(services.application.navigateToApp).toHaveBeenCalled();
+    });
+  });
+
   it('calls onClose when cancel is clicked', () => {
     const onClose = jest.fn();
     renderWithProviders(coreMock.createStart(), onClose);

@@ -53,12 +53,13 @@ const createAiIndexButtonLabel = i18n.translate('xpack.contextEngine.createAiInd
 const ContextLandingPageContent = ({
   hasCustomAiIndices,
   isLoading,
+  onOpenCreateModal,
 }: {
   hasCustomAiIndices: boolean;
   isLoading: boolean;
+  onOpenCreateModal: () => void;
 }) => {
   const { services } = useKibana();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const contextEngineLinks = services.docLinks.links.contextEngine;
   const { mode, error } = useAiIndexListMode(hasCustomAiIndices, isLoading);
 
@@ -76,7 +77,7 @@ const ContextLandingPageContent = ({
         id: 'createAiIndex',
         label: createAiIndexButtonLabel,
         iconType: 'plusCircle',
-        run: () => setIsCreateModalOpen(true),
+        run: onOpenCreateModal,
         testId: 'contextCreateAiIndexButton',
         ebt: {
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CREATE,
@@ -84,7 +85,7 @@ const ContextLandingPageContent = ({
         },
       },
     };
-  }, [showCreateInHeader]);
+  }, [onOpenCreateModal, showCreateInHeader]);
 
   const headerDescription = useMemo(
     () => ({
@@ -106,12 +107,10 @@ const ContextLandingPageContent = ({
         {error ? (
           <AiIndexListError error={error} />
         ) : (
-          <ContentList
-            emptyState={<AiIndexOnboardingPanel onCreateClick={() => setIsCreateModalOpen(true)} />}
-          >
+          <ContentList emptyState={<AiIndexOnboardingPanel onCreateClick={onOpenCreateModal} />}>
             {mode === 'onboarding' ? (
               <>
-                <AiIndexOnboardingPanel onCreateClick={() => setIsCreateModalOpen(true)} />
+                <AiIndexOnboardingPanel onCreateClick={onOpenCreateModal} />
                 <AiIndexManagedRowList />
               </>
             ) : (
@@ -128,34 +127,41 @@ const ContextLandingPageContent = ({
           </ContentList>
         )}
       </ContextEnginePageSection>
-      {isCreateModalOpen && <CreateAiIndexModal onClose={() => setIsCreateModalOpen(false)} />}
     </ContextEnginePageTemplate>
   );
 };
 
 export const ContextLandingPage = () => {
   const { services } = useKibana();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { findItems, hasCustomAiIndices, isLoading } = useListAiIndices();
 
   return (
-    <ContentListClientProvider
-      id="context-engine-ai-indices"
-      core={services}
-      labels={AI_INDEX_LIST_LABELS}
-      findItems={findItems}
-      features={{
-        sorting: false,
-        selection: false,
-        pagination: {
-          initialPageSize: AI_INDICES_PER_PAGE,
-          pageSizeOptions: [AI_INDICES_PER_PAGE],
-        },
-        filters: {
-          aiIndexOwner: aiIndexOwnerFilter,
-        },
-      }}
-    >
-      <ContextLandingPageContent hasCustomAiIndices={hasCustomAiIndices} isLoading={isLoading} />
-    </ContentListClientProvider>
+    <>
+      <ContentListClientProvider
+        id="context-engine-ai-indices"
+        core={services}
+        labels={AI_INDEX_LIST_LABELS}
+        findItems={findItems}
+        features={{
+          sorting: false,
+          selection: false,
+          pagination: {
+            initialPageSize: AI_INDICES_PER_PAGE,
+            pageSizeOptions: [AI_INDICES_PER_PAGE],
+          },
+          filters: {
+            aiIndexOwner: aiIndexOwnerFilter,
+          },
+        }}
+      >
+        <ContextLandingPageContent
+          hasCustomAiIndices={hasCustomAiIndices}
+          isLoading={isLoading}
+          onOpenCreateModal={() => setIsCreateModalOpen(true)}
+        />
+      </ContentListClientProvider>
+      {isCreateModalOpen && <CreateAiIndexModal onClose={() => setIsCreateModalOpen(false)} />}
+    </>
   );
 };

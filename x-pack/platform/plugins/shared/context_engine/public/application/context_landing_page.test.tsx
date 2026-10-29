@@ -52,6 +52,39 @@ const createCore = () => {
   return core;
 };
 
+const isAiIndexListGet = (call: unknown[]) => {
+  const pathOrOptions = call[0];
+  const path =
+    typeof pathOrOptions === 'string' ? pathOrOptions : (pathOrOptions as { path: string }).path;
+  return path.includes('/api/context_engine/ai_index') && !path.includes('/kis');
+};
+
+const renderWithProviders = (
+  core: ReturnType<typeof createCore>,
+  queryClient: QueryClient = createTestQueryClient()
+) =>
+  render(
+    <MockAppHeaderProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={queryClient}>
+              <MemoryRouter>
+                <ContextLandingPage />
+              </MemoryRouter>
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </MockAppHeaderProvider>
+  );
+
 const mockContextEngineHttpGet = (
   core: ReturnType<typeof coreMock.createStart>,
   aiIndices: AiIndexHttpItem[],
@@ -71,29 +104,6 @@ const mockContextEngineHttpGet = (
     return Promise.resolve({ ai_indices: aiIndices });
   });
 };
-
-const renderWithProviders = (core: ReturnType<typeof createCore>) =>
-  render(
-    <MockAppHeaderProvider>
-      <I18nProvider>
-        <EuiProvider>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              history: scopedHistoryMock.create(),
-              appChrome: createAppChromeMock(),
-            }}
-          >
-            <QueryClientProvider client={createTestQueryClient()}>
-              <MemoryRouter>
-                <ContextLandingPage />
-              </MemoryRouter>
-            </QueryClientProvider>
-          </KibanaContextProvider>
-        </EuiProvider>
-      </I18nProvider>
-    </MockAppHeaderProvider>
-  );
 
 describe('ContextLandingPage', () => {
   beforeEach(async () => {
@@ -154,6 +164,33 @@ describe('ContextLandingPage', () => {
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     expect(screen.getByTestId('contextAiIndexNameInput')).toBeInTheDocument();
+  });
+
+  it('refetches the app list query after creating a custom index from the modal', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    });
+    const core = createCore();
+    core.http.post.mockResolvedValue({});
+    mockContextEngineHttpGet(core, [buildAiIndex({ id: 'elastic', managed: true })]);
+
+    renderWithProviders(core, queryClient);
+
+    await screen.findByTestId('contextAiIndexOnboarding');
+
+    const listGetsBeforeCreate = core.http.get.mock.calls.filter(isAiIndexListGet).length;
+
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+    fireEvent.change(screen.getByTestId('contextAiIndexNameInput'), {
+      target: { value: 'support-ticket-triage' },
+    });
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
+
+    await waitFor(() => {
+      expect(core.http.get.mock.calls.filter(isAiIndexListGet).length).toBeGreaterThan(
+        listGetsBeforeCreate
+      );
+    });
   });
 
   it('renders exactly one create button in the page header when indexes exist', async () => {

@@ -50,9 +50,15 @@ export const CreateAiIndexModal = ({ onClose }: CreateAiIndexModalProps) => {
     }
   };
 
+  const closeModal = () => {
+    if (!isCreating) {
+      onClose();
+    }
+  };
+
   return (
     <EuiModal
-      onClose={onClose}
+      onClose={closeModal}
       data-test-subj="contextCreateAiIndexModal"
       aria-labelledby={modalTitleId}
     >
@@ -93,7 +99,11 @@ export const CreateAiIndexModal = ({ onClose }: CreateAiIndexModalProps) => {
         </EuiFormRow>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="contextCreateAiIndexModalCancelButton">
+        <EuiButtonEmpty
+          onClick={closeModal}
+          isDisabled={isCreating}
+          data-test-subj="contextCreateAiIndexModalCancelButton"
+        >
           {i18n.translate('xpack.contextEngine.createAiIndexModal.cancelButton', {
             defaultMessage: 'Cancel',
           })}
@@ -105,7 +115,7 @@ export const CreateAiIndexModal = ({ onClose }: CreateAiIndexModalProps) => {
           isLoading={isCreating}
           isDisabled={dest === undefined}
           {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePage,
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexCreateModal,
             action: CONTEXT_ENGINE_UI_EBT.action.aiIndexCreate.CREATE,
           })}
         >
