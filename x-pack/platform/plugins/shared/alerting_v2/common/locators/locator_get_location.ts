@@ -28,6 +28,17 @@ export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLo
   if (params.page === 'sequence_create') {
     return { app, path: `${pathPrefix}/sequence/create`, state: {} };
   }
+  if (params.page === 'sequence_edit' && params.ruleId) {
+    return {
+      app,
+      path: `${pathPrefix}/sequence/${encodeURIComponent(params.ruleId)}/edit`,
+      state: {},
+    };
+  }
+  if (params.page === 'sequence_clone' && params.ruleId) {
+    const search = new URLSearchParams({ cloneFrom: params.ruleId });
+    return { app, path: `${pathPrefix}/sequence/create?${search.toString()}`, state: {} };
+  }
   if (params.ruleId) {
     return { app, path: `${pathPrefix}/${encodeURIComponent(params.ruleId)}`, state: {} };
   }

@@ -30,6 +30,9 @@ interface AlertBasedTilesSeriesOptions {
   /** The live counts, which replace the newest dot so the line ends on the number shown. */
   severeAlertsCount: number;
   watchlistedCount: number;
+  /** From the alert tiles' delta hook (their `previous` counts): the deltas' baselines, which start the lines. */
+  severeAlertsBaseline: number | undefined;
+  watchlistedBaseline: number | undefined;
 }
 
 /**
@@ -49,6 +52,8 @@ export const useAlertBasedTilesSeries = ({
   reachesBack,
   severeAlertsCount,
   watchlistedCount,
+  severeAlertsBaseline,
+  watchlistedBaseline,
 }: AlertBasedTilesSeriesOptions): {
   alertsTrend: number[] | undefined;
   watchlistedTrend: number[] | undefined;
@@ -92,12 +97,14 @@ export const useAlertBasedTilesSeries = ({
     ...state,
     dots: series?.severe,
     liveCount: severeAlertsCount,
+    deltaBaseline: severeAlertsBaseline,
     isHidden: severeGate.isHidden,
   });
   const watchlisted = getTileTrend({
     ...state,
     dots: series?.watchlisted,
     liveCount: watchlistedCount,
+    deltaBaseline: watchlistedBaseline,
     isHidden: watchlistedGate.isHidden,
   });
 
