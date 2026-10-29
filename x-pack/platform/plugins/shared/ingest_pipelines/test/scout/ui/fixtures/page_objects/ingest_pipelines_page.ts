@@ -22,9 +22,12 @@ export class IngestPipelinesPage {
   public readonly navigationBlockConfirmModal: Locator;
   public readonly geoipEmptyListPrompt: Locator;
   public readonly deleteManagedAssetsCallout: Locator;
+  public readonly emptyListPrompt: Locator;
+  public readonly configurePipelineHeader: Locator;
   public readonly createPipelineDropdown: Locator;
   public readonly editPipelineButton: Locator;
   public readonly detailsPanelFooter: Locator;
+  private readonly addProcessorButton: Locator;
   private readonly createNewPipelineButton: Locator;
   private readonly createPipelineFromCsvButton: Locator;
   private readonly nameFieldInput: Locator;
@@ -66,6 +69,9 @@ export class IngestPipelinesPage {
     this.navigationBlockConfirmModal = this.page.testSubj.locator('navigationBlockConfirmModal');
     this.geoipEmptyListPrompt = this.page.testSubj.locator('geoipEmptyListPrompt');
     this.deleteManagedAssetsCallout = this.page.testSubj.locator('deleteManagedAssetsCallout');
+    this.emptyListPrompt = this.page.getByTestId('emptyList');
+    this.configurePipelineHeader = this.page.getByTestId('configurePipelineHeader');
+    this.addProcessorButton = this.page.getByTestId('addProcessorButton');
     this.createPipelineDropdown = this.page.testSubj.locator('createPipelineDropdown');
     this.editPipelineButton = this.page.testSubj.locator('editPipelineButton');
     this.detailsPanelFooter = this.page.testSubj.locator('detailsPanelFooter');
@@ -86,7 +92,7 @@ export class IngestPipelinesPage {
     this.detailsPanelTitle = this.page.testSubj.locator('detailsPanelTitle');
     this.tablePaginationPopoverButton = this.page.testSubj.locator('tablePaginationPopoverButton');
     this.tablePagination50Rows = this.page.testSubj.locator('tablePagination-50-rows');
-    this.logo = this.page.testSubj.locator('logo');
+    this.logo = this.page.getByTestId('logo').or(this.page.getByTestId('nav-header-logo'));
     this.filtersDropdown = this.page.testSubj.locator('filtersDropdown');
     this.managedFilter = this.page.testSubj.locator('managedFilter');
     this.actionsPopoverButton = this.page.testSubj.locator('actionsPopoverButton');
@@ -126,6 +132,17 @@ export class IngestPipelinesPage {
 
     await this.submitButton.click();
     await this.detailsFlyout.waitFor();
+  }
+
+  async openCreateForm() {
+    await this.createPipelineDropdown.click();
+    await this.createNewPipelineButton.click();
+    await this.nameFieldInput.waitFor();
+  }
+
+  async openAddProcessorFlyout() {
+    await this.addProcessorButton.click();
+    await this.configurePipelineHeader.waitFor();
   }
 
   async createPipelineFromCsv({ name }: { name: string }) {
