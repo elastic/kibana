@@ -42,6 +42,7 @@ import {
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { createCaseError, isSOError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
@@ -118,6 +119,25 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case is not allowed ids: [${ids.join(', ')}]`);
   }
+}
+
+/**
+ * Throws an error if any of the requests change `extractObservables` to true for an owner that
+ * cannot auto-extract observables. A request that keeps an already stored true is accepted, so
+ * routine edits of old cases still work.
+ */
+function throwIfExtractObservablesChangedToTrue(requests: UpdateRequestWithOriginalCase[]) {
+  requests.forEach(({ updateReq, originalCase }) => {
+    const requestedValue = updateReq.settings?.extractObservables;
+    const storedValue = originalCase.attributes.settings.extractObservables;
+
+    if (requestedValue === true && storedValue !== true) {
+      assertCanStoreExtractObservables({
+        owner: originalCase.attributes.owner,
+        extractObservables: requestedValue,
+      });
+    }
+  });
 }
 
 /**
@@ -678,6 +698,7 @@ export const bulkUpdate = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
+    throwIfExtractObservablesChangedToTrue(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
 
     // Validate close reasons
