@@ -128,6 +128,9 @@ export interface AgentExecutionClient {
     since?: number
   ): Promise<{ events: ChatEvent[]; status: ExecutionStatus; error?: SerializedExecutionError }>;
 
+  /** Delete an execution document. Resolves silently when it does not exist. */
+  delete(executionId: string): Promise<void>;
+
   /** Search executions by metadata and/or status filters. */
   find(options: FindExecutionsOptions): Promise<AgentExecution[]>;
 }
@@ -319,6 +322,17 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
         return undefined;
+      }
+      throw err;
+    }
+  }
+
+  async delete(executionId: string): Promise<void> {
+    try {
+      await this.esClient.delete({ index: agentExecutionIndexName, id: executionId });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return;
       }
       throw err;
     }

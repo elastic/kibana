@@ -14,16 +14,17 @@ export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'data'> & {
   data: ProcessedRoundInput;
 };
 
-/** A custom conversation event with its LLM representation resolved. */
-export type ProcessedCustomEvent = ConversationEvent & {
+/** A standalone (custom or attachment) event with its LLM representation resolved. */
+export type ProcessedStandaloneEvent = ConversationEvent & {
   representation: ConversationEventRepresentation;
 };
 
 /**
  * The agent-context timeline: normalized events, with `user_message` payloads processed and
- * custom events carrying their LLM representation.
+ * standalone events carrying their LLM representation. Attachment events are on it too: those
+ * owned by an execution or a message as plain timeline events, the others as standalone events.
  */
 export type ProcessedTimelineEvent =
   | Exclude<TimelineEvent, UserMessageEvent>
   | ProcessedUserMessageEvent
-  | ProcessedCustomEvent;
+  | ProcessedStandaloneEvent;

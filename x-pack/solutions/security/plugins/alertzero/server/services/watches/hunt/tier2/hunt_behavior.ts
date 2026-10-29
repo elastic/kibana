@@ -13,12 +13,15 @@ import type { z } from '@kbn/zod/v4';
 import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
+import { originOfIndices } from '../common/host_origin';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -42,6 +45,8 @@ import type {
 } from './types';
 
 const MAX_AFFECTED_ENTITIES = 20;
+/** `HostOrigin.name` schema cap. */
+const MAX_ORIGIN_NAME_LENGTH = 512;
 /** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
 const MAX_HITS = 50;
 
@@ -201,6 +206,44 @@ const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; trunc
 };
 
 /**
+ * Where each kept host was seen, from the `_index` of the rows that named it. Every row here
+ * already passed the required-index check, so `_index` is always a string. A name longer than
+ * the origin schema allows gets no origin, which packaging reads as unknown. When the rows hit
+ * the query's cap, a host's local rows may be past it, so only local origins are kept.
+ */
+const hostOriginsOf = (
+  rows: unknown[][],
+  hostCol: number,
+  indexCol: number,
+  hosts: string[],
+  saturated: boolean
+): HostOrigin[] => {
+  const indicesByHost = new Map(
+    hosts
+      .filter((name) => name.length <= MAX_ORIGIN_NAME_LENGTH)
+      .map((name) => [name, new Set<string>()])
+  );
+  for (const row of rows) {
+    const host = row[hostCol];
+    const index = row[indexCol];
+    if (typeof host !== 'string' || typeof index !== 'string') continue;
+    indicesByHost.get(host.trim())?.add(index);
+  }
+  return [...indicesByHost].flatMap(([name, indices]) => {
+    const origin = originOfIndices(indices);
+    return origin && (origin.local || !saturated) ? [{ name, ...origin }] : [];
+  });
+};
+
+/**
+ * The most rows the executed query could return: `executeEsql` keeps `min(N, limit)` for a
+ * trailing `LIMIT N`, and a `LIMIT` earlier in the pipeline caps it too. A `LIMIT` inside a
+ * string literal only lowers the cap, which leaves more origins unknown.
+ */
+const rowCapOf = (query: string, limit: number): number =>
+  Math.min(limit, ...[...query.matchAll(/\bLIMIT\s+(\d+)/gi)].map(([, n]) => Number(n)));
+
+/**
  * Execute a generated query in the hunt window. Hit bar counts only rows
  * whose `_index` matches a required pattern. Per-behavior errors record
  * `executed: false` and do not fail the tier.
@@ -225,6 +268,7 @@ const executeValidatedEsql = async ({
   execution: BehaviorExecution;
   affected_hosts?: string[];
   affected_users?: string[];
+  affected_host_origins?: HostOrigin[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
   hits?: HuntForThreatHit[];
@@ -297,6 +341,10 @@ const executeValidatedEsql = async ({
             MAX_AFFECTED_ENTITIES
           )
         : undefined;
+    const saturated = values.length >= rowCapOf(prepared, row_limit);
+    const hostOrigins = hosts
+      ? hostOriginsOf(requiredRows, hostCol, indexCol, hosts.items, saturated)
+      : [];
 
     // `prepareEsqlForExecute` injects `METADATA _id`/`_index` but deliberately does
     // not undo a `DROP _id` the model wrote, so a query can keep `_index` — enough to
@@ -343,6 +391,7 @@ const executeValidatedEsql = async ({
       ...(hosts && hosts.items.length > 0
         ? {
             affected_hosts: hosts.items,
+            ...(hostOrigins.length > 0 ? { affected_host_origins: hostOrigins } : {}),
             ...(hosts.truncated ? { affected_hosts_truncated: true } : {}),
           }
         : {}),
@@ -374,7 +423,7 @@ const executeValidatedEsql = async ({
  */
 const resolveGenerationIndex = (allowedIndices: string[]): string => {
   // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
-  const positives = allowedIndices.filter((pattern) => !pattern.startsWith('-'));
+  const positives = allowedIndices.filter((pattern) => !isIndexExclusion(pattern));
   return positives.length > 0 ? positives.join(',') : DEFAULT_GENERATION_INDEX;
 };
 
@@ -400,10 +449,12 @@ const boundSampleEvents = (events: string[], maxChars: number): string[] => {
 const buildGenerationContext = ({
   text,
   iocs,
+  excludedIocs,
   articleContext,
 }: {
   text: string;
   iocs?: HuntBehaviorIoc[];
+  excludedIocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
 }): string => {
   const sections: string[] = [];
@@ -415,6 +466,14 @@ const buildGenerationContext = ({
     sections.push(
       `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${boundedEvents
         .map((evt) => `- ${evt}`)
+        .join('\n')}`
+    );
+  }
+  if (excludedIocs?.length) {
+    sections.push(
+      `--- ADJUDICATED OUT (do not hunt these values) ---\n${excludedIocs
+        .slice(0, MAX_ESQL_PROMPT_IOCS)
+        .map((ioc) => `- ${ioc.type}: ${ioc.value}`)
         .join('\n')}`
     );
   }
@@ -461,6 +520,7 @@ const generateGroundedEsql = async ({
   behaviors,
   text,
   iocs,
+  excludedIocs,
   articleContext,
   allowedIndices,
   rowLimit,
@@ -471,17 +531,19 @@ const generateGroundedEsql = async ({
   behaviors: ValidatedBehavior[];
   text: string;
   iocs?: HuntBehaviorIoc[];
+  excludedIocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
   rowLimit: number;
 }): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
-  const additionalContext = buildGenerationContext({ text, iocs, articleContext });
+  const additionalContext = buildGenerationContext({ text, iocs, excludedIocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
   const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
   const iocValues = (iocs ?? []).map((ioc) => ioc.value);
+  const excludedIocValues = (excludedIocs ?? []).map((ioc) => ioc.value);
 
   const entries = await pMap(
     behaviors,
@@ -530,7 +592,11 @@ const generateGroundedEsql = async ({
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
         }
         // Raw `query.trim()`, the same input the outer grounding gate uses today.
-        const grounded = assertEsqlGroundedInReport(esql, { reportText: text, iocValues });
+        const grounded = assertEsqlGroundedInReport(esql, {
+          reportText: text,
+          iocValues,
+          excludedIocValues,
+        });
         if (grounded.ok) {
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
         }
@@ -572,6 +638,7 @@ const generateGroundedEsql = async ({
           const retryGrounded = assertEsqlGroundedInReport(retryEsql, {
             reportText: text,
             iocValues,
+            excludedIocValues,
           });
           if (retryGrounded.ok) {
             return { outcome: 'generated', techniqueId: behavior.technique_id, esql: retryEsql };
@@ -677,6 +744,7 @@ export const huntBehavior = async (
     report_id: reportId,
     llm_confidence_threshold: llmThreshold = 0.5,
     iocs,
+    excluded_iocs: excludedIocs,
     article_context: articleContext,
     window,
     size,
@@ -966,6 +1034,7 @@ export const huntBehavior = async (
       const groundedInReport = assertEsqlGroundedInReport(esql, {
         reportText: text,
         iocValues: (iocs ?? []).map((ioc) => ioc.value),
+        excludedIocValues: (excludedIocs ?? []).map((ioc) => ioc.value),
       });
       if (!groundedInReport.ok) {
         logger.warn(
@@ -1006,6 +1075,9 @@ export const huntBehavior = async (
         );
       }
       if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
+      if (executed.affected_host_origins) {
+        behavior.affected_host_origins = executed.affected_host_origins;
+      }
       if (executed.affected_users) behavior.affected_users = executed.affected_users;
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
@@ -1020,6 +1092,7 @@ export const huntBehavior = async (
       behaviors: generationTargets,
       text,
       iocs,
+      excludedIocs,
       articleContext,
       allowedIndices,
       rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
@@ -1094,6 +1167,7 @@ export const huntBehavior = async (
         behaviors: secondWave,
         text,
         iocs,
+        excludedIocs,
         articleContext,
         allowedIndices,
         rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,

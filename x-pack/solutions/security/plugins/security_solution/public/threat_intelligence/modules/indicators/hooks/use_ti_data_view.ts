@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { BrowserFields as DataViewBrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields as DataViewBrowserFields } from '@kbn/securitysolution-timeline-common';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';

@@ -358,6 +358,7 @@ const handleConversationExecution = async ({
           agentEvents$,
           nextInput,
           author,
+          releaseExecutionId: execution.executionId,
         })
       : EMPTY;
 
@@ -420,6 +421,7 @@ const handleConversationExecution = async ({
                     error,
                     interrupted,
                     completed,
+                    releaseExecutionId: execution.executionId,
                     logger,
                   }),
               })
@@ -478,6 +480,7 @@ const handleConversationExecution = async ({
           author,
           origin: roundOrigin,
           error: normalized,
+          releaseExecutionId: execution.executionId,
           logger,
         })
       : [];
@@ -596,6 +599,7 @@ const buildPersistenceEvents = ({
   agentEvents$,
   nextInput,
   author,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -603,6 +607,7 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   nextInput: ConverseInput;
   author?: ConversationRoundAuthor;
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -623,6 +628,7 @@ const buildPersistenceEvents = ({
             take(1)
           ),
           title$: endTitle$,
+          releaseExecutionId,
         })
       )
     );
@@ -638,6 +644,7 @@ const buildPersistenceEvents = ({
     input: nextInput,
     author,
     title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+    releaseExecutionId,
   });
 };
 
