@@ -59,6 +59,7 @@ export const getRunStepDefinition = ({
         // the documented "all inputs optional" contract holds for every path.
         const {
           additional_context: additionalContext,
+          aggregate_by: aggregateBy,
           alert_retrieval_mode: alertRetrievalMode = 'custom_query',
           alert_retrieval_workflow_ids: alertRetrievalWorkflowIds = [],
           alerts,
@@ -72,6 +73,7 @@ export const getRunStepDefinition = ({
           // `context.input`, so the default is mirrored here (see the note above).
           include_attack_discoveries: includeAttackDiscoveries = true,
           mode = 'sync',
+          plugin_id: pluginId,
           size = 100,
           start,
           validation_workflow_id: validationWorkflowId = '',
@@ -200,6 +202,10 @@ export const getRunStepDefinition = ({
           shouldStopExecution: () => context.abortSignal?.aborted === true,
           size,
           start,
+          // Only an opting-in caller (a workflow naming `plugin_id`) tags the model calls.
+          ...(pluginId != null
+            ? { telemetryMetadata: { pluginId, ...(aggregateBy != null ? { aggregateBy } : {}) } }
+            : {}),
           trigger: 'workflow',
           type: 'attack_discovery',
           workflowConfig,

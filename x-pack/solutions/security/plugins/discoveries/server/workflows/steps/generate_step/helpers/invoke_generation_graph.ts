@@ -78,6 +78,6 @@ export const invokeGenerationGraph = async ({
     prompts,
     replacements,
     size,
-    telemetryMetadata,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
   });
 };

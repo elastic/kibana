@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   AnalyticsServiceSetup,
   CoreStart,
@@ -205,6 +206,11 @@ export interface ExecuteGenerationWorkflowParams {
   source?: AttackDiscoverySource;
   sourceMetadata?: SourceMetadata;
   start?: string;
+  /**
+   * Token-usage attribution forwarded to the generation model calls, so a caller can roll their
+   * cost up under its own parent feature. Omitted means the calls stay untagged.
+   */
+  telemetryMetadata?: TelemetryMetadata;
   trigger?: string;
   type: string;
   workflowConfig: WorkflowConfig;

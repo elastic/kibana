@@ -28,6 +28,12 @@ export const RunStepTypeId = 'security.attack-discovery.run';
 export const RunStepInputSchema = lazySchema(() =>
   z.object({
     additional_context: z.string().optional(),
+    /**
+     * Parent feature id the generation model calls' token usage also aggregates
+     * under. Only meaningful with `plugin_id`, which names the caller; omit both
+     * to leave the calls untagged.
+     */
+    aggregate_by: z.string().max(256).optional(),
     alert_retrieval_mode: z
       .enum(['custom_only', 'custom_query', 'esql', 'provided'])
       .optional()
@@ -76,6 +82,12 @@ export const RunStepInputSchema = lazySchema(() =>
      */
     include_attack_discoveries: z.boolean().optional().default(true),
     mode: z.enum(['async', 'sync']).optional().default('sync'),
+    /**
+     * Token-usage attribution (`feature_id` in the token-usage index) for the
+     * generation model calls, so a caller can see this run's cost under its own
+     * name. Unset by default, which leaves the calls untagged.
+     */
+    plugin_id: z.string().max(256).optional(),
     size: z.number().int().optional().default(100),
     start: z.string().optional(),
     validation_workflow_id: z.string().optional().default(''),

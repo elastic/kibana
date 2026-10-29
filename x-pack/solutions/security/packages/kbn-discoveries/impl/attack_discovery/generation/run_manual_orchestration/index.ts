@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
@@ -91,6 +92,7 @@ export const runManualOrchestration = async ({
   sourceMetadata,
   spaceId,
   start,
+  telemetryMetadata,
   templateAlertLimit,
   trigger,
   workflowConfig,
@@ -132,6 +134,8 @@ export const runManualOrchestration = async ({
   sourceMetadata?: SourceMetadata;
   spaceId: string;
   start?: string;
+  /** Token-usage attribution for the generation model calls; see `ExecuteGenerationWorkflowParams`. */
+  telemetryMetadata?: TelemetryMetadata;
   /**
    * Set when the connector accepts only a prompt template. Retrieval and the
    * candidate set are capped at this many alerts so coverage counts match the
@@ -393,6 +397,7 @@ export const runManualOrchestration = async ({
       sourceMetadata,
       spaceId,
       start,
+      ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
       workflowConfig,
       workflowsManagementApi,
     });
