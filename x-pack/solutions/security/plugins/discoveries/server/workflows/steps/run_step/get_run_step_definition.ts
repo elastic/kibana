@@ -202,9 +202,10 @@ export const getRunStepDefinition = ({
           shouldStopExecution: () => context.abortSignal?.aborted === true,
           size,
           start,
-          // Only an opting-in caller (a workflow naming `plugin_id`) tags the model calls.
-          ...(pluginId != null
-            ? { telemetryMetadata: { pluginId, ...(aggregateBy != null ? { aggregateBy } : {}) } }
+          // Only an opting-in caller (a workflow naming `plugin_id`) tags the model calls. The
+          // workflow template can hand an unset input over as an empty string.
+          ...(pluginId
+            ? { telemetryMetadata: { pluginId, ...(aggregateBy ? { aggregateBy } : {}) } }
             : {}),
           trigger: 'workflow',
           type: 'attack_discovery',

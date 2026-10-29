@@ -440,6 +440,14 @@ describe('getRunStepDefinition', () => {
       );
     });
 
+    it('treats an empty plugin_id as unset', async () => {
+      await getStepDefinition().handler(contextWith({ aggregate_by: '', plugin_id: '' }) as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
     it('bounds plugin_id and aggregate_by in the input schema', () => {
       const schema = RunStepInputSchema;
       const tooLong = 'x'.repeat(257);

@@ -128,6 +128,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
     connectorId,
     logger,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
     timeout: connectorTimeout,
   });
 

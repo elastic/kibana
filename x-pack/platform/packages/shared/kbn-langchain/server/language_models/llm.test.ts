@@ -268,6 +268,43 @@ describe('ActionsClientLlm', () => {
         expect(actionsClient.execute).not.toHaveBeenCalled();
       });
 
+      it('passes telemetryMetadata to chatComplete as connectorTelemetry', async () => {
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+        });
+
+        await actionsClientLlm._call(prompt);
+
+        expect(mockInferenceClient.chatComplete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            metadata: {
+              connectorTelemetry: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+            },
+          })
+        );
+      });
+
+      it('sends no metadata when telemetryMetadata is not set', async () => {
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await actionsClientLlm._call(prompt);
+
+        expect((mockInferenceClient.chatComplete as jest.Mock).mock.calls[0][0]).not.toHaveProperty(
+          'metadata'
+        );
+      });
+
       it('passes model and temperature when provided', async () => {
         const actionsClientLlm = new ActionsClientLlm({
           actionsClient,
