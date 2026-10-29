@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createEventLoopYielder } from '@kbn/workflows/server';
 import {
   assignBucket,
   computeMetric,
@@ -37,15 +38,17 @@ function validateMetrics(metrics: Metric[]): { valid: true } | { valid: false; e
   return { valid: true };
 }
 
-function buildAggregatedResults(
+async function buildAggregatedResults(
   groups: Map<string, unknown[]>,
   groupByKeys: string[],
   metrics: Metric[],
   hasBuckets: boolean
-): Array<Record<string, unknown>> {
+): Promise<Array<Record<string, unknown>>> {
   const results: Array<Record<string, unknown>> = [];
+  const yieldToEventLoop = createEventLoopYielder();
 
   for (const [compositeKey, groupItems] of groups) {
+    await yieldToEventLoop();
     const record = parseGroupKeyValues(compositeKey, groupByKeys);
 
     if (hasBuckets) {
@@ -151,7 +154,7 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
       }
 
       if (buckets) {
-        return aggregateWithBuckets(
+        return await aggregateWithBuckets(
           items,
           groupBy,
           metrics,
@@ -163,8 +166,8 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
         );
       }
 
-      const groups = groupItemsByKeys(items, groupBy, context.abortSignal);
-      const results = buildAggregatedResults(groups, groupBy, metrics, false);
+      const groups = await groupItemsByKeys(items, groupBy, context.abortSignal);
+      const results = await buildAggregatedResults(groups, groupBy, metrics, false);
 
       return { output: applyOrderAndLimit(results, orderBy, order, limit, context.logger) };
     } catch (error) {
@@ -181,7 +184,7 @@ export const dataAggregateStepDefinition = createServerStepDefinition({
  * then injects _bucket as an additional grouping key so the standard
  * groupItemsByKeys + buildAggregatedResults pipeline handles the rest.
  */
-function aggregateWithBuckets(
+async function aggregateWithBuckets(
   items: unknown[],
   groupBy: string[],
   metrics: Metric[],
@@ -190,10 +193,12 @@ function aggregateWithBuckets(
   order: string | undefined,
   limit: number | undefined,
   context: { abortSignal: AbortSignal; logger: { debug: (msg: string) => void } }
-): { output: Array<Record<string, unknown>> } | { error: Error } {
+): Promise<{ output: Array<Record<string, unknown>> } | { error: Error }> {
   const bucketedItems: Array<{ item: unknown; bucket: string }> = [];
+  const yieldToEventLoop = createEventLoopYielder();
 
   for (let i = 0; i < items.length; i++) {
+    await yieldToEventLoop();
     if (i % 1000 === 0 && context.abortSignal.aborted) {
       return { error: new Error('Step was aborted during bucketing') };
     }
@@ -209,8 +214,8 @@ function aggregateWithBuckets(
   }));
 
   const effectiveKeys = [...groupBy, '_bucket'];
-  const groups = groupItemsByKeys(wrappedItems, effectiveKeys, context.abortSignal);
-  const results = buildAggregatedResults(groups, effectiveKeys, metrics, true);
+  const groups = await groupItemsByKeys(wrappedItems, effectiveKeys, context.abortSignal);
+  const results = await buildAggregatedResults(groups, effectiveKeys, metrics, true);
 
   return { output: applyOrderAndLimit(results, orderBy, order, limit, context.logger) };
 }

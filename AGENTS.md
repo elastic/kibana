@@ -77,6 +77,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Prefer early returns and positive conditions.
 - Handle errors explicitly; return typed errors from APIs when possible.
 - Keep async logic linear; avoid nested `try` blocks when possible.
+- In workflows server code (execution engine, step handlers), loops over user data with no I/O must free the event loop: create one `createEventLoopYielder()` (`@kbn/workflows/server`) before the loop, `await` it each iteration, and then check the abort signal.
 
 ### UI Component Selection and Styling
 - Reuse existing components from the target module and shared packages it can depend on. Prefer `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components — they encode Kibana-specific behavior and conventions.

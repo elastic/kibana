@@ -8,6 +8,7 @@
  */
 
 import { stableStringify } from '@kbn/std';
+import { createEventLoopYielder } from '@kbn/workflows/server';
 import { dataConcatStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -49,21 +50,23 @@ interface ConcatOptions {
  * Single-pass: resolve → flatten → dedupe → push, one item at a time.
  * Only the final result array (and optionally a dedup Set) are held in memory.
  */
-function concatSinglePass(
+async function concatSinglePass(
   rawArrays: unknown[],
   renderFn: (val: unknown) => unknown,
   options: ConcatOptions
-): { result: unknown[] } | { error: Error } {
+): Promise<{ result: unknown[] } | { error: Error }> {
   const { flattenDepth, dedupe, abortSignal } = options;
   const seen = dedupe ? new Set<string>() : null;
   const result: unknown[] = [];
   let totalCount = 0;
+  const yieldToEventLoop = createEventLoopYielder();
 
   for (let i = 0; i < rawArrays.length; i++) {
     const resolved = resolveToArray(renderFn(rawArrays[i]), i);
     const items = flattenDepth > 0 ? flattenIterator(resolved, flattenDepth) : resolved;
 
     for (const item of items) {
+      await yieldToEventLoop();
       if (totalCount % ABORT_CHECK_INTERVAL === 0 && abortSignal?.aborted) {
         return { error: new Error('Operation was aborted') };
       }
@@ -103,7 +106,7 @@ export const dataConcatStepDefinition = createServerStepDefinition({
 
       const flattenDepth = flatten ? (typeof flatten === 'number' ? flatten : 1) : 0;
 
-      const outcome = concatSinglePass(
+      const outcome = await concatSinglePass(
         rawArrays,
         (val) => context.contextManager.renderInputTemplate(val),
         { flattenDepth, dedupe, abortSignal: context.abortSignal }

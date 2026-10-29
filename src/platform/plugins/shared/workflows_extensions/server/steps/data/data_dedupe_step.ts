@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createEventLoopYielder } from '@kbn/workflows/server';
 import { dataDedupeStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -85,17 +86,15 @@ export const dataDedupeStepDefinition = createServerStepDefinition({
       );
 
       const seenKeys = new Map<string, unknown>();
+      const yieldToEventLoop = createEventLoopYielder();
 
-      if (strategy === 'keep_first') {
-        for (const item of items) {
-          const keyValue = buildKeyFromItem(item, keys);
-          if (!seenKeys.has(keyValue)) {
-            seenKeys.set(keyValue, item);
-          }
+      for (const item of items) {
+        await yieldToEventLoop();
+        if (context.abortSignal.aborted) {
+          return { error: new Error('Operation was aborted') };
         }
-      } else {
-        for (const item of items) {
-          const keyValue = buildKeyFromItem(item, keys);
+        const keyValue = buildKeyFromItem(item, keys);
+        if (strategy !== 'keep_first' || !seenKeys.has(keyValue)) {
           seenKeys.set(keyValue, item);
         }
       }

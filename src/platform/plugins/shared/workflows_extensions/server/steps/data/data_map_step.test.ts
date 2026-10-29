@@ -400,6 +400,18 @@ describe('dataMapStepDefinition', () => {
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('Expected items to be an array or object');
     });
+
+    it('should error when aborted', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const context = {
+        ...createMockContext({ items: [{ id: 1 }] }, { fields: { id: '{{ item.id }}' } }),
+        abortSignal: controller.signal,
+      };
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.error?.message).toBe('Operation was aborted');
+    });
   });
 
   describe('$map recursive mapping', () => {

@@ -149,7 +149,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): Record<string, unknown> {
+  public getInput(): Record<string, unknown> | Promise<Record<string, unknown>> {
     return {};
   }
 

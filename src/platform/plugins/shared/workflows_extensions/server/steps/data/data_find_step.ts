@@ -9,6 +9,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
+import { createEventLoopYielder } from '@kbn/workflows/server';
 import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFindStepCommonDefinition } from '../../../common/steps/data';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -19,14 +20,16 @@ type FindStepContext = StepHandlerContext<
   typeof dataFindStepCommonDefinition.configSchema
 >;
 
-function searchForMatch(
+async function searchForMatch(
   items: unknown[],
   kqlAst: KueryNode,
   context: FindStepContext
-): { item: unknown; index: number | null; aborted?: boolean } {
+): Promise<{ item: unknown; index: number | null; aborted?: boolean }> {
+  const yieldToEventLoop = createEventLoopYielder();
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
 
+    await yieldToEventLoop();
     if (context.abortSignal?.aborted) {
       context.logger.warn('Find operation aborted by signal');
       return { item: null, index: null, aborted: true };
@@ -92,7 +95,11 @@ export const dataFindStepDefinition = createServerStepDefinition({
         )}`
       );
 
-      const { aborted, ...result } = searchForMatch(items, parseKqlCondition(condition), context);
+      const { aborted, ...result } = await searchForMatch(
+        items,
+        parseKqlCondition(condition),
+        context
+      );
 
       if (aborted) {
         return { error: new Error('Operation was aborted') };

@@ -1736,6 +1736,28 @@ describe('WorkflowContextManager', () => {
         expect(hits).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
       });
     });
+
+    describe('renderObjectAccordingToContextAsync', () => {
+      it('renders each top-level key with a context built once for the whole object', async () => {
+        testContainer.templatingEngineMock.render = jest
+          .fn()
+          .mockImplementation((template) => `rendered(${template})`);
+        const obj = { first: '{{ workflow.name }}', second: '{{ inputs.userId }}' };
+
+        const result = await testContainer.underTest.renderObjectAccordingToContextAsync(obj);
+
+        expect(result).toEqual({
+          first: 'rendered({{ workflow.name }})',
+          second: 'rendered({{ inputs.userId }})',
+        });
+        expect(
+          testContainer.templatingEngineMock.extractGlobalVariableSegments
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          testContainer.templatingEngineMock.extractGlobalVariableSegments
+        ).toHaveBeenCalledWith(obj);
+      });
+    });
   });
 
   describe('getVariables', () => {

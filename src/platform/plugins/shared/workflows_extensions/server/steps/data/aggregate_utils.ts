@@ -8,6 +8,7 @@
  */
 
 import { get } from 'lodash';
+import { createEventLoopYielder } from '@kbn/workflows/server';
 
 export const MAX_AGGREGATE_ITEMS = 100_000;
 
@@ -70,14 +71,16 @@ export function computeMetric(items: unknown[], metric: Metric): number | null {
  * Each key part is JSON.stringify'd and joined with a null-char delimiter
  * to avoid collision with user data (e.g. values containing "::").
  */
-export function groupItemsByKeys(
+export async function groupItemsByKeys(
   items: unknown[],
   keys: string[],
   abortSignal?: AbortSignal
-): Map<string, unknown[]> {
+): Promise<Map<string, unknown[]>> {
   const groups = new Map<string, unknown[]>();
+  const yieldToEventLoop = createEventLoopYielder();
 
   for (let i = 0; i < items.length; i++) {
+    await yieldToEventLoop();
     if (i % 1000 === 0 && abortSignal?.aborted) {
       break;
     }
