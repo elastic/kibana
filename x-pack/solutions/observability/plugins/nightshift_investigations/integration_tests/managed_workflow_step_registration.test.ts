@@ -6,7 +6,7 @@
  */
 
 /**
- * What the two combined workflows reference has to exist in the step registry of every install
+ * What the managed investigation and combined workflows reference must exist in the step registry of every install
  * that gets them, whatever the feature flags say.
  *
  * The combined materialize workflow installs with Cortex or Memory, and the combined optimize
@@ -23,6 +23,7 @@ import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import {
   getManagedWorkflowDefinition,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -35,6 +36,7 @@ import { NightshiftInvestigationsPlugin } from '../server/plugin';
 const MANAGED_WORKFLOW_IDS = [
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 ];
 
 /** Step types the shipped YAMLs reference, minus the ones the engine implements itself. */

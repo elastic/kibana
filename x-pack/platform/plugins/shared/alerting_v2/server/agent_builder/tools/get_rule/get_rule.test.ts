@@ -71,14 +71,14 @@ describe('getRuleTool', () => {
   });
 
   describe('definition', () => {
-    it('is a builtin read-only tool that points at rule-management', () => {
+    it('is a builtin read-only tool that points at rule-authoring', () => {
       const tool = createTool();
       expect(tool.type).toBe(ToolType.builtin);
       expect(tool.description).toContain('rule-1');
       expect(tool.description).toContain('ep-1');
       expect(tool.description).toContain('attach-1');
       expect(tool.description).toContain('read-only');
-      expect(tool.description).toContain('rule-management');
+      expect(tool.description).toContain('rule-authoring');
       expect(tool.schema.safeParse({}).success).toBe(true);
     });
   });

@@ -129,7 +129,7 @@ const TestComponent = (props: TestComponentProps) => {
         itemsPerPage={50}
         itemsPerPageOptions={[10, 25, 50, 100]}
         rowRenderers={[]}
-        leadingControlColumns={[]}
+        rowAdditionalLeadingControls={[]}
         sort={[['@timestamp', 'desc']]}
         events={mockTimelineData}
         onFieldEdited={onFieldEditedMock}

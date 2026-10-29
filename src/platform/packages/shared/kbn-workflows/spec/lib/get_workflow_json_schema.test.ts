@@ -8,7 +8,7 @@
  */
 
 import { stringify } from 'yaml';
-import { z } from '@kbn/zod/v4';
+import { isoDateTime, z } from '@kbn/zod/v4';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
 
@@ -192,6 +192,33 @@ describe('fixAdditionalPropertiesInSchema', () => {
         expect(isBrokenRef).toBe(false);
       }
     });
+  });
+});
+
+describe('isoDateTime fields', () => {
+  it('keeps date-time format and a pattern that enforces the datetime contract', () => {
+    const jsonSchema = getWorkflowJsonSchema(
+      z.object({
+        at: isoDateTime(),
+        atOffset: isoDateTime({ offset: true }),
+      })
+    );
+    const dateTimeField = { format: 'date-time', pattern: expect.any(String) };
+    expect(jsonSchema).toMatchObject({
+      properties: { at: dateTimeField, atOffset: dateTimeField },
+    });
+    const { at, atOffset } = (
+      jsonSchema as { properties: Record<'at' | 'atOffset', { pattern: string }> }
+    ).properties;
+
+    const atPattern = new RegExp(at.pattern);
+    expect(atPattern.test('2024-02-30T10:00Z')).toBe(false);
+    expect(atPattern.test('2024-01-01T10:00+02:00')).toBe(false);
+    expect(atPattern.test('2024-01-01T10:00Z')).toBe(true);
+
+    const offsetPattern = new RegExp(atOffset.pattern);
+    expect(offsetPattern.test('2024-02-30T10:00Z')).toBe(false);
+    expect(offsetPattern.test('2024-01-01T10:00Z')).toBe(true);
   });
 });
 

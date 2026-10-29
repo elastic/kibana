@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { useBulkAttackInvestigateInTimelineItems } from '../bulk_action_items/use_bulk_attack_investigate_in_timeline_items';
 import { ALERT_ATTACK_DISCOVERY_ALERT_IDS } from '../constants';
 import { transformBulkActionsToContextMenuItems } from '../utils/transform_bulk_actions_to_context_menu_items';
@@ -38,7 +39,10 @@ export const useAttackInvestigateInTimelineContextMenuItems = ({
     () =>
       attacksWithTimelineAlerts.map((attack) => ({
         _id: attack.attackId,
-        data: [{ field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds }],
+        data: [
+          { field: ALERT_ATTACK_DISCOVERY_ALERT_IDS, value: attack.relatedAlertIds },
+          { field: TIMESTAMP, value: attack.timestamp != null ? [attack.timestamp] : [] },
+        ],
         ecs: { _id: attack.attackId },
       })),
     [attacksWithTimelineAlerts]

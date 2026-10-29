@@ -90,6 +90,9 @@ export const ENTITY_STORE_ROUTES = {
     ENTITY_MAINTAINERS_RUN: `${INTERNAL_BASE_ROUTE}/entity_maintainers/run/{id}`,
     ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE_ROUTE}/entity_maintainers`,
     ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE_ROUTE}/entity_maintainers/init`,
+    RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules`,
+    RESOLUTION_CUSTOM_RULE: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/{id}`,
+    RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/_preview`,
   },
 } as const satisfies Record<string, Record<string, string>>;
 
@@ -118,8 +121,24 @@ export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'g
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export { ExtractionMode } from './domain/definitions/entity_schema';
-export type { EntityDefinitionOfAnyType } from './domain/definitions/entity_schema';
+export {
+  ExtractionMode,
+  extractionBlockSchema,
+  dynamicBlockSchema,
+} from './domain/definitions/entity_schema';
+export type {
+  DynamicBlock,
+  EntityDefinitionOfAnyType,
+  EntityDefinitionWithoutId,
+  ExtractionBlock,
+  ExtractedEntityDefinition,
+} from './domain/definitions/entity_schema';
+
+// Consumed by the entity inventory plugin, which must not restate the store's definition rules.
+export { entitySchema } from './domain/definitions/entity_schema';
+export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
+export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
+export { getIdentityFields, getPresenceFilter } from './domain/definitions/dynamic';
 
 export type {
   Entity,
@@ -202,7 +221,10 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
-export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
+export {
+  AI_SUMMARY_EVENT_ACTION,
+  AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID,
+} from './domain/entity_metadata/ai_summary_metadata';
 export type {
   AiSummaryMetadataDoc,
   AiSummaryHighlightItem,

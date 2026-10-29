@@ -51,6 +51,7 @@ const storageSettings = {
         properties: {
           id: types.keyword({}),
           username: types.keyword({}),
+          type: types.keyword({}),
         },
       }),
       agent_params: types.object({ dynamic: false, properties: {} }),

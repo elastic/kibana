@@ -10,11 +10,25 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import { getAnomalySwimLaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import type { AnomalySwimLaneEmbeddableApi } from './types';
+
+const mockSwimlaneContainer = jest.fn();
+jest.mock('../../application/explorer/swimlane_container', () => ({
+  isViewBySwimLaneData: jest.fn(() => false),
+  SwimlaneContainer: (props: Record<string, unknown>) => {
+    mockSwimlaneContainer(props);
+    // The real SwimlaneContainer calls onResize on mount, which triggers the chartWidth$
+    // observable that the data fetcher subscribes to. Simulate that here.
+    React.useEffect(() => {
+      (props.onResize as (size: number) => void)?.(800);
+    }, [props.onResize]);
+    return <div data-test-subj={props['data-test-subj'] as string} />;
+  },
+}));
 
 // Mock dependencies
 const pluginStartDeps = {
@@ -120,6 +134,45 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       expect(api.viewBy.value).toEqual('overall');
 
       expect(screen.getByTestId<HTMLElement>('mlSwimLaneEmbeddable_1234')).toBeInTheDocument();
+    });
+  });
+
+  describe('non-interactive mode', () => {
+    it('passes undefined onCellsSelection and onPaginationChange when viewMode is non-interactive', async () => {
+      const uuid = 'preview-uuid';
+      const viewMode$ = new BehaviorSubject<'non-interactive'>('non-interactive');
+      const parentApi = {
+        executionContext: { type: 'dashboard', id: 'dashboard-id' },
+        viewMode$,
+      };
+
+      const { Component } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState: {
+          swimlane_type: 'viewBy',
+          job_ids: ['my-job'],
+          view_by: 'overall',
+        } satisfies AnomalySwimLaneEmbeddableState,
+        finalizeApi: (preFinalizeApi) => {
+          return {
+            ...preFinalizeApi,
+            uuid,
+            parentApi,
+            type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+          } as AnomalySwimLaneEmbeddableApi;
+        },
+        parentApi,
+        uuid,
+      });
+
+      mockSwimlaneContainer.mockClear();
+      render(<Component />);
+
+      await waitFor(() => {
+        expect(mockSwimlaneContainer).toHaveBeenCalled();
+        const lastProps = mockSwimlaneContainer.mock.calls.at(-1)?.[0];
+        expect(lastProps?.onCellsSelection).toBeUndefined();
+      });
     });
   });
 });

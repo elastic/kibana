@@ -126,6 +126,37 @@ describe('getRiskScoreData', () => {
     });
   });
 
+  describe('when scoreType is provided', () => {
+    it('restricts the risk score search to that score_type', async () => {
+      jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(makeRiskScore()));
+
+      await getRiskScoreData({
+        ...baseOptions,
+        entities: [makeEntity('carol', 'user')],
+        getAlerts: false,
+        scoreType: 'resolution',
+      });
+
+      expect(jest.mocked(esClient.search).mock.calls[0][0]).toMatchObject({
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    { terms: { 'user.name': ['carol'] } },
+                    { term: { 'user.risk.score_type': 'resolution' } },
+                  ],
+                },
+              },
+              { exists: { field: 'user.name' } },
+            ],
+          },
+        },
+      });
+    });
+  });
+
   describe('when there is no risk score for an entity', () => {
     it('returns undefined riskScore with empty alertDocuments', async () => {
       jest.mocked(esClient.search).mockResolvedValue(makeSearchResponse(undefined));

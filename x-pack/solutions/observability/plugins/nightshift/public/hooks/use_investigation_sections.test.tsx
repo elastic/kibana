@@ -146,8 +146,24 @@ describe('useInvestigationSections', () => {
     );
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { in_progress: false, query: 'checkout' }, version: '1' })
+      expect.objectContaining({ query: { query: 'checkout' }, version: '1' })
     );
+  });
+
+  it('counts each matching investigation once, unlike the summed section totals', async () => {
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        // Also listed in its severity section, so the section totals count it twice.
+        return sectionResult({ ids: ['running-a'] });
+      }
+      return params.severities?.[0] === 'none' ? sectionResult({ total: 4 }) : sectionResult();
+    });
+
+    const { result } = renderSections('checkout');
+
+    // 3 critical + 1 high + 0 medium + 2 low + 4 unrated.
+    await waitFor(() => expect(result.current.matchedCount).toBe(10));
+    expect(result.current.totalCount).toBe(5);
   });
 
   it('treats a non-empty in-progress section as active and polls only that section', () => {

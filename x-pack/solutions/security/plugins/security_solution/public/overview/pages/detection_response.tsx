@@ -13,7 +13,9 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { DASHBOARDS } from '../../app/translations';
 import { SecurityPageName } from '../../app/types';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { SecurityAppHeader } from '../../common/components/app_header';
@@ -32,7 +34,7 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 
 const DetectionResponseComponent = () => {
-  const { cases } = useKibana().services;
+  const { cases, docLinks } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
 
   const { dataView, status } = useDataView();
@@ -47,8 +49,17 @@ const DetectionResponseComponent = () => {
   const canReadAlerts = hasAlertsRead && hasIndexRead;
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
+    () => ({
+      href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.dashboards }),
+      label: DASHBOARDS,
+    }),
+    [getSecuritySolutionUrl]
+  );
+
   if (!canReadAlerts && !canReadCases) {
-    return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+    return <NoPrivileges docLinkSelector={({ siem }: DocLinks) => siem.privileges} />;
   }
 
   if (status === 'pristine') {
@@ -60,7 +71,12 @@ const DetectionResponseComponent = () => {
       {indicesExist ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
-            <SecurityAppHeader title={i18n.DETECTION_RESPONSE_TITLE} spacing="largeBleed" />
+            <SecurityAppHeader
+              title={i18n.DETECTION_RESPONSE_TITLE}
+              spacing="largeBleed"
+              back={back}
+              docLink={docLinks.links.siem.detectionResponsePage}
+            />
             {isDataViewReady && (
               <>
                 <EuiSpacer size="m" />

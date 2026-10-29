@@ -945,12 +945,6 @@
             "description": "Number of enabled alerting v2 rules."
           }
         },
-        "count_agent_builder_assisted": {
-          "type": "long",
-          "_meta": {
-            "description": "Number of alerting v2 rules currently tagged as created/edited via Agent Builder."
-          }
-        },
         "count_by_kind": {
           "properties": {
             "alert": {
@@ -8832,6 +8826,118 @@
                 },
                 "maxOnACase": {
                   "type": "long"
+                },
+                "bySource": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "source": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown"
+                        }
+                      },
+                      "type": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "User action type (e.g. comment, status, assignees)"
+                        }
+                      },
+                      "total": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Total number of user actions with this source and type"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "bySource": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "source": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown"
+                        }
+                      },
+                      "type": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "User action type (e.g. comment, status, assignees)"
+                        }
+                      },
+                      "total": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Total number of user actions with this source and type"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "bySource": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "source": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown"
+                        }
+                      },
+                      "type": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "User action type (e.g. comment, status, assignees)"
+                        }
+                      },
+                      "total": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Total number of user actions with this source and type"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "bySource": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "source": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown"
+                        }
+                      },
+                      "type": {
+                        "type": "keyword",
+                        "_meta": {
+                          "description": "User action type (e.g. comment, status, assignees)"
+                        }
+                      },
+                      "total": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Total number of user actions with this source and type"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -9896,6 +10002,410 @@
               }
             }
           }
+        },
+        "workflows": {
+          "properties": {
+            "all": {
+              "properties": {
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
+                  }
+                },
+                "totalCasesWithRuns": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of distinct cases that have had at least one workflow run"
+                  }
+                },
+                "totalUniqueUsers": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
+                  }
+                },
+                "byOriginType": {
+                  "properties": {
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
+                  }
+                },
+                "totalCasesWithRuns": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of distinct cases that have had at least one workflow run"
+                  }
+                },
+                "totalUniqueUsers": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
+                  }
+                },
+                "byOriginType": {
+                  "properties": {
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
+                  }
+                },
+                "totalCasesWithRuns": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of distinct cases that have had at least one workflow run"
+                  }
+                },
+                "totalUniqueUsers": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
+                  }
+                },
+                "byOriginType": {
+                  "properties": {
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "runs": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of workflow runs recorded on cases"
+                      }
+                    },
+                    "monthly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last month"
+                      }
+                    },
+                    "weekly": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last week"
+                      }
+                    },
+                    "daily": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of workflow runs recorded on cases in the last day"
+                      }
+                    }
+                  }
+                },
+                "totalCasesWithRuns": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of distinct cases that have had at least one workflow run"
+                  }
+                },
+                "totalUniqueUsers": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Cardinality of distinct usernames that have triggered a workflow from a case"
+                  }
+                },
+                "byOriginType": {
+                  "properties": {
+                    "case": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the case detail page"
+                      }
+                    },
+                    "observable": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table for a single observable"
+                      }
+                    },
+                    "observables": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from the observables table with a multi-observable selection"
+                      }
+                    },
+                    "attachment": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a single attachment row (for example an alert or event) in a case"
+                      }
+                    },
+                    "attachments": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs triggered from a bulk attachment selection (for example alerts) in a case"
+                      }
+                    },
+                    "unattributed": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Runs carrying no single-case origin, such as cases-list bulk runs"
+                      }
+                    }
+                  }
+                },
+                "byAttachmentType": {
+                  "properties": {
+                    "DYNAMIC_KEY": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)"
+                      }
+                    }
+                  }
+                },
+                "configurationsWithWorkflowTags": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of case configurations that have at least one workflow tag set. Tag values are never reported."
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -10863,6 +11373,206 @@
                             }
                           }
                         }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "context_engine": {
+      "properties": {
+        "ai_indices": {
+          "properties": {
+            "user": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of user-created AI indices across all spaces"
+              }
+            },
+            "managed": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of managed AI index entries across all spaces; one per space the managed AI index is bootstrapped in"
+              }
+            }
+          }
+        },
+        "kis": {
+          "properties": {
+            "user": {
+              "properties": {
+                "active": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active, unexpired KIs in user-created AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active, unexpired KIs in one user-created AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active, unexpired KIs in one user-created AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active, unexpired KIs per user-created AI index"
+                      }
+                    }
+                  }
+                },
+                "expired": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active KIs past their expires_at in user-created AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active KIs past their expires_at in one user-created AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active KIs past their expires_at in one user-created AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active KIs past their expires_at per user-created AI index"
+                      }
+                    }
+                  }
+                },
+                "deleted": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of KIs with lifecycle status deleted in user-created AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most KIs with lifecycle status deleted in one user-created AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest KIs with lifecycle status deleted in one user-created AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average KIs with lifecycle status deleted per user-created AI index"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "managed": {
+              "properties": {
+                "active": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active, unexpired KIs in managed AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active, unexpired KIs in one managed AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active, unexpired KIs in one managed AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active, unexpired KIs per managed AI index"
+                      }
+                    }
+                  }
+                },
+                "expired": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of active KIs past their expires_at in managed AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most active KIs past their expires_at in one managed AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest active KIs past their expires_at in one managed AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average active KIs past their expires_at per managed AI index"
+                      }
+                    }
+                  }
+                },
+                "deleted": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of KIs with lifecycle status deleted in managed AI indices"
+                      }
+                    },
+                    "max": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Most KIs with lifecycle status deleted in one managed AI index"
+                      }
+                    },
+                    "min": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Fewest KIs with lifecycle status deleted in one managed AI index"
+                      }
+                    },
+                    "avg": {
+                      "type": "float",
+                      "_meta": {
+                        "description": "Average KIs with lifecycle status deleted per managed AI index"
                       }
                     }
                   }

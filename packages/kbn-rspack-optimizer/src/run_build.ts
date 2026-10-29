@@ -31,6 +31,8 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
   /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+  // Scout specs, fixtures, page objects, and configs are outside the browser bundle.
+  /[\\/]test[\\/]scout(?:_[^\\/]+)?(?:[\\/]|$)/,
   // Scout/Playwright output (test artifacts, reports, server configs) written
   // into plugin dirs during test runs; must not trigger watch rebuilds.
   /[\\/]\.scout[\\/]/,

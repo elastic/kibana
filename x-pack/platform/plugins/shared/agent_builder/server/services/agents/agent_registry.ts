@@ -11,7 +11,6 @@ import {
   createAgentNotFoundError,
   createAgentUnavailableError,
   createBadRequestError,
-  chatAgentTypeId,
   SELF_AGENT_ID,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
@@ -81,14 +80,8 @@ export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistr
   return new AgentRegistryImpl(opts);
 };
 
-/**
- * Whether an agent should surface in default listings (agent management page, pickers, ...).
- * Read-only managed built-ins (a non-chat type)
- * Chat agents and editable (persisted) agents always show, so the admin-editable managed agent stays visible.
- */
-const isVisibleAgent = (agent: InternalAgentDefinition): boolean => {
-  return agent.type === chatAgentTypeId || !agent.readonly;
-};
+/** Returns true for agents that appear in UI listings by default (agent picker, management page). */
+const isVisibleAgent = (agent: InternalAgentDefinition): boolean => !agent.hidden;
 
 class AgentRegistryImpl implements AgentRegistry {
   private readonly request: KibanaRequest;
@@ -150,7 +143,7 @@ class AgentRegistryImpl implements AgentRegistry {
       allAgents.push(...(await this.getAvailableAgents(provider, opts)));
     }
 
-    return opts.includeManaged ? allAgents : allAgents.filter(isVisibleAgent);
+    return opts.includeHidden ? allAgents : allAgents.filter(isVisibleAgent);
   }
 
   async getIds(opts: AgentListOptions = {}): Promise<string[]> {

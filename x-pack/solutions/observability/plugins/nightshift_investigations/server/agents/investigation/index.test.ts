@@ -8,7 +8,7 @@
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
@@ -73,9 +73,6 @@ describe('Nightshift investigation agent type', () => {
       PROPOSALS_CREATE_TOOL_ID,
       ...SANDBOX_TOOL_IDS,
     ]);
-    expect(base.tools?.[0]?.tool_ids).not.toContain(
-      platformSignificantEventsTools.reportInvestigationProgress
-    );
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
@@ -85,7 +82,11 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).toContain('Affected entity');
     expect(base.instructions).not.toContain('inputs.context.alerts');
     expect(base.instructions).toContain('`- <slug> (id <id>): FROM <view_name>`');
-    expect(base.instructions).toContain('FROM <view_name> | LIMIT 0');
+    expect(base.instructions).toContain('FROM <view_name> | KEEP <prefix>* | LIMIT 0');
+    expect(base.instructions).toContain('see <knowledge_cortex>');
+    expect(base.instructions).toContain('/workspace/cortex/README.md');
+    expect(base.instructions).not.toContain('{{cortex_load_step}}');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
   it('adds Semantic Memory context and workflows when memory is enabled', () => {
@@ -132,6 +133,10 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).not.toContain('/workspace/cortex/');
+    expect(base.instructions).not.toContain('<knowledge_cortex>');
+    expect(base.instructions).not.toContain('{{cortex_load_step}}');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
   it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
@@ -187,10 +192,41 @@ describe('Nightshift investigation agent type', () => {
       expect(instructions).toContain(`\`${tool}\``);
     }
     expect(instructions).toContain('"origin": "nightshift"');
+    expect(instructions).toContain('"category": "todo"');
     expect(instructions).toContain('**Check before you finish.**');
-    expect(instructions).not.toContain('investigation_progress_report');
     expect(instructions).not.toContain('blind_spots');
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
+  });
+
+  it('preserves telemetry connectors when resolving hooks for the space', async () => {
+    const type = getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: true,
+      ...ALL_PLUGINS,
+      resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'c0-telemetry' },
+          orca: { connector_id: 'orca-telemetry' },
+        },
+      },
+    });
+    if (typeof type.baseConfiguration !== 'function') {
+      throw new Error('expected a dynamic base configuration');
+    }
+    const base = await type.baseConfiguration({
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'sa-a',
+    });
+
+    expect(base.connector_ids).toEqual(['legacy', 'c0-telemetry', 'orca-telemetry']);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-sa-a',
+    ]);
   });
 
   describe('custom context', () => {
@@ -250,4 +286,23 @@ describe('Nightshift investigation agent type', () => {
       );
     });
   });
+});
+
+it('allows configured telemetry connectors on the single investigator type', () => {
+  const base = staticBase(
+    getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: false,
+      ...ALL_PLUGINS,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'customer0' },
+          orca: { connector_id: 'orca' },
+          alias: { connector_id: 'orca' },
+        },
+      },
+    })
+  );
+  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
 });

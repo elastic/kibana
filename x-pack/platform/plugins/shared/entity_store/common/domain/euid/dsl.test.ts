@@ -424,6 +424,53 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       // cloud.provider must NOT appear in the filter — namespace is determined by event.module.
       expect(JSON.stringify(result)).not.toContain('cloud.provider');
     });
+
+    describe('aws: user.entity.id ranking', () => {
+      const IAM_ROLE_ARN = 'arn:aws:iam::123456789012:role/Admin';
+
+      it('filters on user.entity.id with no higher-ranked guards when it is present', () => {
+        const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
+          user: { id: IAM_ROLE_ARN, name: 'Admin', entity: { id: IAM_ROLE_ARN } },
+          event: { kind: 'asset', module: 'aws' },
+          cloud: { provider: 'aws' },
+        });
+
+        expect(result?.bool?.filter).toEqual(
+          expect.arrayContaining([{ term: { 'user.entity.id': IAM_ROLE_ARN } }])
+        );
+        expect(result?.bool?.filter).not.toEqual(
+          expect.arrayContaining([{ term: { 'user.id': IAM_ROLE_ARN } }])
+        );
+        expect(result?.bool?.must).toBeUndefined();
+      });
+
+      it('guards user.entity.id as missing-or-empty when an aws document ranks by user.id', () => {
+        const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
+          user: { id: 'AIDAEXAMPLE' },
+          event: { kind: 'asset', module: 'aws' },
+          cloud: { provider: 'aws' },
+        });
+
+        expect(result?.bool?.filter).toEqual(
+          expect.arrayContaining([{ term: { 'user.id': 'AIDAEXAMPLE' } }])
+        );
+        expect(result?.bool?.must).toEqual(
+          expect.arrayContaining([
+            fieldMissingOrEmpty('user.entity.id'),
+            fieldMissingOrEmpty('user.email'),
+          ])
+        );
+      });
+
+      it('does not guard user.entity.id when cloud.provider is not aws', () => {
+        const result = getEuidDslFilterBasedOnDocument(getBuiltInEntityDefinition('user'), {
+          user: { id: 'AIDAEXAMPLE' },
+          event: { kind: 'asset', module: 'aws' },
+        });
+
+        expect(result?.bool?.must).toEqual([fieldMissingOrEmpty('user.email')]);
+      });
+    });
   });
 
   describe('service', () => {
@@ -686,6 +733,43 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
       expect(awsJson).not.toContain('"gcp"');
       expect(gcpJson).not.toContain('"aws"');
       expect(awsJson).not.toEqual(gcpJson);
+    });
+
+    it('aws IAM record: does not guard user.entity.id, which the record does not store', () => {
+      const roleArn = 'arn:aws:iam::123456789012:role/Admin';
+      const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
+        entity: { id: `user:${roleArn}@aws`, namespace: 'aws' },
+        cloud: { provider: 'aws' },
+        user: { id: [roleArn, 'AROAEXAMPLE:session-1'], name: 'Admin' },
+      });
+
+      expect(result?.bool?.filter).toEqual(
+        expect.arrayContaining([{ term: { 'user.id': roleArn } }])
+      );
+      // user.entity.id ranks first but is not on the record. Requiring it to be missing would
+      // match no document, because every AWS document carries it.
+      expect(result?.bool?.must).toEqual([fieldMissingOrEmpty('user.email')]);
+    });
+
+    it('guards only the higher-ranked identity fields that the record stores', () => {
+      const userDefinition = getBuiltInEntityDefinition('user');
+      const withoutStoredEmail = {
+        ...userDefinition,
+        extraction: {
+          ...userDefinition.extraction,
+          fields: userDefinition.extraction.fields.filter(
+            ({ destination }) => destination !== 'user.email'
+          ),
+        },
+      };
+      const record = { entity: { namespace: 'okta' }, user: { id: 'u1' } };
+
+      expect(getEuidDslFilterBasedOnEntityRecord(userDefinition, record)?.bool?.must).toEqual([
+        fieldMissingOrEmpty('user.email'),
+      ]);
+      expect(
+        getEuidDslFilterBasedOnEntityRecord(withoutStoredEmail, record)?.bool?.must
+      ).toBeUndefined();
     });
 
     it('never emits a term on the evaluated entity.namespace destination', () => {

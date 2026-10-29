@@ -32,6 +32,8 @@ import { DestinationTypeFields } from './destination_type_fields';
 import { DESTINATION_TYPE_DEFINITIONS } from './destination_type_registry';
 import type { DestinationStorageKind } from './types';
 
+const CREATE_DESTINATION_MODAL_WIDTH = 560;
+
 interface CreateDestinationModalProps {
   destinations: Pick<
     DestinationsController,
@@ -39,19 +41,27 @@ interface CreateDestinationModalProps {
     | 'storageKind'
     | 'destinationName'
     | 'destinationNameError'
-    | 'elasticsearchIndex'
-    | 'elasticsearchIndexPatterns'
-    | 'indexError'
-    | 'indexPatternsError'
+    | 'elasticsearchAuto'
+    | 'elasticsearchLogsIndex'
+    | 'elasticsearchMetricsIndex'
+    | 'elasticsearchTracesIndex'
+    | 'staticIndexesError'
+    | 'logsIndexError'
+    | 'metricsIndexError'
+    | 'tracesIndexError'
+    | 'apiKeyError'
     | 'canCreateDestination'
     | 'persistenceError'
     | 'isCreatingDestination'
     | 'isCreateFailed'
     | 'setStorageKind'
     | 'setCreateDestinationName'
-    | 'setElasticsearchIndex'
-    | 'setElasticsearchIndexPatterns'
+    | 'setElasticsearchAuto'
+    | 'setElasticsearchIndexes'
     | 'validateCreationForm'
+    | 's3Form'
+    | 's3Errors'
+    | 'setS3Form'
   >;
   onClose: () => void;
 }
@@ -62,19 +72,27 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     storageKind,
     destinationName,
     destinationNameError,
-    elasticsearchIndex,
-    elasticsearchIndexPatterns,
-    indexError,
-    indexPatternsError,
+    elasticsearchAuto,
+    elasticsearchLogsIndex,
+    elasticsearchMetricsIndex,
+    elasticsearchTracesIndex,
+    staticIndexesError,
+    logsIndexError,
+    metricsIndexError,
+    tracesIndexError,
     canCreateDestination,
     persistenceError,
+    apiKeyError,
     isCreatingDestination,
     isCreateFailed,
     setStorageKind,
     setCreateDestinationName,
-    setElasticsearchIndex,
-    setElasticsearchIndexPatterns,
+    setElasticsearchAuto,
+    setElasticsearchIndexes,
     validateCreationForm,
+    s3Form,
+    s3Errors,
+    setS3Form,
   } = destinations;
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
   const destinationNameErrorText =
@@ -85,6 +103,14 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
       : destinationNameError === 'duplicate'
       ? i18n.translate('xpack.streams.destinations.destinationNameDuplicateErrorMessage', {
           defaultMessage: 'A destination with this name already exists.',
+        })
+      : destinationNameError === 'tooLong'
+      ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
+          defaultMessage: 'This name is too long for an S3 destination.',
+        })
+      : destinationNameError === 'credentialConflict'
+      ? i18n.translate('xpack.streams.destinations.destinationNameCredentialConflictErrorMessage', {
+          defaultMessage: 'This name conflicts with an existing credential.',
         })
       : undefined;
 
@@ -97,7 +123,9 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     <EuiModal
       aria-labelledby={modalTitleId}
       onClose={isCreatingDestination ? () => undefined : onClose}
-      maxWidth={480}
+      maxWidth={CREATE_DESTINATION_MODAL_WIDTH}
+      // EuiModal caps height at 75vh, which makes the S3 form scroll on a laptop screen.
+      style={{ width: CREATE_DESTINATION_MODAL_WIDTH, maxBlockSize: '90vh' }}
       data-test-subj="streamsCreateDestinationModal"
     >
       <EuiModalHeader>
@@ -121,14 +149,23 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
-        {persistenceError && (
+        {(apiKeyError || persistenceError) && (
           <>
             <KbnDangerCallout
               announceOnMount
-              title={i18n.translate('xpack.streams.destinations.createDestinationFailedTitle', {
-                defaultMessage: 'Could not create the destination',
-              })}
-              text={persistenceError}
+              title={
+                apiKeyError
+                  ? i18n.translate(
+                      'xpack.streams.destinations.createDestinationApiKeyFailedTitle',
+                      {
+                        defaultMessage: 'Could not create an API key for this destination',
+                      }
+                    )
+                  : i18n.translate('xpack.streams.destinations.createDestinationFailedTitle', {
+                      defaultMessage: 'Could not create the destination',
+                    })
+              }
+              text={apiKeyError ?? persistenceError}
             />
             <EuiSpacer size="s" />
           </>
@@ -189,13 +226,20 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                       {storageKind === definition.storageKind && (
                         <DestinationTypeFields
                           storageKind={storageKind}
-                          index={elasticsearchIndex}
-                          indexPatterns={elasticsearchIndexPatterns}
-                          indexError={indexError}
-                          indexPatternsError={indexPatternsError}
+                          auto={elasticsearchAuto}
+                          logsIndex={elasticsearchLogsIndex}
+                          metricsIndex={elasticsearchMetricsIndex}
+                          tracesIndex={elasticsearchTracesIndex}
+                          staticIndexesError={staticIndexesError}
+                          logsIndexError={logsIndexError}
+                          metricsIndexError={metricsIndexError}
+                          tracesIndexError={tracesIndexError}
                           disabled={isCreatingDestination}
-                          onIndexChange={setElasticsearchIndex}
-                          onIndexPatternsChange={setElasticsearchIndexPatterns}
+                          onAutoChange={setElasticsearchAuto}
+                          onIndexesChange={setElasticsearchIndexes}
+                          s3Form={s3Form}
+                          s3Errors={s3Errors}
+                          onS3Change={setS3Form}
                           onBlur={validateCreationForm}
                         />
                       )}

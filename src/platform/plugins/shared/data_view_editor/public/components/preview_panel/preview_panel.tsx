@@ -44,11 +44,19 @@ export interface Props {
   allowHidden: boolean;
   title: string;
   matchedIndices$: Observable<MatchedIndicesSet>;
+  matchedIndicesError$: Observable<Error | undefined>;
 }
 
-export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }: Props) => {
+export const PreviewPanel = ({
+  type,
+  allowHidden,
+  title = '',
+  matchedIndices$,
+  matchedIndicesError$,
+}: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>();
   const matched = useObservable(matchedIndices$, matchedIndiciesDefault);
+  const matchedIndicesError = useObservable(matchedIndicesError$);
 
   let currentlyVisibleIndices;
   let currentViewMode;
@@ -84,6 +92,7 @@ export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }:
         showSystemIndices={type === INDEX_PATTERN_TYPE.ROLLUP ? false : true}
         isIncludingSystemIndices={allowHidden}
         query={title}
+        error={matchedIndicesError}
       />
       <EuiSpacer size="m" />
       {Boolean(title) &&

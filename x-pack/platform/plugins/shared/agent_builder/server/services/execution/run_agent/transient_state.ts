@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CompactionSummary, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  CompactionSummary,
+  CompactionTrigger,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
@@ -20,7 +25,7 @@ export type ResearchOutcome =
 
 /** A compaction decided by `contextManagement`, executed by `compactContext`. */
 export interface CompactionRequest {
-  trigger: 'forced' | 'round_start' | 'proactive';
+  trigger: CompactionTrigger;
   /** Max tokens of completed cycles kept verbatim before the current one. */
   tailCapTokens: number;
   /** Input tokens that motivated the compaction, when known. */
@@ -98,4 +103,6 @@ export interface CurrentRun {
   retryNotices: RetryNotice[];
   /** The summary the context is currently rendered with; its cursor decides what stays verbatim. */
   compactionSummary?: CompactionSummary;
+  /** Attachment events of the run (a resume: plus the paused round's), placed at their anchors. */
+  attachmentEvents?: AttachmentTimelineEvent[];
 }

@@ -83,11 +83,14 @@ const resultsGroupedOnId = 'aiopsLogRateAnalysisGroupingOn';
 export interface LogRateAnalysisOptionsProps {
   foundGroups: boolean;
   growFirstItem?: boolean;
+  /** Whether the panel's inherited interactivity allows changing the analysis configuration. */
+  isInteractive: boolean;
 }
 
 export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   foundGroups,
   growFirstItem = false,
+  isInteractive,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -97,7 +100,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   const { skippedColumns } = useAppSelector((s) => s.logRateAnalysisTable);
   const { fieldFilterUniqueItems, initialFieldFilterSkippedItems } = fieldCandidates;
   const fieldFilterButtonDisabled =
-    isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
+    !isInteractive || isRunning || fieldCandidates.isLoading || fieldFilterUniqueItems.length === 0;
   const toggleIdSelected = groupResults ? resultsGroupedOnId : resultsGroupedOffId;
 
   const onGroupResultsToggle = (optionId: string) => {
@@ -116,7 +119,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
 
   // Disable the grouping switch toggle only if no groups were found,
   // the toggle wasn't enabled already and no fields were selected to be skipped.
-  const disabledGroupResultsSwitch = !foundGroups && !groupResults;
+  const disabledGroupResultsSwitch = !isInteractive || (!foundGroups && !groupResults);
 
   const toggleButtons = [
     {
@@ -169,8 +172,8 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
       <EuiFlexItem grow={false}>
         <ColumnFilterPopover
           dataTestSubj="aiopsColumnFilterButton"
-          disabled={isRunning}
-          disabledApplyButton={isRunning}
+          disabled={!isInteractive || isRunning}
+          disabledApplyButton={!isInteractive || isRunning}
           disabledApplyTooltipContent={disabledColumnFilterApplyButtonTooltipContent}
           helpText={columnsFilterHelpText}
           itemSearchAriaLabel={columnSearchAriaLabel}

@@ -14,14 +14,14 @@ import { css } from '@emotion/react';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../constants';
 
 const START_TIME = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.maintenanceWindowTooltip.startTime',
+  'xpack.responseOpsAlertsTable.alertsTable.maintenanceWindowTooltip.startTime',
   {
     defaultMessage: 'Start',
   }
 );
 
 const END_TIME = i18n.translate(
-  'xpack.triggersActionsUI.alertsTable.maintenanceWindowTooltip.endTime',
+  'xpack.responseOpsAlertsTable.alertsTable.maintenanceWindowTooltip.endTime',
   {
     defaultMessage: 'End',
   }

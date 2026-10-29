@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildAlertEuidPipeline, evalGuardedTypedEuids } from './euid_pipeline';
+import { buildAlertEuidPipeline, buildEuidStages, evalGuardedTypedEuids } from './euid_pipeline';
 
 describe('evalGuardedTypedEuids', () => {
   it('writes an MV_DEDUPE+MV_APPEND EVAL of null-safe COALESCEs into the given column', () => {
@@ -21,9 +21,18 @@ describe('evalGuardedTypedEuids', () => {
   });
 });
 
+describe('buildEuidStages', () => {
+  it('expands a document into a row per entity it names, rather than keeping only the first id', () => {
+    const stages = buildEuidStages().join('\n');
+    expect(stages).toContain('| MV_EXPAND derived_euids');
+    expect(stages).toContain('| RENAME derived_euids AS `entity.id`');
+    expect(stages).not.toContain('EVAL `entity.id`');
+  });
+});
+
 describe('buildAlertEuidPipeline', () => {
   it('matches each stamped id, which also keeps alerts stamped with several ids', () => {
-    const pipeline = buildAlertEuidPipeline({ stampedEntityIds: ['host:h1', 'user:a'] }).join('\n');
+    const pipeline = buildAlertEuidPipeline({ entityIds: ['host:h1', 'user:a'] }).join('\n');
     expect(pipeline).toContain(
       '| WHERE MV_CONTAINS(`kibana.alert.entity.id`, "host:h1") OR MV_CONTAINS(`kibana.alert.entity.id`, "user:a")'
     );

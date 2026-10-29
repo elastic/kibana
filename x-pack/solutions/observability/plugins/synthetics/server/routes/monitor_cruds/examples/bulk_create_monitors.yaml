@@ -61,3 +61,16 @@ responses:
   400:
     description: >
       Bad request. Returned when the batch is empty or too large, a monitor configuration is invalid, or two monitors use the same name.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/monitors/_bulk_create" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"monitors":[{"type":"http","name":"Storefront","url":"https://example.com","locations":["united_kingdom"]},{"type":"http","name":"Documentation","url":"https://docs.example.com","locations":["united_kingdom"]}]}'
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/monitors/_bulk_create
+      {"monitors":[{"type":"http","name":"Storefront","url":"https://example.com","locations":["united_kingdom"]},{"type":"http","name":"Documentation","url":"https://docs.example.com","locations":["united_kingdom"]}]}

@@ -9,7 +9,6 @@ import type { FunctionComponent } from 'react';
 import React, { Suspense } from 'react';
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiNotificationBadge,
@@ -25,7 +24,6 @@ const LazyEsqlDataGrid = React.lazy(async () => {
 });
 
 interface EsqlViewPreviewResultsProps {
-  error?: Error;
   hasRun: boolean;
   isLoading: boolean;
   isOpen: boolean;
@@ -34,7 +32,6 @@ interface EsqlViewPreviewResultsProps {
 }
 
 export const EsqlViewPreviewResults: FunctionComponent<EsqlViewPreviewResultsProps> = ({
-  error,
   hasRun,
   isLoading,
   isOpen,
@@ -43,28 +40,7 @@ export const EsqlViewPreviewResults: FunctionComponent<EsqlViewPreviewResultsPro
 }) => {
   let content: React.ReactNode;
 
-  if (isLoading) {
-    content = (
-      <EuiEmptyPrompt
-        data-test-subj="esqlViewPreviewLoading"
-        icon={<EuiLoadingSpinner size="l" />}
-        title={<h4>{translations.previewLoadingTitle}</h4>}
-        titleSize="xs"
-      />
-    );
-  } else if (error) {
-    content = (
-      <EuiCallOut
-        announceOnMount
-        color="danger"
-        data-test-subj="esqlViewPreviewError"
-        iconType="warning"
-        title={translations.previewErrorTitle}
-      >
-        <p>{error.message}</p>
-      </EuiCallOut>
-    );
-  } else if (result && result.rows.length > 0) {
+  if (result && result.rows.length > 0) {
     content = (
       <Suspense
         fallback={
@@ -87,6 +63,15 @@ export const EsqlViewPreviewResults: FunctionComponent<EsqlViewPreviewResultsPro
           rows={result.rows}
         />
       </Suspense>
+    );
+  } else if (isLoading && result === undefined) {
+    content = (
+      <EuiEmptyPrompt
+        data-test-subj="esqlViewPreviewLoading"
+        icon={<EuiLoadingSpinner size="l" />}
+        title={<h4>{translations.previewLoadingTitle}</h4>}
+        titleSize="xs"
+      />
     );
   } else {
     const noResults = hasRun && result !== undefined;

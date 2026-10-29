@@ -114,6 +114,8 @@ jest.mock('lodash', () => {
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
       debounced.cancel = jest.fn();
+      // This mock invokes synchronously, so there is never a pending call to flush.
+      debounced.flush = jest.fn();
       return debounced;
     },
   };

@@ -15,9 +15,9 @@ export const CLOUD_SNAPSHOTS_PATH = 'elasticsearch/snapshots/';
 export const ELASTICSEARCH_CONFIG_ROUTE = '/api/internal/cloud/elasticsearch_config';
 
 /**
- * Users with this role present are shown the "Billing and subscription" link in the side navigation.
+ * Users with any of these roles are shown Cloud billing links.
  */
-export const CLOUD_USER_BILLING_ADMIN_ROLE = '_ec_billing_admin';
+export const CLOUD_BILLING_ROLES: readonly string[] = ['superuser', 'admin'];
 
 /**
  * Serverless project roles whose members are allowed to edit Search Power on Cloud.
