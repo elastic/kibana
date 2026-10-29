@@ -58,8 +58,23 @@ export type {
   SeriesSnoozeEsqlRow,
 } from './episode_query';
 
-export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
-export type { EpisodeEventRow, BuildEpisodeEventsQueryOptions } from './episode_events_query';
+export {
+  buildEpisodeEventsQuery,
+  buildEpisodeEventCountQuery,
+  ALERT_EPISODE_EVENT_FIELDS,
+} from './episode_events_query';
+export type {
+  EpisodeEventRow,
+  EpisodeEventCountRow,
+  BuildEpisodeEventsQueryOptions,
+} from './episode_events_query';
+
+export { buildAlertPhasesQuery, buildAlertSeverityPhasesQuery } from './alert_phases_query';
+export type {
+  AlertPhaseRow,
+  AlertSeverityPhaseRow,
+  BuildAlertPhasesQueryOptions,
+} from './alert_phases_query';
 
 export { buildEpisodeActionsQuery } from './episode_actions_query';
 export type { EpisodeActionRow } from './episode_actions_query';

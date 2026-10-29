@@ -28,6 +28,12 @@ export interface EpisodeSeverityTimelineTransition {
   eventData: Record<string, unknown> | null;
 }
 
+/** The event fields the severity timeline reads. */
+export type EpisodeSeverityTimelineSourceRow = Pick<
+  EpisodeEventRow,
+  '@timestamp' | 'severity' | 'data'
+>;
+
 export interface EpisodeSeverityTimelineData {
   segments: EpisodeSeverityTimelineSegment[];
   transitions: EpisodeSeverityTimelineTransition[];
@@ -42,7 +48,7 @@ interface ParsedSeverityEvent {
 
 /** Derives contiguous severity spans and preserves each severity transition. */
 export const deriveEpisodeSeverityTimelineData = (
-  eventRows: EpisodeEventRow[],
+  eventRows: EpisodeSeverityTimelineSourceRow[],
   windowEndMs: number
 ): EpisodeSeverityTimelineData => {
   const events: ParsedSeverityEvent[] = eventRows

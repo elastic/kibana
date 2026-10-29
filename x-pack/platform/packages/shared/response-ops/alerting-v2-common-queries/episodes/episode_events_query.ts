@@ -44,6 +44,17 @@ export interface BuildEpisodeEventsQueryOptions {
   limit?: number;
 }
 
+export interface EpisodeEventCountRow {
+  event_count: number;
+}
+
+const buildEpisodeEventsSource = (spaceId: string, episodeId: string) =>
+  // prettier-ignore
+  esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`
+    .where`type == "alert"`
+    .where`episode.id == ${episodeId}`;
+
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
@@ -52,11 +63,7 @@ export const buildEpisodeEventsQuery = (
   episodeId: string,
   { timeRange, status, limit }: BuildEpisodeEventsQueryOptions = {}
 ): TypedEsqlQuery<EpisodeEventRow> => {
-  // prettier-ignore
-  let query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
-    .where`space_id == ${spaceId}`
-    .where`type == "alert"`
-    .where`episode.id == ${episodeId}`;
+  let query = buildEpisodeEventsSource(spaceId, episodeId);
 
   if (timeRange) {
     query = query.where`@timestamp >= ${timeRange.start}`;
@@ -78,3 +85,15 @@ export const buildEpisodeEventsQuery = (
 
   return asTypedEsqlQuery<EpisodeEventRow>(built.keep(...ALERT_EPISODE_EVENT_FIELDS));
 };
+
+/**
+ * ES|QL query counting all events for a single alert episode, with the same
+ * filters as the unbounded {@link buildEpisodeEventsQuery}.
+ */
+export const buildEpisodeEventCountQuery = (
+  spaceId: string,
+  episodeId: string
+): TypedEsqlQuery<EpisodeEventCountRow> =>
+  asTypedEsqlQuery<EpisodeEventCountRow>(
+    buildEpisodeEventsSource(spaceId, episodeId).pipe`STATS event_count = COUNT(*)`
+  );

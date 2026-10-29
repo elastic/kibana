@@ -16,6 +16,7 @@ import {
   type AlertTimelinePhaseRow,
   type AlertTimelineSummary,
 } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
+import { buildAlertPhasesQuery } from '@kbn/alerting-v2-common-queries';
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 import {
   buildTopNSeriesQuery,
@@ -26,7 +27,6 @@ import {
   MAX_ALERTS_PER_LANE,
   type AlertSelectionRow,
 } from '../queries/alert_series_activity/alert_selection_query';
-import { buildAlertPhasesQuery } from '../queries/alert_series_activity/alert_phases_query';
 import {
   buildAlertStartsQuery,
   type AlertStartRow,
@@ -152,8 +152,7 @@ export const useFetchRuleEvents = ({
         params: {
           query: buildAlertPhasesQuery({
             ruleId: ruleId!,
-            windowStartMs,
-            windowEndMs,
+            window: { startMs: windowStartMs, endMs: windowEndMs },
             alertIds: selectedAlertIds,
           }).print('basic'),
           time_zone: 'UTC',

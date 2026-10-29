@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildAlertPhasesQuery } from './alert_phases_query';
+import { buildAlertPhasesQuery, buildAlertSeverityPhasesQuery } from './alert_phases_query';
 
 const RULE_ID = 'rule-abc';
 const WINDOW_START_MS = Date.parse('2026-04-01T00:00:00Z');
@@ -14,8 +14,7 @@ const WINDOW_END_MS = Date.parse('2026-04-08T00:00:00Z');
 describe('buildAlertPhasesQuery', () => {
   const queryString = buildAlertPhasesQuery({
     ruleId: RULE_ID,
-    windowStartMs: WINDOW_START_MS,
-    windowEndMs: WINDOW_END_MS,
+    window: { startMs: WINDOW_START_MS, endMs: WINDOW_END_MS },
     alertIds: ['ep-1', 'ep-2'],
   }).print('basic');
 
@@ -29,9 +28,10 @@ describe('buildAlertPhasesQuery', () => {
     expect(queryString).toContain('ep-2');
   });
 
-  it('aggregates start/end per episode status phase', () => {
+  it('aggregates start/end and event count per episode status phase', () => {
     expect(queryString).toContain('seg_start = MIN(@timestamp)');
     expect(queryString).toContain('seg_end = MAX(@timestamp)');
+    expect(queryString).toContain('event_count = COUNT(*)');
     expect(queryString).toContain('BY episode.id, episode.status, group_hash');
   });
 
@@ -42,7 +42,33 @@ describe('buildAlertPhasesQuery', () => {
 
   it('keeps the phase columns', () => {
     expect(queryString).toContain(
-      'KEEP `episode.id`, `episode.status`, group_hash, seg_start, seg_end'
+      'KEEP `episode.id`, `episode.status`, group_hash, seg_start, seg_end, event_count'
     );
+  });
+
+  it('omits the time filter when no window is given', () => {
+    const untimed = buildAlertPhasesQuery({ ruleId: RULE_ID, alertIds: ['ep-1'] }).print('basic');
+    expect(untimed).not.toContain('@timestamp >=');
+    expect(untimed).toContain('LIMIT 4');
+  });
+});
+
+describe('buildAlertSeverityPhasesQuery', () => {
+  const queryString = buildAlertSeverityPhasesQuery({
+    ruleId: RULE_ID,
+    alertIds: ['ep-1'],
+  }).print('basic');
+
+  it('scopes to alert type, rule and the given episodes without a time filter', () => {
+    expect(queryString).toContain('type == "alert"');
+    expect(queryString).toContain(RULE_ID);
+    expect(queryString).toContain('episode.id IN');
+    expect(queryString).not.toContain('@timestamp >=');
+  });
+
+  it('aggregates first occurrence and event count per severity', () => {
+    expect(queryString).toContain('seg_start = MIN(@timestamp), event_count = COUNT(*)');
+    expect(queryString).toContain('BY episode.id, severity');
+    expect(queryString).toContain('KEEP `episode.id`, severity, seg_start, event_count');
   });
 });

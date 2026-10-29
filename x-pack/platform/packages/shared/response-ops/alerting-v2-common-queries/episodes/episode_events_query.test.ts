@@ -7,7 +7,7 @@
 
 import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import { buildEpisodeEventsQuery } from './episode_events_query';
+import { buildEpisodeEventCountQuery, buildEpisodeEventsQuery } from './episode_events_query';
 
 const SPACE_ID = 'default';
 
@@ -50,5 +50,16 @@ describe('buildEpisodeEventsQuery', () => {
       limit: 1001,
     }).print('basic');
     expect(queryString).toContain('LIMIT 1001');
+  });
+});
+
+describe('buildEpisodeEventCountQuery', () => {
+  it('counts events with the same filters as the events query', () => {
+    const queryString = buildEpisodeEventCountQuery(SPACE_ID, 'episode-xyz').print('basic');
+    expect(queryString).toContain(`space_id == "${SPACE_ID}"`);
+    expect(queryString).toContain('type == "alert"');
+    expect(queryString).toContain('episode.id == "episode-xyz"');
+    expect(queryString).toContain('STATS event_count = COUNT(*)');
+    expect(queryString).not.toContain('LIMIT');
   });
 });

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useFetchEpisodeEventsQuery } from '../../hooks/use_fetch_episode_events_query';
+import { useEpisodeTimelineSourceRows } from '../../hooks/use_episode_timeline_source_rows';
 import { useFetchEpisodeActionsHistoryQuery } from '../../hooks/use_fetch_episode_actions_history_query';
 import { useBulkGetProfiles } from '../../hooks/use_bulk_get_profiles';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -23,6 +23,7 @@ import * as i18n from './timeline/translations';
 
 export interface AlertEpisodeTimelineSectionProps {
   episodeId: string;
+  ruleId: string | undefined;
   seriesId: string | null | undefined;
   groupHash: string | undefined;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces' | 'userProfile'>;
@@ -30,14 +31,17 @@ export interface AlertEpisodeTimelineSectionProps {
 
 export const AlertEpisodeTimelineSection = ({
   episodeId,
+  ruleId,
   seriesId,
   groupHash,
   services,
 }: AlertEpisodeTimelineSectionProps) => {
-  const { data: eventRows = [], isLoading: isLoadingEventRows } = useFetchEpisodeEventsQuery({
-    episodeId,
-    services,
-  });
+  const {
+    statusRows,
+    severityRows,
+    collapsedEventLimit,
+    isLoading: isLoadingSourceRows,
+  } = useEpisodeTimelineSourceRows({ episodeId, ruleId, services });
 
   const {
     entries: actionEntries,
@@ -52,7 +56,7 @@ export const AlertEpisodeTimelineSection = ({
     services,
   });
 
-  const isLoading = isLoadingEventRows || isLoadingActionEntries;
+  const isLoading = isLoadingSourceRows || isLoadingActionEntries;
 
   const actorUids = useMemo(
     () => [
@@ -83,9 +87,12 @@ export const AlertEpisodeTimelineSection = ({
     return map;
   }, [profiles]);
 
-  const stateChangeEntries = useMemo(() => deriveStateChangeEntries(eventRows), [eventRows]);
+  const stateChangeEntries = useMemo(() => deriveStateChangeEntries(statusRows), [statusRows]);
 
-  const severityChangeEntries = useMemo(() => deriveSeverityChangeEntries(eventRows), [eventRows]);
+  const severityChangeEntries = useMemo(
+    () => deriveSeverityChangeEntries(severityRows),
+    [severityRows]
+  );
 
   const mergedEntries = useMemo(
     () => mergeTimelineEntries(stateChangeEntries, severityChangeEntries, actionEntries),
@@ -113,6 +120,7 @@ export const AlertEpisodeTimelineSection = ({
     <AlertEpisodeTimeline
       entries={mergedEntries}
       profilesMap={profilesMap}
+      collapsedEventLimit={collapsedEventLimit}
       onLoadMore={fetchNextPage}
       hasMore={hasNextPage}
       isLoadingMore={isFetchingNextPage}
