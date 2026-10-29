@@ -32,6 +32,8 @@ const REQUIRED_SERVER_ARGS = [
   '--uiSettings.overrides.workflows:aiAgent:enabled=true',
   // The suite calls /internal/alertzero/workers, which 404s while this per-space setting is off.
   '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+  // It also 404s outside a Security solution space (#300822); this makes Default one at boot.
+  '--xpack.spaces.defaultSolution=security',
 ];
 
 describe('evals_detection_watch_rule_tuning Scout config set', () => {

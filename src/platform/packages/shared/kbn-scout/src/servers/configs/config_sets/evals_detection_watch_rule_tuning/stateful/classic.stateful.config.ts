@@ -28,6 +28,10 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * route is wrapped in `withAlertZeroEnabled`, which 404s while that per-space setting is off
  * (its default). The override covers every space, including per-space worker cells.
  *
+ * `withAlertZeroEnabled` also 404s outside a Security solution space (#300822), and a stateful
+ * stack creates its Default space with no solution. `xpack.spaces.defaultSolution=security`
+ * makes the Default space a Security space when it is created at boot.
+ *
  * Service accounts must be enabled at boot: since #295215 alertzero reports missing dependencies, and
  * `withAlertZeroEnabled` answers every route with 503 "AlertZero dependencies are unavailable", while
  * `xpack.security.serviceAccounts.enabled` is off. The suite binds the worker to a service account, so
@@ -41,6 +45,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 const ENABLE_EXPERIMENTAL_PREFIX = '--xpack.securitySolution.enableExperimental=';
 const REQUIRED_EXPERIMENTAL_FEATURES = ['investigateRuleSkill'];
 const ENABLE_ALERTZERO_ARG = '--uiSettings.overrides.securitySolution:enableAlertZero=true';
+const DEFAULT_SECURITY_SOLUTION_ARG = '--xpack.spaces.defaultSolution=security';
 
 const inheritedArgs = ruleCreationConfig.kbnTestServer.serverArgs;
 const inheritedExperimental = inheritedArgs
@@ -60,6 +65,7 @@ export const servers: ScoutServerConfig = {
       ),
       '--xpack.agenticInvestigations.enabled=true',
       ENABLE_ALERTZERO_ARG,
+      DEFAULT_SECURITY_SOLUTION_ARG,
       ...serviceAccountsServerArgs,
       `${ENABLE_EXPERIMENTAL_PREFIX}${JSON.stringify([
         ...new Set([...inheritedExperimental, ...REQUIRED_EXPERIMENTAL_FEATURES]),
