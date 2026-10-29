@@ -29,6 +29,7 @@ import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_
 import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
 import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
+import { registerSloEbtEvents, SloTelemetryService, toEventOrigin } from './lib/telemetry';
 import { getSloServerRouteRepository } from './routes/utils/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/utils/register_routes';
 import type { SLORoutesDependencies } from './routes/utils/types';
@@ -163,6 +164,8 @@ export class SLOPlugin
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
     registerSloUsageCollector(plugins.usageCollection);
+    registerSloEbtEvents(core.analytics);
+    const telemetryService = new SloTelemetryService(core.analytics, this.logger.get('telemetry'));
 
     const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
@@ -270,6 +273,7 @@ export class SLOPlugin
             transformManager,
             summaryTransformManager,
             racClient,
+            telemetry: telemetryService.getReporter(toEventOrigin(request)),
           };
         },
       },
@@ -312,6 +316,7 @@ export class SLOPlugin
       core,
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
+      telemetryService,
     });
 
     new HealthScanTask({

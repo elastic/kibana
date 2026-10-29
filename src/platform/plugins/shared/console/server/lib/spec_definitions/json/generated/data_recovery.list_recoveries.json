@@ -1,0 +1,37 @@
+{
+  "data_recovery.list_recoveries": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "size": [
+        "100"
+      ],
+      "started_at_gte": [],
+      "started_at_lt": [],
+      "order": [
+        "asc",
+        "desc"
+      ],
+      "search_after_started_at": [],
+      "search_after_recovery_id": "",
+      "status": [
+        "running",
+        "completed",
+        "failed"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_recovery/recoveries"
+    ],
+    "documentation": "",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

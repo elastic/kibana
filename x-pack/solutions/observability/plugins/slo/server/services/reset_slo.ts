@@ -25,6 +25,8 @@ import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { SLO_RESET_EBT_EVENT_TYPE, toSloDefinitionEbtData } from '../lib/telemetry';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { RollbackOperation } from '../utils/run_rollback';
@@ -44,7 +46,8 @@ export class ResetSLO {
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(sloId: string): Promise<ResetSLOResponse> {
@@ -72,6 +75,8 @@ export class ResetSLO {
     await this.installResetedSLO(resetedSlo, signal);
 
     await this.repository.update(resetedSlo);
+
+    this.telemetry.report(SLO_RESET_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(resetedSlo));
 
     return resetSLOResponseSchema.encode(resetedSlo);
   }

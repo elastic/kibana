@@ -124,7 +124,11 @@ export type ActionTimelineToShow =
   | 'export'
   | 'selectable'
   | 'createRule'
-  | 'createRuleFromEql';
+  | 'createRuleFromEql'
+  | 'removeFromCase';
+
+/** Removes a timeline from the case whose Timelines tab hosts the table */
+export type OnRemoveTimelineFromCase = (timelineId: string) => void;
 
 export interface OpenTimelineProps {
   /** Invoked when the user clicks the delete (trash) icon on an individual timeline */

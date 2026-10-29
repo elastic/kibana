@@ -27,6 +27,12 @@ import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_p
 import type { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import {
+  SLO_UPDATED_EBT_EVENT_TYPE,
+  getChangedFields,
+  toSloDefinitionEbtData,
+} from '../lib/telemetry';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { RollbackOperation } from '../utils/run_rollback';
@@ -47,7 +53,8 @@ export class UpdateSLO {
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private userId: string
+    private userId: string,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -128,6 +135,8 @@ export class UpdateSLO {
 
         throw err;
       }
+
+      this.reportUpdated(originalSlo, updatedSlo);
 
       return this.toResponse(updatedSlo);
     }
@@ -216,7 +225,17 @@ export class UpdateSLO {
       this.deleteOriginalSLO(originalSlo, cleanupSignal)
     );
 
+    this.reportUpdated(originalSlo, updatedSlo);
+
     return this.toResponse(updatedSlo);
+  }
+
+  private reportUpdated(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
+    this.telemetry.report(SLO_UPDATED_EBT_EVENT_TYPE, () => ({
+      ...toSloDefinitionEbtData(updatedSlo),
+      revision_bumped: updatedSlo.revision !== originalSlo.revision,
+      changed_fields: getChangedFields(originalSlo, updatedSlo),
+    }));
   }
 
   private async isRevisionBumpRequired(

@@ -459,4 +459,19 @@ describe('AwsXRay', () => {
       await expect(AwsXRay.test.handler(mockContext)).rejects.toThrow('Authentication failed');
     });
   });
+
+  describe('getTraceSummaries input bounds', () => {
+    it.each([
+      [10_000, true],
+      [10_001, false],
+    ])('filterExpression of %d characters valid=%s', (length, expected) => {
+      expect(
+        AwsXRay.actions.getTraceSummaries.input.safeParse({
+          startTime: 1716200000,
+          endTime: 1716203600,
+          filterExpression: 'x'.repeat(length),
+        }).success
+      ).toBe(expected);
+    });
+  });
 });

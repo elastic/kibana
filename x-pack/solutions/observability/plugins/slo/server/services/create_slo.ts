@@ -34,6 +34,8 @@ import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { Duration, DurationUnit } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { SLO_CREATED_EBT_EVENT_TYPE, toSloDefinitionEbtData } from '../lib/telemetry';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
@@ -57,7 +59,8 @@ export class CreateSLO {
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private username: string
+    private username: string,
+    private telemetry: SloTelemetryReporter
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -160,6 +163,8 @@ export class CreateSLO {
 
       throw err;
     }
+
+    this.telemetry.report(SLO_CREATED_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(slo));
 
     return this.toResponse(slo);
   }
