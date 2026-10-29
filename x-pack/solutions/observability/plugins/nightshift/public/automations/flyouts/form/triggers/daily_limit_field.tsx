@@ -8,14 +8,13 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFieldNumber,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { Sentence } from './pills/sentence';
 import { triggerLabels } from './translations';
 import { isValidDailyLimit } from '../validation';
@@ -99,11 +98,9 @@ export const DailyLimitField = ({
         {helpText}
       </EuiText>
       {usedToday !== undefined && tone === 'exceeded' && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           size="s"
-          color="warning"
-          iconType="hourglass"
           css={calloutCss}
           title={triggerLabels.dailyLimitReached}
           text={triggerLabels.getDailyLimitReachedBody(usedToday, limit)}
@@ -112,11 +109,9 @@ export const DailyLimitField = ({
         />
       )}
       {usedToday !== undefined && tone === 'high' && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
           size="s"
-          color="warning"
-          iconType="hourglass"
           css={calloutCss}
           title={triggerLabels.dailyLimitApproaching}
           text={triggerLabels.getDailyLimitApproachingBody(usedToday, limit)}
@@ -140,11 +135,9 @@ export const DailyLimitField = ({
         />
       )}
       {!readOnly && savedLimit !== undefined && savedLimit !== limit && (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount={false}
           size="s"
-          color="primary"
-          iconType="save"
           css={calloutCss}
           title={triggerLabels.getUnsavedLimitTitle(limit)}
           text={<p>{triggerLabels.getUnsavedLimitBody(savedLimit)}</p>}
