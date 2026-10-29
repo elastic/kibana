@@ -165,7 +165,7 @@ export const MAX_THRESHOLD_ARIA_LABEL = i18n.translate(
 export const DEPRECATION_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutTitle',
   {
-    defaultMessage: 'This feature will be consolidated in an upcoming release',
+    defaultMessage: 'This feature will be moved in an upcoming release',
   }
 );
 
