@@ -200,7 +200,7 @@ describe('createRuleChangeHistoryAdapter', () => {
   });
 
   describe('restoreChange', () => {
-    it('restores the change by id and reports the restored rule id', async () => {
+    it('restores the change by id and reports the restored rule', async () => {
       const api = createApiMock();
       const onRestored = jest.fn();
       const adapter = createRuleChangeHistoryAdapter(api, { onRestored });
@@ -209,7 +209,7 @@ describe('createRuleChangeHistoryAdapter', () => {
       await adapter.restoreChange?.({ objectId: 'rule-1', changeId: 'evt-1', signal });
 
       expect(api.restoreRuleChange).toHaveBeenCalledWith({ eventId: 'evt-1', signal });
-      expect(onRestored).toHaveBeenCalledWith('rule-1');
+      expect(onRestored).toHaveBeenCalledWith({ id: 'rule-1', version: 3 });
     });
 
     it('does not report a restore that failed', async () => {

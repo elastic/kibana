@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useQueryClient } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 import { invalidateRulesContentList } from '../../../../hooks/invalidate_rules_content_list';
 import { ruleKeys } from '../../../../hooks/query_key_factory';
@@ -50,13 +51,20 @@ export const useRuleChangeHistoryModal = ({
 }: UseRuleChangeHistoryModalOptions = {}): UseRuleChangeHistoryModalResult => {
   const api = useService(RuleChangeHistoryApi);
   const analytics = useService(CoreStart('analytics'));
+  const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
   const adapter = createRuleChangeHistoryAdapter(api, {
-    onRestored: (ruleId) => {
+    onRestored: (rule) => {
+      toasts.addSuccess(
+        i18n.translate('xpack.alertingV2.ruleChangeHistory.restoreSuccessToast', {
+          defaultMessage: 'Rule "{ruleName}" restored as version {version}',
+          values: { ruleName: rule.metadata.name, version: rule.version },
+        })
+      );
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.allTags());
-      queryClient.invalidateQueries(ruleKeys.detail(ruleId));
+      queryClient.invalidateQueries(ruleKeys.detail(rule.id));
     },
   });
 
