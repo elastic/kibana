@@ -98,6 +98,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const colorTokens = useHeaderColorTokens(color);
+  const dividerColor = isCanvas && !color ? euiTheme.colors.borderBaseSubdued : colorTokens.border;
 
   const textStyles = css`
     ${colorTokens.text ? `color: ${colorTokens.text};` : ''}
@@ -125,7 +126,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     ${!isHeaderOnly
       ? `
       border-bottom: ${euiTheme.border.thin};
-      border-color: ${colorTokens.border};
+      border-color: ${dividerColor};
     `
       : ''}
     border-radius: ${headerBorderRadius};
