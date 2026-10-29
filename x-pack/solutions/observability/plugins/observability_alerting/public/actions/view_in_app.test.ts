@@ -119,6 +119,12 @@ describe('createViewInAppAction', () => {
       expect(action.supportsBulk).toBe(false);
       expect(action.enforcesOwnPrivileges).toBe(true);
     });
+
+    it('is grouped with navigation actions in the details flyout menu', () => {
+      const { action } = setup();
+
+      expect(action.isNavigationAction).toBe(true);
+    });
   });
 
   describe('execute', () => {
