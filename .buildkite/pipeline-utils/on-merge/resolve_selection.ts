@@ -10,12 +10,12 @@
 import type { Build } from '../buildkite/types/build.ts';
 import type { Job } from '../buildkite/types/job.ts';
 import { STEP_KEYS } from '../ci-stats/pick_test_group_run_order/const.ts';
+import { FULL_SHA_PATTERN } from '../git.ts';
 import { SCOUT_STEP_KEYS } from '../scout/step_keys.ts';
 import type { OnMergeSelection, OnMergeTestType, OnMergeTestTypeDecision } from './selection.ts';
 import { ON_MERGE_TEST_TYPES, fullSelection } from './selection.ts';
 
 const MAX_COMMITS = 30;
-const FULL_SHA = /^[0-9a-f]{40}$/i;
 const NULL_SHA = /^0{40}$/;
 
 const ES_DEPENDENT_TEST_TYPES: ReadonlySet<OnMergeTestType> = new Set([
@@ -132,7 +132,7 @@ export const resolveOnMergeSelection = async (
   }
 
   const { base, baseSource } = resolution;
-  if (!FULL_SHA.test(base)) {
+  if (!FULL_SHA_PATTERN.test(base)) {
     return fullSelection(commit, `base ${base} from ${baseSource} is not a full SHA`);
   }
   if (!git.ensureCommit(base)) {

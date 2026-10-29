@@ -7,23 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync } from 'node:child_process';
 import type { BuildkiteClient } from '../buildkite/client.ts';
 import { PIPELINES } from '../ci-stats/pick_test_group_run_order/const.ts';
 import { getGithubClient } from '../github/github.ts';
-import { getKibanaDir } from '../get_kibana_dir.ts';
+import { git } from '../git.ts';
 import type { OnMergeSelectionDeps } from './resolve_selection.ts';
 
 const MAX_ACTIVITY_PAGES = 3;
 // Builds are listed newest first and include all jobs, so keep the page small.
 const PREVIOUS_BUILDS_PAGE_SIZE = 3;
-
-const git = (args: string[]): string =>
-  execFileSync('git', args, {
-    cwd: getKibanaDir(),
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
 
 const gitSucceeds = (args: string[]): boolean => {
   try {

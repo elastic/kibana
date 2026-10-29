@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync } from 'node:child_process';
 import { listChangedFiles } from '../../affected-packages/strategy_git.ts';
-import { getKibanaDir } from '../../get_kibana_dir.ts';
+import { FULL_SHA_PATTERN, git } from '../../git.ts';
 
 export type SelectionBaseKind = 'pr' | 'merge-queue' | 'on-merge';
 
@@ -32,16 +31,10 @@ export const resolveSelectiveTestingChanges = (
     throw new Error(`${source} is not set`);
   }
   // Reject moving refs such as "main"; pinned bases must be the exact commit from their source.
-  if (isPinned && !/^[a-f0-9]{40}$/i.test(selectionBase)) {
+  if (isPinned && !FULL_SHA_PATTERN.test(selectionBase)) {
     throw new Error(`${source} must be a full commit SHA`);
   }
 
-  const git = (args: string[]): string =>
-    execFileSync('git', args, {
-      cwd: getKibanaDir(),
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    }).trim();
   const head = git(['rev-parse', '--verify', 'HEAD^{commit}']);
   const requestedBase = git([
     'rev-parse',
