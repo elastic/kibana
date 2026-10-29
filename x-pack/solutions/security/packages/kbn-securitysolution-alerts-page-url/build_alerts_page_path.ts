@@ -23,10 +23,11 @@ const URL_PARAM_KEY = {
 const WORKFLOW_TAGS_FIELD = 'kibana.alert.workflow_tags';
 
 /**
- * The most alert ids a page link carries. Each id adds about 67 bytes to the URL, and Kibana refuses
- * a request whose headers, URL included, pass 16 KB, so a larger selection must be referenced by tag.
+ * The longest Alerts page path a link should carry, about 100 alert ids. Kibana refuses a request
+ * whose headers, URL included, pass 16 KB, and a proxy in front of it can refuse less, so a longer
+ * selection must be referenced by tag.
  */
-export const MAX_LINKED_ALERT_IDS = 100;
+export const MAX_ALERTS_PAGE_PATH_LENGTH = 8_000;
 
 export interface AlertsSelection {
   alertIds?: readonly string[];

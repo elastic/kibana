@@ -9,7 +9,7 @@ export {
   buildAlertsPagePath,
   buildAlertsPageTagPath,
   buildAlertsSelectionQuery,
-  MAX_LINKED_ALERT_IDS,
+  MAX_ALERTS_PAGE_PATH_LENGTH,
 } from './build_alerts_page_path';
 export type { AlertsSelection } from './build_alerts_page_path';
 export { formatPageFilterSearchParam } from './format_page_filter_search_param';

@@ -74,14 +74,16 @@ describe('createAlertsGroupRenderer', () => {
     });
   });
 
-  it('counts the alerts without a link when there are too many ids for a URL', async () => {
+  it('counts the alerts without a link when their ids make the URL too long', async () => {
+    const ids = Array.from({ length: 150 }, (_, i) => i.toString(16).padStart(64, '0'));
+
     render(
       <ul>
-        <Renderer attachments={[batch(Array.from({ length: 101 }, (_, i) => `id-${i}`))]} />
+        <Renderer attachments={[batch(ids)]} />
       </ul>
     );
 
-    expect(await screen.findByText('101 alerts')).toBeInTheDocument();
+    expect(await screen.findByText('150 alerts')).toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(getUrlForApp).not.toHaveBeenCalled();
   });
@@ -180,6 +182,29 @@ describe('createAlertsGroupRenderer', () => {
 
       expect(await screen.findByText('Alerts')).toBeInTheDocument();
       expect(screen.getByRole('link')).toBeInTheDocument();
+    });
+
+    it('counts the tagged alerts without a link when the tags make the URL too long', async () => {
+      countSearch.mockReturnValue(
+        of({ rawResponse: { hits: { total: { value: 4, relation: 'eq' }, hits: [] } } })
+      );
+
+      render(
+        <ul>
+          <TaggedRenderer
+            attachments={[
+              {
+                id: 'attachment-long-tags',
+                type: SecurityAgentBuilderAttachments.alerts,
+                data: { tags: Array.from({ length: 10 }, (_, i) => `${i}${'界'.repeat(255)}`) },
+              },
+            ]}
+          />
+        </ul>
+      );
+
+      expect(await screen.findByText('4 alerts')).toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
 
     it('keeps the generic title and the link when the count fails', async () => {

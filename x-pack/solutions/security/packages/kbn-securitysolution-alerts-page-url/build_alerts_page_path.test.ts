@@ -11,7 +11,12 @@ import {
   buildAlertsPagePath,
   buildAlertsPageTagPath,
   buildAlertsSelectionQuery,
+  MAX_ALERTS_PAGE_PATH_LENGTH,
 } from './build_alerts_page_path';
+
+/** Alert ids the size of real ones: 64-character hashes. */
+const alertIds = (count: number) =>
+  Array.from({ length: count }, (_, i) => i.toString(16).padStart(64, '0'));
 
 const decodeFilters = (path: string) =>
   decode(new URLSearchParams(path).get('filters') ?? '') as Array<{
@@ -56,13 +61,24 @@ describe('buildAlertsPagePath', () => {
   });
 
   it('puts each alert id in the URL once, so a long batch stays within a byte budget', () => {
-    const ids = Array.from({ length: 200 }, () => uuidv4());
+    const ids = alertIds(200);
 
     const path = buildAlertsPagePath(ids, '2026-09-01T00:00:00.000Z');
 
-    const BYTES_PER_ID = 45;
+    const BYTES_PER_ID = 70;
     const FIXED_OVERHEAD_BYTES = 1500;
     expect(path.length).toBeLessThan(ids.length * BYTES_PER_ID + FIXED_OVERHEAD_BYTES);
+  });
+
+  it('fits about a hundred real alert ids within the path length a link should carry', () => {
+    const options = { dataViewId: 'security-solution-default' };
+
+    expect(
+      buildAlertsPagePath(alertIds(100), '2026-09-01T00:00:00.000Z', options).length
+    ).toBeLessThanOrEqual(MAX_ALERTS_PAGE_PATH_LENGTH);
+    expect(
+      buildAlertsPagePath(alertIds(120), '2026-09-01T00:00:00.000Z', options).length
+    ).toBeGreaterThan(MAX_ALERTS_PAGE_PATH_LENGTH);
   });
 
   it('round-trips the ids', () => {

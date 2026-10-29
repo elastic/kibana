@@ -14,7 +14,10 @@ import type {
 } from '@kbn/agentic-investigations-common';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { buildAlertsPagePath, MAX_LINKED_ALERT_IDS } from '@kbn/securitysolution-alerts-page-url';
+import {
+  buildAlertsPagePath,
+  MAX_ALERTS_PAGE_PATH_LENGTH,
+} from '@kbn/securitysolution-alerts-page-url';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import {
   ALERTS_PATH,
@@ -115,22 +118,22 @@ export const createAlertsGroupRenderer = ({
 
     const count = tags.length > 0 ? taggedCount : ids.length;
 
-    // Past this many ids the page would refuse the link's URL, so the row only counts the alerts.
+    const path = buildAlertsPagePath(
+      ids,
+      createdAt ?? new Date().toISOString(),
+      // The Alerts page opens on the Security default data view of the space.
+      { tags, dataViewId: `${DEFAULT_DATA_VIEW_ID}-${spaceId}` }
+    );
+
+    // Past this length the page could refuse the link's URL, so the row only counts the alerts.
     const action: GroupedAttachmentRowAction | undefined =
-      ids.length > MAX_LINKED_ALERT_IDS
+      path.length > MAX_ALERTS_PAGE_PATH_LENGTH
         ? undefined
         : {
             kind: 'page',
             // Pass the alerts path directly. Without the Alerts privilege that deep link
             // is omitted, and getUrlForApp would leave the Security app root.
-            href: application.getUrlForApp(APP_UI_ID, {
-              path: `${ALERTS_PATH}${buildAlertsPagePath(
-                ids,
-                createdAt ?? new Date().toISOString(),
-                // The Alerts page opens on the Security default data view of the space.
-                { tags, dataViewId: `${DEFAULT_DATA_VIEW_ID}-${spaceId}` }
-              )}`,
-            }),
+            href: application.getUrlForApp(APP_UI_ID, { path: `${ALERTS_PATH}${path}` }),
           };
 
     return (
