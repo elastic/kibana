@@ -455,12 +455,16 @@ const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {
   );
 };
 
-/** Which branches the suite is flaky on, fails on, is skipped on and is clean on, at a glance. */
+/** `main` or a version branch like `9.4`; feature and pull request branches are not. */
+const isMainOrVersionBranch = (branch: string): boolean =>
+  branch === 'main' || /^\d+\.\d+$/.test(branch);
+
+/** Whether the suite is flaky, fails, is skipped or is clean on `main` and each version branch. */
 const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
   const skipped = branchSkips(suite);
   const branches = worstPerKey(
     suite,
-    (test) => test.byBranch,
+    (test) => test.byBranch.filter(({ branch }) => isMainOrVersionBranch(branch)),
     (stats) => stats.branch
   ).map((row) => {
     const skip = skipped.get(row.worst.branch);

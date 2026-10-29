@@ -277,7 +277,7 @@ describe('renderFlakySuiteIssueBody', () => {
     );
   });
 
-  it('says whether the suite is flaky, has some failures, is skipped or is clean on each branch, in that order', () => {
+  it('says whether the suite is flaky, has some failures, is skipped or is clean on main and each version branch, in that order', () => {
     const branch = (
       name: string,
       failedBuilds: number,
@@ -317,6 +317,9 @@ describe('renderFlakySuiteIssueBody', () => {
             buildFailRate: 2 / 5,
             lastFailedAt: new Date('2026-09-04T10:00:00.000Z'),
           }),
+          // feature and pull request branches are left out
+          branch('fix/some-feature', 2, false, { builds: 2, buildFailRate: 1 }),
+          branch('someone:fix-it', 5, false),
         ],
       }),
     ]);
@@ -324,6 +327,8 @@ describe('renderFlakySuiteIssueBody', () => {
 
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
       [
+        '| Branch | Status | Failed builds | Sample failure |',
+        '|---|---|---|---|',
         '| `9.5` | 🔴 Flaky | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
         '| `9.3` | 🟠 Some failures | 2 / 5 (**40%**) | 2026-09-04 10:00 UTC |',
         '| `main` | ⏭️ Skipped, last ran 7 Sep | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC |',
