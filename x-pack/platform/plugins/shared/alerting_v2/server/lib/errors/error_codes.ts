@@ -136,6 +136,13 @@ export const ALERTING_ERROR_CODES = {
    * dispatcher, so create / update / upsert / API key rotation are rejected.
    */
   ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
+  /**
+   * A test notification cannot be built for the action policy, for example because its matcher
+   * has a KQL expression, which synthetic alerts do not satisfy yet.
+   */
+  ACTION_POLICY_TEST_NOT_SUPPORTED: 'ACTION_POLICY_TEST_NOT_SUPPORTED',
+  /** A test notification targeted workflows that are not destinations of the action policy. */
+  ACTION_POLICY_TEST_INVALID_DESTINATIONS: 'ACTION_POLICY_TEST_INVALID_DESTINATIONS',
 
   // ──────────────────────── Alert actions ────────────────────
   /**
@@ -518,6 +525,16 @@ export const ALERTING_LOG_CODES = {
    * valid until an operator revokes it.
    */
   POLICY_API_KEY_LOOKUP_FAILED: 'POLICY_API_KEY_LOOKUP_FAILED',
+  /**
+   * A workflow test run of a test notification could not be started. The error is returned to the
+   * caller for that destination; the other destinations still run.
+   */
+  ACTION_POLICY_TEST_RUN_FAILED: 'ACTION_POLICY_TEST_RUN_FAILED',
+  /**
+   * A test notification could not be written to the audit log. The workflow test runs already
+   * started; only their audit record is missing.
+   */
+  ACTION_POLICY_TEST_AUDIT_FAILED: 'ACTION_POLICY_TEST_AUDIT_FAILED',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**
