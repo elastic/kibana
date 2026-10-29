@@ -16,7 +16,7 @@ import {
   type AlertTimelinePhaseRow,
   type AlertTimelineSummary,
 } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
-import { buildAlertPhasesQuery } from '@kbn/alerting-v2-common-queries';
+import { buildCollapsedStatusPhasesQuery } from '@kbn/alerting-v2-common-queries';
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 import {
   buildTopNSeriesQuery,
@@ -150,7 +150,7 @@ export const useFetchRuleEvents = ({
       runEsqlAsyncSearch({
         data,
         params: {
-          query: buildAlertPhasesQuery({
+          query: buildCollapsedStatusPhasesQuery({
             ruleId: ruleId!,
             window: { startMs: windowStartMs, endMs: windowEndMs },
             alertIds: selectedAlertIds,

@@ -85,7 +85,6 @@ const renderSection = () => {
       <QueryClientProvider client={client}>
         <AlertEpisodeTimelineSection
           episodeId="ep-1"
-          ruleId="rule-1"
           seriesId="series-1"
           groupHash="hash-1"
           services={mockServices}
@@ -267,7 +266,7 @@ describe('AlertEpisodeTimelineSection', () => {
       mockEvents(mockEventRows, false, 5005);
       renderSection();
       expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
-        expect.objectContaining({ episodeId: 'ep-1', ruleId: 'rule-1', enabled: true })
+        expect.objectContaining({ episodeId: 'ep-1', enabled: true })
       );
     });
 

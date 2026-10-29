@@ -44,7 +44,10 @@ export interface AlertSeverityPhaseRow {
 }
 
 export interface BuildAlertPhasesQueryOptions {
-  ruleId: string;
+  /** Omit for alerts that have no rule, such as externally ingested alerts. */
+  ruleId?: string;
+  /** Restricts the events to one space. */
+  spaceId?: string;
   /** The exact alerts being drawn (from `buildAlertSelectionQuery`). */
   alertIds: string[];
   /** Display window (epoch ms) — segments are drawn within it. Omit to cover each alert's whole lifetime. */
@@ -56,11 +59,23 @@ export interface BuildAlertPhasesQueryOptions {
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
 
-const buildAlertEventsSource = ({ ruleId, alertIds, window }: BuildAlertPhasesQueryOptions) => {
+const buildAlertEventsSource = ({
+  ruleId,
+  spaceId,
+  alertIds,
+  window,
+}: BuildAlertPhasesQueryOptions) => {
   const alertLiterals = alertIds.map((id) => esql.str(id));
 
-  let query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
-    .where`rule.id == ${ruleId}`;
+  let query = esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`;
+
+  if (spaceId !== undefined) {
+    query = query.where`space_id == ${spaceId}`;
+  }
+
+  if (ruleId !== undefined) {
+    query = query.where`rule.id == ${ruleId}`;
+  }
 
   if (window) {
     const fromIso = toIsoUtc(window.startMs);
@@ -71,7 +86,7 @@ const buildAlertEventsSource = ({ ruleId, alertIds, window }: BuildAlertPhasesQu
   return query.where`episode.id IN (${alertLiterals})`;
 };
 
-export const buildAlertPhasesQuery = (
+export const buildCollapsedStatusPhasesQuery = (
   options: BuildAlertPhasesQueryOptions
 ): TypedEsqlQuery<AlertPhaseRow> =>
   asTypedEsqlQuery<AlertPhaseRow>(
@@ -83,10 +98,10 @@ export const buildAlertPhasesQuery = (
   );
 
 /**
- * Severity counterpart of {@link buildAlertPhasesQuery}: one row per `severity`
+ * Severity counterpart of {@link buildCollapsedStatusPhasesQuery}: one row per `severity`
  * per alert, with the same flapping caveat (non-contiguous runs are merged).
  */
-export const buildAlertSeverityPhasesQuery = (
+export const buildCollapsedSeverityPhasesQuery = (
   options: BuildAlertPhasesQueryOptions
 ): TypedEsqlQuery<AlertSeverityPhaseRow> =>
   asTypedEsqlQuery<AlertSeverityPhaseRow>(

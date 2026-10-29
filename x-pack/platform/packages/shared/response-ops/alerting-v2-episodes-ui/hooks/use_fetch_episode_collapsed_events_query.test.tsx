@@ -9,9 +9,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
-  buildAlertPhasesQuery,
-  buildAlertSeverityPhasesQuery,
+  buildCollapsedStatusPhasesQuery,
+  buildCollapsedSeverityPhasesQuery,
 } from '@kbn/alerting-v2-common-queries';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeCollapsedEventsQuery } from './use_fetch_episode_collapsed_events_query';
@@ -23,9 +24,9 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
-const queryOptions = { ruleId: 'rule-1', alertIds: ['ep-1'] };
-const phasesQueryString = buildAlertPhasesQuery(queryOptions).print('basic');
-const severityQueryString = buildAlertSeverityPhasesQuery(queryOptions).print('basic');
+const queryOptions = { spaceId: DEFAULT_SPACE_ID, alertIds: ['ep-1'] };
+const phasesQueryString = buildCollapsedStatusPhasesQuery(queryOptions).print('basic');
+const severityQueryString = buildCollapsedSeverityPhasesQuery(queryOptions).print('basic');
 
 describe('useFetchEpisodeCollapsedEventsQuery', () => {
   const data = dataPluginMock.createStartContract();
@@ -40,9 +41,8 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
   });
 
   it.each([
-    ['disabled', { episodeId: 'ep-1', ruleId: 'rule-1', enabled: false }],
-    ['missing the episode id', { episodeId: undefined, ruleId: 'rule-1', enabled: true }],
-    ['missing the rule id', { episodeId: 'ep-1', ruleId: undefined, enabled: true }],
+    ['disabled', { episodeId: 'ep-1', enabled: false }],
+    ['missing the episode id', { episodeId: undefined, enabled: true }],
   ])('does not run when %s', (_label, options) => {
     const { result } = renderHook(
       () =>
@@ -52,6 +52,13 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
 
     expect(result.current.fetchStatus).toBe('idle');
     expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
+  });
+
+  it('scopes the collapsed queries by space and episode, without a rule filter', () => {
+    expect(phasesQueryString).toContain(`space_id == "${DEFAULT_SPACE_ID}"`);
+    expect(phasesQueryString).not.toContain('rule.id');
+    expect(severityQueryString).toContain(`space_id == "${DEFAULT_SPACE_ID}"`);
+    expect(severityQueryString).not.toContain('rule.id');
   });
 
   it('maps the Gantt phase rows to timeline rows, oldest first', async () => {
@@ -103,7 +110,6 @@ describe('useFetchEpisodeCollapsedEventsQuery', () => {
       () =>
         useFetchEpisodeCollapsedEventsQuery({
           episodeId: 'ep-1',
-          ruleId: 'rule-1',
           enabled: true,
           services: { data, spaces: mockSpaces },
         }),

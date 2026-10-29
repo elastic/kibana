@@ -9,8 +9,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
-  buildAlertPhasesQuery,
-  buildAlertSeverityPhasesQuery,
+  buildCollapsedStatusPhasesQuery,
+  buildCollapsedSeverityPhasesQuery,
   rowsFromEsql,
   type EpisodeEventRow,
 } from '@kbn/alerting-v2-common-queries';
@@ -34,7 +34,6 @@ export interface EpisodeTimelineSeverityRow
 
 export interface UseFetchEpisodeCollapsedEventsQueryOptions {
   episodeId: string | undefined;
-  ruleId: string | undefined;
   enabled: boolean;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
@@ -49,11 +48,11 @@ const byTimestamp = (a: { '@timestamp': string }, b: { '@timestamp': string }) =
 
 /**
  * Loads an episode's events collapsed to one row per status and one row per
- * severity (the rule-details Gantt chart grouping), oldest first.
+ * severity (the rule-details Gantt chart grouping), oldest first. Scoped by
+ * space and episode only, so alerts without a rule (external ingest) collapse too.
  */
 export const useFetchEpisodeCollapsedEventsQuery = ({
   episodeId,
-  ruleId,
   enabled,
   services,
 }: UseFetchEpisodeCollapsedEventsQueryOptions) => {
@@ -61,11 +60,14 @@ export const useFetchEpisodeCollapsedEventsQuery = ({
   const spaceId = useSpaceId(services.spaces);
 
   return useQuery({
-    queryKey: queryKeys.episodeCollapsedEvents(spaceId, episodeId ?? '', ruleId ?? ''),
+    queryKey: queryKeys.episodeCollapsedEvents(spaceId, episodeId ?? ''),
     queryFn: async ({ signal }): Promise<EpisodeCollapsedEvents> => {
-      const options = { ruleId: ruleId!, alertIds: [episodeId!] };
-      const phasesQuery = buildAlertPhasesQuery(options);
-      const severityQuery = buildAlertSeverityPhasesQuery(options);
+      if (episodeId === undefined) {
+        return { statusRows: [], severityRows: [] };
+      }
+      const options = { spaceId, alertIds: [episodeId] };
+      const phasesQuery = buildCollapsedStatusPhasesQuery(options);
+      const severityQuery = buildCollapsedSeverityPhasesQuery(options);
 
       const [phasesRaw, severityRaw] = await Promise.all(
         [phasesQuery, severityQuery].map((query) =>
@@ -100,7 +102,7 @@ export const useFetchEpisodeCollapsedEventsQuery = ({
 
       return { statusRows, severityRows };
     },
-    enabled: enabled && Boolean(episodeId) && Boolean(ruleId),
+    enabled: enabled && Boolean(episodeId),
     staleTime: QUERY_STALE_TIME,
   });
 };

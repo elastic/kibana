@@ -26,7 +26,6 @@ const HeatmapSkeleton = () => (
 
 export interface AlertEpisodeTimelineHeatmapsSectionProps {
   episodeId: string;
-  ruleId: string | undefined;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces'>;
   /** Renders the timeline titles one step smaller, for narrow hosts like the details flyout. */
   compressed?: boolean;
@@ -38,16 +37,11 @@ export interface AlertEpisodeTimelineHeatmapsSectionProps {
  */
 export const AlertEpisodeTimelineHeatmapsSection = ({
   episodeId,
-  ruleId,
   services,
   compressed,
 }: AlertEpisodeTimelineHeatmapsSectionProps) => {
   const { statusRows, severityRows, collapsedEventLimit, isLoading, isError } =
-    useEpisodeTimelineSourceRows({
-      episodeId,
-      ruleId,
-      services,
-    });
+    useEpisodeTimelineSourceRows({ episodeId, services });
 
   if (isLoading) {
     return (

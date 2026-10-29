@@ -45,14 +45,10 @@ const mockServices = createMockServices();
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
-const renderSection = (ruleId?: string) =>
+const renderSection = () =>
   render(
     <I18nProvider>
-      <AlertEpisodeTimelineHeatmapsSection
-        episodeId="ep-1"
-        ruleId={ruleId}
-        services={mockServices}
-      />
+      <AlertEpisodeTimelineHeatmapsSection episodeId="ep-1" services={mockServices} />
     </I18nProvider>,
     { wrapper }
   );
@@ -132,7 +128,7 @@ describe('AlertEpisodeTimelineHeatmapsSection', () => {
       return eventsResponse;
     });
 
-    renderSection('rule-1');
+    renderSection();
 
     await waitFor(() => expect(screen.getByTestId('statusRowCount')).toHaveTextContent('3'));
     expect(screen.getByTestId('severityRowCount')).toHaveTextContent('2');

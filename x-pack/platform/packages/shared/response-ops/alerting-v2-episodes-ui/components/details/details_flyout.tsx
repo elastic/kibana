@@ -473,7 +473,6 @@ export const AlertEpisodeDetailsFlyout = ({
                   />
                   <AlertEpisodeTimelineHeatmapsSection
                     episodeId={episodeId}
-                    ruleId={episode?.['rule.id']}
                     services={services}
                     compressed
                   />
@@ -538,7 +537,6 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              ruleId={episode?.['rule.id']}
               seriesId={episode ? episode.series_id ?? null : undefined}
               groupHash={episode?.group_hash}
               services={services}

@@ -10,7 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { buildAlertPhasesQuery } from '@kbn/alerting-v2-common-queries';
+import { buildCollapsedStatusPhasesQuery } from '@kbn/alerting-v2-common-queries';
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { useFetchRuleEvents } from './use_fetch_rule_events';
 
@@ -74,7 +74,7 @@ describe('useFetchRuleEvents', () => {
     expect(runEsqlAsyncSearchMock).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({
-          query: buildAlertPhasesQuery({
+          query: buildCollapsedStatusPhasesQuery({
             ruleId: 'rule-1',
             alertIds: ['ep-1'],
             window: { startMs: WINDOW_START_MS, endMs: WINDOW_END_MS },

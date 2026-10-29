@@ -50,8 +50,8 @@ export const queryKeys = {
   episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
-  episodeCollapsedEvents: (spaceId: string, episodeId: string, ruleId: string) =>
-    [...queryKeys.episodeEvents(spaceId, episodeId), 'collapsed', ruleId] as const,
+  episodeCollapsedEvents: (spaceId: string, episodeId: string) =>
+    [...queryKeys.episodeEvents(spaceId, episodeId), 'collapsed'] as const,
   episodeFlappingAll: () => [...queryKeys.all, 'episode-flapping'] as const,
   episodeFlapping: (spaceId: string, episodeId: string) =>
     [...queryKeys.episodeFlappingAll(), spaceId, episodeId] as const,

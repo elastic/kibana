@@ -23,7 +23,6 @@ import * as i18n from './timeline/translations';
 
 export interface AlertEpisodeTimelineSectionProps {
   episodeId: string;
-  ruleId: string | undefined;
   seriesId: string | null | undefined;
   groupHash: string | undefined;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces' | 'userProfile'>;
@@ -31,7 +30,6 @@ export interface AlertEpisodeTimelineSectionProps {
 
 export const AlertEpisodeTimelineSection = ({
   episodeId,
-  ruleId,
   seriesId,
   groupHash,
   services,
@@ -41,7 +39,7 @@ export const AlertEpisodeTimelineSection = ({
     severityRows,
     collapsedEventLimit,
     isLoading: isLoadingSourceRows,
-  } = useEpisodeTimelineSourceRows({ episodeId, ruleId, services });
+  } = useEpisodeTimelineSourceRows({ episodeId, services });
 
   const {
     entries: actionEntries,

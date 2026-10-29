@@ -69,12 +69,15 @@ export type {
   BuildEpisodeEventsQueryOptions,
 } from './episode_events_query';
 
-export { buildAlertPhasesQuery, buildAlertSeverityPhasesQuery } from './alert_phases_query';
+export {
+  buildCollapsedStatusPhasesQuery,
+  buildCollapsedSeverityPhasesQuery,
+} from './collapsed_phases_query';
 export type {
   AlertPhaseRow,
   AlertSeverityPhaseRow,
   BuildAlertPhasesQueryOptions,
-} from './alert_phases_query';
+} from './collapsed_phases_query';
 
 export { buildEpisodeActionsQuery } from './episode_actions_query';
 export type { EpisodeActionRow } from './episode_actions_query';

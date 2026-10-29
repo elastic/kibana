@@ -95,7 +95,7 @@ const mockSources = ({
 };
 
 const renderSourceRows = () =>
-  renderHook(() => useEpisodeTimelineSourceRows({ episodeId: 'ep-1', ruleId: 'rule-1', services }));
+  renderHook(() => useEpisodeTimelineSourceRows({ episodeId: 'ep-1', services }));
 
 describe('useEpisodeTimelineSourceRows', () => {
   beforeEach(() => {
@@ -108,7 +108,7 @@ describe('useEpisodeTimelineSourceRows', () => {
     const { result } = renderSourceRows();
 
     expect(mockUseFetchCollapsedEvents).toHaveBeenCalledWith(
-      expect.objectContaining({ episodeId: 'ep-1', ruleId: 'rule-1', enabled: false })
+      expect.objectContaining({ episodeId: 'ep-1', enabled: false })
     );
     expect(result.current).toEqual({
       statusRows: eventRows,

@@ -17,7 +17,6 @@ import {
 
 export interface UseEpisodeTimelineSourceRowsOptions {
   episodeId: string | undefined;
-  ruleId: string | undefined;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
 }
 
@@ -40,7 +39,6 @@ const EMPTY_EVENT_ROWS: EpisodeEventRow[] = [];
  */
 export const useEpisodeTimelineSourceRows = ({
   episodeId,
-  ruleId,
   services,
 }: UseEpisodeTimelineSourceRowsOptions): EpisodeTimelineSourceRows => {
   const {
@@ -56,7 +54,6 @@ export const useEpisodeTimelineSourceRows = ({
   const { data: collapsedEvents, isInitialLoading: isLoadingCollapsedEvents } =
     useFetchEpisodeCollapsedEventsQuery({
       episodeId,
-      ruleId,
       enabled: isTruncated,
       services,
     });
