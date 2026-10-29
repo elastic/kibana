@@ -177,6 +177,8 @@ export const CHANGED_STATUS = {
 
 /** The output of the step that opened the run's Investigation. */
 export const OPENED_INVESTIGATION = { output: { conversation_id: INVESTIGATION_ID } };
+/** The Detection Watch reviews find or create their Investigation through the AlertZero route. */
+export const FOUND_INVESTIGATION = { output: { investigationConversationId: INVESTIGATION_ID } };
 
 /** The envelope fields `reportOnDevModeClient` reports on top of the Worker's catalog fields. */
 export const ENVELOPE_FIELDS = {

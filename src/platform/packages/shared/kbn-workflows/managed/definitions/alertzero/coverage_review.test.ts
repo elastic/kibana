@@ -237,7 +237,7 @@ describe('Detection Coverage review', () => {
         expect(stepByName(name)?.type).toBe('ai.conversation.add_user_message');
         expect(withOf(name)?.author_name).toBe('{{ consts.author_name }}');
         expect(withOf(name)?.conversation_id).toBe(
-          '{{ steps.create_investigation.output.conversation_id }}'
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
         );
         expect(stepByName(name)?.['on-failure']?.continue).toBe(true);
       }
@@ -434,23 +434,47 @@ describe('Detection Coverage review', () => {
       expect(stepIndex('resolve_rule')).toBeLessThan(stepIndex('handle_verdict'));
     });
 
-    // Without an investigation there is nowhere to propose, so a failed create must
-    // fail the run rather than continue into a proposal with an empty conversation id.
-    // It opens before the check, so the manual entry gate has somewhere to ask.
-    it('opens an investigation from the template before the coverage check', () => {
-      const create = stepByName('create_investigation');
-      expect(create?.type).toBe('ai.conversation.create');
-      expect(create?.with?.template_id).toBe('investigation');
+    // Without an investigation there is nowhere to propose, so a failed find-or-create
+    // must fail the run rather than continue into a proposal with an empty conversation
+    // id. It opens before the check, so the manual entry gate has somewhere to ask.
+    //
+    // One investigation per gap (elastic/security-team#20386): a gap whose proposal
+    // expired is reviewed again by the next sweep, and `ai.conversation.create` would
+    // open a second investigation each time. The route derives the id from the
+    // indicator, so every review of the gap lands on the same investigation.
+    it('finds or opens the gap investigation through the route before the coverage check', () => {
+      const create = stepByName('find_or_create_investigation');
+      expect(create?.type).toBe('kibana.request');
+      expect(create?.with?.method).toBe('POST');
+      expect(create?.with?.path).toBe(
+        '/s/{{ workflow.spaceId }}/internal/alertzero/investigations/find_or_create'
+      );
+      expect(create?.with?.body).toEqual(
+        expect.objectContaining({
+          workerId: 'system-security-detection-rule-coverage',
+          subjectId: '{{ inputs.ki_id }}',
+          workflowExecutionId: '{{ execution.id }}',
+        })
+      );
       expect(create?.if).toContain('steps.gap.output.ready == true');
       expect(create?.if).not.toContain('verdict');
       expect(create).not.toHaveProperty('on-failure');
-      expect(stepIndex('gap')).toBeLessThan(stepIndex('create_investigation'));
-      expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('coverage_check'));
+      expect(stepIndex('gap')).toBeLessThan(stepIndex('find_or_create_investigation'));
+      expect(stepIndex('find_or_create_investigation')).toBeLessThan(stepIndex('coverage_check'));
+      expect(allReviewSteps.map(({ type }) => type)).not.toContain('ai.conversation.create');
+    });
+
+    it('tells the analyst when a review resumed an earlier investigation', () => {
+      const message = String(withOf('post_indicator')?.message);
+      expect(message).toContain('steps.find_or_create_investigation.output.created != true');
+      expect(message).toContain('**Review resumed.**');
     });
 
     it('describes the gap from the indicator, not from raw inputs', () => {
-      const create = stepByName('create_investigation');
-      expect(String(create?.with?.title)).toContain('steps.gap.output.description');
+      const create = stepByName('find_or_create_investigation');
+      const body = create?.with?.body as Record<string, string>;
+      expect(String(body.title)).toContain('steps.gap.output.description');
+      expect(String(body.description)).toContain('steps.gap.output.description');
       expect(JSON.stringify(withOf('compose_evidence'))).not.toContain('inputs.gap_description');
       expect(JSON.stringify(withOf('compose_evidence'))).toContain('steps.gap.output.evidence');
     });
@@ -495,7 +519,9 @@ describe('Detection Coverage review', () => {
     it('closes the investigation on a decision and leaves it open without one', () => {
       const close = stepByName('close_investigation');
       expect(close?.type).toBe('switch');
-      expect(close?.if).toContain('steps.create_investigation.output.conversation_id != null');
+      expect(close?.if).toContain(
+        'steps.find_or_create_investigation.output.investigationConversationId != null'
+      );
       // No default: a run that reached no decision closes nothing.
       expect(close?.default).toBeUndefined();
 
@@ -616,7 +642,7 @@ describe('Detection Coverage review', () => {
         // A gate that fails outright must fail the run rather than read as a decision.
         expect(proposal).not.toHaveProperty('on-failure');
         expect(inputsOf(proposal).conversationId).toBe(
-          '{{ steps.create_investigation.output.conversation_id }}'
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
         );
       }
     });
@@ -629,7 +655,8 @@ describe('Detection Coverage review', () => {
       expect(enable.actionInput).toEqual({
         id: '{{ steps.resolve_rule.output.id }}',
         expected_revision: '${{ steps.resolve_rule.output.revision }}',
-        investigation_id: '{{ steps.create_investigation.output.conversation_id }}',
+        investigation_id:
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}',
       });
       expect(enable.autoApprove).toBe(false);
     });
@@ -696,7 +723,7 @@ describe('Detection Coverage review', () => {
       expect(creation?.['on-failure']?.continue).toBe(true);
       expect(inputsOf(creation).gap_description).toBe('{{ steps.gap.output.description }}');
       expect(inputsOf(creation).investigation_id).toBe(
-        '{{ steps.create_investigation.output.conversation_id }}'
+        '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
       );
     });
 
@@ -733,8 +760,8 @@ describe('Detection Coverage review', () => {
     // Manual stops once for permission before any work on the gap. Assisted takes the
     // false branch straight to the check.
     it.each([
-      ['manual', { conversation_id: 'c1' }, true],
-      ['assisted', { conversation_id: 'c1' }, false],
+      ['manual', { investigationConversationId: 'c1' }, true],
+      ['assisted', { investigationConversationId: 'c1' }, false],
       ['manual', undefined, false],
     ])(
       'at %s autonomy with investigation %j, asks before the check: %s',
@@ -743,7 +770,7 @@ describe('Detection Coverage review', () => {
         expect(
           evaluateExpression(String(gate?.condition), {
             inputs: { autonomy_level: autonomy },
-            steps: { create_investigation: investigation && { output: investigation } },
+            steps: { find_or_create_investigation: investigation && { output: investigation } },
           })
         ).toBe(expected);
       }
@@ -764,7 +791,7 @@ describe('Detection Coverage review', () => {
       expect(entryCaseOf('expired')).toEqual(['report_review_completed_undecided', 'stop_expired']);
       // Approval has no case, so it falls through to the check.
       expect(decisionSwitch?.default).toBeUndefined();
-      expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('entry_gate'));
+      expect(stepIndex('find_or_create_investigation')).toBeLessThan(stepIndex('entry_gate'));
       expect(stepIndex('stop_expired')).toBeLessThan(stepIndex('coverage_check'));
     });
 
@@ -788,7 +815,9 @@ describe('Detection Coverage review', () => {
 
     it('asks on the investigation, without an action', () => {
       const inputs = inputsOf(stepByName(ENTRY_STEP));
-      expect(inputs.conversationId).toBe('{{ steps.create_investigation.output.conversation_id }}');
+      expect(inputs.conversationId).toBe(
+        '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
+      );
       expect(inputs).not.toHaveProperty('actionWorkflowId');
       expect(inputs).not.toHaveProperty('actionInput');
       // No action, so no inherited category; the queue drops an uncategorised proposal.
@@ -807,7 +836,7 @@ describe('Detection Coverage review', () => {
 
       expect(close?.type).toBe('ai.conversation.metadata.patch');
       expect(close?.with?.conversation_id).toBe(
-        '{{ steps.create_investigation.output.conversation_id }}'
+        '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
       );
       expect((close?.with?.updates as Record<string, string>).status).toBe('closed');
     });
@@ -1140,7 +1169,7 @@ describe('Detection Coverage review', () => {
 
     it('hands the investigation back to the caller', () => {
       expect(emit?.investigation_id).toBe(
-        '{{ steps.create_investigation.output.conversation_id }}'
+        '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
       );
     });
 
@@ -1177,7 +1206,7 @@ describe('Detection Coverage review', () => {
       createWorkflowLiquidEngine().parseAndRenderSync(template ?? '', { steps });
     const reviewSteps = (steps: Record<string, unknown>) => ({
       read_ki: { output: { hits: { total: { value: 1 } } } },
-      create_investigation: { output: { conversation_id: 'investigation-1' } },
+      find_or_create_investigation: { output: { investigationConversationId: 'investigation-1' } },
       ...steps,
     });
 
@@ -1242,7 +1271,7 @@ describe('Detection Coverage review', () => {
       expect(
         render(failure?.note, {
           read_ki: { output: { hits: { total: { value: 0 } } } },
-          create_investigation: { output: {} },
+          find_or_create_investigation: { output: {} },
           coverage_check: { output: {} },
         })
       ).toBe('');
@@ -1254,7 +1283,7 @@ describe('Detection Coverage review', () => {
       expect(note?.['on-failure']?.continue).toBe(true);
       expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
       expect(inputsOf(note).conversation_id).toBe(
-        '{{ steps.create_investigation.output.conversation_id }}'
+        '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
       );
       expect(inputsOf(note).message).toContain('{{ steps.resolve_failure.output.note }}');
     });

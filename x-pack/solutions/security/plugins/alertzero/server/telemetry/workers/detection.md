@@ -16,6 +16,8 @@ Each Worker's global sweep reports the run, and each review reports its own rule
 | `coverage_review.yaml` | `report_review_completed_undecided` | `rule_coverage_review_completed` | Right before `stop_expired`, in the entry gate's `expired` arm |
 | `coverage_review.yaml` | `report_review_completed` | `rule_coverage_review_completed` | Right before `emit_result` |
 
+Both reviews find or create their Investigation through `routes/investigations/find_or_create_investigation.ts`, which reports `worker_investigation_reopened` from TypeScript when a re-review lands on an Investigation an earlier review closed (see the [telemetry README](../README.md)).
+
 Both reviews report a manual entry gate the same way: the gate's own arm reports `entry_gate: declined` or `undecided` (with `decision: none`) right before the step that ends the run, and the review's main report sends `approved` or `skipped`.
 
 ## Runs

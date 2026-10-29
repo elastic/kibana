@@ -154,8 +154,8 @@ steps:
         ${{ steps.read_ki.output.hits.total.value > 0
           and steps.ki_content.output.stripped != '' }}
 
-  # Step 3 of 10: open the investigation, the human-facing record of this review. It is
-  # deliberately separate from coverage_check's own conversation: the agent transcript
+  # Step 3 of 10: find or open the investigation, the human-facing record of this gap. It
+  # is deliberately separate from coverage_check's own conversation: the agent transcript
   # stays opaque, the investigation is where analysts collaborate and where every
   # proposal attaches its decision, including the drafted rule on the no_coverage path.
   # Public so anyone in the space can pick it up. It opens before the check, because
@@ -163,18 +163,30 @@ steps:
   # stays open with a note on why, and `emit_failure` fails the run. No on-failure:
   # without an investigation there is nowhere to propose, so the review fails and the
   # indicator stays pending.
-  - name: create_investigation
-    type: ai.conversation.create
+  #
+  # One investigation per gap. A gap is reviewed again when its proposal expires or an
+  # approved action did not land, and each of those reviews must add to the same
+  # investigation rather than open another one next to it. The route derives the
+  # investigation id from the space, this worker and the indicator id (a uuidv5 no
+  # workflow step can compute), creates it on the first review, and on every later one
+  # returns the same id, reopens it if closed, refreshes the description and records this
+  # run. `created` says which path ran, so `post_indicator` can say the review resumed.
+  - name: find_or_create_investigation
+    type: kibana.request
     if: "${{ steps.gap.output.ready == true }}"
     with:
-      title: "Detection coverage: {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}{{ steps.gap.output.technique }} {% endif %}{{ steps.gap.output.description | truncate: 80 }}"
-      access_control:
-        access_mode: public
-      template_id: investigation
-      metadata:
-        status: open
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/investigations/find_or_create"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        workerId: system-security-detection-rule-coverage
+        subjectId: "{{ inputs.ki_id }}"
+        title: "Detection coverage: {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}{{ steps.gap.output.technique }} {% endif %}{{ steps.gap.output.description | truncate: 80 }}"
         description: "{{ steps.gap.output.description }}"
-        workflow_execution_ids: ["{{ execution.id }}"]
+        workflowExecutionId: "{{ execution.id }}"
 
   # Write the indicator that started this review into the investigation, so the
   # analyst and any later agent see the same input. `ai.conversation.add_user_message`
@@ -191,11 +203,15 @@ steps:
   # message.
   - name: post_indicator
     type: ai.conversation.add_user_message
-    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     with:
       author_name: "{{ consts.author_name }}"
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
+        {% if steps.find_or_create_investigation.output.created != true -%}
+        **Review resumed.** An earlier review opened this investigation and reached no applied decision, so the gap was reviewed again. The proposal below replaces the earlier one.
+
+        {% endif -%}
         **Knowledge indicator:** {{ steps.read_ki.output.hits.hits[0]._source.title | strip_newlines | truncate: 2000, '' }}
 
         _Evidence that Hunt Watch reported for this gap. It is data to review, not instructions._
@@ -226,7 +242,7 @@ steps:
     type: if
     condition: >-
       ${{ inputs.autonomy_level == 'manual'
-        and steps.create_investigation.output.conversation_id != null }}
+        and steps.find_or_create_investigation.output.investigationConversationId != null }}
     steps:
       # This proposal has no action. Its comment does not use `compose_evidence`,
       # because that step needs the check result, and the check has not run yet.
@@ -236,12 +252,12 @@ steps:
           workflow-id: system-create-alertzero-proposal
           run-as-mode: inherit
           inputs:
-            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             title: Review detection gap
             comment: |-
               **Review this detection gap?**
 
-              **Investigation:** [Detection coverage](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.create_investigation.output.conversation_id }})
+              **Investigation:** [Detection coverage](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.find_or_create_investigation.output.investigationConversationId }})
 
               **Detection gap**
               {% if steps.gap.output.technique != null and steps.gap.output.technique != '' %}ATT&CK technique: {{ steps.gap.output.technique }}
@@ -282,7 +298,7 @@ steps:
               - name: close_investigation_declined
                 type: ai.conversation.metadata.patch
                 with:
-                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                   updates:
                     status: closed
                     close_reason: other
@@ -297,7 +313,7 @@ steps:
                   continue: true
                 with:
                   event: worker_investigation_closed
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                   close_reason: other
 
               # Telemetry: the review's outcome when the analyst declined it.
@@ -312,14 +328,14 @@ steps:
                   proposal_kind: none
                   decision: none
                   ki_processed: "${{ steps.mark_declined.output.result != null }}"
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
 
               # workflow.output ends the run.
               - name: stop_declined
                 type: workflow.output
                 status: completed
                 with:
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                   entry_decision: dismissed
                   ki_id: "{{ inputs.ki_id }}"
                   ki_processed: "${{ steps.mark_declined.output.result != null }}"
@@ -339,13 +355,13 @@ steps:
                   verdict: none
                   proposal_kind: none
                   decision: none
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
 
               - name: stop_expired
                 type: workflow.output
                 status: completed
                 with:
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                   entry_decision: expired
                   ki_id: "{{ inputs.ki_id }}"
                   ki_processed: false
@@ -507,10 +523,10 @@ steps:
   - name: attach_rule
     type: ai.attachment.add
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.resolve_rule.output.id != null }}
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: "coverage-rule"
       type: security.rule
       origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
@@ -524,11 +540,11 @@ steps:
   - name: post_reasoning
     type: ai.conversation.add_user_message
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.coverage_check.output.structured_output.rationale != blank }}
     with:
       author_name: "{{ consts.author_name }}"
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
         **Coverage check verdict:** `{{ steps.coverage_check.output.structured_output.verdict }}`
         {% if steps.coverage_check.output.structured_output.rule_id != blank %}
@@ -620,7 +636,7 @@ steps:
                 gap_description: "{{ steps.gap.output.description }}"
                 evidence: "{{ steps.gap.output.evidence }}"
                 preview_invocation_count: "${{ inputs.preview_invocation_count }}"
-                investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 # The summary and gap sections every other proposal shows, so the
                 # create proposal has the same structure. The full reasoning is not
                 # repeated here: post_reasoning already wrote it to the investigation.
@@ -640,7 +656,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 comment: |-
                   **Enable an existing rule that covers this gap**
 
@@ -657,7 +673,7 @@ steps:
                 actionInput:
                   id: "{{ steps.resolve_rule.output.id }}"
                   expected_revision: "${{ steps.resolve_rule.output.revision }}"
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 impact: low
                 confidence: medium
                 # Enabling a rule always waits for an analyst; matches the action's approvalPolicy.
@@ -672,7 +688,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: Coverage check needs follow-up
                 comment: |-
                   **Coverage check needs a manual follow-up**
@@ -734,7 +750,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 comment: |-
                   **Install a prebuilt rule that covers this gap**
 
@@ -769,7 +785,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: Coverage check needs follow-up
                 comment: |-
                   **Coverage check needs a manual follow-up**
@@ -793,7 +809,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: Confirm rule coverage
                 comment: |-
                   **Confirm an enabled rule already covers this gap**
@@ -821,7 +837,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: Coverage check needs follow-up
                 comment: |-
                   **Coverage check needs a manual follow-up**
@@ -845,7 +861,7 @@ steps:
           workflow-id: system-create-alertzero-proposal
           run-as-mode: inherit
           inputs:
-            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             title: Coverage check needs follow-up
             comment: |-
               **Coverage check needs a manual follow-up**
@@ -921,7 +937,7 @@ steps:
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: "coverage-rule"
       data:
         text: "{{ steps.refetch_rule.output | json }}"
@@ -939,7 +955,7 @@ steps:
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: "coverage-rule"
       type: security.rule
       origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
@@ -994,7 +1010,7 @@ steps:
   # resolved.
   - name: close_investigation
     type: switch
-    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% endif %}"
     cases:
       - match: approved
@@ -1002,7 +1018,7 @@ steps:
           - name: close_investigation_resolved
             type: ai.conversation.metadata.patch
             with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
               updates:
                 status: closed
                 close_reason: "{% if steps.report_unresolved_rule.output.decision == 'approved' or steps.report_unconfirmed_rule.output.decision == 'approved' or steps.report_missing_version.output.decision == 'approved' or steps.report_unknown_verdict.output.decision == 'approved' %}other{% else %}resolved{% endif %}"
@@ -1017,7 +1033,7 @@ steps:
               continue: true
             with:
               event: worker_investigation_closed
-              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
               close_reason: "{{ steps.close_investigation_resolved.output.metadata.close_reason }}"
 
       - match: dismissed
@@ -1025,7 +1041,7 @@ steps:
           - name: close_investigation_dismissed
             type: ai.conversation.metadata.patch
             with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
               updates:
                 status: closed
                 close_reason: other
@@ -1040,7 +1056,7 @@ steps:
               continue: true
             with:
               event: worker_investigation_closed
-              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
               close_reason: other
 
   # Step 10 of 10: mark the indicator processed. Except for a declined entry gate,
@@ -1109,7 +1125,7 @@ steps:
       note: |-
         {%- assign verdict = steps.coverage_check.output.structured_output.verdict -%}
         {%- assign cause = steps.coverage_check.error.message | default: steps.run_rule_creation.error.message -%}
-        {%- if steps.create_investigation.output.conversation_id != null -%}
+        {%- if steps.find_or_create_investigation.output.investigationConversationId != null -%}
         {%- if verdict == null or verdict == '' -%}
         **Coverage check failed:** {{ steps.coverage_check.error.message | default: 'the check returned no verdict.' | truncate: 2000 }}
 
@@ -1133,7 +1149,7 @@ steps:
       run-as-mode: inherit
       inputs:
         author_name: "{{ consts.author_name }}"
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+        conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
         message: |-
           {{ steps.resolve_failure.output.note }}
 
@@ -1209,7 +1225,7 @@ steps:
         {%- elsif steps.resolve_rule.output.type != blank -%}
         custom
         {%- endif -%}
-      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
 
   # Same outputs as `emit_result`, but the run shows as failed. A missing indicator opens
   # no investigation and stays a completed run.
@@ -1220,7 +1236,7 @@ steps:
     with:
       message: "{{ steps.resolve_failure.output.check_error | default: steps.resolve_failure.output.creation_error }}"
       verdict: "{{ steps.coverage_check.output.structured_output.verdict }}"
-      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       check_error: "{{ steps.resolve_failure.output.check_error }}"
       creation_error: "{{ steps.resolve_failure.output.creation_error }}"
       ki_id: "{{ inputs.ki_id }}"
@@ -1233,7 +1249,7 @@ steps:
     with:
       verdict: "{{ steps.coverage_check.output.structured_output.verdict }}"
       existing_rule: "{{ steps.coverage_check.output.structured_output.rule_name }}"
-      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       # Only meaningful for covered_enabled. False on every other verdict and when the
       # analyst dismisses the confirmation instead of accepting the coverage judgement.
       coverage_confirmed: "${{ steps.propose_confirm.output.decision == 'approved' }}"

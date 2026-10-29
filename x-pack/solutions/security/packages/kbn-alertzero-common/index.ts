@@ -36,6 +36,7 @@ export {
   ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
+  ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL,
   ALERTZERO_SCAN_FAILURES_URL,
   ALERTZERO_ACTIONS_LIST_TOOL_ID,
   ALERTZERO_PROPOSALS_CATEGORY_URL,
@@ -191,6 +192,8 @@ export {
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
+  FindOrCreateWorkerInvestigationRequestBody,
+  FindOrCreateWorkerInvestigationResponse,
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';

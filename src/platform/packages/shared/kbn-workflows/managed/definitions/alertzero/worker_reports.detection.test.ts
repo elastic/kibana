@@ -338,7 +338,9 @@ describe('Rule Tuning outcome reports', () => {
       expect(
         renderReport(getReport(), {
           steps: {
-            create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
+            find_or_create_investigation: {
+              output: { investigationConversationId: INVESTIGATION_ID },
+            },
             fetch_rule: {
               output: {
                 enabled: true,
@@ -398,7 +400,9 @@ describe('Rule Tuning outcome reports', () => {
         steps: {
           ...(ruleAvailable
             ? {
-                create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
+                find_or_create_investigation: {
+                  output: { investigationConversationId: INVESTIGATION_ID },
+                },
                 diagnose_rule: {
                   output: { structured_output: { change_type: changeType, confidence } },
                 },
@@ -821,7 +825,9 @@ describe('Rule Coverage outcome reports', () => {
       expect(
         renderReport(getReport(), {
           steps: {
-            create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
+            find_or_create_investigation: {
+              output: { investigationConversationId: INVESTIGATION_ID },
+            },
             ...outputs,
           },
         })
@@ -854,7 +860,9 @@ describe('Rule Coverage outcome reports', () => {
     ): Record<string, unknown> => ({
       steps: {
         coverage_check: { output: { structured_output: { verdict } } },
-        create_investigation: verdict ? { output: { conversation_id: INVESTIGATION_ID } } : {},
+        find_or_create_investigation: verdict
+          ? { output: { investigationConversationId: INVESTIGATION_ID } }
+          : {},
         ...stepOutputs,
       },
     });

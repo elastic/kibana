@@ -16,7 +16,7 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
 } from '@kbn/alertzero-common';
 import type { WorkerWorkflowContract } from './shipped_yaml_contract.test_helpers';
-import { CHANGED_STATUS, OPENED_INVESTIGATION } from './shipped_yaml_contract.test_helpers';
+import { CHANGED_STATUS, FOUND_INVESTIGATION } from './shipped_yaml_contract.test_helpers';
 
 /**
  * The Rule Tuning and Rule Coverage Workers' workflows with report steps, and runs where every
@@ -70,13 +70,13 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
       {
         steps: {
           close_investigation_declined: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
+          find_or_create_investigation: FOUND_INVESTIGATION,
         },
       },
       {
         steps: {
           close_investigation_applied: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
+          find_or_create_investigation: FOUND_INVESTIGATION,
           diagnose_rule: {
             output: { structured_output: { change_type: 'query', confidence: 'low' } },
           },
@@ -100,7 +100,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
       {
         steps: {
           close_investigation_dismissed: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
+          find_or_create_investigation: FOUND_INVESTIGATION,
           diagnose_rule: { output: { structured_output: { change_type: 'other' } } },
           fetch_rule: { output: { enabled: true, type: 'a_type_added_later' } },
           propose_manual: { output: { decision: 'dismissed', status: 'no_action' } },
@@ -147,7 +147,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         steps: {
           close_investigation_resolved: { output: CHANGED_STATUS },
           coverage_check: { output: { structured_output: { verdict: 'covered_disabled' } } },
-          create_investigation: OPENED_INVESTIGATION,
+          find_or_create_investigation: FOUND_INVESTIGATION,
           mark_processed: { output: { result: 'updated' } },
           propose_enable: { output: { decision: 'approved', status: 'succeeded' } },
           record_decision: { output: { applied: true, approved: true, dismissed: false } },
@@ -162,7 +162,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         steps: {
           close_investigation_dismissed: { output: CHANGED_STATUS },
           coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
-          create_investigation: OPENED_INVESTIGATION,
+          find_or_create_investigation: FOUND_INVESTIGATION,
           record_decision: { output: { applied: false, approved: false, dismissed: true } },
           run_rule_creation: {
             output: { created: false, decision: 'dismissed', skip_reason: '' },
@@ -173,7 +173,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
       {
         steps: {
           close_investigation_declined: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
+          find_or_create_investigation: FOUND_INVESTIGATION,
           propose_entry: { output: { decision: 'dismissed', status: 'no_action' } },
         },
       },
