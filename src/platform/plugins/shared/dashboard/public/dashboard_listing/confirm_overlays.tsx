@@ -45,11 +45,6 @@ export const confirmDiscardUnsavedChanges = (
       if (isConfirmed) {
         return discardCallback();
       }
-    })
-    .catch((error) => {
-      coreServices.notifications.toasts.addError(error, {
-        title: resetConfirmStrings.getResetErrorTitle(),
-      });
     });
 };
 

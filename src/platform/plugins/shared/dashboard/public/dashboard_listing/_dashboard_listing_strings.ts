@@ -127,10 +127,6 @@ export const resetConfirmStrings = {
     i18n.translate('dashboard.resetChangesConfirmModal.confirmButtonLabel', {
       defaultMessage: 'Reset dashboard',
     }),
-  getResetErrorTitle: () =>
-    i18n.translate('dashboard.resetChangesConfirmModal.resetErrorTitle', {
-      defaultMessage: 'Unable to reset dashboard',
-    }),
 };
 
 export const unsavedChangesConfirmStrings = {
