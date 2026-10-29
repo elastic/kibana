@@ -30,29 +30,31 @@ export const AlertAnalysisWorkflowDeprecationCallout: React.FC = () => {
   const isAlertZeroEnabled =
     isAlertZeroAvailable && uiSettings.get<boolean>(ALERTZERO_ENABLED_SETTING_ID) === true;
 
-  const getPrimaryAction = () => {
+  const getAction = () => {
     if (!isAlertZeroAvailable) {
       return undefined;
     }
 
     if (!isAlertZeroEnabled) {
       return {
-        children: translations.DEPRECATION_CALLOUT_ENABLE_ALERTZERO,
+        label: translations.DEPRECATION_CALLOUT_ENABLE_ALERTZERO,
         href: application.getUrlForApp('management', {
           path: `/kibana/settings?query=${encodeURIComponent(ALERTZERO_ENABLED_SETTING_ID)}`,
         }),
-        'data-test-subj': 'alertAnalysisWorkflowDeprecationEnableAlertZero',
+        testSubj: 'alertAnalysisWorkflowDeprecationEnableAlertZero',
       };
     }
 
     return {
-      children: translations.DEPRECATION_CALLOUT_ADJUST_TRIAGE_WORKER,
+      label: translations.DEPRECATION_CALLOUT_ADJUST_TRIAGE_WORKER,
       href: application.getUrlForApp(ALERTZERO_APP_ID, {
         path: `/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`,
       }),
-      'data-test-subj': 'alertAnalysisWorkflowDeprecationGoToAlertZero',
+      testSubj: 'alertAnalysisWorkflowDeprecationGoToAlertZero',
     };
   };
+
+  const action = getAction();
 
   return (
     <KbnWarningCallout
@@ -60,24 +62,32 @@ export const AlertAnalysisWorkflowDeprecationCallout: React.FC = () => {
       data-test-subj="alertAnalysisWorkflowDeprecationCallout"
       title={translations.DEPRECATION_CALLOUT_TITLE}
       text={
-        <p>
-          {translations.DEPRECATION_CALLOUT_BODY}
-          {!isAlertZeroEnabled && (
-            <>
-              {' '}
-              <EuiLink
-                data-test-subj="alertAnalysisWorkflowDeprecationLearnMore"
-                href={ALERTZERO_LEARN_MORE_URL}
-                target="_blank"
-                external
-              >
-                {translations.DEPRECATION_CALLOUT_LEARN_MORE}
+        <>
+          <p>
+            {translations.DEPRECATION_CALLOUT_BODY}
+            {!isAlertZeroEnabled && (
+              <>
+                {' '}
+                <EuiLink
+                  data-test-subj="alertAnalysisWorkflowDeprecationLearnMore"
+                  href={ALERTZERO_LEARN_MORE_URL}
+                  target="_blank"
+                  external
+                >
+                  {translations.DEPRECATION_CALLOUT_LEARN_MORE}
+                </EuiLink>
+              </>
+            )}
+          </p>
+          {action && (
+            <p>
+              <EuiLink data-test-subj={action.testSubj} href={action.href}>
+                {action.label}
               </EuiLink>
-            </>
+            </p>
           )}
-        </p>
+        </>
       }
-      actionProps={{ primary: getPrimaryAction() }}
     />
   );
 };
