@@ -1,0 +1,57 @@
+---
+description: Design-refresh POC guidance for the damn-daniel branch. Speed and visual fidelity over production readiness; never merge to main.
+alwaysApply: true
+---
+
+# damn-daniel design refresh POC
+
+Reference-only Kibana design-refresh POC on `damn-daniel` — **never merge to main**. Optimize for speed and visual fidelity, not production readiness. Pair with the sibling EUI POC branch.
+
+## Skip
+
+- Writing or updating tests (Jest, FTR, Scout, snapshots) unless explicitly asked
+- Running tests as part of implementation
+- i18n string churn unless the copy change is the task
+- Changelogs / docs / Storybook polish
+- Deprecation paths, migration notes, backwards compatibility
+- Exhaustive a11y audits
+- Unrelated refactors
+
+## Still do
+
+- Keep typecheck and local Kibana start green
+- Prefer EUI tokens and components over hardcoded styles
+- Mark POC shortcuts with `// POC:`
+- Keep basic keyboard focus/semantics when changing interactive UI
+- Respect `prefers-reduced-motion` for new motion
+
+## Scope
+
+- Only change the surface named in the task
+- Don’t touch neighboring apps “while you’re in there”
+- If a design value isn’t specified, pick a reasonable default, flag with `// POC: needs design input`, and mention it in the summary
+
+## EUI
+
+- This branch consumes the EUI design-refresh POC via `yarn watch --kibana` or a tarball pin
+- Don’t casually bump `@elastic/eui*` to published main
+- After EUI sync, component markup may need a Kibana restart with `--no-cache` (shared-deps); theme token changes often show sooner
+- Component/token API changes belong in the EUI sibling branch, not here
+
+## Commits
+
+Use: `[Area / Subarea] Succinct result-focused description.`
+
+- Capitalize the description; end with a period
+- Lead with the result, not a file list
+- Title only is fine
+
+```
+# Good
+[Chrome / Loading] Use primary for the global progress bar.
+[Login] Apply glass panel treatment to the form card.
+```
+
+## When finishing
+
+Summarize what changed, list `POC:` shortcuts / open design questions, and note anything that depends on the EUI POC build.
