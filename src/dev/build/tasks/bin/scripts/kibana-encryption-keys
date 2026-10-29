@@ -15,7 +15,6 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 . "$DIR/bin/kibana_env"
-CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
 {{#darwin}}
 NODE="${DIR}/node/default/bin/node"
 {{/darwin}}
