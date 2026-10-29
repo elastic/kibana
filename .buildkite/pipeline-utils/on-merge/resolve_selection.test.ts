@@ -249,6 +249,25 @@ describe('resolveOnMergeSelection', () => {
     }
   );
 
+  it('runs the test types uploaded by a failed step in full when their jobs never ran', async () => {
+    const full = { mode: 'full', reason: 'did not pass in previous build #99' };
+    const resolveWithFailedStep = (stepKey: string) =>
+      resolveOnMergeSelection(
+        createDeps({
+          getPreviousFinishedBuild: jest
+            .fn()
+            .mockResolvedValue(previousBuild({ jobs: [job(stepKey, { state: 'failed' })] })),
+        })
+      );
+
+    await expect(resolveWithFailedStep('pick_test_group_run_order')).resolves.toMatchObject({
+      testTypes: { ...allSelective, jestUnit: full, jestIntegration: full, ftr: full },
+    });
+    await expect(resolveWithFailedStep('build_scout_tests')).resolves.toMatchObject({
+      testTypes: { ...allSelective, scout: full },
+    });
+  });
+
   it('runs ES-dependent test types in full when the ES snapshot changed', async () => {
     const deps = createDeps({ esSnapshotManifest: 'https://example.com/new.json' });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({

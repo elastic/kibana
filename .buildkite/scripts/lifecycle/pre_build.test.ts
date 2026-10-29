@@ -93,6 +93,17 @@ exit 0
 `
   );
 
+  // GNU `timeout` is missing on macOS; run the command directly and record the limit.
+  writeExecutable(
+    Path.join(binDir, 'timeout'),
+    `#!/usr/bin/env bash
+set -euo pipefail
+echo "timeout $1" >> "$CALLS_FILE"
+shift
+exec "$@"
+`
+  );
+
   writeExecutable(
     Path.join(binDir, 'gh'),
     `#!/usr/bin/env bash
@@ -262,6 +273,7 @@ describe('lifecycle pre_build.sh', () => {
     expect(result.status).toBe(0);
     expect(result.calls).toEqual(
       expect.arrayContaining([
+        'timeout 3m',
         expect.stringMatching(
           /node .*resolve_on_merge_selection\.ts ES_SNAPSHOT_MANIFEST_DEFAULT=https:\/\/storage\.googleapis\.com\/kibana-ci-es-snapshots-daily\/9\.9\.9\/archives\/20260930-000000_abcdef12\/manifest\.json/
         ),

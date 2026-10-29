@@ -29,9 +29,10 @@ if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
 fi
 
 # Non-fatal: test steps run in full when the selection is missing.
+# `timeout` hard-stops hung requests and git fetches that the script's own 2m timeout can't interrupt.
 if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-on-merge" && "${ON_MERGE_SELECTIVE_MODE:-off}" != "off" ]]; then
   ES_SNAPSHOT_MANIFEST_DEFAULT="${ES_SNAPSHOT_MANIFEST_DEFAULT:-}" \
-    node "$(dirname "${0}")/resolve_on_merge_selection.ts" ||
+    timeout 3m node "$(dirname "${0}")/resolve_on_merge_selection.ts" ||
     echo "Failed to resolve on-merge selection; test steps will run in full" >&2
 fi
 

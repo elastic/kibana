@@ -32,11 +32,18 @@ const UNPROVEN_JOB_STATES: ReadonlySet<string> = new Set([
   'canceled',
 ]);
 
+// The picker and the Scout builder upload the test jobs: if they failed, those jobs never existed.
+const PICK_TEST_GROUP_RUN_ORDER_STEP_KEY = 'pick_test_group_run_order';
+const SCOUT_BUILDER_STEP_KEY = 'build_scout_tests';
+
 const TEST_TYPE_STEP_KEY_MATCHERS: Record<OnMergeTestType, (stepKey: string) => boolean> = {
-  scout: (stepKey) => stepKey.startsWith('scout_test_lane_'),
-  jestUnit: (stepKey) => stepKey === STEP_KEYS.JEST_UNIT,
-  jestIntegration: (stepKey) => stepKey === STEP_KEYS.JEST_INTEGRATION,
-  ftr: (stepKey) => /^ftr_configs_\d+$/.test(stepKey),
+  scout: (stepKey) => stepKey === SCOUT_BUILDER_STEP_KEY || stepKey.startsWith('scout_test_lane_'),
+  jestUnit: (stepKey) =>
+    stepKey === PICK_TEST_GROUP_RUN_ORDER_STEP_KEY || stepKey === STEP_KEYS.JEST_UNIT,
+  jestIntegration: (stepKey) =>
+    stepKey === PICK_TEST_GROUP_RUN_ORDER_STEP_KEY || stepKey === STEP_KEYS.JEST_INTEGRATION,
+  ftr: (stepKey) =>
+    stepKey === PICK_TEST_GROUP_RUN_ORDER_STEP_KEY || /^ftr_configs_\d+$/.test(stepKey),
 };
 
 export interface OnMergeSelectionDeps {

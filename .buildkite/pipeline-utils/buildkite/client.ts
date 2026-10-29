@@ -260,6 +260,7 @@ export class BuildkiteClient {
     const params = new URLSearchParams({ branch, per_page: String(numberOfBuilds) });
     params.append('state[]', 'passed');
     params.append('state[]', 'failed');
+    params.append('state[]', 'canceled');
     const response = await this.http.get(
       `v2/organizations/elastic/pipelines/${encodeURIComponent(
         pipelineSlug
