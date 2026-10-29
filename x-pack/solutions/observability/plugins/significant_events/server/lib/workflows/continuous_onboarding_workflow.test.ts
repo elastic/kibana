@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import {
@@ -17,20 +17,22 @@ import {
   POLL_DELAY_SECONDS,
 } from '../../../common/constants';
 import { createContinuousOnboardingWorkflowService } from './continuous_onboarding_workflow';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './managed_workflow_owner';
 import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
+import type { SignificantEventsServer } from '../../types';
 
 // The continuous onboarding workflow YAML lives in the managed workflow
 // definition (kbn-workflows/managed/definitions/significant_events/knowledge_indicators/continuous_onboarding.yaml).
 // These tests keep that YAML in sync with the constants in common/constants.ts.
 const definition = getManagedWorkflowDefinition(
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID
 );
 
 const getWorkflowYaml = (): string => {
-  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-    throw new Error('Continuous onboarding managed workflow definition is missing inline YAML');
+  if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
+    throw new Error('Continuous onboarding managed workflow definition is missing its template');
   }
-  return definition.yaml;
+  return definition.yamlTemplate({ serviceAccountId: 'service-account-id' });
 };
 
 const WORKFLOW_YAML = getWorkflowYaml();
@@ -46,6 +48,11 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 
   it('is disabled by default so the user setting controls enablement', () => {
     assertYamlContains('enabled: false');
+  });
+
+  it('runs as the service account it is installed with, and its onboarding runs inherit it', () => {
+    assertYamlContains('run_as: "service-account-id"');
+    assertYamlContains('run-as-mode: inherit');
   });
 
   it('uses the correct timeout', () => {
@@ -124,16 +131,13 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
 describe('createContinuousOnboardingWorkflowService', () => {
   const request = {} as KibanaRequest;
   const spaceId = 'space-a';
-  const workflowDocumentId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
-  const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
+  const workflowDocumentId = `${NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
 
   let logger: Logger;
   let getWorkflow: jest.Mock;
-  // The legacy unsuffixed document is read through the management API, the space document
-  // through the request-scoped client.
-  let getLegacyWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
+  let getWorkloadBinding: jest.Mock;
 
   beforeEach(() => {
     logger = {
@@ -144,19 +148,17 @@ describe('createContinuousOnboardingWorkflowService', () => {
     } as unknown as Logger;
     (logger.get as jest.Mock).mockReturnValue(logger);
     getWorkflow = jest.fn();
-    getLegacyWorkflow = jest.fn().mockResolvedValue(null);
     managementApi = {
       getClient: jest.fn(() => ({ getWorkflow })),
-      getWorkflow: getLegacyWorkflow,
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-      cancelAllActiveWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
     managedWorkflowsClient = {
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
     };
+    getWorkloadBinding = jest.fn().mockResolvedValue({ serviceAccountId: 'account-id' });
   });
 
   const createService = () =>
@@ -166,17 +168,23 @@ describe('createContinuousOnboardingWorkflowService', () => {
       streamsKIsOnboardingClient: {
         cancelAllRunning: jest.fn().mockResolvedValue(0),
       } as unknown as SignificantEventsKIsOnboardingClient,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      server: {
+        core: { security: { serviceAccounts: { isEnabled: () => true, getWorkloadBinding } } },
+        workflowsExtensions: {
+          getClient: jest.fn().mockResolvedValue({ managedWorkflows: managedWorkflowsClient }),
+        },
+      } as unknown as Pick<SignificantEventsServer, 'core' | 'workflowsExtensions'>,
     });
 
-  it('installs and enables the space document when turned on', async () => {
+  it('installs the document bound to the space account and enables it when turned on', async () => {
     getWorkflow.mockResolvedValue({ enabled: false });
 
     await createService().ensureWorkflow({ enabled: true, request, spaceId });
 
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-      managedWorkflowOptions
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+      NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+      { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId: 'account-id' } }
     );
     expect(getWorkflow).toHaveBeenCalledWith(workflowDocumentId, spaceId);
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
@@ -185,6 +193,16 @@ describe('createContinuousOnboardingWorkflowService', () => {
       spaceId,
       request
     );
+  });
+
+  it('is refused with a 503 when the space is not set up, and installs nothing', async () => {
+    getWorkloadBinding.mockResolvedValue(undefined);
+
+    await expect(
+      createService().ensureWorkflow({ enabled: true, request, spaceId })
+    ).rejects.toMatchObject({ statusCode: 503 });
+    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
   it('throws when turned on and the document is missing after install', async () => {
@@ -224,79 +242,5 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', spaceId, request);
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
-  });
-
-  it('leaves the legacy default-space document alone outside the default space', async () => {
-    getWorkflow.mockResolvedValue({ enabled: false });
-
-    await createService().ensureWorkflow({ enabled: true, request, spaceId });
-
-    expect(getLegacyWorkflow).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
-  });
-
-  describe('in the default space', () => {
-    const defaultSpaceId = 'default';
-
-    it.each([
-      { label: 'on', enabled: true, current: false },
-      { label: 'off', enabled: false, current: true },
-    ])(
-      'stops and removes the legacy unsuffixed document when turned $label',
-      async ({ enabled, current }) => {
-        getWorkflow.mockResolvedValue({ enabled: current });
-        getLegacyWorkflow.mockResolvedValue({ enabled: true });
-
-        await createService().ensureWorkflow({ enabled, request, spaceId: defaultSpaceId });
-
-        expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          { enabled: false },
-          defaultSpaceId,
-          request
-        );
-        expect(managementApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          defaultSpaceId,
-          request
-        );
-        expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          { spaceId: defaultSpaceId }
-        );
-        expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-          `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${defaultSpaceId}`,
-          { enabled },
-          defaultSpaceId,
-          request
-        );
-      }
-    );
-
-    it('skips the removal when the legacy document is already gone', async () => {
-      getWorkflow.mockResolvedValue({ enabled: false });
-
-      await createService().ensureWorkflow({ enabled: true, request, spaceId: defaultSpaceId });
-
-      expect(managementApi.cancelAllActiveWorkflowExecutions).not.toHaveBeenCalled();
-      expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('enables the space document with a warning when the legacy removal fails', async () => {
-      getWorkflow.mockResolvedValue({ enabled: false });
-      getLegacyWorkflow.mockResolvedValue({ enabled: false });
-      managedWorkflowsClient.uninstall.mockRejectedValue(new Error('uninstall failed'));
-
-      await createService().ensureWorkflow({ enabled: true, request, spaceId: defaultSpaceId });
-
-      expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-        `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${defaultSpaceId}`,
-        { enabled: true },
-        defaultSpaceId,
-        request
-      );
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('uninstall failed'));
-    });
   });
 });

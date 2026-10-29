@@ -11,6 +11,7 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
+  getNightshiftBoundKiOnboardingWorkflowId,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -23,13 +24,16 @@ import {
 } from './onboarding_workflow_client';
 const statusRequest = httpServerMock.createKibanaRequest();
 
+const ENTRY_POINT_ID = getNightshiftBoundKiOnboardingWorkflowId('default');
+
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   const api = {
+    // The space's entry point: enabled and bound to a service account.
     getWorkflow: jest.fn().mockResolvedValue({
-      id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
+      id: ENTRY_POINT_ID,
       name: 'onboarding',
       enabled: true,
-      definition: {},
+      definition: { settings: { run_as: 'service-account-id' } },
       yaml: '',
     }),
     runWorkflow: jest.fn().mockResolvedValue('execution-id'),
@@ -45,7 +49,10 @@ const slugOf = (sourceId: string): string => `${sourceId}-slug`;
 const onboardingKeyOf = (sourceId: string): string =>
   `nightshift-source-onboarding-${slugOf(sourceId)}:${sourceId}`;
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
+const createClient = (
+  overrides: Record<string, jest.Mock> = {},
+  isServiceAccountsEnabled = true
+) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
   const sourcesClientGet = jest.fn(async (sourceId: string) => ({
@@ -53,6 +60,7 @@ const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const client = new SignificantEventsKIsOnboardingClient({
+    isServiceAccountsEnabled: async () => isServiceAccountsEnabled,
     managementApi: managementApi as never,
     telemetry,
     getSourcesClient,
@@ -163,7 +171,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('fetches the workflow definition and runs it and returns executionId', async () => {
+    it('runs the space entry point and returns the execution id', async () => {
       const { client, managementApi } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
@@ -177,27 +185,42 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       });
 
       expect(result).toEqual({ executionId: 'execution-id' });
-      expect(managementApi.getWorkflow).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
-        '*'
-      );
+      expect(managementApi.getWorkflow).toHaveBeenCalledWith(ENTRY_POINT_ID, 'default');
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        expect.objectContaining({ id: ENTRY_POINT_ID }),
         'default',
         expect.objectContaining({
           sourceId: 'logs.nginx',
           sourceSlug: slugOf('logs.nginx'),
           sourceRevision: 'revision-2',
         }),
-        request
+        request,
+        expect.anything()
       );
     });
 
-    it('throws when the workflow is not found', async () => {
-      const { client } = createClient({
-        getWorkflow: jest.fn().mockResolvedValue(null),
-      });
-      const request = httpServerMock.createKibanaRequest();
+    it.each([
+      ['the entry point is not installed', { getWorkflow: jest.fn().mockResolvedValue(null) }],
+      [
+        'the entry point is not bound to a service account',
+        {
+          getWorkflow: jest
+            .fn()
+            .mockResolvedValue({ id: ENTRY_POINT_ID, enabled: true, definition: {} }),
+        },
+      ],
+      [
+        'the entry point is disabled',
+        {
+          getWorkflow: jest.fn().mockResolvedValue({
+            id: ENTRY_POINT_ID,
+            enabled: false,
+            definition: { settings: { run_as: 'service-account-id' } },
+          }),
+        },
+      ],
+    ])('is refused with a 503 when %s', async (_, overrides) => {
+      const { client, managementApi } = createClient(overrides);
 
       await expect(
         client.run({
@@ -206,16 +229,14 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             features: { skip: false, start: 1000, end: 2000 },
             queries: { skip: false },
           },
-          request,
+          request: httpServerMock.createKibanaRequest(),
         })
-      ).rejects.toThrow(/not found/);
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('throws when the workflow has no definition', async () => {
-      const { client } = createClient({
-        getWorkflow: jest.fn().mockResolvedValue({ id: 'wf', definition: null }),
-      });
-      const request = httpServerMock.createKibanaRequest();
+    it('is refused with a 503 when service accounts are off', async () => {
+      const { client, managementApi } = createClient({}, false);
 
       await expect(
         client.run({
@@ -224,9 +245,10 @@ describe('SignificantEventsKIsOnboardingClient', () => {
             features: { skip: false, start: 1000, end: 2000 },
             queries: { skip: false },
           },
-          request,
+          request: httpServerMock.createKibanaRequest(),
         })
-      ).rejects.toThrow(/not found/);
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
   });
 
@@ -634,6 +656,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     // `drop` concurrency keyed by slug and id, so a replacement run is dropped until they have stopped.
     const runningExecutionOf = (workflowId: string, concurrencyGroupKey: string) => {
       const ids: Record<string, string> = {
+        [ENTRY_POINT_ID]: 'entry-exec',
         [SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID]: 'onboarding-exec',
         [SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID]: 'features-exec',
         [SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID]: 'queries-exec',
@@ -675,6 +698,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         'default'
       );
       expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'entry-exec',
         'onboarding-exec',
         'features-exec',
         'queries-exec',
@@ -695,6 +719,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       ).resolves.toBeNull();
 
       expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'entry-exec',
         'features-exec',
         'queries-exec',
       ]);
@@ -712,6 +737,7 @@ describe('SignificantEventsKIsOnboardingClient', () => {
       const executions = await client.getNonTerminalExecutions({ request });
 
       expect(executions.map(({ id }) => id)).toEqual([
+        `${ENTRY_POINT_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID}-exec`,
         `${SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID}-exec`,
@@ -775,20 +801,29 @@ describe('SignificantEventsKIsOnboardingClient', () => {
   });
 
   describe('cancelAllRunning', () => {
-    it('cancels all non-terminal onboarding executions', async () => {
+    it('cancels all non-terminal onboarding executions, and the entry point runs that wait for them', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest.fn().mockResolvedValue({
-          results: [
-            { id: 'exec-1', status: ExecutionStatus.RUNNING },
-            { id: 'exec-2', status: ExecutionStatus.PENDING },
-          ],
-        }),
+        getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) =>
+          workflowId === ENTRY_POINT_ID
+            ? { results: [{ id: 'entry-exec', status: ExecutionStatus.RUNNING }] }
+            : {
+                results: [
+                  { id: 'exec-1', status: ExecutionStatus.RUNNING },
+                  { id: 'exec-2', status: ExecutionStatus.PENDING },
+                ],
+              }
+        ),
       });
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(client.cancelAllRunning({ request })).resolves.toBe(2);
+      await expect(client.cancelAllRunning({ request })).resolves.toBe(3);
 
-      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(3);
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'entry-exec',
+        'default',
+        request
+      );
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
         'exec-1',
         'default',

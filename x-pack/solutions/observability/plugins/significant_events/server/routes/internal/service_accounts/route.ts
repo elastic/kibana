@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import {
@@ -35,13 +35,15 @@ const enableServiceAccountsRoute = createServerRoute({
     summary: 'Set up the detection engine in this space to run as its service accounts',
   },
   security: DELEGATED_AUTHZ,
-  params: z.object({
-    body: z.object({
-      serviceAccountIds: z.object({
-        detectionEngine: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        serviceAccountIds: z.object({
+          detectionEngine: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+        }),
       }),
-    }),
-  }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -83,7 +85,7 @@ const disableServiceAccountsRoute = createServerRoute({
     summary: 'Remove the detection engine service account setup from this space',
   },
   security: DELEGATED_AUTHZ,
-  params: z.object({}),
+  params: lazySchema(() => z.object({})),
   handler: async ({
     request,
     server,

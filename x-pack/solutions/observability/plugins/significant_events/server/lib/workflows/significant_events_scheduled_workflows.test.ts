@@ -9,14 +9,16 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { parse } from 'yaml';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './managed_workflow_owner';
 import { createSignificantEventsScheduledWorkflowsService } from './significant_events_scheduled_workflows';
+import type { SignificantEventsServer } from '../../types';
 
 interface ParsedWorkflowStep {
   name: string;
@@ -43,6 +45,7 @@ interface ParsedWorkflowTrigger {
 
 interface ParsedWorkflow {
   enabled: boolean;
+  settings?: { run_as?: string };
   triggers: ParsedWorkflowTrigger[];
   steps: ParsedWorkflowStep[];
 }
@@ -79,7 +82,7 @@ const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   const api = {
     getWorkflow: jest.fn().mockResolvedValue({
-      id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      id: NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
       enabled: false,
     }),
     updateWorkflow: jest.fn().mockResolvedValue({}),
@@ -100,8 +103,8 @@ const createMockManagedWorkflowsClient = () => ({
 
 describe('scheduled Significant Events managed workflows', () => {
   it.each([
-    ['detection', SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID],
-    ['review', SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID],
+    ['detection', NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID],
+    ['review', NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID],
   ])('registers the %s workflow as dynamic and restorable', (_label, id) => {
     const definition = getManagedWorkflowDefinition(id);
 
@@ -117,13 +120,15 @@ describe('scheduled Significant Events managed workflows', () => {
   });
 
   it('wires the detection interval into the trigger cadence and the tuning values into the detect inputs', () => {
-    const defaults = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+    const defaults = getParsedWorkflowYaml(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      serviceAccountId: 'service-account-id',
       detectionIntervalMinutes: 5,
       detectionBucketIntervalMinutes: 1,
       detectionLookbackMinutes: 40,
       targetCoverageMinutes: 10,
     });
-    const tuned = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
+    const tuned = getParsedWorkflowYaml(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID, {
+      serviceAccountId: 'service-account-id',
       detectionIntervalMinutes: 45,
       detectionBucketIntervalMinutes: 5,
       detectionLookbackMinutes: 150,
@@ -137,6 +142,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const defaultsStep = findStep(defaults.steps, 'detect');
     expect(defaultsStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+      'run-as-mode': 'inherit',
       inputs: {
         lookback: 'now-40m',
         bucketInterval: '1m',
@@ -151,6 +157,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const tunedStep = findStep(tuned.steps, 'detect');
     expect(tunedStep?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
+      'run-as-mode': 'inherit',
       inputs: {
         lookback: 'now-150m',
         bucketInterval: '5m',
@@ -160,8 +167,31 @@ describe('scheduled Significant Events managed workflows', () => {
     });
   });
 
+  it.each([
+    ['detection', NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID],
+    ['review', NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID],
+  ])('runs the %s workflow as the service account and its children inherit it', (_label, id) => {
+    const parsed = getParsedWorkflowYaml(id, {
+      serviceAccountId: 'service-account-id',
+      detectionIntervalMinutes: 5,
+      detectionBucketIntervalMinutes: 1,
+      detectionLookbackMinutes: 40,
+      targetCoverageMinutes: 10,
+      reviewIntervalMinutes: 20,
+      discoveryBatchSize: 7,
+      maxReviewPasses: 6,
+      flakyRuleDetectionThreshold: 12,
+      flakyRuleProbeAfterMinutes: 180,
+      flakyRuleExemptSeverityScore: 85,
+    });
+
+    expect(parsed.settings?.run_as).toBe('service-account-id');
+    expect(JSON.stringify(parsed.steps)).toContain('"run-as-mode":"inherit"');
+  });
+
   it('wires each review config value into the discovery drain-loop input', () => {
-    const parsed = getParsedWorkflowYaml(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
+    const parsed = getParsedWorkflowYaml(NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID, {
+      serviceAccountId: 'service-account-id',
       reviewIntervalMinutes: 20,
       discoveryBatchSize: 7,
       maxReviewPasses: 6,
@@ -184,6 +214,7 @@ describe('scheduled Significant Events managed workflows', () => {
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
+      'run-as-mode': 'inherit',
       inputs: {
         detectionBatchMax: 7,
         flakyRuleDetectionThreshold: 12,
@@ -218,6 +249,41 @@ describe('scheduled Significant Events managed workflows', () => {
   });
 });
 
+const CONFIG = {
+  detectionIntervalMinutes: 30,
+  detectionBucketIntervalMinutes: 1,
+  detectionLookbackMinutes: 40,
+  targetCoverageMinutes: 30,
+  reviewIntervalMinutes: 10,
+  discoveryBatchSize: 3,
+  maxReviewPasses: 3,
+  flakyRuleDetectionThreshold: 10,
+  flakyRuleProbeAfterMinutes: 360,
+  flakyRuleExemptSeverityScore: 80,
+};
+
+// The space's account comes from its detection engine binding, and the bound workflows are
+// installed through the request-scoped client.
+const createServer = (
+  managedWorkflowsClient: ReturnType<typeof createMockManagedWorkflowsClient>,
+  serviceAccountId: string | null = 'account-id'
+) =>
+  ({
+    core: {
+      security: {
+        serviceAccounts: {
+          isEnabled: () => true,
+          getWorkloadBinding: jest
+            .fn()
+            .mockResolvedValue(serviceAccountId ? { serviceAccountId } : undefined),
+        },
+      },
+    },
+    workflowsExtensions: {
+      getClient: jest.fn().mockResolvedValue({ managedWorkflows: managedWorkflowsClient }),
+    },
+  } as unknown as Pick<SignificantEventsServer, 'core' | 'workflowsExtensions'>);
+
 describe('SignificantEventsScheduledWorkflowsService', () => {
   it('lazily installs and enables per-space scheduled workflows', async () => {
     const managementApi = createMockManagementApi();
@@ -226,7 +292,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      server: createServer(managedWorkflowsClient),
     });
 
     await service.ensureWorkflow({
@@ -248,11 +314,13 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     });
 
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+      NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
       {
         spaceId: 'space-a',
         workflowIdSuffix: 'space-a',
         values: {
+          serviceAccountId: 'account-id',
           detectionIntervalMinutes: 30,
           detectionBucketIntervalMinutes: 1,
           detectionLookbackMinutes: 40,
@@ -261,11 +329,13 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       }
     );
     expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+      NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
       {
         spaceId: 'space-a',
         workflowIdSuffix: 'space-a',
         values: {
+          serviceAccountId: 'account-id',
           reviewIntervalMinutes: 10,
           discoveryBatchSize: 3,
           maxReviewPasses: 3,
@@ -276,19 +346,19 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       }
     );
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+      `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: true },
       'space-a',
       request
     );
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
+      `${NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID}-space-a`,
       { enabled: true },
       'space-a',
       request
     );
     expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
       'space-a'
     );
   });
@@ -301,7 +371,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      server: createServer(managedWorkflowsClient),
     });
 
     await service.ensureWorkflow({
@@ -340,7 +410,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     const service = createSignificantEventsScheduledWorkflowsService({
       logger: loggerMock.create(),
       managementApi: managementApi as never,
-      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+      server: createServer(managedWorkflowsClient),
     });
 
     await service.ensureWorkflow({
@@ -362,7 +432,7 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     });
 
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+      `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
       { enabled: false },
       'space-a',
       request
@@ -373,22 +443,94 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       request
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+      NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
     );
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+      NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
     );
     expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
-      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
       'space-a'
     );
     expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        workflowId: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+        workflowId: `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
       }),
       'space-a'
     );
+  });
+  it('is refused with a 503 when the space is not set up, and installs nothing', async () => {
+    const managementApi = createMockManagementApi();
+    const managedWorkflowsClient = createMockManagedWorkflowsClient();
+    const service = createSignificantEventsScheduledWorkflowsService({
+      logger: loggerMock.create(),
+      managementApi: managementApi as never,
+      server: createServer(managedWorkflowsClient, null),
+    });
+
+    await expect(
+      service.ensureWorkflow({
+        enabled: true,
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'space-a',
+        config: CONFIG,
+      })
+    ).rejects.toMatchObject({ statusCode: 503 });
+    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+  });
+
+  describe('rebind', () => {
+    it('renders the installed workflows again with the current account, keeping them as they are', async () => {
+      const managementApi = createMockManagementApi({
+        getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
+      });
+      const managedWorkflowsClient = createMockManagedWorkflowsClient();
+      const service = createSignificantEventsScheduledWorkflowsService({
+        logger: loggerMock.create(),
+        managementApi: managementApi as never,
+        server: createServer(managedWorkflowsClient, 'new-account-id'),
+      });
+
+      await service.rebind({
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'space-a',
+        config: CONFIG,
+      });
+
+      expect(managedWorkflowsClient.install).toHaveBeenCalledTimes(2);
+      expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+        NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+        expect.objectContaining({
+          values: expect.objectContaining({ serviceAccountId: 'new-account-id' }),
+        })
+      );
+      expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('leaves a space without scheduled workflows alone', async () => {
+      const managementApi = createMockManagementApi({
+        getWorkflow: jest.fn().mockResolvedValue(null),
+      });
+      const managedWorkflowsClient = createMockManagedWorkflowsClient();
+      const service = createSignificantEventsScheduledWorkflowsService({
+        logger: loggerMock.create(),
+        managementApi: managementApi as never,
+        server: createServer(managedWorkflowsClient),
+      });
+
+      await service.rebind({
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'space-a',
+        config: CONFIG,
+      });
+
+      expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
+    });
   });
 });

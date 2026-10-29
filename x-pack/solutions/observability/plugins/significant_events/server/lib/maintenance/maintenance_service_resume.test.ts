@@ -11,8 +11,10 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import {
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   REQUEST,
@@ -38,6 +40,72 @@ describe('SignificantEventsMaintenanceService', () => {
 
       expect(v2RulesClient?.bulkEnableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       expect(summary.rulesDisabled).toBe(0);
+    });
+
+    it('is refused with a 503 when the space is not set up, and turns nothing back on', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, v2RulesClient } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+        serviceAccountSetUp: false,
+      });
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+
+      await expect(service.resume({ request: REQUEST })).rejects.toMatchObject({
+        statusCode: 503,
+      });
+      expect(v2RulesClient?.bulkEnableRules).not.toHaveBeenCalled();
+      expect(updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('turns the rules back on as the detection engine account', async () => {
+      const { api } = makeManagementApi();
+      const { service, serviceAccounts } = makeService({
+        management: api,
+        ruleBackedRuleIds: ['rule-1'],
+      });
+
+      await service.pause({ request: REQUEST });
+      await service.resume({ request: REQUEST });
+
+      expect(serviceAccounts.withScopedRequestForWorkload).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workloadType: 'detection_engine',
+          workloadId: 'detection_engine',
+          spaceId: 'default',
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('turns the sync and the cleanup back on when they were off before the pause', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api });
+      // Off outside a pause, so Pause does not record them and Resume would not restore them.
+      for (const id of [
+        NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+      ]) {
+        await api.updateWorkflow(`${id}-default`, { enabled: false }, 'default');
+      }
+
+      await service.pause({ request: REQUEST });
+      updateWorkflow.mockClear();
+      await service.resume({ request: REQUEST });
+
+      for (const id of [
+        NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+      ]) {
+        expect(updateWorkflow).toHaveBeenCalledWith(
+          `${id}-default`,
+          { enabled: true },
+          'default',
+          REQUEST
+        );
+      }
     });
 
     it('re-enables exactly the workflows and rules that pause disabled', async () => {
@@ -110,7 +178,7 @@ describe('SignificantEventsMaintenanceService', () => {
       });
       expect(
         pauseWrite.disabledWorkflows.some((workflow) =>
-          workflow.id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          workflow.id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
 
@@ -132,7 +200,7 @@ describe('SignificantEventsMaintenanceService', () => {
         .filter((call) => call[1]?.enabled === true)
         .map((call) => call[0] as string);
       expect(
-        reEnabledIds.some((id) => id.startsWith(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID))
+        reEnabledIds.some((id) => id.startsWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID))
       ).toBe(false);
       // Non-settings-backed workflows still come back.
       expect(reEnabledIds).toContain(cleanupDocumentId('default'));
@@ -174,7 +242,7 @@ describe('SignificantEventsMaintenanceService', () => {
         .map((call) => call[0] as string);
       expect(
         reEnabledIds.some((id) =>
-          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
     });
@@ -448,7 +516,7 @@ describe('SignificantEventsMaintenanceService', () => {
         ])
       );
 
-      const scheduledDocId = `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
+      const scheduledDocId = `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-default`;
       const scheduledEnableCalls = updateWorkflow.mock.calls.filter(
         (call) => call[0] === scheduledDocId && call[1]?.enabled === true
       );

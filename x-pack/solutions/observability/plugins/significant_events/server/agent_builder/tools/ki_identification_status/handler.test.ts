@@ -13,6 +13,7 @@ import { getKiIdentificationStatusToolHandler } from './handler';
 describe('getKiIdentificationStatusToolHandler', () => {
   it('returns the onboarding status', async () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
+      isServiceAccountsEnabled: async () => true,
       managementApi: {
         getClient: () => ({
           getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),

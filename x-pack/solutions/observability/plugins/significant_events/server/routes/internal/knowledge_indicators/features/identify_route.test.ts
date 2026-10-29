@@ -110,11 +110,7 @@ const makeRouteLogger = () => ({
   warn: jest.fn(),
 });
 
-const makeInferredHandlerParams = ({
-  ensureEnabled = jest.fn().mockResolvedValue(undefined),
-}: {
-  ensureEnabled?: jest.Mock;
-} = {}) => {
+const makeInferredHandlerParams = () => {
   const request = makeRequest();
   const routeLogger = makeRouteLogger();
   const source = {
@@ -168,7 +164,6 @@ const makeInferredHandlerParams = ({
     server,
     logger: { get: jest.fn().mockReturnValue(routeLogger) },
     telemetry,
-    syncWorkflowService: { ensureEnabled },
     maintenanceService,
   } as unknown as InferredHandlerParams;
 
@@ -184,7 +179,6 @@ const makeInferredHandlerParams = ({
     maintenanceService,
     telemetry,
     identifyResult,
-    ensureEnabled,
   };
 };
 
@@ -362,7 +356,7 @@ describe('inferred feature identification route', () => {
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
   });
 
-  it('identifies inferred features and bootstraps the sync workflow while enabled', async () => {
+  it('identifies inferred features while enabled', async () => {
     const {
       handlerParams,
       request,
@@ -373,7 +367,6 @@ describe('inferred feature identification route', () => {
       maintenanceService,
       telemetry,
       identifyResult,
-      ensureEnabled,
     } = makeInferredHandlerParams();
 
     await expect(inferredRoute.handler(handlerParams)).resolves.toEqual({
@@ -404,7 +397,6 @@ describe('inferred feature identification route', () => {
       })
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
   });
 
   it('installs the feature identification agent in the request space before identifying', async () => {
@@ -440,21 +432,6 @@ describe('inferred feature identification route', () => {
     const { runId } = mockIdentifyInferredFeatures.mock.calls[0][0];
     expect(runId).toEqual(expect.any(String));
     expect(runId).not.toBe('');
-  });
-
-  it('returns identification results when sync workflow bootstrap fails', async () => {
-    const ensureEnabled = jest.fn().mockRejectedValue(new Error('workflow unavailable'));
-    const { handlerParams, routeLogger, identifyResult } = makeInferredHandlerParams({
-      ensureEnabled,
-    });
-
-    await expect(inferredRoute.handler(handlerParams)).resolves.toEqual({
-      ...identifyResult,
-      connectorId: 'connector-1',
-    });
-    expect(routeLogger.warn).toHaveBeenCalledWith(
-      'Failed to ensure KI sync workflow is enabled: workflow unavailable'
-    );
   });
 
   it('maps an unknown connector override to a 400 response', async () => {

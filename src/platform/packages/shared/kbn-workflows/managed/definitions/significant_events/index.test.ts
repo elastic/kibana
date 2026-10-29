@@ -8,11 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import {
-  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
-  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
-} from '.';
+import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW } from '.';
+import { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW } from './bound_investigation_completed';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -77,15 +74,19 @@ const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as Par
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
-const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
-  | ParsedWorkflow & {
-      triggers: Array<{ type: string; on?: { condition?: string } }>;
-    };
+const investigationCompleted = parse(
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW.yamlTemplate({
+    serviceAccountId: 'service-account-id',
+  })
+) as ParsedWorkflow & {
+  settings?: { run_as?: string };
+  triggers: Array<{ type: string; on?: { condition?: string } }>;
+};
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(27);
-    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(28);
+    expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(5);
   });
 
   it('accepts every non-written events_write result reason in the discovery output schema', () => {
@@ -127,17 +128,6 @@ describe('significant events persistence workflow contracts', () => {
     expect(
       requireStep(discovery, 'run_discovery_agent')['connector-id-by-feature']
     ).toBeUndefined();
-  });
-
-  it('bootstraps per-space cleanup before discovery work', () => {
-    expect(discovery.steps[0]).toMatchObject({
-      name: 'bootstrap_cleanup_workflow',
-      type: 'kibana.request',
-      with: {
-        path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap',
-      },
-      'on-failure': { continue: true },
-    });
   });
 
   it('marks discovery-triggered investigations as automatic', () => {
@@ -237,7 +227,8 @@ describe('significant events persistence workflow contracts', () => {
     expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
   });
 
-  it('attaches completed or failed investigations only to Significant Events', () => {
+  it('attaches completed or failed investigations only to Significant Events, as the service account', () => {
+    expect(investigationCompleted.settings?.run_as).toBe('service-account-id');
     expect(investigationCompleted.triggers).toEqual([
       {
         type: 'nightshift-investigations.completed',

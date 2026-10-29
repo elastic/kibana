@@ -7,10 +7,9 @@
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
@@ -18,6 +17,7 @@ import {
   buildDisableTargets,
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
+  PER_SPACE_BOUND_WORKFLOW_IDS,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
 } from './managed_workflow_targets';
 
@@ -33,38 +33,33 @@ describe('managed_workflow_targets registry', () => {
     }
   });
 
-  it('keeps Significant Events core and lifecycle workflows in the global maintenance set', () => {
-    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([
-      ...GLOBAL_CORE_WORKFLOW_IDS,
-      SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-    ]);
+  it('keeps Significant Events core workflows in the global maintenance set', () => {
+    expect(GLOBAL_MAINTENANCE_WORKFLOW_IDS).toEqual([...GLOBAL_CORE_WORKFLOW_IDS]);
   });
 
   it('tracks continuous onboarding and sync as per-space scheduled workflows', () => {
     expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toEqual(
       expect.arrayContaining([
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
       ])
     );
   });
 
-  it('keeps the legacy default-space sync document in the default space sweeps only', () => {
-    const legacySync = {
-      id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      spaceId: asSpaceId('default'),
-    };
+  it('cancels the bound entry points of a space on pause but never disables them', () => {
+    const space = asSpaceId('space-a');
 
-    expect(buildDisableTargets([asSpaceId('default')])).toContainEqual(legacySync);
-    expect(buildCancelTargets([asSpaceId('default')])).toContainEqual(legacySync);
-    expect(buildDisableTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
-    expect(buildCancelTargets([asSpaceId('space-a')])).not.toContainEqual(legacySync);
+    for (const baseId of PER_SPACE_BOUND_WORKFLOW_IDS) {
+      const target = { id: `${baseId}-space-a`, spaceId: space };
+      expect(buildCancelTargets([space])).toContainEqual(target);
+      expect(buildDisableTargets([space])).not.toContainEqual(target);
+    }
   });
 
   it('tracks cleanup as a per-space scheduled workflow', () => {
-    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toContain(SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID);
+    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toContain(NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID);
     expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual({
-      id: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      id: `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
       spaceId: asSpaceId('space-a'),
     });
   });

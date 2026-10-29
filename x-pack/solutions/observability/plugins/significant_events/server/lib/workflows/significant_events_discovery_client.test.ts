@@ -8,7 +8,10 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundDiscoveryWorkflowId,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
 
@@ -22,13 +25,16 @@ const installDiscoveryAgentsMock = installDiscoveryAgents as jest.MockedFunction
 
 const statusRequest = httpServerMock.createKibanaRequest();
 
+const ENTRY_POINT_ID = getNightshiftBoundDiscoveryWorkflowId('space-a');
+
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   const api = {
+    // The space's entry point: enabled and bound to a service account.
     getWorkflow: jest.fn().mockResolvedValue({
-      id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
-      name: 'sigevents-orchestrator',
+      id: ENTRY_POINT_ID,
+      name: 'sigevents-discovery',
       enabled: true,
-      definition: {},
+      definition: { settings: { run_as: 'service-account-id' } },
       yaml: '',
     }),
     runWorkflow: jest.fn().mockResolvedValue('execution-id'),
@@ -40,9 +46,15 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   return { ...api, getClient: jest.fn(() => api) };
 };
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
+const createClient = (
+  overrides: Record<string, jest.Mock> = {},
+  isServiceAccountsEnabled = true
+) => {
   const managementApi = createMockManagementApi(overrides);
-  const client = new SignificantEventsDiscoveryClient({ managementApi: managementApi as never });
+  const client = new SignificantEventsDiscoveryClient({
+    managementApi: managementApi as never,
+    isServiceAccountsEnabled: async () => isServiceAccountsEnabled,
+  });
   return { client, managementApi };
 };
 
@@ -77,11 +89,50 @@ describe('SignificantEventsDiscoveryClient', () => {
         managementApi.runWorkflow.mock.invocationCallOrder[0]
       );
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID }),
+        expect.objectContaining({ id: ENTRY_POINT_ID }),
         'space-a',
         { connector_id: 'canonical-connector' },
-        request
+        request,
+        NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE
       );
+    });
+
+    it.each([
+      ['the entry point is not installed', { getWorkflow: jest.fn().mockResolvedValue(null) }],
+      [
+        'the entry point is not bound to a service account',
+        {
+          getWorkflow: jest
+            .fn()
+            .mockResolvedValue({ id: ENTRY_POINT_ID, enabled: true, definition: {} }),
+        },
+      ],
+    ])('is refused with a 503 when %s', async (_, overrides) => {
+      const { client, managementApi } = createClient(overrides);
+
+      await expect(
+        client.run({
+          request: httpServerMock.createKibanaRequest(),
+          spaceId: 'space-a',
+          agentBuilder: createAgentBuilder(),
+          resolveModel,
+        })
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('is refused with a 503 when service accounts are off', async () => {
+      const { client, managementApi } = createClient({}, false);
+
+      await expect(
+        client.run({
+          request: httpServerMock.createKibanaRequest(),
+          spaceId: 'space-a',
+          agentBuilder: createAgentBuilder(),
+          resolveModel,
+        })
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('starts a new execution when the latest is terminal', async () => {
@@ -202,7 +253,7 @@ describe('SignificantEventsDiscoveryClient', () => {
       expect(managementApi.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('forwards a canonical explicit connector to the orchestrator', async () => {
+    it('forwards a canonical explicit connector to the entry point', async () => {
       const { client, managementApi } = createClient();
 
       await client.run({
@@ -214,10 +265,11 @@ describe('SignificantEventsDiscoveryClient', () => {
       });
 
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
-        expect.objectContaining({ id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID }),
+        expect.objectContaining({ id: ENTRY_POINT_ID }),
         'space-a',
         { connector_id: 'canonical-connector' },
-        expect.anything()
+        expect.anything(),
+        NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE
       );
     });
   });
@@ -277,28 +329,32 @@ describe('SignificantEventsDiscoveryClient', () => {
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'Workflow system-significant-events-orchestrator timed out',
+        error: `Workflow ${ENTRY_POINT_ID} timed out`,
       });
     });
   });
 
   describe('cancel', () => {
-    it('cancels the latest non-terminal execution and returns its id', async () => {
+    it('cancels the entry point run first, then the orchestrator run it waits for', async () => {
       const { client, managementApi } = createClient({
-        getWorkflowExecutions: jest
-          .fn()
-          .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
+        getWorkflowExecutions: jest.fn(async ({ workflowId }: { workflowId: string }) => ({
+          results: [
+            {
+              id: workflowId === ENTRY_POINT_ID ? 'entry-exec' : 'orchestrator-exec',
+              status: ExecutionStatus.RUNNING,
+            },
+          ],
+        })),
       });
       const request = httpServerMock.createKibanaRequest();
 
       const result = await client.cancel({ request, spaceId: 'space-a' });
 
-      expect(result).toBe('exec-1');
-      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
-        'exec-1',
-        'space-a',
-        request
-      );
+      expect(result).toBe('entry-exec');
+      expect(managementApi.cancelWorkflowExecution.mock.calls.map(([id]) => id)).toEqual([
+        'entry-exec',
+        'orchestrator-exec',
+      ]);
     });
 
     it('returns null when there is no active execution', async () => {
