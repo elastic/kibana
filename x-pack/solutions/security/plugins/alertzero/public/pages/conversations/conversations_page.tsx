@@ -16,7 +16,6 @@ import {
   PROPOSALS_UI_CAPABILITY_DECIDE,
 } from '@kbn/proposals-common';
 import {
-  type ConversationsActionsGroupProps,
   type BaseActionsProps,
   type CardActionType,
   type Investigation,
@@ -457,11 +456,6 @@ const ConversationsPageContent: React.FC = () => {
     []
   );
 
-  const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
-    useCallback(({ id }) => {
-      setSelectedIdForRecommendedAction(id);
-    }, []);
-
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
@@ -637,7 +631,6 @@ const ConversationsPageContent: React.FC = () => {
                 section={section}
                 entityFilter={effectiveEntityFilter}
                 selectedProposalId={currentProposalId}
-                onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
                 onClickAction={onClickAction}
                 onClickCard={onClickCard}
                 onOpenChat={openChatForProposal}
