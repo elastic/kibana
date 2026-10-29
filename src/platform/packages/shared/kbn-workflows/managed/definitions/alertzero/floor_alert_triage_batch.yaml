@@ -161,7 +161,7 @@ steps:
                 - "az:triage_pending"
                 - "az:triage_exec:{{ execution.id }}"
 
-        # A fallback clears the error, so without this fail the run would go on without load_alerts output.
+        # The run fails after the fallback anyway (it re-throws the load error); this adds a clearer message.
         - name: abort_load_failed
           type: workflow.fail
           with:
@@ -289,8 +289,8 @@ steps:
                 - "az:triage_pending"
                 - "az:triage_exec:{{ execution.id }}"
 
-        # Fallback handles the comment and the tags only. Without this fail the parent continues
-        # into empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
+        # Fallback handles the comment and the tags only. The run fails after the fallback anyway
+        # (it re-throws the classify error); this adds a message that names the likely causes.
         - name: abort_classify_failed
           type: workflow.fail
           with:
