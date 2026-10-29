@@ -756,18 +756,18 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
 describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
   const bodySchema = eventsUpdateRoute.params.shape.body;
 
-  it('rejects inactive: operator deactivation goes through Alerting v2 deactivate', () => {
+  it('rejects inactive: operator deactivation uses the deactivate action', () => {
     expect(bodySchema.safeParse({ status: 'inactive' }).success).toBe(false);
     expect(
       bodySchema.safeParse({ status: 'inactive', assessment_note: 'Known noise' }).success
     ).toBe(false);
   });
 
-  it('tells the caller to use the Alerting v2 deactivate action', () => {
+  it('tells the caller to use the deactivate action', () => {
     const result = bodySchema.safeParse({ status: 'inactive' });
 
     expect(result.success ? '' : JSON.stringify(result.error.issues)).toContain(
-      'Alerting v2 episode deactivate action'
+      'use the deactivate action'
     );
   });
 

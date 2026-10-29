@@ -29,7 +29,6 @@ const mockBulkDeactivate = bulkDeactivateEpisodeActions as jest.Mock;
 const addSuccess = jest.fn();
 const addError = jest.fn();
 const addInfo = jest.fn();
-const addDanger = jest.fn();
 
 const event: SignificantEvent = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
@@ -72,7 +71,7 @@ describe('useCloseSignificantEvent', () => {
       services: {
         http,
         notifications: {
-          toasts: { addError, addSuccess, addInfo, addDanger },
+          toasts: { addError, addSuccess, addInfo },
         },
       },
     });
@@ -139,8 +138,7 @@ describe('useCloseSignificantEvent', () => {
 
     await waitFor(() => expect(addInfo).toHaveBeenCalledTimes(1));
     expect(addInfo).toHaveBeenCalledWith({
-      title:
-        'No change made: the significant event is already inactive or was changed by another update',
+      title: 'No change made: the significant event is already inactive or no longer exists',
     });
     expect(addSuccess).not.toHaveBeenCalled();
     expect(addError).not.toHaveBeenCalled();
@@ -166,7 +164,7 @@ describe('useCloseSignificantEvent', () => {
     expect(addInfo).not.toHaveBeenCalled();
   });
 
-  it('uses a next-step message when the per-item error has no message', async () => {
+  it('uses a next-step message when bulk deactivation returns no result', async () => {
     mockBulkDeactivate.mockResolvedValue({
       affected_count: 0,
       errors: [],
@@ -199,7 +197,7 @@ describe('useCloseSignificantEvent', () => {
     });
   });
 
-  it('explains the missing Alerting v2 privilege on HTTP 403', async () => {
+  it('explains the missing permission on HTTP 403', async () => {
     mockBulkDeactivate.mockRejectedValueOnce(
       Object.assign(new Error('Forbidden'), {
         response: { status: 403 },
@@ -214,8 +212,7 @@ describe('useCloseSignificantEvent', () => {
 
     await waitFor(() => expect(addError).toHaveBeenCalled());
     expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-      title:
-        'Marking a significant event inactive requires the Alerting v2 "alerts write" privilege',
+      title: 'You do not have permission to mark this significant event inactive',
     });
   });
 
@@ -228,14 +225,12 @@ describe('useCloseSignificantEvent', () => {
 
     expect(addError).toHaveBeenCalledWith(
       expect.objectContaining({
-        message:
-          'Refresh the list and try again. This event has no Alerting v2 episode to mark inactive.',
+        message: 'Refresh the list and try again.',
       }),
       {
         title: 'Failed to mark significant event inactive',
       }
     );
-    expect(addDanger).not.toHaveBeenCalled();
     expect(mockBulkDeactivate).not.toHaveBeenCalled();
   });
 });

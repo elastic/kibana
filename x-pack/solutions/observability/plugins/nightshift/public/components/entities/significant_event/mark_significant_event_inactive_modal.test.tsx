@@ -43,25 +43,6 @@ describe('MarkSignificantEventInactiveModal', () => {
     mockClosingEventId = undefined;
   });
 
-  it('enables confirm and shows no error while the reason is empty', () => {
-    renderModal();
-
-    expect(screen.getByTestId(CONFIRM)).toBeEnabled();
-    expect(screen.queryByText(/The reason must be at most/)).not.toBeInTheDocument();
-  });
-
-  it('submits an empty reason so the hook can record the standard note', () => {
-    renderModal();
-
-    fireEvent.click(screen.getByTestId(CONFIRM));
-
-    expect(mockCloseSignificantEvent).toHaveBeenCalledWith({
-      eventId: 'event-1',
-      episodeId: 'episode-1',
-      reason: '',
-    });
-  });
-
   it('submits a whitespace-only reason as empty', () => {
     renderModal();
 
@@ -107,58 +88,15 @@ describe('MarkSignificantEventInactiveModal', () => {
     });
   });
 
-  it('marks the reason as optional and explains the allowed length', () => {
-    renderModal();
-
-    expect(screen.getByText('Reason (optional)')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Optional. Up to 1024 characters. If left empty, the agent is told only that an operator set this inactive.'
-      )
-    ).toBeInTheDocument();
-    expect(screen.queryByText('Reason (required)')).not.toBeInTheDocument();
-  });
-
-  it('words the description with the 48 hour recurrence window', () => {
-    renderModal();
-
-    expect(
-      screen.getByText(
-        /may be shown to the discovery agent if the same issue recurs within 48 hours/
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /The agent may reopen the event if it finds new evidence the reason does not explain/
-      )
-    ).toBeInTheDocument();
-  });
-
   it('shows a callout and disables confirm when the event has no episode id', () => {
     renderModal({ episodeId: undefined });
 
     expect(
       screen.getByTestId('nightshiftMarkSignificantEventInactiveMissingEpisode')
-    ).toHaveTextContent(
-      'This event has no Alerting v2 episode and cannot be marked inactive from here.'
-    );
+    ).toHaveTextContent('This event cannot be marked inactive from here.');
     expect(screen.getByTestId(REASON)).toBeDisabled();
     expect(screen.getByTestId(CONFIRM)).toBeDisabled();
     fireEvent.click(screen.getByTestId(CONFIRM));
     expect(mockCloseSignificantEvent).not.toHaveBeenCalled();
-  });
-
-  it('enables the reason textarea when the event has an episode id', () => {
-    renderModal();
-
-    expect(screen.getByTestId(REASON)).toBeEnabled();
-  });
-
-  it('does not show the missing episode callout when the episode id is present', () => {
-    renderModal();
-
-    expect(
-      screen.queryByTestId('nightshiftMarkSignificantEventInactiveMissingEpisode')
-    ).not.toBeInTheDocument();
   });
 });

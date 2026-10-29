@@ -42,7 +42,7 @@ const MODAL_DESCRIPTION = i18n.translate(
   'xpack.nightshift.markSignificantEventInactiveModal.description',
   {
     defaultMessage:
-      'Mark this event inactive. You can add a reason. It is recorded as the closure note and may be shown to the discovery agent if the same issue recurs within {hours} hours. The agent may reopen the event if it finds new evidence the reason does not explain.',
+      'Mark this event inactive. You can add a reason. It is recorded as the closure note and taken into consideration the next time the detection engine sees a similar issue within {hours} hours.',
     values: { hours: INACTIVE_SERIES_LOOKBACK_HOURS },
   }
 );
@@ -56,7 +56,7 @@ const REASON_HELP_TEXT = i18n.translate(
   'xpack.nightshift.markSignificantEventInactiveModal.reasonHelpText',
   {
     defaultMessage:
-      'Optional. Up to {max} characters. If left empty, the agent is told only that an operator set this inactive.',
+      'Optional. Up to {max} characters. If left empty, the event is recorded as set inactive by an operator.',
     values: { max: MAX_DEACTIVATION_REASON_LENGTH },
   }
 );
@@ -64,8 +64,7 @@ const REASON_HELP_TEXT = i18n.translate(
 const MISSING_EPISODE_CALLOUT_TITLE = i18n.translate(
   'xpack.nightshift.markSignificantEventInactiveModal.missingEpisodeCallout',
   {
-    defaultMessage:
-      'This event has no Alerting v2 episode and cannot be marked inactive from here.',
+    defaultMessage: 'This event cannot be marked inactive from here.',
   }
 );
 
@@ -94,7 +93,6 @@ export const MarkSignificantEventInactiveModal = ({
   onSuccess,
 }: {
   eventId: string;
-  /** The `alert.id` of the event's latest version; Alerting v2 `deactivate` targets it. */
   episodeId?: string;
   onClose: () => void;
   onSuccess?: () => void;

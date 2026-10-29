@@ -23,11 +23,10 @@ const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.su
   defaultMessage: 'Significant event marked inactive',
 });
 
-const CLOSE_ALREADY_INACTIVE_TOAST_TITLE = i18n.translate(
-  'xpack.nightshift.closeEvent.alreadyInactiveToastTitle',
+const CLOSE_NO_CHANGE_TOAST_TITLE = i18n.translate(
+  'xpack.nightshift.closeEvent.noChangeToastTitle',
   {
-    defaultMessage:
-      'No change made: the significant event is already inactive or was changed by another update',
+    defaultMessage: 'No change made: the significant event is already inactive or no longer exists',
   }
 );
 
@@ -38,16 +37,7 @@ const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.erro
 const CLOSE_FORBIDDEN_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.closeEvent.forbiddenToastTitle',
   {
-    defaultMessage:
-      'Marking a significant event inactive requires the Alerting v2 "alerts write" privilege',
-  }
-);
-
-const CLOSE_MISSING_EPISODE_MESSAGE = i18n.translate(
-  'xpack.nightshift.closeEvent.missingEpisodeMessage',
-  {
-    defaultMessage:
-      'Refresh the list and try again. This event has no Alerting v2 episode to mark inactive.',
+    defaultMessage: 'You do not have permission to mark this significant event inactive',
   }
 );
 
@@ -61,18 +51,22 @@ const CLOSE_FALLBACK_ERROR_MESSAGE = i18n.translate(
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-const isForbidden = (error: Error): boolean => {
-  const { response } = error as Partial<IHttpFetchError>;
-  return response?.status === 403;
-};
+const markEventInactive = (
+  current: NightshiftSignificantEventsQueryData | undefined,
+  eventId: string
+): NightshiftSignificantEventsQueryData | undefined =>
+  current && {
+    ...current,
+    hits: current.hits.map((event) =>
+      event.event_id === eventId ? { ...event, status: 'inactive' as const } : event
+    ),
+  };
 
 type CloseOutcome = 'closed' | 'already_inactive';
 
 interface CloseSignificantEventArgs {
   eventId: string;
-  /** The `alert.id` of the series' latest version, which `deactivate` takes as its target. */
   episodeId?: string;
-  /** When empty or whitespace-only, a standard note is recorded instead. */
   reason?: string;
 }
 
@@ -117,37 +111,23 @@ export const useCloseSignificantEvent = ({
     onSuccess: (outcome, { eventId }) => {
       // The invalidation in `onSettled` refetches the list.
       if (outcome === 'already_inactive') {
-        notifications.toasts.addInfo({ title: CLOSE_ALREADY_INACTIVE_TOAST_TITLE });
+        notifications.toasts.addInfo({ title: CLOSE_NO_CHANGE_TOAST_TITLE });
         onClosed?.();
         return;
       }
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-        (current) =>
-          current
-            ? {
-                ...current,
-                hits: current.hits.map((event) =>
-                  event.event_id === eventId
-                    ? {
-                        ...event,
-                        status: 'inactive' as const,
-                      }
-                    : event
-                ),
-              }
-            : current
+        (current) => markEventInactive(current, eventId)
       );
       notifications.toasts.addSuccess({ title: CLOSE_SUCCESS_TOAST_TITLE });
       onClosed?.();
     },
     onError: (error: unknown) => {
       const normalized = toError(error);
-      if (isForbidden(normalized)) {
-        notifications.toasts.addError(normalized, { title: CLOSE_FORBIDDEN_TOAST_TITLE });
-        return;
-      }
-      notifications.toasts.addError(normalized, { title: CLOSE_ERROR_TOAST_TITLE });
+      const { response } = normalized as Partial<IHttpFetchError>;
+      const title =
+        response?.status === 403 ? CLOSE_FORBIDDEN_TOAST_TITLE : CLOSE_ERROR_TOAST_TITLE;
+      notifications.toasts.addError(normalized, { title });
     },
     onSettled: async () => {
       setClosingEventId(undefined);
@@ -158,7 +138,7 @@ export const useCloseSignificantEvent = ({
   return {
     closeSignificantEvent: ({ eventId, episodeId, reason }) => {
       if (!episodeId) {
-        notifications.toasts.addError(new Error(CLOSE_MISSING_EPISODE_MESSAGE), {
+        notifications.toasts.addError(new Error(CLOSE_FALLBACK_ERROR_MESSAGE), {
           title: CLOSE_ERROR_TOAST_TITLE,
         });
         return;

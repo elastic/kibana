@@ -108,7 +108,6 @@ const getEventsResponse = (
   };
 };
 
-/** Storybook episode ids are the event id behind this prefix, so the mock can map them back. */
 const EPISODE_ID_PREFIX = 'episode-';
 
 const createServices = ({
@@ -223,7 +222,6 @@ const createServices = ({
       basePath: {
         prepend: (path: string) => path,
       },
-      // Alerting v2 `_bulk_deactivate`: marks the event inactive in the Storybook fixtures.
       post: async (_path: string, options?: { body?: string }) => {
         const items: Array<{ alert_id: string }> = JSON.parse(
           options?.body ?? '{"items":[]}'
