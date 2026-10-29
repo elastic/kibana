@@ -75,6 +75,16 @@ describe('getAlertingClassicNavSection', () => {
     ]);
   });
 
+  it('adds Import alerts when the experimental features setting is on and rules are readable', () => {
+    setSettings(core, { v2Enabled: true, showV1Table: true });
+    setCapabilities(core, { alerting_v2_rules: { read: true } });
+
+    expect(getEntries(core)).toEqual([
+      { label: 'Rule Library', app: 'observabilityAlerting', path: '/rule-library' },
+      { label: 'Import alerts', app: 'observabilityAlerting', path: '/imports' },
+    ]);
+  });
+
   it('lists Rule Library when the user has v2 rules read', () => {
     setCapabilities(core, { alerting_v2_rules: { read: true } });
 

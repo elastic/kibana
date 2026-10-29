@@ -21,5 +21,7 @@ export interface AlertingV2PublicStart {
   EpisodesPage: ComponentType<AlertingV2PageProps>;
   ActionPoliciesPage: ComponentType<AlertingV2PageProps>;
   ExecutionHistoryPage: ComponentType<AlertingV2PageProps>;
+  /** POC: Import alerts page. */
+  ImportsPage: ComponentType<AlertingV2PageProps>;
   createAlertingV2HostApp: CreateAlertingV2HostApp;
 }

@@ -11,6 +11,7 @@ import {
   ALERTING_V2_ACTION_POLICIES_LOCATOR,
   ALERTING_V2_EPISODES_LOCATOR,
   ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
+  ALERTING_V2_IMPORTS_LOCATOR,
   ALERTING_V2_RULE_LIBRARY_LOCATOR,
   ALERTING_V2_RULES_LOCATOR,
 } from '@kbn/alerting-v2-constants';
@@ -99,5 +100,19 @@ export const AlertingV2ExecutionHistoryLocatorDefinition: LocatorDefinition<Aler
     ): Promise<KibanaLocation> => {
       const { getExecutionHistoryLocation } = await import('./locator_get_location');
       return getExecutionHistoryLocation(params);
+    },
+  };
+
+/** POC: Import alerts page. */
+export interface AlertingV2ImportsLocatorParams extends SerializableRecord {
+  host: LocatorHost;
+}
+
+export const AlertingV2ImportsLocatorDefinition: LocatorDefinition<AlertingV2ImportsLocatorParams> =
+  {
+    id: ALERTING_V2_IMPORTS_LOCATOR,
+    getLocation: async (params: AlertingV2ImportsLocatorParams): Promise<KibanaLocation> => {
+      const { getImportsLocation } = await import('./locator_get_location');
+      return getImportsLocation(params);
     },
   };

@@ -26,6 +26,7 @@ import {
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID,
 } from './constants';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 
@@ -76,6 +77,7 @@ describe('ObservabilityAlertingPlugin', () => {
           EpisodesPage: () => null,
           ActionPoliciesPage: () => null,
           ExecutionHistoryPage: () => null,
+          ImportsPage: () => null,
           CreateRuleOptionsFlyout: () => null,
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
@@ -183,6 +185,7 @@ describe('ObservabilityAlertingPlugin', () => {
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
     });
   });
 

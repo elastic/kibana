@@ -60,3 +60,5 @@ export const OBSERVABILITY_ALERTING_RULES_V2_PATH = '/rules/universal';
 export const OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH = '/rule-library';
 export const OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH = '/action-policies';
 export const OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH = '/execution-history';
+/** POC: Import alerts page, behind the Alerting v2 experimental features setting. */
+export const OBSERVABILITY_ALERTING_IMPORTS_PATH = '/imports';

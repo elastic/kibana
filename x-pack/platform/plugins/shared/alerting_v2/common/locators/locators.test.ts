@@ -12,6 +12,7 @@ import {
   ALERTING_V2_EPISODES_LOCATOR,
   ALERTING_V2_ACTION_POLICIES_LOCATOR,
   ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
+  ALERTING_V2_IMPORTS_LOCATOR,
 } from '@kbn/alerting-v2-constants';
 import {
   type AlertingV2HostApp,
@@ -20,6 +21,7 @@ import {
   AlertingV2EpisodesLocatorDefinition,
   AlertingV2ActionPoliciesLocatorDefinition,
   AlertingV2ExecutionHistoryLocatorDefinition,
+  AlertingV2ImportsLocatorDefinition,
   createAlertingV2HostApp,
 } from './locators';
 
@@ -29,6 +31,7 @@ const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabi
   alerts: '/inbox',
   actionPolicies: '/action-policies',
   executionHistory: '/execution-history',
+  imports: '/imports',
 });
 
 const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
@@ -37,6 +40,7 @@ const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
   alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
+  imports: '/alerting/imports',
 });
 
 describe('AlertingV2RulesLocatorDefinition', () => {
@@ -370,6 +374,18 @@ describe('AlertingV2ExecutionHistoryLocatorDefinition', () => {
   });
 });
 
+describe('AlertingV2ImportsLocatorDefinition', () => {
+  it('has the correct id', () => {
+    expect(AlertingV2ImportsLocatorDefinition.id).toBe(ALERTING_V2_IMPORTS_LOCATOR);
+  });
+
+  it('resolves for observability host', async () => {
+    expect(
+      await AlertingV2ImportsLocatorDefinition.getLocation({ host: OBSERVABILITY_HOST.imports })
+    ).toMatchObject({ app: 'observabilityAlerting', path: '/imports' });
+  });
+});
+
 describe('createAlertingV2HostApp', () => {
   it('builds a host app config from an appId and page paths', () => {
     const host = createAlertingV2HostApp('myApp', {
@@ -378,6 +394,7 @@ describe('createAlertingV2HostApp', () => {
       alerts: '/e',
       actionPolicies: '/ap',
       executionHistory: '/eh',
+      imports: '/im',
     });
 
     expect(host.rules).toEqual({ app: 'myApp', pathPrefix: '/r' });

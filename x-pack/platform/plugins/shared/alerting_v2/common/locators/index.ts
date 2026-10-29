@@ -11,6 +11,7 @@ export {
   AlertingV2EpisodesLocatorDefinition,
   AlertingV2ActionPoliciesLocatorDefinition,
   AlertingV2ExecutionHistoryLocatorDefinition,
+  AlertingV2ImportsLocatorDefinition,
   createAlertingV2HostApp,
 } from './locators';
 export type {
@@ -20,6 +21,7 @@ export type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
+  AlertingV2ImportsLocatorParams,
 } from './locators';
 export type { CreateAlertingV2HostApp } from './locator_host';
 export { OBSERVABILITY_ALERTING_HOST } from './observability_alerting_host';

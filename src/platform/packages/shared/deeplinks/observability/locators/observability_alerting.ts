@@ -12,6 +12,7 @@ import {
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
@@ -22,6 +23,7 @@ export interface ObservabilityAlertingV2PagePaths {
   alerts: string;
   actionPolicies: string;
   executionHistory: string;
+  imports: string;
 }
 
 /** Builds an Alerting v2 host for the Observability Alerting mount. */
@@ -34,4 +36,5 @@ export const createObservabilityAlertingV2Host = <THost>(
     alerts: OBSERVABILITY_ALERTING_ALERTS_PATH,
     actionPolicies: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
     executionHistory: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+    imports: OBSERVABILITY_ALERTING_IMPORTS_PATH,
   });

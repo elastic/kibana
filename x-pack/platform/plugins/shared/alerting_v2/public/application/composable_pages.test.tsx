@@ -139,6 +139,7 @@ const defaultProps = (): InternalPageProps => ({
     alerts: '/alerting/inbox',
     actionPolicies: '/alerting/action-policies',
     executionHistory: '/alerting/execution-history',
+    imports: '/alerting/imports',
   }),
 });
 
@@ -222,6 +223,7 @@ describe('composable pages', () => {
         alerts: '/alerting/inbox',
         actionPolicies: '/alerting/action-policies',
         executionHistory: '/alerting/execution-history',
+        imports: '/alerting/imports',
       });
 
       renderInRouter(<AlertingV2RulesPage {...defaultProps()} hostApp={hostApp} />);

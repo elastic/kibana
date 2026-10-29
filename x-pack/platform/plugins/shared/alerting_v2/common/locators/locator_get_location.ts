@@ -11,6 +11,7 @@ import type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2EpisodesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
+  AlertingV2ImportsLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2RulesLocatorParams,
 } from './locators';
@@ -118,6 +119,11 @@ export const getActionPoliciesLocation = (
 export const getExecutionHistoryLocation = (
   params: AlertingV2ExecutionHistoryLocatorParams
 ): KibanaLocation => {
+  const { app, pathPrefix } = params.host;
+  return { app, path: pathPrefix, state: {} };
+};
+
+export const getImportsLocation = (params: AlertingV2ImportsLocatorParams): KibanaLocation => {
   const { app, pathPrefix } = params.host;
   return { app, path: pathPrefix, state: {} };
 };

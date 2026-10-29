@@ -11,6 +11,7 @@ import {
   ALERTING_V2_ACTION_POLICIES_LOCATOR,
   ALERTING_V2_EPISODES_LOCATOR,
   ALERTING_V2_EXECUTION_HISTORY_LOCATOR,
+  ALERTING_V2_IMPORTS_LOCATOR,
   ALERTING_V2_RULE_LIBRARY_LOCATOR,
   ALERTING_V2_RULES_LOCATOR,
 } from '@kbn/alerting-v2-constants';
@@ -20,6 +21,7 @@ import type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
   AlertingV2HostApp,
+  AlertingV2ImportsLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2RulesLocatorParams,
 } from '../../common/locators';
@@ -42,6 +44,9 @@ export const getAlertingV2Locators = (share: SharePluginStart): RawAlertingV2Loc
   )!,
   executionHistoryLocators: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(
     ALERTING_V2_EXECUTION_HISTORY_LOCATOR
+  )!,
+  importsLocators: share.url.locators.get<AlertingV2ImportsLocatorParams>(
+    ALERTING_V2_IMPORTS_LOCATOR
   )!,
 });
 
@@ -82,4 +87,5 @@ export const bindLocatorsToHost = (
     locators.executionHistoryLocators,
     hostApp.executionHistory
   ),
+  importsLocators: bindLocatorToHost(locators.importsLocators, hostApp.imports),
 });

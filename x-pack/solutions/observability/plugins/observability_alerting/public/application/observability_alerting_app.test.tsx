@@ -32,6 +32,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_IMPORTS_PATH,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
@@ -122,6 +123,12 @@ const mockAlertingVTwo = {
       privilegeCheck={privilegeCheck}
     />
   ),
+  ImportsPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
+    <Placeholder
+      name={`importsPage:${hostApp?.imports?.app ?? 'none'}`}
+      privilegeCheck={privilegeCheck}
+    />
+  ),
   CreateRuleOptionsFlyout: () => null,
   createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
@@ -129,6 +136,7 @@ const mockAlertingVTwo = {
     alerts: { app: appId, pathPrefix: paths.alerts },
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
+    imports: { app: appId, pathPrefix: paths.imports },
   })),
 };
 
@@ -422,6 +430,14 @@ describe('ObservabilityAlertingApp', () => {
       expect(
         getByTestId(`executionHistoryPage:${OBSERVABILITY_ALERTING_APP_ID}`)
       ).toBeInTheDocument();
+    });
+  });
+
+  it('renders ImportsPage at /imports with observability host', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_IMPORTS_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId(`importsPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
     });
   });
 

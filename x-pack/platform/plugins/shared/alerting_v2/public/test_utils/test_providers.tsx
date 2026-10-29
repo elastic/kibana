@@ -27,6 +27,7 @@ import type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
+  AlertingV2ImportsLocatorParams,
 } from '../../common/locators';
 
 const createMockLocator = <P extends SerializableRecord>() => {
@@ -45,6 +46,7 @@ export const createMockLocators = (): AlertingV2Locators => ({
     createMockLocator<WithOptionalHost<AlertingV2ActionPoliciesLocatorParams>>(),
   executionHistoryLocators:
     createMockLocator<WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>>(),
+  importsLocators: createMockLocator<WithOptionalHost<AlertingV2ImportsLocatorParams>>(),
 });
 
 export function MockLocatorProvider({

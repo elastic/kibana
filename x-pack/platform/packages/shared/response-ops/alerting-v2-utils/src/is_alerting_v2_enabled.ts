@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
 
@@ -114,3 +115,12 @@ export const shouldShowV1ObservabilityAlertsTable = (core: CoreStart): boolean =
 export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
   return isAlertingV2Enabled(core) && hasAlertingV2Capability(core, 'rules');
 };
+
+/**
+ * POC: whether the Import alerts page should be offered. Needs the per-space Alerting v2
+ * experimental features setting and read access to rules (imports reuse the rules feature).
+ */
+export const isAlertingV2ImportsAvailable = (core: CoreStart): boolean =>
+  isAlertingV2Enabled(core) &&
+  hasAlertingV2Capability(core, 'rules') &&
+  core.settings.client.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID, false) === true;

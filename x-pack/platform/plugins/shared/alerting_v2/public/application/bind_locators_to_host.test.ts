@@ -27,6 +27,7 @@ const SEARCH_HOST = createAlertingV2HostApp('search', {
   alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
+  imports: '/alerting/imports',
 });
 
 const OBSERVABILITY_HOST = createAlertingV2HostApp('observability', {
@@ -35,6 +36,7 @@ const OBSERVABILITY_HOST = createAlertingV2HostApp('observability', {
   alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
+  imports: '/alerting/imports',
 });
 
 describe('bindLocatorToHost', () => {
@@ -91,12 +93,18 @@ describe('bindLocatorsToHost', () => {
       episodesLocators: createMockLocator(),
       actionPolicyLocators: createMockLocator(),
       executionHistoryLocators: createMockLocator(),
+      importsLocators: createMockLocator(),
     } as unknown as RawAlertingV2Locators;
 
     const bound = bindLocatorsToHost(locators, SEARCH_HOST);
     bound.rulesLocators.navigateSync({});
     bound.episodesLocators.navigateSync({});
+    bound.importsLocators.navigateSync({});
 
+    expect(locators.importsLocators.navigateSync).toHaveBeenCalledWith(
+      { host: SEARCH_HOST.imports },
+      undefined
+    );
     expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith(
       { host: SEARCH_HOST.rules },
       undefined
@@ -114,6 +122,7 @@ describe('bindLocatorsToHost', () => {
       episodesLocators: createMockLocator(),
       actionPolicyLocators: createMockLocator(),
       executionHistoryLocators: createMockLocator(),
+      importsLocators: createMockLocator(),
     } as unknown as RawAlertingV2Locators;
 
     const obsBound = bindLocatorsToHost(locators, OBSERVABILITY_HOST);

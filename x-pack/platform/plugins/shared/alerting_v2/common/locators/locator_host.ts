@@ -13,6 +13,7 @@ export interface AlertingV2HostApp {
   alerts: LocatorHost;
   actionPolicies: LocatorHost;
   executionHistory: LocatorHost;
+  imports: LocatorHost;
 }
 
 export const createAlertingV2HostApp = (
@@ -23,6 +24,7 @@ export const createAlertingV2HostApp = (
     alerts: string;
     actionPolicies: string;
     executionHistory: string;
+    imports: string;
   }
 ): AlertingV2HostApp => ({
   rules: { app: appId, pathPrefix: pagePathPrefixes.rules },
@@ -30,6 +32,7 @@ export const createAlertingV2HostApp = (
   alerts: { app: appId, pathPrefix: pagePathPrefixes.alerts },
   actionPolicies: { app: appId, pathPrefix: pagePathPrefixes.actionPolicies },
   executionHistory: { app: appId, pathPrefix: pagePathPrefixes.executionHistory },
+  imports: { app: appId, pathPrefix: pagePathPrefixes.imports },
 });
 
 export type CreateAlertingV2HostApp = typeof createAlertingV2HostApp;

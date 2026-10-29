@@ -24,6 +24,7 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
+import { ImportsApi } from './services/imports_api';
 import { RuleChangeHistoryApi } from './services/rule_change_history_api';
 import { RulesApi } from './services/rules_api';
 import { RuleTemplatesApi } from './services/rule_templates_api';
@@ -41,6 +42,7 @@ import {
   AlertingV2EpisodesLocatorDefinition,
   AlertingV2ActionPoliciesLocatorDefinition,
   AlertingV2ExecutionHistoryLocatorDefinition,
+  AlertingV2ImportsLocatorDefinition,
   createAlertingV2HostApp,
 } from '../common/locators';
 
@@ -95,6 +97,7 @@ export type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
+  AlertingV2ImportsLocatorParams,
 } from '../common/locators';
 export {
   useV2RulesTabNewBadge,
@@ -105,6 +108,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
+  bind(ImportsApi).toSelf().inSingletonScope();
   bind(RuleTemplatesApi).toSelf().inSingletonScope();
   bind(RuleChangeHistoryApi).toSelf().inSingletonScope();
   bind(UserCapabilities).toSelf().inSingletonScope();
@@ -151,6 +155,13 @@ const pluginModule = new ContainerModule(({ bind }) => {
             })),
           container
         ),
+        ImportsPage: lazyPageWithContainer(
+          () =>
+            import('./application/composable_pages').then((m) => ({
+              default: m.AlertingV2ImportsPage,
+            })),
+          container
+        ),
         createAlertingV2HostApp,
       } satisfies AlertingV2PublicStart;
     })
@@ -181,6 +192,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
     share.url.locators.create(AlertingV2EpisodesLocatorDefinition);
     share.url.locators.create(AlertingV2ActionPoliciesLocatorDefinition);
     share.url.locators.create(AlertingV2ExecutionHistoryLocatorDefinition);
+    share.url.locators.create(AlertingV2ImportsLocatorDefinition);
 
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();

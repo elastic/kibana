@@ -17,6 +17,7 @@ const mockCreateAlertingV2HostApp: jest.Mock = jest.fn(
     alerts: { app: appId, pathPrefix: paths.alerts },
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
+    imports: { app: appId, pathPrefix: paths.imports },
   })
 );
 
@@ -32,6 +33,7 @@ describe('mountObservabilityAlertingApp', () => {
       EpisodesPage: () => null,
       ActionPoliciesPage: () => null,
       ExecutionHistoryPage: () => null,
+      ImportsPage: () => null,
       CreateRuleOptionsFlyout: () => null,
       createAlertingV2HostApp: mockCreateAlertingV2HostApp,
     };

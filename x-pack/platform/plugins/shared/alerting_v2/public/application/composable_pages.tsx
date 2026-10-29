@@ -32,6 +32,7 @@ import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
+import { ImportsApp } from './imports_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
@@ -159,6 +160,23 @@ export const AlertingV2ExecutionHistoryPage = ({
     privilegeCheck={privilegeCheck}
   >
     <ExecutionHistoryApp />
+  </StandardProviders>
+);
+
+/** POC: Import alerts page. */
+export const AlertingV2ImportsPage = ({
+  container,
+  setBreadcrumbs,
+  hostApp,
+  privilegeCheck,
+}: InternalPageProps) => (
+  <StandardProviders
+    container={container}
+    setBreadcrumbs={setBreadcrumbs}
+    hostApp={hostApp}
+    privilegeCheck={privilegeCheck}
+  >
+    <ImportsApp />
   </StandardProviders>
 );
 

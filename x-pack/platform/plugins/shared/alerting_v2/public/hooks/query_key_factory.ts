@@ -115,3 +115,14 @@ export const userProfileKeys = {
   all: ['userProfile'] as const,
   bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
 };
+
+/** POC: custom imports. */
+export const importKeys = {
+  all: ['import'] as const,
+  detail: (id: string) => [...importKeys.all, 'detail', id] as const,
+  lists: () => [...importKeys.all, 'list'] as const,
+  stats: () => [...importKeys.all, 'stats'] as const,
+  connectorTypes: () => [...importKeys.all, 'connectorTypes'] as const,
+  connectors: (connectorTypeId: string) =>
+    [...importKeys.all, 'connectors', connectorTypeId] as const,
+};

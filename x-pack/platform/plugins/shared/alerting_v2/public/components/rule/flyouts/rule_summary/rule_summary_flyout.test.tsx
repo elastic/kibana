@@ -25,6 +25,7 @@ const TEST_HOST = createAlertingV2HostApp('test-app', {
   alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
+  imports: '/alerting/imports',
 });
 
 const mockLocators = createMockLocators();

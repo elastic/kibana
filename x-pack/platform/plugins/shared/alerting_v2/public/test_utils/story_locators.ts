@@ -43,4 +43,5 @@ export const createStoryLocators = (
     'executionHistory',
     navigateSync('executionHistory.navigateSync')
   ),
+  importsLocators: createStoryLocator('imports', navigateSync('imports.navigateSync')),
 });

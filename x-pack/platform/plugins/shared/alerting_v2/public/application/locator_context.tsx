@@ -14,6 +14,7 @@ import type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
+  AlertingV2ImportsLocatorParams,
 } from '../../common/locators';
 
 export type WithOptionalHost<P> = Omit<P, 'host'> & { host?: LocatorHost };
@@ -25,6 +26,7 @@ export interface RawAlertingV2Locators {
   episodesLocators: LocatorPublic<AlertingV2EpisodesLocatorParams>;
   actionPolicyLocators: LocatorPublic<AlertingV2ActionPoliciesLocatorParams>;
   executionHistoryLocators: LocatorPublic<AlertingV2ExecutionHistoryLocatorParams>;
+  importsLocators: LocatorPublic<AlertingV2ImportsLocatorParams>;
 }
 
 /** Bound locators provided to components — `host` is optional (injected by binding). */
@@ -36,6 +38,7 @@ export interface AlertingV2Locators {
   executionHistoryLocators: LocatorPublic<
     WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>
   >;
+  importsLocators: LocatorPublic<WithOptionalHost<AlertingV2ImportsLocatorParams>>;
 }
 
 const LocatorContext = createContext<AlertingV2Locators | null>(null);

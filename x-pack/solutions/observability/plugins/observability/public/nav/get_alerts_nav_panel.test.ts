@@ -408,5 +408,38 @@ describe('getAlertsNavPanel', () => {
         expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
       ]);
     });
+
+    it('hides Import alerts while the experimental features setting is off', () => {
+      setCapabilities(core, {
+        alerting_v2_rules: { read: true },
+        alerting_v2_execution_history: { read: true },
+      });
+
+      expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+      ]);
+    });
+
+    it('shows Import alerts when the experimental features setting is on and rules are readable', () => {
+      core.settings.client.get = <T>(_key: string) => true as T;
+      setCapabilities(core, {
+        alerting_v2_rules: { read: true },
+        alerting_v2_execution_history: { read: true },
+      });
+
+      expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+        { link: 'observabilityAlerting:imports' },
+      ]);
+    });
+
+    it('hides Import alerts without rules read even when the setting is on', () => {
+      core.settings.client.get = <T>(_key: string) => true as T;
+      setCapabilities(core, { alerting_v2_execution_history: { read: true } });
+
+      expect(getSectionByTitle(core, 'Operations')?.children).toEqual([
+        expect.objectContaining({ link: 'observabilityAlerting:execution-history' }),
+      ]);
+    });
   });
 });

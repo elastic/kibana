@@ -10,6 +10,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
@@ -18,6 +19,7 @@ import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_
 
 const SEARCHABLE: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
 const ALERTS: AppDeepLinkLocations[] = [...SEARCHABLE, 'classicSideNav'];
+const SIDE_NAV_ONLY: AppDeepLinkLocations[] = ['projectSideNav'];
 
 const capabilities = (features: Record<string, Record<string, boolean>>): Capabilities =>
   ({
@@ -44,6 +46,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: SEARCHABLE,
+      [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: SIDE_NAV_ONLY,
     });
   });
 
@@ -55,6 +58,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
       [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
       [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
     });
   });
 
@@ -67,6 +71,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
 
@@ -78,6 +83,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: SIDE_NAV_ONLY,
       });
     });
 
@@ -90,6 +96,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
           [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
           [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
           [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+          [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: SIDE_NAV_ONLY,
         }
       );
     });
@@ -117,6 +124,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
 
@@ -128,6 +136,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
     });
 
@@ -139,7 +148,23 @@ describe('getObservabilityAlertingDeepLinks', () => {
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID]: [],
       });
+    });
+  });
+
+  describe('Import alerts', () => {
+    it('is only offered in the project side nav, to users with v2 rules read', () => {
+      expect(
+        visibleInById(capabilities({ alerting_v2_rules: { read: true } }))[
+          OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID
+        ]
+      ).toEqual(SIDE_NAV_ONLY);
+      expect(
+        visibleInById(capabilities({ alerting_v2_alerts: { read: true } }))[
+          OBSERVABILITY_ALERTING_IMPORTS_DEEP_LINK_ID
+        ]
+      ).toEqual([]);
     });
   });
 

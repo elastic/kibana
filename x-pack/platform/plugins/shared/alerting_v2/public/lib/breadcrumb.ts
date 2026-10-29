@@ -17,7 +17,8 @@ export type AlertingV2BreadcrumbPage =
   | 'action_policy_edit'
   | 'episodes_list'
   | 'episode_details'
-  | 'execution_history_list';
+  | 'execution_history_list'
+  | 'imports_list';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -78,6 +79,12 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.executionHistoryListTitle', {
           defaultMessage: 'Execution history',
+        }),
+      };
+    case 'imports_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.imports.breadcrumb', {
+          defaultMessage: 'Import alerts',
         }),
       };
   }
