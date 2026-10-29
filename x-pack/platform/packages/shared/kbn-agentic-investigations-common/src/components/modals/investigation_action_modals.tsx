@@ -43,7 +43,8 @@ export interface InvestigationActionModalsProps<
   /** Proposal awaiting a decision, if any. */
   approvalProposal?: TProposal;
   onCloseAction: () => void;
-  onCloseApproval: () => void;
+  /** Closes the approval modal. Needed by hosts that pass `approvalProposal`. */
+  onCloseApproval?: () => void;
   /**
    * Commits the approval. Receives the proposal rather than closing over it, so a caller's
    * handler stays referentially stable across renders. Falls back to closing the modal, so a
@@ -116,7 +117,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   currentActorName,
 }: InvestigationActionModalsProps<TProposal>) => (
   <>
-    {approvalProposal ? (
+    {approvalProposal && onCloseApproval ? (
       <ApprovalModal
         proposal={approvalProposal}
         readOnly={readOnly}
