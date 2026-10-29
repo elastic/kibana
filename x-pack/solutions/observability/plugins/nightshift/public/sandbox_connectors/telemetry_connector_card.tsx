@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { SourceCard } from './source_card';
+import { ConnectorCountBadge } from './connector_count_badge';
 
 /**
  * One of the deployment's telemetry connectors, configured as a telemetry target of the sandbox.
- * The agent always has it, so the card only says it is connected.
+ * The agent always has it, so the card only says so.
  */
 export function TelemetryConnectorCard({
   connector,
@@ -32,14 +31,13 @@ export function TelemetryConnectorCard({
       icon={model?.iconClass ?? 'plugs'}
       title={connector.name}
       description={model?.actionTypeTitle ?? connector.connector_type_id}
-      data-test-subj={`nightshiftTelemetryConnectorCard-${connector.id}`}
-      actionNode={
-        <EuiBadge color="success">
-          {i18n.translate('xpack.nightshift.telemetryConnectorCard.connected', {
-            defaultMessage: 'Connected',
-          })}
-        </EuiBadge>
+      badge={
+        <ConnectorCountBadge
+          count={1}
+          data-test-subj={`nightshiftTelemetryConnectorCount-${connector.id}`}
+        />
       }
+      data-test-subj={`nightshiftTelemetryConnectorCard-${connector.id}`}
     />
   );
 }

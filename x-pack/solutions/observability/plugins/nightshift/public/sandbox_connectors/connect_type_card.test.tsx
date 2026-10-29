@@ -35,7 +35,7 @@ const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
   const group = {
     actionType: http,
     connectors: options.connectors ?? connectors,
-    assignedCount: 1,
+    assignedCount: (options.assigned ?? ['a']).length,
   };
   renderWithProviders(<ConnectTypeCard group={group} />);
   return services;
@@ -79,6 +79,20 @@ describe('ConnectTypeCard', () => {
   });
 
   describe('with connectors of the type', () => {
+    it('counts the assigned ones on the card', async () => {
+      setup();
+
+      expect(await screen.findByTestId('.http-connectorCount')).toHaveTextContent('1 connector');
+    });
+
+    it('shows no count when none is assigned', async () => {
+      setup({ assigned: [] });
+
+      await screen.findByTestId('.http-card');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(screen.queryByTestId('.http-connectorCount')).not.toBeInTheDocument();
+    });
+
     it('lists them in a popover, the assigned ones ticked', async () => {
       setup();
 

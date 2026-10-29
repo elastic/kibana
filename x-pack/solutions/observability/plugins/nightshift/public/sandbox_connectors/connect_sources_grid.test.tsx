@@ -79,7 +79,7 @@ describe('ConnectSourcesGrid', () => {
     const telemetryCard = screen.getByTestId('nightshiftTelemetryConnectorCard-telemetry');
     expect(telemetryCard).toHaveTextContent('Local Elasticsearch telemetry');
     expect(telemetryCard).toHaveTextContent('HTTP');
-    expect(telemetryCard).toHaveTextContent('Connected');
+    expect(telemetryCard).toHaveTextContent('1 connector');
     expect(telemetryCard.querySelector('button')).toBeNull();
     expect(screen.getByTestId('.new_relic-card')).toHaveTextContent('APM and more');
   });

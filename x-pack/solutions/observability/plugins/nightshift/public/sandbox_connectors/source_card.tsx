@@ -32,6 +32,7 @@ export function SourceCard({
   title,
   description,
   connected = false,
+  badge,
   action,
   actionNode,
   'data-test-subj': dataTestSubj,
@@ -40,6 +41,7 @@ export function SourceCard({
   title: string;
   description?: string;
   connected?: boolean;
+  badge?: React.ReactNode;
   action?: SourceCardAction;
   actionNode?: React.ReactNode;
   'data-test-subj'?: string;
@@ -54,6 +56,12 @@ export function SourceCard({
     gap: ${euiTheme.size.m};
     border-radius: ${euiTheme.size.m};
   `;
+  const plateRowStyles = css`
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: ${euiTheme.size.s};
+  `;
   const plateStyles = css`
     display: flex;
     align-items: center;
@@ -66,6 +74,10 @@ export function SourceCard({
           euiTheme.colors.success
         };`
       : `background: ${euiTheme.colors.backgroundBasePlain}; color: ${euiTheme.colors.textHeading}; ${plateShadow}`}
+  `;
+  const badgeStyles = css`
+    flex: 0 0 auto;
+    max-width: 50%;
   `;
   const titleStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
@@ -120,8 +132,11 @@ export function SourceCard({
       role="listitem"
       data-test-subj={dataTestSubj}
     >
-      <div css={plateStyles} aria-hidden={true}>
-        <EuiIcon type={connected ? 'check' : icon} size="m" aria-hidden={true} />
+      <div css={plateRowStyles}>
+        <div css={plateStyles} aria-hidden={true}>
+          <EuiIcon type={connected ? 'check' : icon} size="m" aria-hidden={true} />
+        </div>
+        {badge ? <div css={badgeStyles}>{badge}</div> : null}
       </div>
       <div>
         <div css={titleRowStyles}>
@@ -135,7 +150,7 @@ export function SourceCard({
           </EuiText>
         ) : null}
       </div>
-      <div css={actionStyles}>{renderAction()}</div>
+      {(action || actionNode) && <div css={actionStyles}>{renderAction()}</div>}
     </EuiPanel>
   );
 }

@@ -16,6 +16,7 @@ import { useEditConnector } from './use_edit_connector';
 import { useDeleteConnector } from './use_delete_connector';
 import { getSourceCardItem } from './source_card_item';
 import { SourceCard } from './source_card';
+import { ConnectorCountBadge } from './connector_count_badge';
 import { ConnectPopover } from './connect_popover';
 
 const noPermissionReason = i18n.translate('xpack.nightshift.connectSources.noPermission', {
@@ -27,7 +28,7 @@ const connectLabel = i18n.translate('xpack.nightshift.connectSources.connectButt
 });
 
 export function ConnectTypeCard({
-  group: { actionType, connectors },
+  group: { actionType, connectors, assignedCount },
 }: {
   group: ConnectorTypeGroup;
 }): React.ReactElement | null {
@@ -57,6 +58,12 @@ export function ConnectTypeCard({
         icon={item.iconClass}
         title={item.name}
         description={item.description}
+        badge={
+          <ConnectorCountBadge
+            count={assignedCount}
+            data-test-subj={`${actionType.id}-connectorCount`}
+          />
+        }
         data-test-subj={`${actionType.id}-card`}
         action={
           hasConnectors
