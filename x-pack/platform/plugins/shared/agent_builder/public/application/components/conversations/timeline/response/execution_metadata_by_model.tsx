@@ -24,7 +24,7 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { formatCompactNumber } from '../../../../utils/format_compact_number';
-import { getModelColor } from './model_colors';
+import { getModelColors } from './model_colors';
 
 const labels = {
   tableCaption: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.tableCaption', {
@@ -102,15 +102,22 @@ const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
 const wrappingHeaderStyles = css({ whiteSpace: 'normal' });
 const rightAlignedHeaderStyles = css({ whiteSpace: 'normal', textAlign: 'right' });
 
-const HeaderCell: React.FC<
-  React.PropsWithChildren<{ isRightAligned?: boolean; subLabel?: string }>
-> = ({ children, isRightAligned = false, subLabel }) => (
+interface HeaderCellProps {
+  isRightAligned?: boolean;
+  subLabel?: string;
+  hasSecondLine?: boolean;
+}
+
+const HeaderCell: React.FC<React.PropsWithChildren<HeaderCellProps>> = ({
+  children,
+  isRightAligned = false,
+  subLabel,
+  hasSecondLine = false,
+}) => (
   <EuiText size="xs" css={isRightAligned ? rightAlignedHeaderStyles : wrappingHeaderStyles}>
     <strong>{children}</strong>
-    {subLabel && (
-      <div>
-        <strong>{subLabel}</strong>
-      </div>
+    {hasSecondLine && (
+      <div aria-hidden={!subLabel}>{subLabel ? <strong>{subLabel}</strong> : <>&nbsp;</>}</div>
     )}
   </EuiText>
 );
@@ -143,72 +150,87 @@ const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = (
 const getColumns = (
   hasCache: boolean,
   hasReasoning: boolean
-): Array<EuiBasicTableColumn<ModelRow>> => [
-  {
-    field: 'label',
-    name: <HeaderCell>{labels.model}</HeaderCell>,
-    render: (label: string, { color, fullName }: ModelRow) =>
-      color ? (
-        <ModelName label={label} tooltip={fullName ?? label} color={color} />
-      ) : (
-        <Cell>{label}</Cell>
+): Array<EuiBasicTableColumn<ModelRow>> => {
+  const hasSecondHeaderLine = hasCache || hasReasoning;
+  return [
+    {
+      field: 'label',
+      name: <HeaderCell hasSecondLine={hasSecondHeaderLine}>{labels.model}</HeaderCell>,
+      render: (label: string, { color, fullName }: ModelRow) =>
+        color ? (
+          <ModelName label={label} tooltip={fullName ?? label} color={color} />
+        ) : (
+          <Cell>{label}</Cell>
+        ),
+    },
+    {
+      field: 'llmCalls',
+      name: (
+        <HeaderCell isRightAligned hasSecondLine={hasSecondHeaderLine}>
+          {labels.llmCalls}
+        </HeaderCell>
       ),
-  },
-  {
-    field: 'llmCalls',
-    name: <HeaderCell isRightAligned>{labels.llmCalls}</HeaderCell>,
-    align: RIGHT_ALIGNMENT,
-    render: (llmCalls: number) => (
-      <Cell>
-        <strong>{formatCompactNumber(llmCalls)}</strong>
-      </Cell>
-    ),
-  },
-  {
-    field: 'inputTokens',
-    name: (
-      <HeaderCell isRightAligned subLabel={hasCache ? labels.cachedSuffix : undefined}>
-        {labels.tokensSent}
-      </HeaderCell>
-    ),
-    align: RIGHT_ALIGNMENT,
-    render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
-      <Cell>
-        <strong>{formatCompactNumber(inputTokens)}</strong>
-        {hasCache && (
-          <>
-            {' '}
-            <EuiTextColor color="subdued">
-              (<ReportedTokens value={cachedInputTokens} />)
-            </EuiTextColor>
-          </>
-        )}
-      </Cell>
-    ),
-  },
-  {
-    field: 'outputTokens',
-    name: (
-      <HeaderCell isRightAligned subLabel={hasReasoning ? labels.reasoningSuffix : undefined}>
-        {labels.tokensReceived}
-      </HeaderCell>
-    ),
-    align: RIGHT_ALIGNMENT,
-    render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
-      <Cell>
-        <strong>{formatCompactNumber(outputTokens)}</strong>
-        {hasReasoning && (
-          <>
-            {' '}
-            <EuiTextColor color="subdued">
-              (<ReportedTokens value={reasoningTokens} />)
-            </EuiTextColor>
-          </>
-        )}
-      </Cell>
-    ),
-  },
-];
+      align: RIGHT_ALIGNMENT,
+      render: (llmCalls: number) => (
+        <Cell>
+          <strong>{formatCompactNumber(llmCalls)}</strong>
+        </Cell>
+      ),
+    },
+    {
+      field: 'inputTokens',
+      name: (
+        <HeaderCell
+          isRightAligned
+          subLabel={hasCache ? labels.cachedSuffix : undefined}
+          hasSecondLine={hasSecondHeaderLine}
+        >
+          {labels.tokensSent}
+        </HeaderCell>
+      ),
+      align: RIGHT_ALIGNMENT,
+      render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
+        <Cell>
+          <strong>{formatCompactNumber(inputTokens)}</strong>
+          {hasCache && (
+            <>
+              {' '}
+              <EuiTextColor color="subdued">
+                (<ReportedTokens value={cachedInputTokens} />)
+              </EuiTextColor>
+            </>
+          )}
+        </Cell>
+      ),
+    },
+    {
+      field: 'outputTokens',
+      name: (
+        <HeaderCell
+          isRightAligned
+          subLabel={hasReasoning ? labels.reasoningSuffix : undefined}
+          hasSecondLine={hasSecondHeaderLine}
+        >
+          {labels.tokensReceived}
+        </HeaderCell>
+      ),
+      align: RIGHT_ALIGNMENT,
+      render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
+        <Cell>
+          <strong>{formatCompactNumber(outputTokens)}</strong>
+          {hasReasoning && (
+            <>
+              {' '}
+              <EuiTextColor color="subdued">
+                (<ReportedTokens value={reasoningTokens} />)
+              </EuiTextColor>
+            </>
+          )}
+        </Cell>
+      ),
+    },
+  ];
+};
 
 interface ExecutionMetadataByModelProps {
   modelUsage: RoundModelUsageStats;
@@ -239,6 +261,8 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
       model?: string;
     }) => model ?? connectorId;
 
+    const colors = getModelColors(connectors.map(getKey), MODEL_PALETTE);
+
     return [
       {
         key: 'all',
@@ -249,7 +273,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
         outputTokens: modelUsage.output_tokens,
         reasoningTokens: modelUsage.reasoning_tokens,
       },
-      ...connectors.map((connector) => {
+      ...connectors.map((connector, index) => {
         const aiConnector = aiConnectorsById.get(connector.connector_id);
         return {
           key: connector.connector_id,
@@ -257,7 +281,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
             ? removeCreatorPrefix(aiConnector.name, aiConnector.metadata?.display?.model_creator)
             : getKey(connector),
           fullName: aiConnector?.name,
-          color: getModelColor(getKey(connector), MODEL_PALETTE),
+          color: colors[index],
           llmCalls: connector.llm_calls,
           inputTokens: connector.input_tokens,
           cachedInputTokens: connector.cached_input_tokens,

@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPopover,
-  EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -101,6 +101,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<MetadataTab>('total');
+  const { euiTheme } = useEuiTheme();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((v) => !v), []);
@@ -155,7 +156,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
       >
         <EuiFlexGroup
           direction="column"
-          gutterSize="s"
+          gutterSize="none"
           css={css`
             ${hasSeveralModels
               ? `min-width: ${POPOVER_MIN_WIDTH_WITH_TABLE}px;`
@@ -164,7 +165,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
           `}
         >
           {hasSeveralModels && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={{ paddingBlockEnd: euiTheme.size.m }}>
               <EuiButtonGroup
                 legend={labels.tabsLegend}
                 variant="selection"
@@ -195,7 +196,6 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
                   </EuiButton>
                 ))}
               </EuiButtonGroup>
-              <EuiSpacer size="xs" />
             </EuiFlexItem>
           )}
           {hasSeveralModels && selectedTab === 'byModel' ? (
@@ -230,8 +230,7 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
               <MetadataDivider />
             </>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="xs" />
+          <EuiFlexItem grow={false} css={{ paddingBlockStart: euiTheme.size.m }}>
             <EuiButton
               iconType="code"
               size="s"
@@ -274,19 +273,22 @@ interface MetadataRowProps {
   isSubRow?: boolean;
 }
 
-const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = false }) => (
-  <EuiFlexItem grow={false}>
-    <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
-          {isSubRow ? label : <strong>{label}</strong>}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
-          {value}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlexItem>
-);
+const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = false }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexItem grow={false} css={{ paddingBlock: euiTheme.size.xs }}>
+      <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
+            {isSubRow ? label : <strong>{label}</strong>}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
+            {value}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};

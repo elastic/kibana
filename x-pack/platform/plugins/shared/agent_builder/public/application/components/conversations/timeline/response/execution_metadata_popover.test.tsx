@@ -334,6 +334,23 @@ describe('ExecutionMetadataPopover', () => {
       ).toHaveLength(2);
     });
 
+    it('reserves the second header line for every column when a header has a suffix', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      const headers = within(screen.getByTestId('executionMetadataByModelTable')).getAllByRole(
+        'columnheader'
+      );
+
+      expect(headers).toHaveLength(4);
+      headers.forEach((header) => {
+        expect(header.querySelectorAll('strong, [aria-hidden]').length).toBeGreaterThan(1);
+      });
+    });
+
     it('does not mention the cached tokens when no model reported them', async () => {
       const { cached_input_tokens: _cached, ...usageWithoutTopLevelCache } = usageWithBreakdown;
       render(
