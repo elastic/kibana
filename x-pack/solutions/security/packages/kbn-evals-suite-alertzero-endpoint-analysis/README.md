@@ -52,11 +52,12 @@ is reported as its own `ActionSafety` evaluator, never folded into a weighted sc
 L3 enforces it through `assertAnalysisExecution` using the seeded `agent.id`. Each check is
 mutation-proven: disabling it turns its unit tests red.
 
-Each L3 run owns a UUID-scoped endpoint index, AI index, indicator and investigation.
+Each L3 run owns a UUID-scoped endpoint index, indicator and investigation, plus its own KI
+document in the shared AI index.
 The pending indicator uses the production `security.analyze_endpoint` type,
 `attributes.status: pending`, default space and manual autonomy. Before dispatch,
 the suite queries its real seeded event IDs. Cleanup cancels pending parent/child
-runs and deletes only fixture-owned conversations and indices. L2 grounding uses
+runs and deletes only fixture-owned conversations, indices and KI documents. L2 grounding uses
 host/command evidence because the production timeline schema does not expose event IDs.
 
 ## Gates
