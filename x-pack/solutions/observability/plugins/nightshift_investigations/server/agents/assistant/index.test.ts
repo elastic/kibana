@@ -72,7 +72,7 @@ describe('Nightshift assistant agent type', () => {
     expect(instructions).not.toBe(investigatorInstructions);
     expect(assistant).toEqual(investigator);
     expect(assistant).toMatchObject({
-      connector_ids: ['telemetry'],
+      connector_ids: ['telemetry', 'elastic-apps-slack'],
       workflow_ids: [
         getNightshiftBoundHookWorkflowId(
           NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type {
   AgentBaseConfiguration,
@@ -24,6 +25,7 @@ import {
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import { getTelemetryTargets } from '../../telemetry_targets';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
@@ -178,21 +180,27 @@ export const buildNightshiftAgentConfiguration = ({
             ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
             ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
             ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+            // The Elastic Slack app connector has no credentials to hand the sandbox: Relay
+            // holds the token, so the agent calls it as a tool.
+            platformCoreTools.executeConnectorSubAction,
           ],
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConfig
-        ? [
-            ...new Set(
-              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
-                connectorId ? [connectorId] : []
-              )
-            ),
-          ]
-        : telemetryConnectorId
-        ? [telemetryConnectorId]
-        : [],
+      connector_ids: [
+        ...(telemetryConfig
+          ? [
+              ...new Set(
+                getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+                  connectorId ? [connectorId] : []
+                )
+              ),
+            ]
+          : telemetryConnectorId
+          ? [telemetryConnectorId]
+          : []),
+        ELASTIC_APPS_SLACK_CONNECTOR_ID,
+      ],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
