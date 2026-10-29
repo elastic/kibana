@@ -1415,7 +1415,7 @@ describe('MetricsGrid', () => {
             dataset: {
               esql: expect.stringMatching(/BUCKET\(latency\.exp, 10, 1, 9\)/),
             },
-            palette: { colors: expect.any(Array) },
+            color: expect.objectContaining({ type: 'dynamic', steps: expect.any(Array) }),
           }),
         }),
         expect.anything()

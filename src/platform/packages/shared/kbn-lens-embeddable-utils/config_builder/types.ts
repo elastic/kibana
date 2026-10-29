@@ -16,6 +16,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { XYLegendValue } from '@kbn/chart-expressions-common';
+import type { AutoColorType, ColorByValueType } from './schema/color';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -250,12 +251,10 @@ export interface LensHeatmapConfigBase {
   legend?: Identity<LensLegendConfig>;
   axisLabel?: { xAxis?: boolean; yAxis?: boolean };
   /**
-   * Low-to-high cell colors, distributed across the value range.
-   * Omit to keep the default heatmap palette.
+   * Cell color scale, in the same shape as the heatmap API `metric.color`.
+   * Omit or use `auto` to keep the default heatmap palette.
    */
-  palette?: {
-    colors: string[];
-  };
+  color?: ColorByValueType | AutoColorType;
   /** Vertical-axis order. Becomes the heatmap `ySortPredicate`. Omitted keeps datasource order. */
   ySort?: 'asc' | 'desc';
 }

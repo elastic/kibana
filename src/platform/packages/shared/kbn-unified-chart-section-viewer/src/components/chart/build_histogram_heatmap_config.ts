@@ -22,6 +22,11 @@ import {
   createTimeBucketAggregation,
 } from '../../common/utils';
 
+type HeatmapColorSteps = Extract<
+  NonNullable<LensHeatmapConfig['color']>,
+  { type: 'dynamic' }
+>['steps'];
+
 /** Series colors below this are adjusted so the hottest cell stays visible. */
 const MIN_SERIES_CONTRAST = 1.8;
 const LIGHT_TARGET_CONTRAST = 2.2;
@@ -48,6 +53,16 @@ const heatmapCellColors = (seriesColor: string, backgroundColor: string): string
   );
 };
 
+/** Spreads low-to-high colors evenly across a percentage scale Lens remaps to the data domain. */
+const toPercentageColorSteps = (colors: readonly string[]): HeatmapColorSteps => {
+  const step = 100 / colors.length;
+  return colors.map((color, index) => {
+    const gte = index * step;
+    const end = (index + 1) * step;
+    return index === colors.length - 1 ? { color, gte, lte: end } : { color, gte, lt: end };
+  });
+};
+
 /** Builds a histogram heatmap with the same Lens config builder the XY charts use. */
 export const buildHistogramHeatmapConfig = ({
   query,
@@ -71,8 +86,10 @@ export const buildHistogramHeatmapConfig = ({
   breakdown: HISTOGRAM_BUCKET_COLUMN,
   legend: { show: false },
   axisLabel: { xAxis: true, yAxis: true },
-  palette: {
-    colors: heatmapCellColors(seriesColor, backgroundColor),
+  color: {
+    type: 'dynamic',
+    range: 'percentage',
+    steps: toPercentageColorSteps(heatmapCellColors(seriesColor, backgroundColor)),
   },
   // Histogram ranges run high to low, matching the previous query sort.
   ySort: 'desc',

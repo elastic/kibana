@@ -18,13 +18,17 @@ const backgroundColor = '#FFFFFF';
 const contrast = (color: string, background: string): number =>
   calculateContrast(hexToRgb(color), hexToRgb(background));
 
-const cellColors = (color: string, background: string): string[] =>
-  buildHistogramHeatmapConfig({
+const cellColors = (color: string, background: string): string[] => {
+  const { color: heatmapColor } = buildHistogramHeatmapConfig({
     query,
     title: 'latency',
     seriesColor: color,
     backgroundColor: background,
-  }).palette?.colors ?? [];
+  });
+  return heatmapColor?.type === 'dynamic'
+    ? heatmapColor.steps.map(({ color: stepColor }) => stepColor)
+    : [];
+};
 
 describe('buildHistogramHeatmapConfig', () => {
   it('builds the heatmap with the same config builder XY charts use', () => {
@@ -46,11 +50,30 @@ describe('buildHistogramHeatmapConfig', () => {
       breakdown: 'bucket',
       legend: { show: false },
       axisLabel: { xAxis: true, yAxis: true },
-      palette: {
-        colors: cellColors(seriesColor, backgroundColor),
+      color: {
+        type: 'dynamic',
+        range: 'percentage',
+        steps: expect.any(Array),
       },
       ySort: 'desc',
     });
+  });
+
+  it('spreads the cell colors evenly across the percentage range', () => {
+    const { color } = buildHistogramHeatmapConfig({
+      query,
+      title: 'latency',
+      seriesColor,
+      backgroundColor,
+    });
+    const steps = color?.type === 'dynamic' ? color.steps : [];
+    const bandSize = 100 / LENS_HEATMAP_DEFAULT_COLOR_STEPS;
+
+    expect(steps).toHaveLength(LENS_HEATMAP_DEFAULT_COLOR_STEPS);
+    expect(steps[0]).toEqual(expect.objectContaining({ gte: 0, lt: bandSize }));
+    expect(steps[steps.length - 1]).toEqual(
+      expect.objectContaining({ gte: 100 - bandSize, lte: 100 })
+    );
   });
 
   it('keeps a visible series color and deepens a pale one on a light panel', () => {

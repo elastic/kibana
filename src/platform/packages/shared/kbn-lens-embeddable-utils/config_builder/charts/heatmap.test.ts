@@ -140,7 +140,6 @@ test('hides the legend when configured', async () => {
 });
 
 test('writes a custom percent palette when cell colors are provided', async () => {
-  const colors = ['#d6e8f5', '#8ec4ea', '#1ba9f5'];
   const { state } = await buildHeatmap(
     {
       chartType: 'heatmap',
@@ -151,7 +150,15 @@ test('writes a custom percent palette when cell colors are provided', async () =
       breakdown: 'category',
       xAxis: '@timestamp',
       value: 'count',
-      palette: { colors },
+      color: {
+        type: 'dynamic',
+        range: 'percentage',
+        steps: [
+          { color: '#d6e8f5', gte: 0, lt: 100 / 3 },
+          { color: '#8ec4ea', gte: 100 / 3, lt: 200 / 3 },
+          { color: '#1ba9f5', gte: 200 / 3, lte: 100 },
+        ],
+      },
     },
     {
       dataViewsAPI: mockDataViewsService() as any,
@@ -185,6 +192,27 @@ test('writes a custom percent palette when cell colors are provided', async () =
       },
     })
   );
+});
+
+test('keeps the default palette when color is auto', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      color: { type: 'auto' },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).not.toHaveProperty('palette');
 });
 
 test('sorts the vertical axis when configured', async () => {

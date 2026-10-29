@@ -12,12 +12,13 @@ import type {
   HeatmapPalette,
   HeatmapVisualizationState,
 } from '@kbn/lens-common';
+import { LENS_HEATMAP_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../constants';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
-import { fromColorByValueAPIToLensState } from '../transforms/coloring';
+import { fromColorByValueAPIToLensState, isAutoColor } from '../transforms/coloring';
 
 const ACCESSOR = 'metric_formula_accessor';
 
@@ -25,42 +26,12 @@ function getAccessorName(type: 'x' | 'y') {
   return `${type}_${ACCESSOR}`;
 }
 
-/** Maps low-to-high colors onto a percent scale Lens can remap to the data domain. */
-function buildCellPalette(colors: readonly string[]): HeatmapPalette | undefined {
-  if (colors.length === 0) {
-    return undefined;
-  }
-
-  const step = 100 / colors.length;
-  const palette = fromColorByValueAPIToLensState({
-    type: 'dynamic',
-    range: 'percentage',
-    steps: colors.map((color, index) => {
-      const start = index * step;
-      const end = (index + 1) * step;
-      return index === colors.length - 1
-        ? { color, gte: start, lte: end }
-        : { color, gte: start, lt: end };
-    }),
-  });
-
-  if (!palette) {
-    return undefined;
-  }
-
-  return {
-    ...palette,
-    accessor: ACCESSOR,
-    params: {
-      ...palette.params,
-      continuity: 'none',
-    },
-  };
-}
-
 function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
   const layer = config;
-  const palette = layer.palette ? buildCellPalette(layer.palette.colors) : undefined;
+  const basePalette =
+    layer.color && !isAutoColor(layer.color)
+      ? fromColorByValueAPIToLensState(layer.color, LENS_HEATMAP_DEFAULT_COLOR_STEPS)
+      : undefined;
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -92,7 +63,12 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
       position: config.legend?.position || 'left',
       type: 'heatmap_legend',
     },
-    ...(palette ? { palette } : {}),
+    ...(basePalette && {
+      palette: {
+        ...basePalette,
+        accessor: ACCESSOR,
+      } satisfies HeatmapPalette,
+    }),
   };
 }
 
