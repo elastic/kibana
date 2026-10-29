@@ -70,6 +70,18 @@ export type QueryPointEventAnnotationConfig = {
   };
 } & PointStyleProps;
 
+export type EsqlEventAnnotationConfig = {
+  id: string;
+  type: 'esql';
+  query: { esql: string };
+  timeColumn: string;
+  textColumn?: string;
+  extraColumns?: string[];
+} & (
+  | (PointStyleProps & { key: { type: 'point_in_time' } })
+  | (RangeStyleProps & { key: { type: 'range' }; endTimeColumn: string })
+);
+
 export type EventAnnotationConfig =
   | PointInTimeEventAnnotationConfig
   | RangeEventAnnotationConfig

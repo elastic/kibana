@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type {
   EventAnnotationConfig,
+  EsqlEventAnnotationConfig,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
@@ -63,6 +64,12 @@ export const isQueryAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is QueryPointEventAnnotationConfig => {
   return Boolean(annotation && annotation.type === 'query');
+};
+
+export const isEsqlAnnotationConfig = (
+  annotation?: EventAnnotationConfig | EsqlEventAnnotationConfig
+): annotation is EsqlEventAnnotationConfig => {
+  return annotation?.type === 'esql';
 };
 
 export const createCopiedAnnotation = (
