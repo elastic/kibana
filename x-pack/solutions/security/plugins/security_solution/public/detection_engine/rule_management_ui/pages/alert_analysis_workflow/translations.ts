@@ -172,7 +172,7 @@ export const DEPRECATION_CALLOUT_TITLE = i18n.translate(
 export const DEPRECATION_CALLOUT_BODY = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutBody',
   {
-    defaultMessage: 'This feature is being replaced with the AlertZero Triage Worker.',
+    defaultMessage: 'The alert analysis workflow is being replaced by the AlertZero Triage Worker.',
   }
 );
 
