@@ -279,6 +279,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
+      extraEvaluators: TOOL_USAGE_EVALUATORS,
     });
   });
 
@@ -304,6 +305,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
+      extraEvaluators: TOOL_USAGE_EVALUATORS,
     });
   });
 
@@ -324,6 +326,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
           ],
         },
+        extraEvaluators: TOOL_USAGE_EVALUATORS,
       });
     });
   }
@@ -394,6 +397,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
           ],
         },
+        extraEvaluators: TOOL_USAGE_EVALUATORS,
       });
     });
 
