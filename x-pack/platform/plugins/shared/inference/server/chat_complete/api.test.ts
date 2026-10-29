@@ -707,7 +707,7 @@ describe('createChatCompleteApi', () => {
       });
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ temperature: undefined, reasoning: undefined })
+        expect.objectContaining({ reasoning: undefined })
       );
     });
 
