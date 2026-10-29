@@ -6,7 +6,7 @@ set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 If Defined KBN_NODE_HOME (
-  set "NODE=%KBN_NODE_HOME%\bin\node.exe"
+  set "NODE=%KBN_NODE_HOME%\node.exe"
 ) Else (
   set "NODE=%DIR%\node\default\node.exe"
 )
