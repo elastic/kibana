@@ -39,7 +39,9 @@ export class FetchRulesStep implements DispatcherStep {
       return { type: 'continue', data: { rules: RuleCatalog.empty() } };
     }
 
-    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds);
+    const result = await this.rulesSavedObjectService.findByIds(uniqueRuleIds, {
+      fields: ['metadata'],
+    });
     const rules = new Map<RuleId, Rule>();
 
     for (const doc of result) {
