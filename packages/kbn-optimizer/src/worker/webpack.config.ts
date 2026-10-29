@@ -171,15 +171,7 @@ export function getWebpackConfig(
                 sourceMap: !worker.dist,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !worker.dist,
-                postcssOptions: {
-                  config: require.resolve('../../postcss.config.js'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
           ],
         },
         {
@@ -198,15 +190,7 @@ export function getWebpackConfig(
                     sourceMap: !worker.dist,
                   },
                 },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                    postcssOptions: {
-                      config: require.resolve('../../postcss.config.js'),
-                    },
-                  },
-                },
+                { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
                 {
                   loader: 'sass-loader',
                   options: {
@@ -216,7 +200,7 @@ export function getWebpackConfig(
                           loaderContext.context || loaderContext.rootContext,
                           Path.resolve(
                             worker.repoRoot,
-                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                            `src/core/packages/core/public/styles/core_app/_globals_${theme}.scss`
                           )
                         )
                       );
@@ -295,7 +279,7 @@ export function getWebpackConfig(
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
-          'src/core/public/styles/core_app/images'
+          'src/core/packages/core/public/styles/core_app/images'
         ),
         'react-dom$':
           worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',

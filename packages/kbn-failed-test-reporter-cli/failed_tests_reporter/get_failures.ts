@@ -9,7 +9,10 @@
 
 import stripAnsi from 'strip-ansi';
 
-import { FailedTestCase, TestReport, makeFailedTestCaseIter } from './test_report';
+import type { FailedTestCase, TestReport } from './test_report';
+import { makeFailedTestCaseWithSuiteIter } from './test_report';
+
+export type JUnitTestType = 'ftr' | 'jest' | 'cypress';
 
 export type TestFailure = FailedTestCase['$'] & {
   failure: string;
@@ -18,7 +21,9 @@ export type TestFailure = FailedTestCase['$'] & {
   githubIssue?: string;
   failureCount?: number;
   commandLine?: string;
-  owners?: any;
+  owners?: string;
+  testType?: JUnitTestType;
+  location?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -34,6 +39,33 @@ const getText = (node?: Array<string | { _: string }>) => {
 
   return stripAnsi(String(nodeWrapped));
 };
+
+/** Decode the repository-relative file path stored in an FTR classname. */
+export function getLocationFromClassname(classname: string): string {
+  const idx = classname.indexOf('.');
+  if (idx === -1) {
+    return '';
+  }
+  return classname.slice(idx + 1).replace(/·/g, '.');
+}
+
+/**
+ * Best-effort detection of the test framework that produced a failure so it can
+ * be surfaced in the issue metadata. Scout failures are handled separately.
+ */
+function getTestType(rootName: string | undefined, classname: string): JUnitTestType | undefined {
+  if (/cypress/i.test(classname.split('.')[0])) {
+    return 'cypress';
+  }
+  if (rootName === 'jest' || rootName === 'ftr') {
+    return rootName;
+  }
+  return undefined;
+}
+
+function getRootSuiteName(report: TestReport): string | undefined {
+  return 'testsuites' in report ? report.testsuites?.$?.name : undefined;
+}
 
 const isLikelyIrrelevant = (name: string, failure: string) => {
   if (
@@ -79,11 +111,15 @@ export function getFailures(report: TestReport) {
   const failures: TestFailure[] = [];
 
   const commandLine = getCommandLineFromReport(report);
+  const rootName = getRootSuiteName(report);
 
-  for (const testCase of makeFailedTestCaseIter(report)) {
+  for (const { testCase, testSuite } of makeFailedTestCaseWithSuiteIter(report)) {
     const failure = getText(testCase.failure);
     const likelyIrrelevant = isLikelyIrrelevant(testCase.$.name, failure);
     const owners = testCase.$.owners;
+    const testType = getTestType(rootName, testCase.$.classname);
+    const location =
+      testType === 'jest' ? testSuite.$.name : getLocationFromClassname(testCase.$.classname);
 
     const failureObj = {
       // unwrap xml weirdness
@@ -94,6 +130,8 @@ export function getFailures(report: TestReport) {
       'system-out': getText(testCase['system-out']),
       commandLine,
       owners,
+      testType,
+      location,
     };
 
     // cleaning up duplicates

@@ -35,7 +35,10 @@ module.exports = {
   },
   resolve: {
     alias: {
-      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
+      core_app_image_assets: path.resolve(
+        KIBANA_ROOT,
+        'src/core/packages/core/public/styles/core_app/images'
+      ),
       [require.resolve('@elastic/eui/es/components/drag_and_drop')]: false,
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
@@ -128,14 +131,7 @@ module.exports = {
               sourceMap: !isProd,
             },
           },
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config'),
-              },
-            },
-          },
+          { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
           {
             loader: 'sass-loader',
             options: {
@@ -176,7 +172,7 @@ module.exports = {
                     loaderContext.context || loaderContext.rootContext,
                     path.resolve(
                       KIBANA_ROOT,
-                      'src/core/public/styles/core_app/_globals_v8light.scss'
+                      'src/core/packages/core/public/styles/core_app/_globals_v8light.scss'
                     )
                   )
                 );
