@@ -14,6 +14,7 @@ import {
   getReadableFailureStoreNames,
   loadDestinationIndexStats,
   type DestinationIndexStats,
+  type DestinationIndexStatsRequest,
   type DestinationIndexStatsTimeRange,
 } from '../destination_index_stats';
 
@@ -28,7 +29,7 @@ export interface DestinationDetailInput {
 export interface DestinationDetailContext {
   destinationId: string;
   indices?: ResolvedDestinationIndex[];
-  /** Set by the first stats request; reused when indices reload. */
+  /** Set once stats are requested; reused when indices reload. */
   indexStatsTimeRange?: DestinationIndexStatsTimeRange;
   indexStats?: DestinationIndexStats;
 }
@@ -36,7 +37,7 @@ export interface DestinationDetailContext {
 export type DestinationDetailEvent =
   | { type: 'indices.reset' }
   | { type: 'indices.update'; indices: ResolvedDestinationIndex[] }
-  | { type: 'indexStats.request'; timeRange: DestinationIndexStatsTimeRange }
+  | ({ type: 'indexStats.request' } & DestinationIndexStatsRequest)
   | { type: 'xstate.done.actor.loadIndexStats'; output: DestinationIndexStats }
   | { type: 'xstate.error.actor.loadIndexStats'; error: unknown };
 
@@ -46,7 +47,13 @@ export interface LoadIndexStatsInput {
   timeRange: DestinationIndexStatsTimeRange;
 }
 
-/** Details of one destination, loaded only while something displays them. */
+const isNewTimeRange = (
+  { indexStatsTimeRange }: DestinationDetailContext,
+  timeRange: DestinationIndexStatsTimeRange
+): boolean =>
+  indexStatsTimeRange?.start !== timeRange.start || indexStatsTimeRange?.end !== timeRange.end;
+
+/** Details of one destination, alive only while something displays them. */
 export const destinationDetailStateMachine = setup({
   types: {
     input: {} as DestinationDetailInput,
@@ -76,13 +83,12 @@ export const destinationDetailStateMachine = setup({
       if (event.type !== 'indexStats.request') {
         return false;
       }
-      const isNewTimeRange =
-        context.indexStatsTimeRange?.start !== event.timeRange.start ||
-        context.indexStatsTimeRange?.end !== event.timeRange.end;
       const hasPartialFailure =
         context.indexStats !== undefined &&
         Object.values(context.indexStats).some((value) => value === undefined);
-      return isNewTimeRange || hasPartialFailure;
+      return (
+        Boolean(event.refresh) || isNewTimeRange(context, event.timeRange) || hasPartialFailure
+      );
     },
   },
 }).createMachine({
@@ -141,7 +147,10 @@ export const destinationDetailStateMachine = setup({
         ready: {},
         failed: {
           on: {
-            'indexStats.request': { target: 'pending', actions: 'storeIndexStatsTimeRange' },
+            'indexStats.request': {
+              target: 'pending',
+              actions: 'storeIndexStatsTimeRange',
+            },
           },
         },
       },

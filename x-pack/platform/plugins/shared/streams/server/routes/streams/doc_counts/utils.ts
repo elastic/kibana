@@ -44,20 +44,21 @@ export const statsStreamNamesTimeRangeBodySchema = lazySchema(() =>
 
 const getNamedDataStreams = async (
   esClient: ElasticsearchClient,
-  names: string[]
+  names: string[],
+  retries = 3
 ): Promise<IndicesGetDataStreamResponse['data_streams']> => {
+  const { data_streams: resolvedDataStreams = [] } = await esClient.indices.resolveIndex({
+    name: names.join(','),
+    expand_wildcards: 'open',
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    filter_path: 'data_streams.name',
+  });
+  const resolvedNames = resolvedDataStreams.map(({ name }) => name);
+  if (resolvedNames.length === 0) {
+    return [];
+  }
   try {
-    const { data_streams: resolvedDataStreams = [] } = await esClient.indices.resolveIndex({
-      name: names.join(','),
-      expand_wildcards: 'open',
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      filter_path: 'data_streams.name',
-    });
-    const resolvedNames = resolvedDataStreams.map(({ name }) => name);
-    if (resolvedNames.length === 0) {
-      return [];
-    }
     // filter_path drops `data_streams` entirely when nothing matches.
     const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream({
       name: resolvedNames,
@@ -65,10 +66,11 @@ const getNamedDataStreams = async (
     });
     return dataStreams;
   } catch (error) {
-    if (isNotFoundError(error)) {
-      return [];
+    if (!isNotFoundError(error)) {
+      throw error;
     }
-    throw error;
+    // A stream deleted after resolving fails the whole request; resolving again skips it.
+    return retries > 0 ? getNamedDataStreams(esClient, resolvedNames, retries - 1) : [];
   }
 };
 

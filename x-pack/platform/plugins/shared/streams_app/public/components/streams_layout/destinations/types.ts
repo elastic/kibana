@@ -7,7 +7,6 @@
 
 import type { UnitDestinationSignal, UnitDestinationSignalTargets } from '@kbn/streams-schema';
 import type { DestinationNameValidationError } from './destination_helpers';
-
 /**
  * Destination storage choices shown in the create form.
  * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
@@ -19,7 +18,6 @@ export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
 export type DestinationType = 'elasticsearch' | 's3';
 
 export type DestinationSignal = UnitDestinationSignal;
-
 /** How an Elasticsearch destination chooses its indices. */
 export type DestinationIndexMode = 'static' | 'auto';
 

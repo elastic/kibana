@@ -31,6 +31,7 @@ import {
 } from '@xyflow/react';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import {
   buildUnitCanvasGraph,
   configuredDestinationNodeId,
@@ -156,9 +157,11 @@ export function StreamsCanvas() {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
+        data,
       },
     },
   } = useKibana();
+  const { timeState$ } = useTimefilter();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
@@ -172,6 +175,8 @@ export function StreamsCanvas() {
       core={core}
       urlStateStorageContainer={urlStateStorageContainer}
       apiKeyGenerationDeps={apiKeyGenerationDeps}
+      data={data}
+      timeState$={timeState$}
       loadSourceEnvironment={loadSourceEnvironment}
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
@@ -268,7 +273,7 @@ function StreamsCanvasInner() {
       buildConfiguredDestinationNode(
         destination,
         connectedDestinationIds.has(destination.id),
-        resolvedIndicesByDestination[destination.id]?.map((index) => index.name) ?? []
+        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? []
       )
     );
     const graphNodes = [
@@ -790,13 +795,16 @@ function StreamsCanvasInner() {
           {flyoutDestination ? (
             <UnitDestinationFlyout
               destination={flyoutDestination}
-              indices={resolvedIndicesByDestination[flyoutDestination.id] ?? NO_DESTINATION_INDICES}
+              indices={
+                resolvedIndicesByDestination.get(flyoutDestination.id) ?? NO_DESTINATION_INDICES
+              }
               indicesStatus={resolvedIndicesStatus}
               indicesError={resolvedIndicesError}
-              destinationDetailRef={
-                destinationsController.destinationDetailRefs[flyoutDestination.id]
-              }
-              onRequestIndexStats={destinationsController.requestIndexStats}
+              destinationDetailRef={destinationsController.destinationDetailRefs.get(
+                flyoutDestination.id
+              )}
+              onShowDestinationDetail={destinationsController.showDestinationDetail}
+              onHideDestinationDetail={destinationsController.hideDestinationDetail}
               onClose={closeFlyout}
               isDeleteDisabled={isSaving}
               onIndexClick={openIndexFlyout}

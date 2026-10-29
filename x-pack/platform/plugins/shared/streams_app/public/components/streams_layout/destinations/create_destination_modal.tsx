@@ -68,9 +68,11 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
   const {
     methods,
     formData: { storageKind },
-    formErrors,
+    formErrors: validationErrors,
     canSubmit,
   } = useDestinationCreationForm({ unitDefinition });
+  // The destination being saved is already in the unit, so its own name would read as taken.
+  const formErrors = isCreatingDestination ? {} : validationErrors;
   const { destinationName: destinationNameError } = formErrors;
   const destinationNameErrorText =
     destinationNameError === 'required'

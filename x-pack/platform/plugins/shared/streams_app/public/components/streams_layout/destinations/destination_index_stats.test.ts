@@ -22,7 +22,6 @@ const dataStream = (
   is_data_stream: true,
   lifecycle: { dsl: { data_retention: '7d' } },
   failure_store_enabled: false,
-  failure_store_has_data: false,
   privileges: { read_failure_store: true },
   ...overrides,
 });
@@ -133,17 +132,14 @@ describe('destination index stats', () => {
         dataStream('logs-off-default'),
         dataStream('logs-denied-default', {
           failure_store_enabled: true,
-          failure_store_has_data: true,
           privileges: { read_failure_store: false },
         }),
+        // Not yet holding failed docs: the first one can arrive after indices were resolved.
         dataStream('logs-empty-default', { failure_store_enabled: true }),
-        dataStream('logs-readable-default', {
-          failure_store_enabled: true,
-          failure_store_has_data: true,
-        }),
+        dataStream('logs-readable-default', { failure_store_enabled: true }),
         { name: 'legacy-index', is_data_stream: false },
       ])
-    ).toEqual(['logs-readable-default']);
+    ).toEqual(['logs-empty-default', 'logs-readable-default']);
   });
 
   it('only requests the given data streams, in batches, and skips failed counts without a readable failure store', async () => {

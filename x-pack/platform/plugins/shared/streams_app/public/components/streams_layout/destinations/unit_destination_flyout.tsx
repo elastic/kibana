@@ -26,10 +26,7 @@ import { getSignalTargetsWritePatterns } from '@kbn/streams-schema';
 import { IngestRateChartContent } from '../../stream_detail_overview/ingest_rate_chart';
 import { DeferredMount } from '../deferred_mount';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
-import {
-  getReadableFailureStoreNames,
-  type DestinationIndexStatsTimeRange,
-} from './destination_index_stats';
+import { getReadableFailureStoreNames } from './destination_index_stats';
 import { DestinationIndicesTable } from './destination_indices_table';
 import { useDestinationIndexStats } from './destinations_context';
 import { S3DestinationDetails } from './s3_destination_details';
@@ -92,7 +89,8 @@ export const UnitDestinationFlyout = ({
   indicesStatus,
   indicesError,
   destinationDetailRef,
-  onRequestIndexStats,
+  onShowDestinationDetail,
+  onHideDestinationDetail,
   onClose,
   onDelete,
   onIndexClick,
@@ -103,7 +101,8 @@ export const UnitDestinationFlyout = ({
   indicesStatus: ResolvedIndicesStatus;
   indicesError?: string;
   destinationDetailRef?: DestinationDetailActorRef;
-  onRequestIndexStats: (destinationId: string, timeRange: DestinationIndexStatsTimeRange) => void;
+  onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
+  onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
   onClose: () => void;
   onDelete: () => void;
   onIndexClick: (indexName: string) => void;
@@ -203,7 +202,8 @@ export const UnitDestinationFlyout = ({
               indicesStatus={indicesStatus}
               indicesError={indicesError}
               destinationDetailRef={destinationDetailRef}
-              onRequestStats={onRequestIndexStats}
+              onShowDestinationDetail={onShowDestinationDetail}
+              onHideDestinationDetail={onHideDestinationDetail}
               onIndexClick={onIndexClick}
               showToolbar
             />

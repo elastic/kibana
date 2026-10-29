@@ -8,7 +8,19 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, enqueueActions, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
+import {
+  and,
+  assign,
+  enqueueActions,
+  fromEventObservable,
+  fromPromise,
+  not,
+  sendTo,
+  setup,
+  stateIn,
+} from 'xstate';
+import type { DataPublicPluginStart, TimefilterHook } from '@kbn/data-plugin/public';
+import { filter, map, startWith } from 'rxjs';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   STREAMS_DEFAULT_UNIT_ID,
@@ -62,6 +74,12 @@ export interface DestinationsParentEvent {
   secrets?: StreamsUnit.Secrets;
 }
 
+/** The page time filter: `timeState$` signals changes and refreshes, `data` reads the range. */
+export interface DestinationsTimeDeps {
+  data: DataPublicPluginStart;
+  timeState$: TimefilterHook['timeState$'];
+}
+
 export interface DestinationsStateInput {
   unitDefinition: Unit;
   parentRef: AnyActorRef;
@@ -90,10 +108,14 @@ export interface DestinationsStateContext {
   apiKeyError?: string;
   hasReceivedUnit: boolean;
   parentRef: AnyActorRef;
-  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesError?: string;
-  /** Spawned the first time a destination's details are shown. */
-  destinationDetailRefs: Record<string, DestinationDetailActorRef>;
+  /** Spawned when a destination's details are first shown, stopped once nothing shows them. */
+  destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  /** Components showing each destination's details. */
+  destinationDetailViewerIds: ReadonlyMap<string, ReadonlySet<string>>;
+  /** The page time range, which the stats of every shown destination follow. */
+  timeRange?: DestinationIndexStatsTimeRange;
 }
 
 export type DestinationsStateEvent =
@@ -120,11 +142,9 @@ export type DestinationsStateEvent =
   | { type: 'resolvedIndices.reload' }
   | { type: 'xstate.done.actor.loadResolvedIndices'; output: ResolveUnitIndicesResponse }
   | { type: 'xstate.error.actor.loadResolvedIndices'; error: unknown }
-  | {
-      type: 'indexStats.request';
-      destinationId: string;
-      timeRange: DestinationIndexStatsTimeRange;
-    };
+  | { type: 'destinationDetail.show'; destinationId: string; viewerId: string }
+  | { type: 'timefilter.changed'; timeRange: DestinationIndexStatsTimeRange }
+  | { type: 'destinationDetail.hide'; destinationId: string; viewerId: string };
 
 const removeDestinationsFromContext = (
   context: Pick<DestinationsStateContext, 'unitDefinition' | 'selectedDestinationId'>,
@@ -156,6 +176,7 @@ export const destinationsStateMachine = setup({
   actors: {
     generateApiKey: getPlaceholderFor(createGenerateApiKeyActor),
     loadResolvedIndices: getPlaceholderFor(createLoadResolvedIndicesActor),
+    watchTimefilter: getPlaceholderFor(createWatchTimefilterActor),
     destinationDetail: destinationDetailStateMachine,
   },
   actions: {
@@ -168,7 +189,7 @@ export const destinationsStateMachine = setup({
         return {};
       }
       return {
-        resolvedIndicesByDestination: Object.fromEntries(
+        resolvedIndicesByDestination: new Map(
           Object.entries(event.output.destinations).map(([destinationId, { indices }]) => [
             destinationId,
             indices,
@@ -178,54 +199,108 @@ export const destinationsStateMachine = setup({
       };
     }),
     clearResolvedIndices: assign({
-      resolvedIndicesByDestination: {},
+      resolvedIndicesByDestination: () => new Map(),
       resolvedIndicesError: undefined,
     }),
     spawnDestinationDetail: assign(({ context, event, spawn }) => {
-      if (event.type !== 'indexStats.request') {
+      if (event.type !== 'destinationDetail.show') {
         return {};
       }
       const { destinationId } = event;
       return {
-        destinationDetailRefs: {
-          ...context.destinationDetailRefs,
-          [destinationId]: spawn('destinationDetail', {
+        destinationDetailRefs: new Map(context.destinationDetailRefs).set(
+          destinationId,
+          spawn('destinationDetail', {
             id: `destinationDetail-${destinationId}`,
             input: {
               destinationId,
-              indices: context.resolvedIndicesByDestination[destinationId] ?? [],
+              indices: context.resolvedIndicesByDestination.get(destinationId) ?? [],
             },
-          }),
-        },
+          })
+        ),
       };
     }),
     // Spawned while indices are resolving; the detail waits for `indices.update`.
     spawnPendingDestinationDetail: assign(({ context, event, spawn }) => {
-      if (event.type !== 'indexStats.request') {
+      if (event.type !== 'destinationDetail.show') {
         return {};
       }
       const { destinationId } = event;
       return {
-        destinationDetailRefs: {
-          ...context.destinationDetailRefs,
-          [destinationId]: spawn('destinationDetail', {
+        destinationDetailRefs: new Map(context.destinationDetailRefs).set(
+          destinationId,
+          spawn('destinationDetail', {
             id: `destinationDetail-${destinationId}`,
             input: { destinationId },
-          }),
-        },
+          })
+        ),
       };
     }),
-    forwardIndexStatsRequest: enqueueActions(({ context, event, enqueue }) => {
-      if (event.type !== 'indexStats.request') {
+    // Skips the assign for a known viewer, which would otherwise create a new context.
+    addDestinationDetailViewer: enqueueActions(({ context, event, enqueue }) => {
+      if (event.type !== 'destinationDetail.show') {
         return;
       }
-      const detailRef = context.destinationDetailRefs[event.destinationId];
+      const { destinationId, viewerId } = event;
+      const viewerIds = context.destinationDetailViewerIds.get(destinationId);
+      if (viewerIds?.has(viewerId)) {
+        return;
+      }
+      enqueue.assign({
+        destinationDetailViewerIds: new Map(context.destinationDetailViewerIds).set(
+          destinationId,
+          new Set(viewerIds).add(viewerId)
+        ),
+      });
+    }),
+    requestIndexStats: enqueueActions(({ context, event, enqueue }) => {
+      if (event.type !== 'destinationDetail.show' || !context.timeRange) {
+        return;
+      }
+      const detailRef = context.destinationDetailRefs.get(event.destinationId);
       if (detailRef) {
-        enqueue.sendTo(detailRef, { type: 'indexStats.request', timeRange: event.timeRange });
+        enqueue.sendTo(detailRef, { type: 'indexStats.request', timeRange: context.timeRange });
       }
     }),
+    // A change that keeps the time range is a refresh, so the stats reload either way.
+    updateTimeRange: enqueueActions(({ context, event, enqueue }) => {
+      if (event.type !== 'timefilter.changed') {
+        return;
+      }
+      const { timeRange } = event;
+      enqueue.assign({ timeRange });
+      for (const detailRef of context.destinationDetailRefs.values()) {
+        enqueue.sendTo(detailRef, { type: 'indexStats.request', timeRange, refresh: true });
+      }
+    }),
+    hideDestinationDetail: enqueueActions(({ context, event, enqueue }) => {
+      if (event.type !== 'destinationDetail.hide') {
+        return;
+      }
+      const { destinationId, viewerId } = event;
+      if (!context.destinationDetailViewerIds.get(destinationId)?.has(viewerId)) {
+        return;
+      }
+      const viewerIds = new Set(context.destinationDetailViewerIds.get(destinationId));
+      viewerIds.delete(viewerId);
+      const destinationDetailViewerIds = new Map(context.destinationDetailViewerIds);
+      if (viewerIds.size > 0) {
+        enqueue.assign({
+          destinationDetailViewerIds: destinationDetailViewerIds.set(destinationId, viewerIds),
+        });
+        return;
+      }
+      destinationDetailViewerIds.delete(destinationId);
+      const destinationDetailRefs = new Map(context.destinationDetailRefs);
+      const detailRef = destinationDetailRefs.get(destinationId);
+      if (detailRef) {
+        enqueue.stopChild(detailRef);
+        destinationDetailRefs.delete(destinationId);
+      }
+      enqueue.assign({ destinationDetailRefs, destinationDetailViewerIds });
+    }),
     resetDestinationDetails: enqueueActions(({ context, enqueue }) => {
-      for (const detailRef of Object.values(context.destinationDetailRefs)) {
+      for (const detailRef of context.destinationDetailRefs.values()) {
         enqueue.sendTo(detailRef, { type: 'indices.reset' });
       }
     }),
@@ -233,19 +308,21 @@ export const destinationsStateMachine = setup({
       const destinationIds = new Set(
         getUnitDestinations(context.unitDefinition).map(({ id }) => id)
       );
-      const destinationDetailRefs: Record<string, DestinationDetailActorRef> = {};
-      for (const [destinationId, detailRef] of Object.entries(context.destinationDetailRefs)) {
+      const destinationDetailRefs = new Map<string, DestinationDetailActorRef>();
+      const destinationDetailViewerIds = new Map(context.destinationDetailViewerIds);
+      for (const [destinationId, detailRef] of context.destinationDetailRefs) {
         if (!destinationIds.has(destinationId)) {
           enqueue.stopChild(detailRef);
+          destinationDetailViewerIds.delete(destinationId);
           continue;
         }
-        destinationDetailRefs[destinationId] = detailRef;
+        destinationDetailRefs.set(destinationId, detailRef);
         enqueue.sendTo(detailRef, {
           type: 'indices.update',
-          indices: context.resolvedIndicesByDestination[destinationId] ?? [],
+          indices: context.resolvedIndicesByDestination.get(destinationId) ?? [],
         });
       }
-      enqueue.assign({ destinationDetailRefs });
+      enqueue.assign({ destinationDetailRefs, destinationDetailViewerIds });
     }),
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
@@ -471,8 +548,8 @@ export const destinationsStateMachine = setup({
   },
   guards: {
     hasDestinationDetail: ({ context, event }) =>
-      event.type === 'indexStats.request' &&
-      Boolean(context.destinationDetailRefs[event.destinationId]),
+      event.type === 'destinationDetail.show' &&
+      context.destinationDetailRefs.has(event.destinationId),
     canCreateDestination: ({ context, event }) =>
       event.type === 'destination.create' &&
       canSubmitDestinationForm({
@@ -514,12 +591,14 @@ export const destinationsStateMachine = setup({
     unitDefinition: input.unitDefinition,
     hasReceivedUnit: false,
     parentRef: input.parentRef,
-    resolvedIndicesByDestination: {},
-    destinationDetailRefs: {},
+    resolvedIndicesByDestination: new Map(),
+    destinationDetailRefs: new Map(),
+    destinationDetailViewerIds: new Map(),
   }),
+  invoke: { id: 'watchTimefilter', src: 'watchTimefilter' },
   on: {
-    'unit.loaded': { actions: 'syncLoadedUnit' },
-    'unit.persisted': { actions: ['syncLoadedUnit', 'notifyDestinationDeleted'] },
+    'timefilter.changed': { actions: 'updateTimeRange' },
+    'destinationDetail.hide': { actions: 'hideDestinationDetail' },
     'unit.persistenceFailed': {
       guard: 'isDeletePersistenceFailure',
       actions: 'restoreUnitAfterPersistenceFailure',
@@ -593,7 +672,7 @@ export const destinationsStateMachine = setup({
             'unit.persisted': {
               guard: 'isCreatedDestination',
               target: 'idle',
-              actions: ['syncLoadedUnit', 'notifyDestinationCreated', 'clearCreate'],
+              actions: ['notifyDestinationCreated', 'clearCreate'],
             },
             'unit.persistenceFailed': {
               guard: 'isCreatedDestination',
@@ -625,21 +704,36 @@ export const destinationsStateMachine = setup({
         },
       },
     },
+    // This region handles every unit event, which overrides any root handler for them,
+    // so syncing the unit and the delete toast have to happen here.
     resolvedIndices: {
       initial: 'loading',
       on: {
         'resolvedIndices.reload': { target: '.loading' },
-        'unit.persisted': { target: '.loading' },
-        'unit.loaded': { guard: 'hasPreviouslyLoadedUnit', target: '.loading' },
+        'unit.persisted': {
+          target: '.loading',
+          actions: ['syncLoadedUnit', 'notifyDestinationDeleted'],
+        },
+        'unit.loaded': [
+          { guard: 'hasPreviouslyLoadedUnit', target: '.loading', actions: 'syncLoadedUnit' },
+          { actions: 'syncLoadedUnit' },
+        ],
       },
       states: {
         loading: {
           entry: ['resetDestinationDetails', 'clearResolvedIndices'],
           on: {
-            'indexStats.request': [
-              { guard: 'hasDestinationDetail', actions: 'forwardIndexStatsRequest' },
+            'destinationDetail.show': [
               {
-                actions: ['spawnPendingDestinationDetail', 'forwardIndexStatsRequest'],
+                guard: 'hasDestinationDetail',
+                actions: ['addDestinationDetailViewer', 'requestIndexStats'],
+              },
+              {
+                actions: [
+                  'spawnPendingDestinationDetail',
+                  'addDestinationDetailViewer',
+                  'requestIndexStats',
+                ],
               },
             ],
           },
@@ -659,10 +753,17 @@ export const destinationsStateMachine = setup({
         ready: {
           entry: 'updateDestinationDetails',
           on: {
-            'indexStats.request': [
-              { guard: 'hasDestinationDetail', actions: 'forwardIndexStatsRequest' },
+            'destinationDetail.show': [
               {
-                actions: ['spawnDestinationDetail', 'forwardIndexStatsRequest'],
+                guard: 'hasDestinationDetail',
+                actions: ['addDestinationDetailViewer', 'requestIndexStats'],
+              },
+              {
+                actions: [
+                  'spawnDestinationDetail',
+                  'addDestinationDetailViewer',
+                  'requestIndexStats',
+                ],
               },
             ],
           },
@@ -671,10 +772,17 @@ export const destinationsStateMachine = setup({
           entry: 'updateDestinationDetails',
           on: {
             'resolvedIndices.reload': { target: 'loading' },
-            'indexStats.request': [
-              { guard: 'hasDestinationDetail', actions: 'forwardIndexStatsRequest' },
+            'destinationDetail.show': [
               {
-                actions: ['spawnDestinationDetail', 'forwardIndexStatsRequest'],
+                guard: 'hasDestinationDetail',
+                actions: ['addDestinationDetailViewer', 'requestIndexStats'],
+              },
+              {
+                actions: [
+                  'spawnDestinationDetail',
+                  'addDestinationDetailViewer',
+                  'requestIndexStats',
+                ],
               },
             ],
           },
@@ -694,12 +802,12 @@ export const destinationsStateMachine = setup({
         'unit.loaded': {
           guard: 'loadedUnitRemovedViewedDestination',
           target: '.closed',
-          actions: ['syncLoadedUnit', 'closeFlyout'],
+          actions: 'closeFlyout',
         },
         'unit.persisted': {
           guard: 'loadedUnitRemovedViewedDestination',
           target: '.closed',
-          actions: ['syncLoadedUnit', 'notifyDestinationDeleted', 'closeFlyout'],
+          actions: 'closeFlyout',
         },
       },
       states: {
@@ -819,6 +927,24 @@ function createLoadResolvedIndicesActor({
   });
 }
 
+function createWatchTimefilterActor({ data, timeState$ }: DestinationsTimeDeps) {
+  const toTimeRangeEvent = (): DestinationsStateEvent => {
+    const { from, to } = data.query.timefilter.timefilter.getAbsoluteTime();
+    return {
+      type: 'timefilter.changed',
+      timeRange: { start: new Date(from).getTime(), end: new Date(to).getTime() },
+    };
+  };
+  // Every later emission is a range change or a refresh, including one that keeps an absolute range.
+  return fromEventObservable(() =>
+    timeState$.pipe(
+      filter(({ kind }) => kind !== 'initial'),
+      map(toTimeRangeEvent),
+      startWith(toTimeRangeEvent())
+    )
+  );
+}
+
 function createNotifyResolvedIndicesErrorAction({ toasts }: { toasts: Toasts }) {
   return ({ event }: { event: DestinationsStateEvent }) => {
     if (event.type !== 'xstate.error.actor.loadResolvedIndices') {
@@ -835,15 +961,18 @@ function createNotifyResolvedIndicesErrorAction({ toasts }: { toasts: Toasts }) 
 export const createDestinationsMachineImplementations = ({
   toasts,
   apiKeyGenerationDeps,
+  data,
+  timeState$,
 }: {
   toasts: Toasts;
   apiKeyGenerationDeps: DestinationApiKeyGenerationDeps;
-}): MachineImplementationsFrom<typeof destinationsStateMachine> => {
+} & DestinationsTimeDeps): MachineImplementationsFrom<typeof destinationsStateMachine> => {
   const services = createDestinationApiKeyServices(apiKeyGenerationDeps);
   return {
     actors: {
       generateApiKey: createGenerateApiKeyActor({ services }),
       loadResolvedIndices: createLoadResolvedIndicesActor(apiKeyGenerationDeps),
+      watchTimefilter: createWatchTimefilterActor({ data, timeState$ }),
       destinationDetail: destinationDetailStateMachine.provide(
         createDestinationDetailMachineImplementations(apiKeyGenerationDeps)
       ),

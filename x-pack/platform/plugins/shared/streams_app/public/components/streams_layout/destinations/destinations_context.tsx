@@ -10,16 +10,14 @@ import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_DEFAULT_UNIT_ID, type ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 import {
   getDestinationViewModels,
   type DestinationsActorRef,
   type ResolvedIndicesStatus,
 } from './state_machines/destinations_state_machine';
-import type {
-  DestinationIndexStats,
-  DestinationIndexStatsTimeRange,
-} from './destination_index_stats';
+import type { DestinationIndexStats } from './destination_index_stats';
 import {
   selectIndexStats,
   selectIndexStatsStatus,
@@ -35,12 +33,13 @@ import type { DestinationCreationFormData, DestinationType, DestinationViewModel
 
 export interface DestinationsController {
   destinations: DestinationViewModel[];
-  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
   resolvedIndicesError?: string;
   /** Only destinations whose details were shown. */
-  destinationDetailRefs: Record<string, DestinationDetailActorRef>;
-  requestIndexStats: (destinationId: string, timeRange: DestinationIndexStatsTimeRange) => void;
+  destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  showDestinationDetail: (destinationId: string, viewerId: string) => void;
+  hideDestinationDetail: (destinationId: string, viewerId: string) => void;
   query: string;
   selectedDestination?: DestinationViewModel;
   isCreateModalOpen: boolean;
@@ -89,9 +88,10 @@ export const useDestinationsTable = (): DestinationsTableController => {
       notifications: { toasts },
     },
     dependencies: {
-      start: { streams },
+      start: { streams, data },
     },
   } = useKibana();
+  const { timeState$ } = useTimefilter();
   const unitDefinitionRepository = useMemo(
     () =>
       createUnitRepository({
@@ -107,6 +107,8 @@ export const useDestinationsTable = (): DestinationsTableController => {
         streamsRepositoryClient: streams.streamsRepositoryClient,
         unitId: STREAMS_DEFAULT_UNIT_ID,
       },
+      data,
+      timeState$,
       loadUnitDefinition: unitDefinitionRepository.load,
       persistUnitDefinition: unitDefinitionRepository.persist,
     },
@@ -236,9 +238,14 @@ export const useDestinations = ({
     destinationsActorRef,
     (state) => state.context.destinationDetailRefs
   );
-  const requestIndexStats = useCallback(
-    (destinationId: string, timeRange: DestinationIndexStatsTimeRange) =>
-      destinationsActorRef.send({ type: 'indexStats.request', destinationId, timeRange }),
+  const showDestinationDetail = useCallback(
+    (destinationId: string, viewerId: string) =>
+      destinationsActorRef.send({ type: 'destinationDetail.show', destinationId, viewerId }),
+    [destinationsActorRef]
+  );
+  const hideDestinationDetail = useCallback(
+    (destinationId: string, viewerId: string) =>
+      destinationsActorRef.send({ type: 'destinationDetail.hide', destinationId, viewerId }),
     [destinationsActorRef]
   );
 
@@ -268,7 +275,8 @@ export const useDestinations = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
-      requestIndexStats,
+      showDestinationDetail,
+      hideDestinationDetail,
       query,
       selectedDestination: destinationViews.find(({ id }) => id === selectedDestinationId),
       isCreateModalOpen,
@@ -300,7 +308,8 @@ export const useDestinations = ({
     }),
     [
       destinationDetailRefs,
-      requestIndexStats,
+      showDestinationDetail,
+      hideDestinationDetail,
       resolvedIndicesByDestination,
       resolvedIndicesError,
       resolvedIndicesStatus,

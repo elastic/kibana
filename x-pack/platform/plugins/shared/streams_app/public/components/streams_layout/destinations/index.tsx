@@ -26,7 +26,8 @@ export const DestinationsTab = () => {
     resolvedIndicesStatus,
     resolvedIndicesError,
     destinationDetailRefs,
-    requestIndexStats,
+    showDestinationDetail,
+    hideDestinationDetail,
     query,
     isCreateModalOpen,
     isRefreshingUnit,
@@ -96,12 +97,12 @@ export const DestinationsTab = () => {
       const aValue = getDestinationSortableValue(
         a,
         sort.id,
-        resolvedIndicesByDestination[a.id]?.length ?? 0
+        resolvedIndicesByDestination.get(a.id)?.length ?? 0
       );
       const bValue = getDestinationSortableValue(
         b,
         sort.id,
-        resolvedIndicesByDestination[b.id]?.length ?? 0
+        resolvedIndicesByDestination.get(b.id)?.length ?? 0
       );
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
@@ -149,7 +150,8 @@ export const DestinationsTab = () => {
             resolvedIndicesStatus={resolvedIndicesStatus}
             resolvedIndicesError={resolvedIndicesError}
             destinationDetailRefs={destinationDetailRefs}
-            onRequestIndexStats={requestIndexStats}
+            onShowDestinationDetail={showDestinationDetail}
+            onHideDestinationDetail={hideDestinationDetail}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
             visibleColumns={visibleColumnIds}
             pagination={pagination}

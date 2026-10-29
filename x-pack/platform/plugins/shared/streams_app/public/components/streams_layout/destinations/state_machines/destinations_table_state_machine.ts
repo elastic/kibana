@@ -14,6 +14,7 @@ import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
   type DestinationsActorRef,
+  type DestinationsTimeDeps,
 } from './destinations_state_machine';
 import {
   createDefaultUnit,
@@ -32,7 +33,7 @@ export interface DestinationsTablePagination {
   pageSize: number;
 }
 
-export interface DestinationsTableStateInput {
+export interface DestinationsTableStateInput extends DestinationsTimeDeps {
   unitDefinition?: Unit;
   toasts: CoreStart['notifications']['toasts'];
   apiKeyGenerationDeps: DestinationApiKeyGenerationDeps;
@@ -246,6 +247,8 @@ export const destinationsTableStateMachine = setup({
           createDestinationsMachineImplementations({
             toasts: input.toasts,
             apiKeyGenerationDeps: input.apiKeyGenerationDeps,
+            data: input.data,
+            timeState$: input.timeState$,
           })
         ),
         {

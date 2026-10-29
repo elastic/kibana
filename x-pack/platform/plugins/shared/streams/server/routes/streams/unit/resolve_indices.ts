@@ -140,7 +140,6 @@ export const resolveUnitIndicesRoute = createServerRoute({
     const names = [...resolvedNames];
     const lifecycleByName = new Map<string, ClassicIngestStreamEffectiveLifecycle>();
     const failureStoreEnabledByName = new Map<string, boolean>();
-    const failureStoreHasDataByName = new Map<string, boolean>();
     const healthByName = new Map<string, ResolvedDestinationIndexHealth>();
     const privilegesByName: Record<string, { read_failure_store: boolean }> =
       dataStreamNames.size > 0
@@ -172,10 +171,6 @@ export const resolveUnitIndicesRoute = createServerRoute({
           dataStream.name,
           isEnabledFailureStore(getFailureStore({ dataStream }))
         );
-        failureStoreHasDataByName.set(
-          dataStream.name,
-          Boolean(dataStream.failure_store?.indices?.length)
-        );
         const health = toResolvedIndexHealth(dataStream.status);
         if (health) {
           healthByName.set(dataStream.name, health);
@@ -200,7 +195,6 @@ export const resolveUnitIndicesRoute = createServerRoute({
                           error: { message: 'Data stream not found' },
                         },
                         failure_store_enabled: failureStoreEnabledByName.get(name) ?? true,
-                        failure_store_has_data: failureStoreHasDataByName.get(name),
                         health: healthByName.get(name),
                         privileges: {
                           read_failure_store: privilegesByName[name]?.read_failure_store ?? false,

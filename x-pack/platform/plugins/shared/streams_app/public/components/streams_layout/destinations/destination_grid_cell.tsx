@@ -103,6 +103,6 @@ export const getDestinationSortableValue = (
 };
 
 export const getTargetedIndexCount = (
-  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>,
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>,
   destinationId: string
-): number => resolvedIndicesByDestination[destinationId]?.length ?? 0;
+): number => resolvedIndicesByDestination.get(destinationId)?.length ?? 0;

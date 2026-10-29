@@ -29,7 +29,12 @@ const timeRange = { start: 0, end: 1000 };
 
 const createDetailActor = (initialIndices?: ResolvedDestinationIndex[]) => {
   const loadIndexStats = jest.fn(
-    async ({ input }: { input: LoadIndexStatsInput }): Promise<DestinationIndexStats> => ({
+    async ({
+      input,
+    }: {
+      input: LoadIndexStatsInput;
+      signal: AbortSignal;
+    }): Promise<DestinationIndexStats> => ({
       timeRange: input.timeRange,
       docs: Object.fromEntries(input.dataStreamNames.map((name) => [name, 1])),
       degradedDocs: {},
@@ -132,5 +137,37 @@ describe('destination detail state machine', () => {
     await waitForStatus(actor, 'ready');
 
     expect(loadIndexStats).toHaveBeenCalledTimes(2);
+  });
+
+  it('reloads on a refresh of the same time range', async () => {
+    const { actor, loadIndexStats } = createDetailActor(indices);
+
+    actor.send({ type: 'indexStats.request', timeRange });
+    await waitForStatus(actor, 'ready');
+    actor.send({ type: 'indexStats.request', timeRange, refresh: true });
+    await waitForStatus(actor, 'ready');
+
+    expect(loadIndexStats).toHaveBeenCalledTimes(2);
+  });
+
+  it('restarts a running load on a refresh of the same time range', async () => {
+    const { actor, loadIndexStats } = createDetailActor(indices);
+
+    actor.send({ type: 'indexStats.request', timeRange });
+    actor.send({ type: 'indexStats.request', timeRange, refresh: true });
+    await waitForStatus(actor, 'ready');
+
+    expect(loadIndexStats).toHaveBeenCalledTimes(2);
+    expect(loadIndexStats.mock.calls[0][0].signal.aborted).toBe(true);
+  });
+
+  it('keeps the running load when the same time range is requested again', async () => {
+    const { actor, loadIndexStats } = createDetailActor(indices);
+
+    actor.send({ type: 'indexStats.request', timeRange });
+    actor.send({ type: 'indexStats.request', timeRange });
+    await waitForStatus(actor, 'ready');
+
+    expect(loadIndexStats).toHaveBeenCalledTimes(1);
   });
 });

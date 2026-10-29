@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiToolTip,
   formatNumber,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -48,7 +49,6 @@ import {
 } from '../../stream_list_view/translations';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useTimefilter } from '../../../hooks/use_timefilter';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
 import {
   buildDestinationIndexRows,
@@ -56,7 +56,6 @@ import {
   type DestinationIndexRow,
   type DestinationIndexSort,
   type DestinationIndexSortField,
-  type DestinationIndexStatsTimeRange,
 } from './destination_index_stats';
 import { useDestinationIndexStats } from './destinations_context';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
@@ -143,8 +142,10 @@ interface DestinationIndicesTableProps {
   indicesStatus: ResolvedIndicesStatus;
   indicesError?: string;
   destinationDetailRef?: DestinationDetailActorRef;
-  /** Called on mount and whenever the time range or the indices change. */
-  onRequestStats: (destinationId: string, timeRange: DestinationIndexStatsTimeRange) => void;
+  /** Called on mount; the details then follow the page time range and the indices. */
+  onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
+  /** Called on unmount, so the details stop once nothing displays them. */
+  onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
   /** Opens an index in place. When omitted, index links navigate to the index page. */
   onIndexClick?: (indexName: string) => void;
   /** Search and data quality filter above the table. */
@@ -158,15 +159,14 @@ export const DestinationIndicesTable = ({
   indicesStatus,
   indicesError,
   destinationDetailRef,
-  onRequestStats,
+  onShowDestinationDetail,
+  onHideDestinationDetail,
   onIndexClick,
   showToolbar = false,
 }: DestinationIndicesTableProps) => {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
+  const viewerId = useGeneratedHtmlId({ prefix: 'destinationIndicesTable' });
   const { stats, status: statsStatus } = useDestinationIndexStats(destinationDetailRef);
   const [query, setQuery] = useState('');
   const [selectedQualities, setSelectedQualities] = useState<QualityIndicators[]>([]);
@@ -174,10 +174,9 @@ export const DestinationIndicesTable = ({
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
   useEffect(() => {
-    if (indicesStatus !== 'loading') {
-      onRequestStats(destinationId, { start, end });
-    }
-  }, [destinationId, indices, indicesStatus, onRequestStats, start, end]);
+    onShowDestinationDetail(destinationId, viewerId);
+    return () => onHideDestinationDetail(destinationId, viewerId);
+  }, [destinationId, onHideDestinationDetail, onShowDestinationDetail, viewerId]);
 
   const isStatsLoading = statsStatus === 'loading';
   const isStatsFailed = statsStatus === 'failed';

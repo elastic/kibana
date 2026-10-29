@@ -6,6 +6,8 @@
  */
 
 import { createMemoryHistory } from 'history';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { EMPTY } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createKbnUrlStateStorage,
@@ -72,6 +74,8 @@ const startCanvas = (
         useHash: false,
       }),
       apiKeyGenerationDeps: { streamsRepositoryClient: createStreamsRepositoryClient(core) },
+      data: dataPluginMock.createStartContract(),
+      timeState$: EMPTY,
       loadUnitDefinition: async () => unit,
       persistUnitDefinition,
       createHistoryRef: { current: { hold: () => {}, reset: () => {}, discard: () => {} } },
@@ -319,6 +323,8 @@ describe('canvasStateMachine', () => {
       apiKeyGenerationDeps: {
         streamsRepositoryClient: { fetch: jest.fn() },
       } as unknown as DestinationApiKeyGenerationDeps,
+      data: dataPluginMock.createStartContract(),
+      timeState$: EMPTY,
       loadUnitDefinition: load,
       persistUnitDefinition: persist,
       createHistoryRef: { current: { hold: jest.fn(), reset: jest.fn(), discard: jest.fn() } },

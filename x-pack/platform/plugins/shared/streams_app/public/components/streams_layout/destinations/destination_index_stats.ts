@@ -21,6 +21,12 @@ export interface DestinationIndexStatsTimeRange {
   end: number;
 }
 
+export interface DestinationIndexStatsRequest {
+  timeRange: DestinationIndexStatsTimeRange;
+  /** Reloads even when the time range is unchanged. */
+  refresh?: boolean;
+}
+
 /** Per-index values of one bulk stats request; `undefined` when the request failed or was skipped. */
 type StatsByIndex = Record<string, number> | undefined;
 
@@ -76,10 +82,7 @@ export const getReadableFailureStoreNames = (
   indices: readonly ResolvedDestinationIndex[]
 ): string[] =>
   indices.flatMap((index) =>
-    index.is_data_stream &&
-    index.failure_store_enabled &&
-    index.failure_store_has_data &&
-    index.privileges.read_failure_store
+    index.is_data_stream && index.failure_store_enabled && index.privileges.read_failure_store
       ? [index.name]
       : []
   );

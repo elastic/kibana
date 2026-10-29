@@ -6,6 +6,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { EMPTY } from 'rxjs';
 import { createActor, waitFor, type Actor } from 'xstate';
 import { createDefaultUnit } from '../../../../services/unit_repository';
 import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
@@ -33,6 +35,8 @@ describe('destinationsTableStateMachine', () => {
         apiKeyGenerationDeps: {
           streamsRepositoryClient: { fetch },
         } as unknown as DestinationApiKeyGenerationDeps,
+        data: dataPluginMock.createStartContract(),
+        timeState$: EMPTY,
         loadUnitDefinition: load,
         persistUnitDefinition: persist,
       },

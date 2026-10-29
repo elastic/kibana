@@ -6,6 +6,9 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { TimeState } from '@kbn/es-query';
+import { Subject, type ObservedValueOf } from 'rxjs';
 import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
 import { createDefaultUnit } from '../../../../services/unit_repository';
 import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
@@ -16,6 +19,7 @@ import {
   destinationsStateMachine,
   getDestinationViewModels,
   type DestinationsParentEvent,
+  type DestinationsTimeDeps,
 } from './destinations_state_machine';
 
 type DestinationsActor = Actor<typeof destinationsStateMachine>;
@@ -27,6 +31,20 @@ describe('destinationsStateMachine', () => {
   let fetch: jest.Mock;
   let parentSend: jest.Mock<void, [DestinationsParentEvent]>;
   let actor: DestinationsActor;
+  let data: ReturnType<typeof dataPluginMock.createStartContract>;
+  let timeState$: Subject<ObservedValueOf<DestinationsTimeDeps['timeState$']>>;
+  const setAbsoluteTime = (from: string, to: string) =>
+    jest.mocked(data.query.timefilter.timefilter.getAbsoluteTime).mockReturnValue({ from, to });
+  const emitTimeState = (kind: 'shift' | 'override', from: string, to: string) => {
+    setAbsoluteTime(from, to);
+    const timeState: TimeState = {
+      timeRange: { from, to },
+      asAbsoluteTimeRange: { from, to, mode: 'absolute' },
+      start: Date.parse(from),
+      end: Date.parse(to),
+    };
+    timeState$.next({ kind, timeState });
+  };
 
   const apiKeyCalls = () =>
     fetch.mock.calls.filter(([endpoint]: [string]) => endpoint.includes('/destinations/api_key'));
@@ -53,6 +71,9 @@ describe('destinationsStateMachine', () => {
     fetch = jest.fn(async (endpoint: string) =>
       endpoint.startsWith('GET /internal/streams/unit/') ? { destinations: {} } : apiKeyResponse
     );
+    data = dataPluginMock.createStartContract();
+    timeState$ = new Subject();
+    setAbsoluteTime('1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z');
     parentSend = jest.fn();
     const parentRef = {
       send: jest.fn(),
@@ -66,6 +87,8 @@ describe('destinationsStateMachine', () => {
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
           } as unknown as DestinationApiKeyGenerationDeps,
+          data,
+          timeState$,
         })
       ),
       { input: { unitDefinition, parentRef } }
@@ -86,13 +109,20 @@ describe('destinationsStateMachine', () => {
     expect(parentSend).not.toHaveBeenCalled();
   });
 
-  it('keeps the context when stats are requested again for a destination', () => {
-    const timeRange = { start: 0, end: 1000 };
-    actor.send({ type: 'indexStats.request', destinationId: 'es-1', timeRange });
+  it('keeps the context when a destination is shown again by the same viewer', () => {
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'es-1',
+      viewerId: 'viewer',
+    });
     const { context } = actor.getSnapshot();
-    const detailRef = context.destinationDetailRefs['es-1'];
+    const detailRef = context.destinationDetailRefs.get('es-1');
 
-    actor.send({ type: 'indexStats.request', destinationId: 'es-1', timeRange });
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'es-1',
+      viewerId: 'viewer',
+    });
 
     expect(detailRef).toBeDefined();
     expect(actor.getSnapshot().context).toBe(context);
@@ -133,15 +163,12 @@ describe('destinationsStateMachine', () => {
       },
     });
     actor.send({ type: 'resolvedIndices.reload' });
-    await waitFor(
-      actor,
-      (snapshot) => snapshot.context.resolvedIndicesByDestination['es-1'] !== undefined
-    );
+    await waitFor(actor, (snapshot) => snapshot.context.resolvedIndicesByDestination.has('es-1'));
 
     fetch.mockResolvedValueOnce({ destinations: {} });
     actor.send({ type: 'resolvedIndices.reload' });
 
-    expect(actor.getSnapshot().context.resolvedIndicesByDestination).toEqual({});
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.size).toBe(0);
     await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
   });
 
@@ -212,5 +239,143 @@ describe('destinationsStateMachine', () => {
     expect(apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'))).toEqual(
       []
     );
+  });
+
+  it('keeps a unit loaded from outside when a destination is deleted afterwards', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'unit.loaded', unitDefinition });
+    const loaded = {
+      ...unitDefinition,
+      unit: {
+        ...unitDefinition.unit,
+        sources: [{ id: 'src-b', type: 'otlp', supported_telemetry: ['logs' as const] }],
+        destinations: [
+          { id: 'es-1', type: 'elasticsearch', supported_telemetry: ['logs' as const] },
+        ],
+      },
+    };
+
+    actor.send({ type: 'unit.loaded', unitDefinition: loaded });
+    expect(actor.getSnapshot().context.unitDefinition).toBe(loaded);
+    actor.send({ type: 'destination.delete', destinationId: 'es-1' });
+
+    const [[deleted]] = parentSend.mock.calls;
+    expect(deleted.unitDefinition.unit.sources).toEqual(loaded.unit.sources);
+    expect(deleted.unitDefinition.unit.destinations).toEqual([]);
+  });
+
+  it('syncs the unit and notifies once when a delete is persisted', async () => {
+    const toasts = coreMock.createStart().notifications.toasts;
+    const deleteActor = createActor(
+      destinationsStateMachine.provide(
+        createDestinationsMachineImplementations({
+          toasts,
+          apiKeyGenerationDeps: {
+            streamsRepositoryClient: { fetch },
+          } as unknown as DestinationApiKeyGenerationDeps,
+          data,
+          timeState$,
+        })
+      ),
+      { input: { unitDefinition, parentRef: { send: jest.fn() } as unknown as AnyActorRef } }
+    ).start();
+    await waitFor(deleteActor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+
+    deleteActor.send({ type: 'unit.persisted', destinationIds: ['es-1'], unitDefinition });
+
+    expect(deleteActor.getSnapshot().context.unitDefinition).toBe(unitDefinition);
+    expect(deleteActor.getSnapshot().context.hasReceivedUnit).toBe(true);
+    expect(toasts.addSuccess).toHaveBeenCalledTimes(1);
+    deleteActor.stop();
+  });
+
+  it('spawns details for a destination whose id is an Object.prototype key', () => {
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'constructor',
+      viewerId: 'viewer',
+    });
+
+    const detailRef = actor.getSnapshot().context.destinationDetailRefs.get('constructor');
+    expect(detailRef?.getSnapshot().context.destinationId).toBe('constructor');
+    expect(actor.getSnapshot().context.resolvedIndicesByDestination.get('constructor')).toBe(
+      undefined
+    );
+  });
+
+  it('stops the destination details once their last viewer hides them', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'es-1',
+      viewerId: 'row',
+    });
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'es-1',
+      viewerId: 'flyout',
+    });
+    const detailRef = actor.getSnapshot().context.destinationDetailRefs.get('es-1');
+
+    actor.send({ type: 'destinationDetail.hide', destinationId: 'es-1', viewerId: 'row' });
+    expect(actor.getSnapshot().context.destinationDetailRefs.get('es-1')).toBe(detailRef);
+    expect(detailRef?.getSnapshot().status).toBe('active');
+
+    actor.send({ type: 'destinationDetail.hide', destinationId: 'es-1', viewerId: 'flyout' });
+    const { context } = actor.getSnapshot();
+    expect(context.destinationDetailRefs.has('es-1')).toBe(false);
+    expect(context.destinationDetailViewerIds.has('es-1')).toBe(false);
+    expect(detailRef?.getSnapshot().status).toBe('stopped');
+  });
+
+  it('spawns new details when a destination is shown again after being hidden', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'es-1',
+      viewerId: 'row',
+    });
+    const hidden = actor.getSnapshot().context.destinationDetailRefs.get('es-1');
+    actor.send({ type: 'destinationDetail.hide', destinationId: 'es-1', viewerId: 'row' });
+
+    actor.send({
+      type: 'destinationDetail.show',
+      destinationId: 'es-1',
+      viewerId: 'row',
+    });
+
+    const detailRef = actor.getSnapshot().context.destinationDetailRefs.get('es-1');
+    expect(detailRef).toBeDefined();
+    expect(detailRef).not.toBe(hidden);
+    expect(detailRef?.getSnapshot().context.indexStatsTimeRange).toEqual({ start: 0, end: 1000 });
+  });
+
+  it('reloads the shown destinations when the time range changes or is refreshed', async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'destinationDetail.show', destinationId: 'es-1', viewerId: 'row' });
+    const detailRef = actor.getSnapshot().context.destinationDetailRefs.get('es-1');
+    if (!detailRef) {
+      throw new Error('Expected destination details');
+    }
+    const isReady = () =>
+      waitFor(detailRef, (snapshot) => snapshot.matches({ indexStats: 'ready' }));
+    await isReady();
+
+    emitTimeState('shift', '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:02.000Z');
+    expect(detailRef.getSnapshot().matches({ indexStats: 'loading' })).toBe(true);
+    expect(detailRef.getSnapshot().context.indexStatsTimeRange).toEqual({ start: 0, end: 2000 });
+    await isReady();
+
+    emitTimeState('override', '1970-01-01T00:00:00.000Z', '1970-01-01T00:00:02.000Z');
+    expect(detailRef.getSnapshot().matches({ indexStats: 'loading' })).toBe(true);
+    await isReady();
+  });
+
+  it('ignores a hide for a destination without details', () => {
+    const { context } = actor.getSnapshot();
+
+    actor.send({ type: 'destinationDetail.hide', destinationId: 'es-1', viewerId: 'row' });
+
+    expect(actor.getSnapshot().context.destinationDetailRefs).toBe(context.destinationDetailRefs);
   });
 });

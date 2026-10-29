@@ -174,7 +174,6 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
       is_data_stream: true,
       lifecycle: { dsl: { data_retention: '7d', downsample: undefined, frozen_after: undefined } },
       failure_store_enabled: true,
-      failure_store_has_data: true,
       health: 'green',
       privileges: { read_failure_store: true },
     });
@@ -212,7 +211,6 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
           dsl: { data_retention: '7d', downsample: undefined, frozen_after: undefined },
         },
         failure_store_enabled: false,
-        failure_store_has_data: false,
         privileges: { read_failure_store: false },
       },
       { name: 'logs-regular', is_data_stream: false },

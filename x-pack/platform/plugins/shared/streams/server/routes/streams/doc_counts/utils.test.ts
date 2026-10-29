@@ -353,6 +353,42 @@ describe('getDataStreamsWithIndexNames', () => {
     });
   });
 
+  it('keeps the other streams when one is deleted after resolving', async () => {
+    const getDataStream = jest.fn(async ({ name }: { name: string[] }) => {
+      if (name.includes('logs-deleted')) {
+        throw notFoundError();
+      }
+      return { data_streams: name.map((dataStreamName) => ({ name: dataStreamName })) };
+    });
+    const resolveIndex = jest
+      .fn()
+      .mockResolvedValueOnce({
+        data_streams: [{ name: 'logs-a' }, { name: 'logs-deleted' }, { name: 'logs-b' }],
+      })
+      .mockResolvedValueOnce({ data_streams: [{ name: 'logs-a' }, { name: 'logs-b' }] });
+
+    const result = await getDataStreamsWithIndexNames({
+      esClient: makeClient(getDataStream, resolveIndex),
+      streamNames: ['logs-a', 'logs-deleted', 'logs-b'],
+    });
+
+    expect(result).toEqual([{ name: 'logs-a' }, { name: 'logs-b' }]);
+    expect(resolveIndex).toHaveBeenCalledTimes(2);
+    expect(getDataStream).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries at most three times when streams keep disappearing', async () => {
+    const getDataStream = jest.fn().mockRejectedValue(notFoundError());
+
+    await expect(
+      getDataStreamsWithIndexNames({
+        esClient: makeClient(getDataStream),
+        streamNames: ['logs-a', 'logs-b'],
+      })
+    ).resolves.toEqual([]);
+    expect(getDataStream).toHaveBeenCalledTimes(4);
+  });
+
   it('rethrows any other error', async () => {
     const getDataStream = jest.fn().mockRejectedValue(new Error('boom'));
 

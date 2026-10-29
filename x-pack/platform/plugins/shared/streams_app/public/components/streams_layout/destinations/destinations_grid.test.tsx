@@ -73,10 +73,11 @@ describe('DestinationsGrid', () => {
       <DestinationsGrid
         status="ready"
         destinations={destinations}
-        resolvedIndicesByDestination={{}}
+        resolvedIndicesByDestination={new Map()}
         resolvedIndicesStatus="ready"
-        destinationDetailRefs={{}}
-        onRequestIndexStats={jest.fn()}
+        destinationDetailRefs={new Map()}
+        onShowDestinationDetail={jest.fn()}
+        onHideDestinationDetail={jest.fn()}
         hasActiveFilters={false}
         visibleColumns={DESTINATION_GRID_COLUMNS.map(({ id }) => id)}
         pagination={{ pageIndex: 0, pageSize: 10 }}

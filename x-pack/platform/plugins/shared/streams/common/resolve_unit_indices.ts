@@ -20,8 +20,6 @@ export type ResolvedDestinationIndex =
       lifecycle: ClassicIngestStreamEffectiveLifecycle;
       /** True when enabled, or when the data stream lookup failed and it is unknown. */
       failure_store_enabled: boolean;
-      /** True when the enabled failure store has at least one backing index. */
-      failure_store_has_data?: boolean;
       /** Undefined when the data stream lookup failed. */
       health?: ResolvedDestinationIndexHealth;
       privileges: { read_failure_store: boolean };

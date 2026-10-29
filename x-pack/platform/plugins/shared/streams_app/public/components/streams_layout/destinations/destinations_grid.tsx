@@ -35,7 +35,6 @@ import {
   getDestinationSortableValue,
   getTargetedIndexCount,
 } from './destination_grid_cell';
-import type { DestinationIndexStatsTimeRange } from './destination_index_stats';
 import { DestinationIndicesTable } from './destination_indices_table';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
@@ -83,11 +82,12 @@ export const DESTINATION_GRID_COLUMNS: EuiDataGridColumn[] = [
 interface DestinationsGridProps {
   status: DestinationsGridStatus;
   destinations: DestinationViewModel[];
-  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
   resolvedIndicesError?: string;
-  destinationDetailRefs: Record<string, DestinationDetailActorRef>;
-  onRequestIndexStats: (destinationId: string, timeRange: DestinationIndexStatsTimeRange) => void;
+  destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
+  onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
   hasActiveFilters: boolean;
   visibleColumns: string[];
   pagination: { pageIndex: number; pageSize: number };
@@ -129,7 +129,8 @@ export const DestinationsGrid = ({
   resolvedIndicesStatus,
   resolvedIndicesError,
   destinationDetailRefs,
-  onRequestIndexStats,
+  onShowDestinationDetail,
+  onHideDestinationDetail,
   hasActiveFilters,
   visibleColumns,
   pagination,
@@ -186,7 +187,8 @@ export const DestinationsGrid = ({
       resolvedIndicesStatus={resolvedIndicesStatus}
       resolvedIndicesError={resolvedIndicesError}
       destinationDetailRefs={destinationDetailRefs}
-      onRequestIndexStats={onRequestIndexStats}
+      onShowDestinationDetail={onShowDestinationDetail}
+      onHideDestinationDetail={onHideDestinationDetail}
       hasActiveFilters={hasActiveFilters}
       visibleColumns={visibleColumns}
       pagination={pagination}
@@ -203,11 +205,12 @@ export const DestinationsGrid = ({
 interface DestinationsGridBodyContextValue {
   destinations: DestinationViewModel[];
   expandedDestinationIds: ReadonlySet<string>;
-  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>;
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
   resolvedIndicesError?: string;
-  destinationDetailRefs: Record<string, DestinationDetailActorRef>;
-  onRequestIndexStats: (destinationId: string, timeRange: DestinationIndexStatsTimeRange) => void;
+  destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
+  onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
+  onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
 }
 
 const DestinationsGridBodyContext = createContext<DestinationsGridBodyContextValue | undefined>(
@@ -235,7 +238,8 @@ const DestinationsGridBody = ({
     resolvedIndicesStatus,
     resolvedIndicesError,
     destinationDetailRefs,
-    onRequestIndexStats,
+    onShowDestinationDetail,
+    onHideDestinationDetail,
   } = context;
   const rows: React.ReactNode[] = [];
 
@@ -289,11 +293,12 @@ const DestinationsGridBody = ({
                 <DeferredMount>
                   <DestinationIndicesTable
                     destinationId={destination.id}
-                    indices={resolvedIndicesByDestination[destination.id] ?? NO_INDICES}
+                    indices={resolvedIndicesByDestination.get(destination.id) ?? NO_INDICES}
                     indicesStatus={resolvedIndicesStatus}
                     indicesError={resolvedIndicesError}
-                    destinationDetailRef={destinationDetailRefs[destination.id]}
-                    onRequestStats={onRequestIndexStats}
+                    destinationDetailRef={destinationDetailRefs.get(destination.id)}
+                    onShowDestinationDetail={onShowDestinationDetail}
+                    onHideDestinationDetail={onHideDestinationDetail}
                   />
                 </DeferredMount>
               )}
@@ -319,7 +324,8 @@ const DestinationsGridTable = ({
   resolvedIndicesStatus,
   resolvedIndicesError,
   destinationDetailRefs,
-  onRequestIndexStats,
+  onShowDestinationDetail,
+  onHideDestinationDetail,
   hasActiveFilters,
   visibleColumns,
   pagination,
@@ -433,7 +439,8 @@ const DestinationsGridTable = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
-      onRequestIndexStats,
+      onShowDestinationDetail,
+      onHideDestinationDetail,
     }),
     [
       destinations,
@@ -442,7 +449,8 @@ const DestinationsGridTable = ({
       resolvedIndicesStatus,
       resolvedIndicesError,
       destinationDetailRefs,
-      onRequestIndexStats,
+      onShowDestinationDetail,
+      onHideDestinationDetail,
     ]
   );
 

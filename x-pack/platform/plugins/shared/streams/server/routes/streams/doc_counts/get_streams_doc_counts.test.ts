@@ -101,7 +101,7 @@ describe.each(cases)('$name', ({ run, expected }) => {
 
     await expect(run(esClient, 'logs-a')).resolves.toEqual(expected);
     expect(getDataStream).toHaveBeenCalledWith({
-      name: ['logs-a', 'logs-b'],
+      name: ['logs-a'],
       filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
     });
   });
@@ -162,7 +162,7 @@ describe('getFailedDocCountsForStreams query scope', () => {
     });
 
     expect(getDataStream).toHaveBeenCalledWith({
-      name: ['logs-a'],
+      name: ['logs-a', 'logs-b'],
       filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
     });
     expect(getEsqlQuery(esClient)).toMatch(/^FROM \.fs-logs-a-000001,\.fs-logs-b-1 METADATA/);
