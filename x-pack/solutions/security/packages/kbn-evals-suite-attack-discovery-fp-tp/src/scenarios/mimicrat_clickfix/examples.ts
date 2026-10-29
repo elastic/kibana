@@ -166,7 +166,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     expectedOutcome: 'false_positive',
     provenance: 'authored',
     checks: {
-      entityRole: 'contradicts',
+      entityRole: 'neutral',
       processParent: 'contradicts',
       networkDestination: 'contradicts',
     },
@@ -201,7 +201,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       description: 'each alert has its own process ids; host and user are shared',
     },
     checks: {
-      entityRole: 'contradicts',
+      entityRole: 'neutral',
       processParent: 'contradicts',
       networkDestination: 'contradicts',
     },
@@ -218,11 +218,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       of: FP_ID,
       description: 'host is an administrative jump box; no parents recorded',
     },
-    checks: {
-      entityRole: 'contradicts',
-      processParent: 'neutral',
-      networkDestination: 'contradicts',
-    },
+    checks: { entityRole: 'neutral', processParent: 'neutral', networkDestination: 'contradicts' },
     buildWorld: jumpBoxWorld,
   },
   {
@@ -268,7 +264,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       of: FP_ID,
       description: 'raw events removed',
     },
-    checks: { entityRole: 'contradicts', processParent: 'skipped', networkDestination: 'skipped' },
+    checks: { entityRole: 'neutral', processParent: 'skipped', networkDestination: 'skipped' },
     buildWorld: (runMarker) => withoutEvents(fpWorld(runMarker)),
   },
   {
@@ -292,38 +288,30 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
   },
   {
     id: 'mimicrat-clickfix.role-swap-sccm',
-    situation: 'U2',
+    situation: 'U6',
     evidenceState: 'complete',
-    expectedOutcome: 'inconclusive',
+    expectedOutcome: 'true_positive',
     provenance: 'replay',
     variant: {
       kind: 'mutation',
       of: TP_ID,
       description: 'host is an SCCM distribution point',
     },
-    checks: {
-      entityRole: 'contradicts',
-      processParent: 'supports',
-      networkDestination: 'supports',
-    },
+    checks: { entityRole: 'neutral', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) => tpWorld(runMarker, 'sccm_distribution_point'),
   },
   {
     id: 'mimicrat-clickfix.role-swap-mdm',
-    situation: 'U2',
+    situation: 'U6',
     evidenceState: 'complete',
-    expectedOutcome: 'inconclusive',
+    expectedOutcome: 'true_positive',
     provenance: 'replay',
     variant: {
       kind: 'mutation',
       of: TP_ID,
       description: 'host is an Intune provisioning host',
     },
-    checks: {
-      entityRole: 'contradicts',
-      processParent: 'supports',
-      networkDestination: 'supports',
-    },
+    checks: { entityRole: 'neutral', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) => tpWorld(runMarker, 'mdm_management'),
   },
   {

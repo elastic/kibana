@@ -63,7 +63,7 @@ const observedChecks = (world: FpTpWorld): Record<string, string> => {
     ? 'neutral'
     : subType === 'employee_workstation'
     ? 'supports'
-    : 'contradicts';
+    : 'neutral';
 
   const sources = eventSources(world);
   const parents = sources
