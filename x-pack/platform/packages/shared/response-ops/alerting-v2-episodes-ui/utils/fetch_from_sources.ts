@@ -6,9 +6,10 @@
  */
 
 import {
-  sourceFilterIncludesClassic,
+  EPISODE_SOURCE_FILTER_CLASSIC,
   sourceFilterIncludesV2,
 } from '@kbn/alerting-v2-common-queries';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import { ALERTING_V2_EPISODE_SOURCE_ID } from '../constants';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeDataSource } from '../types/episode_data_source';
@@ -112,8 +113,15 @@ export const fetchFromV2AndSource = async <TV2, TSource>({
 };
 
 /**
- * Decides which pipelines a source selection can match, so a Classic-only or
- * v2-only filter does not query the pipeline that would return nothing.
+ * Filter value for an additional source. Classic rows are selected with the
+ * namespaced filter id, so a connector slug `v1` does not select them.
+ */
+const filterValueForAdditionalSource = (sourceId: string): string =>
+  sourceId === CLASSIC_EPISODE_SOURCE_ID ? EPISODE_SOURCE_FILTER_CLASSIC : sourceId;
+
+/**
+ * Decides which pipelines a source selection can match, so a selection that
+ * cannot match a pipeline does not query it.
  */
 export const resolveEpisodeSourceQueries = ({
   sources,
@@ -126,10 +134,15 @@ export const resolveEpisodeSourceQueries = ({
 }): {
   queryV2Source: boolean;
   additionalSource: EpisodeDataSource | undefined;
-} => ({
-  queryV2Source: queryV2Source && sourceFilterIncludesV2(sources),
-  additionalSource: sourceFilterIncludesClassic(sources) ? additionalSource : undefined,
-});
+} => {
+  const includeAdditional =
+    additionalSource != null &&
+    (!sources?.length || sources.includes(filterValueForAdditionalSource(additionalSource.id)));
+  return {
+    queryV2Source: queryV2Source && sourceFilterIncludesV2(sources),
+    additionalSource: includeAdditional ? additionalSource : undefined,
+  };
+};
 
 export const fetchEpisodesFromSource = async (
   source: EpisodeDataSource | undefined,

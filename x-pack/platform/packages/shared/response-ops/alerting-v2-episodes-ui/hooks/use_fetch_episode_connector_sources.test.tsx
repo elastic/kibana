@@ -51,7 +51,10 @@ afterEach(() => {
 
 describe('useFetchEpisodeConnectorSources', () => {
   it('returns connector sources for the time range', async () => {
-    mockFetchEpisodeConnectorSources.mockResolvedValue(['datadog', 'zabbix']);
+    mockFetchEpisodeConnectorSources.mockResolvedValue({
+      sources: ['datadog', 'zabbix'],
+      truncated: false,
+    });
 
     const { result } = renderHook(
       () =>
@@ -64,7 +67,7 @@ describe('useFetchEpisodeConnectorSources', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.data).toEqual(['datadog', 'zabbix']);
+    expect(result.current.data).toEqual({ sources: ['datadog', 'zabbix'], truncated: false });
     expect(mockFetchEpisodeConnectorSources).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'default',
@@ -87,6 +90,6 @@ describe('useFetchEpisodeConnectorSources', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(mockFetchEpisodeConnectorSources).not.toHaveBeenCalled();
-    expect(result.current.data).toEqual([]);
+    expect(result.current.data).toEqual({ sources: [], truncated: false });
   });
 });

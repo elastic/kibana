@@ -441,6 +441,18 @@ describe('buildEpisodesQuery', () => {
     );
   });
 
+  it('treats a connector slug of v1 as a connector, not as Classic', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { sources: ['v1'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('| WHERE source IN ("v1")');
+    expect(queryString).not.toContain('WHERE FALSE');
+  });
+
   it('should match connector slugs with source IN', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EPISODE_SOURCE_FILTER_CLASSIC } from '@kbn/alerting-v2-common-queries';
-
 export const CLASSIC_ALERTS_LIST_PAGE_SIZE = 1000;
 export const CLASSIC_ALERTS_HISTOGRAM_LIMIT = 10_000;
 export const CLASSIC_ALERTS_TAGS_LIMIT = 500;
-export const CLASSIC_EPISODE_SOURCE_ID = EPISODE_SOURCE_FILTER_CLASSIC;
+/** Row source id stamped on classic episodes. Not a source-filter value. */
+export const CLASSIC_EPISODE_SOURCE_ID = 'v1';

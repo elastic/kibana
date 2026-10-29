@@ -16,11 +16,12 @@ import {
 } from './source_labels';
 
 describe('getConnectorSource', () => {
-  it('returns a connector slug and drops native and reserved ids', () => {
+  it('returns a connector slug, including v1 and v2, and drops the native source', () => {
     expect(getConnectorSource('zabbix')).toBe('zabbix');
+    expect(getConnectorSource(ALERTING_V2_EPISODE_SOURCE_ID)).toBe(ALERTING_V2_EPISODE_SOURCE_ID);
+    expect(getConnectorSource(CLASSIC_EPISODE_SOURCE_ID)).toBe(CLASSIC_EPISODE_SOURCE_ID);
     expect(getConnectorSource(NATIVE_RULE_SOURCE)).toBeUndefined();
-    expect(getConnectorSource(ALERTING_V2_EPISODE_SOURCE_ID)).toBeUndefined();
-    expect(getConnectorSource(CLASSIC_EPISODE_SOURCE_ID)).toBeUndefined();
+    expect(getConnectorSource('')).toBeUndefined();
   });
 });
 

@@ -28,9 +28,11 @@ describe('isEpisodeSourceFilterSystemId', () => {
 });
 
 describe('isConnectorEpisodeSource', () => {
-  it('accepts a connector slug', () => {
+  it('accepts a connector slug, including slugs that match row source ids', () => {
     expect(isConnectorEpisodeSource('zabbix')).toBe(true);
     expect(isConnectorEpisodeSource('datadog')).toBe(true);
+    expect(isConnectorEpisodeSource('v1')).toBe(true);
+    expect(isConnectorEpisodeSource('v2')).toBe(true);
   });
 
   it('drops empty, native, and values that collide with the reserved system ids', () => {
@@ -59,5 +61,6 @@ describe('source filter pipeline selection', () => {
     const sources = [EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix'];
     expect(sourceFilterIncludesClassic(sources)).toBe(false);
     expect(sourceFilterIncludesV2(sources)).toBe(true);
+    expect(sourceFilterIncludesV2(['v1'])).toBe(true);
   });
 });

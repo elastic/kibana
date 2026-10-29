@@ -20,6 +20,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AlertEpisode } from '../queries/episodes_query';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
@@ -364,7 +365,10 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('skips the v2 fetch when the source filter is Classic only', async () => {
     fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
     const fetchEpisodes = jest.fn().mockResolvedValue([]);
-    const dataSource = sourceWithEpisodes(fetchEpisodes);
+    const dataSource = createTestEpisodeSource({
+      id: CLASSIC_EPISODE_SOURCE_ID,
+      fetchEpisodes,
+    });
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <EpisodeDataSourceProvider dataSource={dataSource}>
         {wrapper({ children })}

@@ -8,23 +8,22 @@
 /**
  * Source-filter ids for the unified alerts table.
  *
- * `v1` and `v2` are the row source ids. The episodes UI re-exports them as
- * `CLASSIC_EPISODE_SOURCE_ID` and `ALERTING_V2_EPISODE_SOURCE_ID`. Any other
- * value is a connector slug stored on the episode `source` field.
+ * These are namespaced so they cannot collide with a connector slug. Row source
+ * ids stay `v1` and `v2` (`CLASSIC_EPISODE_SOURCE_ID`, `ALERTING_V2_EPISODE_SOURCE_ID`).
+ * Any other filter value is a connector slug stored on the episode `source` field.
  */
 
 /**
  * `source` written on events of native v2 rules. It is not a selectable
- * filter option; Universal covers it. The episodes UI re-exports this as
- * `NATIVE_RULE_SOURCE`.
+ * filter option; Universal covers it.
  */
 export const NATIVE_EPISODE_SOURCE = 'internal';
 
 /** Classic alerts, fetched from the v1 pipeline rather than an ES field. */
-export const EPISODE_SOURCE_FILTER_CLASSIC = 'v1' as const;
+export const EPISODE_SOURCE_FILTER_CLASSIC = 'system:v1' as const;
 
 /** Native Universal alerts: document `source` is empty or {@link NATIVE_EPISODE_SOURCE}. */
-export const EPISODE_SOURCE_FILTER_UNIVERSAL = 'v2' as const;
+export const EPISODE_SOURCE_FILTER_UNIVERSAL = 'system:v2' as const;
 
 export const EPISODE_SOURCE_FILTER_SYSTEM_IDS = [
   EPISODE_SOURCE_FILTER_CLASSIC,

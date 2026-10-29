@@ -10,6 +10,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import { isConnectorEpisodeSource } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodeConnectorSourceOptionsQuery,
+  CONNECTOR_SOURCE_OPTIONS_LIMIT,
   type EpisodeConnectorSourceOptionRow,
 } from '../queries/episode_connector_source_options_query';
 import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
@@ -22,15 +23,24 @@ export interface FetchEpisodeConnectorSourcesParams {
   services: { expressions: ExpressionsStart };
 }
 
+export interface EpisodeConnectorSourcesResult {
+  sources: string[];
+  /** True when more connector sources exist than the option list can show. */
+  truncated: boolean;
+}
+
+const EMPTY_CONNECTOR_SOURCES: EpisodeConnectorSourcesResult = { sources: [], truncated: false };
+
 /**
- * Connector slugs on alert events in the time range. Empty, native, and reserved ids are dropped.
+ * Connector slugs on the latest alert event of each episode in the time range.
+ * Empty and native sources are dropped.
  */
 export const fetchEpisodeConnectorSources = async ({
   spaceId,
   timeRange,
   abortSignal,
   services: { expressions },
-}: FetchEpisodeConnectorSourcesParams): Promise<string[]> => {
+}: FetchEpisodeConnectorSourcesParams): Promise<EpisodeConnectorSourcesResult> => {
   const query = buildEpisodeConnectorSourceOptionsQuery(spaceId).print('basic');
   const input: {
     type: 'kibana_context';
@@ -52,5 +62,13 @@ export const fetchEpisodeConnectorSources = async ({
     abortSignal,
   });
 
-  return rows.map(({ source }) => source).filter(isConnectorEpisodeSource);
+  return {
+    sources: rows
+      .slice(0, CONNECTOR_SOURCE_OPTIONS_LIMIT)
+      .map(({ source }) => source)
+      .filter(isConnectorEpisodeSource),
+    truncated: rows.length > CONNECTOR_SOURCE_OPTIONS_LIMIT,
+  };
 };
+
+export { EMPTY_CONNECTOR_SOURCES };

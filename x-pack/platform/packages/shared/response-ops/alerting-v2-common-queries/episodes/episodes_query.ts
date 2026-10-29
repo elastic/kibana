@@ -237,8 +237,9 @@ const addSourceFilter = (query: ComposerQuery, sources: string[]) => {
 /**
  * Applies the filters that must run after the aggregations: they either read
  * columns the aggregations compute (tags, severity, assignee) or must only
- * narrow the aggregated rows (status, source, and queryString). `source` is read
- * from the latest episode row, which survives `WHERE @timestamp == last_timestamp`.
+ * narrow the aggregated rows (status, source, and queryString). `source` is the
+ * value on the latest episode row (`WHERE @timestamp == last_timestamp`), not an
+ * earlier event. The connector option list uses that same latest row.
  * `ruleId` and `groupHash` are applied before the aggregations by
  * `buildEpisodesBaseQuery` instead.
  */

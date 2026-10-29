@@ -13,6 +13,7 @@ import {
   EPISODE_SOURCE_FILTER_CLASSIC,
   EPISODE_SOURCE_FILTER_UNIVERSAL,
 } from '@kbn/alerting-v2-common-queries';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../../classic_alerts/constants';
 import { EpisodeDataSourceProvider } from '../../context/episode_data_source_context';
 import { createMockSpaces } from '../../hooks/test_utils';
 import { createTestEpisodeSource } from '../../types/episode_data_source.mock';
@@ -46,7 +47,7 @@ describe('SourceFilter', () => {
   };
 
   const user = userEvent.setup({ delay: null });
-  const classicSource = createTestEpisodeSource({ id: EPISODE_SOURCE_FILTER_CLASSIC });
+  const classicSource = createTestEpisodeSource({ id: CLASSIC_EPISODE_SOURCE_ID });
 
   const renderFilter = ({
     queryV2Source = true,
@@ -65,7 +66,7 @@ describe('SourceFilter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseFetchEpisodeConnectorSources.mockReturnValue({
-      data: ['zabbix'],
+      data: { sources: ['zabbix'], truncated: false },
       isLoading: false,
       isError: false,
     } as unknown as ReturnType<typeof useFetchEpisodeConnectorSourcesModule.useFetchEpisodeConnectorSources>);
@@ -117,6 +118,36 @@ describe('SourceFilter', () => {
     ]);
   });
 
+  it('keeps a selected system source visible when that source is not offered', async () => {
+    renderFilter({ withClassic: false, selectedSources: [EPISODE_SOURCE_FILTER_CLASSIC] });
+    await openPopover();
+
+    const { options } = InlineFilterPopoverSpy.mock.calls[0][0];
+    expect(optionIdentity(options)).toEqual([
+      { label: 'Universal', value: EPISODE_SOURCE_FILTER_UNIVERSAL },
+      { label: 'Classic', value: EPISODE_SOURCE_FILTER_CLASSIC },
+      { label: 'zabbix', value: 'zabbix' },
+    ]);
+  });
+
+  it('keeps sources hidden by the search when another source is ticked', async () => {
+    const onSourcesChange = jest.fn();
+    renderFilter({
+      onSourcesChange,
+      selectedSources: [EPISODE_SOURCE_FILTER_UNIVERSAL],
+    });
+    await openPopover();
+
+    act(() => {
+      InlineFilterPopoverSpy.mock.calls[0][0].onSearchChange?.('zab');
+    });
+    act(() => {
+      InlineFilterPopoverSpy.mock.calls.at(-1)![0].onSelectionChange(['zabbix']);
+    });
+
+    expect(onSourcesChange).toHaveBeenCalledWith([EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix']);
+  });
+
   it('keeps a selected connector that is outside the current time range', async () => {
     renderFilter({ selectedSources: ['datadog'] });
     await openPopover();
@@ -164,7 +195,7 @@ describe('SourceFilter', () => {
 
   it('shows an error when connector sources fail to load', async () => {
     mockUseFetchEpisodeConnectorSources.mockReturnValue({
-      data: [],
+      data: { sources: [], truncated: false },
       isLoading: false,
       isError: true,
     } as unknown as ReturnType<typeof useFetchEpisodeConnectorSourcesModule.useFetchEpisodeConnectorSources>);

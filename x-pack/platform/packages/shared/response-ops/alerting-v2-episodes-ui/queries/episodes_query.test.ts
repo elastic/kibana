@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EPISODE_SOURCE_FILTER_UNIVERSAL } from '@kbn/alerting-v2-common-queries';
 import {
   buildEpisodesKpisQuery,
   buildEpisodesHistogramQuery,
@@ -100,7 +101,9 @@ describe('buildEpisodesKpisQuery', () => {
   });
 
   it('applies the source filter after the aggregations', () => {
-    const output = buildEpisodesKpisQuery(SPACE, UID, { sources: ['v2'] });
+    const output = buildEpisodesKpisQuery(SPACE, UID, {
+      sources: [EPISODE_SOURCE_FILTER_UNIVERSAL],
+    });
     expect(output).toContain('| WHERE source IS NULL OR source == "" OR source == "internal"');
     expect(output.indexOf('| WHERE source IS NULL')).toBeGreaterThan(
       output.indexOf('WHERE @timestamp == last_timestamp')

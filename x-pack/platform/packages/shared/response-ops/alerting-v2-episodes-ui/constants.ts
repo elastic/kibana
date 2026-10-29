@@ -7,15 +7,14 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { EPISODE_SOURCE_FILTER_UNIVERSAL } from '@kbn/alerting-v2-common-queries';
 
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 /** Max episodes returned per list page (ESQL LIMIT). */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;
-/** Source id used when settling the native v2 ES|QL episode fetches. */
-export const ALERTING_V2_EPISODE_SOURCE_ID = EPISODE_SOURCE_FILTER_UNIVERSAL;
+/** Row source id for native v2 episodes. Not a source-filter value. */
+export const ALERTING_V2_EPISODE_SOURCE_ID = 'v2';
 export const QUERY_STALE_TIME = 30_000;
 /**
  * Fields produced by buildEpisodesHistogramQuery that are valid as breakdown dimensions.

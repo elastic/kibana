@@ -7,7 +7,7 @@
 
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFilterButton, EuiIcon, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiFilterButton, EuiIcon, EuiPopover, EuiText, useEuiTheme } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -15,6 +15,7 @@ import {
   EPISODE_SOURCE_FILTER_CLASSIC,
   EPISODE_SOURCE_FILTER_UNIVERSAL,
   isConnectorEpisodeSource,
+  isEpisodeSourceFilterSystemId,
 } from '@kbn/alerting-v2-common-queries';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -23,6 +24,8 @@ import {
   useAdditionalEpisodesDataSource,
   useQueryV2Source,
 } from '../../context/episode_data_source_context';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../../classic_alerts/constants';
+import { ALERTING_V2_EPISODE_SOURCE_ID } from '../../constants';
 import { useFetchEpisodeConnectorSources } from '../../hooks/use_fetch_episode_connector_sources';
 import { useEpisodeSource } from '../../source_labels';
 import { InlineFilterPopover } from './inline_filter_popover';
@@ -49,6 +52,8 @@ const connectorIcon = (source: string): React.ReactNode => {
   );
 };
 
+const EMPTY_SOURCES: string[] = [];
+
 interface AlertEpisodesSourceFilterProps {
   selectedSources?: string[] | null;
   onSourcesChange: (sources: string[] | undefined) => void;
@@ -67,39 +72,39 @@ export function AlertEpisodesSourceFilter({
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const hasClassic = useAdditionalEpisodesDataSource()?.id === EPISODE_SOURCE_FILTER_CLASSIC;
+  const hasClassic = useAdditionalEpisodesDataSource()?.id === CLASSIC_EPISODE_SOURCE_ID;
   const hasUniversal = useQueryV2Source();
   const {
-    data: connectorSources = [],
+    data: connectorSourceResult,
     isLoading,
     isError,
   } = useFetchEpisodeConnectorSources({
     services,
     timeRange,
   });
-  const universalSource = useEpisodeSource(EPISODE_SOURCE_FILTER_UNIVERSAL);
-  const classicSource = useEpisodeSource(EPISODE_SOURCE_FILTER_CLASSIC);
+  const connectorSources = connectorSourceResult?.sources ?? EMPTY_SOURCES;
+  const connectorSourcesTruncated = connectorSourceResult?.truncated ?? false;
+  const universalSource = useEpisodeSource(ALERTING_V2_EPISODE_SOURCE_ID);
+  const classicSource = useEpisodeSource(CLASSIC_EPISODE_SOURCE_ID);
+  const selectedValues = selectedSources ?? EMPTY_SOURCES;
 
   const allOptions = useMemo(() => {
+    const universalOption: SourceFilterOption = {
+      label: universalSource.label,
+      value: EPISODE_SOURCE_FILTER_UNIVERSAL,
+      prepend: sourceIcon(universalSource.icon),
+    };
+    const classicOption: SourceFilterOption = {
+      label: classicSource.label,
+      value: EPISODE_SOURCE_FILTER_CLASSIC,
+      prepend: sourceIcon(classicSource.icon),
+    };
+    const selectedSet = new Set(selectedValues);
     const systemOptions: SourceFilterOption[] = [
-      ...(hasUniversal
-        ? [
-            {
-              label: universalSource.label,
-              value: EPISODE_SOURCE_FILTER_UNIVERSAL,
-              prepend: sourceIcon(universalSource.icon),
-            },
-          ]
+      ...(hasUniversal || selectedSet.has(EPISODE_SOURCE_FILTER_UNIVERSAL)
+        ? [universalOption]
         : []),
-      ...(hasClassic
-        ? [
-            {
-              label: classicSource.label,
-              value: EPISODE_SOURCE_FILTER_CLASSIC,
-              prepend: sourceIcon(classicSource.icon),
-            },
-          ]
-        : []),
+      ...(hasClassic || selectedSet.has(EPISODE_SOURCE_FILTER_CLASSIC) ? [classicOption] : []),
     ];
     const connectorOptions = connectorSources.map((source) => ({
       label: source,
@@ -110,8 +115,13 @@ export function AlertEpisodesSourceFilter({
     for (const source of connectorSources) {
       knownValues.add(source);
     }
-    const missingSelected = (selectedSources ?? [])
-      .filter((source) => isConnectorEpisodeSource(source) && !knownValues.has(source))
+    const missingSelected = selectedValues
+      .filter(
+        (source) =>
+          !isEpisodeSourceFilterSystemId(source) &&
+          isConnectorEpisodeSource(source) &&
+          !knownValues.has(source)
+      )
       .map((source) => ({
         label: source,
         value: source,
@@ -124,7 +134,7 @@ export function AlertEpisodesSourceFilter({
     connectorSources,
     hasClassic,
     hasUniversal,
-    selectedSources,
+    selectedValues,
     universalSource.icon,
     universalSource.label,
   ]);
@@ -139,12 +149,14 @@ export function AlertEpisodesSourceFilter({
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
-      onSourcesChange(values.length > 0 ? values : undefined);
+      const visible = new Set(options.map((option) => option.value));
+      const hiddenSelected = selectedValues.filter((source) => !visible.has(source));
+      const next = [...hiddenSelected, ...values];
+      onSourcesChange(next.length > 0 ? next : undefined);
     },
-    [onSourcesChange]
+    [onSourcesChange, options, selectedValues]
   );
 
-  const selectedValues = selectedSources ?? [];
   const activeCount = selectedValues.length;
 
   const closePopover = useCallback(() => {
@@ -208,6 +220,18 @@ export function AlertEpisodesSourceFilter({
         isLoading={isLoading}
         data-test-subj={`${dataTestSubj}-popover`}
       />
+      {connectorSourcesTruncated ? (
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+          data-test-subj={`${dataTestSubj}-truncated`}
+        >
+          <p>{i18n.SOURCE_FILTER_TRUNCATED}</p>
+        </EuiText>
+      ) : null}
     </EuiPopover>
   );
 }

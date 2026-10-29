@@ -136,6 +136,8 @@ export const EpisodesFilterBar = ({
   const onSourcesChange = useCallback(
     (sources: string[] | undefined) => {
       onFilterChange((prev) => {
+        // Drop the key. `{ sources: undefined }` is not deep-equal to the default
+        // filter, so Clear filters stays enabled until the URL state is read back.
         if (!sources?.length) {
           const { sources: _omit, ...rest } = prev;
           return rest;

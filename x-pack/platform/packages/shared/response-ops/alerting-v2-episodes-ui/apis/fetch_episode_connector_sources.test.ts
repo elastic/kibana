@@ -57,7 +57,7 @@ describe('fetchEpisodeConnectorSources', () => {
     ]);
   });
 
-  it('drops empty, native, and reserved source values', async () => {
+  it('drops empty and native sources and keeps connector slugs named v1 or v2', async () => {
     mockExecuteEsqlQuery.mockResolvedValue([
       { source: 'zabbix' },
       { source: 'internal' },
@@ -67,11 +67,28 @@ describe('fetchEpisodeConnectorSources', () => {
       { source: 'datadog' },
     ]);
 
-    const sources = await fetchEpisodeConnectorSources({
+    const result = await fetchEpisodeConnectorSources({
       spaceId: 'default',
       services: { expressions: {} as ExpressionsStart },
     });
 
-    expect(sources).toEqual(['zabbix', 'datadog']);
+    expect(result).toEqual({
+      sources: ['zabbix', 'v1', 'v2', 'datadog'],
+      truncated: false,
+    });
+  });
+
+  it('reports when the connector list is longer than the cap', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue(
+      Array.from({ length: 501 }, (_, index) => ({ source: `source-${index}` }))
+    );
+
+    const result = await fetchEpisodeConnectorSources({
+      spaceId: 'default',
+      services: { expressions: {} as ExpressionsStart },
+    });
+
+    expect(result.sources).toHaveLength(500);
+    expect(result.truncated).toBe(true);
   });
 });

@@ -9,7 +9,10 @@ import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { fetchEpisodeConnectorSources } from '../apis/fetch_episode_connector_sources';
+import {
+  EMPTY_CONNECTOR_SOURCES,
+  fetchEpisodeConnectorSources,
+} from '../apis/fetch_episode_connector_sources';
 import { useQueryV2Source } from '../context/episode_data_source_context';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -30,7 +33,7 @@ export const useFetchEpisodeConnectorSources = ({
     queryKey: queryKeys.connectorSources(spaceId, timeRange ?? undefined, queryV2Source),
     queryFn: ({ signal }) => {
       if (!queryV2Source) {
-        return [];
+        return EMPTY_CONNECTOR_SOURCES;
       }
       return fetchEpisodeConnectorSources({
         spaceId,

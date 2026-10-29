@@ -9,6 +9,7 @@ import {
   EPISODE_SOURCE_FILTER_CLASSIC,
   EPISODE_SOURCE_FILTER_UNIVERSAL,
 } from '@kbn/alerting-v2-common-queries';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import {
   fetchFromSource,
   fetchFromV2AndSource,
@@ -139,13 +140,32 @@ describe('resolveEpisodeSourceQueries', () => {
   });
 
   it('skips v2 when only Classic is selected', () => {
+    const classic = createTestEpisodeSource({ id: CLASSIC_EPISODE_SOURCE_ID });
     expect(
       resolveEpisodeSourceQueries({
         sources: [EPISODE_SOURCE_FILTER_CLASSIC],
         queryV2Source: true,
-        additionalSource: source,
+        additionalSource: classic,
       })
-    ).toEqual({ queryV2Source: false, additionalSource: source });
+    ).toEqual({ queryV2Source: false, additionalSource: classic });
+  });
+
+  it('keeps a non-classic additional source only when its own id is selected', () => {
+    const slo = createTestEpisodeSource({ id: 'slo' });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: ['slo'],
+        queryV2Source: true,
+        additionalSource: slo,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: slo });
+    expect(
+      resolveEpisodeSourceQueries({
+        sources: [EPISODE_SOURCE_FILTER_UNIVERSAL],
+        queryV2Source: true,
+        additionalSource: slo,
+      })
+    ).toEqual({ queryV2Source: true, additionalSource: undefined });
   });
 
   it('skips the classic source when the selection has no Classic id', () => {

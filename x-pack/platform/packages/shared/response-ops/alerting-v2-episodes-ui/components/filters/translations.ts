@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CONNECTOR_SOURCE_OPTIONS_LIMIT } from '../../queries/episode_connector_source_options_query';
 
 /** --- Inline filter popover --- */
 export const INLINE_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
@@ -206,5 +207,13 @@ export const SOURCE_FILTER_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.sourceFilter.loadErrorMessage',
   {
     defaultMessage: "Couldn't load connector sources",
+  }
+);
+
+export const SOURCE_FILTER_TRUNCATED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.truncatedLabel',
+  {
+    defaultMessage: 'Showing the first {limit} sources',
+    values: { limit: CONNECTOR_SOURCE_OPTIONS_LIMIT },
   }
 );
