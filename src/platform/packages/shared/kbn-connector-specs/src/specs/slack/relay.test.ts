@@ -631,6 +631,16 @@ describe('relayGetConversationHistory', () => {
     expect(readMessages).not.toHaveBeenCalled();
   });
 
+  it('fails instead of not_readable when the name scan stops before the last page', async () => {
+    const readMessages = jest.fn();
+    const listBindings = jest.fn().mockResolvedValue({ bindings: [], nextCursor: 'next' });
+
+    await expect(read({ channel: '#alerts' }, { readMessages, listBindings })).rejects.toThrow(
+      /Pass its id from listChannels/
+    );
+    expect(readMessages).not.toHaveBeenCalled();
+  });
+
   it.each([
     {
       error: relayError(403, { reason: 'not_readable' }),

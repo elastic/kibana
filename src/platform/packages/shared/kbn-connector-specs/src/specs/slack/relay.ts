@@ -379,7 +379,15 @@ const resolveReadChannel = async (
     ctx,
     SlackResolveChannelIdInputSchema.parse({ name: trimmed })
   );
-  return resolved.found ? resolved.id : undefined;
+  if (resolved.found) {
+    return resolved.id;
+  }
+  if (resolved.nextCursor) {
+    throw new Error(
+      `Channel "${trimmed}" is not in the first ${resolved.pagesFetched} pages of connected channels. Pass its id from listChannels instead.`
+    );
+  }
+  return undefined;
 };
 
 /**

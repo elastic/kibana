@@ -307,9 +307,9 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
     channel: z
       .string()
       .min(1)
-      .max(SLACK_MAX_ID_LENGTH)
+      .max(SLACK_MAX_NAME_LENGTH)
       .describe(
-        'Conversation ID to fetch history for (e.g. C... for channels, G... for private channels, D... for DMs).'
+        'Conversation ID to fetch history for (e.g. C... for channels, G... for private channels, D... for DMs). Through the Elastic Slack app, a connected channel name also works.'
       ),
     oldest: z
       .string()
