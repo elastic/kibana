@@ -98,7 +98,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const colorTokens = useHeaderColorTokens(color);
-  const dividerColor = isCanvas && !color ? euiTheme.colors.borderBaseSubdued : colorTokens.border;
+  const dividerColor = isCanvas && !color ? euiTheme.colors.borderBaseSubdued : colorTokens.divider;
 
   const textStyles = css`
     ${colorTokens.text ? `color: ${colorTokens.text};` : ''}

@@ -604,6 +604,12 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`closeCanvas`** - Callback to dismiss the canvas; `undefined` when not in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded
 
+#### Header color and action buttons
+
+`getHeader` can return an optional `color` (`'primary'`, `'danger'` or `'warning'`) to tint the attachment header and the card border. Omit it for the default plain header.
+
+The header renders `getActionButtons` as a split button: the first action with `type: ActionButtonType.PRIMARY` is the main button, and every other action goes in the menu next to it. A lone action with no primary is shown as the main button. Only the main button uses the action's `color`; actions in the menu ignore it. On narrow headers (560px or less) the main button shows only its icon when it has one.
+
 #### Canvas flyout width
 
 By default the canvas flyout opens at `50vw` in full-screen context. You can override this per attachment type using the optional `canvasWidth` property on `AttachmentUIDefinition`:

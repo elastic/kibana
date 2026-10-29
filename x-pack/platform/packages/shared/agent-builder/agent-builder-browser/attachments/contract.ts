@@ -157,7 +157,7 @@ export interface GetHeaderParams<TAttachment extends UnknownAttachment = Unknown
  * Color variants for the attachment header and card border.
  * Each name maps to the matching EUI color tokens, so dark mode keeps working.
  */
-export type HeaderColor = 'primary' | 'danger' | 'warning' | 'accent' | 'success';
+export type HeaderColor = 'primary' | 'danger' | 'warning';
 
 /**
  * Return value of the `getHeader` resolver.

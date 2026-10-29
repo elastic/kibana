@@ -315,7 +315,7 @@ export const CompactWidth: Story = {
   },
 };
 
-const COLOR_VARIANTS: HeaderColor[] = ['primary', 'danger', 'warning', 'accent', 'success'];
+const COLOR_VARIANTS: HeaderColor[] = ['primary', 'danger', 'warning'];
 
 export const ColorVariants: Story = {
   render: () => (

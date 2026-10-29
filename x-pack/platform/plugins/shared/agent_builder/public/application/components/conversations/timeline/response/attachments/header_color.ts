@@ -9,8 +9,10 @@ import { useEuiTheme } from '@elastic/eui';
 import type { HeaderColor } from '@kbn/agent-builder-browser/attachments';
 
 interface HeaderColorTokens {
-  /** Border color of the card, and the divider under the header. */
+  /** Border color of the card. */
   border: string;
+  /** Color of the divider under the header. */
+  divider: string;
   /** Color of the header title and icon. Unset for the default (no color) variant. */
   text?: string;
 }
@@ -21,12 +23,24 @@ export const useHeaderColorTokens = (color?: HeaderColor): HeaderColorTokens => 
     euiTheme: { colors },
   } = useEuiTheme();
   const variants: Record<HeaderColor, HeaderColorTokens> = {
-    primary: { border: colors.borderBasePrimary, text: colors.textPrimary },
-    danger: { border: colors.borderBaseDanger, text: colors.textDanger },
-    warning: { border: colors.borderBaseWarning, text: colors.textWarning },
-    accent: { border: colors.borderBaseAccent, text: colors.textAccent },
-    success: { border: colors.borderBaseSuccess, text: colors.textSuccess },
+    primary: {
+      border: colors.borderStrongPrimary,
+      divider: colors.borderBaseSubdued,
+      text: colors.textPrimary,
+    },
+    danger: {
+      border: colors.borderStrongDanger,
+      divider: colors.borderBaseSubdued,
+      text: colors.textDanger,
+    },
+    warning: {
+      border: colors.borderStrongWarning,
+      divider: colors.borderBaseSubdued,
+      text: colors.textWarning,
+    },
   };
 
-  return color ? variants[color] : { border: colors.borderBasePlain };
+  return color
+    ? variants[color]
+    : { border: colors.borderBasePlain, divider: colors.borderBasePlain };
 };

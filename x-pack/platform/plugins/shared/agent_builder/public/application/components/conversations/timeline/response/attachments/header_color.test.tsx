@@ -24,10 +24,10 @@ describe('useHeaderColorTokens', () => {
   it('returns the plain border and no text color when no color is set', () => {
     const { tokens, plainBorder } = renderTokens();
 
-    expect(tokens).toEqual({ border: plainBorder });
+    expect(tokens).toEqual({ border: plainBorder, divider: plainBorder });
   });
 
-  it.each<HeaderColor>(['primary', 'danger', 'warning', 'accent', 'success'])(
+  it.each<HeaderColor>(['primary', 'danger', 'warning'])(
     'returns a distinct border and text color for %s',
     (color) => {
       const { tokens, plainBorder } = renderTokens(color);
