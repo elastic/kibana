@@ -563,6 +563,61 @@ describe('Textbased Data Source', () => {
         )?.fieldName
       ).toBe('Over time');
     });
+
+    it('clears a working trendline when a changed filter also loses time identity', () => {
+      const query =
+        'FROM kibana_sample_data_logs | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)';
+      const state: TextBasedPrivateState = {
+        indexPatternRefs: [],
+        layers: {
+          main: {
+            columns: [{ columnId: 'metric', fieldName: 'avg_bytes', meta: { type: 'number' } }],
+            query: { esql: query },
+            index: 'logs',
+            timeField: '@timestamp',
+          },
+          trendline: {
+            columns: [{ columnId: 'time', fieldName: 'b', meta: { type: 'date' } }],
+            query: { esql: query },
+            index: 'logs',
+            timeField: '@timestamp',
+          },
+        },
+      };
+      const sync = (nextState: TextBasedPrivateState) =>
+        TextBasedDatasource.syncColumns({
+          state: nextState,
+          links: [
+            {
+              from: { layerId: 'main', columnId: 'metric', groupId: LENS_METRIC_GROUP_ID.METRIC },
+              to: {
+                layerId: 'trendline',
+                columnId: 'trend_metric',
+                groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
+              },
+            },
+          ],
+          getDimensionGroups: jest.fn(),
+          indexPatterns: {},
+        });
+      const working = sync(state);
+      expect(working.layers.trendline.columns).not.toHaveLength(0);
+      const changedQuery =
+        query.replace('| STATS', '| WHERE bytes > 1000 | STATS') + ' | EVAL b = "asdf"';
+      const result = sync({
+        ...working,
+        layers: {
+          ...working.layers,
+          main: { ...working.layers.main, query: { esql: changedQuery } },
+        },
+      });
+      expect(result.layers.main.query?.esql).toBe(changedQuery);
+      expect(result.layers.trendline.query).toBeUndefined();
+      expect(result.layers.trendline.columns).toEqual([]);
+      expect(
+        TextBasedDatasource.toExpression(result, 'trendline', {}, dateRange, new Date())
+      ).toBeNull();
+    });
   });
 
   describe('#initializeDimension', () => {
