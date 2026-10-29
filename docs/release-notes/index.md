@@ -77,51 +77,51 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add write actions to the GitHub connector [#283473]({{kib-pull}}283473).
 * Add eight write actions to the Gmail connector: `listLabels`, `modifyLabels`, `markAsRead`, `markAsUnread`, `trashMessage`, `untrashMessage`, `sendMessage`, and `replyMessage`. These actions require OAuth 2.0 authorization code authentication with the `gmail.modify` scope [#284912]({{kib-pull}}284912).
 * Add 14 write actions to the Jira Cloud connector to create and update issues, post comments, transition statuses, assign users, manage attachments, and more [#284910]({{kib-pull}}284910).
-* Add the Azure SQL connector [#294876]({{kib-pull}}294876).
-* Add the Azure Functions connector [#293758]({{kib-pull}}293758).
-* Add the Azure AKS connector [#289161]({{kib-pull}}289161).
-* Add the Azure Monitor connector [#282353]({{kib-pull}}282353).
-* Add the Amazon EKS connector [#289144]({{kib-pull}}289144).
-* Add the Amazon CloudWatch connector [#282281]({{kib-pull}}282281).
-* Add the AWS X-Ray connector [#282264]({{kib-pull}}282264).
-* Add the OpenSearch and Amazon OpenSearch Service connector [#282554]({{kib-pull}}282554).
-* Add the Google Kubernetes Engine connector [#289111]({{kib-pull}}289111).
-* Add the Google Cloud Secret Manager connector [#284100]({{kib-pull}}284100).
-* Add the Google Cloud IAM connector [#283471]({{kib-pull}}283471).
-* Add the Google Cloud Monitoring connector [#282428]({{kib-pull}}282428).
-* Add the Prometheus connector, which expands and renames the Prometheus Alertmanager connector [#282364]({{kib-pull}}282364), [#282238]({{kib-pull}}282238).
-* Add the Datadog connector [#281810]({{kib-pull}}281810).
-* Add the Dynatrace connector [#281816]({{kib-pull}}281816).
-* Add the New Relic connector [#281144]({{kib-pull}}281144).
-* Add the Grafana connector [#281141]({{kib-pull}}281141).
-* Add the Sentry connector [#281136]({{kib-pull}}281136).
-* Add the PostHog connector [#281149]({{kib-pull}}281149).
-* Add the Rootly connector [#281142]({{kib-pull}}281142).
-* Add the Zabbix connector [#282937]({{kib-pull}}282937).
-* Add the SolarWinds Platform connector [#295471]({{kib-pull}}295471).
-* Add the Kubernetes connector as a technical preview to read and modify cluster resources through the Kubernetes REST API [#275922]({{kib-pull}}275922).
-* Add the Argo CD connector for GitOps application management [#280074]({{kib-pull}}280074).
-* Add the Ansible Control Server connector for AWX and Controller jobs, and make it available in workflows [#280115]({{kib-pull}}280115), [#297437]({{kib-pull}}297437).
-* Add the Jenkins connector [#281935]({{kib-pull}}281935).
-* Add the Buildkite connector [#281927]({{kib-pull}}281927).
-* Add the ThreatQ connector for intelligence searches and triage updates [#291383]({{kib-pull}}291383).
-* Add the MISP connector [#286746]({{kib-pull}}286746).
-* Add the Google Threat Intelligence connector [#285533]({{kib-pull}}285533).
-* Add the URLScan.io connector [#284125]({{kib-pull}}284125).
-* Add the Censys connector [#274568]({{kib-pull}}274568).
-* Add the Sublime Security connector as a technical preview to search flagged email, retrieve verdicts, and quarantine, trash, or restore message groups [#279707]({{kib-pull}}279707).
-* Add the Okta connector [#283353]({{kib-pull}}283353).
-* Add the UniFi connector for Network and Protect, and make it available in workflows [#283915]({{kib-pull}}283915), [#283925]({{kib-pull}}283925).
-* Add the GitLab REST API connector [#292140]({{kib-pull}}292140).
-* Add the Bitbucket Cloud connector [#288824]({{kib-pull}}288824).
-* Add the Databricks connector [#280518]({{kib-pull}}280518).
-* Add the Monday.com connector [#279558]({{kib-pull}}279558).
-* Add the external {{es}} connector [#288447]({{kib-pull}}288447).
-* Add the MongoDB connector with the `find`, `aggregate`, `count`, and `listCollections` actions available as Agent Builder tools [#279607]({{kib-pull}}279607).
-* Add the GraphQL connector [#279501]({{kib-pull}}279501).
-* Add the Trello connector, which enables agents to search and browse boards, lists, and cards, create and update cards, and post comments [#277890]({{kib-pull}}277890).
-* Add the Workday connector [#275226]({{kib-pull}}275226).
-* Add the Google Docs connector, which enables agents to read documents as Markdown and apply batch updates [#285260]({{kib-pull}}285260).
+* Add the Azure SQL connector, available in Agent Builder [#294876]({{kib-pull}}294876).
+* Add the Azure Functions connector, available in Agent Builder [#293758]({{kib-pull}}293758).
+* Add the Azure AKS connector, available in Agent Builder [#289161]({{kib-pull}}289161).
+* Add the Azure Monitor connector, available in Agent Builder [#282353]({{kib-pull}}282353).
+* Add the Amazon EKS connector, available in Agent Builder [#289144]({{kib-pull}}289144).
+* Add the Amazon CloudWatch connector, available in Agent Builder [#282281]({{kib-pull}}282281).
+* Add the AWS X-Ray connector, available in Agent Builder [#282264]({{kib-pull}}282264).
+* Add the OpenSearch and Amazon OpenSearch Service connector, available in Agent Builder [#282554]({{kib-pull}}282554).
+* Add the Google Kubernetes Engine connector, available in Agent Builder [#289111]({{kib-pull}}289111).
+* Add the Google Cloud Secret Manager connector, available in Agent Builder and workflows [#284100]({{kib-pull}}284100).
+* Add the Google Cloud IAM connector, available in Agent Builder and workflows [#283471]({{kib-pull}}283471).
+* Add the Google Cloud Monitoring connector, available in Agent Builder [#282428]({{kib-pull}}282428).
+* Add the Prometheus connector, available in Agent Builder and workflows. It expands and renames the Prometheus Alertmanager connector [#282364]({{kib-pull}}282364), [#282238]({{kib-pull}}282238).
+* Add the Datadog connector, available in Agent Builder and workflows [#281810]({{kib-pull}}281810).
+* Add the Dynatrace connector, available in Agent Builder and workflows [#281816]({{kib-pull}}281816).
+* Add the New Relic connector, available in Agent Builder and workflows [#281144]({{kib-pull}}281144).
+* Add the Grafana connector, available in Agent Builder and workflows [#281141]({{kib-pull}}281141).
+* Add the Sentry connector, available in Agent Builder and workflows [#281136]({{kib-pull}}281136).
+* Add the PostHog connector, available in Agent Builder [#281149]({{kib-pull}}281149).
+* Add the Rootly connector, available in Agent Builder and workflows [#281142]({{kib-pull}}281142).
+* Add the Zabbix connector, available in Agent Builder [#282937]({{kib-pull}}282937).
+* Add the SolarWinds Platform connector, available in Agent Builder and workflows [#295471]({{kib-pull}}295471).
+* Add the Kubernetes connector as a technical preview, available in Agent Builder and workflows, to read and modify cluster resources through the Kubernetes REST API [#275922]({{kib-pull}}275922).
+* Add the Argo CD connector for GitOps application management, available in Agent Builder [#280074]({{kib-pull}}280074).
+* Add the Ansible Control Server connector for AWX and Controller jobs, available in Agent Builder and workflows [#280115]({{kib-pull}}280115), [#297437]({{kib-pull}}297437).
+* Add the Jenkins connector, available in Agent Builder and workflows [#281935]({{kib-pull}}281935).
+* Add the Buildkite connector, available in Agent Builder and workflows [#281927]({{kib-pull}}281927).
+* Add the ThreatQ connector for intelligence searches and triage updates, available in Agent Builder and workflows [#291383]({{kib-pull}}291383).
+* Add the MISP connector, available in Agent Builder and workflows [#286746]({{kib-pull}}286746).
+* Add the Google Threat Intelligence connector, available in Agent Builder and workflows [#285533]({{kib-pull}}285533).
+* Add the URLScan.io connector, available in Agent Builder and workflows [#284125]({{kib-pull}}284125).
+* Add the Censys connector, available in Agent Builder and workflows [#274568]({{kib-pull}}274568).
+* Add the Sublime Security connector as a technical preview, available in Agent Builder and workflows, to search flagged email, retrieve verdicts, and quarantine, trash, or restore message groups [#279707]({{kib-pull}}279707).
+* Add the Okta connector, available in Agent Builder and workflows [#283353]({{kib-pull}}283353).
+* Add the UniFi connector for Network and Protect, available in Agent Builder and workflows [#283915]({{kib-pull}}283915), [#283925]({{kib-pull}}283925).
+* Add the GitLab REST API connector, available in Agent Builder [#292140]({{kib-pull}}292140).
+* Add the Bitbucket Cloud connector, available in Agent Builder [#288824]({{kib-pull}}288824).
+* Add the Databricks connector, available in Agent Builder [#280518]({{kib-pull}}280518).
+* Add the Monday.com connector, available in Agent Builder and workflows [#279558]({{kib-pull}}279558).
+* Add the external {{es}} connector, available in Agent Builder [#288447]({{kib-pull}}288447).
+* Add the MongoDB connector, available in Agent Builder, with the `find`, `aggregate`, `count`, and `listCollections` actions [#279607]({{kib-pull}}279607).
+* Add the GraphQL connector, available in Agent Builder [#279501]({{kib-pull}}279501).
+* Add the Trello connector, available in Agent Builder, so agents can search and browse boards, lists, and cards, create and update cards, and post comments [#277890]({{kib-pull}}277890).
+* Add the Workday connector, available in Agent Builder [#275226]({{kib-pull}}275226).
+* Add the Google Docs connector, available in Agent Builder, so agents can read documents as Markdown and apply batch updates [#285260]({{kib-pull}}285260).
 
 **Dashboards and Visualizations**:
 * Add undo and redo to dashboards, with toolbar buttons and the `Cmd+Z` or `Ctrl+Z` and `Cmd+Y` or `Ctrl+Y` shortcuts [#277103]({{kib-pull}}277103).
