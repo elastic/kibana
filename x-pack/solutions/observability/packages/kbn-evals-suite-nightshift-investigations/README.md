@@ -443,6 +443,163 @@ Set `SELECTED_EVALUATORS=connector_used,within_time_budget` to skip the judge. E
 case, duration, tool-call count, conversation and trace ids and scores. A failed `converse` call
 fails the test; low scores do not.
 
+## Writeup
+
+`NIGHTSHIFT_DATASETS=writeup` rewrites the agent's final reply from a recorded investigation under
+a given prompt, and scores how it's written up. No investigation runs: for each recorded round it
+rebuilds what the model saw just before it replied, and asks it to write that reply again under the
+investigator prompt in your checkout (or another one, below). A run takes minutes and changes only with the prompt, the model and the judge, so it can
+show a prompt change's before and after. How well the agent investigates is the end-to-end evals'
+job (trace-only and ORCA above).
+
+It is opt-in: unset and `all` never select it. It needs model connectors but no sandbox or
+telemetry, so it runs on a plain Scout server:
+
+```bash
+NIGHTSHIFT_DATASETS=writeup node scripts/evals start \
+  --suite nightshift-investigations --profile dev-vault --scout-arch stateful \
+  --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
+```
+
+`--model` writes the replies (Sonnet 5 wrote most production rounds) and `--judge` scores them.
+Use a judge from another family than the model, or at least a different model, so nothing grades
+its own writing.
+
+### How a reply is rewritten
+
+- **Input** ([`replay.ts`](evals/writeup/replay.ts)): the prompt under test as the system
+  prompt, then every earlier round as Agent Builder renders it (user message, tool calls with
+  results, the reply it sent), then the rewritten round's user message and tool calls, including the
+  agent's recording calls. Steps are read with the plugin's own `stepsFromRound`. Results stay whole
+  up to 20,000 characters within a 420,000-character budget; earlier rounds are clipped first.
+- **Output**: the model's next message, as free markdown. Tools stay declared, plus
+  `attachments.add`, which Agent Builder always offers, so the model may still call one before it
+  replies, as it can in production. Recording calls get a plain success, an attachment is kept so a
+  judge can read what the reply shows, and queries get "No new results." (an error that named the
+  replay came back in replies as "Let me finalize my reply"). Extra calls are listed in the report.
+- **Still different from production**: Agent Builder wraps the prompt in its own instructions and
+  compacts history its own way, earlier thinking isn't replayed, and tool calls stay as recorded,
+  so a prompt that would have queried differently can't show it.
+
+### Scores
+
+| Evaluator            | Kind | Scores                                                                                          |
+| -------------------- | ---- | ----------------------------------------------------------------------------------------------- |
+| `reply_generated`    | CODE | The model wrote a reply. The eval fails when fewer than 80% of rounds get one.                  |
+| `reply_gates`        | CODE | 1 when every gate below passes; the failed gates are in the explanation.                        |
+| `reply_words`        | CODE | Words in the reply. Neutral: shorter only helps while nothing the reader needs is lost.         |
+| `reply_faithfulness` | LLM  | 1–5 against everything the agent had seen, normalized to [0, 1], with unsupported claims.       |
+| `reply_vs_golden`    | LLM  | Pairwise against the round's golden reply, in both orders; a tie counts half.                   |
+| `reply_vs_baseline`  | LLM  | Pairwise against the baseline prompt's reply, when `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` is set. |
+
+Each round is tagged with the kind of reply its question calls for. Short: `wrapup` (the
+investigation's first message), `answer` (a direct follow-up), `summary` and `action` (a request to
+do something). Long, where the user asked for more: `method` (how a result was produced), `list`,
+`detail` (an explanation or walk-through) and `visual`. A round without a tag is a wrap-up when it
+opens the conversation and an answer otherwise.
+
+The gates ([`gates.ts`](evals/writeup/gates.ts)) read the markdown the model wrote. Every reply
+needs a first sentence of 22 words or fewer, every number of two or more digits found in what the
+agent saw, no method narration ("I queried…") unless the question asked for the method, and no
+table over 12 rows (a longer list belongs in an attachment). A short reply also gets at most 100
+words, at most 3 points (a wrap-up without points: at most 4 sentences), 90% or more of sentences at
+20 words or fewer, and no headings or bold labels. A long reply gets a word cap by type (method 300,
+list 200, detail 400, visual 150) and nothing else on its shape. Table rows count toward neither
+words nor sentences. A reply that mentions an attachment ("attached", "the table above") must show
+one with a `<render_attachment>` tag. The minimum length doesn't apply when a table or an
+attachment carries the answer, and tag lines are skipped when finding the first sentence.
+
+The pairwise judge ([`judges.ts`](evals/writeup/judges.ts)) reads what the agent had seen, what the
+investigation panel shows (summary, verdict, impact, hypotheses, proposed actions), the latest
+message and the two replies, with each attachment a reply shows written out where its tag sits. It
+doesn't see the reply type or the prompt's rules: it picks the reply this reader would rather get,
+judging correctness first, then whether it leads with what matters, fits what the question asked
+for, and is easy to follow. Terser isn't better by itself, and a reply that restates the panel
+loses. Its rubric was checked against a person's blind picks on 30 replayed pairs; the report splits
+the head to head into short questions and requests for more, since a prompt can win one and lose
+the other.
+
+Each run prints a summary table with one row per prompt, plus `recorded`, the reply the
+conversation actually got, and writes `report.md` and `results.json` under
+`data/nightshift_writeup/runs/`. The report quotes every reply next to its golden, lists
+unsupported claims, and names **ratchet** candidates: replies that pass every gate, score at least
+4 on faithfulness and win at least five of every six golden comparisons. A person reviews a
+candidate before it replaces its golden in the fixtures.
+
+### Before and after a prompt change
+
+Run on `main` for a baseline, then on the prompt branch. To score both prompts in one run and add a
+head-to-head comparison, point `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` at a git ref or a prompt file.
+`NIGHTSHIFT_WRITEUP_PROMPT` does the same for the prompt under test, which otherwise is the
+checkout's, so a branch's prompt can be measured without switching to it:
+
+```bash
+NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=origin/main \
+  node scripts/evals run --suite nightshift-investigations --profile dev-vault \
+  --model eis-anthropic-claude-5-sonnet --judge eis-anthropic-claude-5-opus
+```
+
+Replies are cached under `data/nightshift_writeup/cache/` by round, model, prompt and
+repetition, so a re-run only makes judge calls (`NIGHTSHIFT_WRITEUP_CACHE=off` regenerates). One
+repetition per round is usually enough to compare prompts, since averaging over rounds evens out a
+single reply's randomness. Use `--repetitions 2` or more before replacing a golden, which is decided
+per round, or when two prompts are only a few words apart.
+
+### Judge agreement
+
+Because replies are cached, re-running with another `--judge` scores the same replies. Compare the
+runs, reference judge first, with the suite's writeup CLI (run from the repository root):
+
+```bash
+node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scripts/writeup judge-agreement \
+  data/nightshift_writeup/runs/<opus run>/results.json \
+  data/nightshift_writeup/runs/<gpt run>/results.json
+```
+
+It reports pairwise results per judge, per-round winner agreement, faithfulness correlation, and
+how often the shorter reply wins. In the prototype this eval was ported from, judges from three
+families agreed on which prompt wrote better replies, but not on the faithfulness scale, and every
+judge preferred the shorter reply most of the time. So treat faithfulness as a rough signal until
+a person calibrates it, don't claim "no faithfulness loss" from one judge, and lean on the gates and
+human review to catch a short reply that drops something the reader needs.
+
+### Datasets
+
+The committed dataset, `nightshift/writeup`, holds five synthetic ORCA investigations
+(the OpenTelemetry Demo shop; the ORCA telemetry is CC BY 4.0) in
+[`evals/writeup/fixtures/orca/`](evals/writeup/fixtures/orca), one file each. Each ran on
+`main` with Sonnet 5 and then got two scripted follow-up questions, so every conversation has its
+first-round wrap-up and two question replies rewritten. Their goldens are seeded from variant B's brief
+of the reply each round got (an answer line and up to three points), as the prototype's were.
+
+None of those questions asks for more, so each file also has a `follow_ups` entry: one request for
+a walk-through, a list, the queries, a chart or a timeline, asked after the last round. The context
+is real; only the question is added, so it has no recorded reply and no golden. Rebuilding the
+fixtures keeps each file's `follow_ups` and `reply_types`.
+
+Customer 0 conversations must not be committed. Keep them in a private conversations file and run
+it directly, or store it once as an evaluations dataset and select it by name:
+
+```bash
+# Build a private file from exported conversations (Agent Builder GET /api/agent_builder/conversations/{id})
+node -r @kbn/setup-node-env x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scripts/writeup build --out ~/private/writeup-c0.json \
+  --dataset nightshift/writeup-c0 --rounds last exports/*.json
+
+# Run it; the executor stores it under its dataset name in the profile's evaluations cluster
+NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_WRITEUP_EXAMPLES_FILE=~/private/writeup-c0.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault ...
+
+# Later runs read the stored dataset
+NIGHTSHIFT_DATASETS=writeup NIGHTSHIFT_DATASET_NAME=nightshift/writeup-c0 \
+  node scripts/evals run --suite nightshift-investigations --profile dev-vault ...
+```
+
+`--prototype-goldens <dir>` reads the prototype's last-round goldens, and `--goldens <file>` any
+others, keyed by case id. The dataset upsert route caps a dataset at 5 MiB, so `build` clips tool
+results to `--result-cap` characters (8,000 by default) and refuses data that would not fit;
+`--rounds last` rewrites only each conversation's final reply. To refresh the ORCA conversations,
+export them again and rebuild with `--fixtures-dir evals/writeup/fixtures/orca`.
+
 ## Deferred sandbox session isolation
 
 The shared sandbox workspace is scoped to a space and conversation, not to an agent's connector
@@ -604,13 +761,18 @@ against.
 
 ## Environment variables
 
-| Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
-| `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `GCS_CREDENTIALS`                | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Variable                             | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_DATASETS`                | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes) and `writeup` the [writeup eval](#writeup); unset and `all` never include either. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_PROBE_EXAMPLES_FILE`     | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `NIGHTSHIFT_PROBE_TIME_BUDGET_S`     | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `NIGHTSHIFT_WRITEUP_EXAMPLES_FILE`   | Private conversations file for `writeup`. See [writeup](#writeup).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `NIGHTSHIFT_WRITEUP_PROMPT`          | Git ref or prompt file the writeup eval tests instead of the checkout's investigator prompt.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` | Git ref or prompt file the writeup eval also rewrites replies under, and compares head to head.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `NIGHTSHIFT_WRITEUP_VOTES`           | Pairwise votes per order for the writeup judges (default 2).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `NIGHTSHIFT_WRITEUP_CACHE`           | `off` regenerates writeup replies instead of reading the cache.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `SELECTED_EVALUATORS`                | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `GCS_CREDENTIALS`                    | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
 

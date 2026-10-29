@@ -198,6 +198,35 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
   });
 
+  it('tells the agent how to reply and how to write for readers', () => {
+    const { instructions } = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+    );
+
+    // The answer shape for follow-up questions, referenced from the final check.
+    expect(instructions).toContain('<chat_answer>');
+    expect(instructions).toContain('in the shape\n   described in <chat_answer>');
+    expect(instructions).toContain('**First sentence: the direct answer.**');
+    // A request to investigate gets a wrap-up; a question gets an answer.
+    expect(instructions).toContain(
+      "- **The investigation's first message, or a later request to investigate**"
+    );
+    expect(instructions).toContain('- **A question**');
+    expect(instructions).not.toContain('your final chat message is only a short wrap-up');
+    // Method first, reporting last, ending on the checklist the agent runs before it replies.
+    const text = instructions ?? '';
+    expect(text.indexOf('\n</investigation_method>\n')).toBeLessThan(
+      text.indexOf('\n<reporting>\n')
+    );
+    expect(text.trimEnd().endsWith('</before_you_reply>\n</reporting>')).toBe(true);
+    // A short table goes in the reply; a long one in an attachment shown inline.
+    expect(instructions).toContain('**When a table says it better, use one**');
+    expect(instructions).toContain('`<render_attachment id="<attachment_id>"/>`');
+    // Plain writing: keep component names, explain the mechanics.
+    expect(instructions).toContain('**Keep the names, explain the mechanics.**');
+    expect(instructions).toContain('**One idea per sentence.**');
+  });
+
   it('preserves telemetry connectors when resolving hooks for the space', async () => {
     const type = getInvestigationAgentType({
       sandboxEnabled: true,
