@@ -40,6 +40,8 @@ describe('createPlaywrightConfig', () => {
   const originalCI = process.env.CI;
   const originalRetries = process.env.SCOUT_TEST_RETRIES;
   const originalBuildkiteRetryCount = process.env.BUILDKITE_RETRY_COUNT;
+  const originalUseCitadelProxy = process.env.USE_CITADEL_PROXY;
+  const originalIpv6Only = process.env.KIBANA_TEST_IPV6_ONLY;
 
   const restoreEnvVar = (name: string, value: string | undefined) => {
     if (value === undefined) {
@@ -55,12 +57,17 @@ describe('createPlaywrightConfig', () => {
     delete process.env.CI;
     delete process.env.SCOUT_TEST_RETRIES;
     delete process.env.BUILDKITE_RETRY_COUNT;
+    // Set on CI builds that opt in to the Citadel proxy, including this test's own job.
+    delete process.env.USE_CITADEL_PROXY;
+    delete process.env.KIBANA_TEST_IPV6_ONLY;
   });
 
   afterAll(() => {
     restoreEnvVar('CI', originalCI);
     restoreEnvVar('SCOUT_TEST_RETRIES', originalRetries);
     restoreEnvVar('BUILDKITE_RETRY_COUNT', originalBuildkiteRetryCount);
+    restoreEnvVar('USE_CITADEL_PROXY', originalUseCitadelProxy);
+    restoreEnvVar('KIBANA_TEST_IPV6_ONLY', originalIpv6Only);
   });
 
   it('should return a valid default Playwright configuration', () => {
@@ -297,6 +304,34 @@ describe('createPlaywrightConfig', () => {
       expect(() => createPlaywrightConfig({ testDir: './my_tests' })).toThrow(
         /SCOUT_TEST_RETRIES must be a non-negative integer/
       );
+    });
+  });
+
+  describe('chromium launch args', () => {
+    it('sets no launch options by default', () => {
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use).not.toHaveProperty('launchOptions');
+    });
+
+    it('keeps the browser off the proxy when USE_CITADEL_PROXY is true', () => {
+      process.env.USE_CITADEL_PROXY = 'true';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use?.launchOptions).toEqual({ args: ['--no-proxy-server'] });
+    });
+
+    it('ignores USE_CITADEL_PROXY values other than true', () => {
+      process.env.USE_CITADEL_PROXY = 'false';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use).not.toHaveProperty('launchOptions');
+    });
+
+    it('combines the IPv6-only and Citadel args', () => {
+      process.env.KIBANA_TEST_IPV6_ONLY = 'true';
+      process.env.USE_CITADEL_PROXY = 'true';
+      const config = createPlaywrightConfig({ testDir: './my_tests' });
+      expect(config.use?.launchOptions).toEqual({
+        args: ['--host-resolver-rules=MAP localhost [::1]', '--no-proxy-server'],
+      });
     });
   });
 
