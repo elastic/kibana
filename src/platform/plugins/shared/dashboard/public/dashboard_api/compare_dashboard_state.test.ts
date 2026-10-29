@@ -8,6 +8,8 @@
  */
 
 import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
+import { getControlsSchema } from '@kbn/controls-schemas';
+import { logger } from '../services/logger';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { diffDashboardStates } from './compare_dashboard_state';
 
@@ -186,18 +188,14 @@ describe('diffDashboardStates', () => {
         ...overrides,
       } as DashboardPanel);
     const ignoreConfig = { compareSerializedState: () => true };
-
-    describe('layout identity', () => {
-      const pinnedPanel = (
-        title = 'Host',
-        id?: string
-      ): NonNullable<DashboardState['pinned_panels']>[number] => ({
+    const pinnedPanel = (title = 'Host', id?: string) =>
+      getControlsSchema().parse({
         ...(id !== undefined && { id }),
         type: 'options_list_control',
-        width: 'medium',
-        config: { title },
+        config: { title, data_view_id: 'logs', field_name: 'host.name' },
       });
 
+    describe('layout identity', () => {
       type LayoutCase = [
         string,
         (title: string) => Partial<DashboardState>,
@@ -337,7 +335,7 @@ describe('diffDashboardStates', () => {
 
     describe('comparator failures', () => {
       beforeEach(() => {
-        jest.spyOn(console, 'warn').mockImplementation(() => {});
+        jest.spyOn(logger, 'warn').mockImplementation(() => {});
       });
 
       afterEach(() => {
@@ -347,15 +345,11 @@ describe('diffDashboardStates', () => {
       it('continues comparing pinned panels when a panel comparator throws', () => {
         const baseline = state({
           panels: [lensPanel({ id: 'panel-1' })],
-          pinned_panels: [
-            { id: 'control-1', type: 'options_list_control', config: { title: 'Host' } },
-          ],
+          pinned_panels: [pinnedPanel('Host', 'control-1')],
         });
         const current = state({
           panels: [lensPanel({ id: 'panel-1' })],
-          pinned_panels: [
-            { id: 'control-1', type: 'options_list_control', config: { title: 'Updated host' } },
-          ],
+          pinned_panels: [pinnedPanel('Updated host', 'control-1')],
         });
         const error = new Error('Cannot compare panel state');
         const comparePinnedPanel = jest.fn(() => false);
@@ -375,21 +369,21 @@ describe('diffDashboardStates', () => {
           })
         ).toStrictEqual({ panels: current.panels, pinned_panels: current.pinned_panels });
         expect(comparePinnedPanel).toHaveBeenCalledWith(
-          { title: 'Host' },
-          { title: 'Updated host' }
+          baseline.pinned_panels?.[0].config,
+          current.pinned_panels?.[0].config
         );
-        expect(console.warn).toHaveBeenCalledWith(
+        expect(logger.warn).toHaveBeenCalledWith(
           'Unable to compare serialized state for dashboard panel "panel-1".',
-          error
+          { error }
         );
       });
 
       it('returns pinned panels when their comparator throws', () => {
         const baseline = state({
-          pinned_panels: [{ id: 'control-1', type: 'options_list_control', config: {} }],
+          pinned_panels: [pinnedPanel('Host', 'control-1')],
         });
         const current = state({
-          pinned_panels: [{ id: 'control-1', type: 'options_list_control', config: {} }],
+          pinned_panels: [pinnedPanel('Host', 'control-1')],
         });
         const error = new Error('Cannot compare control state');
 
@@ -403,9 +397,9 @@ describe('diffDashboardStates', () => {
             },
           })
         ).toStrictEqual({ pinned_panels: current.pinned_panels });
-        expect(console.warn).toHaveBeenCalledWith(
+        expect(logger.warn).toHaveBeenCalledWith(
           'Unable to compare serialized state for dashboard panel "control-1".',
-          error
+          { error }
         );
       });
     });
