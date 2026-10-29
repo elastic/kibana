@@ -42,6 +42,7 @@ export const getTimelineAttachment = () =>
     id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
     getIcon: () => 'timeline',
     getLabel: () => i18n.TIMELINE_DISPLAY_NAME,
+    getCountLabel: ({ count }) => i18n.TIMELINES_COUNT(count),
     schema: TimelineAttachmentPayloadSchema,
     getCreationActivity: (props) => {
       const { savedObjectId, attachmentId, metadata } = props;

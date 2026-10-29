@@ -20,6 +20,7 @@ describe('createEndpointLookupService', () => {
     scoped?: { isCpsRead: () => boolean };
     getHostMetadataList?: jest.Mock;
     agentTypes?: ResponseActionAgentType[];
+    resolutionMode?: 'dispatch';
   }) => {
     const listAgents =
       overrides?.listAgents ??
@@ -44,7 +45,10 @@ describe('createEndpointLookupService', () => {
         endpointAppContextService,
         spaceId,
         overrides?.scoped as never,
-        overrides?.agentTypes ? { agentTypes: overrides.agentTypes } : undefined
+        {
+          ...(overrides?.agentTypes ? { agentTypes: overrides.agentTypes } : {}),
+          ...(overrides?.resolutionMode ? { resolutionMode: overrides.resolutionMode } : {}),
+        }
       ),
       listAgents,
       ensureInCurrentSpace,
@@ -196,6 +200,147 @@ describe('createEndpointLookupService', () => {
 
     expect(result.kind).toBe('found');
     expect(result).toHaveProperty('endpoint.agentId', 'newer');
+  });
+
+  it('dispatch mode reports ambiguity for two offline agents sharing the hostname', async () => {
+    // A write must not guess between stale records either — which of two
+    // offline duplicates is the machine the analyst means is not decidable
+    // from enrollment recency, so the model is sent for an agent ID.
+    const { lookup } = buildService({
+      resolutionMode: 'dispatch',
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          {
+            id: 'older',
+            status: 'offline',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'newer',
+            status: 'offline',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:00:00.000Z',
+          },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('all-offline-host');
+
+    expect(result).toEqual({
+      kind: 'ambiguous',
+      candidates: [
+        { agentId: 'newer', status: HostStatus.OFFLINE },
+        { agentId: 'older', status: HostStatus.OFFLINE },
+      ],
+    });
+  });
+
+  it('dispatch mode resolves the single live agent over stale unenrolled history', async () => {
+    // Re-enrollment leaves `unenrolled` history next to the current record.
+    // Those records are definitively gone, so they are not claimable and the
+    // dispatch still resolves to the one live agent.
+    const { lookup } = buildService({
+      resolutionMode: 'dispatch',
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [
+          {
+            id: 'replaced-agent',
+            status: 'unenrolled',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T10:00:00.000Z',
+          },
+          {
+            id: 'current-agent',
+            status: 'online',
+            packages: ['endpoint'],
+            enrolled_at: '2026-07-17T13:42:02.000Z',
+          },
+        ],
+      }),
+    });
+
+    const result = await lookup.resolveByHostName('multi-enrolled-host');
+
+    expect(result.kind).toBe('found');
+    expect(result).toHaveProperty('endpoint.agentId', 'current-agent');
+  });
+
+  it('dispatch mode reports not_found when only a linked project holds a claimable match', async () => {
+    // CPS: the scoped metadata read sees a same-named host enrolled in a
+    // linked project, but origin Fleet and the origin metadata read have no
+    // record — the response-actions client dispatches through origin Fleet,
+    // so the hostname has no dispatchable answer from this project and must
+    // not surface the linked candidates.
+    const scoped = { isCpsRead: () => true };
+    const getHostMetadataList = jest.fn(async (_query: unknown, passedScoped?: unknown) => {
+      if (passedScoped) {
+        return {
+          data: [
+            {
+              host_status: HostStatus.HEALTHY,
+              metadata: {
+                elastic: { agent: { id: 'linked-agent' } },
+                host: { hostname: 'linked-only-host', name: 'linked-only-host' },
+              },
+            },
+          ],
+          total: 1,
+        };
+      }
+      return { data: [], total: 0 };
+    });
+    const { lookup } = buildService({
+      resolutionMode: 'dispatch',
+      scoped,
+      listAgents: jest.fn().mockResolvedValue({ agents: [] }),
+      getHostMetadataList,
+    });
+
+    const result = await lookup.resolveByHostName('linked-only-host');
+
+    expect(result).toEqual({ kind: 'not_found' });
+    // Both metadata reads ran: origin for resolution, scoped for collision.
+    expect(getHostMetadataList).toHaveBeenCalledTimes(2);
+  });
+
+  it('dispatch mode reports ambiguity when a linked project hosts a same-named machine', async () => {
+    // The origin host alone would resolve, but the scoped read finds a second
+    // same-named machine in a linked project — the card must not offer the
+    // origin host while another machine shares its name.
+    const scoped = { isCpsRead: () => true };
+    const getHostMetadataList = jest.fn(async (_query: unknown, passedScoped?: unknown) => {
+      if (passedScoped) {
+        return {
+          data: [
+            {
+              host_status: HostStatus.HEALTHY,
+              metadata: {
+                elastic: { agent: { id: 'linked-agent' } },
+                host: { hostname: 'shared-name', name: 'shared-name' },
+              },
+            },
+          ],
+          total: 1,
+        };
+      }
+      return { data: [], total: 0 };
+    });
+    const { lookup } = buildService({
+      resolutionMode: 'dispatch',
+      scoped,
+      listAgents: jest.fn().mockResolvedValue({
+        agents: [{ id: 'origin-agent', status: 'online', packages: ['endpoint'] }],
+      }),
+      getHostMetadataList,
+    });
+
+    const result = await lookup.resolveByHostName('shared-name');
+
+    expect(result.kind).toBe('ambiguous');
+    const candidates = (result as { candidates: Array<{ agentId: string }> }).candidates;
+    expect(candidates.map((c) => c.agentId).sort()).toEqual(['linked-agent', 'origin-agent']);
   });
 
   it('reports ambiguity when two online agents share the hostname', async () => {

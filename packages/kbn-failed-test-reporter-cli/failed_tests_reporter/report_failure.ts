@@ -16,7 +16,7 @@ import {
   getConfigPathFromCommandLine,
 } from './failure_details';
 import { isScoutFailure } from './failure_identity';
-import type { TestFailure } from './get_failures';
+import type { JUnitTestType, TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssueComment } from './github_api';
@@ -277,6 +277,16 @@ function createScoutBody(
   );
 }
 
+/**
+ * Distinct from the type definition so we don't silently create new GitHub
+ * labels if we add a new test framework.
+ */
+const JUNIT_FRAMEWORK_LABELS: Record<JUnitTestType, string> = {
+  ftr: 'ftr',
+  jest: 'jest',
+  cypress: 'cypress',
+};
+
 async function createJUnitFailureIssue(
   buildUrl: string,
   failure: TestFailure,
@@ -287,7 +297,9 @@ async function createJUnitFailureIssue(
 ) {
   const title = createJUnitTitle(failure, prependTitle);
   const body = createJUnitBody(failure, buildUrl, branch, pipeline);
-  const labels = ['failed-test'];
+  const labels = failure.testType
+    ? ['failed-test', JUNIT_FRAMEWORK_LABELS[failure.testType]]
+    : ['failed-test'];
 
   return await api.createIssue(title, body, labels);
 }
@@ -327,8 +339,8 @@ interface CommentOptions {
   nameTest?: boolean;
 }
 
-/** How a suite issue comment names the failed test: a Scout failure only knows its describe and title */
-const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
+/** How a suite issue names the failed test: a Scout failure only knows its describe and title */
+export const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
   isScoutFailure(failure) ? `${failure.classname} ${failure.name}` : failure.name;
 
 function createJUnitComment(

@@ -8,19 +8,19 @@
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { passThroughTransformer } from '../../../common/attachments/base';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrowZod } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
-import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
+import { AttachmentTransformedAttributesSchema } from '../../../common/types/attachments_v1';
 import type {
   AttachmentAttributesV2,
   AttachmentSavedObjectTransformedV2,
   UnifiedAttachmentAttributes,
 } from '../../../common/types/attachments_v2';
 import type { AttachmentV2, UnifiedAttachment } from '../../../../common/types/domain';
+import type { AttachmentPatchAttributesV2 } from '../../../../common/types/domain/attachment/v2';
 import {
-  type AttachmentPatchAttributesV2,
-  UnifiedAttachmentAttributesRt,
-  UnifiedAttachmentRt,
+  UnifiedAttachmentAttributesSchema,
+  UnifiedAttachmentSchema,
 } from '../../../../common/types/domain/attachment/v2';
 import { isConvertibleToUnified } from '../../../../common/utils/attachments';
 import {
@@ -53,7 +53,9 @@ export function toUnifiedAttributes({
 
   if (isConvertibleToUnified(attributes)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
-    const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
+    const validatedAttributes = decodeOrThrowZod(UnifiedAttachmentAttributesSchema)(
+      unifiedAttrs
+    ) as UnifiedAttachmentAttributes;
     return { isUnified: true, attributes: validatedAttributes };
   }
 
@@ -73,7 +75,7 @@ export const decodeAttachmentSavedObject = (
   const transformed = toUnifiedAttributes({ attributes: injectedSo.attributes });
   const attributes = transformed.isUnified
     ? transformed.attributes
-    : decodeOrThrow(AttachmentTransformedAttributesRt)(transformed.attributes);
+    : decodeOrThrowZod(AttachmentTransformedAttributesSchema)(transformed.attributes);
 
   return Object.assign(injectedSo, { attributes }) as AttachmentSavedObjectTransformedV2;
 };
@@ -81,11 +83,11 @@ export const decodeAttachmentSavedObject = (
 export const toUnifiedAttachment = (attachment: AttachmentV2): UnifiedAttachment => {
   const { id, version, ...attributes } = attachment;
   const { attributes: folded } = toUnifiedAttributes({ attributes });
-  return decodeOrThrow(UnifiedAttachmentRt)({
+  return decodeOrThrowZod(UnifiedAttachmentSchema)({
     id,
     version,
     ...folded,
-  });
+  }) as UnifiedAttachment;
 };
 
 /**

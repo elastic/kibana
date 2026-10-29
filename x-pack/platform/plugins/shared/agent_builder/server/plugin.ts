@@ -42,6 +42,7 @@ import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -134,6 +135,12 @@ export class AgentBuilderPlugin
       usageApi: setupDeps.usageApi,
       actions: setupDeps.actions,
     });
+
+    serviceSetups.hooks.registerCycleHook(
+      createRelevantSkillsCycleHook({
+        getUiSettings: async () => (await coreSetup.getStartServices())[0].uiSettings,
+      })
+    );
 
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
@@ -348,6 +355,7 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
       licensing,
       security: securityPlugin,
+      isomer,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -384,6 +392,7 @@ export class AgentBuilderPlugin
         airgapped: this.env.airgapped,
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
+      isomer,
       conversationEventBus: this.conversationEventBus,
     });
 

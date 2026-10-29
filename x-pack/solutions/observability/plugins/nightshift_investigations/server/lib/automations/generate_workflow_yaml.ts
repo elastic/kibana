@@ -29,17 +29,13 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// One investigation per message, so concurrent messages in a channel do not share a subject.
-const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
-
-// The message's thread, which the managed Slack thread workflow looks the investigation up by when
-// someone replies. Only recorded for an automation that already reports in that thread: it makes
-// a reply there report the investigation, which a silent or channel-mode automation does not do.
-// The trigger condition guarantees a workspace.
+// The message's thread, keyed by the Relay's thread key so a later reply or mention in it continues
+// the investigation. Only top-level messages trigger, so each message is its own thread.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',
   thread_ts: '{{ event.messageId }}',
+  external_conversation_id: '{{ event.externalConversationId }}',
 };
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
@@ -145,6 +141,7 @@ function generateAlertWorkflow(
       {
         name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
+        ...(alertRows.length > 0 ? { if: ALERT_ACTIVE_STEP_CONDITION } : {}),
         with: {
           automation_id: automationId,
           subject_type: alertRows.length > 0 ? 'alert' : 'manual',
@@ -162,9 +159,35 @@ function generateAlertWorkflow(
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },
+      ...(alertRows.length > 0 ? [RECOVERED_ALERT_STEP] : []),
     ],
   };
 }
+
+const ALERT_ACTIVE_STEP_CONDITION = "${{ event.alert.status == 'active' }}";
+
+/**
+ * Continues the open investigation that holds a recovered alert with the recovery brief, or does
+ * nothing when no open investigation holds it. It never starts an investigation, so it does not
+ * consume the automation's daily limit.
+ */
+const RECOVERED_ALERT_STEP = {
+  name: 'follow_up_recovered_alert',
+  type: 'nightshift.followUpRecoveredAlert',
+  if: "${{ event.alert.status == 'recovered' }}",
+  with: {
+    alert_uuid: '{{ event.alert.uuid }}',
+    alert_id: '${{ event.alert.id }}',
+    alert_start: '${{ event.alert.start }}',
+    // Stamped when the event is dispatched to workflows, after the rule run that found the alert
+    // recovered has saved its state.
+    recovered_at: '{{ event.timestamp }}',
+    rule_id: '{{ event.rule.id }}',
+    rule_name: '${{ event.rule.name }}',
+    rule_type_id: '{{ event.rule.ruleTypeId }}',
+    rule_tags: '${{ event.rule.tags }}',
+  },
+};
 
 function buildAlertContext() {
   return {
@@ -229,9 +252,11 @@ type TriggerKind = 'alert' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
- * previous one. Scheduled runs have no event payload and share one concurrency key per automation.
+ * previous one. An alert's recovery is keyed apart from its activation, so it is not dropped while
+ * the activation's run is still in progress. Scheduled runs have no event payload and share one
+ * concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}';
+const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}-{{ event.alert.status }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -276,7 +301,6 @@ function generateSlackWorkflow(
   hasMultipleTriggers: boolean
 ) {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
-  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   const condition = buildSlackCondition(slackRows);
   // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
@@ -294,9 +318,8 @@ function generateSlackWorkflow(
         type: 'nightshift.triggerInvestigation',
         with: {
           automation_id: automationId,
-          subject_type: 'manual',
-          subject_id: SLACK_SUBJECT_ID,
-          ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
+          subject_type: 'slack_thread',
+          slack_thread: SLACK_THREAD,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
@@ -469,10 +492,10 @@ function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert
   return rowConditions.map((c) => `(${c})`).join(' OR ');
 }
 
-const ACTIVE_ALERT_CONDITION = 'event.alert.status: "active"';
+const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.status: "recovered")';
 
 function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [ACTIVE_ALERT_CONDITION];
+  const parts: string[] = [ALERT_STATUS_CONDITION];
 
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);
