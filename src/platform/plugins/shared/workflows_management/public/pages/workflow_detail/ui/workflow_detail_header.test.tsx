@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -25,6 +25,11 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import {
+  resetWorkflowSettingsSurfaceVariantForTests,
+  setWorkflowSettingsSurfaceVariant,
+} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 const mockUseKibana = jest.fn();
@@ -70,6 +75,13 @@ jest.mock('../../../entities/workflows/model/use_update_workflow', () => ({
 }));
 jest.mock('@kbn/css-utils/public/use_memo_css', () => ({
   useMemoCss: (styles: any) => mockUseMemoCss(styles),
+}));
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: jest.fn().mockReturnValue(false),
+}));
+jest.mock('../../../entities/workflows/model/use_workflow_stats', () => ({
+  useWorkflowFiltersOptions: () => ({ data: { tags: [] } }),
+  useWorkflowStats: () => ({ data: undefined }),
 }));
 
 describe('WorkflowDetailHeader', () => {
@@ -145,7 +157,9 @@ describe('WorkflowDetailHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
     localStorage.clear();
+    resetWorkflowSettingsSurfaceVariantForTests();
     mockNavigateToApp = jest.fn();
     mockUseKibana.mockReturnValue({
       services: {
@@ -231,6 +245,25 @@ describe('WorkflowDetailHeader', () => {
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
   });
 
+  it('opens the workflow settings flyout from the header gear', () => {
+    // The settings gear only renders behind the experimental visual-editor flag.
+    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('workflowSettingsButton'));
+    expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
+  });
+
+  it.each(['b', 'c'] as const)(
+    'hides the header gear for canvas settings surface %s',
+    (variant) => {
+      setWorkflowSettingsSurfaceVariant(variant);
+      const { queryByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+      expect(queryByTestId('workflowSettingsButton')).not.toBeInTheDocument();
+    }
+  );
+
   it('links to connector management from the overflow menu', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
@@ -308,6 +341,11 @@ describe('WorkflowDetailHeader', () => {
       hasChanges: true,
     });
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
+  });
+
+  it('does not expose a Run action in the header app menu', () => {
+    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+    expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
   });
 
   it('disables enabled toggle when yaml has validation errors', () => {
@@ -529,7 +567,7 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('exposes the change history entry point on the workflow tab when a workflow id is present', async () => {
+  it('exposes the change history entry point inline left of Executions when a workflow id is present', () => {
     const changeHistoryModal = {
       isOpen: false,
       openModal: jest.fn(),
@@ -541,11 +579,9 @@ describe('WorkflowDetailHeader', () => {
       </ChangeHistoryModalContext.Provider>
     );
 
-    // History lives in the overflow ("More") menu, so open it before locating the entry point.
-    await openAppMenuOverflow();
-
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();
+    expect(getByTestId('workflowDetailExecutionsButton')).toBeInTheDocument();
 
     fireEvent.click(historyItem);
     expect(changeHistoryModal.openModal).toHaveBeenCalledTimes(1);

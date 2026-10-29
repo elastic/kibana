@@ -124,6 +124,8 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
             properties: {
               who: { type: 'string', default: 'world' },
               name: { type: 'string' },
+              // `anyOf` is not builder-editable, so the form falls back to the Monaco editor.
+              either: { anyOf: [{ type: 'string' }, { type: 'number' }] },
             },
             required: ['who', 'name'],
           } as JsonModelSchemaType

@@ -133,16 +133,22 @@ export const packCrossAxis = ({
     // The body of a `merge` step hangs off it, but the items after it start on the same
     // rows (nothing pushes them down, unlike a fallback lane), so it must clear them.
     // Packing back to front measures each item once, against the final reach of what follows.
-    const packed: Packed[] = [];
+    // Reductions and the back-to-front walk avoid `Math.max(...spread)` and `unshift`,
+    // which overflow the call stack / go quadratic on very long sequences.
+    const packedBackToFront: Packed[] = [];
     let followingReach = 0;
-    [...items].reverse().forEach((item) => {
+    let left = 0;
+    for (let index = items.length - 1; index >= 0; index--) {
+      const item = items[index];
       const piece = packItem(item, item.kind === 'step' && item.attached ? followingReach : 0);
-      packed.unshift(piece);
+      packedBackToFront.push(piece);
       followingReach = Math.max(followingReach, piece.right);
-    });
+      left = Math.max(left, piece.left);
+    }
+    const packed = packedBackToFront.reverse();
     return {
-      left: Math.max(0, ...packed.map((piece) => piece.left)),
-      right: Math.max(0, ...packed.map((piece) => piece.right)),
+      left,
+      right: followingReach,
       place: (spine) => packed.forEach((piece) => piece.place(spine)),
     };
   };

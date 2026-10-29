@@ -29,6 +29,7 @@ import type {
   StepExecutionData,
 } from '../execution_context/build_execution_context';
 import { getInterceptedHover } from '../hover/get_intercepted_hover';
+import { isStepFragmentModel } from '../step_fragment/step_fragment_models';
 import { evaluateExpression } from '../template_expression/evaluate_expression';
 import { parseTemplateAtPosition } from '../template_expression/parse_template_at_position';
 import { formatValueAsJson } from '../template_expression/resolve_path_value';
@@ -63,6 +64,14 @@ export class UnifiedHoverProvider implements monaco.languages.HoverProvider {
     cancellationToken: monaco.CancellationToken
   ): Promise<monaco.languages.Hover | null> {
     if (cancellationToken.isCancellationRequested) {
+      return null;
+    }
+
+    // Step-fragment editors (the graph flyout's YAML tab) show one
+    // de-indented step; this provider's helpers resolve against the main
+    // document and the fragment's own coordinates, so they'd misfire here.
+    // Monaco's built-in marker hover still shows our validation messages.
+    if (isStepFragmentModel(model)) {
       return null;
     }
 

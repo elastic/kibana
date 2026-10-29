@@ -8,53 +8,25 @@
  */
 
 import dagre, { graphlib } from '@dagrejs/dagre';
-import type { EdgeLabel } from '@dagrejs/dagre';
 import {
   alignDagreCrossAxisInPlace,
   type CrossAxis,
   separateRankOverlapsInPlace,
-  shiftEdgePointsInterpolated,
-  snapshotDagreNodeCenters,
 } from './align_cross_axis';
-import type {
-  DagEdge,
-  DagLayoutDirection,
-  DagNode,
-  DagPositionedEdge,
-  DagPositionedNode,
-} from './types';
-import { CROSS_AXIS_DELTA_TOLERANCE, STRAIGHT_X_THRESHOLD } from './constants';
+import { DAGRE_EDGE_SEP } from './constants';
+import type { DagEdge, DagLayoutDirection, DagNode, DagPositionedNode } from './types';
 
-/** Drops Dagre waypoints when endpoints align but middle segments still spread laterally. */
-export const resolveShiftedEdgePoints = ({
-  shifted,
-  sourceCenter,
-  targetCenter,
-  crossAxis,
-}: {
-  shifted: Array<{ x: number; y: number }>;
-  sourceCenter: number;
-  targetCenter: number;
-  crossAxis: CrossAxis;
-}): Array<{ x: number; y: number }> => {
-  const endpointSpread = Math.abs(sourceCenter - targetCenter);
-  const crossCoord = (p: { x: number; y: number }): number => (crossAxis === 'x' ? p.x : p.y);
-  const allCrossCoords = [sourceCenter, targetCenter, ...shifted.map(crossCoord)];
-  const waypointSpread = Math.max(...allCrossCoords) - Math.min(...allCrossCoords);
-  if (endpointSpread < STRAIGHT_X_THRESHOLD && waypointSpread >= STRAIGHT_X_THRESHOLD) {
-    return [];
-  }
-  return shifted;
-};
-
+/**
+ * Runs dagre (ranks depend on the edges), re-centres the cross axis on the
+ * barycenter of each node's neighbours, and returns the node boxes.
+ */
 export function applyDagre(
   nodes: readonly DagNode[],
   edges: readonly DagEdge[],
   direction: DagLayoutDirection,
   nodeSep: number,
-  rankSep: number,
-  alignmentIgnoredEdges?: readonly string[]
-): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } {
+  rankSep: number
+): DagPositionedNode[] {
   const g = new graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({
@@ -62,30 +34,26 @@ export function applyDagre(
     ranker: 'tight-tree',
     nodesep: nodeSep,
     ranksep: rankSep,
-    edgesep: 40,
+    edgesep: DAGRE_EDGE_SEP,
   });
 
   for (const node of nodes) {
     g.setNode(node.id, { width: node.width, height: node.height });
   }
   for (const edge of edges) {
-    g.setEdge(edge.source, edge.target, { label: edge.id });
+    g.setEdge(edge.source, edge.target);
   }
 
   dagre.layout(g);
 
   const crossAxis: CrossAxis = direction === 'LR' ? 'y' : 'x';
-  const mainAxis: CrossAxis = direction === 'LR' ? 'x' : 'y';
-  const nodeIds = nodes.map((n) => n.id);
-  const centersBefore = snapshotDagreNodeCenters(g, nodeIds);
-  const ignoredEdgeIdSet = new Set(alignmentIgnoredEdges ?? []);
-  alignDagreCrossAxisInPlace(g, crossAxis, nodeSep, ignoredEdgeIdSet);
+  alignDagreCrossAxisInPlace(g, crossAxis, nodeSep);
   // The barycenter pass can pull a wide subtree's head across its rank until it
   // overlaps a sibling; restore dagre's non-overlap guarantee before positions
-  // and edge deltas are read (so edge routing reflects the final coordinates).
+  // are read.
   separateRankOverlapsInPlace(g, crossAxis, nodeSep);
 
-  const positioned: DagPositionedNode[] = nodes.map((node) => {
+  return nodes.map((node) => {
     const dagreNode = g.node(node.id);
     if (!dagreNode) {
       throw new Error(`Dagre layout produced no position for node "${node.id}"`);
@@ -98,66 +66,4 @@ export function applyDagre(
       height: dagreNode.height,
     };
   });
-
-  const routedEdges: DagPositionedEdge[] = edges.map((edge) => {
-    const dagreEdge = g.edge(edge.source, edge.target) as EdgeLabel | undefined;
-    const rawPoints = dagreEdge?.points;
-    const beforeSource = centersBefore.get(edge.source);
-    const beforeTarget = centersBefore.get(edge.target);
-    const afterSource = g.node(edge.source);
-    const afterTarget = g.node(edge.target);
-
-    let points: Array<{ x: number; y: number }> = [];
-    if (
-      rawPoints &&
-      rawPoints.length >= 2 &&
-      beforeSource &&
-      beforeTarget &&
-      afterSource &&
-      afterTarget
-    ) {
-      const sourceDelta =
-        crossAxis === 'x' ? afterSource.x - beforeSource.x : afterSource.y - beforeSource.y;
-      const targetDelta =
-        crossAxis === 'x' ? afterTarget.x - beforeTarget.x : afterTarget.y - beforeTarget.y;
-      // Exclude alignment-ignored edges (e.g. failure edges) so that a fallback
-      // owner's spine edge is not mistaken for a fan-out when the owner has only
-      // one non-failure successor. Unfiltered, a fallback owner always shows
-      // successorCount === 2 and drops its waypoints.
-      const successorCount = (g.outEdges(edge.source) ?? []).filter(
-        (oe) =>
-          !ignoredEdgeIdSet.has(
-            ((g.edge(oe.v, oe.w) as EdgeLabel | undefined)?.label as string) ?? ''
-          )
-      ).length;
-      const predecessorCount = (g.inEdges(edge.target) ?? []).filter(
-        (ie) =>
-          !ignoredEdgeIdSet.has(
-            ((g.edge(ie.v, ie.w) as EdgeLabel | undefined)?.label as string) ?? ''
-          )
-      ).length;
-      // Fan-out/fan-in edges keep stale multi-rank Dagre buses after barycenter; smooth-step instead.
-      const isBranchOrMergeEdge = successorCount > 1 || predecessorCount > 1;
-      const useDagreWaypoints =
-        !isBranchOrMergeEdge && Math.abs(sourceDelta - targetDelta) <= CROSS_AXIS_DELTA_TOLERANCE;
-      if (useDagreWaypoints) {
-        const shifted = shiftEdgePointsInterpolated({
-          points: rawPoints.map((p) => ({ x: p.x, y: p.y })),
-          crossAxis,
-          mainAxis,
-          sourceMain: mainAxis === 'x' ? afterSource.x : afterSource.y,
-          targetMain: mainAxis === 'x' ? afterTarget.x : afterTarget.y,
-          sourceDelta,
-          targetDelta,
-        });
-        const sourceCenter = crossAxis === 'x' ? afterSource.x : afterSource.y;
-        const targetCenter = crossAxis === 'x' ? afterTarget.x : afterTarget.y;
-        points = resolveShiftedEdgePoints({ shifted, sourceCenter, targetCenter, crossAxis });
-      }
-    }
-
-    return { id: edge.id, source: edge.source, target: edge.target, points };
-  });
-
-  return { nodes: positioned, edges: routedEdges };
 }

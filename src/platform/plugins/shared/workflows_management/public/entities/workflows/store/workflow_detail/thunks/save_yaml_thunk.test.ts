@@ -173,6 +173,24 @@ describe('saveYamlThunk', () => {
       expect(result.type).toBe('detail/saveYamlThunk/fulfilled');
     });
 
+    it('preserves the current URL search when navigating after create', async () => {
+      const originalSearch = window.location.search;
+      window.history.replaceState({}, '', `${window.location.pathname}?view=graph`);
+      mockWorkflowApi.createWorkflow.mockResolvedValue(mockWorkflow);
+
+      try {
+        await store.dispatch(saveYamlThunk());
+        expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            path: 'test-workflow-1?view=graph',
+          })
+        );
+      } finally {
+        window.history.replaceState({}, '', `${window.location.pathname}${originalSearch}`);
+      }
+    });
+
     it('should handle HTTP error when creating', async () => {
       const error = {
         body: { message: 'Creation failed' },

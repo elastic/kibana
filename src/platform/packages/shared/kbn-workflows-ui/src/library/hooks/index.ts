@@ -14,3 +14,7 @@ export { useLibraryEnabled } from './use_library_enabled';
 export { useActiveSolution } from './use_active_solution';
 export { useConnectors, useInvalidateConnectors } from './use_connectors';
 export { useInstallTemplate } from './use_install_template';
+export {
+  useRecommendedTemplates,
+  type UseRecommendedTemplatesResult,
+} from './use_recommended_templates';

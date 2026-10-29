@@ -8,6 +8,7 @@
  */
 
 import { createContext, type ReactNode, useContext } from 'react';
+import type { BranchSlot } from '@kbn/workflows';
 
 /**
  * Render-prop type for injecting a custom icon resolver into the graph canvas.
@@ -24,6 +25,66 @@ export type RenderStepIcon = (args: {
   color?: string;
 }) => ReactNode;
 
+/**
+ * Where an insertion lands. Name-addressed per ADR-0007:
+ * - `trigger` appends a new trigger.
+ * - `prepend-step` inserts a step at the beginning of the top-level steps array
+ *   (used when clicking the flow port on a trigger node — no preceding step anchor).
+ * - `after` inserts a step after the named anchor step in its containing sequence.
+ * - `branch` inserts at the head of an empty branch owned by the named step.
+ * - `fallback` adds the first fallback step to the named step's `on-failure.fallback`.
+ *
+ * Every handler receives graph node ids; the caller maps them back to step names
+ * via `TransformResult.nodeRefs`. The graph never sees YAML directly.
+ */
+export type WorkflowGraphInsertionContext =
+  | { readonly mode: 'trigger' }
+  | { readonly mode: 'prepend-step' }
+  | { readonly mode: 'after'; readonly stepName: string }
+  | {
+      readonly mode: 'branch';
+      readonly stepName: string;
+      readonly branch: BranchSlot;
+      /**
+       * Where to insert within the branch sequence.
+       * - `'start'` (default when chips are the anchor) — unshifts to the top.
+       * - `'end'` — appends at the bottom (legacy; used for inner after-leaf controls).
+       */
+      readonly position?: 'start' | 'end';
+    }
+  | { readonly mode: 'fallback'; readonly stepName: string };
+
+/** Screen-space rectangle of the control that opened an insertion, for anchoring the menu. */
+export interface WorkflowGraphAnchorRect {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Editing callbacks. Their presence on the context switches the canvas into
+ * edit mode (insertion controls, node action cluster, keyboard delete).
+ * Every handler receives graph node ids; the caller maps them back to the
+ * YAML document via `TransformResult.nodeRefs`.
+ */
+export interface WorkflowGraphEditActions {
+  onInsert: (context: WorkflowGraphInsertionContext, anchor: WorkflowGraphAnchorRect) => void;
+  onEditStep: (nodeId: string) => void;
+  onDeleteNode: (nodeId: string) => void;
+}
+
+/** Applied-state reason for the node warning badge tooltip. */
+export type NodeConfigWarningReason = 'incomplete' | 'misconfigured' | 'both';
+
+/** Settings node kinds (Option B canvas row above triggers). */
+export type WorkflowSettingsNodeKind = 'info' | 'constants' | 'outputs';
+
+/**
+ * Stable, caller-supplied callbacks only. Per-node volatile values (port
+ * targets, config warnings, pending error-path flag) travel on each node's
+ * `data` so a change for one node never re-renders the others.
+ */
 export interface WorkflowGraphActions {
   /** Called when the user clicks the Play icon on a node hover. */
   onStepRun?: (stepName: string) => void;
@@ -32,12 +93,19 @@ export interface WorkflowGraphActions {
   /** Called when the user keyboard-activates (Enter/Space) a node. */
   onStepSelect?: (nodeId: string) => void;
   /**
+   * Called when the user activates a settings node (info / constants /
+   * outputs). `undefined` clears the settings selection (e.g. pane click).
+   */
+  onSettingsNodeSelect?: (kind: WorkflowSettingsNodeKind | undefined) => void;
+  /**
    * Optional renderer for step icons inside graph nodes. When provided, the
    * canvas delegates icon resolution to the caller (e.g. the plugin's
    * `<StepIcon/>` which consults the extension registry and action-type
    * registry). Falls back to the built-in `STEP_TYPE_ICON` table when absent.
    */
   renderStepIcon?: RenderStepIcon;
+  /** Edit-mode callbacks; undefined renders the read-only canvas. */
+  edit?: WorkflowGraphEditActions;
 }
 
 export const WorkflowGraphActionsContext = createContext<WorkflowGraphActions>({});

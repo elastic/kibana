@@ -18,16 +18,17 @@ import type { ConversationAttachment } from '@kbn/agent-builder-common/attachmen
  * import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
  *
  * application.navigateToApp(WORKFLOWS_APP_ID, {
- *   path: '/create',
+ *   path: '/create?view=graph',
  *   state: { initialYaml } satisfies WorkflowsCreateRouteState,
  * });
  * ```
  *
  * The state travels on the history entry rather than the URL, so it survives
  * back/forward navigation but is not shareable: a plain `/create` link seeds
- * the editor with the default YAML. Used by the Workflow Template Library's
- * "Remix with AI" action to open a rendered template in the editor, and by the
- * empty Workflows list to hand its prompt to the AI chat.
+ * the editor with the default YAML. New-workflow entry points pass
+ * `?view=graph` so creation lands on the visual builder. Used by the Workflow
+ * Template Library's "Remix with AI" action to open a rendered template in the
+ * editor, and by the empty Workflows list to hand its prompt to the AI chat.
  */
 export interface WorkflowsCreateRouteState {
   /** Workflow YAML to seed the editor with, in place of the default. */

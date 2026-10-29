@@ -62,6 +62,9 @@ export const typeToEuiIconMap = {
   constant_keyword: { iconType: 'tokenConstant' },
   gauge: { iconType: 'tokenMetricGauge' },
   counter: { iconType: 'tokenMetricCounter' },
+  // Structural types (also used outside ES field lists, e.g. workflow catalogs)
+  array: { iconType: 'tokenArray' },
+  object: { iconType: 'tokenObject' },
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
   percolator: { iconType: 'tokenPercolator' },

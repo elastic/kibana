@@ -39,6 +39,7 @@ interface WorkflowDetailPageProps {
 const mockUseWorkflowsBreadcrumbs = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseGlobalExecutionsViewEnabled = jest.fn();
+const mockUseWorkflowsExperimentalUiSetting = jest.fn();
 
 let mockLoadConnectors = jest.fn();
 let mockLoadWorkflow = jest.fn();
@@ -55,6 +56,9 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 }));
 jest.mock('../../../hooks/use_global_executions_view_enabled', () => ({
   useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
+}));
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -238,6 +242,7 @@ describe('WorkflowDetailPage', () => {
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseGlobalExecutionsViewEnabled.mockReturnValue(false);
+    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
@@ -344,6 +349,18 @@ describe('WorkflowDetailPage', () => {
       });
 
       expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
+    });
+
+    it('skips the landing on /create when the visual editor is enabled', () => {
+      mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
+
+      renderWithProviders({ id: undefined }, () => createMockStore(), ['/create']);
+
+      expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflow-detail-editor')).toHaveAttribute(
+        'data-auto-open-agent-chat',
+        'false'
+      );
     });
 
     it('opens the editor without the agent chat on "Start manually"', () => {
@@ -682,6 +699,33 @@ describe('WorkflowDetailPage', () => {
       rerender(<WorkflowDetailPage id="different-workflow-456" />);
 
       expect(mockLoadWorkflow).toHaveBeenCalledWith({ id: 'different-workflow-456' });
+    });
+
+    it('does not reload the workflow when only the editor view toggles', () => {
+      const urlState = {
+        activeTab: 'workflow' as const,
+        selectedExecutionId: undefined as string | undefined,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+        editorView: 'yaml' as 'yaml' | 'graph',
+        setEditorView: jest.fn(),
+      };
+      mockUseWorkflowUrlState.mockImplementation(() => urlState);
+
+      const store = createMockStore();
+      const services = createStartServicesMock();
+      const wrapper = getTestProvider({ store, services });
+
+      const Harness = ({ view }: { view: 'yaml' | 'graph' }) => {
+        urlState.editorView = view;
+        return <WorkflowDetailPage id="test-workflow-123" />;
+      };
+
+      const { rerender } = render(<Harness view="yaml" />, { wrapper });
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
+
+      rerender(<Harness view="graph" />);
+      expect(mockLoadWorkflow).toHaveBeenCalledTimes(1);
     });
   });
 

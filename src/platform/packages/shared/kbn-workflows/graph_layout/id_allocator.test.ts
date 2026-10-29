@@ -55,6 +55,22 @@ describe('IdAllocator', () => {
     expect(a.allocate('---')).toBe('step');
   });
 
+  it('does not throw for names longer than the slug input limit', () => {
+    const a = new IdAllocator();
+    expect(a.allocate('a'.repeat(2000))).toBe('a'.repeat(1000));
+    expect(a.allocate('a'.repeat(2000))).toBe(`${'a'.repeat(1000)}-2`);
+  });
+
+  it('keeps names at the slug input limit untouched', () => {
+    const a = new IdAllocator();
+    expect(a.allocate('b'.repeat(1000))).toBe('b'.repeat(1000));
+  });
+
+  it('falls back to "step" for an empty name', () => {
+    const a = new IdAllocator();
+    expect(a.allocate('')).toBe('step');
+  });
+
   it('allocates 10 000 duplicates with unique suffixes within the regression limit', () => {
     const a = new IdAllocator();
     const allocatedIds = new Set<string>();

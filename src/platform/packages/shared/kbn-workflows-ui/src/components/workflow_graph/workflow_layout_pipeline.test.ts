@@ -12,7 +12,7 @@
  *   transformWorkflowToGraph → computeWorkflowLayout → assert positions.
  */
 
-import { dagLayout, resolveShiftedEdgePoints } from '@kbn/dag-layout';
+import { dagLayout } from '@kbn/dag-layout';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
@@ -45,16 +45,6 @@ const findNode = (nodes: ReturnType<typeof computeWorkflowLayout>['nodes'], id: 
   const n = nodes.find((x) => x.id === id);
   if (!n) throw new Error(`Expected positioned node "${id}"`);
   return n;
-};
-
-const findEdge = (
-  edges: ReturnType<typeof computeWorkflowLayout>['edges'],
-  source: string,
-  target: string
-) => {
-  const e = edges.find((x) => x.source === source && x.target === target);
-  if (!e) throw new Error(`Expected edge ${source} → ${target}`);
-  return e;
 };
 
 const centerX = (n: ReturnType<typeof findNode>) => n.x + n.width / 2;
@@ -129,20 +119,6 @@ describe('workflow layout pipeline', () => {
     const lrXSpread = Math.max(...lrSteps.map((n) => n.x)) - Math.min(...lrSteps.map((n) => n.x));
     const lrYSpread = Math.max(...lrSteps.map((n) => n.y)) - Math.min(...lrSteps.map((n) => n.y));
     expect(lrXSpread).toBeGreaterThan(lrYSpread);
-  });
-
-  it('returns edges with points arrays', () => {
-    const { result } = runLayout(
-      minimal({
-        steps: [
-          { name: 'a', type: 'http' },
-          { name: 'b', type: 'http' },
-        ] as unknown as WorkflowYaml['steps'],
-      })
-    );
-    for (const e of result.edges) {
-      expect(Array.isArray(e.points)).toBe(true);
-    }
   });
 
   it('TB merge node is horizontally centered between parallel branch leaves', () => {
@@ -224,70 +200,7 @@ describe('workflow layout pipeline', () => {
     }
   });
 
-  it('TB linear chain edge waypoints share center X with nodes', () => {
-    const { result } = runLayout(
-      minimal({
-        steps: [
-          { name: 'a', type: 'http' },
-          { name: 'b', type: 'http' },
-        ] as unknown as WorkflowYaml['steps'],
-      }),
-      'TB'
-    );
-    const a = findNode(result.nodes, 'a');
-    const b = findNode(result.nodes, 'b');
-    const e = findEdge(result.edges, 'a', 'b');
-    for (const p of e.points) {
-      expect(Math.abs(p.x - centerX(a))).toBeLessThanOrEqual(CENTER_TOLERANCE);
-      expect(Math.abs(p.x - centerX(b))).toBeLessThanOrEqual(CENTER_TOLERANCE);
-    }
-  });
-
-  it('TB if branch fan-out omits dagre waypoints for smooth-step routing', () => {
-    const { result } = runLayout(
-      minimal({
-        steps: [
-          {
-            name: 'gate',
-            type: 'if',
-            condition: 'true',
-            steps: [{ name: 'left_step', type: 'http' }],
-            else: [
-              {
-                name: 'wide_loop',
-                type: 'foreach',
-                foreach: 'items',
-                steps: [
-                  { name: 'inner_a', type: 'http' },
-                  { name: 'inner_b', type: 'http' },
-                ],
-              },
-            ],
-          },
-        ] as unknown as WorkflowYaml['steps'],
-      }),
-      'TB'
-    );
-    const thenEdge = findEdge(result.edges, 'gate', 'left-step');
-    expect(thenEdge.points.length).toBeLessThan(2);
-  });
-
-  it('drops co-linear spine waypoints when middle bus is laterally stale', () => {
-    expect(
-      resolveShiftedEdgePoints({
-        shifted: [
-          { x: 175, y: 100 },
-          { x: 400, y: 150 },
-          { x: 175, y: 200 },
-        ],
-        sourceCenter: 175,
-        targetCenter: 175,
-        crossAxis: 'x',
-      })
-    ).toEqual([]);
-  });
-
-  it('shifts foreach inner edge points to absolute coordinates', () => {
+  it('positions foreach inner nodes absolutely within the container', () => {
     const { result } = runLayout(
       minimal({
         steps: [
@@ -308,11 +221,6 @@ describe('workflow layout pipeline', () => {
     // inner-a should be absolutely within the loop container bounds
     expect(innerA.x).toBeGreaterThanOrEqual(loop.x);
     expect(innerA.y).toBeGreaterThanOrEqual(loop.y);
-    const innerEdge = findEdge(result.edges, 'inner-a', 'inner-b');
-    for (const p of innerEdge.points) {
-      expect(p.x).toBeGreaterThanOrEqual(loop.x - 1);
-      expect(p.y).toBeGreaterThanOrEqual(loop.y - 1);
-    }
   });
 
   it('TB parallel fan-out keeps sibling steps separated', () => {
@@ -479,6 +387,45 @@ describe('workflow layout pipeline', () => {
       const sorted = [...triggerNodes].sort((a, b) => centerX(a) - centerX(b));
       expect(sorted[0].id).toContain('manual');
     });
+
+    /**
+     * Regression for an unbalanced T-junction: two triggers feeding one `if`
+     * whose branches are asymmetric (a wide `foreach` container on `true`, an
+     * empty/thin bypass lane on `false`). enforceForkLaneOrder re-centers the
+     * `if` over its branch heads, which pulls it away from the trigger row's
+     * midpoint — the fix must shift the trigger row back under the `if`
+     * (fan-in propagation), not leave it stranded at its original dagre spot.
+     */
+    it('two triggers feeding an asymmetric if stay centered under it (no unbalanced T-junction)', () => {
+      const yaml = minimal({
+        triggers: [{ type: 'manual' }, { type: 'alert' }],
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'wide_loop',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner_a', type: 'http' }],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const { result, transformed } = runLayout(yaml, 'TB');
+      const triggerIds = new Set(
+        transformed.nodes.filter((n) => n.type === 'trigger').map((n) => n.id)
+      );
+      const triggerNodes = result.nodes.filter((n) => triggerIds.has(n.id));
+      expect(triggerNodes.length).toBe(2);
+      const gate = findNode(result.nodes, 'gate');
+      const triggerRowCenter =
+        (Math.min(...triggerNodes.map(centerX)) + Math.max(...triggerNodes.map(centerX))) / 2;
+      expect(Math.abs(triggerRowCenter - centerX(gate))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+    });
   });
 
   it('throws on a cyclic foreach group graph', () => {
@@ -496,59 +443,53 @@ describe('workflow layout pipeline', () => {
     expect(() => dagLayout(dagNodes, [], dagGroups)).toThrow(/cycle/i);
   });
 
-  it('constants match the hook: nodeSep is WORKFLOW_NODE_SEP and rankSep is WORKFLOW_RANK_SEP', () => {
-    // Regression guard: if the constants drifted between the hook and the
-    // pipeline, layout results would silently differ. The test just asserts
-    // the exported values have the expected numeric meaning (50 / 70) that
-    // was hard-coded in the original use_workflow_layout.ts.
-    expect(WORKFLOW_NODE_SEP).toBe(50);
-    expect(WORKFLOW_RANK_SEP).toBe(70);
-  });
-
-  it('applyDagre returns points.length < 2 for every fan-in edge (cross-package invariant)', () => {
-    // The merge-bus fix rests on this guarantee from @kbn/dag-layout: for any
-    // edge whose target has predecessorCount > 1, applyDagre unconditionally
-    // returns points: []. If that ever changes, isMerge-tagged edges would use
-    // stale dagre waypoints instead of the merge bus, silently regressing.
-    const { result, transformed } = runLayout(
+  it('TB if then-branch sits left of else (matches true→false port order)', () => {
+    const { result } = runLayout(
       minimal({
         steps: [
           {
-            name: 'route',
+            name: 'gate',
             type: 'if',
             condition: 'x',
-            steps: [{ name: 'branch_a', type: 'http' }],
-            else: [{ name: 'branch_b', type: 'http' }],
+            steps: [{ name: 'yes', type: 'console' }],
+            else: [{ name: 'no', type: 'console' }],
           },
-          { name: 'summary', type: 'http' },
         ] as unknown as WorkflowYaml['steps'],
-      })
+      }),
+      'TB'
     );
+    const yes = findNode(result.nodes, 'yes');
+    const no = findNode(result.nodes, 'no');
+    expect(yes.x).toBeLessThan(no.x);
+  });
 
-    // Collect all edges that genuinely have multiple predecessors.
-    const incomingByTarget = new Map<string, string[]>();
-    const allEdges = [
-      ...transformed.edges,
-      ...transformed.foreachGroups.flatMap((g) => g.innerEdges),
-    ];
-    for (const e of allEdges) {
-      const arr = incomingByTarget.get(e.target);
-      if (arr) arr.push(e.source);
-      else incomingByTarget.set(e.target, [e.source]);
-    }
-    const fanInTargets = new Set(
-      [...incomingByTarget.entries()]
-        .filter(([, sources]) => sources.length > 1)
-        .map(([target]) => target)
+  it('LR if then-branch sits above else (matches true→false port order)', () => {
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'console' }],
+            else: [{ name: 'no', type: 'console' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      }),
+      'LR'
     );
-    expect(fanInTargets.size).toBeGreaterThan(0);
+    const yes = findNode(result.nodes, 'yes');
+    const no = findNode(result.nodes, 'no');
+    expect(yes.y).toBeLessThan(no.y);
+  });
 
-    for (const posEdge of result.edges) {
-      if (fanInTargets.has(posEdge.target)) {
-        // applyDagre must have blanked these waypoints.
-        expect(posEdge.points.length).toBeLessThan(2);
-      }
-    }
+  it('constants match the hook: nodeSep is WORKFLOW_NODE_SEP and rankSep is WORKFLOW_RANK_SEP', () => {
+    // Regression guard: if the constants drifted between the hook and the
+    // pipeline, layout results would silently differ. The test just asserts
+    // the exported values have the expected numeric meaning (50 / 90) that
+    // was hard-coded in the original use_workflow_layout.ts.
+    expect(WORKFLOW_NODE_SEP).toBe(50);
+    expect(WORKFLOW_RANK_SEP).toBe(70);
   });
 });
 
@@ -680,6 +621,39 @@ describe('spec 02 regression — named fixtures', () => {
     expect(loopNode).toBeDefined();
     expect(elseNode).toBeDefined();
     expect(centerX(loopNode!)).toBeLessThan(centerX(elseNode!));
+  });
+
+  it('main-chain fallback stays right of owner after if-step re-centering', () => {
+    // Regression: pass 1 re-centres the if-step and propagates the delta to the
+    // spine ancestor (owner). The fallback lane node was placed by dagLayout at
+    // owner_dagre_x + nodeSep (350px), but was left unmoved when the owner shifted.
+    // Pass 1c must sync the fallback node so it stays +350px to the right.
+    const { result } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'owner',
+            type: 'http',
+            'on-failure': {
+              fallback: [{ name: 'fallback-step', type: 'http' }],
+            },
+          },
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'then-step', type: 'http' }],
+            else: [{ name: 'else-step', type: 'http' }],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const ownerNode = result.nodes.find((n) => n.id === 'owner');
+    const fallbackNode = result.nodes.find((n) => n.id === 'fallback-step');
+    expect(ownerNode).toBeDefined();
+    expect(fallbackNode).toBeDefined();
+    // fallback must be to the RIGHT of its owner (not left, not same column).
+    expect(centerX(fallbackNode!)).toBeGreaterThan(centerX(ownerNode!) + 100);
   });
 
   it('owner with fallback and a plain following step share the spine column', () => {
@@ -887,6 +861,75 @@ describe('spec 02 regression — named fixtures', () => {
     expect(pairs).toHaveLength(0);
   });
 
+  // ── variant G — fallback-of-a-fallback inside a fork branch ────────────────
+  // then-fallback (depth 0) itself has its own on-failure.fallback (depth 1),
+  // and else-step has its own (depth 0) fallback too — the combination that
+  // reproduces the bug (with else-step a plain step, pass 1b's local-obstacle
+  // computation happens to re-derive the same origin pass 1c would have, so
+  // the bug was latent but invisible; giving else-step its own fallback changes
+  // the branch-local obstacles enough that pass 1b and pass 1c disagree).
+  // A since-fixed bug in pass 1c's owner-delta "re-sync" re-derived a bogus
+  // correction for the depth-1 lane (whose owner is itself a lane node, not a
+  // spine node) and dragged it to land exactly on the else branch's column —
+  // invisible to findOverlappingPairs because the colliding nodes sit at
+  // different ranks; it only showed up as the else branch's long merge-edge
+  // cutting through the depth-1 lane's cards.
+  it('variant G (fallback-of-a-fallback inside then): depth-1 lane stays left of else, not just depth-0', () => {
+    const { result, transformed } = runLayout(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'then-step',
+                type: 'http',
+                'on-failure': {
+                  fallback: [
+                    {
+                      name: 'then-fallback',
+                      type: 'http',
+                      'on-failure': {
+                        fallback: [
+                          { name: 'then-fallback-2a', type: 'http' },
+                          { name: 'then-fallback-2b', type: 'http' },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            else: [
+              {
+                name: 'else-step',
+                type: 'http',
+                'on-failure': { fallback: [{ name: 'else-fallback', type: 'http' }] },
+              },
+            ],
+          },
+          { name: 'final-step', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const thenFallback2a = findNode(result.nodes, 'then-fallback-2a');
+    const thenFallback2b = findNode(result.nodes, 'then-fallback-2b');
+    const elseNode = findNode(result.nodes, 'else-step');
+    // The depth-1 lane (fallback-of-a-fallback) must stay left of the else
+    // branch by at least a full node separation, same as the depth-0 lane does.
+    expect(thenFallback2a.x + thenFallback2a.width).toBeLessThanOrEqual(
+      elseNode.x - WORKFLOW_NODE_SEP + CENTER_TOLERANCE
+    );
+    expect(thenFallback2b.x + thenFallback2b.width).toBeLessThanOrEqual(
+      elseNode.x - WORKFLOW_NODE_SEP + CENTER_TOLERANCE
+    );
+    const groupIds = new Set(transformed.foreachGroups.map((g) => g.id));
+    const pairs = findOverlappingPairs(result.nodes, groupIds);
+    expect(pairs).toHaveLength(0);
+  });
+
   // ── continue: true — spine head shared between fallback and spine lanes ────
   it('continue: true — fork is not skipped (asymmetric exclusion)', () => {
     // Without the asymmetric exclusion fix, buildLaneSets would classify the
@@ -999,7 +1042,7 @@ describe('spec 02 regression — named fixtures', () => {
     }
   );
 
-  it('drops the layout engine waypoints, so edges are routed from the final handle positions', () => {
+  it('lays out an on-failure fallback lane with finite positions', () => {
     const { result } = runLayout(
       minimal({
         steps: [
@@ -1018,8 +1061,6 @@ describe('spec 02 regression — named fixtures', () => {
       expect(isFinite(n.x)).toBe(true);
       expect(isFinite(n.y)).toBe(true);
     }
-    expect(result.edges.length).toBeGreaterThan(0);
-    expect(result.edges.every((e) => e.points.length === 0)).toBe(true);
   });
 });
 

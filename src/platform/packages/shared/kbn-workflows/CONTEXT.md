@@ -14,8 +14,8 @@ The output of `graph_layout/transform_workflow_to_graph.ts`. A placement-indepen
 **execution graph**
 The output of `graph/build_execution_graph/build_execution_graph.ts`. A compiled step graph used by the execution engine. The `EnterTryBlock`/`ExitTryBlock` diamond pattern for `on-failure.fallback` lives here, not in the logical graph.
 
-**topology fingerprint**
-A stable hash of the logical graph's shape (node ids, edges, branch structure). Used as the memo key for `useWorkflowLayout`; recomputed by `compute_topology_fingerprint.ts`. Layout is recalculated only when the fingerprint changes.
+**layout key**
+A stable string of the logical graph's layout-relevant shape (node ids and sizes, edge endpoints, groups, lanes, branch structure), derived from the `TransformResult` by `computeLayoutKey` in `kbn-workflows-ui`'s `use_workflow_layout.ts`. It is the memo key for the layout: layout is recalculated only when the key changes, so edits that don't change the structure (descriptions, params, expressions) never re-run dagre.
 
 **node ref**
 An entry in `TransformResult.nodeRefs` mapping a graph node id to a workflow step name and position. The canonical bridge between the rendering layer (which knows node ids) and the mutation layer (which knows step names).
@@ -109,6 +109,28 @@ The rendered layout has two shapes depending on `continue`:
 - `fallback` + `continue: true` (or any truthy template) → rejoining lane, re-entering the owner's next sibling. Reuses `isMerge` / `buildMergeBusPath` on the join edge.
 
 ---
+
+## Human-in-the-loop (`waitForInput`)
+
+**responder**
+The person who answers a `waitForInput` step. Distinct from the workflow _author_, who writes the step's `message` and `schema`.
+_Avoid_: user, operator (both used elsewhere for different roles), approver (one response shape among several, not the general term).
+
+**response surface**
+One of the UIs a responder can use to answer a `waitForInput` step: the Inbox flyout, the external (Slack-linked) HTML form, or the Kibana execution view. Each renders a different subset of `with.schema`.
+_Avoid_: resume UI, answer screen.
+
+**form field**
+One property of `with.schema`, as the author edits it in the visual builder — a label, an answer type, and whether it's required or has a default. Distinct from the underlying JSON Schema property, which is its serialized form.
+_Avoid_: schema property (reserve for the JSON Schema level), question (Slack/competitor term, not used here).
+
+**response**
+The value a responder submits, read downstream as `steps.<name>.output.response.<key>`. Distinct from the step's `output`, which also carries audit fields (`respondedBy`, `respondedAt`, `channel`).
+_Avoid_: answer, submission.
+
+**message**
+The `with.message` string shown to the responder above the form fields. Liquid-rendered, plain text on every response surface today.
+_Avoid_: prompt (reserved for LLM-facing text elsewhere in the codebase).
 
 ## Code / copy divergence (intentional)
 

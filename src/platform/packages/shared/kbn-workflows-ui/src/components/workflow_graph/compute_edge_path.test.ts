@@ -20,8 +20,6 @@ const TRUNK = 20;
 // Constants mirrored from compute_edge_path.ts so tests are self-documenting.
 const FORK_BUS_TRUNK = 20;
 const MERGE_BUS_TRUNK = 20;
-const TB_LABEL_Y_OFFSET = 30;
-const TRUNK_LENGTH_TO_TARGET = 14;
 
 describe('buildMergeBusPath', () => {
   describe('TB (top-to-bottom)', () => {
@@ -226,6 +224,41 @@ describe('computeEdgePath', () => {
       const busY = 100 + FORK_BUS_TRUNK;
       expect(r.path).toContain(String(busY));
     });
+
+    it('switch case targeting a bypass-lane node (hideEndMarker=true) also routes via fork bus', () => {
+      // Empty switch cases produce bypass-lane nodes (hideEndMarker=true). Previously
+      // `!hideEndMarker` suppressed fork-bus for these edges, causing all empty-case
+      // labels to stack at the same (sourceX, sourceY + 30) coordinate.
+      const r = computeEdgePath({
+        sourceX: 200,
+        sourceY: 100,
+        targetX: 350,
+        targetY: 280,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        branchType: 'switch',
+        hideEndMarker: true,
+      });
+      const busY = 100 + FORK_BUS_TRUNK;
+      expect(r.path).toContain(String(busY));
+      // Label must be at targetX (spread per branch), not sourceX (overlapping).
+      expect(r.labelX).toBe(350);
+    });
+
+    it('then-branch targeting a bypass-lane node (empty then, non-empty else) also uses fork bus', () => {
+      const r = computeEdgePath({
+        sourceX: 200,
+        sourceY: 100,
+        targetX: 100,
+        targetY: 250,
+        sourcePosition: Position.Bottom,
+        targetPosition: Position.Top,
+        branchType: 'then',
+        hideEndMarker: true,
+      });
+      const busY = 100 + FORK_BUS_TRUNK;
+      expect(r.path).toContain(String(busY));
+    });
   });
 
   describe('merge-bus routing (isMerge + gap > trunk)', () => {
@@ -300,76 +333,7 @@ describe('computeEdgePath', () => {
     });
   });
 
-  describe('dagre-waypoints TB routing', () => {
-    it('effectively-straight chain: path starts and ends on the source X', () => {
-      // xSpread = 0 < STRAIGHT_X_THRESHOLD(100) → straight path
-      const r = computeEdgePath({
-        sourceX: 200,
-        sourceY: 100,
-        targetX: 200,
-        targetY: 300,
-        sourcePosition: Position.Bottom,
-        targetPosition: Position.Top,
-        points: [
-          { x: 200, y: 100 },
-          { x: 200, y: 300 },
-        ],
-      });
-      expect(r.path).toMatch(/^M 200 /);
-      expect(r.path).toContain('L 200 300');
-      expect(r.labelX).toBe(200);
-      expect(r.labelY).toBe(100 + TB_LABEL_Y_OFFSET);
-    });
-
-    it('branching chain: trunkTargetY appears in the path', () => {
-      // xSpread = 200 >= STRAIGHT_X_THRESHOLD(100) → branching trunk-stub path
-      const r = computeEdgePath({
-        sourceX: 200,
-        sourceY: 100,
-        targetX: 400,
-        targetY: 400,
-        sourcePosition: Position.Bottom,
-        targetPosition: Position.Top,
-        points: [
-          { x: 200, y: 100 },
-          { x: 200, y: 200 },
-          { x: 400, y: 200 },
-          { x: 400, y: 400 },
-        ],
-      });
-      // trunkTargetY = targetY - TRUNK_LENGTH_TO_TARGET = 400 - 14 = 386
-      const trunkTargetY = 400 - TRUNK_LENGTH_TO_TARGET;
-      expect(r.path).toContain(String(trunkTargetY));
-      expect(r.labelX).toBe(400); // targetX
-      expect(r.labelY).toBe(100 + TB_LABEL_Y_OFFSET);
-    });
-  });
-
-  describe('dagre-waypoints LR routing', () => {
-    it('LR chain: trunkTargetX appears in the path and label lands at (mid, targetY)', () => {
-      const r = computeEdgePath({
-        sourceX: 100,
-        sourceY: 200,
-        targetX: 400,
-        targetY: 400,
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-        points: [
-          { x: 100, y: 200 },
-          { x: 100, y: 200 },
-          { x: 100, y: 400 },
-          { x: 400, y: 400 },
-        ],
-      });
-      // trunkTargetX = targetX - TRUNK_LENGTH_TO_TARGET = 400 - 14 = 386
-      const trunkTargetX = 400 - TRUNK_LENGTH_TO_TARGET;
-      expect(r.path).toContain(String(trunkTargetX));
-      expect(r.labelX).toBe((100 + 400) / 2); // (sourceX + targetX) / 2
-      expect(r.labelY).toBe(400); // targetY
-    });
-  });
-
-  describe('smooth-step fallback (no points, no fork/merge)', () => {
+  describe('smooth-step fallback (no fork/merge)', () => {
     it('returns a non-empty path with labelX between source and target', () => {
       const r = computeEdgePath({
         sourceX: 200,
@@ -405,7 +369,7 @@ describe('computeEdgePath', () => {
     it('fallback owner spine edge is NOT fork-bus routed (no branchType, no isFailure)', () => {
       // Before the fix, the spine edge of a fallback owner carried isFork: true
       // and was routed via buildForkBusPath. After the fix, it carries neither
-      // branchType nor isFailure, so it routes via dagre waypoints or smooth-step.
+      // branchType nor isFailure, so it routes via smooth-step.
       // The fork busY = sourceY + FORK_BUS_TRUNK = 100 + 20 = 120.
       const r = computeEdgePath({
         sourceX: 200,
@@ -511,8 +475,7 @@ describe('buildFailureLanePath', () => {
 
   it('computeEdgePath spine edge (no flags) does NOT route via failure-lane path', () => {
     // The spine edge carries no isFailure, no branchType — it should route via
-    // dagre waypoints or smooth-step, never via buildFailureLanePath.
-    // If no dagrePoints are given, smooth-step is used.
+    // smooth-step, never via buildFailureLanePath.
     const r = computeEdgePath({
       sourceX: 200,
       sourceY: 100,

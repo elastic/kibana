@@ -118,4 +118,20 @@ steps:
 
     expect(result).toContain('enabled: false'); // Uses enabledValue, not workflow.enabled
   });
+
+  it('removes the description key when set to empty string', () => {
+    const yaml = 'name: Test\ndescription: Keep me\nsteps: []';
+    const result = updateWorkflowYamlFields(yaml, { description: '' });
+
+    expect(result).not.toContain('description');
+    expect(result).toContain('name: Test');
+  });
+
+  it('removes the tags key when set to an empty array', () => {
+    const yaml = 'name: Test\ntags:\n  - alpha\nsteps: []';
+    const result = updateWorkflowYamlFields(yaml, { tags: [] });
+
+    expect(result).not.toMatch(/\btags\b/);
+    expect(result).toContain('name: Test');
+  });
 });

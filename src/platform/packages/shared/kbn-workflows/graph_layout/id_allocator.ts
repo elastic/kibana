@@ -9,6 +9,10 @@
 
 import { toSlugIdentifier } from '@kbn/std';
 
+// `toSlugIdentifier` throws above this input length; names are cut to it so an
+// over-long step name degrades to a truncated id instead of failing the render.
+const MAX_NAME_LENGTH = 1000;
+
 export function slugify(name: string): string {
   return toSlugIdentifier(name);
 }
@@ -24,7 +28,7 @@ export class IdAllocator {
   private nextCounter = new Map<string, number>();
 
   allocate(name: string): string {
-    const base = slugify(name) || 'step';
+    const base = slugify(name.slice(0, MAX_NAME_LENGTH)) || 'step';
     if (!this.usedIds.has(base)) {
       this.usedIds.add(base);
       return base;

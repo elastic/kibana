@@ -8,9 +8,10 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import type { NodeProps } from '@xyflow/react';
+import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React, { memo } from 'react';
+import type { WorkflowBypassLaneData } from './workflow_node_data';
 
 /**
  * Invisible layout-only node rendered for the missing branch lane of an `if`
@@ -22,14 +23,14 @@ import React, { memo } from 'react';
  * edge's endpoint (top handle) and the merge edge's start (bottom handle),
  * making the bypass lane appear continuous regardless of the rendered height.
  */
-function WorkflowGraphBypassLaneNodeInner(props: NodeProps) {
+function WorkflowGraphBypassLaneNodeInner(props: NodeProps<Node<WorkflowBypassLaneData>>) {
   const { targetPosition = Position.Top, sourcePosition = Position.Bottom, data } = props;
   const { euiTheme } = useEuiTheme();
 
   // When this empty branch is the one that executed, tint the bridge line with
   // the same `success` token as traversed edges so the lane reads as one
   // continuous green path.
-  const traversed = (data as { traversed?: boolean } | undefined)?.traversed ?? false;
+  const traversed = data?.traversed ?? false;
 
   return (
     <>

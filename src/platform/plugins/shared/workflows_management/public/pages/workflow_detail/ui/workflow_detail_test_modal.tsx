@@ -16,11 +16,13 @@ import {
   selectIsTestModalOpen,
   selectReplayExecutionId,
   selectReplayIsTestRun,
+  selectTestModalStayInEditor,
   selectWorkflow,
   selectWorkflowDefinition,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  addTreeRun,
   clearReplay,
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -41,6 +43,7 @@ export const WorkflowDetailTestModal = () => {
   const { setSelectedExecution } = useWorkflowUrlState();
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
+  const stayInEditor = useSelector(selectTestModalStayInEditor);
   const replayExecutionId = useSelector(selectReplayExecutionId);
   const replayIsTestRun = useSelector(selectReplayIsTestRun);
   const definition = useSelector(selectWorkflowDefinition);
@@ -95,11 +98,17 @@ export const WorkflowDetailTestModal = () => {
       const executionId = await testWorkflow({ inputs, triggerTab });
 
       if (executionId) {
-        setSelectedExecution(executionId.workflowExecutionId);
+        if (stayInEditor) {
+          dispatch(addTreeRun({ executionId: executionId.workflowExecutionId }));
+        } else {
+          setSelectedExecution(executionId.workflowExecutionId);
+        }
       }
     },
     [
       isReplay,
+      stayInEditor,
+      dispatch,
       notifications.toasts,
       replayIsTestRun,
       runWorkflow,
