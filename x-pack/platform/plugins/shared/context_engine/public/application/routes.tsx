@@ -22,7 +22,11 @@ export const ContextEngineRoutes = () => (
       component={KiPage}
     />
     <Route
-      path={[CONTEXT_ENGINE_PATHS.detail, CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators]}
+      path={[
+        CONTEXT_ENGINE_PATHS.detail,
+        CONTEXT_ENGINE_PATHS.detailSources,
+        CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
+      ]}
       exact
       component={AiIndexDetailPage}
     />
