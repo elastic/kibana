@@ -388,6 +388,33 @@ describe('NightshiftApp', () => {
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
   });
 
+  it.each([
+    ['its severity tile is clicked', undefined],
+    ['a ?severity= link points at it', '/?severity=critical'],
+  ])('opens a closed section when %s', async (_how, link) => {
+    setSections({
+      sections: defaultSections({
+        critical: { investigations: [criticalInvestigation], total: 1 },
+      }),
+    });
+    window.localStorage.setItem(
+      'nightshift.investigations.collapsedSections:default',
+      JSON.stringify(['critical'])
+    );
+
+    renderApp(link ? { initialEntries: [link] } : undefined);
+    if (!link) {
+      fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
+    }
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationSectionToggle-critical')).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    );
+  });
+
   it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {
     setSections({
       sections: defaultSections({ critical: { error: new Error('boom') } }),
