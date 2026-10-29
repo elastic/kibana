@@ -37,6 +37,8 @@ properties:
     type: boolean
     description: >
       Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+      Only Security can change this to `true`. For Stack and Observability, a request that changes this to `true`,
+      in the configuration or in a template, fails with a 400 error. A request that keeps an already stored `true` is accepted.
   templates:
     $ref: 'templates.yaml'
   workflowTags:
