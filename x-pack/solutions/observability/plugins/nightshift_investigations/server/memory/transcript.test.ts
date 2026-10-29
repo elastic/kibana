@@ -240,7 +240,9 @@ describe('readsSeededKnowledge', () => {
     ['nightshift_sandbox_bash', { command: 'cat /workspace/cortex/INDEX.md' }],
     ['nightshift_sandbox_bash', { command: 'grep -r redis cortex/ decision-trees/' }],
     ['nightshift_sandbox_bash', { command: 'ls /workspace/decision-trees' }],
-    ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.md' }],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/.connector-docs/elastic.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '.connector-docs/github.md' }],
+    ['nightshift_sandbox_bash', { command: 'ls /workspace/.connector-docs' }],
     [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: 'connectors.md' }],
     ['read_file', { path: '/workspace/decision-trees/decision_tree_checkout-redis-lag.md' }],
   ])('matches %s %j', (toolId, params) => {
@@ -255,6 +257,7 @@ describe('readsSeededKnowledge', () => {
       { command: 'esql "FROM traces-* | WHERE service.name == \\"cortex\\""' },
     ],
     ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.mdx' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/.connector-docs-notes.md' }],
   ])('does not match %s %j', (toolId, params) => {
     expect(readsSeededKnowledge(toolId, params)).toBe(false);
   });

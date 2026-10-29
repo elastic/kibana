@@ -28,7 +28,7 @@ const output = (overrides: Partial<ConnectorProbeTaskOutput> = {}): ConnectorPro
   tool_call_trajectory: [
     {
       tool_id: 'nightshift_sandbox_view_file',
-      params: { path: '/workspace/elastic.md' },
+      params: { path: '/workspace/.connector-docs/elastic.md' },
       result: '',
     },
     {

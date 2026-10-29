@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SANDBOX_BASH_TOOL_ID } from './tool';
+import { ELASTIC_MANIFEST_PATH } from './connector_docs';
 
 /** Where the sandbox gets Elasticsearch credentials: the telemetry connector. */
 export interface ElasticCredentials {
@@ -127,7 +128,7 @@ export const writeElasticManifest = async ({
 
   const [result] = await session.writeFiles([
     {
-      path: '/workspace/elastic.md',
+      path: ELASTIC_MANIFEST_PATH,
       content: Buffer.from(renderElasticManifest(credentials, { readableIndices }), 'utf8'),
     },
   ]);

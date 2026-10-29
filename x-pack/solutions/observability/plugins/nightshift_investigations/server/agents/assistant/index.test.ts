@@ -75,7 +75,7 @@ describe('Nightshift assistant agent type', () => {
   it('points to the workspace files instead of embedding their guidance', () => {
     for (const path of [
       '/workspace/connectors.md',
-      '/workspace/elastic.md',
+      '/workspace/.connector-docs/elastic.md',
       '/workspace/cortex/INDEX.md',
       '/workspace/memories/.index.json',
     ]) {
