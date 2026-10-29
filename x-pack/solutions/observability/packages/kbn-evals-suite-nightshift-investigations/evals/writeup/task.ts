@@ -241,7 +241,16 @@ export const createWriteupTask = ({
     replay: Replay,
     sample: number
   ): Promise<GeneratedReply> => {
-    const key = cache?.key([example.metadata.case_id, connectorId, replay.system, String(sample)]);
+    // The replayed history and tools are in the key, so rebuilding a conversation or changing a
+    // follow-up question under the same case ID generates again instead of reusing a stale reply.
+    const key = cache?.key([
+      example.metadata.case_id,
+      connectorId,
+      replay.system,
+      hashText(JSON.stringify(replay.messages)),
+      replay.toolNames.join(','),
+      String(sample),
+    ]);
     const hit = key ? cache?.read(key) : undefined;
     if (hit) return { ...hit, cached: true };
     const out = await replayReply(inferenceClient, replay);

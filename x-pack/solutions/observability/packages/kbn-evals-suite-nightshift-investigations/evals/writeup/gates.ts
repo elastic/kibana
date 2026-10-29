@@ -121,7 +121,9 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
   const tables = tableRows > 0;
   // A reply that points at an attachment it never shows leaves the reader with nothing.
   const attachmentShown = new RegExp(RENDER_ATTACHMENT.source).test(reply);
-  const attachmentUnshown = !attachmentShown && MENTIONS_ATTACHMENT.test(reply);
+  // "The table above" is fine when the reply has an inline table to point at.
+  const mentions = tables ? reply.replace(/\bthe table above\b/gi, '') : reply;
+  const attachmentUnshown = !attachmentShown && MENTIONS_ATTACHMENT.test(mentions);
   const method = [...new Set([...reply.matchAll(METHOD)].map((m) => m[0]))];
   const numbers = (plain(reply).match(NUMBER) ?? [])
     .map(normalizeNumber)

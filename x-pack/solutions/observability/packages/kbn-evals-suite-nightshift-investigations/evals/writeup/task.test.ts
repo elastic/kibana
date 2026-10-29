@@ -161,6 +161,26 @@ describe('createWriteupTask', () => {
     });
     await expect(rerun(example)).resolves.toMatchObject({ reply: first.reply, cached: true });
   });
+
+  it('generates again when the replayed conversation changes under the same case ID', async () => {
+    const cache = createGenerationCache(mkdtempSync(join(tmpdir(), 'writeup-')));
+    const run = (ex: WriteupExample, text: string) =>
+      createWriteupTask({
+        inferenceClient: fakeClient([reply(text)]),
+        connectorId: 'model',
+        arm,
+        cache,
+      })(ex);
+    await run(example, REPLY);
+    const changed: WriteupExample = {
+      ...example,
+      input: {
+        ...example.input,
+        rounds: [{ ...example.input.rounds[0], input: { message: 'Why did payment fail?' } }],
+      },
+    };
+    await expect(run(changed, `${REPLY} New.`)).resolves.toMatchObject({ reply: `${REPLY} New.` });
+  });
 });
 
 describe('fillCortex', () => {

@@ -107,7 +107,12 @@ export const createReplyFaithfulnessEvaluator = (deps: JudgeDeps): WriteupEvalua
   evaluate: async ({ input, output }) => {
     if (!output.reply) return NO_REPLY;
     const replay = buildReplay(input.rounds, input.round_index, '');
-    const result = await judgeFaithfulness(deps.inferenceClient, output.reply, replay, deps.log);
+    // Check what the reader sees, attachments included, the same way the pairwise judge does.
+    const reply = expandAttachments(output.reply, [
+      ...(output.attachments ?? []),
+      ...recordedAttachments(input.rounds, input.round_index),
+    ]);
+    const result = await judgeFaithfulness(deps.inferenceClient, reply, replay, deps.log);
     if (!result) return { score: null, label: 'failed', explanation: 'The judge did not answer.' };
     return {
       score: (result.score - 1) / 4,

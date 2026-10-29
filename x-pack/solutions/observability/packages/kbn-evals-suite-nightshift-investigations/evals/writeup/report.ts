@@ -7,7 +7,7 @@
 
 import type { DatasetRunResult } from '@kbn/evals';
 import { knownNumbers, runReplyGates, type ReplyGates } from './gates';
-import { replayCorpus } from './replay';
+import { expandAttachments, recordedAttachments, replayCorpus } from './replay';
 import type { PairTally } from './judges';
 import {
   REPLY_FAITHFULNESS_EVALUATOR,
@@ -16,6 +16,7 @@ import {
 } from './evaluators';
 import {
   isLongReplyType,
+  type ReplyAttachment,
   type ReplyType,
   type WriteupExample,
   type WriteupTaskOutput,
@@ -32,6 +33,8 @@ export interface WriteupRow {
   sample: number;
   question: string;
   reply: string | null;
+  /** The attachments the reply shows, so the report and agreement see what the reader saw. */
+  attachments: ReplyAttachment[];
   error?: string;
   extra_calls: string[];
   gates: ReplyGates | null;
@@ -43,8 +46,18 @@ export interface WriteupRow {
   golden: string | null;
   /** Empty, with no gates, for a follow-up question production never answered. */
   recorded: { reply: string; gates: ReplyGates | null };
-  baseline: { reply: string | null; gates: ReplyGates | null } | null;
+  baseline: {
+    reply: string | null;
+    attachments: ReplyAttachment[];
+    gates: ReplyGates | null;
+  } | null;
 }
+
+/** The attachments a reply shows, from the ones it made and the ones earlier rounds recorded. */
+const shownAttachments = (
+  reply: string | null | undefined,
+  candidates: readonly ReplyAttachment[]
+): ReplyAttachment[] => (reply ? candidates.filter((a) => reply.includes(`id="${a.id}"`)) : []);
 
 export interface WriteupResults {
   dataset: string;
@@ -70,6 +83,7 @@ export const toWriteupRows = (
       const input = run.input as WriteupExample['input'];
       const expected = run.expected as WriteupExample['output'];
       const known = knownNumbers(replayCorpus(input.rounds, input.round_index));
+      const recorded = recordedAttachments(input.rounds, input.round_index);
       const gates = (reply?: string | null) =>
         reply ? runReplyGates(reply, output.reply_type, known) : null;
       const result = (name: string) =>
@@ -88,6 +102,7 @@ export const toWriteupRows = (
         sample: run.repetition,
         question: output.question,
         reply: output.reply ?? null,
+        attachments: shownAttachments(output.reply, [...(output.attachments ?? []), ...recorded]),
         ...(output.error ? { error: output.error } : {}),
         extra_calls: output.extra_calls,
         gates: gates(output.reply),
@@ -98,7 +113,14 @@ export const toWriteupRows = (
         golden: expected.golden ?? null,
         recorded: { reply: expected.recorded_reply, gates: gates(expected.recorded_reply) },
         baseline: output.baseline
-          ? { reply: output.baseline.reply ?? null, gates: gates(output.baseline.reply) }
+          ? {
+              reply: output.baseline.reply ?? null,
+              attachments: shownAttachments(output.baseline.reply, [
+                ...(output.baseline.attachments ?? []),
+                ...recorded,
+              ]),
+              gates: gates(output.baseline.reply),
+            }
           : null,
       };
     })
@@ -256,14 +278,14 @@ export const formatReport = (results: WriteupResults): { summary: string; report
         r.extra_calls.length ? ` (after extra calls: ${r.extra_calls.join(', ')})` : ''
       } (${status(r.gates, r.error)}${r.faith ? `, faith ${r.faith}` : ''})`,
       '',
-      quote(r.reply ?? ''),
+      quote(expandAttachments(r.reply ?? '', r.attachments)),
       ''
     );
     if (r.baseline) {
       detail.push(
         `**${results.baseline!.label}** (${status(r.baseline.gates)})`,
         '',
-        quote(r.baseline.reply ?? ''),
+        quote(expandAttachments(r.baseline.reply ?? '', r.baseline.attachments)),
         ''
       );
     }

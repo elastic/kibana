@@ -159,6 +159,25 @@ describe('tables and attachments in the reply', () => {
     ).toEqual([]);
   });
 
+  it('lets a reply refer to its own inline table', () => {
+    const reply = [
+      'Errors came from two services.',
+      '',
+      '| Service | Errors |',
+      '| --- | --- |',
+      '| cart | 127 |',
+      '| checkout | 12 |',
+      '',
+      'The table above lists errors by service.',
+    ].join('\n');
+    expect(runReplyGates(reply, 'answer', known).failed).not.toContain(
+      "mentions an attachment it doesn't show"
+    );
+    expect(
+      runReplyGates('The table above lists errors by service.', 'answer', known).failed
+    ).toContain("mentions an attachment it doesn't show");
+  });
+
   it('ignores attachment tags when finding the first sentence', () => {
     const gates = runReplyGates(
       '<render_attachment id="a1" />\nNo customer was charged during the window.',

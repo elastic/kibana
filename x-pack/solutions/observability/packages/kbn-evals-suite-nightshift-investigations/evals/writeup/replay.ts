@@ -191,12 +191,14 @@ export const panelText = (rounds: readonly RecordedRound[], roundIndex: number):
       s.kind === 'tool' ? [{ id: s.toolId, params: (s.params ?? {}) as Params }] : []
     );
   const last = (pattern: RegExp) => [...calls].reverse().find((c) => pattern.test(c.id))?.params;
-  // Metadata calls may set one field at a time, so merge them in order.
+  // Metadata and impact calls may set one field at a time, so merge them in order. As in the
+  // impact service, an omitted field keeps what was stored and an explicit null clears it.
   const meta: Params = {};
+  const impact: Params = {};
   for (const c of calls) {
     if (/set_conversation_metadata$/.test(c.id)) Object.assign(meta, c.params.metadata ?? {});
+    if (/set_impact$/.test(c.id)) Object.assign(impact, c.params);
   }
-  const impact = last(/set_impact$/);
   const hypotheses = (last(/set_hypotheses$/)?.hypotheses ?? []) as Params[];
   const proposals = calls
     .filter((c) => /proposals[._]create$/.test(c.id))
@@ -205,7 +207,7 @@ export const panelText = (rounds: readonly RecordedRound[], roundIndex: number):
     meta.severity && `Severity: ${meta.severity}`,
     meta.summary && `Summary: ${meta.summary}`,
     meta.verdict && `Verdict: ${meta.verdict}`,
-    impact?.summary && `Impact: ${impact.summary}`,
+    impact.summary && `Impact: ${impact.summary}`,
     hypotheses.length &&
       `Hypotheses:\n${hypotheses
         .map((h) => `- [${h.status}, ${h.confidence}] ${h.candidate}: ${h.reason ?? ''}`)

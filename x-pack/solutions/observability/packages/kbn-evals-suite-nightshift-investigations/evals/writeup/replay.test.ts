@@ -9,6 +9,7 @@ import { MessageRole } from '@kbn/inference-common';
 import {
   buildReplay,
   fillPrompt,
+  panelText,
   questionOf,
   replayCorpus,
   replayText,
@@ -129,5 +130,35 @@ describe('replay helpers', () => {
     expect(text.startsWith('…[earlier history cut]')).toBe(true);
     expect(text).toContain('xxx');
     expect(replayText(buildReplay(rounds, 0, 'p'))).toContain('CALL c1 nightshift_sandbox_bash');
+  });
+});
+
+describe('panelText', () => {
+  const impactCall = (id: string, params: Record<string, unknown>) => ({
+    ...toolStep(id, 'agentic_investigations.set_impact', 'ok'),
+    params,
+  });
+  const impactRounds = (...calls: Array<Record<string, unknown>>): RecordedRound[] => [
+    {
+      input: { message: 'Investigate checkout' },
+      steps: calls.map((params, i) => impactCall(`i${i}`, params)),
+      response: { message: 'Done.' },
+    },
+  ];
+
+  it('keeps the impact summary when a later call sets only other fields', () => {
+    const panel = panelText(
+      impactRounds({ summary: 'Checkout failed for 40 minutes.' }, { evidence: { esql: 'x' } }),
+      0
+    );
+    expect(panel).toContain('Impact: Checkout failed for 40 minutes.');
+  });
+
+  it('drops the impact summary when a later call clears it', () => {
+    const panel = panelText(
+      impactRounds({ summary: 'Checkout failed for 40 minutes.' }, { summary: null }),
+      0
+    );
+    expect(panel).not.toContain('Impact:');
   });
 });

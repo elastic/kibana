@@ -34,7 +34,9 @@ export const pearson = (xs: number[], ys: number[]): number => {
 export const judgeAgreement = (runs: WriteupResults[]): string => {
   if (runs.length < 2)
     throw new Error('Pass at least two results files; the first is the reference judge.');
-  const fingerprint = (r: WriteupRow) => `${r.reply ?? ''}\n${r.baseline?.reply ?? ''}`;
+  // Attachments count: two replies with the same tag can show different content.
+  const fingerprint = (r: WriteupRow) =>
+    JSON.stringify([r.reply, r.attachments, r.baseline?.reply, r.baseline?.attachments]);
   const byKey = runs.map((run) => new Map(run.rows.map((r) => [rowKey(r), r])));
   const keys = [...byKey[0].keys()].sort();
   const same = keys.filter((k) =>

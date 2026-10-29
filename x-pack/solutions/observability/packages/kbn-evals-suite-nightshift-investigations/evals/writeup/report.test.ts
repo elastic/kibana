@@ -109,6 +109,36 @@ describe('toWriteupRows and formatReport', () => {
   });
 });
 
+describe('attachments in rows', () => {
+  const withAttachment = (content: string): TaskRun => {
+    const run = taskRun('case/r2', 'Here are the orders.\n<render_attachment id="t1" />');
+    return {
+      ...run,
+      output: {
+        ...(run.output as object),
+        attachments: [{ id: 't1', type: 'text', content }],
+      },
+    };
+  };
+
+  it('keeps the attachment a reply shows and puts its content in the report', () => {
+    const rows = toWriteupRows({ a: withAttachment('order 1\norder 2') }, []);
+    expect(rows[0].attachments).toEqual([{ id: 't1', type: 'text', content: 'order 1\norder 2' }]);
+    const { report } = formatReport({ ...results('opus', 5, { win: 4, loss: 0 }), rows });
+    expect(report).toContain('> order 2');
+  });
+
+  it('treats the same tag with different attachment content as different replies', () => {
+    const rows = (judge: string, content: string): WriteupResults => ({
+      ...results(judge, 5, { win: 4, loss: 0 }),
+      rows: toWriteupRows({ a: withAttachment(content) }, []),
+    });
+    expect(judgeAgreement([rows('opus', 'order 1'), rows('gpt', 'order 9')])).toContain(
+      'dropped case/r2#0'
+    );
+  });
+});
+
 describe('judgeAgreement', () => {
   it('compares judges on identical replies', () => {
     const out = judgeAgreement([
