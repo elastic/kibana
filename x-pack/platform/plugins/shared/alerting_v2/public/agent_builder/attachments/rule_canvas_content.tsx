@@ -27,7 +27,7 @@ import {
   RuleSummaryInvestigationSection,
 } from '../../components/rule/rule_summary';
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
-import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 

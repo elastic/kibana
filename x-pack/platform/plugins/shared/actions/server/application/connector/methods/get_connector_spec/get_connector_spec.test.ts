@@ -68,11 +68,26 @@ const catalogOnly = {
   test: { handler: async () => ({}), enabled: true },
 } as unknown as ConnectorSpec;
 
+const stubWithSkill = {
+  metadata: {
+    id: '.stub-with-skill',
+    displayName: 'Stub (with skill)',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  auth: null,
+  schema: null,
+  skill: 'Use listThings to search. '.repeat(40),
+  actions: {},
+  test: { handler: async () => ({}), enabled: true },
+} as unknown as ConnectorSpec;
+
 const specsById: Record<string, ConnectorSpec> = {
   ...Object.fromEntries(Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])),
   [stubNoTest.metadata.id]: stubNoTest,
   [stubExperimentalEars.metadata.id]: stubExperimentalEars,
   [catalogOnly.metadata.id]: catalogOnly,
+  [stubWithSkill.metadata.id]: stubWithSkill,
 };
 
 const listRow = (spec: ConnectorSpec): ActionType => ({
@@ -201,7 +216,44 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(Array.isArray(result.actions)).toBe(true);
   });
 
-  it('returns actions with name and isTool fields', async () => {
+  it('returns the connector spec with auth, inbound flags and action input schemas', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+    expect(result.metadata).toHaveProperty('id', '.alienvault-otx');
+    expect(result).toHaveProperty('schema');
+    expect(result).toHaveProperty('authTypeIds');
+    expect(result).toHaveProperty('hasInboundEvents');
+    expect(result).toHaveProperty('isInboundOnly');
+    expect(result).toHaveProperty('isEarsExperimental');
+    expect(result).not.toHaveProperty('detail');
+    expect(result).not.toHaveProperty('availability');
+    for (const action of result.actions) {
+      expect(action).toHaveProperty('inputSchema');
+    }
+  });
+
+  it('returns the bundled skill for server callers when the spec defines one', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.stub-with-skill',
+      configurationUtilities,
+    });
+    expect(result.skill).toBe(stubWithSkill.skill);
+  });
+
+  it('omits skill when the spec does not define one', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+    expect(result).not.toHaveProperty('skill');
+  });
+
+  it('returns actions with name, isTool, scope and input schema', async () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.pagerduty_mcp',
@@ -214,7 +266,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
       expect(action).toHaveProperty('isTool');
       expect(typeof action.isTool).toBe('boolean');
       expect(typeof action.scope).toBe('string');
-      expect(action).not.toHaveProperty('inputSchema');
+      expect(action.inputSchema).toEqual(expect.objectContaining({ type: expect.any(String) }));
     }
   });
 

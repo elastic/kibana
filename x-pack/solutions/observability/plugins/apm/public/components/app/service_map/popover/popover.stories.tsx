@@ -7,10 +7,8 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { MarkerType } from '@xyflow/react';
-import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
 import { PopoverContent } from './popover_content';
-import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
+import type { ServiceMapNode } from '../../../../../common/service_map';
 
 const noop = () => {};
 
@@ -37,7 +35,6 @@ export const Dependency: Story = {
   render: () => (
     <PopoverContent
       selectedNode={dependencyNode}
-      selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
@@ -72,7 +69,6 @@ export const ExternalsList: Story = {
   render: () => (
     <PopoverContent
       selectedNode={externalsListNode}
-      selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
@@ -99,7 +95,6 @@ export const Resource: Story = {
   render: () => (
     <PopoverContent
       selectedNode={resourceNode}
-      selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
@@ -124,7 +119,6 @@ export const Service: Story = {
   render: () => (
     <PopoverContent
       selectedNode={serviceNode}
-      selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
@@ -151,7 +145,6 @@ export const ServiceWithAlerts: Story = {
   render: () => (
     <PopoverContent
       selectedNode={serviceNodeWithAlerts}
-      selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
@@ -179,7 +172,6 @@ export const ServiceWithSlo: Story = {
   render: () => (
     <PopoverContent
       selectedNode={serviceNodeWithSlo}
-      selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
@@ -208,48 +200,6 @@ export const ServiceWithAllBadges: Story = {
   render: () => (
     <PopoverContent
       selectedNode={serviceNodeWithAllBadges}
-      selectedEdge={null}
-      environment="ENVIRONMENT_ALL"
-      kuery=""
-      start="now-15m"
-      end="now"
-      onFocusClick={noop}
-    />
-  ),
-};
-
-const edgeSelection: ServiceMapEdge = {
-  id: 'e1',
-  source: 'svc-a',
-  target: 'svc-b',
-  type: 'default',
-  data: {
-    isBidirectional: false,
-    sourceData: {
-      id: 'svc-a',
-      [SPAN_DESTINATION_SERVICE_RESOURCE]: 'svc-a',
-      [SPAN_TYPE]: 'external',
-      [SPAN_SUBTYPE]: 'http',
-      label: 'svc-a',
-    },
-    targetData: {
-      id: 'svc-b',
-      [SPAN_DESTINATION_SERVICE_RESOURCE]: 'svc-b',
-      [SPAN_TYPE]: 'external',
-      [SPAN_SUBTYPE]: 'http',
-      label: 'svc-b',
-    },
-    resources: ['svc-b'],
-  },
-  style: { stroke: '#000', strokeWidth: 1 },
-  markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#000' },
-};
-
-export const Edge: Story = {
-  render: () => (
-    <PopoverContent
-      selectedNode={null}
-      selectedEdge={edgeSelection}
       environment="ENVIRONMENT_ALL"
       kuery=""
       start="now-15m"
