@@ -65,11 +65,17 @@ export const SettingRow: React.FC<SettingRowProps> = ({
     >
       <div>
         <EuiText size="s">
-          <strong id={labelId}>{label}</strong>
           {labelTooltip ? (
-            <>
-              {/* A non-breaking space keeps the icon on the same line as the label's last word. */}
-              {'\u00a0'}
+            // Flex keeps the icon beside the label, even when a long label wraps; an inline icon
+            // after a non-breaking space can still wrap onto its own line.
+            <span
+              css={css`
+                display: inline-flex;
+                align-items: baseline;
+                gap: 4px;
+              `}
+            >
+              <strong id={labelId}>{label}</strong>
               <EuiIconTip
                 type="info"
                 color="subdued"
@@ -81,8 +87,10 @@ export const SettingRow: React.FC<SettingRowProps> = ({
               <EuiScreenReaderOnly>
                 <span id={tooltipId}>{labelTooltip}</span>
               </EuiScreenReaderOnly>
-            </>
-          ) : null}
+            </span>
+          ) : (
+            <strong id={labelId}>{label}</strong>
+          )}
         </EuiText>
         {labelHelp ? (
           <EuiText
