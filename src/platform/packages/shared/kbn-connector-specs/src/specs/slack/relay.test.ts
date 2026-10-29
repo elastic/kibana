@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { ActionContext } from '../../connector_spec';
 import {
   getRelayConnection,
+  relayGetConversationHistory,
   relayListChannels,
   relayResolveChannelId,
   relaySendMessage,
@@ -35,8 +36,14 @@ const createContext = (
 const relaySecrets = { authType: 'relay', tenantKey: 'team-A' };
 
 /** What a `RelayRequestError` looks like to this package, which cannot import it. */
-const relayError = (statusCode: number) =>
-  Object.assign(new Error(`Relay request failed with status ${statusCode}`), { statusCode });
+const relayError = (
+  statusCode: number,
+  details: { reason?: string; retryAfterSeconds?: number } = {}
+) =>
+  Object.assign(new Error(`Relay request failed with status ${statusCode}`), {
+    statusCode,
+    ...details,
+  });
 
 describe('getRelayConnection', () => {
   it('returns null for a connector holding its own Slack token', () => {
@@ -490,6 +497,166 @@ describe('relayResolveChannelId', () => {
   });
 });
 
+describe('relayGetConversationHistory', () => {
+  const NOW_SECONDS = 1_700_000_000;
+
+  const read = async (
+    input: Record<string, unknown>,
+    deps: { readMessages: jest.Mock; listBindings?: jest.Mock }
+  ) =>
+    relayGetConversationHistory(
+      { client: deps as never, tenantKey: 'team-A' },
+      createContext(relaySecrets, deps),
+      { limit: 100, ...input } as Parameters<typeof relayGetConversationHistory>[2]
+    );
+
+  const page = (overrides: Record<string, unknown> = {}) => ({
+    channel: { id: 'C123', name: 'alerts' },
+    messages: [
+      {
+        ts: '1699999990.000200',
+        threadTs: '1699999990.000200',
+        replyCount: 3,
+        author: { id: 'U1', isBot: false },
+        text: 'checkout is down',
+      },
+      { ts: '1699999000.000100', author: { name: 'Elastic', isBot: true }, text: 'alert fired' },
+    ],
+    truncated: false,
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: NOW_SECONDS * 1000 });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('reads the last two hours by default, clamping the limit, and maps the messages', async () => {
+    const readMessages = jest.fn().mockResolvedValue(page());
+
+    await expect(read({ channel: 'C123', limit: 1000 }, { readMessages })).resolves.toEqual({
+      ok: true,
+      channel: 'C123',
+      channelName: 'alerts',
+      messages: [
+        {
+          ts: '1699999990.000200',
+          user: 'U1',
+          username: undefined,
+          is_bot: false,
+          text: 'checkout is down',
+          thread_ts: '1699999990.000200',
+          reply_count: 3,
+        },
+        {
+          ts: '1699999000.000100',
+          user: undefined,
+          username: 'Elastic',
+          is_bot: true,
+          text: 'alert fired',
+          thread_ts: undefined,
+          reply_count: undefined,
+        },
+      ],
+      nextCursor: undefined,
+      hasMore: false,
+    });
+    expect(readMessages).toHaveBeenCalledWith({
+      tenantKey: 'team-A',
+      channelId: 'C123',
+      oldest: String(NOW_SECONDS - 7200),
+      limit: 200,
+    });
+  });
+
+  it('pages back from the oldest message returned, keeping the floor', async () => {
+    const readMessages = jest.fn().mockResolvedValue(page({ truncated: true }));
+
+    const first = await read(
+      { channel: 'C123', oldest: '1699000000', latest: '1700000000' },
+      { readMessages }
+    );
+    expect(first).toMatchObject({ hasMore: true, nextCursor: '1699000000:1699999000.000100' });
+
+    await read({ channel: 'C123', cursor: '1699000000:1699999000.000100' }, { readMessages });
+    expect(readMessages).toHaveBeenLastCalledWith(
+      expect.objectContaining({ oldest: '1699000000', latest: '1699999000.000100' })
+    );
+  });
+
+  it.each(['not-a-cursor', 'abc:1700000000', '1:2:3'])(
+    'rejects the cursor %s before calling Relay',
+    async (cursor) => {
+      const readMessages = jest.fn();
+
+      await expect(read({ channel: 'C123', cursor }, { readMessages })).rejects.toThrow(
+        /Invalid cursor/
+      );
+      expect(readMessages).not.toHaveBeenCalled();
+    }
+  );
+
+  it('rejects a malformed window bound before calling Relay', async () => {
+    const readMessages = jest.fn();
+
+    await expect(read({ channel: 'C123', latest: 'yesterday' }, { readMessages })).rejects.toThrow(
+      /Slack timestamps/
+    );
+    expect(readMessages).not.toHaveBeenCalled();
+  });
+
+  it('resolves a channel name against the connected channels first', async () => {
+    const readMessages = jest.fn().mockResolvedValue(page());
+    const listBindings = jest
+      .fn()
+      .mockResolvedValue({ bindings: [{ scope_id: 'C123', display_name: 'alerts' }] });
+
+    await read({ channel: '#alerts' }, { readMessages, listBindings });
+
+    expect(readMessages).toHaveBeenCalledWith(expect.objectContaining({ channelId: 'C123' }));
+  });
+
+  it('returns not_readable for a name that is not connected, without reading', async () => {
+    const readMessages = jest.fn();
+    const listBindings = jest.fn().mockResolvedValue({ bindings: [] });
+
+    await expect(read({ channel: '#secret' }, { readMessages, listBindings })).resolves.toEqual({
+      ok: false,
+      reason: 'not_readable',
+      channel: '#secret',
+    });
+    expect(readMessages).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      error: relayError(403, { reason: 'not_readable' }),
+      expected: { ok: false, reason: 'not_readable', channel: 'C123' },
+    },
+    {
+      error: relayError(429, { reason: 'throttled', retryAfterSeconds: 30 }),
+      expected: { ok: false, reason: 'throttled', retry_after_seconds: 30 },
+    },
+  ])('returns $expected.reason as a result, not an error', async ({ error, expected }) => {
+    const readMessages = jest.fn().mockRejectedValue(error);
+
+    await expect(read({ channel: 'C123' }, { readMessages })).resolves.toEqual(expected);
+  });
+
+  it.each([
+    { error: relayError(403), message: /Not allowed to read the connected channels/ },
+    { error: relayError(409, { reason: 'not_installed' }), message: /no longer installed/ },
+    { error: relayError(400, { reason: 'bad_request' }), message: /at most 7 days/ },
+  ])('throws on a failure that ends the scan: $message', async ({ error, message }) => {
+    const readMessages = jest.fn().mockRejectedValue(error);
+
+    await expect(read({ channel: 'C123' }, { readMessages })).rejects.toThrow(message);
+  });
+});
+
 describe('relayTest', () => {
   it('proves the Relay path by reading a single binding', async () => {
     const listBindings = jest.fn().mockResolvedValue({ bindings: [{ scope_id: 'C123' }] });
@@ -530,7 +697,7 @@ describe('slackRelay.assertNotSupported', () => {
         'searchMessages'
       )
     ).toThrow(
-      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId.'
+      'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId, getConversationHistory.'
     );
   });
 });

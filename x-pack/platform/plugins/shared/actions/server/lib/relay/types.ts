@@ -122,6 +122,38 @@ export interface RelayTriggerResponse {
   externalConversationId?: string;
 }
 
+/**
+ * A window of a bound public channel (`GET .../channels/:id/messages`). The Relay defaults a
+ * channel read to the last two hours and refuses a window longer than seven days.
+ */
+export interface RelayReadMessagesInput {
+  tenantKey: string;
+  /** Slack conversation id. The Relay rejects a channel name with a 400. */
+  channelId: string;
+  /** Slack ts or whole epoch seconds. */
+  oldest?: string;
+  latest?: string;
+  /** 1-200; the Relay defaults to 50. */
+  limit?: number;
+}
+
+export interface RelayReadMessage {
+  ts: string;
+  threadTs?: string;
+  /** On thread parents. */
+  replyCount?: number;
+  author: { id?: string; name?: string; isBot: boolean };
+  text: string;
+}
+
+export interface RelayReadResponse {
+  channel: { id: string; name: string };
+  /** Newest first. */
+  messages: RelayReadMessage[];
+  /** Slack has more in the window, or the Relay clipped the response at its size cap. */
+  truncated: boolean;
+}
+
 export interface RelayClientContract {
   /**
    * `xpack.actions.relay.uiam.enabled`. When true, install sends a service-account
@@ -145,6 +177,8 @@ export interface RelayClientContract {
   unbindChannel(tenantKey: string, channelId: string): Promise<void>;
   /** Post to a bound channel. `channel` is an id or a connected name. 403 if not bound; 409 if uninstalled; 429 if Slack throttled the lookup. */
   trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
+  /** Read a window of a bound public channel. 403 `not_readable` on any denial; 429 if Slack throttled it. */
+  readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
 }

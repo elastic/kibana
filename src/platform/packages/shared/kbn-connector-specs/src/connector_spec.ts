@@ -293,6 +293,28 @@ export interface RelayActionClient {
     }>;
     nextCursor?: string;
   }>;
+  /** A window of a bound public channel, newest first. */
+  readMessages(input: RelayReadInput): Promise<RelayReadResult>;
+}
+
+interface RelayReadInput {
+  tenantKey: string;
+  channelId: string;
+  oldest?: string;
+  latest?: string;
+  limit?: number;
+}
+
+interface RelayReadResult {
+  channel: { id: string; name: string };
+  messages: Array<{
+    ts: string;
+    threadTs?: string;
+    replyCount?: number;
+    author: { id?: string; name?: string; isBot: boolean };
+    text: string;
+  }>;
+  truncated: boolean;
 }
 
 export interface ActionContext {
