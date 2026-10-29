@@ -9,7 +9,7 @@ import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { EvaluationIndices } from '@kbn/evals-common';
 
-const evaluationsDataStreamMappings = {
+export const evaluationsDataStreamMappings = {
   properties: {
     '@timestamp': { type: 'date' },
     experiment_id: { type: 'keyword' },

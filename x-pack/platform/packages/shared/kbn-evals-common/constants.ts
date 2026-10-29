@@ -53,6 +53,10 @@ export const EVALS_DATASET_COPY_URL = `${EVALS_DATASET_URL}/_copy` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 export const EVALS_DATASET_RESOLVE_URL = `${EVALS_DATASETS_URL}/_resolve` as const;
+export const EVALS_BASELINES_URL = `${EVALS_INTERNAL_URL}/baselines` as const;
+export const EVALS_BASELINES_PIN_URL = `${EVALS_BASELINES_URL}/_pin` as const;
+export const EVALS_BASELINES_LATEST_URL = `${EVALS_BASELINES_URL}/latest` as const;
+export const EVALS_BASELINE_SCORES_URL = `${EVALS_BASELINES_URL}/{baselineId}/scores` as const;
 
 const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
@@ -62,6 +66,9 @@ export const EvaluationIndices = {
   DATASETS: `${EVALUATION_INDEX_PREFIX}-datasets`,
   DATASET_EXAMPLES: `${EVALUATION_INDEX_PREFIX}-dataset-examples`,
   EVALUATORS: `${EVALUATION_INDEX_PREFIX}-evaluators`,
+  // Pinned regression baselines: score snapshots + pointer docs that must outlive the
+  // 90-day retention on the scores data stream (no retention configured).
+  PINNED_BASELINES: `${EVALUATION_INDEX_PREFIX}-pinned-baselines`,
 } as const;
 
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;

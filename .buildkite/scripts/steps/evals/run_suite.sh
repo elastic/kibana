@@ -296,6 +296,8 @@ EOF
           EVAL_SPEC_FILES: "${shard_spec_file_args}"
           EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
           EVAL_CONCURRENCY: "${EVAL_CONCURRENCY:-}"
+          EVAL_PIN_BASELINE: "${EVAL_PIN_BASELINE:-}"
+          EVAL_PIN_BASELINE_REASON: "${EVAL_PIN_BASELINE_REASON:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -712,4 +714,34 @@ run_eval_suite() {
 }
 
 run_eval_suite
+
+# Scheduled baseline runs (EVAL_PIN_BASELINE=1, e.g. the monthly regression baseline
+# pipeline) pin this run's scores as the new baseline for the suite/model after the run
+# succeeds. PR runs never set this: they only compare against the pinned baseline.
+pin_baseline() {
+  if [[ "${EVAL_PIN_BASELINE:-}" != "1" ]]; then
+    return 0
+  fi
+  if [[ -z "${EVAL_PROJECT:-}" ]]; then
+    echo "EVAL_PIN_BASELINE=1 requires a per-connector step (EVAL_PROJECT); skipping pin."
+    return 0
+  fi
+
+  local composite=""
+  if command -v buildkite-agent >/dev/null 2>&1; then
+    composite="$(buildkite-agent meta-data get "kbn-evals:execution-id:${EVAL_SUITE_ID}:${EVAL_PROJECT}" 2>/dev/null || true)"
+  fi
+  if [[ -z "$composite" ]]; then
+    echo "No execution ID recorded for ${EVAL_SUITE_ID}/${EVAL_PROJECT}; cannot pin baseline."
+    return 1
+  fi
+
+  echo "--- Pinning baseline for ${EVAL_SUITE_ID}/${EVAL_PROJECT}: ${composite}"
+  node scripts/evals pin-baseline \
+    --suite "$EVAL_SUITE_ID" \
+    --execution-id "$composite" \
+    --reason "${EVAL_PIN_BASELINE_REASON:-scheduled baseline run}"
+}
+
+pin_baseline
 

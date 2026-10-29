@@ -10,6 +10,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
 import { compareScores, pairScores } from '@kbn/evals-common';
+import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
@@ -20,6 +21,30 @@ import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
+
+/**
+ * The judge model a run's LLM evaluators scored with: the dominant
+ * `evaluator.model.id` across LLM-kind scores. Mirrors the attribution the pin
+ * route records on the baseline pointer.
+ */
+const resolveJudgeModelId = (scores: EvaluationScoreDocument[]): string | undefined => {
+  const counts = new Map<string, number>();
+  for (const score of scores) {
+    const modelId = score.evaluator.kind === 'llm' ? score.evaluator.model?.id : undefined;
+    if (modelId) {
+      counts.set(modelId, (counts.get(modelId) ?? 0) + 1);
+    }
+  }
+  let winner: string | undefined;
+  let winnerCount = 0;
+  for (const [modelId, count] of counts) {
+    if (count > winnerCount) {
+      winner = modelId;
+      winnerCount = count;
+    }
+  }
+  return winner;
+};
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -33,8 +58,12 @@ export const compareCmd: Command<void> = {
     2. Auto-resolve baseline from a branch (for CI):
        node scripts/evals compare <experiment-id> --baseline-branch main --suite <suite-id>
 
+    3. Compare against the pinned baseline (regression suites):
+       node scripts/evals compare <experiment-id> --baseline-pinned --suite <suite-id>
+
   Options:
     --baseline-branch  Branch to find the latest baseline experiment on (e.g. "main")
+    --baseline-pinned  Compare against the suite's pinned baseline (see "evals pin-baseline")
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
@@ -57,8 +86,10 @@ export const compareCmd: Command<void> = {
       'refresh-url',
       'space-ids',
     ],
+    boolean: ['baseline-pinned'],
     help: `
       --baseline-branch  Branch to find the latest baseline experiment on
+      --baseline-pinned  Compare against the suite's pinned baseline instead of a branch run
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
@@ -70,6 +101,7 @@ export const compareCmd: Command<void> = {
   run: async ({ log, flagsReader }) => {
     const positionals = flagsReader.getPositionals();
     const baselineBranch = flagsReader.string('baseline-branch');
+    const baselinePinned = flagsReader.boolean('baseline-pinned');
     const suiteId = flagsReader.string('suite');
     const format = flagsReader.string('format') ?? 'terminal';
     const kibanaUrl = flagsReader.string('kibana-url');
@@ -118,8 +150,72 @@ export const compareCmd: Command<void> = {
     let targetExperimentId: string;
     let baselineExperimentId: string;
     let baselineMetadata: BaselineExperiment | undefined;
+    let pinnedBaselineId: string | undefined;
+    let pinnedJudgeModelId: string | null | undefined;
 
-    if (baselineBranch) {
+    if (baselinePinned && baselineBranch) {
+      throw createFlagError('--baseline-pinned and --baseline-branch are mutually exclusive.');
+    }
+
+    if (baselinePinned) {
+      if (!suiteId) {
+        throw createFlagError('--suite is required when using --baseline-pinned.');
+      }
+
+      targetExperimentId = positionals[0];
+      if (!targetExperimentId) {
+        throw createFlagError(
+          'One experiment ID is required with --baseline-pinned. Example: node scripts/evals compare <experiment-id> --baseline-pinned --suite <suite-id>'
+        );
+      }
+
+      // Same base-build-ID resolution as the branch mode (see below).
+      if (!targetExperimentId.includes('::')) {
+        const resolved = await evalsClient.findLatestExperimentForBuild({
+          suiteId,
+          baseExecutionId: targetExperimentId,
+        });
+        if (resolved) {
+          log.info(`Resolved PR experiment: ${targetExperimentId} → ${resolved.executionId}`);
+          targetExperimentId = resolved.executionId;
+        } else {
+          log.warning(`Could not resolve base ID "${targetExperimentId}"; using raw ID.`);
+        }
+      }
+
+      const taskModelId = targetExperimentId.includes('::')
+        ? targetExperimentId.split('::').pop()
+        : undefined;
+
+      log.info(
+        `Looking up pinned baseline for suite "${suiteId}"${
+          taskModelId ? ` (model: ${taskModelId})` : ''
+        }...`
+      );
+
+      const pinned = await evalsClient.findLatestPinnedBaseline({ suiteId, taskModelId });
+      if (!pinned) {
+        log.warning(
+          `No pinned baseline found for suite ${suiteId}${
+            taskModelId ? ` and model ${taskModelId}` : ''
+          }. Seed one with: node scripts/evals pin-baseline --suite ${suiteId} --execution-id <id>`
+        );
+        return;
+      }
+
+      pinnedBaselineId = pinned.baseline_id;
+      pinnedJudgeModelId = pinned.judge_model_id;
+      baselineExperimentId = pinned.execution_id;
+      baselineMetadata = {
+        executionId: pinned.execution_id,
+        timestamp: pinned.pinned_at,
+        gitCommitSha: pinned.git_commit_sha ?? null,
+        gitBranch: pinned.git_branch ?? null,
+      };
+      log.info(
+        `Found pinned baseline ${pinned.baseline_id} (execution ${pinned.execution_id}, pinned at ${pinned.pinned_at})`
+      );
+    } else if (baselineBranch) {
       if (!suiteId) {
         throw createFlagError('--suite is required when using --baseline-branch.');
       }
@@ -228,8 +324,32 @@ export const compareCmd: Command<void> = {
 
     const [targetExperimentScores, baselineExperimentScores] = await Promise.all([
       evalsClient.getExperimentScores(targetExperimentId, targetFilter),
-      evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
+      // A pinned baseline's scores live in the pinned-baselines snapshot, which
+      // outlives the retention on the scores data stream.
+      pinnedBaselineId
+        ? evalsClient.getPinnedBaselineScores(pinnedBaselineId)
+        : evalsClient.getExperimentScores(baselineExperimentId, baselineFilter),
     ]);
+
+    // Scores from different judges are not comparable: refuse the comparison instead of
+    // gating on garbage. The dominant LLM-evaluator model identifies each side's judge.
+    if (pinnedJudgeModelId) {
+      const targetJudgeModelId = resolveJudgeModelId(targetExperimentScores);
+      if (targetJudgeModelId && targetJudgeModelId !== pinnedJudgeModelId) {
+        const message =
+          `Judge mismatch: the pinned baseline was scored by "${pinnedJudgeModelId}" but this run ` +
+          `was scored by "${targetJudgeModelId}". The comparison is invalid — re-run with the pinned ` +
+          `judge, or pin a new baseline under the new judge.`;
+        log.error(message);
+        if (format === 'markdown' && outputPath) {
+          Fs.appendFileSync(
+            outputPath,
+            `### ⚠️ Comparison invalid: judge mismatch\n\n${message}\n\n`
+          );
+        }
+        return;
+      }
+    }
 
     if (targetExperimentScores.length === 0) {
       throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
