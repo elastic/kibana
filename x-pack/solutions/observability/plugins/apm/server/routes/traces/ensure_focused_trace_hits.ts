@@ -121,19 +121,31 @@ export async function ensureFocusedTraceHits<THit extends FocusedTraceHit>({
     return hits;
   }
 
-  const reservedIds = new Set(
-    reserved.flatMap((hit) => {
-      const id = getTraceHitId(hit);
-      return id ? [id] : [];
-    })
-  );
+  // Pin the focused document and every ancestor already resolved, including
+  // hits that were on the ranked page. Newly fetched ancestors take slots from
+  // the tail, and the selected document is often that tail.
+  const chain: THit[] = [];
+  const seenChainIds = new Set<string>();
+  let chainId: string | undefined = focusedDocId;
+
+  for (let hop = 0; hop < MAX_ANCESTOR_HOPS && chainId && !seenChainIds.has(chainId); hop++) {
+    seenChainIds.add(chainId);
+    const chainHit = hitsById.get(chainId);
+    if (!chainHit) {
+      break;
+    }
+    chain.push(chainHit);
+    chainId = getTraceHitParentId(chainHit);
+  }
+
   const rankedRemainder = hits.filter((hit) => {
     const id = getTraceHitId(hit);
-    return id !== undefined && !reservedIds.has(id);
+    return id !== undefined && !seenChainIds.has(id);
   });
-  const remainingSlots = Math.max(0, maxTraceItems - reserved.length);
+  const keptChain = chain.slice(0, maxTraceItems);
+  const remainingSlots = Math.max(0, maxTraceItems - keptChain.length);
 
-  return [...reserved, ...rankedRemainder.slice(0, remainingSlots)];
+  return [...keptChain, ...rankedRemainder.slice(0, remainingSlots)];
 }
 
 async function fetchTraceHitsByIds({

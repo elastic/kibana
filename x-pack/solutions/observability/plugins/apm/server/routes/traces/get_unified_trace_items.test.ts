@@ -1788,9 +1788,12 @@ describe('getUnifiedTraceItems focused document reservation', () => {
 
   const mockLogsClient = {} as LogsClient;
 
+  const mockLogger = loggingSystemMock.createLogger();
+
   const defaultParams = {
     apmEventClient: mockApmEventClient,
     logsClient: mockLogsClient,
+    logger: mockLogger,
     traceId: 'test-trace-id',
     start: 0,
     end: 1000,

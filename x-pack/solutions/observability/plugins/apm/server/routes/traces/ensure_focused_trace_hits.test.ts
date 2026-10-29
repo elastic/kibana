@@ -119,4 +119,29 @@ describe('ensureFocusedTraceHits', () => {
     expect(search).toHaveBeenCalledTimes(2);
     expect(result.map(getTraceHitId)).toEqual(['focused', 'parent']);
   });
+
+  it('keeps an already ranked focused document when a missing ancestor takes a slot', async () => {
+    const rootA = createHit({ id: 'root-a' });
+    const rootB = createHit({ id: 'root-b' });
+    const focused = createHit({ id: 'focused', parentId: 'parent' });
+    const parent = createHit({ id: 'parent' });
+
+    search.mockResolvedValueOnce({
+      hits: { hits: [parent] },
+    });
+
+    const result = await ensureFocusedTraceHits({
+      apmEventClient,
+      hits: [rootA, rootB, focused],
+      focusedDocId: 'focused',
+      maxTraceItems: 3,
+      traceId: 'trace-1',
+      start: 0,
+      end: 1000,
+      ecsOnly: true,
+    });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(result.map(getTraceHitId)).toEqual(['focused', 'parent', 'root-a']);
+  });
 });
