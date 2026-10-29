@@ -34,7 +34,7 @@ import type {
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { getChangePointLabel } from '../../../common/change_point';
 import { getVerdictBadge } from './verdict';
 import { SkippedDetectionBadge } from './skipped_detection';

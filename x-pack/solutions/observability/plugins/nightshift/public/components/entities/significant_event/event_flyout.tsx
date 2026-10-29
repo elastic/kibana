@@ -29,7 +29,7 @@ import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
 } from '../../../chat/open_significant_event_in_chat';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
 import { useFetchInvestigationStatuses } from '../../../data/investigations/use_fetch_investigation_statuses';

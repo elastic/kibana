@@ -17,7 +17,7 @@ import React, { useCallback } from 'react';
 import { buildDiscoverParams } from '../../../common/discover_helpers';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useFlyoutShareUrlCustomAction } from '../../ui/flyout_share_url_button';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { buildNightshiftRuleFlyoutShareUrl } from '../../../common/url_params';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
 import { useKibana } from '../../../hooks/use_kibana';
