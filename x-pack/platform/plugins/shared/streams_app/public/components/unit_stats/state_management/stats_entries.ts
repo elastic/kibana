@@ -12,7 +12,7 @@ import type {
   MappedStatsResponse,
 } from '../../../services/unit_stats_client/types';
 import { STATS_REQUEST_FAILED_ERROR_CODE } from './constants';
-import { hasRegistrants, pruneUnusedComponents } from './stats_registration';
+import { getComponentState, hasRegistrants, pruneUnusedComponents } from './stats_registration';
 import type { ComponentRecord, StatsBatch, StatsComponents, StatsEntry } from './types';
 
 const LOADING_ENTRY: StatsEntry<never> = { status: 'loading' };
@@ -49,7 +49,7 @@ const markLoadingKind = <TStats>(
 ): ComponentRecord<TStats> => {
   const next = { ...record };
   for (const id of ids) {
-    const current = record[id];
+    const current = getComponentState(record, id);
     if (current && (!current.entry || current.entry.status === 'error')) {
       next[id] = { ...current, entry: LOADING_ENTRY };
     }
@@ -84,7 +84,7 @@ const mergeResultsKind = <TStats>(
     const result = results[id];
     if (!result) continue;
 
-    const current = record[id] ?? { registrants: [] };
+    const current = getComponentState(record, id) ?? { registrants: [] };
     const entry: StatsEntry<TStats> = {
       status: result.status,
       stats: result.stats,
@@ -127,7 +127,7 @@ const markFailedKind = <TStats>(
 ): ComponentRecord<TStats> => {
   const next = { ...record };
   for (const id of ids) {
-    const current = record[id];
+    const current = getComponentState(record, id);
     if (!current) continue;
 
     const { entry } = current;
