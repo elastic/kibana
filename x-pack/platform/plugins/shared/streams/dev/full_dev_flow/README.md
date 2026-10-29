@@ -330,5 +330,5 @@ make kind-delete    # from either repo
 | Stats are `null` / no new documents in `metrics-streams.otel-default` | An idle collector writes no documents. Run `streams_full_dev.sh traffic`. |
 | No `telemetry.yaml` on the unit ConfigMap | Controller patch did not land; check `STREAMS_CONTROLLER` and Tilt rebuild. |
 | Motel `502` / TLS handshake | Motel ingress must stay `scheme: http`. |
-| Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs deploy/streams-default --since=10m` |
+| Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs -l app.kubernetes.io/instance=default --since=10m` |
 | Logs in, `metrics-streams.otel-default` empty | Index collector is missing or cannot reach ES. Re-run `setup` / `seed`. Logs: `kubectl --context kind-streams -n motel-index-collector logs deploy/motel-index-collector --since=10m` |
