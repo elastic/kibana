@@ -31,6 +31,13 @@ describe('reinforcementExamples', () => {
     const markdown = requiring[0].input.prior_tree.markdown;
     expect(markdown).toContain('E2[Pod restarted]');
     expect(markdown).toContain('E3[Pod deleted]');
+    expect(requiring[0].input.response).toContain('uiam-58fb87db87-26cfj');
     expect(requiring[0].input.response).toContain('same pod-loss event');
+    expect(requiring[0].input.response).not.toContain('keep one node');
+    const view = requiring[0].input.tool_results[0].results[0] as { data: { text: string } };
+    expect(view.data.text).toBe(markdown);
+    const command = String(requiring[0].input.tool_calls[1].params.command);
+    expect(command).toContain('FROM logs-*');
+    expect(command.startsWith('esql "FROM logs-*')).toBe(true);
   });
 });

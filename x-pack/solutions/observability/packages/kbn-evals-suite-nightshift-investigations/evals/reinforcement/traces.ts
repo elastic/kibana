@@ -9,10 +9,13 @@ import { symptomFilePath } from '@kbn/nightshift-decision-trees';
 import type { ReinforcementExample } from './types';
 
 /**
- * Reduced rounds from the published Customer-0 smoke incident
+ * Rounds from the published Customer-0 smoke incident
  * (`customer0-eql-slo-burn-rate-2026-09-14` in elastic/nightshift-program).
- * The first prior tree has two nodes for one pod-loss event, so the reinforcement
- * agent has a real merge to declare. They are not raw cluster transcripts.
+ * The question and conclusion are that label. The gateway and proxy rounds are the two
+ * symptoms the label names. Each view_file result is the prior tree, and each sandbox
+ * command is an ES|QL query whose rows restate the label. They are not a captured
+ * cluster transcript. The first prior tree has two nodes for one pod-loss event, so
+ * the reinforcement agent has a real merge to declare.
  * Set `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` to replay an export instead.
  */
 const VIEW_FILE = 'nightshift_sandbox_view_file';
@@ -26,27 +29,28 @@ const treePath = (treeId: string): string => `/workspace/${symptomFilePath(treeI
 const round = (
   example: Omit<ReinforcementExample, 'input'> & {
     input: Omit<ReinforcementExample['input'], 'tool_calls' | 'tool_results'> & {
-      bash: string;
+      query: string;
+      stdout: string;
     };
   }
 ): ReinforcementExample => {
-  const { tree_id: treeId } = example.input.prior_tree;
+  const { tree_id: treeId, markdown: treeMarkdown } = example.input.prior_tree;
   const viewId = `${example.metadata.case_id}-view`;
   const bashId = `${example.metadata.case_id}-bash`;
-  const { bash, ...input } = example.input;
+  const { query, stdout, ...input } = example.input;
   return {
     metadata: example.metadata,
     input: {
       ...input,
       tool_calls: [
         { tool_id: VIEW_FILE, tool_call_id: viewId, params: { file_path: treePath(treeId) } },
-        { tool_id: BASH, tool_call_id: bashId, params: { command: 'esql' } },
+        { tool_id: BASH, tool_call_id: bashId, params: { command: query } },
       ],
       tool_results: [
         {
           tool_id: VIEW_FILE,
           tool_call_id: viewId,
-          results: [{ tool_result_id: `${viewId}-r`, type: 'other', data: { text: 'tree' } }],
+          results: [{ tool_result_id: `${viewId}-r`, type: 'other', data: { text: treeMarkdown } }],
         },
         {
           tool_id: BASH,
@@ -55,7 +59,7 @@ const round = (
             {
               tool_result_id: `${bashId}-r`,
               type: 'other',
-              data: { exit_code: 0, stdout: bash },
+              data: { exit_code: 0, stdout },
             },
           ],
         },
@@ -63,6 +67,19 @@ const round = (
     },
   };
 };
+
+/** Published label for `customer0-eql-slo-burn-rate-2026-09-14`. */
+const PUBLISHED_CONCLUSION = [
+  'The problematic pod uiam-58fb87db87-26cfj (in cluster prd-azueus2-cp-app-1, Azure East US 2) was deleted.',
+  'Kubernetes scheduled a healthy replacement pod (uiam-58fb87db87-vd5fc), which began serving traffic normally.',
+  'Errors in the otel-delivery-gateway and the Elasticsearch proxy logs stopped after the deletion.',
+].join(' ');
+
+const confirmed = (candidate: string): string =>
+  `{"hypotheses":[{"candidate":"${candidate}","status":"confirmed"}]}`;
+
+const esqlQuery = (body: string): string =>
+  `esql "FROM logs-* | WHERE @timestamp >= \\"2026-09-14T17:50:00.000Z\\" AND @timestamp < \\"2026-09-14T18:20:00.000Z\\" AND ${body} | LIMIT 20"`;
 
 const EQL_TREE = `flowchart TD
     S1([EQL query success SLO burn]) --> E1[Read otel gateway and proxy errors]
@@ -89,71 +106,85 @@ export const reinforcementExamples: ReinforcementExample[] = [
   round({
     metadata: {
       case_id: 'customer0-eql-slo-burn-rate-2026-09-14',
-      source: 'customer0-smoke-reduced',
+      source: 'customer0-smoke',
       require_merge: true,
     },
     input: {
-      question:
-        'Debug the root cause of "SLO burn-rate/availability alert on EQL query success rate". ' +
-        'Detected 2026-09-14 18:00 UTC. Environment: Production, Azure eastus2. ' +
-        'Product: Elastic Cloud Serverless.',
+      question: [
+        'i want you to debug and identify the root cause of "SLO burn-rate/availability alert on EQL query success rate"',
+        'Detected/Started/Acknowledged: 2026-09-14 18:00 UTC',
+        'Environment: Production, Azure (azure.eastus2)',
+        'Product impacted: Elastic Cloud Serverless',
+      ].join('\n'),
       response: [
-        'Conclusion: uiam-58fb87db87-26cfj in prd-azueus2-cp-app-1 was deleted.',
-        'Kubernetes scheduled replacement uiam-58fb87db87-vd5fc, which served traffic normally.',
-        'otel-delivery-gateway and Elasticsearch proxy errors stopped after the deletion.',
-        'Restart and deletion are the same pod-loss event, so the tree should keep one node.',
-        '{"status":"confirmed","candidate":"uiam pod deleted and replaced"}',
+        `Conclusion: ${PUBLISHED_CONCLUSION}`,
+        'Pod restarted and Pod deleted are the same pod-loss event.',
+        confirmed('uiam pod deleted and replaced'),
       ].join('\n'),
       prior_tree: {
         tree_id: 'symptom:eql-slo-burn-rate',
         version: 1,
         markdown: markdown('EQL query success SLO burn', EQL_TREE),
       },
-      bash:
-        'uiam-58fb87db87-26cfj deleted at 18:00 UTC; replacement uiam-58fb87db87-vd5fc ready. ' +
-        'EQL success recovered. Restart and deletion are the same pod-loss event.',
+      query: esqlQuery(
+        'k8s.pod.name LIKE \\"uiam-58fb87db87-*\\" | KEEP @timestamp, k8s.pod.name, event.action | SORT @timestamp'
+      ),
+      stdout: [
+        '@timestamp                 k8s.pod.name           event.action',
+        '2026-09-14T18:00:00.000Z   uiam-58fb87db87-26cfj  deleted',
+        '2026-09-14T18:01:00.000Z   uiam-58fb87db87-vd5fc  started',
+      ].join('\n'),
     },
   }),
   round({
     metadata: {
       case_id: 'customer0-otel-gateway-errors-2026-09-14',
-      source: 'customer0-smoke-reduced',
+      source: 'customer0-smoke',
     },
     input: {
       question:
-        'The same 2026-09-14 18:00 UTC Azure eastus2 incident also raised otel-delivery-gateway errors. ' +
-        'The EQL SLO tree already recorded the uiam pod deletion. Update the gateway tree.',
-      response: [
-        'Conclusion: gateway errors stopped once the deleted uiam pod was replaced.',
-        '{"status":"confirmed","candidate":"upstream uiam pod loss"}',
-      ].join('\n'),
+        'otel-delivery-gateway errors were logged during the 2026-09-14 18:00 UTC Azure eastus2 incident, ' +
+        'alongside the EQL query success SLO burn.',
+      response: [`Conclusion: ${PUBLISHED_CONCLUSION}`, confirmed('upstream uiam pod loss')].join(
+        '\n'
+      ),
       prior_tree: {
         tree_id: 'symptom:otel-gateway-errors',
         version: 2,
         markdown: markdown('Otel delivery gateway errors', GATEWAY_TREE),
       },
-      bash: 'otel-delivery-gateway errors drop to zero after uiam-58fb87db87-vd5fc becomes ready. No gateway deploy.',
+      query: esqlQuery(
+        'service.name == \\"otel-delivery-gateway\\" | STATS errors = COUNT(*) BY BUCKET(@timestamp, 5 minutes) | SORT @timestamp'
+      ),
+      stdout: [
+        '@timestamp                 errors',
+        '2026-09-14T17:55:00.000Z   1',
+        '2026-09-14T18:05:00.000Z   0',
+      ].join('\n'),
     },
   }),
   round({
     metadata: {
       case_id: 'customer0-es-proxy-errors-2026-09-14',
-      source: 'customer0-smoke-reduced',
+      source: 'customer0-smoke',
     },
     input: {
       question:
-        'Elasticsearch proxy errors were logged during the 2026-09-14 18:00 UTC Azure eastus2 incident. ' +
-        'Decide whether they are their own fault.',
+        'Elasticsearch proxy errors were logged during the 2026-09-14 18:00 UTC Azure eastus2 incident, ' +
+        'alongside the EQL query success SLO burn.',
       response: [
-        'Proxy errors overlap the uiam pod deletion but also appear on other pods in the window.',
-        '{"status":"rejected","candidate":"proxy errors limited to the deleted pod"}',
+        `Conclusion: ${PUBLISHED_CONCLUSION}`,
+        confirmed('proxy errors stopped after the uiam pod deletion'),
       ].join('\n'),
       prior_tree: {
         tree_id: 'symptom:es-proxy-errors',
         version: 1,
         markdown: markdown('Elasticsearch proxy errors', PROXY_TREE),
       },
-      bash: 'Proxy errors occur on several pods between 17:50 and 18:10 UTC, not only uiam-58fb87db87-26cfj.',
+      query: esqlQuery(
+        'service.name == \\"elasticsearch-proxy\\" | STATS errors = COUNT(*) BY k8s.pod.name | SORT errors DESC'
+      ),
+      stdout: ['k8s.pod.name           errors', 'uiam-58fb87db87-26cfj  0'].join('\n'),
     },
   }),
 ];
