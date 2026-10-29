@@ -32,7 +32,8 @@ case "$ES_ZONE_COUNT" in
     ;;
 esac
 
-ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-2048}
+# TEMP (session-replay-poc): the deployment was resized by hand to 4GB; revert to 2048 before merge.
+ES_HOT_TIER_MEMORY_SIZE=${ES_HOT_TIER_MEMORY_SIZE:-4096}
 case "$ES_HOT_TIER_MEMORY_SIZE" in
   1024|2048|4096|8192|16384|32768)
     echo "--- Elasticsearch hot tier memory size: ${ES_HOT_TIER_MEMORY_SIZE}MB"
