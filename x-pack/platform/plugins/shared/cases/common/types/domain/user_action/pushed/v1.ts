@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { ExternalServiceBasicRt, ExternalServiceRt } from '../../external_service/v1';
+import { z } from '@kbn/zod/v4';
+import { ExternalServiceBasicSchema, ExternalServiceSchema } from '../../external_service/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const PushedUserActionPayloadWithoutConnectorIdRt = rt.strict({
-  externalService: ExternalServiceBasicRt,
+export const PushedUserActionPayloadWithoutConnectorIdSchema = z.object({
+  externalService: ExternalServiceBasicSchema,
 });
 
-export const PushedUserActionPayloadRt = rt.strict({
-  externalService: ExternalServiceRt,
+export const PushedUserActionPayloadSchema = z.object({
+  externalService: ExternalServiceSchema,
 });
 
-export const PushedUserActionWithoutConnectorIdRt = rt.strict({
-  type: rt.literal(UserActionTypes.pushed),
-  payload: PushedUserActionPayloadWithoutConnectorIdRt,
+export const PushedUserActionWithoutConnectorIdSchema = z.object({
+  type: z.literal(UserActionTypes.pushed),
+  payload: PushedUserActionPayloadWithoutConnectorIdSchema,
 });
 
-export const PushedUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.pushed),
-  payload: PushedUserActionPayloadRt,
+export const PushedUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.pushed),
+  payload: PushedUserActionPayloadSchema,
 });

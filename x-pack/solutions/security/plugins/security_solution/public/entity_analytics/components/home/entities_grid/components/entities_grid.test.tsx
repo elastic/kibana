@@ -88,6 +88,16 @@ describe('EntitiesGrid', () => {
     expect(screen.getByText('beta')).toBeInTheDocument();
   });
 
+  it('leaves full screen when the grid unmounts', () => {
+    const onFullScreenChange = jest.fn();
+    const { unmount } = renderGrid({ onFullScreenChange });
+    onFullScreenChange.mockClear();
+
+    unmount();
+
+    expect(onFullScreenChange).toHaveBeenCalledWith(false);
+  });
+
   it('expands only the groups that have records', () => {
     renderGrid();
 

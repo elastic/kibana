@@ -11,18 +11,36 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TriggerIcon, WorkflowsTriggersList } from './worflows_triggers_list';
+import { triggerSchemas } from '../../trigger_schemas';
+
+const mockGetTriggerDefinition = triggerSchemas.getTriggerDefinition as jest.Mock;
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isTriggerType: jest.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
 }));
 
-jest.mock('../../trigger_schemas', () => ({
-  triggerSchemas: {
-    getTriggerDefinition: jest.fn(() => undefined),
-  },
-}));
+jest.mock('../../trigger_schemas', () => {
+  const { getTriggerName } = jest.requireActual('@kbn/workflows') as {
+    getTriggerName: (triggerType: string, registeredTitle?: string) => string;
+  };
+  const getTriggerDefinition = jest.fn(
+    (_triggerType: string): { title?: string } | undefined => undefined
+  );
+  return {
+    triggerSchemas: {
+      getTriggerDefinition,
+      getTriggerName: (triggerType: string) =>
+        getTriggerName(triggerType, getTriggerDefinition(triggerType)?.title),
+    },
+  };
+});
 
 describe('WorkflowsTriggersList', () => {
+  afterEach(() => {
+    mockGetTriggerDefinition.mockReset();
+  });
+
   it('renders the empty state when triggers array is empty', () => {
     render(<WorkflowsTriggersList triggers={[]} />);
     expect(screen.getByText('No triggers')).toBeInTheDocument();
@@ -49,9 +67,18 @@ describe('WorkflowsTriggersList', () => {
     expect(screen.getByText('+2')).toBeInTheDocument();
   });
 
-  it('uses capitalized type as the title for unknown trigger types', () => {
+  it('uses the type id as the title when the trigger is not registered', () => {
     render(<WorkflowsTriggersList triggers={[{ type: 'custom_thing' }]} />);
-    expect(document.querySelector('[title="Custom_thing"]')).toBeInTheDocument();
+    expect(document.querySelector('[title="custom_thing"]')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['custom.event', 'Registered title'],
+    ['another.type', 'Another title'],
+  ])('uses the registered title for %s', (type, title) => {
+    mockGetTriggerDefinition.mockReturnValue({ title });
+    render(<WorkflowsTriggersList triggers={[{ type }]} />);
+    expect(document.querySelector(`[title="${title}"]`)).toBeInTheDocument();
   });
 
   describe('responsive structure', () => {
