@@ -33,13 +33,15 @@ export function SourceCard({
   description,
   connected = false,
   action,
+  actionNode,
   'data-test-subj': dataTestSubj,
 }: {
   icon: IconType;
   title: string;
   description?: string;
   connected?: boolean;
-  action: SourceCardAction;
+  action?: SourceCardAction;
+  actionNode?: React.ReactNode;
   'data-test-subj'?: string;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -84,19 +86,30 @@ export function SourceCard({
     align-self: flex-start;
   `;
 
-  const button = (
-    <EuiButton
-      size="s"
-      color="text"
-      iconType={action.icon}
-      onClick={action.onClick}
-      isDisabled={action.disabledReason !== undefined}
-      aria-label={`${action.label} ${title}`}
-      data-test-subj={action['data-test-subj']}
-    >
-      {action.label}
-    </EuiButton>
-  );
+  const renderAction = (): React.ReactNode => {
+    if (actionNode) return actionNode;
+    if (!action) return null;
+    const button = (
+      <EuiButton
+        size="s"
+        color="text"
+        iconType={action.icon}
+        onClick={action.onClick}
+        isDisabled={action.disabledReason !== undefined}
+        aria-label={`${action.label} ${title}`}
+        data-test-subj={action['data-test-subj']}
+      >
+        {action.label}
+      </EuiButton>
+    );
+    return action.disabledReason === undefined ? (
+      button
+    ) : (
+      <EuiToolTip position="top" content={action.disabledReason}>
+        {button}
+      </EuiToolTip>
+    );
+  };
 
   return (
     <EuiPanel
@@ -122,15 +135,7 @@ export function SourceCard({
           </EuiText>
         ) : null}
       </div>
-      <div css={actionStyles}>
-        {action.disabledReason === undefined ? (
-          button
-        ) : (
-          <EuiToolTip position="top" content={action.disabledReason}>
-            {button}
-          </EuiToolTip>
-        )}
-      </div>
+      <div css={actionStyles}>{renderAction()}</div>
     </EuiPanel>
   );
 }

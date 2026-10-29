@@ -22,7 +22,7 @@ export const noAgentPermissionReason = i18n.translate(
   { defaultMessage: 'You need permission to edit the investigation agent.' }
 );
 
-interface ConnectorRef {
+export interface ConnectorRef {
   id: string;
   name: string;
 }

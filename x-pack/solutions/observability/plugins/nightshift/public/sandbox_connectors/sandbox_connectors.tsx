@@ -36,6 +36,11 @@ export const preconfiguredTooltip = i18n.translate(
   { defaultMessage: 'This connector is configured in kibana.yml and cannot be changed here.' }
 );
 
+export const deleteNoPermissionTooltip = i18n.translate(
+  'xpack.nightshift.sandboxConnectors.deleteNoPermission',
+  { defaultMessage: 'You need permission to delete connectors.' }
+);
+
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors';
 
 /** Link to the Stack Management connectors page, for users allowed to see connectors. */
@@ -136,9 +141,7 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
           const deleteDisabledReason = connector.is_preconfigured
             ? preconfiguredTooltip
             : !canDelete
-            ? i18n.translate('xpack.nightshift.sandboxConnectors.deleteNoPermission', {
-                defaultMessage: 'You need permission to delete connectors.',
-              })
+            ? deleteNoPermissionTooltip
             : !canEditAgent
             ? noAgentPermissionReason
             : undefined;

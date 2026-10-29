@@ -19,6 +19,7 @@ export type SandboxConnector = Pick<
 
 export interface GetSandboxConnectorsResponse {
   connectors: SandboxConnector[];
+  telemetry_connector_ids: string[];
 }
 
 export type SandboxConnectorType = ActionType;

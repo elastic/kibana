@@ -25,7 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
-import { getTelemetryTargets } from './telemetry_targets';
+import { getTelemetryConnectorIds, getTelemetryTargets } from './telemetry_targets';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
   InvestigationLocatorDefinition,
@@ -542,6 +542,7 @@ export class NightshiftInvestigationsPlugin
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
+          getTelemetryConnectorIds: () => getTelemetryConnectorIds(this.ctx.config.get().sandbox),
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {

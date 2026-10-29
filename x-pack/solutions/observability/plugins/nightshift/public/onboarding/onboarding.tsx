@@ -34,7 +34,7 @@ import {
   type OnboardingStepState,
 } from './onboarding_steps';
 import { OnboardingEnableStep } from './enable_step';
-import { OnboardingConnectStep } from './connect_step';
+import { OnboardingConnectStep, type ConnectSubStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
@@ -104,6 +104,11 @@ export function NightshiftOnboarding({
     : latestInvestigation && stepOverride !== 'investigate'
     ? 'automate'
     : 'investigate';
+
+  const [connectSubStep, setConnectSubStep] = useState<ConnectSubStep>('telemetry');
+  if (step !== 'connect' && connectSubStep !== 'telemetry') {
+    setConnectSubStep('telemetry');
+  }
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -178,8 +183,12 @@ export function NightshiftOnboarding({
       hint:
         step !== 'connect'
           ? undefined
-          : i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
-              defaultMessage: 'Connectors, Slack and hints are optional',
+          : connectSubStep === 'telemetry'
+          ? i18n.translate('xpack.nightshift.onboarding.steps.telemetryHint', {
+              defaultMessage: 'Telemetry',
+            })
+          : i18n.translate('xpack.nightshift.onboarding.steps.additionalSourcesHint', {
+              defaultMessage: 'Additional sources',
             }),
     },
     investigate: {
@@ -205,18 +214,43 @@ export function NightshiftOnboarding({
   const stepAction =
     step === 'connect' ? (
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiButton
-          fill
-          fullWidth
-          size="s"
-          iconType="sortRight"
-          iconSide="right"
-          isLoading={startSuggestions.isLoading}
-          onClick={() => startSuggestions.mutate()}
-          data-test-subj="nightshiftOnboardingContinueButton"
-        >
-          {PROCEED_LABEL}
-        </EuiButton>
+        {connectSubStep === 'telemetry' ? (
+          <EuiButton
+            fill
+            fullWidth
+            size="s"
+            iconType="sortRight"
+            iconSide="right"
+            onClick={() => setConnectSubStep('additional')}
+            data-test-subj="nightshiftOnboardingContinueButton"
+          >
+            {PROCEED_LABEL}
+          </EuiButton>
+        ) : (
+          <>
+            <EuiButton
+              fill
+              fullWidth
+              size="s"
+              iconType="sortRight"
+              iconSide="right"
+              isLoading={startSuggestions.isLoading}
+              onClick={() => startSuggestions.mutate()}
+              data-test-subj="nightshiftOnboardingStartButton"
+            >
+              {PROCEED_LABEL}
+            </EuiButton>
+            <EuiButtonEmpty
+              size="s"
+              onClick={() => setConnectSubStep('telemetry')}
+              data-test-subj="nightshiftOnboardingBackToTelemetryButton"
+            >
+              {i18n.translate('xpack.nightshift.onboarding.backButton', {
+                defaultMessage: 'Back',
+              })}
+            </EuiButtonEmpty>
+          </>
+        )}
         {isConnected && (
           <EuiButtonEmpty
             size="s"
@@ -292,7 +326,7 @@ export function NightshiftOnboarding({
           ) : step === 'enable' ? (
             <OnboardingEnableStep />
           ) : step === 'connect' || !execution ? (
-            <OnboardingConnectStep />
+            <OnboardingConnectStep subStep={connectSubStep} />
           ) : step === 'investigate' || !latestInvestigation ? (
             <OnboardingFirstInvestigationStep
               execution={execution}

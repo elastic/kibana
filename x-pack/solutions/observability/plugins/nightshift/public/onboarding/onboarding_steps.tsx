@@ -27,7 +27,7 @@ const STEP_TITLES: Record<OnboardingStepId, string> = {
     defaultMessage: 'Enable Nightshift',
   }),
   connect: i18n.translate('xpack.nightshift.onboarding.steps.connect', {
-    defaultMessage: 'Add signals and alerts',
+    defaultMessage: 'Add data',
   }),
   investigate: i18n.translate('xpack.nightshift.onboarding.steps.investigate', {
     defaultMessage: 'Try first investigation',

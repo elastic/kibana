@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
@@ -14,32 +14,47 @@ import { SlackAppCard } from '../settings/components/apps_section';
 import { CustomContextSnippets } from '../custom_context/custom_context_flyout';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
 import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
-import { ConnectedConnectors } from '../sandbox_connectors/connected_connectors';
+import { AddDataCard } from '../sandbox_connectors/add_data_card';
 
-export function OnboardingConnectStep(): React.ReactElement {
-  const { application } = useKibana().services;
-  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const [connectedCollapseSignal, setConnectedCollapseSignal] = useState(0);
+/** The two pages of the "Add data" step: the telemetry sources first, then everything else. */
+export type ConnectSubStep = 'telemetry' | 'additional';
 
+export function OnboardingConnectStep({
+  subStep,
+}: {
+  subStep: ConnectSubStep;
+}): React.ReactElement {
   return (
     <div data-test-subj="nightshiftOnboardingConnectStep">
-      <EuiTitle size="xs">
+      {subStep === 'telemetry' ? <TelemetryPage /> : <AdditionalSourcesPage />}
+    </div>
+  );
+}
+
+function TelemetryPage(): React.ReactElement {
+  return (
+    <div data-test-subj="nightshiftOnboardingTelemetry">
+      <EuiTitle size="s">
         <h3>
-          {i18n.translate('xpack.nightshift.onboarding.connect.title', {
-            defaultMessage: 'Add signals and alerts',
+          {i18n.translate('xpack.nightshift.onboarding.telemetry.title', {
+            defaultMessage: 'Add telemetry data',
           })}
         </h3>
       </EuiTitle>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.nightshift.onboarding.connect.description', {
-            defaultMessage:
-              "Nightshift already sees this deployment's telemetry. Connect other tools through Kibana connectors so it can look there too. Everything on this step is optional.",
-          })}
-        </p>
-      </EuiText>
+      <EuiSpacer size="m" />
+      <div data-test-subj="nightshiftOnboardingConnectors">
+        <ConnectSourcesGrid group="telemetry" trailing={<AddDataCard />} />
+      </div>
+    </div>
+  );
+}
 
-      <EuiSpacer size="l" />
+function AdditionalSourcesPage(): React.ReactElement {
+  const { application } = useKibana().services;
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+
+  return (
+    <div data-test-subj="nightshiftOnboardingAdditionalSources">
       <EuiTitle size="s">
         <h3>
           {i18n.translate('xpack.nightshift.onboarding.connectors.title', {
@@ -49,9 +64,7 @@ export function OnboardingConnectStep(): React.ReactElement {
       </EuiTitle>
       <EuiSpacer size="m" />
       <div data-test-subj="nightshiftOnboardingConnectors">
-        <ConnectSourcesGrid onConnected={() => setConnectedCollapseSignal((n) => n + 1)} />
-        <EuiSpacer size="m" />
-        <ConnectedConnectors collapseSignal={connectedCollapseSignal} />
+        <ConnectSourcesGrid group="additional" />
       </div>
 
       <EuiSpacer size="l" />

@@ -36,6 +36,14 @@ export const resolveTelemetryTarget = (
   return { connectorId: configured.connector_id, readableIndices: configured.readable_indices };
 };
 
+export const getTelemetryConnectorIds = (
+  sandbox: NightshiftInvestigationsConfig['sandbox']
+): string[] => [
+  ...new Set(
+    getTelemetryTargets(sandbox).flatMap(({ connectorId }) => (connectorId ? [connectorId] : []))
+  ),
+];
+
 export const getTelemetryTargets = (
   sandbox: NightshiftInvestigationsConfig['sandbox']
 ): TelemetryTarget[] => [
