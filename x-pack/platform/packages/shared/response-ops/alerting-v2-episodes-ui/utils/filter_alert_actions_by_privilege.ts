@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { EpisodeAction } from '../actions';
 
 /**
  * Privilege level applied when filtering alert actions: `all` keeps every

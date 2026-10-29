@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EpisodesHistogram, type EpisodesHistogramProps } from './episodes_histogram';
 import { useUnifiedHistogram } from '@kbn/unified-histogram';
-import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query';
-import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
+import { useEpisodesHistogramQuery } from '../../hooks/use_episodes_histogram_query';
+import { useSpaceId } from '../../hooks/use_space_id';
 
 jest.mock('@kbn/unified-histogram', () => ({
   useUnifiedHistogram: jest.fn(),
@@ -27,8 +27,8 @@ jest.mock('@kbn/unified-histogram', () => ({
   ),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_space_id');
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query');
+jest.mock('../../hooks/use_space_id');
+jest.mock('../../hooks/use_episodes_histogram_query');
 
 const mockUseUnifiedHistogram = jest.mocked(useUnifiedHistogram);
 const mockUseEpisodesHistogramQuery = jest.mocked(useEpisodesHistogramQuery);
