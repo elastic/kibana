@@ -1526,7 +1526,7 @@ describe('detection rule workflows', () => {
         expect(csvOf(undefined)).toBe('');
         for (const name of ['preview_rule', 'preview_proposed']) {
           expect(String(byName(name).if)).toContain(
-            'steps.resolve_privileges.output.unreadable_indices == blank'
+            'steps.collect_unreadable_indices.output.unreadable_indices == blank'
           );
         }
         for (const verdict of ['succeeded', 'proposed_succeeded']) {
@@ -1539,18 +1539,21 @@ describe('detection rule workflows', () => {
           },
         };
         const unreadable = createWorkflowLiquidEngine().parseAndRenderSync(
-          String((byName('resolve_privileges').with as Record<string, string>).unreadable_indices),
+          String(
+            (byName('collect_unreadable_indices').with as Record<string, string>).unreadable_indices
+          ),
           { steps }
         );
         expect(
           createWorkflowLiquidEngine().parseAndRenderSync(emit.unreadable_indices, {
-            steps: { resolve_privileges: { output: { unreadable_indices: unreadable } } },
+            steps: { collect_unreadable_indices: { output: { unreadable_indices: unreadable } } },
           })
         ).toBe('custom-edr-*');
         expect(
           createWorkflowLiquidEngine().parseAndRenderSync(
             String(
-              (byName('resolve_privileges').with as Record<string, string>).unreadable_indices
+              (byName('collect_unreadable_indices').with as Record<string, string>)
+                .unreadable_indices
             ),
             { steps: {} }
           )

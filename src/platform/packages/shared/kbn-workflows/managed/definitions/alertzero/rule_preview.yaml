@@ -105,7 +105,7 @@ steps:
 
   # Comma-separated names the identity cannot read; empty when every one is
   # readable, when no indices were given, or when the probe itself failed.
-  - name: resolve_privileges
+  - name: collect_unreadable_indices
     type: data.set
     with:
       unreadable_indices: >-
@@ -115,7 +115,7 @@ steps:
 
   - name: preview_rule
     type: kibana.request
-    if: "${{ steps.resolve_privileges.output.unreadable_indices == blank }}"
+    if: "${{ steps.collect_unreadable_indices.output.unreadable_indices == blank }}"
     with:
       method: POST
       path: "/s/{{ inputs.space_id }}/api/detection_engine/rules/preview"
@@ -178,7 +178,7 @@ steps:
   # lost resume strands the caller in waiting_for_child.
   - name: preview_proposed
     type: kibana.request
-    if: "${{ inputs.proposed_body != null and steps.resolve_privileges.output.unreadable_indices == blank }}"
+    if: "${{ inputs.proposed_body != null and steps.collect_unreadable_indices.output.unreadable_indices == blank }}"
     with:
       method: POST
       path: "/s/{{ inputs.space_id }}/api/detection_engine/rules/preview"
@@ -233,7 +233,7 @@ steps:
     status: completed
     with:
       succeeded: >-
-        ${{ steps.resolve_privileges.output.unreadable_indices == blank
+        ${{ steps.collect_unreadable_indices.output.unreadable_indices == blank
           and steps.preview_rule.error == null
           and steps.count_preview_alerts.error == null
           and steps.count_preview_alerts.output.timed_out == false
@@ -245,7 +245,7 @@ steps:
       error_text: "{{ steps.collect_errors.output.error_text }}"
       proposed_succeeded: >-
         ${{ inputs.proposed_body != null
-          and steps.resolve_privileges.output.unreadable_indices == blank
+          and steps.collect_unreadable_indices.output.unreadable_indices == blank
           and steps.preview_proposed.error == null
           and steps.count_proposed_alerts.error == null
           and steps.count_proposed_alerts.output.timed_out == false
@@ -255,7 +255,7 @@ steps:
       proposed_preview_id: "{{ steps.preview_proposed.output.previewId }}"
       proposed_is_aborted: "${{ steps.preview_proposed.output.isAborted | default: false }}"
       proposed_error_text: "{{ steps.collect_proposed_errors.output.error_text }}"
-      unreadable_indices: "{{ steps.resolve_privileges.output.unreadable_indices | remove_first: ', ' }}"
+      unreadable_indices: "{{ steps.collect_unreadable_indices.output.unreadable_indices | remove_first: ', ' }}"
       no_matching_indices: "${{ steps.collect_errors.output.error_text contains 'Unable to find matching' }}"
       proposed_no_matching_indices: "${{ steps.collect_proposed_errors.output.error_text contains 'Unable to find matching' }}"
       alert_limit_reached: "${{ steps.collect_errors.output.limit_hits != blank }}"
