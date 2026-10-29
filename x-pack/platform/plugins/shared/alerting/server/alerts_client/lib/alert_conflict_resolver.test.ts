@@ -685,7 +685,7 @@ describe('alert_conflict_resolver', () => {
       items: [getResponseItem('index', id, true, 429, 'es_rejected_execution_exception')],
     });
 
-    test('when other writes still fail after all retries', async () => {
+    test('when other writes still fail after all retries, but not the ones whose create conflicted', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('c cc cr ir');
 
       esClient.bulk
@@ -704,7 +704,6 @@ describe('alert_conflict_resolver', () => {
           took: 0,
           items: [
             getResponseItem('delete', 1, false, 200),
-            getResponseItem('delete', 2, false, 200),
             getResponseItem('delete', 3, false, 200),
           ],
         });
@@ -727,10 +726,10 @@ describe('alert_conflict_resolver', () => {
       expect(esClient.bulk).toHaveBeenCalledTimes(4);
       expect(esClient.bulk.mock.calls[3][0]).toEqual({
         refresh: 'wait_for',
-        operations: [getDeleteOp(1), getDeleteOp(2), getDeleteOp(3)],
+        operations: [getCreatedDeleteOp(1), getCreatedDeleteOp(3)],
       });
       expect(logger.info).toHaveBeenLastCalledWith(
-        `Deleted 3 alerts created by this run so the next run reports them as new ${ruleInfo}`,
+        `Deleted 2 alerts created by this run so the next run reports them as new ${ruleInfo}`,
         logTags
       );
     });
@@ -758,11 +757,11 @@ describe('alert_conflict_resolver', () => {
       expect(esClient.bulk).toHaveBeenCalledTimes(2);
       expect(esClient.bulk.mock.calls[1][0]).toEqual({
         refresh: 'wait_for',
-        operations: [getDeleteOp(1)],
+        operations: [getCreatedDeleteOp(1)],
       });
     });
 
-    test('and logs the alerts it could not delete', async () => {
+    test('and keeps the alerts that changed since they were created', async () => {
       const { bulkRequest, bulkResponse } = getReqRes('c ir');
 
       esClient.bulk
@@ -772,7 +771,7 @@ describe('alert_conflict_resolver', () => {
         .mockResolvedValueOnce({
           errors: true,
           took: 0,
-          items: [getResponseItem('delete', 1, true, 500, 'illegal_state_exception')],
+          items: [getResponseItem('delete', 1, true, 409, 'version_conflict_engine_exception')],
         });
 
       const result = await resolveAlertConflicts({
@@ -787,7 +786,7 @@ describe('alert_conflict_resolver', () => {
 
       expect(result.unresolvedCount).toBe(1);
       expect(logger.warn).toHaveBeenLastCalledWith(
-        `Failed to delete 1 of 1 alerts created by this run ${ruleInfo}, the next run reports them as ongoing: 1 illegal_state_exception`,
+        `Failed to delete 1 of 1 alerts created by this run ${ruleInfo}, the next run reports them as ongoing: 1 version_conflict_engine_exception`,
         logTags
       );
     });
@@ -1022,6 +1021,18 @@ function getDeleteOp(id: number) {
     delete: {
       _id: `id-${id}`,
       _index: `index-${id}`,
+    },
+  };
+}
+
+// deletes a doc created with a successful response item from getResponseItem
+function getCreatedDeleteOp(id: number) {
+  return {
+    delete: {
+      _id: `id-${id}`,
+      _index: `index-${id}`,
+      if_seq_no: 18,
+      if_primary_term: 1,
     },
   };
 }
