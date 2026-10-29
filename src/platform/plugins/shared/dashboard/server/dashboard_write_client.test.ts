@@ -143,8 +143,11 @@ describe('dashboard server client writes', () => {
       expect(error).toBeInstanceOf(DashboardValidationError);
       expect(error.issues).toEqual(
         expect.arrayContaining([
-          { type: 'state', path: ['title'], message: expect.any(String) },
-          { type: 'state', path: ['bogus'], message: 'Unrecognized key' },
+          { type: 'state', issue: expect.objectContaining({ path: ['title'] }) },
+          {
+            type: 'state',
+            issue: expect.objectContaining({ code: 'unrecognized_keys', keys: ['bogus'] }),
+          },
         ])
       );
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -273,7 +276,9 @@ describe('dashboard server client writes', () => {
         .catch((e) => e);
 
       expect(error).toBeInstanceOf(DashboardValidationError);
-      expect(error.issues).toEqual([{ type: 'id', message: expect.any(String) }]);
+      expect(error.issues).toEqual([
+        { type: 'id', issue: expect.objectContaining({ message: expect.any(String) }) },
+      ]);
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });

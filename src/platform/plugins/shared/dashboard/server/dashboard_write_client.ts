@@ -9,53 +9,18 @@
 
 import { once } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { z } from '@kbn/zod';
 import type { DashboardState, DashboardStateInput } from '@kbn/as-code-dashboard-schema';
 import { create } from './api/create/create';
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 import { TransformPanelsInError } from './api/transforms/in/transform_panels_in_error';
 import type { DashboardRequestServices } from './api/types';
 import { InvalidDashboardIdError, update } from './api/update/update';
-import type { DashboardValidationIssue } from './dashboard_validation_error';
 import { DashboardValidationError } from './dashboard_validation_error';
 import { coreServices, logger, spacesService } from './kibana_services';
 import type { DashboardServerClient } from './types';
 import { trackCreateDashboardAction, trackUpdateDashboardAction } from './user_activity';
 
 type DashboardStateSchema = ReturnType<typeof getDashboardStateSchema>;
-
-const MAX_UNION_MESSAGE_LENGTH = 1000;
-
-const formatNestedIssue = (issue: z.core.$ZodIssue): string => {
-  const path = issue.path.map(String).join('.');
-  const message = formatIssueMessage(issue);
-  return path ? `${path}: ${message}` : message;
-};
-
-// Zod only reports "Invalid input" for a union, so list the issues of every option.
-const formatIssueMessage = (issue: z.core.$ZodIssue): string => {
-  if (issue.code === 'invalid_union' && issue.errors.length > 0) {
-    const options = issue.errors.map(
-      (optionIssues) => `(${optionIssues.map(formatNestedIssue).join(', ')})`
-    );
-    const message = `No union option matched: ${options.join(' | ')}`;
-    return message.length > MAX_UNION_MESSAGE_LENGTH
-      ? `${message.slice(0, MAX_UNION_MESSAGE_LENGTH)}…`
-      : message;
-  }
-  return issue.message;
-};
-
-const toStateIssues = (issues: readonly z.core.$ZodIssue[]): DashboardValidationIssue[] =>
-  issues.flatMap((issue): DashboardValidationIssue[] =>
-    issue.code === 'unrecognized_keys'
-      ? issue.keys.map((key) => ({
-          type: 'state',
-          path: [...issue.path, key],
-          message: 'Unrecognized key',
-        }))
-      : [{ type: 'state', path: issue.path, message: formatIssueMessage(issue) }]
-  );
 
 const withPreSaveValidationErrors = async <T>(write: () => Promise<T>): Promise<T> => {
   try {
@@ -67,9 +32,7 @@ const withPreSaveValidationErrors = async <T>(write: () => Promise<T>): Promise<
       );
     }
     if (e instanceof InvalidDashboardIdError) {
-      throw new DashboardValidationError(
-        e.zodError.issues.map(({ message }) => ({ type: 'id', message }))
-      );
+      throw new DashboardValidationError(e.zodError.issues.map((issue) => ({ type: 'id', issue })));
     }
     throw e;
   }
@@ -110,7 +73,9 @@ export const createDashboardWriteClient = (
       state
     );
     if (!result.success) {
-      throw new DashboardValidationError(toStateIssues(result.error.issues));
+      throw new DashboardValidationError(
+        result.error.issues.map((issue) => ({ type: 'state', issue }))
+      );
     }
     return result.data;
   };

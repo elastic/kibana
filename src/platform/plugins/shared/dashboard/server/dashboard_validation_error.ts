@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { z } from '@kbn/zod';
+
 /** One reason a dashboard was rejected before it was saved. */
 export type DashboardValidationIssue =
   | {
       /**
-       * A dashboard state field failed the schema. In the default format, this includes a panel
-       * config that fails its embeddable schema, reported at the panel's path.
+       * The state failed the schema. In the default format, this includes a panel config that
+       * fails its embeddable schema, reported as a union issue at the panel's path.
        */
       readonly type: 'state';
-      readonly path: ReadonlyArray<PropertyKey>;
-      readonly message: string;
+      readonly issue: z.core.$ZodIssue;
     }
   | {
       /**
@@ -30,41 +31,15 @@ export type DashboardValidationIssue =
   | {
       /** The ID of a dashboard that does not exist yet is not a valid "as code" ID. */
       readonly type: 'id';
-      readonly message: string;
+      readonly issue: z.core.$ZodIssue;
     };
-
-const MAX_LISTED_ISSUES = 10;
-
-const formatIssue = (issue: DashboardValidationIssue): string => {
-  switch (issue.type) {
-    case 'state': {
-      const path = issue.path.map(String).join('.');
-      return path ? `${path}: ${issue.message}` : issue.message;
-    }
-    case 'panel':
-      return `panel of type "${issue.panelType}": ${issue.message}`;
-    case 'id':
-      return `id: ${issue.message}`;
-    default: {
-      const unhandled: never = issue;
-      return unhandled;
-    }
-  }
-};
 
 /** Thrown by the dashboard server client when the dashboard is invalid; nothing was saved. */
 export class DashboardValidationError extends Error {
   public readonly issues: readonly DashboardValidationIssue[];
 
   constructor(issues: readonly DashboardValidationIssue[]) {
-    const unlisted = issues.length - MAX_LISTED_ISSUES;
-    super(
-      [
-        'The dashboard is invalid:',
-        ...issues.slice(0, MAX_LISTED_ISSUES).map((issue) => `- ${formatIssue(issue)}`),
-        ...(unlisted > 0 ? [`- and ${unlisted} more`] : []),
-      ].join('\n')
-    );
+    super('The dashboard is invalid');
     this.name = 'DashboardValidationError';
     this.issues = issues;
   }
