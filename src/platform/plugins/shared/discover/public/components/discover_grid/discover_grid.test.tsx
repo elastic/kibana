@@ -8,6 +8,7 @@
  */
 
 const mockUnifiedDataTable = jest.fn<void, [Record<string, unknown>]>();
+const mockGroupBySelectorMount = jest.fn();
 
 jest.mock('@kbn/unified-data-table', () => ({
   DEFAULT_PAGINATION_MODE: 'multiPage',
@@ -28,11 +29,20 @@ jest.mock('../../context_awareness', () => ({
   }),
 }));
 
-jest.mock('../../application/main/components/layout/cascaded_documents', () => ({
-  useGetGroupBySelectorRenderer: () => () => <div data-test-subj="mockGroupBySelector" />,
-  LazyCascadedDocumentsLayout: () => null,
-  CascadedDocumentsProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+jest.mock('../../application/main/components/layout/cascaded_documents', () => {
+  const { useEffect } = jest.requireActual('react');
+  const MockGroupBySelector = () => {
+    useEffect(() => {
+      mockGroupBySelectorMount();
+    }, []);
+    return <div data-test-subj="mockGroupBySelector" />;
+  };
+  return {
+    useGetGroupBySelectorRenderer: () => () => <MockGroupBySelector />,
+    LazyCascadedDocumentsLayout: () => null,
+    CascadedDocumentsProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -106,7 +116,16 @@ describe('DiscoverGrid renderMode', () => {
 describe('DiscoverGrid externalAdditionalControls', () => {
   beforeEach(() => {
     mockUnifiedDataTable.mockClear();
+    mockGroupBySelectorMount.mockClear();
   });
+
+  const groupByProps: Partial<DiscoverGridProps> = {
+    dataSource: { kind: 'esql' } as DiscoverGridProps['dataSource'],
+    cascadedDocumentsContext: {
+      availableCascadeGroups: ['geo.dest'],
+      selectedCascadeGroups: [],
+    } as unknown as CascadedDocumentsContext,
+  };
 
   const renderAdditionalControls = (props: Partial<DiscoverGridProps>) => {
     render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} {...props} />);
@@ -118,13 +137,24 @@ describe('DiscoverGrid externalAdditionalControls', () => {
     expect(renderAdditionalControls({})).toBeUndefined();
   });
 
+  it('keeps the group by selector mounted when custom controls appear', () => {
+    const { rerender } = render(<>{renderAdditionalControls(groupByProps)}</>);
+    rerender(
+      <>
+        {renderAdditionalControls({
+          ...groupByProps,
+          externalAdditionalControls: <div data-test-subj="mockCustomControl" />,
+        })}
+      </>
+    );
+
+    expect(screen.getByTestId('mockCustomControl')).toBeInTheDocument();
+    expect(mockGroupBySelectorMount).toHaveBeenCalledTimes(1);
+  });
+
   it('renders custom controls and the group by selector side by side in one row', () => {
     const controls = renderAdditionalControls({
-      dataSource: { kind: 'esql' } as DiscoverGridProps['dataSource'],
-      cascadedDocumentsContext: {
-        availableCascadeGroups: ['geo.dest'],
-        selectedCascadeGroups: [],
-      } as unknown as CascadedDocumentsContext,
+      ...groupByProps,
       externalAdditionalControls: <div data-test-subj="mockCustomControl" />,
     });
     render(<>{controls}</>);

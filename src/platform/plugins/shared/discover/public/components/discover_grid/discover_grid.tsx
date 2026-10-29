@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
@@ -100,33 +99,25 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
-      const additionalControls: ReactNode[] = [];
-
-      if (customExternalAdditionalControls) {
-        additionalControls.push(customExternalAdditionalControls);
-      }
-
-      if (isCascadedDocumentsAvailable) {
-        additionalControls.push(
-          groupBySelectorRenderer(
-            cascadedDocumentsContext.availableCascadeGroups,
-            cascadedDocumentsContext.selectedCascadeGroups
-          )
-        );
-      }
-
-      if (!additionalControls.length) {
+      if (!customExternalAdditionalControls && !isCascadedDocumentsAvailable) {
         return undefined;
       }
 
-      // Each control needs its own flex item, otherwise they stack vertically in the toolbar
+      // Each control needs its own flex item, otherwise they stack vertically in the toolbar.
+      // Fixed child slots keep the group by selector mounted when the custom controls toggle.
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {additionalControls.map((control, index) => (
-            <EuiFlexItem key={index} grow={false}>
-              {control}
+          {customExternalAdditionalControls && (
+            <EuiFlexItem grow={false}>{customExternalAdditionalControls}</EuiFlexItem>
+          )}
+          {isCascadedDocumentsAvailable && (
+            <EuiFlexItem grow={false}>
+              {groupBySelectorRenderer(
+                cascadedDocumentsContext.availableCascadeGroups,
+                cascadedDocumentsContext.selectedCascadeGroups
+              )}
             </EuiFlexItem>
-          ))}
+          )}
         </EuiFlexGroup>
       );
     }, [
