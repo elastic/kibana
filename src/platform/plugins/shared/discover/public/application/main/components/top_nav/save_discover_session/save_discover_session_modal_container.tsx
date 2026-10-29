@@ -70,6 +70,7 @@ export const DiscoverSessionSaveModalContainer = ({
 
   const isSaveCallbackFlow = Boolean(onSaveCb);
 
+  const [hasTimeRestoreError, setHasTimeRestoreError] = useState(false);
   const [copyOnSaveToggled, setCopyOnSaveToggled] = useState(false);
 
   const showDashboardOptionsForSaveAs = initialCopyOnSave || copyOnSaveToggled;
@@ -108,10 +109,17 @@ export const DiscoverSessionSaveModalContainer = ({
       runtimeStateManager,
     });
 
+    if (newTimeRestore && !isTimeBasedOnSave) {
+      setHasTimeRestoreError(true);
+      return { discoverSession: undefined };
+    }
+
+    setHasTimeRestoreError(false);
+
     return await dispatch(
       internalStateActions.saveDiscoverSession({
         newTitle,
-        newTimeRestore: newTimeRestore && isTimeBasedOnSave,
+        newTimeRestore,
         newCopyOnSave: effectiveCopyOnSave,
         newDescription,
         newTags,
@@ -207,6 +215,7 @@ export const DiscoverSessionSaveModalContainer = ({
       initialTags={persistedDiscoverSession?.tags ?? []}
       initialTimeRestore={timeRestore}
       isTimeBased={isTimeBased}
+      hasTimeRestoreError={hasTimeRestoreError}
       managed={persistedDiscoverSession?.managed ?? false}
       onClose={onClose}
       onCopyOnSaveChange={onCopyOnSaveChange}

@@ -109,6 +109,22 @@ describe('DiscoverSessionSaveDashboardModal', () => {
     );
   });
 
+  it('shows a store time error without changing the selection and lets the user turn it off', async () => {
+    const { onSave, rerender } = renderSaveModal({ initialTimeRestore: true });
+    await screen.findByTestId('savedObjectSaveModal');
+
+    rerender({ isTimeBased: false, hasTimeRestoreError: true });
+
+    const timeSwitch = screen.getByTestId('storeTimeWithSearch');
+    expect(timeSwitch).toBeInvalid();
+    expect(timeSwitch).toBeChecked();
+    await userEvent.click(timeSwitch);
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ newTimeRestore: false }))
+    );
+  });
+
   it('forwards copy-on-save toggle changes', async () => {
     const { onCopyOnSaveChange } = renderSaveModal({ isTimeBased: false });
 

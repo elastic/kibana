@@ -31,6 +31,7 @@ export interface DiscoverSessionSaveDashboardModalProps {
   initialTags?: string[];
   initialTimeRestore?: boolean;
   isTimeBased: boolean;
+  hasTimeRestoreError?: boolean;
   managed?: boolean;
   onClose: () => void;
   onCopyOnSaveChange?: (newCopyOnSave: boolean) => void;
@@ -47,6 +48,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
   initialTags = [],
   initialTimeRestore,
   isTimeBased,
+  hasTimeRestoreError = false,
   managed,
   onClose,
   onCopyOnSaveChange,
@@ -83,8 +85,17 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
     />
   ) : null;
 
-  const timeSwitch = isTimeBased ? (
+  const isTimeRestoreInvalid = hasTimeRestoreError && timeRestore;
+  const showTimeSwitch = isTimeBased || hasTimeRestoreError;
+  const timeSwitch = showTimeSwitch ? (
     <EuiFormRow
+      isInvalid={isTimeRestoreInvalid}
+      error={
+        <FormattedMessage
+          id="discover.topNav.saveModal.timeRestoreErrorMessage"
+          defaultMessage='Unable to store time with this session because no time-based data view is available. Check your data views or turn off "Store time with Discover session" and try again.'
+        />
+      }
       helpText={
         <FormattedMessage
           id="discover.topNav.saveModal.storeTimeWithSearchToggleDescription"
@@ -93,6 +104,7 @@ export const DiscoverSessionSaveDashboardModal: FC<DiscoverSessionSaveDashboardM
       }
     >
       <EuiSwitch
+        aria-invalid={isTimeRestoreInvalid}
         checked={timeRestore}
         data-test-subj="storeTimeWithSearch"
         label={
