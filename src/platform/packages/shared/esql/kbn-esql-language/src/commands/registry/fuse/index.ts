@@ -21,7 +21,7 @@ export const fuseCommand = {
   name: 'fuse',
   methods: fuseCommandMethods,
   metadata: {
-    description: i18n.translate('kbn-esql-language.esql.definitions.fuseDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.fuseDoc', {
       defaultMessage:
         'Combines multiple result sets with different scoring functions into a single result set.',
     }),

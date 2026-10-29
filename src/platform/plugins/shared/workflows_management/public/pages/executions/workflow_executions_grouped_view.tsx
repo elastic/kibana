@@ -42,6 +42,7 @@ import {
 
 export interface WorkflowExecutionsGroupedViewProps {
   executions: WorkflowExecutionListItemDto[];
+  totalHits: number;
   groupBy: Exclude<ExecutionsGroupBy, 'none'>;
   onOpenExecution: (execution: WorkflowExecutionListItemDto) => void;
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
@@ -96,13 +97,25 @@ const GroupPanelTitle = ({ title }: { title: string }) => (
   </div>
 );
 
-const GroupStats = ({ count }: { count: number }) => {
+const GroupStats = ({
+  count,
+  isCurrentPageOnly,
+}: {
+  count: number;
+  isCurrentPageOnly: boolean;
+}) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const badgeValue = count > 99 ? '99+' : count.toString();
   const executionsLabel = i18n.translate('workflows.executionsPage.table.groupBy.stat.executions', {
     defaultMessage: 'Executions',
   });
+  const tooltipContent = isCurrentPageOnly
+    ? i18n.translate('workflows.executionsPage.table.groupBy.stat.executionsCurrentPageTooltip', {
+        defaultMessage: '{count} {count, plural, one {execution} other {executions}} on this page',
+        values: { count },
+      })
+    : count;
 
   return (
     <EuiFlexGroup
@@ -119,7 +132,7 @@ const GroupStats = ({ count }: { count: number }) => {
           `}
         >
           {executionsLabel}
-          <EuiToolTip position="top" content={count}>
+          <EuiToolTip position="top" content={tooltipContent}>
             <EuiBadge
               tabIndex={0}
               color="hollow"
@@ -236,12 +249,20 @@ const GroupTable = React.memo<{
 GroupTable.displayName = 'GroupTable';
 
 export const WorkflowExecutionsGroupedView = React.memo<WorkflowExecutionsGroupedViewProps>(
-  ({ executions, groupBy, onOpenExecution, onReRunExecution, onViewAllExecutionsForWorkflow }) => {
+  ({
+    executions,
+    totalHits,
+    groupBy,
+    onOpenExecution,
+    onReRunExecution,
+    onViewAllExecutionsForWorkflow,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const xsFontSize = useEuiFontSize('xs').fontSize;
     const accordionId = useGeneratedHtmlId({ prefix: 'executionsTableGroups' });
     // TODO: server-side aggregation for correct counts across the full result set.
     const groups = useMemo(() => groupExecutions(executions, groupBy), [executions, groupBy]);
+    const isCurrentPageOnly = totalHits > executions.length;
     const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
 
     useEffect(() => {
@@ -274,14 +295,23 @@ export const WorkflowExecutionsGroupedView = React.memo<WorkflowExecutionsGroupe
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText css={summaryCss} data-test-subj="executionsTableGroupSummary">
-              {i18n.translate('workflows.executionsPage.table.groupBy.summary', {
-                defaultMessage:
-                  '{executionCount} {executionCount, plural, one {execution} other {executions}} | {groupCount} {groupCount, plural, one {group} other {groups}}',
-                values: {
-                  executionCount: executions.length,
-                  groupCount: groups.length,
-                },
-              })}
+              {isCurrentPageOnly
+                ? i18n.translate('workflows.executionsPage.table.groupBy.summaryCurrentPage', {
+                    defaultMessage:
+                      '{executionCount} {executionCount, plural, one {execution} other {executions}} on this page | {groupCount} {groupCount, plural, one {group} other {groups}}',
+                    values: {
+                      executionCount: executions.length,
+                      groupCount: groups.length,
+                    },
+                  })
+                : i18n.translate('workflows.executionsPage.table.groupBy.summary', {
+                    defaultMessage:
+                      '{executionCount} {executionCount, plural, one {execution} other {executions}} | {groupCount} {groupCount, plural, one {group} other {groups}}',
+                    values: {
+                      executionCount: executions.length,
+                      groupCount: groups.length,
+                    },
+                  })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -296,7 +326,12 @@ export const WorkflowExecutionsGroupedView = React.memo<WorkflowExecutionsGroupe
                 className="executionsGroupingAccordion"
                 buttonElement="div"
                 buttonContent={<GroupPanelTitle title={group.label} />}
-                extraAction={<GroupStats count={group.executions.length} />}
+                extraAction={
+                  <GroupStats
+                    count={group.executions.length}
+                    isCurrentPageOnly={isCurrentPageOnly}
+                  />
+                }
                 forceState={isOpen ? 'open' : 'closed'}
                 onToggle={(nextIsOpen) => handleToggle(group.key, nextIsOpen)}
                 paddingSize="m"

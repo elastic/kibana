@@ -21,7 +21,7 @@ export const limitCommand = {
   methods: limitCommandMethods,
   metadata: {
     docPreserving: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.limitDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.limitDoc', {
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),

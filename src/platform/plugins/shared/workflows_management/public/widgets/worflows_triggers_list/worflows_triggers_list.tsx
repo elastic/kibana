@@ -9,7 +9,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { capitalize } from 'lodash';
 import React, { Suspense } from 'react';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import { isTriggerType } from '@kbn/workflows';
@@ -63,11 +62,6 @@ function getTriggerIconType(triggerType: string): string | React.ComponentType {
   return DEFAULT_TRIGGER_ICON;
 }
 
-export function getTriggerLabel(triggerType: string): string {
-  const definition = triggerSchemas.getTriggerDefinition(triggerType);
-  return definition?.title ?? capitalize(triggerType);
-}
-
 const triggerIconAnchorStyle = css({
   display: 'inline-flex',
   alignItems: 'center',
@@ -86,7 +80,7 @@ export function TriggerIcon({
   showLabelInTooltip = true,
 }: TriggerIconProps) {
   const icon = getTriggerIconType(triggerType);
-  const label = getTriggerLabel(triggerType);
+  const label = triggerSchemas.getTriggerName(triggerType);
   const iconNode =
     typeof icon === 'string' ? (
       <EuiIcon type={icon} size="m" title={label} />
@@ -172,7 +166,7 @@ export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) 
                   <TriggerIcon triggerType={trigger.type} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s">{getTriggerLabel(trigger.type)}</EuiText>
+                  <EuiText size="s">{triggerSchemas.getTriggerName(trigger.type)}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
