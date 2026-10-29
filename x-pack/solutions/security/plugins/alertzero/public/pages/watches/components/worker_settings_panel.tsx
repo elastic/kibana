@@ -375,7 +375,7 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           <p>
             <FormattedMessage
               id="xpack.alertzero.watches.settings.models.description"
-              defaultMessage="This Worker uses models configured in {featureSettingsLink}."
+              defaultMessage="This Worker uses the models configured in {featureSettingsLink}."
               values={{
                 featureSettingsLink: (
                   <FeatureSettingsLink data-test-subj={`alertZeroModelsLink-${worker.id}`} />

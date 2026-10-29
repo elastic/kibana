@@ -38,8 +38,7 @@ export const THREAT_INTEL_SUPPLY_SECTION_TITLE = i18n.translate(
 export const THREAT_INTEL_SUPPLY_SECTION_SUBTITLE = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.sectionSubtitle',
   {
-    defaultMessage:
-      'These workflows feed Hunt Watch. Ingest and enrich are shared across all spaces.',
+    defaultMessage: 'These workflows maintain the threat reports that the Hunt Watch searches.',
   }
 );
 
@@ -395,19 +394,18 @@ export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.tr
 
 export const TRIGGER_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.trigger.helpText',
-  { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+  { defaultMessage: 'Set how often this Worker runs.' }
 );
 
 export const TRIGGER_HELP_READ_ONLY_4H = i18n.translate(
   'xpack.alertzero.watches.settings.trigger.helpTextReadOnly4h',
   {
-    defaultMessage:
-      'Hunt Watch runs every 4 hours on a fixed schedule. The interval cannot be changed.',
+    defaultMessage: 'The interval is fixed.',
   }
 );
 
 export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
-  defaultMessage: 'Trigger',
+  defaultMessage: 'Schedule',
 });
 
 export const TRIGGER_UNIT_ARIA_LABEL = i18n.translate(
@@ -442,7 +440,7 @@ export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
   {
     defaultMessage:
-      'Lowest confidence at which a false positive is surfaced for review or auto-closed.',
+      'Set the lowest false positive confidence score at which an alert is proposed for closure or auto-closed.',
   }
 );
 
@@ -450,7 +448,7 @@ export const MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreDetailText',
   {
     defaultMessage:
-      'Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+      "Alerts below this score are still tagged with their classification, but aren't proposed for closure or closed. Lower scores let more alerts qualify; higher scores let fewer qualify.",
   }
 );
 
@@ -483,32 +481,26 @@ export const MINIMUM_SEVERITY_LABEL = i18n.translate(
 
 export const MINIMUM_SEVERITY_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumSeverityHelpText',
-  { defaultMessage: 'Lowest alert severity that is triaged.' }
+  { defaultMessage: 'Select the lowest alert severity to triage.' }
 );
 
 export const MINIMUM_SEVERITY_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumSeverityDetailText',
   {
-    defaultMessage:
-      'Alerts below this severity are never sent to the Worker. Choose Low to triage every alert.',
+    defaultMessage: 'Alerts below this severity are skipped. To triage every alert, select Low.',
   }
 );
 
 export const EXCLUDE_BUILDING_BLOCKS_LABEL = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksLabel',
-  { defaultMessage: 'Exclude building-block alerts' }
-);
-
-export const EXCLUDE_BUILDING_BLOCKS_HELP_TEXT = i18n.translate(
-  'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksHelpText',
-  { defaultMessage: 'Skip alerts from building-block rules.' }
+  { defaultMessage: 'Exclude building block alerts' }
 );
 
 export const EXCLUDE_BUILDING_BLOCKS_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.excludeBuildingBlocksDetailText',
   {
     defaultMessage:
-      'Alerts from EQL sequence rules are still triaged: a sequence raises its own alert in addition to its building-block alerts.',
+      "Each EQL sequence rule's main alert is still triaged. Only the building block alerts it creates are skipped.",
   }
 );
 
@@ -525,8 +517,7 @@ export const EXCLUDED_RULE_TAGS_HELP_TEXT = i18n.translate(
 export const EXCLUDED_RULE_TAGS_DETAIL_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsDetailText',
   {
-    defaultMessage:
-      'Press Enter after each tag to add several. Alerts from a rule with any one of the tags are skipped. Tags are matched exactly, including case.',
+    defaultMessage: 'Press Enter after each tag to add multiple. Tags are case-sensitive.',
   }
 );
 

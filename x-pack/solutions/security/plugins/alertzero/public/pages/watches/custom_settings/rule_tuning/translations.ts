@@ -25,8 +25,7 @@ export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
 export const ANALYSIS_WINDOW_DAYS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.analysisWindowDays.help',
   {
-    defaultMessage:
-      'How many days of alerts Rule Tuning analyses. Applies to this Worker only. Between {min} and {max}.',
+    defaultMessage: 'How many days of alerts this Worker analyzes. Between {min} and {max}.',
     values: { min: ANALYSIS_WINDOW_DAYS_MIN, max: ANALYSIS_WINDOW_DAYS_MAX },
   }
 );
@@ -44,17 +43,16 @@ export const QUALIFYING_THRESHOLDS_LABEL = i18n.translate(
 export const QUALIFYING_THRESHOLDS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.qualifyingThresholds.help',
   {
-    defaultMessage:
-      'A rule qualifies for analysis only when both are met within the analysis window.',
+    defaultMessage: 'A rule is analyzed only when it meets both thresholds in this window.',
   }
 );
 
-/** Shared help line under both threshold inputs; names the ranges an edit has to stay inside. */
+/** Tooltip on the thresholds row: defines both thresholds and names the ranges an edit has to stay inside. */
 export const QUALIFYING_THRESHOLDS_FIELDS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.qualifyingThresholds.fieldsHelp',
   {
     defaultMessage:
-      'Alerts closed as false positives within the analysis window. Count between {countMin} and {countMax}, rate between {rateMin} and {rateMax}%.',
+      "Count is alerts closed as false positives within the analysis window. Rate is the share of the rule's alerts closed as false positives. Count between {countMin} and {countMax}, rate between {rateMin} and {rateMax}%.",
     values: {
       countMin: FP_COUNT_THRESHOLD_MIN,
       countMax: FP_COUNT_THRESHOLD_MAX,

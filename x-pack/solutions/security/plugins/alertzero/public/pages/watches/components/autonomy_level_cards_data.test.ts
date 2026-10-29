@@ -42,15 +42,14 @@ const loadCardsWithCatalog = (messages: Record<string, string>): AutonomyLevelCa
   return cards;
 };
 
-const factValueOf = (workerId: string, level: string, label: string): string | undefined =>
+const factTextsOf = (workerId: string, level: string): string[] =>
   getAutonomyLevelCards(workerId)
     ?.levels.find((card) => card.level === level)
-    ?.facts.find((fact) => fact.label === label)?.value;
+    ?.facts.map(({ value }) => factValueToText(value)) ?? [];
 
 describe('autonomy level card copy', () => {
   it('reads every fact value from the message catalog, so the copy is localizable', () => {
-    const id =
-      'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidentsValue';
+    const id = 'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.workerValue';
     const cards = loadCardsWithCatalog({ [id]: '<worker> escalate themselves' });
     const value = cards?.levels.find((card) => card.level === 'manual')?.facts[0].value;
 
@@ -80,7 +79,7 @@ describe('autonomy level card copy', () => {
       if (!cards) return [];
       return cards.levels.flatMap((level) =>
         [level.who, ...level.facts.map(({ value }) => value)]
-          .filter((line) => /confidence/i.test(line))
+          .filter((line) => line !== undefined && /confidence/i.test(line))
           .map((line) => `${workerId} ${level.level}: ${line}`)
       );
     });
@@ -89,11 +88,28 @@ describe('autonomy level card copy', () => {
   });
 
   it('describes Alert Triage closures by who decides them', () => {
-    expect(factValueToText(factValueOf(TRIAGE_WORKER_ID, 'manual', 'Closures')!)).toBe(
-      'You answer each Proposal — accept to close, or reject and re-tag'
-    );
-    expect(factValueToText(factValueOf(TRIAGE_WORKER_ID, 'supervised', 'Closures')!)).toBe(
-      'Worker closes false positives on its own — You reopen any you disagree with'
-    );
+    expect(factTextsOf(TRIAGE_WORKER_ID, 'manual')).toEqual([
+      'Worker classifies new alerts.',
+      'You approve or decline each proposed closure.',
+    ]);
+    expect(factTextsOf(TRIAGE_WORKER_ID, 'supervised')).toEqual([
+      'Worker classifies new alerts and closes false positives automatically.',
+      'You can reopen closed alerts you disagree with.',
+    ]);
+  });
+
+  it('starts every row with who acts, so the cards need no summary line or row labels', () => {
+    const offenders = SYSTEM_SECURITY_WORKER_IDS.flatMap((workerId) => {
+      const cards = getAutonomyLevelCards(workerId);
+      if (!cards) return [];
+      return cards.levels.flatMap((level) => [
+        ...(level.who ? [`${workerId} ${level.level}: has a summary line`] : []),
+        ...level.facts
+          .filter(({ label, value }) => label || factValueParts(value)[0]?.kind !== 'pill')
+          .map(({ value }) => `${workerId} ${level.level}: ${value}`),
+      ]);
+    });
+
+    expect(offenders).toEqual([]);
   });
 });
