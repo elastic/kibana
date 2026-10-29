@@ -199,16 +199,16 @@ export const FieldSelect: FC<FieldSelectProps> = ({
     showTimeSeriesDimensions,
   ]);
 
+  const selectedFieldLabel = selectedField
+    ? currentIndexPattern.getFieldByName(selectedField)?.displayName ?? selectedField
+    : undefined;
+
   return (
     <FieldPicker<FieldChoiceWithOperationType>
       activeField={
         (selectedOperationType && selectedField
           ? {
-              label:
-                (selectedOperationType &&
-                  selectedField &&
-                  currentIndexPattern.getFieldByName(selectedField)?.displayName) ??
-                selectedField,
+              label: selectedFieldLabel ?? selectedField,
               value: { type: 'field', field: selectedField },
             }
           : undefined) as unknown as VisFieldOption<FieldChoiceWithOperationType>
@@ -222,6 +222,7 @@ export const FieldSelect: FC<FieldSelectProps> = ({
       onDelete={onDeleteColumn}
       fieldIsInvalid={Boolean(incompleteOperation || fieldIsInvalid)}
       data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      data-selected-field={selectedFieldLabel}
       aria-describedby={ariaDescribedby}
       aria-label={ariaLabel}
     />
