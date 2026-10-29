@@ -280,7 +280,8 @@ describe('registerAlertingV2UsageCollector', () => {
           action_policies_count_by_grouping_mode: {
             per_alert: {
               _meta: {
-                description: 'Number of action policies with grouping mode per_alert (the default).',
+                description:
+                  'Number of action policies with grouping mode per_alert (the default).',
               },
               type: 'long',
             },
@@ -302,7 +303,8 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             per_status_interval: {
               _meta: {
-                description: 'Number of action policies with throttle strategy per_status_interval.',
+                description:
+                  'Number of action policies with throttle strategy per_status_interval.',
               },
               type: 'long',
             },
@@ -313,7 +315,9 @@ describe('registerAlertingV2UsageCollector', () => {
               type: 'long',
             },
             every_time: {
-              _meta: { description: 'Number of action policies with throttle strategy every_time.' },
+              _meta: {
+                description: 'Number of action policies with throttle strategy every_time.',
+              },
               type: 'long',
             },
             none: {

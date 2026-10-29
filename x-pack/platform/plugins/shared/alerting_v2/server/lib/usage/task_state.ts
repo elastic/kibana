@@ -255,7 +255,8 @@ export const stateSchemaByVersion = {
     up: (state: Record<string, unknown>) => ({
       ...state,
       action_policies_count_by_status: state.action_policies_count_by_status ?? undefined,
-      action_policies_count_by_grouping_mode: state.action_policies_count_by_grouping_mode ?? undefined,
+      action_policies_count_by_grouping_mode:
+        state.action_policies_count_by_grouping_mode ?? undefined,
       action_policies_count_by_throttle_strategy:
         state.action_policies_count_by_throttle_strategy ?? undefined,
       action_policies_workflows_per_policy: state.action_policies_workflows_per_policy ?? undefined,
