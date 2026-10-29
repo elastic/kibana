@@ -107,7 +107,7 @@ apiTest.describe(
       async ({ apiClient, samlAuth, esClient }) => {
         const episodeId = uniqueId('episode');
         const ruleName = `Ad hoc ${episodeId}`;
-        const { _id: docId } = await esClient.index({
+        await esClient.index({
           index: '.rule-events',
           op_type: 'create',
           refresh: true,
@@ -141,7 +141,11 @@ apiTest.describe(
           });
           expect(investigation.subjects[0].snapshot?.rule_id).toBeUndefined();
         } finally {
-          await esClient.delete({ index: '.rule-events', id: docId, refresh: true });
+          await esClient.deleteByQuery({
+            index: '.rule-events',
+            query: { term: { 'alert.id': episodeId } },
+            refresh: true,
+          });
         }
       }
     );
