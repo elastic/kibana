@@ -64,15 +64,11 @@ describe('InstanceAgentFlyout', () => {
       />
     );
 
-  it('opens the agentless enrollment flyout for a managed integration policy', () => {
-    render(true);
-
-    expect(screen.getByTestId('agentlessEnrollmentFlyout')).toHaveTextContent('ap1 aws-1');
-    expect(screen.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
-  });
-
-  it('opens the component health of the clicked agent for an agent-based policy', () => {
-    render(false);
+  it.each([
+    ['managed integration (agentless)', true],
+    ['agent-based', false],
+  ])('opens the component health of the agent for a %s policy', (_, supportsAgentless) => {
+    render(supportsAgentless);
 
     expect(screen.getByTestId('agentlessStatusDetailsFlyout')).toHaveTextContent(
       'AWS agent-1 ap1 pp1'
