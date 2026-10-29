@@ -110,6 +110,8 @@ overrides:
   '@babel/plugin-transform-typescript': '7.24.7'
   '@bufbuild/protobuf': '2.5.2'
   '@elastic/elasticsearch@9>@elastic/transport': '9.4.0'
+  # ems-client@8.7.0 pins an older MapLibre; use Kibana's version.
+  '@elastic/ems-client@8.7.0>maplibre-gl': '6.4.1'
   '@elastic/esql-definitions': 'catalog:'
   '@elastic/esql-grammar': 'catalog:'
   '@elastic/esql-promql-grammar': 'catalog:'
