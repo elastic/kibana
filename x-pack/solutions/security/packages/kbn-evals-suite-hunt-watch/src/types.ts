@@ -42,12 +42,15 @@ export interface HuntReportExpectation {
    */
   pendingProposals?: number | { min: number };
   /**
-   * Whether report `evidence[]` and `last_hunted_at` are written. The hunt child writes evidence
-   * exactly when the coordinator result's `completed_successfully` is true (`write_evidence` in
-   * `hunt.yaml`): `complete` or `incomplete_final`, never `incomplete_retryable`. That is not the
-   * child's own `status`, which is `partial` for both incomplete kinds, so a hunt that retired a
-   * report with evidence marked incomplete still counts as written here.
-   * `iff_completed_successfully` is for rows where the hunt may legitimately end partial.
+   * Whether the report's hunt-once stamp (`last_hunted_at` on its `evidence[]` element) is written.
+   * The hunt child sends every finished run to the `write_hunt_evidence` route, which stamps when
+   * the run found a confirmed hit, whatever the completeness, or when the coordinator's
+   * `completed_successfully` is true (`complete` or `incomplete_final`). A retryable run with no
+   * hit is not stamped, so the report stays eligible; it may still record a coverage ledger, which
+   * is not a stamp. That is not the child's own `status`, which is `partial` for both incomplete
+   * kinds, so a hunt that retired a report with evidence marked incomplete still counts as written.
+   * `iff_completed_successfully` is for rows where the hunt may legitimately end partial, and
+   * expects the stamp exactly under that rule.
    */
   evidenceWritten: boolean | 'iff_completed_successfully';
   /** Whether a schema-valid SSE attachment is expected on the Investigation. */
