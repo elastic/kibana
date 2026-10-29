@@ -57,6 +57,13 @@ triggers:
           type: integer
           minimum: 0
           description: How many detection alerts the attack lists, so the card can say how many an approval reaches at most.
+        caveat:
+          type: string
+          maxLength: 2000
+          description: >
+            Markdown the analyst should read before deciding, such as containment that
+            never reached the approval queue. Shown first on the card. Optional: a
+            containment gate that settled normally has nothing to add.
       required:
         - investigationConversationId
         - attackDiscoveryId
@@ -126,7 +133,13 @@ steps:
         close_reason: "{{ inputs.closeReason }}"
         attack_reason: "{{ inputs.attackReason }}"
         summary: "{{ inputs.assessment | default: '' }}"
+      # A caveat comes first: whatever went wrong before this question changes what
+      # Approve means, so it is read before the close itself.
       comment: |-
+        {%- if inputs.caveat != blank -%}
+        **Before you close:** {{ inputs.caveat }}
+
+        {% endif -%}
         {%- assign alerts = 'its detection alerts' -%}
         {%- if inputs.attackAlertCount > 0 %}{% assign alerts = 'up to ' | append: inputs.attackAlertCount | append: ' detection alert(s)' %}{% endif -%}
         {%- if inputs.closeReason == 'false_positive' -%}
