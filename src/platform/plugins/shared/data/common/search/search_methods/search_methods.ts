@@ -388,11 +388,13 @@ export class SearchMethodsService implements ISearchMethods {
   private buildDslPagination(
     rawResponse: any,
     originalParams: IDslSearchParams,
-    options?: IDslSearchOptions
+    options?: IDslSearchOptions,
+    previouslyLoadedCount = 0
   ): IDslPagination {
     const self = this;
     const lastHit = rawResponse.hits?.hits?.at?.(-1);
-    const currentCount = rawResponse.hits?.hits?.length ?? 0;
+    // Total hits is for the whole query, so it is compared against everything loaded so far
+    const currentCount = previouslyLoadedCount + (rawResponse.hits?.hits?.length ?? 0);
     const totalValue =
       typeof rawResponse.hits?.total === 'number'
         ? rawResponse.hits.total
@@ -445,7 +447,8 @@ export class SearchMethodsService implements ISearchMethods {
           pagination: self.buildDslPagination(
             nextResponse.rawResponse,
             nextParams,
-            paginationOptions
+            paginationOptions,
+            currentCount
           ),
         };
       },

@@ -317,6 +317,29 @@ describe('SearchMethodsService', () => {
       });
     });
 
+    it('nextPage() reports no further page once every hit has been loaded', async () => {
+      const page = (ids: string[]) => ({
+        hits: {
+          hits: ids.map((id) => ({ _id: id, sort: [Number(id)] })),
+          total: { value: 5 },
+        },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+        .mockReturnValueOnce(createMockResponse(page(['3', '4'])))
+        .mockReturnValueOnce(createMockResponse(page(['5'])));
+
+      const first = await service.dslPaginated({
+        index: 'logs-*',
+        sort: [{ timestamp: 'desc' }],
+      });
+      const second = await first.pagination.nextPage();
+      const third = await second?.pagination.nextPage();
+
+      expect(second?.pagination.hasNextPage).toBe(true);
+      expect(third?.pagination.hasNextPage).toBe(false);
+    });
+
     describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },
