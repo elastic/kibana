@@ -698,13 +698,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, origin, ...props }: OpenEntityRiskInputsParams) => {
-      const { entityType, entityName, entityId, subTab } = props;
+      const { entityType, entityName, entityId, subTab, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
         entityType: entityType as string,
         entityName,
         entityId,
         ...(subTab ? { subTab } : {}),
+        scopeId,
       });
       // Entity tools open session:'start' (roots): the entity main is not persisted alongside the
       // tool, so closing the tool clears the param rather than reverting to the entity.

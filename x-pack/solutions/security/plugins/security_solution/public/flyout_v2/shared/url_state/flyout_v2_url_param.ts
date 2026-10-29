@@ -254,6 +254,7 @@ export interface EntityRiskInputsDescriptor {
   entityName: string;
   entityId?: string;
   subTab?: string;
+  scopeId?: string;
 }
 
 export interface EntityAnomalyInsightsDescriptor {

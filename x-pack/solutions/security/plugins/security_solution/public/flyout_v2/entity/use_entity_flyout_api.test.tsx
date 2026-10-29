@@ -492,6 +492,23 @@ describe('useEntityFlyoutApi', () => {
     });
   });
 
+  it('openEntityRiskInputs persists the scopeId on the URL descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityRiskInputs({
+      entityType: EntityType.host,
+      entityName: 'my-host',
+      entityId: 'e-1',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
+        scopeId: 'entity-analytics-new-entities-table-7d',
+      })
+    );
+  });
+
   it('openEntityAnomalyInsights writes an entityAnomalyInsights descriptor and clears the param on close', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({
