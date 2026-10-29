@@ -163,6 +163,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
 
+    // Start the span after a microtask so it does not stay in the caller's APM context
+    // after it ends (see runNode).
+    await Promise.resolve();
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
     if (stepSpan) {
