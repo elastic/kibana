@@ -388,4 +388,10 @@ describe('DetectionsSettingsTab', () => {
       'rrf_rank_constant: 10'
     );
   });
+
+  it('hides stale event cleanup when developer mode is off', () => {
+    setup({ isDeveloperMode: false });
+
+    expect(screen.queryByTestId('stale-event-cleanup-section')).not.toBeInTheDocument();
+  });
 });

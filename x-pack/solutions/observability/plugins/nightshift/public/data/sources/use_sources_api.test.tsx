@@ -91,6 +91,18 @@ describe('useSourcesApi knowledge invalidation', () => {
     }
   });
 
+  it('marks knowledge stale after enabling or disabling, which flips the rules', async () => {
+    const { result, invalidateQueries } = setup();
+
+    act(() => result.current.setSourceEnabled.mutate({ sourceId: 'source-1', enabled: false }));
+
+    await waitFor(() => expect(result.current.setSourceEnabled.isSuccess).toBe(true));
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: SOURCES_QUERY_KEY });
+    for (const queryKey of KNOWLEDGE_PREFIXES) {
+      expect(invalidateQueries).toHaveBeenCalledWith({ queryKey, refetchType: 'none' });
+    }
+  });
+
   it('leaves knowledge alone after a create, since a new source has none', async () => {
     const { result, invalidateQueries } = setup();
 

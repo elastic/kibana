@@ -111,10 +111,12 @@ describe('filter automations', () => {
 
 describe('isGlobalInvestigationLimitReached', () => {
   it.each([
-    [quotas({ used: 3 }), true],
-    [quotas({ limit: 0, used: 5 }), false],
-    [quotas({ enabled: false }), false],
-  ])('%j -> %s', (input, expected) => {
+    ['is reached once usage hits the limit', quotas({ limit: 3, used: 3 }), true],
+    ['is not reached while usage is below the limit', quotas({ limit: 3, used: 2 }), false],
+    ['is not reached when the limit is 0', quotas({ limit: 0, used: 5 }), false],
+    ['is not reached when quotas are disabled', quotas({ enabled: false }), false],
+    ['is not reached before quotas load', undefined, false],
+  ])('%s', (_, input, expected) => {
     expect(isGlobalInvestigationLimitReached(input)).toBe(expected);
   });
 });

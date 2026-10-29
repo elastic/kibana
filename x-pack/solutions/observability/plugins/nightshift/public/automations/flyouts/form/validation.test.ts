@@ -18,7 +18,14 @@ const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'eve
 });
 
 describe('automation validation', () => {
-  it.each([['51', false]])('validates daily limit %s', (value, expected) => {
+  it.each([
+    ['1', true],
+    ['50', true],
+    ['', false],
+    ['0', false],
+    ['51', false],
+    ['1.5', false],
+  ])('validates daily limit %p', (value, expected) => {
     expect(isValidDailyLimit(value)).toBe(expected);
   });
 

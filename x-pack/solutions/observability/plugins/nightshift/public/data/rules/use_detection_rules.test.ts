@@ -37,6 +37,11 @@ const convert = (
 ): DetectionRule => toDetectionRule(row, { engineState, sourceEnabled });
 
 describe('toDetectionRule', () => {
+  it('counts documents and takes the last matching interval', () => {
+    expect(convert(makeRow(true))).toMatchObject({ matches: 8, lastActivity: 3 });
+    expect(convert({ ...makeRow(true), occurrences: [] }).lastActivity).toBeUndefined();
+  });
+
   it.each([
     [true, 'paused', true, 'engine_paused'],
     [true, 'enabled', false, 'source_disabled'],
@@ -52,4 +57,12 @@ describe('toDetectionRule', () => {
       });
     }
   );
+
+  it('marks an enabled rule active when its engine and source are enabled', () => {
+    expect(convert(makeRow(true), 'enabled', true).status).toEqual({ state: 'active' });
+  });
+
+  it('leaves status unknown when the server omits it', () => {
+    expect(convert(makeRow(), 'paused', false).status).toBeUndefined();
+  });
 });

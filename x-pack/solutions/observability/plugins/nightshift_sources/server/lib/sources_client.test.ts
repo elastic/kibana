@@ -141,6 +141,14 @@ describe('SourcesClient', () => {
       });
     });
 
+    it('fails closed when the privilege check itself fails', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.security.hasPrivileges.mockRejectedValue(new Error('security unavailable'));
+
+      await expect(client.assertReadable('source-1')).rejects.toThrow('security unavailable');
+    });
+
     it('trusts a source that only reads another cluster', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(

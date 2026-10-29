@@ -98,4 +98,27 @@ describe('EsqlViewsClient', () => {
       expect(internalEsClient.esql.putView).toHaveBeenCalledTimes(3);
     });
   });
+
+  describe('deleteView', () => {
+    it('deletes as the internal user and never as the current user', async () => {
+      const { esClient, internalEsClient, client } = setup();
+      internalEsClient.esql.deleteView.mockResponse({ acknowledged: true });
+
+      await client.deleteView(VIEW_NAME);
+
+      expect(internalEsClient.esql.deleteView).toHaveBeenCalledTimes(1);
+      expect(esClient.esql.deleteView).not.toHaveBeenCalled();
+    });
+
+    it('ignores a missing view', async () => {
+      const { internalEsClient, client } = setup();
+      internalEsClient.esql.deleteView.mockResponse({ acknowledged: true });
+
+      await expect(client.deleteView(VIEW_NAME)).resolves.toBeUndefined();
+      expect(internalEsClient.esql.deleteView).toHaveBeenCalledWith(
+        { name: VIEW_NAME },
+        { ignore: [404] }
+      );
+    });
+  });
 });
