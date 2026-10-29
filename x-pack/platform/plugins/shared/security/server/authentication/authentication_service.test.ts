@@ -1310,6 +1310,56 @@ describe('AuthenticationService', () => {
         }
       );
 
+      it.each([
+        ['a bearer token', 'Bearer some-token', ', error="invalid_token"'],
+        ['a lowercase bearer token', 'bearer some-token', ', error="invalid_token"'],
+        ['no token', undefined, ''],
+        ['non-bearer credentials', 'Basic dXNlcjpwYXNz', ''],
+      ])(
+        'sets the RFC 6750 error in the WWW-Authenticate header when the request carried %s',
+        async (_, authorization, expectedError) => {
+          const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+
+          mockSetupAuthenticationParams.config = createConfig(
+            ConfigSchema.validate(
+              {
+                mcp: {
+                  oauth2: {
+                    metadata: {
+                      authorization_servers: ['https://localhost:9200'],
+                      resource: 'http://localhost:5620/api/agent_builder/mcp',
+                    },
+                  },
+                },
+              },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          );
+
+          const { onPreResponseHandler } = getService();
+
+          await onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/agent_builder/mcp',
+              routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+              headers: authorization ? { authorization } : {},
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          );
+
+          expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: expect.objectContaining({
+                'WWW-Authenticate': `Bearer resource_metadata="http://localhost:5620/.well-known/oauth-protected-resource/api/agent_builder/mcp"${expectedError}`,
+              }),
+            })
+          );
+        }
+      );
+
       it('does not add WWW-Authenticate header when mcp config is not set', async () => {
         const mockReturnedValue = { type: 'next' as any };
         const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
