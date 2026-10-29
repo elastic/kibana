@@ -9,7 +9,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Evals APIs', function () {
-    // --xpack.evals.enabled (from the serverless config) only applies to a locally-started FTR
+    // --xpack.evals.enabled and --xpack.evals.mode (from the serverless config) only apply to a locally-started FTR
     // Kibana; MKI runs against an existing project. Skip until evals is enabled by default on the
     // serverless projects this job targets.
     this.tags(['skipMKI']);
