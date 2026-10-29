@@ -40,7 +40,7 @@ import {
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
-} from './field_names';
+} from '../../../../common/otel_data';
 
 export interface SearchParams {
   start: number;
