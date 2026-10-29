@@ -717,8 +717,9 @@ const INCONCLUSIVE_CLOUD_NO_PRINCIPAL: LabeledAlert = {
   description:
     'Gate F — generic Tier 4 cloud rule alert carrying only a provider and region: no API ' +
     'action, no principal, no request parameters, no source address. Same absence of action, ' +
-    'actor and parameters as the endpoint case, on a different data source, so the verdict ' +
-    'cannot depend on endpoint-shaped fields.',
+    'actor and parameters as the endpoint case, with cloud-flavoured rule metadata. The ' +
+    'document keeps the shared endpoint envelope, so this checks that a missing action and ' +
+    'principal still yield inconclusive, not that the verdict is independent of data source.',
   doc: buildEvidenceFreeDoc({
     id: 'aa-eval-inconclusive-cloud-no-principal',
     index: 12,
