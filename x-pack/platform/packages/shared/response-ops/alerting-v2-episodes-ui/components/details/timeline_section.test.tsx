@@ -282,5 +282,20 @@ describe('AlertEpisodeTimelineSection', () => {
       expect(comments).toHaveLength(4);
       expect(comments[0]).toHaveAttribute('data-timestamp', '2024-01-02T00:00:00.000Z');
     });
+
+    it('shows the collapsed warning on each change between collapsed phases', () => {
+      mockEvents(mockEventRows, false, 5005);
+      mockCollapsedEvents(collapsedEvents);
+      renderSection();
+      // pending -> active -> recovering: 2 status changes; the single severity is only an initial set
+      expect(screen.getAllByTestId('alertingV2EpisodeCollapsedEventsWarning')).toHaveLength(2);
+    });
+
+    it('does not show the collapsed warning when every event was returned', () => {
+      renderSection();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeCollapsedEventsWarning')
+      ).not.toBeInTheDocument();
+    });
   });
 });
