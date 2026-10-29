@@ -10,8 +10,8 @@
  *
  * For each eval example the spec indexes a fresh copy of the alert (with a per-run unique alert
  * and rule uuid) into `.alerts-security.alerts-default`, runs the real workflow end-to-end, then
- * deletes it. The workflow's `ai.agent` step classifies the alert true_positive / false_positive,
- * and we grade that verdict against `expected`.
+ * deletes it. The workflow's `ai.agent` step classifies the alert true_positive / false_positive /
+ * inconclusive, and we grade that verdict against `expected`.
  *
  * The dataset exercises the four confidence tiers the workflow prompt reasons over
  * (see the `<alert_confidence_tier>` and `<reasoning_process>` sections of
@@ -88,10 +88,11 @@ export interface BuildAlertParams {
 
 /**
  * Bulky, low-signal fields a real Elastic Defend / SIEM alert `_source` carries, modeled on an
- * actual endpoint alert. Every field here is attachment-only noise: none is read by the workflow's
- * `build_alert_observable_context` step, so padding with it bloats the raw `_source` (which the
- * `pick` allow-list is meant to trim) without altering the model's reasoning message. Values are
- * partly derived from `id` so the noise looks per-alert-authentic rather than obviously constant.
+ * actual endpoint alert. Padding with them bloats the raw `_source` (which the `pick` allow-list
+ * is meant to trim). Most are never shown to the model, but the `build_agent_message` step renders
+ * the alert block from a fixed field list and the keys in `RENDERED_NOISE_KEYS` do reach the
+ * model; alerts built with `buildDocWithoutRenderedNoise` omit them. Values are partly derived
+ * from `id` so the noise looks per-alert-authentic rather than obviously constant.
  */
 const buildNoiseEnvelope = (id: string, timestamp: string): Record<string, unknown> => ({
   // Agent / data stream / ECS / elastic provenance
