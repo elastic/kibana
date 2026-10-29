@@ -473,7 +473,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Show inline attachments as cards in the events timeline [#293080]({{kib-pull}}293080).
 * Add the Elastic Agent Builder connectors capability as a technical preview, no longer gated behind the experimental features setting [#286620]({{kib-pull}}286620).
 * Add streaming support to the agent-to-agent (A2A) endpoint [#287763]({{kib-pull}}287763).
-* Enable agents to find case templates by name [#287744]({{kib-pull}}287744).
 * Display MCP server URLs for the current space when the OAuth resource is a public {{kib}} URL [#292927]({{kib-pull}}292927).
 * Add MCP tool annotations, such as `readOnlyHint` and `destructiveHint`, to the tools that the Agent Builder MCP server exposes [#284764]({{kib-pull}}284764).
 * Include OpenTelemetry user attributes (`user.id`, `user.name`, and `user.hash`) in conversation traces, following the Gen AI tracing privacy settings [#282858]({{kib-pull}}282858).
@@ -485,7 +484,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add the built-in anomaly detection skills, which help agents query anomaly results with {{esql}}, troubleshoot anomaly detection jobs, and manage jobs [#270306]({{kib-pull}}270306).
 * Add guidance for anomaly charts, the anomaly swim lane, and the single metric viewer to the anomaly detection skills [#284519]({{kib-pull}}284519).
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
-* Add a case attachments tool to Agent Builder, and document template fields in the cases-analytics skill [#279680]({{kib-pull}}279680), [#291716]({{kib-pull}}291716), [#287638]({{kib-pull}}287638).
+* Document template fields in the cases-analytics skill for Agent Builder [#291716]({{kib-pull}}291716).
 
 **Alerting and cases**:
 * Add the `POST /api/alerting/v2/rules/_bulk_create` API to create up to 100 {{kib}} alerting v2 rules in one request [#288950]({{kib-pull}}288950).
@@ -500,13 +499,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
 * Add an Agent Builder attachment for alerting v2 rules [#285472]({{kib-pull}}285472).
 * Add an Agent Builder attachment for alerting v2 episodes, with automatic attachment [#285275]({{kib-pull}}285275).
-* Add the `cases.deleteAttachments` workflow step, and enable the cases agent in Agent Builder to delete case attachments [#298188]({{kib-pull}}298188).
-* Add the `cases.attachmentsDeleted`, `cases.observablesAdded`, and `cases.extendedFieldsUpdated` workflow triggers [#295254]({{kib-pull}}295254), [#288224]({{kib-pull}}288224), [#287043]({{kib-pull}}287043).
-* Remove alerts from a case in the case **Attachments** tab [#299266]({{kib-pull}}299266).
-* Select and remove several attachments at once from the case **Attachments** tab, or delete case attachments in bulk by attachment ID [#298949]({{kib-pull}}298949), [#298950]({{kib-pull}}298950).
-* Delete several observables at once from the observables table [#295408]({{kib-pull}}295408).
-* Add column customization to the **Similar cases** table [#295985]({{kib-pull}}295985).
-* Add a source filter to the case activity feed, and record the source of case user actions [#291285]({{kib-pull}}291285), [#287149]({{kib-pull}}287149).
 * Add a public API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add a public API to discover the extended fields (`extended_fields`) that you can apply to a case, for a given owner and optional template [#279684]({{kib-pull}}279684).
 * Expand template defaults on the server when you create a case [#280143]({{kib-pull}}280143).
@@ -686,7 +678,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
 
 **{{kib}} platform**:
-* Add an **Anonymization** page under **{{stack-manage-app}}** → **AI** to choose which sensitive values, such as email addresses, IP addresses, host and account names, and custom patterns, {{kib}} anonymizes before it sends AI requests. The page adds a master switch, built-in rules, and a pattern tester, and replaces the `ai:anonymizationSettings` advanced setting [#295895]({{kib-pull}}295895), [#295894]({{kib-pull}}295894), [#297148]({{kib-pull}}297148), [#293633]({{kib-pull}}293633).
 * Disallow code generation from strings in Node.js by default [#278233]({{kib-pull}}278233).
 * Add a certificate identity field, for strong identity verification, to cross-cluster API keys in API key management [#275610]({{kib-pull}}275610).
 * Add the `filters` setting on a logger in `kibana.yml` to filter log records by metadata fields [#268372]({{kib-pull}}268372).
@@ -787,18 +778,11 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix task and connector failures that aren't `Error` objects being logged as `[object Object]` [#276782]({{kib-pull}}276782).
 * Fix an organization-level API key causing a generic parse failure when you create or enable a rule, by returning a clear `400` error [#282287]({{kib-pull}}282287).
 * Fix signal rule updates not persisting `query.format: composed` [#283754]({{kib-pull}}283754).
-* Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185), [#283072]({{kib-pull}}283072), [#288636]({{kib-pull}}288636), [#287308]({{kib-pull}}287308), [#283922]({{kib-pull}}283922), [#287306]({{kib-pull}}287306), [#287327]({{kib-pull}}287327).
-* Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576), [#287945]({{kib-pull}}287945), [#283645]({{kib-pull}}283645), [#284940]({{kib-pull}}284940), [#284475]({{kib-pull}}284475).
-* Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772), [#284310]({{kib-pull}}284310), [#284035]({{kib-pull}}284035).
+* Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185).
+* Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576).
+* Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772).
 * Fix duplicate field definitions, field definition identity, and field definition references in the cases field library [#282060]({{kib-pull}}282060), [#282770]({{kib-pull}}282770), [#282450]({{kib-pull}}282450), [#280493]({{kib-pull}}280493).
-* Fix case attachment deletion, including file attachments that couldn't be deleted, and the attachment UI in the case **Attachments** tab [#297885]({{kib-pull}}297885), [#285456]({{kib-pull}}285456).
-* Fix a push to an external connector handling comments twice [#295571]({{kib-pull}}295571).
-* Fix cases created from v2 templates not inheriting the template's external connector, sync and observables settings, and assignees through the cases system action [#284854]({{kib-pull}}284854).
 * Fix the case header showing no reporter name by falling back to the email address [#282504]({{kib-pull}}282504).
-* Fix the create case modal appearing for users without permission to create cases [#292761]({{kib-pull}}292761).
-* Fix **Associated users** and **Associated hosts** metrics not including entity attachments [#283036]({{kib-pull}}283036).
-* Fix saved visualizations not appearing in case attachments, and add helper text to the case Markdown editor [#286164]({{kib-pull}}286164).
-* Fix the case feature settings so non-security owners don't get alert sync turned on by default when you create a case through a workflow or from a v2 template [#286670]({{kib-pull}}286670).
 
 **Connectivity**:
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
@@ -1044,6 +1028,28 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Add a workflow YAML preview to the automation rows in Context Engine [#282233]({{kib-pull}}282233).
 % * Add a **Knowledge Indicators** tab to the AI index detail page, with type filters and expandable rows that show each stored knowledge indicator as JSON [#286456]({{kib-pull}}286456).
 % * Teach the workflow authoring skill about knowledge indicator steps [#287154]({{kib-pull}}287154).
+
+% Removed from 9.6.0: Team:Security Investigations owns these. They belong in the Security solution notes.
+% * Enable agents to find case templates by name [#287744]({{kib-pull}}287744).
+% (partial: 279680,287638) * Add a case attachments tool to Agent Builder, and document template fields in the cases-analytics skill [#279680]({{kib-pull}}279680), [#291716]({{kib-pull}}291716), [#287638]({{kib-pull}}287638).
+% * Add the `cases.deleteAttachments` workflow step, and enable the cases agent in Agent Builder to delete case attachments [#298188]({{kib-pull}}298188).
+% * Add the `cases.attachmentsDeleted`, `cases.observablesAdded`, and `cases.extendedFieldsUpdated` workflow triggers [#295254]({{kib-pull}}295254), [#288224]({{kib-pull}}288224), [#287043]({{kib-pull}}287043).
+% * Remove alerts from a case in the case **Attachments** tab [#299266]({{kib-pull}}299266).
+% * Select and remove several attachments at once from the case **Attachments** tab, or delete case attachments in bulk by attachment ID [#298949]({{kib-pull}}298949), [#298950]({{kib-pull}}298950).
+% * Delete several observables at once from the observables table [#295408]({{kib-pull}}295408).
+% * Add column customization to the **Similar cases** table [#295985]({{kib-pull}}295985).
+% * Add a source filter to the case activity feed, and record the source of case user actions [#291285]({{kib-pull}}291285), [#287149]({{kib-pull}}287149).
+% * Add an **Anonymization** page under **{{stack-manage-app}}** → **AI** to choose which sensitive values, such as email addresses, IP addresses, host and account names, and custom patterns, {{kib}} anonymizes before it sends AI requests. The page adds a master switch, built-in rules, and a pattern tester, and replaces the `ai:anonymizationSettings` advanced setting [#295895]({{kib-pull}}295895), [#295894]({{kib-pull}}295894), [#297148]({{kib-pull}}297148), [#293633]({{kib-pull}}293633).
+% (partial: 283072,288636,287308,283922,287306,287327) * Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185), [#283072]({{kib-pull}}283072), [#288636]({{kib-pull}}288636), [#287308]({{kib-pull}}287308), [#283922]({{kib-pull}}283922), [#287306]({{kib-pull}}287306), [#287327]({{kib-pull}}287327).
+% (partial: 287945,283645,284940,284475) * Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576), [#287945]({{kib-pull}}287945), [#283645]({{kib-pull}}283645), [#284940]({{kib-pull}}284940), [#284475]({{kib-pull}}284475).
+% (partial: 284310,284035) * Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772), [#284310]({{kib-pull}}284310), [#284035]({{kib-pull}}284035).
+% * Fix case attachment deletion, including file attachments that couldn't be deleted, and the attachment UI in the case **Attachments** tab [#297885]({{kib-pull}}297885), [#285456]({{kib-pull}}285456).
+% * Fix a push to an external connector handling comments twice [#295571]({{kib-pull}}295571).
+% * Fix cases created from v2 templates not inheriting the template's external connector, sync and observables settings, and assignees through the cases system action [#284854]({{kib-pull}}284854).
+% * Fix the create case modal appearing for users without permission to create cases [#292761]({{kib-pull}}292761).
+% * Fix **Associated users** and **Associated hosts** metrics not including entity attachments [#283036]({{kib-pull}}283036).
+% * Fix saved visualizations not appearing in case attachments, and add helper text to the case Markdown editor [#286164]({{kib-pull}}286164).
+% * Fix the case feature settings so non-security owners don't get alert sync turned on by default when you create a case through a workflow or from a v2 template [#286670]({{kib-pull}}286670).
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
