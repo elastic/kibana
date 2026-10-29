@@ -116,6 +116,13 @@ const ebtAction = {
   viewKi: {
     TAB_DETAILS: 'tab_details',
     TAB_DOCUMENT: 'tab_document',
+    DELETE: 'delete',
+    RESTORE: 'restore',
+  },
+  editKi: {
+    EDIT: 'edit',
+    SAVE: 'save_content',
+    CANCEL: 'cancel_content',
   },
 } as const;
 
