@@ -23,13 +23,45 @@ import { getUnifiedSearchComparators } from './unified_search_manager';
 
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
 
+type LayoutItem = { id?: string; panels?: LayoutItem[] };
+
+const getLayoutIds = (items: LayoutItem[] = []): string[] =>
+  items.flatMap(({ id, panels }) => [...(id === undefined ? [] : [id]), ...getLayoutIds(panels)]);
+
+const withComparisonIds = <Item extends LayoutItem>(
+  items: Item[] | undefined,
+  prefix: string
+): Item[] =>
+  (items ?? []).map((item, index) => ({
+    ...item,
+    id: item.id ?? `${prefix}${index}`,
+    ...(item.panels && { panels: withComparisonIds(item.panels, `${prefix}${index}:`) }),
+  }));
+
 const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
-  const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
-  const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
+  const explicitIds = [
+    ...getLayoutIds(baseline.panels),
+    ...getLayoutIds(baseline.pinned_panels),
+    ...getLayoutIds(current.panels),
+    ...getLayoutIds(current.pinned_panels),
+    ...Object.keys(children ?? {}),
+  ];
+  let prefix = '__comparison:';
+  while (explicitIds.some((id) => id.startsWith(prefix))) {
+    prefix = `_${prefix}`;
+  }
+  const baselineLayout = deserializeLayout(
+    withComparisonIds(baseline.panels, `${prefix}panel:`),
+    withComparisonIds(baseline.pinned_panels, `${prefix}pinned:`)
+  );
+  const currentLayout = deserializeLayout(
+    withComparisonIds(current.panels, `${prefix}panel:`),
+    withComparisonIds(current.pinned_panels, `${prefix}pinned:`)
+  );
 
   const getType = ({ layout }: typeof baselineLayout, panelId: string) =>
     (layout.panels[panelId] ?? layout.pinnedPanels[panelId])?.type;
