@@ -12,7 +12,7 @@
     "@kbn/i18n",
     "@kbn/observability-shared-plugin",
     "@kbn/app-header",
-    "@kbn/shared-ux-router",
+    "@kbn/typed-react-router-config",
     "@kbn/deeplinks-observability",
     "@kbn/share-plugin",
     "@kbn/ebt-click",

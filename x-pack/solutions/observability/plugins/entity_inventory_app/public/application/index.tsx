@@ -10,8 +10,8 @@ import ReactDOM from 'react-dom';
 import { EuiBetaBadge, EuiPageSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { Redirect, useLocation } from 'react-router-dom';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -19,6 +19,7 @@ import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-p
 import type { StartServices } from '../hooks/use_kibana';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppStartDependencies } from '../types';
+import { entityInventoryRouter } from '../routes/config';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -46,15 +47,6 @@ const TECH_PREVIEW_BADGE: AppHeaderBadge[] = [
   },
 ];
 
-function EntityInventoryContent() {
-  return (
-    <>
-      <br />
-      <h1>Entity Inventory content here.</h1>
-    </>
-  );
-}
-
 export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps) {
   const { pathname } = useLocation();
   const currentPage = ENTITY_INVENTORY_PAGES.find((page) => page.path === pathname);
@@ -64,12 +56,7 @@ export function EntityInventoryShell({ PageTemplate }: EntityInventoryShellProps
     <PageTemplate isPageDataLoaded={true} pageSectionProps={{ paddingSize: 'none' }}>
       <AppHeader title={title} badges={TECH_PREVIEW_BADGE} menu={{}} spacing="standard" />
       <EuiPageSection paddingSize="m" grow restrictWidth={false}>
-        <Routes>
-          {ENTITY_INVENTORY_PAGES.map(({ path }) => (
-            <Route key={path} path={path} component={EntityInventoryContent} />
-          ))}
-          <Redirect from="/" to={ENTITY_INVENTORY_PAGES[0].path} />
-        </Routes>
+        <RouteRenderer />
       </EuiPageSection>
     </PageTemplate>
   );
@@ -87,9 +74,9 @@ export function renderApp(
   ReactDOM.render(
     core.rendering.addContext(
       <KibanaContextProvider services={services}>
-        <Router history={history}>
+        <RouterProvider history={history} router={entityInventoryRouter}>
           <EntityInventoryShell PageTemplate={PageTemplate} />
-        </Router>
+        </RouterProvider>
       </KibanaContextProvider>
     ),
     element

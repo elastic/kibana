@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { EntityInventoryPagePath } from './routes/config';
 
 export const ENTITY_INVENTORY_TITLE = i18n.translate('xpack.entityInventoryApp.appTitle', {
   defaultMessage: 'Entity Inventory',
@@ -17,7 +18,7 @@ export interface EntityInventoryPage {
   deepLinkId: string;
   /** Also reported as the click detail of the no data button: changing a value changes the telemetry data. */
   entityCategory: string;
-  path: string;
+  path: EntityInventoryPagePath;
   title: string;
   /** Onboarding locator params for the "Add data" button of the no data state. */
   onboarding: ObservabilityOnboardingLocatorParams;
