@@ -35,8 +35,8 @@ export const findAttachmentsRoute = createCasesRoute<
     query: createIoTsRouteValidation(UnifiedAttachmentsFindQueryParamsRt),
   },
   routerOptions: {
-    // TODO(security-team#15572): flip to 'public' once this API is ready to ship.
-    access: 'internal',
+    access: 'public',
+    availability: { stability: 'tech_preview', since: '9.6.0' },
     summary: `Find case attachments`,
     tags: ['oas-tag:cases'],
     description: 'Retrieves a paginated, optionally type-filtered list of attachments for a case.',

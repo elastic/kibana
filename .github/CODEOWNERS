@@ -2106,7 +2106,6 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-dashboards
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-dashboards
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-dashboards
-/x-pack/platform/test/functional/apps/maps/ @elastic/kibana-dashboards
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-dashboards
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-dashboards
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-dashboards
@@ -3209,7 +3208,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @e
 src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/threat_intel @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/common/threat_intel @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/test/scout_alertzero @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout_alertzero @elastic/security-investigations @elastic/security-detection-engineering
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/alertzero @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_hunt_watch @elastic/security-investigations
