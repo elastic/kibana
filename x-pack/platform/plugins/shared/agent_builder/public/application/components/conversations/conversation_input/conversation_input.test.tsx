@@ -30,7 +30,6 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { useToasts } from '../../../hooks/use_toasts';
 import { useMessageEditor } from './message_editor';
-import { CommandId } from './message_editor/command_menu/types';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useInputDraft } from '../../../hooks/use_input_draft';
@@ -471,32 +470,6 @@ describe('ConversationInput', () => {
   });
 
   describe('mentions', () => {
-    const lastExcludedCommandIds = () =>
-      mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0]
-        ?.excludedCommandIds;
-
-    it('turns the mention menu off with the experimental flag off', () => {
-      mockedUseIsSharedConversation.mockReturnValue(true);
-      renderInput(<ConversationInput />);
-
-      expect(lastExcludedCommandIds()).toEqual([CommandId.Mention]);
-    });
-
-    it('turns the mention menu off in a chat that is not shared', () => {
-      mockedUseExperimentalFeatures.mockReturnValue(true);
-      renderInput(<ConversationInput />);
-
-      expect(lastExcludedCommandIds()).toEqual([CommandId.Mention]);
-    });
-
-    it('turns the mention menu on in a shared chat with the experimental flag on', () => {
-      mockedUseExperimentalFeatures.mockReturnValue(true);
-      mockedUseIsSharedConversation.mockReturnValue(true);
-      renderInput(<ConversationInput />);
-
-      expect(lastExcludedCommandIds()).toEqual([]);
-    });
-
     it('shows the mention button only in a shared chat with the experimental flag on', () => {
       const { rerender } = renderInput(<ConversationInput />);
       expect(screen.queryByTestId('mock-mention-button')).not.toBeInTheDocument();
@@ -684,17 +657,6 @@ describe('ConversationInput', () => {
 
         expect(modeValue()).toHaveValue('never');
       });
-    });
-
-    it('turns the mention menu on when the chat becomes shared, without a remount', () => {
-      mockedUseExperimentalFeatures.mockReturnValue(true);
-      const { rerender } = renderInput(<ConversationInput />);
-      expect(lastExcludedCommandIds()).toEqual([CommandId.Mention]);
-
-      mockedUseIsSharedConversation.mockReturnValue(true);
-      rerenderInput(rerender);
-
-      expect(lastExcludedCommandIds()).toEqual([]);
     });
   });
 

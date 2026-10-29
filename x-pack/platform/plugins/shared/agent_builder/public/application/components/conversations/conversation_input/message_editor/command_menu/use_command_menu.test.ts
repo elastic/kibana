@@ -9,10 +9,17 @@ import { renderHook, act } from '@testing-library/react';
 import { useCommandMenu } from './use_command_menu';
 import { CommandId } from './types';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
+import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
+import { useIsSharedConversation } from '../../../../../hooks/use_conversation';
 
 jest.mock('../../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => true,
+  useExperimentalFeatures: jest.fn(),
 }));
+jest.mock('../../../../../hooks/use_conversation', () => ({
+  useIsSharedConversation: jest.fn(),
+}));
+const mockedUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
+const mockedUseIsSharedConversation = jest.mocked(useIsSharedConversation);
 
 jest.mock('./utils/get_text_before_cursor');
 const mockGetTextBeforeCursor = jest.mocked(getTextBeforeCursor);
@@ -22,6 +29,8 @@ const mockElement = document.createElement('div');
 describe('useCommandMenuCommand', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseExperimentalFeatures.mockReturnValue(true);
+    mockedUseIsSharedConversation.mockReturnValue(true);
   });
 
   it('returns inactive match initially', () => {
@@ -107,39 +116,48 @@ describe('useCommandMenuCommand', () => {
     expect(result.current.match.isActive).toBe(false);
   });
 
-  it('excludedCommandIds prevents detection of the excluded command only', () => {
-    const excludedCommandIds = [CommandId.Skill];
-    const { result } = renderHook(() => useCommandMenu({ excludedCommandIds }));
+  describe('mentions', () => {
+    const typeMention = (result: { current: ReturnType<typeof useCommandMenu> }) => {
+      mockGetTextBeforeCursor.mockReturnValue('hi @jul');
+      act(() => {
+        result.current.checkInputForCommand(mockElement);
+      });
+    };
 
-    mockGetTextBeforeCursor.mockReturnValue('/summarize');
-    act(() => {
-      result.current.checkInputForCommand(mockElement);
+    it('"@" opens the mention menu in a shared chat with the experimental flag on', () => {
+      const { result } = renderHook(() => useCommandMenu());
+      typeMention(result);
+
+      expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
+      expect(result.current.match.activeCommand?.query).toBe('jul');
     });
-    expect(result.current.match.isActive).toBe(false);
 
-    mockGetTextBeforeCursor.mockReturnValue('#connector');
-    act(() => {
-      result.current.checkInputForCommand(mockElement);
+    it('"@" opens no menu in a chat that is not shared', () => {
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      const { result } = renderHook(() => useCommandMenu());
+      typeMention(result);
+
+      expect(result.current.match.isActive).toBe(false);
     });
-    expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Sml);
-  });
 
-  it('"@" opens the mention menu, unless the mention command is excluded', () => {
-    mockGetTextBeforeCursor.mockReturnValue('hi @jul');
+    it('"@" opens no menu with the experimental flag off', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(false);
+      const { result } = renderHook(() => useCommandMenu());
+      typeMention(result);
 
-    const { result: allowed } = renderHook(() => useCommandMenu());
-    act(() => {
-      allowed.current.checkInputForCommand(mockElement);
+      expect(result.current.match.isActive).toBe(false);
     });
-    expect(allowed.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
-    expect(allowed.current.match.activeCommand?.query).toBe('jul');
 
-    const excludedCommandIds = [CommandId.Mention];
-    const { result: excluded } = renderHook(() => useCommandMenu({ excludedCommandIds }));
-    act(() => {
-      excluded.current.checkInputForCommand(mockElement);
+    it('turns the mention menu on when the chat becomes shared, without a remount', () => {
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      const { result, rerender } = renderHook(() => useCommandMenu());
+
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      rerender();
+      typeMention(result);
+
+      expect(result.current.match.activeCommand?.command.id).toBe(CommandId.Mention);
     });
-    expect(excluded.current.match.isActive).toBe(false);
   });
 
   describe('no stickiness — a later trigger always wins immediately', () => {

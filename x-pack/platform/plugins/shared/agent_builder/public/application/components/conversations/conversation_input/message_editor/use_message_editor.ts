@@ -7,7 +7,7 @@
 
 import type { RefObject } from 'react';
 import { useRef, useMemo, useState, useCallback } from 'react';
-import type { CommandId, CommandMatchResult, CommandBadgeData } from './command_menu';
+import type { CommandMatchResult, CommandBadgeData } from './command_menu';
 import { useCommandMenu, useCommandMenuPrefetch } from './command_menu';
 import {
   CommandBadgeSerializationError,
@@ -83,20 +83,18 @@ const useMessageEditorInstance = ({
   syncIsEmpty,
   onEditorFocus,
   onContentChange,
-  excludedCommandIds,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
   onEditorFocus?: () => void;
   onContentChange?: () => void;
-  excludedCommandIds?: readonly CommandId[];
 }): MessageEditorInstance => {
   const {
     match: commandMatch,
     dismiss: dismissCommandMenu,
     checkInputForCommand,
     reportContent,
-  } = useCommandMenu({ excludedCommandIds });
+  } = useCommandMenu();
   const prefetchCommandMenus = useCommandMenuPrefetch();
 
   const messageEditor = useMemo(
@@ -276,18 +274,13 @@ const useMessageEditorController = ({
  * <MessageEditor messageEditor={messageEditor} onSubmit={handleSubmit} />
  */
 export const useMessageEditor = (
-  options: {
-    onEditorFocus?: () => void;
-    onContentChange?: () => void;
-    maxLength?: number;
-    excludedCommandIds?: readonly CommandId[];
-  } = {}
+  options: { onEditorFocus?: () => void; onContentChange?: () => void; maxLength?: number } = {}
 ): {
   messageEditor: MessageEditorInstance;
   controller: MessageEditorController;
   overLimitCharacterCount: number;
 } => {
-  const { onEditorFocus, onContentChange, maxLength = Infinity, excludedCommandIds } = options;
+  const { onEditorFocus, onContentChange, maxLength = Infinity } = options;
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
   const [overLimitCharacterCount, setOverLimitCharacterCount] = useState(0);
@@ -308,13 +301,7 @@ export const useMessageEditor = (
     setIsEmpty(nextIsEmpty);
   }, [maxLength]);
 
-  const instance = useMessageEditorInstance({
-    ref,
-    syncIsEmpty,
-    onEditorFocus,
-    onContentChange,
-    excludedCommandIds,
-  });
+  const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
   // A ref keeps the controller stable when `instance` changes
   const onChangeRef = useRef(instance.onChange);
   onChangeRef.current = instance.onChange;
