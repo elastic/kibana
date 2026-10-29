@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -317,6 +318,85 @@ describe('createCustomContentTemplateResolver — additional queries', () => {
       resolve({ prompt: 'Show it', esqlQuery: 'FROM main', additionalEsqlQueries: ['FROM a'] })
     ).rejects.toThrow(/Query 2 \(queries\[1\]\): Could not sample.*socket hang up/);
     expect(mockChatComplete).not.toHaveBeenCalled();
+  });
+
+  describe('control values', () => {
+    const usesHost = 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)';
+    const variables = [
+      { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
+    ];
+
+    beforeEach(() => {
+      mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+    });
+
+    // Without the value, a query that refers to a control fails with an unbound parameter, and so
+    // would a style-only edit of the panel even though no query changed.
+    it('binds the control values an additional query uses when sampling it', async () => {
+      await resolve({
+        prompt: 'Restyle',
+        existingTemplate: '<div/>',
+        hasExistingQuery: true,
+        additionalEsqlQueries: [usesHost],
+        esqlVariables: variables,
+      });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ host: 'web-1' }] })
+      );
+    });
+
+    it('sends only the values a query uses', async () => {
+      await resolve({
+        prompt: 'Restyle',
+        existingTemplate: '<div/>',
+        hasExistingQuery: true,
+        additionalEsqlQueries: ['FROM logs | STATS hits = COUNT(*)'],
+        esqlVariables: variables,
+      });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.not.objectContaining({ params: expect.anything() })
+      );
+    });
+
+    it('binds the time range and the control values together', async () => {
+      await resolve({
+        prompt: 'Restyle',
+        existingTemplate: '<div/>',
+        hasExistingQuery: true,
+        additionalEsqlQueries: [
+          'FROM logs | WHERE @timestamp >= ?_tstart AND host.name == ?host | STATS hits = COUNT(*)',
+        ],
+        esqlVariables: variables,
+      });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ _tstart: expect.any(String) }, { host: 'web-1' }] })
+      );
+    });
+
+    it('binds them when sampling the main query too', async () => {
+      await resolve({ prompt: 'Show it', esqlQuery: usesHost, esqlVariables: variables });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ host: 'web-1' }] })
+      );
+    });
+
+    it('still fails with a clear message when a query needs a value that was not provided', async () => {
+      mockEsqlQuery.mockRejectedValue(new Error('Unknown query parameter [host]'));
+
+      await expect(
+        resolve({
+          prompt: 'Restyle',
+          existingTemplate: '<div/>',
+          hasExistingQuery: true,
+          additionalEsqlQueries: [usesHost],
+        })
+      ).rejects.toThrow(/Query 2 \(queries\[1\]\)/);
+    });
   });
 
   it('ignores additional queries for a panel that has no main query', async () => {

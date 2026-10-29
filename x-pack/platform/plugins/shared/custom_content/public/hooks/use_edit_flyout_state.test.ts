@@ -16,7 +16,7 @@ import type { HttpStart } from '@kbn/core/public';
 import {
   fetchEsqlData,
   getLinkBasePath,
-  fillTemplate,
+  fillTemplateDatasets,
   sanitizeHtml,
   applyHtmlTheme,
 } from '@kbn/custom-content-renderer';
@@ -24,7 +24,7 @@ import { getServices } from '../services';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
-const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
+const mockFillTemplate = fillTemplateDatasets as jest.MockedFunction<typeof fillTemplateDatasets>;
 const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
 const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
 
@@ -182,6 +182,83 @@ describe('useEditFlyoutState', () => {
       expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
+    });
+
+    // The preview has to show what applying the template will: a panel with several queries has
+    // sections that read `queries[1]`, which an unchanged first-query-only preview would blank.
+    it('fetches every query of the panel and fills the template with one dataset per query', async () => {
+      const columns = [{ name: 'n', type: 'long' }];
+      mockFetchEsqlData
+        .mockResolvedValueOnce({ columns, values: [[1]], all_columns: columns })
+        .mockResolvedValueOnce({ columns, values: [[2]], all_columns: columns });
+
+      const { result } = renderHook(() =>
+        useEditFlyoutState({ ...baseParams, additionalEsqlQueries: ['FROM metrics | LIMIT 5'] })
+      );
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(2);
+      expect(mockFetchEsqlData).toHaveBeenNthCalledWith(
+        2,
+        mockSearch,
+        mockHttp,
+        'FROM metrics | LIMIT 5',
+        undefined,
+        expect.any(AbortSignal),
+        expect.anything()
+      );
+      expect(mockFillTemplate).toHaveBeenCalledWith('hello', [
+        { columns, rows: [[1]] },
+        { columns, rows: [[2]] },
+      ]);
+      expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
+    });
+
+    it('fetches only the first query for a single-query panel, as before', async () => {
+      const { result } = renderHook(() => useEditFlyoutState(baseParams));
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
+      expect(mockFillTemplate).toHaveBeenCalledWith('hello', [{ columns: [], rows: [] }]);
+    });
+
+    it('does not fetch the additional queries of a panel that has no first query', async () => {
+      const { result } = renderHook(() =>
+        useEditFlyoutState({
+          ...baseParams,
+          esqlQuery: undefined,
+          additionalEsqlQueries: ['FROM metrics'],
+        })
+      );
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+      expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
+    });
+
+    it('says which query failed when the panel has several', async () => {
+      mockFetchEsqlData
+        .mockResolvedValueOnce({ columns: [], values: [], all_columns: [] })
+        .mockRejectedValueOnce(new Error('bad index'));
+      const { result } = renderHook(() =>
+        useEditFlyoutState({ ...baseParams, additionalEsqlQueries: ['FROM bad'] })
+      );
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(result.current.esqlDataError).toBe('Query 2 failed: bad index');
+      expect(mockOnRunPreview).not.toHaveBeenCalled();
     });
 
     it('skips fetch and uses draft template directly when no esql query', async () => {

@@ -43,6 +43,8 @@ const FLYOUT_FIXED_CHROME_HEIGHT = 380;
 
 export interface EditCustomContentFlyoutProps {
   esqlQuery: string | undefined;
+  /** The panel's other queries, which "Run preview" fetches too. The editor does not change them. */
+  additionalEsqlQueries?: readonly string[];
   template: string | undefined;
   timeRange: TimeRange | undefined;
   isApproximate: boolean;
@@ -60,6 +62,7 @@ export interface EditCustomContentFlyoutProps {
 
 export const EditCustomContentFlyout = ({
   esqlQuery,
+  additionalEsqlQueries,
   template,
   timeRange,
   isApproximate,
@@ -90,6 +93,7 @@ export const EditCustomContentFlyout = ({
     handleRender,
   } = useEditFlyoutState({
     esqlQuery,
+    additionalEsqlQueries,
     template,
     timeRange,
     isApproximate,

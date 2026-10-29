@@ -132,6 +132,23 @@ describe('EditCustomContentFlyout', () => {
     });
   });
 
+  it('hands the additional queries of the panel to the state, so a preview can fetch them', () => {
+    render(
+      <EditCustomContentFlyout
+        {...defaultProps}
+        esqlQuery="FROM logs"
+        additionalEsqlQueries={['FROM metrics', 'FROM traces']}
+      />
+    );
+
+    expect(mockUseEditFlyoutState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlQuery: 'FROM logs',
+        additionalEsqlQueries: ['FROM metrics', 'FROM traces'],
+      })
+    );
+  });
+
   it('links to the custom panels docs', () => {
     render(<EditCustomContentFlyout {...defaultProps} />);
 

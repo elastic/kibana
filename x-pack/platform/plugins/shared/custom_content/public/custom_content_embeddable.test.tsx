@@ -8,7 +8,8 @@
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
@@ -72,6 +73,8 @@ let capturedFlyoutProps:
       onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
       onClose: () => void;
       onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
+      esqlQuery?: string;
+      additionalEsqlQueries?: readonly string[];
     }
   | undefined;
 
@@ -121,6 +124,12 @@ const mockTelemetry = {
 };
 
 jest.mock('./telemetry', () => ({ getTelemetry: () => mockTelemetry }));
+
+const mockGetESQLAdHocDataview = jest.fn();
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: (...args: unknown[]) => mockGetESQLAdHocDataview(...args),
+}));
 
 jest.mock('./services', () => ({
   getServices: () => ({
@@ -212,6 +221,92 @@ describe('customContentEmbeddableFactory', () => {
       expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
       );
+    });
+  });
+
+  describe('data views', () => {
+    // One fake data view per index: `FROM logs | …` is the data view of `logs`.
+    const indexOf = (query: string) => query.replace(/^FROM (\S+).*$/, '$1');
+    const titles = (embeddable: { api: { dataViews$: { getValue: () => unknown } } }) =>
+      ((embeddable.api.dataViews$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
+        dataView.getIndexPattern()
+      );
+
+    beforeEach(() => {
+      mockGetESQLAdHocDataview.mockReset();
+      mockGetESQLAdHocDataview.mockImplementation(async ({ query }: { query: string }) => {
+        if (query.startsWith('FROM broken')) throw new Error('cannot resolve');
+        return { getIndexPattern: () => indexOf(query) };
+      });
+    });
+
+    // The dashboard uses these for the filter bar's field suggestions and to decide whether to
+    // offer its time picker, and every query is fetched with the dashboard's time range.
+    it('publishes a data view for every query, not only the main one', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1', 'FROM traces | LIMIT 1'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics', 'traces']));
+    });
+
+    it('publishes a data view once when several queries read the same index', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM logs | STATS a = COUNT(*)', 'FROM logs | STATS b = COUNT(*) BY host'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+    });
+
+    it('keeps the data views of the other queries when one cannot be resolved', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM broken | LIMIT 1', 'FROM metrics | LIMIT 1'],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['metrics']));
+    });
+
+    it('publishes none when the panel has no query', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      await act(async () => {});
+      expect(embeddable.api.dataViews$.getValue()).toBeUndefined();
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+    });
+
+    it('follows the additional queries when they change', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
+        });
+      });
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
+    });
+
+    it('does not resolve the data views again when nothing about the queries changed', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
+      });
+      await waitFor(() => expect(titles(embeddable)).toEqual(['logs', 'metrics']));
+      const calls = mockGetESQLAdHocDataview.mock.calls.length;
+
+      act(() => {
+        embeddable.api.applySerializedState({
+          ...baseState,
+          esql_query: ['FROM logs | LIMIT 1', 'FROM metrics | LIMIT 1'],
+        });
+      });
+      await act(async () => {});
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledTimes(calls);
     });
   });
 
@@ -553,6 +648,20 @@ describe('customContentEmbeddableFactory', () => {
 
     // The editor does not change the other queries yet, so a refine must not lose them: the agent
     // hands back whatever the attachment carried.
+    it('gives the flyout the additional queries of the panel, so its preview can fetch them', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a', 'FROM b', 'FROM c'],
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+
+      expect(capturedFlyoutProps?.esqlQuery).toBe('FROM a');
+      expect(capturedFlyoutProps?.additionalEsqlQueries).toEqual(['FROM b', 'FROM c']);
+    });
+
     it('sends the additional queries of the panel to the chat', async () => {
       const openChat = jest.fn();
       mockAgentBuilder = {

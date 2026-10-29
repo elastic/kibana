@@ -157,6 +157,8 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
           additionalEsqlQueries,
+          // The values of the controls the panel was sent with, for queries that use one.
+          esqlVariables: currentData?.esql_variables,
         }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);

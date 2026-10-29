@@ -10,10 +10,11 @@ import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   getLinkBasePath,
   fetchEsqlData,
-  fillTemplate,
+  fillTemplateDatasets,
   sanitizeHtml,
   applyHtmlTheme,
   type EsqlDataResult,
@@ -37,6 +38,8 @@ export interface EditFlyoutState {
 
 export interface UseEditFlyoutStateParams {
   esqlQuery: string | undefined;
+  /** The panel's queries after the first, read by the template as `queries[1]`, ... Previewed, not edited. */
+  additionalEsqlQueries?: readonly string[];
   template: string | undefined;
   timeRange: TimeRange | undefined;
   colorMode: EuiThemeColorModeStandard;
@@ -49,8 +52,11 @@ export interface UseEditFlyoutStateParams {
   onRunPreview: (html: string) => void;
 }
 
+const NO_ADDITIONAL_QUERIES: readonly string[] = [];
+
 export const useEditFlyoutState = ({
   esqlQuery,
+  additionalEsqlQueries = NO_ADDITIONAL_QUERIES,
   template,
   timeRange,
   colorMode,
@@ -168,17 +174,36 @@ export const useEditFlyoutState = ({
 
     try {
       let rawHtml: string;
-      if (state.draftEsqlQuery) {
-        const result = await fetchEsqlData(
-          search,
-          core.http,
-          state.draftEsqlQuery,
-          timeRange,
-          controller.signal,
-          fetchOptions
+      // The preview has to show what applying the template will, so every query the panel has is
+      // fetched, not only the one the editor changes.
+      const queries = state.draftEsqlQuery ? [state.draftEsqlQuery, ...additionalEsqlQueries] : [];
+      if (queries.length > 0) {
+        const results = await Promise.all(
+          queries.map((queryToFetch, index) =>
+            fetchEsqlData(
+              search,
+              core.http,
+              queryToFetch,
+              timeRange,
+              controller.signal,
+              fetchOptions
+            ).catch((err: Error) => {
+              // Say which query failed, but leave a single-query panel's message as it is.
+              if (queries.length === 1 || err.name === 'AbortError') throw err;
+              throw new Error(
+                i18n.translate('xpack.customContent.editFlyout.queryFailed', {
+                  defaultMessage: 'Query {position} failed: {message}',
+                  values: { position: index + 1, message: err.message },
+                })
+              );
+            })
+          )
         );
         if (controller.signal.aborted) return;
-        rawHtml = await fillTemplate(state.draftTemplate, result.columns, result.values ?? []);
+        rawHtml = await fillTemplateDatasets(
+          state.draftTemplate,
+          results.map(({ columns, values }) => ({ columns, rows: values ?? [] }))
+        );
       } else {
         rawHtml = state.draftTemplate;
       }
@@ -201,6 +226,7 @@ export const useEditFlyoutState = ({
     }
   }, [
     state.draftEsqlQuery,
+    additionalEsqlQueries,
     state.draftTemplate,
     timeRange,
     isApproximate,

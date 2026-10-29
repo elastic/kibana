@@ -10,7 +10,7 @@ A `custom_content` panel stores two pieces of state (both optional) alongside th
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `esql_query` | `string[] \| undefined` | Optional ES\|QL queries whose results are injected into the template at render time. The first is the panel's main query (`rows`); up to five are allowed (`CUSTOM_CONTENT_MAX_ESQL_QUERIES`) and the rest are read by position as `queries[n]`. Read and write it via `readEsqlQuery` / `readAdditionalEsqlQueries` / `toEsqlQueryState`. Only hand-edited panels hold more than one for now: the flyout does not change the others, and the agent tools keep them as they are |
+| `esql_query` | `string[] \| undefined` | Optional ES\|QL queries whose results are injected into the template at render time. The first is the panel's main query (`rows`); up to ten are allowed (`CUSTOM_CONTENT_MAX_ESQL_QUERIES`) and the rest are read by position as `queries[n]`. Read and write it via `readEsqlQuery` / `readAdditionalEsqlQueries` / `toEsqlQueryState`. Only hand-edited panels hold more than one for now: the flyout does not change the others, and the agent tools keep them as they are |
 | `template` | `string \| undefined` | LiquidJS HTML template — the actual rendered content |
 
 Panels are saved as part of the dashboard's serialized state (standard embeddable contract, `server/embeddable/schemas.ts`). No separate saved object is created. Both `template` and `esql_query` participate in unsaved-change detection (`esql_query` compares with `deepEquality`, since a fresh array would otherwise look changed on every serialize).
@@ -103,8 +103,7 @@ JavaScript is explicitly blocked — the iframe sandbox, a strict CSP, and `DOMP
 Opening the panel context menu → Edit renders `EditCustomContentFlyout`, which lets users:
 
 - Edit the LiquidJS template directly in a Monaco editor (`liquid` language mode), with a copy-to-clipboard button and a vertically resizable editor pane
-- Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`)
-- Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`)
+- Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`). The flyout edits only the first query, but "Run preview" fetches every query the panel has, so a template that reads `queries[1]` previews the way it will render
 - Hand off to the AI chat sidebar with the current draft attached — labelled "Refine with chat" when a template already exists and "Generate with chat" when the editor is empty, and shown only when `agentBuilder` is available
 
 "Run Preview" renders the current draft into the panel without saving, and is enabled only while there are unpreviewed changes. "Apply and close" is enabled only when the template or the query has changed from the saved state.
@@ -161,7 +160,7 @@ The agent does not create or change a panel's additional queries yet, but it wor
 
 - The context attachment carries them as `additional_esql_queries` and its text lists each one with the name the template reads it by (`queries[1]`, …). The chat card renders them, and an applied update, including `Preview` on an earlier version, puts them back on the panel.
 - `custom_content_update_panel` and the dashboard generation tool keep them through an edit. They are dropped with the main query when that is removed, because they have nothing to extend.
-- The template resolver samples each additional query on every refinement and adds `queries[n]` guidance to the Liquid system prompt, only for panels that have them, so a restyle does not drop or mangle a section that reads `queries[1]`. A failed sample names the query (`Query 2 (queries[1]): …`) and fails the whole resolve, like the main query.
+- The template resolver samples each additional query on every refinement (binding the control values the panel was sent with, so a query that uses `?name` can be sampled) and adds `queries[n]` guidance to the Liquid system prompt, only for panels that have them, so a restyle does not drop or mangle a section that reads `queries[1]`. A failed sample names the query (`Query 2 (queries[1]): …`) and fails the whole resolve, like the main query.
 - "Refine with chat" from the flyout sends the panel's queries, so an agent update does not lose the additional ones.
 
 ### How a panel's query is resolved

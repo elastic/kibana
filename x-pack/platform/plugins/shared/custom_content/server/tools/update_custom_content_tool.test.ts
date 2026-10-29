@@ -283,6 +283,15 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    it('hands the control values the panel was sent with to the template resolver', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Make colors more vivid' },
+        { ...existing, esql_variables: esqlVariables }
+      );
+      expect(mockResolver).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
     it('keeps the additional queries in the updated attachment and the UI event', async () => {
       const { ctx } = await callHandler(
         { embeddable_id: 'p1', prompt: 'Make colors more vivid' },

@@ -10,7 +10,8 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
+import { appendLimitToQuery, getNamedParams } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -229,6 +230,11 @@ export type CustomContentTemplateResolver = (params: {
    * ... They are sampled every time, because the model needs their columns to keep using them.
    */
   additionalEsqlQueries?: readonly string[];
+  /**
+   * The values of the dashboard controls a query refers to (`?name`), so a query that uses one can
+   * be sampled. Only the ones a query uses are sent.
+   */
+  esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
 
 export const createCustomContentTemplateResolver = ({
@@ -236,9 +242,10 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  const sampleQuery = async (query: string) => {
+  const sampleQuery = async (query: string, esqlVariables?: ESQLControlVariable[]) => {
     const sampledQuery = appendLimitToQuery(query, SAMPLE_ROW_COUNT);
-    const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+    // The time range and any control values the query uses: an unbound `?name` is an error.
+    const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
     const result = await esClient.asCurrentUser.esql.query({
       query: sampledQuery,
       ...(params.length ? { params } : {}),
@@ -255,13 +262,14 @@ export const createCustomContentTemplateResolver = ({
     existingTemplate,
     hasExistingQuery,
     additionalEsqlQueries = [],
+    esqlVariables,
   }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
     if (esqlQuery) {
       try {
-        ({ columns, values } = await sampleQuery(esqlQuery));
+        ({ columns, values } = await sampleQuery(esqlQuery, esqlVariables));
       } catch (err) {
         logger.warn(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
         throw new Error(describeSamplingFailure(err));
@@ -275,7 +283,7 @@ export const createCustomContentTemplateResolver = ({
     for (const [index, additionalQuery] of queriesAfterMain.entries()) {
       const variable = `queries[${index + 1}]`;
       try {
-        const sample = await sampleQuery(additionalQuery);
+        const sample = await sampleQuery(additionalQuery, esqlVariables);
         additionalSections.push(
           `Query ${index + 2}, read by the template as ${variable}:\n${
             sample.columns.length > 0

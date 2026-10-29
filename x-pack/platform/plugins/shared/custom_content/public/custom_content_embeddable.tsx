@@ -314,6 +314,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               return (
                 <EditCustomContentFlyout
                   esqlQuery={esqlQuery$.getValue()}
+                  additionalEsqlQueries={additionalEsqlQueries$.getValue()}
                   template={template$.getValue()}
                   timeRange={timeRange}
                   isApproximate={isApproximate}
@@ -365,23 +366,57 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       )
       .subscribe(esql$);
 
-    // Important for unified search support — KQL bar and filter builder suggestions.
-    const dataViewsSubscription = combineLatest([esqlQuery$, projectRouting$])
+    // Important for unified search support: KQL bar and filter builder suggestions, and whether the
+    // dashboard offers its time picker. Every query counts, since every query is fetched with the
+    // dashboard's time range, so a data view is published for each one.
+    const dataViewsSubscription = combineLatest([
+      esqlQuery$,
+      additionalEsqlQueries$,
+      projectRouting$,
+    ])
       .pipe(
-        distinctUntilChanged(([q1, r1], [q2, r2]) => q1 === q2 && r1 === r2),
-        switchMap(([esqlQueryValue, routingValue]) => {
-          if (!esqlQueryValue) return of(undefined);
+        map(([esqlQueryValue, additionalQueries, routingValue]) => ({
+          queries: esqlQueryValue ? [esqlQueryValue, ...additionalQueries] : [],
+          routingValue,
+        })),
+        distinctUntilChanged(
+          (a, b) =>
+            a.routingValue === b.routingValue &&
+            a.queries.length === b.queries.length &&
+            a.queries.every((query, index) => query === b.queries[index])
+        ),
+        switchMap(({ queries, routingValue }) => {
+          if (queries.length === 0) return of(undefined);
           return from(
-            getESQLAdHocDataview({
-              dataViewsService: dataViews,
-              query: esqlQueryValue,
-              http: core.http,
-              projectRouting: routingValue,
-            })
-          ).pipe(catchError(() => of(undefined)));
+            Promise.all(
+              queries.map(async (query) => {
+                // One query that cannot be resolved must not hide the data views of the others, or
+                // end the subscription.
+                try {
+                  return await getESQLAdHocDataview({
+                    dataViewsService: dataViews,
+                    query,
+                    http: core.http,
+                    projectRouting: routingValue,
+                  });
+                } catch {
+                  return undefined;
+                }
+              })
+            )
+          );
         })
       )
-      .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
+      .subscribe((resolved) => {
+        // Queries on the same index describe the same data view, so it is published once.
+        const byIndexPattern = new Map<string, DataView>();
+        (resolved ?? []).forEach((dataView) => {
+          if (dataView && !byIndexPattern.has(dataView.getIndexPattern())) {
+            byIndexPattern.set(dataView.getIndexPattern(), dataView);
+          }
+        });
+        dataViews$.next(byIndexPattern.size ? Array.from(byIndexPattern.values()) : undefined);
+      });
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {
       isApproximate$.next(ctx.isApproximate);
