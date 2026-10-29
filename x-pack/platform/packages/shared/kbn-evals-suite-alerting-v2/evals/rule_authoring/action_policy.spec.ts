@@ -23,7 +23,10 @@ import {
   WORKFLOW_GENERATION_TOOL_ID,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../src/constants';
-import { assertActionPolicyWorkflowLiquid } from '../../src/assert_action_policy_workflow_liquid';
+import {
+  assertActionPolicyWorkflowLinksAlertDetails,
+  assertActionPolicyWorkflowLiquid,
+} from '../../src/assert_action_policy_workflow_liquid';
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
 
 evaluate.describe(
@@ -60,6 +63,7 @@ evaluate.describe(
                     'After the user accepts notifications, the assistant loads the action-policy-authoring skill to own workflow + action policy setup (rather than composing those from the rule-authoring skill alone).',
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
                     'The action policy uses per_alert grouping and on_status_change throttle.',
+                    "The notification workflow's message includes each alert's details link from the payload (`alert_url`), not a hand-built Kibana URL or the workflow execution link.",
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                     'The assistant never claims the rule, workflow, or action policy has been saved or activated (describing them as prepared drafts is fine) — it directs the user to save them via the attachment action buttons, with the workflow saved before the action policy.',
                     'The assistant does not require the rule to be saved before the action policy, but reminds the user that the rule is still unsaved and that the policy will not match any alerts until the rule carrying its routing tag is saved.',
@@ -118,6 +122,7 @@ evaluate.describe(
                     expect(parsedWorkflow.triggers.map((trigger) => trigger.type)).toEqual([
                       'manual',
                     ]);
+                    assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
                   },
                 },
               },
@@ -155,6 +160,7 @@ evaluate.describe(
                     'The assistant does not add a routing tag to the rule and does not link the policy to it.',
                     'The assistant does not require the unsaved rule to be saved before the action policy can be created; it does not block or delay the policy on the rule.',
                     'The assistant never claims the workflow or action policy has been saved or activated (describing them as prepared drafts is fine), and directs the user to save the workflow before the action policy.',
+                    "The notification workflow's message includes each alert's details link from the payload (`alert_url`), not a hand-built Kibana URL or the workflow execution link.",
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                   ],
                   expectedSkills: [
@@ -178,10 +184,10 @@ evaluate.describe(
                       attachments,
                       RULE_ATTACHMENT_TYPE
                     );
-                    const workflow = getLatestAttachmentData<{ workflowId?: string }>(
-                      attachments,
-                      WORKFLOW_YAML_ATTACHMENT_TYPE
-                    );
+                    const workflow = getLatestAttachmentData<{
+                      workflowId?: string;
+                      yaml?: string;
+                    }>(attachments, WORKFLOW_YAML_ATTACHMENT_TYPE);
                     const actionPolicy = getLatestAttachmentData<ActionPolicyAttachmentData>(
                       attachments,
                       ACTION_POLICY_ATTACHMENT_TYPE
@@ -199,6 +205,11 @@ evaluate.describe(
                       { type: 'workflow', id: workflowId },
                     ]);
                     expect(rule?.metadata?.routing_tags ?? []).toEqual([]);
+
+                    const { workflow: parsedWorkflow } = assertActionPolicyWorkflowLiquid(
+                      workflow?.yaml
+                    );
+                    assertActionPolicyWorkflowLinksAlertDetails(parsedWorkflow);
                   },
                 },
               },

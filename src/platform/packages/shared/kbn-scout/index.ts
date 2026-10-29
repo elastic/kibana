@@ -68,6 +68,7 @@ export {
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  GotoAppOptions,
   ScoutPage,
   PageObjects,
   ScoutTestFixtures,

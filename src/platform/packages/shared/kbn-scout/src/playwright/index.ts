@@ -24,6 +24,7 @@ export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 // Fixtures and Page Objects (can be extended with solution-specific logic)
 export type {
   BrowserAuthFixture,
+  GotoAppOptions,
   ScoutPage,
   PageObjects, // can be extended with solution specific Page Objects
 } from './fixtures/scope/test';

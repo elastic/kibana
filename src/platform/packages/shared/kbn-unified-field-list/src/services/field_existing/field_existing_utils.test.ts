@@ -95,17 +95,33 @@ describe('fetchFieldExistence', () => {
   const mockMetaFields = ['_id', '_type'];
 
   const createMockDataView = (fields: Array<Partial<DataViewField>> = []) => {
+    const dataViewFields = [...fields];
     return {
       getIndexPattern: jest.fn().mockReturnValue('test-pattern'),
-      getFieldByName: jest.fn((name) => fields.find((f) => f.name === name)),
-      fields,
+      getFieldByName: jest.fn((name) => {
+        const field = dataViewFields.find((f) => f.name === name);
+        return field && { ...field, toSpec: () => field };
+      }),
+      fields: dataViewFields,
     } as unknown as DataView;
   };
 
   const createMockDataViewsService = (fields: Array<Partial<DataViewField>>) => {
     return {
       getFieldsForIndexPattern: jest.fn().mockResolvedValue(fields),
-      refreshFields: jest.fn().mockResolvedValue(undefined),
+      // like the real refresh: applies the new mapping to the data view, keeping saved field attributes
+      refreshFields: jest.fn(async (dataView: DataView) => {
+        const dataViewFields = dataView.fields as unknown as Array<Partial<DataViewField>>;
+        fields.forEach((field) => {
+          const index = dataViewFields.findIndex(({ name }) => name === field.name);
+          if (index === -1) {
+            dataViewFields.push(field);
+            return;
+          }
+          const { customLabel, count } = dataViewFields[index];
+          dataViewFields[index] = { ...field, customLabel, count };
+        });
+      }),
     } as unknown as DataViewsContract;
   };
 
@@ -115,6 +131,7 @@ describe('fetchFieldExistence', () => {
     {
       scenario: 'field changes from unmapped to mapped',
       shouldRefresh: true,
+      expectedNewFields: [{ name: 'previously_unmapped_field', type: 'keyword' }],
       existingFields: [
         {
           name: 'previously_unmapped_field',
@@ -134,11 +151,16 @@ describe('fetchFieldExistence', () => {
     {
       scenario: 'field type changes',
       shouldRefresh: true,
+      expectedNewFields: [
+        { name: 'changing_type_field', type: 'long', customLabel: 'Custom label', count: 5 },
+      ],
       existingFields: [
         {
           name: 'changing_type_field',
           type: 'keyword',
           isMapped: true,
+          customLabel: 'Custom label',
+          count: 5,
         },
       ],
       returnedFields: [
@@ -153,6 +175,7 @@ describe('fetchFieldExistence', () => {
     {
       scenario: 'fields are unchanged',
       shouldRefresh: false,
+      expectedNewFields: [],
       existingFields: [
         {
           name: 'unchanged_field',
@@ -172,6 +195,7 @@ describe('fetchFieldExistence', () => {
     {
       scenario: 'new fields are detected',
       shouldRefresh: true,
+      expectedNewFields: [{ name: 'new_field', type: 'long' }],
       existingFields: [
         {
           name: 'existing_field',
@@ -185,23 +209,27 @@ describe('fetchFieldExistence', () => {
         { name: 'new_field', type: 'long', aggregatable: true, searchable: true },
       ],
     },
-  ])('should handle when $scenario', async ({ shouldRefresh, existingFields, returnedFields }) => {
-    const mockDataViewsService = createMockDataViewsService(returnedFields);
-    const mockDataView = createMockDataView(existingFields as Array<Partial<DataViewField>>);
+  ])(
+    'should handle when $scenario',
+    async ({ shouldRefresh, expectedNewFields, existingFields, returnedFields }) => {
+      const mockDataViewsService = createMockDataViewsService(returnedFields);
+      const mockDataView = createMockDataView(existingFields as Array<Partial<DataViewField>>);
 
-    await fetchFieldExistence({
-      search: mockSearch,
-      dataViewsService: mockDataViewsService,
-      dataView: mockDataView,
-      dslQuery: mockDslQuery,
-      includeFrozen: false,
-      metaFields: mockMetaFields,
-    });
+      const { newFields } = await fetchFieldExistence({
+        search: mockSearch,
+        dataViewsService: mockDataViewsService,
+        dataView: mockDataView,
+        dslQuery: mockDslQuery,
+        includeFrozen: false,
+        metaFields: mockMetaFields,
+      });
 
-    if (shouldRefresh) {
-      expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(mockDataView, false, true);
-    } else {
-      expect(mockDataViewsService.refreshFields).not.toHaveBeenCalled();
+      if (shouldRefresh) {
+        expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(mockDataView, false, true);
+      } else {
+        expect(mockDataViewsService.refreshFields).not.toHaveBeenCalled();
+      }
+      expect(newFields).toMatchObject(expectedNewFields);
     }
-  });
+  );
 });
