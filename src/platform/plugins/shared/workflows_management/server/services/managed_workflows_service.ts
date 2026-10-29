@@ -10,7 +10,7 @@
 import { createHash } from 'node:crypto';
 import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -34,6 +34,7 @@ import type { WorkflowCrudService } from './workflow_crud_service';
 import type { ManagedWorkflowOrphan } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
+import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -505,6 +506,15 @@ export class ManagedWorkflowsService {
     if (!existing.definition) {
       throw new Error(
         `Managed workflow '${id}' as '${workflowDocumentId}' has no valid definition`
+      );
+    }
+
+    // This method starts the engine directly (like a parent's `workflow.execute`
+    // step), so it bypasses the `runWorkflow` standalone gate. Refuse here too:
+    // a delegating workflow has no identity of its own to run under.
+    if (requiresDelegatedIdentity(existing)) {
+      throw new WorkflowRequiresDelegatedIdentityError(
+        `Managed workflow '${workflowDocumentId}' delegates its execution identity to a parent workflow and cannot be run standalone.`
       );
     }
 
