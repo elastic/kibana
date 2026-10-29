@@ -122,7 +122,7 @@ export async function update(
 
     /**
      * `changeAccessMode` updates the same saved object and advances its version, so the version
-     * read earlier is stale. Use the version it returned instead of reading the object again.
+     * read earlier is stale; update the expected version
      */
     if (!changeResult?.version) {
       throw new Error('Unexpected error: changeAccessMode did not return an updated version.');
