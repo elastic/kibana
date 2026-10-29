@@ -19,6 +19,8 @@ export class UpgradeAssistantPage {
   public readonly kibanaStatsPanel: Locator;
   public readonly esDeprecationsTable: Locator;
   public readonly kibanaDeprecations: Locator;
+  public readonly noDeprecationsPrompt: Locator;
+  public readonly logsFlyout: Locator;
   public readonly viewDetailsLink: Locator;
   public readonly hasWarningsCallout: Locator;
   public readonly noWarningsCallout: Locator;
@@ -34,7 +36,8 @@ export class UpgradeAssistantPage {
   public readonly upgradeAssistantLink: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.overview = this.page.testSubj.locator('overview');
+    // The Machine Learning link in the side nav uses the same 'overview' test subject.
+    this.overview = this.page.getByRole('main').getByTestId('overview');
     this.backupStepIncomplete = this.page.testSubj.locator('backupStep-incomplete');
     this.migrateSystemIndicesText = this.page.testSubj.locator('migrateSystemIndicesText');
     this.fixIssuesStepIncomplete = this.page.testSubj.locator('fixIssuesStep-incomplete');
@@ -44,6 +47,8 @@ export class UpgradeAssistantPage {
     this.kibanaStatsPanel = this.page.testSubj.locator('kibanaStatsPanel');
     this.esDeprecationsTable = this.page.testSubj.locator('esDeprecationsTable');
     this.kibanaDeprecations = this.page.testSubj.locator('kibanaDeprecations');
+    this.noDeprecationsPrompt = this.page.getByTestId('noDeprecationsPrompt');
+    this.logsFlyout = this.page.getByTestId('esDeprecationLogsFlyout');
     this.viewDetailsLink = this.page.testSubj.locator('viewDetailsLink');
     this.hasWarningsCallout = this.page.testSubj.locator('hasWarningsCallout');
     this.noWarningsCallout = this.page.testSubj.locator('noWarningsCallout');
@@ -64,6 +69,14 @@ export class UpgradeAssistantPage {
   async gotoOverview() {
     await this.page.gotoApp(UPGRADE_ASSISTANT_PATHS.overview);
     await this.overview.waitFor();
+  }
+
+  async gotoEsDeprecations() {
+    await this.page.gotoApp(UPGRADE_ASSISTANT_PATHS.esDeprecations);
+  }
+
+  async gotoKibanaDeprecations() {
+    await this.page.gotoApp(UPGRADE_ASSISTANT_PATHS.kibanaDeprecations);
   }
 
   async gotoManagement() {
