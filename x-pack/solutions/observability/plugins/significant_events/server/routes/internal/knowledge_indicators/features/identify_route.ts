@@ -179,22 +179,24 @@ const identifyInferredFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      connectorId: z.string().max(MAX_ID_LENGTH).optional(),
-      runId: z.string().max(MAX_ID_LENGTH).optional(),
-      iteration: z.number().optional(),
-      documents: inferenceDocumentsSchema,
-      samplingTelemetry: z.object({
-        totalFilters: z.number().int().min(0),
-        filtersCapped: z.boolean(),
-        hasFilteredDocuments: z.boolean(),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        connectorId: z.string().max(MAX_ID_LENGTH).optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
+        iteration: z.number().optional(),
+        documents: inferenceDocumentsSchema,
+        samplingTelemetry: z.object({
+          totalFilters: z.number().int().min(0),
+          filtersCapped: z.boolean(),
+          hasFilteredDocuments: z.boolean(),
+        }),
+        maxExcludedFeaturesInPrompt: z.number().int().min(0).max(50),
+        maxPreviouslyIdentifiedFeatures: z.number().optional(),
       }),
-      maxExcludedFeaturesInPrompt: z.number().int().min(0).max(50),
-      maxPreviouslyIdentifiedFeatures: z.number().optional(),
-    }),
-  }),
+    })
+  ),
   handler: async ({
     params,
     request,
