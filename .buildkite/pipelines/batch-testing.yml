@@ -35,9 +35,10 @@ steps:
         label: 'FTR (on-prem)'
         key: dispatch-ftr-tests
         agents:
-          provider: k8s
-          image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-          imageUID: 1000
+          image: family/kibana-minimal-ubuntu-2604
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
         timeout_in_minutes: 15
         env:
           FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
