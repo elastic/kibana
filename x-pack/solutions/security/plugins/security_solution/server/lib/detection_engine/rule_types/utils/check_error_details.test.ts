@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { checkErrorDetails } from './check_error_details';
 
 describe('checkErrorDetails', () => {
@@ -162,6 +163,16 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
     });
 
+    it('should mark a non-digit character in a numeric value as user error when only root causes are listed', () => {
+      const errorMessage = `Error searching events
+Error: ResponseError: search_phase_execution_exception
+	Caused by:
+		no_such_element_exception: null
+	Root causes:
+		query_shard_exception: failed to create query: Character   is neither a decimal digit number, decimal point, nor "e" notation exponential mark.`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
     it('should mark IP string literal error as user error when wrapped in search_phase_execution_exception without illegal_argument_exception', () => {
       const errorMessage = `search_phase_execution_exception
 	Root causes:
@@ -179,6 +190,17 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
     it('should not mark a query_shard_exception with a reason outside the known list as user error', () => {
       const errorMessage = `index: "logs-*" reason: "failed to create query: some unexpected framework error" type: "query_shard_exception"`;
       expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', false);
+    });
+  });
+
+  describe('KQL syntax errors', () => {
+    it('should mark a KQLSyntaxError as user error', () => {
+      expect(() => fromKueryExpression('host.name: (a or')).toThrow();
+      try {
+        fromKueryExpression('host.name: (a or');
+      } catch (error) {
+        expect(checkErrorDetails(error)).toEqual({ isUserError: true });
+      }
     });
   });
 

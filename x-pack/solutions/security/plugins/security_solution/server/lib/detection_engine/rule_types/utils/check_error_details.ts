@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { KQLSyntaxError } from '@kbn/es-query';
 import type { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
 const USER_ERRORS_EXCEPTIONS = [
@@ -29,6 +30,8 @@ const USER_ERRORS_EXCEPTIONS = [
 const USER_ERROR_REASON_SUBSTRINGS = [
   'is not an IP string literal',
   'Can only use prefix queries on keyword, text and wildcard fields',
+  // number_format_exception reason, which can arrive without the exception type.
+  'is neither a decimal digit number, decimal point, nor "e" notation exponential mark',
 ];
 
 // Fielddata errors can also be emitted for framework-generated aggregations and sorts, so they
@@ -63,6 +66,11 @@ export const isMlJobMissingError = (error: unknown): boolean => {
  * user errors are excluded from SLO dashboards
  */
 export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
+  // Thrown in Kibana while the rule query is parsed, before any search runs.
+  if (error instanceof KQLSyntaxError) {
+    return { isUserError: true };
+  }
+
   const errorType = (error as KbnSearchError)?.errBody?.error?.type;
   if (USER_ERRORS_EXCEPTIONS.includes(errorType)) {
     return { isUserError: true };
