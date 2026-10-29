@@ -535,7 +535,11 @@ export const SecretConnectionPanel = () => {
                         f ? { ...f, allowedMonitorHosts: options.map(({ label }) => label) } : f
                       );
                     }}
-                    onSearchChange={() => setHostError(undefined)}
+                    // The input is also cleared right after a create attempt, which must not
+                    // hide the error, so only typing resets it.
+                    onSearchChange={(value) => {
+                      if (value) setHostError(undefined);
+                    }}
                   />
                 </EuiFormRow>
                 {testResult && (
