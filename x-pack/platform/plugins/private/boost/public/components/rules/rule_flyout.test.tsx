@@ -825,7 +825,7 @@ describe('RuleFlyout superseded targets', () => {
     renderNewRule();
 
     await userEvent.click(screen.getByText('Select index'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('2 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(/^Showing 2 indices$/);
   });
 });
 
@@ -967,10 +967,12 @@ describe('RuleFlyout hidden data sources', () => {
     const picker = within(screen.getByTestId('boostRulePicker'));
     expect(picker.queryByRole('option', { name: /\.catalog-archive/ })).not.toBeInTheDocument();
     // It counts what it lists.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('2 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(
+      /^Showing 2 indices · 1 hidden index not shown$/
+    );
 
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('3 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(/^Showing 3 indices$/);
     const option = picker.getByRole('option', { name: /\.catalog-archive/ });
     expect(within(option).getByTestId('boostHiddenBadge')).toBeInTheDocument();
     await userEvent.click(option);
@@ -979,6 +981,6 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
     expect(picker.getByRole('option', { name: /\.catalog-archive/ })).toBeInTheDocument();
     // Still listed, so still counted.
-    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent('3 indices');
+    expect(screen.getByTestId('boostRulePickedCount')).toHaveTextContent(/^Showing 3 indices$/);
   });
 });

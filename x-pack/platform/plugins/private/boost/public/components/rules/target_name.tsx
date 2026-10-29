@@ -121,19 +121,23 @@ export const getSupersedingDescription = (rule: string): string =>
 
 /**
  * The rule that applies to a target instead, as just its icon, naming the rule in its tooltip, for a
- * list that leaves out the rule's name to keep to the targets.
+ * list that leaves out the rule's name to keep to the targets. It follows the struck-through target
+ * in the same disabled color.
  */
-export const SupersedingRuleTip = ({ rule }: { rule: string }) => (
-  <EuiIconTip
-    type={SUPERSEDING_ICON}
-    color="subdued"
-    content={getSupersedingDescription(rule)}
-    aria-label={SUPERSEDING_LABEL}
-    // A flex anchor sizes to the icon, so it centers on the name beside it.
-    display="flex"
-    anchorProps={{ 'data-test-subj': 'boostSupersedingRule' }}
-  />
-);
+export const SupersedingRuleTip = ({ rule }: { rule: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiIconTip
+      type={SUPERSEDING_ICON}
+      color={euiTheme.colors.textDisabled}
+      content={getSupersedingDescription(rule)}
+      aria-label={SUPERSEDING_LABEL}
+      // A flex anchor sizes to the icon, so it centers on the name beside it.
+      display="flex"
+      anchorProps={{ 'data-test-subj': 'boostSupersedingRule' }}
+    />
+  );
+};
 
 interface SupersedingRuleProps {
   rule: string;

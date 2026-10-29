@@ -58,7 +58,7 @@ import { TARGET_LIST_HEADER_HEIGHT, TargetListHeader } from './target_list_heade
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
-import { HiddenBadge } from '../hidden_data';
+import { HiddenBadge, formatHiddenNotShown } from '../hidden_data';
 import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
@@ -528,6 +528,8 @@ export const RuleFlyout = ({
   const hasHidden = typedDataSources.some(({ hidden }) => hidden);
   // What the list shows before it's searched: hidden data sources only once shown, or selected.
   const pickableCount = pickOptions.length;
+  // The hidden ones it leaves out, which the switch would show.
+  const hiddenNotListed = typedDataSources.length - pickableCount;
 
   // The list grows with what the search shows, up to the same height as the pattern's matches.
   // EUI only sizes a list to its options up to seven of them, so the height is set here.
@@ -914,9 +916,9 @@ export const RuleFlyout = ({
                     <EuiPanel hasBorder hasShadow={false} paddingSize="none">
                       {/* How many are selected, of all the list shows, as the pattern's tab of
                         every data source counts them, or just how many it shows when the rule
-                        selects one. Off until a profile is selected, as in the pattern's matches,
-                        and the switch only while there's something hidden to show, unless it's on
-                        already. */}
+                        selects one, and how many hidden ones it leaves out. Off until a profile is
+                        selected, as in the pattern's matches, and the switch only while there's
+                        something hidden to show, unless it's on already. */}
                       <TargetListHeader
                         includesHidden={includesHidden}
                         onIncludesHiddenChange={setIncludesHidden}
@@ -929,7 +931,19 @@ export const RuleFlyout = ({
                         >
                           {allowsMultipleTargets
                             ? PICKED_COUNT_FORMATS[targetType](draft.picked.length, pickableCount)
-                            : formatDataSourceCount(targetType, pickableCount)}
+                            : i18n.translate('xpack.boost.ruleForm.pickShowingCount', {
+                                defaultMessage: 'Showing {targets}',
+                                values: {
+                                  targets: formatDataSourceCount(targetType, pickableCount),
+                                },
+                              })}
+                          {hiddenNotListed > 0 && (
+                            <>
+                              {' '}
+                              <span aria-hidden={true}>·</span>{' '}
+                              {formatHiddenNotShown(targetType, hiddenNotListed)}
+                            </>
+                          )}
                         </EuiText>
                       </TargetListHeader>
                       {/* Padding rather than the list's own, which it would count in its width. */}

@@ -523,7 +523,7 @@ describe('RuleDetailsPage', () => {
     expect(matched.queryByText('.catalog-archive')).not.toBeInTheDocument();
     // The count says how many are left out.
     expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent(
-      /^Showing 1–3 of 3 indices • 1 hidden index not shown$/
+      /^Showing 1–3 of 3 indices · 1 hidden index not shown$/
     );
 
     await userEvent.click(matched.getByTestId('boostMatchedShowHidden'));
