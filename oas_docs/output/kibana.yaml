@@ -208950,6 +208950,7 @@ components:
           items:
             maxLength: 1024
             type: string
+          maxItems: 10000
           nullable: true
           type: array
         esFilters:
