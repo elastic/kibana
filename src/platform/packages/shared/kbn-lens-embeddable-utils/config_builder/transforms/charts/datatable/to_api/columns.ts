@@ -38,10 +38,20 @@ type APIClassicColorProps = Partial<
   Pick<Exclude<APIMetric, { apply_color_to: 'progress_bar' }>, 'apply_color_to' | 'color'>
 >;
 
+type ProgressBarColumnState = ColumnState & {
+  colorMode: 'progress';
+  fillStyle: CellDecorationFillConfig;
+};
+
+// The editor always seeds `fillStyle` together with the progress decoration.
+const isProgressBarColumn = (column: ColumnState): column is ProgressBarColumnState =>
+  column.colorMode === 'progress' && column.fillStyle != null;
+
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
   return stripUndefined<APIMetricRowCommonProps>({
     visible: column.hidden != null ? !column.hidden : undefined,
-    alignment: column.alignment,
+    // A progress bar resolves its own alignment, which excludes `center`
+    alignment: isProgressBarColumn(column) ? undefined : column.alignment,
     width: column.width,
   });
 }
@@ -109,19 +119,13 @@ function buildProgressBarProps({
   fillStyle,
   palette,
   alignment,
-}: ColumnState): ProgressBarProps | undefined {
-  // The editor always seeds `fillStyle` together with the progress decoration.
-  if (!fillStyle) {
-    return;
-  }
-
+}: ProgressBarColumnState): ProgressBarProps {
   return {
     apply_color_to: 'progress_bar',
     value_range: buildValueRange(fillStyle),
-    // The editor leaves the alignment unset, which renders `right`.
     alignment: alignment === 'left' ? 'left' : 'right',
     ...buildFillProps(fillStyle, palette),
-  } satisfies ProgressBarProps;
+  };
 }
 
 /**
@@ -131,12 +135,17 @@ function buildProgressBarProps({
  * - If palette is present → output colorByValue
  */
 export function buildColorProps(column: ColumnState): APIClassicColorProps | ProgressBarProps {
+  if (isProgressBarColumn(column)) {
+    return buildProgressBarProps(column);
+  }
+
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
   const applyColorTo = colorModeToApplyColorTo(colorMode);
+  // A progress decoration without `fillStyle` draws no bar, so it exports as a plain column.
   if (applyColorTo === 'progress_bar') {
-    return buildProgressBarProps(column) ?? {};
+    return {};
   }
 
   // Prefer colorMapping if present, otherwise use palette
