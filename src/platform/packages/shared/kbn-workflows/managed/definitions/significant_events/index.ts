@@ -67,7 +67,7 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 4,
+  version: 5,
   billable: false,
   yaml: ORCHESTRATOR_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,

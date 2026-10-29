@@ -13,13 +13,6 @@ import { renderRunAs } from '../../nightshift_investigations/render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID = 'system-sources-ki-onboarding-bound';
 
-/**
- * `triggeredBy` of every run of the entry point that the detection engine starts. The entry point
- * fails any other run, so KI onboarding as the service account goes through Significant Events
- * and its checks rather than the generic workflow run API. Only server code sets `triggeredBy`.
- */
-export const NIGHTSHIFT_SOURCE_KI_EXTRACTION_TRIGGER_SOURCE = 'nightshift-source-ki-extraction';
-
 /** Document id of the entry point installed in a space (installed with `workflowIdSuffix`). */
 export const getNightshiftBoundKiOnboardingWorkflowId = (spaceId: string): string =>
   `${NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID}-${spaceId}`;

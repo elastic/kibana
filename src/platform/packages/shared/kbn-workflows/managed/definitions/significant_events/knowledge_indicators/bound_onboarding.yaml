@@ -43,7 +43,7 @@ steps:
   # service account. Only server code sets `triggeredBy`.
   - name: refuse_direct_runs
     type: if
-    condition: 'not execution.triggeredBy : "nightshift-source-ki-extraction"'
+    condition: 'not execution.triggeredBy : "nightshift-detection-engine"'
     steps:
       - name: refuse
         type: workflow.fail

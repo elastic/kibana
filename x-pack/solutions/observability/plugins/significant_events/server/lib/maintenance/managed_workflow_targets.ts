@@ -7,6 +7,7 @@
 
 import type { SpaceId } from '@kbn/core-spaces-common';
 import {
+  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
@@ -46,12 +47,13 @@ export const GLOBAL_CORE_WORKFLOW_IDS = [
 /**
  * Manually started workflows bound to a service account and installed per space, as
  * `${id}-${spaceId}`, by the space's setup. Pausing cancels their executions but does not disable
- * them: the KI onboarding entry point is only started by routes that are blocked while the space
- * is paused, and source reconciliation keeps applying source changes, which leaves rules off
+ * them: the KI onboarding and discovery entry points are only started by routes that are blocked
+ * while the space is paused, and source reconciliation keeps applying source changes, which leaves rules off
  * while the space is paused.
  */
 export const PER_SPACE_BOUND_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 

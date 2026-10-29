@@ -38,6 +38,9 @@ export const createWorkflowClients = ({
       telemetry,
       getSourcesClient,
     }),
-    significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
+    significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({
+      managementApi,
+      isServiceAccountsEnabled,
+    }),
   };
 };

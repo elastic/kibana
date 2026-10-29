@@ -11,7 +11,7 @@ import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   getNightshiftBoundKiOnboardingWorkflowId,
-  NIGHTSHIFT_SOURCE_KI_EXTRACTION_TRIGGER_SOURCE,
+  NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -377,7 +377,7 @@ export class SignificantEventsKIsOnboardingClient {
         sourceRevision: source.esql_updated_at,
       }),
       request,
-      triggeredBy: NIGHTSHIFT_SOURCE_KI_EXTRACTION_TRIGGER_SOURCE,
+      triggeredBy: NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE,
     });
 
     this.telemetry.trackOnboardingScheduled({

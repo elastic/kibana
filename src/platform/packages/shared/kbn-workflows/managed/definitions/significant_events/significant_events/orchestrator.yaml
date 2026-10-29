@@ -28,14 +28,30 @@ triggers:
           description: "Optional chat model connector or inference endpoint ID for discovery."
       additionalProperties: false
 steps:
-  - name: detect
-    type: workflow.execute
-    with:
-      workflow-id: "system-significant-events-detection"
+  # Runs as the space's detection engine service account, started by the space's entry point.
+  # Detection and discovery sit inside the check: `on-failure: continue` would carry on past a
+  # failing step before them.
+  - name: run_as_service_account
+    type: if
+    condition: 'execution.effectiveIdentity.type : "service_account"'
+    steps:
+      - name: detect
+        type: workflow.execute
+        with:
+          workflow-id: "system-significant-events-detection"
+          run-as-mode: inherit
 
-  - name: discover
-    type: workflow.execute
-    with:
-      workflow-id: "system-significant-events-discovery"
-      inputs:
-        connector_id: "{{ inputs.connector_id }}"
+      - name: discover
+        type: workflow.execute
+        with:
+          workflow-id: "system-significant-events-discovery"
+          run-as-mode: inherit
+          inputs:
+            connector_id: "{{ inputs.connector_id }}"
+    else:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            Detection and discovery run as the Nightshift service account. Start discovery from
+            Nightshift in a space that is set up.

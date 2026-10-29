@@ -16,7 +16,9 @@ import {
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  getNightshiftBoundDiscoveryWorkflowId,
   getNightshiftBoundKiOnboardingWorkflowId,
+  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   getNightshiftBoundScheduledDetectionWorkflowId,
   getNightshiftBoundScheduledReviewWorkflowId,
   getNightshiftBoundSourceReconciliationWorkflowId,
@@ -47,6 +49,7 @@ export interface DetectionEngineServiceAccountIds {
 /** Bound workflows the setup installs in the space. */
 const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
@@ -221,6 +224,7 @@ export const createServiceAccountSetupService = ({
     // onboarding are blocked while the space is paused.
     for (const workflowId of [
       getNightshiftBoundKiOnboardingWorkflowId(spaceId),
+      getNightshiftBoundDiscoveryWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
     ]) {
       await setEnabled({
@@ -287,6 +291,7 @@ export const createServiceAccountSetupService = ({
     // The manually started ones too, so nothing can start a run as the account.
     for (const workflowId of [
       getNightshiftBoundKiOnboardingWorkflowId(spaceId),
+      getNightshiftBoundDiscoveryWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
     ]) {
       await setEnabled({
@@ -302,6 +307,7 @@ export const createServiceAccountSetupService = ({
       getNightshiftBoundKiSyncWorkflowId(spaceId),
       getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
+      getNightshiftBoundDiscoveryWorkflowId(spaceId),
       getNightshiftBoundScheduledDetectionWorkflowId(spaceId),
       getNightshiftBoundScheduledReviewWorkflowId(spaceId),
     ]) {

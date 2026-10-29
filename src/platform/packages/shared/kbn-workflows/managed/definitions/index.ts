@@ -95,6 +95,7 @@ import { NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW } from './significan
 import { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW } from './significant_events/knowledge_indicators/bound_onboarding';
 import { NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW } from './significant_events/knowledge_indicators/bound_source_reconciliation';
 import { NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW } from './significant_events/knowledge_indicators/bound_sync';
+import { NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW } from './significant_events/significant_events/bound_orchestrator';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
@@ -136,9 +137,9 @@ export {
 export {
   getNightshiftBoundKiOnboardingWorkflowId,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
-  NIGHTSHIFT_SOURCE_KI_EXTRACTION_TRIGGER_SOURCE,
   type NightshiftBoundKiOnboardingTemplateValues,
 } from './significant_events/knowledge_indicators/bound_onboarding';
+export { NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE } from './significant_events/trigger_source';
 export {
   getNightshiftBoundKiSyncWorkflowId,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
@@ -154,6 +155,11 @@ export {
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   type NightshiftBoundSourceReconciliationTemplateValues,
 } from './significant_events/knowledge_indicators/bound_source_reconciliation';
+export {
+  getNightshiftBoundDiscoveryWorkflowId,
+  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  type NightshiftBoundDiscoveryTemplateValues,
+} from './significant_events/significant_events/bound_orchestrator';
 export {
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
@@ -293,6 +299,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW,
   NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW,
+  NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW,
