@@ -9,13 +9,24 @@
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { SERVICE_NAME_FIELD } from '../../../../../../common/data_types/logs/constants';
 import { getTracesSummaryColumn } from '../../../../../components/data_types/traces/summary_column';
-import type { DataSourceProfileProvider } from '../../../../profiles';
+import {
+  createServiceSummaryDefinition,
+  getEntitySummaryCell,
+} from '../../../../../components/data_types/entity_summary';
 import { getServiceNameCell } from '../../../../../components/data_types/logs/service_name_cell';
+import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
   (prev, { toolkit }) =>
   (params) => ({
     ...prev(params),
     [SOURCE_COLUMN]: getTracesSummaryColumn(params, toolkit),
-    [SERVICE_NAME_FIELD]: getServiceNameCell(SERVICE_NAME_FIELD, toolkit),
+    // The dedicated Service name column shows the same service-summary popover; it falls back to the
+    // filter/copy badge when APM isn't available to provide the data.
+    [SERVICE_NAME_FIELD]: getEntitySummaryCell({
+      fieldName: SERVICE_NAME_FIELD,
+      definition: createServiceSummaryDefinition(),
+      toolkit,
+      FallbackCell: getServiceNameCell(SERVICE_NAME_FIELD, toolkit),
+    }),
   });
