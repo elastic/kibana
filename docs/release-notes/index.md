@@ -641,12 +641,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Update the Microsoft Teams content connector to application-only authentication with a client secret or a certificate, and remove username and password authentication [#287028]({{kib-pull}}287028).
 * Add a **Display options** control to the **Connectors** list that hides deprecated connectors by default [#289130]({{kib-pull}}289130).
 * Clarify that Salesforce document level security applies per object type, not per record [#297728]({{kib-pull}}297728).
-* Show the complete list of selected locations and any in-use problems in the **Region preferences** confirmation before you save the policy [#289906]({{kib-pull}}289906).
-* Add a **Confirm region selection** modal that lists the indexes and pipelines that still use denied inference endpoints, so you can review the conflict and ignore those errors when you save region preferences [#285264]({{kib-pull}}285264).
 * Add a toggle to the **Manage Region Preferences** modal to remove a custom region policy and return to the default of allowing all regions [#282769]({{kib-pull}}282769).
 * Add a dismissible warning to the {{infer-cap}} model flyout when a model isn't available in the locations that region preferences allow [#286932]({{kib-pull}}286932).
 * Use the region names that {{es}} sends with each endpoint in the **Regions** list [#287211]({{kib-pull}}287211).
-* Redesign the **Region preferences** modal [#287605]({{kib-pull}}287605).
+* Redesign the **Region preferences** modal. Before you save, the **Confirm region selection** modal shows the complete list of selected locations and the indexes and pipelines that still use endpoints that the policy would block, so you can review the conflict and ignore those errors [#287605]({{kib-pull}}287605), [#285264]({{kib-pull}}285264), [#289906]({{kib-pull}}289906).
 * Return a `400` error when a query rule, ruleset, or synonyms set ID in an API path contains characters other than letters, numbers, `_`, and `-`, or is longer than 512 characters [#276710]({{kib-pull}}276710).
 * Add an **Expand role members** toggle for compact document-level security to ServiceNow connectors, and an **Expand site group members** toggle to SharePoint Online connectors, in {{fleet}} [#288071]({{kib-pull}}288071), [#288070]({{kib-pull}}288070).
 

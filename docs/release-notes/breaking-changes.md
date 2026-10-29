@@ -52,17 +52,6 @@ $$$kibana-291514$$$
 View [#291514]({{kib-pull}}291514).
 ::::
 
-$$$kibana-287729$$$
-::::{dropdown} Update clients that read the `actions` attachment type in the Cases API
-**Details**<br> The Cases API now returns attachments of the legacy `actions` type, which the API reference doesn't document, in the same shape as the `endpoint` type that replaced it in 2024. This applies to attachments that already exist and to new attachments, in API responses (`GET`, `_find`, `POST`, and `PATCH`) and in recorded user actions. {{kib}} doesn't change the stored attachments. The `user` and `alert` attachment types don't change.
-
-**Impact**<br> Clients that inspect `actions` attachments in Cases API responses receive the `endpoint` shape instead.
-
-**Action**<br> Update clients that read `actions` attachments to handle the `endpoint` shape.
-
-View [#287729]({{kib-pull}}287729).
-::::
-
 $$$kibana-285645$$$
 ::::{dropdown} Workflow execution detail routes now require the `read` privilege in addition to `readExecution`
 **Details**<br> The following Workflows API routes previously accepted callers holding only the `workflowsManagement:readExecution` privilege (the **Read Workflow Execution** sub-feature privilege, `workflow_execution_read`). Execution documents include a YAML snapshot of the workflow definition, so those callers could retrieve a workflow definition without holding the `workflowsManagement:read` privilege (**Read**, `workflow_read`). Reading execution data now requires both privileges. This applies to every execution read route, including the list and search routes:
@@ -83,12 +72,12 @@ View [#285645]({{kib-pull}}285645).
 ::::
 
 $$$kibana-283150$$$
-::::{dropdown} Verify TLS certificates for email connectors that send through HTTPS proxies
-**Details**<br> {{kib}} now includes nodemailer 9, which validates the TLS certificate of an HTTPS server when the email connector fetches remote content. This includes OAuth 2.0 token endpoints and HTTP or HTTPS proxy connections. Earlier versions skipped that check.
+::::{dropdown} Update HTTPS proxy TLS settings if the email connector fails after upgrade
+**Details**<br> {{kib}} now ships nodemailer 9, which validates the proxy server's TLS certificate when the email connector sends mail through an HTTPS proxy. Earlier versions skipped that check, so a proxy with a self-signed, expired, or hostname-mismatched certificate now causes sending to fail. Hosted and cloud SMTP with public certificate authorities is unaffected.
 
-**Impact**<br> Email connectors that send mail through an HTTPS proxy, or that use a token endpoint, with a self-signed, expired, or hostname-mismatched certificate fail instead of sending the message.
+**Impact**<br> Self-managed deployments that route email through an HTTPS proxy with a certificate that isn't trusted by default can no longer send email until TLS verification is updated.
 
-**Action**<br> Use certificates that a trusted certificate authority signed for these servers. For SMTP servers, you can relax verification with the `ssl.verificationMode` setting in `xpack.actions.customHostSettings`.
+**Action**<br> Trust the proxy certificate, or set `xpack.actions.ssl.proxyVerificationMode: none` to restore the previous behavior. Note that `certificate` behaves the same as `full` on the proxy connection: a custom CA or relaxed hostname check does not apply there.
 
 View [#283150]({{kib-pull}}283150).
 ::::
@@ -102,17 +91,6 @@ $$$kibana-282404$$$
 **Action**<br> Update any `additional_datastreams_permissions` values to the `<type>-<suffix>` format.
 
 View [#282404]({{kib-pull}}282404).
-::::
-
-$$$kibana-280959$$$
-::::{dropdown} Stop using the package policy and agent policy APIs to manage agentless integrations
-**Details**<br> {{fleet}} turns on the `disableAgentlessLegacyAPI` feature flag. The package policy and agent policy APIs no longer create, update, upgrade, or copy managed integrations.
-
-**Impact**<br> Clients that create, update, upgrade, or copy managed integrations through the package policy and agent policy APIs receive a `400` error.
-
-**Action**<br> Use the Managed integrations API (`/api/fleet/managed_integrations`) instead.
-
-View [#280959]({{kib-pull}}280959).
 ::::
 
 ## 9.5.2 [kibana-9.5.2-breaking-changes]
