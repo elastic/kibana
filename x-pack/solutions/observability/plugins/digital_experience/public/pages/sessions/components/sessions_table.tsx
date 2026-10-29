@@ -16,7 +16,11 @@ import {
   EuiTextColor,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
@@ -194,11 +198,31 @@ const renderText = (text: string | null) =>
   );
 
 /** Right-aligned like APM's lists, on one line so the table scrolls rather than wraps. */
-const numberColumn = (width = '6em') => ({
+const numberColumn = (
+  width = '6em'
+): Pick<
+  EuiTableFieldDataColumnType<SessionSummary>,
+  'align' | 'width' | 'minWidth' | 'className'
+> => ({
   align: RIGHT_ALIGNMENT,
   width,
   minWidth: width,
   className: 'eui-textNoWrap',
+});
+
+/** A Core Web Vital of the session, colored by its rating. */
+const vitalColumn = (
+  vital: (typeof VITAL_COLUMNS)[number]
+): EuiTableFieldDataColumnType<SessionSummary> => ({
+  field: `webVitals.${vital}`,
+  name: COLUMN_LABELS[vital],
+  ...numberColumn('7em'),
+  render: (value: number | null) =>
+    value === null ? (
+      <EmptyCellValue />
+    ) : (
+      <WebVitalBadge vital={vital} value={value} showLabel={false} />
+    ),
 });
 
 export function SessionsTable({
@@ -372,22 +396,9 @@ export function SessionsTable({
         width: '6em',
         render: (bounced: boolean) => (bounced ? YES : NO),
       },
-      ...(Object.fromEntries(
-        VITAL_COLUMNS.map((vital) => [
-          vital,
-          {
-            field: `webVitals.${vital}`,
-            name: COLUMN_LABELS[vital],
-            ...numberColumn('7em'),
-            render: (value: number | null) =>
-              value === null ? (
-                <EmptyCellValue />
-              ) : (
-                <WebVitalBadge vital={vital} value={value} showLabel={false} />
-              ),
-          },
-        ])
-      ) as Record<(typeof VITAL_COLUMNS)[number], EuiBasicTableColumn<SessionSummary>>),
+      lcp: vitalColumn('lcp'),
+      inp: vitalColumn('inp'),
+      cls: vitalColumn('cls'),
     };
 
     return [
