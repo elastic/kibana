@@ -1952,26 +1952,26 @@ export class RulesClient {
   public async restoreRule({
     id,
     snapshot,
-    expectedVersion,
+    currentVersion,
   }: {
     id: string;
     snapshot: Record<string, unknown>;
-    expectedVersion?: number;
+    currentVersion?: number;
   }): Promise<RuleResponse> {
     const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
-    return this.replaceExistingRule({ id, parsed, expectedVersion });
+    return this.replaceExistingRule({ id, parsed, currentVersion });
   }
 
   private async replaceExistingRule({
     id,
     parsed,
-    expectedVersion,
+    currentVersion,
   }: {
     id: string;
     parsed: PutRuleData;
-    expectedVersion?: number;
+    currentVersion?: number;
   }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
@@ -1983,8 +1983,8 @@ export class RulesClient {
     } = await this.getExistingRule(id);
 
     if (
-      expectedVersion !== undefined &&
-      expectedVersion !== (existingAttrs.version ?? RULE_VERSION_FALLBACK)
+      currentVersion !== undefined &&
+      currentVersion !== (existingAttrs.version ?? RULE_VERSION_FALLBACK)
     ) {
       throw Boom.conflict(getRuleVersionConflictMessage(id), {
         code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,

@@ -2084,30 +2084,30 @@ describe('RulesClient', () => {
       ]);
     });
 
-    it('restores when expected_version matches the current version', async () => {
+    it('restores when current_version matches the current version', async () => {
       const client = createClient();
       mockExistingRule();
 
-      await client.restoreRule({ id: 'rule-id-1', snapshot, expectedVersion: 5 });
+      await client.restoreRule({ id: 'rule-id-1', snapshot, currentVersion: 5 });
 
       expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
     });
 
-    it('compares expected_version against the reported version of a rule without a stored counter', async () => {
+    it('compares current_version against the reported version of a rule without a stored counter', async () => {
       const client = createClient();
       mockExistingRule({ version: undefined });
 
-      await client.restoreRule({ id: 'rule-id-1', snapshot, expectedVersion: 1 });
+      await client.restoreRule({ id: 'rule-id-1', snapshot, currentVersion: 1 });
 
       expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
     });
 
-    it('throws RULE_VERSION_CONFLICT when expected_version is stale', async () => {
+    it('throws RULE_VERSION_CONFLICT when current_version is stale', async () => {
       const client = createClient();
       mockExistingRule();
 
       await expect(
-        client.restoreRule({ id: 'rule-id-1', snapshot, expectedVersion: 4 })
+        client.restoreRule({ id: 'rule-id-1', snapshot, currentVersion: 4 })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
         data: { code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT },
