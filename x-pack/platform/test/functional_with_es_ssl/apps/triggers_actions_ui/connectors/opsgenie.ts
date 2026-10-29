@@ -180,9 +180,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
 
           await testSubjects.missingOrFail('messageInput');
-          await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
-          await retry.waitFor('message input to be displayed', async () => {
-            return await testSubjects.exists('messageInput');
+          await retry.try(async () => {
+            if (
+              (await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')) !==
+              'createAlert'
+            ) {
+              await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
+            }
+            expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
+              'createAlert'
+            );
+            await testSubjects.existOrFail('messageInput');
           });
 
           expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
