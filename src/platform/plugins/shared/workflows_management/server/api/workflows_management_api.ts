@@ -17,7 +17,12 @@ import type {
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
-import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  CustomRequestHandlerContext,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { AccessControlInput } from '@kbn/entity-access-control';
 import { i18n } from '@kbn/i18n';
 import {
@@ -78,6 +83,11 @@ import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import type {
+  LoadAlertDocumentsRequest,
+  LoadedAlertDocuments,
+} from './routes/executions/utils/load_alert_documents';
+import { loadAlertDocuments } from './routes/executions/utils/load_alert_documents';
 import {
   ALL_TRIGGER_SELECTION_KINDS,
   preprocessTriggerInputs,
@@ -786,6 +796,23 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  /**
+   * Loads alert documents in the same shape alert-triggered workflows receive, so steps that load
+   * alerts themselves see identical documents. `esClient` must be scoped to the requesting user.
+   */
+  public async loadAlertDocuments({
+    esClient,
+    ...request
+  }: LoadAlertDocumentsRequest & { esClient: ElasticsearchClient }): Promise<LoadedAlertDocuments> {
+    const { alerting } = await this.workflowsService.getPluginsStart();
+    return loadAlertDocuments({
+      ...request,
+      esClient,
+      ruleTypes: alerting?.listTypes() ?? new Map(),
+      logger: this.logger,
+    });
   }
 
   /**

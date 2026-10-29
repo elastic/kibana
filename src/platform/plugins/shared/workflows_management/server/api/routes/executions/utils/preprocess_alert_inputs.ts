@@ -8,12 +8,9 @@
  */
 
 import { get, isString } from 'lodash';
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { Logger } from '@kbn/core/server';
-import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { fetchAlertSourcesByIds } from './fetch_by_ids';
+import { loadAlertDocuments } from './load_alert_documents';
 import type {
   AlertEventRule,
   AlertSelection,
@@ -99,26 +96,14 @@ async function fetchAlerts(
   context: AlertPreprocessingContext,
   logger: Logger
 ): Promise<AlertHit[]> {
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const ruleTypeRegistryMap = (await context.alerting).listTypes();
-
-  const documents = await fetchAlertSourcesByIds({ selections: alertIds, esClient, logger });
-
-  return documents.map(({ _id, _index, _source }) => {
-    let alert = _source as Alert;
-
-    const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
-
-    const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
-    // Format alert using the registered rule type's formatAlert function if available,
-    if (registeredRuleType?.alerts?.formatAlert) {
-      alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
-    }
-
-    const expandedAlert = expandFlattenedAlert(alert) as Alert;
-
-    return { _id, _index, ...expandedAlert };
+  const { alerts } = await loadAlertDocuments({
+    alerts: { selections: alertIds },
+    esClient: (await context.core).elasticsearch.client.asCurrentUser,
+    ruleTypes: (await context.alerting).listTypes(),
+    logger,
   });
+
+  return alerts as AlertHit[];
 }
 
 /**
