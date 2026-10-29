@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { DocViewRestorableStateProps } from '@kbn/unified-doc-viewer/types';
 import { flyoutChainSchema } from './flyout_descriptor_schema';
 
@@ -13,9 +13,11 @@ import { flyoutChainSchema } from './flyout_descriptor_schema';
  * Shareable state schema for Security doc views in Discover: the open flyout chain (root and
  * optional child), in the same descriptor format as the `flyoutV2` URL param.
  */
-export const flyoutV2DocViewerStateSchema = z.object({
-  flyoutV2: flyoutChainSchema.optional(),
-});
+export const flyoutV2DocViewerStateSchema = lazySchema(() =>
+  z.object({
+    flyoutV2: flyoutChainSchema.optional(),
+  })
+);
 
 export type FlyoutV2DocViewerState = z.infer<typeof flyoutV2DocViewerStateSchema>;
 
