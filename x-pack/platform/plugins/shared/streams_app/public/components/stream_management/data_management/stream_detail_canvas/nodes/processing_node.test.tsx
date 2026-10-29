@@ -75,13 +75,6 @@ beforeEach(() => {
 });
 
 describe('ProcessingNode', () => {
-  it('still shows its title and its processor count', () => {
-    renderNode(PIPELINE_NODE_DATA);
-
-    expect(screen.getByText('Parse and enrich')).toBeTruthy();
-    expect(screen.getByText('2 processors')).toBeTruthy();
-  });
-
   it('shows the stats of a pipeline slot, read from the processors of that slot', () => {
     renderNode(PIPELINE_NODE_DATA);
 
@@ -91,6 +84,9 @@ describe('ProcessingNode', () => {
     });
     expect(screen.getByTestId('streamsCanvasProcessingNodeRate').textContent).toBe('3.7k eps');
     expect(screen.getByTestId('streamsCanvasProcessingNodeDuration').textContent).toBe('8ms');
+    expect(screen.getByTestId('streamsCanvasProcessingNode').getAttribute('title')).toBe(
+      'Parse and enrich'
+    );
   });
 
   it('shows the stats of a route slot, read from the processors of that route', () => {
@@ -103,7 +99,7 @@ describe('ProcessingNode', () => {
     expect(isShown('streamsCanvasProcessingNodeStats')).toBe(true);
   });
 
-  it('keeps its stats row, with no numbers, while nothing is known', () => {
+  it('keeps its stats area, with no numbers, while nothing is known', () => {
     mockUseSlotStats.mockReturnValue({
       status: 'unknown',
       eventsRate: null,
@@ -114,6 +110,6 @@ describe('ProcessingNode', () => {
 
     expect(isShown('streamsCanvasProcessingNodeStats')).toBe(true);
     expect(isShown('streamsCanvasProcessingNodeRate')).toBe(false);
-    expect(screen.getByText('Parse and enrich')).toBeTruthy();
+    expect(isShown('streamsCanvasProcessingNodeDuration')).toBe(false);
   });
 });

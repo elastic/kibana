@@ -21,11 +21,11 @@ interface ProcessingNodeStatsProps {
 }
 
 /**
- * The stats row of a processing node: the records per second that reach the slot, and the time a
- * record spends in it. It is its own component, so a stats update re-renders only this row. It
- * reads the saved unit, because the stats describe what is deployed. Until the first result
- * arrives the row keeps its space and shows nothing, so a load or a failure never looks like a
- * measured zero.
+ * The stats of a processing node, on two lines: the records per second that reach the slot, and
+ * the time a record spends in it. It is its own component, so a stats update re-renders only
+ * this part. It reads the saved unit, because the stats describe what is deployed. Until the
+ * first result arrives it keeps its space and shows nothing, so a load or a failure never looks
+ * like a measured zero.
  */
 export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
@@ -38,9 +38,9 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
       data-test-subj="streamsCanvasProcessingNodeStats"
       css={css`
         display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.s};
-        min-height: ${euiTheme.size.l};
+        flex-direction: column;
+        justify-content: center;
+        min-height: ${euiTheme.size.xxl};
       `}
     >
       {stats.status === 'ready' && (

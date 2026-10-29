@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { PROCESSING_SLOT_KIND } from '../../../../../services/unit_graph';
@@ -20,10 +20,6 @@ import { ProcessingNodeStats } from './processing_node_stats';
 /** Compact pill for processing applied between a source, a route and a destination. */
 export function ProcessingNode({ data, selected, dragging }: NodeProps<ProcessingNodeType>) {
   const { euiTheme } = useEuiTheme();
-  const countLabel = i18n.translate('xpack.streams.canvas.processingNode.processorCount', {
-    defaultMessage: '{count, plural, one {# processor} other {# processors}}',
-    values: { count: data.processorCount },
-  });
 
   return (
     <>
@@ -44,20 +40,24 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
           getNodeCardStyles(euiTheme, { width: PROCESSING_NODE_WIDTH, selected, dragging }),
           css`
             min-height: ${PROCESSING_NODE_HEIGHT}px;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
             align-items: center;
-            gap: ${euiTheme.size.s};
+            gap: ${euiTheme.size.m};
           `,
         ]}
       >
-        <EuiIcon type="processor" aria-hidden={true} />
-        <div>
-          <EuiText size="xs">
-            <strong>{data.title}</strong>
-            <div>{countLabel}</div>
-          </EuiText>
-          <ProcessingNodeStats slot={data.ref} />
+        <div
+          css={css`
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            justify-self: center;
+          `}
+        >
+          <EuiIcon type="processor" size="m" aria-hidden={true} />
         </div>
+        <ProcessingNodeStats slot={data.ref} />
       </EuiPanel>
       {data.ref.kind === PROCESSING_SLOT_KIND.pipeline ? (
         <ConnectionHandle
