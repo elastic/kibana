@@ -7,15 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createIntl } from '@formatjs/intl';
+import { createIntl, createIntlCache } from '@formatjs/intl';
 import { activateTranslation, translate } from './i18n';
+
+jest.mock('@formatjs/intl', () => {
+  const actual = jest.requireActual<typeof import('@formatjs/intl')>('@formatjs/intl');
+  return { ...actual, createIntlCache: jest.fn(actual.createIntlCache) };
+});
 
 describe('plain default messages', () => {
   beforeEach(() => {
     activateTranslation({ locale: 'en', messages: {} });
   });
 
-  test('returns plain English text with or without values', () => {
+  test('returns plain English text without retaining message formatters', () => {
+    const cache = jest.mocked(createIntlCache).mock.results.at(-1)?.value;
+    if (!cache) {
+      throw new Error('Expected a FormatJS cache for the active translation.');
+    }
+
     expect(translate('plain', { defaultMessage: 'Hello, 🌍! 50% — café.\nNext line' })).toBe(
       'Hello, 🌍! 50% — café.\nNext line'
     );
@@ -25,6 +35,12 @@ describe('plain default messages', () => {
         values: { unused: 'ignored' },
       })
     ).toBe('Plain text #1');
+    expect(cache.message).toEqual({});
+
+    expect(
+      translate('formatted', { defaultMessage: 'Hello {name}', values: { name: 'Ada' } })
+    ).toBe('Hello Ada');
+    expect(Object.keys(cache.message)).toHaveLength(1);
   });
 
   test('uses translated messages and respects locale changes', () => {
