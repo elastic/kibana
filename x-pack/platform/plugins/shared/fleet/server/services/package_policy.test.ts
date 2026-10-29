@@ -26,6 +26,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import { CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE } from '../../common/constants/cloud_connector';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
 import type {
@@ -7199,7 +7200,7 @@ describe('Package policy service', () => {
         });
       });
 
-      it('recomputes conditions only for agent policies the package policy moves between', async () => {
+      it('recomputes conditions for all associated agent policies when assignments change', async () => {
         expect(
           await bulkUpdateAndGetUnchangedFlags(
             {},
@@ -7207,7 +7208,7 @@ describe('Package policy service', () => {
           )
         ).toEqual({
           'test-agent-policy-1': false,
-          'test-agent-policy-2': true,
+          'test-agent-policy-2': false,
           'test-agent-policy-3': false,
         });
       });
@@ -7240,12 +7241,21 @@ describe('Package policy service', () => {
         });
       });
 
-      it('recomputes conditions when the package policy had a stored condition', async () => {
+      it('keeps stored conditions on the same package version when version specific policies are disabled', async () => {
+        jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+          enableVersionSpecificPolicies: false,
+        } as ExperimentalFeatures);
+        (getPackageInfo as jest.Mock).mockImplementation(async ({ pkgName, pkgVersion }) => ({
+          name: pkgName,
+          version: pkgVersion,
+          conditions: { agent: { version: '>=9.3.0' } },
+        }));
+
         expect(
           await bulkUpdateAndGetUnchangedFlags({ package_agent_version_condition: '>=9.3.0' }, {})
         ).toEqual({
-          'test-agent-policy-1': false,
-          'test-agent-policy-2': false,
+          'test-agent-policy-1': true,
+          'test-agent-policy-2': true,
         });
       });
     });
