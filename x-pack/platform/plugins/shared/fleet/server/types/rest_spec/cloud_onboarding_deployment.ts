@@ -79,6 +79,41 @@ const RequestServiceVarsSchema = schema.recordOf(
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
+const InstanceSchema = schema.object({
+  instanceId: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: {
+      description:
+        'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.',
+    },
+  }),
+  serviceId: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: { description: 'ID of the service this instance belongs to.' },
+  }),
+  name: schema.string({
+    maxLength: 255,
+    meta: {
+      description:
+        'Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.',
+    },
+  }),
+  isDuplicate: schema.boolean({
+    meta: { description: 'Whether the instance is a duplicate of another service.' },
+  }),
+});
+
+// The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
+const INSTANCES_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
+
+const InstancesSchema = (description: string) =>
+  schema.arrayOf(InstanceSchema, {
+    maxSize: 1000,
+    meta: { description, availability: INSTANCES_AVAILABILITY },
+  });
+
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
     maxLength: 255,
@@ -147,6 +182,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: { description: 'Integration description from the Service settings step.' },
     })
+  ),
+  instances: schema.maybe(
+    InstancesSchema(
+      'Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.'
+    )
   ),
   namespace: schema.maybe(
     schema.string({
@@ -270,6 +310,11 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Integration description from the Service settings step.' },
       })
     ),
+    instances: schema.maybe(
+      InstancesSchema(
+        'Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.'
+      )
+    ),
     namespace: schema.maybe(
       schema.string({
         maxLength: 100,
@@ -383,6 +428,11 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       )
     ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    instances: schema.maybe(
+      InstancesSchema(
+        'Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.'
+      )
+    ),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
         minSize: 1,

@@ -16,7 +16,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntIncompleteReason, HuntForThreatHit, HuntIncompleteness } from '../components/hunt.gen';
+import {
+  HuntIncompleteReason,
+  HostOrigin,
+  HuntForThreatHit,
+  HuntIncompleteness,
+} from '../components/hunt.gen';
 
 export const HuntBehaviorStatus = lazySchema(() =>
   z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed'])
@@ -154,6 +159,16 @@ export const HuntBehaviorResponse = lazySchema(() =>
           .array(z.string())
           .optional()
           .describe('Distinct user.name values from required-index rows, capped at 20.'),
+        /**
+         * Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`.
+         */
+        affected_host_origins: z
+          .array(HostOrigin)
+          .max(20)
+          .optional()
+          .describe(
+            "Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`."
+          ),
         /**
          * True when more than 20 distinct hosts were seen.
          */
