@@ -10,6 +10,7 @@
 import type { DurationStats, LatencyMapSelection } from '../types';
 import { LATENCY_MAP_ROWS, durationUsToRow } from '../query/duration_rows';
 import type { LatencyGrid } from '../query/parse';
+import { timeToEdge } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
 
 /** Below this share of a cell, the overlap is rounding, not a cell the selection takes part of. */
@@ -46,9 +47,10 @@ export function getSelectionCounts({
   stats: DurationStats;
   selection: LatencyMapSelection;
 }): SelectionCounts {
-  const { fromMs, binMs } = timeGrid;
-  const fromEdge = (Date.parse(selection.from) - fromMs) / binMs;
-  const toEdge = (Date.parse(selection.to) - fromMs) / binMs;
+  // Edges are measured so that the last column, which may reach past the range, is as wide as the
+  // data it has: a selection over all of it covers all of it.
+  const fromEdge = timeToEdge(timeGrid, Date.parse(selection.from));
+  const toEdge = timeToEdge(timeGrid, Date.parse(selection.to));
   const rowOf = (durationUs: number) =>
     Math.min(LATENCY_MAP_ROWS, Math.max(0, durationUsToRow(durationUs, stats)));
   // The bottom row reads everything below it too: a minimum of 0 starts at its floor.

@@ -9,6 +9,7 @@
 
 import type { DurationStats, LatencyMapSelection } from '../types';
 import { LATENCY_MAP_ROWS, durationUsToRow, rowToDurationUs } from '../query/duration_rows';
+import { timeToEdge } from '../query/time_grid';
 import type { TimeGrid } from '../query/time_grid';
 import type { Cell, CellRange, HandleId } from './cell_range';
 import { LAYOUT } from './layout';
@@ -89,7 +90,7 @@ export function createMapGeometry({
 
   const edgeToX = (edge: number) => plotLeft + edge * colWidth;
   const edgeToY = (edge: number) => plotBottom - edge * rowHeight;
-  const timeToEdge = (timestampMs: number) => (timestampMs - fromMs) / binMs;
+  const edgeOf = (timestampMs: number) => timeToEdge(timeGrid, timestampMs);
   const durationToEdge = (durationUs: number) => clamp(durationUsToRow(durationUs, stats), 0, rows);
   const isInPlot = ({ x, y }: Point) =>
     x >= plotLeft && x <= plotRight && y >= plotTop && y <= plotBottom;
@@ -137,8 +138,8 @@ export function createMapGeometry({
       ...(failedOnly ? { failedOnly } : {}),
     }),
     selectionToRange: (selection) => {
-      const xa = clamp(Math.round(timeToEdge(Date.parse(selection.from))), 0, bins);
-      const xb = clamp(Math.round(timeToEdge(Date.parse(selection.to))), 0, bins);
+      const xa = clamp(Math.round(edgeOf(Date.parse(selection.from))), 0, bins);
+      const xb = clamp(Math.round(edgeOf(Date.parse(selection.to))), 0, bins);
       const ya = Math.round(durationToEdge(selection.minDurationUs));
       const yb = Math.round(durationToEdge(selection.maxDurationUs));
       const x0 = Math.min(xa, xb, bins - 1);

@@ -147,4 +147,21 @@ describe('createMapGeometry', () => {
     const first = geometryOf70.rangeToSelection({ x0: 0, x1: 1, y0: 0, y1: 24 });
     expect(Date.parse(first.to) - Date.parse(first.from)).toBe(padded.binMs);
   });
+
+  it('restores a full-width selection whole when the last column is under half a bin wide', () => {
+    // One second in 85 columns of 12 ms is 84 columns, and the last has 4 ms of range.
+    const clipped = getTimeGrid('2026-10-26T10:00:00.000Z', '2026-10-26T10:00:01.000Z', 85);
+    const clippedGeometry = createMapGeometry({
+      plot: { left: 0, top: 0, colWidth: 8, rowHeight: 8 },
+      timeGrid: clipped,
+      stats,
+    });
+    const full = { x0: 0, x1: clipped.bins, y0: 0, y1: 24 };
+    const selection = clippedGeometry.rangeToSelection(full);
+    expect(selection.to).toBe('2026-10-26T10:00:01.000Z');
+    expect(clippedGeometry.selectionToRange(selection)).toEqual(full);
+
+    const last = { x0: clipped.bins - 1, x1: clipped.bins, y0: 3, y1: 9 };
+    expect(clippedGeometry.selectionToRange(clippedGeometry.rangeToSelection(last))).toEqual(last);
+  });
 });

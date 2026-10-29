@@ -26,3 +26,17 @@ export function getTimeGrid(from: string, to: string, targetBins: number): TimeG
   const binMs = Math.max(1, Math.ceil(rangeMs / Math.max(1, targetBins)));
   return { fromMs, binMs, bins: Math.ceil(rangeMs / binMs), endMs: fromMs + rangeMs };
 }
+
+/**
+ * Where a timestamp falls among the column edges (`0..bins`, fractions inside a column). The last
+ * column may reach past the range, where the map read no spans, so only its part inside the range
+ * counts, and that part is the whole column: the end of the range is the final edge, `bins`. This
+ * keeps a selection that ends at the end of the range a whole number of columns, and the counts
+ * of a selection over that column against the width of data it really has.
+ */
+export function timeToEdge({ fromMs, binMs, bins, endMs }: TimeGrid, timestampMs: number): number {
+  const lastStart = fromMs + (bins - 1) * binMs;
+  if (timestampMs < lastStart) return (timestampMs - fromMs) / binMs;
+  const inRange = Math.max(1, endMs - lastStart);
+  return bins - 1 + Math.min(1, (timestampMs - lastStart) / inRange);
+}

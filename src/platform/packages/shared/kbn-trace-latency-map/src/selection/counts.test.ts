@@ -93,4 +93,49 @@ describe('getSelectionCounts', () => {
     expect(Number.isFinite(counts.spans)).toBe(true);
     expect(counts.spans).toBe(40 + 20 + 8 + 3);
   });
+
+  describe('a last column that reaches past the range', () => {
+    // One second in 85 columns of 12 ms: 84 columns, the last with 4 ms of range in its 12.
+    const clippedGrid = getTimeGrid('2026-10-26T10:00:00.000Z', '2026-10-26T10:00:01.000Z', 85);
+    const clippedGeometry = createMapGeometry({
+      plot: { left: 0, top: 0, colWidth: 1, rowHeight: 1 },
+      timeGrid: clippedGrid,
+      stats,
+    });
+    const last = clippedGrid.bins - 1;
+    const clippedCells: LatencyGrid = {
+      bins: clippedGrid.bins,
+      maxSpans: 0,
+      cells: new Map([
+        [5 * clippedGrid.bins + last, { xi: last, yi: 5, spans: 30, failed: 6 }],
+        [5 * clippedGrid.bins + last - 1, { xi: last - 1, yi: 5, spans: 10, failed: 0 }],
+      ]),
+    };
+    const countClipped = (x0: number, x1: number) =>
+      getSelectionCounts({
+        grid: clippedCells,
+        timeGrid: clippedGrid,
+        stats,
+        selection: clippedGeometry.rangeToSelection({ x0, x1, y0: 5, y1: 6 }),
+      });
+
+    it('counts a selection over the whole of it for all its spans, not as an estimate', () => {
+      expect(countClipped(last, last + 1)).toEqual({ spans: 30, failed: 6, estimated: false });
+    });
+
+    it('counts it with the column before it, whole', () => {
+      expect(countClipped(last - 1, last + 1)).toEqual({ spans: 40, failed: 6, estimated: false });
+    });
+
+    it('counts the part of it that a selection starting inside it covers, over the data it has', () => {
+      // From the middle of the 4 ms of range to its end: half of its spans.
+      const selection = {
+        ...clippedGeometry.rangeToSelection({ x0: last, x1: last + 1, y0: 5, y1: 6 }),
+        from: iso(clippedGrid.fromMs + last * clippedGrid.binMs + 2),
+      };
+      expect(
+        getSelectionCounts({ grid: clippedCells, timeGrid: clippedGrid, stats, selection })
+      ).toEqual({ spans: 15, failed: 3, estimated: true });
+    });
+  });
 });
