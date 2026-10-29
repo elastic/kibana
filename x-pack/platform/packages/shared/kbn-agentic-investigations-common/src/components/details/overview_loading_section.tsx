@@ -6,21 +6,31 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiSkeletonText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiText,
+} from '@elastic/eui';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
 
 /**
  * A placeholder for the sections an agent has not written yet, shown under everything the
- * investigation has so far while it is still being worked on. It stands in for a section heading
- * and its body, so the flyout reads as "more is coming here" rather than as finished.
+ * investigation has so far while it is still being worked on. A short note says more is coming, and
+ * the skeleton stands in for a section heading and its body, so the flyout does not read as finished.
  */
 export const OverviewLoadingSection = memo(() => (
   <EuiFlexGroup
     direction="column"
     gutterSize="s"
     data-test-subj="investigationOverviewLoadingSection"
-    aria-label={OVERVIEW_SECTION_LABELS.loading}
   >
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        <p>{OVERVIEW_SECTION_LABELS.loading}</p>
+      </EuiText>
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiSkeletonTitle
         size="xs"

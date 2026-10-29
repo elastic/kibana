@@ -15,6 +15,6 @@ export const OVERVIEW_SECTION_LABELS = Object.freeze({
     defaultMessage: 'Subject',
   }),
   loading: i18n.translate('xpack.alertzero.detailsFlyout.sections.loading', {
-    defaultMessage: 'The investigation is still running; more details are on their way',
+    defaultMessage: 'Still investigating. This flyout will update with new findings.',
   }),
 });

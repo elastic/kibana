@@ -256,6 +256,9 @@ describe('OverviewTab', () => {
     renderTab({ isRunning: true });
 
     expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+    expect(
+      screen.getByText('Still investigating. This flyout will update with new findings.')
+    ).toBeInTheDocument();
   });
 
   it('renders no loading skeleton once nothing works on the investigation', () => {
