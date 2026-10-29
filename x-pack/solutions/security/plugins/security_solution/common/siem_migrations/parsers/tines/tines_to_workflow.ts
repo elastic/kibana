@@ -107,11 +107,15 @@ const convertPathToKqlField = (
   warnings: string[]
 ): string => {
   const liquid = convertTinesTemplate(path, agentNameToStepName, warnings).trim();
-  const withoutBraces = liquid.replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '').trim();
+  const withoutBraces = liquid
+    .replace(/^\{\{\s*/, '')
+    .replace(/\s*\}\}$/, '')
+    .trim();
   return withoutBraces.length > 0 ? withoutBraces : path;
 };
 
-const escapeKqlLiteral = (value: string): string => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+const escapeKqlLiteral = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 /**
  * Best-effort conversion of Tines TriggerAgent rules into a KQL condition string.
@@ -319,7 +323,9 @@ export class TinesToWorkflowMapper {
             return [
               mapUnmappedAgent(
                 agent,
-                `EventTransformationAgent mode "${agent.options?.mode ?? 'unknown'}" is not supported (only explode)`
+                `EventTransformationAgent mode "${
+                  agent.options?.mode ?? 'unknown'
+                }" is not supported (only explode)`
               ),
               ...mapOutgoing(agent),
             ];
@@ -502,9 +508,7 @@ const mapHttpAgent = (
 
   if (typeof options.content_type === 'string' && options.content_type.length > 0) {
     const contentType =
-      options.content_type.toLowerCase() === 'json'
-        ? 'application/json'
-        : options.content_type;
+      options.content_type.toLowerCase() === 'json' ? 'application/json' : options.content_type;
     withBlock.headers = {
       'Content-Type': contentType,
     };
