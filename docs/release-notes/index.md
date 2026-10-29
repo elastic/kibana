@@ -694,7 +694,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Simplify the deprecation and end-of-life notices on model cards, badges, and feature settings, with consistent `YYYY-MM-DD` dates [#298474]({{kib-pull}}298474).
 * Support `list` fields when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
 * Add a sparkline chart to the **Summary** column of change point detection [#286173]({{kib-pull}}286173).
-* Restore anomaly detection and data frame analytics in Serverless Search [#284524]({{kib-pull}}284524).
 
 **Workflows**:
 * Show agent fixes from the **Executions** tab in the editor [#296145]({{kib-pull}}296145).
@@ -971,7 +970,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix AI diffs on resumed conversations and duplicate workflow attachments [#286167]({{kib-pull}}286167).
 * Fix legacy workflow inputs missing from tool schemas [#285149]({{kib-pull}}285149).
 * Fix executing a workflow requiring the `read` privilege [#284822]({{kib-pull}}284822).
-* Fix external UIAM API key task grants, and clone API keys when scheduling workflow Task Manager tasks [#283807]({{kib-pull}}283807), [#281474]({{kib-pull}}281474).
 * Fix version conflicts on execution and step document updates by retrying [#283735]({{kib-pull}}283735).
 * Fix custom steps failing with HTTP `404` when {{kib}} uses a server base path [#283101]({{kib-pull}}283101).
 * Fix a crash in trigger execution details [#282920]({{kib-pull}}282920).
@@ -1034,7 +1032,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix saved visualizations not appearing in case attachments, and add helper text to the case Markdown editor [#286164]({{kib-pull}}286164).
 % * Fix the case feature settings so non-security owners don't get alert sync turned on by default when you create a case through a workflow or from a v2 template [#286670]({{kib-pull}}286670).
 
-% Removed from 9.6.0: Serverless-only. The CPS (cpsEnabled) and UIAM (xpack.security.uiam) settings exist only for the serverless offering.
+% Removed from 9.6.0: Serverless-only. The CPS (cpsEnabled) and UIAM (xpack.security.uiam) settings exist only for the serverless offering, and 284524 only changes config/serverless.es.yml.
+% * Restore anomaly detection and data frame analytics in Serverless Search [#284524]({{kib-pull}}284524).
+% * Fix external UIAM API key task grants, and clone API keys when scheduling workflow Task Manager tasks [#283807]({{kib-pull}}283807), [#281474]({{kib-pull}}281474).
 % * Show information about the projects that {{kib}} queried in the inspector flyout when cross-project search has linked projects [#287597]({{kib-pull}}287597).
 % * Fix API key tags missing from Elastic Cloud rules not being removed or migrated after a rule receives a valid key [#292364]({{kib-pull}}292364).
 % * Fix stored UIAM task API keys being presented in a form that rules can't use [#285163]({{kib-pull}}285163).
