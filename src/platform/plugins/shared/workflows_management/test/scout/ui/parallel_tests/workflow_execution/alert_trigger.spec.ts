@@ -337,6 +337,10 @@ test.describe(
       const toggleSwitch = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflowName);
       await expect(toggleSwitch).toBeChecked();
       await toggleSwitch.click();
+      await page.testSubj.waitForSelector('workflowsDisableConfirmationModal', {
+        state: 'visible',
+      });
+      await page.testSubj.click('confirmModalConfirmButton');
       await expect(toggleSwitch).not.toBeChecked();
 
       // Trigger alerts — the rule will fire both actions, but only the canary should execute

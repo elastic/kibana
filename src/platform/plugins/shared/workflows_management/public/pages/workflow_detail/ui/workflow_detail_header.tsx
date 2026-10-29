@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
@@ -33,6 +32,8 @@ import {
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
@@ -153,7 +154,8 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const saveYaml = useSaveYaml();
+    const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+    const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
     const isSaving = useSelector(selectIsSavingYaml);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
@@ -303,7 +305,10 @@ export const WorkflowDetailHeader = React.memo(
         }),
         labelProps: {},
         checked: isEnabled,
-        onChange: (checked: boolean) => {
+        onChange: async (checked: boolean) => {
+          if (!checked && !(await confirmDisable([workflowId]))) {
+            return;
+          }
           updateWorkflow({ workflow: { enabled: checked } });
         },
         disabled: isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
@@ -313,6 +318,7 @@ export const WorkflowDetailHeader = React.memo(
     }, [
       workflowId,
       isEnabled,
+      confirmDisable,
       updateWorkflow,
       isLoading,
       canUpdateWorkflow,
@@ -466,6 +472,7 @@ export const WorkflowDetailHeader = React.memo(
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}
+        {disableConfirmModal}
       </>
     );
   }

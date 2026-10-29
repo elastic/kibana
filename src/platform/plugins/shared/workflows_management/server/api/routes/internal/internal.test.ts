@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
@@ -65,8 +66,12 @@ describe('Internal Routes', () => {
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
   >();
+  const mockRulesFind = jest.fn();
 
   const mockContext = {
+    alerting: Promise.resolve({
+      getRulesClient: jest.fn().mockResolvedValue({ find: mockRulesFind }),
+    }),
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
@@ -617,6 +622,53 @@ describe('Internal Routes', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 3, disabled: 3, failures: [] },
     });
+  });
+
+  it('should return the rules that run the given workflows', async () => {
+    mockRulesFind.mockResolvedValue({
+      total: 12,
+      data: [{ id: 'rule-1', name: 'Rule 1', alertTypeId: 'siem.queryRule' }],
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1', 'wf-"2'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockRulesFind).toHaveBeenCalledWith({
+      options: {
+        filter:
+          'alert.attributes.actions:{ actionRef: "system_action:system-connector-.workflows" and params.subActionParams.workflowId: ("wf-1" or "wf-\\"2") }',
+        page: 1,
+        perPage: 10,
+        sortField: 'name',
+        sortOrder: 'asc',
+      },
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { total: 12, rules: [{ id: 'rule-1', name: 'Rule 1', ruleTypeId: 'siem.queryRule' }] },
+    });
+  });
+
+  it('should return no linked rules when the user cannot read any rule types', async () => {
+    mockRulesFind.mockRejectedValue(
+      Boom.forbidden('Unauthorized to find rules for any rule types.')
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { total: 0, rules: [] } });
   });
 
   it('rejects non-integer workflow history page values at route validation', () => {
