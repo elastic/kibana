@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { generateAPIKeyName } from '@kbn/alerting-plugin/server/rules_client/common';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import {
   checkAAD,
   getEventLog,
@@ -702,6 +703,14 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
       .expect(200);
 
     return !!allApiKeys.apiKeys.find((key: { name: string }) => key.name === generatedApiKeyName);
+  }
+
+  async function expectApiKeyToExist(ruleTypeId: string, ruleName: string) {
+    // The _query search hits the .security index, which can lag a just-completed write,
+    // so poll the read until the generated key is searchable instead of asserting once.
+    await retry.waitForWithTimeout(`API key for "${ruleName}" to be queryable`, 30_000, () =>
+      apiKeyExists(ruleTypeId, ruleName)
+    );
   }
 
   async function createRule(apiKey: string, ruleName: string, enabled: boolean = true) {
