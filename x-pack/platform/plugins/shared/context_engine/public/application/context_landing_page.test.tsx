@@ -118,6 +118,44 @@ describe('ContextLandingPage', () => {
     expect(createButtons[0]).toHaveTextContent('Create AI Index');
   });
 
+  it('opens and closes the create modal from the onboarding create button', async () => {
+    const core = createCore();
+    core.http.get.mockResolvedValue({ ai_indices: [] });
+
+    renderWithProviders(core);
+
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
+
+    expect(screen.queryByTestId('contextAiIndexNameInput')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    expect(screen.getByTestId('contextAiIndexNameInput')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalCancelButton'));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('contextAiIndexNameInput')).not.toBeInTheDocument()
+    );
+  });
+
+  it('opens the create modal from the header create button when indexes exist', async () => {
+    const core = createCore();
+    core.http.get.mockResolvedValue({
+      ai_indices: [buildAiIndex({ id: 'first' })],
+    });
+
+    renderWithProviders(core);
+
+    await screen.findAllByTestId('contextAiIndexCard');
+
+    expect(screen.queryByTestId('contextAiIndexNameInput')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    expect(screen.getByTestId('contextAiIndexNameInput')).toBeInTheDocument();
+  });
+
   it('renders exactly one create button in the page header when indexes exist', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({

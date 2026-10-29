@@ -9,25 +9,24 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../common/telemetry';
 import {
   AiIndexCardGrid,
   AiIndexListError,
   AiIndexManagedRowList,
   AiIndexOnboardingPanel,
+  CreateAiIndexModal,
 } from './components/ai_index_list';
 import { useAiIndexListMode } from './hooks/use_ai_index_list_mode';
 import { useContextEngineBreadcrumbs } from './hooks/use_context_engine_breadcrumbs';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
-import { useNavigation } from './hooks/use_navigation';
 import { useKibana } from './hooks/use_kibana';
 import { ContextEngineLandingHeader } from './layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from './layout/context_engine_page_template';
-import { CONTEXT_ENGINE_PATHS } from './paths';
 import {
   AI_INDICES_PER_PAGE,
   AI_INDEX_LIST_LABELS,
@@ -59,7 +58,7 @@ const ContextLandingPageContent = ({
   isLoading: boolean;
 }) => {
   const { services } = useKibana();
-  const { createContextEngineUrl } = useNavigation();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const contextEngineLinks = services.docLinks.links.contextEngine;
   const { mode, error } = useAiIndexListMode(hasCustomAiIndices, isLoading);
 
@@ -77,7 +76,7 @@ const ContextLandingPageContent = ({
         id: 'createAiIndex',
         label: createAiIndexButtonLabel,
         iconType: 'plusCircle',
-        href: createContextEngineUrl(CONTEXT_ENGINE_PATHS.create),
+        run: () => setIsCreateModalOpen(true),
         testId: 'contextCreateAiIndexButton',
         ebt: {
           action: CONTEXT_ENGINE_UI_EBT.action.aiIndexList.CREATE,
@@ -85,7 +84,7 @@ const ContextLandingPageContent = ({
         },
       },
     };
-  }, [createContextEngineUrl, showCreateInHeader]);
+  }, [showCreateInHeader]);
 
   const headerDescription = useMemo(
     () => ({
@@ -107,10 +106,12 @@ const ContextLandingPageContent = ({
         {error ? (
           <AiIndexListError error={error} />
         ) : (
-          <ContentList emptyState={<AiIndexOnboardingPanel />}>
+          <ContentList
+            emptyState={<AiIndexOnboardingPanel onCreateClick={() => setIsCreateModalOpen(true)} />}
+          >
             {mode === 'onboarding' ? (
               <>
-                <AiIndexOnboardingPanel />
+                <AiIndexOnboardingPanel onCreateClick={() => setIsCreateModalOpen(true)} />
                 <AiIndexManagedRowList />
               </>
             ) : (
@@ -127,6 +128,7 @@ const ContextLandingPageContent = ({
           </ContentList>
         )}
       </ContextEnginePageSection>
+      {isCreateModalOpen && <CreateAiIndexModal onClose={() => setIsCreateModalOpen(false)} />}
     </ContextEnginePageTemplate>
   );
 };
