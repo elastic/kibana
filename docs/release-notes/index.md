@@ -657,7 +657,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
 
 **{{kib}} platform**:
-* Disallow code generation from strings in Node.js by default [#278233]({{kib-pull}}278233).
+* Disallow code generation from strings in Node.js by default, which hardens {{kib}} against code injection. Code that builds functions from strings at run time, such as `eval`, now fails unless an administrator sets the `KBN_DISALLOW_CODE_GEN_FROM_STRINGS` environment variable to `false` [#278233]({{kib-pull}}278233).
 * Add a certificate identity field, for strong identity verification, to cross-cluster API keys in API key management [#275610]({{kib-pull}}275610).
 * Add the `filters` setting on a logger in `kibana.yml` to filter log records by metadata fields [#268372]({{kib-pull}}268372).
 * Add the `i18n.detectBrowserLocale` setting. Set it to `false` to stop {{kib}} from choosing the interface language from the browser's language preferences while each person can still choose their own language [#295756]({{kib-pull}}295756).
