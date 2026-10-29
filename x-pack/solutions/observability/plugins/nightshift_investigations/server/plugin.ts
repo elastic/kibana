@@ -35,6 +35,8 @@ import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
+import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
+import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
@@ -244,6 +246,7 @@ export class NightshiftInvestigationsPlugin
         agentAvailability: this.getInvestigationAvailability(),
       }),
       logger: this.logger.get('onboarding'),
+      ensureFailureSweep: this.ensureFailureSweep,
     });
 
     const listSandboxConnectors = createListSandboxConnectors({
@@ -432,6 +435,16 @@ export class NightshiftInvestigationsPlugin
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
             getRoutingClient: this.getNotificationRoutingClient,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          sweepInvestigationFailuresStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
+            getRoutingClient: this.getNotificationRoutingClient,
+            getTriggerEmitter,
+            getWorkflowsManagement: () => this.workflowsManagement,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -720,6 +733,16 @@ export class NightshiftInvestigationsPlugin
     return this.investigationAvailability;
   };
 
+  private ensureFailureSweep = async (request: KibanaRequest, spaceId: string): Promise<void> =>
+    createEnsureFailureSweep({
+      getWorkflowsManagement: () => this.workflowsManagement,
+      getManagedWorkflowsClient: async () => {
+        if (!this.managedWorkflowsClient) throw new Error('Managed workflows are unavailable');
+        return this.managedWorkflowsClient;
+      },
+      logger: this.logger,
+    })(request, spaceId);
+
   private getInvestigationsClient = (request: KibanaRequest, spaceId?: string) => {
     if (!this.featureFlags) {
       throw new Error('featureFlags is not available — plugin start() has not been called');
@@ -734,6 +757,7 @@ export class NightshiftInvestigationsPlugin
       spaces: this.spaces,
       logger: this.logger,
       spaceIdOverride: spaceId,
+      ensureFailureSweep: () => this.ensureFailureSweep(request, resolvedSpaceId),
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
       agentAvailability: this.getInvestigationAvailability(),

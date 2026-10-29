@@ -263,3 +263,41 @@ these fallbacks. Reporting those outcomes needs a durable Workflows terminal-out
 coordinated with recovery (#1677), before #1820 can be closed. Future intentional-cancellation messages
 should say "Investigation stopped". The separate Slack follow-up workflow's status-message editor is
 unchanged; consolidating it with investigation-owned notifications remains follow-up work.
+
+## Unexpected termination reconciliation
+
+Nightshift installs `system-nightshift-investigation-failure-sweep-<spaceId>` when the space is
+onboarded or an investigation is created. The managed copy is enabled using the caller's normal
+Workflows scheduling authorization and retains that scheduler identity. Installation failure is
+logged without failing investigation creation; a subsequent enable/start attempts setup again.
+Existing spaces acquire the sweep on their next onboarding enable or investigation creation.
+
+The sweep runs every minute with a 50-second workflow timeout and drops overlapping runs. It reads
+permission-filtered, non-test `failed` and `timed_out` executions of the investigation workflow and
+its managed copies, then revalidates each source execution and investigation binding. It never
+classifies running, waiting, or queued work as terminal. Recovery still owns that decision.
+
+A history pass starts at the sweep copy's creation time and has a fixed upper completion-time
+bound. Each run scans at most 100 records by ID and saves its cursor in normal workflow output;
+the next completed sweep resumes that pass. Finishing a pass resets the cursor so retained failures,
+late recovery writes, and temporary reporting errors are revisited. During a large history pass,
+an additional page of at most 100 recent failures gets priority. Reporting latency is normally the
+schedule interval, but depends on scheduling and backlog volume. Workflows history retention bounds
+catch-up. Failures completed before installation are not backfilled.
+
+The reporter uses the source execution ID and its validated inputs for request context, subjects,
+and notification destinations. It preserves conversation rounds and open/closed state and does not
+recreate a deleted investigation known to have been accepted or ensured. A timeout has a distinct
+conversation entry and Slack message; existing failure-trigger subscribers receive an unsuccessful
+outcome with the original execution ID. A delayed sweep suppresses that aggregate lifecycle update
+when a newer run is found in the same concurrency group, including queued follow-ups. If the group
+or its lookup is unavailable, the sweep also skips aggregate lifecycle emission; per-run context and
+Slack reporting still proceed. Started notifications, normal completion, and the ordinary
+failure fallback remain in the investigation workflow.
+
+Slack claims and receipts suppress repeated or uncertain external delivery. Conversation entries
+are reused by execution ID, and a persisted claim limits terminal lifecycle emission to one attempt.
+This is best effort: a process exit after a claim can leave delivery unconfirmed or lifecycle
+emission missing. Denied writes remain denied, cancellation is outside this sweep's scope, and a
+per-space schedule that cannot run requires its normal Workflows identity/scheduling issue to be
+repaired. There is no new watcher service, storage index, or engine hook.

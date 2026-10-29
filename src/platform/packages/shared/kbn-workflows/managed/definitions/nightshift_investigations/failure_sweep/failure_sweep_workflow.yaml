@@ -1,0 +1,37 @@
+# Installed and enabled per space during Nightshift onboarding or investigation creation.
+# The scheduled request retains the enabling caller's authorization; no elevated reads are used.
+version: '1'
+name: 'Nightshift Investigation Failure Sweep'
+enabled: false
+description: 'Reconciles failed and timed-out investigation executions.'
+tags: [nightshift, investigations, maintenance]
+settings:
+  timeout: '50s'
+  concurrency:
+    key: 'nightshift-investigation-failure-sweep'
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: '1m'
+  - type: manual
+outputs:
+  properties:
+    checked:
+      type: number
+    errors:
+      type: number
+    checkpoint:
+      type: object
+      additionalProperties: true
+steps:
+  - name: sweep
+    type: nightshift.sweepInvestigationFailures
+    with: {}
+  - name: save_checkpoint
+    type: workflow.output
+    with:
+      checked: '${{ steps.sweep.output.checked }}'
+      errors: '${{ steps.sweep.output.errors }}'
+      checkpoint: '${{ steps.sweep.output.checkpoint }}'

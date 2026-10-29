@@ -12,7 +12,10 @@ import {
   WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
 } from '@kbn/workflows';
 import { of } from 'rxjs';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import {
   createPollServerStepDefinition,
   createServerStepDefinition,
@@ -35,6 +38,7 @@ import type { WorkflowSubjectInput } from '../server/client/investigation_subjec
 import { createRoutingTestContext } from '../server/lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../server/lib/notifications/notification_delivery';
 import { handleInvestigationFailureStepDefinition } from '../server/step_definitions/handle_investigation_failure';
+import { sweepInvestigationFailuresStepDefinition } from '../server/step_definitions/sweep_investigation_failures';
 import { sendNotificationsStepDefinition } from '../server/step_definitions/send_notifications';
 import {
   createNightshiftWorkflowFixture,
@@ -50,7 +54,8 @@ type Failure =
   | 'permission'
   | 'agent'
   | 'handler'
-  | 'step_timeout';
+  | 'step_timeout'
+  | 'workflow_timeout';
 
 const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = false) => {
   jest
@@ -64,13 +69,19 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
   );
   const routing = createRoutingTestContext('fake_space_id');
   const destinations = [{ type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } }];
-  const execute = jest.fn(async (_execution: NotificationExecution) => ({
-    status: 'ok',
-    data: { ts: '1.2', channel: 'C123' },
-  }));
+  const delivered: NotificationExecution[] = [];
+  const execute = jest.fn(async (execution: NotificationExecution) => {
+    delivered.push(execution);
+    return { status: 'ok', data: { ts: '1.2', channel: 'C123' } };
+  });
   const storedConversations = new Map<string, ConversationWithPermissions>();
   const storedSubjects = new Map<string, WorkflowSubjectInput[]>();
   const conversations = {
+    get: async (id: string) => {
+      const conversation = storedConversations.get(id);
+      if (!conversation) throw new Error('Conversation not found');
+      return conversation;
+    },
     bulkGet: async (ids: string[]) =>
       new Map([...storedConversations].filter(([id]) => ids.includes(id))),
     create: async ({ id, metadata, templateId }: ConversationCreatePublicRequest) => {
@@ -112,17 +123,23 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
       return recorded;
     },
   };
+  const latestRuns = jest.fn(async () => ({ results: [{ id: 'fake_workflow_execution_id' }] }));
   const client = new NightshiftInvestigationsClient({
     request: engine.fakeKibanaRequest,
     spaceIdOverride: 'fake_space_id',
     logger: engine.loggerMock,
     workflowsManagement: {
       management: {
+        getWorkflowExecutions: latestRuns,
         getWorkflowExecution: async (id: string, spaceId: string) => {
           const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
           // The engine fixture uses a synthetic workflow id; retain its real execution and inputs.
           return execution?.spaceId === spaceId
-            ? { ...execution, originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }
+            ? {
+                ...execution,
+                originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+                concurrencyGroupKey: 'investigation:inv-1',
+              }
             : null;
         },
       },
@@ -154,13 +171,18 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
     workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
     notificationDestinations: destinations,
   }));
-  const emitter = jest.fn();
+  const lifecycleEmissions: number[] = [];
+  const emitter = jest.fn(() => {
+    lifecycleEmissions.push(1);
+  });
   const deps = {
     investigationLocator: new MockUrlService().locators.create(
       new InvestigationLocatorDefinition()
     ),
     getInvestigationsClient: jest.fn(() => ({
       ensureForFailure: client.ensureForFailure.bind(client),
+      getUnsuccessfulRun: client.getUnsuccessfulRun.bind(client),
+      isLatestInvestigationRun: client.isLatestInvestigationRun.bind(client),
       getInvestigationExecutionContext,
       getLifecycleSubject: async () => ({
         subject: { type: 'manual', id: 'question' },
@@ -204,7 +226,7 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
   const definitions: ServerStepDefinition[] = [
     sendNotificationsStepDefinition(deps),
     handleInvestigationFailureStepDefinition(deps),
-    failure === 'step_timeout'
+    failure === 'step_timeout' || failure === 'workflow_timeout'
       ? createPollServerStepDefinition({
           id: 'ai.agent',
           label: 'Waiting agent',
@@ -239,6 +261,9 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
     fixture,
     routing,
     execute,
+    delivered,
+    lifecycleEmissions,
+    latestRuns,
     agent,
     ensureForFailure,
     emitter,
@@ -248,7 +273,13 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
     persistenceAttempts: () => persistenceAttempts,
     run: async () => {
       await engine.runWorkflow({
-        workflowYaml: managedYaml(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID),
+        workflowYaml:
+          failure === 'workflow_timeout'
+            ? managedYaml(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID).replace(
+                "timeout: '60m'",
+                "timeout: '1m'"
+              )
+            : managedYaml(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID),
         inputs: {
           investigation_id: 'inv-1',
           message: 'Why is latency high?',
@@ -257,6 +288,47 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
         },
       });
       await fixture.driveToTerminal();
+    },
+    sweep: async () => {
+      const sweepFixture = createNightshiftWorkflowFixture();
+      const definition = sweepInvestigationFailuresStepDefinition({
+        ...deps,
+        getWorkflowsManagement: () =>
+          ({
+            management: {
+              getWorkflow: async () => ({
+                originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID,
+                createdAt: '2026-01-01T00:00:00.000Z',
+              }),
+              getWorkflowExecutions: async () => ({ results: [] }),
+              searchExecutionsView: async () => ({
+                results: [...engine.workflowExecutionRepositoryMock.workflowExecutions.values()]
+                  .filter((run) =>
+                    [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(run.status)
+                  )
+                  .map((run) => ({
+                    ...run,
+                    originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+                  })),
+              }),
+            },
+          } as never),
+      });
+      sweepFixture.engine.dependencies.workflowsExtensions.hasStepDefinition.mockReturnValue(true);
+      const original =
+        sweepFixture.engine.dependencies.workflowsExtensions.getStepDefinition.getMockImplementation();
+      sweepFixture.engine.dependencies.workflowsExtensions.getStepDefinition.mockImplementation(
+        (id) => (id === definition.id ? definition : original?.(id))
+      );
+      await sweepFixture.engine.runWorkflow({
+        workflowYaml: managedYaml(NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID),
+      });
+      const sweepRun = sweepFixture.engine.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+      expect(sweepRun?.error).toBeUndefined();
+      expect(sweepRun?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(sweepRun?.context?.output).toEqual({ checked: 1, errors: 0, checkpoint: {} });
     },
     execution: () =>
       engine.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id'),
@@ -311,6 +383,102 @@ describe('managed investigation workflow failure handling', () => {
       ).toHaveLength(1);
     }
   );
+
+  it('creates an early failure root when both setup and its fallback failed', async () => {
+    const context = setup('model');
+    context.ensureForFailure.mockRejectedValue(new Error('Fallback unavailable'));
+    await context.run();
+    expect(context.execution()?.error?.message).toBe('Model unavailable');
+    expect(context.delivered).toHaveLength(0);
+    context.ensureForFailure.mockRestore();
+    await context.sweep();
+    await context.sweep();
+    expect(context.delivered).toHaveLength(1);
+    expect(context.delivered[0].params).toMatchObject({
+      subAction: 'sendMessage',
+      subActionParams: { text: expect.stringContaining('Model unavailable') },
+    });
+    expect(context.storedConversations.get('inv-1')?.events).toEqual([
+      expect.objectContaining({
+        data: {
+          execution_id: 'fake_workflow_execution_id',
+          request: 'Why is latency high?',
+          reason: 'Model unavailable',
+        },
+      }),
+    ]);
+    expect(context.storedConversations.get('inv-1')?.rounds).toEqual([]);
+    expect(context.lifecycleEmissions).toHaveLength(1);
+  });
+
+  it('reports a real workflow timeout through the managed sweep and deduplicates replay', async () => {
+    const context = setup('workflow_timeout');
+    await context.run();
+    expect(context.execution()?.status).toBe(ExecutionStatus.TIMED_OUT);
+    expect(context.ensureForFailure).not.toHaveBeenCalled();
+    expect(context.delivered).toHaveLength(1);
+    const originalError = context.execution()?.error;
+    await context.sweep();
+    await context.sweep();
+    expect(context.execution()?.status).toBe(ExecutionStatus.TIMED_OUT);
+    expect(context.execution()?.error).toEqual(originalError);
+    expect(context.delivered).toHaveLength(2);
+    expect(context.delivered.at(-1)?.params).toMatchObject({
+      subAction: 'updateMessage',
+      subActionParams: {
+        messageTs: '1.2',
+        text: expect.stringContaining('Investigation timed out'),
+      },
+    });
+    expect(context.storedConversations.get('inv-1')?.events).toEqual([
+      expect.objectContaining({
+        type: 'investigation_run_timed_out',
+        data: {
+          execution_id: 'fake_workflow_execution_id',
+          request: 'Why is latency high?',
+          reason: expect.stringContaining('timeout'),
+        },
+      }),
+    ]);
+    expect(context.storedSubjects.get('inv-1')).toHaveLength(1);
+    expect(context.lifecycleEmissions).toHaveLength(1);
+  });
+
+  it('recovers a failed fallback through the sweep without replacing the original error', async () => {
+    const context = setup('handler');
+    await context.run();
+    expect(context.execution()?.error?.message).toBe('Agent execution failed');
+    expect(context.delivered).toHaveLength(1);
+    context.ensureForFailure.mockRestore();
+    await context.sweep();
+    await context.sweep();
+    expect(context.execution()?.error?.message).toBe('Agent execution failed');
+    expect(context.delivered).toHaveLength(2);
+    expect(context.lifecycleEmissions).toHaveLength(1);
+    expect(context.storedConversations.get('inv-1')?.events).toHaveLength(1);
+  });
+
+  it('keeps older run context and Slack reporting without replacing a newer queued outcome', async () => {
+    const context = setup('model');
+    context.ensureForFailure.mockRejectedValue(new Error('Fallback unavailable'));
+    await context.run();
+    context.ensureForFailure.mockRestore();
+    context.latestRuns.mockResolvedValue({ results: [{ id: 'newer-queued-follow-up' }] });
+    await context.sweep();
+    expect(context.delivered).toHaveLength(1);
+    expect(context.storedConversations.get('inv-1')?.events).toHaveLength(1);
+    expect(context.lifecycleEmissions).toHaveLength(0);
+    expect(context.execution()?.error?.message).toBe('Model unavailable');
+  });
+
+  it('does not repeat fallback delivery when the sweep sees the same failed run', async () => {
+    const context = setup('permission');
+    await context.run();
+    await context.sweep();
+    expect(context.delivered).toHaveLength(2);
+    expect(context.lifecycleEmissions).toHaveLength(1);
+    expect(context.storedConversations.get('inv-1')?.events).toHaveLength(1);
+  });
 
   it('does not notify failure when a persistence retry succeeds', async () => {
     const context = setup(undefined, 1);

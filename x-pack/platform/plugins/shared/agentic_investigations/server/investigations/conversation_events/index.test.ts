@@ -7,7 +7,11 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { EventActorType } from '@kbn/agent-builder-common';
-import { investigationRunFailedEventType, investigationSeverityChangedEventType } from '.';
+import {
+  investigationRunFailedEventType,
+  investigationRunTimedOutEventType,
+  investigationSeverityChangedEventType,
+} from '.';
 import { INVESTIGATION_RUN_FAILED_EVENT_TYPE } from '../../../common/investigations/run_failure';
 
 const format = (data: { severity: 'low' | 'high'; previous_severity?: 'low' | 'high' }) =>
@@ -67,4 +71,29 @@ describe('investigationRunFailedEventType', () => {
       expect(result?.value).toContain('Permission denied');
     }
   );
+});
+
+describe('investigationRunTimedOutEventType', () => {
+  it('identifies an unfinished historical request to a later agent continuation', async () => {
+    const result = await investigationRunTimedOutEventType.format?.(
+      {
+        id: 'timeout',
+        created_at: '2026-01-01T00:00:00.000Z',
+        type: 'investigation_run_timed_out',
+        actor: { type: EventActorType.user, id: 'workflow-user' },
+        data: {
+          execution_id: 'source-execution',
+          request: 'Investigate latency',
+          reason: 'Deadline exceeded',
+        },
+      },
+      { request: httpServerMock.createKibanaRequest(), spaceId: 'default' }
+    );
+    expect(result?.value).toContain(
+      'historical timeout report, not a successful investigation result'
+    );
+    expect(result?.value).toContain('source-execution');
+    expect(result?.value).toContain('Investigate latency');
+    expect(result?.value).toContain('Deadline exceeded');
+  });
 });

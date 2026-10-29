@@ -59,6 +59,7 @@ export const handleInvestigationFailureStepDefinition = (
             if (lifecycleSubject) {
               emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
                 investigation_id: investigationId,
+                execution_id: executionId,
                 subject: lifecycleSubject.subject,
                 trigger_type: lifecycleSubject.triggerType,
                 started_at: lifecycleSubject.startedAt,
