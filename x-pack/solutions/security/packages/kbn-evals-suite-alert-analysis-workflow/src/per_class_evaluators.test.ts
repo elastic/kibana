@@ -8,7 +8,7 @@
 import type { Evaluator } from '@kbn/evals';
 import type { Classification } from './constants';
 import { maliciousNotClosed, perClassAccuracyEvaluators } from './per_class_evaluators';
-import { ALERT_ANALYSIS_EVAL_ALERTS } from './synthetic_alerts';
+import { ALERT_ANALYSIS_EVAL_ALERTS, RENDERED_NOISE_KEYS } from './synthetic_alerts';
 
 const run = (evaluator: Evaluator, predicted: Classification | undefined, expected: string) =>
   evaluator.evaluate({
@@ -40,6 +40,10 @@ describe('per-class accuracy', () => {
 });
 
 describe('maliciousNotClosed', () => {
+  it('is named apart from the batch evaluator', () => {
+    expect(maliciousNotClosed.name).toBe('MaliciousNotClosed:example');
+  });
+
   it('fails only a true positive classified false_positive', async () => {
     expect((await run(maliciousNotClosed, 'false_positive', 'true_positive')).score).toBe(0);
     expect((await run(maliciousNotClosed, 'inconclusive', 'true_positive')).score).toBe(1);
@@ -57,27 +61,46 @@ describe('evidence-free inconclusive alerts', () => {
     ({ expected }) => expected === 'inconclusive'
   );
 
-  // The prompt renders these fields as evidence; any of them would make "no evidence" a lie.
-  const EVIDENCE_FIELDS = [
+  // Fields the `build_agent_message` template renders into the alert block as action, actor or
+  // parameter evidence, plus the noise-envelope fields it also renders (`RENDERED_NOISE_KEYS`).
+  // Any of them present would make "no evidence" untrue.
+  const TEMPLATE_RENDERED_EVIDENCE_FIELDS = [
+    'event.action',
+    'event.outcome',
+    'event.type',
+    'event.category',
+    'event.code',
+    'user.name',
+    'user.domain',
+    'user.id',
+    'host.hostname',
     'process.name',
     'process.executable',
     'process.command_line',
-    'process.working_directory',
-    'process.hash.sha256',
+    'process.code_signature.exists',
+    'process.code_signature.trusted',
+    'process.code_signature.subject_name',
     'process.parent.name',
-    'user.name',
+    'process.parent.command_line',
+    'process.parent.executable',
+    'process.parent.code_signature.trusted',
+    'process.parent.code_signature.subject_name',
     'file.path',
     'file.name',
-    'url.full',
+    'file.hash.sha256',
     'source.ip',
+    'source.port',
     'destination.ip',
-    'event.action',
-    'host.os.name',
+    'destination.port',
+    'network.protocol',
+    'url.full',
+    'dns.question.name',
+    'cloud.account.id',
+    'aws.cloudtrail.user_identity.arn',
+    'azure.auditlogs.properties.initiated_by.user.user_principal_name',
+    'gcp.audit.authentication_info.principal_email',
   ];
-
-  it('has at least two', () => {
-    expect(inconclusive.length).toBeGreaterThanOrEqual(2);
-  });
+  const EVIDENCE_FIELDS = [...TEMPLATE_RENDERED_EVIDENCE_FIELDS, ...RENDERED_NOISE_KEYS];
 
   it.each(inconclusive.map((alert) => [alert.id, alert] as const))(
     '%s carries no action, actor or parameter fields',
@@ -87,8 +110,31 @@ describe('evidence-free inconclusive alerts', () => {
     }
   );
 
+  it('has exactly two', () => {
+    expect(inconclusive.map(({ id }) => id)).toEqual([
+      'aa-eval-inconclusive-no-evidence',
+      'aa-eval-inconclusive-cloud-no-principal',
+    ]);
+  });
+
   it('has unique ids', () => {
     const ids = ALERT_ANALYSIS_EVAL_ALERTS.map(({ id }) => id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+});
+
+describe('hard-boundary alerts', () => {
+  const hard = ALERT_ANALYSIS_EVAL_ALERTS.filter(({ id }) => id.startsWith('aa-eval-hard-'));
+
+  it('has the three hard alerts', () => {
+    expect(hard).toHaveLength(3);
+  });
+
+  it.each(hard.map((alert) => [alert.id, alert] as const))(
+    '%s does not carry noise-envelope fields the prompt renders',
+    (_id, alert) => {
+      const present = RENDERED_NOISE_KEYS.filter((key) => alert.doc[key] !== undefined);
+      expect(present).toEqual([]);
+    }
+  );
 });

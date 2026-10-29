@@ -41,7 +41,7 @@ export const perClassAccuracyEvaluators: Evaluator[] = CLASSIFICATIONS.map(creat
 
 /** Guardrail: a true positive classified false_positive would be closed as benign. */
 export const maliciousNotClosed: Evaluator = {
-  name: 'MaliciousNotClosed',
+  name: 'MaliciousNotClosed:example',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {

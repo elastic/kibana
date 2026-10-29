@@ -33,7 +33,7 @@
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
  *   - Accuracy:<class> (CODE): the same comparison per expected class, scored only on examples of
  *     that class, so a model that never answers `inconclusive` is visible.
- *   - MaliciousNotClosed (CODE, guardrail): 0 when a true positive is classified false_positive.
+ *   - MaliciousNotClosed:example (CODE, guardrail): 0 when a true positive is classified false_positive.
  *   - ValidVerdict (CODE): structured output conforms (enum classification + confidence in [0,1]).
  *   - trajectory (CODE, agent only): zero-tool guardrail — agent must not call tools after
  *     pre-built context. A prompt has no tools, so the guardrail is not run for it.

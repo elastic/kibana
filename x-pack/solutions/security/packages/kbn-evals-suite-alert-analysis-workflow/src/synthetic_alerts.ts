@@ -23,9 +23,10 @@
  *   - Tier 4 (generic/threshold rule, benign signed process) → false_positive (Gate D)
  *
  * The hard-boundary and inconclusive alerts are where models separate (every model scores 1.0
- * on the tier examples). Inconclusive alerts (Gate F) carry no action, actor or parameters; they
- * are built with `buildEvidenceFreeDoc`, which also drops the noise fields the prompt renders as
- * evidence, so the alert is truly evidence-free.
+ * on the tier examples). Inconclusive alerts (Gate F) carry no action, actor or parameters. The
+ * hard-boundary and inconclusive alerts are built with `buildDocWithoutRenderedNoise`, which drops
+ * the noise-envelope fields the prompt renders into the alert block, so those fields are neither
+ * hidden evidence nor a hint.
  *
  * Each alert carries a base rule uuid here, but the spec overrides it with a per-run unique uuid
  * before indexing (see the task in the spec). That is what guarantees the workflow's per-rule
@@ -44,10 +45,14 @@
  * rule config, etc.). This exists so the suite can meaningfully validate changes that narrow the
  * alert `_source` sent to the model — e.g. the `pick` filter in
  * https://github.com/elastic/kibana/pull/277085. Without the noise, a field allow-list would have
- * nothing to strip and the before/after comparison would be a no-op. The noise is deliberately
- * limited to fields that the workflow's `build_alert_observable_context` step does NOT read, so it
- * only bloats the attachment `_source` (what `pick` trims) and never changes the reasoning message
- * the model classifies on — keeping the golden labels valid.
+ * nothing to strip and the before/after comparison would be a no-op.
+ *
+ * Not all of that noise is invisible to the model: the `build_agent_message` step also renders
+ * `event.dataset`, `host.os.*`, `process.working_directory` and `process.hash.sha256` into the
+ * alert block (see `RENDERED_NOISE_KEYS`). The 8 tier examples still carry those rendered
+ * fields; moving them out of `buildNoiseEnvelope` is deliberately left to a separate change. The
+ * hard-boundary and inconclusive alerts do not carry them, so their reasoning message contains
+ * only the evidence each alert is meant to have.
  */
 
 import type { Classification } from './constants';
@@ -246,11 +251,12 @@ export const buildDoc = ({
 });
 
 /**
- * Noise-envelope fields the alert-analysis prompt renders into the alert block. They are harmless
- * on alerts that carry real evidence, but they would leak action/actor hints into alerts that are
- * meant to have none, so `buildEvidenceFreeDoc` removes them.
+ * Noise-envelope fields the alert-analysis prompt renders into the alert block (`event.dataset`,
+ * `host.os.*`, `process.working_directory`, `process.hash.sha256`). On alerts whose labels depend
+ * on exactly which evidence is visible they would add unrelated or misleading evidence, so
+ * `buildDocWithoutRenderedNoise` removes them.
  */
-const RENDERED_NOISE_KEYS = [
+export const RENDERED_NOISE_KEYS = [
   'process.working_directory',
   'process.hash.sha256',
   'host.os.name',
@@ -258,8 +264,8 @@ const RENDERED_NOISE_KEYS = [
   'event.dataset',
 ] as const;
 
-/** Like `buildDoc`, minus every noise field the prompt would render as evidence. */
-const buildEvidenceFreeDoc = (params: BuildAlertParams): Record<string, unknown> => {
+/** Like `buildDoc`, minus every noise-envelope field the prompt renders into the alert block. */
+const buildDocWithoutRenderedNoise = (params: BuildAlertParams): Record<string, unknown> => {
   const doc = buildDoc(params);
   RENDERED_NOISE_KEYS.forEach((key) => {
     delete doc[key];
@@ -572,7 +578,7 @@ const CERTUTIL_DOWNLOAD_EXEC: LabeledAlert = {
     'downloads from an external IP and runs the result from C:\\Users\\Public. Gate C: external ' +
     'URL with download+execute is a concrete attack indicator, and Gate C is evaluated before ' +
     'Gate D, so the valid signature and low severity do not make it routine.',
-  doc: buildDoc({
+  doc: buildDocWithoutRenderedNoise({
     id: 'aa-eval-hard-certutil-download',
     index: 8,
     ruleName: 'Certificate Utility Network Activity',
@@ -610,9 +616,9 @@ const LSASS_PROCDUMP_LOW_SEVERITY: LabeledAlert = {
     'Hard TP — Tier 2 "Credential Access via LSASS Memory" scored low severity, with a ' +
     'Microsoft-signed procdump.exe dumping lsass from a script in C:\\Users\\Public. Tier 2: ' +
     'LSASS access has few legitimate explanations and Gate D is applied cautiously for Tier 2; ' +
-    'the dump written to Windows\\Temp by a user-writable parent is a concrete indicator ' +
-    '(Gate C), and absent a legitimate explanation Gate E also lands on true_positive.',
-  doc: buildDoc({
+    'a dumping tool executing from the user-writable C:\\Users\\Public path is a concrete ' +
+    'indicator (Gate C), and absent a legitimate explanation Gate E also lands on true_positive.',
+  doc: buildDocWithoutRenderedNoise({
     id: 'aa-eval-hard-procdump-lsass',
     index: 9,
     ruleName: 'Malicious Behavior Detection Alert: Credential Access via LSASS Memory',
@@ -637,8 +643,9 @@ const LSASS_PROCDUMP_LOW_SEVERITY: LabeledAlert = {
       'process.code_signature.exists': true,
       'process.code_signature.trusted': true,
       'process.code_signature.subject_name': 'Microsoft Corporation',
-      'process.parent.name': 'collect.bat',
-      'process.parent.executable': 'C:\\Users\\Public\\collect.bat',
+      'process.parent.name': 'cmd.exe',
+      'process.parent.executable': 'C:\\Windows\\System32\\cmd.exe',
+      'process.parent.command_line': 'cmd.exe /c C:\\Users\\Public\\collect.bat',
     },
   }),
 };
@@ -652,7 +659,7 @@ const SIGNED_VENDOR_BYPASS_SCRIPT: LabeledAlert = {
     'script from its Program Files directory, signed by Qualys. Gate D: actor, action, ' +
     'arguments and signing authority fit a routine vendor workflow with no anomalous indicator; ' +
     'no URL, encoded payload or user-writable path (so Gate C does not match).',
-  doc: buildDoc({
+  doc: buildDocWithoutRenderedNoise({
     id: 'aa-eval-hard-vendor-script',
     index: 10,
     ruleName: 'Malicious Behavior Detection Alert: Suspicious PowerShell Execution',
@@ -694,8 +701,11 @@ const INCONCLUSIVE_GENERIC_NO_FIELDS: LabeledAlert = {
     'Gate F — generic Tier 4 rule alert with no process, no user, no file and no command line; ' +
     'only the host is known. No action, no actor and no parameters: any classification is ' +
     "indefensible, which is the prompt's one case for `inconclusive`. Gate D cannot match " +
-    '(nothing to fit to a routine pattern) and Gate C needs a concrete indicator.',
-  doc: buildEvidenceFreeDoc({
+    "(nothing to fit to a routine pattern) and Gate C needs a concrete indicator. Caveat: Gate F's " +
+    'literal condition holds, but it conflicts with the prompt\'s "never use inconclusive as a ' +
+    'hedge" rule and its default to false_positive for Tier 3/4 alerts without anomaly evidence, ' +
+    'so a false_positive answer may reflect the prompt rather than the model.',
+  doc: buildDocWithoutRenderedNoise({
     id: 'aa-eval-inconclusive-no-evidence',
     index: 11,
     ruleName: 'Anomalous Activity Detected',
@@ -719,8 +729,11 @@ const INCONCLUSIVE_CLOUD_NO_PRINCIPAL: LabeledAlert = {
     'action, no principal, no request parameters, no source address. Same absence of action, ' +
     'actor and parameters as the endpoint case, with cloud-flavoured rule metadata. The ' +
     'document keeps the shared endpoint envelope, so this checks that a missing action and ' +
-    'principal still yield inconclusive, not that the verdict is independent of data source.',
-  doc: buildEvidenceFreeDoc({
+    'principal still yield inconclusive, not that the verdict is independent of data source. ' +
+    "Caveat: Gate F's literal condition holds, but it conflicts with the prompt's \"never use " +
+    'inconclusive as a hedge" rule and its default to false_positive for Tier 3/4 alerts without ' +
+    'anomaly evidence, so a false_positive answer may reflect the prompt rather than the model.',
+  doc: buildDocWithoutRenderedNoise({
     id: 'aa-eval-inconclusive-cloud-no-principal',
     index: 12,
     ruleName: 'Unusual Cloud Account Activity',
@@ -733,32 +746,6 @@ const INCONCLUSIVE_CLOUD_NO_PRINCIPAL: LabeledAlert = {
       'event.kind': 'signal',
       'cloud.provider': 'aws',
       'cloud.region': 'eu-west-1',
-    },
-  }),
-};
-
-const INCONCLUSIVE_BEHAVIOR_NAME_ONLY: LabeledAlert = {
-  id: 'aa-eval-inconclusive-tier3-name-only',
-  expected: 'inconclusive',
-  description:
-    'Gate F — Tier 3 "Suspicious WMI Execution" (event.code=behavior) with no process, actor ' +
-    'or command line. Tier 3 is not Tier 2, so Gate E (true_positive by default) does not ' +
-    'apply, Gate C finds no indicator and Gate D has no evidence to fit; the technique name ' +
-    'alone is explicitly not sufficient. Gate F is the first gate that matches.',
-  doc: buildEvidenceFreeDoc({
-    id: 'aa-eval-inconclusive-tier3-name-only',
-    index: 13,
-    ruleName: 'Malicious Behavior Detection Alert: Suspicious WMI Execution',
-    ruleDescription:
-      'Elastic Defend behavioral engine detected WMI process execution, which can be used for remote execution.',
-    severity: 'medium',
-    riskScore: 47,
-    tactic: { id: 'TA0002', name: 'Execution' },
-    technique: { id: 'T1047', name: 'Windows Management Instrumentation' },
-    observable: {
-      'event.kind': 'signal',
-      'event.code': 'behavior',
-      'host.name': 'ws-it-08',
     },
   }),
 };
@@ -777,5 +764,4 @@ export const ALERT_ANALYSIS_EVAL_ALERTS: LabeledAlert[] = [
   SIGNED_VENDOR_BYPASS_SCRIPT,
   INCONCLUSIVE_GENERIC_NO_FIELDS,
   INCONCLUSIVE_CLOUD_NO_PRINCIPAL,
-  INCONCLUSIVE_BEHAVIOR_NAME_ONLY,
 ];
