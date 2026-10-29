@@ -82,6 +82,17 @@ describe('isEvidenceQuoteGrounded', () => {
     expect(isEvidenceQuoteGrounded('called sts.AssumeRole into escalated-group', text)).toBe(false);
   });
 
+  it('accepts a verbatim quote of a report that uses an ellipsis itself', () => {
+    const report =
+      'It adds tool definitions (apex_score, apex_code_review, …) to outgoing requests.';
+    expect(
+      isEvidenceQuoteGrounded(
+        'tool definitions (apex_score, apex_code_review, …) to outgoing requests',
+        report
+      )
+    ).toBe(true);
+  });
+
   it('rejects a quote word that only matches part of a report word', () => {
     const report = 'The login was successfully blocked.';
     expect(isEvidenceQuoteGrounded('The login was successful.', report)).toBe(false);
