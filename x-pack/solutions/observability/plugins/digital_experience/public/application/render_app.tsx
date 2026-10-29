@@ -40,7 +40,8 @@ export const renderApp = ({
             {/* Outside the template's error boundary, so an invalid URL param reaches the router's
             boundary, which removes it from the URL. */}
             <RouteBreadcrumbsContextProvider>
-              <PageTemplate>
+              {/* Unpadded, so each page's AppHeader spans the page; pages pad their own content. */}
+              <PageTemplate pageSectionProps={{ paddingSize: 'none' }}>
                 <RouteRenderer />
               </PageTemplate>
             </RouteBreadcrumbsContextProvider>
