@@ -9,12 +9,11 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   type EuiThemeComputed,
-  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Component } from 'react';
@@ -36,6 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm } from './components';
+import logoElasticHorizontal from './assets/logo_elastic_horizontal_color.svg';
 import type { StartServices } from '../..';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
@@ -151,7 +151,8 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
+    // POC: left-aligned card column; branding moves into the form card
+    const loginContentStyle = (euiTheme: EuiThemeComputed) =>
       css`
         position: relative;
         margin: auto;
@@ -159,11 +160,11 @@ export class LoginPage extends Component<Props, State> {
         padding-left: ${euiTheme.size.xl};
         padding-right: ${euiTheme.size.xl};
         z-index: 10;
-        text-align: center;
+        text-align: ${loginIsSupported ? 'left' : 'center'};
       `;
 
-    const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
-      loginWelcomeStyle(euiTheme),
+    const contentStyles = (euiTheme: EuiThemeComputed) => [
+      loginContentStyle(euiTheme),
       !loginIsSupported &&
         css`
           max-width: 700px;
@@ -171,16 +172,24 @@ export class LoginPage extends Component<Props, State> {
     ];
 
     const customLogo = this.state.customBranding?.logo;
+    // POC: horizontal Elastic lockup inside the card (custom branding still wins)
     const logo = customLogo ? (
       <EuiImage src={customLogo} size={40} alt="logo" />
     ) : (
-      <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
+      <EuiImage
+        src={logoElasticHorizontal}
+        alt=""
+        aria-hidden={true}
+        css={css`
+          block-size: 36px;
+          inline-size: auto;
+        `}
+      />
     );
-    // custom logo needs to be centered
-    const logoStyle = customLogo ? { padding: 0 } : {};
+
     return (
       <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
-        <header
+        <div
           css={({ euiTheme }) => css`
             margin-top: calc(${euiTheme.size.xxl} * 3);
             position: relative;
@@ -188,30 +197,32 @@ export class LoginPage extends Component<Props, State> {
             z-index: 10;
           `}
         >
-          <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
-            <span className="loginWelcome__logo" style={logoStyle}>
-              {logo}
-            </span>
-            <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
-              <h1>
+          <div css={({ euiTheme }) => contentStyles(euiTheme)}>
+            <EuiScreenReaderOnly>
+              <h1 data-test-subj="loginWelcomeTitle">
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
                   defaultMessage="Welcome to Elastic"
                 />
               </h1>
-            </EuiTitle>
+            </EuiScreenReaderOnly>
+            {!loginIsSupported && (
+              <header>
+                <span className="loginWelcome__logo">{logo}</span>
+                <EuiSpacer />
+              </header>
+            )}
+            <EuiFlexGroup gutterSize="l">
+              <EuiFlexItem>
+                {this.getLoginForm({
+                  ...loginState,
+                  isSecureConnection,
+                  isCookiesEnabled,
+                  logo: loginIsSupported ? logo : undefined,
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
-        </header>
-        <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>
-              {this.getLoginForm({
-                ...loginState,
-                isSecureConnection,
-                isCookiesEnabled,
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </div>
       </div>
     );
@@ -224,9 +235,11 @@ export class LoginPage extends Component<Props, State> {
     isCookiesEnabled,
     selector,
     loginHelp,
+    logo,
   }: LoginState & {
     isSecureConnection: boolean;
     isCookiesEnabled: boolean;
+    logo?: React.ReactNode;
   }) => {
     const isLoginExplicitlyDisabled = selector.providers.length === 0;
     if (isLoginExplicitlyDisabled) {
@@ -391,6 +404,7 @@ export class LoginPage extends Component<Props, State> {
         loginAssistanceMessage={this.props.loginAssistanceMessage}
         loginHelp={loginHelp}
         authProviderHint={searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER) || undefined}
+        logo={logo}
       />
     );
   };

@@ -8,6 +8,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  euiCanAnimate,
+  euiCantAnimate,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -26,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
-import React, { Component, Fragment } from 'react';
+import React, { Component, createElement, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
@@ -47,7 +49,12 @@ export interface LoginFormProps {
   loginAssistanceMessage: string;
   loginHelp?: string;
   authProviderHint?: string;
+  /** POC: branding rendered inside the form card (logo + wordmark). */
+  logo?: React.ReactNode;
 }
+
+// POC: login form entrance / exit motion phases
+type MotionPhase = 'hidden' | 'visible' | 'exiting' | 'gone';
 
 interface State {
   loadingState:
@@ -58,7 +65,21 @@ interface State {
   message: FormMessage;
   mode: PageMode;
   previousMode: PageMode;
+  motion: MotionPhase;
 }
+
+// POC: EUI "slight resistance" easing
+const MOTION_EASE = 'cubic-bezier(0.32, 0.72, 0, 1)';
+const ENTRANCE_DELAY_MS = 400;
+const ENTRANCE_DURATION_MS = 700;
+const EXIT_DURATION_MS = 350;
+const LOADING_HOLD_MS = 1200;
+
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 enum LoadingStateType {
   None,
@@ -123,11 +144,46 @@ const assistanceCss = (theme: UseEuiTheme) => css`
   }
 `;
 
+// POC: entrance / exit motion for the login card stack
+const formMotionCss = (phase: Exclude<MotionPhase, 'gone'>) => css`
+  opacity: ${phase === 'visible' ? 1 : 0};
+  transform: translateY(${phase === 'visible' ? 0 : 12}px);
+
+  ${euiCanAnimate} {
+    ${phase === 'visible' &&
+    css`
+      transition: opacity ${ENTRANCE_DURATION_MS}ms ${MOTION_EASE} ${ENTRANCE_DELAY_MS}ms,
+        transform ${ENTRANCE_DURATION_MS}ms ${MOTION_EASE} ${ENTRANCE_DELAY_MS}ms;
+    `}
+    ${phase === 'exiting' &&
+    css`
+      transition: opacity ${EXIT_DURATION_MS}ms ${MOTION_EASE},
+        transform ${EXIT_DURATION_MS}ms ${MOTION_EASE};
+    `}
+  }
+
+  ${euiCantAnimate} {
+    transform: none;
+    transition: none;
+    opacity: ${phase === 'hidden' || phase === 'exiting' ? 0 : 1};
+  }
+`;
+
+const loaderRingWrapCss = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 200px;
+`;
+
 export class LoginForm extends Component<LoginFormProps, State> {
   private readonly noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
     defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
     values: { origin: window.location.origin },
   });
+
+  private enterFrame: number | undefined;
+  private unmounted = false;
 
   private readonly validator: LoginValidator;
 
@@ -176,12 +232,27 @@ export class LoginForm extends Component<LoginFormProps, State> {
           : { type: MessageType.None }),
       mode,
       previousMode: mode,
+      motion: 'hidden',
     };
   }
 
   async componentDidMount() {
+    // POC: kick off entrance after first paint so the transition runs
+    this.enterFrame = window.requestAnimationFrame(() => {
+      if (!this.unmounted) {
+        this.setState({ motion: 'visible' });
+      }
+    });
+
     if (this.suggestedProvider?.usesLoginForm === false) {
       await this.loginWithSelector({ provider: this.suggestedProvider, autoLogin: true });
+    }
+  }
+
+  componentWillUnmount() {
+    this.unmounted = true;
+    if (this.enterFrame !== undefined) {
+      window.cancelAnimationFrame(this.enterFrame);
     }
   }
 
@@ -190,15 +261,36 @@ export class LoginForm extends Component<LoginFormProps, State> {
       return this.renderAutoLoginOverlay();
     }
 
+    if (this.state.motion === 'gone') {
+      return this.renderLoaderRing();
+    }
+
     return (
-      <Fragment>
+      <div css={formMotionCss(this.state.motion)}>
         {this.renderLoginAssistanceMessage()}
-        {renderMessage(this.state.message)}
         {this.renderContent()}
+        {/* POC: message below the card so clearing it on submit doesn't shift the form */}
+        {this.state.message.type !== MessageType.None && this.state.message.content && (
+          <EuiSpacer size="l" />
+        )}
+        {renderMessage(this.state.message)}
         {this.renderPageModeSwitchLink()}
-      </Fragment>
+      </div>
     );
   }
+
+  private renderLoaderRing = () => {
+    // POC: reuse boot-splash CE already registered via /ui/loader_ring.js
+    return (
+      <div css={loaderRingWrapCss} data-test-subj="loginLoaderRing">
+        {createElement('elastic-loader-ring', {
+          mode: 'sweep',
+          size: '120',
+          thickness: '5',
+        })}
+      </div>
+    );
+  };
 
   private renderLoginAssistanceMessage = () => {
     if (!this.props.loginAssistanceMessage) {
@@ -247,7 +339,15 @@ export class LoginForm extends Component<LoginFormProps, State> {
     ) : null;
 
     return (
-      <EuiPanel data-test-subj="loginForm" color="plain">
+      <EuiPanel
+        data-test-subj="loginForm"
+        color="plain"
+        paddingSize="l"
+        hasShadow
+        hasBorder={false}
+      >
+        {this.props.logo}
+        {this.props.logo && <EuiSpacer size="xl" />}
         <form onSubmit={this.submitLoginForm}>
           <EuiFormRow
             label={
@@ -295,13 +395,13 @@ export class LoginForm extends Component<LoginFormProps, State> {
             />
           </EuiFormRow>
 
-          <EuiSpacer />
+          <EuiSpacer size="l" />
 
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                fullWidth
+                minWidth={120}
                 type="submit"
                 color="primary"
                 onClick={this.submitLoginForm}
@@ -500,21 +600,47 @@ export class LoginForm extends Component<LoginFormProps, State> {
     // We try to log in with the provider that uses login form and has the lowest order.
     const providerToLoginWith = this.availableProviders.find((provider) => provider.usesLoginForm)!;
 
-    try {
-      const { location } = await this.props.http.post<{ location: string }>(
-        '/internal/security/login',
-        {
-          body: JSON.stringify({
-            providerType: providerToLoginWith.type,
-            providerName: providerToLoginWith.name,
-            currentURL: window.location.href,
-            params: { username, password },
-          }),
-        }
-      );
+    // POC: hold button loading ≥ LOADING_HOLD_MS on success, then exit → loader ring
+    const loginPromise = this.props.http.post<{ location: string }>(
+      '/internal/security/login',
+      {
+        body: JSON.stringify({
+          providerType: providerToLoginWith.type,
+          providerName: providerToLoginWith.name,
+          currentURL: window.location.href,
+          params: { username, password },
+        }),
+      }
+    );
 
-      window.location.href = location;
+    try {
+      const [{ location }] = await Promise.all([loginPromise, wait(LOADING_HOLD_MS)]);
+      if (this.unmounted) {
+        return;
+      }
+
+      if (prefersReducedMotion()) {
+        this.setState({ motion: 'gone' });
+        window.location.href = location;
+        return;
+      }
+
+      this.setState({ motion: 'exiting' });
+      await wait(EXIT_DURATION_MS);
+      if (this.unmounted) {
+        return;
+      }
+
+      this.setState({ motion: 'gone' });
+      // Paint the loader ring before navigating into the boot splash
+      window.requestAnimationFrame(() => {
+        window.location.href = location;
+      });
     } catch (error) {
+      if (this.unmounted) {
+        return;
+      }
+
       const message =
         (error as IHttpFetchError).response?.status === 401
           ? i18n.translate(
@@ -528,6 +654,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
       this.setState({
         message: { type: MessageType.Danger, content: message },
         loadingState: { type: LoadingStateType.None },
+        motion: 'visible',
       });
     }
   };
