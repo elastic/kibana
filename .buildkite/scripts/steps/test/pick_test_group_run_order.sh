@@ -3,7 +3,12 @@
 set -euo pipefail
 
 export KBN_BOOTSTRAP_NO_PREBUILT=true
-source .buildkite/scripts/bootstrap.sh
+# FTR-only dispatch uses .buildkite dependencies and supports sparse checkouts.
+if [[ "${LIMIT_CONFIG_TYPE:-}" == "functional" ]]; then
+  source .buildkite/scripts/common/util.sh
+else
+  source .buildkite/scripts/bootstrap.sh
+fi
 
 STORE_CACHE=${STORE_CACHE:-false}
 STORE_CACHE_OUTPUT=$(mktemp)
