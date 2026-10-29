@@ -481,7 +481,9 @@ class ConversationClientImpl implements ConversationClient {
     if (!this.eventEmitter) {
       return;
     }
-    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    const attachmentEvents = writtenEvents
+      .filter(isAttachmentEvent)
+      .filter((event) => !event.data.hidden);
     if (attachmentEvents.length === 0) {
       return;
     }
@@ -1528,7 +1530,8 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-        validateMetadataUpdate(template.id, template.fields, updates);
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+        validateMetadataUpdate(template.id, template.fields, updates, storedMetadata);
 
         const serialized = Object.fromEntries(
           Object.entries(updates).map(([k, v]) => {
@@ -1536,8 +1539,6 @@ class ConversationClientImpl implements ConversationClient {
             return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
           })
         );
-
-        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
         const metadata = { ...storedMetadata, ...serialized };

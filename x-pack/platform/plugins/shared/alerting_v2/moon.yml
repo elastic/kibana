@@ -141,6 +141,7 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/alerts-ui-shared'
   - '@kbn/es-types'
+  - '@kbn/resizable-layout'
   - '@kbn/app-header'
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
@@ -174,6 +175,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*
