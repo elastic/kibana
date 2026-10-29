@@ -6,7 +6,10 @@
  */
 
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
-import { ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+} from '@kbn/alertzero-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { HuntModels, HuntModelTier } from '../../../services/watches/hunt/types';
@@ -66,6 +69,7 @@ export interface ResolveHuntModelsOutcome {
 export const resolveHuntModels = async ({
   inference,
   searchInferenceEndpoints,
+  telemetryPluginId,
   request,
   uiSettingsClient,
   logger,
@@ -73,6 +77,8 @@ export const resolveHuntModels = async ({
 }: {
   inference: InferenceServerStart | undefined;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  /** Token-usage `feature_id` for every model this call resolves, rolled up under `alertzero_parent`. */
+  telemetryPluginId: string;
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
@@ -95,6 +101,14 @@ export const resolveHuntModels = async ({
             request,
             uiSettingsClient,
             logger,
+            chatModelOptions: {
+              // Without this the token-usage doc carries no feature_id/parent_feature_id, so the
+              // call is invisible to per-feature cost reporting.
+              telemetryMetadata: {
+                pluginId: telemetryPluginId,
+                aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+              },
+            },
           });
           return outcome.ok
             ? { tier, model: outcome.model }

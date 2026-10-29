@@ -77,6 +77,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/unsaved-changes-prompt",
     "@kbn/telemetry-plugin",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-mocks"
   ]
 }
