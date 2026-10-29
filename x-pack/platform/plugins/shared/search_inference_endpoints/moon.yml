@@ -70,6 +70,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -78,6 +79,4 @@ fileGroups:
     - server/**/*
     - test/scout_inference_test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

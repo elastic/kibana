@@ -1,5 +1,5 @@
 {
-  "sha1": "79d5aac5618d2dda8b4450ed9b791ce359c067cf",
+  "sha1": "9d9fa589a86a06d4dbd6357fca8bef2c11324b57",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,11 +21,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-security_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 186,
+        "line": 178,
         "column": 15
       }
     },
@@ -35,11 +37,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-security_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 302,
+        "line": 294,
         "column": 24
       }
     },
@@ -49,12 +53,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-security_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 469,
-        "column": 20
+        "line": 481,
+        "column": 26
       }
     },
     {

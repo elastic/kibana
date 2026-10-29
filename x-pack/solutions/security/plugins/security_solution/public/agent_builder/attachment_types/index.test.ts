@@ -7,7 +7,12 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions } from '.';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { registerAttachmentUiDefinitions, registerEntityAttachment } from '.';
+
+jest.mock('./entity_attachment', () => ({
+  createEntityAttachmentDefinition: jest.fn(),
+}));
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -71,4 +76,43 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(alertsCall).toBeDefined();
     expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
   });
+});
+
+describe('registerEntityAttachment impact entity opener', () => {
+  const setup = (spaces?: SpacesPluginStart) => {
+    const registerImpactEntityOpener = jest.fn();
+    registerEntityAttachment({
+      attachments: { addAttachmentType: jest.fn() } as unknown as AttachmentServiceStartContract,
+      application: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['application'],
+      experimentalFeatures: {} as unknown as Parameters<
+        typeof registerEntityAttachment
+      >[0]['experimentalFeatures'],
+      resolveSecurityCanvasContext: jest.fn(),
+      uiSettings: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['uiSettings'],
+      rendering: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['rendering'],
+      spaces,
+      registerImpactEntityOpener,
+    });
+    return registerImpactEntityOpener;
+  };
+
+  const spacesWithSolution = (solution?: string) =>
+    ({
+      getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default', solution }),
+    } as unknown as SpacesPluginStart);
+
+  it('registers the opener in a security space', async () => {
+    const registerImpactEntityOpener = setup(spacesWithSolution('security'));
+    await new Promise(process.nextTick);
+    expect(registerImpactEntityOpener).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([undefined, 'classic', 'oblt', 'es', 'workplaceai'])(
+    'does not register the opener in a %s space',
+    async (solution) => {
+      const registerImpactEntityOpener = setup(spacesWithSolution(solution));
+      await new Promise(process.nextTick);
+      expect(registerImpactEntityOpener).not.toHaveBeenCalled();
+    }
+  );
 });

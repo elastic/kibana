@@ -67,6 +67,26 @@ describe('source helpers', () => {
     );
   });
 
+  it('builds only the selected managed OTLP signal endpoints', () => {
+    expect(
+      resolveSourceCapabilities({
+        type: 'otlp',
+        sourceId: 'otlp-prod-app-logs-abc123',
+        signals: ['logs', 'traces'],
+        managedInputBaseUrl: 'https://cluster.ingest.elastic.cloud',
+      }).endpoints
+    ).toEqual([
+      {
+        id: 'logs',
+        url: 'https://cluster.ingest.elastic.cloud/inputs/otlp/otlp-prod-app-logs-abc123/v1/logs',
+      },
+      {
+        id: 'traces',
+        url: 'https://cluster.ingest.elastic.cloud/inputs/otlp/otlp-prod-app-logs-abc123/v1/traces',
+      },
+    ]);
+  });
+
   it('builds each managed OTLP signal endpoint', () => {
     expect(
       resolveSourceCapabilities({
@@ -283,12 +303,12 @@ describe('source helpers', () => {
         isCloudEnabled: true,
         isServerless: true,
       })
-    ).toEqual(['async_bulk', 'otlp', 'prometheus_remote_write', 'bulk']);
+    ).toEqual(['async_bulk', 'otlp', 'prometheus_remote_write']);
 
     expect(
       getAvailableSourceTypes({
         elasticsearchBaseUrl: 'https://localhost:9200',
       })
-    ).toEqual(['bulk']);
+    ).toEqual([]);
   });
 });

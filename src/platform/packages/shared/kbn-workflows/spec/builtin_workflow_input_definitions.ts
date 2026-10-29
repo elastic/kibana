@@ -95,6 +95,11 @@ const alertingV2NotificationGroup: JsonSchema = {
             type: 'string',
             description: 'Unique identifier of the alert',
           },
+          alert_url: {
+            type: 'string',
+            format: 'uri',
+            description: 'Absolute URL of the alert details page in Kibana, in the alert space',
+          },
           alert_status: {
             type: 'string',
             description: 'Current lifecycle status of the alert',
@@ -118,6 +123,7 @@ const alertingV2NotificationGroup: JsonSchema = {
           'space_id',
           'group_hash',
           'alert_id',
+          'alert_url',
           'alert_status',
         ],
         additionalProperties: false,

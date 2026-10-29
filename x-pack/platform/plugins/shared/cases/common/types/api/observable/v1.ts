@@ -4,59 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import * as rt from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import {
   MAX_OBSERVABLES_PER_CASE,
   MIN_BULK_DELETE_OBSERVABLE_IDS,
   OBSERVABLE_ID_MAX_LENGTH,
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema } from '../../../schema';
-import { CaseObservableBaseRt } from '../../domain/observable/v1';
+import { CaseObservableBaseSchema } from '../../domain/observable/v1';
 
-/**
- * Observables
- */
-export const ObservablePostRt = CaseObservableBaseRt;
+export const ObservablePostSchema = CaseObservableBaseSchema;
 
-export const ObservablePatchRt = rt.strict({
-  value: rt.string,
-  description: rt.union([rt.string, rt.null]),
+export const ObservablePatchSchema = z.object({
+  value: z.string(),
+  description: z.string().nullable(),
 });
 
-export type ObservablePatch = rt.TypeOf<typeof ObservablePatchRt>;
-export type ObservablePost = rt.TypeOf<typeof ObservablePostRt>;
-
-export const AddObservableRequestRt = rt.strict({
-  observable: ObservablePostRt,
+export const AddObservableRequestSchema = z.object({
+  observable: ObservablePostSchema,
 });
 
-export const UpdateObservableRequestRt = rt.strict({
-  observable: ObservablePatchRt,
+export const UpdateObservableRequestSchema = z.object({
+  observable: ObservablePatchSchema,
 });
 
-export const BulkAddObservablesRequestRt = rt.strict({
-  caseId: rt.string,
-  observables: rt.array(ObservablePostRt),
+export const BulkAddObservablesRequestSchema = z.object({
+  caseId: z.string(),
+  observables: z.array(ObservablePostSchema),
 });
 
-const BoundedObservableIdRt = limitedStringSchema({
+const BoundedObservableIdSchema = limitedStringSchema({
   fieldName: 'observableId',
   min: 1,
   max: OBSERVABLE_ID_MAX_LENGTH,
 });
 
-export const BulkDeleteObservablesRequestRt = rt.strict({
-  caseId: rt.string,
+export const BulkDeleteObservablesRequestSchema = z.object({
+  caseId: z.string(),
   observableIds: limitedArraySchema({
-    codec: BoundedObservableIdRt,
+    codec: BoundedObservableIdSchema,
     min: MIN_BULK_DELETE_OBSERVABLE_IDS,
     max: MAX_OBSERVABLES_PER_CASE,
     fieldName: 'observableIds',
   }),
 });
 
-export type AddObservableRequest = rt.TypeOf<typeof AddObservableRequestRt>;
-export type UpdateObservableRequest = rt.TypeOf<typeof UpdateObservableRequestRt>;
-export type BulkAddObservablesRequest = rt.TypeOf<typeof BulkAddObservablesRequestRt>;
-export type BulkDeleteObservablesRequest = rt.TypeOf<typeof BulkDeleteObservablesRequestRt>;
+export type ObservablePost = z.infer<typeof ObservablePostSchema>;
+export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
+export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
+export type UpdateObservableRequest = z.infer<typeof UpdateObservableRequestSchema>;
+export type BulkAddObservablesRequest = z.infer<typeof BulkAddObservablesRequestSchema>;
+export type BulkDeleteObservablesRequest = z.infer<typeof BulkDeleteObservablesRequestSchema>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
@@ -22,14 +22,13 @@ const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) =>
 });
 
 const setup = (docs: Array<Record<string, unknown>> = []) => {
-  const search = jest.fn().mockResolvedValue({
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.search.mockResolvedValue({
     hits: { hits: docs.map((source, i) => ({ _id: `doc-${i}`, _source: source })) },
-  });
-  const dataStreams = dataStreamServiceMock.createStartContract();
-  dataStreams.initializeClient.mockResolvedValue({ search } as never);
+  } as never);
 
-  const deps = { dataStreams, logger: loggingSystemMock.createLogger() };
-  return { deps, search };
+  const deps = { esClient, logger: loggingSystemMock.createLogger() };
+  return { deps, search: esClient.search };
 };
 
 describe('queryNotifications', () => {
@@ -58,8 +57,8 @@ describe('queryNotifications', () => {
       to: '2026-07-20T00:00:00.000Z',
     });
 
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toEqual(
+    const [request] = search.mock.calls[0];
+    expect(request?.query?.bool?.filter).toEqual(
       expect.arrayContaining([
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
@@ -77,8 +76,8 @@ describe('queryNotifications', () => {
 
     await queryNotifications(deps);
 
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toEqual([]);
+    const [request] = search.mock.calls[0];
+    expect(request?.query?.bool?.filter).toEqual([]);
   });
 
   it('returns the full collapsed set for the client to paginate', async () => {

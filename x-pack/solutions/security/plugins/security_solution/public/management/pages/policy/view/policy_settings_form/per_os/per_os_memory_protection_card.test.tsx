@@ -23,7 +23,7 @@ import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } f
 import { CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL } from '../components/shared_translations';
 import type { PerOsMemoryProtectionCardProps } from './per_os_memory_protection_card';
 import {
-  LOCKED_CARD_MEMORY_TITLE,
+  MEMORY_PROTECTION_CARD_TITLE,
   PerOsMemoryProtectionCard,
 } from './per_os_memory_protection_card';
 import { selectOsControlOption } from './select_os_control_option.test.helpers';
@@ -206,7 +206,7 @@ describe('PerOsMemoryProtectionCard', () => {
       render();
 
       expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
-        exactMatchText(LOCKED_CARD_MEMORY_TITLE)
+        exactMatchText(MEMORY_PROTECTION_CARD_TITLE)
       );
     });
   });

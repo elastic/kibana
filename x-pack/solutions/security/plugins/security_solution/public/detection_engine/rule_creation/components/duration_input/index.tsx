@@ -116,8 +116,9 @@ export const DurationInput = memo(function DurationInputComponent({
             {...rest}
           />
         }
+        // No "max" on purpose: VoiceOver announces a spinbutton's value as a percentage of its
+        // min-max range, so a sentinel like Number.MAX_SAFE_INTEGER is always read as "0%".
         min={minimumValue}
-        max={Number.MAX_SAFE_INTEGER}
         onChange={onChangeTimeVal}
         value={durationValue}
         data-test-subj="interval"

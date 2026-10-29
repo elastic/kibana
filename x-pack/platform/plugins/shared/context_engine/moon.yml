@@ -86,12 +86,15 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/esql-utils'
   - '@kbn/ebt-click'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/unsaved-changes-prompt'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -100,6 +103,4 @@ fileGroups:
     - scripts/**/*
     - test/scout_agent_builder/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

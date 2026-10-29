@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { FilterableSource } from '@kbn/data-source';
 import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,8 +40,7 @@ import type {
   AppHeaderShareAction,
 } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { AppMenuComponent, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
@@ -67,6 +67,7 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
+import { useHeaderMode } from './use_header_mode';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
@@ -140,6 +141,9 @@ const DashboardAppHeader = ({
   );
 };
 
+const isEsqlDataView = (dataView: FilterableSource) =>
+  'type' in dataView && dataView.type === 'esql';
+
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
@@ -152,15 +156,10 @@ export function InternalDashboardTopNav({
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const chromeStyle = useChromeStyle();
-  // Header rendering mode:
-  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
-  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
-  //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
-  const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = chromeStyle === 'project';
-  const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
+  const headerMode = useHeaderMode({
+    isEmbeddedViaUrl: Boolean(embedSettings?.isEmbeddedViaUrl),
+    isHostedByApp: Boolean(setCustomHeaderActionMenu),
+  });
 
   const { onAppLeave } = useDashboardMountContext();
 
@@ -185,7 +184,7 @@ export function InternalDashboardTopNav({
     dataLoading,
     canCancel,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.dataViews$,
+    dashboardApi.dataSources$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
     dashboardApi.isApproximate$,
@@ -377,9 +376,7 @@ export function InternalDashboardTopNav({
     }
     const disabled =
       (allDataViews?.length ?? 0) > 0 &&
-      !allDataViews?.some(
-        (dv) => (dv.type !== 'esql' && dv.isTimeBased()) || (dv.type === 'esql' && dv.timeFieldName)
-      );
+      !allDataViews?.some((dv) => (isEsqlDataView(dv) ? dv.timeFieldName : dv.isTimeBased()));
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
@@ -509,6 +506,9 @@ export function InternalDashboardTopNav({
             experimentalDashboardAiAction={experimentalDashboardAiAction}
           />
         </DashboardFavoritesProvider>
+      )}
+      {headerMode === 'embedded' && visibilityProps.showTopNavMenu && (
+        <AppMenuComponent config={appMenuConfig} />
       )}
       {headerMode === 'legacy' && (
         <LegacyDashboardHeader
