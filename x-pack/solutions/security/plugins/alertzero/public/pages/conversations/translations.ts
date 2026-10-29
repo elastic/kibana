@@ -17,6 +17,12 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   assignError: i18n.translate('xpack.alertzero.queue.assignError', {
     defaultMessage: 'Could not update assignees',
   }),
+  reopenSuccess: i18n.translate('xpack.alertzero.queue.reopenSuccess', {
+    defaultMessage: 'Investigation reopened',
+  }),
+  reopenError: i18n.translate('xpack.alertzero.queue.reopenError', {
+    defaultMessage: 'Could not reopen the investigation',
+  }),
 });
 
 export const COPY_LINK_TOASTS = Object.freeze({

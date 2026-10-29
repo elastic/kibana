@@ -21,6 +21,7 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { getSourceWriteConflictMetadata } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 import {
@@ -198,6 +199,7 @@ export function createQueryKnowledgeIndicatorTool({
               type: ToolResultType.error,
               data: {
                 message: `Failed to create query knowledge indicator: ${message}`,
+                metadata: getSourceWriteConflictMetadata(error),
               },
             },
           ],

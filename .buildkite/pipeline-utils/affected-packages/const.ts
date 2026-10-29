@@ -14,6 +14,10 @@ export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 export const CRITICAL_FILES_JEST_UNIT_TESTS = [
   'scripts/jest.js',
   'scripts/jest_all.js',
+  'scripts/moon_jest.js',
+  'scripts/moon_test_configs.js',
+  'packages/kbn-moon/src/test_config_selection.ts',
+  '.moon/tasks/jest-unit-tests.yml',
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig.json',
@@ -32,6 +36,9 @@ export const CRITICAL_FILES_JEST_UNIT_TESTS = [
 export const CRITICAL_FILES_JEST_INTEGRATION_TESTS = [
   'scripts/jest_integration.js',
   'scripts/jest_all.js',
+  'scripts/moon_test_configs.js',
+  'packages/kbn-moon/src/test_config_selection.ts',
+  '.moon/tasks/jest-integration-tests.yml',
   'package.json',
   'pnpm-lock.yaml',
   'tsconfig.json',

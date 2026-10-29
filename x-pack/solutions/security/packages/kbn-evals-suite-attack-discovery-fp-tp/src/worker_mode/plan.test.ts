@@ -17,6 +17,7 @@ import {
   assertWorkerModeSpace,
   buildWorkerModePlan,
   createWorkerModeSuffix,
+  hostUserFromAlerts,
   resolveWorkerModeExample,
   WORKER_MODE_EXAMPLES,
   workerModeCleanupTargets,
@@ -175,6 +176,10 @@ describe('buildWorkerModePlan', () => {
     expect(plan.entityReadAlias).toBe('entities-latest-qa-fp');
   });
 
+  it('returns a classic plan without the serverless flag', () => {
+    expect(plan.serverless).toBe(false);
+  });
+
   it('returns the host of every alert and event', () => {
     const hostIds = [...plan.world.alerts, ...plan.world.events].map(
       ({ source }) => (source.host as { id: string }).id
@@ -234,6 +239,10 @@ describe('buildWorkerModePlan', () => {
     );
   });
 
+  it('returns a set that does not share its host', () => {
+    expect(plan.sharesHostUser).toBe(false);
+  });
+
   it('throws for the default space', () => {
     expect(() =>
       buildWorkerModePlan({ space: 'default', exampleId: 'encoded-powershell.fp', now: NOW })
@@ -289,6 +298,113 @@ describe('buildWorkerModePlan for the truncated-events example', () => {
   });
 });
 
+describe('buildWorkerModePlan on serverless', () => {
+  const classic = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.fp',
+    now: NOW,
+    suffix: 'run1',
+  });
+  const plan = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.fp',
+    now: NOW,
+    suffix: 'run1',
+    serverless: true,
+  });
+
+  it('flags the plan as serverless', () => {
+    expect(plan.serverless).toBe(true);
+  });
+
+  it('rewrites every event index into the seeder-owned namespace', () => {
+    expect(plan.events.length).toBe(classic.events.length);
+    expect(
+      plan.events.filter(
+        ({ index }) => index.startsWith('logs-endpoint.events.fp-tp-') && index.endsWith('-qa-fp')
+      )
+    ).toEqual(plan.events);
+  });
+
+  it('keeps every event id and rescopes data_stream.namespace to the space', () => {
+    expect(plan.events.map(({ id }) => id)).toEqual(classic.events.map(({ id }) => id));
+    expect(
+      new Set(
+        plan.world.events.map(
+          ({ source }) => (source.data_stream as { namespace: string }).namespace
+        )
+      )
+    ).toEqual(new Set(['qa-fp']));
+  });
+
+  it('leaves alerts, entities and hosts as the classic plan', () => {
+    expect(plan.alertOperations).toEqual(classic.alertOperations);
+    expect(plan.entityReadAlias).toBe(classic.entityReadAlias);
+    expect([...plan.hostIds].sort()).toEqual([...classic.hostIds].sort());
+  });
+});
+
+describe('buildWorkerModePlan sharing a host and user', () => {
+  const first = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.tp',
+    now: NOW,
+    suffix: 'run1',
+  });
+  const hostUser = hostUserFromAlerts(first.world.alerts);
+  const plain = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.tp',
+    now: NOW,
+    suffix: 'run2',
+  });
+  const shared = buildWorkerModePlan({
+    space: 'qa-fp',
+    exampleId: 'encoded-powershell.tp',
+    now: NOW,
+    suffix: 'run2',
+    hostUser,
+  });
+
+  it('returns the first set host id', () => {
+    expect(shared.hostIds).toEqual(first.hostIds);
+  });
+
+  it('returns the first set host and user names', () => {
+    expect(hostUserFromAlerts(shared.world.alerts)).toEqual(hostUser);
+  });
+
+  it('returns the alert ids of its own run marker', () => {
+    expect(shared.alertIds).toEqual(plain.alertIds);
+  });
+
+  it('returns event ids disjoint from the first set', () => {
+    const firstEventIds = first.events.map(({ id }) => id);
+    expect(shared.events.map(({ id }) => id).filter((id) => firstEventIds.includes(id))).toEqual(
+      []
+    );
+  });
+
+  it('returns no entities to write', () => {
+    expect(shared.entities).toEqual([]);
+  });
+
+  it('returns sharesHostUser', () => {
+    expect(shared.sharesHostUser).toBe(true);
+  });
+});
+
+describe('hostUserFromAlerts', () => {
+  it('throws when the alerts name more than one host', () => {
+    expect(() =>
+      hostUserFromAlerts([
+        { source: { host: { id: 'h1', name: 'host-a' }, user: { name: 'alice' } } },
+        { source: { host: { id: 'h2', name: 'host-b' }, user: { name: 'alice' } } },
+      ])
+    ).toThrow('exactly one host and one user');
+  });
+});
+
 describe('workerModeCleanupTargets', () => {
   const targets = workerModeCleanupTargets('qa-fp');
 
@@ -308,6 +424,13 @@ describe('workerModeCleanupTargets', () => {
 
   it('returns raw events in every namespace', () => {
     expect(targets.eventsIndexPattern).toBe('logs-endpoint.events.*');
+  });
+
+  it('keeps serverless cleanup inside the seeder-owned namespace', () => {
+    expect(workerModeCleanupTargets('qa-fp', true).eventsIndexPattern).toBe(
+      'logs-endpoint.events.fp-tp-*'
+    );
+    expect(workerModeCleanupTargets('qa-fp').eventsIndexPattern).toBe('logs-endpoint.events.*');
   });
 
   it('returns the space entity alias', () => {

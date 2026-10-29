@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { SpanKind } from '@opentelemetry/api';
+import {
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import type { ToolRunnableConfig } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
 import { ToolMessage } from '@langchain/core/messages';
@@ -294,10 +300,22 @@ export const createTaskTool = (params: TaskToolParams) => {
       }
 
       try {
-        const result = await subAgent.invoke(modifiedState, {
-          callbacks: config?.callbacks,
-          signal: config?.signal,
-        });
+        const result = await withActiveInferenceSpan(
+          `invoke_agent ${input.subagent_name}`,
+          {
+            kind: SpanKind.INTERNAL,
+            attributes: {
+              [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
+              [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
+              [GenAISemanticConventions.GenAIAgentName]: input.subagent_name,
+            },
+          },
+          () =>
+            subAgent.invoke(modifiedState, {
+              callbacks: config?.callbacks,
+              signal: config?.signal,
+            })
+        );
 
         return new Command({
           update: {
