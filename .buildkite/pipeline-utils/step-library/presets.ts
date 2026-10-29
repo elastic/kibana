@@ -63,6 +63,7 @@ export const usZones = [
 
 export const spotZones = {
   centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
+  centralFCBA: ['us-central1-f', 'us-central1-c', 'us-central1-b', 'us-central1-a'],
   allUS: usZones,
   // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
   n2dPreemptible: [
