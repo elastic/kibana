@@ -94,7 +94,6 @@ Follow existing patterns in the target area first; below are common defaults.
 
 ## CI
 - Use the `bk` CLI when interacting with Buildkite.
-- For fast PR feedback without the full build, comment `run static checks` (only when the user asks).
 
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
