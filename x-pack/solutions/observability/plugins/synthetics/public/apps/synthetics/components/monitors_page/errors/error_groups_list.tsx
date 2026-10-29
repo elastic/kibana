@@ -34,6 +34,7 @@ import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import type { ClientPluginsStart } from '../../../../../plugin';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { ErrorPreviewFlyout } from './error_preview_flyout';
 
 export const ErrorGroupsList = ({
@@ -316,8 +317,7 @@ const ExpandedGroupRow = ({
       align: 'right',
       render: (value: number) => {
         if (!value || isNaN(value)) return <>{'--'}</>;
-        if (value < 60000) return <EuiText size="s">{`${Math.round(value / 1000)}s`}</EuiText>;
-        return <EuiText size="s">{`${Math.round(value / 60000)}m`}</EuiText>;
+        return <EuiText size="s">{formatTestDuration(value, true)}</EuiText>;
       },
     },
     {

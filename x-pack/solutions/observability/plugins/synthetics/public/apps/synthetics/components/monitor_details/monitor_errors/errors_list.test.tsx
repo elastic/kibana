@@ -6,13 +6,19 @@
  */
 
 import type { PingState } from '../../../../../../common/runtime_types';
-import { computeActiveErrorKeys, getNextUpStateForResolvedError } from './errors_list';
+import {
+  computeActiveErrorKeys,
+  getErrorStateDurationMs,
+  getNextUpStateForResolvedError,
+} from './errors_list';
 
 const makePingState = (overrides: {
   configId: string;
   locationId: string;
   timestamp: string;
   startedAt?: string;
+  durationMs?: number;
+  timespan?: { gte: string; lt: string };
 }): PingState =>
   ({
     config_id: overrides.configId,
@@ -22,7 +28,7 @@ const makePingState = (overrides: {
     state: {
       id: `state-${overrides.configId}-${overrides.locationId}-${overrides.timestamp}`,
       started_at: overrides.startedAt ?? overrides.timestamp,
-      duration_ms: 0,
+      duration_ms: overrides.durationMs ?? 0,
       ends: null,
       checks: 1,
       up: 0,
@@ -36,6 +42,7 @@ const makePingState = (overrides: {
       id: overrides.configId,
       name: 'm',
       status: 'down',
+      ...(overrides.timespan ? { timespan: overrides.timespan } : {}),
     },
     error: { message: 'boom' },
     docId: 'd',
@@ -154,5 +161,120 @@ describe('computeActiveErrorKeys', () => {
 
     expect(ids.has(activeKey(errUsEast))).toBe(true);
     expect(ids.size).toBe(1);
+  });
+});
+
+describe('getErrorStateDurationMs', () => {
+  const MONITOR = 'm-123';
+  const timespan = { gte: '2026-05-07T10:05:00.000Z', lt: '2026-05-07T10:10:00.000Z' };
+  const errorState = makePingState({
+    configId: MONITOR,
+    locationId: 'us-east',
+    timestamp: '2026-05-07T10:05:00.000Z',
+    startedAt: '2026-05-07T10:00:00.000Z',
+    durationMs: 300_000,
+    timespan,
+  });
+
+  it('adds the time until the next up state for a resolved error', () => {
+    const upUsEast = makePingState({
+      configId: MONITOR,
+      locationId: 'us-east',
+      timestamp: '2026-05-07T10:07:00.000Z',
+      startedAt: '2026-05-07T10:07:00.000Z',
+    });
+
+    expect(
+      getErrorStateDurationMs({
+        errorState,
+        upStates: [upUsEast],
+        isActive: false,
+        scopeByMonitor: true,
+      })
+    ).toBe(420_000);
+  });
+
+  it('returns only the recorded duration for a resolved error with no matching up state', () => {
+    const upEuWest = makePingState({
+      configId: MONITOR,
+      locationId: 'eu-west',
+      timestamp: '2026-05-07T10:07:00.000Z',
+      startedAt: '2026-05-07T10:07:00.000Z',
+    });
+
+    expect(
+      getErrorStateDurationMs({
+        errorState,
+        upStates: [upEuWest],
+        isActive: false,
+        scopeByMonitor: true,
+      })
+    ).toBe(300_000);
+  });
+
+  it('adds the time since the last check for an active error', () => {
+    expect(
+      getErrorStateDurationMs({
+        errorState,
+        upStates: [],
+        isActive: true,
+        scopeByMonitor: true,
+        now: Date.parse('2026-05-07T10:06:30.000Z'),
+      })
+    ).toBe(390_000);
+  });
+
+  it('caps the time since the last check at one check interval for an active error', () => {
+    expect(
+      getErrorStateDurationMs({
+        errorState,
+        upStates: [],
+        isActive: true,
+        scopeByMonitor: true,
+        now: Date.parse('2026-05-07T11:00:00.000Z'),
+      })
+    ).toBe(600_000);
+  });
+
+  it('returns the recorded duration when the ping has no timespan', () => {
+    const withoutTimespan = makePingState({
+      configId: MONITOR,
+      locationId: 'us-east',
+      timestamp: '2026-05-07T10:05:00.000Z',
+      durationMs: 300_000,
+    });
+
+    expect(
+      getErrorStateDurationMs({
+        errorState: withoutTimespan,
+        upStates: [],
+        isActive: true,
+        scopeByMonitor: true,
+        now: Date.parse('2026-05-07T11:00:00.000Z'),
+      })
+    ).toBe(300_000);
+  });
+
+  it('counts the gap to recovery when the recorded duration is zero', () => {
+    const upUsEast = makePingState({
+      configId: MONITOR,
+      locationId: 'us-east',
+      timestamp: '2026-05-07T10:09:42.000Z',
+      startedAt: '2026-05-07T10:09:42.000Z',
+    });
+
+    expect(
+      getErrorStateDurationMs({
+        errorState: makePingState({
+          configId: MONITOR,
+          locationId: 'us-east',
+          timestamp: '2026-05-07T10:05:00.000Z',
+          timespan,
+        }),
+        upStates: [upUsEast],
+        isActive: false,
+        scopeByMonitor: true,
+      })
+    ).toBe(282_000);
   });
 });
