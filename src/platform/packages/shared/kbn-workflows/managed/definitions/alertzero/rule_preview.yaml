@@ -30,7 +30,8 @@ triggers:
           description: >-
             Source indices the bodies read. Checked for `read` as the running identity
             before any preview; an unreadable one skips both previews. Exclusion
-            patterns (`-name`) are ignored.
+            patterns (`-name`) and cross-cluster patterns (`cluster:name`) are ignored;
+            a `::selector` suffix is dropped.
       required:
         - preview_body
         - space_id
@@ -73,15 +74,21 @@ steps:
   # nothing. Asked up front so the caller can say which indices are the problem.
   #
   # A `-name` entry excludes indices from the search; `_has_privileges` would read it
-  # as an index name the identity cannot access. Rendered as a JSON array body, since
-  # Liquid cannot filter an array on a prefix any other way.
+  # as an index name the identity cannot access. A `cluster:name` entry is left out
+  # too: the API checks names against local grants only and answers false for a
+  # remote pattern the role does hold through `remote_indices`, and an unreadable
+  # remote still surfaces as the preview's "no matching indices" warning. A
+  # `::failures` / `::data` selector is dropped from the name, since the API rejects
+  # the whole request when any name carries one. Rendered as a JSON array body,
+  # since Liquid cannot filter an array on a prefix any other way.
   - name: probe_names
     type: data.set
     with:
       csv: >-
         {%- for name in inputs.indices -%}
-        {%- assign first = name | slice: 0, 1 -%}
-        {%- if first != '-' -%},{{ name | json }}{%- endif -%}
+        {%- assign base = name | split: '::' | first -%}
+        {%- assign first = base | slice: 0, 1 -%}
+        {%- if first == '-' or base contains ':' -%}{%- else -%},{{ base | json }}{%- endif -%}
         {%- endfor -%}
 
   - name: probe_privileges

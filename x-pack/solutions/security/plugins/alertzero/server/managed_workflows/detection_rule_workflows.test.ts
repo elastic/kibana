@@ -1493,7 +1493,10 @@ describe('detection rule workflows', () => {
         expect(String(probe.if)).toContain('steps.probe_names.output.csv != blank');
 
         // `-name` entries exclude indices from the search and are not index names the
-        // identity could hold a privilege on, so they stay out of the probe.
+        // identity could hold a privilege on, so they stay out of the probe. So do
+        // `cluster:name` entries: `_has_privileges` checks local grants only and
+        // answers false for a remote pattern the role holds through `remote_indices`.
+        // A `::failures` selector is stripped, as the API rejects any name carrying one.
         const csvOf = (indices: unknown) =>
           createWorkflowLiquidEngine().parseAndRenderSync(
             String((byName('probe_names').with as Record<string, string>).csv),
@@ -1504,11 +1507,22 @@ describe('detection rule workflows', () => {
             (probe.with?.body as { index: Array<{ names: string }> }).index[0].names,
             { steps: { probe_names: { output: { csv } } } }
           );
-        expect(namesOf(csvOf(['logs-*', '-*elastic-cloud-logs-*', 'custom-edr-*']))).toEqual([
-          'logs-*',
-          'custom-edr-*',
-        ]);
+        expect(
+          namesOf(
+            csvOf([
+              'logs-*',
+              '-*elastic-cloud-logs-*',
+              'remote1:logs-*',
+              '*:logs-*',
+              'remote1:logs-*::failures',
+              'custom-edr-*',
+              'custom-edr-*::failures',
+            ])
+          )
+        ).toEqual(['logs-*', 'custom-edr-*', 'custom-edr-*']);
         expect(csvOf(['-*elastic-cloud-logs-*'])).toBe('');
+        expect(csvOf(['remote1:logs-*'])).toBe('');
+        expect(namesOf(csvOf(['logs-*::data']))).toEqual(['logs-*']);
         expect(csvOf(undefined)).toBe('');
         for (const name of ['preview_rule', 'preview_proposed']) {
           expect(String(byName(name).if)).toContain(
