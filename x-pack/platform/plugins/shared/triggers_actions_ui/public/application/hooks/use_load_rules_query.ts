@@ -81,7 +81,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       });
     },
     onSuccess: (response) => {
-      if (!response?.data?.length && page.index > 0) {
+      if (!response?.data?.length && !response?.errors?.length && page.index > 0) {
         onPage({ ...page, index: 0 });
       }
     },
