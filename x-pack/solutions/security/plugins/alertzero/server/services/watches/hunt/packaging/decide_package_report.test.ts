@@ -183,8 +183,9 @@ const forensicsHandoff: ActionCatalogEntry = {
 const enrolledHost = (
   name: string,
   agentId: string,
-  capabilities: string[] = ['isolation']
-): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities });
+  capabilities: string[] = ['isolation'],
+  capabilitiesSource: CurrentRunHost['capabilitiesSource'] = 'reported'
+): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities, capabilitiesSource });
 
 const selector = (
   overrides: Partial<ProcessSelector> & Pick<ProcessSelector, 'processKey' | 'processName'>
@@ -300,6 +301,21 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].comment).toContain('ghost');
   });
 
+  it('mints no executable action for a run whose evidence is all on a remote cluster', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [{ name: 'ubuntu', enrolled: false, capabilities: [] }],
+        allEventsActionable: false,
+        hasProcessBearingEvent: false,
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].actionWorkflowId).toBeUndefined();
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
   it('mints executable plus a recommendation when some hosts are unenrolled (trigger: partial enrollment)', () => {
     const result = decidePackageReport({
       conversationId,
@@ -318,6 +334,52 @@ describe('decidePackageReport', () => {
     expect(recommendation).toBeDefined();
     expect(recommendation?.comment).toContain('ghost');
     expect(recommendation?.comment).toContain('not enrolled');
+  });
+
+  it('packages a remote-only host as a recommendation naming its cluster, beside the local host action', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          enrolledHost('host-a', 'agent-a'),
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['infosec_zocalo'] },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    expect(result.proposals.map((p) => p.title).sort()).toEqual([
+      'Analyst recommendation',
+      'Isolate host host-a',
+    ]);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain(
+      "Host ubuntu (infosec_zocalo) was seen only on a remote cluster, so response actions from this deployment can't reach it."
+    );
+    // It was never looked up in local Fleet, so "not enrolled" would be unchecked.
+    expect(recommendation?.comment).not.toContain('not enrolled');
+  });
+
+  it('names local unenrolled and remote-only hosts on separate lines', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          { name: 'ghost', enrolled: false, capabilities: [] },
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['b', 'c'] },
+          { name: 'db-1', enrolled: false, capabilities: [], remoteClusters: ['d'] },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    const [recommendation] = result.proposals;
+    expect(recommendation.comment).toContain(
+      'Host ghost is not enrolled, so no Defend action reaches it.'
+    );
+    expect(recommendation.comment).toContain(
+      "Hosts ubuntu (b, c), db-1 (d) were seen only on a remote cluster, so response actions from this deployment can't reach them."
+    );
   });
 
   it('mints a recommendation when the catalog errors (trigger: no executable proposal at all)', () => {
@@ -360,7 +422,13 @@ describe('decidePackageReport', () => {
           kind: 'host',
           value: 'host-a',
           reachable: true,
-          host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+          host: {
+            name: 'host-a',
+            enrolled: true,
+            agentId: 'agent-a',
+            capabilities: [],
+            capabilitiesSource: 'reported',
+          },
         },
       })
     ).toBe(false);
@@ -513,7 +581,13 @@ describe('decidePackageReport', () => {
     kind: 'process',
     value: processSelector.processName,
     reachable: true,
-    host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+    host: {
+      name: 'host-a',
+      enrolled: true,
+      agentId: 'agent-a',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
     processSelector,
   });
 
@@ -776,7 +850,13 @@ describe('decidePackageReport', () => {
       const subjects = collectSubjects(
         baseHitState({
           hosts: [
-            { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+            {
+              name: 'host-a',
+              enrolled: true,
+              agentId: 'agent-a',
+              capabilities: [],
+              capabilitiesSource: 'reported',
+            },
             { name: 'ghost', enrolled: false, capabilities: [] },
           ],
           processSelectors: [
@@ -873,6 +953,34 @@ describe('decidePackageReport', () => {
       );
       expect(result.proposals.find((p) => !p.actionWorkflowId)?.comment).toContain(
         'does not report isolation'
+      );
+    });
+
+    it('says the capabilities could not be read, not that the endpoint lacks them, when the metadata was unavailable', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [enrolledHost('host-a', 'agent-a', [], 'unavailable')],
+          processSelectors: [ps1, rundll],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+      ]);
+      expect(
+        executable.every((p) =>
+          p.comment.includes(
+            "the endpoint's capabilities could not be read (memdump_process is not assumed)"
+          )
+        )
+      ).toBe(true);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('**Held back**');
+      expect(recommendation?.comment).toContain(
+        "the endpoint's capabilities could not be read (isolation is not assumed)"
       );
     });
 

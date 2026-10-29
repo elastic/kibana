@@ -39,53 +39,32 @@ apiTest.describe('Install rule template API', { tag: API_ENGINE_TAG }, () => {
     await apiServices.alertingV2.rules.cleanUp();
   });
 
-  apiTest(
-    'should create the rule from the body and record the template on it',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.ruleTemplates.create({
-        id: 'nginx-error-rate',
-        attributes: buildRuleTemplateData({ metadata: { name: 'nginx-error-rate' } }),
-      });
-      const body = buildCreateRuleData({
-        metadata: { name: 'nginx-error-rate-edited', tags: ['nginx'] },
-        schedule: { every: '5m', lookback: '10m' },
-      });
+  apiTest('should create the rule from the body', async ({ apiClient, apiServices }) => {
+    await apiServices.alertingV2.ruleTemplates.create({
+      id: 'nginx-error-rate',
+      attributes: buildRuleTemplateData({ metadata: { name: 'nginx-error-rate' } }),
+    });
+    const body = buildCreateRuleData({
+      metadata: { name: 'nginx-error-rate-edited', tags: ['nginx'] },
+      schedule: { every: '5m', lookback: '10m' },
+    });
 
-      const response = await apiClient.post(getInstallRuleTemplateUrl('nginx-error-rate'), {
-        headers: writerHeaders,
-        body,
-      });
+    const response = await apiClient.post(getInstallRuleTemplateUrl('nginx-error-rate'), {
+      headers: writerHeaders,
+      body,
+    });
 
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata).toMatchObject({
-        name: 'nginx-error-rate-edited',
-        tags: ['nginx'],
-        template: { id: 'nginx-error-rate' },
-      });
-      expect(response.body.schedule).toStrictEqual(body.schedule);
-      expect(response.body.enabled).toBe(true);
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.metadata).toMatchObject({
+      name: 'nginx-error-rate-edited',
+      tags: ['nginx'],
+    });
+    expect(response.body.schedule).toStrictEqual(body.schedule);
+    expect(response.body.enabled).toBe(true);
 
-      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
-      expect(persisted.metadata.name).toBe('nginx-error-rate-edited');
-      expect(persisted.metadata.template).toStrictEqual({ id: 'nginx-error-rate' });
-    }
-  );
-
-  apiTest(
-    'should record the template when the body is the unedited template rule',
-    async ({ apiClient, apiServices }) => {
-      const attributes = buildRuleTemplateData({ metadata: { name: 'as-is' } });
-      await apiServices.alertingV2.ruleTemplates.create({ id: 'as-is', attributes });
-
-      const response = await apiClient.post(getInstallRuleTemplateUrl('as-is'), {
-        headers: writerHeaders,
-        body: attributes.rule,
-      });
-
-      expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata.template).toStrictEqual({ id: 'as-is' });
-    }
-  );
+    const persisted = await apiServices.alertingV2.rules.get(response.body.id);
+    expect(persisted.metadata.name).toBe('nginx-error-rate-edited');
+  });
 
   apiTest('should not let the body choose the template', async ({ apiClient, apiServices }) => {
     await apiServices.alertingV2.ruleTemplates.create({

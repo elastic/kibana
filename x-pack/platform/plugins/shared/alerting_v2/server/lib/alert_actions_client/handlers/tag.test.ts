@@ -9,7 +9,7 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { buildAlertEventRecord, buildHandlerItem } from '../test_utils';
 import { tagHandler } from './tag';
 
-const buildItem = (requested: string[], current: string[]) =>
+const buildItem = (requested: string[] | null, current: string[]) =>
   buildHandlerItem(
     { action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: requested } as const,
     buildAlertEventRecord(),
@@ -32,8 +32,8 @@ describe('tagHandler', () => {
     expect(() => tagHandler.prepare(buildItem(['prod'], []))).not.toThrow();
   });
 
-  it('accepts clearing the tags of a tagged alert', () => {
-    expect(() => tagHandler.prepare(buildItem([], ['prod']))).not.toThrow();
+  it('accepts clearing the tags of a tagged alert with null', () => {
+    expect(() => tagHandler.prepare(buildItem(null, ['prod']))).not.toThrow();
   });
 
   it('accepts a request that drops one tag of several', () => {
@@ -69,7 +69,7 @@ describe('tagHandler', () => {
   });
 
   it('rejects clearing the tags of an untagged alert', () => {
-    expect(() => tagHandler.prepare(buildItem([], []))).toThrow(
+    expect(() => tagHandler.prepare(buildItem(null, []))).toThrow(
       expect.objectContaining({
         message: '[episode-1] already has these tags.',
       })

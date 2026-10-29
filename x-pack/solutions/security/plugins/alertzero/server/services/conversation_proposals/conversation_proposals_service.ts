@@ -27,7 +27,7 @@ type GetImpactClient = AgenticInvestigationsPluginStart['getImpactClient'];
 /** Conversation-derived fields merged onto a proposal on read. Absent when unreadable. */
 type ConversationDecoration = Pick<
   ProposalItem,
-  'conversationTitle' | 'conversationAgentId' | 'conversationAssignees'
+  'conversationTitle' | 'conversationAgentId' | 'conversationStatus' | 'conversationAssignees'
 >;
 
 /**
@@ -39,6 +39,9 @@ const readAssignees = (value: MetadataFieldValue | undefined): string[] => {
   if (Array.isArray(value)) return value;
   return typeof value === 'string' ? [value] : [];
 };
+
+const readStatus = (value: MetadataFieldValue | undefined): 'open' | 'closed' | undefined =>
+  value === 'open' || value === 'closed' ? value : undefined;
 
 /**
  * Breaks every tie the timestamps leave, so a row cannot move between two offset
@@ -161,6 +164,9 @@ export class ConversationProposalsService {
           {
             ...(title ? { conversationTitle: title } : {}),
             ...(agentId ? { conversationAgentId: agentId } : {}),
+            ...(readStatus(metadata?.status)
+              ? { conversationStatus: readStatus(metadata?.status) }
+              : {}),
             conversationAssignees: readAssignees(metadata?.assignees),
           },
         ])
@@ -171,57 +177,27 @@ export class ConversationProposalsService {
     }
   }
 
-  /**
-   * Second pass after the proposal list. Impact lives in its own index, keyed
-   * by conversationId. The client checks the investigations manage privilege and derives the space
-   * from the request. Failure here omits the field the same way a missing
-   * title does — the queue is still usable without pills.
-   */
-  private async getEntities(
-    conversationIds: string[],
-    request: KibanaRequest
-  ): Promise<Map<string, Array<{ id: string; type?: string }>>> {
-    if (conversationIds.length === 0) return new Map();
-
-    try {
-      return await this.getImpactClient(request).getEntitiesByConversationId(conversationIds);
-    } catch (err) {
-      this.logger.debug(`Could not resolve investigation impact: ${err}`);
-      return new Map();
-    }
-  }
-
   private async decorate(
     proposals: ProposalWithMetadata[],
     request: KibanaRequest
   ): Promise<ProposalItem[]> {
-    const conversationIds = proposals.map((proposal) => proposal.conversationId);
-    const [conversations, entities] = await Promise.all([
-      this.fetchConversations(conversationIds, request),
-      this.getEntities(conversationIds, request),
-    ]);
-    return this.enrichProposals(proposals, conversations, entities);
+    const conversations = await this.fetchConversations(
+      proposals.map((proposal) => proposal.conversationId),
+      request
+    );
+    return this.enrichProposals(proposals, conversations);
   }
 
   private enrichProposals(
     proposals: ProposalWithMetadata[],
-    conversations: Map<string, ConversationDecoration>,
-    entities: Map<string, Array<{ id: string; type?: string }>>
+    conversations: Map<string, ConversationDecoration>
   ): ProposalItem[] {
     return proposals.map((proposal) => {
       const conversation = conversations.get(proposal.conversationId);
-      const list = entities.get(proposal.conversationId) ?? [];
-      const ids = list.map((entity) => entity.id);
-      const entityTypes: Record<string, string> = {};
-      for (const { id, type } of list) {
-        if (type) entityTypes[id] = type;
-      }
       return {
         ...proposal,
         ...conversation,
         conversationAssignees: conversation?.conversationAssignees ?? [],
-        ...(ids.length > 0 ? { entityIds: ids } : {}),
-        ...(Object.keys(entityTypes).length > 0 ? { entityTypes } : {}),
       };
     });
   }

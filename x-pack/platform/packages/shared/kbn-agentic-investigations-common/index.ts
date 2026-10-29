@@ -24,6 +24,8 @@ export {
   type CardActionType,
 } from './src/components/actions/base_actions';
 
+export { toPlainSummary } from './src/utils/to_plain_summary';
+
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
@@ -141,7 +143,12 @@ export {
   type ImpactEntityFlyoutType,
   type ImpactEntityTarget,
 } from './src/components/impact/open_impact_entity';
-export { Impact, useEntityFilter, type ImpactPill } from './src/components/filters/impact';
+export {
+  Impact,
+  useEntityFilter,
+  type ImpactPill,
+  type PagedImpactPills,
+} from './src/components/filters/impact';
 
 export { BaseActionModal } from './src/components/modals/base_action_modal';
 export { MODAL_TRANSLATIONS } from './src/components/modals/translations';

@@ -20,7 +20,10 @@ import { resolveScopedModel } from './lib/scoped_model';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import type { HuntBehaviorResult } from '../../services/watches/hunt/tier2/types';
 
-jest.mock('./lib/scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+jest.mock('./lib/scoped_model', () => ({
+  resolveScopedModel: jest.fn(),
+  resolveConfiguredScopedModel: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../../services/watches/hunt/tier2/hunt_behavior', () => ({ huntBehavior: jest.fn() }));
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
@@ -61,7 +64,11 @@ const makeDeps = () => {
   const asInternalUser = { search: jest.fn() };
   const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: uiSettingsClient },
@@ -288,6 +295,25 @@ describe('registerHuntBehaviorRoute', () => {
         llm_confidence_threshold: 0.8,
         iocs: [{ type: 'ip', value: '1.2.3.4' }],
       }),
+      expect.anything(),
+      mitreDataClient
+    );
+  });
+
+  it('forwards excluded_iocs to the service when present', async () => {
+    const { handler, context } = makeDeps();
+    const excluded = [{ type: 'ip', value: '169.254.169.254' }];
+
+    await handler(
+      context,
+      requestFor({ iocs: [{ type: 'hash', value: 'abc' }], excluded_iocs: excluded }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(huntBehaviorMock).toHaveBeenCalledWith(
+      { extraction: model, esql: model },
+      expect.anything(),
+      expect.objectContaining({ excluded_iocs: excluded }),
       expect.anything(),
       mitreDataClient
     );
