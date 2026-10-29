@@ -1725,10 +1725,17 @@ class AgentPolicyService {
         const { updatedPolicies, failedPolicies } = await packagePolicyService.bulkUpdatePartial(
           soClient,
           policiesWithMultipleAP.map(({ id: packagePolicyId, version, policy_ids: policyIds }) => {
+            // Without a version the saved objects client skips the version check and could
+            // overwrite concurrent changes.
+            if (!version) {
+              throw new FleetError(
+                `Cannot delete agent policy [${id}]: shared package policy [${packagePolicyId}] has no version`
+              );
+            }
             const newPolicyIds = policyIds.filter((policyId) => policyId !== id);
             return {
               id: packagePolicyId,
-              version: version ?? '',
+              version,
               attributes: {
                 policy_id: newPolicyIds[0],
                 policy_ids: newPolicyIds,

@@ -1191,7 +1191,7 @@ describe('Agent policy', () => {
 
     it('should remove the agent policy from shared package policies before deleting the others', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-1', version: 'WzEsMV0=', policy_ids: ['policy_1', 'policy_2'] },
         { id: 'package-2', policy_ids: ['policy_1'] },
       ] as any);
       const callOrder: string[] = [];
@@ -1211,7 +1211,7 @@ describe('Agent policy', () => {
 
     it('should not delete the agent policy when removing it from shared package policies fails', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-1', version: 'WzEsMV0=', policy_ids: ['policy_1', 'policy_2'] },
         { id: 'package-2', policy_ids: ['policy_1'] },
       ] as any);
       mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValueOnce({
@@ -1235,9 +1235,26 @@ describe('Agent policy', () => {
       expect(soClient.delete).not.toHaveBeenCalled();
     });
 
-    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
+    it('should not change any package policy when a shared package policy has no version', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdatePartial.mockClear();
+      mockedPackagePolicyService.delete.mockClear();
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
+        'Cannot delete agent policy [policy_1]: shared package policy [package-1] has no version'
+      );
+
+      expect(mockedPackagePolicyService.bulkUpdatePartial).not.toHaveBeenCalled();
+      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', version: 'WzEsMV0=', policy_ids: ['policy_1', 'policy_2'] },
       ] as any);
       mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValueOnce({
         updatedPolicies: [],
