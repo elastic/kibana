@@ -24,6 +24,7 @@ source .buildkite/scripts/common/util.sh
     kibana-opentelemetry-semantic-conventions-sync | \
     kibana-purge-cloud-deployments | \
     kibana-renovate-helper | \
+    kibana-report-flaky-tests | \
     kibana-scout-update-metadata | \
     kibana-serverless-release-readiness)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"

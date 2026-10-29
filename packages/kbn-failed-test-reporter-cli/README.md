@@ -102,11 +102,12 @@ off.
   window can still hold the failures a fix was merged for.
 - An issue that already has the report, as on a retried build, is left alone.
 
-In `elastic/kibana`, a `kibanamachine` comment on a `failed-test` issue runs the failed-test
-alert of `elastic/kibana-operations` (`triage/`): a Slack message to the teams that opted in to
-alerts for existing failures (none at the time of writing). The alert reads `report.count` from
-the metadata, so the body is updated before the comment is posted. Editing a body or reopening an
-issue runs no alert; a reopen does start the `failed-test-investigator` workflow again.
+In CI the command posts as `elastic-vault-github-plugin-prod[bot]`, the app behind the pipeline's
+short-lived GitHub token. The failed-test alert of `elastic/kibana-operations` (`triage/`) doesn't
+run on its comments, only on the `kibanamachine` ones `report_failed_tests` posts for CI failures:
+a Slack message to the teams that opted in to alerts for existing failures (none at the time of
+writing). Editing a body or reopening an issue runs no alert; a reopen does start the
+`failed-test-investigator` workflow again.
 
 The stale `failed-test` sweep closes the issues of suites that drop out of the report, as nothing
 refreshes them any more.
