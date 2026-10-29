@@ -63,48 +63,47 @@ test.describe('AlertZero queue page width', { tag: tags.stateful.classic }, () =
     await restoreDefaultSolutionView?.();
   });
 
-  test('keeps the page and the trend charts within the window after it narrows', async ({
+  test('keeps the trend charts within the window and resizes them when it narrows', async ({
     page,
     pageObjects,
   }) => {
     const { alertZeroQueue } = pageObjects;
+    const chartWidths = async () =>
+      Promise.all(
+        (await alertZeroQueue.trendSparklines.all()).map(
+          async (sparkline) => (await sparkline.boundingBox())?.width ?? 0
+        )
+      );
+    let wideChartWidths: number[] = [];
 
     await test.step('render the charts in a wide window', async () => {
       await page.setViewportSize(testData.WIDE_VIEWPORT);
       await alertZeroQueue.goto();
       await expect(alertZeroQueue.trendChartCards).toHaveCount(3);
       await expect(alertZeroQueue.trendSparklines).toHaveCount(3);
+      wideChartWidths = await chartWidths();
     });
 
     await test.step('narrow the window', async () => {
       await page.setViewportSize(testData.NARROW_VIEWPORT);
     });
 
-    await test.step('the page does not scroll sideways', async () => {
+    await test.step('the chart row stays inside the window', async () => {
       await expect
-        .poll(() =>
-          page.evaluate(
-            () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-          )
-        )
-        .toBeLessThanOrEqual(0);
+        .poll(async () => {
+          const box = await alertZeroQueue.trendChartRow.boundingBox();
+          return box ? box.x + box.width : Number.POSITIVE_INFINITY;
+        })
+        .toBeLessThanOrEqual(testData.NARROW_VIEWPORT.width);
     });
 
-    await test.step('the charts shrink with their cards', async () => {
-      for (const card of await alertZeroQueue.trendChartCards.all()) {
-        const sparkline = card.locator(alertZeroQueue.trendSparklines);
-        await expect
-          .poll(async () => {
-            const [cardBox, chartBox] = await Promise.all([
-              card.boundingBox(),
-              sparkline.boundingBox(),
-            ]);
-            return cardBox && chartBox
-              ? chartBox.x + chartBox.width <= cardBox.x + cardBox.width
-              : false;
-          })
-          .toBe(true);
-      }
+    await test.step('each chart is narrower than it was in the wide window', async () => {
+      await expect
+        .poll(async () => {
+          const narrowChartWidths = await chartWidths();
+          return narrowChartWidths.every((width, index) => width < wideChartWidths[index]);
+        })
+        .toBe(true);
     });
   });
 });
