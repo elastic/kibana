@@ -42,7 +42,14 @@ const expectOperations = (operations: unknown[]) =>
 
 describe('useDiscoveryFeaturesApi', () => {
   beforeEach(() => {
-    mockFetch.mockReset().mockResolvedValue({ succeeded: 2, failed: 0, conflicts: 0, skipped: 0 });
+    mockFetch.mockReset().mockResolvedValue({
+      succeeded: 2,
+      failed: 0,
+      conflicts: 0,
+      skipped: 0,
+      failedIds: [],
+      conflictIds: [],
+    });
   });
 
   it('fans an aggregated row out to every instance', async () => {
@@ -54,7 +61,13 @@ describe('useDiscoveryFeaturesApi', () => {
       { durability: { id: 'u1', durable: true } },
       { durability: { id: 'u2', durable: true } },
     ]);
-    expect(outcome).toEqual({ succeededCount: 2, failedCount: 0, conflictCount: 0 });
+    expect(outcome).toEqual({
+      succeededCount: 2,
+      failedCount: 0,
+      conflictCount: 0,
+      failedIds: [],
+      conflictIds: [],
+    });
   });
 
   it('targets the feature uuid when there are no instances', async () => {

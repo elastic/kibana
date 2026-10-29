@@ -385,7 +385,15 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ succeeded: number; failed: number; conflicts: number; skipped: number }> => {
+  }): Promise<{
+    succeeded: number;
+    failed: number;
+    conflicts: number;
+    skipped: number;
+    failedIds: string[];
+    /** Retryable: the owning source was busy. */
+    conflictIds: string[];
+  }> => {
     const scopedClients = await getScopedClients({
       request,
     });
@@ -416,8 +424,8 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     const resolved = await kiClient.findFeaturesByIds(requestedUuids);
     const skippedFromLookup = requestedUuids.length - resolved.length;
 
-    // Group resolved ops by source.
-    const bySource = resolved.reduce<Record<string, KIBulkOperation[]>>(
+    // Group resolved ops by source; the uuid rides along so a thrown batch can be reported per id.
+    const bySource = resolved.reduce<Record<string, Array<{ uuid: string; op: KIBulkOperation }>>>(
       (acc, { id: featureId, source_id: sourceId }) => {
         const op = opsByUuid.get(featureId);
         if (!op) {
@@ -426,7 +434,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
         if (!acc[sourceId]) {
           acc[sourceId] = [];
         }
-        acc[sourceId].push(op);
+        acc[sourceId].push({ uuid: featureId, op });
         return acc;
       },
       {}
@@ -437,16 +445,17 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     // and the bulk call). Both classes show up as additional `skipped` count.
     // Only thrown batches count as `failed`, or as `conflicts` when the source was busy.
     let succeeded = 0;
-    let failed = 0;
-    let conflicts = 0;
     let skipped = skippedFromLookup;
+    const failedIds: string[] = [];
+    const conflictIds: string[] = [];
 
     const sourcesWithShrinkingOps = new Set<string>();
 
     const limiter = pLimit(BULK_SOURCE_CONCURRENCY);
     await Promise.all(
-      Object.entries(bySource).map(([sourceId, ops]) =>
+      Object.entries(bySource).map(([sourceId, entries]) =>
         limiter(async () => {
+          const ops = entries.map(({ op }) => op);
           try {
             const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
             succeeded += applied;
@@ -460,11 +469,10 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
                 error instanceof Error ? error.message : String(error)
               }`
             );
-            if (getSourceWriteConflictMetadata(error)?.retryable) {
-              conflicts += ops.length;
-            } else {
-              failed += ops.length;
-            }
+            const target = getSourceWriteConflictMetadata(error)?.retryable
+              ? conflictIds
+              : failedIds;
+            target.push(...entries.map(({ uuid }) => uuid));
           }
         })
       )
@@ -483,7 +491,14 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       }
     }
 
-    return { succeeded, failed, conflicts, skipped };
+    return {
+      succeeded,
+      failed: failedIds.length,
+      conflicts: conflictIds.length,
+      skipped,
+      failedIds,
+      conflictIds,
+    };
   },
 });
 

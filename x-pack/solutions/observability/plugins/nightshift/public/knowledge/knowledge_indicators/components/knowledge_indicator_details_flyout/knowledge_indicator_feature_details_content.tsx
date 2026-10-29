@@ -30,7 +30,7 @@ import { getConfidenceColor } from '../../../../common/get_confidence_color';
 import { DurabilityBadge } from '../durability_badge';
 
 interface Props {
-  /** Top-level fields are the viewed instance's; `uuid` tells it apart from the other instances. */
+  /** Top-level fields belong to the viewed instance, which need not be the representative. */
   feature: AggregatedFeature;
   getSourceTitle: (sourceId: string) => string;
   onSelectInstance: (uuid: string) => void;

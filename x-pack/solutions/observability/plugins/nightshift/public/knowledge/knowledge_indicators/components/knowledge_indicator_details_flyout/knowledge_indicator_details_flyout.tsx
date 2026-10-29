@@ -30,7 +30,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -66,7 +66,7 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
-  features: Feature[];
+  features: AggregatedFeature[];
   /** Source of the knowledge indicator; absent while the source list loads or if it was deleted. */
   source?: NightshiftSource;
   pageIndex?: number;
@@ -125,7 +125,7 @@ export function KnowledgeIndicatorDetailsFlyout({
   }, [discoverLocator, featureFilter, viewedSource, timeState]);
 
   const streamFeatures = useMemo(
-    () => features.filter((f) => f.source_id === sourceId),
+    () => features.filter((f) => f.sources.includes(sourceId)),
     [features, sourceId]
   );
 

@@ -38,6 +38,7 @@ const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery
 
 // Collects all source/target endpoints of dependency features that reference any of the seed IDs.
 // Called once per filter pass so entity expansion doesn't re-scan the indicator list per indicator.
+// Copies folded into one row may disagree on endpoints, so every instance is inspected.
 function buildConnectedEndpoints(
   indicators: KnowledgeIndicator[],
   featureIds: Set<string>
@@ -45,21 +46,23 @@ function buildConnectedEndpoints(
   const endpoints = new Set<string>();
   for (const ki of indicators) {
     if (!isFeatureIndicator(ki) || ki.feature.type !== 'dependency') continue;
-    const { source, target } = ki.feature.properties;
-    if (
-      (isString(source) && featureIds.has(source)) ||
-      (isString(target) && featureIds.has(target)) ||
-      featureIds.has(ki.feature.id)
-    ) {
-      if (isString(source)) endpoints.add(source);
-      if (isString(target)) endpoints.add(target);
+    for (const { id, properties } of ki.feature.instances) {
+      const { source, target } = properties;
+      if (
+        (isString(source) && featureIds.has(source)) ||
+        (isString(target) && featureIds.has(target)) ||
+        featureIds.has(id)
+      ) {
+        if (isString(source)) endpoints.add(source);
+        if (isString(target)) endpoints.add(target);
+      }
     }
   }
   return endpoints;
 }
 
-function featureMatchesTopology(
-  { feature }: KnowledgeIndicatorFeature,
+function instanceMatchesTopology(
+  feature: Feature,
   featureIds: Set<string>,
   connectedEndpoints: Set<string>
 ): boolean {
@@ -80,6 +83,15 @@ function featureMatchesTopology(
   }
   return false;
 }
+
+const featureMatchesTopology = (
+  { feature }: KnowledgeIndicatorFeature,
+  featureIds: Set<string>,
+  connectedEndpoints: Set<string>
+): boolean =>
+  feature.instances.some((instance) =>
+    instanceMatchesTopology(instance, featureIds, connectedEndpoints)
+  );
 
 /** Orders sources by slug, which people read, and falls back to the id for unknown sources. */
 type SourceSortKey = (sourceId: string) => string;

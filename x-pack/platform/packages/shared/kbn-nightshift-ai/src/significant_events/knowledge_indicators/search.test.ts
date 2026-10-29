@@ -428,27 +428,54 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators[0].kind).toBe('feature');
   });
 
-  it('folds a feature held by several sources into one indicator', async () => {
+  it('keeps a folded row and its connected entities when only a non-representative copy matches feature_ids', async () => {
     const res = await searchKnowledgeIndicators({
-      params: { kind: ['feature'] },
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency', 'entity'],
+        feature_ids: ['redis-cache'],
+      },
       getSourceIds: async () => ['src-a', 'src-b'],
       getFeatures: async (sourceId) => [
         makeFeature({
-          id: 'redis',
-          uuid: `${sourceId}:redis`,
+          id: 'frontend-redis',
+          uuid: `${sourceId}:frontend-redis`,
           source_id: sourceId,
-          type: 'technology',
-          confidence: sourceId === 'src-a' ? 70 : 90,
+          type: 'dependency',
+          confidence: sourceId === 'src-a' ? 90 : 60,
+          properties: {
+            source: 'frontend',
+            target: sourceId === 'src-a' ? 'redis' : 'redis-cache',
+          },
+        }),
+        makeFeature({
+          id: 'frontend-entity',
+          uuid: `${sourceId}:frontend-entity`,
+          source_id: sourceId,
+          type: 'entity',
+          properties: { name: 'frontend' },
+        }),
+        makeFeature({
+          id: 'unrelated-entity',
+          uuid: `${sourceId}:unrelated-entity`,
+          source_id: sourceId,
+          type: 'entity',
+          properties: { name: 'checkout' },
         }),
       ],
       getQueries: async () => [],
     });
 
-    expect(res.total).toBe(1);
-    const [indicator] = res.knowledge_indicators;
-    expect(indicator).toMatchObject({
-      kind: 'feature',
-      feature: { source_id: 'src-b', sources: ['src-a', 'src-b'] },
+    const ids = res.knowledge_indicators.map((ki) =>
+      ki.kind === 'feature' ? ki.feature.id : null
+    );
+    expect(ids).toEqual(expect.arrayContaining(['frontend-redis', 'frontend-entity']));
+    expect(ids).not.toContain('unrelated-entity');
+    const dependency = res.knowledge_indicators.find(
+      (ki) => ki.kind === 'feature' && ki.feature.id === 'frontend-redis'
+    );
+    expect(dependency).toMatchObject({
+      feature: { source_id: 'src-a', sources: ['src-a', 'src-b'] },
     });
   });
 

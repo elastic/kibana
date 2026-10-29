@@ -14,12 +14,17 @@ export interface BulkOperationResult {
   failedCount: number;
   /** Operations not applied because their source was busy; the same request can succeed later. */
   conflictCount: number;
+  /** Per-instance uuids behind `failedCount`; counts are copies, not rows. */
+  failedIds: string[];
+  conflictIds: string[];
 }
 
 export const EMPTY_BULK_OPERATION_RESULT: BulkOperationResult = {
   succeededCount: 0,
   failedCount: 0,
   conflictCount: 0,
+  failedIds: [],
+  conflictIds: [],
 };
 
 type CrossStreamOp =
@@ -42,7 +47,7 @@ interface DiscoveryFeaturesApi {
   ) => Promise<BulkOperationResult>;
 }
 
-const getInstanceUuids = ({ uuid, instances }: BulkTarget): string[] =>
+export const getInstanceUuids = ({ uuid, instances }: BulkTarget): string[] =>
   instances?.length ? instances.map((instance) => instance.uuid) : [uuid];
 
 export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
@@ -57,17 +62,17 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
       if (features.length === 0) {
         return EMPTY_BULK_OPERATION_RESULT;
       }
-      const { succeeded, failed, conflicts } = await significantEventsRepositoryClient.fetch(
-        'POST /internal/streams/features/_bulk',
-        {
+      const { succeeded, failed, conflicts, failedIds, conflictIds } =
+        await significantEventsRepositoryClient.fetch('POST /internal/streams/features/_bulk', {
           signal: null,
           params: { body: { operations: features.flatMap(getInstanceUuids).map(buildOp) } },
-        }
-      );
+        });
       return {
         succeededCount: succeeded,
         failedCount: failed,
         conflictCount: conflicts,
+        failedIds,
+        conflictIds,
       };
     };
 
