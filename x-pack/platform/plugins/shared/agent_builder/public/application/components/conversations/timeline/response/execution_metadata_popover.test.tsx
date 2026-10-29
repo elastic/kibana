@@ -110,6 +110,23 @@ describe('ExecutionMetadataPopover', () => {
       expect(screen.getByText('22')).toBeInTheDocument();
     });
 
+    it('shows the tokens in a compact format', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'c1',
+            llm_calls: 1,
+            input_tokens: 1234567,
+            output_tokens: 12345,
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.getByText('1.2m')).toBeInTheDocument();
+      expect(screen.getByText('12.3k')).toBeInTheDocument();
+    });
+
     it('shows the cache hit tokens under the tokens sent when they are reported', async () => {
       render(
         <ExecutionMetadataPopover
@@ -341,13 +358,14 @@ describe('ExecutionMetadataPopover', () => {
       const user = await openPopover();
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
-      const headers = within(screen.getByTestId('executionMetadataByModelTable')).getAllByRole(
-        'columnheader'
-      );
+      const [model, llmCalls, tokensSent, tokensReceived] = within(
+        screen.getByTestId('executionMetadataByModelTable')
+      ).getAllByRole('columnheader');
 
-      expect(headers).toHaveLength(4);
-      headers.forEach((header) => {
-        expect(header.querySelectorAll('strong, [aria-hidden]').length).toBeGreaterThan(1);
+      expect(tokensSent).toHaveTextContent('(cached)');
+      expect(tokensSent.querySelector('[aria-hidden="true"]')).toBeNull();
+      [model, llmCalls, tokensReceived].forEach((header) => {
+        expect(header.querySelectorAll('[aria-hidden="true"]')).toHaveLength(1);
       });
     });
 

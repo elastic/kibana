@@ -149,88 +149,86 @@ const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = (
 
 const getColumns = (
   hasCache: boolean,
-  hasReasoning: boolean
-): Array<EuiBasicTableColumn<ModelRow>> => {
-  const hasSecondHeaderLine = hasCache || hasReasoning;
-  return [
-    {
-      field: 'label',
-      name: <HeaderCell hasSecondLine={hasSecondHeaderLine}>{labels.model}</HeaderCell>,
-      render: (label: string, { color, fullName }: ModelRow) =>
-        color ? (
-          <ModelName label={label} tooltip={fullName ?? label} color={color} />
-        ) : (
-          <Cell>{label}</Cell>
-        ),
-    },
-    {
-      field: 'llmCalls',
-      name: (
-        <HeaderCell isRightAligned hasSecondLine={hasSecondHeaderLine}>
-          {labels.llmCalls}
-        </HeaderCell>
+  hasReasoning: boolean,
+  hasSecondHeaderLine: boolean
+): Array<EuiBasicTableColumn<ModelRow>> => [
+  {
+    field: 'label',
+    name: <HeaderCell hasSecondLine={hasSecondHeaderLine}>{labels.model}</HeaderCell>,
+    render: (label: string, { color, fullName }: ModelRow) =>
+      color ? (
+        <ModelName label={label} tooltip={fullName ?? label} color={color} />
+      ) : (
+        <Cell>{label}</Cell>
       ),
-      align: RIGHT_ALIGNMENT,
-      render: (llmCalls: number) => (
-        <Cell>
-          <strong>{formatCompactNumber(llmCalls)}</strong>
-        </Cell>
-      ),
-    },
-    {
-      field: 'inputTokens',
-      name: (
-        <HeaderCell
-          isRightAligned
-          subLabel={hasCache ? labels.cachedSuffix : undefined}
-          hasSecondLine={hasSecondHeaderLine}
-        >
-          {labels.tokensSent}
-        </HeaderCell>
-      ),
-      align: RIGHT_ALIGNMENT,
-      render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
-        <Cell>
-          <strong>{formatCompactNumber(inputTokens)}</strong>
-          {hasCache && (
-            <>
-              {' '}
-              <EuiTextColor color="subdued">
-                (<ReportedTokens value={cachedInputTokens} />)
-              </EuiTextColor>
-            </>
-          )}
-        </Cell>
-      ),
-    },
-    {
-      field: 'outputTokens',
-      name: (
-        <HeaderCell
-          isRightAligned
-          subLabel={hasReasoning ? labels.reasoningSuffix : undefined}
-          hasSecondLine={hasSecondHeaderLine}
-        >
-          {labels.tokensReceived}
-        </HeaderCell>
-      ),
-      align: RIGHT_ALIGNMENT,
-      render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
-        <Cell>
-          <strong>{formatCompactNumber(outputTokens)}</strong>
-          {hasReasoning && (
-            <>
-              {' '}
-              <EuiTextColor color="subdued">
-                (<ReportedTokens value={reasoningTokens} />)
-              </EuiTextColor>
-            </>
-          )}
-        </Cell>
-      ),
-    },
-  ];
-};
+  },
+  {
+    field: 'llmCalls',
+    name: (
+      <HeaderCell isRightAligned hasSecondLine={hasSecondHeaderLine}>
+        {labels.llmCalls}
+      </HeaderCell>
+    ),
+    align: RIGHT_ALIGNMENT,
+    render: (llmCalls: number) => (
+      <Cell>
+        <strong>{formatCompactNumber(llmCalls)}</strong>
+      </Cell>
+    ),
+  },
+  {
+    field: 'inputTokens',
+    name: (
+      <HeaderCell
+        isRightAligned
+        subLabel={hasCache ? labels.cachedSuffix : undefined}
+        hasSecondLine={hasSecondHeaderLine}
+      >
+        {labels.tokensSent}
+      </HeaderCell>
+    ),
+    align: RIGHT_ALIGNMENT,
+    render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
+      <Cell>
+        <strong>{formatCompactNumber(inputTokens)}</strong>
+        {hasCache && (
+          <>
+            {' '}
+            <EuiTextColor color="subdued">
+              (<ReportedTokens value={cachedInputTokens} />)
+            </EuiTextColor>
+          </>
+        )}
+      </Cell>
+    ),
+  },
+  {
+    field: 'outputTokens',
+    name: (
+      <HeaderCell
+        isRightAligned
+        subLabel={hasReasoning ? labels.reasoningSuffix : undefined}
+        hasSecondLine={hasSecondHeaderLine}
+      >
+        {labels.tokensReceived}
+      </HeaderCell>
+    ),
+    align: RIGHT_ALIGNMENT,
+    render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
+      <Cell>
+        <strong>{formatCompactNumber(outputTokens)}</strong>
+        {hasReasoning && (
+          <>
+            {' '}
+            <EuiTextColor color="subdued">
+              (<ReportedTokens value={reasoningTokens} />)
+            </EuiTextColor>
+          </>
+        )}
+      </Cell>
+    ),
+  },
+];
 
 interface ExecutionMetadataByModelProps {
   modelUsage: RoundModelUsageStats;
@@ -246,7 +244,10 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
 
   const hasCache = modelUsage.cached_input_tokens !== undefined;
   const hasReasoning = modelUsage.reasoning_tokens !== undefined;
-  const columns = useMemo(() => getColumns(hasCache, hasReasoning), [hasCache, hasReasoning]);
+  const columns = useMemo(
+    () => getColumns(hasCache, hasReasoning, hasCache || hasReasoning),
+    [hasCache, hasReasoning]
+  );
 
   const rows = useMemo<ModelRow[]>(() => {
     const connectors = modelUsage.connectors ?? [];
