@@ -94,7 +94,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
           (error && !isLoading ? (
             <NotFoundPanel
               pipelineName={pipelineName}
-              onCreatePipeline={canManage ? () => onCreateClick(pipelineName) : undefined}
+              onCreatePipeline={() => onCreateClick(pipelineName)}
               error={error}
               displayWarning={pipelineName !== ingestPipeline}
             />

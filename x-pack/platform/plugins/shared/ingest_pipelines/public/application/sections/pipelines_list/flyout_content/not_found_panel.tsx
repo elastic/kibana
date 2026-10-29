@@ -12,13 +12,14 @@ import { EuiCode, useGeneratedHtmlId, EuiSpacer, EuiSplitPanel } from '@elastic/
 import { KbnWarningCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { EuiTitle } from '@elastic/eui';
 import type { Error } from '../../../../shared_imports';
+import { useKibana } from '../../../../shared_imports';
 import { getErrorText, isIntegrationsPipeline } from '../../utils';
 
 interface Props {
   pipelineName: string;
   error: Error;
   displayWarning: boolean;
-  onCreatePipeline?: () => void;
+  onCreatePipeline: () => void;
 }
 
 export const NotFoundPanel: FunctionComponent<Props> = ({
@@ -27,6 +28,12 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
   displayWarning,
   onCreatePipeline,
 }) => {
+  const {
+    services: {
+      config: { canManage },
+    },
+  } = useKibana();
+
   const renderErrorCallOut = () => {
     const isCustom = isIntegrationsPipeline(pipelineName);
     if (displayWarning || (error.statusCode === 404 && isCustom)) {
@@ -51,7 +58,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
           }
           data-test-subj="missingCustomPipeline"
           actionProps={
-            onCreatePipeline
+            canManage
               ? {
                   primary: {
                     onClick: onCreatePipeline,
