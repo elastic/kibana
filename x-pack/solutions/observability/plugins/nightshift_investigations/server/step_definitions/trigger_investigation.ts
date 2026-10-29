@@ -16,6 +16,10 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
+import type { NightshiftSettingsLocator } from '../../common/locators';
+import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_SUBJECT_TYPES,
@@ -39,6 +43,7 @@ import type { AutomationBudget } from '../types';
 
 const inputSchema = lazySchema(() =>
   z.object({
+    telemetry_target: telemetryTargetNameSchema.optional(),
     automation_id: z
       .string()
       .min(1)
@@ -183,7 +188,9 @@ export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
   getAutomationsSoClient: GetAutomationsSoClient,
   getAlertsClient: GetAlertsClient,
-  getEpisodeLookup: GetEpisodeLookup
+  getEpisodeLookup: GetEpisodeLookup,
+  getActions: () => ActionsPluginStart | undefined,
+  settingsLocator: NightshiftSettingsLocator
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -212,7 +219,7 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow } = context.contextManager.getContext();
+      const { workflow, kibanaUrl } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       const subjectId = toSubjectId(input);
@@ -253,6 +260,7 @@ export const triggerInvestigationStepDefinition = (
               summary: input.summary,
             },
             title: input.title,
+            ...(input.telemetry_target ? { telemetry_target: input.telemetry_target } : {}),
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
             source_ids: input.source_ids,
@@ -279,6 +287,19 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
           );
+          if (input.slack_thread) {
+            await notifyInvestigationQuotaReached({
+              getSoClient: () => getAutomationsSoClient(request, spaceId),
+              getActions,
+              request,
+              spaceId,
+              slackThread: input.slack_thread,
+              settingsLocator,
+              kibanaUrl,
+              signal: context.abortSignal,
+              logger: context.logger,
+            });
+          }
           return { output: { skip_reason: 'investigation_limit' as const } };
         }
         throw error;

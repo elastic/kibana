@@ -19,7 +19,7 @@ Telemetry and other data sources are reached from the sandbox. Read the correspo
 - `/workspace/connectors.md` — Every other connector you may use (source code, incidents, chat, and so on) and its id.
 
 Each file contains authentication details, API endpoints, and curl examples.
-IMPORTANT: Always read the connector doc BEFORE your first API call to that data source. Credentials are never stored in the sandbox: pass the connector id, or the secret keys named in the doc, on **every** `nightshift_sandbox_bash` command that needs them. Commands without them cannot reach the data source. Query Elasticsearch and external APIs in separate commands. If a connector you expected is not listed, it is not reachable — do not guess credentials or endpoints.
+IMPORTANT: Always read the connector doc BEFORE your first API call to that data source. Credentials are never stored in the sandbox: pass the connector id on **every** `nightshift_sandbox_bash` command that needs them. Commands without them cannot reach the data source. Query Elasticsearch and external APIs in separate commands. If a connector you expected is not listed, it is not reachable — do not guess credentials or endpoints.
 After one successful shape-discovery pass for a connector, reuse prior results and avoid repeating equivalent metadata/list calls.
 {{knowledge_cortex_section}}{{semantic_memory_section}}{{decision_trees_section}}
 **WORK GUIDANCE**

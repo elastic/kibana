@@ -35,6 +35,8 @@ const staticBase = (type: AgentTypeDefinition): AgentBaseConfiguration => {
   return type.baseConfiguration;
 };
 
+const ALL_PLUGINS = { investigationToolsEnabled: true, proposalsEnabled: true } as const;
+
 describe('Nightshift investigation agent type', () => {
   it('registers under the Nightshift investigation type id', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
@@ -165,6 +167,37 @@ describe('Nightshift investigation agent type', () => {
     }
   });
 
+  it('preserves telemetry connectors when resolving hooks for the space', async () => {
+    const type = getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: true,
+      ...ALL_PLUGINS,
+      resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'c0-telemetry' },
+          orca: { connector_id: 'orca-telemetry' },
+        },
+      },
+    });
+    if (typeof type.baseConfiguration !== 'function') {
+      throw new Error('expected a dynamic base configuration');
+    }
+    const base = await type.baseConfiguration({
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'sa-a',
+    });
+
+    expect(base.connector_ids).toEqual(['legacy', 'c0-telemetry', 'orca-telemetry']);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-sa-a',
+    ]);
+  });
+
   describe('custom context', () => {
     const ctx = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-a' };
     const CUSTOM_CONTEXT =
@@ -219,4 +252,23 @@ describe('Nightshift investigation agent type', () => {
       );
     });
   });
+});
+
+it('allows configured telemetry connectors on the single investigator type', () => {
+  const base = staticBase(
+    getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: false,
+      ...ALL_PLUGINS,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'customer0' },
+          orca: { connector_id: 'orca' },
+          alias: { connector_id: 'orca' },
+        },
+      },
+    })
+  );
+  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
 });
