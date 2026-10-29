@@ -8,7 +8,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -21,6 +20,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { CUSTOM_CONTENT_MAX_ESQL_QUERIES } from '@kbn/custom-content-common';
@@ -34,6 +34,10 @@ import { EsqlQueryEditor } from './esql_query_editor';
 
 const MAIN_QUERY_KEY = 'main';
 const QUERY_TAB_CONTENT_ID = 'customContentQueryTabContent';
+
+// The flyout pads its body by `--euiFlyoutBodyPadding`; pulling the tab bar out by the same amount
+// makes it run from one edge of the flyout to the other, like the Lens flyout's tabs.
+const fullWidthTabsCss = css({ marginInline: 'calc(var(--euiFlyoutBodyPadding, 0px) * -1)' });
 
 /** The "…" menu of a tab. A tab that cannot be removed has no menu. */
 const QueryTabMenu = ({ position, onRemove }: { position: number; onRemove: () => void }) => {
@@ -116,8 +120,8 @@ export interface EsqlDataSectionProps {
 }
 
 /**
- * The panel's ES|QL queries. A single query shows just its editor; once there are several, each
- * gets a tab, so the section stays one editor tall however many queries there are.
+ * The panel's ES|QL queries, one tab each. The tab bar is always there, even for a single query, so
+ * the layout does not shift as queries are added, and it stays one editor tall however many there are.
  */
 export const EsqlDataSection = ({
   esqlQuery,
@@ -163,7 +167,6 @@ export const EsqlDataSection = ({
   ];
   // The selected tab is gone once it was removed; fall back to the first query.
   const activeTab = tabs.find(({ key }) => key === selectedKey) ?? tabs[0];
-  const hasSeveralQueries = tabs.length > 1;
 
   const tabItems: TabItem[] = tabs.map((tab, index) => ({
     id: tab.key,
@@ -188,27 +191,30 @@ export const EsqlDataSection = ({
     previousCountRef.current = additionalQueries.length;
   }, [additionalQueries]);
 
+  const addQueryLabel = i18n.translate('xpack.customContent.editFlyout.esqlSection.addQuery', {
+    defaultMessage: 'Add query',
+  });
+  // The "+" at the end of the tab row. It sits in the bar's own new-tab slot, which the bar hides
+  // once the panel holds as many queries as it can.
   const addQueryButton = (
     <EuiToolTip
       content={
         canAddQuery
-          ? undefined
+          ? addQueryLabel
           : i18n.translate('xpack.customContent.editFlyout.esqlSection.addQueryDisabled', {
-              defaultMessage: 'Add a first query before adding more. A panel holds up to five.',
+              defaultMessage: 'Add a first query before adding more.',
             })
       }
+      disableScreenReaderOutput
     >
-      <EuiButtonEmpty
-        size="xs"
-        iconType="plusCircle"
+      <EuiButtonIcon
+        iconType="plus"
+        color="text"
+        aria-label={addQueryLabel}
         onClick={onAddQuery}
         isDisabled={!canAddQuery}
         data-test-subj="customContentAddQueryButton"
-      >
-        {i18n.translate('xpack.customContent.editFlyout.esqlSection.addQuery', {
-          defaultMessage: 'Add query',
-        })}
-      </EuiButtonEmpty>
+      />
     </EuiToolTip>
   );
 
@@ -224,13 +230,9 @@ export const EsqlDataSection = ({
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
-                {hasSeveralQueries
-                  ? i18n.translate('xpack.customContent.editFlyout.esqlSection.titleMultiple', {
-                      defaultMessage: 'Data sources (ES|QL)',
-                    })
-                  : i18n.translate('xpack.customContent.editFlyout.esqlSection.title', {
-                      defaultMessage: 'Data source (ES|QL)',
-                    })}
+                {i18n.translate('xpack.customContent.editFlyout.esqlSection.title', {
+                  defaultMessage: 'Data sources (ES|QL)',
+                })}
               </strong>
             </EuiText>
           </EuiFlexItem>
@@ -260,45 +262,33 @@ export const EsqlDataSection = ({
       )}
 
       <EuiSpacer size="xs" />
-      {hasSeveralQueries ? (
-        <>
-          <UnifiedTabs
-            items={tabItems}
-            selectedItemId={activeTab.key}
-            recentlyClosedItems={[]}
-            onClearRecentlyClosed={() => {}}
-            maxItemsCount={CUSTOM_CONTENT_MAX_ESQL_QUERIES}
-            services={{ core: { chrome: getServices().core.chrome } }}
-            // Only the selection changes here: tabs are added, removed and renamed by our own controls.
-            onChanged={({ selectedItem }) => setSelectedKey(selectedItem?.id ?? MAIN_QUERY_KEY)}
-            onEBTEvent={() => {}}
-            customNewTabButton={<></>}
-            createItem={() => ({ id: '', label: '' })}
-            tabContentIdOverride={QUERY_TAB_CONTENT_ID}
-            data-test-subj="customContentQueryTabs"
-            disableInlineLabelEditing
-            disableDragAndDrop
-            disableTabsBarMenu
-            disableCloseButton
-          />
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-            <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.customContent.editFlyout.esqlSection.variableCaption', {
-                  defaultMessage: 'Used in the template as',
-                })}{' '}
-                <code data-test-subj="customContentQueryVariable">{activeTab.variable}</code>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{addQueryButton}</EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : (
-        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>{addQueryButton}</EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <div css={fullWidthTabsCss}>
+        <UnifiedTabs
+          items={tabItems}
+          selectedItemId={activeTab.key}
+          recentlyClosedItems={[]}
+          onClearRecentlyClosed={() => {}}
+          maxItemsCount={CUSTOM_CONTENT_MAX_ESQL_QUERIES}
+          services={{ core: { chrome: getServices().core.chrome } }}
+          // Only the selection changes here: tabs are added, removed and renamed by our own controls.
+          onChanged={({ selectedItem }) => setSelectedKey(selectedItem?.id ?? MAIN_QUERY_KEY)}
+          onEBTEvent={() => {}}
+          customNewTabButton={addQueryButton}
+          createItem={() => ({ id: '', label: '' })}
+          tabContentIdOverride={QUERY_TAB_CONTENT_ID}
+          disableInlineLabelEditing
+          disableDragAndDrop
+          disableTabsBarMenu
+          disableCloseButton
+        />
+      </div>
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.customContent.editFlyout.esqlSection.variableCaption', {
+          defaultMessage: 'Used in the template as',
+        })}{' '}
+        <code data-test-subj="customContentQueryVariable">{activeTab.variable}</code>
+      </EuiText>
 
       <div id={QUERY_TAB_CONTENT_ID}>
         <EsqlQueryEditor

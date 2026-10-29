@@ -31,6 +31,7 @@ jest.mock('../services', () => ({
   getServices: () => ({ core: { chrome: undefined } }),
 }));
 
+import { CUSTOM_CONTENT_MAX_ESQL_QUERIES } from '@kbn/custom-content-common';
 import { EsqlDataSection } from './esql_data_section';
 import type { EsqlDataSectionProps } from './esql_data_section';
 
@@ -67,11 +68,41 @@ describe('EsqlDataSection', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('with a single query', () => {
-    it('shows the editor and no tabs', () => {
+    // The bar is always there, so the layout does not shift when a second query is added.
+    it('shows the tab bar with the one query, and its editor', () => {
       render(<EsqlDataSection {...defaultProps} />);
-      expect(screen.getByText('Data source (ES|QL)')).toBeInTheDocument();
+      expect(screen.getAllByRole('tab')).toHaveLength(1);
+      expect(screen.getByTestId(tabTestSubj('main'))).toHaveAttribute('aria-selected', 'true');
       expect(screen.getByTestId('mockQueryText')).toHaveTextContent('FROM main');
-      expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customContentQueryVariable')).toHaveTextContent(/^rows$/);
+    });
+
+    it('has no actions menu on the only query, since there is nothing to remove', () => {
+      render(<EsqlDataSection {...defaultProps} />);
+      expect(screen.queryByTestId('customContentQueryActions-1')).not.toBeInTheDocument();
+    });
+
+    it('keeps the same section title whatever the number of queries', () => {
+      const { rerender } = render(<EsqlDataSection {...defaultProps} />);
+      expect(screen.getByText('Data sources (ES|QL)')).toBeInTheDocument();
+
+      rerender(<EsqlDataSection {...defaultProps} additionalQueries={twoExtraQueries} />);
+      expect(screen.getByText('Data sources (ES|QL)')).toBeInTheDocument();
+    });
+
+    it('puts the add button in the tab bar, after the tabs', () => {
+      render(<EsqlDataSection {...defaultProps} />);
+      const bar = screen.getByTestId('unifiedTabs_tabsBar');
+      const addButton = screen.getByTestId('customContentAddQueryButton');
+      expect(bar).toContainElement(addButton);
+      expect(screen.getByRole('tab').compareDocumentPosition(addButton)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
+    });
+
+    it('labels the add button for screen readers', () => {
+      render(<EsqlDataSection {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Add query' })).toBeInTheDocument();
     });
 
     it('adds a query', async () => {
@@ -98,7 +129,7 @@ describe('EsqlDataSection', () => {
       expect(screen.getByTestId('mockQueryText')).toHaveTextContent('FROM main');
     });
 
-    it('keeps the add button below the tab bar', async () => {
+    it('adds a query from the button at the end of the tab row when there are several', async () => {
       renderSeveral();
       await userEvent.click(screen.getByTestId('customContentAddQueryButton'));
       expect(defaultProps.onAddQuery).toHaveBeenCalledTimes(1);
@@ -173,11 +204,21 @@ describe('EsqlDataSection', () => {
       expect(screen.getByTestId(tabTestSubj('query-9'))).toHaveAttribute('aria-selected', 'true');
     });
 
-    it('drops back to a single editor with no tabs when only the first query is left', () => {
+    it('keeps the tab bar, with one tab, when only the first query is left', () => {
       const { rerender } = renderSeveral();
       rerender(<EsqlDataSection {...defaultProps} additionalQueries={[]} />);
-      expect(screen.queryByRole('tab')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('tab')).toHaveLength(1);
       expect(screen.getByTestId('mockQueryText')).toHaveTextContent('FROM main');
+    });
+
+    it('stops offering the add button once the panel holds as many queries as it can', () => {
+      renderSeveral({
+        additionalQueries: Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES - 1 }, (_, i) =>
+          draft(i, `FROM q${i}`)
+        ),
+      });
+      expect(screen.getAllByRole('tab')).toHaveLength(CUSTOM_CONTENT_MAX_ESQL_QUERIES);
+      expect(screen.queryByTestId('customContentAddQueryButton')).not.toBeInTheDocument();
     });
 
     it('shows a preview error above the tabs whichever query is selected', async () => {
