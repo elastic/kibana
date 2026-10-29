@@ -229,12 +229,15 @@ export async function getFullAgentPolicy(
     });
   }
 
+  const getOutputProxy = (output: Output) =>
+    isBeatsOutput(output) && output.proxy_id
+      ? proxies.find((proxy) => output.proxy_id === proxy.id)
+      : undefined;
+
   const fullPolicyOutputs = outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
     acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
       output,
-      isBeatsOutput(output) && output.proxy_id
-        ? proxies.find((proxy) => output.proxy_id === proxy.id)
-        : undefined,
+      getOutputProxy(output),
       standalone,
       redactProxySecrets
     );
@@ -254,9 +257,13 @@ export async function getFullAgentPolicy(
         input.use_output = getOutputIdForAgentPolicy(output);
       }
       if (input.type === 'fleet-server' && fleetServerHost) {
+        const inputOutput = outputs.find(
+          (policyOutput) => getOutputIdForAgentPolicy(policyOutput) === input.use_output
+        );
         const bootstrapOutput = generateFleetServerOutputSSLConfig(
           fleetServerHost,
-          input.use_output ? fullPolicyOutputs[input.use_output] : undefined
+          input.use_output ? fullPolicyOutputs[input.use_output] : undefined,
+          inputOutput ? getOutputProxy(inputOutput) : undefined
         );
         input = {
           ...input,
@@ -861,11 +868,14 @@ const CLIENT_CERTIFICATE_SSL_KEYS = ['certificate', 'key', 'key_passphrase', 'ke
 // output is a copy of it, so that the hosts configured on the policy's output are not lost, and the ES SSL
 // settings of the fleet server host only fill the settings that the output does not set. The precedence is
 // output > fleet server host > install time `--fleet-server-es*` flags (filled in by fleet-server).
+// The CA of the proxy of the output is not an ES setting of the output: it is added to the CA list on top of the
+// ones of the output or of the fleet server host.
 // Otherwise it only contains the ES SSL settings and elastic-agent/fleet-server fill the remaining attributes
 // from the bootstrap configuration.
 export function generateFleetServerOutputSSLConfig(
   fleetServerHost: FleetServerHost | undefined,
-  baseOutput?: FullAgentPolicyOutput
+  baseOutput?: FullAgentPolicyOutput,
+  baseOutputProxy?: FleetProxy
 ):
   | {
       [key: string]: FullAgentPolicyOutput;
@@ -890,11 +900,13 @@ export function generateFleetServerOutputSSLConfig(
 
   if (Object.keys(esSsl).length === 0 && !esSecretKey) return undefined;
 
+  // only an elasticsearch output can be copied, with its proxy; for any other one only the ES ssl settings are used
+  const esBaseOutput = baseOutput?.type === 'elasticsearch' ? baseOutput : undefined;
   const {
     secrets: baseSecrets,
     ssl: baseNestedSsl,
     ...baseWithDottedSsl
-  } = baseOutput?.type === 'elasticsearch' ? baseOutput : ({} as Partial<FullAgentPolicyOutput>);
+  } = esBaseOutput ?? ({} as Partial<FullAgentPolicyOutput>);
 
   // The Advanced YAML of an output (config_yaml) is copied as is into the compiled output, so its dotted
   // keys (e.g. `ssl.certificate`) are flat keys next to the nested `ssl`. Move them into `ssl`, otherwise the
@@ -918,9 +930,34 @@ export function generateFleetServerOutputSSLConfig(
   const baseSetsClientCertificate =
     !isEmpty(pick(baseSsl, CLIENT_CERTIFICATE_SSL_KEYS)) || Boolean(baseSecrets?.ssl?.key);
 
+  // transformOutputToFullPolicyOutput appends the CA of the proxy of the output to the CA list, so it is not
+  // a CA set by the output itself: take it out here and add it back once the CA list is merged.
+  const proxyCertificateAuthority = esBaseOutput
+    ? baseOutputProxy?.certificate_authorities
+    : undefined;
+  const baseCertificateAuthorities = baseSsl.certificate_authorities;
+  const outputCertificateAuthorities =
+    proxyCertificateAuthority &&
+    baseCertificateAuthorities?.[baseCertificateAuthorities.length - 1] ===
+      proxyCertificateAuthority
+      ? baseCertificateAuthorities.slice(0, -1)
+      : baseCertificateAuthorities;
+
   // the ssl settings of the output win over the ones of the fleet server host, which only fill the gaps
   const hostSsl = baseSetsClientCertificate ? omit(esSsl, CLIENT_CERTIFICATE_SSL_KEYS) : esSsl;
-  const ssl: OutputSsl = { ...hostSsl, ...baseSsl };
+  const ssl: OutputSsl = {
+    ...hostSsl,
+    ...omit(baseSsl, 'certificate_authorities'),
+    ...(outputCertificateAuthorities?.length
+      ? { certificate_authorities: outputCertificateAuthorities }
+      : {}),
+  };
+  if (proxyCertificateAuthority) {
+    ssl.certificate_authorities = [
+      ...(ssl.certificate_authorities ?? []),
+      proxyCertificateAuthority,
+    ];
+  }
   if (Object.keys(ssl).length > 0) {
     outputConfig.ssl = ssl;
   }
