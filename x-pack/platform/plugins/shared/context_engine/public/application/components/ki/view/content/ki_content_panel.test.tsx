@@ -10,18 +10,25 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
-import { ViewKiContentPanel } from './view_ki_content_panel';
+import { KiContentPanel } from './ki_content_panel';
 
-const renderPanel = (document: KiDocument) =>
+jest.mock('./edit_ki_content_panel', () => ({
+  EditKiContentPanel: () => <div data-test-subj="contextViewKiContentEditing" />,
+}));
+
+const renderPanel = (
+  document: KiDocument,
+  props: Partial<React.ComponentProps<typeof KiContentPanel>> = {}
+) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <ViewKiContentPanel document={document} />
+        <KiContentPanel document={document} {...props} />
       </EuiProvider>
     </I18nProvider>
   );
 
-describe('ViewKiContentPanel', () => {
+describe('KiContentPanel', () => {
   it('renders content when document.content is a non-empty string', () => {
     renderPanel({ content: 'Hello world' });
 
@@ -40,6 +47,20 @@ describe('ViewKiContentPanel', () => {
     renderPanel({ content: '' });
 
     expect(screen.getByTestId('contextViewKiContentEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiContent')).not.toBeInTheDocument();
+  });
+
+  it('renders the loading skeleton when isLoading is true', () => {
+    renderPanel({ content: 'Hello world' }, { isLoading: true });
+
+    expect(screen.getByTestId('contextViewKiContentLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextViewKiContent')).not.toBeInTheDocument();
+  });
+
+  it('renders the edit panel when isEditing is true', () => {
+    renderPanel({ content: 'Hello world' }, { isEditing: true });
+
+    expect(screen.getByTestId('contextViewKiContentEditing')).toBeInTheDocument();
     expect(screen.queryByTestId('contextViewKiContent')).not.toBeInTheDocument();
   });
 });

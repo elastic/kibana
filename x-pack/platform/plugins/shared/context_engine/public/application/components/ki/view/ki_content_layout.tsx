@@ -8,20 +8,28 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import type { KiDocument } from '../../../../../common/http_api/knowledge_indicators';
-import { ViewKiContentPanel } from './content/view_ki_content_panel';
+import { KiContentPanel, type KiContentPanelSaveFields } from './content/ki_content_panel';
 import { ViewKiMetadataPanel } from './metadata/view_ki_metadata_panel';
 
-interface ViewKiContentLayoutProps {
+interface KiContentLayoutProps {
   document?: KiDocument;
   kiId: string;
   isLoading?: boolean;
+  isEditing?: boolean;
+  onCancel?: () => void;
+  isSaving?: boolean;
+  onSave?: (fields: KiContentPanelSaveFields) => void;
 }
 
-export const ViewKiContentLayout = ({
+export const KiContentLayout = ({
   document,
   kiId,
   isLoading = false,
-}: ViewKiContentLayoutProps) => (
+  isEditing,
+  onCancel,
+  isSaving,
+  onSave,
+}: KiContentLayoutProps) => (
   <EuiFlexGroup
     gutterSize="xl"
     responsive
@@ -29,7 +37,14 @@ export const ViewKiContentLayout = ({
     data-test-subj="contextViewKiContentLayout"
   >
     <EuiFlexItem grow={2} data-test-subj="contextViewKiMainColumn">
-      <ViewKiContentPanel document={document} isLoading={isLoading} />
+      <KiContentPanel
+        document={document}
+        isLoading={isLoading}
+        isEditing={isEditing}
+        onCancel={onCancel}
+        isSaving={isSaving}
+        onSave={onSave}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={1} data-test-subj="contextViewKiSidebarColumn">
       <ViewKiMetadataPanel kiId={kiId} document={document} isLoading={isLoading} />

@@ -10,7 +10,8 @@ export const CONTEXT_ENGINE_PATHS = {
   create: '/ai_index/create',
   detail: '/ai_index/:id',
   detailKnowledgeIndicators: '/ai_index/:id/knowledge_indicators',
-  viewKi: '/ai_index/:id/ki/:kiId*',
+  viewKi: '/ai_index/:id/ki/:kiId',
+  viewKiDocument: '/ai_index/:id/ki/:kiId/document',
 } as const;
 
 export const getAiIndexDetailPath = (id: string): string => `/ai_index/${id}`;
@@ -26,6 +27,9 @@ export const getAiIndexKnowledgeIndicatorsPath = (id: string): string =>
  */
 export const getViewKiPath = (aiIndexId: string, kiId: string): string =>
   `/ai_index/${aiIndexId}/ki/${encodeURIComponent(kiId)}`;
+
+export const getViewKiDocumentPath = (aiIndexId: string, kiId: string): string =>
+  `${getViewKiPath(aiIndexId, kiId)}/document`;
 
 /**
  * Best-effort decode for a KI id read from the URL. `history` already runs

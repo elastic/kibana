@@ -9,6 +9,7 @@ import {
   decodeRouteParam,
   getAiIndexDetailPath,
   getAiIndexKnowledgeIndicatorsPath,
+  getViewKiDocumentPath,
   getViewKiPath,
 } from './paths';
 
@@ -35,6 +36,14 @@ describe('getViewKiPath', () => {
     expect(
       getViewKiPath('quick-test', 'quick-test-metadata-2/traces-agent_builder.otel-default')
     ).toBe('/ai_index/quick-test/ki/quick-test-metadata-2%2Ftraces-agent_builder.otel-default');
+  });
+});
+
+describe('getViewKiDocumentPath', () => {
+  it('appends /document to the view KI path', () => {
+    expect(getViewKiDocumentPath('my-ai-index', 'ki-1')).toBe(
+      '/ai_index/my-ai-index/ki/ki-1/document'
+    );
   });
 });
 
