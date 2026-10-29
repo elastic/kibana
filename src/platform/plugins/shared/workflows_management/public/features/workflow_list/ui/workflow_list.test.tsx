@@ -323,6 +323,13 @@ describe('WorkflowList', () => {
       expect(nameLink).toHaveTextContent('My Test Workflow');
     });
 
+    it('renders workflow names as a single link, not a link nested inside a button', () => {
+      renderComponent();
+      const nameLink = screen.getByTestId('workflowNameLink');
+      expect(nameLink.tagName).toBe('A');
+      expect(nameLink.closest('button')).toBeNull();
+    });
+
     it('keeps workflow name links clean while preserving list search params in route state', async () => {
       const user = userEvent.setup();
       const RouteStateProbe = () => {
