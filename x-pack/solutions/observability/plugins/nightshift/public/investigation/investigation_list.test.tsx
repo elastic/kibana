@@ -198,6 +198,78 @@ describe('InvestigationList', () => {
     expect(ref.current?.scrollToSeverity('critical')).toBe(false);
   });
 
+  describe('when the accordion animates open', () => {
+    const bodyId = 'nightshiftInvestigationSection-high-accordion';
+
+    beforeEach(() => {
+      // jsdom reports no transitions, so give the body the one EUI applies in a browser.
+      const getComputedStyle = window.getComputedStyle.bind(window);
+      jest.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) =>
+        element.id === bodyId
+          ? ({
+              transitionDuration: '0.25s, 0.25s',
+              transitionDelay: '0s, 0s',
+            } as unknown as CSSStyleDeclaration)
+          : getComputedStyle(element, pseudoElement)
+      );
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      jest.useRealTimers();
+    });
+
+    const renderCollapsedHigh = () => {
+      window.localStorage.setItem(SECTION_EXPANSION_STORAGE_KEY, JSON.stringify({ high: false }));
+      const ref = React.createRef<InvestigationListHandle>();
+      renderSections([makeSection('high', { investigations: [investigation], total: 1 })], ref);
+      return ref;
+    };
+
+    it('scrolls once the section has finished growing, not before', () => {
+      const ref = renderCollapsedHigh();
+
+      act(() => {
+        ref.current?.scrollToSeverity('high');
+      });
+
+      expect(getToggleControl('high')).toHaveAttribute('aria-expanded', 'true');
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      fireEvent.transitionEnd(document.getElementById(bodyId) as HTMLElement);
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId('nightshiftInvestigationSection-high')).toHaveFocus();
+    });
+
+    it('still scrolls when the transition never reports its end', () => {
+      jest.useFakeTimers();
+      const ref = renderCollapsedHigh();
+
+      act(() => {
+        ref.current?.scrollToSeverity('high');
+      });
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it('scrolls at once when the section is already expanded', () => {
+      const ref = React.createRef<InvestigationListHandle>();
+      renderSections([makeSection('high', { investigations: [investigation], total: 1 })], ref);
+
+      act(() => {
+        ref.current?.scrollToSeverity('high');
+      });
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('renders each investigation as the shared investigation card', () => {
     renderSections([makeSection('critical', { investigations: [investigation], total: 1 })]);
 

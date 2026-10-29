@@ -56,6 +56,10 @@ export interface InvestigationSectionProps {
 export const getInvestigationSectionAnchorId = (id: InvestigationSectionId): string =>
   `nightshiftInvestigationSection-${id}`;
 
+/** The collapsible body of a section: the element the accordion grows when it opens. */
+export const getInvestigationSectionBodyId = (id: InvestigationSectionId): string =>
+  `${getInvestigationSectionAnchorId(id)}-accordion`;
+
 /** Everything derived from a section's id: what it is called and where it is anchored. */
 interface SectionPresentation {
   id: InvestigationSectionId;
@@ -206,6 +210,32 @@ const SectionHeading = ({
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
+);
+
+/**
+ * Sits in the accordion header, outside the collapsible body, so a failed request stays visible
+ * while the section is collapsed and is never mistaken for an empty section.
+ */
+const SectionErrorBadge = ({
+  presentation: { id },
+  isUnloadable,
+}: {
+  presentation: SectionPresentation;
+  isUnloadable: boolean;
+}): React.ReactElement => (
+  <EuiBadge
+    color={isUnloadable ? 'danger' : 'warning'}
+    iconType="warning"
+    data-test-subj={`nightshiftInvestigationSectionError-${id}`}
+  >
+    {isUnloadable
+      ? i18n.translate('xpack.nightshift.investigations.sectionLoadingErrorBadge', {
+          defaultMessage: 'Unable to load',
+        })
+      : i18n.translate('xpack.nightshift.investigations.sectionRefreshWarningBadge', {
+          defaultMessage: 'Refresh failed',
+        })}
+  </EuiBadge>
 );
 
 const RetryCallout = ({
@@ -445,21 +475,23 @@ export const InvestigationSection = ({
     >
       <SectionPanel>
         <EuiAccordion
-          id={`${presentation.anchorId}-accordion`}
+          id={getInvestigationSectionBodyId(id)}
           // The heading lives in the trigger, and a heading cannot sit inside a button; EUI then
           // makes the arrow the keyboard control and keeps the whole header clickable.
           buttonElement="div"
           buttonContent={
-            <SectionHeading
-              presentation={presentation}
-              total={total}
-              showCount={view !== 'loading'}
-            />
+            // A count is only meaningful once rows loaded: a failed first load has nothing to count.
+            <SectionHeading presentation={presentation} total={total} showCount={view === 'rows'} />
           }
           buttonProps={{
             paddingSize: 'm',
             'data-test-subj': `nightshiftInvestigationSectionToggle-${id}`,
           }}
+          extraAction={
+            error != null && view !== 'loading' ? (
+              <SectionErrorBadge presentation={presentation} isUnloadable={view === 'unloadable'} />
+            ) : undefined
+          }
           arrowDisplay="left"
           paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}

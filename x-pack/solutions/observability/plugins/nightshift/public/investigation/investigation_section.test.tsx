@@ -178,4 +178,46 @@ describe('InvestigationSection', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
   });
+
+  it('keeps a failed load visible in the header while collapsed, with no count to mistake for empty', () => {
+    renderSection({ error: new Error('Network unavailable'), isExpanded: false });
+
+    expect(screen.getByTestId('nightshiftInvestigationSectionError-critical')).toHaveTextContent(
+      'Unable to load'
+    );
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSectionCount-critical')
+    ).not.toBeInTheDocument();
+    // The retry callout is in the collapsed body; the badge is what stays in view.
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionRetry-critical').closest('[inert]')
+    ).not.toBeNull();
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionError-critical').closest('[inert]')
+    ).toBeNull();
+  });
+
+  it('flags a failed refresh in the header and keeps the count of the rows it still shows', () => {
+    renderSection({
+      investigations: [investigation],
+      total: 1,
+      error: new Error('Network unavailable'),
+      isExpanded: false,
+    });
+
+    expect(screen.getByTestId('nightshiftInvestigationSectionError-critical')).toHaveTextContent(
+      'Refresh failed'
+    );
+    expect(screen.getByTestId('nightshiftInvestigationSectionCount-critical')).toHaveTextContent(
+      '1'
+    );
+  });
+
+  it('shows no error badge when the section loaded', () => {
+    renderSection({ investigations: [investigation], total: 1 });
+
+    expect(
+      screen.queryByTestId('nightshiftInvestigationSectionError-critical')
+    ).not.toBeInTheDocument();
+  });
 });
