@@ -103,3 +103,47 @@ export const resolveScopedModel = async ({
       'advanced settings, or configure a GenAI connector for the current user.',
   };
 };
+
+/**
+ * Builds the connector an operator saved for `featureId`. An empty row, an
+ * unregistered feature, and a failed build all return undefined. There is no
+ * fallthrough to the deployment default: this read is for a row that must stay
+ * unused until someone saves a model on it.
+ */
+export const resolveConfiguredScopedModel = async ({
+  inference,
+  searchInferenceEndpoints,
+  featureId,
+  request,
+  logger,
+  chatModelOptions = {},
+}: {
+  inference: InferenceServerStart | undefined;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  featureId: string;
+  request: KibanaRequest;
+  logger: Logger;
+  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
+  chatModelOptions?: ChatModelOptions;
+}): Promise<ScopedModel | undefined> => {
+  if (!inference || !searchInferenceEndpoints) return undefined;
+  if (searchInferenceEndpoints.features.get(featureId) == null) return undefined;
+
+  try {
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+      featureId,
+      request,
+      { onlyReturnConfigured: true }
+    );
+    const connectorId = endpoints[0]?.connectorId;
+    if (!connectorId) return undefined;
+    return await buildScopedModel({ inference, request, connectorId, chatModelOptions });
+  } catch (err) {
+    logger.warn(
+      `[hunt:connector] configured feature '${featureId}' could not be built. ${
+        (err as Error).message
+      }`
+    );
+    return undefined;
+  }
+};

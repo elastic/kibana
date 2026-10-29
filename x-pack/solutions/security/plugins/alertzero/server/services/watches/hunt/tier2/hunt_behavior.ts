@@ -9,7 +9,6 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { z } from '@kbn/zod/v4';
 import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -35,6 +34,14 @@ import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
 import { scopedEsqlProbeClient } from './scoped_esql_probe_client';
 import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_grounding';
+import { invokeHuntStructured } from '../common/invoke_hunt_structured';
+import {
+  HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+  HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS,
+  HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS,
+  HUNT_PROMPT_TEMPLATE_VERSION,
+  clampHuntTemplateString,
+} from '../common/hunt_prompt_templates';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
@@ -793,13 +800,27 @@ export const huntBehavior = async (
     };
   }
 
-  const structured = models.extraction.chatModel.withStructuredOutput(
-    huntBehaviorLlmExtractionSchema
-  );
   const contextBlock = renderArticleContext(articleContext);
-  const result = (await structured.invoke(
-    `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
-  )) as z.infer<typeof huntBehaviorLlmExtractionSchema>;
+  const result = await invokeHuntStructured({
+    model: models.extraction,
+    // ES|QL stays on a messages model when extraction's connector requires a
+    // template, so it can take the call if the gateway rejects that template.
+    messagesFallback: models.esql,
+    schema: huntBehaviorLlmExtractionSchema,
+    prompt: `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`,
+    logger,
+    template: {
+      id: HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+      version: HUNT_PROMPT_TEMPLATE_VERSION,
+      variables: {
+        environment_context: clampHuntTemplateString(
+          contextBlock,
+          HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS
+        ),
+        report_text: clampHuntTemplateString(text, HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS),
+      },
+    },
+  });
   const candidates = (result.candidates ?? [])
     .map((c) => ({
       technique_id: c.technique_id.toUpperCase().trim(),

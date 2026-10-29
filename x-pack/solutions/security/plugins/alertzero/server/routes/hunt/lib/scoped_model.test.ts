@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { resolveScopedModel } from './scoped_model';
+import { resolveConfiguredScopedModel, resolveScopedModel } from './scoped_model';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -29,6 +29,9 @@ const mockInference = {
 };
 
 const mockSearchInferenceEndpoints = {
+  features: {
+    get: jest.fn(),
+  },
   endpoints: {
     getForFeature: jest.fn(),
   },
@@ -146,6 +149,91 @@ describe('resolveScopedModel', () => {
 
     expect(result.ok).toBe(true);
     expect(mockInference.getConnectorById).toHaveBeenCalledWith('fallback-connector', mockRequest);
+  });
+
+  describe('resolveConfiguredScopedModel', () => {
+    it('returns undefined when the feature is not registered', async () => {
+      mockSearchInferenceEndpoints.features.get.mockReturnValue(undefined);
+
+      const result = await resolveConfiguredScopedModel({
+        inference: mockInference as never,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+        featureId,
+        request: mockRequest,
+        logger,
+      });
+
+      expect(result).toBeUndefined();
+      expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when the row has no saved model', async () => {
+      mockSearchInferenceEndpoints.features.get.mockReturnValue({ featureId });
+      mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({ endpoints: [] });
+
+      const result = await resolveConfiguredScopedModel({
+        inference: mockInference as never,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+        featureId,
+        request: mockRequest,
+        logger,
+      });
+
+      expect(result).toBeUndefined();
+      expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+        featureId,
+        mockRequest,
+        { onlyReturnConfigured: true }
+      );
+      expect(mockInference.getDefaultConnector).not.toHaveBeenCalled();
+    });
+
+    it('builds the saved connector and does not fall through to the deployment default', async () => {
+      mockSearchInferenceEndpoints.features.get.mockReturnValue({ featureId });
+      mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+        endpoints: [{ connectorId: 'daybreak' }],
+      });
+
+      const result = await resolveConfiguredScopedModel({
+        inference: mockInference as never,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+        featureId,
+        request: mockRequest,
+        logger,
+      });
+
+      expect(result?.connector).toBe(mockConnector);
+      expect(mockInference.getConnectorById).toHaveBeenCalledWith('daybreak', mockRequest);
+      expect(mockInference.getChatModel).toHaveBeenCalledWith({
+        request: mockRequest,
+        connectorId: 'daybreak',
+        chatModelOptions: {},
+      });
+      expect(mockInference.getDefaultConnector).not.toHaveBeenCalled();
+    });
+
+    it('passes the chat model options to the saved connector it builds', async () => {
+      mockSearchInferenceEndpoints.features.get.mockReturnValue({ featureId });
+      mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+        endpoints: [{ connectorId: 'daybreak' }],
+      });
+      const chatModelOptions = { telemetryMetadata: { pluginId: 'test_plugin' } };
+
+      await resolveConfiguredScopedModel({
+        inference: mockInference as never,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+        featureId,
+        request: mockRequest,
+        logger,
+        chatModelOptions,
+      });
+
+      expect(mockInference.getChatModel).toHaveBeenCalledWith({
+        request: mockRequest,
+        connectorId: 'daybreak',
+        chatModelOptions,
+      });
+    });
   });
 
   describe('a stale genAi:defaultAIConnector setting', () => {
