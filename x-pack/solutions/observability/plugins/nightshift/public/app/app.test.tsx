@@ -175,6 +175,7 @@ function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {
 
 describe('NightshiftApp', () => {
   beforeEach(() => {
+    refetchAll.mockClear();
     reportEvent.mockClear();
     scrollIntoView.mockClear();
     mockUseKibana.mockReturnValue({
@@ -199,6 +200,25 @@ describe('NightshiftApp', () => {
       }),
       hasActiveInvestigations: true,
     });
+  });
+
+  it('shows a retry action when every section fails to load', () => {
+    const error = new Error('Network unavailable');
+    setSections({
+      sections: defaultSections({
+        'in-progress': { error },
+        critical: { error },
+        high: { error },
+        medium: { error },
+        low: { error },
+        'not-rated': { error },
+      }),
+    });
+
+    renderApp();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(refetchAll).toHaveBeenCalledTimes(1);
   });
 
   it('keeps cached investigations visible when a refresh fails', () => {
@@ -266,6 +286,16 @@ describe('NightshiftApp', () => {
     const [{ onClose }] = openConversationDetails.mock.calls[0];
     onClose();
     await waitFor(() => expect(screen.getByTestId('locationProbe')).toHaveTextContent(''));
+  });
+
+  it('opens the conversation details flyout from an investigation locator link', async () => {
+    renderApp({ initialEntries: ['/?investigationId=conversation-9'] });
+
+    await waitFor(() =>
+      expect(openConversationDetails).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'conversation-9' })
+      )
+    );
   });
 
   it('reports a search by length and result count, never by term', async () => {

@@ -9,7 +9,10 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Feature } from '@kbn/significant-events-schema';
+import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import type { PromoteResult } from '../../data/rules/use_queries_api';
+import { BULK_EXCLUDE_PARTIAL_TOAST_TITLE } from './translations';
+import type { KnowledgeIndicatorsQuery } from './use_knowledge_indicators_query_params';
 import {
   useKnowledgeIndicatorsTable,
   getKnowledgeIndicatorTitle,
@@ -24,6 +27,8 @@ const mockToasts = {
   addError: jest.fn(),
 };
 
+let mockQuery: KnowledgeIndicatorsQuery = {};
+
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: { notifications: { toasts: mockToasts } },
@@ -32,7 +37,7 @@ jest.mock('../../hooks/use_kibana', () => ({
 
 jest.mock('./use_knowledge_indicators_query_params', () => ({
   useKnowledgeIndicatorsQueryParams: () => ({
-    query: {},
+    query: mockQuery,
     push: mockPush,
     replace: mockReplace,
   }),
@@ -77,30 +82,39 @@ jest.mock('../../data/knowledge_indicators/use_invalidate_promote_queries', () =
 }));
 
 const mockDeleteKnowledgeIndicatorsInBulk = jest.fn();
+let mockIsDeleting = false;
 
 jest.mock('../../data/knowledge_indicators/use_knowledge_indicators_bulk_delete', () => ({
-  useKnowledgeIndicatorsBulkDelete: () => ({
-    deleteKnowledgeIndicatorsInBulk: mockDeleteKnowledgeIndicatorsInBulk,
-    isDeleting: false,
-  }),
+  useKnowledgeIndicatorsBulkDelete: ({ onSuccess }: { onSuccess?: () => void }) => {
+    mockBulkDeleteOnSuccess = onSuccess;
+    return {
+      deleteKnowledgeIndicatorsInBulk: mockDeleteKnowledgeIndicatorsInBulk,
+      isDeleting: mockIsDeleting,
+    };
+  },
 }));
+
+let mockBulkDeleteOnSuccess: (() => void) | undefined;
 
 jest.mock('@kbn/react-hooks', () => ({
   useDebouncedValue: (value: string) => value,
 }));
 
+let mockIsMutatingValue = 0;
 const mockMutate = jest.fn();
 let mockMutationCallbacks: {
   onSuccess?: (result: PromoteResult) => Promise<void>;
+  onError?: (e: Error) => Promise<void>;
 } = {};
 
 jest.mock('@kbn/react-query', () => ({
-  useIsMutating: () => 0,
+  useIsMutating: () => mockIsMutatingValue,
   useMutation: (config: {
     mutationFn: (ids: string[]) => Promise<unknown>;
     onSuccess?: (result: PromoteResult) => Promise<void>;
+    onError?: (e: Error) => Promise<void>;
   }) => {
-    mockMutationCallbacks = { onSuccess: config.onSuccess };
+    mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
     return {
       mutate: mockMutate,
       isLoading: false,
@@ -160,11 +174,27 @@ describe('getKnowledgeIndicatorTitle', () => {
 describe('useKnowledgeIndicatorsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockQuery = {};
     mockKnowledgeIndicators = [];
     mockIsLoading = false;
+    mockIsDeleting = false;
+    mockIsMutatingValue = 0;
   });
 
   describe('filteredKnowledgeIndicators', () => {
+    it('filters by active status (excludes features with excluded)', () => {
+      mockKnowledgeIndicators = [
+        makeFeatureKI({ id: 'f1', source_id: 's1' }),
+        makeFeatureKI({ id: 'f2', source_id: 's1', excluded: true }),
+      ];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.filteredKnowledgeIndicators).toHaveLength(1);
+      expect(result.current.filteredKnowledgeIndicators[0].kind).toBe('feature');
+      if (result.current.filteredKnowledgeIndicators[0].kind === 'feature') {
+        expect(result.current.filteredKnowledgeIndicators[0].feature.id).toBe('f1');
+      }
+    });
+
     it('sorts alphabetically by title', () => {
       mockKnowledgeIndicators = [
         makeFeatureKI({ id: 'f2', source_id: 's1', title: 'Zebra' }),
@@ -175,9 +205,170 @@ describe('useKnowledgeIndicatorsTable', () => {
       const titles = result.current.filteredKnowledgeIndicators.map(getKnowledgeIndicatorTitle);
       expect(titles).toEqual(['Alpha', 'Middle', 'Zebra']);
     });
+
+    it('filters by search term (case-insensitive)', () => {
+      mockKnowledgeIndicators = [
+        makeFeatureKI({ id: 'f1', source_id: 's1', title: 'CPU Usage' }),
+        makeFeatureKI({ id: 'f2', source_id: 's1', title: 'Memory' }),
+      ];
+      mockQuery = { search: 'cpu' };
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.filteredKnowledgeIndicators).toHaveLength(1);
+    });
+
+    it('hides computed feature types by default', () => {
+      mockKnowledgeIndicators = [
+        makeFeatureKI({ id: 'f1', source_id: 's1', type: 'entity' }),
+        makeFeatureKI({ id: 'f2', source_id: 's1', type: 'dataset_analysis' }),
+      ];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.filteredKnowledgeIndicators).toHaveLength(1);
+    });
+
+    it('shows computed types when showComputed is true', () => {
+      mockQuery = { showComputed: 'true' };
+      mockKnowledgeIndicators = [
+        makeFeatureKI({ id: 'f1', source_id: 's1', type: 'entity' }),
+        makeFeatureKI({ id: 'f2', source_id: 's1', type: 'dataset_analysis' }),
+      ];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.filteredKnowledgeIndicators).toHaveLength(2);
+    });
+  });
+
+  describe('handleTableChange', () => {
+    it('updates pagination', () => {
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.handleTableChange({
+          page: { index: 2, size: 50 },
+        } as CriteriaWithPagination<KnowledgeIndicator>);
+      });
+      expect(result.current.pagination).toEqual({ pageIndex: 2, pageSize: 50 });
+    });
+
+    it('does nothing when page is undefined', () => {
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.handleTableChange({} as CriteriaWithPagination<KnowledgeIndicator>);
+      });
+      expect(result.current.pagination).toEqual({ pageIndex: 0, pageSize: 25 });
+    });
   });
 
   describe('bulk exclude', () => {
+    it('calls excludeFeaturesInBulk with features only, shows success', async () => {
+      const feature = makeFeature({ id: 'f1', source_id: 's1' });
+      const ki = { kind: 'feature' as const, feature };
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 0,
+        conflictCount: 0,
+      });
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockExcludeFeaturesInBulk).toHaveBeenCalledWith([feature]);
+      expect(mockToasts.addSuccess).toHaveBeenCalled();
+      expect(result.current.selectedKnowledgeIndicators).toEqual([]);
+      expect(mockRefetch).toHaveBeenCalled();
+    });
+
+    it('shows warning when some features fail', async () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 0,
+        failedCount: 1,
+        conflictCount: 0,
+      });
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        text: undefined,
+      });
+    });
+
+    it('adds that the source was busy to the partial warning when changes hit a conflict', async () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 0,
+        failedCount: 0,
+        conflictCount: 1,
+      });
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        text: BULK_WRITE_CONFLICT_MESSAGE,
+      });
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+    });
+
+    it('shows error toast when operation throws', async () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockRejectedValue(new Error('network fail'));
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockToasts.addError).toHaveBeenCalled();
+      expect(mockRefetch).toHaveBeenCalled();
+    });
+
+    it('wraps non-Error throwables', async () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockRejectedValue('string error');
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockToasts.addError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: expect.any(String) })
+      );
+    });
+
     it('skips when no features are selected (only queries)', async () => {
       const ki = makeQueryKI({ id: 'q1', source_id: 's1' });
       mockKnowledgeIndicators = [ki];
@@ -192,6 +383,34 @@ describe('useKnowledgeIndicatorsTable', () => {
       });
 
       expect(mockExcludeFeaturesInBulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bulk restore', () => {
+    it('calls restoreFeaturesInBulk and shows success', async () => {
+      const ki = makeFeatureKI({
+        id: 'f1',
+        source_id: 's1',
+        excluded: true,
+      });
+      mockKnowledgeIndicators = [ki];
+      mockRestoreFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 0,
+        conflictCount: 0,
+      });
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkRestore();
+      });
+
+      expect(mockRestoreFeaturesInBulk).toHaveBeenCalled();
+      expect(mockToasts.addSuccess).toHaveBeenCalled();
     });
   });
 
@@ -281,6 +500,37 @@ describe('useKnowledgeIndicatorsTable', () => {
         text: expect.stringContaining('STATS'),
       });
     });
+
+    it('promote onError shows error toast and refreshes queries other sources may have promoted', async () => {
+      renderHook(() => useKnowledgeIndicatorsTable());
+
+      await act(async () => {
+        await mockMutationCallbacks.onError?.(new Error('promote failed'));
+      });
+
+      expect(mockToasts.addError).toHaveBeenCalled();
+      expect(mockInvalidatePromoteRelatedQueries).toHaveBeenCalled();
+    });
+  });
+
+  describe('bulk delete callback', () => {
+    it('onSuccess clears selections and closes flyout', () => {
+      mockKnowledgeIndicators = [makeFeatureKI({ id: 'f1', source_id: 's1' })];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators(mockKnowledgeIndicators);
+        result.current.setKnowledgeIndicatorsToDelete(mockKnowledgeIndicators);
+      });
+
+      act(() => {
+        mockBulkDeleteOnSuccess?.();
+      });
+
+      expect(result.current.selectedKnowledgeIndicators).toEqual([]);
+      expect(result.current.knowledgeIndicatorsToDelete).toEqual([]);
+      expect(mockPush).toHaveBeenCalled();
+    });
   });
 
   describe('selection pruning', () => {
@@ -316,9 +566,111 @@ describe('useKnowledgeIndicatorsTable', () => {
       });
       expect(result.current.selectionContainsNonExcludable).toBe(true);
     });
+
+    it('selectionContainsNonExcludable is true when computed features are selected', () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1', type: 'dataset_analysis' });
+      mockQuery = { showComputed: 'true' };
+      mockKnowledgeIndicators = [ki];
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+      expect(result.current.selectionContainsNonExcludable).toBe(true);
+    });
+
+    it('selectionContainsNonExcludable is false for regular features', () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1', type: 'entity' });
+      mockKnowledgeIndicators = [ki];
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+      expect(result.current.selectionContainsNonExcludable).toBe(false);
+    });
+
+    it('isSelectionActionsDisabled is true when nothing selected', () => {
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.isSelectionActionsDisabled).toBe(true);
+    });
+
+    it('isSelectionActionsDisabled is true when operation in progress', () => {
+      mockIsDeleting = true;
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+      expect(result.current.isSelectionActionsDisabled).toBe(true);
+    });
+
+    it('hasPromotableSelected is true when unbacked queries selected', () => {
+      const q = makeQueryKI({ id: 'q1', source_id: 's1', backed: false });
+      mockKnowledgeIndicators = [q];
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([q]);
+      });
+      expect(result.current.hasPromotableSelected).toBe(true);
+    });
+
+    it('hasPromotableSelected is false when only backed queries selected', () => {
+      const q = makeQueryKI({ id: 'q1', source_id: 's1', backed: true });
+      mockKnowledgeIndicators = [q];
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([q]);
+      });
+      expect(result.current.hasPromotableSelected).toBe(false);
+    });
+  });
+
+  describe('isOperationInProgress', () => {
+    it('is true when deleting', () => {
+      mockIsDeleting = true;
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.isOperationInProgress).toBe(true);
+    });
+
+    it('is true when row action is in progress', () => {
+      mockIsMutatingValue = 1;
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.isOperationInProgress).toBe(true);
+    });
+
+    it('is false when nothing is in progress', () => {
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.isOperationInProgress).toBe(false);
+    });
   });
 
   describe('hasOnlyHiddenComputedFeatures', () => {
+    it('returns false when hideComputedTypes is false', () => {
+      mockQuery = { showComputed: 'true' };
+      mockKnowledgeIndicators = [
+        makeFeatureKI({ id: 'f1', source_id: 's1', type: 'dataset_analysis' }),
+      ];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.hasOnlyHiddenComputedFeatures).toBe(false);
+    });
+
+    it('returns false when there are no indicators', () => {
+      mockKnowledgeIndicators = [];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.hasOnlyHiddenComputedFeatures).toBe(false);
+    });
+
+    it('returns false when there are visible filtered results', () => {
+      mockKnowledgeIndicators = [makeFeatureKI({ id: 'f1', source_id: 's1', type: 'entity' })];
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      expect(result.current.hasOnlyHiddenComputedFeatures).toBe(false);
+    });
+
     it('returns true when all matching indicators are hidden computed features', () => {
       mockKnowledgeIndicators = [
         makeFeatureKI({ id: 'f1', source_id: 's1', type: 'dataset_analysis' }),

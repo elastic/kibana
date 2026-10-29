@@ -26,6 +26,38 @@ describe('DailyLimitField', () => {
     expect(onChange).toHaveBeenCalledWith('15');
   });
 
+  it('shows the callout without the raise action when read-only', () => {
+    render(
+      <I18nProvider>
+        <DailyLimitField
+          value="20"
+          helpText="Help text"
+          onChange={jest.fn()}
+          usedToday={27}
+          readOnly
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationDailyLimitReachedCallout')).toHaveTextContent(
+      '7 above the limit were not addressed'
+    );
+    expect(screen.queryByTestId('automationDailyLimitRaise')).not.toBeInTheDocument();
+  });
+
+  it('warns when usage is approaching the limit', () => {
+    render(
+      <I18nProvider>
+        <DailyLimitField value="10" helpText="Help text" onChange={jest.fn()} usedToday={8} />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('automationDailyLimitApproachingCallout')).toHaveTextContent(
+      'This automation has handled 8 of 10 triggers today.'
+    );
+    expect(screen.queryByTestId('automationDailyLimitReachedCallout')).not.toBeInTheDocument();
+  });
+
   it('warns about a high limit above 30', () => {
     render(
       <I18nProvider>

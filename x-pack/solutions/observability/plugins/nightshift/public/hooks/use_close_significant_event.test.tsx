@@ -118,4 +118,23 @@ describe('useCloseSignificantEvent', () => {
       }
     );
   });
+
+  it('surfaces inactive update failures as toast errors', async () => {
+    significantEventsFetch.mockRejectedValueOnce(new Error('inactive update failed'));
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
+
+    act(() => result.current.closeSignificantEvent(event.event_id, 'known noise'));
+
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Failed to mark significant event inactive',
+    });
+  });
 });

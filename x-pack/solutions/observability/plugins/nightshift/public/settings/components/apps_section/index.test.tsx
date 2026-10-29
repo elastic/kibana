@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
@@ -58,14 +58,14 @@ function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
   mockUseUnbindChannel.mockReturnValue({ unbind: unbindChannel, isLoading: false });
 }
 
-function setup() {
+function setup(canEdit = true) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <AppsSection canEdit />
+        <AppsSection canEdit={canEdit} />
       </QueryClientProvider>
     </I18nProvider>
   );
@@ -174,6 +174,59 @@ describe('AppsSection', () => {
     await waitFor(() => expect(input).toHaveValue(''));
   });
 
+  it('opens a confirm modal and disconnects the workspace on confirm', async () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    setup();
+
+    const disconnectBtn = await screen.findByTestId('streamsSlackAppDisconnectButton');
+    fireEvent.click(disconnectBtn);
+
+    const modal = await screen.findByTestId('streamsSlackAppDisconnectConfirmModal');
+    expect(modal).toBeInTheDocument();
+
+    const confirmBtn = within(modal).getByRole('button', { name: /disconnect workspace/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => expect(mockDisconnectWorkspace).toHaveBeenCalledTimes(1));
+  });
+
+  it('cancel on the workspace disconnect confirm modal does not disconnect', async () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    setup();
+
+    const disconnectBtn = await screen.findByTestId('streamsSlackAppDisconnectButton');
+    fireEvent.click(disconnectBtn);
+
+    const modal = await screen.findByTestId('streamsSlackAppDisconnectConfirmModal');
+    const cancelBtn = within(modal).getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelBtn);
+
+    expect(mockDisconnectWorkspace).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.queryByTestId('streamsSlackAppDisconnectConfirmModal')).not.toBeInTheDocument()
+    );
+  });
+
+  it('cancel on the unbind confirm modal does not call unbind', async () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    setup();
+    revealChannels();
+
+    const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
+    fireEvent.click(btn);
+
+    const modal = await screen.findByTestId('streamsSlackAppUnbindConfirmModal');
+    expect(modal).toBeInTheDocument();
+
+    const cancelBtn = within(modal).getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelBtn);
+
+    expect(unbindChannel).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.queryByTestId('streamsSlackAppUnbindConfirmModal')).not.toBeInTheDocument()
+    );
+  });
+
   it('offers to reconnect Slack when private channel access is missing', async () => {
     makeBindings([]);
     mockUseBindChannel.mockReturnValue({
@@ -190,6 +243,19 @@ describe('AppsSection', () => {
     );
     expect(screen.getByTestId('streamsSlackAppBindFailureReconnect')).toBeInTheDocument();
     expect(screen.getByTestId('streamsSlackAppBindFailureRetry')).toBeInTheDocument();
+  });
+
+  it('disables the Bind and Unbind controls when canEdit is false', async () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    setup(false /* canEdit = false */);
+    revealChannels();
+
+    const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
+    fireEvent.change(input, { target: { value: 'C0123456789' } });
+
+    expect(input).toBeDisabled();
+    expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
+    expect(screen.getByTestId('streamsSlackAppUnbindChannelButton')).toBeDisabled();
   });
 
   it('shows pagination controls and steps forward using the relay cursor', async () => {

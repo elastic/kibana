@@ -10,7 +10,7 @@ import type { Automation } from '../../hooks/use_automations';
 import { toAutomationFormValues, toPresetSchedule } from './automation_form_values';
 
 describe('automation form values', () => {
-  it.each(['25:00'])('ignores invalid schedules when loading the form: %s', (time) => {
+  it.each(['invalid', '25:00'])('ignores invalid schedules when loading the form: %s', (time) => {
     const automation: Automation = {
       id: 'automation-1',
       name: 'Unsupported schedule',
@@ -30,6 +30,8 @@ describe('automation form values', () => {
 
   it.each<PresetSchedule>([
     { schedulePreset: 'hourly', hourWindow: { start: 0, end: 23 }, timezone: 'Asia/Kolkata' },
+    { schedulePreset: 'daily', time: '09:30', timezone: 'Europe/Berlin' },
+    { schedulePreset: 'weekly', time: '00:00', daysOfWeek: [0, 5, 1], timezone: 'UTC' },
   ])('round trips structured preset fields through the form: %j', (schedule) => {
     const automation: Automation = {
       id: 'automation-1',

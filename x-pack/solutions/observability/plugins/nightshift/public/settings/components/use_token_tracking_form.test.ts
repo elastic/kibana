@@ -77,6 +77,30 @@ describe('useTokenTrackingForm', () => {
     installDashboard.mockReset().mockResolvedValue({ installed: true });
   });
 
+  it('stages and cancels changes before saving through the shared action', async () => {
+    const { result } = setup();
+
+    act(() => result.current.updateEnabled(true));
+    expect(result.current).toMatchObject({ enabled: true, isDirty: true });
+    expect(setUiSetting).not.toHaveBeenCalled();
+
+    act(() => result.current.cancel());
+    expect(result.current).toMatchObject({ enabled: false, isDirty: false });
+
+    act(() => result.current.updateEnabled(true));
+    await act(async () => expect(result.current.save()).resolves.toBe('saved'));
+
+    expect(setUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING, true);
+    expect(installDashboard).toHaveBeenCalledWith(
+      '/internal/gen_ai_settings/install_token_usage_dashboard'
+    );
+    expect(result.current).toMatchObject({
+      enabled: true,
+      savedEnabled: true,
+      isDirty: false,
+    });
+  });
+
   it('does not commit an optimistic settings emission before persistence succeeds', async () => {
     let resolveSave: (saved: boolean) => void = () => {};
     const { result, tracking$ } = setup();

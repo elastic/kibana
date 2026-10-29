@@ -39,6 +39,8 @@ const unknownColumnError = () =>
   );
 
 const withColumns = { columns: [{ name: 'status', type: 'integer' }], values: [] };
+// What ES returns for a wildcard that matches no index: one placeholder column.
+const withoutColumns = { columns: [{ name: '<no-fields>', type: 'null' }], values: [] };
 
 const SPACE_ID = 'default';
 const NGINX_VIEW_NAME = getNightshiftSourceViewName(SPACE_ID, 'nginx-errors');
@@ -131,6 +133,33 @@ describe('SourcesClient', () => {
         has_all_requested: granted,
       } as never);
 
+    it('asks for read on the index patterns of the stored query as the current user', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      hasPrivileges(dataEsClient, true);
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-nginx-*'], privileges: ['read'] }],
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('checks every index of a multi-index source and drops selectors and exclusions', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM logs-a-*::data, logs-b, -logs-a-old' }))
+      );
+      hasPrivileges(dataEsClient, true);
+
+      await client.assertReadable('source-1');
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-a-*', 'logs-b'], privileges: ['read'] }],
+      });
+    });
+
     it('rejects with 403 when the user lacks read on the data', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -193,6 +222,41 @@ describe('SourcesClient', () => {
       await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
     });
 
+    it('is view_drift when the view query differs beyond formatting', async () => {
+      const { client, viewsClient } = setup();
+      viewsClient.getView.mockResolvedValue({
+        name: NGINX_VIEW_NAME,
+        query: 'FROM logs-nginx-* | WHERE status >= 400',
+      });
+
+      await expect(client.getHealth(makeSource())).resolves.toBe('view_drift');
+    });
+
+    it('treats formatting-only differences as matching', async () => {
+      const { client, viewsClient, dataEsClient } = setup();
+      viewsClient.getView.mockResolvedValue({
+        name: NGINX_VIEW_NAME,
+        query: 'from   logs-nginx-*\n| where status>=500',
+      });
+
+      await expect(client.getHealth(makeSource())).resolves.toBe('ok');
+      expect(dataEsClient.esql.query).toHaveBeenCalledWith({
+        query: `FROM ${NGINX_VIEW_NAME} | LIMIT 0`,
+        format: 'json',
+      });
+    });
+
+    it('is ok when the probe hits a pattern with no indices yet', async () => {
+      const { client, viewsClient, dataEsClient } = setup();
+      viewsClient.getView.mockResolvedValue({
+        name: NGINX_VIEW_NAME,
+        query: makeAttributes().esql,
+      });
+      dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
+
+      await expect(client.getHealth(makeSource())).resolves.toBe('ok');
+    });
+
     it('is unresolvable when Unknown index comes from a multi-source query', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       const source = makeSource({
@@ -224,6 +288,19 @@ describe('SourcesClient', () => {
       });
     });
 
+    it('is ok when the view cannot resolve columns because nothing exists behind it yet', async () => {
+      const { client, viewsClient, dataEsClient } = setup();
+      viewsClient.getView.mockResolvedValue({
+        name: NGINX_VIEW_NAME,
+        query: makeAttributes().esql,
+      });
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withoutColumns);
+
+      await expect(client.getHealth(makeSource())).resolves.toBe('ok');
+    });
+
     it('is unknown when the probe is forbidden', async () => {
       const { client, viewsClient, dataEsClient } = setup();
       viewsClient.getView.mockResolvedValue({
@@ -235,6 +312,49 @@ describe('SourcesClient', () => {
       );
 
       await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
+    });
+
+    it('is unknown when the follow-up source probe fails for a non-verification reason', async () => {
+      const { client, viewsClient, dataEsClient } = setup();
+      viewsClient.getView.mockResolvedValue({
+        name: NGINX_VIEW_NAME,
+        query: makeAttributes().esql,
+      });
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockRejectedValueOnce(createEsResponseError(503, 'unavailable', 'shards down'));
+
+      await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
+    });
+  });
+
+  describe('validateQuery', () => {
+    it('reports whether any index exists yet behind an accepted query', async () => {
+      const { client, dataEsClient } = setup();
+
+      await expect(client.validateQuery({ esql: 'FROM logs-nginx-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: true,
+      });
+
+      dataEsClient.esql.query.mockResponseOnce(withoutColumns);
+      await expect(client.validateQuery({ esql: 'FROM logs-none-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query.mockRejectedValueOnce(unknownIndexError());
+      await expect(client.validateQuery({ esql: 'FROM logs-none' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withoutColumns);
+      await expect(
+        client.validateQuery({ esql: 'FROM logs-none-* | WHERE status >= 500' })
+      ).resolves.toEqual({ type: 'logs', indexExists: false });
     });
   });
 
@@ -271,6 +391,36 @@ describe('SourcesClient', () => {
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
+    it('surfaces an unknown field on an existing index as a 400', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(
+          createEsResponseError(400, 'verification_exception', 'Unknown column [nope]')
+        )
+        .mockResponseOnce(withColumns);
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-* | WHERE nope > 1' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('Unknown column [nope]'),
+      });
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('surfaces a non-verification ES failure with its own status', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      dataEsClient.esql.query.mockRejectedValue(
+        createEsResponseError(403, 'security_exception', 'unauthorized for user [x]')
+      );
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-* | WHERE x > 1' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(dataEsClient.esql.query).toHaveBeenCalledTimes(1);
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
     it('rolls the saved object back when the view cannot be created', async () => {
       const { client, soClient, viewsClient } = setup();
       viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
@@ -296,6 +446,79 @@ describe('SourcesClient', () => {
   });
 
   describe('update', () => {
+    it('keeps the stored type on a title-only save', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const updated = await client.update('source-1', {
+        title: 'renamed',
+        tags: ['nginx'],
+        esql: 'FROM logs-nginx-* | WHERE status >= 500',
+      });
+
+      expect(updated.type).toBe('logs');
+      expect(updated.title).toBe('renamed');
+    });
+
+    it('recomputes the type when the query changes', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const updated = await client.update('source-1', {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: 'TS metrics-*',
+      });
+
+      expect(updated.type).toBe('metrics');
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ type: 'metrics' }),
+        expect.anything()
+      );
+    });
+
+    it('rejects an unresolvable field without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withColumns);
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-* | WHERE nope > 1',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
+      const { client, soClient } = setup();
+      const stored = !sent;
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
+      const body = {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+        enabled: sent,
+      };
+
+      const updated = await client.update('source-1', body);
+
+      expect(updated.enabled).toBe(stored);
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ enabled: stored }),
+        expect.anything()
+      );
+    });
+
     it('moves esql_updated_at forward when the clock does not', async () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
@@ -408,6 +631,30 @@ describe('SourcesClient', () => {
     });
   });
 
+  describe('setEnabled', () => {
+    it('flips the flag and touches updated_at only', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.setEnabled('source-1', false);
+
+      expect(source.enabled).toBe(false);
+      expect(source.esql_updated_at).toBe('2026-09-01T00:00:00.000Z');
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('short-circuits when the flag already matches', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.setEnabled('source-1', true);
+
+      expect(source.enabled).toBe(true);
+      expect(source.updated_at).toBe('2026-09-01T00:00:00.000Z');
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('change notifications', () => {
     it('reports a created source once its view exists', async () => {
       const { client, onChange } = setup();
@@ -438,6 +685,32 @@ describe('SourcesClient', () => {
         tags: ['nginx'],
         esql: makeAttributes().esql,
       });
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+      });
+    });
+
+    it('does not report an update that was restored', async () => {
+      const { client, soClient, viewsClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockResolvedValueOnce({ ...makeSavedObject(), version: 'v2' });
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+
+      await expect(
+        client.update('source-1', { title: 'new', tags: [], esql: 'FROM logs-other-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports a disabled source as an update', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.setEnabled('source-1', false);
 
       expect(onChange).toHaveBeenCalledWith({
         type: 'updated',

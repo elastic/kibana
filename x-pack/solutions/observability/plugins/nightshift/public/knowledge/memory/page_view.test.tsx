@@ -132,6 +132,18 @@ describe('MemoryPageView', () => {
     expect(screen.queryByText('memory')).not.toBeInTheDocument();
   });
 
+  it('hides archive and delete from a read-only viewer', () => {
+    // The routes require manage for archive and configure for delete. A viewer
+    // granted neither should see the page without actions that would 403.
+    givenCapabilities({});
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryArchiveToggle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
+  });
+
   it('restores an archived memory rather than re-archiving it', async () => {
     mockUseMemoryPage.mockReturnValue(asDetail({ archived: true, archive_reason: 'harmful' }));
     renderView();
@@ -142,6 +154,18 @@ describe('MemoryPageView', () => {
     await waitFor(() => {
       expect(mockSetArchived).toHaveBeenCalledWith({ id: 'memory_kafka-lag', archived: false });
     });
+  });
+
+  it('writes once per click, so a failed archive is never retried behind the operator', async () => {
+    // The store already exhausted its own optimistic-concurrency retries; the UI
+    // must not paper over that with another one. The failure itself is toasted by
+    // the hook, which is what `use_memory.test.tsx` covers.
+    mockUseMemoryPage.mockReturnValue(asDetail({ archived: true, archive_reason: 'manual' }));
+    renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
+
+    await waitFor(() => expect(mockSetArchived).toHaveBeenCalledTimes(1));
   });
 
   it('does not delete without an explicit confirmation', async () => {
@@ -179,6 +203,35 @@ describe('MemoryPageView', () => {
         expect.objectContaining({ onSuccess: expect.any(Function) })
       )
     );
+  });
+
+  it('stays on the page when the delete write fails', async () => {
+    // The optimizer writes asynchronously, so a conflict is a real outcome the
+    // operator has to see. The hook toasts it; the view must not navigate away.
+    // The operator has to see something, so the write is offered once and left
+    // alone. A failing mutation never calls its success callback.
+    mockDelete.mockImplementation(() => undefined);
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    const { onDeleted } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    await userEvent.click(screen.getByText('Delete permanently'));
+
+    await waitFor(() => expect(mockDelete).toHaveBeenCalled());
+    // The memory may well still be there — the store never confirmed the delete.
+    expect(onDeleted).not.toHaveBeenCalled();
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
+  });
+
+  it('keeps the actions hidden from a viewer with the show privilege alone', async () => {
+    // `show` lets the tab render; it is not `manage`, so neither write is offered.
+    givenCapabilities({ show: true });
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryArchiveToggle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
   });
 
   it('offers archive but not delete to a manager without configure', async () => {

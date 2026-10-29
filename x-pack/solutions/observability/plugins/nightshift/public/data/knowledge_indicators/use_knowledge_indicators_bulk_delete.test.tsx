@@ -14,6 +14,7 @@ import type { BulkOperationResult } from './use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from './use_knowledge_indicators_bulk_delete';
 
 const mockToasts = {
+  addSuccess: jest.fn(),
   addWarning: jest.fn(),
   addError: jest.fn(),
 };
@@ -80,6 +81,39 @@ const renderBulkDelete = () => {
 describe('useKnowledgeIndicatorsBulkDelete', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('adds that the source was busy to the partial warning when deletes hit a conflict', async () => {
+    givenFeatureResult({ succeededCount: 1, failedCount: 0, conflictCount: 1 });
+    mockFetch.mockResolvedValue({ succeeded: 1, failed: 0 });
+    const { result } = renderBulkDelete();
+
+    await act(() =>
+      result.current.deleteKnowledgeIndicatorsInBulk([
+        featureKI('a'),
+        featureKI('b'),
+        queryKI('q1'),
+      ])
+    );
+
+    expect(mockToasts.addWarning).toHaveBeenCalledWith({
+      title: '2 knowledge indicators deleted. 1 knowledge indicator failed.',
+      text: BULK_WRITE_CONFLICT_MESSAGE,
+    });
+  });
+
+  it('shows the partial warning without the busy text when deletes fail for another reason', async () => {
+    givenFeatureResult({ succeededCount: 1, failedCount: 1, conflictCount: 0 });
+    const { result } = renderBulkDelete();
+
+    await act(() =>
+      result.current.deleteKnowledgeIndicatorsInBulk([featureKI('a'), featureKI('b')])
+    );
+
+    expect(mockToasts.addWarning).toHaveBeenCalledWith({
+      title: '1 knowledge indicator deleted. 1 knowledge indicator failed.',
+      text: undefined,
+    });
   });
 
   it('reports the source was busy as an error when nothing was deleted because of a conflict', async () => {

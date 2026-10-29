@@ -8,10 +8,13 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { SlackAppBindingsResponse } from '@kbn/significant-events-plugin/common';
 import {
   formatChannelValue,
   useAllRelayAppBindings,
+  useRelayAppBindings,
   useBindChannel,
+  useUnbindChannel,
 } from './use_relay_app_bindings';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -36,6 +39,51 @@ const createSetup = () => {
 };
 
 const flush = (ms = 0) => act(() => jest.advanceTimersByTimeAsync(ms));
+
+describe('useRelayAppBindings', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: { get: httpGet, post: httpPost },
+        notifications: { toasts: { addError } },
+      },
+    } as any);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('fetches the first page (no cursor) with a perPage query and exposes nextCursor', async () => {
+    const response: SlackAppBindingsResponse = {
+      bindings: [
+        { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+        { channel: 'C456', status: 'bound_to_self' },
+      ],
+      nextCursor: 'cursor-2',
+    };
+    httpGet.mockResolvedValue(response);
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppBindings(true), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/significant_events/apps/slack/bindings',
+      expect.objectContaining({
+        query: { perPage: 10 },
+        signal: expect.any(AbortSignal),
+      })
+    );
+    expect(result.current.bindings).toEqual([
+      { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+      { channel: 'C456', status: 'bound_to_self' },
+    ]);
+    expect(result.current.nextCursor).toBe('cursor-2');
+    expect(result.current.isLoading).toBe(false);
+  });
+});
 
 describe('useAllRelayAppBindings', () => {
   beforeEach(() => {
@@ -122,32 +170,107 @@ describe('useBindChannel', () => {
     jest.useRealTimers();
   });
 
-  it.each([['something_new', 'other']])(
-    'exposes a %s rejection as the %s failure instead of a toast',
-    async (sent, expected) => {
-      httpPost.mockRejectedValue({
-        body: {
-          message: 'Elastic is not in this channel.',
-          attributes: { data: { reason: sent } },
-        },
-      });
-      const { wrapper } = createSetup();
-      const { result } = renderHook(() => useBindChannel(), { wrapper });
+  it('POSTs to the bind route and invalidates the bindings query', async () => {
+    httpGet.mockResolvedValue({ bindings: [] });
+    httpPost.mockResolvedValue({ status: 'bound' });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useBindChannel(), { wrapper });
 
-      await act(async () => {
-        await result.current.bind('C123').catch(() => {});
-      });
+    await act(async () => {
+      await result.current.bind('C123');
+    });
 
-      await flush();
-      expect(result.current.failure).toEqual({
-        reason: expected,
-        message: 'Elastic is not in this channel.',
-      });
-      expect(addError).not.toHaveBeenCalled();
+    expect(httpPost).toHaveBeenCalledWith(
+      '/internal/significant_events/apps/slack/bindings/C123/bind'
+    );
+  });
 
-      act(() => result.current.clearFailure());
-      await flush();
-      expect(result.current.failure).toBeUndefined();
-    }
-  );
+  it.each([
+    ['private_channel_access_required', 'private_channel_access_required'],
+    ['something_new', 'other'],
+  ])('exposes a %s rejection as the %s failure instead of a toast', async (sent, expected) => {
+    httpPost.mockRejectedValue({
+      body: { message: 'Elastic is not in this channel.', attributes: { data: { reason: sent } } },
+    });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useBindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.bind('C123').catch(() => {});
+    });
+
+    await flush();
+    expect(result.current.failure).toEqual({
+      reason: expected,
+      message: 'Elastic is not in this channel.',
+    });
+    expect(addError).not.toHaveBeenCalled();
+
+    act(() => result.current.clearFailure());
+    await flush();
+    expect(result.current.failure).toBeUndefined();
+  });
+});
+
+describe('useUnbindChannel', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: { get: httpGet, post: httpPost },
+        notifications: { toasts: { addError } },
+      },
+    } as any);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('POSTs to the unbind route and invalidates the bindings query', async () => {
+    httpPost.mockResolvedValue({ status: 'unbound' });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useUnbindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.unbind('C123');
+    });
+
+    expect(httpPost).toHaveBeenCalledWith(
+      '/internal/significant_events/apps/slack/bindings/C123/unbind'
+    );
+  });
+
+  it('shows an error toast when unbind fails', async () => {
+    httpPost.mockRejectedValue(new Error('forbidden'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useUnbindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.unbind('C123').catch(() => {});
+    });
+
+    expect(addError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ title: expect.stringContaining('unbind') })
+    );
+  });
+
+  it('surfaces the relay reason from the response body as the toast message', async () => {
+    httpPost.mockRejectedValue(
+      Object.assign(new Error('Forbidden'), { body: { message: 'owned by another deployment' } })
+    );
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useUnbindChannel(), { wrapper });
+
+    await act(async () => {
+      await result.current.unbind('C123').catch(() => {});
+    });
+
+    expect(addError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'owned by another deployment' }),
+      expect.any(Object)
+    );
+  });
 });

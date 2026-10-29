@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -102,6 +102,83 @@ describe('EventsTab', () => {
       isLoading: false,
       isSuccess: false,
     });
+  });
+
+  it('sorts by a column header and keeps the choice in the URL', async () => {
+    const history = renderTab();
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortField: 'severity', sortOrder: 'desc' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: /^Time/ }));
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'created_at', page: 1 })
+      )
+    );
+    expect(new URLSearchParams(history.location.search).get('sortField')).toBe('created_at');
+  });
+
+  it('sends search and filter query params and resets the page', async () => {
+    const history = renderTab('/detections/events?page=3');
+
+    fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
+      target: { value: 'checkout' },
+    });
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 1, search: 'checkout' })
+      )
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-active')
+    );
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsSeverityFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsSeverityFilterOption-high')
+    );
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsInvestigationFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsInvestigationFilterOption-not_started')
+    );
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          page: 1,
+          search: 'checkout',
+          status: ['active'],
+          severity: ['high'],
+          investigation: ['not_started'],
+        })
+      )
+    );
+    const params = new URLSearchParams(history.location.search);
+    expect(params.has('page')).toBe(false);
+    expect(params.get('search')).toBe('checkout');
+    expect(params.getAll('status')).toEqual(['active']);
+    expect(params.getAll('severity')).toEqual(['high']);
+    expect(params.getAll('investigation')).toEqual(['not_started']);
+  });
+
+  it('shows an error with a retry when the list fails to load', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab();
+
+    expect(screen.getByTestId('nightshiftDetectionEventsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionEventsTable')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsRetryButton'));
+    expect(mockRefreshEvents).toHaveBeenCalled();
   });
 
   it('fetches a deep-linked event that is not on the current page', () => {

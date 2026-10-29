@@ -43,11 +43,14 @@ const mockUseApi = useSignificantEventsDiscoveryApi as jest.MockedFunction<
 interface StatusResponse {
   status: SignificantEventsWorkflowStatus;
   executionId?: string;
+  error?: string;
 }
 
 const STATUS_QUERY_KEY = ['significant_events_discovery_status'];
 
 const addSuccess = jest.fn();
+const addDanger = jest.fn();
+const addError = jest.fn();
 
 const trigger = jest.fn();
 const cancel = jest.fn();
@@ -82,7 +85,7 @@ describe('SignificantEventsPageProvider', () => {
         application: {
           capabilities: { nightshift: { show: true } },
         },
-        notifications: { toasts: { addSuccess } },
+        notifications: { toasts: { addSuccess, addDanger, addError } },
       },
     } as never);
     mockUseApi.mockReturnValue({
@@ -92,40 +95,128 @@ describe('SignificantEventsPageProvider', () => {
     } as never);
   });
 
-  it('invalidates Nightshift event and detection queries when a run completes', async () => {
-    trigger.mockResolvedValue({ executionId: 'exec-1' });
-    const { result, setStatus, queryClient } = renderContext();
-    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+  describe('handleRun', () => {
+    it('optimistically sets isRunning before the trigger resolves', async () => {
+      trigger.mockResolvedValue({ executionId: 'exec-1' });
+      const { result } = renderContext();
 
-    act(() => {
-      result.current.handleRun();
-    });
-    await waitFor(() => expect(result.current.isRunning).toBe(true));
+      act(() => {
+        result.current.handleRun();
+      });
 
-    act(() => {
-      setStatus({ status: SignificantEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
-    });
-    act(() => {
-      setStatus({ status: SignificantEventsWorkflowStatus.Completed, executionId: 'exec-1' });
+      expect(result.current.isRunning).toBe(true);
+      await waitFor(() => expect(trigger).toHaveBeenCalledTimes(1));
     });
 
-    await waitFor(() => expect(addSuccess).toHaveBeenCalledTimes(1));
-    const keys = invalidateQueries.mock.calls.map(
-      ([filters]) => (filters as { queryKey?: unknown }).queryKey
-    );
-    expect(keys).toEqual(
-      expect.arrayContaining([
-        SIGNIFICANT_EVENTS_LIST_QUERY_KEY,
-        SIGNIFICANT_EVENTS_FACETS_QUERY_KEY,
-        EVENT_BY_ID_QUERY_KEY,
-        EVENT_LIFECYCLE_QUERY_KEY,
-        DETECTIONS_LIST_QUERY_KEY,
-        DETECTION_OVERVIEW_QUERY_KEY,
-        DETECTION_ENTITIES_QUERY_KEY,
-        NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-      ])
-    );
-    expect(keys).not.toContainEqual(['significantEvents']);
+    it('resets running state and shows an error toast when the trigger fails', async () => {
+      trigger.mockRejectedValue(new Error('boom'));
+      const { result } = renderContext();
+
+      act(() => {
+        result.current.handleRun();
+      });
+
+      await waitFor(() => expect(addError).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(result.current.isRunning).toBe(false));
+    });
+  });
+
+  describe('handleCancel', () => {
+    it('clears isCanceling and shows an error toast when cancel fails', async () => {
+      cancel.mockRejectedValue(new Error('nope'));
+      const { result } = renderContext();
+
+      act(() => {
+        result.current.handleCancel();
+      });
+
+      await waitFor(() => expect(addError).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(result.current.isCanceling).toBe(false));
+    });
+  });
+
+  describe('terminal status transitions', () => {
+    it('fires the success toast and onComplete when a run completes', async () => {
+      trigger.mockResolvedValue({ executionId: 'exec-1' });
+      const onComplete = jest.fn();
+      const { result, setStatus } = renderContext(onComplete);
+
+      act(() => {
+        result.current.handleRun();
+      });
+      await waitFor(() => expect(result.current.isRunning).toBe(true));
+
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
+      });
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.Completed, executionId: 'exec-1' });
+      });
+
+      await waitFor(() => expect(addSuccess).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(onComplete).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(result.current.isRunning).toBe(false));
+    });
+
+    it('fires a danger toast when a run fails', async () => {
+      trigger.mockResolvedValue({ executionId: 'exec-1' });
+      const { result, setStatus } = renderContext();
+
+      act(() => {
+        result.current.handleRun();
+      });
+      await waitFor(() => expect(result.current.isRunning).toBe(true));
+
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
+      });
+      act(() => {
+        setStatus({
+          status: SignificantEventsWorkflowStatus.Failed,
+          executionId: 'exec-1',
+          error: 'kaboom',
+        });
+      });
+
+      await waitFor(() => expect(addDanger).toHaveBeenCalledTimes(1));
+      expect(addDanger).toHaveBeenCalledWith(expect.objectContaining({ text: 'kaboom' }));
+    });
+
+    it('invalidates Nightshift event and detection queries when a run completes', async () => {
+      trigger.mockResolvedValue({ executionId: 'exec-1' });
+      const { result, setStatus, queryClient } = renderContext();
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+      act(() => {
+        result.current.handleRun();
+      });
+      await waitFor(() => expect(result.current.isRunning).toBe(true));
+
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
+      });
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.Completed, executionId: 'exec-1' });
+      });
+
+      await waitFor(() => expect(addSuccess).toHaveBeenCalledTimes(1));
+      const keys = invalidateQueries.mock.calls.map(
+        ([filters]) => (filters as { queryKey?: unknown }).queryKey
+      );
+      expect(keys).toEqual(
+        expect.arrayContaining([
+          SIGNIFICANT_EVENTS_LIST_QUERY_KEY,
+          SIGNIFICANT_EVENTS_FACETS_QUERY_KEY,
+          EVENT_BY_ID_QUERY_KEY,
+          EVENT_LIFECYCLE_QUERY_KEY,
+          DETECTIONS_LIST_QUERY_KEY,
+          DETECTION_OVERVIEW_QUERY_KEY,
+          DETECTION_ENTITIES_QUERY_KEY,
+          NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
+        ])
+      );
+      expect(keys).not.toContainEqual(['significantEvents']);
+    });
   });
 
   // Regression coverage for triggering a run while a previous run's terminal

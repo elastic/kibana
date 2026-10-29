@@ -15,6 +15,7 @@ import {
   MEMORY_PAGE_SIZE,
   useDeleteMemoryPage,
   useMemoryKeywordPages,
+  useMemoryPage,
   useMemoryPages,
   useSetMemoryArchived,
 } from './use_memory';
@@ -72,6 +73,13 @@ const givenClient = () =>
     },
   } as unknown as ReturnType<typeof useKibana>);
 
+const givenNoClient = () =>
+  mockUseKibana.mockReturnValue({
+    services: {
+      notifications: { toasts: { addError: addErrorMock } },
+    },
+  } as unknown as ReturnType<typeof useKibana>);
+
 /** The `params.query` each list request was issued with, in order. */
 const listQueries = () =>
   fetchMock.mock.calls
@@ -110,6 +118,18 @@ describe('useMemoryPages', () => {
     });
   });
 
+  it('stops paging when the server omits the cursor', async () => {
+    fetchMock.mockResolvedValue(listResult(['memory_a', 'memory_b']));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryPages('all'), { wrapper });
+
+    await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    // A full page might still be the last, so the only proof the set is exhausted
+    // is the absent cursor.
+    expect(result.current.hasNextPage).toBe(false);
+  });
+
   it('reports the server totals rather than counting the loaded rows', async () => {
     // The header numbers come from the server's whole-set aggregation. Counting the
     // loaded slice here would make them shrink as the operator pages.
@@ -123,9 +143,31 @@ describe('useMemoryPages', () => {
     expect(result.current.total).toBe(42);
     expect(result.current.stats).toEqual(stats);
   });
+
+  it('is disabled, and issues no request, when the client is absent', async () => {
+    givenNoClient();
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryPages('active'), { wrapper });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });
 
 describe('useMemoryKeywordPages', () => {
+  it('asks the list route for the widest page of live memories', async () => {
+    // The tab's own list is a 25-row slice, which would describe a quarter of
+    // the store; the chart asks for its own wider page rather than a new route.
+    fetchMock.mockResolvedValue(listResult(['memory_a']));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryKeywordPages(), { wrapper });
+
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(1));
+    expect(listQueries()[0]).toEqual({ filter: 'active', size: MEMORY_KEYWORD_SIZE });
+  });
+
   it('sends the selected keywords so the server returns the filtered set', async () => {
     fetchMock.mockResolvedValue(listResult([]));
     const { wrapper } = createWrapper();
@@ -188,6 +230,26 @@ describe('useMemoryKeywordPages', () => {
     expect(result.current.data?.capped).toBe(true);
   });
 
+  it('refetches when the selection changes, rather than reusing the stale set', async () => {
+    fetchMock.mockResolvedValue(listResult([]));
+    const { wrapper } = createWrapper();
+
+    const { rerender } = renderHook(({ tags }: { tags: string[] }) => useMemoryKeywordPages(tags), {
+      wrapper,
+      initialProps: { tags: [] as string[] },
+    });
+    await waitFor(() => expect(listQueries()).toHaveLength(1));
+
+    rerender({ tags: ['kafka'] });
+
+    await waitFor(() => expect(listQueries()).toHaveLength(2));
+    expect(listQueries()[1]).toEqual({
+      filter: 'active',
+      size: MEMORY_KEYWORD_SIZE,
+      tags: ['kafka'],
+    });
+  });
+
   it('keeps two selections apart even when their terms join to the same string', async () => {
     // Tags are free text, so `a|b` and two terms `a` and `b` are different
     // filters that a joined cache key cannot tell apart.
@@ -208,6 +270,40 @@ describe('useMemoryKeywordPages', () => {
       size: MEMORY_KEYWORD_SIZE,
       tags: ['es', 'ql'],
     });
+  });
+
+  it('stays disabled, and issues no request, when the client is absent', async () => {
+    givenNoClient();
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryKeywordPages(), { wrapper });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('useMemoryPage', () => {
+  it('is disabled until an id is selected', async () => {
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryPage(undefined), { wrapper });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('fetches the page by id once one is selected', async () => {
+    fetchMock.mockResolvedValue({ page: summary('memory_a'), usefulness: 0.5, confidence: 0.8 });
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useMemoryPage('memory_a'), { wrapper });
+
+    await waitFor(() => expect(result.current.data?.page.id).toBe('memory_a'));
+    expect(fetchMock).toHaveBeenCalledWith(
+      'GET /internal/nightshift/memory/pages/{id}',
+      expect.objectContaining({ params: { path: { id: 'memory_a' } } })
+    );
   });
 });
 
@@ -233,6 +329,27 @@ describe('useSetMemoryArchived', () => {
     await waitFor(() => expect(listQueries().length).toBeGreaterThan(before));
     expect(addErrorMock).not.toHaveBeenCalled();
   });
+
+  it('toasts a failed archive and refetches, because a conflict means the page moved', async () => {
+    // The optimizer writes between our read and our write, so what is on screen
+    // is stale whatever the outcome. The toast is the operator's only report.
+    fetchMock.mockRejectedValue(new Error('version conflict'));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useSetMemoryArchived(), { wrapper });
+    await act(async () => {
+      await expect(result.current.mutateAsync({ id: 'memory_a', archived: true })).rejects.toThrow(
+        'version conflict'
+      );
+    });
+
+    expect(addErrorMock).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.any(String) }),
+      {
+        title: expect.any(String),
+      }
+    );
+  });
 });
 
 describe('useDeleteMemoryPage', () => {
@@ -257,5 +374,22 @@ describe('useDeleteMemoryPage', () => {
       })
     );
     await waitFor(() => expect(listQueries().length).toBeGreaterThan(before));
+  });
+
+  it('reports a rejected delete as an error state rather than a success', async () => {
+    fetchMock.mockRejectedValue(new Error('version conflict'));
+    const { wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useDeleteMemoryPage(), { wrapper });
+    await act(async () => {
+      await expect(result.current.mutateAsync({ id: 'memory_a', version })).rejects.toThrow(
+        'version conflict'
+      );
+    });
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+    // A failed write must not invalidate anything: there is nothing to refetch.
+    expect(listQueries()).toHaveLength(0);
+    expect(addErrorMock).toHaveBeenCalled();
   });
 });

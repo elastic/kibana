@@ -44,6 +44,18 @@ describe('EsqlViewsClient', () => {
 
       await expect(client.getView(VIEW_NAME)).resolves.toBeUndefined();
     });
+
+    it('maps a 403 to a Boom forbidden error', async () => {
+      const { esClient, client } = setup();
+      esClient.esql.getView.mockRejectedValue(
+        createEsResponseError(403, 'security_exception', 'unauthorized for user')
+      );
+
+      await expect(client.getView(VIEW_NAME)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+        message: expect.stringContaining('unauthorized for user'),
+      });
+    });
   });
 
   describe('putView', () => {

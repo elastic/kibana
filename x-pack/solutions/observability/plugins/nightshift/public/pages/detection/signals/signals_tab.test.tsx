@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Detection } from '@kbn/significant-events-schema';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -100,6 +100,24 @@ describe('SignalsTab', () => {
     });
   });
 
+  it('sends the entity selection and URL filters to the list request', () => {
+    renderTab('/detections/signals?signalsSearch=checkout&changeType=spike', {
+      entities: ['service-a'],
+      unassigned: true,
+    });
+
+    expect(mockUseDetectionsList).toHaveBeenLastCalledWith({
+      from: 'now-24h',
+      to: 'now',
+      page: 1,
+      perPage: 25,
+      search: 'checkout',
+      change_point_type: ['spike'],
+      entityIds: ['service-a'],
+      unassignedEntities: true,
+    });
+  });
+
   it('opens a deep-linked signal outside the current page from the by-id query', () => {
     const deepLinkedSignal = {
       ...signal,
@@ -129,6 +147,25 @@ describe('SignalsTab', () => {
     expect(history.action).toBe('REPLACE');
     expect(history.location.search).toBe('?changeType=spike');
     expect(screen.queryByTestId('detectionDetailsFlyoutStub')).not.toBeInTheDocument();
+  });
+
+  it('shows a retry action when a deep-linked signal cannot be loaded', () => {
+    const refetch = jest.fn();
+    mockUseDetectionById.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isLoading: false,
+      isSuccess: false,
+      refetch,
+    });
+
+    renderTab('/detections/signals?signalId=signal-failed');
+
+    expect(screen.getByTestId('nightshiftDetectionSignalError')).toHaveTextContent(
+      'Unable to open signal'
+    );
+    fireEvent.click(screen.getByTestId('nightshiftDetectionSignalRetryButton'));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('hides a retained by-id error when the selected signal is resolved by the list', () => {

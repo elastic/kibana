@@ -101,6 +101,14 @@ const setup = ({
   return { agents, getEditConnectorFlyout, getAddConnectorFlyout, fetch, rerender };
 };
 
+const expectAdded = (agents: { addConnectorToAgent: jest.Mock }, connectorId: string) =>
+  waitFor(() =>
+    expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
+      agentId: 'nightshift.investigation',
+      connectorId,
+    })
+  );
+
 describe('ConnectedConnectors', () => {
   it('lists the connectors assigned to the agent with their count and type', async () => {
     setup({
@@ -126,6 +134,20 @@ describe('ConnectedConnectors', () => {
       expect(screen.getByTestId('nightshiftConnectedConnectorsCount')).toHaveTextContent('0');
       expect(screen.getByTestId('nightshiftAddConnectorButton')).toBeVisible();
       expect(screen.queryByText('No connectors assigned yet')).not.toBeInTheDocument();
+    });
+
+    it('assigns a connector from the library and shows its card, section still open', async () => {
+      const { agents } = setup({ connectors: [connector('github')], assigned: [] });
+
+      fireEvent.click(await screen.findByTestId('nightshiftAddConnectorButton'));
+      await screen.findByTestId('agentConnectorLibraryFlyout');
+      fireEvent.click(await screen.findByRole('switch', { name: 'Connector github' }));
+
+      await expectAdded(agents, 'github');
+      expect(await screen.findByTestId('nightshiftConnectedConnectorCard-github')).toBeVisible();
+      // The library stays open, as in Agent Builder, so more connectors can be added.
+      expect(screen.getByTestId('agentConnectorLibraryFlyout')).toBeInTheDocument();
+      expect(screen.getByRole('switch', { name: 'Connector github' })).toBeChecked();
     });
   });
 

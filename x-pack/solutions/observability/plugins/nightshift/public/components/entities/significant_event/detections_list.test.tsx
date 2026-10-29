@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
 import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
@@ -83,14 +83,21 @@ const buildDetectionsEarliestFirst = (count: number): LifecycleDetection[] =>
     })
   );
 
-function setLifecycle({ detections = [] as LifecycleDetection[] } = {}) {
+function setLifecycle({
+  detections = [] as LifecycleDetection[],
+  isLoading = false,
+  isFetching = false,
+  isError = false,
+  refetch = jest.fn(),
+} = {}) {
   mockUseFetchEventLifecycle.mockReturnValue({
-    data: { detections, events: [] },
-    isLoading: false,
-    isFetching: false,
-    isError: false,
-    refetch: jest.fn(),
+    data: isLoading || isError ? undefined : { detections, events: [] },
+    isLoading,
+    isFetching: isLoading || isFetching,
+    isError,
+    refetch,
   });
+  return { refetch };
 }
 
 const defaultListEvent = mockEvent();
@@ -103,6 +110,33 @@ const renderList = (props: Partial<React.ComponentProps<typeof DetectionsList>> 
   );
 
 describe('DetectionsList', () => {
+  it('keeps cached detections visible while refetching', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'first-detection' }),
+        mockDetection({ detection_id: 'det-2', rule_name: 'second-detection' }),
+      ],
+      isFetching: true,
+    });
+    renderList();
+
+    expect(screen.queryByTestId('nightshiftDetectionCardSkeleton')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(2);
+    expect(screen.getByText('first-detection')).toBeInTheDocument();
+    expect(screen.getByText('second-detection')).toBeInTheDocument();
+  });
+
+  it('shows an error state with a retry action instead of the empty state', () => {
+    const { refetch } = setLifecycle({ isError: true });
+    renderList();
+
+    expect(screen.getByText('Unable to load detections')).toBeInTheDocument();
+    expect(screen.queryByText('No detections found for this event.')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionsRetryButton'));
+    expect(refetch).toHaveBeenCalled();
+  });
+
   it('sorts detections with the earliest first', () => {
     setLifecycle({
       detections: [
@@ -136,6 +170,23 @@ describe('DetectionsList', () => {
       expect(screen.queryByText(`detection-${MAX_VISIBLE_DETECTIONS + 1}`)).not.toBeInTheDocument();
     });
 
+    it('expands to the full list and collapses back', () => {
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList();
+
+      fireEvent.click(screen.getByTestId('nightshiftDetectionsShowMore'));
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(
+        MAX_VISIBLE_DETECTIONS + 2
+      );
+      expect(screen.getByText(`detection-${MAX_VISIBLE_DETECTIONS + 1}`)).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('nightshiftDetectionsShowLess'));
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 2 more');
+    });
+
     it('takes the last visible slot for a selected detection past the cap', () => {
       setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList({
@@ -166,6 +217,14 @@ describe('DetectionsList', () => {
         `detection-${MAX_VISIBLE_DETECTIONS}`
       );
       expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 1 more');
+    });
+
+    it('ignores a selected detection that is no longer in the list', () => {
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList({ selectedDetectionId: 'det-already-gone', onDetectionClick: jest.fn() });
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('Show 2 more');
     });
   });
 });

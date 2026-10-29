@@ -149,6 +149,20 @@ describe('SandboxConnectorsTable', () => {
     );
   });
 
+  it('locks remove and delete when the user cannot edit the agent', async () => {
+    setup({ connectors: [connector('github')], canUpdateAgent: false });
+
+    expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
+    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
+  });
+
+  it('locks remove and delete without the Agent Builder manage agents privilege', async () => {
+    setup({ connectors: [connector('github')], canManageAgents: false });
+
+    expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
+    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
+  });
+
   it('locks delete without the connector delete privilege', async () => {
     setup({
       connectors: [connector('github')],
@@ -157,6 +171,19 @@ describe('SandboxConnectorsTable', () => {
 
     expect(await screen.findByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
     expect(screen.getByTestId('nightshiftConnectorRemove-github')).toBeEnabled();
+  });
+
+  it('reports an update that failed', async () => {
+    const { agents, addError } = setup({ connectors: [connector('github')] });
+    agents.removeConnectorFromAgent.mockRejectedValueOnce(forbiddenError());
+
+    fireEvent.click(await screen.findByTestId('nightshiftConnectorRemove-github'));
+
+    await waitFor(() =>
+      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Could not update the investigation agent',
+      })
+    );
   });
 
   it('takes a connector off the agent, deletes it after confirmation and refreshes the list', async () => {

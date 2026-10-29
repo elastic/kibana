@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
@@ -43,6 +43,92 @@ describe('SignificantEventItem', () => {
         </EuiProvider>
       </I18nProvider>
     );
+
+  it('activates the row with Enter and Space keys', () => {
+    const onClick = jest.fn();
+    renderItem({ onClick });
+
+    const row = screen.getByTestId('nightshiftSignificantEventItem');
+    fireEvent.keyDown(row, { key: 'Enter' });
+    fireEvent.keyDown(row, { key: ' ' });
+    expect(onClick).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not activate the row for other keys', () => {
+    const onClick = jest.fn();
+    renderItem({ onClick });
+
+    const row = screen.getByTestId('nightshiftSignificantEventItem');
+    fireEvent.keyDown(row, { key: 'Tab' });
+    fireEvent.keyDown(row, { key: 'Escape' });
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('ignores key presses bubbling from nested interactive elements', () => {
+    const onClick = jest.fn();
+    const onChatClick = jest.fn();
+    renderItem({ onClick, onChatClick });
+
+    fireEvent.keyDown(screen.getByTestId('nightshiftOpenEventInChatButton'), { key: 'Enter' });
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not open the flyout when the click ends a text selection', () => {
+    const onClick = jest.fn();
+    renderItem({ onClick });
+
+    const getSelectionSpy = jest
+      .spyOn(window, 'getSelection')
+      .mockReturnValue({ toString: () => 'selected text' } as Selection);
+
+    fireEvent.click(screen.getByTestId('nightshiftSignificantEventItem'));
+    expect(onClick).not.toHaveBeenCalled();
+
+    getSelectionSpy.mockRestore();
+  });
+
+  it('opens chat without triggering the row click', () => {
+    const onClick = jest.fn();
+    const onChatClick = jest.fn();
+    renderItem({ onClick, onChatClick });
+
+    const chatButton = screen.getByTestId('nightshiftOpenEventInChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+
+    fireEvent.click(chatButton);
+    expect(onChatClick).toHaveBeenCalledWith(mockEvent);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('closes the event without triggering the row click', () => {
+    const onClick = jest.fn();
+    const onCloseClick = jest.fn();
+    renderItem({ onClick, onCloseClick });
+
+    const closeButton = screen.getByTestId('nightshiftCloseSignificantEventButton');
+    expect(closeButton).toHaveAttribute('data-ebt-action', 'closeSignificantEvent');
+    expect(closeButton).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
+    expect(closeButton).toHaveAttribute('data-ebt-detail', 'needsAction');
+
+    fireEvent.click(closeButton);
+    expect(onCloseClick).toHaveBeenCalledWith(mockEvent);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('hides the close action for inactive events', () => {
+    const status = 'inactive' as const;
+    renderItem({ event: { ...mockEvent, status }, onCloseClick: jest.fn() });
+
+    expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
+  });
+
+  it('shows progress while closing', () => {
+    renderItem({ onCloseClick: jest.fn(), isClosing: true });
+
+    expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
+  });
 
   describe('investigation marker', () => {
     it('falls back to completed_at while the status is still being fetched', () => {

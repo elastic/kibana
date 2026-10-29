@@ -69,7 +69,7 @@ describe('useFetchEventById polling', () => {
     jest.useRealTimers();
   });
 
-  it.each(['completed'] as const)(
+  it.each(['completed', 'failed'] as const)(
     'refetches a pending event and stops after its %s outcome arrives',
     async (outcome) => {
       const pending = createPendingEvent();
@@ -111,6 +111,22 @@ describe('useFetchEventById polling', () => {
     expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(2);
     await advanceTime(10_000);
     expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(2);
+    expect(result.current.data).toEqual(pending);
+  });
+
+  it('does not poll an event whose pending investigation has already expired', async () => {
+    const pending = createPendingEvent();
+    pending.investigations = pending.investigations?.map((investigation) => ({
+      ...investigation,
+      started_at: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
+    }));
+    mockSignificantEventsFetch.mockResolvedValue({ hits: [pending] });
+    const { result } = renderQuery();
+    await waitFor(() => expect(result.current.data).toEqual(pending));
+
+    await advanceTime(10_000);
+
+    expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(1);
     expect(result.current.data).toEqual(pending);
   });
 });

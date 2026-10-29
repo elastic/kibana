@@ -108,6 +108,48 @@ describe('useInvestigationSections', () => {
     );
   });
 
+  it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
+    const { result } = renderSections('checkout');
+
+    expect(
+      mockUseFetchInvestigations.mock.calls
+        .slice(0, 6)
+        .map(([{ inProgress, severities, query }]) => ({ inProgress, severities, query }))
+    ).toEqual([
+      { inProgress: true, severities: undefined, query: 'checkout' },
+      { inProgress: false, severities: ['critical'], query: 'checkout' },
+      { inProgress: false, severities: ['high'], query: 'checkout' },
+      { inProgress: false, severities: ['medium'], query: 'checkout' },
+      { inProgress: false, severities: ['low'], query: 'checkout' },
+      { inProgress: false, severities: ['none'], query: 'checkout' },
+    ]);
+    expect(result.current.sections.map(({ id }) => id)).toEqual([
+      'in-progress',
+      'critical',
+      'high',
+      'medium',
+      'low',
+      'not-rated',
+    ]);
+  });
+
+  it('maps the shared severity counts onto the tiers for the tiles', async () => {
+    const { result } = renderSections('checkout');
+
+    await waitFor(() =>
+      expect(result.current.severityCounts).toEqual({
+        critical: 3,
+        high: 1,
+        medium: 0,
+        low: 2,
+      })
+    );
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/investigations/investigations/_severity_counts',
+      expect.objectContaining({ query: { query: 'checkout' }, version: '1' })
+    );
+  });
+
   it('counts each matching investigation once, unlike the summed section totals', async () => {
     mockUseFetchInvestigations.mockImplementation((params) => {
       if (params.inProgress) {
@@ -122,6 +164,15 @@ describe('useInvestigationSections', () => {
     // 3 critical + 1 high + 0 medium + 2 low + 4 unrated.
     await waitFor(() => expect(result.current.matchedCount).toBe(10));
     expect(result.current.totalCount).toBe(5);
+  });
+
+  it('treats a non-empty in-progress section as active and polls only that section', () => {
+    const { result } = renderSections();
+
+    expect(result.current.hasActiveInvestigations).toBe(true);
+    expect(
+      mockUseFetchInvestigations.mock.calls.slice(0, 6).map(([params]) => params.refetchInterval)
+    ).toEqual([5_000, undefined, undefined, undefined, undefined, undefined]);
   });
 
   it('refetches the other sections when work leaves the in-progress section', () => {
@@ -139,5 +190,24 @@ describe('useInvestigationSections', () => {
     rerender({ query: undefined });
 
     expect(refetchCritical).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not refetch when new work starts or the search changes', () => {
+    const refetchCritical = jest.fn();
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({ ids: ['running-a'], refetchCritical })
+    );
+    const { rerender } = renderSections('checkout');
+
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })
+    );
+    rerender({ query: 'checkout' });
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({ ids: ['running-c'], refetchCritical })
+    );
+    rerender({ query: 'checkout errors' });
+
+    expect(refetchCritical).not.toHaveBeenCalled();
   });
 });

@@ -170,6 +170,21 @@ describe('useKnowledgeIndicatorsUrlState', () => {
   });
 
   describe('handler callbacks', () => {
+    it('handleStatusFilterChange updates statusFilter and calls clearSelection', () => {
+      const clearSelection = jest.fn();
+      const resetPagination = jest.fn();
+      const { result } = renderHook(() =>
+        useKnowledgeIndicatorsUrlState({ ...defaultParams, clearSelection, resetPagination })
+      );
+
+      act(() => {
+        result.current.handleStatusFilterChange('excluded');
+      });
+      expect(result.current.statusFilter).toBe('excluded');
+      expect(clearSelection).toHaveBeenCalled();
+      expect(resetPagination).toHaveBeenCalled();
+    });
+
     it('handleSelectedTypesChange updates types and clears subtypes', () => {
       const knowledgeIndicators = [
         makeFeatureKI({ uuid: 'f1', source_id: 's1', type: 'entity', subtype: 'sub1' }),
@@ -185,6 +200,21 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       });
       expect(result.current.selectedTypes).toEqual(['entity']);
       expect(result.current.selectedSubtypes).toEqual([]);
+    });
+
+    it('handleComputedToggleChange toggles computed types', () => {
+      const { result } = renderHook(() => useKnowledgeIndicatorsUrlState(defaultParams));
+      expect(result.current.hideComputedTypes).toBe(true);
+
+      act(() => {
+        result.current.handleComputedToggleChange(true);
+      });
+      expect(result.current.hideComputedTypes).toBe(false);
+
+      act(() => {
+        result.current.handleComputedToggleChange(false);
+      });
+      expect(result.current.hideComputedTypes).toBe(true);
     });
 
     it('handleComputedToggleChange removes computed types from selectedTypes when hiding', () => {
@@ -234,6 +264,22 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       );
       waitFor(() => {
         expect(result.current.selectedStreams).toEqual(['logs', 'metrics']);
+      });
+    });
+
+    it('prunes stream filters that no longer match any indicator and were not in the initial URL', async () => {
+      const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 'logs' })];
+      mockQuery = { source: ['logs'] };
+      const { result } = renderHook(() =>
+        useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
+      );
+
+      act(() => {
+        result.current.handleSelectedStreamsChange(['logs', 'metrics']);
+      });
+
+      await waitFor(() => {
+        expect(result.current.selectedStreams).toEqual(['logs']);
       });
     });
   });

@@ -235,7 +235,7 @@ describe('automation request', () => {
       ]);
     });
 
-    it.each(['#oncall'])(
+    it.each(['#oncall', '#new-channel'])(
       'preserves the saved Slack connector when saving channel %s',
       (destination) => {
         const automation = buildAutomation({
@@ -281,6 +281,24 @@ describe('automation request', () => {
       } as Parameters<typeof toAutomationUpdateBody>[0];
 
       expect(toAutomationUpdateBody(values, automation).trigger).toEqual({ rows: [row] });
+    });
+
+    it('keeps the saved daily limit for a scheduled automation', () => {
+      const automation = buildAutomation({
+        trigger: {
+          rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
+        },
+        runtime: { dailyDispatchLimit: 15 },
+      });
+      const values = {
+        ...toAutomationFormValues(automation),
+        name: 'Renamed',
+        trigger: toAutomationFormValues(automation).trigger,
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
+        dailyDispatchLimit: 15,
+      });
     });
 
     it('saves a reply-in-thread action without a destination', () => {
