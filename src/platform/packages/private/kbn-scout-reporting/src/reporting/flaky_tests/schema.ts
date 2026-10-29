@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Bump whenever a change to the schemas below would break a consumer reading a previously
  * written report.
  */
-export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
+export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 2;
 
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
@@ -38,38 +38,42 @@ export const FlakyTestSampleFailureSchema = z.object({
 });
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
 
-/** Failed attempts with one error on one pipeline. */
-export const FlakyTestErrorPipelineSchema = z.object({
-  pipeline: z.string(),
-  failuresCount: z.int(),
-});
+/** Builds with one error on one pipeline. */
+export const FlakyTestErrorPipelineSchema = lazySchema(() =>
+  z.object({
+    pipeline: z.string(),
+    buildsCount: z.int(),
+    /** Buildkite build ids, sorted; lets a consumer count builds across several tests. */
+    buildIds: z.array(z.string()),
+  })
+);
 
 /**
  * One distinct error of a test over the window, across every pipeline and branch, not just the
  * report scope. Errors are told apart by the first three lines of their message with ids, URLs
  * and numbers normalised away, so a diff that differs only in a count is one error.
  */
-export const FlakyTestErrorSchema = z.object({
-  /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
-  key: z.string(),
-  /** The newest failure's message, in full. */
-  message: z.string(),
-  /** Failed attempts with this error. */
-  failuresCount: z.int(),
-  /** Distinct builds those attempts ran in. */
-  buildsCount: z.int(),
-  /** Most failures first. */
-  byPipeline: z.array(FlakyTestErrorPipelineSchema),
-  /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
-  branches: z.array(z.string()),
-  /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
-  targets: z.array(z.string()),
-  firstFailedAt: z.coerce.date(),
-  lastFailedAt: z.coerce.date(),
-  /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
-  lastFailedBuildUrl: z.optional(z.string()),
-  lastFailedJobId: z.optional(z.string()),
-});
+export const FlakyTestErrorSchema = lazySchema(() =>
+  z.object({
+    /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
+    key: z.string(),
+    /** The newest failure's message, in full. */
+    message: z.string(),
+    /** Distinct builds with this error; retries in one build count once. */
+    buildsCount: z.int(),
+    /** Most builds first. */
+    byPipeline: z.array(FlakyTestErrorPipelineSchema),
+    /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
+    branches: z.array(z.string()),
+    /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
+    targets: z.array(z.string()),
+    firstFailedAt: z.coerce.date(),
+    lastFailedAt: z.coerce.date(),
+    /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
+    lastFailedBuildUrl: z.optional(z.string()),
+    lastFailedJobId: z.optional(z.string()),
+  })
+);
 export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
 
 /**
