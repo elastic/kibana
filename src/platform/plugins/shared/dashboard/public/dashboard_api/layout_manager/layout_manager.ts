@@ -27,7 +27,7 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
+import { DEFAULT_PINNED_CONTROL_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
 import type {
   PinnedControlLayoutState,
   PinnedControlLayoutState as PinnedPanelLayoutState,
@@ -38,6 +38,7 @@ import type {
   LayoutConstraints,
 } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
+import { controlHasVariableName } from '@kbn/esql-types';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishing';
@@ -246,13 +247,33 @@ export function initializeLayoutManager(
   // --------------------------------------------------------------------------------------
   const addIncomingEmbeddables = (embeddables?: EmbeddablePackageState[]) => {
     if (!embeddables?.length) return;
-    const first = embeddables[0];
-    if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
+    let firstEmbeddableId: string | undefined;
 
     for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
+      if (
+        !existingPanel &&
+        type === ESQL_CONTROL &&
+        controlHasVariableName(serializedState) &&
+        Object.entries({ ...layout$.value.panels, ...layout$.value.pinnedPanels }).some(
+          ([panelId, panel]) => {
+            const panelState = currentChildState[panelId];
+            return (
+              panelId !== incomingEmbeddable.embeddableId &&
+              panel.type === ESQL_CONTROL &&
+              (!isDashboardLayoutPanel(panel) || !panel.grid.sectionId) &&
+              controlHasVariableName(panelState) &&
+              panelState.variable_name === serializedState.variable_name
+            );
+          }
+        )
+      ) {
+        continue;
+      }
+
+      firstEmbeddableId ??= uuid;
       const sameType = existingPanel?.type === type;
 
       const updatedLayout = existingPanel
@@ -277,7 +298,7 @@ export function initializeLayoutManager(
              * We can assume that all panels being sent as a single package are related; so,
              * place them close together by grouping them around the first embeddable.
              */
-            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
+            beside: uuid === firstEmbeddableId ? undefined : firstEmbeddableId,
           });
       currentChildState[uuid] = {
         ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
@@ -286,8 +307,10 @@ export function initializeLayoutManager(
 
       layout$.next(updatedLayout);
     }
-    trackPanel.setScrollToPanelId(first.embeddableId);
-    trackPanel.setHighlightPanelId(first.embeddableId);
+    if (firstEmbeddableId) {
+      trackPanel.setScrollToPanelId(firstEmbeddableId);
+      trackPanel.setHighlightPanelId(firstEmbeddableId);
+    }
   };
 
   // --------------------------------------------------------------------------------------

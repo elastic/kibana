@@ -253,6 +253,11 @@ describe('EmbeddableEditorService', () => {
         variable_name: 'host.name',
         title: 'Host name',
       },
+      discoverServicePanel: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Service name',
+      },
     };
     const incomingState = createIncomingState({
       originatingPath: '#/view/dashboard-1',
@@ -284,7 +289,17 @@ describe('EmbeddableEditorService', () => {
 
     expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenLastCalledWith(
       'dashboard',
-      { path: '#/view/dashboard-1', state: [expectedSearchPackage] }
+      {
+        path: '#/view/dashboard-1',
+        state: [
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverServicePanel,
+            embeddableId: 'discoverServicePanel',
+          },
+          expectedSearchPackage,
+        ],
+      }
     );
 
     service.transferBackToEditor(TransferAction.SaveByReference, {
@@ -299,16 +314,48 @@ describe('EmbeddableEditorService', () => {
       {
         path: '#/view/dashboard-2',
         state: [
-          {
+          ...Object.values(controlGroupState).map((serializedState) => ({
             type: ESQL_CONTROL,
-            serializedState: controlGroupState.discoverHostPanel,
-            embeddableId: 'discoverHostPanel',
-          },
+            serializedState,
+            embeddableId: undefined,
+          })),
           expectedSearchPackage,
         ],
       }
     );
   });
+
+  it.each(['#/view/dashboard-1', '#/create'])(
+    'transfers standalone session controls to %s for destination reconciliation',
+    (path) => {
+      const { service, embeddableStateTransfer } = createService();
+
+      service.transferBackToEditor(TransferAction.SaveByReference, {
+        app: 'dashboards',
+        path,
+        state: { savedObjectId: 'saved-search-1', controlGroupState: mockControlState },
+      });
+
+      expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+        'dashboards',
+        {
+          path,
+          state: [
+            {
+              type: ESQL_CONTROL,
+              serializedState: mockControlState.panel1,
+              embeddableId: undefined,
+            },
+            {
+              type: SEARCH_EMBEDDABLE_TYPE,
+              serializedState: { ref_id: 'saved-search-1', overrides: {} },
+              embeddableId: undefined,
+            },
+          ],
+        }
+      );
+    }
+  );
 
   it('serializes by-value state and control packages when navigating back to the editor', () => {
     const byValueState = createByValueState();

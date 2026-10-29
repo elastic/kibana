@@ -164,7 +164,7 @@ export class EmbeddableEditorService {
       ([embeddableId, controlPanelState]) => ({
         type: ESQL_CONTROL,
         serializedState: controlPanelState,
-        embeddableId,
+        embeddableId: targetsOriginatingEditor ? embeddableId : undefined,
       })
     );
 

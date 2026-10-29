@@ -15,6 +15,7 @@ import {
   ControlValuesSource,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
+  ESQL_CONTROL,
 } from '@kbn/controls-constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
@@ -231,6 +232,153 @@ describe('layout manager', () => {
     });
     expect(incomingPanelStatePanelThree).toEqual({
       title: 'Panel Three',
+    });
+  });
+
+  describe('incoming ES|QL controls', () => {
+    const existingControl = {
+      id: 'dashboardControl',
+      type: ESQL_CONTROL,
+      grid: { w: 12, h: 2, x: 0, y: 0 },
+      config: {
+        control_type: 'STATIC_VALUES' as const,
+        variable_name: 'hostName',
+        variable_type: 'values' as const,
+        single_select: true,
+        available_options: ['dashboard-host', 'discover-host'],
+        selected_options: ['dashboard-host'],
+      },
+    };
+    const incomingControl = {
+      embeddableId: 'discoverControl',
+      type: ESQL_CONTROL,
+      serializedState: { ...existingControl.config, selected_options: ['discover-host'] },
+    };
+
+    test.each(['grid', 'pinned'])(
+      'preserves the destination %s control and adds missing variables',
+      (placement) => {
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          placement === 'grid' ? [existingControl] : [],
+          placement === 'pinned'
+            ? [{ ...DEFAULT_PINNED_CONTROL_STATE, ...existingControl, type: ESQL_CONTROL }]
+            : [],
+          trackPanelMock
+        );
+        const newControl = {
+          ...incomingControl,
+          embeddableId: 'serviceControl',
+          serializedState: { ...incomingControl.serializedState, variable_name: 'serviceName' },
+        };
+        const discoverPanel = {
+          embeddableId: 'discoverPanel',
+          type: 'search',
+          serializedState: { ref_id: 'saved-session', overrides: {} },
+        };
+
+        layoutManager.api.addIncomingEmbeddables([incomingControl, newControl, discoverPanel]);
+
+        const { panels, pinnedPanels } = layoutManager.api.layout$.value;
+        expect(Object.keys(panels)).toEqual(
+          placement === 'pinned'
+            ? ['serviceControl', 'discoverPanel']
+            : ['dashboardControl', 'serviceControl', 'discoverPanel']
+        );
+        expect(Object.keys(pinnedPanels)).toEqual(
+          placement === 'pinned' ? ['dashboardControl'] : []
+        );
+        expect(layoutManager.internalApi.getSerializedStateForPanel('dashboardControl')).toEqual(
+          existingControl.config
+        );
+        expect(layoutManager.internalApi.getSerializedStateForPanel('serviceControl')).toEqual(
+          newControl.serializedState
+        );
+        expect(layoutManager.internalApi.getSerializedStateForPanel('discoverPanel')).toEqual(
+          discoverPanel.serializedState
+        );
+        expect(trackPanelMock.setScrollToPanelId).toHaveBeenCalledWith('serviceControl');
+        expect(trackPanelMock.setHighlightPanelId).toHaveBeenCalledWith('serviceControl');
+      }
+    );
+
+    test('adds a global control when the variable only exists inside a section', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [{ ...section1, collapsed: true, panels: [existingControl] }],
+        [],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([incomingControl]);
+
+      expect(Object.keys(layoutManager.api.layout$.value.panels)).toEqual([
+        'dashboardControl',
+        'discoverControl',
+      ]);
+      expect(layoutManager.api.layout$.value.panels.discoverControl.grid.sectionId).toBeUndefined();
+      expect(layoutManager.internalApi.getSerializedStateForPanel('dashboardControl')).toEqual(
+        existingControl.config
+      );
+      expect(layoutManager.internalApi.getSerializedStateForPanel('discoverControl')).toEqual(
+        incomingControl.serializedState
+      );
+    });
+
+    test('still applies updates by ID when another control has the same variable', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [existingControl, { ...existingControl, id: 'existingDuplicateControl' }],
+        [],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([
+        { ...incomingControl, embeddableId: existingControl.id },
+      ]);
+
+      expect(Object.keys(layoutManager.api.layout$.value.panels)).toEqual([
+        'dashboardControl',
+        'existingDuplicateControl',
+      ]);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('dashboardControl')).toEqual(
+        incomingControl.serializedState
+      );
+      expect(
+        layoutManager.internalApi.getSerializedStateForPanel('existingDuplicateControl')
+      ).toEqual(existingControl.config);
+    });
+
+    test('does not track a panel when all incoming controls already exist', () => {
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        [existingControl],
+        [],
+        trackPanelMock
+      );
+
+      layoutManager.api.addIncomingEmbeddables([incomingControl]);
+
+      expect(Object.keys(layoutManager.api.layout$.value.panels)).toEqual(['dashboardControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('dashboardControl')).toEqual(
+        existingControl.config
+      );
+      expect(trackPanelMock.setScrollToPanelId).not.toHaveBeenCalled();
+      expect(trackPanelMock.setHighlightPanelId).not.toHaveBeenCalled();
+    });
+
+    test('adds each variable only once within the incoming packages', () => {
+      const layoutManager = initializeLayoutManager(viewModeManagerMock, [], [], trackPanelMock);
+
+      layoutManager.api.addIncomingEmbeddables([
+        incomingControl,
+        { ...incomingControl, embeddableId: 'duplicateControl' },
+      ]);
+
+      expect(Object.keys(layoutManager.api.layout$.value.panels)).toEqual(['discoverControl']);
+      expect(layoutManager.internalApi.getSerializedStateForPanel('discoverControl')).toEqual(
+        incomingControl.serializedState
+      );
     });
   });
 
