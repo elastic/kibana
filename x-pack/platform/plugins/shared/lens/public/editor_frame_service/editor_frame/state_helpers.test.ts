@@ -35,9 +35,11 @@ describe('initializeSources', () => {
   const initialize = async ({
     adHocDataViews,
     references,
+    internalReferences,
   }: {
     adHocDataViews?: Record<string, DataViewSpec>;
     references?: Reference[];
+    internalReferences?: Reference[];
   }) => {
     mockLoadIndexPatterns.mockResolvedValue({});
     await initializeSources({
@@ -50,6 +52,7 @@ describe('initializeSources', () => {
       storage: createMockStorage() as never,
       defaultIndexPatternId: 'default',
       references,
+      internalReferences,
       adHocDataViews,
     });
     return mockLoadIndexPatterns.mock.calls[0][0].adHocDataViews;
@@ -78,6 +81,38 @@ describe('initializeSources', () => {
   it('does not derive a spec for a layer pointing to a saved data view', async () => {
     const loaded = await initialize({
       references: [{ type: 'index-pattern', id: 'esql-id', name: 'layer-reference' }],
+    });
+
+    expect(loaded).toEqual({});
+  });
+
+  it('derives the spec of an ES|QL layer whose only reference is an internal one', async () => {
+    const loaded = await initialize({
+      adHocDataViews: {},
+      internalReferences: [
+        {
+          type: 'index-pattern',
+          id: 'esql-id',
+          name: 'textBasedLanguages-datasource-layer-layer1',
+        },
+      ],
+    });
+
+    expect(loaded).toEqual({
+      'esql-id': { id: 'esql-id', title: 'logs-*', type: 'esql', timeFieldName: '@timestamp' },
+    });
+  });
+
+  it('does not derive a spec when a saved reference points to the layer, even with an internal one', async () => {
+    const loaded = await initialize({
+      references: [{ type: 'index-pattern', id: 'esql-id', name: 'layer-reference' }],
+      internalReferences: [
+        {
+          type: 'index-pattern',
+          id: 'esql-id',
+          name: 'textBasedLanguages-datasource-layer-layer1',
+        },
+      ],
     });
 
     expect(loaded).toEqual({});

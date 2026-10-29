@@ -240,6 +240,7 @@ export async function initializeSources(
     storage,
     defaultIndexPatternId,
     references,
+    internalReferences,
     initialContext,
     adHocDataViews,
     http,
@@ -253,7 +254,10 @@ export async function initializeSources(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
+    /** References to saved objects. Only these tell a saved data view from an ES|QL dataset. */
     references?: Reference[];
+    /** References of the ad hoc data views of the chart, kept apart from the saved ones. */
+    internalReferences?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     http?: HttpStart;
@@ -261,9 +265,12 @@ export async function initializeSources(
   },
   options?: InitializationOptions
 ) {
+  const allReferences = internalReferences
+    ? [...(references ?? []), ...internalReferences]
+    : references;
   const annotationGroups = await initializeEventAnnotationGroups(
     eventAnnotationService,
-    references
+    allReferences
   );
 
   // Regenerate ESQL ad-hoc DataViews once at editor initialization.
@@ -286,7 +293,7 @@ export async function initializeSources(
       dataViews,
       storage,
       defaultIndexPatternId,
-      references,
+      references: allReferences,
       adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
@@ -299,14 +306,14 @@ export async function initializeSources(
     initialContext,
     indexPatternRefs,
     indexPatterns,
-    references,
+    references: allReferences,
   });
 
   const initializedVisualizationState = initializeVisualization({
     visualizationMap,
     visualizationState,
     datasourceStates,
-    references,
+    references: allReferences,
     initialContext,
     annotationGroups,
   });
