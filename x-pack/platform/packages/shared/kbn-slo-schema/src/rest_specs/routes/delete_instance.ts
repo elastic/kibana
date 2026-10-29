@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 
-import { sloIdSchema } from '../../schema/zod/slo';
+import { sloIdSchema } from '../../schema/slo';
 
 const deleteSLOInstancesParamsSchema = z.object({
   body: z.object({

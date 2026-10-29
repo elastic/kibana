@@ -60,6 +60,7 @@ import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
+  ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
 
@@ -82,6 +83,9 @@ interface StoredProposal {
   seqNo?: number;
   primaryTerm?: number;
 }
+
+/** The version a write is guarded by, or the one it produced. */
+type WriteVersion = Pick<StoredProposal, 'seqNo' | 'primaryTerm'>;
 
 /**
  * Every field the gate workflow can advance. All optional: a call may move the
@@ -107,6 +111,12 @@ export interface ProposalsServiceDeps {
 
 /** How long `reopen` waits for the gate workflow to create the successor. */
 const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
+
+/**
+ * Elasticsearch's default `max_result_window`: the most live revisions one search can return, so
+ * also the most chains `getLatestRevisions` reads in one call.
+ */
+const MAX_LATEST_REVISIONS = 10_000;
 
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
@@ -455,11 +465,11 @@ export class ProposalsService {
 
   /**
    * Releases the parked gate so the workflow can record the decision behind it.
-   * Writes nothing but the annotations below, and only once every refusal has
-   * passed — so there is nothing to roll back when a resume fails, and the
-   * decision reaches the record by exactly one path regardless of which surface
-   * released the gate. The one write a refusal makes is settling a proposal
-   * whose gate has ended, since nothing else can settle it anymore.
+   * Writes nothing but the release mark and the annotations below, and only
+   * once every refusal has passed — so the decision reaches the record by
+   * exactly one path regardless of which surface released the gate. The one
+   * write a refusal makes is settling a proposal whose gate has ended, since
+   * nothing else can settle it anymore.
    *
    * The caller is expected to have been authorized already — the routes do it
    * declaratively, and the workflow re-checks the resumer behind the gate.
@@ -500,53 +510,100 @@ export class ProposalsService {
         `Execution [${execution.id}] is not waiting for input (status: ${execution.status})`
       );
     }
+    // The execution keeps reading as waiting until the resumed gate runs, so a
+    // second release would get this far. Resolving the step before writing
+    // refuses one whose gate another resumer already claimed, which would
+    // otherwise bump the version the gate's own decision write is guarded by.
+    const stepExecutionId = findWaitingGateStepId(execution.stepExecutions);
+    if (stepExecutionId === undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is already being decided: its gate has no unclaimed step waiting`
+      );
+    }
 
-    const annotated = await this.annotate(
+    const released = await this.markReleased(
       proposal,
       { dismissReason, rationale },
       { seqNo, primaryTerm }
     );
 
-    await this.resumeGate(execution, { spaceId, request, approved });
+    try {
+      await this.resumeGate(execution.id, stepExecutionId, { spaceId, request, approved });
+    } catch (error) {
+      // Only a resume the engine turned away is undone, because it is the one
+      // failure that proves the gate will never act on this release. Any other
+      // leaves its outcome unknown, and lifting the mark under a resume that
+      // did land would reopen the window it closes; a mark left standing only
+      // holds revisions back until the proposal is decided or expires.
+      if (isRefusedResume(error)) {
+        await this.revertRelease(proposal, released);
+      }
+      throw error;
+    }
 
-    return stripRanks(annotated);
+    return stripRanks(released.proposal);
   }
 
   /**
-   * Writes the decision's free-text annotations and nothing else.
+   * Stamps `gateReleasedAt` and writes the decision's free-text annotations,
+   * under the loaded sequence number, so this and a concurrent `revise()`
+   * cannot both land: whichever writes second conflicts.
    *
-   * This is the one thing a route still writes, and it exists because
-   * `waitForApproval` reconstructs its resume payload as
-   * `{ approved: approved === true }` and discards the rest — so a dismiss
-   * reason or a rationale cannot reach the workflow through the gate. The line
-   * is "the route annotates, the workflow decides". A dismissal arriving
-   * through the platform's own resume API simply carries no reason, which is
-   * fine because both fields are optional.
+   * The mark is what `revise()` refuses. The gate writes the decision only
+   * after it has adopted the chain head, so without it a revision appended
+   * between the resume and that write is the one the approval would execute.
    *
-   * A resume that fails after this point does leave the annotation behind on an
+   * The annotations are here because `waitForApproval` reconstructs its resume
+   * payload as `{ approved: approved === true }` and discards the rest — so a
+   * dismiss reason or a rationale cannot reach the workflow through the gate.
+   * The line is "the route annotates, the workflow decides". A dismissal
+   * arriving through the platform's own resume API simply carries no reason,
+   * which is fine because both fields are optional.
+   *
+   * A resume that fails ambiguously after this point leaves both behind on an
    * undecided proposal. That window cannot be closed without a transaction, and
-   * it is the better trade: annotating after the resume would race the
-   * workflow's own decision write and lose the reason outright.
+   * it is the better trade: writing after the resume would race the workflow's
+   * own decision write, losing the reason and reopening the revise window.
    */
-  private async annotate(
+  private async markReleased(
     proposal: StoredProposalRecord,
     { dismissReason, rationale }: Pick<ReleaseGateParams, 'dismissReason' | 'rationale'>,
-    { seqNo, primaryTerm }: { seqNo?: number; primaryTerm?: number }
-  ): Promise<StoredProposalRecord> {
-    if (dismissReason === undefined && rationale === undefined) {
-      return proposal;
-    }
-
-    const annotated: StoredProposalRecord = {
+    { seqNo, primaryTerm }: WriteVersion
+  ): Promise<StoredProposal> {
+    const released: StoredProposalRecord = {
       ...proposal,
+      gateReleasedAt: new Date().toISOString(),
       ...(dismissReason !== undefined ? { dismissReason } : {}),
       ...(rationale !== undefined ? { rationale } : {}),
     };
-    const { id, ...document } = annotated;
+    const { id, ...document } = released;
 
-    await this.writeDocument(id, document, { seqNo, primaryTerm });
+    const version = await this.writeDocument(id, document, { seqNo, primaryTerm });
 
-    return annotated;
+    return { proposal: released, ...version };
+  }
+
+  /**
+   * Puts back the record a refused release replaced, so it can be revised again
+   * and keeps no annotation for a decision that never happened. Guarded by the
+   * release write's own sequence number, so a record that moved since is left
+   * as it is. Best effort: the caller has to see the refused resume, not this.
+   */
+  private async revertRelease(
+    { id, ...original }: StoredProposalRecord,
+    { seqNo, primaryTerm }: WriteVersion
+  ): Promise<void> {
+    try {
+      await this.writeDocument(id, original, { seqNo, primaryTerm });
+    } catch (error) {
+      if (error instanceof ProposalConflictError) {
+        this.deps.logger.debug(`Proposal [${id}] moved before its release could be reverted`);
+      } else {
+        this.deps.logger.warn(
+          `Could not revert the release of proposal [${id}] after its gate refused the resume: ${error}`
+        );
+      }
+    }
   }
 
   /**
@@ -690,6 +747,9 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // The original was released to reach `failed`, and inheriting the mark
+      // would refuse every revision of the retry for good.
+      gateReleasedAt: undefined,
       // Why the attempt this one re-offers failed. Denormalised from the
       // predecessor so the queue can say so from the row it already has.
       previousExecutionError: failure,
@@ -852,6 +912,12 @@ export class ProposalsService {
         `Proposal [${id}] was already decided as ${proposal.decision} and cannot be revised`
       );
     }
+    // Released but not yet decided: the gate adopts the chain head before it
+    // writes the decision, so a revision appended now would be the one executed
+    // under an approval given to this one.
+    if (proposal.gateReleasedAt !== undefined) {
+      throw new ProposalConflictError(`Proposal [${id}] is being decided and cannot be revised`);
+    }
     if (proposal.status !== 'pending') {
       throw new ProposalConflictError(
         `Proposal [${id}] has settled as ${proposal.status} and cannot be revised`
@@ -907,6 +973,7 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      gateReleasedAt: undefined,
       // `previousExecutionError` rides along with the spread untouched: a
       // revision corrects a proposal, it does not run anything, so the last
       // attempt to fail is still the one the predecessor was re-offered for.
@@ -1088,6 +1155,11 @@ export class ProposalsService {
           must_not: [{ exists: { field: 'supersededBy' } }],
         },
       },
+      // A released revision wins. A revision that lost its race to the release
+      // stays live until its cleanup lands, and an unsorted read could adopt it.
+      // `revise()` refuses a released row, so at most one live row in a chain
+      // carries the mark, and it is the revision the approver answered.
+      sort: [{ gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } }],
     });
 
     const hit = response.hits.hits[0];
@@ -1113,6 +1185,71 @@ export class ProposalsService {
       decision: source.decision,
       actionInput: source.actionInput,
     };
+  }
+
+  /**
+   * The live revision of every chain rooted at one of `rootProposalIds`, read in one search and
+   * keyed by root id. A root with no live revision is absent rather than an error, and so is one
+   * whose live revision `filters` excludes.
+   *
+   * Returns every head or throws {@link ProposalLookupTruncatedError}: a caller that reads a
+   * missing chain as free would create a duplicate.
+   */
+  async getLatestRevisions(
+    rootProposalIds: string[],
+    spaceId: string,
+    filters: Partial<Pick<ProposalFilters, 'origin' | 'excludeExpired'>> = {}
+  ): Promise<Map<string, Proposal>> {
+    const ids = [...new Set(rootProposalIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    if (ids.length > MAX_LATEST_REVISIONS) {
+      throw new ProposalLookupTruncatedError(
+        `Cannot read ${ids.length} proposal chains in one lookup: the limit is ${MAX_LATEST_REVISIONS}`
+      );
+    }
+
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: MAX_LATEST_REVISIONS,
+      // A failed shard would otherwise drop its heads from both the hits and the total.
+      allow_partial_search_results: false,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              { excludeExpired: false, ...filters, excludeSuperseded: true },
+              spaceId
+            ),
+            { terms: { rootProposalId: ids } },
+          ],
+        },
+      },
+      // A chain caught between the two writes of a revision has two live rows. The released one
+      // wins, for the reason `getLatestRevision` gives; otherwise the later revision, which is the
+      // one the chain settles on once its predecessor is marked. A retry keeps its original's
+      // revision, so between the two writes of `clone()` only the release orders them.
+      sort: [
+        { gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } },
+        { revision: { order: 'desc' } },
+      ],
+    });
+
+    const { hits, total } = response.hits;
+    if (total.value > hits.length) {
+      throw new ProposalLookupTruncatedError(
+        `The lookup matched ${total.value} live revisions but returned ${hits.length}`
+      );
+    }
+
+    const heads = new Map<string, Proposal>();
+    for (const hit of hits) {
+      if (hit._id !== undefined && !heads.has(hit._source.rootProposalId)) {
+        heads.set(hit._source.rootProposalId, toProposal(hit._id, hit._source));
+      }
+    }
+    return heads;
   }
 
   /**
@@ -1276,20 +1413,26 @@ export class ProposalsService {
     }
   }
 
-  /** Optimistically-concurrent write, with the lost race reported as a conflict. */
+  /**
+   * Optimistically-concurrent write, with the lost race reported as a conflict.
+   * Returns the version it produced, for a follow-up write that must not land
+   * on top of anyone else's.
+   */
   private async writeDocument(
     id: string,
     document: ProposalDocument,
-    { seqNo, primaryTerm }: { seqNo?: number; primaryTerm?: number }
-  ): Promise<void> {
+    { seqNo, primaryTerm }: WriteVersion
+  ): Promise<WriteVersion> {
     try {
-      await this.deps.storage.index({
-        id,
-        document,
-        ...(seqNo !== undefined && primaryTerm !== undefined
-          ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
-          : {}),
-      });
+      const { _seq_no: writtenSeqNo, _primary_term: writtenPrimaryTerm } =
+        await this.deps.storage.index({
+          id,
+          document,
+          ...(seqNo !== undefined && primaryTerm !== undefined
+            ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+            : {}),
+        });
+      return { seqNo: writtenSeqNo, primaryTerm: writtenPrimaryTerm };
     } catch (error) {
       if (isVersionConflict(error)) {
         throw new ProposalConflictError(`Proposal [${id}] was modified by another actor first`);
@@ -1327,22 +1470,21 @@ export class ProposalsService {
   }
 
   /**
-   * Releases the parked gate. The waiting step is resolved here and passed
-   * explicitly: the platform's own lookup only matches `waitForInput`, and when
-   * it resolves nothing it resumes without claiming the step or stamping the
-   * audit envelope.
+   * Releases the parked gate. The waiting step is resolved by the caller and
+   * passed explicitly: the platform's own lookup only matches `waitForInput`,
+   * and when it resolves nothing it resumes without claiming the step or
+   * stamping the audit envelope.
    */
   private async resumeGate(
-    execution: WorkflowExecutionDto,
+    executionId: string,
+    stepExecutionId: string,
     { spaceId, request, approved }: { spaceId: string; request: KibanaRequest; approved: boolean }
   ): Promise<void> {
-    const stepExecutionId = findWaitingGateStepId(execution.stepExecutions);
-
     await this.deps
       .getWorkflowsApi()
-      .resumeWorkflowExecution(execution.id, spaceId, { approved }, request, {
+      .resumeWorkflowExecution(executionId, spaceId, { approved }, request, {
         channel: PROPOSALS_RESUME_CHANNEL,
-        ...(stepExecutionId ? { stepExecutionId } : {}),
+        stepExecutionId,
       });
   }
 
@@ -1672,7 +1814,7 @@ const findWaitingGateStepId = (
     status: string;
     startedAt: string;
     finishedAt?: string;
-    hitl?: { respondedAt?: string };
+    hitl?: { respondedAt?: string } | null;
   }>
 ): string | undefined =>
   stepExecutions
@@ -1717,6 +1859,14 @@ const isVersionConflict = (error: unknown): boolean => {
   const metaStatus = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
   return status === 409 || metaStatus === 409;
 };
+
+/**
+ * A resume the engine turned away before scheduling anything: the gate step was
+ * claimed by someone else, or the execution is no longer waiting. Matched by
+ * name because `@kbn/workflows` does not export the class from its entry point.
+ */
+const isRefusedResume = (error: unknown): boolean =>
+  error instanceof Error && error.name === 'WorkflowExecutionInvalidStatusError';
 
 /**
  * Columns are looked up by name, not position: `drop_null_columns: true` (the

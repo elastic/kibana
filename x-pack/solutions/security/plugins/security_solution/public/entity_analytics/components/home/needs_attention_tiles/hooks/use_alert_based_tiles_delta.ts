@@ -44,6 +44,9 @@ export const useAlertBasedTilesDelta = ({
 }: AlertBasedTilesDeltaOptions): {
   severeAlertsDelta: number | undefined;
   watchlistedDelta: number | undefined;
+  /** The counts over the previous period, which the sparklines start from. */
+  severeAlertsPrevious: number | undefined;
+  watchlistedPrevious: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
@@ -77,6 +80,8 @@ export const useAlertBasedTilesDelta = ({
   return {
     severeAlertsDelta: previous ? severeAlertsCount - previous.severeAlertsCount : undefined,
     watchlistedDelta: previous ? watchlistedCount - previous.watchlistedCount : undefined,
+    severeAlertsPrevious: previous?.severeAlertsCount,
+    watchlistedPrevious: previous?.watchlistedCount,
     isHistoryMissing,
     reachesBack,
     isDeltaLoading: isDeltaStillComing({
