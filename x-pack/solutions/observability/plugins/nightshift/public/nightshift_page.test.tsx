@@ -103,11 +103,10 @@ jest.mock('./hooks/use_significant_events_availability');
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
 const mockUseOnboardingVisibility = useOnboardingVisibility as jest.Mock;
-/** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
-const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
-  const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
-});
+const getUrlForApp = jest.fn(
+  (appId: string, { path }: { path: string }) =>
+    `/app/${appId}${path.startsWith('/') ? path : `/${path}`}`
+);
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
 const featureFlags = { useBooleanValue: jest.fn() };
@@ -306,12 +305,20 @@ describe('NightshiftPage', () => {
     expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
   });
 
-  it('shows Sources and detection Settings in the Detections header', async () => {
+  it('shows the Detections header actions and marks Detections as the Settings origin', async () => {
     renderPage('/detections/events');
 
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+
+    await openAppMenuOverflow();
+    const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
+    expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
+    expect(screen.getAllByRole('menuitem')[0]).toBe(knowledgeLink);
+
+    await act(async () => fireEvent.click(knowledgeLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
 
     const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
     expect(sourcesLink).toBeVisible();
@@ -322,8 +329,16 @@ describe('NightshiftPage', () => {
 
     const settingsLink = screen.getByTestId('nightshiftSettingsLink');
     expect(settingsLink).toBeVisible();
-    expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings/detections');
+    expect(settingsLink).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/detections?origin=detections'
+    );
     expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+
+    await act(async () => fireEvent.click(settingsLink));
+    expect(navigateToUrl).toHaveBeenLastCalledWith(
+      '/app/nightshift/settings/detections?origin=detections'
+    );
   });
 
   describe('app menu', () => {

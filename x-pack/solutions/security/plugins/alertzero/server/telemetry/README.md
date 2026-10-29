@@ -77,6 +77,7 @@ The `alertzero.reportWorkerOutcome` workflow step emits these events from Worker
 |---|---|---|
 | `alertzero_ad_worker_run_completed`, `_review_started`, `_analysis_completed`, `_handoff_resolved` | Attack Discovery | Run, or reviewed attack |
 | `alertzero_alert_triage_batch_classified` | Alert Triage | Classified alert batch |
+| `alertzero_alert_triage_batch_grouped` | Alert Triage | Classified alert batch |
 | `alertzero_alert_triage_closure_resolved` | Alert Triage | Settled closure proposal |
 | `alertzero_rule_tuning_review_completed` | Rule Tuning | Reviewed rule |
 | `alertzero_rule_coverage_review_completed` | Rule Coverage | Reviewed detection gap |
@@ -208,7 +209,26 @@ Emitted by the Alert Triage Worker once a batch of alerts is classified, before 
 | `alerts_without_verdict` | long | yes | Alerts the analysis returned no verdict for. They are not tagged, noted or proposed |
 | `fp_candidates` | long | yes | False positives at or above the confidence floor, which the closure proposal covers |
 | `fp_below_floor` | long | yes | False positives below the floor, which are tagged and noted but not proposed |
-| `investigation_id` | keyword | yes | The Investigation the Worker opened for the batch. It joins to the batch's close |
+| `investigation_id` | keyword | no | Absent: a batch has no Investigation of its own. Only a new proposal or a failure creates one |
+
+### `alertzero_alert_triage_batch_grouped`
+
+Emitted by the Alert Triage Worker once for each classified batch, after it tagged the alerts with their pattern keys. It shows how well a pattern key would group the alerts of one rule, and what the grouping did. A batch holds one rule (or one detection of a rule), so the counts give a distribution across batches. The event carries no rule id and no key.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| envelope | | | See above |
+| `alerts_with_strict_key` | long | yes | Classified alerts with a strict pattern key, whatever their verdict. An alert with no identifying field (path) has none |
+| `strict_keys` | long | yes | Distinct strict keys among those alerts |
+| `strict_keys_single_alert` | long | yes | Strict keys that only one alert of the batch has |
+| `wide_keys` | long | yes | Distinct wide keys among the classified alerts. Every alert has one |
+| `wide_keys_single_alert` | long | yes | Wide keys that only one alert of the batch has |
+| `fp_candidates_on_fallback` | long | yes | False positives at or above the confidence floor that have no strict key, so they group by rule and detection only |
+| `grouping` | keyword | yes | `on`, or why the batch was not grouped: `supervised` (supervised autonomy never groups), `flag_off` (the `alertzero.triageGrouping` kill switch), `lookup_incomplete` (the proposal lookup returned fewer proposals than it matched, so the batch got random proposal ids and no joins) or `no_candidates` (nothing to propose) |
+| `alerts_joined` | long | yes | Alerts that joined a proposal an earlier batch opened. `0` when grouping is off |
+| `proposals_created` | long | yes | New closure proposals the batch raised. `0` when grouping is off |
+| `alerts_pooled` | long | yes | Alerts pooled into one shared proposal. `0` when grouping is off |
+| `conversation_created` | boolean | yes | Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals or has no false positive to propose creates none |
 
 ### `alertzero_alert_triage_closure_resolved`
 
@@ -220,9 +240,10 @@ Emitted by the Alert Triage closure review once its proposal has settled and the
 | `outcome` | keyword | yes | `approved`, `dismissed`, `expired` or `unknown` (any other gate state, which leaves the Investigation open) |
 | `alerts_proposed` | long | yes | Alerts the closure proposal covered |
 | `alerts_retag_failed` | long | yes | Alerts a dismissal could not re-tag from `az:false_positive`, `0` on any other outcome |
+| `revisions` | long | yes | Revisions the proposal reached when it settled, counting the first as `1`. More than `1` means alerts joined it |
 | `auto_approve_requested` | boolean | yes | Whether the review asked the gate to auto-approve (supervised autonomy) |
 | `proposal_read_failed` | boolean | yes | Whether the decided proposal could not be read back. A dismissal then leaves the tags and the Investigation untouched |
-| `investigation_id` | keyword | yes | The batch's Investigation. It joins to `alertzero_alert_triage_batch_classified` and to the close |
+| `investigation_id` | keyword | yes | The Investigation of the proposal the review settled. Each new proposal has its own, and it joins to the close. It does not join to `alertzero_alert_triage_batch_classified`, which carries none |
 
 ### `alertzero_rule_tuning_review_completed`
 

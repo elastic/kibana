@@ -53,8 +53,9 @@ const V2 = 'https://api.example.com/v2';
 
 const action = <T>(
   input: z.ZodType<T>,
-  handler: ActionDefinition<T>['handler']
-): ActionDefinition<T> => ({ input, handler, scope: 'read' });
+  handler: ActionDefinition<T>['handler'],
+  scope: ActionDefinition<T>['scope'] = 'read'
+): ActionDefinition<T> => ({ input, handler, scope });
 
 const connector: ConnectorSpec = {
   metadata: {
@@ -80,7 +81,8 @@ const connector: ConnectorSpec = {
     ),
     createItem: action(
       z.object({ name: z.string() }),
-      async ({ client }, body) => (await client.post(`${V1}/items`, body)).data
+      async ({ client }, body) => (await client.post(`${V1}/items`, body)).data,
+      'write'
     ),
     tooMany: action(
       z.object({ limit: z.number().int().min(10) }),
@@ -137,21 +139,70 @@ describe('recordActions', () => {
     );
   });
 
-  it('merges fixture inputs and checks read-only actions', async () => {
+  it('merges fixture inputs', async () => {
     const { findings } = await recordActions({
       connector,
       specs,
-      fixtures: { createItem: { readOnly: true }, refined: { input: { id: 'ID-1' } } },
+      fixtures: { refined: { input: { id: 'ID-1' } } },
     });
 
-    expect(findings).toContainEqual({
-      kind: 'read-only',
-      action: 'createItem',
-      request: `POST ${V1}/items`,
-    });
     expect(findings).not.toContainEqual(
       expect.objectContaining({ kind: 'no-input', action: 'refined' })
     );
+  });
+
+  it("allows 'read' scoped actions only safe methods and the queries their fixtures list", async () => {
+    const searching: ConnectorSpec = {
+      ...connector,
+      actions: {
+        ...connector.actions,
+        searchItems: action(
+          z.object({ name: z.string() }),
+          async ({ client }, body) => (await client.post(`${V1}/items`, body)).data
+        ),
+      },
+    };
+    const readScope = (fixtures = {}) =>
+      recordActions({ connector: searching, specs, fixtures }).then(({ findings }) =>
+        findings.filter(({ kind }) => kind === 'read-scope' || kind === 'unused-query')
+      );
+
+    expect(await readScope()).toEqual([
+      { kind: 'read-scope', action: 'searchItems', request: `POST ${V1}/items` },
+    ]);
+    expect(
+      await readScope({ searchItems: { queries: [{ method: 'POST', path: '/items' }] } })
+    ).toEqual([]);
+    expect(
+      await readScope({
+        getItem: { queries: [{ method: 'POST', path: '/items' }] },
+        searchItems: { queries: [{ source: 'v2', method: 'POST', path: '/items' }] },
+      })
+    ).toEqual([
+      { kind: 'unused-query', action: 'getItem', operation: 'POST /items' },
+      { kind: 'read-scope', action: 'searchItems', request: `POST ${V1}/items` },
+      { kind: 'unused-query', action: 'searchItems', operation: 'POST /items' },
+    ]);
+  });
+
+  it('runs actions with a config sampled from the connector schema, unless one is given', async () => {
+    const configured: ConnectorSpec = {
+      ...connector,
+      schema: z.object({ region: z.enum(['us', 'eu']), debug: z.boolean().optional() }),
+      actions: {
+        getItem: action(z.object({}), async ({ client, config }) => {
+          if (config?.region === undefined || 'debug' in config) {
+            throw new Error(`Unexpected config ${JSON.stringify(config)}`);
+          }
+          return (await client.get(`${V1}/items/${config.region}`)).data;
+        }),
+      },
+    };
+
+    expect((await recordActions({ connector: configured, specs })).findings).toEqual([]);
+    expect(
+      (await recordActions({ connector: configured, specs, config: { debug: true } })).findings
+    ).toEqual([expect.objectContaining({ kind: 'handler-error' })]);
   });
 
   it('serves response overrides and reports those the spec contradicts', async () => {

@@ -275,6 +275,97 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
+      describe('instances', () => {
+        const instances = [
+          {
+            instanceId: 'cloudtrail',
+            serviceId: 'cloudtrail',
+            name: 'AWS CloudTrail',
+            isDuplicate: false,
+          },
+          {
+            instanceId: 'cloudtrail__dup-1',
+            serviceId: 'cloudtrail',
+            name: 'CloudTrail prod',
+            isDuplicate: true,
+          },
+        ];
+        const createWith = (body: Record<string, unknown>) =>
+          supertest
+            .post(BASE_URL)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              provider: 'aws',
+              authMethod: 'static_keys',
+              mechanisms: ['managed_integration'],
+              services: ['cloudtrail'],
+              ...body,
+            });
+
+        it('should store and return the instances, duplicates included', async () => {
+          const { body } = await createWith({ instances }).expect(200);
+
+          expect(body.item.instances).to.eql(instances);
+          createdIds.push(body.item.id);
+
+          const { body: fetched } = await supertest
+            .get(`${BASE_URL}/${body.item.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+          expect(fetched.item.instances).to.eql(instances);
+        });
+
+        it('should create a deployment without instances, as before they were stored', async () => {
+          const { body } = await createWith({}).expect(200);
+
+          expect(body.item.instances).to.be(undefined);
+          createdIds.push(body.item.id);
+        });
+
+        it('should accept an instance id and name of exactly the limit (255)', async () => {
+          const { body } = await createWith({
+            instances: [
+              {
+                instanceId: 'a'.repeat(255),
+                serviceId: 'cloudtrail',
+                name: 'n'.repeat(255),
+                isDuplicate: false,
+              },
+            ],
+          }).expect(200);
+
+          createdIds.push(body.item.id);
+        });
+
+        it('should return 400 when an instance has no instanceId', async () => {
+          await createWith({
+            instances: [{ serviceId: 'cloudtrail', name: 'AWS CloudTrail', isDuplicate: false }],
+          }).expect(400);
+        });
+
+        it('should return 400 when an instance id or name is over the limit (255)', async () => {
+          await createWith({
+            instances: [{ ...instances[0], instanceId: 'a'.repeat(256) }],
+          }).expect(400);
+          await createWith({ instances: [{ ...instances[0], name: 'n'.repeat(256) }] }).expect(400);
+        });
+
+        it('should return 400 when isDuplicate is not a boolean', async () => {
+          await createWith({ instances: [{ ...instances[0], isDuplicate: 'yes' }] }).expect(400);
+        });
+
+        it('should return 400 for more than 1000 instances', async () => {
+          await createWith({
+            instances: Array.from({ length: 1001 }, (_, i) => ({
+              instanceId: `cloudtrail__dup-${i}`,
+              serviceId: 'cloudtrail',
+              name: `CloudTrail ${i}`,
+              isDuplicate: true,
+            })),
+          }).expect(400);
+        });
+      });
+
       it('should create an agent-based deployment with authMethod and no connectorId', async () => {
         const { body } = await supertest
           .post(BASE_URL)
@@ -536,6 +627,66 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item.serviceVars).to.eql(serviceVars);
+      });
+
+      describe('instances', () => {
+        const original = {
+          instanceId: 'cloudwatch_metrics',
+          serviceId: 'cloudwatch_metrics',
+          name: 'AWS CloudWatch',
+          isDuplicate: false,
+        };
+        const duplicate = {
+          instanceId: 'cloudwatch_metrics__dup-1',
+          serviceId: 'cloudwatch_metrics',
+          name: 'CloudWatch prod',
+          isDuplicate: true,
+        };
+        const put = (instances: unknown) =>
+          supertest.put(`${BASE_URL}/${deploymentId}`).set('kbn-xsrf', 'xxxx').send({ instances });
+
+        it('should round-trip the instances', async () => {
+          const { body } = await put([original, duplicate]).expect(200);
+          expect(body.item.instances).to.eql([original, duplicate]);
+
+          const { body: fetched } = await supertest
+            .get(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+          expect(fetched.item.instances).to.eql([original, duplicate]);
+        });
+
+        it('should replace the instances rather than merge them', async () => {
+          await put([original, duplicate]).expect(200);
+
+          const { body } = await put([original]).expect(200);
+
+          expect(body.item.instances).to.eql([original]);
+        });
+
+        it('should keep the instances when an update does not mention them', async () => {
+          await put([original, duplicate]).expect(200);
+
+          const { body } = await supertest
+            .put(`${BASE_URL}/${deploymentId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ status: 'deploying' })
+            .expect(200);
+
+          expect(body.item.instances).to.eql([original, duplicate]);
+        });
+
+        it('should return 400 when an instance violates the schema', async () => {
+          await put([{ serviceId: 'cloudwatch_metrics', name: 'x', isDuplicate: false }]).expect(
+            400
+          );
+          await put([{ ...original, name: 'n'.repeat(256) }]).expect(400);
+          await put([{ ...original, isDuplicate: 'yes' }]).expect(400);
+        });
+
+        it('should return 400 when instances is not an array', async () => {
+          await put(original).expect(400);
+        });
       });
 
       it('should return 404 when updating a non-existent deployment', async () => {
