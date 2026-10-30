@@ -10,7 +10,10 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
 /** Runs an ES|QL query. Hosts decide how: search strategy, API route, test double. */
-export type RunEsql = (query: string, options?: { signal?: AbortSignal }) => Promise<ESQLSearchResponse>;
+export type RunEsql = (
+  query: string,
+  options?: { signal?: AbortSignal }
+) => Promise<ESQLSearchResponse>;
 
 /** The traces the map reads. */
 export interface TraceSource {

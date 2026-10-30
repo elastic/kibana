@@ -46,6 +46,12 @@ jest.mock('@elastic/charts', () => ({
   TooltipStickTo: { Bottom: 'bottom' },
 }));
 jest.mock('@kbn/charts-theme', () => ({ useElasticChartsTheme: () => ({}) }));
+// The width jsdom cannot measure: 320 is the narrowest map, which gets the same 40 columns.
+let mockWidth = 320;
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: () => ({ width: mockWidth, height: 0 }),
+}));
 
 const source: TraceSource = {
   timeRange: { from: '2026-10-26T10:00:00.000Z', to: '2026-10-26T11:00:00.000Z' },
@@ -114,7 +120,10 @@ beforeAll(() => {
   }
 });
 
-function renderMap(props: Partial<LatencyMapProps> = {}, table: ESQLSearchResponse = gridTable(CELLS)) {
+function renderMap(
+  props: Partial<LatencyMapProps> = {},
+  table: ESQLSearchResponse = gridTable(CELLS)
+) {
   const runEsql = jest.fn(async (query: string) =>
     query.includes('PERCENTILE') ? statsTable : table
   );
@@ -145,6 +154,17 @@ const brush = (xs: [number, number], rows: number[]) =>
   );
 
 describe('LatencyMap', () => {
+  it('loads nothing until the map is measured', async () => {
+    mockWidth = 0;
+    try {
+      const { runEsql } = renderMap();
+      expect(await screen.findByTestId('traceLatencyMapLoading')).toBeInTheDocument();
+      expect(runEsql).not.toHaveBeenCalled();
+    } finally {
+      mockWidth = 320;
+    }
+  });
+
   it('shows a loading chart, then the heatmap with a legend and a summary', async () => {
     const onStats = jest.fn();
     const onLoad = jest.fn();
@@ -183,7 +203,7 @@ describe('LatencyMap', () => {
     expect(typeof mockChart.heatmap.timeZone).toBe('string');
   });
 
-  it('labels the axes sparsely, with round durations and times', async () => {
+  it('labels the durations sparsely and every column with its time', async () => {
     renderMap();
     await waitForChart();
     const { yAxisLabelFormatter, xAxisLabelFormatter } = mockChart.heatmap;
@@ -192,8 +212,8 @@ describe('LatencyMap', () => {
     expect(yLabels.filter(Boolean).length).toBeLessThan(12);
     expect(yAxisLabelFormatter(23)).toBe('≥10ms');
     const xLabels = Array.from({ length: 40 }, (_, column) => xAxisLabelFormatter(timeAt(column)));
-    expect(xLabels.filter(Boolean).length).toBeGreaterThan(1);
-    expect(xLabels.filter(Boolean)[0]).toMatch(/^\d\d:\d\d$/);
+    // The chart thins the columns' labels to the ones that fit.
+    expect(xLabels.every((label) => /^\d\d:\d\d$/.test(label))).toBe(true);
   });
 
   it('says so when the range has no spans, and reports it loaded', async () => {
@@ -454,6 +474,43 @@ describe('LatencyMap', () => {
       );
     });
 
+    it('lets go of the handles while a new region is brushed, and shows them again after', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapLayer'), {
+        button: 0,
+        pointerId: 1,
+      });
+      expect(screen.queryByTestId(/^traceLatencyMapHandle-/)).not.toBeInTheDocument();
+      fireEvent.pointerUp(window, { pointerId: 1 });
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+    });
+
+    it('keeps the handles when a press lands on them', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapHandle-tr'), {
+        button: 0,
+        pointerId: 1,
+      });
+      expect(screen.getAllByTestId(/^traceLatencyMapHandle-/)).toHaveLength(8);
+    });
+
+    it('grabs the region, and the hover outline gives way while it is moved', async () => {
+      renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const grip = screen.getByTestId('traceLatencyMapGrip');
+      expect(grip).toHaveStyle({ cursor: 'grab' });
+      expect(screen.getByTestId('traceLatencyMapHover')).toBeInTheDocument();
+      fireEvent.pointerDown(grip, { ...centerOf(4, 5), button: 0, pointerId: 1 });
+      expect(screen.getByTestId('traceLatencyMapGrip')).toHaveStyle({ cursor: 'grabbing' });
+      expect(screen.queryByTestId('traceLatencyMapHover')).not.toBeInTheDocument();
+    });
+
     it('reads a press on the region that does not travel as a click on the cell', async () => {
       const onCellClick = jest.fn();
       const { onSelectionCommit } = renderMap({ selection, onCellClick });
@@ -650,6 +707,17 @@ describe('LatencyMap', () => {
       act(() => layer.focus());
       press(layer, 'Escape');
       expect(second.onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+    });
+
+    it('does nothing on Enter with a cursor and no region, so the selection stays', async () => {
+      const { onSelectionCommit } = renderMap({
+        selection: geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+      });
+      const layer = await getLayer();
+      act(() => layer.focus());
+      press(layer, 'ArrowRight');
+      press(layer, 'Enter');
+      expect(onSelectionCommit).not.toHaveBeenCalled();
     });
 
     it('ignores Enter before the cursor is shown', async () => {

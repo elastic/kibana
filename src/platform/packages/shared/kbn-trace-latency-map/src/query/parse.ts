@@ -36,7 +36,11 @@ export const createEmptyGrid = (bins: number): LatencyGrid => ({
  * Adds the table of one grid query to a grid. `scale` is how many spans each counted span
  * stands for: 1, or 1 / probability for the sampled part of a large range.
  */
-export function addTableToGrid(grid: LatencyGrid, table: ESQLSearchResponse, scale = 1): LatencyGrid {
+export function addTableToGrid(
+  grid: LatencyGrid,
+  table: ESQLSearchResponse,
+  scale = 1
+): LatencyGrid {
   const [xiIndex, yiIndex, spansIndex, failedIndex] = ['xi', 'yi', 'spans', 'failed'].map((name) =>
     table.columns.findIndex((column) => column.name === name)
   );

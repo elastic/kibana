@@ -19,7 +19,9 @@ describe('NORMALIZE_COMMANDS', () => {
 
   it('takes the nanoseconds of OTel as they are, and multiplies the microseconds of APM', () => {
     expect(commands).toContain('EVAL otel_duration_ns = TO_DOUBLE(duration)');
-    expect(commands).toContain('EVAL transaction_duration_ns = TO_DOUBLE(transaction.duration.us) * 1000');
+    expect(commands).toContain(
+      'EVAL transaction_duration_ns = TO_DOUBLE(transaction.duration.us) * 1000'
+    );
     expect(commands).toContain('EVAL span_duration_ns = TO_DOUBLE(span.duration.us) * 1000');
   });
 

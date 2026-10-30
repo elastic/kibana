@@ -33,8 +33,8 @@ export const getKeyboardRange = ({ cursor, anchor }: KeyboardState) =>
 
 /**
  * Arrows move the cursor, Shift+arrows extend a region from where Shift began, Enter commits
- * the region (the cursor's cell when there is none) and Escape drops it, or clears the
- * selection when there is none to drop.
+ * that region and Escape drops it, or clears the selection when there is none to drop. Enter
+ * with no region does nothing: a cursor alone must not replace the selection.
  */
 export function reduceKeyboard(
   state: KeyboardState,
@@ -54,6 +54,7 @@ export function reduceKeyboard(
     };
   }
   if (key === 'Enter') {
+    if (!state.anchor) return { state, handled: false };
     return {
       state: { cursor: state.cursor },
       action: { type: 'commit', range: getKeyboardRange(state) },

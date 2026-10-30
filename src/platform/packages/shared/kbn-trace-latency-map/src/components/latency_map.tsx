@@ -40,6 +40,7 @@ import { isSamePlot } from '../geometry/plot_calibration';
 import { formatDuration, formatTimestamp } from '../geometry/ticks';
 import { useLatencyGrid } from '../hooks/use_latency_grid';
 import { useLatencyMapColors } from '../hooks/use_latency_map_colors';
+import { useSettledWidth } from '../hooks/use_settled_width';
 import { endGesture, moveGesture, startGesture } from '../selection/gesture';
 import type { Gesture } from '../selection/gesture';
 import { getKeyboardRange, reduceKeyboard } from '../selection/keyboard';
@@ -52,7 +53,7 @@ import { LatencyMapLegend } from './legend';
 import { MapHeader } from './map_header';
 import type { SlowestPercentile } from './map_header';
 import { SelectionBar } from './selection_bar';
-import { SelectionOverlay } from './selection_overlay';
+import { OVERLAY_CONTROL_ATTRIBUTE, SelectionOverlay } from './selection_overlay';
 import { getCountText } from './unit_text';
 
 export interface LatencyMapProps {
@@ -130,10 +131,13 @@ export function LatencyMap({
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const { width: measuredWidth } = useResizeObserver(container);
   const width = Math.max(measuredWidth, LAYOUT.minWidth);
-  const targetBins = getTimeBinsForWidth(measuredWidth);
+  // Nothing is loaded before the map is measured, and a resize is followed once it stops, into
+  // the time columns of its tier: dragging a window edge does not load the data again.
+  const settledWidth = useSettledWidth(measuredWidth);
+  const targetBins = getTimeBinsForWidth(settledWidth);
   const mapSource = getMapSource(source, { unit, selectionCondition, mapFilters });
   const { grid, stats, timeGrid, sampled, isLoading, isEmpty, error, loadedSource } =
-    useLatencyGrid({ source: mapSource, runEsql, targetBins });
+    useLatencyGrid({ source: mapSource, runEsql, targetBins, enabled: settledWidth > 0 });
 
   const callbacks = useRef({ onStats, onLoad });
   callbacks.current = { onStats, onLoad };
@@ -186,6 +190,9 @@ export function LatencyMap({
   const [draft, setDraft] = useState<CellRange>();
   const [keyboard, setKeyboard] = useState<KeyboardState>();
   const [hoverCell, setHoverCell] = useState<Cell>();
+  // A press on the chart starts a brush, a press on the selection's own grip or handles a move.
+  const [isBrushing, setIsBrushing] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
 
   // A new grid (the map resized, or its range changed) puts cells elsewhere: a cursor, an anchor or
   // a move in progress would point at cells that are no longer there, or past the new edge.
@@ -194,6 +201,8 @@ export function LatencyMap({
     setKeyboard(undefined);
     setDraft(undefined);
     gestureRef.current = undefined;
+    setIsMoving(false);
+    setIsBrushing(false);
   }, [gridKey]);
 
   const committedRange = useMemo(
@@ -260,6 +269,7 @@ export function LatencyMap({
   const cancelGesture = () => {
     gestureRef.current = undefined;
     setDraft(undefined);
+    setIsMoving(false);
   };
 
   const onOverlayPointerDown = (event: PointerEvent<SVGSVGElement>) => {
@@ -267,6 +277,7 @@ export function LatencyMap({
     const gesture = startGesture(getPoint(event), geometry, committedRange);
     if (!gesture) return;
     gestureRef.current = gesture;
+    setIsMoving(true);
     (event.target as Element).setPointerCapture?.(event.pointerId);
   };
 
@@ -343,15 +354,26 @@ export function LatencyMap({
     const handleFocusOut = (event: FocusEvent) => {
       if (!layer.contains(event.relatedTarget as Node | null)) setKeyboard(undefined);
     };
-    // Capturing, so that the chart below cannot stop it.
-    const handlePointerDown = () => setKeyboard(undefined);
+    // Capturing, so that the chart below cannot stop it. A press anywhere but on the selection's
+    // own controls is the chart's brush, which draws a new region while the old one lets go.
+    const handlePointerDown = (event: Event) => {
+      setKeyboard(undefined);
+      if (!(event.target as Element).closest?.(`[${OVERLAY_CONTROL_ATTRIBUTE}]`)) {
+        setIsBrushing(true);
+      }
+    };
+    const handlePointerEnd = () => setIsBrushing(false);
     layer.addEventListener('keydown', handleKeyDown);
     layer.addEventListener('focusout', handleFocusOut);
     layer.addEventListener('pointerdown', handlePointerDown, true);
+    window.addEventListener('pointerup', handlePointerEnd);
+    window.addEventListener('pointercancel', handlePointerEnd);
     return () => {
       layer.removeEventListener('keydown', handleKeyDown);
       layer.removeEventListener('focusout', handleFocusOut);
       layer.removeEventListener('pointerdown', handlePointerDown, true);
+      window.removeEventListener('pointerup', handlePointerEnd);
+      window.removeEventListener('pointercancel', handlePointerEnd);
     };
   }, [layer]);
 
@@ -425,7 +447,7 @@ export function LatencyMap({
           tabIndex={0}
           aria-label={i18n.translate('traceLatencyMap.interactiveLabel', {
             defaultMessage:
-              'Latency map. Arrow keys move between cells, Shift and arrow keys select a region, Enter selects, Escape clears.',
+              'Latency map. Arrow keys move between cells, Shift and arrow keys select a region, Enter commits it, Escape clears.',
           })}
           aria-busy={isLoading}
           css={css`
@@ -443,7 +465,6 @@ export function LatencyMap({
             timeZone={timeZone}
             colors={colors}
             failedOnly={failedOnly}
-            width={width}
             height={height}
             highlight={highlight}
             summary={summary}
@@ -457,7 +478,7 @@ export function LatencyMap({
               geometry={geometry}
               rect={overlayRange && geometry.rangeToRect(overlayRange)}
               hoverRect={
-                hoverCell && !draft
+                hoverCell && !draft && !isBrushing && !isMoving
                   ? geometry.rangeToRect({
                       x0: hoverCell.xi,
                       x1: hoverCell.xi + 1,
@@ -469,7 +490,8 @@ export function LatencyMap({
               colors={colors}
               width={width}
               height={height}
-              showHandles
+              showHandles={!isBrushing}
+              isMoving={isMoving}
               onPointerDown={onOverlayPointerDown}
               onPointerMove={onOverlayPointerMove}
               onPointerUp={onOverlayPointerUp}

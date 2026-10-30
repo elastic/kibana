@@ -22,21 +22,20 @@ import type { DurationStats, LatencyMapUnit } from '../types';
 import { LATENCY_MAP_ROWS, rowToDuration } from '../query/duration_rows';
 import type { LatencyGrid } from '../query/parse';
 import type { TimeGrid } from '../query/time_grid';
-import { getXAxisLabels, getYAxisLabels } from '../chart/axis_labels';
+import { getYAxisLabels } from '../chart/axis_labels';
 import { brushToRange, rangeToHighlight } from '../chart/brush';
 import { buildColorBands, buildHeatmapData } from '../chart/encoding';
 import type { Cell as GridPosition, CellRange } from '../geometry/cell_range';
 import { LAYOUT } from '../geometry/layout';
-import { resolveTimeZone } from '../geometry/ticks';
+import { formatColumnTime, resolveTimeZone } from '../geometry/ticks';
 import { calibratePlot } from '../geometry/plot_calibration';
 import type { ChartCell } from '../geometry/plot_calibration';
 import type { PlotArea } from '../geometry/map_geometry';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 import { CellDetails } from './cell_details';
 
-/** Room, in pixels, a label of the axes needs, to leave blanks between them. */
+/** Room, in pixels, a label of the duration axis needs, to leave blanks between them. */
 const Y_LABEL_PX = 18;
-const X_LABEL_PX = 96;
 
 export interface LatencyHeatmapProps {
   grid: LatencyGrid;
@@ -48,8 +47,7 @@ export interface LatencyHeatmapProps {
   colors: LatencyMapColors;
   /** The cells of the failed spans alone. */
   failedOnly: boolean;
-  /** Width and height of the chart, in pixels. */
-  width: number;
+  /** Height of the chart, in pixels; it takes the width of its container. */
   height: number;
   /** The cells to draw as selected: the selection, the region being moved, the keyboard's. */
   highlight?: CellRange;
@@ -91,7 +89,6 @@ export function LatencyHeatmap({
   timeZone,
   colors,
   failedOnly,
-  width,
   height,
   highlight,
   summary,
@@ -113,16 +110,6 @@ export function LatencyHeatmap({
     () => getYAxisLabels(stats, Math.max(1, Math.ceil(Y_LABEL_PX / rowHeight))),
     [stats, rowHeight]
   );
-  const xLabels = useMemo(
-    () =>
-      getXAxisLabels(
-        timeGrid,
-        Math.max(2, Math.floor((width - LAYOUT.plotInset.horizontal) / X_LABEL_PX)),
-        timeZone
-      ),
-    [timeGrid, width, timeZone]
-  );
-
   const theme = useMemo<PartialTheme>(
     () => ({
       // So that the plot starts where `GRID_ORIGIN` says, whatever the base theme is.
@@ -141,7 +128,8 @@ export function LatencyHeatmap({
         },
         xAxisLabel: { visible: true, fontSize: 10 },
         yAxisLabel: { visible: true, fontSize: 10, width: LAYOUT.yAxisLabelWidth },
-        brushMask: { visible: true, fill: colors.outsideSelectionMask },
+        // The region is tinted and outlined; the rest of the map is not covered.
+        brushMask: { visible: false },
         brushArea: {
           visible: true,
           fill: colors.selectionFill,
@@ -253,7 +241,12 @@ export function LatencyHeatmap({
           ySortPredicate="numDesc"
           timeZone={resolveTimeZone(timeZone)}
           xAxisLabelFormatter={(value) =>
-            xLabels.get(Math.round((Number(value) - timeGrid.fromMs) / timeGrid.binMs)) ?? ''
+            formatColumnTime(
+              Number(value),
+              timeGrid.binMs,
+              timeGrid.endMs - timeGrid.fromMs,
+              timeZone
+            )
           }
           yAxisLabelFormatter={(value) => yLabels.get(Number(value)) ?? ''}
           highlightedData={highlight ? rangeToHighlight(highlight, timeGrid) : undefined}

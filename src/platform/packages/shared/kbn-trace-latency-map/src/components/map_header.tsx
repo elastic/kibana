@@ -48,8 +48,8 @@ export function MapHeader({
       {([95, 99] as const).map((percentile) => (
         <EuiButtonEmpty
           key={percentile}
-          size="xs"
-          iconType="chevronSingleUp"
+          size="s"
+          iconType="partial"
           isDisabled={isDisabled}
           onClick={() => onSelectSlowest(percentile)}
           data-test-subj={`traceLatencyMapSlowest${percentile}`}

@@ -31,9 +31,12 @@ describe('latency map rows', () => {
     expect(rowToDuration(LATENCY_MAP_INNER_ROWS + 1, stats)).toBeGreaterThan(2_000_000_000);
   });
 
-  it.each([100_000, 450_000, 9_999_000, 10_000_000, 500_000_000])('round-trips %s ns', (duration) => {
-    expect(rowToDuration(durationToRow(duration, stats), stats)).toBeCloseTo(duration, 1);
-  });
+  it.each([100_000, 450_000, 9_999_000, 10_000_000, 500_000_000])(
+    'round-trips %s ns',
+    (duration) => {
+      expect(rowToDuration(durationToRow(duration, stats), stats)).toBeCloseTo(duration, 1);
+    }
+  );
 
   it('keeps a map whose max equals its p99 from collapsing the top row', () => {
     const flat = { ...stats, min: 500_000, p99: 500_000, max: 500_000 };
@@ -43,7 +46,10 @@ describe('latency map rows', () => {
   it('reads the statistics table', () => {
     expect(
       parseDurationStats({
-        columns: ['min', 'p90', 'p95', 'p99', 'max', 'spans'].map((name) => ({ name, type: 'long' })),
+        columns: ['min', 'p90', 'p95', 'p99', 'max', 'spans'].map((name) => ({
+          name,
+          type: 'long',
+        })),
         values: [[1, 2, 3, 4, 5, 6]],
       })
     ).toEqual({ min: 1, p90: 2, p95: 3, p99: 4, max: 5, spans: 6 });

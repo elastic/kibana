@@ -61,7 +61,6 @@ const colors: LatencyMapColors = {
   failureRamp: [],
   selectionStroke: 'rgb(1,2,3)',
   selectionFill: 'rgba(1,2,3,0.1)',
-  outsideSelectionMask: 'rgba(255,255,255,0.5)',
   handleFill: '#fff',
   axisText: '#666',
   hoverOutline: '#000',
@@ -123,7 +122,6 @@ function renderChart(initial: { highlight?: CellRange } = {}) {
       timeZone="UTC"
       colors={colors}
       failedOnly={false}
-      width={WIDTH}
       height={HEIGHT}
       summary="Latency map"
       onBrush={onBrush}

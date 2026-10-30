@@ -32,14 +32,17 @@ export const LAYOUT = {
 };
 
 /**
- * Time columns for a map of this width, in multiples of 5 so that a small resize does not
- * reload the map. Never more than the grid query can return, however wide the map is.
+ * The numbers of time columns a map has, so that resizing it within a tier stretches the cells it
+ * has instead of loading the data again. The last is the most the grid query returns in full.
+ */
+const TIME_BIN_TIERS = [LAYOUT.minTimeBins, 60, 80, 120, 160, 240, 320, MAX_TIME_BINS];
+
+/**
+ * Time columns for a map of this width: the largest tier that gives cells no narrower than
+ * `LAYOUT.cellWidth`, so that a resize loads again only when it crosses into another tier.
  */
 export const getTimeBinsForWidth = (width: number) => {
   const plotWidth = Math.max(width, LAYOUT.minWidth) - LAYOUT.plotInset.horizontal;
-  const bins = Math.max(
-    LAYOUT.minTimeBins,
-    Math.round(Math.floor(plotWidth / LAYOUT.cellWidth) / 5) * 5
-  );
-  return Math.min(bins, MAX_TIME_BINS);
+  const fitting = TIME_BIN_TIERS.filter((tier) => tier * LAYOUT.cellWidth <= plotWidth);
+  return fitting.length ? Math.max(...fitting) : LAYOUT.minTimeBins;
 };

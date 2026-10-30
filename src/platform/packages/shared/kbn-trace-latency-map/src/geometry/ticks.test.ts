@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
-import { formatDuration, getDurationTicks, getTimeTicks } from './ticks';
+import { formatColumnTime, formatDuration, getDurationTicks } from './ticks';
 
 describe('formatDuration', () => {
   it.each([
@@ -40,50 +39,36 @@ describe('getDurationTicks', () => {
   });
 });
 
-describe('getTimeTicks', () => {
+describe('formatColumnTime', () => {
   const from = Date.parse('2026-10-26T10:03:20.000Z');
+  const MINUTE = 60_000;
+  const DAY = 24 * 60 * MINUTE;
 
-  it('ticks round times of the time zone', () => {
-    const ticks = getTimeTicks(from, from + 15 * 60_000, 4, 'UTC');
-    expect(ticks.map((tick) => tick.label)).toEqual(['10:05', '10:10', '10:15']);
+  it('reads hours and minutes for columns of minutes within a day', () => {
+    expect(formatColumnTime(from, 30 * 1000 * 2, 30 * MINUTE, 'UTC')).toBe('10:03');
   });
 
-  it('rounds to local time, not UTC', () => {
-    const ticks = getTimeTicks(from, from + 15 * 60_000, 4, 'Asia/Kolkata');
-    expect(ticks[0].label).toBe('15:35');
+  it('adds seconds when a column is under a minute', () => {
+    expect(formatColumnTime(from, 15_000, 10 * MINUTE, 'UTC')).toBe('10:03:20');
   });
 
-  it('adds the date to a range of days', () => {
-    const ticks = getTimeTicks(from, from + 36 * 3_600_000, 6, 'UTC');
-    expect(ticks[0].label).toMatch(/^Oct 26 \d\d:00$/);
+  it('adds the date for a range of days', () => {
+    expect(formatColumnTime(from, 30 * MINUTE, 3 * DAY, 'UTC')).toBe('Oct 26 10:03');
   });
 
-  it('takes whole weeks for a range longer than the usual steps, not a tick a day', () => {
-    const year = 365 * 24 * 3_600_000;
-    const ticks = getTimeTicks(from, from + year, 8, 'UTC');
-    expect(ticks.length).toBeLessThanOrEqual(8);
-    expect(ticks.length).toBeGreaterThan(2);
+  it('reads only the date for columns of a day', () => {
+    expect(formatColumnTime(from, DAY, 30 * DAY, 'UTC')).toBe('Oct 26');
   });
 
-  it('stays on round local times when the clocks change in the range', () => {
-    // Amsterdam sets its clocks back on 2026-10-25: a day tick must stay at local midnight.
-    const start = Date.parse('2026-10-23T12:00:00Z');
-    const ticks = getTimeTicks(start, start + 5 * 86_400_000, 5, 'Europe/Amsterdam');
-    expect(ticks.length).toBeGreaterThanOrEqual(4);
-    ticks.forEach((tick) => {
-      expect(moment.tz(tick.timestampMs, 'Europe/Amsterdam').format('HH:mm')).toBe('00:00');
-    });
-    // One tick a day, even across the 25 hours of the day the clocks change.
-    const days = ticks.map((tick) => moment.tz(tick.timestampMs, 'Europe/Amsterdam').format('D'));
-    expect(new Set(days).size).toBe(days.length);
+  it('shows the time of the time zone, not UTC', () => {
+    expect(formatColumnTime(from, MINUTE, 30 * MINUTE, 'Asia/Kolkata')).toBe('15:33');
   });
 
-  it('puts every tick inside the range, in order', () => {
-    const ticks = getTimeTicks(from, from + 15 * 60_000, 4, 'UTC');
-    ticks.forEach((tick, i) => {
-      expect(tick.timestampMs).toBeGreaterThanOrEqual(from);
-      expect(tick.timestampMs).toBeLessThanOrEqual(from + 15 * 60_000);
-      if (i) expect(tick.timestampMs).toBeGreaterThan(ticks[i - 1].timestampMs);
-    });
+  it('stays on local time when the clocks change in the range', () => {
+    // Amsterdam sets its clocks back on 2026-10-25: 00:30 UTC is 02:30 CEST, 01:30 UTC is 02:30 CET.
+    const before = Date.parse('2026-10-25T00:30:00Z');
+    const after = Date.parse('2026-10-25T01:30:00Z');
+    expect(formatColumnTime(before, 60 * MINUTE, 3 * DAY, 'Europe/Amsterdam')).toBe('Oct 25 02:30');
+    expect(formatColumnTime(after, 60 * MINUTE, 3 * DAY, 'Europe/Amsterdam')).toBe('Oct 25 02:30');
   });
 });

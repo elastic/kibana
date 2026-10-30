@@ -70,74 +70,21 @@ export const resolveTimeZone = (timeZone?: string) =>
 export const formatTimestamp = (timestampMs: number, timeZone?: string) =>
   moment.tz(timestampMs, resolveTimeZone(timeZone)).format('MMM D, HH:mm:ss');
 
-export interface TimeTick {
-  timestampMs: number;
-  label: string;
-}
-
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
-const WEEK = 7 * DAY;
-const TICK_STEPS = [
-  SECOND,
-  5 * SECOND,
-  10 * SECOND,
-  15 * SECOND,
-  30 * SECOND,
-  MINUTE,
-  5 * MINUTE,
-  10 * MINUTE,
-  15 * MINUTE,
-  30 * MINUTE,
-  HOUR,
-  3 * HOUR,
-  6 * HOUR,
-  12 * HOUR,
-  DAY,
-  WEEK,
-];
+const MINUTE = 60_000;
+const DAY = 24 * 60 * MINUTE;
 
 /**
- * The step of the ticks: the smallest of the usual ones that gives no more than `count` ticks, or
- * whole weeks for a range longer than those reach.
+ * The time of a column for the axis, in `timeZone`: with seconds when a column is under a minute,
+ * with the date when the range is longer than a day or a column is a day, else `10:05`. Every
+ * column gets one and the chart thins them to the ones that fit.
  */
-function getTickStep(rangeMs: number, count: number) {
-  const wanted = rangeMs / Math.max(1, count);
-  return TICK_STEPS.find((candidate) => candidate >= wanted) ?? Math.ceil(wanted / WEEK) * WEEK;
-}
-
-/** Ticks at round local times of `timeZone` (the browser's when absent), about `count` of them. */
-export function getTimeTicks(
-  fromMs: number,
-  toMs: number,
-  count: number,
+export function formatColumnTime(
+  timestampMs: number,
+  binMs: number,
+  rangeMs: number,
   timeZone?: string
-): TimeTick[] {
-  const zone = resolveTimeZone(timeZone);
-  const rangeMs = toMs - fromMs;
-  const step = getTickStep(rangeMs, count);
+) {
   const format =
-    step < MINUTE ? 'HH:mm:ss' : step < DAY ? (rangeMs > DAY ? 'MMM D HH:mm' : 'HH:mm') : 'MMM D';
-
-  const offsetAt = (timestampMs: number) => moment.tz(timestampMs, zone).utcOffset() * MINUTE;
-  /** The first round local time after `timestampMs`, with the offset in force at that time. */
-  const alignAfter = (timestampMs: number) => {
-    const guess = Math.ceil((timestampMs + 1 + offsetAt(timestampMs)) / step) * step;
-    const aligned = guess - offsetAt(guess - offsetAt(timestampMs));
-    // The offset can change between the two: align once more with the one in force there.
-    const settled = guess - offsetAt(aligned);
-    return settled > timestampMs ? settled : aligned;
-  };
-
-  const ticks: TimeTick[] = [];
-  for (
-    let timestampMs = alignAfter(fromMs - 1);
-    timestampMs <= toMs;
-    timestampMs = alignAfter(timestampMs)
-  ) {
-    ticks.push({ timestampMs, label: moment.tz(timestampMs, zone).format(format) });
-  }
-  return ticks;
+    binMs < MINUTE ? 'HH:mm:ss' : binMs >= DAY ? 'MMM D' : rangeMs > DAY ? 'MMM D HH:mm' : 'HH:mm';
+  return moment.tz(timestampMs, resolveTimeZone(timeZone)).format(format);
 }

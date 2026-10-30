@@ -11,9 +11,13 @@ import { ESQL_MAX_ROWS, LATENCY_MAP_ROWS } from '../query/duration_rows';
 import { LAYOUT, getTimeBinsForWidth } from './layout';
 
 describe('getTimeBinsForWidth', () => {
-  it('gives more columns to a wider map, in multiples of 5', () => {
+  it('gives more columns to a wider map', () => {
     expect(getTimeBinsForWidth(1000)).toBeGreaterThan(getTimeBinsForWidth(600));
-    expect(getTimeBinsForWidth(1000) % 5).toBe(0);
+  });
+
+  it('keeps the columns through a resize within a tier, so that the data is not loaded again', () => {
+    expect(getTimeBinsForWidth(1160)).toBe(getTimeBinsForWidth(1240));
+    expect(getTimeBinsForWidth(700)).toBe(getTimeBinsForWidth(760));
   });
 
   it('gives a narrow map the least', () => {

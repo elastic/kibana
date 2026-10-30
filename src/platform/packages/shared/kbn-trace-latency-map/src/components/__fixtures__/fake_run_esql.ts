@@ -11,7 +11,13 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { RunEsql } from '../../types';
 import { LATENCY_MAP_ROWS } from '../../query/duration_rows';
 
-const STATS = { min: 120_000, p90: 6_000_000, p95: 11_000_000, p99: 20_000_000, max: 3_000_000_000 };
+const STATS = {
+  min: 120_000,
+  p90: 6_000_000,
+  p95: 11_000_000,
+  p99: 20_000_000,
+  max: 3_000_000_000,
+};
 
 /** Cheap deterministic noise (a linear congruential generator), so a story looks the same on every load. */
 function createRandom(seed: number) {
@@ -106,6 +112,9 @@ export function createFakeRunEsql({
           values.push([xi, yi, cellSpans, Math.min(cellSpans, Math.round(cell.failed * share))]);
       }
     }
-    return { columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })), values };
+    return {
+      columns: ['xi', 'yi', 'spans', 'failed'].map((name) => ({ name, type: 'long' })),
+      values,
+    };
   };
 }

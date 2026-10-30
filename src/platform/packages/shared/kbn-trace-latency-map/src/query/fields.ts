@@ -90,5 +90,8 @@ export const durationBelowCondition = (duration: number) =>
 export const durationRangeCondition = (minDuration: number, maxDuration: number) =>
   DURATION_FAMILIES.map(
     ({ field, nsPerUnit }) =>
-      `(${field} >= ${inUnits(minDuration, nsPerUnit)} AND ${field} < ${inUnits(maxDuration, nsPerUnit)})`
+      `(${field} >= ${inUnits(minDuration, nsPerUnit)} AND ${field} < ${inUnits(
+        maxDuration,
+        nsPerUnit
+      )})`
   ).join(' OR ');

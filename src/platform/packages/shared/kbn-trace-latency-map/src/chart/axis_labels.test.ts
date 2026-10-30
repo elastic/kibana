@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTimeGrid } from '../query/time_grid';
-import { getXAxisLabels, getYAxisLabels } from './axis_labels';
+import { getYAxisLabels } from './axis_labels';
 
 const stats = { min: 120_000, p90: 0, p95: 0, p99: 90_000_000, max: 5_000_000_000, spans: 1 };
 
@@ -31,27 +30,6 @@ describe('getYAxisLabels', () => {
     [...getYAxisLabels(stats, 1).keys()].forEach((row) => {
       expect(row).toBeGreaterThanOrEqual(0);
       expect(row).toBeLessThan(24);
-    });
-  });
-});
-
-describe('getXAxisLabels', () => {
-  const timeGrid = getTimeGrid('2026-10-26T10:03:20.000Z', '2026-10-26T10:33:20.000Z', 60);
-
-  it('labels the column each round time falls in', () => {
-    const labels = getXAxisLabels(timeGrid, 6, 'UTC');
-    expect([...labels.values()].slice(0, 3)).toEqual(['10:05', '10:10', '10:15']);
-    expect(
-      labels.get(
-        Math.round((Date.parse('2026-10-26T10:05:00Z') - timeGrid.fromMs) / timeGrid.binMs)
-      )
-    ).toBe('10:05');
-  });
-
-  it('leaves out ticks outside the columns', () => {
-    getXAxisLabels(timeGrid, 6, 'UTC').forEach((_, column) => {
-      expect(column).toBeGreaterThanOrEqual(0);
-      expect(column).toBeLessThan(timeGrid.bins);
     });
   });
 });

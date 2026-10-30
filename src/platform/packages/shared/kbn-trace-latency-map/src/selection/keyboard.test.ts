@@ -35,11 +35,10 @@ describe('keyboard selection', () => {
     expect(press(extended, 'ArrowRight').state.anchor).toBeUndefined();
   });
 
-  it('commits the region, or the cell the cursor is on', () => {
-    expect(press(start, 'Enter').action).toEqual({
-      type: 'commit',
-      range: { x0: 3, x1: 4, y0: 3, y1: 4 },
-    });
+  it('commits the region it extended, and does nothing for a cursor alone', () => {
+    const bare = press(start, 'Enter');
+    expect(bare.handled).toBe(false);
+    expect(bare.action).toBeUndefined();
     const extended = press(start, 'ArrowRight', true).state;
     expect(press(extended, 'Enter').action).toEqual({
       type: 'commit',

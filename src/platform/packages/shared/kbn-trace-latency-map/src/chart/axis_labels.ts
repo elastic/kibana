@@ -8,9 +8,8 @@
  */
 
 import { LATENCY_MAP_INNER_ROWS, LATENCY_MAP_ROWS } from '../query/duration_rows';
-import type { TimeGrid } from '../query/time_grid';
 import type { DurationStats } from '../types';
-import { formatDuration, getDurationTicks, getTimeTicks } from '../geometry/ticks';
+import { formatDuration, getDurationTicks } from '../geometry/ticks';
 
 /**
  * Labels for the duration rows. The chart labels rows, not values, so a row gets the round
@@ -31,20 +30,5 @@ export function getYAxisLabels(stats: DurationStats, minRowGap: number): Map<num
     if (topRow - row < minRowGap) labels.delete(row);
   });
   labels.set(topRow, `≥${formatDuration(stats.p99)}`);
-  return labels;
-}
-
-/** Labels for the time columns: round times of `timeZone`, on the column each falls in. */
-export function getXAxisLabels(
-  timeGrid: TimeGrid,
-  labelCount: number,
-  timeZone?: string
-): Map<number, string> {
-  const { fromMs, binMs, bins } = timeGrid;
-  const labels = new Map<number, string>();
-  for (const tick of getTimeTicks(fromMs, fromMs + bins * binMs, labelCount, timeZone)) {
-    const column = Math.round((tick.timestampMs - fromMs) / binMs);
-    if (column >= 0 && column < bins) labels.set(column, tick.label);
-  }
   return labels;
 }

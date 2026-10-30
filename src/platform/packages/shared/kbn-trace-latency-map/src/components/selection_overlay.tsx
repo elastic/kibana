@@ -14,6 +14,9 @@ import { LAYOUT } from '../geometry/layout';
 import type { MapGeometry, PxRect } from '../geometry/map_geometry';
 import type { LatencyMapColors } from '../hooks/use_latency_map_colors';
 
+/** Marks what takes the pointer in the overlay, so a press elsewhere is known to be the chart's. */
+export const OVERLAY_CONTROL_ATTRIBUTE = 'data-latency-map-control';
+
 /**
  * What goes over the chart. The cell under the pointer gets an outline, which the chart does not
  * draw. The selection, which the chart draws itself, gets what it cannot: a grip and handles for
@@ -28,6 +31,7 @@ export function SelectionOverlay({
   width,
   height,
   showHandles,
+  isMoving,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -42,6 +46,8 @@ export function SelectionOverlay({
   width: number;
   height: number;
   showHandles: boolean;
+  /** The selection is being moved or resized: the cursor says so, and nothing else reacts. */
+  isMoving: boolean;
   onPointerDown: (event: PointerEvent<SVGSVGElement>) => void;
   onPointerMove: (event: PointerEvent<SVGSVGElement>) => void;
   onPointerUp: (event: PointerEvent<SVGSVGElement>) => void;
@@ -85,7 +91,8 @@ export function SelectionOverlay({
           height={rect.y1 - rect.y0}
           fill="transparent"
           pointerEvents="all"
-          style={{ cursor: 'move' }}
+          style={{ cursor: isMoving ? 'grabbing' : 'grab' }}
+          {...{ [OVERLAY_CONTROL_ATTRIBUTE]: '' }}
           data-test-subj="traceLatencyMapGrip"
         />
       )}
@@ -106,6 +113,7 @@ export function SelectionOverlay({
               strokeWidth={1.5}
               pointerEvents="all"
               style={{ cursor: handle.cursor }}
+              {...{ [OVERLAY_CONTROL_ATTRIBUTE]: '' }}
               data-test-subj={`traceLatencyMapHandle-${handle.id}`}
             />
           ))}

@@ -47,10 +47,13 @@ export function useLatencyGrid({
   source,
   runEsql,
   targetBins,
+  enabled = true,
 }: {
   source: TraceSource;
   runEsql: RunEsql;
   targetBins: number;
+  /** Loads nothing until true: a map that has not been measured has no columns to ask for. */
+  enabled?: boolean;
 }): LatencyGridState {
   // Keyed by content, so a host passing an equal source in a new object does not reload.
   const sourceKey = JSON.stringify(source);
@@ -60,6 +63,7 @@ export function useLatencyGrid({
   const [state, setState] = useState<LatencyGridState>(LOADING);
 
   useEffect(() => {
+    if (!enabled) return;
     const controller = new AbortController();
     const run = (query: string) => runEsqlRef.current(query, { signal: controller.signal });
     setState((previous) => ({ ...previous, isLoading: true, error: undefined }));
@@ -123,7 +127,7 @@ export function useLatencyGrid({
     );
 
     return () => controller.abort();
-  }, [stableSource, targetBins]);
+  }, [stableSource, targetBins, enabled]);
 
   return state;
 }
