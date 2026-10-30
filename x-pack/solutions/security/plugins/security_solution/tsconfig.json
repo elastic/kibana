@@ -8,8 +8,6 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "test/scout/**/*",
-    "test/scout_es_max_response_size/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -18,7 +16,7 @@
     "../../../../../typings/**/*",
     "emotion.d.ts"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": ["target/**/*", "test/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
@@ -245,7 +243,6 @@
     "@kbn/inference-common",
     "@kbn/esql-ast",
     "@kbn/inference-langchain",
-    "@kbn/scout-security",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",

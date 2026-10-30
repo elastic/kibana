@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-declare module 'tar-fs' {
-  interface PackOptions {
-    map?: (header: { name: string; type: string }) => { name: string; type: string };
-    filter?: (name: string) => boolean;
-  }
+import { execSync } from 'child_process';
+import * as path from 'path';
 
-  function pack(cwd: string, opts?: PackOptions): NodeJS.ReadableStream;
+const kibanaRoot = execSync('git rev-parse --show-toplevel').toString().trim() || process.cwd();
+
+export function prettifyCommandLine(args: string[]) {
+  let [executable, ...rest] = args;
+  if (executable.endsWith('node')) {
+    executable = 'node';
+  }
+  rest = rest.map((arg) => path.relative(kibanaRoot, arg));
+
+  return [executable, ...rest].join(' ');
 }
