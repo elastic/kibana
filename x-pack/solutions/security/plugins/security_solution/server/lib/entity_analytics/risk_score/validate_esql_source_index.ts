@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// Upper bound on the source-index string length. Real index-pattern expressions are far
-// shorter; the cap keeps an oversized stored value from being interpolated into a query.
-const MAX_SOURCE_INDEX_LENGTH = 4096;
-
 // Characters that must not appear in a source expression interpolated unquoted into an ES|QL
 // `FROM` clause. The ES|QL lexer only requires a source to be quoted when it contains
 // `: " = | , [ ] /` or whitespace (see `shouldBeQuotedSource`, built from the lexer's
@@ -26,9 +22,7 @@ const UNSAFE_ESQL_SOURCE_CHARS = /[\u0000-\u001f\u007f\s"'`|\\/()[\]{}<>=;?#]/;
  * `FROM` clause of an ES|QL query.
  */
 export const isValidEsqlSourceIndex = (index: string): boolean =>
-  index.length > 0 &&
-  index.length <= MAX_SOURCE_INDEX_LENGTH &&
-  !UNSAFE_ESQL_SOURCE_CHARS.test(index);
+  index.length > 0 && !UNSAFE_ESQL_SOURCE_CHARS.test(index);
 
 /**
  * Throws when `index` cannot be safely interpolated into an ES|QL `FROM` clause. The risk

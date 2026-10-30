@@ -56,11 +56,5 @@ describe('validate_esql_source_index', () => {
         `Risk scoring source index ${index} is not a valid index expression`
       );
     });
-
-    it('rejects an index expression longer than the maximum', () => {
-      const tooLong = `a${'a'.repeat(4096)}`;
-      expect(isValidEsqlSourceIndex(tooLong)).toBe(false);
-      expect(() => assertValidEsqlSourceIndex(tooLong)).toThrow();
-    });
   });
 });
