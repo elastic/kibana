@@ -103,7 +103,6 @@ apiTest.describe(
           body: { seed: SEED },
         });
         expect(preview).toHaveStatusCode(200);
-        expect(preview.body.status).toBe('ok');
         expect(preview.body.destinations).toStrictEqual([{ id: workflowId, executable: false }]);
 
         const send = await apiClient.post(sendUrl(policyId), {
@@ -182,7 +181,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'reports a policy whose matcher has a KQL expression as unsupported, and does not send it',
+      'sends a test notification for a policy whose matcher has a KQL expression',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(
           ALERTING_V2_ACTION_POLICIES_READ_AND_WORKFLOW_EXECUTE_ROLE
@@ -194,14 +193,14 @@ apiTest.describe(
           body: {},
         });
         expect(preview).toHaveStatusCode(200);
-        expect(preview.body).toMatchObject({ status: 'unsupported', reason: 'matcher_expression' });
+        expect(preview.body.groups).toHaveLength(1);
 
         const send = await apiClient.post(sendUrl(expressionPolicyId), {
           headers,
-          body: { seed: SEED, destination_ids: [workflowId] },
+          body: { seed: preview.body.seed, destination_ids: [workflowId] },
         });
-        expect(send).toHaveStatusCode(400);
-        expect(send.body.code).toBe('ACTION_POLICY_TEST_NOT_SUPPORTED');
+        expect(send).toHaveStatusCode(200);
+        expect(typeof send.body.results[0].workflow_execution_id).toBe('string');
       }
     );
 
@@ -218,7 +217,6 @@ apiTest.describe(
           body: { seed: SEED },
         });
         expect(preview).toHaveStatusCode(200);
-        expect(preview.body.status).toBe('ok');
         expect(preview.body.seed).toBe(SEED);
         expect(preview.body.destinations).toStrictEqual([
           { id: workflowId, name: 'scout-send-test-notification', enabled: true, executable: true },

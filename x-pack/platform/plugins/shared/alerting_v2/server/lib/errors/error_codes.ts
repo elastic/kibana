@@ -136,11 +136,6 @@ export const ALERTING_ERROR_CODES = {
    * dispatcher, so create / update / upsert / API key rotation are rejected.
    */
   ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
-  /**
-   * A test notification cannot be built for the action policy, for example because its matcher
-   * has a KQL expression, which synthetic alerts do not satisfy yet.
-   */
-  ACTION_POLICY_TEST_NOT_SUPPORTED: 'ACTION_POLICY_TEST_NOT_SUPPORTED',
   /** A test notification targeted workflows that are not destinations of the action policy. */
   ACTION_POLICY_TEST_INVALID_DESTINATIONS: 'ACTION_POLICY_TEST_INVALID_DESTINATIONS',
 

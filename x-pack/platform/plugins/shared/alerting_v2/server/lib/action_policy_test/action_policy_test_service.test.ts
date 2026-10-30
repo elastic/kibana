@@ -104,7 +104,6 @@ describe('ActionPolicyTestService', () => {
 
       const result = await service.preview({ policyId: 'policy-1', seed: 5 });
 
-      if (result.status !== 'ok') throw new Error('expected an ok preview');
       expect(result.seed).toBe(5);
       expect(result.groups).toHaveLength(1);
       const [payload] = result.groups;
@@ -121,9 +120,6 @@ describe('ActionPolicyTestService', () => {
       const second = await service.preview({ policyId: 'policy-1', seed: 5 });
       const generated = await service.preview({ policyId: 'policy-1' });
 
-      if (first.status !== 'ok' || second.status !== 'ok' || generated.status !== 'ok') {
-        throw new Error('expected ok previews');
-      }
       expect(first.groups[0].id).toBe(second.groups[0].id);
       expect(Number.isInteger(generated.seed)).toBe(true);
     });
@@ -173,20 +169,6 @@ describe('ActionPolicyTestService', () => {
       expect(destinations[1]).toEqual({ id: 'workflow-2', executable: false });
     });
 
-    it('reports a policy whose matcher has a KQL expression as unsupported', async () => {
-      const { service } = setup({
-        policy: createPolicy({ matcher: { expression: 'severity: critical' } }),
-      });
-
-      const result = await service.preview({ policyId: 'policy-1' });
-
-      expect(result).toEqual({
-        status: 'unsupported',
-        reason: 'matcher_expression',
-        destinations: expect.any(Array),
-      });
-    });
-
     it('rejects when the license does not support action policies', async () => {
       const { service, licenseService, actionPolicyClient } = setup();
       licenseService.assertActionPoliciesLicense.mockRejectedValue(Boom.forbidden('license'));
@@ -210,7 +192,6 @@ describe('ActionPolicyTestService', () => {
       });
 
       const preview = await service.preview({ policyId: 'policy-1', seed: 5 });
-      if (preview.status !== 'ok') throw new Error('expected an ok preview');
       const [previewPayload] = preview.groups;
 
       // The payload sent is the previewed one; only `last_event_timestamp` is rebuilt as now.
@@ -290,18 +271,15 @@ describe('ActionPolicyTestService', () => {
       expect(workflowsManagement.testWorkflow).not.toHaveBeenCalled();
     });
 
-    it('rejects a policy whose matcher has a KQL expression', async () => {
+    it('sends a policy whose matcher has a KQL expression', async () => {
       const { service, workflowsManagement } = setup({
         policy: createPolicy({ matcher: { tags: ['prod'], expression: 'severity: critical' } }),
       });
+      workflowsManagement.testWorkflow.mockResolvedValue('execution-1');
 
-      const error = await service
-        .send({ policyId: 'policy-1', seed: 5, destinationIds: ['workflow-1'] })
-        .catch((e) => e);
+      await service.send({ policyId: 'policy-1', seed: 5, destinationIds: ['workflow-1'] });
 
-      expect(error.output.statusCode).toBe(400);
-      expect(error.data.code).toBe(ALERTING_ERROR_CODES.ACTION_POLICY_TEST_NOT_SUPPORTED);
-      expect(workflowsManagement.testWorkflow).not.toHaveBeenCalled();
+      expect(workflowsManagement.testWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('rejects when the license does not support action policies', async () => {

@@ -72,29 +72,12 @@ const actionPolicyTestPayloadSchema = lazySchema(() =>
     )
 );
 
-/**
- * Why a test scenario cannot be built. `matcher_expression`: the policy matcher has a KQL
- * expression, and synthetic alerts that satisfy it are not generated yet.
- */
-export const ACTION_POLICY_TEST_UNSUPPORTED_REASONS = ['matcher_expression'] as const;
-
-export type ActionPolicyTestUnsupportedReason =
-  (typeof ACTION_POLICY_TEST_UNSUPPORTED_REASONS)[number];
-
 export const actionPolicyTestPreviewResponseSchema = lazySchema(() =>
-  z.discriminatedUnion('status', [
-    z.object({
-      status: z.literal('ok'),
-      seed: testScenarioSeedSchema,
-      groups: z.array(actionPolicyTestPayloadSchema),
-      destinations: z.array(actionPolicyTestDestinationSchema),
-    }),
-    z.object({
-      status: z.literal('unsupported'),
-      reason: z.enum(ACTION_POLICY_TEST_UNSUPPORTED_REASONS),
-      destinations: z.array(actionPolicyTestDestinationSchema),
-    }),
-  ])
+  z.object({
+    seed: testScenarioSeedSchema,
+    groups: z.array(actionPolicyTestPayloadSchema),
+    destinations: z.array(actionPolicyTestDestinationSchema),
+  })
 );
 
 export interface ActionPolicyTestPreviewParams {

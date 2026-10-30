@@ -7,6 +7,7 @@
 
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import React, { useState } from 'react';
 import { usePreviewTestNotification } from '../../../hooks/use_preview_test_notification';
@@ -36,7 +37,8 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
   const selectedIds = destinations
     .filter(({ id, executable }) => executable && !deselectedIds.has(id))
     .map(({ id }) => id);
-  const payload = preview?.status === 'ok' ? preview.groups[0] : undefined;
+  const payload = preview?.groups[0];
+  const hasKqlMatcher = Boolean(normalizeMatcher(policy.matcher)?.expression);
   const resultsByWorkflowId = new Map(
     (sendResponse?.results ?? []).map((result) => [result.workflow_id, result])
   );
@@ -51,7 +53,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     });
 
   const send = () => {
-    if (preview?.status !== 'ok') {
+    if (!preview) {
       return;
     }
     sendTestNotification({ seed: preview.seed, destinationIds: selectedIds });
@@ -77,13 +79,13 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           text={labels.REAL_CHANNELS_TEXT}
           data-test-subj="sendTestNotificationRealChannelsCallout"
         />
-        {preview?.status === 'unsupported' && (
+        {hasKqlMatcher && (
           <Body.Callout
-            id="unsupported"
-            level="warning"
-            title={labels.UNSUPPORTED_MATCHER_TITLE}
-            text={labels.UNSUPPORTED_MATCHER_TEXT}
-            data-test-subj="sendTestNotificationUnsupportedCallout"
+            id="kqlMatcher"
+            level="info"
+            title={labels.KQL_MATCHER_TITLE}
+            text={labels.KQL_MATCHER_TEXT}
+            data-test-subj="sendTestNotificationKqlMatcherCallout"
           />
         )}
         {error && (
@@ -150,7 +152,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           onClick={send}
           isLoading={isSending}
           isDisabled={!payload || selectedIds.length === 0}
-          tooltip={preview?.status === 'unsupported' ? labels.UNSUPPORTED_MATCHER_TITLE : undefined}
           data-test-subj="sendTestNotificationSendButton"
         />
       </Footer>

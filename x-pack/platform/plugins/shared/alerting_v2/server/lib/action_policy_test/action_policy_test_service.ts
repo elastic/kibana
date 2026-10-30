@@ -40,7 +40,7 @@ import { PrivilegeChecker } from '../services/privilege_checker/privilege_checke
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { getMatcherType } from '../telemetry/action_policy_ebt_event';
 import { ACTION_POLICY_TEST_SENT_EBT_EVENT_TYPE } from '../telemetry/action_policy_test_ebt_event';
-import { buildTestScenario, type TestScenario } from './test_scenario_builder';
+import { buildTestScenario } from './test_scenario_builder';
 
 const TEST_SEND_AUDIT_ACTION = 'alerting_v2_action_policy_test_send';
 
@@ -91,19 +91,10 @@ export class ActionPolicyTestService {
       this.actionPolicyClient.getActionPolicy({ id: policyId }),
       this.privilegeChecker.canRunWorkflows(),
     ]);
-    const scenario = this.buildScenario(policy, seed);
+    const groups = this.buildScenario(policy, seed);
     const destinations = await this.describeDestinations(policy, canRunWorkflows);
 
-    if (scenario.status === 'unsupported') {
-      return { status: 'unsupported', reason: scenario.reason, destinations };
-    }
-
-    return {
-      status: 'ok',
-      seed,
-      groups: scenario.groups.map((payload) => ({ ...payload })),
-      destinations,
-    };
+    return { seed, groups: groups.map((payload) => ({ ...payload })), destinations };
   }
 
   public async send({
@@ -127,18 +118,7 @@ export class ActionPolicyTestService {
       );
     }
 
-    const scenario = this.buildScenario(policy, seed);
-    if (scenario.status === 'unsupported') {
-      throw Boom.badRequest(
-        `A test notification cannot be sent for action policy [${policyId}] because its matcher has a KQL expression`,
-        {
-          code: ALERTING_ERROR_CODES.ACTION_POLICY_TEST_NOT_SUPPORTED,
-          details: { action_policy_id: policyId, reason: scenario.reason },
-        }
-      );
-    }
-
-    const [payload] = scenario.groups;
+    const [payload] = this.buildScenario(policy, seed);
     const results = await Promise.all(
       workflowIds.map((workflowId) => this.runWorkflowTest(policyId, workflowId, payload))
     );
@@ -148,7 +128,7 @@ export class ActionPolicyTestService {
     return { results };
   }
 
-  private buildScenario(policy: ActionPolicyResponse, seed: number): TestScenario {
+  private buildScenario(policy: ActionPolicyResponse, seed: number): ActionPolicyWorkflowPayload[] {
     return buildTestScenario({
       policy: this.toDispatcherPolicy(policy),
       kibanaBaseUrl: this.kibanaBaseUrl,

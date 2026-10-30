@@ -30,16 +30,16 @@ export const REAL_CHANNELS_TEXT = i18n.translate(
   }
 );
 
-export const UNSUPPORTED_MATCHER_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.unsupportedMatcher.title',
-  { defaultMessage: 'Policies with a matching query are not supported yet' }
+export const KQL_MATCHER_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.kqlMatcher.title',
+  { defaultMessage: 'Alert values may not match this policy' }
 );
 
-export const UNSUPPORTED_MATCHER_TEXT = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.unsupportedMatcher.text',
+export const KQL_MATCHER_TEXT = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.kqlMatcher.text',
   {
     defaultMessage:
-      'Synthetic alerts that satisfy the matching query of this policy cannot be generated yet, so no test notification can be sent.',
+      "The test alerts are not generated to satisfy this policy's matching query, so their values can differ from the alerts it receives in production.",
   }
 );
 

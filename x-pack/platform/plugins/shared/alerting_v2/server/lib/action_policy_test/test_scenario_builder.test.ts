@@ -39,13 +39,8 @@ const buildParams = (policy: ActionPolicy, seed = SEED) => ({
   now: NOW,
 });
 
-const buildGroups = (policy: ActionPolicy, seed = SEED): ActionPolicyWorkflowPayload[] => {
-  const scenario = buildTestScenario(buildParams(policy, seed));
-  if (scenario.status !== 'ok') {
-    throw new Error(`expected a scenario, got ${scenario.status}`);
-  }
-  return scenario.groups;
-};
+const buildGroups = (policy: ActionPolicy, seed = SEED): ActionPolicyWorkflowPayload[] =>
+  buildTestScenario(buildParams(policy, seed));
 
 /** Groups the synthetic alerts the way the dispatcher pipeline does: match, then group. */
 const groupWithDispatcher = async (policy: ActionPolicy, seed = SEED) => {
@@ -194,20 +189,12 @@ describe('buildTestScenario', () => {
     });
   });
 
-  it('does not support a policy whose matcher has a KQL expression', () => {
+  it('builds a group for a policy whose matcher has a KQL expression, without applying it', () => {
     expect(
-      buildTestScenario(
-        buildParams(
-          createActionPolicy({ matcher: { tags: ['prod'], expression: 'severity: critical' } })
-        )
+      buildGroups(
+        createActionPolicy({ matcher: { tags: ['prod'], expression: 'severity: critical' } })
       )
-    ).toEqual({ status: 'unsupported', reason: 'matcher_expression' });
-  });
-
-  it('supports a policy whose matcher expression is blank', () => {
-    expect(
-      buildTestScenario(buildParams(createActionPolicy({ matcher: { expression: '   ' } }))).status
-    ).toBe('ok');
+    ).toHaveLength(1);
   });
 });
 

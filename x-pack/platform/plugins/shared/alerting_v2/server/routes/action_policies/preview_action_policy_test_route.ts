@@ -50,7 +50,8 @@ export class PreviewActionPolicyTestRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => actionPolicyTestPreviewResponseSchema,
-        description: 'Returns the synthetic action groups, or why none can be built.',
+        description:
+          'Returns the synthetic workflow payloads, one per action group, and the destinations.',
       },
       400: {
         body: () => errorResponseSchema,
