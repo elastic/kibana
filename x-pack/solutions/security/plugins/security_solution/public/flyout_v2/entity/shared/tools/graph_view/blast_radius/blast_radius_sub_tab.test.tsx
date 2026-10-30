@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { RunGraphTraversalResponse } from '@kbn/entity-store/common';
 import { TestProviders } from '../../../../../../common/mock';
 import { BlastRadiusSubTab } from './blast_radius_sub_tab';
 import { useRunBlastRadius } from './use_run_blast_radius';
 import {
   BLAST_RADIUS_CLEAR_EXCLUSIONS_TEST_ID,
+  BLAST_RADIUS_ENGINE_TEST_ID,
   BLAST_RADIUS_ERROR_TEST_ID,
   BLAST_RADIUS_EXCLUSION_BADGE_TEST_ID,
   BLAST_RADIUS_EXCLUSIONS_TEST_ID,
@@ -112,7 +113,7 @@ describe('BlastRadiusSubTab', () => {
     expect(mockUseRunBlastRadius).toHaveBeenCalledWith({ entityId: SEED });
     fireEvent.click(screen.getByTestId(BLAST_RADIUS_RUN_BUTTON_TEST_ID));
     expect(mutation.mutate).toHaveBeenCalledTimes(1);
-    expect(mutation.mutate).toHaveBeenCalledWith({ exclusions: [] });
+    expect(mutation.mutate).toHaveBeenCalledWith({ exclusions: [], engine: 'workflow' });
     expect(screen.queryByTestId(BLAST_RADIUS_EXCLUSIONS_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -126,6 +127,7 @@ describe('BlastRadiusSubTab', () => {
     fireEvent.click(screen.getByTestId(`mockExclude-${role}`));
     expect(mutation.mutate).toHaveBeenLastCalledWith({
       exclusions: [{ field: 'entity.id', values: [role] }],
+      engine: 'workflow',
     });
     const badge = screen.getByTestId(BLAST_RADIUS_EXCLUSION_BADGE_TEST_ID);
     expect(badge).toHaveTextContent('okta-prod-admin');
@@ -134,10 +136,11 @@ describe('BlastRadiusSubTab', () => {
     fireEvent.click(screen.getByTestId(BLAST_RADIUS_RUN_BUTTON_TEST_ID));
     expect(mutation.mutate).toHaveBeenLastCalledWith({
       exclusions: [{ field: 'entity.id', values: [role] }],
+      engine: 'workflow',
     });
 
     fireEvent.click(badge.querySelector('button') as Element);
-    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [] });
+    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [], engine: 'workflow' });
     expect(screen.queryByTestId(BLAST_RADIUS_EXCLUSIONS_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -149,7 +152,42 @@ describe('BlastRadiusSubTab', () => {
     fireEvent.click(screen.getByTestId('mockExclude-arn:aws:iam::1:role/okta-prod-admin'));
     fireEvent.click(screen.getByTestId(BLAST_RADIUS_CLEAR_EXCLUSIONS_TEST_ID));
 
-    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [] });
+    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [], engine: 'workflow' });
+  });
+
+  it('runs through ES|QL once that engine is selected', () => {
+    const mutation = mockMutation({});
+    mockUseRunBlastRadius.mockReturnValue(mutation);
+
+    renderTab();
+
+    fireEvent.click(
+      within(screen.getByTestId(BLAST_RADIUS_ENGINE_TEST_ID)).getByRole('button', {
+        name: 'ES|QL',
+      })
+    );
+    fireEvent.click(screen.getByTestId(BLAST_RADIUS_RUN_BUTTON_TEST_ID));
+    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [], engine: 'esql' });
+  });
+
+  it('says in the summary when ES|QL produced the result', () => {
+    mockUseRunBlastRadius.mockReturnValue(
+      mockMutation({ data: { ...completed, execution_id: 'esql', engine: 'esql' } })
+    );
+
+    renderTab();
+
+    expect(screen.getByTestId(BLAST_RADIUS_SUMMARY_TEST_ID)).toHaveTextContent(
+      'Ran as one ES|QL GRAPH EXPAND statement.'
+    );
+  });
+
+  it('does not mention ES|QL when the workflow produced the result', () => {
+    mockUseRunBlastRadius.mockReturnValue(mockMutation({ data: completed }));
+
+    renderTab();
+
+    expect(screen.getByTestId(BLAST_RADIUS_SUMMARY_TEST_ID)).not.toHaveTextContent('ES|QL');
   });
 
   it('shows a loading state while the workflow runs', () => {

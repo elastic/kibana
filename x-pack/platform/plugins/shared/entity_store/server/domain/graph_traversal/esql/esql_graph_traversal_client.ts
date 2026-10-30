@@ -79,8 +79,10 @@ export class EsqlGraphTraversalClient {
       );
     }
     const statement = buildGraphExpandStatement({ plan, seedId, lookback, exclusions, until });
-    this.logger.debug(
-      `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}:\n${statement.query}`
+    this.logger.info(
+      `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}, issuing:\n${
+        statement.query
+      }\nparams: ${JSON.stringify(statement.params)}`
     );
     const result = await this.execute(statement.query, statement.params);
     const mapped = mapGraphExpandResult(result, statement, plan, seedId);

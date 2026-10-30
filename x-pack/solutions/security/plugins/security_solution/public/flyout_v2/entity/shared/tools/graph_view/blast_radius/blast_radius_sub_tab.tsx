@@ -12,6 +12,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,10 +24,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Graph } from '@kbn/cloud-security-posture-graph';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { GraphTraversalExclusion, GraphTraversalOutput } from '@kbn/entity-store/common';
+import type {
+  GraphTraversalEngine,
+  GraphTraversalExclusion,
+  GraphTraversalOutput,
+} from '@kbn/entity-store/common';
 import { useFlyoutBodyAvailableHeight } from '../../../../../document/tools/graph/hooks/use_flyout_body_available_height';
 import {
   BLAST_RADIUS_CLEAR_EXCLUSIONS_TEST_ID,
+  BLAST_RADIUS_ENGINE_TEST_ID,
   BLAST_RADIUS_ERROR_TEST_ID,
   BLAST_RADIUS_EXCLUSION_BADGE_TEST_ID,
   BLAST_RADIUS_EXCLUSIONS_TEST_ID,
@@ -60,21 +66,50 @@ const REMOVE_EXCLUSION_LABEL = i18n.translate(
   { defaultMessage: 'Remove exclusion' }
 );
 
+const ENGINE_LEGEND = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.blastRadius.engineLegend',
+  { defaultMessage: 'Traversal engine' }
+);
+
+const ENGINE_OPTIONS: Array<{ id: GraphTraversalEngine; label: string }> = [
+  {
+    id: 'workflow',
+    label: i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.blastRadius.engineWorkflow',
+      { defaultMessage: 'Workflow' }
+    ),
+  },
+  {
+    id: 'esql',
+    label: i18n.translate('xpack.securitySolution.flyout.entityDetails.blastRadius.engineEsql', {
+      defaultMessage: 'ES|QL',
+    }),
+  },
+];
+
+const isGraphTraversalEngine = (id: string): id is GraphTraversalEngine =>
+  ENGINE_OPTIONS.some((option) => option.id === id);
+
 /**
- * Runs the entity graph traversal workflow for the entity on demand and renders the traversed
- * nodes and edges as a left-to-right graph. Nodes can be excluded from the traversal, which
- * re-runs it with the exclusion list.
+ * Runs the entity graph traversal for the entity on demand and renders the traversed nodes
+ * and edges as a left-to-right graph. The traversal runs through the managed workflow or as
+ * one ES|QL `GRAPH EXPAND` statement, as selected. Nodes can be excluded from the traversal,
+ * which re-runs it with the exclusion list.
  */
 export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId }) => {
   const { mutate, data, error, isLoading, reset } = useRunBlastRadius({ entityId });
   const [exclusions, setExclusions] = useState<GraphTraversalExclusion[]>([]);
+  const [engine, setEngine] = useState<GraphTraversalEngine>('workflow');
 
+  const selectEngine = useCallback((id: string) => {
+    if (isGraphTraversalEngine(id)) setEngine(id);
+  }, []);
   const runWith = useCallback(
     (next: GraphTraversalExclusion[]) => {
       setExclusions(next);
-      mutate({ exclusions: next });
+      mutate({ exclusions: next, engine });
     },
-    [mutate]
+    [mutate, engine]
   );
   const run = useCallback(() => runWith(exclusions), [runWith, exclusions]);
   const excludeNode = useCallback(
@@ -108,6 +143,36 @@ export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId })
         flex-direction: column;
       `}
     >
+      {!isLoading && (
+        <>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            css={css`
+              flex: 0 0 auto;
+            `}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {ENGINE_LEGEND}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                data-test-subj={BLAST_RADIUS_ENGINE_TEST_ID}
+                legend={ENGINE_LEGEND}
+                buttonSize="compressed"
+                options={ENGINE_OPTIONS}
+                idSelected={engine}
+                onChange={selectEngine}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {!isLoading && exclusions.length > 0 && (
         <>
           <BlastRadiusExclusions
@@ -199,7 +264,7 @@ export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId })
 
       {!isLoading && output && graph && (
         <>
-          <BlastRadiusSummary output={output} onRerun={run} />
+          <BlastRadiusSummary output={output} engine={data?.engine} onRerun={run} />
           <EuiSpacer size="s" />
           <div
             data-test-subj={BLAST_RADIUS_GRAPH_TEST_ID}
@@ -228,10 +293,11 @@ export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId })
 
 BlastRadiusSubTab.displayName = 'BlastRadiusSubTab';
 
-const BlastRadiusSummary: FC<{ output: GraphTraversalOutput; onRerun: () => void }> = ({
-  output,
-  onRerun,
-}) => (
+const BlastRadiusSummary: FC<{
+  output: GraphTraversalOutput;
+  engine?: GraphTraversalEngine;
+  onRerun: () => void;
+}> = ({ output, engine, onRerun }) => (
   <EuiFlexGroup
     data-test-subj={BLAST_RADIUS_SUMMARY_TEST_ID}
     alignItems="center"
@@ -260,6 +326,15 @@ const BlastRadiusSummary: FC<{ output: GraphTraversalOutput; onRerun: () => void
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.blastRadius.truncated"
               defaultMessage="The result was truncated by the traversal limits."
+            />
+          </>
+        )}
+        {engine === 'esql' && (
+          <>
+            {' '}
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.blastRadius.ranWithEsql"
+              defaultMessage="Ran as one ES|QL GRAPH EXPAND statement."
             />
           </>
         )}

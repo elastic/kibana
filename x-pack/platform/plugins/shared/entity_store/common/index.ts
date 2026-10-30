@@ -241,6 +241,7 @@ export {
 } from './graph_traversal';
 export type {
   GraphTraversalEdge,
+  GraphTraversalEngine,
   GraphTraversalEntity,
   GraphTraversalExclusion,
   GraphTraversalStopCondition,

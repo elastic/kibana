@@ -43,6 +43,9 @@ export interface GraphTraversalRoute {
   route: string[];
 }
 
+/** How a traversal runs: the managed workflow, or one ES|QL `GRAPH EXPAND` statement. */
+export type GraphTraversalEngine = 'workflow' | 'esql';
+
 export interface RunGraphTraversalRequestBody {
   /** Entity store id (EUID) of the entity to start from. */
   entity_id: string;
@@ -173,7 +176,7 @@ export interface RunGraphTraversalResponse {
   /** `esql` when the run was one GRAPH EXPAND statement; otherwise the workflow execution id. */
   execution_id: string;
   /** How the traversal ran; absent means the workflow. */
-  engine?: 'workflow' | 'esql';
+  engine?: GraphTraversalEngine;
   /** Terminal workflow execution status: `completed`, `failed`, `cancelled` or `timed_out`. */
   status: string;
   /** Present when the execution completed. */

@@ -12,6 +12,7 @@ import {
   ENTITY_STORE_ROUTES,
 } from '@kbn/entity-store/common';
 import type {
+  GraphTraversalEngine,
   GraphTraversalExclusion,
   RunGraphTraversalRequestBody,
   RunGraphTraversalResponse,
@@ -26,23 +27,25 @@ export interface UseRunBlastRadiusParams {
 
 export interface RunBlastRadiusVariables {
   exclusions: GraphTraversalExclusion[];
+  /** The workflow unless `esql`, which runs the scenario as one ES|QL `GRAPH EXPAND` statement. */
+  engine?: GraphTraversalEngine;
 }
 
 /**
- * Runs the entity graph traversal workflow for the entity and resolves with its output. The
- * request stays open while the workflow runs, so the mutation is loading for the whole
- * traversal.
+ * Runs the entity graph traversal for the entity and resolves with its output. The request
+ * stays open while the traversal runs, so the mutation is loading for the whole traversal.
  */
 export const useRunBlastRadius = ({ entityId, scenarioId }: UseRunBlastRadiusParams) => {
   const { http } = useKibana().services;
   const effectiveScenarioId = scenarioId ?? getDefaultGraphTraversalScenarioId(entityId);
 
   return useMutation<RunGraphTraversalResponse, Error, RunBlastRadiusVariables>({
-    mutationFn: ({ exclusions }) => {
+    mutationFn: ({ exclusions, engine }) => {
       const body: RunGraphTraversalRequestBody = {
         entity_id: entityId,
         scenario_id: effectiveScenarioId,
         ...(exclusions.length > 0 && { exclusions }),
+        ...(engine === 'esql' && { esql: true }),
       };
       return http.fetch<RunGraphTraversalResponse>(
         ENTITY_STORE_ROUTES.internal.GRAPH_TRAVERSAL_RUN,
