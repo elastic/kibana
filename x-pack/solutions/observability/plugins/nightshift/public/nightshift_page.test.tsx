@@ -17,9 +17,9 @@ import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { NightshiftPage } from './nightshift_page';
 import { Router } from '@kbn/shared-ux-router';
 import { useKibana } from './hooks/use_kibana';
-import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
-import type { NightshiftAppHeaderProps } from './app/app_header';
+import type { NightshiftAppHeaderProps } from './components/app_header';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
 jest.mock('@elastic/eui', () => ({
@@ -37,7 +37,7 @@ jest.mock('./onboarding/onboarding', () => ({
 }));
 jest.mock('./onboarding/use_onboarding_visibility');
 jest.mock('./knowledge/page', () => {
-  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  const { NightshiftAppHeader } = jest.requireActual('./components/app_header');
   return {
     KnowledgePage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
       <>
@@ -48,7 +48,7 @@ jest.mock('./knowledge/page', () => {
   };
 });
 jest.mock('./sources/page', () => {
-  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  const { NightshiftAppHeader } = jest.requireActual('./components/app_header');
   return {
     SourcesPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
       <>
@@ -59,7 +59,7 @@ jest.mock('./sources/page', () => {
   };
 });
 jest.mock('./pages/detection/page', () => {
-  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  const { NightshiftAppHeader } = jest.requireActual('./components/app_header');
   return {
     DetectionPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
       <>
@@ -98,7 +98,12 @@ jest.mock('./hooks/use_developer_mode', () => ({
     setDeveloperMode: jest.fn(),
   }),
 }));
-jest.mock('./hooks/use_significant_events_availability');
+jest.mock('./data/availability/use_significant_events_availability');
+let mockServiceAccount: { isLoading: boolean; isSuccess: boolean; data?: Record<string, unknown> };
+jest.mock('./service_account/use_investigator_service_account', () => ({
+  ...jest.requireActual('./service_account/use_investigator_service_account'),
+  useInvestigatorServiceAccount: () => mockServiceAccount,
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
@@ -130,6 +135,11 @@ describe('NightshiftPage', () => {
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
     featureFlags.useBooleanValue.mockReturnValue(true);
+    mockServiceAccount = {
+      isLoading: false,
+      isSuccess: true,
+      data: { installed: true, enabled: true, bound: true, serviceAccountsEnabled: true },
+    };
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseOnboardingVisibility.mockReturnValue({
       isLoading: false,
@@ -159,6 +169,47 @@ describe('NightshiftPage', () => {
           },
         },
       },
+    });
+  });
+
+  describe('service account setup', () => {
+    const withInvestigations = () => {
+      const { services } = mockUseKibana();
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...services,
+          nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } },
+        },
+      });
+    };
+
+    it('shows the setup step instead of the app until the space is set up', () => {
+      withInvestigations();
+      mockServiceAccount = {
+        isLoading: false,
+        isSuccess: true,
+        data: { installed: false, enabled: null, serviceAccountsEnabled: true },
+      };
+      renderPage();
+
+      expect(screen.getByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+    });
+
+    it('shows the app once the space is set up', () => {
+      withInvestigations();
+      renderPage();
+
+      expect(screen.queryByTestId('nightshiftOnboardingStub')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+    });
+
+    it('does not block the app when the setup status cannot be read', () => {
+      withInvestigations();
+      mockServiceAccount = { isLoading: false, isSuccess: false };
+      renderPage();
+
+      expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
     });
   });
 

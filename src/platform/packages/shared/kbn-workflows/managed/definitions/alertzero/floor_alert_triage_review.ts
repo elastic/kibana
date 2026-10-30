@@ -23,10 +23,10 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID =
  * a decision per rule is `settings.concurrency.max` in the YAML.
  */
 export const ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 10,
+  version: 12,
   yaml: FLOOR_ALERT_TRIAGE_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
