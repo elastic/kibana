@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { TopologySnapshotProperties } from '@kbn/significant-events-schema';
 import { createServerRoute } from '../../create_server_route';
@@ -30,15 +30,17 @@ const getTopologyRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    query: z
-      .object({
-        sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
-          'Source ids to build the topology from'
-        ),
-      })
-      .optional(),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+            'Source ids to build the topology from'
+          ),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,
