@@ -995,11 +995,22 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       // Update profile only if it's available for the current user.
       if (values.data) {
+        // Leave an unchanged locale out of the payload. partialUpdate posts this
+        // object as the request body, and the route rejects a locale that is no
+        // longer enabled.
+        const { locale, ...userSettingsWithoutLocale } = values.data.userSettings;
+        const profileData = {
+          ...values.data,
+          userSettings:
+            locale !== initialValues.data?.userSettings.locale
+              ? values.data.userSettings
+              : userSettingsWithoutLocale,
+        };
         submitActions.push(
           update(
             values.avatarType === 'image'
-              ? values.data
-              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
+              ? profileData
+              : { ...profileData, avatar: { ...profileData.avatar, imageUrl: null } }
           )
         );
       }

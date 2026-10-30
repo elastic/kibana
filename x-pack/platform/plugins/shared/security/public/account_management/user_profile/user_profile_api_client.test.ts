@@ -84,6 +84,38 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
+  it('posts only the partial payload and keeps other cached fields in memory', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+
+    await apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } });
+
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
+      body: JSON.stringify({ userSettings: { darkMode: 'dark' } }),
+    });
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'dark' },
+    });
+  });
+
+  it('reverts the in-memory profile when a partial update fails', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+    coreStart.http.post.mockRejectedValueOnce(new Error('nope'));
+
+    await expect(apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } })).rejects.toThrow(
+      'nope'
+    );
+
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'light' },
+    });
+  });
+
   it('should get user profiles in bulk', async () => {
     await apiClient.bulkGet({ uids: new Set(['UID-1', 'UID-2']), dataPath: '*' });
     expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_bulk_get', {

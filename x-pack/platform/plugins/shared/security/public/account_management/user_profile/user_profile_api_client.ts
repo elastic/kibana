@@ -143,33 +143,38 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   /**
-   * Updates user profile data of the current user.
-   * @param data Application data to be written (merged with existing data).
+   * Replaces the in-memory profile with `data` and posts that same object.
    */
   public update<D extends UserProfileData>(data: D) {
-    // Optimistic update the user profile Observable.
-    const previous = this._userProfile$.getValue();
-    this._userProfile$.next(data);
-
-    return this.http
-      .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
-      .then(() => {
-        this._cache.clear();
-        this.internalDataUpdates$.next(data);
-      })
-      .catch((err) => {
-        // Revert the user profile data to the previous state.
-        this._userProfile$.next(previous);
-        return Promise.reject(err);
-      });
+    return this.postProfileData(data, data);
   }
 
   /**
-   * Updates user profile data of the current user.
-   * @param data Application data to be written (merged with existing data).
+   * Merges `data` into the in-memory profile and posts only `data`.
+   *
+   * The profile data API merges the body into the stored document, so a field
+   * left out of `data` stays stored and is not re-validated. Posting the merged
+   * cache would send those untouched fields back through that validation.
+   * @param data Fields to merge into the stored profile.
    */
   public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
     const updated = merge({}, this._userProfile$.getValue(), data);
-    return this.update(updated);
+    return this.postProfileData(updated, data);
+  }
+
+  private postProfileData(optimistic: UserProfileData, body: Partial<UserProfileData>) {
+    const previous = this._userProfile$.getValue();
+    this._userProfile$.next(optimistic);
+
+    return this.http
+      .post('/internal/security/user_profile/_data', { body: JSON.stringify(body) })
+      .then(() => {
+        this._cache.clear();
+        this.internalDataUpdates$.next(optimistic);
+      })
+      .catch((err) => {
+        this._userProfile$.next(previous);
+        return Promise.reject(err);
+      });
   }
 }
