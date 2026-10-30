@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimeWindowType } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import {
   BUDGETING_METHOD_OPTIONS,
   CALENDARALIGNED_TIMEWINDOW_OPTIONS,
@@ -37,19 +37,19 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 export function SloEditFormObjectiveSection() {
   const {
     control,
-    watch,
     getFieldState,
     setValue,
     formState: { defaultValues },
   } = useFormContext<CreateSLOForm>();
+  const formState = useFormState({ control, name: 'objective.target' });
   const { isServerless } = usePluginContext();
 
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowTypeSelect = useGeneratedHtmlId({ prefix: 'timeWindowTypeSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
-  const timeWindowType = watch('timeWindow.type');
-  const indicator = watch('indicator.type');
-  const budgetingMethod = watch('budgetingMethod');
+  const timeWindowType = useWatch({ control, name: 'timeWindow.type' });
+  const indicator = useWatch({ control, name: 'indicator.type' });
+  const budgetingMethod = useWatch({ control, name: 'budgetingMethod' });
 
   const [timeWindowTypeState, setTimeWindowTypeState] = useState<TimeWindowType | undefined>(
     defaultValues?.timeWindow?.type
@@ -268,7 +268,7 @@ export function SloEditFormObjectiveSection() {
         <EuiFlexGrid columns={3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
-              isInvalid={getFieldState('objective.target').invalid}
+              isInvalid={getFieldState('objective.target', formState).invalid}
               label={
                 <span>
                   {i18n.translate('xpack.slo.sloEdit.targetSlo.label', {
