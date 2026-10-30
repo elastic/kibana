@@ -21,6 +21,7 @@ const STATEFUL_ALERTS_INDEX_PATTERN = '.internal.alerts-stack.alerts-*';
 const INDEX_THRESHOLD_RULE_TYPE_ID = '.index-threshold';
 const FILTER_FIELD = 'kibana.alert.action_group';
 const FILTER_VALUES = ['value-one', 'value-two', 'value-three'];
+const ALERTS_FIELDS_LOAD_TIMEOUT = 30_000;
 
 interface BrowserFieldsResponse {
   fields: Array<{ name: string }>;
@@ -174,14 +175,11 @@ test.describe('Rule action alerts filter', { tag: tags.stateful.classic }, () =>
     await defineIndexThresholdRule(page, ruleName);
     await selectConnectorInRuleAction(page, connectorName);
 
-    const browserFieldsResponse = page.waitForResponse(
-      (response) =>
-        response.url().includes('/internal/rac/alerts/browser_fields') && response.status() === 200
-    );
     await page.testSubj.locator('alertsFilterQueryToggle').scrollIntoViewIfNeeded();
     await page.testSubj.click('alertsFilterQueryToggle');
-    await browserFieldsResponse;
-    await expect(page.testSubj.locator('addFilter')).toBeVisible();
+    await expect(page.testSubj.locator('addFilter')).toBeVisible({
+      timeout: ALERTS_FIELDS_LOAD_TIMEOUT,
+    });
 
     await pageObjects.filterBar.openFilterBuilder();
     await page.testSubj.click('filterFieldSuggestionList');
@@ -231,6 +229,9 @@ test.describe('Rule action alerts filter', { tag: tags.stateful.classic }, () =>
 
     await page.testSubj.locator('alertsFilterQueryToggle').scrollIntoViewIfNeeded();
     await expect(page.testSubj.locator('alertsFilterQueryToggle')).toBeChecked();
+    await expect(page.testSubj.locator('addFilter')).toBeVisible({
+      timeout: ALERTS_FIELDS_LOAD_TIMEOUT,
+    });
 
     const filterLabels = await pageObjects.filterBar.getFiltersLabel();
     const filterLabel = filterLabels.find((label) => label.includes(FILTER_FIELD));
