@@ -71,6 +71,7 @@ const setup = ({
   const get = jest.fn().mockResolvedValue({ id: 'inv-1', agent_id: 'investigator', rounds });
   const getScopedClient = jest.fn().mockResolvedValue({ get });
   const reportOnlineEvalScore = jest.fn();
+  const reportOnlineEvalsStepFailed = jest.fn();
   const logger = { warn: jest.fn() };
   const definition = scoreOnlineEvalsRoundStepDefinition({
     getAgentBuilder: () =>
@@ -78,7 +79,10 @@ const setup = ({
     getEvaluate: () => (evalsAvailable ? evaluate : undefined),
     isPaused: () => paused,
     shouldIncludeExplanations: () => includeExplanations,
-    telemetry: { reportOnlineEvalScore } as unknown as NightshiftTelemetryClient,
+    telemetry: {
+      reportOnlineEvalScore,
+      reportOnlineEvalsStepFailed,
+    } as unknown as NightshiftTelemetryClient,
   });
   const run = (input: Record<string, unknown> = {}) =>
     definition.handler({
@@ -93,7 +97,15 @@ const setup = ({
       },
     } as never);
 
-  return { run, evaluate, get, getScopedClient, reportOnlineEvalScore, logger };
+  return {
+    run,
+    evaluate,
+    get,
+    getScopedClient,
+    reportOnlineEvalScore,
+    reportOnlineEvalsStepFailed,
+    logger,
+  };
 };
 
 describe('scoreOnlineEvalsRoundStepDefinition', () => {
@@ -249,12 +261,21 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();
   });
 
-  it('rejects more evaluators than one evaluation runs in parallel', async () => {
-    const { run, reportOnlineEvalScore } = setup();
+  it('reports invalid input, such as more evaluators than one evaluation runs, without failing the step', async () => {
+    const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup();
 
     await expect(
       run({ evaluators: ['a', 'b', 'c', 'd', 'e'].map((name) => ({ name })) })
-    ).rejects.toThrow();
+    ).resolves.toEqual({ output: { scored: false, skip_reason: 'scoring_failed' } });
+    expect(evaluate).not.toHaveBeenCalled();
     expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith({
+      step: 'score',
+      code: 'invalid_input',
+      investigation_id: 'inv-1',
+      round_id: 'round-1',
+      workflow_execution_id: 'scoring-exec-1',
+      space_id: 'ops',
+    });
   });
 });

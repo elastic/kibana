@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { NightshiftTelemetryClient } from '../telemetry';
 import { classifyOnlineEvalsRoundStepDefinition } from './classify_online_evals_round';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -21,7 +22,14 @@ const request = {} as KibanaRequest;
 const createContext = (input: Record<string, unknown>) =>
   ({
     input,
-    contextManager: { getFakeRequest: jest.fn().mockReturnValue(request) },
+    logger: { warn: jest.fn() },
+    contextManager: {
+      getFakeRequest: jest.fn().mockReturnValue(request),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { spaceId: 'ops' },
+        execution: { id: 'investigation-exec-1' },
+      }),
+    },
   } as never);
 
 const setup = ({
@@ -36,11 +44,13 @@ const setup = ({
   const get = jest.fn().mockResolvedValue({ id: 'inv-1', rounds });
   const getScopedClient = jest.fn().mockResolvedValue({ get });
   const isPaused = jest.fn().mockReturnValue(paused);
+  const reportOnlineEvalsStepFailed = jest.fn();
   const definition = classifyOnlineEvalsRoundStepDefinition({
     getAgentBuilder: () =>
       ({ conversations: { getScopedClient } } as unknown as AgentBuilderPluginStart),
     isEvalsAvailable: () => evalsAvailable,
     isPaused,
+    telemetry: { reportOnlineEvalsStepFailed } as unknown as NightshiftTelemetryClient,
   });
   const run = (input: Record<string, unknown> = {}) =>
     definition.handler(
@@ -51,7 +61,7 @@ const setup = ({
       })
     );
 
-  return { run, get, getScopedClient, isPaused };
+  return { run, get, getScopedClient, isPaused, reportOnlineEvalsStepFailed };
 };
 
 describe('classifyOnlineEvalsRoundStepDefinition', () => {
@@ -132,17 +142,31 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
     });
   });
 
-  it('fails the step when the investigation cannot be read, so the run records the error', async () => {
-    const { run, get } = setup();
-    get.mockRejectedValue(new Error('Conversation not found'));
+  it('reports a failure to read the investigation and skips the round, without failing the investigation', async () => {
+    const { run, get, reportOnlineEvalsStepFailed } = setup();
+    get.mockRejectedValue(new Error('Conversation inv-1 not found'));
 
-    await expect(run()).rejects.toThrow('Conversation not found');
+    await expect(run()).resolves.toEqual({
+      output: { should_score: false, skip_reason: 'classification_failed' },
+    });
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith({
+      step: 'classify_round',
+      code: 'investigation_unavailable',
+      investigation_id: 'inv-1',
+      workflow_execution_id: 'investigation-exec-1',
+      space_id: 'ops',
+    });
   });
 
-  it('rejects a run start time that is not a date', async () => {
-    const { run, getScopedClient } = setup();
+  it('reports invalid input and skips the round, without reading the investigation', async () => {
+    const { run, getScopedClient, reportOnlineEvalsStepFailed } = setup();
 
-    await expect(run({ investigation_started_at: 'yesterday' })).rejects.toThrow();
+    await expect(run({ investigation_started_at: 'yesterday' })).resolves.toEqual({
+      output: { should_score: false, skip_reason: 'classification_failed' },
+    });
     expect(getScopedClient).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'classify_round', code: 'invalid_input' })
+    );
   });
 });
