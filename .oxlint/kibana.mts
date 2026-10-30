@@ -194,4 +194,69 @@ export const kibanaOverrides: OxlintOverride[] = [
       '@kbn/eslint/no_export_all': 'error',
     },
   },
+  {
+    // Browser-only UI libraries must not load in the Kibana server process: a
+    // single value import of the @elastic/eui barrel pulls 1,100+ modules of
+    // React components into Node.js. Type-only imports are allowed (erased at
+    // runtime); pure color/token values are available from
+    // @elastic/eui-theme-common and @elastic/eui-theme-borealis.
+    files: [
+      'src/**/server/**/*.{ts,tsx}',
+      'x-pack/**/server/**/*.{ts,tsx}',
+      'packages/**/server/**/*.{ts,tsx}',
+      'examples/**/server/**/*.{ts,tsx}',
+    ],
+    excludeFiles: [
+      '**/*.{test,spec,stories}.{ts,tsx}',
+      '**/test/**',
+      '**/tests/**',
+      '**/integration_tests/**',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/__fixtures__/**',
+      '**/mocks/**',
+      '**/test_helpers/**',
+      '**/scripts/**',
+    ],
+    rules: {
+      '@kbn/eslint/no_browser_imports_in_server': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@elastic/eui',
+                '@elastic/eui/**',
+                'react',
+                'react-dom',
+                'react-dom/**',
+                'react-intl',
+                'react-use',
+                'react-use/**',
+                'react-redux',
+                'redux',
+                '@reduxjs/toolkit',
+                '@reduxjs/toolkit/**',
+                '@emotion/react',
+                '@emotion/css',
+                '@emotion/styled',
+                'refractor',
+                'refractor/**',
+                'prismjs',
+                'prismjs/**',
+                '@elastic/apm-rum',
+                '@elastic/apm-rum-core',
+                '@kbn/i18n-react',
+              ],
+              allowTypeImports: true,
+              message:
+                'Browser-only UI libraries must not load in the Kibana server process. ' +
+                'Use type-only imports, pure modules (e.g. @elastic/eui-theme-common for color palettes), ' +
+                'or move the UI code to public/.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
