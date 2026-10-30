@@ -81,6 +81,7 @@ triggers:
         description: "Max excluded features sent in LLM prompt during features identification."
       - name: featuresMaxEntityFilters
         type: number
+        default: 10
         description: "Max entity filters applied during features identification sampling."
       - name: featuresMaxPreviouslyIdentified
         type: number
