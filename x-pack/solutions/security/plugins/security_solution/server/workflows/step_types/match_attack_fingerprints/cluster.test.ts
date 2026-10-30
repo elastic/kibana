@@ -487,10 +487,46 @@ describe('disposition', () => {
     expect(disposition(canonical, undefined, undefined).kind).toBe('review');
   });
 
-  it('returns attach for a closed false positive that still shares alerts', () => {
-    expect(
-      disposition(canonical, stored(), { status: 'closed', closeReason: 'false_positive' }).kind
-    ).toBe('attach');
+  it('reviews a closed false positive instead of attaching', () => {
+    const decision = disposition(canonical, stored(), {
+      status: 'closed',
+      closeReason: 'false_positive',
+    });
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('false_positive');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
+  });
+
+  it('reviews a closed false positive continuation that brings unjudged alerts', () => {
+    const decision = disposition(
+      attack({ alertIds: ['a1', 'a2', 'a3', 'a4'] }),
+      stored({
+        alertIds: ['a1', 'a2', 'already-stored'],
+        analyzedAlertIds: ['a1', 'a2'],
+        investigationId: 'closed-fp',
+      }),
+      { status: 'closed', closeReason: 'false_positive' }
+    );
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedInvestigationId).toBe('closed-fp');
+    expect(decision.relatedLinkReason).toBe('false_positive');
+    expect(decision.tagFpChainAlerts).toBe(false);
+    expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
+  });
+
+  it('reviews a closed false positive continuation whose alerts were all judged', () => {
+    const decision = disposition(
+      attack({ alertIds: ['a1', 'a2'] }),
+      stored({ alertIds: ['a1', 'a2', 'a3'], analyzedAlertIds: ['a1', 'a2', 'a3'] }),
+      { status: 'closed', closeReason: 'false_positive' }
+    );
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('false_positive');
+    expect(decision.tagFpChainAlerts).toBe(false);
   });
 
   it('returns review_linked for a closed false positive with no shared alerts', () => {
@@ -501,6 +537,7 @@ describe('disposition', () => {
     );
 
     expect(decision.kind).toBe('review_linked');
+    expect(decision.tagFpChainAlerts).toBe(false);
   });
 
   it('names a closed false positive as the link reason', () => {
@@ -551,10 +588,12 @@ describe('disposition', () => {
     expect(decision.kind).toBe('attach');
   });
 
-  it('returns a new review when the matched Investigation cannot be read', () => {
+  it('retargets when the matched Investigation cannot be read and the fingerprint has no clock', () => {
     const decision = disposition(canonical, stored(), undefined);
 
-    expect(decision.kind).toBe('review');
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('investigation_missing');
+    expect(decision.retargetFingerprint).toBe(true);
     expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
   });
 
@@ -571,25 +610,91 @@ describe('disposition', () => {
     expect(decision.kind).toBe('attach');
     expect(decision.investigationId).toBe('11111111-1111-8111-8111-111111111111');
     expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
   });
 
-  it('returns a new review when the unread Investigation is no longer pending', () => {
+  it('retargets a fingerprint whose Investigation is missing and already older than 15 minutes', () => {
     const now = new Date('2026-10-21T12:00:00.000Z');
     const decision = disposition(
       canonical,
-      stored({ writtenAt: '2026-10-21T10:00:00.000Z' }),
+      stored({ writtenAt: '2026-10-21T10:00:00.000Z', investigationId: 'missing-a' }),
       undefined,
       [canonical],
       now
     );
 
-    expect(decision.kind).toBe('review');
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('investigation_missing');
+    expect(decision.relatedInvestigationId).toBe('missing-a');
+    expect(decision.retargetFingerprint).toBe(true);
+    expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
   });
 
-  it('returns attach and tags an open in-analysis investigation', () => {
+  it('does not retarget a fingerprint whose Investigation could not be read', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const decision = disposition(
+      canonical,
+      stored({ writtenAt: '2026-10-21T10:00:00.000Z', investigationId: 'live-inv' }),
+      { unreadable: true },
+      [canonical],
+      now
+    );
+
+    expect(decision.kind).toBe('review');
+    expect(decision.retargetFingerprint).toBeUndefined();
+    expect(decision.relatedInvestigationId).toBe('');
+    expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
+  });
+
+  it('returns attach and leaves an open in-analysis investigation untagged', () => {
     const decision = disposition(canonical, stored(), { status: 'open', verdict: 'In analysis' });
 
-    expect(decision.tagCorrelatedAlerts).toBe(true);
+    expect(decision.kind).toBe('attach');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
+    expect(decision.journalAlertsRetired).toBe(false);
+  });
+
+  it('reviews a failed gate the same way as a failed analysis', () => {
+    const decision = disposition(canonical, stored({ investigationId: 'failed-gate' }), {
+      status: 'open',
+      verdict:
+        'The escalation gate failed. GATE FAILED, so no lifecycle action was taken and the Investigation is left open.',
+    });
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedInvestigationId).toBe('failed-gate');
+    expect(decision.relatedLinkReason).toBe('analysis_failed');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
+  });
+
+  it('reviews a failed analysis on its own', () => {
+    const decision = disposition(canonical, stored({ investigationId: 'failed-analysis' }), {
+      status: 'open',
+      verdict:
+        'FP/TP analysis failed for this attack after its retries were exhausted. NO CLASSIFICATION was produced.',
+    });
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedInvestigationId).toBe('failed-analysis');
+    expect(decision.relatedLinkReason).toBe('analysis_failed');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
+  });
+
+  it('reviews an expired proposal on its own', () => {
+    const decision = disposition(canonical, stored({ investigationId: 'expired-proposal' }), {
+      status: 'open',
+      verdict:
+        'The escalation proposal expired with no decision. The Investigation and the Attack Discovery are both left open.',
+    });
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedInvestigationId).toBe('expired-proposal');
+    expect(decision.relatedLinkReason).toBe('proposal_expired');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
   });
 
   it('returns attach and tags a handed-off investigation', () => {
@@ -610,10 +715,17 @@ describe('disposition', () => {
     expect(decision.journalAlertsRetired).toBe(true);
   });
 
-  it('returns attach and tags a declined close', () => {
-    const decision = disposition(canonical, stored(), { status: 'closed', closeReason: 'other' });
+  it('reviews a declined close on its own', () => {
+    const decision = disposition(canonical, stored({ investigationId: 'declined' }), {
+      status: 'closed',
+      closeReason: 'other',
+    });
 
-    expect(decision.tagCorrelatedAlerts).toBe(true);
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedInvestigationId).toBe('declined');
+    expect(decision.relatedLinkReason).toBe('closed');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
   });
 
   it('returns no retirement journal for a declined close', () => {
@@ -623,13 +735,17 @@ describe('disposition', () => {
       verdict: 'Escalation declined by an analyst',
     });
 
+    expect(decision.kind).toBe('review_linked');
     expect(decision.journalAlertsRetired).toBe(false);
   });
 
-  it('returns attach and tags a close that has no close reason', () => {
+  it('reviews a close that has no close reason', () => {
     const decision = disposition(canonical, stored(), { status: 'closed' });
 
-    expect(decision.tagCorrelatedAlerts).toBe(true);
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('closed');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
   });
 
   it('reviews a later attack that shares only SYSTEM on the same host', () => {
@@ -855,13 +971,17 @@ describe('disposition', () => {
     expect(decision.kind).toBe('review');
   });
 
-  it('returns attach and does not tag a false-positive close', () => {
+  it('reviews a false-positive close instead of tagging an fp chain', () => {
     const decision = disposition(canonical, stored(), {
       status: 'closed',
       closeReason: 'false_positive',
     });
 
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('false_positive');
     expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.tagFpChainAlerts).toBe(false);
+    expect(decision.journalAlertsRetired).toBe(false);
   });
 });
 
@@ -878,6 +998,119 @@ describe('bestStoredFingerprint', () => {
     expect(
       bestStoredFingerprint(attack({ alertIds: ['a1', 'a2', 'a3', 'a4'] }), [loser, winner])?.id
     ).toBe('more');
+  });
+
+  it('prefers a fingerprint you can still join over a closed one with more overlap', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const closed = stored({
+      id: 'closed-fp',
+      investigationId: 'closed-inv',
+      alertIds: ['a1', 'a2', 'a3', 'a4'],
+    });
+    const open = stored({
+      id: 'open-fp',
+      investigationId: 'open-inv',
+      alertIds: ['a1', 'a2'],
+    });
+    const investigations = new Map([
+      ['closed-inv', { status: 'closed', closeReason: 'false_positive' }],
+      ['open-inv', { status: 'open', verdict: 'In analysis' }],
+    ]);
+
+    expect(
+      bestStoredFingerprint(
+        attack({ alertIds: ['a1', 'a2', 'a3', 'a4'] }),
+        [closed, open],
+        investigations,
+        now
+      )?.id
+    ).toBe('open-fp');
+  });
+
+  it('prefers an open fingerprint over one whose Investigation could not be read', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const unread = stored({
+      id: 'unread-fp',
+      investigationId: 'unread-inv',
+      alertIds: ['a1', 'a2', 'a3', 'a4'],
+      writtenAt: '2026-10-21T10:00:00.000Z',
+    });
+    const open = stored({
+      id: 'open-fp',
+      investigationId: 'open-inv',
+      alertIds: ['a1', 'a2'],
+      writtenAt: '2026-10-21T11:00:00.000Z',
+    });
+    const investigations = new Map([
+      ['unread-inv', { unreadable: true }],
+      ['open-inv', { status: 'open', verdict: 'In analysis' }],
+    ]);
+
+    expect(
+      bestStoredFingerprint(
+        attack({ alertIds: ['a1', 'a2', 'a3', 'a4'] }),
+        [unread, open],
+        investigations,
+        now
+      )?.id
+    ).toBe('open-fp');
+  });
+
+  it('prefers a missing fingerprint still inside 15 minutes over an older missing one', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const stale = stored({
+      id: 'stale-fp',
+      investigationId: 'stale-inv',
+      alertIds: ['a1', 'a2', 'a3', 'a4'],
+      writtenAt: '2026-10-21T10:00:00.000Z',
+    });
+    const pending = stored({
+      id: 'pending-fp',
+      investigationId: 'pending-inv',
+      alertIds: ['a1', 'a2'],
+      writtenAt: now.toISOString(),
+    });
+    const investigations = new Map<string, undefined>([
+      ['stale-inv', undefined],
+      ['pending-inv', undefined],
+    ]);
+
+    expect(
+      bestStoredFingerprint(
+        attack({ alertIds: ['a1', 'a2', 'a3', 'a4'] }),
+        [stale, pending],
+        investigations,
+        now
+      )?.id
+    ).toBe('pending-fp');
+  });
+
+  it('ranks a missing fingerprint past 15 minutes ahead of a closed one', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const closed = stored({
+      id: 'closed-fp',
+      investigationId: 'closed-inv',
+      alertIds: ['a1', 'a2', 'a3', 'a4'],
+    });
+    const stale = stored({
+      id: 'stale-fp',
+      investigationId: 'stale-inv',
+      alertIds: ['a1', 'a2'],
+      writtenAt: '2026-10-21T10:00:00.000Z',
+    });
+    const investigations = new Map<string, { status: string } | undefined>([
+      ['closed-inv', { status: 'closed' }],
+      ['stale-inv', undefined],
+    ]);
+
+    expect(
+      bestStoredFingerprint(
+        attack({ alertIds: ['a1', 'a2', 'a3', 'a4'] }),
+        [closed, stale],
+        investigations,
+        now
+      )?.id
+    ).toBe('stale-fp');
   });
 
   it('returns undefined when a cross-run host-only fingerprint is the only hit', () => {

@@ -4,7 +4,12 @@ description: >
   Attaches one Attack Discovery to an Investigation that already describes the
   same attack. Waits for the review to create that Investigation, then journals
   the match, the attachments, and any alert tagging. Does not create the
-  Investigation, and does not run FP/TP analysis or the forensics gate.
+  Investigation, and does not run FP/TP analysis or the forensics gate. If that
+  Investigation is still missing after the wait, retargets the fingerprint at
+  this attack and starts a review of it, instead of leaving it unattached or
+  writing a second fingerprint. Re-reads the Investigation before attaching.
+  If it has since closed, expired, or failed, this run does not attach: it
+  writes a fingerprint for this attack and starts a review.
 enabled: true
 tags:
   - security
@@ -52,6 +57,12 @@ triggers:
             When true, tag the detection alerts `az:ad_correlated`. Set only when
             the Investigation has already escalated or closed for a reason other
             than false positive.
+        tag_fp_chain_alerts:
+          type: boolean
+          description: >
+            When true, tag the detection alerts `az:ad_fp_chain` and acknowledge
+            the ones still open. Set when this attack joins an Investigation
+            already closed as a false positive. Wins when both tag flags are set.
         journal_alerts_retired:
           type: boolean
           description: >
@@ -62,6 +73,66 @@ triggers:
           type: string
           maxLength: 128
           description: Workflow execution id of the runner that launched this attach.
+        fingerprint_pending:
+          type: boolean
+          description: >
+            True when the matcher has not seen the Investigation yet. This run
+            adds the continuation's alert ids to the fingerprint only after the
+            Investigation appears and the re-read still says to attach. If it
+            is still missing after the wait, the existing fingerprint is
+            retargeted at this attack. A second fingerprint is not created.
+        own_fingerprint_id:
+          type: string
+          maxLength: 128
+          description: >
+            Fingerprint id for the review this run starts when the re-read says
+            the Investigation has closed, expired, or failed. Omitted on a
+            direct call, which then starts that review without writing one.
+        host_entity_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 512
+        user_entity_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 512
+        entity_pairs:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 1024
+        tactics:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 64
+        first_alert_at:
+          type: string
+          maxLength: 64
+        last_alert_at:
+          type: string
+          maxLength: 64
+        expires_at:
+          type: string
+          maxLength: 64
+          description: >
+            When this attack's fingerprint expires. Used by the retarget and by
+            the fingerprint written when the re-read starts a review.
+        autonomy:
+          type: string
+          enum:
+            - manual
+            - supervised
+          description: >
+            Worker autonomy, forwarded only when this attach gives up and starts
+            a review. Omitted on a direct run, which leaves the review at its
+            own default.
       required:
         - attack_discovery_id
         - title
@@ -71,6 +142,9 @@ consts:
   no_alert_ids: []
   alerts_per_attachment: 20
   ad_correlated_tag: az:ad_correlated
+  # Same literal as `consts.ad_fp_chain_tag` in attack_discovery_review.yaml.
+  # Generation excludes it. Alert Triage does not.
+  ad_fp_chain_tag: az:ad_fp_chain
   impact_entity_cap: 50
 steps:
   # The review creates the Investigation, after it has read the de-anonymized
@@ -81,7 +155,8 @@ steps:
   # conversation yet, retries for 15 minutes. That is the same window the
   # matcher treats the fingerprint as in flight. Generation will not hand this
   # discovery to a later run, so the wait has to cover that window. Still
-  # missing after that, this run stops.
+  # missing after that, the next step reviews this attack on its own. The
+  # review journals the miss; this conversation is not there to write on.
   - name: wait_for_investigation
     type: ai.conversation.metadata.read
     with:
@@ -90,29 +165,280 @@ steps:
       retry:
         max-attempts: 30
         delay: 30s
+      continue: true
+
+  # The Investigation id this attack would open if the wait fails. The same
+  # slice the review uses, so the retargeted fingerprint is the one that review
+  # reads back.
+  - name: resolve_own_investigation_id
+    type: data.set
+    with:
+      investigation_id: |-
+        {%- assign attack = inputs.attack_discovery_id -%}
+        {{ attack | slice: 0,8 }}-{{ attack | slice: 8,4 }}-8{{ attack | slice: 12,3 }}-8{{ attack | slice: 15,3 }}-{{ attack | slice: 18,12 }}
+
+  # The fingerprint the matcher withheld this attack's alert ids from. Looked up
+  # by the Investigation it still points at, which is the one the wait used.
+  - name: find_pending_fingerprint
+    type: elasticsearch.search
+    if: "${{ inputs.fingerprint_pending == true }}"
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      size: 1
+      _source:
+        - attributes.alert_ids
+      query:
+        bool:
+          filter:
+            - term:
+                type: security.attack_fingerprint
+            - term:
+                attributes.space_id: "{{ workflow.spaceId }}"
+            - term:
+                attributes.investigation_id: "{{ inputs.investigation_id }}"
+
+  # The wait failed. Point the existing fingerprint at this attack, in one
+  # write, so a later match waits for this review instead of opening another
+  # Investigation. The write is a no-op once another attack has already claimed
+  # it. Hosts, users, and tactics stay. Alert ids become this attack's only.
+  # The same script is RETARGET_FINGERPRINT_SCRIPT in the matcher.
+  - name: retarget_pending_fingerprint
+    type: elasticsearch.update
+    if: "${{ inputs.fingerprint_pending == true and steps.wait_for_investigation.error != blank and steps.find_pending_fingerprint.output.hits.hits[0]._id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      id: "{{ steps.find_pending_fingerprint.output.hits.hits[0]._id }}"
+      retry_on_conflict: 3
+      script:
+        lang: painless
+        source: >-
+          if (ctx._source.attributes == null || ctx._source.attributes.investigation_id != params.expected.investigation_id) {
+            ctx.op = 'noop';
+          } else {
+            ctx._source['@timestamp'] = params.next.written_at;
+            ctx._source.attributes.investigation_id = params.next.investigation_id;
+            ctx._source.attributes.attack_discovery_id = params.next.attack_discovery_id;
+            ctx._source.attributes.alert_ids = params.alerts.values;
+            ctx._source.attributes.analyzed_alert_ids = params.alerts.values;
+            ctx._source.attributes.alert_count = params.alerts.values.size();
+            if (params.next.expires_at != null && params.next.expires_at.length() > 0) {
+              ctx._source.expires_at = params.next.expires_at;
+            }
+            if (params.next.last_alert_at != null && params.next.last_alert_at.length() > 0) {
+              ctx._source.attributes.last_alert_at = params.next.last_alert_at;
+            }
+          }
+        params:
+          expected:
+            investigation_id: "{{ inputs.investigation_id }}"
+          next:
+            written_at: "${{ now }}"
+            investigation_id: "{{ steps.resolve_own_investigation_id.output.investigation_id }}"
+            attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+            expires_at: "{{ inputs.expires_at }}"
+            last_alert_at: "{{ inputs.last_alert_at }}"
+          alerts:
+            values: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+
+  # The id this attack was going to join is recorded as a related Investigation.
+  # `investigation_missing` is what makes the review's note say the wait failed,
+  # rather than that the earlier Investigation was a closed false positive.
+  # Runs after the retarget, so the review reads the fingerprint that now
+  # points at this attack.
+  - name: review_when_investigation_missing
+    type: workflow.executeAsync
+    if: "${{ steps.wait_for_investigation.error != blank }}"
+    with:
+      workflow-id: system-security-attack-discovery-review
+      run-as-mode: inherit
+      inputs:
+        attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+        title: "{{ inputs.title }}"
+        alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+        summary_markdown: "{{ inputs.summary_markdown }}"
+        related_investigation_id: "{{ inputs.investigation_id }}"
+        related_link_reason: investigation_missing
+        sibling_alert_ids: "${{ consts.no_alert_ids }}"
+        sibling_attack_discovery_ids: "${{ consts.no_alert_ids }}"
+        autonomy: "${{ inputs.autonomy | default: 'manual' }}"
+        parent_run_id: "{{ inputs.parent_run_id }}"
+
+  # The wait can finish minutes after the matcher decided. Read again and apply
+  # that row. A failed read falls back to the wait's metadata.
+  - name: reread_investigation
+    type: ai.conversation.metadata.read
+    if: "${{ steps.wait_for_investigation.error == blank }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 2s
+      continue: true
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+
+  - name: resolve_attach_row
+    type: data.set
+    if: "${{ steps.wait_for_investigation.error == blank }}"
+    with:
+      row: |-
+        {%- assign read = steps.reread_investigation -%}
+        {%- assign meta = read.output.metadata -%}
+        {%- if read.error != blank -%}
+          {%- assign meta = steps.wait_for_investigation.output.metadata -%}
+        {%- endif -%}
+        {%- assign status = meta.status | default: '' -%}
+        {%- assign verdict = meta.verdict | default: '' -%}
+        {%- if status == 'closed' or verdict contains 'NO CLASSIFICATION' or verdict contains 'expired with no decision' or verdict contains 'GATE FAILED' -%}
+        review
+        {%- elsif verdict contains 'Handed off' -%}
+        handed_off
+        {%- else -%}
+        quiet
+        {%- endif -%}
+      reason: |-
+        {%- assign read = steps.reread_investigation -%}
+        {%- assign meta = read.output.metadata -%}
+        {%- if read.error != blank -%}
+          {%- assign meta = steps.wait_for_investigation.output.metadata -%}
+        {%- endif -%}
+        {%- assign status = meta.status | default: '' -%}
+        {%- assign verdict = meta.verdict | default: '' -%}
+        {%- assign close_reason = meta.close_reason | default: '' -%}
+        {%- if status == 'closed' and close_reason == 'false_positive' -%}
+        false_positive
+        {%- elsif status == 'closed' -%}
+        closed
+        {%- elsif verdict contains 'expired with no decision' -%}
+        proposal_expired
+        {%- elsif verdict contains 'NO CLASSIFICATION' or verdict contains 'GATE FAILED' -%}
+        analysis_failed
+        {%- endif -%}
+
+  # The Investigation finished while this attach was in flight. Do not write on
+  # it. This attack's review has to have its own fingerprint, or the next tick
+  # matches the finished one and opens another Investigation.
+  - name: write_own_fingerprint
+    type: elasticsearch.index
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'review' and inputs.own_fingerprint_id != blank }}"
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      id: "{{ inputs.own_fingerprint_id }}"
+      op_type: create
+      refresh: wait_for
+      document:
+        "@timestamp": "${{ now }}"
+        id: "{{ inputs.own_fingerprint_id }}"
+        type: security.attack_fingerprint
+        title: "{{ inputs.title | truncate: 512, '' }}"
+        tags:
+          - consumer:attack-discovery
+        expires_at: "{{ inputs.expires_at }}"
+        permissions:
+          kibana:
+            privileges:
+              - space: "{{ workflow.spaceId }}"
+        attributes:
+          space_id: "{{ workflow.spaceId }}"
+          investigation_id: "{{ steps.resolve_own_investigation_id.output.investigation_id }}"
+          attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+          alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+          analyzed_alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+          alert_count: "${{ inputs.alert_ids | default: consts.no_alert_ids | size }}"
+          host_entity_ids: "${{ inputs.host_entity_ids | default: consts.no_alert_ids }}"
+          user_entity_ids: "${{ inputs.user_entity_ids | default: consts.no_alert_ids }}"
+          entity_pairs: "${{ inputs.entity_pairs | default: consts.no_alert_ids }}"
+          mitre_attack_tactics: "${{ inputs.tactics | default: consts.no_alert_ids }}"
+          first_alert_at: "{{ inputs.first_alert_at }}"
+          last_alert_at: "{{ inputs.last_alert_at }}"
+          status: open
+          parent_run_id: "{{ inputs.parent_run_id }}"
+
+  - name: review_when_investigation_changed
+    type: workflow.executeAsync
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'review' }}"
+    with:
+      workflow-id: system-security-attack-discovery-review
+      run-as-mode: inherit
+      inputs:
+        attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+        title: "{{ inputs.title }}"
+        alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+        summary_markdown: "{{ inputs.summary_markdown }}"
+        related_investigation_id: "{{ inputs.investigation_id }}"
+        related_link_reason: "{{ steps.resolve_attach_row.output.reason }}"
+        sibling_alert_ids: "${{ consts.no_alert_ids }}"
+        sibling_attack_discovery_ids: "${{ consts.no_alert_ids }}"
+        autonomy: "${{ inputs.autonomy | default: 'manual' }}"
+        parent_run_id: "{{ inputs.parent_run_id }}"
+
+  # The Investigation appeared, and the re-read still says to attach. Add this
+  # attack's alert ids now. They were kept off the fingerprint while the wait
+  # was open. The list stops at 100, the same cap the matcher uses. Script
+  # params have to be objects.
+  - name: extend_pending_fingerprint
+    type: elasticsearch.update
+    if: "${{ inputs.fingerprint_pending == true and steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' and steps.find_pending_fingerprint.output.hits.hits[0]._id != blank }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      id: "{{ steps.find_pending_fingerprint.output.hits.hits[0]._id }}"
+      retry_on_conflict: 3
+      script:
+        lang: painless
+        source: >-
+          if (ctx._source.attributes.alert_ids == null) {
+            ctx._source.attributes.alert_ids = new ArrayList();
+          }
+          for (def id : params.alert_ids.values) {
+            if (!ctx._source.attributes.alert_ids.contains(id) && ctx._source.attributes.alert_ids.size() < 100) {
+              ctx._source.attributes.alert_ids.add(id);
+            }
+          }
+          ctx._source.attributes.alert_count = ctx._source.attributes.alert_ids.size();
+        params:
+          alert_ids:
+            values: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
 
   # The decision, before any attachment write. Says why this attack did not open
   # its own Investigation. It does not claim the attachments landed: those writes
   # are still ahead, and a later note reports them.
   - name: journal_attach_started
     type: workflow.execute
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
         conversation_id: "{{ inputs.investigation_id }}"
         message: >-
+          {%- assign alert_count = inputs.alert_ids | default: consts.no_alert_ids | size -%}
           Matched Attack Discovery {{ inputs.attack_discovery_id }}
           ("{{ inputs.title }}") to this Investigation.
-          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
+          {% if inputs.tag_fp_chain_alerts == true %}{{ alert_count }} detection alert(s).
+          FP/TP analysis was skipped because this Investigation is already closed as a false positive.
+          {% else %}{{ alert_count }} correlated detection alert(s).
           FP/TP analysis was skipped because this attack matches one already under investigation.
-          Parent run: {{ inputs.parent_run_id }}.
+          {% endif %}Parent run: {{ inputs.parent_run_id }}.
           This execution: {{ execution.id }}.
     on-failure:
       continue: true
 
   - name: attach_discovery
     type: ai.attachment.add
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' }}"
     with:
       conversation_id: "{{ inputs.investigation_id }}"
       id: "attack-discovery-{{ inputs.attack_discovery_id }}"
@@ -125,6 +451,7 @@ steps:
 
   - name: attach_alerts
     type: foreach
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' }}"
     foreach: "{{ inputs.alert_ids | default: consts.no_alert_ids | chunk: consts.alerts_per_attachment }}"
     steps:
       - name: attach_alert_batch
@@ -136,7 +463,7 @@ steps:
           data:
             alertIds: "${{ foreach.item }}"
           description: >-
-            Detection alerts correlated by an attached Attack Discovery
+            {%- if inputs.tag_fp_chain_alerts == true -%}Detection alerts from an Attack Discovery attached to a closed false positive{%- else -%}Detection alerts correlated by an attached Attack Discovery{%- endif %}
             (batch {{ foreach.index | plus: 1 }} of {{ foreach.total }})
         on-failure:
           continue: true
@@ -146,15 +473,18 @@ steps:
   # one landed. The attachment list is what shows which batches are present.
   - name: journal_evidence_attached
     type: workflow.execute
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
         conversation_id: "{{ inputs.investigation_id }}"
         message: >-
+          {%- assign alert_count = inputs.alert_ids | default: consts.no_alert_ids | size -%}
           Attempted attachment of Attack Discovery {{ inputs.attack_discovery_id }}
-          and {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection
-          alert(s). See the attachment list for what landed.
+          and {{ alert_count }}
+          {% if inputs.tag_fp_chain_alerts == true %}detection alert(s) from the closed false positive{% else %}correlated detection alert(s){% endif %}.
+          See the attachment list for what landed.
     on-failure:
       continue: true
 
@@ -162,7 +492,7 @@ steps:
   # add have to be recorded here. Merged by id onto the impact already stored.
   - name: collect_impact_entities
     type: security.getAlertEntities
-    if: "${{ inputs.alert_ids != blank }}"
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' and inputs.alert_ids != blank }}"
     timeout: "60s"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
@@ -172,7 +502,7 @@ steps:
 
   - name: attach_impact
     type: investigations.attachImpact
-    if: "${{ steps.collect_impact_entities.output.entities != blank }}"
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' and steps.collect_impact_entities.output.entities != blank }}"
     with:
       conversationId: "{{ inputs.investigation_id }}"
       entities: "${{ steps.collect_impact_entities.output.entities }}"
@@ -182,6 +512,7 @@ steps:
   # Counts only hosts and users: `collect_impact_entities` keeps the step's default entity types.
   - name: journal_impact_recorded
     type: workflow.execute
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row != 'review' }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
@@ -206,23 +537,32 @@ steps:
     on-failure:
       continue: true
 
+  # `az:ad_fp_chain` wins when that flag is set. Anything else that tags uses
+  # `az:ad_correlated`. An open review attaches with neither flag set.
+  - name: resolve_alert_tag
+    type: data.set
+    with:
+      tag: "{{ consts.ad_correlated_tag }}"
+
   - name: tag_correlated_alerts
     type: security.setAlertTags
-    if: "${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}"
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}"
     with:
       alert_ids: "${{ inputs.alert_ids }}"
       tags_to_add:
-        - "{{ consts.ad_correlated_tag }}"
+        - "{{ steps.resolve_alert_tag.output.tag }}"
     on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
       continue: true
 
-  # Same alerts the tag step just marked, and only the ones still open. A by-id
-  # status write has no status condition, so an alert closed while this ran would
-  # be reopened. The query skips those. Same gate as the tag: a closed false
-  # positive does not reach here.
+  # Same alerts the tag step just marked, and only the ones still open.
+  # A by-id status write has no status condition, so an alert
+  # closed while this ran would be reopened. The query skips those.
   - name: acknowledge_correlated_alerts
     type: kibana.SetAlertsStatus
-    if: "${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}"
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}"
     timeout: "60s"
     with:
       status: acknowledged
@@ -240,26 +580,82 @@ steps:
         delay: 5s
       continue: true
 
-  # Same gate as the review's `journal_alerts_retired`: a true-positive or
-  # inconclusive verdict. The worker sets the input only when the Investigation
-  # verdict records that handoff. A declined or other close still tags above and
-  # does not get this note. No error message: it would be read back as user input.
+  # The tag and acknowledge calls can return success and change nothing. Read
+  # the alerts back before the journal says what landed. Same gate as the note:
+  # a declined close tags and does not get this read.
+  - name: verify_alerts_retired
+    type: elasticsearch.search
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}"
+    with:
+      index: .alerts-security.alerts-{{ workflow.spaceId }}
+      size: 0
+      track_total_hits: true
+      query:
+        ids:
+          values: "${{ inputs.alert_ids }}"
+      aggregations:
+        tagged:
+          filter:
+            term:
+              kibana.alert.workflow_tags: "{{ steps.resolve_alert_tag.output.tag }}"
+        open:
+          filter:
+            term:
+              kibana.alert.workflow_status: open
+        acknowledged:
+          filter:
+            term:
+              kibana.alert.workflow_status: acknowledged
+        closed:
+          filter:
+            term:
+              kibana.alert.workflow_status: closed
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  - name: resolve_alerts_retired
+    type: data.set
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}"
+    with:
+      read: "${{ steps.verify_alerts_retired.output.hits != null }}"
+      requested: "${{ inputs.alert_ids | size }}"
+      tagged: "${{ steps.verify_alerts_retired.output.aggregations.tagged.doc_count | default: 0 }}"
+      open: "${{ steps.verify_alerts_retired.output.aggregations.open.doc_count | default: 0 }}"
+      acknowledged: "${{ steps.verify_alerts_retired.output.aggregations.acknowledged.doc_count | default: 0 }}"
+      closed: "${{ steps.verify_alerts_retired.output.aggregations.closed.doc_count | default: 0 }}"
+
+  # A handed-off true positive or inconclusive, or a continuation of a closed
+  # false positive. The worker sets `journal_alerts_retired` only when the
+  # Investigation verdict records that handoff. A declined or other close still
+  # tags above and does not get this note. A closed false positive does.
+  # Counts come from the read-back, including zero. No error message: it would
+  # be read back as user input.
   - name: journal_alerts_retired
     type: workflow.execute
-    if: "${{ inputs.journal_alerts_retired == true and inputs.alert_ids != blank }}"
+    if: "${{ steps.wait_for_investigation.error == blank and steps.resolve_attach_row.output.row == 'handed_off' and inputs.alert_ids != blank }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
         conversation_id: "{{ inputs.investigation_id }}"
         message: >-
-          {% if steps.tag_correlated_alerts.error == blank %}Tagged
-          {{ inputs.alert_ids | size }} correlated detection alert(s)
-          {{ consts.ad_correlated_tag }}, so later Worker runs skip them.
-          {% if steps.acknowledge_correlated_alerts.error == blank %}Acknowledged the ones that were still open.{% else %}Could not acknowledge the ones that were still open. See attach execution {{ execution.id }}.{% endif %}
-          {% else %}Could not tag the
-          {{ inputs.alert_ids | size }} correlated detection alert(s)
-          {{ consts.ad_correlated_tag }}. Later Worker runs may correlate them again.
-          See attach execution {{ execution.id }}.{% endif %}
+          {%- assign retired = steps.resolve_alerts_retired.output -%}
+          {%- assign tag = steps.resolve_alert_tag.output.tag -%}
+          {% if retired.read != true %}Could not read the
+          {{ retired.requested }} detection alert(s) back, so whether they were
+          tagged {{ tag }} and acknowledged is unknown. See attach execution
+          {{ execution.id }}.{% else %}Tagged {{ retired.tagged }} of
+          {{ retired.requested }} detection alert(s)
+          {{ tag }}{% if retired.tagged < retired.requested %}; later Worker runs
+          may correlate the other {{ retired.requested | minus: retired.tagged }}
+          again{% else %}, so later Worker runs skip them{% endif %}. Acknowledged:
+          {{ retired.acknowledged }}{% if retired.closed > 0 %}; already closed and
+          left as they were: {{ retired.closed }}{% endif %}{% if retired.open > 0 %};
+          still open, because acknowledging them did not land: {{ retired.open }}{% endif %}.{% if
+          retired.tagged < retired.requested or retired.open > 0 %} See attach execution
+          {{ execution.id }}.{% endif %}{% endif %}
     on-failure:
       continue: true
