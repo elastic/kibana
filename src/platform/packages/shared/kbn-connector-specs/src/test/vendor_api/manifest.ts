@@ -124,10 +124,17 @@ const unmatchedSchema = z
   })
   .strict();
 
+/** A source name is lowercase snake_case, since its snapshot file takes the name. */
+export const SOURCE_NAME_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*$/;
+
+const sourceNameSchema = z
+  .string()
+  .regex(SOURCE_NAME_PATTERN, 'A source name is lowercase snake_case, such as v2 or users_v1');
+
 /** `vendor_api/manifest.json`: the vendor specs a connector depends on and what it calls. */
 export const vendorApiManifestSchema = z
   .object({
-    sources: z.record(z.string(), sourceSchema),
+    sources: z.record(sourceNameSchema, sourceSchema),
     /** Per action, the vendor operations it calls, sorted. */
     operations: z.record(z.string(), z.array(operationSchema)),
     /** Per action, acknowledged requests that match no vendor operation. */

@@ -14,6 +14,7 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findConnector } from '../src/test/vendor_api/find_connector';
 import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
+import { SOURCE_NAME_PATTERN } from '../src/test/vendor_api/manifest';
 import { createSpecCache } from '../src/test/vendor_api/spec_cache';
 import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
 
@@ -24,7 +25,13 @@ const parseSource = (flag: string): [string, string] => {
   if (separator < 1) {
     throw createFlagError(`--source must look like name=url, got "${flag}"`);
   }
-  return [flag.slice(0, separator), flag.slice(separator + 1)];
+  const name = flag.slice(0, separator);
+  if (!SOURCE_NAME_PATTERN.test(name)) {
+    throw createFlagError(
+      `--source names are lowercase snake_case, such as v2 or users_v1, since the snapshot file takes the name; got "${name}"`
+    );
+  }
+  return [name, flag.slice(separator + 1)];
 };
 
 const fetchText = async (url: string): Promise<string> => {
