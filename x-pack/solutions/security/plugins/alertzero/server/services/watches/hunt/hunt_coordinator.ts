@@ -42,6 +42,8 @@ import {
 import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
+import { getPendingTechniqueIds } from './tier2/pending_technique_ids';
+import { getSearchedTechniqueIds } from './tier2/searched_technique_ids';
 
 export type HuntCoordinatorTier2SkipReason =
   /**
@@ -187,6 +189,26 @@ export interface HuntCoordinatorCoreResult {
    * it chose not to search those values.
    */
   excluded_report_iocs?: { count: number };
+  /**
+   * The techniques Tier 2 searched on this run, which the caller records so a later run on
+   * the same report spends its generation budget on the ones still unsearched. Absent when
+   * Tier 2 did not run.
+   */
+  searched_technique_ids?: string[];
+  /**
+   * The techniques Tier 2 could not search on this run but a later one still should (the ones a
+   * retryable gap names). The caller records them so the next run keeps them as pending even if
+   * its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the
+   * caller to leave what is already recorded alone; empty when nothing is pending.
+   */
+  pending_technique_ids?: string[];
+  /**
+   * Whether this run was a manual replay of the whole report: Tier 2 ran on the report's own text
+   * without skipping anything an earlier run searched. The caller reads it to let this run's result
+   * replace an earlier finding, which a run that skipped techniques (or never reached Tier 2)
+   * cannot do. Absent when Tier 2 did not run.
+   */
+  replayed_whole_report?: boolean;
   /**
    * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
    * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
@@ -541,6 +563,7 @@ const huntCoordinatorCore = async (
     text: callerText,
     run_id,
     indexPatterns,
+    trigger,
   } = params;
 
   // A report-driven run (the Worker's child passes only `report_id`) hunts the
@@ -1055,6 +1078,12 @@ const huntCoordinatorCore = async (
     completed_successfully: completedSuccessfully(completeness),
     ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
+    searched_technique_ids: getSearchedTechniqueIds(tier2Raw),
+    pending_technique_ids: getPendingTechniqueIds(
+      tier2Raw,
+      nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+    ),
+    replayed_whole_report: trigger === 'manual' && callerText === undefined,
   };
 
   if (!hasConfirmedHit) {
