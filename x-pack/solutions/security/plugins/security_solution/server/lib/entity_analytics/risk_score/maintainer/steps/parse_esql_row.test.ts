@@ -98,7 +98,10 @@ describe('normalization by sample size', () => {
   it('keeps an overridden sample size within 100 instead of using the default normalizer', () => {
     const raw = saturatedRaw(1_000);
 
-    const followed = parseEsqlBaseScoreRow(index, 1_000)([1_000, raw, [input], undefined, 'host:h1']);
+    const followed = parseEsqlBaseScoreRow(
+      index,
+      1_000
+    )([1_000, raw, [input], undefined, 'host:h1']);
     const defaultNormalizer = raw / getRiemannZetaValue(500);
 
     expect(followed.normalized_score).toBeLessThanOrEqual(100.000000001);
