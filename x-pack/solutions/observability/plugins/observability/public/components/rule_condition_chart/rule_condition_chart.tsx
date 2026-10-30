@@ -24,6 +24,7 @@ import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { TimeUnitChar } from '../../../common';
@@ -320,7 +321,7 @@ export function RuleConditionChart({
       if (annotation.key.type === 'range') {
         return;
       }
-      if ('timeField' in annotation) {
+      if (isQueryAnnotationConfig(annotation)) {
         if (!annotation.timeField) {
           return;
         }
