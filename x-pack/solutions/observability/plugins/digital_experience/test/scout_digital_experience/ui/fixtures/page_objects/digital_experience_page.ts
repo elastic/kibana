@@ -26,7 +26,8 @@ export class DigitalExperiencePage {
   public readonly search: Locator;
   public readonly summary: Locator;
   public readonly pageLoadsChart: Locator;
-  public readonly otelOverviewPlaceholder: Locator;
+  public readonly otelOverviewKpis: Locator;
+  public readonly otelOverviewPageLoads: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
   public readonly breadcrumbs: Locator;
@@ -50,7 +51,8 @@ export class DigitalExperiencePage {
     this.search = page.getByTestId('digitalExperienceApplicationsSearch');
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
-    this.otelOverviewPlaceholder = page.getByTestId('digitalExperienceOtelOverviewPlaceholder');
+    this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
+    this.otelOverviewPageLoads = page.getByTestId('digitalExperienceOverviewPageLoads');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
     this.breadcrumbs = page.getByTestId('breadcrumbs');

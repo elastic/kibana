@@ -14,6 +14,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
@@ -27,7 +28,10 @@ import {
   EventActorType,
   agentBuilderDefaultAgentId,
   createBadRequestError,
+  createForbiddenError,
   createInternalError,
+  isConversationBusyError,
+  isConversationWriteConflictError,
   isExecutionAbortReason,
   isRequestAbortedError,
   roundUserMessageEventId,
@@ -43,6 +47,7 @@ import type {
   AbortExecutionResult,
   AgentExecutionService,
   AgentExecution,
+  AgentExecutionParams,
   ConversationExecutionParams,
   ExecuteAgentParams,
   ExecuteAgentResult,
@@ -56,22 +61,29 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
+import { apiPrivileges } from '../../../common/features';
+import { AGENT_WORKLOAD_TYPE } from '../agents/service_account_binding';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
 import {
   handleAgentExecution,
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { resolveExecutionConnectorId, serializeExecutionError } from './utils';
+import {
+  getPendingResumeRound,
+  resolveExecutionConnectorId,
+  serializeExecutionError,
+} from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
+import type { AcquireActiveExecution } from '../conversation/client/types';
 import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
-  isPendingResumeConversation,
   persistUserMessage,
+  releaseActiveExecution,
   type ConversationWithOperation,
 } from './utils/conversations';
 import {
@@ -98,6 +110,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
   getSmlTypeDefinition: GetSmlTypeDefinition;
+  securityPlugin?: SecurityPluginStart;
 }
 
 // Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
@@ -180,6 +193,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
     const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
+    // Resolved once the agent is known, which may be the stored conversation's, and before any
+    // write: a caller refused here leaves no execution record, no conversation and no message.
+    const runAs = await this.resolveExecutionIdentity({
+      request,
+      agentId,
+      configurationOverrides: params.configurationOverrides,
+    });
 
     if (
       params.reasoningLevel !== undefined &&
@@ -210,6 +230,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           username: owner.username,
           ...(owner.type ? { type: owner.type } : {}),
         },
+        ...(runAs ? { runAs } : {}),
         agentParams:
           conversationParams && conversation
             ? {
@@ -234,16 +255,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );
 
-          // Repairs executions left in `scheduled` when the original delivery
-          // failed before scheduling the task.
+          // Only the original delivery dispatches the run, so a duplicate never starts it before
+          // the conversation is written.
           const existing = await executionClient.peek(executionId);
-
-          if (existing?.status === ExecutionStatus.scheduled) {
-            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
-              request,
-              cloneApiKey: true,
-            });
-          }
 
           // The replay's own conversation may be an unwritten placeholder.
           return {
@@ -259,29 +273,54 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw err;
     }
 
-    // After the record, so an idempotency-key replay is recognised before a second message lands.
-    // A resume continues a round that is already open, so it does not write a new message.
-    if (
-      conversationParams &&
-      conversation &&
-      conversationParams.storeConversation !== false &&
-      !isPendingResumeConversation(conversation)
-    ) {
+    // After the record, so an idempotency-key replay is recognised before a second message lands
+    // or the execution becomes active. A resume continues a round that is already open, so it
+    // sets the active execution without writing a new message.
+    let activeConversationId: string | undefined;
+
+    if (conversationParams && conversation && conversationParams.storeConversation !== false) {
+      const pendingResumeRound = getPendingResumeRound(conversation);
+      const activeExecution: AcquireActiveExecution = { action: 'acquire', executionId };
+
       try {
-        await this.writeUserMessage({
-          conversation,
-          conversationClient,
-          params: conversationParams,
-          request,
-          receivedAt,
-          eventId: roundUserMessageEventId(roundId),
-          mergeAttachments: false,
-          parentExecution,
-          // The run reads the conversation by id (real-time). The conversation is already listed,
-          // so a list search before the next scheduled refresh only sees the previous `updated_at`.
-          appendRefresh: false,
-        });
+        if (pendingResumeRound) {
+          await conversationClient.update(
+            { id: conversation.id },
+            { source: 'execution', access: 'converse', retryOnConflict: true, activeExecution }
+          );
+        } else {
+          await this.writeUserMessage({
+            conversation,
+            conversationClient,
+            params: conversationParams,
+            request,
+            receivedAt,
+            eventId: roundUserMessageEventId(roundId),
+            mergeAttachments: false,
+            parentExecution,
+            // The run reads the conversation by id (real-time). The conversation is already
+            // listed, so a list search before the next scheduled refresh only sees the previous
+            // `updated_at`.
+            appendRefresh: false,
+            activeExecution,
+          });
+        }
+
+        activeConversationId = conversation.id;
       } catch (err) {
+        // A refused run never started, so it leaves no execution record behind: a keyed
+        // redelivery then starts afresh instead of replaying the refusal.
+        if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+          try {
+            await executionClient.delete(executionId);
+          } catch (deleteErr) {
+            this.logger.warn(
+              `Failed to delete execution ${executionId} refused by conversation ${conversation.id}: ${deleteErr.message}`
+            );
+          }
+          throw err;
+        }
+
         try {
           await executionClient.updateStatus(executionId, ExecutionStatus.failed, {
             error: serializeExecutionError(err),
@@ -315,15 +354,34 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
-    const result = useScheduledTask
-      ? await this.executeWithScheduledTask({
-          executionId,
-          agentId,
-          request,
-          requestImmediateClaim,
-        })
-      : await this.executeLocally({ execution, request, interactivity });
+    let result: ExecuteAgentResult;
+
+    try {
+      const useScheduledTask = await this.shouldUseScheduledTask(
+        request,
+        useTaskManager,
+        execution
+      );
+      result = useScheduledTask
+        ? await this.executeWithScheduledTask({ execution, request, requestImmediateClaim })
+        : await this.executeLocally({ execution, request, interactivity });
+    } catch (err) {
+      // A run that never got dispatched would otherwise stay active until it goes stale.
+      if (activeConversationId) {
+        try {
+          await releaseActiveExecution({
+            conversationClient,
+            conversationId: activeConversationId,
+            executionId,
+          });
+        } catch (releaseErr) {
+          this.logger.warn(
+            `Failed to release conversation ${activeConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`
+          );
+        }
+      }
+      throw err;
+    }
 
     if (!conversation) {
       return result;
@@ -502,11 +560,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
-  private buildRunAgentTask(executionId: string) {
+  private buildRunAgentTask({
+    executionId,
+    agentId,
+    spaceId,
+    runAs,
+  }: Pick<AgentExecution, 'executionId' | 'agentId' | 'spaceId' | 'runAs'>) {
     return {
       id: `agent-${executionId}`,
       taskType: taskTypes.runAgent,
       params: { executionId },
+      // A bound execution runs with the service account's credential minted by Task Manager at
+      // run time, pinned to the account the agent was bound to when it was dispatched.
+      ...(runAs
+        ? {
+            runAs: {
+              workloadType: AGENT_WORKLOAD_TYPE,
+              workloadId: agentId,
+              spaceId,
+              expectedServiceAccountId: runAs.serviceAccountId,
+            },
+          }
+        : {}),
       scope: ['agent-builder'],
       enabled: true,
       state: {},
@@ -514,23 +589,38 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   private async executeWithScheduledTask({
-    executionId,
-    agentId,
+    execution,
     request,
     requestImmediateClaim,
   }: {
-    executionId: string;
-    agentId: string;
+    execution: AgentExecution;
     request: ExecuteAgentParams['request'];
     requestImmediateClaim: boolean;
   }): Promise<ExecuteAgentResult> {
-    const task = this.buildRunAgentTask(executionId);
-    // ensureScheduled tolerates the task already existing: a concurrent idempotent
-    // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(task, {
-      request,
-      cloneApiKey: true,
-    });
+    const { executionId, agentId } = execution;
+    const task = this.buildRunAgentTask(execution);
+
+    try {
+      // A bound execution carries no caller credential: Task Manager mints the service account's.
+      await this.deps.taskManager.schedule(
+        task,
+        execution.runAs ? undefined : { request, cloneApiKey: true }
+      );
+    } catch (err) {
+      // No task will ever run this execution: a keyed redelivery, which only follows it, then sees
+      // it failed instead of waiting on it.
+      try {
+        await this.createExecutionClient().updateStatus(executionId, ExecutionStatus.failed, {
+          error: serializeExecutionError(err),
+        });
+      } catch (statusErr) {
+        this.logger.error(
+          `Failed to record status for execution ${executionId} after it failed to schedule: ${statusErr.message}`
+        );
+      }
+
+      throw err;
+    }
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 
@@ -568,6 +658,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     interactivity: InteractivityConfig;
   }): Promise<ExecuteAgentResult> {
     const { executionId } = execution;
+    if (execution.runAs && !this.requestRunsAs(request, execution.runAs)) {
+      throw createInternalError(
+        `Execution ${executionId} runs as a service account and must run through Task Manager`
+      );
+    }
     const executionClient = this.createExecutionClient();
 
     // Update status to running
@@ -693,14 +788,26 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Determine whether execution should run on a Task Manager node.
    *
-   * 1. If `useTaskManager` is explicitly provided, honour it.
-   * 2. If the request is a fakeRequest (already running on TM), run locally.
-   * 3. Otherwise, run on task manager.
+   * 1. A bound execution runs on Task Manager, which mints its service account credential, unless
+   *    the request already runs as that account (a workflow or parent run under the same account),
+   *    in which case the usual rules apply so it is not nested in a second blocking task.
+   * 2. If `useTaskManager` is explicitly provided, honour it.
+   * 3. If the request is a fakeRequest (already running on TM), run locally.
+   * 4. Otherwise, run on task manager.
    */
   private async shouldUseScheduledTask(
     request: KibanaRequest,
-    useTaskManager?: boolean
+    useTaskManager: boolean | undefined,
+    execution: AgentExecution
   ): Promise<boolean> {
+    if (execution.runAs && !this.requestRunsAs(request, execution.runAs)) {
+      if (useTaskManager === false) {
+        this.logger.debug(
+          `Execution ${execution.executionId} runs as a service account: ignoring the local execution mode`
+        );
+      }
+      return true;
+    }
     if (useTaskManager !== undefined) {
       return useTaskManager;
     }
@@ -765,6 +872,70 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }),
       parentExecution,
     };
+  }
+
+  /** Whether the request's credential already is the service account the execution runs as. */
+  private requestRunsAs(request: KibanaRequest, runAs: NonNullable<AgentExecution['runAs']>) {
+    const principal = this.deps.security.authc.getPrincipal(request);
+    return (
+      principal?.type === 'service_account' && principal.serviceAccountId === runAs.serviceAccountId
+    );
+  }
+
+  /**
+   * Resolves the identity a run of `agentId` executes under for this caller.
+   *
+   * The caller's own `use` access to the agent is checked first. A bound agent then requires
+   * service accounts to be enabled and the caller to hold the invoke privilege; a caller that
+   * fails either is refused rather than run under their own credentials. Runtime configuration
+   * overrides would let such a caller change what the account executes, so on a bound agent they
+   * are only accepted from a request that already runs as that account.
+   */
+  private async resolveExecutionIdentity({
+    request,
+    agentId,
+    configurationOverrides,
+  }: {
+    request: KibanaRequest;
+    agentId: string;
+    configurationOverrides?: AgentExecutionParams['configurationOverrides'];
+  }): Promise<AgentExecution['runAs']> {
+    const agentRegistry = await this.deps.agentService.getRegistry({ request });
+    const agent = await agentRegistry.get(agentId, { access: 'use' });
+    const serviceAccountId = agent.service_account_id;
+    if (!serviceAccountId) {
+      return undefined;
+    }
+    if (!this.deps.security.serviceAccounts.isEnabled()) {
+      throw createForbiddenError(
+        `Agent "${agentId}" is bound to service account "${serviceAccountId}" but service accounts are disabled on this Kibana.`
+      );
+    }
+    const { securityPlugin } = this.deps;
+    if (!securityPlugin) {
+      throw createForbiddenError(
+        `Agent "${agentId}" runs as service account "${serviceAccountId}", which requires the security plugin.`
+      );
+    }
+    const { hasAllRequested } = await securityPlugin.authz.checkPrivilegesDynamicallyWithRequest(
+      request
+    )({ kibana: [securityPlugin.authz.actions.api.get(apiPrivileges.invokeBoundAgents)] });
+    if (!hasAllRequested) {
+      throw createForbiddenError(
+        `You are not allowed to start conversations with agent "${agentId}", which runs as service account "${serviceAccountId}". The Agent Builder privilege "Chat with agents that run as a service account" is required.`
+      );
+    }
+    const runAs = { type: 'service_account' as const, serviceAccountId };
+    if (
+      configurationOverrides &&
+      Object.keys(configurationOverrides).length > 0 &&
+      !this.requestRunsAs(request, runAs)
+    ) {
+      throw createForbiddenError(
+        `Runtime configuration overrides are not allowed on agent "${agentId}", which runs as service account "${serviceAccountId}": changing what it runs requires editing the agent, which needs the manage_security privilege.`
+      );
+    }
+    return runAs;
   }
 
   private async isIdempotentReplay({
@@ -910,6 +1081,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments,
     parentExecution,
     appendRefresh,
+    activeExecution,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -920,6 +1092,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments: boolean;
     parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
+    activeExecution?: AcquireActiveExecution;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
@@ -931,6 +1104,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       eventId,
       author,
       appendRefresh,
+      ...(activeExecution ? { activeExecution } : {}),
       ...(origin ? { origin } : {}),
       ...(parentExecution
         ? {

@@ -28,6 +28,11 @@ import type {
   AgentBuilderStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
+import {
+  AGENT_WORKLOAD_TYPE,
+  resolveAgentWorkloads,
+} from './services/agents/service_account_binding';
+import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
@@ -42,6 +47,7 @@ import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
+import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -135,8 +141,15 @@ export class AgentBuilderPlugin
       actions: setupDeps.actions,
     });
 
+    serviceSetups.hooks.registerCycleHook(
+      createRelevantSkillsCycleHook({
+        getUiSettings: async () => (await coreSetup.getStartServices())[0].uiSettings,
+      })
+    );
+
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,
+      getStartServices: coreSetup.getStartServices,
       getTaskHandler: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -147,6 +160,24 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    // Registered even where service accounts are disabled so existing bindings can still be
+    // listed and removed.
+    coreSetup.security.serviceAccounts.registerWorkloadType({
+      type: AGENT_WORKLOAD_TYPE,
+      name: 'Agent',
+      description: 'Agent Builder agent that runs every conversation as the bound service account',
+      resolveWorkloads: async (workloads) => {
+        const [coreStart] = await coreSetup.getStartServices();
+        return resolveAgentWorkloads({
+          storage: createAgentStorage({
+            logger: this.logger.get('agents'),
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+          }),
+          workloads,
+        });
+      },
+    });
 
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 

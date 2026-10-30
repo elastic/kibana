@@ -465,7 +465,7 @@ describe('buildTestMetadataQuery', () => {
     const query = buildTestMetadataQuery(scope, ['ftr']);
 
     expect(query).toContain('test.status IN ("failed", "timedOut")');
-    expect(query).toContain('title = MAX(test.title.keyword)');
+    expect(query).toContain('title = MAX(test.title),');
     expect(query).toContain('config_category = MAX(test_run.config.category)');
     expect(query).toContain('suite_title = MAX(suite.title.keyword)');
     expect(query).toContain('owners = VALUES(test.file.owner)');
@@ -805,6 +805,11 @@ describe('buildTestErrorsQuery', () => {
         '"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", "ID"), "https?://[^ \\n]+", "URL"), "[0-9]+", "N")'
     );
     expect(query).toContain('message = LEFT(event.error.message, 12000)');
+    // builds, not attempts: a retry that failed again counts once
+    expect(query).toContain(
+      'STATS builds = COUNT_DISTINCT(buildkite.build.id), build_ids = VALUES(buildkite.build.id),'
+    );
+    expect(query).not.toContain('COUNT(*)');
     expect(query).toContain(
       'message = LAST(message, @timestamp) BY test.id, head, buildkite.pipeline.slug'
     );
@@ -817,8 +822,8 @@ describe('fetchTestErrors', () => {
     test_id: 't1',
     head: 'Error: boom N',
     pipeline: 'kibana-on-merge',
-    failures: 1,
     builds: 1,
+    build_ids: 'b1',
     branches: 'main',
     targets: 'stateful-classic',
     first_failed_at: '2026-09-02T00:00:00.000Z',
@@ -846,13 +851,18 @@ describe('fetchTestErrors', () => {
     ).rejects.toThrow(`Distinct errors query hit the ${ESQL_ROW_LIMIT} row limit`);
   });
 
-  it('folds the per-pipeline rows of an error, newest message and build first, most failures first', async () => {
+  it('folds the per-pipeline rows of an error, newest message and build first, most builds first', async () => {
     const { client } = mockEs([
-      row({ pipeline: 'kibana-on-merge', failures: 3, builds: 3, branches: ['main', '9.5'] }),
+      row({
+        pipeline: 'kibana-on-merge',
+        builds: 3,
+        build_ids: ['m3', 'm1', 'm2'],
+        branches: ['main', '9.5'],
+      }),
       row({
         pipeline: 'kibana-pull-request',
-        failures: 5,
         builds: 4,
+        build_ids: ['p1', 'p2', 'p3', 'p4'],
         branches: ['a:x', 'b:y'],
         targets: ['stateful-classic', 'serverless-search'],
         first_failed_at: '2026-09-01T00:00:00.000Z',
@@ -861,7 +871,7 @@ describe('fetchTestErrors', () => {
         last_failed_job_id: 'job-9',
         message: 'Error: boom 9',
       }),
-      row({ head: 'TypeError: nope', failures: 1, builds: 1, message: 'TypeError: nope' }),
+      row({ head: 'TypeError: nope', message: 'TypeError: nope' }),
       // a row without a head cannot be grouped
       row({ head: null }),
       row({ test_id: 't2', head: 'Other', message: 'Other', last_failed_build_url: null }),
@@ -876,11 +886,10 @@ describe('fetchTestErrors', () => {
       {
         key: 'Error: boom N',
         message: 'Error: boom 9',
-        failuresCount: 8,
         buildsCount: 7,
         byPipeline: [
-          { pipeline: 'kibana-pull-request', failuresCount: 5 },
-          { pipeline: 'kibana-on-merge', failuresCount: 3 },
+          { pipeline: 'kibana-pull-request', buildsCount: 4, buildIds: ['p1', 'p2', 'p3', 'p4'] },
+          { pipeline: 'kibana-on-merge', buildsCount: 3, buildIds: ['m1', 'm2', 'm3'] },
         ],
         branches: ['9.5', 'a:x', 'b:y', 'main'],
         targets: ['serverless-search', 'stateful-classic'],
@@ -889,7 +898,7 @@ describe('fetchTestErrors', () => {
         lastFailedBuildUrl: 'https://b/9',
         lastFailedJobId: 'job-9',
       },
-      expect.objectContaining({ key: 'TypeError: nope', failuresCount: 1 }),
+      expect.objectContaining({ key: 'TypeError: nope', buildsCount: 1 }),
     ]);
     expect(errors.get('t2')).toEqual([
       expect.objectContaining({ key: 'Other', lastFailedBuildUrl: undefined }),
