@@ -38,7 +38,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('shows validation error on submit', async () => {
-      await page.locator('.euiSideNavItem').locator('text=Synthetics').click();
+      await page.testSubj.click('observability-nav-synthetics-monitors');
       await page.click('text=Create monitor');
       await expect(page.getByText('URL is required')).toBeVisible();
     });
