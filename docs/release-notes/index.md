@@ -965,9 +965,9 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension [#297429]({{kib-pull}}297429).
 
 **Data ingestion and {{fleet}}**:
-* Fix the minimum {{agent}} version advertised by an agent policy being wrong after you upgrade several integration policies at once [#294439]({{kib-pull}}294439).
+* Fix an agent policy showing an outdated minimum {{agent}} version after you upgrade several integration policies at once [#294439]({{kib-pull}}294439).
 * Fix integration policy edits not reaching {{agent}} for packages that declare their {{agent}} version requirement in the package manifest [#296354]({{kib-pull}}296354).
-* Fix agents enrolled by an older {{fleet}} Server being left on a deleted version-specific agent policy [#295107]({{kib-pull}}295107).
+* Fix agents enrolled by an older {{fleet-server}} being left on a deleted version-specific agent policy [#295107]({{kib-pull}}295107).
 * Fix managed integration policy upgrades redeploying the agent policy once per integration policy, which slowed upgrades and could stall them when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
 * Fix integrations that default to agentless deployment saving an agent-based policy when the integration also has a cloud connector option [#299039]({{kib-pull}}299039).
 * Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
