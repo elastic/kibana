@@ -38,7 +38,16 @@ export const evaluateInvestigationQuota = async ({
 
   if (result.timedout) {
     pending.then(
-      (late) => (late.allowed ? late.release?.() : undefined),
+      (late) =>
+        late.allowed
+          ? Promise.resolve(late.release?.()).catch((error) =>
+              logger.warn(
+                `Could not release the late investigation quota slot: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              )
+            )
+          : undefined,
       () => undefined
     );
     throw unavailable(`timed out after ${INVESTIGATION_QUOTA_TIMEOUT_MS}ms`);

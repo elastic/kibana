@@ -70,6 +70,29 @@ describe('evaluateInvestigationQuota', () => {
     expect(release).toHaveBeenCalledTimes(1);
   });
 
+  it('logs a failed release of a late allowed result instead of leaving it unhandled', async () => {
+    jest.useFakeTimers();
+    const logger = createLogger();
+    const release = jest.fn().mockRejectedValue(new Error('Update failed'));
+    let resolveCallback: (result: InvestigationQuotaResult) => void = () => {};
+    const callback = jest.fn(
+      () =>
+        new Promise<InvestigationQuotaResult>((resolve) => {
+          resolveCallback = resolve;
+        })
+    );
+
+    const result = evaluateInvestigationQuota({ callback, logger });
+    const assertion = expect(result).rejects.toBeInstanceOf(InvestigationUnavailableError);
+    await jest.advanceTimersByTimeAsync(10_000);
+    await assertion;
+
+    resolveCallback({ allowed: true, release });
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(logger.warn).toHaveBeenLastCalledWith(expect.stringContaining('Update failed'));
+  });
+
   it('handles a late rejection after timeout without retrying or warning again', async () => {
     jest.useFakeTimers();
     const logger = createLogger();
