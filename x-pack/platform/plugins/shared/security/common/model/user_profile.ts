@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { colorVis } from '@elastic/eui-theme-borealis';
-
 import type {
   AuthenticatedUser,
   UserProfileData,
-  UserProfileUserInfo,
   UserProfileWithSecurity,
 } from '@kbn/security-plugin-types-common';
-import type { UserProfileAvatarData } from '@kbn/user-profile-components';
-
-import { getUserDisplayName } from './user';
 
 /**
  * User profile enriched with session information.
@@ -26,66 +20,4 @@ export interface GetUserProfileResponse<D extends UserProfileData = UserProfileD
    * Information about the currently authenticated user that owns the profile.
    */
   user: UserProfileWithSecurity['user'] & Pick<AuthenticatedUser, 'authentication_provider'>;
-}
-
-export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"
-export const USER_AVATAR_MAX_INITIALS = 2;
-
-// Same values as EUI's VISUALIZATION_COLORS, without importing @elastic/eui
-const VISUALIZATION_COLORS = [
-  colorVis.euiColorVis0,
-  colorVis.euiColorVis1,
-  colorVis.euiColorVis2,
-  colorVis.euiColorVis3,
-  colorVis.euiColorVis4,
-  colorVis.euiColorVis5,
-  colorVis.euiColorVis6,
-  colorVis.euiColorVis7,
-  colorVis.euiColorVis8,
-  colorVis.euiColorVis9,
-];
-
-/**
- * Determines the color for the provided user profile.
- * If a color is present on the user profile itself, then that is used.
- * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
- *
- * @param {UserProfileUserInfo} user User info
- * @param {UserProfileAvatarData} avatar User avatar
- */
-export function getUserAvatarColor(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
-  avatar?: UserProfileAvatarData
-) {
-  if (avatar && avatar.color) {
-    return avatar.color;
-  }
-
-  const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
-
-  return VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
-}
-
-/**
- * Determines the initials for the provided user profile.
- * If initials are present on the user profile itself, then that is used.
- * Otherwise, the initials are calculated based off the words in the display name, with a max length of 2 characters.
- *
- * @param {UserProfileUserInfo} user User info
- * @param {UserProfileAvatarData} avatar User avatar
- */
-export function getUserAvatarInitials(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
-  avatar?: UserProfileAvatarData
-) {
-  if (avatar && avatar.initials) {
-    return avatar.initials;
-  }
-
-  const words = getUserDisplayName(user).split(' ');
-  const numInitials = Math.min(USER_AVATAR_MAX_INITIALS, words.length);
-
-  words.splice(numInitials, words.length);
-
-  return words.map((word) => word.substring(0, 1)).join('');
 }
