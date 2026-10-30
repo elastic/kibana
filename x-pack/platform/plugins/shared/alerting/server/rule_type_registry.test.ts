@@ -21,6 +21,8 @@ import type { RecoveredActionGroupId } from '../common';
 import type { AlertingConfig } from './config';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { getRule } from './task_runner/action_scheduler/test_fixtures';
+import type { RuleV2Draft } from './rule_type_v2_migration/types';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -1136,6 +1138,46 @@ describe('Create Lifecycle', () => {
       expect(context).toBeTruthy();
       expect(context!.length).toBe(1);
       expect(context![0]).toEqual({ name: 'c', description: 'x context' });
+    });
+  });
+
+  describe('alertingV2Migration', () => {
+    const baseRuleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+      id: 'foo',
+      name: 'Foo',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      executor: jest.fn(),
+      category: 'test',
+      producer: 'alerts',
+      solution: 'stack',
+      validate: { params: { validate: (params) => params } },
+    };
+    const draft: RuleV2Draft = {
+      kind: 'alert',
+      metadata: { name: 'name-of-alert' },
+      time_field: '@timestamp',
+      schedule: { every: '1m' },
+      query: { base: 'FROM logs-*' },
+    };
+
+    test('keeps the migration a rule type registers with', () => {
+      const toV2Draft = jest.fn().mockReturnValue(draft);
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register({ ...baseRuleType, alertingV2Migration: { toV2Draft } });
+      const rule = getRule({ alertTypeId: 'foo' });
+
+      expect(registry.get('foo').alertingV2Migration?.toV2Draft(rule)).toBe(draft);
+      expect(toV2Draft).toHaveBeenCalledWith(rule);
+    });
+
+    test('has no migration when the rule type does not register one', () => {
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(baseRuleType);
+
+      expect(registry.get('foo').alertingV2Migration).toBeUndefined();
     });
   });
 
