@@ -7,9 +7,21 @@
 
 import { getAllowedHostsRefusal } from './affected_monitors';
 
-const allowed = new Set(['api.example.com', '10.0.0.1', '::1']);
+const allowed = new Set(['api.example.com', '10.0.0.1', '::1', '2001:db8::1']);
 
 describe('getAllowedHostsRefusal', () => {
+  it.each([
+    ['a bare IPv6 ICMP host', { type: 'icmp', hosts: '2001:db8::1' }],
+    ['a bare IPv6 ICMP host in another spelling', { type: 'icmp', hosts: '2001:0DB8:0:0:0:0:0:1' }],
+    ['a bracketed IPv6 tcp host', { type: 'tcp', hosts: '[2001:db8::1]:443' }],
+  ])('lets %s on the list use the connection', (_name, monitor) => {
+    expect(getAllowedHostsRefusal(monitor, allowed)).toBeUndefined();
+  });
+
+  it('refuses a bare IPv6 ICMP host that is not on the list', () => {
+    expect(getAllowedHostsRefusal({ type: 'icmp', hosts: '2001:db8::2' }, allowed)).toBe('host');
+  });
+
   it.each([
     ['an http monitor on an allowed host', { type: 'http', urls: 'https://API.example.com/path' }],
     ['a tcp monitor with a port', { type: 'tcp', hosts: 'api.example.com:443' }],

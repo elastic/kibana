@@ -16,6 +16,7 @@ import {
   testSecretConnectionRoute,
 } from './secret_connection';
 import { testHashiCorpVault } from './vault_client';
+import { AFFECTED_MONITORS_TIMEOUT_MS } from './affected_monitors';
 import { SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
 import { hostNotAllowedMessage, LOOPBACK_NOT_TESTABLE_MESSAGE } from './address_guard';
 import { connectionInUseMessage, SECRET_CONNECTIONS_DISABLED_MESSAGE } from './connection_utils';
@@ -378,6 +379,48 @@ describe('saving allowed monitor hosts', () => {
         { name: 'uses-global', reason: 'monitor_type' },
         { name: 'local-reference', reason: 'monitor_type' },
       ]);
+    });
+
+    it('finds monitors when a parameter they use holds quotes or backslashes', async () => {
+      const { routeContext } = setup({
+        body: body(['api.example.com']),
+        globalParams: { secret: 'vault://prod@app#key', pw: 'a"b\\c', host: 'other.example' },
+        monitors: [
+          {
+            name: 'tricky',
+            type: 'http',
+            urls: 'https://${host}/x',
+            password: '${secret}',
+            'check.request.body': '${pw}',
+          },
+        ],
+      });
+
+      const result = (await save(routeContext)) as any;
+
+      expect(result.affectedMonitors).toEqual([{ name: 'tricky', reason: 'host' }]);
+    });
+
+    it('does not let a slow lookup hold up the save', async () => {
+      jest.useFakeTimers();
+      try {
+        const { routeContext, create } = setup({ body: body(['api.example.com']) });
+        routeContext.monitorConfigRepository.findDecryptedMonitors.mockReturnValue(
+          new Promise(() => {})
+        );
+
+        const pending = save(routeContext);
+        await jest.advanceTimersByTimeAsync(AFFECTED_MONITORS_TIMEOUT_MS);
+        const result = (await pending) as any;
+
+        expect(create).toHaveBeenCalledTimes(1);
+        expect(result).not.toHaveProperty('affectedMonitors');
+        expect(routeContext.server.logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('timed out')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('does not look at monitors when the list is unchanged', async () => {

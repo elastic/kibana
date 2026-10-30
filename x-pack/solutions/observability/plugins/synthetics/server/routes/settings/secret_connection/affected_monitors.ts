@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { isIP } from 'net';
+import { isPlainObject, omit } from 'lodash';
 import type { RouteContext } from '../../types';
 import type { SyntheticsMonitor } from '../../../../common/runtime_types';
 import type { AffectedMonitor, AffectedMonitorReason } from '../../../../common/runtime_types';
@@ -26,18 +27,51 @@ const HOST_RESTRICTABLE_TYPES = new Set<string>([
 
 const MAX_LISTED_AFFECTED_MONITORS = 20;
 
+// IPs in their canonical form (as Heartbeat compares them), names lowercase without a trailing dot.
+const canonicalHost = (host: string): string => {
+  const normalized = normalizeAllowedMonitorHost(host);
+  if (isIP(normalized) !== 6) return normalized;
+  try {
+    return new URL(`http://[${normalized}]`).hostname.replace(/^\[|\]$/g, '');
+  } catch {
+    return normalized;
+  }
+};
+
 /** The host of a monitor target (`https://host/path`, `host:port` or `host`), if it has one. */
 const hostOfTarget = (target: unknown): string | undefined => {
   if (typeof target !== 'string' || !target.trim()) return undefined;
+  const value = target.trim();
+  // A bare IPv6 literal (an ICMP host) has no port and is not a valid URL authority unbracketed.
+  if (isIP(value) === 6) return canonicalHost(value);
   try {
-    const { hostname } = new URL(target.includes('://') ? target : `tcp://${target}`);
-    return hostname ? normalizeAllowedMonitorHost(hostname.replace(/^\[|\]$/g, '')) : undefined;
+    const { hostname } = new URL(value.includes('://') ? value : `tcp://${value}`);
+    return hostname ? canonicalHost(hostname.replace(/^\[|\]$/g, '')) : undefined;
   } catch {
     return undefined;
   }
 };
 
 const asList = (value: unknown): unknown[] => (Array.isArray(value) ? value : [value]);
+
+/**
+ * Substitutes parameters in every string on its own, like the real formatters do per field. The
+ * whole-object path serializes to JSON first, so a parameter holding a quote or a backslash
+ * would break it and leave everything unresolved.
+ */
+const resolveParams = (value: unknown, params: Record<string, string>): unknown => {
+  if (typeof value === 'string') return replaceStringWithParams(value, params);
+  if (Array.isArray(value)) return value.map((item) => resolveParams(item, params));
+  if (isPlainObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+        key,
+        resolveParams(item, params),
+      ])
+    );
+  }
+  return value;
+};
 
 /**
  * Why Heartbeat would refuse the monitor once the connection is restricted to `allowedHosts`, or
@@ -72,11 +106,37 @@ export interface AffectedMonitors {
   total: number;
 }
 
+// The check is advisory and runs inside the save request, so a large space must not make a
+// saved change look like it failed.
+export const AFFECTED_MONITORS_TIMEOUT_MS = 8000;
+
 /**
  * Monitors of the space that use the connection, directly or through a parameter, and would be
- * refused by Heartbeat once it is limited to `allowedHosts`.
+ * refused by Heartbeat once it is limited to `allowedHosts`. Rejects after
+ * {@link AFFECTED_MONITORS_TIMEOUT_MS}.
  */
-export const findMonitorsAffectedByAllowedHosts = async (
+export const findMonitorsAffectedByAllowedHosts = (
+  routeContext: Pick<
+    RouteContext,
+    'syntheticsMonitorClient' | 'monitorConfigRepository' | 'spaceId'
+  >,
+  connectionName: string,
+  allowedMonitorHosts: readonly string[]
+): Promise<AffectedMonitors> => {
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`timed out after ${AFFECTED_MONITORS_TIMEOUT_MS / 1000}s`)),
+      AFFECTED_MONITORS_TIMEOUT_MS
+    );
+  });
+  return Promise.race([
+    scanAffectedMonitors(routeContext, connectionName, allowedMonitorHosts),
+    timeout,
+  ]).finally(() => clearTimeout(timer));
+};
+
+const scanAffectedMonitors = async (
   {
     syntheticsMonitorClient,
     monitorConfigRepository,
@@ -90,7 +150,7 @@ export const findMonitorsAffectedByAllowedHosts = async (
     monitorConfigRepository.findDecryptedMonitors({ spaceId }),
   ]);
   const params = getParamsForSpace(paramsBySpace, spaceId);
-  const allowed = new Set(allowedMonitorHosts.map(normalizeAllowedMonitorHost));
+  const allowed = new Set(allowedMonitorHosts.map(canonicalHost));
 
   const affected: AffectedMonitor[] = [];
   for (const savedMonitor of savedMonitors) {
@@ -99,7 +159,7 @@ export const findMonitorsAffectedByAllowedHosts = async (
       unknown
     >;
     // What Heartbeat sees: parameters substituted, and the script itself left out.
-    const resolved = replaceStringWithParams(
+    const resolved = resolveParams(
       omit(attributes, [ConfigKey.SOURCE_INLINE, ConfigKey.SOURCE_PROJECT_CONTENT]),
       params
     ) as Record<string, unknown>;
