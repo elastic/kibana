@@ -162,8 +162,8 @@ const converse = async (
   return { conversationId, connectorId, message };
 };
 
-const getEisInferenceIds = async (client: Client): Promise<Set<string>> => {
-  const response = await client.inference.get({ inference_id: '_all' });
+const getEisInferenceIds = async (client: Client, signal: AbortSignal): Promise<Set<string>> => {
+  const response = await client.inference.get({ inference_id: '_all' }, { signal });
   const endpoints = response.endpoints as Array<{
     inference_id: string;
     service: string;
@@ -207,22 +207,29 @@ run(
     log.info(`Using Kibana at ${config.kibanaUrl} as ${config.username}.`);
 
     try {
-      const eisInferenceIds = await getEisInferenceIds(esClient);
+      const eisInferenceIds = await getEisInferenceIds(esClient, abortController.signal);
       if (eisInferenceIds.size === 0) {
         throw new Error(
           'No EIS chat-completion endpoints are available. Start Elasticsearch with EIS configured and run node scripts/eis.js.'
         );
       }
 
-      const aiIndexResponse = await kibanaRequest(config, 'POST', AI_INDEX_API, {
-        id: aiIndexId,
-        description: 'Temporary AI index for the live Memory smoke test.',
-        dest: { type: 'index', value: destinationIndex },
-        memory_enabled: true,
-        automations: [],
-        sources: [],
-        traces: [],
-      });
+      abortController.signal.throwIfAborted();
+      const aiIndexResponse = await kibanaRequest(
+        config,
+        'POST',
+        AI_INDEX_API,
+        {
+          id: aiIndexId,
+          description: 'Temporary AI index for the live Memory smoke test.',
+          dest: { type: 'index', value: destinationIndex },
+          memory_enabled: true,
+          automations: [],
+          sources: [],
+          traces: [],
+        },
+        { signal: abortController.signal }
+      );
       if (
         aiIndexResponse.status === 400 &&
         JSON.stringify(aiIndexResponse.data).includes('memory is disabled')
@@ -233,16 +240,23 @@ run(
       }
       requireStatus('Create temporary AI index', aiIndexResponse, [201]);
 
-      const agentResponse = await kibanaRequest(config, 'POST', `${AGENT_BUILDER_API}/agents`, {
-        id: agentId,
-        name: 'Memory smoke test agent',
-        description: 'Disposable agent for testing cross-conversation Memory.',
-        configuration: {
-          tools: [],
-          enable_elastic_capabilities: false,
-          ai_indices: [aiIndexId],
+      abortController.signal.throwIfAborted();
+      const agentResponse = await kibanaRequest(
+        config,
+        'POST',
+        `${AGENT_BUILDER_API}/agents`,
+        {
+          id: agentId,
+          name: 'Memory smoke test agent',
+          description: 'Disposable agent for testing cross-conversation Memory.',
+          configuration: {
+            tools: [],
+            enable_elastic_capabilities: false,
+            ai_indices: [aiIndexId],
+          },
         },
-      });
+        { signal: abortController.signal }
+      );
       requireStatus('Create temporary agent', agentResponse, [200]);
 
       log.info('Asking the real model to store a unique fact…');
@@ -358,6 +372,16 @@ run(
       } catch (error) {
         cleanupErrors.push(
           `AI index ${aiIndexId}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+
+      try {
+        await esClient.indices.delete({ index: destinationIndex }, { ignore: [404] });
+      } catch (error) {
+        cleanupErrors.push(
+          `backing index ${destinationIndex}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
       }
 
