@@ -30,24 +30,51 @@ describe('findByExternalId', () => {
     } as never);
   });
 
-  it('filters on the external incident id and the connector', async () => {
+  it('filters on the external incident id and references the connector', async () => {
     await findByExternalId({ externalId: '10001', connectorId: 'jira-1' }, clientArgs);
 
-    const { filter } = caseService.findCases.mock.calls[0][0] ?? {};
+    const { filter, hasReference } = caseService.findCases.mock.calls[0][0] ?? {};
     const query = JSON.stringify(toElasticsearchQuery(filter!));
     expect(query).toContain('cases.attributes.external_service.external_id');
     expect(query).toContain('10001');
-    expect(query).toContain('cases.attributes.external_service.connector_id');
-    expect(query).toContain('jira-1');
+    expect(query).not.toContain('external_service.connector_id');
+    expect(hasReference).toEqual({ type: 'action', id: 'jira-1' });
   });
 
-  it('does not filter on the connector when none is given', async () => {
+  it('only returns the cases pushed through the connector', async () => {
+    const pushedThrough = (id: string, connectorId: string) => ({
+      ...mockCases[0],
+      id,
+      score: 1,
+      attributes: {
+        ...mockCases[0].attributes,
+        external_service: {
+          connector_id: connectorId,
+          connector_name: 'Jira',
+          external_id: '10001',
+          external_title: 'ISSUE-1',
+          external_url: 'https://jira.example.com/browse/ISSUE-1',
+          pushed_at: '2026-10-30T12:00:00.000Z',
+          pushed_by: { username: 'elastic', full_name: null, email: null },
+        },
+      },
+    });
+    caseService.findCases.mockResolvedValue({
+      saved_objects: [pushedThrough('case-1', 'jira-1'), pushedThrough('case-2', 'jira-2')],
+      total: 2,
+      page: 1,
+      per_page: 100,
+    } as never);
+
+    const res = await findByExternalId({ externalId: '10001', connectorId: 'jira-1' }, clientArgs);
+
+    expect(res.map(({ id }) => id)).toEqual(['case-1']);
+  });
+
+  it('does not reference a connector when none is given', async () => {
     await findByExternalId({ externalId: '10001' }, clientArgs);
 
-    const { filter } = caseService.findCases.mock.calls[0][0] ?? {};
-    expect(JSON.stringify(toElasticsearchQuery(filter!))).not.toContain(
-      'external_service.connector_id'
-    );
+    expect(caseService.findCases.mock.calls[0][0]).not.toHaveProperty('hasReference');
   });
 
   it('checks authorization on the returned cases and flattens them', async () => {

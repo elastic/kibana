@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { Case } from '../../../common/types/domain';
 import { CasesSchema } from '../../../common/types/domain';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -49,20 +50,18 @@ export const findByExternalId = async (
           field: 'external_service.external_id',
           operator: 'or',
         }),
-        connectorId != null
-          ? buildFilter({
-              filters: connectorId,
-              field: 'external_service.connector_id',
-              operator: 'or',
-            })
-          : undefined,
         authorizationFilter,
       ],
       NodeBuilderOperators.and
     );
 
+    // The push connector is stored as a reference, not an attribute, so it cannot be filtered on.
+    // The reference also matches cases that only use the connector, hence the check below.
     const found = await caseService.findCases({
       filter,
+      ...(connectorId != null
+        ? { hasReference: { type: ACTION_SAVED_OBJECT_TYPE, id: connectorId } }
+        : {}),
       perPage: Math.min(MAX_MATCHES, MAX_DOCS_PER_PAGE),
       sortField: 'created_at',
     });
@@ -71,9 +70,13 @@ export const findByExternalId = async (
       found.saved_objects.map((theCase) => ({ id: theCase.id, owner: theCase.attributes.owner }))
     );
 
-    return decodeOrThrowZod(CasesSchema)(
+    const cases = decodeOrThrowZod(CasesSchema)(
       found.saved_objects.map((savedObject) => flattenCaseSavedObject({ savedObject }))
     );
+
+    return connectorId != null
+      ? cases.filter((theCase) => theCase.external_service?.connector_id === connectorId)
+      : cases;
   } catch (error) {
     throw createCaseError({
       message: `Failed to find cases for external id ${externalId}${
