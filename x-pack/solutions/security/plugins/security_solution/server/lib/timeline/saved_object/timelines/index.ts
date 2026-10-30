@@ -16,7 +16,7 @@ import {
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
-import { getUserDisplayName } from '@kbn/user-profile-components';
+import { getUserDisplayName } from '@kbn/user-profile-components/src/user_profile';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
