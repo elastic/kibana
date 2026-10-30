@@ -345,7 +345,7 @@ describe('createContractContext', () => {
         getIdToken: {
           scope: 'read',
           input: z.object({}),
-          handler: async ({ secrets, fetch: contextFetch }) => {
+          handler: async ({ secrets, fetchTestOnly: contextFetch }) => {
             const { client_email: email, private_key: key } = parseServiceAccountKey(
               String(secrets?.serviceAccountJson)
             );

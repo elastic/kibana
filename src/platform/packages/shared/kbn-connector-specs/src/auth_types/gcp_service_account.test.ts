@@ -63,7 +63,7 @@ describe('GcpServiceAccountAuth', () => {
 
       const contextFetch = jest.fn();
       await GcpServiceAccountAuth.configure(
-        { fetch: contextFetch } as unknown as AuthContext,
+        { fetchTestOnly: contextFetch } as unknown as AuthContext,
         mockAxiosInstance,
         { serviceAccountJson: VALID_SERVICE_ACCOUNT_JSON }
       );

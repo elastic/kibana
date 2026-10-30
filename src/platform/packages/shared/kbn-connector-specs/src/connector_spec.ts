@@ -142,7 +142,7 @@ export interface AuthContext {
    * The `fetch` for requests an auth type sends itself rather than through the axios client,
    * such as token exchanges. Defaults to the global `fetch`; contract tests pass the mock's.
    */
-  fetch?: typeof fetch;
+  fetchTestOnly?: typeof fetch;
 }
 
 export type AuthMode = 'per-user' | 'shared';
@@ -332,7 +332,7 @@ export interface ActionContext {
    * The `fetch` for requests a handler sends itself rather than through `client`, such as token
    * exchanges. Defaults to the global `fetch`; contract tests pass the mock's.
    */
-  fetch?: typeof fetch;
+  fetchTestOnly?: typeof fetch;
 }
 
 // ============================================================================

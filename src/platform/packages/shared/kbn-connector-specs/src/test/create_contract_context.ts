@@ -158,7 +158,7 @@ const createAuthContext = (mockFetch: typeof fetch): AuthContext => ({
   getToken: async () => ACCESS_TOKEN,
   logger: silentLogger,
   sslSettings: {},
-  fetch: mockFetch,
+  fetchTestOnly: mockFetch,
 });
 
 // Auth types sign with Web Crypto, which jest environments leave out.
@@ -255,7 +255,7 @@ export const createContractContext = async ({
     getClient: async (clientType) => {
       throw new Error(`Client ${String(clientType)} is not available in contract tests`);
     },
-    fetch: mock.fetch,
+    fetchTestOnly: mock.fetch,
   };
 
   const runAction = async (name: string, input: unknown): Promise<unknown> => {

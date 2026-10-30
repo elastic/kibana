@@ -68,7 +68,7 @@ export const GcpServiceAccountAuth: AuthTypeSpec<AuthSchemaType> = {
       serviceAccount.client_email,
       serviceAccount.private_key,
       scope,
-      ctx.fetch
+      ctx.fetchTestOnly
     );
 
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;

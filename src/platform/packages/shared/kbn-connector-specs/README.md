@@ -580,7 +580,7 @@ expect(mock.calls.flatMap(({ requestViolations }) => requestViolations)).toEqual
 
 Inputs are parsed with the action's schema first. Auth secrets the test leaves out get the auth type's defaults, or placeholders its schema accepts; `serviceAccountJson` gets a service account key with a throwaway RSA key, so GCP auth types can sign their JWTs. OAuth auth types get a fixed access token.
 
-Auth types and handlers that send requests themselves rather than through the axios client, such as GCP token exchanges, should use the `fetch` on `AuthContext` and `ActionContext`. It's unset in Kibana, so the global `fetch` is used; contract contexts set it to the mock's, which answers token URLs. While a contract context configures its auth type or runs an action, the global `fetch` throws, so a request that bypasses the mock fails instead of reaching the network.
+`AuthContext` and `ActionContext` have an optional `fetchTestOnly`, set only by contract contexts (never in Kibana, where the global `fetch` is used). It exists so auth helpers that exchange tokens themselves, such as GCP's, can reach the mock, which answers token URLs. Do not use it for vendor calls: those must go through `client`, which applies Kibana's proxy and SSL settings. While a contract context configures its auth type or runs an action, the global `fetch` throws, so a request that bypasses the mock fails instead of reaching the network.
 
 ## Vendor API artifacts
 
