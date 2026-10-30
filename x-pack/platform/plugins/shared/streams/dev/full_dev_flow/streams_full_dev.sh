@@ -230,7 +230,7 @@ cmd_status() {
   if kubectl_ctx -n streams-controller get deploy streams-controller >/dev/null 2>&1; then
     ok "controller Deployment"
   else
-    missing "controller  →  cd streams-controller && tilt up --port 10351"
+    missing "controller  →  cd streams-controller && tilt up --context kind-streams --port 10351"
   fi
   if [[ -n "$ES" ]]; then
     ok "Elasticsearch $ES ($ES_USER)"
@@ -1195,7 +1195,7 @@ Start these yourself and leave them running:
   pnpm es serverless --projectType=observability
   pnpm serverless-oblt
   cd streams-config-distributor && tilt up --context kind-streams -- --port 18443
-  cd streams-controller && tilt up --port 10351
+  cd streams-controller && tilt up --context kind-streams --port 10351
 
 Then from the Kibana checkout:
 
