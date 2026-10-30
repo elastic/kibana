@@ -93,13 +93,6 @@ const alertActionAppliedEventSchema: EventTypeOpts<AlertActionAppliedEbtData>['s
       optional: false,
     },
   },
-  alert_count: {
-    type: 'long',
-    _meta: {
-      description: 'Each applied alert is reported as its own event, so this count is 1.',
-      optional: false,
-    },
-  },
 };
 
 /** One registered event per action type. Every event uses {@link AlertActionAppliedEbtData}. */
@@ -118,5 +111,4 @@ export const buildAlertActionAppliedEventData = (event: {
   space_id: event.spaceId,
   ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
   origin: event.origin,
-  alert_count: 1,
 });

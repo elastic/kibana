@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_ACTION_EBT_EVENT_TYPES,
   alertActionAppliedTelemetryDataSchema,
@@ -30,10 +29,9 @@ describe('alertActionAppliedTelemetryDataSchema', () => {
     space_id: 'default',
     rule_id: 'rule-1',
     origin,
-    alert_count: 1,
   };
 
-  it('accepts space id, rule id, origin, and alert count', () => {
+  it('accepts space id, rule id, and origin', () => {
     expect(alertActionAppliedTelemetryDataSchema.parse(payload)).toEqual(payload);
   });
 
@@ -62,29 +60,18 @@ describe('alertActionAppliedTelemetryDataSchema', () => {
     expect(alertActionAppliedTelemetryDataSchema.parse(withApp)).toEqual(withApp);
   });
 
-  it('rejects a payload without space_id, origin, or alert_count', () => {
+  it('rejects a payload without space_id or origin', () => {
     expect(
       alertActionAppliedTelemetryDataSchema.safeParse({ ...payload, space_id: undefined }).success
     ).toBe(false);
     expect(
       alertActionAppliedTelemetryDataSchema.safeParse({ ...payload, origin: undefined }).success
     ).toBe(false);
-    expect(
-      alertActionAppliedTelemetryDataSchema.safeParse({ ...payload, alert_count: undefined })
-        .success
-    ).toBe(false);
   });
 
   it('rejects an origin without an actor', () => {
     expect(
       alertActionAppliedTelemetryDataSchema.safeParse({ ...payload, origin: { channel: 'api' } })
-        .success
-    ).toBe(false);
-  });
-
-  it.each([0, 1.5, MAX_BULK_ITEMS + 1])('rejects alert_count %s', (alertCount) => {
-    expect(
-      alertActionAppliedTelemetryDataSchema.safeParse({ ...payload, alert_count: alertCount })
         .success
     ).toBe(false);
   });

@@ -89,8 +89,8 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
       space_id: 'default',
       rule_id: ruleId,
       origin: API_ORIGIN,
-      alert_count: 1,
     });
+    expect(Object.keys(event.properties)).not.toContain('alert_count');
     expect(event.properties.origin.app).toBeUndefined();
   });
 
@@ -130,8 +130,8 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
         space_id: 'default',
         rule_id: ruleId,
         origin: API_ORIGIN,
-        alert_count: 1,
       });
+      expect(Object.keys(event.properties)).not.toContain('alert_count');
       expect(event.properties.origin.app).toBeUndefined();
     }
   });

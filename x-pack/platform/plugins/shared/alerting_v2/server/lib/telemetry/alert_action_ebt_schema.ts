@@ -6,7 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { MAX_BULK_ITEMS, ruleIdSchema } from '@kbn/alerting-v2-schemas';
+import { ruleIdSchema } from '@kbn/alerting-v2-schemas';
 import { eventOriginSchema } from '../event_origin/origin_schemas';
 
 export const ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE =
@@ -71,12 +71,6 @@ export const alertActionAppliedTelemetryDataSchema = lazySchema(() =>
         'The id of the rule that produced the alert. Absent when the alert has no rule id.'
       ),
     origin: eventOriginSchema.describe('Where the action came from.'),
-    alert_count: z
-      .number()
-      .int()
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe('Each applied alert is reported as its own event, so this count is 1.'),
   })
 );
 

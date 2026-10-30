@@ -120,7 +120,6 @@ describe('AlertActionTelemetrySubscriber', () => {
           space_id: 'default',
           rule_id: 'rule-1',
           origin: apiOrigin,
-          alert_count: 1,
         }
       );
     });
@@ -137,19 +136,16 @@ describe('AlertActionTelemetrySubscriber', () => {
           space_id: 'default',
           rule_id: 'rule-a',
           origin: apiOrigin,
-          alert_count: 1,
         },
         {
           space_id: 'default',
           rule_id: 'rule-a',
           origin: apiOrigin,
-          alert_count: 1,
         },
         {
           space_id: 'default',
           rule_id: 'rule-b',
           origin: apiOrigin,
-          alert_count: 1,
         },
       ]);
     });
@@ -183,7 +179,6 @@ describe('AlertActionTelemetrySubscriber', () => {
           space_id: 'default',
           rule_id: 'rule-1',
           origin: apiOrigin,
-          alert_count: 1,
         }
       );
       expect(ebtService.reportEvent).toHaveBeenNthCalledWith(
@@ -193,7 +188,6 @@ describe('AlertActionTelemetrySubscriber', () => {
           space_id: 'default',
           rule_id: 'rule-1',
           origin: apiOrigin,
-          alert_count: 1,
         }
       );
     });
@@ -208,7 +202,6 @@ describe('AlertActionTelemetrySubscriber', () => {
         {
           space_id: 'default',
           origin: apiOrigin,
-          alert_count: 1,
         }
       );
     });

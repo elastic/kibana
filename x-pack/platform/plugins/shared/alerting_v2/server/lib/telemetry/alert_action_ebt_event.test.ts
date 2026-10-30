@@ -59,19 +59,17 @@ describe('alert action EBT events', () => {
     ]);
   });
 
-  it('records alert_count as a long', () => {
-    expect(alertActionTelemetryEvents[0]?.schema.alert_count).toEqual({
-      type: 'long',
-      _meta: {
-        description: 'Each applied alert is reported as its own event, so this count is 1.',
-        optional: false,
-      },
-    });
+  it('records space id, optional rule id, and origin', () => {
+    expect(Object.keys(alertActionTelemetryEvents[0]?.schema ?? {})).toEqual([
+      'space_id',
+      'rule_id',
+      'origin',
+    ]);
   });
 });
 
 describe('buildAlertActionAppliedEventData', () => {
-  it('projects space id, rule id, origin, and alert count', () => {
+  it('projects space id, rule id, and origin', () => {
     expect(
       buildAlertActionAppliedEventData({
         spaceId: 'default',
@@ -82,7 +80,6 @@ describe('buildAlertActionAppliedEventData', () => {
       space_id: 'default',
       rule_id: 'rule-1',
       origin: { actor: 'user', channel: 'api' },
-      alert_count: 1,
     });
   });
 
@@ -96,7 +93,6 @@ describe('buildAlertActionAppliedEventData', () => {
     expect(data).toEqual({
       space_id: 'default',
       origin: { actor: 'user', channel: 'api' },
-      alert_count: 1,
     });
     expect(data).not.toHaveProperty('rule_id');
   });
