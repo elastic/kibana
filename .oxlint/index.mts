@@ -11,8 +11,6 @@
 // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
 // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
 // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
-// Exception: the generated `test-api-clients` bundles keep `@kbn/imports/no_unused_imports` and
-// `import/no-duplicates` in ESLint, because the OpenAPI generator relies on both fixing its output in one pass.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
