@@ -40,6 +40,8 @@ const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;
   isTestable?: boolean;
   hideRulesTab?: boolean;
+  /** Whether to show the Access tab, for stored connectors while object-level security is enabled. */
+  showAccessTab?: boolean;
   docsUrl?: string;
 }> = ({
   icon,
@@ -52,6 +54,7 @@ const FlyoutHeaderComponent: React.FC<{
   setTab,
   isTestable,
   hideRulesTab = false,
+  showAccessTab = false,
   docsUrl,
 }) => {
   const {
@@ -71,6 +74,10 @@ const FlyoutHeaderComponent: React.FC<{
 
   const setRulesTab = useCallback(() => {
     setTab(EditConnectorTabs.Rules);
+  }, [setTab]);
+
+  const setAccessTab = useCallback(() => {
+    setTab(EditConnectorTabs.Access);
   }, [setTab]);
 
   return (
@@ -216,6 +223,17 @@ const FlyoutHeaderComponent: React.FC<{
           >
             {i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.tabText', {
               defaultMessage: 'Test',
+            })}
+          </EuiTab>
+        )}
+        {showAccessTab && (
+          <EuiTab
+            onClick={setAccessTab}
+            data-test-subj="accessConnectorTab"
+            isSelected={EditConnectorTabs.Access === selectedTab}
+          >
+            {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.accessTabText', {
+              defaultMessage: 'Access',
             })}
           </EuiTab>
         )}
