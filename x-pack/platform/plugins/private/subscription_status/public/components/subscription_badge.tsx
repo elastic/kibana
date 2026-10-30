@@ -169,10 +169,6 @@ const SubscriptionPopover = ({
               fill={primaryActionStyle === 'fill'}
               fullWidth={!secondaryAction}
               size="s"
-              iconType={
-                primaryAction.external && primaryActionStyle === 'tinted' ? 'external' : undefined
-              }
-              iconSide="right"
               data-test-subj="subscriptionStatusPrimaryAction"
             >
               {primaryAction.label}
