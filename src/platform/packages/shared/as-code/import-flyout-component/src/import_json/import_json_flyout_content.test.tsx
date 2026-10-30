@@ -119,7 +119,9 @@ describe('ImportJsonFlyoutContent', () => {
     renderFlyout({ sanitizeImportJson });
     await pickFile(VALID_FILE);
     await waitFor(() => expect(screen.getByTestId('testServerError')).toBeInTheDocument());
-    expect(screen.getByText(/could not be imported/)).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('testServerError')).getByText(/could not be imported/)
+    ).toBeInTheDocument();
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
     expect(mockCaptureError).toHaveBeenCalledWith(
       expect.any(Error),
@@ -214,13 +216,14 @@ describe('ImportJsonFlyoutContent', () => {
     renderFlyout({ sanitizeImportJson });
     await pickFile(VALID_FILE);
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
-    expect(screen.getByText(/Unsupported properties were removed/)).toBeInTheDocument();
-    expect(screen.getByText(/1 item removed from the imported file/)).toBeInTheDocument();
+    const callout = within(screen.getByTestId('testWarnings'));
+    expect(callout.getByText(/Unsupported properties were removed/)).toBeInTheDocument();
+    expect(callout.getByText(/1 item removed from the imported file/)).toBeInTheDocument();
     expect(screen.queryByTestId('testWarningsList')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('Show details'));
-    expect(screen.getAllByTestId('testWarningsList')[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/Panel "chart-1" could not be loaded/)[0]).toBeInTheDocument();
+    expect(screen.getByTestId('testWarningsList')).toBeInTheDocument();
+    expect(screen.getByText(/Panel "chart-1" could not be loaded/)).toBeInTheDocument();
 
     const warnings = screen.getByTestId('testWarnings');
     const filePicker = screen.getByTestId('testFilePicker');
@@ -244,23 +247,24 @@ describe('ImportJsonFlyoutContent', () => {
     await pickFile(VALID_FILE);
 
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
-    expect(screen.getByText('Review import warnings')).toBeInTheDocument();
+    const callout = within(screen.getByTestId('testWarnings'));
+    expect(callout.getByText('Review import warnings')).toBeInTheDocument();
     expect(
-      screen.getByText(
+      callout.getByText(
         /This import references 123 related items. Make sure that these items exist in this cluster or space/
       )
     ).toBeInTheDocument();
-    expect(screen.getByText('Showing the first 2.')).toBeInTheDocument();
+    expect(callout.getByText('Showing the first 2.')).toBeInTheDocument();
     expect(screen.queryByTestId('testRelatedItemsList')).not.toBeInTheDocument();
 
     await user.click(within(screen.getByTestId('testRelatedItemsAccordion')).getByRole('button'));
-    expect(screen.getAllByTestId('testRelatedItemsList')[0]).toBeInTheDocument();
-    expect(screen.getAllByRole('columnheader', { name: 'Item type' })[0]).toBeInTheDocument();
-    expect(screen.getAllByRole('columnheader', { name: 'Item ID' })[0]).toBeInTheDocument();
-    expect(screen.getAllByText('data view')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('lens')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('library-item-1')[0]).toBeInTheDocument();
+    expect(screen.getByTestId('testRelatedItemsList')).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Item type' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Item ID' })).toBeInTheDocument();
+    expect(screen.getByText('data view')).toBeInTheDocument();
+    expect(screen.getByText('data-view-1')).toBeInTheDocument();
+    expect(screen.getByText('lens')).toBeInTheDocument();
+    expect(screen.getByText('library-item-1')).toBeInTheDocument();
     expect(screen.getByTestId('testImportButton')).toBeEnabled();
   });
 
@@ -276,9 +280,10 @@ describe('ImportJsonFlyoutContent', () => {
 
     await waitFor(() => expect(screen.getByTestId('testWarnings')).toBeInTheDocument());
     expect(screen.getAllByTestId('testWarnings')).toHaveLength(1);
-    expect(screen.getByText(/1 item removed from the imported file/)).toBeInTheDocument();
+    const callout = within(screen.getByTestId('testWarnings'));
+    expect(callout.getByText(/1 item removed from the imported file/)).toBeInTheDocument();
     expect(
-      screen.getByText(
+      callout.getByText(
         /This import references 1 related item. Make sure that these items exist in this cluster or space/
       )
     ).toBeInTheDocument();
@@ -287,9 +292,9 @@ describe('ImportJsonFlyoutContent', () => {
     const relatedItemsAccordion = screen.getByTestId('testRelatedItemsAccordion');
     await user.click(within(warningsAccordion).getByRole('button'));
     await user.click(within(relatedItemsAccordion).getByRole('button'));
-    expect(screen.getAllByText(/Panel "chart-1" could not be loaded/)[0]).toBeInTheDocument();
-    expect(screen.getAllByText('index-pattern')[0]).toBeInTheDocument();
-    expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
+    expect(screen.getByText(/Panel "chart-1" could not be loaded/)).toBeInTheDocument();
+    expect(screen.getByText('index-pattern')).toBeInTheDocument();
+    expect(screen.getByText('data-view-1')).toBeInTheDocument();
     expect(screen.getByTestId('testImportButton')).toBeEnabled();
   });
 
@@ -318,7 +323,7 @@ describe('ImportJsonFlyoutContent', () => {
     await waitFor(() => expect(sanitizeImportJson).toHaveBeenCalledTimes(2));
     expect(screen.getByTestId('testWarnings')).toBeInTheDocument();
     await user.click(within(screen.getByTestId('testWarningsAccordion')).getByRole('button'));
-    expect(screen.getAllByText('A property was removed')[0]).toBeInTheDocument();
+    expect(screen.getByText('A property was removed')).toBeInTheDocument();
   });
 
   it('creates the object and calls onImportSuccess', async () => {
@@ -363,11 +368,26 @@ describe('ImportJsonFlyoutContent', () => {
       await user.click(
         within(screen.getByTestId('testServerErrorDetailsAccordion')).getByRole('button')
       );
-      expect(screen.getAllByText('[request body]: expected title')[0]).toBeInTheDocument();
+      expect(screen.getByText('[request body]: expected title')).toBeInTheDocument();
 
       await pickFile(new File([JSON.stringify(VALID_STATE)], 'another-object.json'));
       await waitFor(() => expect(screen.getByTestId('testImportButton')).toBeEnabled());
       expect(screen.queryByTestId('testServerErrorDetailsAccordion')).not.toBeInTheDocument();
+    });
+
+    it('announces the error without cloning the details accordion into the live region', async () => {
+      renderFlyout({
+        sanitizeImportJson: jest
+          .fn()
+          .mockRejectedValue(createHttpError(400, '[request body]: expected title')),
+      });
+      await pickFile(VALID_FILE);
+      await waitFor(() => expect(screen.getByTestId('testServerError')).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByRole('status')).toHaveTextContent('The file could not be imported.')
+      );
+      expect(screen.getAllByTestId('testServerErrorDetailsAccordion')).toHaveLength(1);
+      expect(within(screen.getByRole('status')).queryByRole('button')).not.toBeInTheDocument();
     });
 
     it('does not show details for a 5xx sanitize error', async () => {

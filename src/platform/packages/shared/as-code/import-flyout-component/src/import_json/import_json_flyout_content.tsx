@@ -22,6 +22,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -45,7 +46,7 @@ export interface ImportJsonFlyoutContentProps<SanitizedState> {
   /** Application-specific description shown above the NDJSON note. */
   description?: ReactNode;
   serverValidationErrorTitle: string;
-  serverValidationErrorText?: ReactNode;
+  serverValidationErrorText?: string;
   /** Override the default generic warnings summary. */
   getWarningsSummary?: (count: number) => string;
   sanitizeImportJson: SanitizeImportJson<SanitizedState>;
@@ -133,7 +134,6 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
         {serverError && (
           <>
             <KbnDangerCallout
-              announceOnMount
               title={serverValidationErrorTitle}
               data-test-subj={`${dataTestSubjPrefix}ServerError`}
             >
@@ -145,6 +145,9 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
                 />
               )}
             </KbnDangerCallout>
+            <EuiLiveAnnouncer>
+              {[serverValidationErrorTitle, serverValidationErrorText].filter(Boolean).join(', ')}
+            </EuiLiveAnnouncer>
             <EuiSpacer size="m" />
           </>
         )}
