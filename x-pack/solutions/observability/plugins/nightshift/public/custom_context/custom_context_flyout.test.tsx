@@ -14,7 +14,7 @@ import { useKibana } from '../hooks/use_kibana';
 import { CustomContextFlyout } from './custom_context_flyout';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../common/format_timestamp', () => ({
+jest.mock('../hooks/use_format_timestamp', () => ({
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 

@@ -13,11 +13,11 @@ import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
-import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
-import { useInvestigationSections } from '../hooks/use_investigation_sections';
+import type { InvestigationSectionState } from '../data/investigations/use_investigation_sections';
+import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
 
-jest.mock('../hooks/use_investigation_sections');
+jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
