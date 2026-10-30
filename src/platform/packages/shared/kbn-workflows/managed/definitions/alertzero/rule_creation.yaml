@@ -234,6 +234,8 @@ steps:
       # The tool rejected the request for a reason another run would not change: no
       # index fits the gap, or the request makes no sense as a rule. Any other unusable
       # draft, such as a model mistake or a tool error, can pass on the next sweep.
+      # The tool does not return INCOHERENT or NOT_SECURITY_RELEVANT yet. They are
+      # listed so those requests close the gap once it does.
       final: >-
         ${{ steps.draft_creation.output.structured_output.rejection_code == 'NO_DATA'
           or steps.draft_creation.output.structured_output.rejection_code == 'INCOHERENT'
