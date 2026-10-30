@@ -26,6 +26,7 @@ import {
   getThemeConfigByName,
   DEFAULT_THEME_CONFIG,
 } from '@kbn/react-kibana-context-common';
+import type { ChromeStart, ChromeStyle } from '@kbn/core-chrome-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
@@ -36,6 +37,11 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
   theme: ThemeServiceStart;
   userProfile?: Pick<UserProfileService, 'getUserProfile$'>;
   globalStyles?: boolean;
+  /**
+   * Optional chrome style APIs. Used to inset overlay flyouts in project chrome.
+   * Prefer passing via `KibanaRootContextProvider`'s `chrome` prop.
+   */
+  chrome?: Partial<Pick<ChromeStart, 'getChromeStyle$' | 'getChromeStyle'>>;
 }
 
 const sharedCacheOptions = {
@@ -77,24 +83,9 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
 
 const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
 const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
-
-const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
-  EuiFlyout: {
-    includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
-    container: FLYOUT_CONTAINER_SELECTOR,
-  },
-  EuiPopover: {
-    repositionOnScroll: true,
-  },
-  EuiToolTip: {
-    repositionOnScroll: true,
-  },
-  EuiTable: {
-    scrollableInline: true,
-    tableLayout: 'auto',
-    responsiveBreakpoint: false,
-  },
-};
+// POC: inset overlay flyouts in project chrome; EUI no-ops offset when pushed
+const PROJECT_FLYOUT_OFFSET = 8;
+const DEFAULT_CHROME_STYLE: ChromeStyle = 'classic';
 
 /**
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
@@ -106,6 +97,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
   modify,
+  chrome,
   children,
 }) => {
   const { theme$ } = theme;
@@ -142,6 +134,40 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // This logic was drawn from the Core theme provider, and wasn't present (or even used)
   // elsewhere.  Should be a passive addition to anyone using the older theme provider(s).
   const globalStyles = globalStylesProp === false ? false : undefined;
+
+  const chromeStyle$ = useMemo(
+    () => chrome?.getChromeStyle$?.() ?? Rx.of(DEFAULT_CHROME_STYLE),
+    [chrome]
+  );
+  const chromeStyle = useObservable(
+    chromeStyle$,
+    chrome?.getChromeStyle?.() ?? DEFAULT_CHROME_STYLE
+  );
+
+  const componentDefaults = useMemo<EuiProviderProps<unknown>['componentDefaults']>(
+    () => ({
+      EuiFlyout: {
+        includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+        container: FLYOUT_CONTAINER_SELECTOR,
+        // POC: inset overlay flyouts in project chrome only (push mode ignores offset)
+        offset: chromeStyle === 'project' ? PROJECT_FLYOUT_OFFSET : 0,
+        // POC: no overlay mask by default; call sites can opt in with ownFocus={true}
+        ownFocus: false,
+      },
+      EuiPopover: {
+        repositionOnScroll: true,
+      },
+      EuiToolTip: {
+        repositionOnScroll: true,
+      },
+      EuiTable: {
+        scrollableInline: true,
+        tableLayout: 'auto',
+        responsiveBreakpoint: false,
+      },
+    }),
+    [chromeStyle]
+  );
 
   return (
     <EuiProvider

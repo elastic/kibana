@@ -14,6 +14,7 @@ import { v4 as uuidV4 } from 'uuid';
 import type { EuiFlyoutMenuProps, EuiFlyoutProps } from '@elastic/eui';
 import { EuiFlyout, getFlyoutManagerStore } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
@@ -138,6 +139,8 @@ interface SystemFlyoutStartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   targetDomElement: Element;
+  /** Chrome style APIs for project/classic EUI component defaults (e.g. flyout offset). */
+  chrome?: Pick<ChromeStart, 'getChromeStyle$' | 'getChromeStyle'>;
 }
 
 /**
@@ -267,6 +270,7 @@ export class SystemFlyoutService {
     i18n,
     theme,
     userProfile,
+    chrome,
     targetDomElement,
   }: SystemFlyoutStartDeps): SystemFlyoutServiceStart {
     this.targetDomElement = targetDomElement;
@@ -304,6 +308,7 @@ export class SystemFlyoutService {
             i18n={i18n}
             theme={theme}
             userProfile={userProfile}
+            chrome={chrome}
           >
             {/* `OverlaySystemFlyoutOpenOptions` is built from `Omit<EuiFlyoutProps |
                 EuiFlyoutResizableProps, …>`; omitting over that union widens `type`, so narrow it
@@ -365,6 +370,7 @@ export class SystemFlyoutService {
             i18n={i18n}
             theme={theme}
             userProfile={userProfile}
+            chrome={chrome}
           >
             <FlyoutTemplateManagedProvider value={managed}>
               <FlyoutMountGuard onError={onCloseFlyout}>

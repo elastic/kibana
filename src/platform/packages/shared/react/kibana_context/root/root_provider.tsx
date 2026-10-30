@@ -42,8 +42,12 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   executionContext?: ExecutionContextStart;
   /** `CoreEnv` from core */
   coreEnv?: CoreEnv;
-  /** Chrome service for wrapping children in Chrome context providers */
-  chrome?: Pick<ChromeStart, 'withProvider'>;
+  /**
+   * Chrome service for wrapping children in Chrome context providers and for
+   * chrome-style-aware EUI defaults (e.g. project flyout offset).
+   * Fields are partial so overlay React trees can pass style APIs without `withProvider`.
+   */
+  chrome?: Partial<Pick<ChromeStart, 'withProvider' | 'getChromeStyle$' | 'getChromeStyle'>>;
   /**
    * Core's authentication service (`coreStart.security.authc`).
    */
@@ -112,7 +116,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   } else {
     const { theme, globalStyles, colorMode, modify } = props;
     return (
-      <KibanaEuiProvider {...{ theme, userProfile, globalStyles, colorMode, modify }}>
+      <KibanaEuiProvider {...{ theme, userProfile, globalStyles, colorMode, modify, chrome }}>
         {rootContextProvider}
       </KibanaEuiProvider>
     );

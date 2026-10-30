@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ChromeStart, ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -27,12 +29,27 @@ interface StartDeps {
   uiSettings: IUiSettingsClient;
 }
 
+type ChromeStyleApis = Pick<ChromeStart, 'getChromeStyle$' | 'getChromeStyle'>;
+
+const DEFAULT_CHROME_STYLE: ChromeStyle = 'classic';
+
 /** @internal */
 export class OverlayService {
   private bannersService = new OverlayBannersService();
   private modalService = new ModalService();
   private flyoutService = new FlyoutService();
   private systemFlyoutService = new SystemFlyoutService();
+  // Chrome starts after overlays; setChrome() wires style APIs for overlay EuiProviders.
+  private chromeStyleApis: ChromeStyleApis | undefined;
+
+  /**
+   * Provide chrome style APIs after ChromeService starts.
+   * Overlay flyouts mount in a separate React tree and need these for EUI defaults
+   * (e.g. project flyout offset).
+   */
+  public setChrome(chrome: ChromeStyleApis): void {
+    this.chromeStyleApis = chrome;
+  }
 
   public closeAllFlyouts(): void {
     this.flyoutService.closeAllFlyouts();
@@ -40,11 +57,19 @@ export class OverlayService {
   }
 
   public start({ targetDomElement, ...startDeps }: StartDeps): OverlayStart {
+    // Stable adapter identity for KibanaEuiProvider; delegates to chrome once setChrome runs.
+    const chrome: ChromeStyleApis = {
+      getChromeStyle$: () =>
+        this.chromeStyleApis?.getChromeStyle$() ?? of(DEFAULT_CHROME_STYLE),
+      getChromeStyle: () => this.chromeStyleApis?.getChromeStyle() ?? DEFAULT_CHROME_STYLE,
+    };
+    const startDepsWithChrome = { ...startDeps, chrome };
+
     const flyoutElement = document.createElement('div');
     targetDomElement.appendChild(flyoutElement);
     const flyouts = this.flyoutService.start({
       targetDomElement: flyoutElement,
-      ...startDeps,
+      ...startDepsWithChrome,
     });
 
     const banners = this.bannersService.start(startDeps);
@@ -53,7 +78,7 @@ export class OverlayService {
     targetDomElement.appendChild(modalElement);
     const modals = this.modalService.start({
       targetDomElement: modalElement,
-      ...startDeps,
+      ...startDepsWithChrome,
     });
 
     // Create system flyout container within the main React tree
@@ -62,7 +87,7 @@ export class OverlayService {
     targetDomElement.appendChild(systemFlyoutElement);
     const systemFlyouts = this.systemFlyoutService.start({
       targetDomElement: systemFlyoutElement,
-      ...startDeps,
+      ...startDepsWithChrome,
     });
 
     return {

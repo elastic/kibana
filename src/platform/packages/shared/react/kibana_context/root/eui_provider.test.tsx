@@ -14,6 +14,7 @@ import { render, waitFor } from '@testing-library/react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { useEuiTheme, EuiProvider } from '@elastic/eui';
+import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
@@ -47,6 +48,15 @@ describe('KibanaEuiProvider', () => {
       euiTheme = theme;
     }, [theme]);
     return <div>foo</div>;
+  };
+
+  const createChrome = (style: ChromeStyle) => {
+    const chromeStyle$ = new BehaviorSubject<ChromeStyle>(style);
+    return {
+      getChromeStyle$: () => chromeStyle$.asObservable(),
+      getChromeStyle: () => chromeStyle$.getValue(),
+      chromeStyle$,
+    };
   };
 
   it('exposes the EUI theme provider', async () => {
@@ -116,6 +126,8 @@ describe('KibanaEuiProvider', () => {
           EuiFlyout: {
             includeSelectorInFocusTrap: '[data-eui-includes-in-flyout-focus-trap="true"]',
             container: '#app-main-scroll',
+            offset: 0,
+            ownFocus: false,
           },
           EuiPopover: {
             repositionOnScroll: true,
@@ -132,5 +144,74 @@ describe('KibanaEuiProvider', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('sets EuiFlyout offset for project chrome', async () => {
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
+    const chrome = createChrome('project');
+
+    render(
+      <KibanaEuiProvider
+        theme={{ theme$: of(coreTheme) }}
+        userProfile={userProfile}
+        chrome={chrome}
+      >
+        <div>test</div>
+      </KibanaEuiProvider>
+    );
+
+    expect(EuiProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        componentDefaults: expect.objectContaining({
+          EuiFlyout: expect.objectContaining({
+            offset: 8,
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('updates EuiFlyout offset when chrome style changes', async () => {
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
+    const chrome = createChrome('classic');
+
+    render(
+      <KibanaEuiProvider
+        theme={{ theme$: of(coreTheme) }}
+        userProfile={userProfile}
+        chrome={chrome}
+      >
+        <div>test</div>
+      </KibanaEuiProvider>
+    );
+
+    expect(EuiProvider).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        componentDefaults: expect.objectContaining({
+          EuiFlyout: expect.objectContaining({
+            offset: 0,
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+
+    act(() => {
+      chrome.chromeStyle$.next('project');
+    });
+
+    await waitFor(() => {
+      expect(EuiProvider).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          componentDefaults: expect.objectContaining({
+            EuiFlyout: expect.objectContaining({
+              offset: 8,
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
   });
 });

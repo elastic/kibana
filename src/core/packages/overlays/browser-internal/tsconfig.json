@@ -28,6 +28,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
+    "@kbn/core-chrome-browser",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-user-profile-browser",
     "@kbn/flyout-template"

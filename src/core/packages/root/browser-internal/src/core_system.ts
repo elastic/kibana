@@ -392,6 +392,8 @@ export class CoreSystem {
         userProfile,
         uiSettings,
       });
+      // Overlay flyouts mount outside the main React tree; wire chrome style for EUI defaults.
+      this.overlay.setChrome(chrome);
       const deprecations = this.deprecations.start({ http });
 
       const rendering = this.rendering.start({

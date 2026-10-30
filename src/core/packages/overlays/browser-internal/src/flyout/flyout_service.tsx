@@ -14,6 +14,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -68,6 +69,8 @@ interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   targetDomElement: Element;
+  /** Chrome style APIs for project/classic EUI component defaults (e.g. flyout offset). */
+  chrome?: Pick<ChromeStart, 'getChromeStyle$' | 'getChromeStyle'>;
 }
 
 /** @internal */
@@ -80,6 +83,7 @@ export class FlyoutService {
     i18n,
     theme,
     userProfile,
+    chrome,
     targetDomElement,
   }: StartDeps): OverlayFlyoutStart {
     this.targetDomElement = targetDomElement;
@@ -133,6 +137,7 @@ export class FlyoutService {
             i18n={i18n}
             theme={theme}
             userProfile={userProfile}
+            chrome={chrome}
           >
             {getWrapper(<OverlayMountWrapper mount={mount} />)}
           </KibanaRenderContextProvider>,

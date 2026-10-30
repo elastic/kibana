@@ -53,10 +53,12 @@ const globalTempHackStyles = (
     }
 
     .euiFlyout[class*='right'] {
-      // match the application area border-radius on the right edge,
-      // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
+      // Match the framed application area's right-edge radius for flush flyouts (push /
+      // non-offset). Skip EUI offset overlays (class*=-offset) so all four corners stay
+      // rounded — the flush clip-path !important otherwise squares the right.
+      // POC: class*=-offset depends on Emotion's style label, not a public EUI API.
       ${appearance === 'framed' &&
-      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
+      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]):not([class*='-offset']) {
           border-top-right-radius: ${_euiTheme.border.radius.frame};
           border-bottom-right-radius: ${_euiTheme.border.radius.frame};
           // EUI clips overlay-right flyout shadows with a sharp polygon; round it to match
