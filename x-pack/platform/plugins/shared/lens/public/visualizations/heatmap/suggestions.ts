@@ -107,7 +107,13 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     newState.valueAccessor = numberMetric.columnId;
   }
 
-  const [histogram, ordinal] = partition(groups, (g) => g.operation.scale === 'interval');
+  // ES|QL histogram distribution: BUCKET over a histogram field returns a number_range type
+  const hasRangeBucket = groups.some((g) => g.operation.dataType === 'number_range');
+
+  const [histogram, ordinal] = partition(
+    groups,
+    (g) => g.operation.scale === 'interval' || (hasRangeBucket && g.operation.dataType === 'date')
+  );
 
   newState.xAccessor = histogram[0]?.columnId || ordinal[0]?.columnId;
   newState.yAccessor = groups.find((g) => g.columnId !== newState.xAccessor)?.columnId;
@@ -122,7 +128,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   const hasDatehistogram = groups.some((group) => group.operation.dataType === 'date');
 
-  if (!hasDatehistogram) {
+  if (!hasDatehistogram || hasRangeBucket) {
     if (newState.xAccessor) {
       score += 0.3;
     }

@@ -50,6 +50,7 @@ import {
   findMinMaxByColumnId,
   getFormattedTable,
   getSortPredicate,
+  sortRowsByRangeLowerBound,
 } from './helpers';
 import {
   LegendColorPickerWrapperContext,
@@ -458,6 +459,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           return row;
         });
       }
+    }
+
+    if (yAxisColumn?.meta.type === 'number_range') {
+      chartData = sortRowsByRangeLowerBound(
+        chartData,
+        yAxisColumn.id,
+        args.gridConfig.ySortPredicate
+      );
     }
 
     const xScaleType = isTimeBasedX ? ScaleType.Time : args.gridConfig.xScaleType;
