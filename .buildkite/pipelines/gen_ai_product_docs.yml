@@ -1,6 +1,8 @@
 env:
   FTR_GEN_AI: '1'
   FTR_EIS_CCM: '1'
+  # Serverless product docs. The Kibana version from GET /api/status is built by
+  # gen_ai_stack_version_docs.yml every two weeks.
   STACK_DOCS_VERSION: 'latest'
 steps:
   - label: '👨‍🔧 Pre-Build'
@@ -16,7 +18,7 @@ steps:
   # Always run this step: resolve_reusable_kibana_build.sh picks a recent
   # kibana-on-merge distributable (≤36h) when KIBANA_BUILD_ID is unset, then
   # build_kibana.sh short-circuits. Falls back to a full build if none found.
-  # Shared with gen_ai_security_labs.yml. Force a rebuild with KIBANA_REUSE_BUILD=false
+  # Shared with gen_ai_security_labs.yml and gen_ai_stack_version_docs.yml. Force a rebuild with KIBANA_REUSE_BUILD=false
   # or pin a build by setting KIBANA_BUILD_ID on the Buildkite build.
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: |
@@ -32,16 +34,18 @@ steps:
 
   - wait
 
-  - label: AppEx AI-Infra Inference APIs FTR tests
-    key: ai-infra-gen-ai-inference-api
+  # Same FTR group, two agents: Jina and ELSER on EIS. Distinct config paths so
+  # ftr_configs.sh does not treat the second model as already executed.
+  - label: AppEx AI-Infra serverless product docs artifacts (Jina)
+    key: ai-infra-gen-ai-inference-api-jina
     command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
     env:
-      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts'
+      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_jina_artifacts.config.ts'
       FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
       FTR_GEN_AI: '1'
       FTR_EIS_CCM: '1'
-      # Same EIS chat model the local ES|QL docs update uses.
-      ESQL_DOCS_INFERENCE_ID: '.openai-gpt-5.5-chat_completion'
+      INFERENCE_ID: '.jina-embeddings-v5-text-small'
+      OPENAPI_INFERENCE_ID: '.jina-embeddings-v5-text-small'
       # Keep ES/Kibana server logs on disk so mocha log capture does not OOM on ML-heavy suites
       FTR_EXTRA_ARGS: '--writeLogsToPath=data/ftr_servers_logs'
     timeout_in_minutes: 180
@@ -51,7 +55,35 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      # ES|QL enrichment + multi-product semantic indices need more than the default boot disk
+      # Multi-product semantic indices need more than the default boot disk
+      diskSizeGb: 180
+      preemptible: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+        - exit_status: '*'
+          limit: 1
+
+  - label: AppEx AI-Infra serverless product docs artifacts (ELSER on EIS)
+    key: ai-infra-gen-ai-inference-api-elser-eis
+    command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
+    env:
+      FTR_CONFIG: 'x-pack/platform/test/functional_gen_ai/inference/generate_elser_eis_artifacts.config.ts'
+      FTR_CONFIG_GROUP_KEY: 'ftr-ai-infra-gen-ai-inference-api'
+      FTR_GEN_AI: '1'
+      FTR_EIS_CCM: '1'
+      INFERENCE_ID: '.elser-2-elastic'
+      OPENAPI_INFERENCE_ID: '.elser-2-elastic'
+      # Keep ES/Kibana server logs on disk so mocha log capture does not OOM on ML-heavy suites
+      FTR_EXTRA_ARGS: '--writeLogsToPath=data/ftr_servers_logs'
+    timeout_in_minutes: 180
+    parallelism: 1
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
       diskSizeGb: 180
       preemptible: true
     retry:
