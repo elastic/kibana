@@ -541,8 +541,15 @@ export class SignificantEventsPlugin
           const { spaceId } = request;
           // Source changes are applied as the space's service account, by the space's bound
           // reconciliation. A space that is not set up has no detection engine to apply them to.
+          // The sync workflow and the eligible streams sweep align the space with its sources once
+          // it is set up.
+          // TODO: refuse to change the sources of a space that is not set up, so that nothing is
+          // left to catch up. Sources are part of the detection engine.
           const [coreStart] = await core.getStartServices();
           if (!(await isDetectionEngineSetUp({ core: coreStart, spaceId }))) {
+            this.logger.warn(
+              `The change of source ${sourceId} was not applied: Nightshift is not set up in space ${spaceId}`
+            );
             return;
           }
           await new WorkflowExecutionService<{ sourceId: string; sourceSlug: string }>({
