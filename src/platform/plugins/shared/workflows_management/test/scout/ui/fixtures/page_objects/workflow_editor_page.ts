@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
+// eslint-disable-next-line @kbn/kbn-monaco/no_direct_monaco_import -- we need to import monaco directly for this service
 import type { monaco } from '@kbn/monaco';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
@@ -131,14 +131,8 @@ export class WorkflowEditorPage {
     await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
       params: { tab: 'executions' },
     });
-    const list = this.page.testSubj.locator('workflowExecutionList');
-    const openList = this.page.testSubj.locator('workflowDetailExecutionsButton');
-    // The executions tab still shows the list inline. The flyout opens from the header button.
-    await list.or(openList).waitFor({ state: 'visible' });
-    if (!(await list.isVisible())) {
-      await openList.click();
-      await list.waitFor({ state: 'visible' });
-    }
+    // The executions tab opens the list. Do not click the header button: it closes the list.
+    await this.page.testSubj.locator('workflowExecutionList').waitFor({ state: 'visible' });
   }
 
   /**

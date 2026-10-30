@@ -14,6 +14,7 @@ import {
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   getErrorMessage,
   type CustomContentPanelResolutionRequest,
@@ -25,6 +26,8 @@ export type CustomContentEsqlGenerator = (params: {
   nlQuery: string;
   index?: string;
   existingQueries: string[];
+  /** The values of the dashboard's ES|QL controls, for a query that refers to one (`?name`). */
+  esqlVariables?: ESQLControlVariable[];
 }) => Promise<string>;
 
 const resolveCustomContentState = async (
@@ -33,8 +36,23 @@ const resolveCustomContentState = async (
   generateEsql: CustomContentEsqlGenerator
 ): Promise<CustomContentState> => {
   const { nlQuery, esql, hasData, index, existingPanel } = request;
-  const generate = (existingQueries: string[]) =>
-    generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries });
+  // A control's column type is looked up only for a variable that the queries use, or for any when
+  // the query is yet to be generated.
+  const getEsqlVariables = (
+    queries: ReadonlyArray<string | null | undefined>,
+    options?: { anyVariable?: boolean }
+  ) =>
+    request.resolveEsqlVariables?.(
+      queries.filter((query): query is string => !!query),
+      options
+    );
+  const generate = async (existingQueries: string[]) =>
+    generateEsql({
+      nlQuery: nlQuery ?? '',
+      index,
+      existingQueries,
+      esqlVariables: await getEsqlVariables([esql, ...existingQueries], { anyVariable: true }),
+    });
 
   if (!existingPanel) {
     // The agent always states hasData: a static panel (false) has no query unless one is supplied.
@@ -45,7 +63,11 @@ const resolveCustomContentState = async (
       isNewPanel: true,
       generate,
     });
-    const { template } = await resolveTemplate({ prompt: nlQuery, esqlQuery: query });
+    const { template } = await resolveTemplate({
+      prompt: nlQuery,
+      esqlQuery: query,
+      esqlVariables: query ? await getEsqlVariables([query]) : undefined,
+    });
     return { esql_query: toEsqlQueryState(query), template };
   }
 
@@ -66,8 +88,11 @@ const resolveCustomContentState = async (
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
     additionalEsqlQueries,
+    esqlVariables:
+      isQueryChanging && mergedEsqlQuery ? await getEsqlVariables([mergedEsqlQuery]) : undefined,
   });
   return {
+    ...existing,
     esql_query: toEsqlQueryState(mergedEsqlQuery, additionalEsqlQueries),
     template,
   };
