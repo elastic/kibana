@@ -37,6 +37,7 @@ import {
   isLookupDslNotApplicable,
   isLookupIndexMode,
   isLookupLifecycleNotApplicable,
+  isManaged,
 } from '../../../../lib/data_streams';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
@@ -61,6 +62,8 @@ interface TableDataStream extends DataStream {
 
 interface Props {
   dataStreams?: DataStream[];
+  /** Loaded data streams that are excluded from `dataStreams` by the view filters. */
+  excludedDataStreams?: DataStream[];
   isLoading?: boolean;
   reload: UseRequestResponse['resendRequest'];
   history: ScopedHistory;
@@ -86,6 +89,7 @@ const useStyles = () => {
 
 export const DataStreamTable: React.FunctionComponent<Props> = ({
   dataStreams,
+  excludedDataStreams = [],
   isLoading,
   reload,
   history,
@@ -111,11 +115,54 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     }));
   }, [dataStreams]);
 
+  const searchQuery = searchValue.trim().toLowerCase();
+
   const filteredData = useMemo(() => {
-    const q = searchValue.trim().toLowerCase();
-    if (!q) return data;
-    return data.filter((ds) => ds.name.toLowerCase().includes(q));
-  }, [data, searchValue]);
+    if (!searchQuery) return data;
+    return data.filter((ds) => ds.name.toLowerCase().includes(searchQuery));
+  }, [data, searchQuery]);
+
+  // Data streams that would match the search but are excluded by the view filters.
+  const excludedMatchingData = useMemo(() => {
+    if (!searchQuery) return excludedDataStreams;
+    return excludedDataStreams.filter((ds) => ds.name.toLowerCase().includes(searchQuery));
+  }, [excludedDataStreams, searchQuery]);
+
+  // Turn on only the view filters that are currently excluding matching data streams.
+  const showExcludedDataStreams = () => {
+    const hasManaged = excludedMatchingData.some(isManaged);
+    const hasHidden = excludedMatchingData.some(({ hidden }) => hidden);
+
+    onViewFilterChange({
+      managed: hasManaged ? { ...viewFilters.managed, checked: 'on' } : viewFilters.managed,
+      hidden: hasHidden ? { ...viewFilters.hidden, checked: 'on' } : viewFilters.hidden,
+    });
+  };
+
+  const isEmptyBecauseOfViewFilters = filteredData.length === 0 && excludedMatchingData.length > 0;
+
+  const noItemsMessage = isEmptyBecauseOfViewFilters ? (
+    <FormattedMessage
+      id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMatchingViewFiltersMessage"
+      defaultMessage="{count, plural, one {# managed or hidden data stream is} other {# managed or hidden data streams are}} not shown. {showAllLink}"
+      values={{
+        count: excludedMatchingData.length,
+        showAllLink: (
+          <EuiLink onClick={showExcludedDataStreams} data-test-subj="showAllDataStreamsLink">
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreamList.table.showAllDataStreamsLinkText"
+              defaultMessage="Show all data streams"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
+      defaultMessage="No data streams found"
+    />
+  );
 
   const columns: Array<EuiBasicTableColumn<TableDataStream>> = [];
 
@@ -485,12 +532,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
           defaultMessage: 'Data streams',
         })}
-        noItemsMessage={
-          <FormattedMessage
-            id="xpack.idxMgmt.dataStreamList.table.noDataStreamsMessage"
-            defaultMessage="No data streams found"
-          />
-        }
+        noItemsMessage={noItemsMessage}
         tableLayout="auto"
         scrollableInline
         responsiveBreakpoint={false}

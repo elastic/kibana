@@ -57,3 +57,6 @@ xpack.index_management.enableIndexMode: false
 ## stateless (https://github.com/elastic/elasticsearch/pull/158563). Keep the
 ## implementation and this flag so it can be re-enabled or reused for a replacement.
 xpack.index_management.enableVectorCount: false
+## Hide managed data streams by default in the data streams list so users land on their own data
+## streams. They can still be revealed via the "View" filter.
+xpack.index_management.showManagedDataStreamsByDefault: false
