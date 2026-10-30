@@ -25,7 +25,7 @@ const PermissionWrapper: React.FunctionComponent<
       content={
         <FormattedMessage
           id="xpack.fleet.agentFlyout.standaloneMissingPermissions"
-          defaultMessage="Read access to Agent Policies is required to see the standalone instructions."
+          defaultMessage="Read access to Agent policies and Integrations is required to see the standalone instructions."
         />
       }
     >
@@ -86,10 +86,10 @@ export const InstallationModeSelectionStep = ({
           },
           {
             id: `standalone_${radioSuffix}`,
-            // Disabled if no agentPolicies read permission
-            disabled: !authz.fleet.readAgentPolicies,
+            // Disabled if no agent policies and integrations read permission
+            disabled: !authz.integrations.readIntegrationPolicies,
             label: (
-              <PermissionWrapper showTooltip={!authz.fleet.readAgentPolicies}>
+              <PermissionWrapper showTooltip={!authz.integrations.readIntegrationPolicies}>
                 <FormattedMessage
                   data-test-subj="agentFlyoutStandaloneRadioButtons"
                   id="xpack.fleet.agentFlyout.standaloneRadioOption"

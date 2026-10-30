@@ -48,7 +48,9 @@ describe('<AgentEnrollmentFlyout />', () => {
       fleet: {
         readAgentPolicies: true,
       },
-      integrations: {},
+      integrations: {
+        readIntegrationPolicies: true,
+      },
     } as any);
     jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
@@ -187,6 +189,34 @@ describe('<AgentEnrollmentFlyout />', () => {
             expect(results.queryByTestId('agent-enrollment-key-selection-step')).toBeNull();
             expect(results.queryByTestId('configure-standalone-step')).not.toBeNull();
           });
+        });
+      });
+
+      describe('without integration policies read permission', () => {
+        beforeEach(async () => {
+          jest.mocked(useAuthz).mockReturnValue({
+            fleet: {
+              readAgentPolicies: true,
+            },
+            integrations: {
+              readIntegrationPolicies: false,
+            },
+          } as any);
+          results = render({
+            isIntegrationFlow: true,
+            agentPolicy: testAgentPolicy,
+          });
+          await waitFor(() => {
+            expect(sendGetOneAgentPolicy).toHaveBeenCalled();
+          });
+        });
+
+        it('disables the standalone tab', async () => {
+          const standaloneTab = results.getByTestId('standaloneTab');
+          expect(standaloneTab).toHaveAttribute('disabled');
+
+          fireEvent.click(standaloneTab);
+          expect(results.queryByTestId('configure-standalone-step')).toBeNull();
         });
       });
     });

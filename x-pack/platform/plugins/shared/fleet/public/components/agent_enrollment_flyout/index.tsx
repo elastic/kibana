@@ -195,8 +195,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
                 data-test-subj="standaloneTab"
                 isSelected={mode === 'standalone'}
                 onClick={() => setMode('standalone')}
-                // Standalone need read access to agent policies and cannot be used for Fleet Server policies
-                disabled={!authz.fleet.readAgentPolicies || isFleetServerPolicySelected}
+                // Standalone needs read access to agent policies and integrations and cannot be used for Fleet Server policies
+                disabled={
+                  !authz.integrations.readIntegrationPolicies || isFleetServerPolicySelected
+                }
               >
                 <FormattedMessage
                   id="xpack.fleet.agentEnrollment.enrollStandaloneTabLabel"
