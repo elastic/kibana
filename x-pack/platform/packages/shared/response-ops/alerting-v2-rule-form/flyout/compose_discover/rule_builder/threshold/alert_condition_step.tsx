@@ -32,6 +32,7 @@ import {
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { getDatasets } from '@kbn/esql-utils';
 import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import { splitEsqlQuery } from '@kbn/alerting-v2-utils';
 import type { FormValues } from '../../../../form/types';
 import { useResolveTimeField } from '../../use_resolve_time_field';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
@@ -68,7 +69,6 @@ import {
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { EvaluationExpressionField } from './evaluation_expression_field';
 import { SeveritySection } from './severity_section';
-import { splitQuery } from '../../use_heuristic_split';
 import { OPTIONAL_LABEL } from '../../../../form/optional_field_label';
 import {
   AGGREGATION_OPTIONS,
@@ -171,7 +171,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     }
 
     if (isAlert) {
-      const { base, alertBlock } = splitQuery(esqlQuery);
+      const { base, alertBlock } = splitEsqlQuery(esqlQuery);
       setValue('query', { base, breach: { segment: alertBlock } });
       if (recoveryBlock) {
         setValue('recovery', { strategy: recoveryStrategy.condition, segment: recoveryBlock });
