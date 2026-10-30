@@ -122,7 +122,6 @@ apiTest.describe(
         expect(resourceMetadataUrl!.pathname).toBe(
           `/.well-known/oauth-protected-resource/${MCP_ENDPOINT}`
         );
-        // No token was sent, so the challenge must not claim one was rejected (RFC 6750 §3.1).
         expect(response.headers.get('www-authenticate')).not.toContain('error=');
 
         const body = await response.json();

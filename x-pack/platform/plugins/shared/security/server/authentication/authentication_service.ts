@@ -249,8 +249,7 @@ export class AuthenticationService {
         );
         const resourceMetadataUrl = getProtectedResourceMetadataUrl(resource);
 
-        // Tell clients that sent a bearer token that it was rejected, so they can tell a revoked or
-        // expired token apart from a missing one.
+        // Signal that a bearer token was sent but rejected, as opposed to missing.
         // https://datatracker.ietf.org/doc/html/rfc6750#section-3.1
         const hasBearerToken =
           HTTPAuthorizationHeader.parseFromRequest(request)?.scheme.toLowerCase() === 'bearer';
