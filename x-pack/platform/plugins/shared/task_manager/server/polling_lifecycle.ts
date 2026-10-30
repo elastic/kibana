@@ -77,6 +77,11 @@ import {
 import type { BackpressureReason } from './lib/backpressure_reason';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
+import {
+  recordPollSkippedNoCapacity,
+  recordSlotTime,
+  registerCapacityProviders,
+} from './otel/capacity_telemetry';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
 
@@ -139,6 +144,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   public capacityConfiguration$: Observable<number>;
   public pollIntervalConfiguration$: Observable<number>;
 
+  private readonly startingCapacity: number;
+  private currentCapacity: number;
+
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
 
@@ -189,6 +197,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
+    this.startingCapacity = startingCapacity;
+    this.currentCapacity = startingCapacity;
 
     // `countErrors` is cold, so share it: the capacity scan, poll-interval scan,
     // and reason tracker must all react to the same windowed error counts.
@@ -209,6 +219,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.pollIntervalConfiguration$.subscribe((newPollInterval) => {
       this.currentPollInterval = newPollInterval;
     });
+    this.capacityConfiguration$.subscribe((newCapacity) => {
+      this.currentCapacity = newCapacity;
+    });
+
+    this.events$.subscribe((event) => recordSlotTime(event, this.definitions));
 
     const claimNudgeSuppressed$ = new BehaviorSubject(false);
 
@@ -289,6 +304,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     });
     this.pool.load.subscribe(emitEvent);
 
+    registerCapacityProviders({
+      getConfiguredCapacity: () => this.startingCapacity,
+      getEffectiveCapacity: () => this.currentCapacity,
+      getOccupiedCost: () => this.pool.usedCapacity,
+    });
+
     this.taskClaiming = new TaskClaiming({
       taskStore,
       strategy: config.claim_strategy,
@@ -326,6 +347,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       backpressure$: claimNudgeSuppressed$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
+        if (capacity <= 0) {
+          recordPollSkippedNoCapacity();
+        }
         if (!capacity) {
           const usedCapacityPercentage = this.pool.usedCapacityPercentage;
 
