@@ -14,10 +14,6 @@ export interface UseAddToChatTourStateResult {
   tourState: AddToChatTourState;
   goToStep: (step: AddToChatTourStepNumber) => void;
   completeTour: () => void;
-  /** Reported by the tour component so "Add to chat" clicks only end a tour the user can see. */
-  setIsStepShowing: (isStepShowing: boolean) => void;
-  /** Ends the tour if one of its steps is currently showing. */
-  onAddToChat: () => void;
 }
 
 /** Persisted progress of the rule migrations "Add to chat" tour. */
@@ -30,7 +26,6 @@ export const useAddToChatTourState = (): UseAddToChatTourStateResult => {
     ...DEFAULT_ADD_TO_CHAT_TOUR_STATE,
     ...storage.get(ADD_TO_CHAT_TOUR_STORAGE_KEY),
   }));
-  const [isStepShowing, setIsStepShowing] = useState(false);
 
   // Persist only on user-driven transitions, so a tour that never started leaves no trace.
   const saveTourState = useCallback(
@@ -52,11 +47,5 @@ export const useAddToChatTourState = (): UseAddToChatTourStateResult => {
     }
   }, [saveTourState, tourState]);
 
-  const onAddToChat = useCallback(() => {
-    if (isStepShowing) {
-      completeTour();
-    }
-  }, [completeTour, isStepShowing]);
-
-  return { tourState, goToStep, completeTour, setIsStepShowing, onAddToChat };
+  return { tourState, goToStep, completeTour };
 };

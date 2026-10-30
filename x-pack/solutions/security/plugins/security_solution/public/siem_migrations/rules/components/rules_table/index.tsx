@@ -99,7 +99,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const addToChatTour = useAddToChatTourState();
     const {
       tourState: { isTourActive: isAddToChatTourActive },
-      onAddToChat: onAddToChatTour,
+      completeTour: completeAddToChatTour,
     } = addToChatTour;
 
     const [pageIndex, setPageIndex] = useState(0);
@@ -309,7 +309,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           <EuiFlexGroup>
             {isSiemMigrationAgentBuilderEnabled && !migrationRule.elastic_rule?.id && (
               <EuiFlexItem grow={false}>
-                <AddMigrationRuleToChatButton rule={migrationRule} onAddToChat={onAddToChatTour} />
+                <AddMigrationRuleToChatButton
+                  rule={migrationRule}
+                  onAddToChat={completeAddToChatTour}
+                />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
@@ -342,7 +345,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           </EuiFlexGroup>
         );
       },
-      [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading, onAddToChatTour]
+      [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading, completeAddToChatTour]
     );
 
     const getMatchedPrebuiltRule = useCallback(

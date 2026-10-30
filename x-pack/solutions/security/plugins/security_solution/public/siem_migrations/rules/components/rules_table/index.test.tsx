@@ -1164,17 +1164,5 @@ describe('MigrationRulesTable', () => {
       await flushTour();
       expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
     });
-
-    it('should keep the tour for a later visit when Add to chat in rule details is clicked while no step is showing', async () => {
-      mockIsToursEnabled.mockReturnValue(false);
-      const { unmount } = renderTourTable();
-      openFlyoutForRule('First Rule');
-      clickRuleDetailsAddToChat();
-      unmount();
-
-      mockIsToursEnabled.mockReturnValue(true);
-      renderTourTable();
-      expect(await screen.findByTestId(step(1))).toBeInTheDocument();
-    });
   });
 });

@@ -72,7 +72,7 @@ interface AddToChatTourProps {
 
 /** Three-step "Add to chat" tour for the rule migrations table and the rule details flyout. */
 export const AddToChatTour: React.FC<AddToChatTourProps> = ({
-  tour: { tourState, goToStep, completeTour, setIsStepShowing },
+  tour: { tourState, goToStep, completeTour },
   migrationRules,
   isTableLoaded,
   openedMigrationRuleId,
@@ -152,11 +152,6 @@ export const AddToChatTour: React.FC<AddToChatTourProps> = ({
 
   const isAnchorMounted = useIsAnchorMounted(activeStep?.anchor ?? 'body');
   const isStepShowing = activeStep != null && isAnchorMounted;
-
-  useEffect(() => {
-    setIsStepShowing(isStepShowing);
-    return () => setIsStepShowing(false);
-  }, [isStepShowing, setIsStepShowing]);
 
   if (!isStepShowing) {
     return null;
