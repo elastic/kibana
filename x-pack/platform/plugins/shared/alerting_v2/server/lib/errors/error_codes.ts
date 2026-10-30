@@ -673,6 +673,13 @@ export const ALERTING_LOG_CODES = {
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
   /**
+   * A background task that is disabled by config could not be removed at
+   * boot. Nothing was scheduled; if the task exists from an earlier start it
+   * keeps running until the next restart. The task type is carried in
+   * `labels.task_id`.
+   */
+  TASKS_REMOVE_FAILED: 'TASKS_REMOVE_FAILED',
+  /**
    * The pending API-key invalidation background task run failed. Keys queued
    * for invalidation remain until the next scheduled run.
    */
