@@ -7,7 +7,6 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
-import { getBoundedResponsePreview } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../../types';
@@ -22,6 +21,7 @@ import {
   getEmptyModelResponseError,
   isEmptyModelResponseError,
 } from '../helpers/empty_model_response';
+import { getParseErrorSummary } from '../helpers/get_parse_error_summary';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
 
@@ -202,20 +202,16 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
             llmType: llm._llmType(),
             nodeName: 'generate',
           })
-        : `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
+        : `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
+            error
+          )}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
+      // Raw model output can contain alert-derived text, so it is only ever logged at debug and is
+      // never added to `errors`, which reach persisted and telemetry sinks:
       logger?.debug(
         () =>
           `generate node raw response that failed to parse (${llm._llmType()}) from attempt ${generationAttempts}:\n${rawResponse}`
       );
-
-      // Persist a bounded prefix of the raw response with the error: on serverless there is no
-      // log-level switch, so a debug-only log leaves the bytes unrecoverable in support.
-      const rawResponsePreview = getBoundedResponsePreview(rawResponse);
-      const persistedError =
-        rawResponse.length > 0
-          ? `${parsingError}; raw response (${rawResponse.length} characters): "${rawResponsePreview}"`
-          : parsingError;
 
       return {
         ...state,
@@ -226,7 +222,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
           combinedGenerations,
           combinedResponse,
         }),
-        errors: [...state.errors, persistedError],
+        errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
         generations: partialResponse.length > 0 ? [...generations, partialResponse] : generations,
       };

@@ -192,13 +192,13 @@ ${ATTACK_DISCOVERY_REFINE}
       refinements: ['{"key": "value"}'],
     });
 
-    // the parse failure AND the raw response are persisted: on serverless there is no log-level
-    // switch that would let support recover the bytes from a debug-only log:
+    // the parse failure is persisted without the model output:
     expect(state.errors).toHaveLength(1);
     expect(state.errors[0]).toContain(
-      'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model):'
+      'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): the response does not match the expected schema ('
     );
-    expect(state.errors[0]).toContain(response);
+    expect(state.errors[0]).not.toContain('"key"');
+    expect(state.errors[0]).not.toContain('value');
   });
 
   it('logs the raw response at debug when the response cannot be parsed', async () => {
@@ -344,9 +344,9 @@ ${ATTACK_DISCOVERY_REFINE}
     });
 
     expect(state.errors[0]).toContain(
-      'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token'
+      'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: the response is not valid JSON'
     );
-    expect(state.errors[0]).toContain('raw response (7 characters): "refine1"');
+    expect(state.errors[0]).not.toContain('refine1');
   });
 
   it('records an error for every empty response instead of discarding one as a repeated generation', async () => {
@@ -571,10 +571,37 @@ ${ATTACK_DISCOVERY_REFINE}
     });
 
     expect(state.errors[0]).toContain(
-      'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token'
+      'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: the response is not valid JSON'
     );
-    expect(state.errors[0]).toContain(
-      `raw response (${response.length} characters): "${response}"`
-    );
+    expect(state.errors[0]).not.toContain(response);
+  });
+
+  it('keeps model output out of state.errors when the response cannot be parsed', async () => {
+    const rawResponse = `<html>ALERT-DERIVED-TEXT 502 Bad Gateway${'x'.repeat(500)}</html>`;
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const refineNode = getRefineNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain('SyntaxError: the response is not valid JSON');
+    expect(JSON.stringify(state.errors)).not.toContain('ALERT-DERIVED-TEXT');
+    expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
+    expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
 });

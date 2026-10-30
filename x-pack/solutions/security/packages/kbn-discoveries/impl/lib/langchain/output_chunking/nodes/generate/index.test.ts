@@ -6,11 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {
-  EmptyModelResponseError,
-  MAX_RESPONSE_PREVIEW_LENGTH,
-  type ActionsClientLlm,
-} from '@kbn/langchain/server';
+import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -185,13 +181,14 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       generations: ['{"key": "value"}'],
     });
 
-    // the parse failure AND the raw response are persisted: on serverless there is no log-level
-    // switch that would let support recover the bytes from a debug-only log:
+    // the parse failure is persisted without the model output:
     expect(state.errors).toHaveLength(1);
     expect(state.errors[0]).toContain(
-      'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model):'
+      'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): the response does not match the expected schema ('
     );
-    expect(state.errors[0]).toContain(response);
+    expect(state.errors[0]).not.toContain('"key"');
+    expect(state.errors[0]).not.toContain('value');
+    expect(state.errors[0]).not.toContain('here it is');
   });
 
   it('handles hallucinations', async () => {
@@ -311,9 +308,10 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     });
 
     expect(state.errors[0]).toContain(
-      'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token \'g\', "gen0gen1" is not valid JSON'
+      'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: the response is not valid JSON'
     );
-    expect(state.errors[0]).toContain('raw response (4 characters): "gen1"');
+    expect(state.errors[0]).not.toContain('gen0');
+    expect(state.errors[0]).not.toContain('gen1');
   });
 
   it('logs the raw response at debug when the response cannot be parsed', async () => {
@@ -465,8 +463,8 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
   });
 
-  it('persists a bounded prefix of a raw response that cannot be parsed', async () => {
-    const rawResponse = `<html>502 Bad Gateway${'x'.repeat(MAX_RESPONSE_PREVIEW_LENGTH)}</html>`;
+  it('keeps model output out of state.errors when the response cannot be parsed', async () => {
+    const rawResponse = `<html>ALERT-DERIVED-TEXT 502 Bad Gateway${'x'.repeat(500)}</html>`;
 
     const mockLlmWithResponse = new FakeLLM({
       response: rawResponse,
@@ -489,9 +487,10 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     const state = await generateNode(initialGraphState);
 
     expect(state.errors).toHaveLength(1);
-    expect(state.errors[0]).toContain(`raw response (${rawResponse.length} characters)`);
-    expect(state.errors[0]).toContain(rawResponse.slice(0, MAX_RESPONSE_PREVIEW_LENGTH));
-    expect(state.errors[0]).toContain(`truncated, ${rawResponse.length} characters total`);
+    expect(state.errors[0]).toContain('SyntaxError: the response is not valid JSON');
+    expect(JSON.stringify(state.errors)).not.toContain('ALERT-DERIVED-TEXT');
+    expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
+    expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
 
   it('classifies a thrown empty completion as an empty model response, keeping the connector details', async () => {

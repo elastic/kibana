@@ -257,6 +257,29 @@ describe('ActionsClientLlm', () => {
       );
     });
 
+    it('keeps the response out of the error message and exposes it as responsePreview', async () => {
+      const responseText = '   \n  \t ';
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: { message: responseText },
+          status: 'ok',
+        })
+      );
+
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+      });
+
+      const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+      expect(error).toBeInstanceOf(EmptyModelResponseError);
+      expect(error.message).not.toContain('response: "');
+      expect(error.message).toContain(`response length: ${responseText.length} characters`);
+      expect(error.responsePreview).toEqual(responseText);
+    });
+
     it('rejects with an empty-response error the response has no content', async () => {
       actionsClient.execute.mockImplementation(
         jest.fn().mockResolvedValue({

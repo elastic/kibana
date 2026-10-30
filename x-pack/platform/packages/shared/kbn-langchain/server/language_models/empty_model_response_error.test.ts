@@ -55,6 +55,22 @@ describe('EmptyModelResponseError', () => {
     expect(error.message).toContain('traceId: unknown');
   });
 
+  it('keeps the response body out of the message and exposes a bounded preview separately', () => {
+    const responseBody = `ALERT-DERIVED-TEXT host=srv-01 ${'x'.repeat(
+      MAX_RESPONSE_PREVIEW_LENGTH
+    )}`;
+
+    const error = getError({ contentLength: responseBody.length, responseBody });
+
+    expect(error.message).not.toContain('ALERT-DERIVED-TEXT');
+    expect(error.message).not.toContain('srv-01');
+    expect(error.message).not.toContain('response: "');
+    expect(error.message).toContain(`response length: ${responseBody.length} characters`);
+    expect(error.stack ?? '').not.toContain('ALERT-DERIVED-TEXT');
+    expect(error.responsePreview).toEqual(getBoundedResponsePreview(responseBody));
+    expect(error.responsePreview.startsWith('ALERT-DERIVED-TEXT host=srv-01')).toBe(true);
+  });
+
   it('exposes the structured fields for callers that classify the failure', () => {
     const error = getError({ completionTokens: 0, contentLength: 0 });
 
