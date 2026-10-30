@@ -40429,6 +40429,7 @@ paths:
           name: sourceId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -40510,6 +40511,7 @@ paths:
           name: sourceId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -40704,6 +40706,7 @@ paths:
           name: sourceId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -41015,6 +41018,7 @@ paths:
           name: sortField
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Sort order, ascending or descending
           in: query
@@ -41036,6 +41040,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
           in: query
@@ -41294,6 +41299,7 @@ paths:
                 ids:
                   description: list of package policy ids
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -41385,6 +41391,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -41486,6 +41493,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -41584,6 +41592,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -41703,6 +41712,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -41798,6 +41808,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: If true, returns the policy as a downloadable file
           in: query
@@ -41916,6 +41927,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: If true, returns the policy as a downloadable file
           in: query
@@ -42028,6 +42040,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -42276,6 +42289,7 @@ paths:
           name: policyId
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Filter by one or more agent policy IDs
           in: query
@@ -42283,6 +42297,7 @@ paths:
           required: false
           schema:
             items:
+              minLength: 0
               type: string
             maxItems: 1000
             type: array
@@ -42291,6 +42306,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -42406,6 +42422,7 @@ paths:
           required: true
           schema:
             items:
+              minLength: 0
               type: string
             maxItems: 10000
             type: array
@@ -42414,6 +42431,7 @@ paths:
           name: pkgName
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Filter by integration package version
           in: query
@@ -43913,6 +43931,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When true, include agentless agents in the results
           in: query
@@ -43954,6 +43973,7 @@ paths:
           name: sortField
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Sort order, ascending or descending
           in: query
@@ -44467,6 +44487,7 @@ paths:
               properties:
                 actionIds:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -44557,6 +44578,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -44641,6 +44663,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: When true, include CPU and memory metrics in the response
           in: query
@@ -45114,6 +45137,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45131,6 +45155,7 @@ paths:
               properties:
                 tags:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
@@ -45598,6 +45623,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45774,6 +45800,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -45848,6 +45875,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45900,6 +45928,7 @@ paths:
                       type: string
                     tags:
                       items:
+                        minLength: 0
                         type: string
                       maxItems: 10
                       type: array
@@ -45986,6 +46015,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46083,6 +46113,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46097,6 +46128,7 @@ paths:
               type: object
               properties:
                 policy_id:
+                  minLength: 0
                   type: string
               required:
                 - policy_id
@@ -46172,6 +46204,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -46224,6 +46257,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46404,6 +46438,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -46475,6 +46510,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46546,6 +46582,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46634,6 +46671,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -46966,6 +47004,7 @@ paths:
           name: actionId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -47229,6 +47268,7 @@ paths:
                       type: string
                     tags:
                       items:
+                        minLength: 0
                         type: string
                       maxItems: 10
                       type: array
@@ -47468,6 +47508,7 @@ paths:
                   default: false
                   type: boolean
                 policy_id:
+                  minLength: 0
                   type: string
               required:
                 - policy_id
@@ -48153,11 +48194,13 @@ paths:
                   type: boolean
                 tagsToAdd:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
                 tagsToRemove:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
@@ -48376,6 +48419,7 @@ paths:
           name: fileId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -48451,6 +48495,7 @@ paths:
           name: fileId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: The name of the uploaded file
           in: path
@@ -48727,6 +48772,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When true, include tags from inactive agents
           in: query
@@ -48905,6 +48951,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -49337,6 +49384,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: If true, forces deletion even if the cloud connector is in use.
           in: query
@@ -49414,6 +49462,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -49580,6 +49629,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -49829,6 +49879,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: The page number for pagination.
           in: query
@@ -51917,6 +51968,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -52180,6 +52232,7 @@ paths:
           name: keyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.
           in: query
@@ -52269,6 +52322,7 @@ paths:
           name: keyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -52604,6 +52658,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -53300,6 +53355,7 @@ paths:
           name: taskId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -53439,6 +53495,7 @@ paths:
           name: taskId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -53587,6 +53644,7 @@ paths:
           name: taskId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -54053,6 +54111,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54131,6 +54190,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54244,6 +54304,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54365,6 +54426,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54455,6 +54517,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54537,6 +54600,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54549,6 +54613,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -54616,6 +54681,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54700,6 +54766,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54779,6 +54846,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54871,6 +54939,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54963,6 +55032,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -55076,6 +55146,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -55155,6 +55226,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -55218,6 +55290,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -55466,6 +55539,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -55664,6 +55738,7 @@ paths:
                           minItems: 1
                           type: array
                         id:
+                          minLength: 0
                           type: string
                         is_default:
                           default: false
@@ -55674,8 +55749,10 @@ paths:
                           default: false
                           type: boolean
                         name:
+                          minLength: 0
                           type: string
                         proxy_id:
+                          minLength: 0
                           nullable: true
                           type: string
                         secrets:
@@ -55692,6 +55769,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -55703,6 +55781,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -55714,6 +55793,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -55856,6 +55936,7 @@ paths:
                   minItems: 1
                   type: array
                 id:
+                  minLength: 0
                   type: string
                 is_default:
                   default: false
@@ -55866,8 +55947,10 @@ paths:
                   default: false
                   type: boolean
                 name:
+                  minLength: 0
                   type: string
                 proxy_id:
+                  minLength: 0
                   nullable: true
                   type: string
                 secrets:
@@ -55884,6 +55967,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55895,6 +55979,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55906,6 +55991,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55988,6 +56074,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -55998,8 +56085,10 @@ paths:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_id:
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -56016,6 +56105,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56027,6 +56117,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56038,6 +56129,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56147,6 +56239,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -56228,6 +56321,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -56265,6 +56359,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -56275,8 +56370,10 @@ paths:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_id:
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -56293,6 +56390,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56304,6 +56402,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56315,6 +56414,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56434,6 +56534,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -56467,9 +56568,11 @@ paths:
                 is_internal:
                   type: boolean
                 name:
+                  minLength: 0
                   type: string
                 proxy_id:
                   default: null
+                  minLength: 0
                   nullable: true
                   type: string
                 secrets:
@@ -56486,6 +56589,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -56497,6 +56601,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -56508,6 +56613,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -56587,6 +56693,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -56597,8 +56704,10 @@ paths:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_id:
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -56615,6 +56724,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56626,6 +56736,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56637,6 +56748,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56765,6 +56877,7 @@ paths:
               type: object
               properties:
                 id:
+                  minLength: 0
                   type: string
               required:
                 - id
@@ -58844,6 +58957,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58943,6 +59057,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -59051,6 +59166,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -59170,6 +59286,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -59264,6 +59381,7 @@ paths:
           name: sortField
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Sort order, ascending or descending
           in: query
@@ -59285,6 +59403,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -59563,6 +59682,7 @@ paths:
                 ids:
                   description: list of package policy ids
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -59673,6 +59793,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: When true, delete the package policy even if it is managed
           in: query
@@ -59743,6 +59864,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -59861,6 +59983,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -60415,11 +60538,13 @@ paths:
                           nullable: true
                           type: string
                         id:
+                          minLength: 0
                           type: string
                         is_preconfigured:
                           default: false
                           type: boolean
                         name:
+                          minLength: 0
                           type: string
                         proxy_headers:
                           additionalProperties:
@@ -60525,11 +60650,13 @@ paths:
                   nullable: true
                   type: string
                 id:
+                  minLength: 0
                   type: string
                 is_preconfigured:
                   default: false
                   type: boolean
                 name:
+                  minLength: 0
                   type: string
                 proxy_headers:
                   additionalProperties:
@@ -60575,11 +60702,13 @@ paths:
                         nullable: true
                         type: string
                       id:
+                        minLength: 0
                         type: string
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_headers:
                         additionalProperties:
@@ -60657,6 +60786,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -60738,6 +60868,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -60770,11 +60901,13 @@ paths:
                         nullable: true
                         type: string
                       id:
+                        minLength: 0
                         type: string
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_headers:
                         additionalProperties:
@@ -60862,6 +60995,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -60889,6 +61023,7 @@ paths:
                   nullable: true
                   type: string
                 name:
+                  minLength: 0
                   type: string
                 proxy_headers:
                   additionalProperties:
@@ -60931,11 +61066,13 @@ paths:
                         nullable: true
                         type: string
                       id:
+                        minLength: 0
                         type: string
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_headers:
                         additionalProperties:
@@ -61990,6 +62127,7 @@ paths:
           name: uninstallTokenId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -155028,10 +155166,12 @@ components:
           type: boolean
         kuery:
           description: KQL query to select enrollment tokens to delete.
+          minLength: 0
           type: string
         tokenIds:
           description: List of enrollment token IDs to delete.
           items:
+            minLength: 0
             type: string
           maxItems: 10000
           type: array
@@ -155092,11 +155232,13 @@ components:
         packages:
           items:
             anyOf:
-              - type: string
+              - minLength: 0
+                type: string
               - additionalProperties: false
                 type: object
                 properties:
                   name:
+                    minLength: 0
                     type: string
                   prerelease:
                     type: boolean
@@ -155198,6 +155340,7 @@ components:
         packages:
           description: Package names to apply the customization changes to.
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           minItems: 1
@@ -155292,6 +155435,7 @@ components:
             properties:
               name:
                 description: Package name to rollback
+                minLength: 0
                 type: string
             required:
               - name
@@ -155323,6 +155467,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               version:
                 type: string
@@ -155394,6 +155539,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               version:
                 type: string
@@ -155892,6 +156038,7 @@ components:
       additionalProperties: false
       properties:
         description:
+          minLength: 0
           type: string
         name:
           minLength: 1
@@ -156206,6 +156353,7 @@ components:
         force:
           type: boolean
         integrationName:
+          minLength: 0
           type: string
       required:
         - integrationName
@@ -156466,6 +156614,7 @@ components:
           type: array
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
+          minLength: 0
           nullable: true
           type: string
         cloud_connector_name:
@@ -156484,6 +156633,7 @@ components:
           type: boolean
         description:
           description: Package policy description
+          minLength: 0
           type: string
         enabled:
           type: boolean
@@ -156497,6 +156647,7 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -156511,6 +156662,7 @@ components:
           type: array
         id:
           description: Package policy unique identifier
+          minLength: 0
           type: string
         inputs:
           items:
@@ -156542,6 +156694,7 @@ components:
               enabled:
                 type: boolean
               id:
+                minLength: 0
                 type: string
               keep_enabled:
                 type: boolean
@@ -156610,6 +156763,7 @@ components:
                     enabled:
                       type: boolean
                     id:
+                      minLength: 0
                       type: string
                     keep_enabled:
                       type: boolean
@@ -156680,12 +156834,14 @@ components:
           type: boolean
         name:
           description: Unique name for the package policy.
+          minLength: 0
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
+          minLength: 0
           nullable: true
           type: string
         overrides:
@@ -156705,16 +156861,19 @@ components:
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
+          minLength: 0
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
         spaceIds:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -157209,6 +157368,7 @@ components:
       properties:
         agentPolicyId:
           description: The ID of the agent policy
+          minLength: 0
           type: string
         force:
           description: bypass validation checks that can prevent agent policy deletion
@@ -157265,6 +157425,7 @@ components:
           type: boolean
         packagePolicyIds:
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -157332,6 +157493,7 @@ components:
       properties:
         packagePolicyIds:
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -160010,8 +160172,10 @@ components:
             type: object
             properties:
               id:
+                minLength: 0
                 type: string
               type:
+                minLength: 0
                 type: string
             required:
               - id
@@ -160312,6 +160476,7 @@ components:
         ids:
           description: list of package policy ids
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -161560,6 +161725,7 @@ components:
         space_ids:
           description: When provided, assets are installed in the specified spaces instead of the current space.
           items:
+            minLength: 0
             type: string
           maxItems: 100
           minItems: 1
@@ -170615,13 +170781,16 @@ components:
                     memory:
                       type: string
         data_output_id:
+          minLength: 0
           nullable: true
           type: string
         description:
+          minLength: 0
           type: string
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
+          minLength: 0
           nullable: true
           type: string
         download_source_ids:
@@ -170632,6 +170801,7 @@ components:
           maxItems: 3
           type: array
         fleet_server_host_id:
+          minLength: 0
           nullable: true
           type: string
         force:
@@ -170643,6 +170813,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -170658,6 +170829,7 @@ components:
         has_fleet_server:
           type: boolean
         id:
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -170731,6 +170903,7 @@ components:
               minimum: 0
               type: number
         monitoring_output_id:
+          minLength: 0
           nullable: true
           type: string
         monitoring_pprof_enabled:
@@ -170786,6 +170959,7 @@ components:
           type: array
         space_ids:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -170884,8 +171058,10 @@ components:
           maxLength: 20
           type: string
         name:
+          minLength: 0
           type: string
         policy_id:
+          minLength: 0
           type: string
       required:
         - policy_id
@@ -179271,13 +179447,16 @@ components:
         bumpRevision:
           type: boolean
         data_output_id:
+          minLength: 0
           nullable: true
           type: string
         description:
+          minLength: 0
           type: string
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
+          minLength: 0
           nullable: true
           type: string
         download_source_ids:
@@ -179288,6 +179467,7 @@ components:
           maxItems: 3
           type: array
         fleet_server_host_id:
+          minLength: 0
           nullable: true
           type: string
         force:
@@ -179299,6 +179479,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -179314,6 +179495,7 @@ components:
         has_fleet_server:
           type: boolean
         id:
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -179387,6 +179569,7 @@ components:
               minimum: 0
               type: number
         monitoring_output_id:
+          minLength: 0
           nullable: true
           type: string
         monitoring_pprof_enabled:
@@ -179442,6 +179625,7 @@ components:
           type: array
         space_ids:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -180294,6 +180478,7 @@ components:
           type: array
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
+          minLength: 0
           nullable: true
           type: string
         cloud_connector_name:
@@ -180309,6 +180494,7 @@ components:
           type: string
         description:
           description: Package policy description
+          minLength: 0
           type: string
         enabled:
           type: boolean
@@ -180321,6 +180507,7 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -180363,6 +180550,7 @@ components:
               enabled:
                 type: boolean
               id:
+                minLength: 0
                 type: string
               keep_enabled:
                 type: boolean
@@ -180431,6 +180619,7 @@ components:
                     enabled:
                       type: boolean
                     id:
+                      minLength: 0
                       type: string
                     keep_enabled:
                       type: boolean
@@ -180500,12 +180689,14 @@ components:
         is_managed:
           type: boolean
         name:
+          minLength: 0
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
+          minLength: 0
           nullable: true
           type: string
         overrides:
@@ -180525,16 +180716,19 @@ components:
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
+          minLength: 0
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
         spaceIds:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -180844,6 +181038,7 @@ components:
       properties:
         packagePolicyIds:
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
