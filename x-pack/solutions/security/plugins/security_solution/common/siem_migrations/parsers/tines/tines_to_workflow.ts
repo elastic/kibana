@@ -225,12 +225,10 @@ export class TinesToWorkflowMapper {
 
     // Agents reached from a non-webhook enabled agent are nested under that parent.
     const nestedReceivers = new Set<number>();
-    for (const agent of enabledAgents) {
-      if (isWebhook(agent)) {
-        continue;
-      }
+    for (const agent of enabledAgents.filter((candidate) => !isWebhook(candidate))) {
       for (const receiver of agent.outgoingLinks) {
-        if (enabledIndexes.has(receiver) && !isWebhook(agentsByIndex.get(receiver)!)) {
+        const receiverAgent = agentsByIndex.get(receiver);
+        if (receiverAgent && enabledIndexes.has(receiver) && !isWebhook(receiverAgent)) {
           nestedReceivers.add(receiver);
         }
       }
@@ -262,14 +260,10 @@ export class TinesToWorkflowMapper {
     const mapOutgoing = (agent: ParsedTinesAgent): WorkflowStep[] => {
       const steps: WorkflowStep[] = [];
       for (const receiver of agent.outgoingLinks) {
-        if (!enabledIndexes.has(receiver)) {
-          continue;
-        }
         const child = agentsByIndex.get(receiver);
-        if (!child || isWebhook(child)) {
-          continue;
+        if (child && enabledIndexes.has(receiver) && !isWebhook(child)) {
+          steps.push(...mapAgent(receiver));
         }
-        steps.push(...mapAgent(receiver));
       }
       return steps;
     };
