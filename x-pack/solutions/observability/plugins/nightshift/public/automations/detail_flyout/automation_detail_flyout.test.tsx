@@ -80,20 +80,14 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     canManage = true,
     usedToday = 0,
     editDisabledReason,
-    target = automation,
-  }: {
-    canManage?: boolean;
-    usedToday?: number;
-    editDisabledReason?: string;
-    target?: Automation;
-  } = {}) => {
+  }: { canManage?: boolean; usedToday?: number; editDisabledReason?: string } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
         <Router history={history}>
           <AutomationDetailFlyout
-            automations={[target]}
-            automation={target}
+            automations={[automation]}
+            automation={automation}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
             usedToday={usedToday}
@@ -113,14 +107,11 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
 
-  it('keeps an unlimited automation unlimited without an unsaved limit callout', () => {
-    renderFlyout({
-      target: { ...automation, runtime: {} } as Automation,
-      usedToday: 3,
-    });
+  it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {
+    renderFlyout();
     startEditing();
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
 
-    expect(screen.getByTestId('automationDailyLimitUnlimited')).toBeChecked();
     expect(screen.queryByTestId('automationDailyLimitUnsavedCallout')).not.toBeInTheDocument();
   });
 

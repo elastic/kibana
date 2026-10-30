@@ -117,7 +117,7 @@ export const DailyLimitField = ({
       <EuiText size="s" color="subdued">
         {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
-      {usedToday !== undefined && !isUnlimited && tone === 'exceeded' && (
+      {usedToday !== undefined && tone === 'exceeded' && (
         <KbnWarningCallout
           announceOnMount={false}
           size="s"
@@ -128,7 +128,7 @@ export const DailyLimitField = ({
           data-test-subj="automationDailyLimitReachedCallout"
         />
       )}
-      {usedToday !== undefined && !isUnlimited && tone === 'high' && (
+      {usedToday !== undefined && tone === 'high' && (
         <KbnWarningCallout
           announceOnMount={false}
           size="s"
