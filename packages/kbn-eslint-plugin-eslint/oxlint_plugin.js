@@ -48,6 +48,7 @@ module.exports = eslintCompatPlugin({
     scout_no_raw_eui_selectors: require('./rules/scout_no_raw_eui_selectors'),
     scout_no_promise_all_with_playwright_apis: require('./rules/scout_no_promise_all_with_playwright_apis'),
     security_imports_restriction: require('./rules/security_imports_restriction'),
+    no_browser_imports_in_server: require('./rules/no_browser_imports_in_server'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_lazy_zod_schema: require('./rules/require_lazy_zod_schema'),
