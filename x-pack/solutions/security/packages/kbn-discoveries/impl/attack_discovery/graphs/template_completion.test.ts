@@ -10,6 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import {
   attackDiscoveryRefineTemplateRequest,
   createAttackDiscoveryTemplateCompletion,
+  resolveAttackDiscoveryTemplateCompletion,
 } from './template_completion';
 
 const chatComplete = jest.fn().mockResolvedValue({ content: '{}' });
@@ -52,6 +53,56 @@ describe('createAttackDiscoveryTemplateCompletion', () => {
     await complete({ alerts: ['alert'], phase: 'generate' });
 
     expect(chatComplete.mock.calls[0][0].timeout).toBe(600_000);
+  });
+});
+
+describe('createAttackDiscoveryTemplateCompletion telemetry', () => {
+  beforeEach(() => {
+    chatComplete.mockClear();
+  });
+
+  it('sends telemetryMetadata to chatComplete as connectorTelemetry', async () => {
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+      telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
+
+    await complete({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0].metadata).toEqual({
+      connectorTelemetry: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
+  });
+
+  it('sends no metadata when telemetryMetadata is not set', async () => {
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+    });
+
+    await complete({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('metadata');
+  });
+
+  it('threads telemetryMetadata through resolveAttackDiscoveryTemplateCompletion', async () => {
+    const complete = await resolveAttackDiscoveryTemplateCompletion({
+      inferenceClient: {
+        chatComplete,
+        getConnectorById: jest
+          .fn()
+          .mockResolvedValue({ metadata: { capabilities: { templates: { policy: 'required' } } } }),
+      },
+      connectorId: 'daybreak',
+      telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
+
+    await complete?.({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0].metadata).toEqual({
+      connectorTelemetry: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+    });
   });
 });
 

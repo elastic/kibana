@@ -190,6 +190,13 @@ steps:
           feature_id:
             - alertzero_template_models
             - alertzero_frontier
+          # Token-usage attribution for the generation model calls: cost lands under
+          # `plugin_id` and rolls up under the AlertZero parent feature. Keep in sync
+          # with ALERTZERO_AD_GENERATION_TELEMETRY_PLUGIN_ID and
+          # ALERTZERO_INFERENCE_PARENT_FEATURE_ID in @kbn/alertzero-common; a test in
+          # the alertzero plugin pins both.
+          plugin_id: alertzero_ad_generation
+          aggregate_by: alertzero_parent
           # No ground-truth gate: each generated attack goes to a review whose FP/TP
           # analysis owns the false-positive decision. The gate corroborates the
           # alerts against the same entities and raw events and hands its

@@ -144,15 +144,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * run step's ground-truth gate, so false-positive triage happens only in the
  * review's FP/TP analysis. Version 5 skips alerts the review tagged
  * `az:ad_correlated`. Version 6 gives the child a 12h workflow timeout and
- * limits retrieval to the prorated alert cap. Each bump is a deliberate
- * rollout signal; the YAML change alone already rolls out through `definitionHash`.
+ * limits retrieval to the prorated alert cap. Version 8 tags the run step's
+ * generation model calls for token-usage attribution under the AlertZero parent
+ * feature. Each bump is a deliberate rollout signal; the YAML change alone
+ * already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 7,
+  version: 8,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
