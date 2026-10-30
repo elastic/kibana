@@ -5201,6 +5201,9 @@ importers:
       '@kbn/check-saved-objects-cli':
         specifier: workspace:*
         version: link:packages/kbn-check-saved-objects-cli
+      '@kbn/check-server-import-graph-cli':
+        specifier: workspace:*
+        version: link:packages/kbn-check-server-import-graph-cli
       '@kbn/ci-stats-core':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ci-stats-core
@@ -6996,6 +6999,8 @@ importers:
   packages/kbn-check-prod-native-modules-cli: {}
 
   packages/kbn-check-saved-objects-cli: {}
+
+  packages/kbn-check-server-import-graph-cli: {}
 
   packages/kbn-ci-stats-performance-metrics: {}
 

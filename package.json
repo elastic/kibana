@@ -1759,6 +1759,7 @@
     "@kbn/check-kibana-settings-cli": "workspace:*",
     "@kbn/check-prod-native-modules-cli": "workspace:*",
     "@kbn/check-saved-objects-cli": "workspace:*",
+    "@kbn/check-server-import-graph-cli": "workspace:*",
     "@kbn/ci-stats-core": "workspace:*",
     "@kbn/ci-stats-performance-metrics": "workspace:*",
     "@kbn/ci-stats-reporter": "workspace:*",

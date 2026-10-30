@@ -1,0 +1,566 @@
+{
+  "//": "Source files reachable from the Kibana server entry points that import browser-only node modules. This list may only shrink: fix the chain (move the browser-only code out of the module the server imports) and run `node scripts/check_server_import_graph --update-baseline` to remove the entry.",
+  "violations": {
+    "examples/response_stream/common/api/redux_stream/data_slice.ts": [
+      "@reduxjs/toolkit"
+    ],
+    "src/platform/kbn-ui/ai-components/src/ai_button/ai_button_base.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/ai-components/src/ai_button/ai_button_xs_size_styles.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/ai-components/src/ai_icon/ai_icon.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/ai-components/src/gradient_styles/use_ai_gradient_styles.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/callout/src/danger_callout.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/callout/src/info_callout.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/callout/src/success_callout.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/kbn-ui/callout/src/warning_callout.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/chart-expressions-common/components/chart_tooltip_footer_message.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-cases-components/src/status/status.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-cases-components/src/tooltip/icon_with_count.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-cases-components/src/tooltip/skeleton.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-cases-components/src/tooltip/tooltip.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-cases-components/src/tooltip/tooltip_content.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-cases-components/src/user_action_title_link/index.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/color_manipulation/index.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/categorical_color_mapping.tsx": [
+      "react-redux-v7",
+      "redux-toolkit-v1"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/assignment/assignment.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/assignment/duplicate_warning.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/assignment/match.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/assignment/range.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/assignment/special_assignment.tsx": [
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/color_picker/color_picker.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/color_picker/color_swatch.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/color_picker/palette_colors.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/color_picker/rgb_picker.tsx": [
+      "@elastic/eui",
+      "react-use"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/container/assignments.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/container/container.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/container/unassigned_terms_config.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/palette_selector/gradient.tsx": [
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/palette_selector/gradient_add_stop.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/palette_selector/palette_selector.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/components/palette_selector/scale.tsx": [
+      "@elastic/eui",
+      "react-redux-v7"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/state/color_mapping.ts": [
+      "redux-toolkit-v1"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/state/ui.ts": [
+      "redux-toolkit-v1"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/coloring/color_ranges/color_ranges.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/coloring/color_ranges/color_ranges_extra_actions.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/coloring/color_ranges/color_ranges_item.tsx": [
+      "@elastic/eui",
+      "react-use"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/coloring/color_ranges/color_ranges_item_buttons.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/coloring/palette_configuration.tsx": [
+      "@elastic/eui",
+      "react-use"
+    ],
+    "src/platform/packages/shared/kbn-coloring/src/shared_components/coloring/palette_picker.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-css-utils/public/use_memo_css.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-discover-utils/src/components/custom_control_columns/degraded_docs_control.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-discover-utils/src/components/error_callout/error_callout.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/components/log_level_badge.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_color.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx": [
+      "@elastic/apm-rum-core"
+    ],
+    "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts": [
+      "react-use"
+    ],
+    "src/platform/packages/shared/kbn-i18n-react/index.tsx": [
+      "react-intl"
+    ],
+    "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx": [
+      "react-intl"
+    ],
+    "src/platform/packages/shared/kbn-i18n-react/src/inject.tsx": [
+      "react-intl"
+    ],
+    "src/platform/packages/shared/kbn-i18n-react/src/provider.tsx": [
+      "react-intl"
+    ],
+    "src/platform/packages/shared/kbn-palettes/components/index.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/hooks/use_kbn_palettes.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/categorical/elastic.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/categorical/elastic_line_optimized.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/complementary.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/cool.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/gray.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/green.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/red.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/status.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/temperature.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/gradient/warm.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/complementary.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/cool.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/gray.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/green.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/red.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/status.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/temperature.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-palettes/palettes/legacy/gradient/warm.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/configuration/connector_configuration.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/configuration/connector_configuration_field.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/configuration/connector_configuration_form.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/configuration/connector_configuration_form_items.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/configuration/document_level_security_panel.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/configuration/platinum_license_popover.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_daily.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_editor.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_hourly.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_minutely.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_monthly.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_weekly.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/cron_editor/cron_yearly.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/scheduling/connector_cron_editor.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/scheduling/connector_error.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/scheduling/connector_scheduling.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/scheduling/connector_unconfigured.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/scheduling/full_content.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/documents_panel.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/events_panel.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/filtering_panel.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/filtering_rules_table.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/flyout_panel.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/pipeline_panel.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/sync_callouts.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/sync_job_cancel_modal.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/sync_job_flyout.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/sync_jobs_table.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-errors/src/es_error.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-errors/src/painless_error.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-search-errors/src/tsdb_error.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-shared-ux-utility/src/fallback.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx": [
+      "react-use"
+    ],
+    "src/platform/packages/shared/kbn-user-profile-components/src/user_avatar.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-user-profile-components/src/user_profile.ts": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-visualization-utils/src/tooltip_wrapper.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-visualizations-common/components/visualization_container.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-visualizations-common/components/visualization_error.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/kbn-visualizations-common/components/visualization_noresults.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/shared-ux/error_boundary/src/ui/error_boundary.tsx": [
+      "@elastic/apm-rum"
+    ],
+    "src/platform/packages/shared/shared-ux/error_boundary/src/ui/message_components.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/shared-ux/error_boundary/src/ui/section_error_boundary.tsx": [
+      "@elastic/apm-rum"
+    ],
+    "src/platform/packages/shared/shared-ux/flyout/info-blocks/src/info_block.component.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/packages/shared/shared-ux/flyout/info-blocks/src/info_blocks.component.tsx": [
+      "@elastic/eui"
+    ],
+    "src/platform/plugins/shared/kibana_utils/common/state_containers/create_state_container_react_helpers.ts": [
+      "react-use"
+    ],
+    "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts": [
+      "react-use"
+    ],
+    "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/tree_node_labels/more_pipelines_label.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/tree_node_labels/pipeline_tree_node_label.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/actions/action_button.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/actions/base_actions.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/conversation_card/actions_group.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/conversation_card/conversation_card.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/conversation_card/conversation_card_compact.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/conversation_card/conversation_meta_info.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/conversation_queue/conversation_queue.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/conversation_queue/conversation_queue_skeleton.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/detail_block.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/details_flyout_tab_contents.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/escalation_flyout_header.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/escalation_overview_tab.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/flyout_footer.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/flyout_header.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/header_blocks.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/impact_section.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/linked_investigations_list.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/overview_loading_section.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/proposed_action_button.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/proposed_actions_list.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/severity_picker.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/status_toggle.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/details/whats_happened_block.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/escalation_queue/assign_to_users.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/escalation_queue/assignee_avatar_stack.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/escalation_queue/escalation_card.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/escalation_queue/escalation_meta_info.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/escalation_queue/escalation_queue.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/escalation_queue/linked_investigations_badge.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/filters/impact/impact.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/grouped_attachments/grouped_attachment_list.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/grouped_attachments/grouped_attachment_row.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/grouped_attachments/grouped_attachments_section.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/show_more_footer/show_more_footer.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/components/use_is_text_truncated.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/template_ui/conversation_title.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-agentic-investigations-common/src/template_ui/register.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/always_allow_checkbox.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_actor_time.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_content.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_content_body.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_content_footer.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_content_header.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_modal.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/approval_status_callouts.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/decline_reason_form.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/needs_review_badge.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-proposals-ui/src/proposal_caption.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/shared/convert_for_ui.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/api/stream_reducer.ts": [
+      "@reduxjs/toolkit"
+    ],
+    "x-pack/platform/packages/shared/ml/aiops_log_rate_analysis/constants.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/packages/shared/ml/anomaly_utils/use_severity_color.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/platform/plugins/shared/security/common/model/user_profile.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/solutions/observability/plugins/infra/common/color_palette.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/solutions/observability/plugins/observability/common/components/elapsed_timestamp_tooltip.tsx": [
+      "@elastic/eui"
+    ],
+    "x-pack/solutions/observability/plugins/observability_shared/common/color_palette.ts": [
+      "@elastic/eui"
+    ],
+    "x-pack/solutions/observability/plugins/profiling/common/topn.ts": [
+      "@elastic/eui"
+    ]
+  }
+}
