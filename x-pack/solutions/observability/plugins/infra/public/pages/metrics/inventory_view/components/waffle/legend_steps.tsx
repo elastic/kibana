@@ -48,7 +48,8 @@ function ColorCell({ color, onChange }: ColorCellProps) {
       color={color}
       compressed
       aria-label={selectColorLabel}
-      button={<EuiColorPickerSwatch color={color} aria-label={selectColorLabel} />}
+      // EuiColorPickerSwatch provides its own aria-label including the color value
+      button={<EuiColorPickerSwatch color={color} />}
     />
   );
 }
