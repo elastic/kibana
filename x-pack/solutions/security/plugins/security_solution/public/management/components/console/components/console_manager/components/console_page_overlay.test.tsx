@@ -141,4 +141,17 @@ describe('ConsolePageOverlay', () => {
 
     document.removeEventListener('keydown', documentListener);
   });
+
+  // The header's overflow menu is portaled outside the overlay; its Escape must close only the menu.
+  it('does not hide the console on `Escape` pressed in the header overflow menu', async () => {
+    const onHide = jest.fn();
+    renderOverlay({ onHide, docLink: 'https://example.com/response-actions' });
+    await openAppMenuOverflow();
+
+    const menuItem = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation);
+    menuItem.focus();
+    await userEvent.keyboard('{Escape}');
+
+    expect(onHide).not.toHaveBeenCalled();
+  });
 });
