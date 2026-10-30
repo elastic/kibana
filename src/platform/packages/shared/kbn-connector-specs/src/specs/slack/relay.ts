@@ -299,8 +299,7 @@ const SLACK_WINDOW_BOUND = /^\d{1,12}(\.\d{1,6})?$/;
 
 const RELAY_MAX_READ_LIMIT = 200;
 
-// The Relay's own default, made explicit so later pages keep the same floor:
-// https://github.com/elastic/relay-service/blob/6d468f0d7334954531c6d7ad90ec2f1c190d0197/src/contracts/http/slack-read.ts#L31
+/** The Relay's own default, made explicit so later pages keep the same floor. */
 const RELAY_DEFAULT_HISTORY_WINDOW_SECONDS = 2 * 60 * 60;
 
 /**
