@@ -55,16 +55,16 @@ jest.mock('../filter_editor', () => ({
   withCloseFilterEditorConfirmModal: (Component: React.ComponentType<any>) => Component,
 }));
 
-const ANIMALS_DATA_VIEW_ID = 'animals';
+const LOGSTASH_DATA_VIEW_ID = 'logstash-*';
 // Not part of the current view; can't be told apart from a deleted data view
 const UNKNOWN_DATA_VIEW_ID = 'unknown';
 
-// The "current view": only the animals data view is available
+// The "current view": only the logstash data view is available
 const dataViews = [
   {
-    id: ANIMALS_DATA_VIEW_ID,
-    title: 'animals-*',
-    fields: [{ name: 'name' }, { name: '@timestamp' }],
+    id: LOGSTASH_DATA_VIEW_ID,
+    title: 'logstash-*',
+    fields: [{ name: 'host' }, { name: '@timestamp' }],
   },
 ] as unknown as FilterableSource[];
 
@@ -103,23 +103,23 @@ const renderFilter = (filter: Filter) => {
 describe('FilterItemComponent with bad filters', () => {
   it('unknown data view, field found: rendered without warning', () => {
     const { subjects, labelStatus, errorMessage } = renderFilter(
-      buildPhraseFilter('name', 'moo', { index: UNKNOWN_DATA_VIEW_ID })
+      buildPhraseFilter('host', 'kibana.org', { index: UNKNOWN_DATA_VIEW_ID })
     );
 
     expect(labelStatus).toBe('');
     expect(errorMessage).toBeFalsy();
     expect(subjects).toEqual(
-      expect.arrayContaining(['filter-key-name', 'filter-value-moo', 'filter-enabled'])
+      expect.arrayContaining(['filter-key-host', 'filter-value-kibana.org', 'filter-enabled'])
     );
   });
 
   it('known data view, field missing: rendered with warning', () => {
     const { subjects, labelStatus, errorMessage } = renderFilter(
-      buildPhraseFilter('baad-field', 'moo', { index: ANIMALS_DATA_VIEW_ID })
+      buildPhraseFilter('baad-field', 'kibana.org', { index: LOGSTASH_DATA_VIEW_ID })
     );
 
     expect(labelStatus).toBe('warn');
-    expect(errorMessage).toBe('Field baad-field not found in data view animals-*');
+    expect(errorMessage).toBe('Field baad-field not found in data view logstash-*');
     expect(subjects).toEqual(
       expect.arrayContaining(['filter-key-baad-field', 'filter-value-warn', 'filter-enabled'])
     );
