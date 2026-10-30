@@ -27,6 +27,7 @@ export const registerHuntIndexScopeRoute = ({
   logger,
   getSpaceId,
   getClusterClient,
+  isCpsEnabled,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -58,6 +59,7 @@ export const registerHuntIndexScopeRoute = ({
             esClient,
             spaceId,
             indexPatterns,
+            crossProjectSearch: isCpsEnabled(),
             logger,
           });
           if (scope.resolution === 'blocked:empty_universe') {

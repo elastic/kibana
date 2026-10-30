@@ -158,6 +158,7 @@ export const registerHuntCoordinatorRoute = ({
   logger,
   getSpaceId,
   getClusterClient,
+  isCpsEnabled,
   getHuntServices,
   getAgentBuilderAttachments,
 }: RouteDependencies): void => {
@@ -275,6 +276,7 @@ export const registerHuntCoordinatorRoute = ({
               max_tier2_sample_events,
               trigger,
               indexPatterns,
+              crossProjectSearch: isCpsEnabled(),
               run_id: runId,
             },
             attachmentsClient,

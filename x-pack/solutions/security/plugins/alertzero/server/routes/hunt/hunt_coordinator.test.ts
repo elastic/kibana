@@ -72,7 +72,13 @@ const makeDeps = ({
   spaceId = 'default',
   indexPatterns = UNIVERSE,
   agentBuilderStarted = true,
-}: { spaceId?: string; indexPatterns?: string[]; agentBuilderStarted?: boolean } = {}) => {
+  cpsEnabled = false,
+}: {
+  spaceId?: string;
+  indexPatterns?: string[];
+  agentBuilderStarted?: boolean;
+  cpsEnabled?: boolean;
+} = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -91,6 +97,7 @@ const makeDeps = ({
     logger,
     getSpaceId: () => spaceId,
     getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
     getHuntServices: () =>
       ({
         getInference: () => ({}),
@@ -230,6 +237,16 @@ describe('registerHuntCoordinatorRoute', () => {
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(paramsOf().spaceId).toBe('hunt-space');
+  });
+
+  it('tells the coordinator whether cross-project search is on', async () => {
+    const off = makeDeps();
+    await off.handler(off.context, requestFor(), httpServerMock.createResponseFactory());
+    const on = makeDeps({ cpsEnabled: true });
+    await on.handler(on.context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(paramsOf(0).crossProjectSearch).toBe(false);
+    expect(paramsOf(1).crossProjectSearch).toBe(true);
   });
 
   it('reads reports as the internal user and searches as the current user', async () => {

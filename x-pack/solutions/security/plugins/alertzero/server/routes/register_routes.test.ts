@@ -20,6 +20,7 @@ const setup = () => {
     logger: loggerMock.create(),
     getSpaceId: service,
     getClusterClient: service,
+    isCpsEnabled: () => false,
     getWatchesService: service,
     getWorkersService: service,
     getConversationProposalsService: service,

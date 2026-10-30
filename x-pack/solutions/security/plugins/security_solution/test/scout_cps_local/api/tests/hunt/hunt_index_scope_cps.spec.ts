@@ -26,6 +26,8 @@ const RUN = Date.now();
 const LINKED_ALIAS = 'linked_local_project';
 const LINKED_STREAM = `logs-cps-hunt-${RUN}`;
 const ORIGIN_STREAM = `logs-cps-hunt-origin-${RUN}`;
+// Exists on the linked project only, so an unqualified pattern for it resolves nowhere locally.
+const LINKED_ONLY_STREAM = `logs-cps-hunt-linkedonly-${RUN}`;
 const LINKED_PATTERN = `${LINKED_ALIAS}:${LINKED_STREAM}*`;
 const CUSTOM_PATTERN = `custom-edr-cps-${RUN}-*`;
 const CUSTOM_INDEX = `custom-edr-cps-${RUN}-1`;
@@ -90,6 +92,11 @@ apiTest.describe.serial(
         document: { ...document(), source: { ip: LINKED_IOC_IP } },
         refresh: true,
       });
+      await linkedProject.esClient.index({
+        index: LINKED_ONLY_STREAM,
+        document: document(),
+        refresh: true,
+      });
       await esClient.index({ index: ORIGIN_STREAM, document: document(), refresh: true });
       await setDefaultIndexInSpace({
         apiClient,
@@ -104,6 +111,10 @@ apiTest.describe.serial(
         {
           name: 'delete the linked data stream',
           run: () => linkedProject.esClient.indices.deleteDataStream({ name: LINKED_STREAM }),
+        },
+        {
+          name: 'delete the linked-only data stream',
+          run: () => linkedProject.esClient.indices.deleteDataStream({ name: LINKED_ONLY_STREAM }),
         },
         {
           name: 'delete the origin data stream',
@@ -151,6 +162,46 @@ apiTest.describe.serial(
           expect(coverageBody.unreadable_by_worker).not.toContain(LINKED_PATTERN);
         } finally {
           // Never leave the linked pattern behind for the role-coverage tests below.
+          await setDefaultIndexInSpace({
+            apiClient,
+            headers: adminHeaders,
+            spaceId: SPACE,
+            patterns: ['logs-*', CUSTOM_PATTERN],
+          });
+        }
+      }
+    );
+
+    // In a flat-world space an unqualified pattern reaches the linked project too, so one whose
+    // data lives only there is covered rather than reported missing.
+    apiTest(
+      'does not report an unqualified pattern missing when only the linked project has its data',
+      async ({ apiClient }) => {
+        await setDefaultIndexInSpace({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: SPACE,
+          patterns: [`logs-cps-hunt-linkedonly-${RUN}*`],
+        });
+        try {
+          const response = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, SPACE), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
+          const coverage = await apiClient.get(spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, SPACE), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
+
+          expect(response.body as HuntIndexScopeResponse).toMatchObject({
+            status: 'ok',
+            resolution: 'universe',
+            missing: [],
+          });
+          expect(coverage.body as HuntWorkerIndexCoverageResponse).toMatchObject({
+            missing_for_everyone: [],
+          });
+        } finally {
           await setDefaultIndexInSpace({
             apiClient,
             headers: adminHeaders,

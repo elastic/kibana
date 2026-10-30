@@ -32,6 +32,7 @@ export const registerHuntWorkerIndexCoverageRoute = ({
   logger,
   getSpaceId,
   getClusterClient,
+  isCpsEnabled,
   getWorkersService,
   getWorkflowsManagement,
   isServerless,
@@ -69,6 +70,7 @@ export const registerHuntWorkerIndexCoverageRoute = ({
             request,
             spaceId,
             indexPatterns,
+            crossProjectSearch: isCpsEnabled(),
             workflowId,
             serviceAccountId,
             roleName: getWorkerRoleName(

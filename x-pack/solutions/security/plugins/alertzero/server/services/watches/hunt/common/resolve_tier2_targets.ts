@@ -10,6 +10,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntForThreatResult } from '@kbn/alertzero-common';
 import { parseIndexScopeEntry, splitRemoteCluster } from '../../../../../common/remote_cluster';
 import { boundTargetPatterns, collapseIndexName } from './classify_actionable_indices';
+import { scopeGuardPatterns } from './cps_scope';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
 import { clusterCovers, exclusionReachesCluster, literalPrefix } from './index_glob';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
@@ -188,6 +189,7 @@ export const resolveTier2Targets = async ({
   report,
   model,
   messagesFallback,
+  crossProjectSearch = false,
   logger,
 }: {
   scope: Pick<
@@ -199,9 +201,12 @@ export const resolveTier2Targets = async ({
   model?: ScopedModel;
   /** Tier model used when the gateway rejects the dataset-match template. */
   messagesFallback?: ScopedModel;
+  /** Cross-project search is on: an unqualified universe entry also covers linked projects. */
+  crossProjectSearch?: boolean;
   logger?: Logger;
 }): Promise<Tier2Targets> => {
   const reportMatches = scope.report_matches;
+  const universe = scopeGuardPatterns(scope.index_patterns, crossProjectSearch);
   const tier1Hits = uniq(tier1.per_index.map(({ index }) => collapseIndexName(index)));
 
   let modelMatches: string[] = [];
@@ -228,12 +233,12 @@ export const resolveTier2Targets = async ({
   const constrainToUniverse = (patterns: string[]): string[] =>
     uniq(
       patterns.flatMap((pattern) => {
-        if (staysInsideUniverse(pattern, scope.index_patterns)) return [pattern];
+        if (staysInsideUniverse(pattern, universe)) return [pattern];
         universeNarrowed = true;
         const dataset = datasetByPattern.get(pattern);
         const narrowed = (dataset?.data_streams ?? []).map((stream) => `${stream}*`);
         const allowed = narrowed.filter((candidate) =>
-          staysInsideUniverse(candidate, scope.index_patterns)
+          staysInsideUniverse(candidate, universe)
         );
         logger?.warn(
           `Hunt Tier 2 target "${pattern}" reaches outside the hunt universe; ${

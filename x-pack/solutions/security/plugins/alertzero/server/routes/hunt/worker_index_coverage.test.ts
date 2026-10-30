@@ -36,7 +36,8 @@ const coverage = {
 const makeDeps = ({
   isServerless = false,
   management = {},
-}: { isServerless?: boolean; management?: object | null } = {}) => {
+  cpsEnabled = false,
+}: { isServerless?: boolean; management?: object | null; cpsEnabled?: boolean } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { get: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -53,6 +54,7 @@ const makeDeps = ({
     logger,
     getSpaceId: () => 'space-a',
     getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
     getWorkersService: () => workersService,
     getWorkflowsManagement: () => management ?? undefined,
     isServerless,
@@ -119,6 +121,28 @@ describe('registerHuntWorkerIndexCoverageRoute', () => {
         serviceAccountId: 'kibana/alertzero_threat_hunt',
         indexPatterns: ['logs-*'],
       })
+    );
+  });
+
+  it('tells the coverage read whether cross-project search is on', async () => {
+    const off = makeDeps();
+    await off.handler(
+      off.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+    expect(resolveMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: false })
+    );
+
+    const on = makeDeps({ cpsEnabled: true });
+    await on.handler(
+      on.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+    expect(resolveMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: true })
     );
   });
 

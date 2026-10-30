@@ -34,6 +34,8 @@ export interface RouteDependencies {
   getSpaceId: AlertZeroSpaceIdResolver;
   /** The deployment cluster client from core start; routes scope it per request. */
   getClusterClient: () => IClusterClient;
+  /** True when cross-project search is on, where unqualified index patterns reach linked projects. */
+  isCpsEnabled: () => boolean;
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;

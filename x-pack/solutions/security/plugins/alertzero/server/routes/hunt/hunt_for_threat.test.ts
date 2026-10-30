@@ -62,7 +62,8 @@ const tier1Result: HuntForThreatServiceResult = {
 const makeDeps = ({
   spaceId = 'default',
   indexPatterns = UNIVERSE,
-}: { spaceId?: string; indexPatterns?: string[] } = {}) => {
+  cpsEnabled = false,
+}: { spaceId?: string; indexPatterns?: string[]; cpsEnabled?: boolean } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -75,6 +76,7 @@ const makeDeps = ({
     logger,
     getSpaceId: () => spaceId,
     getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
   } as unknown as RouteDependencies);
 
   const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
@@ -152,6 +154,20 @@ describe('registerHuntForThreatRoute', () => {
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(huntForThreatMock).toHaveBeenCalledWith(scoped.asCurrentUser, expect.anything());
+  });
+
+  it('tells scope resolution whether cross-project search is on', async () => {
+    const off = makeDeps();
+    await off.handler(off.context, httpServerMock.createKibanaRequest(), httpServerMock.createResponseFactory());
+    expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: false })
+    );
+
+    const on = makeDeps({ cpsEnabled: true });
+    await on.handler(on.context, httpServerMock.createKibanaRequest(), httpServerMock.createResponseFactory());
+    expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ crossProjectSearch: true })
+    );
   });
 
   it('scopes the client to the request with the space project routing', async () => {

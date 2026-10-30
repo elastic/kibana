@@ -29,6 +29,7 @@ export const registerHuntForThreatRoute = ({
   logger,
   getSpaceId,
   getClusterClient,
+  isCpsEnabled,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -63,6 +64,7 @@ export const registerHuntForThreatRoute = ({
             esClient,
             spaceId,
             indexPatterns,
+            crossProjectSearch: isCpsEnabled(),
             logger,
           });
 

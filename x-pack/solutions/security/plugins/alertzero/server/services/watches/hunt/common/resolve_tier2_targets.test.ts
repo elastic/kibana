@@ -427,6 +427,63 @@ describe('resolveTier2Targets', () => {
       expect(result.degraded).toBe(true);
     });
 
+    describe('with cross-project search on', () => {
+      it('keeps a linked project report match under an unqualified universe', async () => {
+        const result = await resolveTier2Targets({
+          scope: remoteScope(['logs-*']),
+          tier1: hits(),
+          crossProjectSearch: true,
+          logger,
+        });
+
+        expect(result.tier2_targets).toEqual(['infosec_zocalo:logs-aws.cloudtrail-*']);
+        expect(result.degraded).toBe(false);
+      });
+
+      it('still drops it under another cluster or a whole-cluster exclusion', async () => {
+        const result = await resolveTier2Targets({
+          scope: remoteScope(['other:logs-*', '-infosec_zocalo:*']),
+          tier1: hits(),
+          crossProjectSearch: true,
+          logger,
+        });
+
+        expect(result.tier2_targets).toEqual([]);
+      });
+
+      it('keeps an unqualified exclusion in force on the linked project', async () => {
+        const result = await resolveTier2Targets({
+          scope: {
+            ...remoteScope(['logs-*', '-logs-aws.cloudtrail-prod*']),
+            discovered: [
+              {
+                ...remoteCloudtrail,
+                data_streams: [
+                  'infosec_zocalo:logs-aws.cloudtrail-default',
+                  'infosec_zocalo:logs-aws.cloudtrail-prod',
+                ],
+              },
+            ],
+          },
+          tier1: hits(),
+          crossProjectSearch: true,
+          logger,
+        });
+
+        expect(result.tier2_targets).toEqual(['infosec_zocalo:logs-aws.cloudtrail-default*']);
+      });
+
+      it('leaves an unqualified universe local-only when it is off', async () => {
+        const result = await resolveTier2Targets({
+          scope: remoteScope(['logs-*']),
+          tier1: hits(),
+          logger,
+        });
+
+        expect(result.tier2_targets).toEqual([]);
+      });
+    });
+
     it('narrows a remote report match past a remote index exclusion', async () => {
       const result = await resolveTier2Targets({
         scope: {

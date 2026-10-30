@@ -21,6 +21,7 @@ import {
   FINAL_WHEN_NOTHING_SEARCHABLE,
   huntCompletenessOf,
 } from './common/completeness';
+import { scopeGuardPatterns } from './common/cps_scope';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
@@ -83,6 +84,8 @@ export interface HuntCoordinatorParams {
    * `securitySolution:defaultIndex` setting.
    */
   indexPatterns: string[];
+  /** Cross-project search is on: unqualified patterns in the universe reach linked projects. */
+  crossProjectSearch?: boolean;
   text?: string;
   iocs?: HuntIoc[];
   techniques?: string[];
@@ -565,6 +568,7 @@ const huntCoordinatorCore = async (
     text: callerText,
     run_id,
     indexPatterns,
+    crossProjectSearch = false,
     trigger,
   } = params;
 
@@ -698,6 +702,7 @@ const huntCoordinatorCore = async (
       esClient,
       spaceId,
       indexPatterns,
+      crossProjectSearch,
       report: scopeReport,
       logger,
     });
@@ -845,6 +850,7 @@ const huntCoordinatorCore = async (
     report: scopeReport,
     model: datasetMatchModel,
     messagesFallback: models.efficient,
+    crossProjectSearch,
     logger,
   });
 
@@ -1018,7 +1024,7 @@ const huntCoordinatorCore = async (
         row_limit: scope.row_limit,
         // Every reader downstream (the allowlist, the schema probe, the publish/execute
         // gates, the hit bar) treats this as the set Tier 2 may read.
-        allowed_indices: targets.tier2_targets,
+        allowed_indices: scopeGuardPatterns(targets.tier2_targets, crossProjectSearch),
       },
       esClient,
       mitreDataClient
