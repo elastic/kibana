@@ -180,7 +180,10 @@ import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
-import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
+import {
+  scheduleBumpAgentPoliciesByIdTask,
+  scheduleDebouncedBumpAgentPoliciesByIdTask,
+} from './agent_policies/bump_agent_policies_by_id_task';
 import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpers';
 import {
   getVersionSpecificPolicies,
@@ -1332,6 +1335,38 @@ class AgentPolicyService {
         packageAgentVersionConditions: packageAgentVersionConditions ?? null,
       });
     });
+  }
+
+  /**
+   * Bumps the revision of each agent policy after `delayMs` (5s by default), once
+   * for all calls made for it in that window from any Kibana node, so a burst of
+   * changes to one agent policy redeploys it once instead of once per change.
+   * Pass `delayMs: 0` when agents should pick the change up right away. Missing
+   * agent policies are skipped.
+   */
+  public async scheduleRevisionBump(
+    agentPolicyIds: readonly string[],
+    options?: { delayMs?: number }
+  ): Promise<void> {
+    if (agentPolicyIds.length === 0) {
+      return;
+    }
+
+    // Callers only know ids; the bump task needs a space each policy lives in.
+    const agentPolicies = await this.getByIds(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+      uniq(agentPolicyIds).map((id) => ({ id, spaceId: '*' })),
+      { ignoreMissing: true, fields: ['name'] }
+    );
+
+    await scheduleDebouncedBumpAgentPoliciesByIdTask(
+      appContextService.getTaskManagerStart()!,
+      agentPolicies.map((agentPolicy) => ({
+        id: agentPolicy.id,
+        spaceId: getSpaceForAgentPolicy(agentPolicy),
+      })),
+      options
+    );
   }
 
   private async computeMinAgentVersionData(

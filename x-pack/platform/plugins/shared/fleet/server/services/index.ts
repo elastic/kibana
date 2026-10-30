@@ -23,6 +23,7 @@ export interface AgentPolicyServiceInterface {
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
   getByIds: (typeof agentPolicyService)['getByIds'];
   bumpRevision: (typeof agentPolicyService)['bumpRevision'];
+  scheduleRevisionBump: (typeof agentPolicyService)['scheduleRevisionBump'];
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
