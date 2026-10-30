@@ -685,6 +685,13 @@ export const ALERTING_LOG_CODES = {
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
   /**
+   * A background task that could not be removed.
+   * if the task exists from an earlier start it
+   * keeps running until the next removal attempt.
+   * The task type is carried in `labels.task_id`.
+   */
+  TASKS_REMOVE_FAILED: 'TASKS_REMOVE_FAILED',
+  /**
    * The pending API-key invalidation background task run failed. Keys queued
    * for invalidation remain until the next scheduled run.
    */

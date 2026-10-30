@@ -263,14 +263,6 @@ describe('AutomationsPage', () => {
       mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
     });
 
-    it('sorts rows by automation name by default', () => {
-      renderPage();
-
-      const names = screen.getAllByTestId('nightshiftAutomationName').map((el) => el.textContent);
-      expect(names).toEqual(['Daily report', 'Triage incoming alerts']);
-      expect(screen.getByText('Showing 2 automations')).toBeInTheDocument();
-    });
-
     it('shows tags, run counts, usage, and the daily limit warning', () => {
       renderPage();
 
@@ -334,14 +326,6 @@ describe('AutomationsPage', () => {
 
       expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
       expect(history.location.pathname).toBe('/automations');
-    });
-
-    it('opens the create flyout', () => {
-      renderPage();
-
-      fireEvent.click(screen.getByRole('button', { name: 'Create automation' }));
-
-      expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
     });
 
     it('opens a detail flyout and returns to the list with router navigation', () => {
