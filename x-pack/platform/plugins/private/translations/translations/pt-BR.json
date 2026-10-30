@@ -49392,8 +49392,6 @@
     "xpack.securitySolution.uiSettings.duplicateClosingReason": "Sem valores duplicados.",
     "xpack.securitySolution.uiSettings.enableAssetInventoryDescription": "Ative a experiência Cloud Connector na Security Solution. Quando ativado, você pode acessar o novo recurso de conector de nuvem configurando uma integração de CSPM ou de inventário de ativos sem agente.",
     "xpack.securitySolution.uiSettings.enableAssetInventoryLabel": "Habilitar conector de nuvem",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutDescription": "<p>Ativa o novo sistema de painel flutuante para detalhes de documentos na Security Solution.</p>",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutLabel": "Ativar novo menu suspenso",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>Ativa o feed de notícias</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "Feed de notícias",
     "xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription": "<p>Habilita o recurso de histórico de alterações das regras de detecção no Security Solution.</p>",

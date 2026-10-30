@@ -78,7 +78,7 @@ export const registerTools = (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(buildRedirectUrlTool(core, experimentalFeatures));
+  agentBuilder.tools.register(buildRedirectUrlTool(core));
   agentBuilder.tools.register(getEntityTool(core, logger, ml, experimentalFeatures));
   agentBuilder.tools.register(
     getEntityGraphTool(core, logger, experimentalFeatures, productFeaturesService)

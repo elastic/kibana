@@ -49030,8 +49030,6 @@
     "xpack.securitySolution.uiSettings.duplicateClosingReason": "Aucune valeur en double.",
     "xpack.securitySolution.uiSettings.enableAssetInventoryDescription": "Activez l'expérience cloud Connector au sein de la solution de sécurité. Lorsqu'elle est activée, vous pouvez accéder à la nouvelle fonctionnalité Cloud Connector en configurant une intégration CSPM sans agent ou une intégration de l'inventaire des actifs.",
     "xpack.securitySolution.uiSettings.enableAssetInventoryLabel": "Activer Cloud Connector",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutDescription": "<p>Activez le nouveau volet pour les détails des documents dans Solution de sécurité.</p>",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutLabel": "Activer le nouveau menu volant",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>Active le fil d'actualités</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "Fil d'actualités",
     "xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription": "<p>Active la fonctionnalité d'historique des modifications des règles de détection dans Solution de sécurité.</p>",

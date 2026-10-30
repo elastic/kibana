@@ -265,7 +265,7 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'The agent calls NO mutating tool (no security.link_entities or security.unlink_entities) — the user asked to see the UI, not to change anything.',
-                    `The reply contains a clickable markdown link whose URL carries a flyout deep-link for ${RESOLUTION_FLYOUT_HOST_EUID} (a \`flyout=\` query parameter opening the "host-panel" panel).`,
+                    `The reply contains a clickable markdown link whose URL carries a flyout deep-link for ${RESOLUTION_FLYOUT_HOST_EUID} (a \`flyoutV2=\` query parameter opening that host's entity flyout).`,
                   ],
                   toolCalls: [
                     {

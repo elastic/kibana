@@ -49420,8 +49420,6 @@
     "xpack.securitySolution.uiSettings.duplicateClosingReason": "重複する値はありません。",
     "xpack.securitySolution.uiSettings.enableAssetInventoryDescription": "Security Solution内でCloud Connector体験を有効にします。有効にすると、エージェントレスCSPMまたは資産インベントリ統合を設定することで、新しいCloud Connector機能にアクセスできるようになります。",
     "xpack.securitySolution.uiSettings.enableAssetInventoryLabel": "Cloud Connectorを有効にする",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutDescription": "<p>Security Solutionの文書詳細に関する新しいフライアウトシステムを有効にします。</p>",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutLabel": "新しいフライアウトを有効にする",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>ニュースフィードを有効にします</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "ニュースフィード",
     "xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription": "<p>Security Solution内の検出ルール変更履歴機能を有効にします。</p>",

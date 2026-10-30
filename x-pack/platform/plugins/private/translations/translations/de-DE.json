@@ -49254,8 +49254,6 @@
     "xpack.securitySolution.uiSettings.duplicateClosingReason": "Keine doppelten Werte.",
     "xpack.securitySolution.uiSettings.enableAssetInventoryDescription": "Aktivieren Sie die Cloud Connector-Erfahrung innerhalb der Security-Lösung. Wenn diese Option aktiviert ist, können Sie auf die neue Cloud Connector-Features zugreifen, indem Sie eine Agentless CSPM- oder Asset Inventory Integration einrichten.",
     "xpack.securitySolution.uiSettings.enableAssetInventoryLabel": "Cloud Connector aktivieren",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutDescription": "<p>Aktiviert das neue Flyout-System für Dokumentendetails in Security Solution.</p>",
-    "xpack.securitySolution.uiSettings.enableNewFlyoutLabel": "Neues Flyout aktivieren",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>Aktiviert den News-Feed</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "Nachrichten-Feed",
     "xpack.securitySolution.uiSettings.enableRuleChangesHistoryDescription": "<p>Aktiviert die Funktion zur Anzeige der Historie von Erkennungsregeländerungen innerhalb von Security Solution.</p>",
