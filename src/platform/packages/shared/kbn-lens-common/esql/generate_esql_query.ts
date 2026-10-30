@@ -27,15 +27,11 @@ import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { buildOuterTopNFilter } from './build_outer_top_n_filter';
 import {
-  buildOtherBucketLabelFragment,
-  buildOtherBucketNamedFlagFragment,
+  buildOtherBucketOutputParts,
   buildOuterTopNOtherRemap,
 } from './build_outer_top_n_other_remap';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import {
-  getTermsConversionFailure,
-  type TermsConversionContext,
-} from './get_terms_conversion_failure';
+import { getTermsConversionFailure } from './get_terms_conversion_failure';
 import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
@@ -469,20 +465,19 @@ export function generateEsqlQuery(
   const hasUnsupportedDateHistogramNesting =
     hasOuterTermsBelowOtherBucket || (hasTrailingBuckets && leadingBucketEntries.length > 0);
 
-  // Single Top values with no sibling buckets: Other remaps via EVAL + CASE. Nested outer
-  // Other and Top values above a date histogram with Other remain gated until follow-ups.
-  const supportsSingleTermsOtherBucket =
-    termsBuckets.length === 1 && !hasTrailingBuckets && leadingBucketEntries.length === 0;
-
+  // Other is supported when this terms column is the first bucket: alone, above a date
+  // histogram, or the outer of two Top values. An inner Top values Other (or terms under a
+  // date histogram) stays gated — DSL builds one Other per parent bucket.
   // Fail fast on terms blockers before building bucket expressions; metric
   // failures above still take precedence. One reason per terms column; take the first.
-  const termsConversionContext: TermsConversionContext = {
-    hasUnsupportedDateHistogramNesting,
-    termsBucketCount: termsBuckets.length,
-    supportsOtherBucket: supportsSingleTermsOtherBucket,
-  };
   const termsFailureReason = termsBuckets
-    .map(({ col }) => getTermsConversionFailure(col, termsConversionContext))
+    .map(({ col, index }) =>
+      getTermsConversionFailure(col, {
+        hasUnsupportedDateHistogramNesting,
+        termsBucketCount: termsBuckets.length,
+        supportsOtherBucket: index === 0 && !hasUnsupportedDateHistogramNesting,
+      })
+    )
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);
   if (termsFailureReason) {
     return getEsqlQueryFailedResult(termsFailureReason);
@@ -628,13 +623,35 @@ export function generateEsqlQuery(
         uniqueBucketsByOutputName.set(outputName, expression);
       }
     });
-    const aliasedBuckets = Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
-      outputName !== expression ? `${esql.col(outputName)} = ${expression}` : expression
-    );
+    const toStatsGroup = (outputName: string, expression: string): string =>
+      outputName !== expression ? `${esql.col(outputName)} = ${expression}` : expression;
+    // With a key override, Other groups by its typed key in place of the field; the label EVAL
+    // restores the field afterwards.
+    const buildStatsGroups = (
+      leadingGroups: string[],
+      keyOverride?: { groupExpr: string; keyAlias: string }
+    ): string =>
+      [
+        ...leadingGroups,
+        ...Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
+          outputName === keyOverride?.groupExpr
+            ? keyOverride.keyAlias
+            : toStatsGroup(outputName, expression)
+        ),
+      ].join(', ');
     const buildStatsClause = (leadingGroups: string[] = []): string | undefined =>
       validMetrics.length > 0
-        ? `STATS ${validMetrics.join(', ')} BY ${[...leadingGroups, ...aliasedBuckets].join(', ')}`
+        ? `STATS ${validMetrics.join(', ')} BY ${buildStatsGroups(leadingGroups)}`
         : undefined;
+    // Unlike the plain clause, Other always needs the STATS so the key collapses into one group.
+    const buildOtherBucketStatsClause = (
+      leadingGroups: string[],
+      keyOverride: { groupExpr: string; keyAlias: string }
+    ): string =>
+      `STATS ${validMetrics.length > 0 ? `${validMetrics.join(', ')} ` : ''}BY ${buildStatsGroups(
+        leadingGroups,
+        keyOverride
+      )}`;
 
     if (innerTermsBucket) {
       // "Rank by" resolves either to the bucket's own field (alphabetical) or to the
@@ -656,6 +673,60 @@ export function generateEsqlQuery(
           ? { expr: quoteEsqlColumnRef(expr), direction: orderDirection.toUpperCase() }
           : undefined;
       };
+
+      const allocateHelperAlias = createHelperAliasAllocator(
+        [
+          ...Object.values(layer.columns).flatMap((col) =>
+            'sourceField' in col ? [col.sourceField] : []
+          ),
+          ...metricOutputNamesByColId.values(),
+          ...resolvedBucketExprs.values(),
+        ],
+        (name) => Boolean(indexPattern.getFieldByName(name))
+      );
+
+      // DSL's Other request requires the field to exist, so documents without it stay out of
+      // every bucket instead of falling into "Other". The subquery also sorts by the field so ties
+      // match DSL terms key order.
+      const buildOtherBucketKeyParts = ({
+        groupExpr,
+        scoreFragment,
+        subquerySortKey,
+        size: topSize,
+        keyAlias,
+      }: {
+        groupExpr: string;
+        scoreFragment: string;
+        subquerySortKey: EsqlSortKey;
+        size: number;
+        keyAlias: string;
+      }): string[] => [
+        `WHERE ${groupExpr} IS NOT NULL`,
+        buildOuterTopNOtherRemap({
+          source,
+          timeFilter,
+          groupExpr,
+          scoreFragment,
+          sortClause: formatSortKeys([
+            subquerySortKey,
+            { expr: quoteEsqlColumnRef(groupExpr), direction: 'ASC' },
+          ]),
+          size: topSize,
+          keyAlias,
+        }),
+      ];
+
+      // Other ranks by its typed key, because the field column only exists again after the label
+      // `EVAL`. Alphabetical ranking sorts the key; metric ranking breaks ties by it, like DSL
+      // terms do by key.
+      const getOtherBucketRankSortKeys = (
+        keyAlias: string,
+        direction: string,
+        metricSortKey?: EsqlSortKey
+      ): EsqlSortKey[] =>
+        metricSortKey
+          ? [metricSortKey, { expr: keyAlias, direction: 'ASC' }]
+          : [{ expr: keyAlias, direction }];
 
       const { size, orderBy, orderDirection } = innerTermsBucket.col.params;
       const innerSortKey = resolveTermsSortKey(innerTermsBucket.col, innerTermsBucket.index);
@@ -692,7 +763,7 @@ export function generateEsqlQuery(
           if (!metricExpression) {
             return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
           }
-          rankAlias = getOuterRankAlias(innerTermsBucket.col.sourceField);
+          rankAlias = allocateHelperAlias(getOuterRankAlias(innerTermsBucket.col.sourceField));
           scoreFragment = `${rankAlias} = ${metricExpression}`;
           seriesSortKey = { expr: rankAlias, direction: orderDirection.toUpperCase() };
         } else {
@@ -705,30 +776,70 @@ export function generateEsqlQuery(
           };
         }
 
-        queryParts.push(
-          buildOuterTopNFilter({
-            source,
-            timeFilter,
-            groupExpr: fieldExpr,
-            scoreFragment,
-            sortClause: formatSortKeys([seriesSortKey]),
-            size,
-          })
-        );
+        if (innerTermsBucket.col.params.otherBucket === true) {
+          const { sourceField } = innerTermsBucket.col;
+          const keyAlias = allocateHelperAlias(getOtherBucketKeyAlias(sourceField));
+          const flagAlias = allocateHelperAlias(getOtherBucketNamedFlagAlias(sourceField));
 
-        if (rankAlias) {
-          queryParts.push(`INLINE STATS ${scoreFragment} BY ${fieldExpr}`);
-        }
+          queryParts.push(
+            ...buildOtherBucketKeyParts({
+              groupExpr: fieldExpr,
+              scoreFragment,
+              subquerySortKey: seriesSortKey,
+              size,
+              keyAlias,
+            })
+          );
+          // Ranking by the key gives every Other row the same rank, so Other stays one series.
+          if (rankAlias) {
+            queryParts.push(`INLINE STATS ${scoreFragment} BY ${keyAlias}`);
+          }
+          queryParts.push(
+            buildOtherBucketStatsClause(rankAlias ? [rankAlias] : [], {
+              groupExpr: fieldExpr,
+              keyAlias,
+            }),
+            ...buildOtherBucketOutputParts({
+              groupExpr: fieldExpr,
+              keyAlias,
+              flagAlias,
+              sortClause: formatSortKeys([
+                ...getOtherBucketRankSortKeys(
+                  keyAlias,
+                  orderDirection.toUpperCase(),
+                  rankAlias ? seriesSortKey : undefined
+                ),
+                ...trailingSortKeys,
+              ]),
+              dropAliases: rankAlias ? [rankAlias] : [],
+            })
+          );
+        } else {
+          queryParts.push(
+            buildOuterTopNFilter({
+              source,
+              timeFilter,
+              groupExpr: fieldExpr,
+              scoreFragment,
+              sortClause: formatSortKeys([seriesSortKey]),
+              size,
+            })
+          );
 
-        const statsClause = buildStatsClause(rankAlias ? [rankAlias] : []);
-        if (statsClause) {
-          queryParts.push(statsClause);
-        }
+          if (rankAlias) {
+            queryParts.push(`INLINE STATS ${scoreFragment} BY ${fieldExpr}`);
+          }
 
-        queryParts.push(`SORT ${formatSortKeys([seriesSortKey, ...trailingSortKeys])}`);
+          const statsClause = buildStatsClause(rankAlias ? [rankAlias] : []);
+          if (statsClause) {
+            queryParts.push(statsClause);
+          }
 
-        if (rankAlias) {
-          queryParts.push(`DROP ${rankAlias}`);
+          queryParts.push(`SORT ${formatSortKeys([seriesSortKey, ...trailingSortKeys])}`);
+
+          if (rankAlias) {
+            queryParts.push(`DROP ${rankAlias}`);
+          }
         }
       } else {
         // Only buckets above the inner Top values group its `LIMIT n BY`.
@@ -792,116 +903,170 @@ export function generateEsqlQuery(
         }
 
         if (outerBuckets.length === 0 && innerTermsBucket.col.params.otherBucket === true) {
-          // Single Top values + Other: remap non-top keys to "Other", then keep size + 1 rows.
-          let scoreFragment: string;
-          let rankAlias: string | undefined;
-          let metricExpression: string | undefined;
+          // Single Top values + Other: remap non-top keys to a typed null key, then keep size + 1.
+          const { sourceField } = innerTermsBucket.col;
           const orderDirectionUpper = orderDirection.toUpperCase();
+          let scoreFragment: string;
+          let subquerySortKey: EsqlSortKey;
 
           if (orderBy.type === 'column') {
-            metricExpression = metricExpressionsByColId.get(orderBy.columnId);
+            const metricExpression = metricExpressionsByColId.get(orderBy.columnId);
             if (!metricExpression) {
               return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
             }
-            rankAlias = getOuterRankAlias(innerTermsBucket.col.sourceField);
+            const rankAlias = allocateHelperAlias(getOuterRankAlias(sourceField));
             scoreFragment = `${rankAlias} = ${metricExpression}`;
+            subquerySortKey = { expr: rankAlias, direction: orderDirectionUpper };
           } else {
             scoreFragment = OUTER_TOP_N_GROUPING_ONLY_METRIC;
+            subquerySortKey = {
+              expr: quoteEsqlColumnRef(fieldExpr),
+              direction: orderDirectionUpper,
+            };
           }
 
-          // Metric-ranked subqueries also sort by the field so ties match DSL terms key order.
-          const fieldSortKey: EsqlSortKey = {
-            expr: quoteEsqlColumnRef(fieldExpr),
-            direction: 'ASC',
-          };
-          // DSL's Other request requires the field to exist, so documents without it stay out of
-          // every bucket instead of falling into "Other".
-          queryParts.push(`WHERE ${fieldExpr} IS NOT NULL`);
-          const allocateHelperAlias = createHelperAliasAllocator(
-            [
-              ...Object.values(layer.columns).flatMap((col) =>
-                'sourceField' in col ? [col.sourceField] : []
-              ),
-              ...metricOutputNamesByColId.values(),
-              ...resolvedBucketExprs.values(),
-            ],
-            (name) => Boolean(indexPattern.getFieldByName(name))
-          );
-          const keyAlias = allocateHelperAlias(
-            getOtherBucketKeyAlias(innerTermsBucket.col.sourceField)
-          );
+          const keyAlias = allocateHelperAlias(getOtherBucketKeyAlias(sourceField));
+          const flagAlias = allocateHelperAlias(getOtherBucketNamedFlagAlias(sourceField));
           queryParts.push(
-            buildOuterTopNOtherRemap({
-              source,
-              timeFilter,
+            ...buildOtherBucketKeyParts({
               groupExpr: fieldExpr,
               scoreFragment,
-              sortClause: formatSortKeys(
-                rankAlias
-                  ? [{ expr: rankAlias, direction: orderDirectionUpper }, fieldSortKey]
-                  : [{ expr: quoteEsqlColumnRef(fieldExpr), direction: orderDirectionUpper }]
-              ),
+              subquerySortKey,
               size,
               keyAlias,
+            }),
+            buildOtherBucketStatsClause([], { groupExpr: fieldExpr, keyAlias }),
+            ...buildOtherBucketOutputParts({
+              groupExpr: fieldExpr,
+              keyAlias,
+              flagAlias,
+              // With one dimension, the leaf STATS metric is the rank itself.
+              sortClause: formatSortKeys(
+                getOtherBucketRankSortKeys(
+                  keyAlias,
+                  orderDirectionUpper,
+                  orderBy.type === 'column' ? innerSortKey : undefined
+                )
+              ),
+              limit: size + 1,
             })
           );
-          queryParts.push(
-            validMetrics.length > 0
-              ? `STATS ${validMetrics.join(', ')} BY ${keyAlias}`
-              : `STATS BY ${keyAlias}`
-          );
-
-          // named=1 / Other=0 so SORT named DESC keeps Other last like DSL, for both metric and
-          // alphabetical ranking. Metric ranking also breaks ties by the key (DSL key order).
-          // A single CASE(metric) cannot mix 0::LONG with AVG (double) or similar.
-          const namedFlagAlias = allocateHelperAlias(
-            getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField)
-          );
-          const keySortKey: EsqlSortKey = { expr: keyAlias, direction: 'ASC' };
-          queryParts.push(
-            `EVAL ${buildOtherBucketNamedFlagFragment({ flagAlias: namedFlagAlias, keyAlias })}`
-          );
-          queryParts.push(
-            `SORT ${formatSortKeys([
-              { expr: namedFlagAlias, direction: 'DESC' },
-              rankAlias ? innerSortKey : { ...keySortKey, direction: orderDirectionUpper },
-              ...(rankAlias ? [keySortKey] : []),
-            ])}`
-          );
-          queryParts.push(`LIMIT ${size + 1}`);
-          queryParts.push(
-            `EVAL ${buildOtherBucketLabelFragment({ groupExpr: fieldExpr, keyAlias })}`
-          );
-          queryParts.push(`DROP ${namedFlagAlias}, ${keyAlias}`);
         } else {
-          // Filters run before STATS so the aggregation only sees the kept outer values.
-          queryParts.push(...outerTopNFilters, ...outerRankStats);
-          // Rank columns are constant per outer value, so grouping by them keeps the same groups
-          // and only carries them through STATS.
-          const statsClause = buildStatsClause(outerRankAliases);
-          if (statsClause) {
-            queryParts.push(statsClause);
-          }
-
-          // This SORT decides which rows survive LIMIT BY, so it carries the inner ranking only.
-          queryParts.push(`SORT ${formatSortKeys([innerSortKey])}`);
-
-          if (outerBuckets.length === 0) {
-            queryParts.push(`LIMIT ${size}`);
-          } else {
-            // LIMIT BY groups by result column name, so expression names such as BUCKET(...) are quoted.
-            queryParts.push(
-              `LIMIT ${size} BY ${outerBuckets
-                .map(([, expr]) => quoteEsqlColumnRef(expr))
-                .join(', ')}`
+          // Nested Top values: Other on the outer (first) dimension remaps via a typed key;
+          // Other on an inner dimension is gated above.
+          const outerOtherBucket = outerBuckets
+            .map(([index, bucketExpr]) => {
+              const [, col] = bucketEsAggsEntries[index];
+              return { index, bucketExpr, col };
+            })
+            .find(
+              ({ col }) =>
+                isColumnOfType<TermsIndexPatternColumn>('terms', col) &&
+                col.params.otherBucket === true
             );
-            // The ranking above is consumed by LIMIT BY, so outer dimensions are ordered
-            // afterwards; the inner key trails it to keep each group internally ranked.
-            queryParts.push(`SORT ${formatSortKeys([...outerSortKeys, innerSortKey])}`);
 
-            // No Lens column reads the rank columns, so the result keeps the chart's columns only.
-            if (outerRankAliases.length > 0) {
-              queryParts.push(`DROP ${outerRankAliases.join(', ')}`);
+          if (
+            outerOtherBucket &&
+            isColumnOfType<TermsIndexPatternColumn>('terms', outerOtherBucket.col)
+          ) {
+            const outerCol = outerOtherBucket.col;
+            const outerExpr = outerOtherBucket.bucketExpr;
+            const {
+              orderBy: outerOrderBy,
+              orderDirection: outerDirection,
+              size: outerSize,
+            } = outerCol.params;
+            const orderDirectionUpper = outerDirection.toUpperCase();
+            let scoreFragment: string;
+            let subquerySortKey: EsqlSortKey;
+            let rankAlias: string | undefined;
+            let metricSortKey: EsqlSortKey | undefined;
+
+            if (outerOrderBy.type === 'column') {
+              const metricExpression = metricExpressionsByColId.get(outerOrderBy.columnId);
+              if (!metricExpression) {
+                return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
+              }
+              rankAlias = allocateHelperAlias(getOuterRankAlias(outerCol.sourceField));
+              scoreFragment = `${rankAlias} = ${metricExpression}`;
+              subquerySortKey = { expr: rankAlias, direction: orderDirectionUpper };
+              metricSortKey = subquerySortKey;
+            } else {
+              scoreFragment = OUTER_TOP_N_GROUPING_ONLY_METRIC;
+              subquerySortKey = {
+                expr: quoteEsqlColumnRef(outerExpr),
+                direction: orderDirectionUpper,
+              };
+            }
+
+            const keyAlias = allocateHelperAlias(getOtherBucketKeyAlias(outerCol.sourceField));
+            const flagAlias = allocateHelperAlias(
+              getOtherBucketNamedFlagAlias(outerCol.sourceField)
+            );
+
+            queryParts.push(
+              ...buildOtherBucketKeyParts({
+                groupExpr: outerExpr,
+                scoreFragment,
+                subquerySortKey,
+                size: outerSize,
+                keyAlias,
+              })
+            );
+            if (rankAlias) {
+              queryParts.push(`INLINE STATS ${scoreFragment} BY ${keyAlias}`);
+            }
+            queryParts.push(
+              buildOtherBucketStatsClause(rankAlias ? [rankAlias] : [], {
+                groupExpr: outerExpr,
+                keyAlias,
+              })
+            );
+            // Inner ranking picks which rows survive LIMIT BY per outer key (incl. Other).
+            queryParts.push(`SORT ${formatSortKeys([innerSortKey])}`);
+            queryParts.push(`LIMIT ${size} BY ${keyAlias}`);
+            queryParts.push(
+              ...buildOtherBucketOutputParts({
+                groupExpr: outerExpr,
+                keyAlias,
+                flagAlias,
+                sortClause: formatSortKeys([
+                  ...getOtherBucketRankSortKeys(keyAlias, orderDirectionUpper, metricSortKey),
+                  innerSortKey,
+                ]),
+                dropAliases: rankAlias ? [rankAlias] : [],
+              })
+            );
+          } else {
+            // Filters run before STATS so the aggregation only sees the kept outer values.
+            queryParts.push(...outerTopNFilters, ...outerRankStats);
+            // Rank columns are constant per outer value, so grouping by them keeps the same groups
+            // and only carries them through STATS.
+            const statsClause = buildStatsClause(outerRankAliases);
+            if (statsClause) {
+              queryParts.push(statsClause);
+            }
+
+            // This SORT decides which rows survive LIMIT BY, so it carries the inner ranking only.
+            queryParts.push(`SORT ${formatSortKeys([innerSortKey])}`);
+
+            if (outerBuckets.length === 0) {
+              queryParts.push(`LIMIT ${size}`);
+            } else {
+              // LIMIT BY groups by result column name, so expression names such as BUCKET(...) are quoted.
+              queryParts.push(
+                `LIMIT ${size} BY ${outerBuckets
+                  .map(([, expr]) => quoteEsqlColumnRef(expr))
+                  .join(', ')}`
+              );
+              // The ranking above is consumed by LIMIT BY, so outer dimensions are ordered
+              // afterwards; the inner key trails it to keep each group internally ranked.
+              queryParts.push(`SORT ${formatSortKeys([...outerSortKeys, innerSortKey])}`);
+
+              // No Lens column reads the rank columns, so the result keeps the chart's columns only.
+              if (outerRankAliases.length > 0) {
+                queryParts.push(`DROP ${outerRankAliases.join(', ')}`);
+              }
             }
           }
         }
