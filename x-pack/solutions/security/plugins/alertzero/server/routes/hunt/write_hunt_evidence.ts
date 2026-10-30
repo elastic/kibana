@@ -13,10 +13,8 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, WRITE_HUNT_EVIDENCE_URL } from '../../../common/constants';
-import {
-  isReportVisibleToSpace,
-  writeHuntEvidence,
-} from '../../services/watches/hunt/common/write_hunt_evidence';
+import { isReportVisibleToSpace } from '../../services/watches/hunt/common/report_visibility';
+import { writeHuntEvidence } from '../../services/watches/hunt/common/write_hunt_evidence';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
