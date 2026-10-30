@@ -11,7 +11,6 @@ import type {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
-import { checkEntityStoreIndexPrivileges } from '@kbn/entity-store/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -19,15 +18,16 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type { RiskScoresEntityCalculationResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresEntityCalculationRequest } from '../../../../../common/api/entity_analytics';
 import { APP_ID, RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../common/constants';
-import { RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES } from '../../../../../common/entity_analytics/risk_engine';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
-import { checkAndFormatPrivileges } from '../../utils/check_and_format_privileges';
 import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { recalculateEntityRiskScore } from '../recalculate_entity_risk_score';
-import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
+import {
+  checkEntityRiskScoreCalculationPrivileges,
+  MISSING_INDEX_PRIVILEGES_MESSAGE,
+} from '../check_entity_risk_score_calculation_privileges';
 import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 type Handler = (
@@ -64,46 +64,34 @@ const handler: (
   const namespace = securityContext.getSpaceId();
   const [, { security }] = await getStartServices();
 
-  // Check privileges by the indices the calculation reads and writes.
-  const [riskScorePrivileges, entityStorePrivileges] = await Promise.all([
-    checkAndFormatPrivileges({
-      request,
-      security,
-      privilegesToCheck: {
-        elasticsearch: {
-          cluster: [],
-          index: {
-            ...RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
-            [getLookupIndexName(namespace)]: ['read'],
-          },
-        },
-      },
-    }),
-    checkEntityStoreIndexPrivileges({ request, security, spaceId: namespace }),
-  ]);
-  const { has_read_permissions: canReadEntityStore, has_write_permissions: canWriteEntityStore } =
-    entityStorePrivileges;
-  if (!riskScorePrivileges.has_all_required || !canReadEntityStore || !canWriteEntityStore) {
-    return siemResponse.error({
-      statusCode: 403,
-      body: 'You do not have the index privileges required to calculate risk scores.',
-    });
-  }
-
-  securityContext.getAuditLogger()?.log({
-    message: 'User triggered custom manual scoring',
-    event: {
-      action: RiskScoreAuditActions.RISK_ENGINE_ENTITY_MANUAL_SCORING,
-      category: AUDIT_CATEGORY.DATABASE,
-      type: AUDIT_TYPE.CHANGE,
-      outcome: AUDIT_OUTCOME.UNKNOWN,
-    },
-  });
-
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
   try {
+    const hasRequiredPrivileges = await checkEntityRiskScoreCalculationPrivileges({
+      request,
+      security,
+      namespace,
+      soClient,
+      logger,
+    });
+    if (!hasRequiredPrivileges) {
+      return siemResponse.error({
+        statusCode: 403,
+        body: MISSING_INDEX_PRIVILEGES_MESSAGE,
+      });
+    }
+
+    securityContext.getAuditLogger()?.log({
+      message: 'User triggered custom manual scoring',
+      event: {
+        action: RiskScoreAuditActions.RISK_ENGINE_ENTITY_MANUAL_SCORING,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.CHANGE,
+        outcome: AUDIT_OUTCOME.UNKNOWN,
+      },
+    });
+
     const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(
       coreContext.uiSettings.client
     );
