@@ -32,7 +32,6 @@ const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) 
   latestState$: of(state),
   serializeState: () => state,
   applySerializedState: () => undefined,
-  compareSerializedState: () => true,
 });
 
 describe('initialize edit api', () => {

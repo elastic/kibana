@@ -39,8 +39,9 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Compares two serialized snapshots with the same comparators unsaved changes uses.
    * The baseline does not have to be the last saved state.
    * Returns true when the two states are equal (no changes), false when they differ.
+   * Optional so APIs without it still count as serializable.
    */
-  compareSerializedState: (
+  compareSerializedState?: (
     baseline: Partial<SerializedState> | undefined,
     current: Partial<SerializedState> | undefined
   ) => boolean;
@@ -50,7 +51,6 @@ export const apiHasSerializableState = (api: unknown | null): api is HasSerializ
   return Boolean(
     (api as HasSerializableState)?.serializeState &&
       (api as HasSerializableState)?.applySerializedState &&
-      (api as HasSerializableState)?.compareSerializedState &&
       (api as HasSerializableState)?.anyStateChange$ &&
       (api as HasSerializableState)?.latestState$
   );

@@ -112,7 +112,6 @@ function getDefaultLensApiMock() {
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
     hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
     applySerializedState: jest.fn(),
-    compareSerializedState: jest.fn().mockReturnValue(true),
     projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
     esql$: new BehaviorSubject<AggregateQuery[]>([]),
     approximationApplied$: new BehaviorSubject<boolean | undefined>(false),

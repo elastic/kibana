@@ -44,7 +44,6 @@ describe('Export JSON action', () => {
         hideTitle$: new BehaviorSubject<boolean | undefined>(false),
         serializeState: jest.fn().mockReturnValue({ rawState: { key: 'value' } }),
         applySerializedState: jest.fn(),
-        compareSerializedState: jest.fn().mockReturnValue(true),
         anyStateChange$: new BehaviorSubject<void>(undefined),
         latestState$: of({ key: 'value' }),
       },

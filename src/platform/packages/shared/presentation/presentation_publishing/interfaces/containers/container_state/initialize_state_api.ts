@@ -31,7 +31,9 @@ export const initializeStateApi = <StateType extends object = object>({
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-  }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
+  }): PublishesUnsavedChanges &
+  HasSerializableState<StateType> &
+  Required<Pick<HasSerializableState<StateType>, 'compareSerializedState'>> => {
   const compareSerializedState = (
     baseline: Partial<StateType> | undefined,
     current: Partial<StateType> | undefined
