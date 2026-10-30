@@ -47,7 +47,19 @@ describe('useGetLayerTabsLabel', () => {
     const layerConfigs = [createLayerConfig('layer1', 'referenceLine')];
     const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
 
-    expect(result.current('layer1')).toBe('Reference line');
+    expect(result.current('layer1')).toBe('Reference lines');
+  });
+
+  it('numbers source-specific labels independently', () => {
+    const layerConfigs = [
+      { ...createLayerConfig('static1', 'referenceLine'), tabLabel: 'Static reference lines' },
+      { ...createLayerConfig('query1', 'referenceLine'), tabLabel: 'ES|QL reference lines' },
+      { ...createLayerConfig('static2', 'referenceLine'), tabLabel: 'Static reference lines' },
+    ];
+    const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
+    expect(result.current('static1')).toBe('Static reference lines 1');
+    expect(result.current('static2')).toBe('Static reference lines 2');
+    expect(result.current('query1')).toBe('ES|QL reference lines');
   });
 
   it('returns numbered labels for multiple reference line layers', () => {
@@ -57,8 +69,8 @@ describe('useGetLayerTabsLabel', () => {
     ];
     const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
 
-    expect(result.current('layer1')).toBe('Reference line 1');
-    expect(result.current('layer2')).toBe('Reference line 2');
+    expect(result.current('layer1')).toBe('Reference lines 1');
+    expect(result.current('layer2')).toBe('Reference lines 2');
   });
 
   it('returns label for single annotation layer', () => {
@@ -97,10 +109,10 @@ describe('useGetLayerTabsLabel', () => {
     const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
 
     expect(result.current('layer1')).toBe('Data layer 1');
-    expect(result.current('layer2')).toBe('Reference line 1');
+    expect(result.current('layer2')).toBe('Reference lines 1');
     expect(result.current('layer3')).toBe('Data layer 2');
     expect(result.current('layer4')).toBe('Annotation');
-    expect(result.current('layer5')).toBe('Reference line 2');
+    expect(result.current('layer5')).toBe('Reference lines 2');
   });
 
   it('excludes hidden layers from counting', () => {
