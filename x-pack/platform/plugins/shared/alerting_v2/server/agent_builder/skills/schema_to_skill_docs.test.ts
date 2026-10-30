@@ -787,14 +787,14 @@ describe('schema_to_skill_docs', () => {
       expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
     });
 
-    it('instructs the link-tag flow and defers shared policies to the multi-rule reference', () => {
+    it('instructs the link tool and defers shared policies to the multi-rule reference', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
-      expect(doc).toContain('manage_rule');
+      expect(doc).toContain('platform.alerting.link_action_policy_to_rule');
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
-      expect(doc).toContain('set_matcher');
-      expect(doc).toContain('notify-');
+      expect(doc).toContain('{ operation: "validate" }');
+      expect(doc).not.toContain('Call `manage_rule`');
       expect(doc).not.toContain('rule.id:');
       expect(doc).toContain('kind: signal');
       expect(doc).toContain('(./action-policy-multi-rule.md)');

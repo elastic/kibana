@@ -132,7 +132,7 @@ export const setMetadataOperationSchema = lazySchema(() =>
     .partial()
     .extend({ operation: z.literal('set_metadata') })
     .describe(
-      'Use `set_metadata` to name the rule and add a description or `tags` so the user can filter by it later. `tags` do not link action policies: to link this rule to an action policy, set `routing_tags` to values in the policy `matcher.tags`. `routing_tags` is only allowed on `alert` rules.'
+      `Use \`set_metadata\` to name the rule and add a description or \`tags\` so the user can filter by it later.`
     )
 );
 

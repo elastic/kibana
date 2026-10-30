@@ -122,7 +122,7 @@ export const createRuleAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `A rule attachment represents a Universal Rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill.`,
+    `A rule attachment represents a Universal Rule — either a proposed rule (not yet saved) or a saved rule linked via its ID. To create, explain, or modify rules, load the rule-authoring skill. To link a rule to an action policy in the conversation, use the rule-authoring skill's link_rule_to_action_policy tool.`,
 
   getTools: () => [],
 });

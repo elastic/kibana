@@ -20,7 +20,6 @@ import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
 import { formatMatcher } from '../common/format_matcher';
-
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
@@ -130,7 +129,7 @@ export const createActionPolicyAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `An action policy attachment represents a Universal Alerting notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alerts are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the action-policy-authoring skill.`,
+    `An action policy attachment represents a Universal Alerting notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alerts are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the action-policy-authoring skill. To scope a policy to one rule in the conversation, use the action-policy-authoring skill's link_action_policy_to_rule tool.`,
 
   getTools: () => [],
 });

@@ -35,6 +35,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
+  `${internalNamespaces.platformAlerting}.link_rule_to_action_policy`,
+  `${internalNamespaces.platformAlerting}.link_action_policy_to_rule`,
 
   // Proposals
   'platform.proposals.revise',
