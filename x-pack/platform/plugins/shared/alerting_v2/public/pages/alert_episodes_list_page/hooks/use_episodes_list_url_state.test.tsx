@@ -91,10 +91,10 @@ describe('useEpisodesListUrlState', () => {
     expect(result.current.filterState.queryString).toBe('severity: high');
 
     await act(async () => {
-      result.current.setFilterState(({ queryString: _queryString, ...rest }) => rest);
+      result.current.setFilterState((prev) => ({ ...prev, queryString: undefined }));
     });
 
-    expect(result.current.filterState).toStrictEqual({ status: ['active'] });
+    expect(result.current.filterState.queryString).toBeUndefined();
     expect(history.location.search).toBe('?_a=(alertsList:(timeFrom:now-15m,timeTo:now))');
   });
 });

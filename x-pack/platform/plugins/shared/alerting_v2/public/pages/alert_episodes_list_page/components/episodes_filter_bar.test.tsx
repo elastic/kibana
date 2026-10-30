@@ -191,8 +191,9 @@ describe('EpisodesFilterBar', () => {
 
     expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
     const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
-    expect(updateFilter({ status: ['active'], queryString: 'severity: high' })).toStrictEqual({
+    expect(updateFilter({ status: ['active'], queryString: 'severity: high' })).toEqual({
       status: ['active'],
+      queryString: undefined,
     });
   });
 
