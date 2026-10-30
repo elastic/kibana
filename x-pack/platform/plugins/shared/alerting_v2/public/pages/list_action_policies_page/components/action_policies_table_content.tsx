@@ -47,7 +47,6 @@ interface ConnectedBulkActionsProps {
 
 interface Props {
   canWrite: boolean;
-  canRead: boolean;
   isEnabling: boolean;
   enableVariables: string | undefined;
   isDisabling: boolean;
@@ -102,7 +101,6 @@ const UPDATED_BY_COLUMN_NAME = i18n.translate(
 
 export const ActionPoliciesTableContent = ({
   canWrite,
-  canRead,
   isEnabling,
   enableVariables,
   isDisabling,
@@ -262,7 +260,6 @@ export const ActionPoliciesTableContent = ({
               <ActionPolicyActionsCell
                 policy={policy}
                 canWrite={canWrite}
-                canSendTestNotification={canRead}
                 onViewDetails={(p) => setPolicyToViewId(p.id)}
                 onEdit={onEdit}
                 onClone={onClone}

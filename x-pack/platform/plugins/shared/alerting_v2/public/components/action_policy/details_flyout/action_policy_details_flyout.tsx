@@ -85,9 +85,7 @@ export const ActionPolicyDetailsFlyout = ({
   size = 'm',
 }: Props) => {
   const settings = useService(CoreStart('settings'));
-  const userCapabilities = useService(UserCapabilities);
-  const canReadRules = userCapabilities.canRead('rules');
-  const canReadActionPolicies = userCapabilities.canRead('actionPolicies');
+  const canReadRules = useService(UserCapabilities).canRead('rules');
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
@@ -115,18 +113,18 @@ export const ActionPolicyDetailsFlyout = ({
 
   const { panels: takeActionPanels, modal: takeActionModal } = useActionPolicyMenu({
     policy,
-    onEdit: handleEdit,
-    onClone,
-    onDelete,
-    onEnable,
-    onDisable,
-    onSnooze,
-    onCancelSnooze,
-    onUpdateApiKey,
+    ...(canWrite && {
+      onEdit: handleEdit,
+      onClone,
+      onDelete,
+      onEnable,
+      onDisable,
+      onSnooze,
+      onCancelSnooze,
+      onUpdateApiKey,
+    }),
     isStateLoading,
     isSnoozeLoading,
-    canWrite,
-    canSendTestNotification: canReadActionPolicies,
     flyoutHistoryKey: HISTORY_KEY,
   });
 

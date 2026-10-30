@@ -9,6 +9,7 @@ import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { inject, injectable } from 'inversify';
 import {
   ALERTING_V2_API_PRIVILEGES,
@@ -35,8 +36,23 @@ export class PrivilegeChecker {
     return this.hasApiPrivileges(ALERTING_V2_API_PRIVILEGES[feature].write);
   }
 
+  /** Whether the user can read and run workflows. */
+  public async canRunWorkflows(): Promise<boolean> {
+    return this.hasApiActions(
+      [
+        ...WorkflowsManagementOperationPrivileges.read,
+        ...WorkflowsManagementOperationPrivileges.execute,
+      ].map((privilege) => this.security.authz.actions.api.get(privilege))
+    );
+  }
+
   private async hasApiPrivileges(...actions: string[]): Promise<boolean> {
-    const kibana = actions.map((a) => this.security.authz.actions.api.actionFromRouteTag(a));
+    return this.hasApiActions(
+      actions.map((a) => this.security.authz.actions.api.actionFromRouteTag(a))
+    );
+  }
+
+  private async hasApiActions(kibana: string[]): Promise<boolean> {
     const { hasAllRequested } = await this.security.authz
       .checkPrivilegesWithRequest(this.request)
       .atSpace(this.spaceId, { kibana });

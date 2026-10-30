@@ -15,18 +15,16 @@ interface Props {
   policy: ActionPolicyResponse;
   onViewDetails?: (policy: ActionPolicyResponse) => void;
   onEdit?: (id: string) => void;
-  onClone: (policy: ActionPolicyResponse) => void;
-  onDelete: (policy: ActionPolicyResponse) => void;
+  onClone?: (policy: ActionPolicyResponse) => void;
+  onDelete?: (policy: ActionPolicyResponse) => void;
   onEnable?: (id: string) => void;
   onDisable?: (id: string) => void;
   isStateLoading?: boolean;
-  onUpdateApiKey: (id: string) => void;
+  onUpdateApiKey?: (id: string) => void;
   isDisabled?: boolean;
   onSnooze?: (id: string, snoozedUntil: string) => void;
   onCancelSnooze?: (id: string) => void;
   isSnoozeLoading?: boolean;
-  canWrite?: boolean;
-  canSendTestNotification?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -44,8 +42,6 @@ export const ActionPolicyActionsMenu = ({
   onSnooze,
   onCancelSnooze,
   isSnoozeLoading = false,
-  canWrite = true,
-  canSendTestNotification = false,
   'data-test-subj': dataTestSubj,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -67,8 +63,6 @@ export const ActionPolicyActionsMenu = ({
     onCancelSnooze,
     isSnoozeLoading,
     closeMenu: closePopover,
-    canWrite,
-    canSendTestNotification,
   });
 
   if (panels.length === 0) {

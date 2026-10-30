@@ -10,21 +10,18 @@ import {
   ACTION_POLICY_TEST_SEED_MAX,
   type ActionPolicyResponse,
   type ActionPolicyTestDestination,
+  type ActionPolicyTestPreviewParams,
   type ActionPolicyTestPreviewResponse,
   type ActionPolicyTestSendResponse,
   type ActionPolicyTestSendResult,
 } from '@kbn/alerting-v2-schemas';
-import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { AlertingServerStartDependencies } from '../../types';
 import { ActionPolicyClient } from '../action_policy_client';
 import { DEFAULT_GROUPING } from '../dispatcher/constants';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
@@ -39,18 +36,13 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { PrivilegeChecker } from '../services/privilege_checker/privilege_checker';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import { getMatcherType } from '../telemetry/action_policy_ebt_event';
 import { ACTION_POLICY_TEST_SENT_EBT_EVENT_TYPE } from '../telemetry/action_policy_test_ebt_event';
 import { buildTestScenario, type TestScenario } from './test_scenario_builder';
 
 const TEST_SEND_AUDIT_ACTION = 'alerting_v2_action_policy_test_send';
-
-/** Workflow privileges a user needs to see a destination as runnable: reading it and running it. */
-const WORKFLOW_RUN_PRIVILEGES = [
-  ...WorkflowsManagementOperationPrivileges.read,
-  ...WorkflowsManagementOperationPrivileges.execute,
-];
 
 const toErrorMessage = (error: unknown): string => (isError(error) ? error.message : String(error));
 
@@ -81,8 +73,7 @@ export class ActionPolicyTestService {
     @inject(LicenseServiceToken) private readonly licenseService: LicenseServiceContract,
     @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract,
     @inject(CoreStart('security')) private readonly coreSecurity: SecurityServiceStart,
-    @inject(PluginStart<AlertingServerStartDependencies['security']>('security'))
-    private readonly security: SecurityPluginStart,
+    @inject(PrivilegeChecker) private readonly privilegeChecker: PrivilegeChecker,
     @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(Request) private readonly request: KibanaRequest,
@@ -94,14 +85,14 @@ export class ActionPolicyTestService {
   public async preview({
     policyId,
     seed = createSeed(),
-  }: {
-    policyId: string;
-    seed?: number;
-  }): Promise<ActionPolicyTestPreviewResponse> {
+  }: ActionPolicyTestPreviewParams): Promise<ActionPolicyTestPreviewResponse> {
     await this.licenseService.assertActionPoliciesLicense();
-    const policy = await this.actionPolicyClient.getActionPolicy({ id: policyId });
+    const [policy, canRunWorkflows] = await Promise.all([
+      this.actionPolicyClient.getActionPolicy({ id: policyId }),
+      this.privilegeChecker.canRunWorkflows(),
+    ]);
     const scenario = this.buildScenario(policy, seed);
-    const destinations = await this.describeDestinations(policy);
+    const destinations = await this.describeDestinations(policy, canRunWorkflows);
 
     if (scenario.status === 'unsupported') {
       return { status: 'unsupported', reason: scenario.reason, destinations };
@@ -110,11 +101,7 @@ export class ActionPolicyTestService {
     return {
       status: 'ok',
       seed,
-      groups: scenario.groups.map(({ id, groupKey, payload }) => ({
-        id,
-        group_key: groupKey,
-        payload: { ...payload },
-      })),
+      groups: scenario.groups.map((payload) => ({ ...payload })),
       destinations,
     };
   }
@@ -151,7 +138,7 @@ export class ActionPolicyTestService {
       );
     }
 
-    const [{ payload }] = scenario.groups;
+    const [payload] = scenario.groups;
     const results = await Promise.all(
       workflowIds.map((workflowId) => this.runWorkflowTest(policyId, workflowId, payload))
     );
@@ -198,14 +185,15 @@ export class ActionPolicyTestService {
    * run workflows; otherwise each destination is reported as not executable, without its name.
    */
   private async describeDestinations(
-    policy: ActionPolicyResponse
+    policy: ActionPolicyResponse,
+    canRunWorkflows: boolean
   ): Promise<ActionPolicyTestDestination[]> {
     const ids = getWorkflowDestinationIds(policy);
     if (ids.length === 0) {
       return [];
     }
 
-    if (!(await this.canRunWorkflows())) {
+    if (!canRunWorkflows) {
       return ids.map((id) => ({ id, executable: false }));
     }
 
@@ -228,16 +216,6 @@ export class ActionPolicyTestService {
         executable: workflow.permissions?.execute !== false,
       };
     });
-  }
-
-  private async canRunWorkflows(): Promise<boolean> {
-    const kibana = WORKFLOW_RUN_PRIVILEGES.map((privilege) =>
-      this.security.authz.actions.api.get(privilege)
-    );
-    const { hasAllRequested } = await this.security.authz
-      .checkPrivilegesWithRequest(this.request)
-      .atSpace(this.spaceId, { kibana });
-    return hasAllRequested;
   }
 
   private async runWorkflowTest(
@@ -315,7 +293,6 @@ export class ActionPolicyTestService {
       matcher_type: getMatcherType(policy),
       alert_count: payload.alerts.length,
       destination_count: results.length,
-      started_count: results.length - failedCount,
       failed_count: failedCount,
     });
   }

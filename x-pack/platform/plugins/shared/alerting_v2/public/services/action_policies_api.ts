@@ -10,7 +10,6 @@ import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import { buildPath } from '@kbn/core-http-browser';
 import type {
-  ActionPolicyTestPreviewBody,
   ActionPolicyTestPreviewResponse,
   ActionPolicyTestSendBody,
   ActionPolicyTestSendResponse,
@@ -146,10 +145,10 @@ export class ActionPoliciesApi {
     );
   }
 
-  public async previewTestNotification(id: string, body: ActionPolicyTestPreviewBody = {}) {
+  public async previewTestNotification(id: string) {
     return this.http.post<ActionPolicyTestPreviewResponse>(
       buildPath(ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_PREVIEW_API_PATH, { id }),
-      { body: JSON.stringify(body) }
+      { body: JSON.stringify({}) }
     );
   }
 

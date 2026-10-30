@@ -270,6 +270,14 @@ describe('PrivilegeChecker', () => {
       expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(rulesAll.request);
     });
 
+    it('checks the workflows read and execute API privileges', async () => {
+      const checker = new PrivilegeChecker(rulesAll.request, spaceId, security);
+      await checker.canRunWorkflows();
+
+      expect(security.authz.actions.api.get).toHaveBeenCalledWith('workflowsManagement:read');
+      expect(security.authz.actions.api.get).toHaveBeenCalledWith('workflowsManagement:execute');
+    });
+
     it('passes the spaceId to atSpace', async () => {
       const testRequest = createRequestMock([ALERTING_V2_API_PRIVILEGES.rules.read]);
       const testSecurity = createSecurity(

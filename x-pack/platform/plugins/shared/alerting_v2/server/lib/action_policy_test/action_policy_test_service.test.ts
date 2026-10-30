@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionPolicyClient } from '../action_policy_client';
@@ -18,6 +17,7 @@ import { MOCK_KIBANA_BASE_URL } from '../dispatcher/fixtures/test_utils';
 import { createMockEbtService } from '../services/ebt_service/ebt_service.mock';
 import { createMockLicenseService } from '../services/license_service/license_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import type { PrivilegeChecker } from '../services/privilege_checker/privilege_checker';
 import { ACTION_POLICY_TEST_SENT_EBT_EVENT_TYPE } from '../telemetry/action_policy_test_ebt_event';
 import { ActionPolicyTestService } from './action_policy_test_service';
 
@@ -70,12 +70,7 @@ const setup = ({
   const ebtService = createMockEbtService();
   const coreSecurity = securityServiceMock.createStart();
   const auditLogger = coreSecurity.audit.asScoped(request);
-  const security = securityMock.createStart();
-  security.authz.checkPrivilegesWithRequest.mockReturnValue({
-    globally: jest.fn(),
-    atSpace: jest.fn().mockResolvedValue({ hasAllRequested: canRunWorkflows }),
-    atSpaces: jest.fn(),
-  });
+  const privilegeChecker = { canRunWorkflows: jest.fn().mockResolvedValue(canRunWorkflows) };
   const { loggerService } = createLoggerService();
 
   const service = new ActionPolicyTestService(
@@ -84,7 +79,7 @@ const setup = ({
     licenseService,
     ebtService,
     coreSecurity,
-    security,
+    privilegeChecker as unknown as PrivilegeChecker,
     MOCK_KIBANA_BASE_URL,
     SPACE_ID,
     request,
@@ -99,7 +94,6 @@ const setup = ({
     licenseService,
     ebtService,
     auditLogger,
-    security,
   };
 };
 
@@ -113,11 +107,9 @@ describe('ActionPolicyTestService', () => {
       if (result.status !== 'ok') throw new Error('expected an ok preview');
       expect(result.seed).toBe(5);
       expect(result.groups).toHaveLength(1);
-      const [group] = result.groups;
-      expect(group.payload).toEqual(
-        expect.objectContaining({ id: group.id, policyId: 'policy-1', groupKey: group.group_key })
-      );
-      expect(group.payload.alerts).toEqual([
+      const [payload] = result.groups;
+      expect(payload).toEqual(expect.objectContaining({ policyId: 'policy-1' }));
+      expect(payload.alerts).toEqual([
         expect.objectContaining({ space_id: SPACE_ID, alert_status: 'active', source: 'internal' }),
       ]);
     });
@@ -137,7 +129,7 @@ describe('ActionPolicyTestService', () => {
     });
 
     it('describes the destinations the user can run', async () => {
-      const { service, workflowsManagement, request, security } = setup();
+      const { service, workflowsManagement, request } = setup();
       workflowsManagement.getWorkflowsByIds.mockResolvedValue([
         createWorkflow({ id: 'workflow-1', name: 'Slack', enabled: false }),
         createWorkflow({
@@ -149,8 +141,6 @@ describe('ActionPolicyTestService', () => {
 
       const { destinations } = await service.preview({ policyId: 'policy-1' });
 
-      expect(security.authz.actions.api.get).toHaveBeenCalledWith('workflowsManagement:read');
-      expect(security.authz.actions.api.get).toHaveBeenCalledWith('workflowsManagement:execute');
       expect(workflowsManagement.getWorkflowsByIds).toHaveBeenCalledWith(
         ['workflow-1', 'workflow-2'],
         SPACE_ID,
@@ -221,7 +211,7 @@ describe('ActionPolicyTestService', () => {
 
       const preview = await service.preview({ policyId: 'policy-1', seed: 5 });
       if (preview.status !== 'ok') throw new Error('expected an ok preview');
-      const [{ payload: previewPayload }] = preview.groups;
+      const [previewPayload] = preview.groups;
 
       // The payload sent is the previewed one; only `last_event_timestamp` is rebuilt as now.
       const { alerts: previewAlerts, ...previewGroup } = previewPayload;
@@ -363,7 +353,6 @@ describe('ActionPolicyTestService', () => {
         matcher_type: 'none',
         alert_count: 1,
         destination_count: 2,
-        started_count: 1,
         failed_count: 1,
       });
     });

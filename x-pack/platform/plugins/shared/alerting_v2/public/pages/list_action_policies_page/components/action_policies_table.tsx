@@ -87,9 +87,7 @@ export const ActionPoliciesTable = () => {
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
   const { actionPolicyLocators } = useAlertingLocators();
-  const userCapabilities = useService(UserCapabilities);
-  const canWrite = userCapabilities.canWrite('actionPolicies');
-  const canRead = userCapabilities.canRead('actionPolicies');
+  const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
   const navigateToAgentBuilder = useNavigateToAgentBuilder(
     CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT
   );
@@ -277,7 +275,6 @@ export const ActionPoliciesTable = () => {
         <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent
             canWrite={canWrite}
-            canRead={canRead}
             isEnabling={isEnabling}
             enableVariables={enableVariables}
             isDisabling={isDisabling}

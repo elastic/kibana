@@ -21,13 +21,13 @@ import {
 import { PolicyMatcher } from '../dispatcher/state';
 import { BuildGroupsStep } from '../dispatcher/steps/build_groups_step';
 import { EvaluateMatchersStep } from '../dispatcher/steps/evaluate_matchers_step';
-import type { ActionPolicy } from '../dispatcher/types';
+import type { ActionPolicy, ActionPolicyWorkflowPayload } from '../dispatcher/types';
 import {
   DEFAULT_AGGREGATED_ALERT_COUNT,
   TEST_ID_PREFIX,
   createSyntheticScenario,
 } from './synthetic_alert_factory';
-import { buildTestScenario, type TestScenarioGroup } from './test_scenario_builder';
+import { buildTestScenario } from './test_scenario_builder';
 
 const NOW = new Date('2026-10-29T10:00:00.000Z');
 const SEED = 42;
@@ -39,7 +39,7 @@ const buildParams = (policy: ActionPolicy, seed = SEED) => ({
   now: NOW,
 });
 
-const buildGroups = (policy: ActionPolicy, seed = SEED): TestScenarioGroup[] => {
+const buildGroups = (policy: ActionPolicy, seed = SEED): ActionPolicyWorkflowPayload[] => {
   const scenario = buildTestScenario(buildParams(policy, seed));
   if (scenario.status !== 'ok') {
     throw new Error(`expected a scenario, got ${scenario.status}`);
@@ -105,10 +105,7 @@ describe('buildTestScenario', () => {
       const { groups: dispatcherGroups } = await groupWithDispatcher(policy);
 
       expect(groups).toHaveLength(1);
-      expect(groups.map(({ id, groupKey }) => ({ id, groupKey }))).toEqual(
-        dispatcherGroups.map(({ id, groupKey }) => ({ id, groupKey }))
-      );
-      expect(groups[0].payload).toEqual({
+      expect(groups[0]).toEqual({
         id: dispatcherGroups[0].id,
         policyId: dispatcherGroups[0].policyId,
         groupKey: dispatcherGroups[0].groupKey,
@@ -119,7 +116,7 @@ describe('buildTestScenario', () => {
     });
 
     it('builds a payload valid against the alertingV2NotificationGroup input definition', () => {
-      const [{ payload }] = buildGroups(policy);
+      const [payload] = buildGroups(policy);
 
       expect(payloadValidator.safeParse({ payload }).success).toBe(true);
       expect(
@@ -129,57 +126,72 @@ describe('buildTestScenario', () => {
 
     it('is deterministic for a seed', () => {
       expect(buildGroups(policy, 7)).toEqual(buildGroups(policy, 7));
-      expect(buildGroups(policy, 7)[0].payload.alerts[0].alert_id).not.toEqual(
-        buildGroups(policy, 8)[0].payload.alerts[0].alert_id
+      expect(buildGroups(policy, 7)[0].alerts[0].alert_id).not.toEqual(
+        buildGroups(policy, 8)[0].alerts[0].alert_id
       );
     });
   });
 
   it('builds a per_alert group with one alert and a { groupHash, alertId } key', () => {
-    const [{ groupKey, payload }] = buildGroups(
-      createActionPolicy({ grouping: { mode: 'per_alert' } })
-    );
+    const [payload] = buildGroups(createActionPolicy({ grouping: { mode: 'per_alert' } }));
 
     expect(payload.alerts).toHaveLength(1);
     expect(Object.keys(payload.rules)).toHaveLength(1);
-    expect(groupKey).toEqual({
+    expect(payload.groupKey).toEqual({
       groupHash: payload.alerts[0].group_hash,
       alertId: payload.alerts[0].alert_id,
     });
   });
 
   it('builds an all group with an empty key and alerts spread across placeholder rules', () => {
-    const [{ groupKey, payload }] = buildGroups(createActionPolicy({ grouping: { mode: 'all' } }));
+    const [payload] = buildGroups(createActionPolicy({ grouping: { mode: 'all' } }));
 
-    expect(groupKey).toEqual({});
+    expect(payload.groupKey).toEqual({});
     expect(payload.alerts).toHaveLength(DEFAULT_AGGREGATED_ALERT_COUNT);
     expect(Object.keys(payload.rules)).toHaveLength(DEFAULT_AGGREGATED_ALERT_COUNT);
   });
 
   it('keys a per_field group by the placeholder data values, and a missing field by null', () => {
-    const [{ groupKey, payload }] = buildGroups(
+    const [payload] = buildGroups(
       createActionPolicy({
         grouping: { mode: 'per_field', fields: ['data.host.name', 'labels.missing'] },
       })
     );
 
-    expect(groupKey).toEqual({
+    expect(payload.groupKey).toEqual({
       'data.host.name': expect.stringMatching(/^test-host\.name-[0-9a-f]{8}$/),
       'labels.missing': null,
     });
     expect(payload.alerts).toHaveLength(DEFAULT_AGGREGATED_ALERT_COUNT);
     for (const alert of payload.alerts) {
-      expect(alert.data).toEqual({ host: { name: groupKey['data.host.name'] } });
+      expect(alert.data).toEqual({ host: { name: payload.groupKey['data.host.name'] } });
     }
   });
 
   it('keys a per_field group by alert attributes the synthetic alerts share', () => {
-    const [{ groupKey, payload }] = buildGroups(
+    const [payload] = buildGroups(
       createActionPolicy({ grouping: { mode: 'per_field', fields: ['severity', 'alert_status'] } })
     );
 
-    expect(groupKey).toEqual({ severity: payload.alerts[0].severity, alert_status: 'active' });
+    expect(payload.groupKey).toEqual({
+      severity: payload.alerts[0].severity,
+      alert_status: 'active',
+    });
     expect(payload.alerts.every(({ data }) => data === undefined)).toBe(true);
+  });
+
+  it('builds one per_field group when the grouping fields differ per alert', () => {
+    const groups = buildGroups(
+      createActionPolicy({ grouping: { mode: 'per_field', fields: ['rule_id', 'group_hash'] } })
+    );
+
+    expect(groups).toHaveLength(1);
+    const [payload] = groups;
+    expect(payload.alerts).toHaveLength(DEFAULT_AGGREGATED_ALERT_COUNT);
+    expect(payload.groupKey).toEqual({
+      rule_id: payload.alerts[0].rule_id,
+      group_hash: payload.alerts[0].group_hash,
+    });
   });
 
   it('does not support a policy whose matcher has a KQL expression', () => {

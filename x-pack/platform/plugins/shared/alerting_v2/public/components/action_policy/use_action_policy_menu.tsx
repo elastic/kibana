@@ -29,21 +29,17 @@ export interface UseActionPolicyMenuParams {
   policy: ActionPolicyResponse;
   onViewDetails?: (policy: ActionPolicyResponse) => void;
   onEdit?: (id: string) => void;
-  onClone: (policy: ActionPolicyResponse) => void;
-  onDelete: (policy: ActionPolicyResponse) => void;
+  onClone?: (policy: ActionPolicyResponse) => void;
+  onDelete?: (policy: ActionPolicyResponse) => void;
   onEnable?: (id: string) => void;
   onDisable?: (id: string) => void;
   isStateLoading?: boolean;
-  onUpdateApiKey: (id: string) => void;
+  onUpdateApiKey?: (id: string) => void;
   onSnooze?: (id: string, snoozedUntil: string) => void;
   onCancelSnooze?: (id: string) => void;
   isSnoozeLoading?: boolean;
   /** Called before an item's action runs. Omit it when the menu closes itself on item click. */
   closeMenu?: () => void;
-  /** Whether the write actions are offered. Defaults to `true`. */
-  canWrite?: boolean;
-  /** Whether the user can read action policies, which is enough to send a test notification. */
-  canSendTestNotification?: boolean;
   /** History key of the flyout the menu lives in, shared with the test notification flyout. */
   flyoutHistoryKey?: symbol;
 }
@@ -72,8 +68,6 @@ export const useActionPolicyMenu = ({
   onCancelSnooze,
   isSnoozeLoading = false,
   closeMenu,
-  canWrite = true,
-  canSendTestNotification = false,
   flyoutHistoryKey,
 }: UseActionPolicyMenuParams): UseActionPolicyMenuResult => {
   const { euiTheme } = useEuiTheme();
@@ -85,7 +79,7 @@ export const useActionPolicyMenu = ({
   const panels = useMemo((): FlyoutFooterMenuPanel[] => {
     const licenseTooltip = isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE;
     const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
-    const canSnooze = canWrite && onSnooze != null && onCancelSnooze != null && policy.enabled;
+    const canSnooze = onSnooze != null && onCancelSnooze != null && policy.enabled;
 
     const group1: FlyoutFooterMenuItem[] = [];
     if (onViewDetails) {
@@ -101,7 +95,7 @@ export const useActionPolicyMenu = ({
         },
       });
     }
-    if (canWrite && onEdit) {
+    if (onEdit) {
       group1.push({
         name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.edit', {
           defaultMessage: 'Edit',
@@ -116,7 +110,7 @@ export const useActionPolicyMenu = ({
         },
       });
     }
-    if (canSendTestNotification && isLicenseValid) {
+    if (isLicenseValid) {
       group1.push({
         name: SEND_TEST_NOTIFICATION,
         icon: 'send',
@@ -159,7 +153,7 @@ export const useActionPolicyMenu = ({
         });
       }
     }
-    if (canWrite) {
+    if (onClone) {
       group2.push({
         name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.clone', {
           defaultMessage: 'Clone',
@@ -174,7 +168,7 @@ export const useActionPolicyMenu = ({
         },
       });
     }
-    if (canWrite && onEnable != null && onDisable != null) {
+    if (onEnable != null && onDisable != null) {
       group2.push({
         name: policy.enabled
           ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.disable', {
@@ -197,7 +191,7 @@ export const useActionPolicyMenu = ({
         },
       });
     }
-    if (canWrite) {
+    if (onUpdateApiKey) {
       group2.push({
         name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.updateApiKey', {
           defaultMessage: 'Update API key',
@@ -212,7 +206,7 @@ export const useActionPolicyMenu = ({
     }
 
     const group3: FlyoutFooterMenuItem[] = [];
-    if (canWrite) {
+    if (onDelete) {
       group3.push({
         name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.delete', {
           defaultMessage: 'Delete',
@@ -255,8 +249,6 @@ export const useActionPolicyMenu = ({
     isSnoozeLoading,
     snoozedActive,
     closeMenu,
-    canWrite,
-    canSendTestNotification,
     isLicenseValid,
     euiTheme.colors.textDanger,
   ]);

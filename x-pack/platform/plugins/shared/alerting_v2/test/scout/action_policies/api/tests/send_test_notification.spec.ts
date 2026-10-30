@@ -26,7 +26,6 @@ import {
 const previewUrl = (id: string) =>
   buildPath(testData.INTERNAL_ACTION_POLICY_TEST_PREVIEW_API_PATH, { id });
 const sendUrl = (id: string) => buildPath(testData.INTERNAL_ACTION_POLICY_TEST_API_PATH, { id });
-const executionUrl = (id: string) => `/api/workflows/executions/${encodeURIComponent(id)}`;
 
 const SEED = 42;
 
@@ -224,10 +223,10 @@ apiTest.describe(
         expect(preview.body.destinations).toStrictEqual([
           { id: workflowId, name: 'scout-send-test-notification', enabled: true, executable: true },
         ]);
-        const [group] = preview.body.groups;
-        expect(Object.keys(group.group_key)).toStrictEqual(['data.host.name']);
-        expect(group.group_key['data.host.name']).toMatch(/^test-/);
-        expect(group.payload).toMatchObject({ id: group.id, policyId, groupKey: group.group_key });
+        const [payload] = preview.body.groups;
+        expect(payload.policyId).toBe(policyId);
+        expect(Object.keys(payload.groupKey)).toStrictEqual(['data.host.name']);
+        expect(payload.groupKey['data.host.name']).toMatch(/^test-/);
 
         const send = await apiClient.post(sendUrl(policyId), {
           headers,
@@ -239,19 +238,12 @@ apiTest.describe(
         expect(typeof send.body.results[0].workflow_execution_id).toBe('string');
 
         const [{ workflow_execution_id: executionId }] = send.body.results;
-        await expect
-          .poll(
-            async () => {
-              const execution = await apiClient.get(executionUrl(executionId), { headers });
-              return execution.body.status;
-            },
-            { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
-          )
-          .toBe('completed');
-        const execution = await apiClient.get(executionUrl(executionId), { headers });
-        expect(execution.body).toMatchObject({ isTestRun: true, workflowId });
+        const execution = await apiServices.alertingV2.workflows.waitForCompletedExecution(
+          executionId
+        );
+        expect(execution).toMatchObject({ isTestRun: true, workflowId });
 
-        const [alert] = group.payload.alerts;
+        const [alert] = payload.alerts;
         expect(
           await apiServices.alertingV2.alertActionsEvents.find({ ruleId: alert.rule_id })
         ).toHaveLength(0);

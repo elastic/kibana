@@ -64,17 +64,13 @@ const actionPolicyTestDestinationSchema = lazySchema(() =>
 
 export type ActionPolicyTestDestination = z.infer<typeof actionPolicyTestDestinationSchema>;
 
-const actionPolicyTestGroupSchema = lazySchema(() =>
-  z.object({
-    id: z.string().describe('The action group id, computed like the dispatcher computes it.'),
-    group_key: z.record(z.string(), z.unknown()).describe('The group key of the action group.'),
-    payload: z
-      .record(z.string(), z.unknown())
-      .describe('The workflow payload, passed to the workflow as `inputs.payload`.'),
-  })
+const actionPolicyTestPayloadSchema = lazySchema(() =>
+  z
+    .record(z.string(), z.unknown())
+    .describe(
+      'The workflow payload of one action group, passed to the workflow as `inputs.payload`.'
+    )
 );
-
-export type ActionPolicyTestGroup = z.infer<typeof actionPolicyTestGroupSchema>;
 
 /**
  * Why a test scenario cannot be built. `matcher_expression`: the policy matcher has a KQL
@@ -90,7 +86,7 @@ export const actionPolicyTestPreviewResponseSchema = lazySchema(() =>
     z.object({
       status: z.literal('ok'),
       seed: testScenarioSeedSchema,
-      groups: z.array(actionPolicyTestGroupSchema),
+      groups: z.array(actionPolicyTestPayloadSchema),
       destinations: z.array(actionPolicyTestDestinationSchema),
     }),
     z.object({
@@ -100,6 +96,11 @@ export const actionPolicyTestPreviewResponseSchema = lazySchema(() =>
     }),
   ])
 );
+
+export interface ActionPolicyTestPreviewParams {
+  policyId: string;
+  seed?: number;
+}
 
 export type ActionPolicyTestPreviewResponse = z.infer<typeof actionPolicyTestPreviewResponseSchema>;
 

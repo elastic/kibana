@@ -8,24 +8,18 @@
 import type { ActionPolicyTestUnsupportedReason } from '@kbn/alerting-v2-schemas';
 import { PolicyMatcher, RuleCatalog } from '../dispatcher/state';
 import { buildActionGroups } from '../dispatcher/steps/build_groups_step';
-import type { ActionGroupId, ActionPolicyWorkflowPayload } from '../dispatcher/types';
+import type { ActionPolicyWorkflowPayload } from '../dispatcher/types';
 import { toWorkflowPayload } from '../dispatcher/workflow_payload';
 import { createSyntheticScenario, type SyntheticScenarioParams } from './synthetic_alert_factory';
 
-export interface TestScenarioGroup {
-  id: ActionGroupId;
-  groupKey: Record<string, unknown>;
-  payload: ActionPolicyWorkflowPayload;
-}
-
 export type TestScenario =
-  | { status: 'ok'; groups: TestScenarioGroup[] }
+  | { status: 'ok'; groups: ActionPolicyWorkflowPayload[] }
   | { status: 'unsupported'; reason: ActionPolicyTestUnsupportedReason };
 
 /**
- * Builds the action groups a policy would dispatch for a synthetic scenario. Grouping goes through
- * the dispatcher's own `buildActionGroups`, so group ids, group keys and payloads match production.
- * A policy whose matcher has a KQL expression is not supported yet.
+ * Builds the workflow payloads a policy would dispatch for a synthetic scenario, one per action
+ * group. Grouping goes through the dispatcher's own `buildActionGroups`, so group ids, group keys
+ * and payloads match production. A policy whose matcher has a KQL expression is not supported yet.
  */
 export const buildTestScenario = (params: SyntheticScenarioParams): TestScenario => {
   const { policy } = params;
@@ -40,12 +34,5 @@ export const buildTestScenario = (params: SyntheticScenarioParams): TestScenario
     ruleCatalog
   );
 
-  return {
-    status: 'ok',
-    groups: groups.map((group) => ({
-      id: group.id,
-      groupKey: group.groupKey,
-      payload: toWorkflowPayload(group),
-    })),
-  };
+  return { status: 'ok', groups: groups.map((group) => toWorkflowPayload(group)) };
 };

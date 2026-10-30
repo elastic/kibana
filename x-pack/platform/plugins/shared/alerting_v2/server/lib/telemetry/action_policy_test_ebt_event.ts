@@ -22,7 +22,6 @@ export interface ActionPolicyTestSentEbtData {
   matcher_type: ActionPolicyEbtMatcherType;
   alert_count: number;
   destination_count: number;
-  started_count: number;
   failed_count: number;
 }
 
@@ -59,10 +58,6 @@ export const actionPolicyTestSentTelemetryEvent: EventTypeOpts<ActionPolicyTestS
     destination_count: {
       type: 'integer',
       _meta: { description: 'The number of destinations the test was sent to.', optional: false },
-    },
-    started_count: {
-      type: 'integer',
-      _meta: { description: 'The number of workflow test runs started.', optional: false },
     },
     failed_count: {
       type: 'integer',

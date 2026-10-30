@@ -16,8 +16,6 @@ import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_po
 interface ActionPolicyActionsCellProps {
   policy: ActionPolicyResponse;
   canWrite: boolean;
-  /** Whether the user can read action policies, which is enough to send a test notification. */
-  canSendTestNotification?: boolean;
   onViewDetails: (policy: ActionPolicyResponse) => void;
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
@@ -29,7 +27,6 @@ interface ActionPolicyActionsCellProps {
 export const ActionPolicyActionsCell = ({
   policy,
   canWrite,
-  canSendTestNotification = false,
   onViewDetails,
   onEdit,
   onClone,
@@ -67,22 +64,14 @@ export const ActionPolicyActionsCell = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      {(canWrite || canSendTestNotification) && (
-        <EuiFlexItem grow={false}>
-          {/* Readers reach the details through the name link, so their menu only offers the test. */}
-          <ActionPolicyActionsMenu
-            policy={policy}
-            onViewDetails={canWrite ? onViewDetails : undefined}
-            onEdit={onEdit}
-            onClone={onClone}
-            onDelete={onDelete}
-            onUpdateApiKey={onUpdateApiKey}
-            isDisabled={isDisabled}
-            canWrite={canWrite}
-            canSendTestNotification={canSendTestNotification}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        {/* Readers reach the details through the name link, so their menu only offers the test. */}
+        <ActionPolicyActionsMenu
+          policy={policy}
+          {...(canWrite && { onViewDetails, onEdit, onClone, onDelete, onUpdateApiKey })}
+          isDisabled={isDisabled}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

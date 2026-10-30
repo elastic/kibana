@@ -29,13 +29,12 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   ...overrides,
 });
 
-const renderCell = (canWrite: boolean, canSendTestNotification = false) =>
+const renderCell = (canWrite: boolean) =>
   render(
     <I18nProvider>
       <ActionPolicyActionsCell
         policy={createPolicy()}
         canWrite={canWrite}
-        canSendTestNotification={canSendTestNotification}
         onViewDetails={jest.fn()}
         onEdit={jest.fn()}
         onClone={jest.fn()}
@@ -78,11 +77,10 @@ describe('ActionPolicyActionsCell', () => {
 
       expect(screen.queryByTestId('actionPolicyViewDetailsButton')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
-      expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     });
 
     it('renders a menu that only offers to send a test notification', () => {
-      renderCell(false, true);
+      renderCell(false);
 
       expect(screen.queryByLabelText('Edit this action policy')).not.toBeInTheDocument();
       fireEvent.click(screen.getByLabelText('More actions'));
@@ -93,7 +91,7 @@ describe('ActionPolicyActionsCell', () => {
 
     it('renders no menu when the license is not valid', () => {
       mockIsLicenseValid = false;
-      renderCell(false, true);
+      renderCell(false);
 
       expect(screen.queryByLabelText('More actions')).not.toBeInTheDocument();
     });

@@ -75,6 +75,7 @@ describe('useActionPolicyMenu', () => {
     expect(testSubjects).toEqual([
       'viewDetailsActionPolicy-policy-1',
       'editActionPolicy-policy-1',
+      'sendTestNotificationActionPolicy-policy-1',
       'cloneActionPolicy-policy-1',
       'toggleEnabledActionPolicy-policy-1',
       'updateApiKeyActionPolicy-policy-1',
@@ -86,6 +87,7 @@ describe('useActionPolicyMenu', () => {
     const withAllGroups = renderMenuHook({ onEdit: jest.fn() }).result;
     expect(getItems(withAllGroups).filter((item) => 'isSeparator' in item)).toHaveLength(2);
 
+    mockIsLicenseValid = false;
     const withoutFirstGroup = renderMenuHook().result;
     expect(getItems(withoutFirstGroup)[0]).not.toHaveProperty('isSeparator');
     expect(getItems(withoutFirstGroup).filter((item) => 'isSeparator' in item)).toHaveLength(1);
@@ -177,29 +179,24 @@ describe('useActionPolicyMenu', () => {
   describe('send test notification', () => {
     const SEND_TEST = 'sendTestNotificationActionPolicy-policy-1';
 
-    it('offers the item to users who can read action policies', () => {
-      const { result } = renderMenuHook({ canSendTestNotification: true });
+    it('offers the item with a valid license', () => {
+      const { result } = renderMenuHook();
 
       expect(findItem(getItems(result), SEND_TEST)).toBeDefined();
     });
 
-    it('hides the item without the read capability or a valid license', () => {
-      expect(findItem(getItems(renderMenuHook().result), SEND_TEST)).toBeUndefined();
-
+    it('hides the item without a valid license', () => {
       mockIsLicenseValid = false;
-      const { result } = renderMenuHook({ canSendTestNotification: true });
+      const { result } = renderMenuHook();
+
       expect(findItem(getItems(result), SEND_TEST)).toBeUndefined();
     });
 
-    it('is the only item offered to users who cannot write', () => {
+    it('is the only item offered without write actions', () => {
       const { result } = renderMenuHook({
-        canWrite: false,
-        canSendTestNotification: true,
-        onEdit: jest.fn(),
-        onEnable: jest.fn(),
-        onDisable: jest.fn(),
-        onSnooze: jest.fn(),
-        onCancelSnooze: jest.fn(),
+        onClone: undefined,
+        onDelete: undefined,
+        onUpdateApiKey: undefined,
       });
 
       expect(
@@ -208,7 +205,12 @@ describe('useActionPolicyMenu', () => {
     });
 
     it('returns no panel when no item is available', () => {
-      const { result } = renderMenuHook({ canWrite: false });
+      mockIsLicenseValid = false;
+      const { result } = renderMenuHook({
+        onClone: undefined,
+        onDelete: undefined,
+        onUpdateApiKey: undefined,
+      });
 
       expect(result.current.panels).toEqual([]);
     });

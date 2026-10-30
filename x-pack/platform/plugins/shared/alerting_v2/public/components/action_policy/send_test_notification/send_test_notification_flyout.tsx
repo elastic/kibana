@@ -44,7 +44,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
   const selectedIds = destinations
     .filter(({ id, executable }) => executable && !deselectedIds.has(id))
     .map(({ id }) => id);
-  const group = preview?.status === 'ok' ? preview.groups[0] : undefined;
+  const payload = preview?.status === 'ok' ? preview.groups[0] : undefined;
   const resultsByWorkflowId = new Map(
     (sendResponse?.results ?? []).map((result) => [result.workflow_id, result])
   );
@@ -149,7 +149,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           title={labels.PAYLOAD_TITLE}
           data-test-subj="sendTestNotificationPayload"
         >
-          {group ? (
+          {payload ? (
             <EuiCodeBlock
               language="json"
               fontSize="s"
@@ -158,7 +158,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
               isCopyable
               data-test-subj="sendTestNotificationPayloadCode"
             >
-              {JSON.stringify(group.payload, null, 2)}
+              {JSON.stringify(payload, null, 2)}
             </EuiCodeBlock>
           ) : (
             <EuiText size="s" color="subdued">
@@ -178,7 +178,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           iconType="send"
           onClick={send}
           isLoading={isSending}
-          isDisabled={!group || selectedIds.length === 0}
+          isDisabled={!payload || selectedIds.length === 0}
           tooltip={preview?.status === 'unsupported' ? labels.UNSUPPORTED_MATCHER_TITLE : undefined}
           data-test-subj="sendTestNotificationSendButton"
         />

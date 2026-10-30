@@ -7,9 +7,10 @@
 
 import { SEVERITY_LEVELS } from '@kbn/alerting-v2-schemas';
 import { set } from '@kbn/safer-lodash-set';
+import { get } from 'lodash';
 import seedrandom from 'seedrandom';
 import { buildAlertDetailsUrl } from '../dispatcher/alert_details_url';
-import type { ActionPolicy, Alert, AlertData, Rule } from '../dispatcher/types';
+import type { ActionPolicy, Alert, Rule } from '../dispatcher/types';
 
 /** Prefix of every synthetic id, so a test payload can never be mistaken for a real alert or rule. */
 export const TEST_ID_PREFIX = 'test-';
@@ -40,28 +41,26 @@ const randomHex = (random: () => number): string =>
     .padStart(8, '0');
 
 /**
- * Placeholder `data` for the `data.*` fields that `per_field` grouping reads. Every alert of the
- * scenario shares these values, so they all land in one group.
+ * Gives every alert the first alert's value of each field that `per_field` grouping reads, so they
+ * all land in one group. A `data.*` field gets a placeholder value; any other field the alerts lack
+ * stays absent, and keys the group with `null` like the dispatcher does.
  */
-const buildGroupingData = (policy: ActionPolicy, suffix: string): AlertData | undefined => {
+const shareGroupingValues = (alerts: Alert[], policy: ActionPolicy, suffix: string): void => {
   if (policy.grouping.mode !== 'per_field') {
-    return undefined;
+    return;
   }
 
-  const dataPaths = policy.grouping.fields
-    .filter((field) => field.startsWith(DATA_FIELD_PREFIX))
-    .map((field) => field.slice(DATA_FIELD_PREFIX.length))
-    .filter((path) => path.length > 0);
-
-  if (dataPaths.length === 0) {
-    return undefined;
+  const [firstAlert] = alerts;
+  for (const field of policy.grouping.fields) {
+    const dataPath = field.startsWith(DATA_FIELD_PREFIX)
+      ? field.slice(DATA_FIELD_PREFIX.length)
+      : '';
+    const value =
+      get(firstAlert, field) ?? (dataPath ? `${TEST_ID_PREFIX}${dataPath}-${suffix}` : undefined);
+    if (value !== undefined) {
+      alerts.forEach((alert) => set(alert, field, value));
+    }
   }
-
-  const data: AlertData = {};
-  for (const path of dataPaths) {
-    set(data, path, `${TEST_ID_PREFIX}${path}-${suffix}`);
-  }
-  return data;
 };
 
 /**
@@ -89,7 +88,7 @@ export const createSyntheticScenario = ({
   }));
 
   const severity = SEVERITY_LEVELS[Math.floor(random() * SEVERITY_LEVELS.length)];
-  const data = buildGroupingData(policy, randomHex(random));
+  const groupingSuffix = randomHex(random);
   const lastEventTimestamp = now.toISOString();
 
   const alerts: Alert[] = Array.from({ length: alertCount }, (_, index) => {
@@ -103,10 +102,10 @@ export const createSyntheticScenario = ({
       alert_id: alertId,
       alert_status: 'active',
       severity,
-      ...(data ? { data } : {}),
       alert_url: buildAlertDetailsUrl({ baseUrl: kibanaBaseUrl, spaceId, alertId }),
     };
   });
+  shareGroupingValues(alerts, policy, groupingSuffix);
 
   return { alerts, rules };
 };
