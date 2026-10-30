@@ -10,7 +10,7 @@
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
 import { MultiFieldKey, serializeField } from '@kbn/data-plugin/common';
-import { getValueKey } from '@kbn/coloring';
+import { getValueKey } from '@kbn/coloring/src/shared_components/color_mapping/color/utils';
 
 /**
  * Returns all serialized categories of the dataset for color matching.

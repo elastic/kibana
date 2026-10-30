@@ -17,7 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common/constants';
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
