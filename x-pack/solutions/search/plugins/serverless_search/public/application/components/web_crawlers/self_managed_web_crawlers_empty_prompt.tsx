@@ -18,11 +18,20 @@ import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useKibanaServices } from '../../hooks/use_kibana';
+import { useWebCrawlers } from '../../hooks/api/use_web_crawlers';
+import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH } from '../../constants';
 
 export const SelfManagedWebCrawlersEmptyPrompt = () => {
   const assetBasePath = useAssetBasePath();
   const githubIcon = assetBasePath + '/github_white.svg';
+  const {
+    application: { navigateToApp },
+  } = useKibanaServices();
+  const { data } = useWebCrawlers();
+  const elasticManagedAvailable = data?.agentlessEnabled === true;
 
   return (
     <SearchEmptyPrompt
@@ -181,11 +190,29 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
         </EuiFlexGroup>
       }
       actions={
-        <>
+        <EuiFlexGroup direction="row" gutterSize="m">
+          {elasticManagedAvailable && (
+            <EuiFlexItem>
+              <EuiButton
+                data-test-subj="serverlessSearchEmptyWebCrawlersPromptElasticManagedButton"
+                fill
+                iconType="plusCircle"
+                onClick={() =>
+                  navigateToApp(SERVERLESS_ES_WEB_CRAWLERS_ID, {
+                    path: ELASTIC_MANAGED_WEB_CRAWLERS_PATH,
+                  })
+                }
+              >
+                {i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.elasticManagedButton', {
+                  defaultMessage: 'Elastic managed web crawler',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiButton
               data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
-              fill
+              fill={!elasticManagedAvailable}
               iconType={githubIcon}
               href={'https://github.com/elastic/crawler'}
               target="_blank"
@@ -195,7 +222,7 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
               })}
             </EuiButton>
           </EuiFlexItem>
-        </>
+        </EuiFlexGroup>
       }
     />
   );

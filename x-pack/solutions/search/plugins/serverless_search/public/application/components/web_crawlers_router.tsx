@@ -9,6 +9,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { WebCrawlersOverview } from './web_crawlers_overview';
 import { WebCrawlersElasticManaged } from './web_crawlers_elastic_managed';
+import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH } from '../constants';
 
 export const WebCrawlersRouter: React.FC = () => {
   return (
@@ -16,7 +17,7 @@ export const WebCrawlersRouter: React.FC = () => {
       <Route exact path="/">
         <WebCrawlersOverview />
       </Route>
-      <Route exact path="/elastic_managed">
+      <Route exact path={ELASTIC_MANAGED_WEB_CRAWLERS_PATH}>
         <WebCrawlersElasticManaged />
       </Route>
     </Routes>
