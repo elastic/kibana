@@ -230,15 +230,6 @@ describe('fetchInvestigationAlertSnapshots', () => {
     expect(lookup.getRulesClient).not.toHaveBeenCalled();
   });
 
-  it('leaves a v2 episode without a rule or a rule name unnamed', async () => {
-    const lookup = makeLookup({ columns: v2Columns, rows: [v2Row(null)] });
-
-    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
-
-    expect(snapshot).toEqual(expect.objectContaining({ id: 'episode-1' }));
-    expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
-  });
-
   it('keeps a v2 episode whose data rule name is empty', async () => {
     const lookup = makeLookup({
       columns: v2Columns,

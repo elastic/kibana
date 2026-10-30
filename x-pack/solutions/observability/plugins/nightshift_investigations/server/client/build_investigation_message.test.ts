@@ -350,10 +350,9 @@ describe('buildInvestigationMessage with a mixed alert array', () => {
 });
 
 describe('buildInvestigationMessage with a v2 alert without a rule', () => {
-  const { rule_id: _ruleId, ...base } = {
-    alert_version: 'v2' as const,
+  const base: V2AlertSnapshot = {
+    alert_version: 'v2',
     id: 'episode-1',
-    rule_id: 'unused',
     group_hash: 'hash-1',
     status: 'active',
     start: '2026-08-24T12:00:00.000Z',
