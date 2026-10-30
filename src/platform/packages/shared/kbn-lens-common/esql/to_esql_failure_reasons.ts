@@ -112,7 +112,7 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
     {
       defaultMessage:
-        'Grouping remaining values as "Other" will be supported in an upcoming update.',
+        'Grouping remaining values as "Other" is only supported for a single Top values dimension that is not nested under another bucket and does not include documents without the selected field.',
     }
   ),
   terms_order_by_not_supported: i18n.translate(

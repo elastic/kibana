@@ -27,7 +27,7 @@ import type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
-} from '../locators';
+} from '../../common/locators';
 
 const createMockLocator = <P extends SerializableRecord>() => {
   const m = sharePluginMock.createLocator<P>();

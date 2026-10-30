@@ -10,6 +10,12 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../scout/ui/fixtures';
 import {
+  investigationsList,
+  isInvestigationsList,
+  mockNightshiftApis,
+  holdInvestigationStart,
+} from '../fixtures/mocks';
+import {
   setAlertingV2EnabledSetting,
   unsetAlertingV2EnabledSetting,
 } from '../../../scout/ui/fixtures/alerting_v2_setting';
@@ -20,49 +26,6 @@ const alertId = `nightshift-v2-alert-${suffix}`;
 const ruleId = `nightshift-v2-rule-${suffix}`;
 const ruleName = `Nightshift v2 test rule ${suffix}`;
 const alertIndex = '.alerts-observability.apm.alerts-default';
-
-/** A shared investigations list response (`GET /internal/investigations/investigations`). */
-const investigationsList = (inProgress?: boolean) => ({
-  results:
-    inProgress === undefined
-      ? []
-      : [
-          {
-            id: 'investigation-1',
-            title: 'Investigation',
-            title_pending: false,
-            created_at: '2026-09-15T12:00:00.000Z',
-            updated_at: '2026-09-15T12:05:00.000Z',
-            agent_id: 'nightshift.investigation',
-            metadata: { status: 'open' },
-            in_progress: inProgress,
-            subjects: [{ type: 'alert', id: alertId, created_at: '2026-09-15T12:00:00.000Z' }],
-          },
-        ],
-  pagination: { total: inProgress === undefined ? 0 : 1, page: 1, per_page: 10 },
-});
-
-const isInvestigationsList = (url: URL) =>
-  url.pathname.endsWith('/internal/investigations/investigations') && url.searchParams.size > 0;
-
-const mockNightshiftApis = async (page: any) => {
-  await page.route(
-    (url: URL) => url.pathname.endsWith('/internal/nightshift/investigations/availability'),
-    async (route: any) => {
-      await route.fulfill({ status: 200, json: { available: true } });
-    }
-  );
-  await page.route(isInvestigationsList, async (route: any) => {
-    await route.fulfill({ status: 200, json: investigationsList() });
-  });
-  await page.route(
-    (url: URL) =>
-      url.pathname.endsWith('/internal/nightshift/investigations') && url.searchParams.size === 0,
-    async (route: any) => {
-      await route.fulfill({ status: 200, json: { investigation_id: 'investigation-1' } });
-    }
-  );
-};
 
 test.describe(
   'Observability Alerting v2 Inbox investigation actions',
@@ -106,7 +69,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
       await setAlertingV2EnabledSetting(kbnClient, true);
-      await mockNightshiftApis(page);
+      await mockNightshiftApis(page, alertId);
       await browserAuth.loginAsAdmin();
     });
 
@@ -155,7 +118,7 @@ test.describe(
         (url: URL) =>
           url.pathname.endsWith('/internal/nightshift/investigations') &&
           url.searchParams.size === 0,
-        async (route: any) => {
+        async (route) => {
           await startHeld;
           await route.fulfill({ status: 200, json: { investigation_id: 'investigation-1' } });
         }
@@ -182,6 +145,7 @@ test.describe(
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(nativeRuleId);
       await expect(alerting.pageTitle).toHaveText('Alerts', { timeout: 30_000 });
+      await expect(alerting.episodesTableLoading).toBeHidden();
 
       const menuButton = page.getByRole('button', { name: 'Additional actions' });
       await expect(menuButton).toBeVisible({ timeout: 30_000 });
@@ -197,6 +161,97 @@ test.describe(
       expect((await requestPromise).postDataJSON()).toMatchObject({
         subject: { type: 'alert', ids: [nativeEpisodeId] },
       });
+    });
+
+    test('starts an investigation from Universal details and immediately offers View', async ({
+      page,
+      pageObjects,
+    }, testInfo) => {
+      const alerting = pageObjects.observabilityAlerting;
+      await mockNightshiftApis(page, nativeEpisodeId);
+      await alerting.gotoEpisodeDetails(nativeEpisodeId);
+      await expect(alerting.detailsInvestigateButton).toBeVisible();
+      await testInfo.attach('universal-investigate-header', {
+        body: await page.screenshot(),
+        contentType: 'image/png',
+      });
+      const releaseStart = await holdInvestigationStart(page);
+      const requestPromise = page.waitForRequest(
+        (request) =>
+          request.method() === 'POST' &&
+          request.url().endsWith('/internal/nightshift/investigations')
+      );
+      await alerting.investigateFromDetails();
+      expect((await requestPromise).postDataJSON()).toMatchObject({
+        subject: { type: 'alert', ids: [nativeEpisodeId] },
+      });
+      await expect(alerting.detailsInvestigateButton).toBeDisabled();
+      await expect(alerting.detailsInvestigateButton).toHaveText('Investigating…');
+      releaseStart();
+
+      await expect(alerting.detailsViewInvestigationButton).toBeVisible();
+      await expect(alerting.detailsViewInvestigationButton).toHaveAttribute(
+        'href',
+        /NIGHTSHIFT_INVESTIGATION_LOCATOR/
+      );
+      await expect(page).toHaveURL(new RegExp(`/alerts/${nativeEpisodeId}$`));
+      await testInfo.attach('universal-view-header', {
+        body: await page.screenshot(),
+        contentType: 'image/png',
+      });
+      await alerting.viewInvestigationFromDetails();
+      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
+    });
+
+    for (const { inProgress, reinvestigateCount } of [
+      { inProgress: false, reinvestigateCount: 1 },
+      { inProgress: true, reinvestigateCount: 0 },
+    ]) {
+      test(`views a ${
+        inProgress ? 'running' : 'finished'
+      } investigation from Universal details`, async ({ page, pageObjects }) => {
+        const alerting = pageObjects.observabilityAlerting;
+        await mockNightshiftApis(page, nativeEpisodeId, { inProgress });
+        await alerting.gotoEpisodeDetails(nativeEpisodeId);
+        await expect(alerting.detailsViewInvestigationButton).toBeVisible();
+        await expect(alerting.detailsInvestigateButton).toBeHidden();
+        await alerting.viewInvestigationFromDetails();
+        await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
+
+        await alerting.gotoEpisodeDetails(nativeEpisodeId);
+        await expect(alerting.detailsViewInvestigationButton).toBeVisible();
+        await alerting.openDetailsOverflow();
+        const reinvestigate = page.testSubj.locator('episodeDetailsReinvestigate');
+        await expect(reinvestigate).toHaveCount(reinvestigateCount);
+      });
+    }
+
+    test('opens a running investigation in a new tab from Universal details', async ({
+      page,
+      pageObjects,
+    }) => {
+      const alerting = pageObjects.observabilityAlerting;
+      await mockNightshiftApis(page, nativeEpisodeId, { inProgress: true });
+      await alerting.gotoEpisodeDetails(nativeEpisodeId);
+      await expect(alerting.detailsViewInvestigationButton).toBeVisible();
+      const newTabPromise = page.context().waitForEvent('page');
+      await alerting.viewInvestigationFromDetailsInNewTab();
+      const newTab = await newTabPromise;
+      await expect(newTab).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
+      await expect(page).toHaveURL(new RegExp(`/alerts/${nativeEpisodeId}$`));
+      await newTab.close();
+    });
+
+    test('hides the Universal header investigation action when Nightshift is unavailable', async ({
+      page,
+      pageObjects,
+    }) => {
+      await mockNightshiftApis(page, nativeEpisodeId, { available: false });
+      const alerting = pageObjects.observabilityAlerting;
+      await alerting.gotoEpisodeDetails(nativeEpisodeId);
+      await expect(alerting.viewRuleDetailsLink).toBeVisible();
+      await expect(alerting.detailsInvestigateButton).toBeHidden();
+      await expect(alerting.detailsViewInvestigationButton).toBeHidden();
     });
 
     test('triggers investigation from classic alert details flyout take action menu', async ({
@@ -234,8 +289,8 @@ test.describe(
       pageObjects,
     }) => {
       let inProgress = true;
-      await page.route(isInvestigationsList, async (route: any) => {
-        await route.fulfill({ status: 200, json: investigationsList(inProgress) });
+      await page.route(isInvestigationsList, async (route) => {
+        await route.fulfill({ status: 200, json: investigationsList(inProgress, alertId) });
       });
       const alerting = pageObjects.observabilityAlerting;
       await alerting.gotoInboxFilteredByRule(ruleId);

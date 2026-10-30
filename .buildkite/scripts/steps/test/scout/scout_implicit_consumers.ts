@@ -22,7 +22,9 @@
  */
 
 import { minimatch } from 'minimatch';
+import { filterIgnoredFiles } from '../../../../pipeline-utils/affected-packages/utils.ts';
 import type { ScoutLog } from './scout_log.ts';
+import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 
 interface ImplicitConsumerRule {
   reason: string;
@@ -71,7 +73,8 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
 
 /**
  * Augment an affected-modules set with consumer @kbn/ IDs whose registries are
- * touched by `changedFiles`. Returns a new Set; never removes entries and
+ * touched by `changedFiles`. Files in SCOUT_MODULE_GRAPH_IGNORE (docs, Jest
+ * tests) never trigger consumers. Returns a new Set; never removes entries and
  * never disables selective testing.
  */
 export function expandWithImplicitConsumers(
@@ -80,9 +83,10 @@ export function expandWithImplicitConsumers(
   log: ScoutLog
 ): Set<string> {
   const expanded = new Set(affected);
+  const relevantFiles = filterIgnoredFiles([...changedFiles], SCOUT_MODULE_GRAPH_IGNORE);
 
   for (const rule of IMPLICIT_REGISTRY_CONSUMERS) {
-    const trigger = changedFiles.find((file) =>
+    const trigger = relevantFiles.find((file) =>
       rule.patterns.some((pattern) => minimatch(file, pattern, { dot: true }))
     );
     if (!trigger) continue;
