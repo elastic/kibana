@@ -35,6 +35,7 @@ export type Zone =
 
 // Add a machine type here when a ported step first uses it.
 export type MachineType =
+  | 'c4d-standard-16'
   | 'n2-highcpu-8'
   | 'n2-highmem-4'
   | 'n2-standard-2'
@@ -63,6 +64,7 @@ export const usZones = [
 
 export const spotZones = {
   centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
+  centralFCBA: ['us-central1-f', 'us-central1-c', 'us-central1-b', 'us-central1-a'],
   allUS: usZones,
   // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
   n2dPreemptible: [
@@ -101,6 +103,12 @@ export const retry = {
 } satisfies Record<string, Retry>;
 
 export const hyperdiskBalanced = { diskType: 'hyperdisk-balanced' } as const;
+
+export const k8sMinimalAgent = (): AgentConfig => ({
+  provider: 'k8s',
+  image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
+  imageUID: 1000,
+});
 
 export const onDemandAgent = (machineType: MachineType): AgentConfig => ({ machineType });
 
