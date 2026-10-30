@@ -28,9 +28,6 @@ const ACTION_POLICY_ID = 'dispatch-default-email-policy';
 const ACTION_POLICY_TRIGGER = 'action_policy';
 const RULE_NAME = 'Scout default email rule';
 const HOSTS = ['host-default-email-a', 'host-default-email-b'];
-// The test waits for the alerts to fire and then for the workflow to complete, each for up
-// to `POLL_TIMEOUT_MS`, so it needs a budget above the 60s default to stay off the edge.
-const TEST_TIMEOUT_MS = 120_000;
 // The `date` filter formats in the Kibana server's time zone, which the spec cannot know,
 // so event times are masked and only their format is checked.
 const EVENT_TIME = /Last event \d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/g;
@@ -92,8 +89,6 @@ apiTest.describe(
     apiTest(
       'a breaching rule sends one email listing every alert in the standard layout',
       async ({ apiClient, apiServices, samlAuth }) => {
-        apiTest.setTimeout(TEST_TIMEOUT_MS);
-
         // The policy stores an API key minted from the request credential, so it is
         // created with an interactive user session, like the UI does. The workflow's email
         // step runs as that user, who needs read access to connectors.
