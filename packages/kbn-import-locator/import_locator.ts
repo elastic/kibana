@@ -15,6 +15,8 @@ import Ts from 'typescript';
 
 import { stripSourceCode } from './strip_source_code';
 
+export { stripSourceCode };
+
 const EMPTY = new Set<string>();
 
 export class ImportLocator {

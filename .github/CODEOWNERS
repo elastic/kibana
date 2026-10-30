@@ -58,6 +58,7 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-kibana-settings-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-check-saved-objects-cli @elastic/kibana-core
+packages/kbn-check-server-import-graph-cli @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
