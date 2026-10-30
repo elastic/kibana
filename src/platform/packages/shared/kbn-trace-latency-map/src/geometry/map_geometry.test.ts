@@ -141,7 +141,12 @@ describe('createMapGeometry', () => {
       timeGrid: padded,
       stats,
     });
-    const last = geometryOf70.rangeToSelection({ x0: padded.bins - 1, x1: padded.bins, y0: 0, y1: 24 });
+    const last = geometryOf70.rangeToSelection({
+      x0: padded.bins - 1,
+      x1: padded.bins,
+      y0: 0,
+      y1: 24,
+    });
     expect(last.to).toBe('2026-10-26T11:00:00.000Z');
     // A column inside the range is not cut.
     const first = geometryOf70.rangeToSelection({ x0: 1, x1: 2, y0: 0, y1: 24 });
