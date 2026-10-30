@@ -108,11 +108,9 @@ export const AgentlessEnrollmentFlyout = ({
   useEffect(() => {
     if (agentOnline) return;
     if (agentData) {
-      // An agent failing only outside the integration runs it: go on to check its data.
-      if (
-        agentData.status === 'online' ||
-        getAgentlessEnrollmentState(agentData, packagePolicy) === 'success'
-      ) {
+      // Judged by the integration's units, like the step content: an agent failing only outside
+      // the integration runs it, and an online one that does not run it yet is still pending.
+      if (getAgentlessEnrollmentState(agentData, packagePolicy) === 'success') {
         setAgentOnline(true);
         setConfirmEnrollmentStatus('complete');
         setConfirmDataStatus('loading');

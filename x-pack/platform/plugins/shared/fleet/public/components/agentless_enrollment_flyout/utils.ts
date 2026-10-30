@@ -19,6 +19,8 @@ export type AgentlessEnrollmentState = 'pending' | 'success' | 'failure';
  * Whether the managed integration was deployed. With the package policy known, it is judged by the
  * units of that package policy, like the component health shown below it: an agent in error or
  * degraded only because of something else it runs, like its monitoring, still runs the integration.
+ * An online agent that runs no input unit of the package policy has not started it yet, so the
+ * deployment is still pending.
  */
 export const getAgentlessEnrollmentState = (
   agent?: Agent,
@@ -32,9 +34,9 @@ export const getAgentlessEnrollmentState = (
 
   const alertLevel = getComponentAlertLevel(agent, packagePolicy);
   if (alertLevel === 'failed') return 'failure';
-  if (!isFailing) return 'success';
   const units = getPackagePolicyUnitSummary(agent, packagePolicy);
   const runsIntegration = units.total > units.stopped;
+  if (!isFailing) return runsIntegration ? 'success' : 'pending';
   return runsIntegration && !alertLevel ? 'success' : 'failure';
 };
 

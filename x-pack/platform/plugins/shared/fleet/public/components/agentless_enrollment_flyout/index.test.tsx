@@ -296,6 +296,66 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
     });
 
+    it('keeps listening while the agent is online but does not run the integration yet', async () => {
+      const notRunning = {
+        status: 'online',
+        components: [
+          {
+            id: 'monitoring',
+            type: 'http/metrics',
+            status: 'HEALTHY',
+            units: [{ id: 'monitoring-unit', type: 'input', status: 'HEALTHY', message: '' }],
+          },
+        ],
+      };
+      const running = {
+        ...notRunning,
+        components: [
+          ...notRunning.components,
+          {
+            id: 'c1',
+            type: 'aws-s3',
+            status: 'DEGRADED',
+            units: [{ id: 'input-1', type: 'input', status: 'DEGRADED', message: '' }],
+          },
+        ],
+      };
+      mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [notRunning] } } });
+      const props = {
+        ...baseProps,
+        agentPolicy: { id: 'ap1', name: 'AP' } as any,
+        packagePolicy: { id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any,
+      };
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, queryByText, rerender } = renderer.render(
+        <AgentlessEnrollmentFlyout {...props} />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Step 1 is loading')).toBeInTheDocument();
+        expect(
+          getByText(
+            'Listening for managed integration connection... this could take several minutes'
+          )
+        ).toBeInTheDocument();
+        expect(
+          queryByText('Managed integration deployment was successful')
+        ).not.toBeInTheDocument();
+        expect(getByText('Step 2 is disabled')).toBeInTheDocument();
+      });
+
+      // The integration starts, degraded: it runs, and its component health shows the degradation.
+      mockUseGetAgentsQuery.mockReturnValue({ data: { data: { items: [running] } } });
+      rerender(<AgentlessEnrollmentFlyout {...props} />);
+
+      await waitFor(() => {
+        expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
+        expect(getByText('Step 1 is complete')).toBeInTheDocument();
+        expect(getByText('Step 2 is loading')).toBeInTheDocument();
+      });
+    });
+
     it('stops polling once online without a package policy, keeps polling to refresh component health with one', async () => {
       mockUseGetAgentsQuery.mockReturnValue({
         data: { data: { items: [{ status: 'online' }] } },
@@ -312,10 +372,29 @@ describe('AgentlessEnrollmentFlyout', () => {
       withoutPolicy.unmount();
 
       mockUseGetAgentsQuery.mockClear();
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: {
+          data: {
+            items: [
+              {
+                status: 'online',
+                components: [
+                  {
+                    id: 'c1',
+                    type: 'aws-s3',
+                    status: 'HEALTHY',
+                    units: [{ id: 'input-1', type: 'input', status: 'HEALTHY', message: '' }],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
       const withPolicy = renderer.render(
         <AgentlessEnrollmentFlyout
           {...baseProps}
-          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [] } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
         />
       );
       await waitFor(() => {
