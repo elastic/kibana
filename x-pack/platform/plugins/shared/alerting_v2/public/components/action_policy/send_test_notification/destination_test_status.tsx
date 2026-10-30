@@ -81,7 +81,7 @@ const ErrorText = ({ message }: { message: string }) => (
 export const DestinationTestStatus = ({ result }: { result: ActionPolicyTestSendResult }) => {
   if ('error' in result) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
+      <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <StatusBadge status="failed" />
         </EuiFlexItem>
@@ -118,7 +118,7 @@ const ExecutionStatusRow = ({
   });
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd">
+    <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>

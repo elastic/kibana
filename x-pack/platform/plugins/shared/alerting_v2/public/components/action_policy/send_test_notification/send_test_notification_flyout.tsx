@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiCheckbox,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
-import type { ActionPolicyResponse, ActionPolicyTestDestination } from '@kbn/alerting-v2-schemas';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import React, { useState } from 'react';
 import { usePreviewTestNotification } from '../../../hooks/use_preview_test_notification';
 import { useSendTestNotification } from '../../../hooks/use_send_test_notification';
-import { DestinationTestStatus } from './destination_test_status';
+import { DestinationTestCard } from './destination_test_card';
 import * as labels from './translations';
 
 interface Props {
@@ -129,34 +121,20 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
         <Body.Section
           id="destinations"
           title={labels.DESTINATIONS_TITLE}
-          hasBorder
           data-test-subj="sendTestNotificationDestinations"
         >
           <EuiFlexGroup direction="column" gutterSize="s">
-            {destinations.map((destination) => {
-              const result = resultsByWorkflowId.get(destination.id);
-              return (
-                <EuiFlexItem key={destination.id}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem>
-                      <EuiCheckbox
-                        id={`sendTestNotificationDestination-${destination.id}`}
-                        label={<DestinationLabel destination={destination} />}
-                        checked={destination.executable && !deselectedIds.has(destination.id)}
-                        disabled={!destination.executable || isSending}
-                        onChange={() => toggleDestination(destination.id)}
-                        data-test-subj={`sendTestNotificationDestination-${destination.id}`}
-                      />
-                    </EuiFlexItem>
-                    {result && (
-                      <EuiFlexItem grow={false}>
-                        <DestinationTestStatus result={result} />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            })}
+            {destinations.map((destination) => (
+              <EuiFlexItem key={destination.id}>
+                <DestinationTestCard
+                  destination={destination}
+                  checked={destination.executable && !deselectedIds.has(destination.id)}
+                  disabled={!destination.executable || isSending}
+                  onChange={() => toggleDestination(destination.id)}
+                  result={resultsByWorkflowId.get(destination.id)}
+                />
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </Body.Section>
       </Body>
@@ -179,22 +157,3 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     </FlyoutTemplate>
   );
 };
-
-const DestinationLabel = ({ destination }: { destination: ActionPolicyTestDestination }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} component="span">
-    <EuiFlexItem grow={false} component="span">
-      {destination.name ?? destination.id}
-    </EuiFlexItem>
-    {!destination.executable && (
-      <EuiFlexItem grow={false} component="span">
-        <EuiBadge
-          color="hollow"
-          title={labels.NOT_EXECUTABLE_TOOLTIP}
-          data-test-subj={`sendTestNotificationNotExecutable-${destination.id}`}
-        >
-          {labels.NOT_EXECUTABLE}
-        </EuiBadge>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-);
