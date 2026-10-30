@@ -237,7 +237,7 @@ describe('ErrorPatternPanel', () => {
     expect(result.getByTestId('errorPatternTable')).toBeInTheDocument();
   });
 
-  it('hides the summary line and toggle counts when loading patterns failed', () => {
+  it('shows a failure message and hides the summary line and toggle counts when loading patterns failed', () => {
     mockUseErrorPatterns.mockReturnValue(
       makePattern({
         errorPatterns: [],
@@ -249,6 +249,11 @@ describe('ErrorPatternPanel', () => {
 
     const result = testRenderer.render(<ErrorPatternPanel />);
 
+    // A failed search must not read as "no errors exist"
+    expect(result.getByText('Unable to load error patterns')).toBeInTheDocument();
+    expect(
+      result.queryByText('No error patterns found in the selected time range')
+    ).not.toBeInTheDocument();
     // Counts are meaningless when the request failed, so they are not shown
     expect(result.queryByText(/error patterns across/)).not.toBeInTheDocument();
     expect(result.getByTestId('errorPatternLevelToggle-error')).toHaveTextContent(/^Errors$/);

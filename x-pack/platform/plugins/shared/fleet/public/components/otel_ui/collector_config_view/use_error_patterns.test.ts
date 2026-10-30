@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { of, throwError } from 'rxjs';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { buildQuery, TIME_RANGE_TO_MS, useErrorPatterns } from './use_error_patterns';
@@ -60,6 +60,54 @@ describe('useErrorPatterns', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.error?.message).toBe('search failed');
+  });
+
+  describe('polling', () => {
+    // each refresh sends two searches: one for errors and one for warnings
+    const SEARCHES_PER_REFRESH = 2;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('stops polling after the search failed without ever succeeding', async () => {
+      mockSearch.mockReturnValue(throwError(() => new Error('search failed')));
+
+      const { result } = renderHook(
+        () => useErrorPatterns({ serviceInstanceId: 'my-host', timeRange: '1h' }),
+        { wrapper }
+      );
+      await waitFor(() => expect(result.current.error).toBeDefined());
+      expect(mockSearch).toHaveBeenCalledTimes(SEARCHES_PER_REFRESH);
+
+      await act(async () => {
+        jest.advanceTimersByTime(2 * 30 * 1000 + 1);
+      });
+
+      expect(mockSearch).toHaveBeenCalledTimes(SEARCHES_PER_REFRESH);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('keeps polling every 30 seconds while the search succeeds', async () => {
+      mockSearch.mockReturnValue(of({ rawResponse: {} }));
+
+      const { result } = renderHook(
+        () => useErrorPatterns({ serviceInstanceId: 'my-host', timeRange: '1h' }),
+        { wrapper }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockSearch).toHaveBeenCalledTimes(SEARCHES_PER_REFRESH);
+
+      await act(async () => {
+        jest.advanceTimersByTime(30 * 1000 + 1);
+      });
+
+      await waitFor(() => expect(mockSearch).toHaveBeenCalledTimes(2 * SEARCHES_PER_REFRESH));
+    });
   });
 
   it('is not loading and does not search when serviceInstanceId is empty', () => {

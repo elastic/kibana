@@ -419,6 +419,13 @@ export const ErrorPatternPanel: React.FC = () => {
         })}
         tableLayout="auto"
         loading={isLoading}
+        error={
+          error
+            ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.loadError', {
+                defaultMessage: 'Unable to load error patterns',
+              })
+            : undefined
+        }
         noItemsMessage={emptyMessage}
         rowProps={() => ({
           css: rowBackgroundCss,

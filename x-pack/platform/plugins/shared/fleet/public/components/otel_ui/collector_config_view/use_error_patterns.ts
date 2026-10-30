@@ -178,7 +178,10 @@ export const useErrorPatterns = ({
     },
     {
       enabled: !!serviceInstanceId,
-      refetchInterval: 30 * 1000, // 30 seconds
+      // Polling every 30 seconds. If the search failed before ever succeeding, stop: each refetch
+      // would put the query back in its initial loading state and re-show the loading bar forever.
+      refetchInterval: (_data, query) =>
+        query.state.status === 'error' && !query.state.dataUpdatedAt ? false : 30 * 1000,
       keepPreviousData: true,
     }
   );
