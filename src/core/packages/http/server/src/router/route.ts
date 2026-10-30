@@ -604,7 +604,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *   security: { authz: { requiredPrivileges: ['my-app'] } },
    * },
    * (context, req, res) => {
-   *   req.params; // type unknown
+   *   req.params; // type unknown (value is {} at runtime)
    *   return res.ok();
    * });
    *
