@@ -156,6 +156,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         getPipeline('.buildkite/pipelines/pull_request/check_oas_snapshot.yml', cancelable)
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/server_module_graph.yml', cancelable)
+      );
     }
 
     // Register steps from base.yml that should still be canceled on gate failure.
