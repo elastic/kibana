@@ -13,6 +13,9 @@ import { buildHuntSpaceFilterTerms } from './space_filter';
 
 export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
 
+/** Consecutive retryable runs after which a report that never settled is retired as `incomplete`. */
+export const MAX_HUNT_RETRY_ATTEMPTS = 3;
+
 /**
  * Whether `reportId` is reachable from `spaceId`, using the same filter `loadReportHuntContext`
  * reads through.
@@ -85,68 +88,83 @@ export const deriveLastHuntStatus = ({
  * settle also stamps, whatever the run found: the candidate gate retires a report only on
  * `last_hunted_at`, so a settled flag without a stamp would leave the report in the pool, re-hunting
  * the techniques the cap dropped on every sweep.
+ *
+ * `hunt_retry_count` bounds the retries. A retryable gap is classed retryable because a later run
+ * *could* close it, but model output the gates rejected often repeats on the same report text, and
+ * an unbounded retry would keep the same reports at the top of every sweep. The count is the run of
+ * consecutive retryable runs that searched nothing new:
+ * - a retryable run on an element that is still unsettled (never stamped, or stamped with coverage
+ *   pending) adds one, or restarts at one when it grew the ledger, since that run made progress;
+ * - a retryable run on a settled element is the first of a new run, so it starts at one rather
+ *   than inheriting an old count;
+ * - a run that stamps, or that the ledger cap settles, resets it to zero.
+ * Restarting on progress means a report whose model output varies can keep retrying for as long
+ * as each run searches a technique no earlier run did. That is new coverage rather than a repeat,
+ * and it is bounded by the techniques the report names and by `max_ids`; the candidate sort keeps
+ * such a report behind every report that was never hunted.
+ * At `max_retries` the run settles coverage and stamps the report, the same way the ledger cap
+ * does, and the count stays at the value it reached so the read-back can say why it settled. An
+ * element that already carries a stamp keeps its result (like `keepHit`): retiring a report only
+ * ends its retries, it never turns an earlier `hit` or `clean` into `incomplete`.
  */
 const EVIDENCE_SCRIPT = `
 if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
-boolean found = false;
-for (int i = 0; i < ctx._source.evidence.size(); i++) {
-  if (ctx._source.evidence[i].space_id == params.space_id) {
-    def el = ctx._source.evidence[i];
-    boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';
-    Set ids = new LinkedHashSet();
-    if (el.hunted_technique_ids instanceof List) { ids.addAll(el.hunted_technique_ids); }
-    ids.addAll(params.searched_technique_ids);
-    List capped = new ArrayList();
-    for (def id : ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
-    el.hunted_technique_ids = capped;
-    boolean pending = params.coverage_pending && ids.size() <= params.max_ids;
-    boolean settledByCap = params.coverage_pending && !pending;
-    if (params.stamp || settledByCap) {
-      el.last_hunted_at = params.last_hunted_at;
-      if (!keepHit) {
-        el.last_hunt_status = params.last_hunt_status;
-        el.last_hunt_run_id = params.last_hunt_run_id;
-        el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
-      }
-    }
-    el.coverage_pending = pending;
-    if (!pending) {
-      el.pending_technique_ids = new ArrayList();
-    } else if (params.pending_technique_ids != null) {
-      List pendingIds = new ArrayList();
-      for (def id : params.pending_technique_ids) { if (pendingIds.size() < params.max_ids) { pendingIds.add(id); } }
-      el.pending_technique_ids = pendingIds;
-    }
-    found = true;
-  }
+List targets = new ArrayList();
+for (def candidate : ctx._source.evidence) {
+  if (candidate.space_id == params.space_id) { targets.add(candidate); }
 }
-if (!found) {
-  Map el = new HashMap();
-  el.space_id = params.space_id;
+if (targets.isEmpty()) {
+  Map created = new HashMap();
+  created.space_id = params.space_id;
+  created.hunted_technique_ids = new ArrayList();
+  created.pending_technique_ids = new ArrayList();
+  ctx._source.evidence.add(created);
+  targets.add(created);
+}
+for (def el : targets) {
+  boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';
+  int ledgerBefore = el.hunted_technique_ids instanceof List ? el.hunted_technique_ids.size() : 0;
+  Set ids = new LinkedHashSet();
+  if (el.hunted_technique_ids instanceof List) { ids.addAll(el.hunted_technique_ids); }
+  ids.addAll(params.searched_technique_ids);
   List capped = new ArrayList();
-  for (def id : params.searched_technique_ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
+  for (def id : ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
   el.hunted_technique_ids = capped;
-  boolean pending = params.coverage_pending && params.searched_technique_ids.size() <= params.max_ids;
+  boolean pending = params.coverage_pending && ids.size() <= params.max_ids;
   boolean settledByCap = params.coverage_pending && !pending;
-  if (params.stamp || settledByCap) {
+  boolean unsettled = el.last_hunted_at == null || el.coverage_pending == true;
+  int retries = 0;
+  if (!params.stamp && !settledByCap) {
+    int previous = unsettled && el.hunt_retry_count instanceof Number ? ((Number) el.hunt_retry_count).intValue() : 0;
+    retries = capped.size() > ledgerBefore ? 1 : previous + 1;
+  }
+  boolean settledByRetries = retries >= params.max_retries;
+  if (settledByRetries) { pending = false; }
+  el.hunt_retry_count = retries;
+  boolean keepResult = keepHit || (settledByRetries && el.last_hunted_at != null);
+  if (params.stamp || settledByCap || settledByRetries) {
     el.last_hunted_at = params.last_hunted_at;
-    el.last_hunt_status = params.last_hunt_status;
-    el.last_hunt_run_id = params.last_hunt_run_id;
-    el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+    if (!keepResult) {
+      el.last_hunt_status = params.last_hunt_status;
+      el.last_hunt_run_id = params.last_hunt_run_id;
+      el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+    }
   }
   el.coverage_pending = pending;
-  List pendingIds = new ArrayList();
-  if (pending && params.pending_technique_ids != null) {
+  if (!pending) {
+    el.pending_technique_ids = new ArrayList();
+  } else if (params.pending_technique_ids != null) {
+    List pendingIds = new ArrayList();
     for (def id : params.pending_technique_ids) { if (pendingIds.size() < params.max_ids) { pendingIds.add(id); } }
+    el.pending_technique_ids = pendingIds;
   }
-  el.pending_technique_ids = pendingIds;
-  ctx._source.evidence.add(el);
 }
 `.trim();
 
 interface LedgerElement {
   space_id?: string;
   coverage_pending?: boolean;
+  hunt_retry_count?: number;
 }
 
 interface LedgerSource {
@@ -227,8 +245,12 @@ export const writeHuntEvidence = async (
     index: HUNT_REPORTS_INDEX,
     id: reportId,
     retry_on_conflict: 3,
-    // Read back only the ledger, to tell whether the cap settled a run that wanted to continue.
-    _source_includes: ['evidence.space_id', 'evidence.coverage_pending'],
+    // Read back only the ledger, to tell whether a bound settled a run that wanted to continue.
+    _source_includes: [
+      'evidence.space_id',
+      'evidence.coverage_pending',
+      'evidence.hunt_retry_count',
+    ],
     script: {
       lang: 'painless',
       source: EVIDENCE_SCRIPT,
@@ -244,12 +266,20 @@ export const writeHuntEvidence = async (
         replayed_whole_report: replayedWholeReport && completeness === 'complete',
         coverage_pending: coveragePending,
         max_ids: MAX_HUNT_TECHNIQUE_IDS,
+        max_retries: MAX_HUNT_RETRY_ATTEMPTS,
       },
     },
   });
 
   const stored = response.get?._source?.evidence?.find((element) => element.space_id === spaceId);
-  if (coveragePending && stored?.coverage_pending === false) {
+  if (!coveragePending || stored?.coverage_pending !== false) return;
+
+  if (!stamp && (stored.hunt_retry_count ?? 0) >= MAX_HUNT_RETRY_ATTEMPTS) {
+    logger.warn(
+      `Hunt for report ${reportId} in space ${spaceId} ended retryable ${stored.hunt_retry_count} ` +
+        `runs in a row, so the report was retired as incomplete instead of being retried again.`
+    );
+  } else {
     logger.warn(
       `Hunt coverage ledger for report ${reportId} in space ${spaceId} holds more than ` +
         `${MAX_HUNT_TECHNIQUE_IDS} techniques, so coverage was settled with techniques still unsearched.`

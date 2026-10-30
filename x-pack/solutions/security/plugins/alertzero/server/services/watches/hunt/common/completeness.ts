@@ -29,8 +29,8 @@ import type {
  * The line is whether a later run could plausibly cover the same technique. A technique
  * that is not in the catalog, input this run truncated, a budget it exhausted, and rows
  * it could not interpret all stay final: those reproduce. Retries are not bounded here,
- * because a bound needs an attempt count kept alongside the report, which is state the
- * caller recording hunt outcomes owns rather than this run.
+ * because a bound needs an attempt count kept alongside the report: `writeHuntEvidence`
+ * keeps it and retires a report that stays retryable for `MAX_HUNT_RETRY_ATTEMPTS` runs.
  */
 const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
   'search_partial',

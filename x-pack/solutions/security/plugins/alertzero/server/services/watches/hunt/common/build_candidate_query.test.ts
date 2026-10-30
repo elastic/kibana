@@ -337,10 +337,27 @@ describe('buildCandidateQuery', () => {
         trigger: 'scheduled',
         spaceId: 'hunt-a',
       });
-      expect(searchBodyOf(esClient).sort[0]).toEqual({
+      expect(searchBodyOf(esClient).sort[1]).toEqual({
         'evidence.corroborated_rank_score': {
           order: 'desc',
           missing: 0,
+          nested: { path: 'evidence', filter: { term: { 'evidence.space_id': 'hunt-a' } } },
+        },
+      });
+    });
+
+    it('sorts reports by this space retry count before rank, so a retry never displaces a new report', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'scheduled',
+        spaceId: 'hunt-a',
+      });
+      expect(searchBodyOf(esClient).sort[0]).toEqual({
+        'evidence.hunt_retry_count': {
+          order: 'asc',
+          missing: 0,
+          unmapped_type: 'integer',
           nested: { path: 'evidence', filter: { term: { 'evidence.space_id': 'hunt-a' } } },
         },
       });

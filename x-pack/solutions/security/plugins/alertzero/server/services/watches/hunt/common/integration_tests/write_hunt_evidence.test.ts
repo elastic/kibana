@@ -11,7 +11,7 @@ import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { HUNT_REPORTS_INDEX } from '../../../../../../common/constants';
 import { MAX_HUNT_TECHNIQUE_IDS } from '../hunt_technique_limit';
-import { writeHuntEvidence } from '../write_hunt_evidence';
+import { MAX_HUNT_RETRY_ATTEMPTS, writeHuntEvidence } from '../write_hunt_evidence';
 import type { WriteHuntEvidenceParams } from '../write_hunt_evidence';
 
 interface StoredElement {
@@ -23,6 +23,7 @@ interface StoredElement {
   hunted_technique_ids?: string[];
   pending_technique_ids?: string[];
   coverage_pending?: boolean;
+  hunt_retry_count?: number;
   alert_hits_total?: number;
   alert_hits?: { window: string; ioc_match_hits: number };
 }
@@ -103,6 +104,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
               hunted_technique_ids: { type: 'keyword' },
               pending_technique_ids: { type: 'keyword' },
               coverage_pending: { type: 'boolean' },
+              hunt_retry_count: { type: 'integer' },
             },
           },
         },
@@ -161,6 +163,220 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       hunted_technique_ids: ['T1001'],
       pending_technique_ids: ['T1002'],
       coverage_pending: true,
+      hunt_retry_count: 1,
+    });
+  });
+
+  describe('the retry bound', () => {
+    const retryableNoHit = (runId: string) => ({
+      runId,
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable' as const,
+      searchedTechniqueIds: ['T1001'],
+      pendingTechniqueIds: ['T1002'],
+    });
+
+    it('retires a report as incomplete once it stays retryable for the bound', async () => {
+      const reportId = await newReport();
+
+      for (let run = 1; run < MAX_HUNT_RETRY_ATTEMPTS; run++) {
+        await write(reportId, retryableNoHit(`run-${run}`));
+        const stored = await element(reportId);
+        expect(stored).toEqual(
+          expect.objectContaining({ hunt_retry_count: run, coverage_pending: true })
+        );
+        expect(stored?.last_hunted_at).toBeUndefined();
+      }
+      expect(logger.warn).not.toHaveBeenCalled();
+
+      await write(reportId, retryableNoHit('run-last'));
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS,
+          coverage_pending: false,
+          pending_technique_ids: [],
+          last_hunt_status: 'incomplete',
+          last_hunt_run_id: 'run-last',
+          last_hunted_at: expect.any(String),
+        })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('retired as incomplete'));
+    });
+
+    it('resets the count when a run settles the report', async () => {
+      const reportId = await newReport();
+      await write(reportId, retryableNoHit('run-1'));
+      await write(reportId, retryableNoHit('run-2'));
+
+      await write(reportId, {
+        runId: 'run-3',
+        hasConfirmedHit: false,
+        completeness: 'complete',
+        searchedTechniqueIds: ['T1002'],
+        pendingTechniqueIds: [],
+      });
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: 0,
+          coverage_pending: false,
+          last_hunt_status: 'clean',
+        })
+      );
+    });
+
+    it('counts an element written before the count existed from zero', async () => {
+      const reportId = await newReport([
+        {
+          space_id: SPACE,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: ['T1002'],
+          coverage_pending: true,
+        },
+      ]);
+
+      await write(reportId, retryableNoHit('run-1'));
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({ hunt_retry_count: 1, coverage_pending: true })
+      );
+    });
+
+    it('keeps a pending hit when the bound retires a continuation', async () => {
+      const reportId = await newReport([
+        {
+          space_id: SPACE,
+          last_hunted_at: '2026-01-01T00:00:00.000Z',
+          last_hunt_status: 'hit',
+          last_hunt_run_id: 'run-hit',
+          last_hunt_event_hit_count: 4,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: ['T1002'],
+          coverage_pending: true,
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+        },
+      ]);
+
+      await write(reportId, retryableNoHit('run-over'));
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          coverage_pending: false,
+          last_hunt_status: 'hit',
+          last_hunt_run_id: 'run-hit',
+          last_hunt_event_hit_count: 4,
+        })
+      );
+    });
+
+    it.each(['hit', 'clean'])(
+      'never overwrites a settled %s result, however many retryable replays it gets',
+      async (status) => {
+        const reportId = await newReport([
+          {
+            space_id: SPACE,
+            last_hunted_at: '2026-01-01T00:00:00.000Z',
+            last_hunt_status: status,
+            last_hunt_run_id: 'run-settled',
+            last_hunt_event_hit_count: status === 'hit' ? 4 : 0,
+            hunted_technique_ids: ['T1001'],
+            pending_technique_ids: [],
+            coverage_pending: false,
+          },
+        ]);
+
+        for (let run = 0; run <= MAX_HUNT_RETRY_ATTEMPTS + 1; run++) {
+          await write(reportId, retryableNoHit(`replay-${run}`));
+        }
+
+        expect(await element(reportId)).toEqual(
+          expect.objectContaining({
+            last_hunt_status: status,
+            last_hunt_run_id: 'run-settled',
+            last_hunt_event_hit_count: status === 'hit' ? 4 : 0,
+          })
+        );
+      }
+    );
+
+    it('starts a fresh count when a retired report is hunted again, instead of retiring it at once', async () => {
+      const reportId = await newReport();
+      for (let run = 1; run <= MAX_HUNT_RETRY_ATTEMPTS; run++) {
+        await write(reportId, retryableNoHit(`run-${run}`));
+      }
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS,
+          coverage_pending: false,
+          last_hunt_status: 'incomplete',
+        })
+      );
+
+      await write(reportId, retryableNoHit('replay'));
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: 1,
+          coverage_pending: true,
+          pending_technique_ids: ['T1002'],
+          last_hunt_run_id: `run-${MAX_HUNT_RETRY_ATTEMPTS}`,
+        })
+      );
+
+      await write(reportId, retryableNoHit('continuation'));
+      expect((await element(reportId))?.hunt_retry_count).toBe(2);
+    });
+
+    it('restarts the count at one when a run searched techniques the ledger did not hold', async () => {
+      const reportId = await newReport([
+        {
+          space_id: SPACE,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: ['T1002'],
+          coverage_pending: true,
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+        },
+      ]);
+
+      await write(reportId, { ...retryableNoHit('run-progress'), searchedTechniqueIds: ['T1005'] });
+
+      const stored = await element(reportId);
+      expect(stored).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: 1,
+          coverage_pending: true,
+          hunted_technique_ids: ['T1001', 'T1005'],
+        })
+      );
+      expect(stored?.last_hunted_at).toBeUndefined();
+    });
+
+    it('keeps an earlier clean result when the bound retires a report that was still pending', async () => {
+      const reportId = await newReport([
+        {
+          space_id: SPACE,
+          last_hunted_at: '2026-01-01T00:00:00.000Z',
+          last_hunt_status: 'clean',
+          last_hunt_run_id: 'run-clean',
+          last_hunt_event_hit_count: 0,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: ['T1002'],
+          coverage_pending: true,
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+        },
+      ]);
+
+      await write(reportId, retryableNoHit('run-over'));
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          coverage_pending: false,
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS,
+          last_hunt_status: 'clean',
+          last_hunt_run_id: 'run-clean',
+        })
+      );
     });
   });
 
@@ -232,14 +448,15 @@ describe('writeHuntEvidence against Elasticsearch', () => {
   });
 
   it('keeps the recorded pending ids when Tier 2 did not run, and replaces them when it did', async () => {
-    const reportId = await newReport();
-    await write(reportId, {
-      runId: 'run-1',
-      hasConfirmedHit: false,
-      completeness: 'incomplete_retryable',
-      searchedTechniqueIds: ['T1001'],
-      pendingTechniqueIds: ['T1002', 'T1003'],
-    });
+    // Seeded rather than written, so the two retryable runs below stay under the retry bound.
+    const reportId = await newReport([
+      {
+        space_id: SPACE,
+        hunted_technique_ids: ['T1001'],
+        pending_technique_ids: ['T1002', 'T1003'],
+        coverage_pending: true,
+      },
+    ]);
 
     await write(reportId, {
       runId: 'run-2',
