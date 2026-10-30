@@ -1096,6 +1096,7 @@ export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLin
 export type AnnotationLayerType = z.output<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = z.output<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = z.output<typeof annotationLayerByValueSchema>;
+export type AnnotationLayerESQLType = z.output<typeof annotationLayerESQLSchema>;
 /**
  * Layers whose data source is ES|QL. Annotation layers are intentionally excluded
  * even though ES|QL charts may contain them: they never use the ES|QL datasource
@@ -1106,7 +1107,7 @@ export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
-export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
+export type XYLayer = LayerTypeNoESQL | LayerTypeESQL | AnnotationLayerESQLType;
 
 export type XYLegendOutsideHorizontal = z.output<typeof xyLegendOutsideHorizontalSchema>;
 export type XYLegendOutsideVertical = z.output<typeof xyLegendOutsideVerticalSchema>;

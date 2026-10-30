@@ -17,4 +17,6 @@ export const LENS_LAYER_SUFFIX = `indexpattern-datasource-layer-`;
  */
 export const LENS_XY_ANNOTATION_LAYER_SUFFIX = `xy-visualization-layer-`;
 export const LENS_DEFAULT_TIME_FIELD = '@timestamp';
+/** Suffix for the companion regular data view used by annotation layers in ES|QL XY charts. */
+export const LENS_ESQL_ANNOTATION_DATA_VIEW_ID_SUFFIX = '--annotation';
 export const INDEX_PATTERN_ID = 'index-pattern';
