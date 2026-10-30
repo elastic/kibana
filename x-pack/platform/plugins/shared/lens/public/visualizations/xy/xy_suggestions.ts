@@ -705,7 +705,12 @@ function buildSuggestion({
 
   const isIncomplete = yValues.length === 0;
   const bucketTypes = [xValue, ...(splitBy ?? [])].map((col) => col?.operation.dataType);
-  const isRangeOverTime = bucketTypes.includes('date') && bucketTypes.includes('number_range');
+  // the heatmap suggestion takes tables with one metric and two buckets
+  const isRangeOverTime =
+    yValues.length === 1 &&
+    bucketTypes.length === 2 &&
+    bucketTypes.includes('date') &&
+    bucketTypes.includes('number_range');
 
   return {
     title,
