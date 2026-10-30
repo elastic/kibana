@@ -31,7 +31,7 @@ export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
         version: API_VERSIONS.internal.v1,
       }),
     {
-      enabled: !skip,
+      enabled: !skip && !!agentId,
       retry: false,
       select: (response: GetOneAgentResponse) => response?.item,
       onSuccess: () => setErrorToast(),
