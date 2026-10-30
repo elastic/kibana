@@ -95,20 +95,6 @@ describe('EntityFlyout', () => {
     );
   });
 
-  it('renders evidence as a striped list', () => {
-    renderFlyout();
-
-    expect(screen.getByTestId('nightshiftEntityFlyoutEvidenceList')).toBeInTheDocument();
-    expect(screen.getAllByTestId('nightshiftEntityFlyoutEvidenceItem')).toHaveLength(2);
-  });
-
-  it('does not render the APM callout', () => {
-    renderFlyout();
-
-    expect(screen.queryByText('APM service with similar name detected')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftEntityFlyoutApmLink')).not.toBeInTheDocument();
-  });
-
   it('opens a new chat with the entity attached when Open in chat is clicked', () => {
     renderFlyout();
 

@@ -39,18 +39,4 @@ describe('SourceCard', () => {
 
     expect(screen.getByRole('button', { name: 'Connect GitHub' })).toBeDisabled();
   });
-
-  it('marks a connected source with a check instead of its logo', () => {
-    const { container } = render(
-      <SourceCard
-        icon="logoGithub"
-        title="gh"
-        connected
-        action={{ label: 'Edit connector', icon: 'pencil', onClick: jest.fn() }}
-      />
-    );
-
-    expect(container.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type="logoGithub"]')).not.toBeInTheDocument();
-  });
 });

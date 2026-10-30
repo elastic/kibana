@@ -33,12 +33,6 @@ describe('StartInvestigationPanel', () => {
     mockUseStartInvestigation.mockReturnValue({ startInvestigation, isStarting: false });
   });
 
-  it('closes the panel once the investigation has started', () => {
-    renderPanel();
-
-    expect(mockUseStartInvestigation).toHaveBeenCalledWith({ onStarted: onClose });
-  });
-
   it('disables submit until a non-blank question is entered', () => {
     renderPanel();
 

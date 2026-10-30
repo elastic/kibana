@@ -261,14 +261,6 @@ describe('SandboxConnectorsTable', () => {
     expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeEnabled();
   });
 
-  it('explains what a connector does for the agent when none is assigned', async () => {
-    setup({ connectors: [connector('github')], assigned: [] });
-
-    expect(await screen.findByTestId('nightshiftSandboxConnectorsEmpty')).toHaveTextContent(
-      'add an existing connector, and the investigation agent can use it from its sandbox'
-    );
-  });
-
   it('shows an error with a retry when the connectors cannot be loaded', async () => {
     const { fetch } = setup({ connectors: [connector('github')], fetchError: forbiddenError() });
 

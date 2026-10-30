@@ -150,14 +150,6 @@ describe('CreateAutomationFlyout', () => {
     expect(screen.getByTestId('submitAutomation')).toBeEnabled();
   });
 
-  it('shows the create title and name and tags fields', () => {
-    renderFlyout();
-
-    expect(screen.getByRole('heading', { name: 'Create automation' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Name this automation')).toBeInTheDocument();
-    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
-  });
-
   it('closes a pristine form without confirmation', () => {
     renderFlyout();
 

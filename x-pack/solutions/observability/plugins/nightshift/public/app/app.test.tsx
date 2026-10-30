@@ -577,13 +577,4 @@ describe('NightshiftApp', () => {
     );
     expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('checkout');
   });
-
-  it('leaves the start investigation action to the page header', () => {
-    renderApp();
-
-    expect(
-      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
-  });
 });

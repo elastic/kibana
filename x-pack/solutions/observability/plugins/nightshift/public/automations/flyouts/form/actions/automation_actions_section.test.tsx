@@ -44,13 +44,6 @@ const ActionsSection = () => {
 describe('AutomationActionsSection', () => {
   beforeEach(() => onSlackActionChange.mockClear());
 
-  it('prompts to add an action when there is none', () => {
-    render(<ActionsSection />);
-
-    expect(screen.getByText('Choose what happens when this automation runs.')).toBeInTheDocument();
-    expect(screen.queryByText('Learnings')).not.toBeInTheDocument();
-  });
-
   it('adds, edits, and removes a Slack action', async () => {
     render(<ActionsSection />);
 

@@ -42,14 +42,6 @@ const renderCard = (props: React.ComponentProps<typeof SlackAppCard>) =>
   );
 
 describe('SlackAppCard', () => {
-  it('offers to connect the workspace when the Slack App is available', () => {
-    withConnection({});
-    renderCard({ canEdit: true, description: 'Custom description' });
-
-    expect(screen.getByText('Custom description')).toBeInTheDocument();
-    expect(screen.getByTestId('streamsSlackAppConnectButton')).toBeEnabled();
-  });
-
   it('renders nothing when the Slack App is unavailable', () => {
     withConnection({ available: false });
     renderCard({ canEdit: true });

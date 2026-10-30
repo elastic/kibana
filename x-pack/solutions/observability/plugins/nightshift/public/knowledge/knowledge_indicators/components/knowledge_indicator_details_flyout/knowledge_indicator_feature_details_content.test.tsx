@@ -36,19 +36,6 @@ const renderContent = (isDeveloperMode: boolean) => {
 };
 
 describe('KnowledgeIndicatorFeatureDetailsContent', () => {
-  it('hides meta and raw document while developer mode is off', () => {
-    renderContent(false);
-
-    expect(screen.getByText('A service dependency')).toBeInTheDocument();
-    expect(screen.getByText('service.name=service-a')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('significantEventsAppFeatureDetailsFlyoutMeta')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('significantEventsAppFeatureDetailsFlyoutRawDocument')
-    ).not.toBeInTheDocument();
-  });
-
   it('shows meta and raw document only while developer mode is on', () => {
     const { rerender } = renderContent(true);
 

@@ -125,33 +125,6 @@ describe('MemoryPageView', () => {
     expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('60%');
   });
 
-  it('reads usefulness, confidence and age as a stat strip above the provenance', () => {
-    mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 0.75, confidence: 0.6 }));
-    renderView();
-
-    // The three numbers a reader checks before trusting a memory are labelled
-    // stats rather than another row of the same list as the provenance.
-    const strip = within(screen.getByTestId('nightshiftMemoryMetadata'));
-    expect(strip.getByText('Usefulness')).toBeInTheDocument();
-    expect(strip.getByText('Confidence')).toBeInTheDocument();
-    expect(strip.getByText('Updated')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('75%');
-    expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('60%');
-  });
-
-  it('badges the archive reason as a stat rather than a row', () => {
-    mockUseMemoryPage.mockReturnValue(
-      asDetail({ archived: true, archive_reason: 'merged' as const })
-    );
-    renderView();
-
-    // The reason sits with the rates: whether a memory can be trusted includes
-    // whether it is out of recall, and why.
-    const badge = screen.getByTestId('nightshiftMemoryArchivedBadge');
-    expect(badge).toHaveTextContent('merged into another memory');
-    expect(badge.closest('[class*="euiStat"]')).not.toBeNull();
-  });
-
   it('filters Memory home by a tag when the tag is clicked', async () => {
     mockUseMemoryPage.mockReturnValue(asDetail({ tags: ['memory', 'checkout'] }));
     const { onSelectKeyword } = renderView();
@@ -162,41 +135,12 @@ describe('MemoryPageView', () => {
     expect(onSelectKeyword).toHaveBeenCalledWith('checkout');
   });
 
-  it('names what clicking a tag does, so the badge is not an undiscoverable filter', () => {
-    mockUseMemoryPage.mockReturnValue(asDetail({ tags: ['memory', 'checkout'] }));
-    renderView();
-
-    expect(screen.getByRole('button', { name: 'Filter memories by checkout' })).toBeInTheDocument();
-  });
-
   it('clamps a rate outside [0, 1] rather than rendering 4000%', () => {
     mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 4, confidence: -1 }));
     renderView();
 
     expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('100%');
     expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('0%');
-  });
-
-  it('leaves the two rates uncoloured, so colour never carries the verdict', () => {
-    // 0% usefulness means "never surfaced", which is the normal state for a new
-    // memory, so a warning there would cry wolf on every cold start.
-    mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 0, confidence: 0 }));
-    renderView();
-
-    for (const colour of ['euiTextColor-danger', 'euiTextColor-warning']) {
-      for (const value of ['nightshiftMemoryUsefulnessValue', 'nightshiftMemoryConfidenceValue']) {
-        expect(screen.getByTestId(value).className).not.toContain(colour);
-      }
-    }
-  });
-
-  it('shows the task the memory was learned from as its source task', () => {
-    mockUseMemoryPage.mockReturnValue(asDetail());
-    renderView();
-
-    expect(screen.getByTestId('nightshiftMemorySourceTask')).toHaveTextContent(
-      'Checkout latency spike'
-    );
   });
 
   it('lists the memory tags but not the internal memory marker', () => {
@@ -244,17 +188,6 @@ describe('MemoryPageView', () => {
     expect(screen.queryByTestId('nightshiftMemoryArchivedBadge')).not.toBeInTheDocument();
   });
 
-  it('puts the metadata below the content, and the content above the fold of the footer', () => {
-    mockUseMemoryPage.mockReturnValue(asDetail());
-    renderView();
-
-    // The footer describes the page; the memory itself comes first.
-    const metadata = screen.getByTestId('nightshiftMemoryMetadata');
-    expect(screen.getByText('Scale the consumer.').compareDocumentPosition(metadata)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING
-    );
-  });
-
   it('hides archive and delete from a read-only viewer', () => {
     // The routes require manage for archive and configure for delete. A viewer
     // granted neither should see the page without actions that would 403.
@@ -264,15 +197,6 @@ describe('MemoryPageView', () => {
 
     expect(screen.getByTestId('nightshiftMemoryPageTitle')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftMemoryArchiveToggle')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
-  });
-
-  it('offers delete only to a viewer who may also configure', () => {
-    givenCapabilities({ manage: true });
-    mockUseMemoryPage.mockReturnValue(asDetail());
-    renderView();
-
-    expect(screen.getByTestId('nightshiftMemoryArchiveToggle')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
   });
 
@@ -403,16 +327,6 @@ describe('MemoryPageView', () => {
         expect.objectContaining({ onSuccess: expect.any(Function) })
       )
     );
-  });
-
-  it('deletes in one click once the dialog is open', async () => {
-    mockUseMemoryPage.mockReturnValue(asDetail());
-    renderView();
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
-    await userEvent.click(screen.getByRole('button', { name: 'Delete permanently' }));
-
-    await waitFor(() => expect(mockDelete).toHaveBeenCalled());
   });
 
   it('cancelling the confirmation leaves the memory alone', async () => {

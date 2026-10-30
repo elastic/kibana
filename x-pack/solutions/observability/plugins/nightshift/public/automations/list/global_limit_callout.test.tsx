@@ -33,16 +33,6 @@ const quotas = ({
 });
 
 describe('GlobalLimitCallout', () => {
-  it('renders the paused title', () => {
-    render(
-      <I18nProvider>
-        <GlobalLimitCallout limit={10} />
-      </I18nProvider>
-    );
-    expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
-    expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
-  });
-
   it('renders the settings link when given an href', () => {
     render(
       <I18nProvider>

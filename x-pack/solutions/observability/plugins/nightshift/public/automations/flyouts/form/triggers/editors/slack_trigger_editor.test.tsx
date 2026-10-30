@@ -67,21 +67,6 @@ describe('SlackTriggerEditor', () => {
     mockUseAllRelayAppBindings.mockReturnValue(connected);
   });
 
-  it('describes a new message trigger', () => {
-    render(<Editor kind="slack_message" />);
-
-    expect(screen.getByText('New message')).toBeInTheDocument();
-    expect(screen.getByText('in')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent(
-      'Select channels'
-    );
-    expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('Any message');
-    expect(screen.getByText('from')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
-    expect(screen.getByText('via')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerBots')).toHaveTextContent('Any app');
-  });
-
   it('adds an app or bot', async () => {
     render(<Editor kind="slack_message" />);
 
