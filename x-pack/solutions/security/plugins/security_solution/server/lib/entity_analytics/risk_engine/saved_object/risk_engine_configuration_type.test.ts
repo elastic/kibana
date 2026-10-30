@@ -9,7 +9,19 @@ import type {
   SavedObjectsModelVersion,
   SavedObjectModelTransformationContext,
 } from '@kbn/core-saved-objects-server';
+import type { ObjectType } from '@kbn/config-schema';
 import { riskEngineConfigurationType } from './risk_engine_configuration_type';
+
+const getVersion5CreateSchema = (): ObjectType => {
+  const version5 = (
+    riskEngineConfigurationType.modelVersions as Record<string, SavedObjectsModelVersion>
+  )?.['5'];
+  const createSchema = version5?.schemas?.create;
+  if (!createSchema) {
+    throw new Error('version 5 create schema is not defined');
+  }
+  return createSchema as ObjectType;
+};
 
 describe('riskEngineConfigurationType', () => {
   it('should have the correct model versions', () => {
@@ -17,6 +29,7 @@ describe('riskEngineConfigurationType', () => {
     expect(riskEngineConfigurationType.modelVersions).toHaveProperty('2');
     expect(riskEngineConfigurationType.modelVersions).toHaveProperty('3');
     expect(riskEngineConfigurationType.modelVersions).toHaveProperty('4');
+    expect(riskEngineConfigurationType.modelVersions).toHaveProperty('5');
   });
 
   it('should have filters field in mappings', () => {
@@ -126,6 +139,78 @@ describe('riskEngineConfigurationType', () => {
           filters: existingFilters,
         },
       });
+    });
+  });
+
+  describe('version 5 create schema', () => {
+    const baseAttributes = {
+      enabled: false,
+      filter: {},
+      identifierType: 'host',
+      interval: '1h',
+      pageSize: 1000,
+      range: { start: 'now-30d', end: 'now' },
+      enableResetToZero: true,
+      excludeAlertStatuses: ['closed'],
+      filters: [],
+      _meta: { mappingsVersion: 8 },
+    };
+
+    it('accepts a configuration with a valid dataViewId', () => {
+      const createSchema = getVersion5CreateSchema();
+      expect(() =>
+        createSchema.validate({
+          ...baseAttributes,
+          dataViewId: '.alerts-security.alerts-default',
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts a configuration without a dataViewId', () => {
+      const createSchema = getVersion5CreateSchema();
+      expect(() => createSchema.validate({ ...baseAttributes })).not.toThrow();
+    });
+
+    it('rejects a dataViewId that could inject ES|QL', () => {
+      const createSchema = getVersion5CreateSchema();
+      expect(() =>
+        createSchema.validate({
+          ...baseAttributes,
+          dataViewId:
+            '.alerts-security.alerts-alpha,.alerts-security.alerts-beta,zz* METADATA _index,/* * */_source',
+        })
+      ).toThrow('must be a valid index expression');
+    });
+  });
+
+  describe('version 5 forwardCompatibility schema', () => {
+    const getVersion5ForwardCompatibilitySchema = (): ObjectType => {
+      const version5 = (
+        riskEngineConfigurationType.modelVersions as Record<string, SavedObjectsModelVersion>
+      )?.['5'];
+      const forwardCompatibility = version5?.schemas?.forwardCompatibility;
+      if (!forwardCompatibility) {
+        throw new Error('version 5 forwardCompatibility schema is not defined');
+      }
+      return forwardCompatibility as ObjectType;
+    };
+
+    // Reading a configuration stored before this version (possibly with an invalid
+    // dataViewId) must not throw — the ES|QL source-index validation rejects it at query time.
+    it('does not reject an already-stored dataViewId that could inject ES|QL', () => {
+      const forwardCompatibility = getVersion5ForwardCompatibilitySchema();
+      expect(() =>
+        forwardCompatibility.validate({
+          enabled: false,
+          filter: {},
+          interval: '1h',
+          pageSize: 1000,
+          range: { start: 'now-30d', end: 'now' },
+          _meta: { mappingsVersion: 8 },
+          dataViewId:
+            '.alerts-security.alerts-alpha,.alerts-security.alerts-beta,zz* METADATA _index,/* * */_source',
+        })
+      ).not.toThrow();
     });
   });
 });
