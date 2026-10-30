@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { getDateRange } from '@kbn/timerange';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -90,13 +90,15 @@ const attachmentHasDataField = z
     '(optional, custom content only) Omit to keep the panel\'s current data state. true: ensure the panel has data — keeps the stored query, generating one from "query" only when the panel has none. false: drop the stored query so the panel has no data. A supplied esql always means data: it wins over false. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
   );
 
-const attachmentRegenerateEsqlField = z
-  .boolean()
-  .nullable()
-  .optional()
-  .describe(
-    '(optional, custom content only) true: the edit needs different data (a new measure, grouping, filter or time window, for example "also show the average bytes"), so the stored query is regenerated from "query", keeping the parts the request does not change. Without it the stored query is kept and the new data can never appear. Omit for edits that only change the look (colors, sizes, wording, layout). A supplied esql wins. Ignored for Lens and Vega.'
-  );
+const attachmentRegenerateEsqlField = lazySchema(() =>
+  z
+    .boolean()
+    .nullable()
+    .optional()
+    .describe(
+      '(optional, custom content only) true: the edit needs different data (a new measure, grouping, filter or time window, for example "also show the average bytes"), so the stored query is regenerated from "query", keeping the parts the request does not change. Without it the stored query is kept and the new data can never appear. Omit for edits that only change the look (colors, sizes, wording, layout). A supplied esql wins. Ignored for Lens and Vega.'
+    )
+);
 
 const requiredChartTypeField = z
   .nativeEnum(SupportedChartType)
