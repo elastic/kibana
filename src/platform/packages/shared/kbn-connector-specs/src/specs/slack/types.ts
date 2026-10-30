@@ -706,53 +706,6 @@ export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 // Net-new action input schemas (V2 write-parity additions)
 // =============================================================================
 
-// Shared Block Kit block type — an array of arbitrary Slack Block Kit block objects.
-// Constrained to prevent DoS: each key max 200 chars, max 50 blocks, and a cap on the serialized payload.
-const SLACK_MAX_BLOCKS_PAYLOAD_LENGTH = 100_000;
-
-const slackBlocksField = () =>
-  z
-    .array(z.record(z.string().max(200), z.unknown()))
-    .max(50)
-    .refine((blocks) => JSON.stringify(blocks).length <= SLACK_MAX_BLOCKS_PAYLOAD_LENGTH, {
-      message: `Serialized blocks must not exceed ${SLACK_MAX_BLOCKS_PAYLOAD_LENGTH} characters.`,
-    })
-    .describe(
-      'Array of Slack Block Kit block objects (e.g. section, actions, image). See https://api.slack.com/reference/block-kit/blocks for the full schema. Max 50 blocks per message.'
-    );
-
-// https://api.slack.com/methods/chat.postMessage (with blocks payload)
-export const SlackSendBlockKitMessageInputSchema = lazySchema(() =>
-  z.object({
-    channel: z
-      .string()
-      .min(1)
-      .max(SLACK_MAX_ID_LENGTH)
-      .describe(
-        'Conversation ID to post to (e.g. C... for channels, G... for private channels, D... for DMs).'
-      ),
-    blocks: slackBlocksField(),
-    text: z
-      .string()
-      .max(2000)
-      .optional()
-      .describe(
-        'Fallback plain-text summary shown in notifications and accessibility contexts where blocks cannot render. Strongly recommended for accessibility.'
-      ),
-    threadTs: z
-      .string()
-      .max(SLACK_MAX_TIMESTAMP_LENGTH)
-      .optional()
-      .describe('Timestamp of another message to reply to (creates a threaded reply).'),
-    unfurlLinks: z
-      .boolean()
-      .optional()
-      .describe('Whether to enable unfurling of primarily text-based content.'),
-    unfurlMedia: z.boolean().optional().describe('Whether to enable unfurling of media content.'),
-  })
-);
-export type SlackSendBlockKitMessageInput = z.infer<typeof SlackSendBlockKitMessageInputSchema>;
-
 // https://api.slack.com/methods/conversations.replies
 export const SlackGetConversationRepliesInputSchema = lazySchema(() =>
   z.object({

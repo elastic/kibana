@@ -30,7 +30,6 @@ import {
   SlackLookupUserByEmailInputSchema,
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
-  SlackSendBlockKitMessageInputSchema,
   SlackSendMessageInputSchema,
   SlackUpdateMessageInputSchema,
   SlackUploadFileInputSchema,
@@ -64,7 +63,6 @@ import {
   type SlackLookupUserByEmailInput,
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
-  type SlackSendBlockKitMessageInput,
   type SlackSendMessageInput,
   type SlackUpdateMessageInput,
   type SlackUploadFileInput,
@@ -1195,64 +1193,6 @@ export const Slack: ConnectorSpec = {
       },
     },
 
-    // https://api.slack.com/methods/chat.postMessage (Block Kit payload)
-    sendBlockKitMessage: {
-      isTool: true,
-      scope: 'write',
-      description:
-        'Post a rich Block Kit message to a Slack channel or DM. Use this instead of sendMessage when you need formatted cards, sections, fields, images, or link buttons. Do not include buttons, select menus, or other interactive elements that expect a response: clicks are not received by this connector. Link buttons with a url are fine. Accepts a blocks[] array following the Slack Block Kit schema. Returns the message timestamp, which can be used as threadTs for replies.',
-      input: SlackSendBlockKitMessageInputSchema,
-      handler: async (ctx, input) => {
-        slackRelay.assertNotSupported(ctx, 'sendBlockKitMessage');
-
-        const typedInput: SlackSendBlockKitMessageInput =
-          SlackSendBlockKitMessageInputSchema.parse(input);
-
-        const payload: Record<string, unknown> = {
-          channel: typedInput.channel,
-          blocks: typedInput.blocks,
-        };
-
-        if (typedInput.text) payload.text = typedInput.text;
-        if (typedInput.threadTs) payload.thread_ts = typedInput.threadTs;
-        if (typedInput.unfurlLinks !== undefined) payload.unfurl_links = typedInput.unfurlLinks;
-        if (typedInput.unfurlMedia !== undefined) payload.unfurl_media = typedInput.unfurlMedia;
-
-        try {
-          ctx.log.debug(`Slack sendBlockKitMessage request: channel=${typedInput.channel}`);
-          const response = await slackRequestWithRateLimitRetry<SlackChatPostMessageResponse>({
-            ctx,
-            action: 'sendBlockKitMessage',
-            maxRetries: SLACK_MAX_RETRIES,
-            request: () =>
-              ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
-                headers: { 'Content-Type': 'application/json; charset=utf-8' },
-              }),
-          });
-
-          if (!response.data.ok) {
-            throw new Error(
-              formatSlackApiErrorMessage({
-                action: 'sendBlockKitMessage',
-                responseData: response.data,
-                responseHeaders: response.headers,
-              })
-            );
-          }
-
-          return { timestamp: response.data.ts };
-        } catch (error) {
-          const err = error as AxiosError<unknown>;
-          ctx.log.error(
-            `Slack sendBlockKitMessage failed: ${err.message}, Status: ${
-              err.response?.status
-            }, Data: ${JSON.stringify(err.response?.data)}`
-          );
-          throw error;
-        }
-      },
-    },
-
     // https://api.slack.com/methods/conversations.replies
     getConversationReplies: {
       isTool: true,
@@ -1660,9 +1600,9 @@ export const Slack: ConnectorSpec = {
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text (at most 4,000 characters) and, unless new blocks are passed, removes any blocks, so confirm with the user first.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
-    'sendMessage returns the Slack response plus a timestamp field. Use timestamp as threadTs in a follow-up sendMessage or sendBlockKitMessage to post a reply in the same thread.',
-    'Use sendBlockKitMessage instead of sendMessage when the message needs formatted cards, sections, fields, images, or link buttons. Do not add buttons or menus that expect a response, because clicks are not received by this connector.',
-    'To update an existing message (e.g. change alert state from "open" to "acknowledged"), use updateMessage with the channel ID and the timestamp from the original sendMessage/sendBlockKitMessage response. This edits the message in-place rather than posting a new one.',
+    'sendMessage returns the Slack response plus a timestamp field. Use timestamp as threadTs in a follow-up sendMessage to post a reply in the same thread.',
+    'Pass blocks to sendMessage when the message needs formatted cards, sections, fields, images, or link buttons (text stays as the notification fallback). Do not add buttons or menus that expect a response, because clicks are not received by this connector.',
+    'To update an existing message (e.g. change alert state from "open" to "acknowledged"), use updateMessage with the channel ID and the timestamp from the original sendMessage response. This edits the message in-place rather than posting a new one.',
     'addReaction adds a lightweight emoji acknowledgement to a message. Use it as a quick ack signal (e.g. "eyes" when seen, "white_check_mark" when resolved) without cluttering the channel with new messages.',
     'To read threaded replies on a message, use getConversationReplies with the channel ID and the parent message timestamp. Returns the full thread including the parent message itself.',
     'For "what did I talk to X about recently" or "latest messages from X" queries, do not use searchMessages (its from: modifier does not reliably reach DMs and query is required). Resolve X to a user ID (lookupUserByEmail or listUsers), call listChannels with types ["im"] (paging with nextCursor) and pick the channel with is_im true whose user equals that ID, then call getConversationHistory with that channel ID (D...).',
@@ -1672,7 +1612,7 @@ export const Slack: ConnectorSpec = {
     "listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user's memberships.",
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
     'For Slack files: use uploadFile to attach text or binary content (log snippets, reports, screenshots) to a channel; set encoding="base64" for binary content. Use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range.',
-    'For incident war-room orchestration: createConversation creates a new channel, then inviteToConversation adds the responders, and sendMessage or sendBlockKitMessage posts the initial alert briefing.',
+    'For incident war-room orchestration: createConversation creates a new channel, then inviteToConversation adds the responders, and sendMessage posts the initial alert briefing.',
     'V1 migration note: V1 slack_api.postMessage returned the raw Slack envelope ({ok, channel, ts, message}). V2 sendMessage still returns the Slack envelope and adds a timestamp alias of ts. Replace V1 message field references with text, and channels[] with a resolved channelId (use resolveChannelId since V2 requires an ID).',
   ].join('\n'),
 };

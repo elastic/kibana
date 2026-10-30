@@ -189,24 +189,16 @@ Invite to conversation
 Send message
 :   Send a message to a Slack conversation ID.
     - `channel` (required): Conversation ID (for example, `C123...`). Use **List channels** to browse IDs, or **Resolve channel ID** if you know the channel name.
-    - `text` (required): Message text (up to 40,000 characters).
+    - `text` (required): Message text (up to 40,000 characters). When you also send `blocks`, this is the notification and fallback text.
+    - `blocks` (optional): Array of Slack Block Kit block objects (for example, `section`, `actions`, `image`). Maximum 50 blocks. This connector doesn't receive clicks, so don't rely on buttons or menus that expect a response. Link buttons with a `url` work.
     - `threadTs` (optional): Reply in a thread (timestamp of the parent message).
-    - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
-    - `unfurlMedia` (optional): Turn on unfurling of media content.
-
-Send Block Kit message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
-:   Send a structured [Block Kit](https://api.slack.com/reference/block-kit/blocks) message to a Slack conversation using Slack `chat.postMessage`. Use this instead of **Send message** when you need formatted cards, buttons, sections, or images. This connector doesn't receive clicks, so don't rely on buttons or menus that expect a response. Link buttons with a `url` work.
-    - `channel` (required): Conversation ID to post to (for example, `C...` for channels, `G...` for private channels, `D...` for DMs).
-    - `blocks` (required): Array of Slack Block Kit block objects (for example, `section`, `actions`, `image`). Maximum 50 blocks per message, and the serialized blocks can't exceed 100,000 characters.
-    - `text` (optional): Fallback plain-text summary shown in notifications and accessibility contexts where blocks cannot render. Strongly recommended for accessibility.
-    - `threadTs` (optional): Timestamp of another message to reply to (creates a threaded reply).
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
     - `unfurlMedia` (optional): Turn on unfurling of media content.
 
 Get conversation replies {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
 :   Fetch replies in a message thread using Slack `conversations.replies`. Returns the full thread in chronological order (oldest first), starting with the parent message. When the response includes `hasMore: true`, call **Get conversation replies** again with `nextCursor` from the previous response.
     - `channel` (required): Conversation ID that contains the thread (for example, `C...` for channels, `G...` for private channels, `D...` for DMs).
-    - `ts` (required): Timestamp of the parent message that started the thread (for example, `"1234567890.123456"`). This is the `timestamp` returned by **Send message** or **Send Block Kit message**.
+    - `ts` (required): Timestamp of the parent message that started the thread (for example, `"1234567890.123456"`). This is the `timestamp` (or `ts`) returned by **Send message**.
     - `oldest` (optional): Only replies after this Unix timestamp (string form).
     - `latest` (optional): Only replies before this Unix timestamp (string form).
     - `inclusive` (optional): Include messages with the `oldest` or `latest` timestamps.

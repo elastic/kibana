@@ -22,7 +22,6 @@ import {
   SlackListUserConversationsInputSchema,
   SlackListUsersInputSchema,
   SlackResolveChannelIdInputSchema,
-  SlackSendBlockKitMessageInputSchema,
   SlackUpdateMessageInputSchema,
   SlackSendMessageInputSchema,
   SlackUploadFileInputSchema,
@@ -1544,76 +1543,6 @@ describe('Slack', () => {
           text: 'Hello',
         })
       ).rejects.toThrow('Slack sendMessage error: channel_not_found');
-    });
-  });
-
-  describe('sendBlockKitMessage action', () => {
-    it('should post a Block Kit message and return normalized { timestamp }', async () => {
-      const mockResponse = {
-        data: {
-          ok: true,
-          channel: 'C123',
-          ts: '1700000001.000001',
-          message: { type: 'message' },
-        },
-      };
-      mockClient.post.mockResolvedValue(mockResponse);
-
-      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: '*Alert*: CPU high' } }];
-      const result = await Slack.actions.sendBlockKitMessage.handler(
-        mockContext,
-        SlackSendBlockKitMessageInputSchema.parse({ channel: 'C123', blocks })
-      );
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://slack.com/api/chat.postMessage',
-        expect.objectContaining({ channel: 'C123', blocks }),
-        expect.objectContaining({ headers: { 'Content-Type': 'application/json; charset=utf-8' } })
-      );
-      expect(result).toEqual({ timestamp: '1700000001.000001' });
-    });
-
-    it('should forward text, threadTs, unfurl options', async () => {
-      mockClient.post.mockResolvedValue({
-        data: { ok: true, ts: '1.0', channel: 'C1' },
-      });
-
-      await Slack.actions.sendBlockKitMessage.handler(
-        mockContext,
-        SlackSendBlockKitMessageInputSchema.parse({
-          channel: 'C1',
-          blocks: [{ type: 'section', text: { type: 'plain_text', text: 'Hi' } }],
-          text: 'Fallback text',
-          threadTs: '1700000000.000000',
-          unfurlLinks: false,
-          unfurlMedia: false,
-        })
-      );
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://slack.com/api/chat.postMessage',
-        expect.objectContaining({
-          text: 'Fallback text',
-          thread_ts: '1700000000.000000',
-          unfurl_links: false,
-          unfurl_media: false,
-        }),
-        expect.any(Object)
-      );
-    });
-
-    it('should throw when Slack API returns error', async () => {
-      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'channel_not_found' } });
-
-      await expect(
-        Slack.actions.sendBlockKitMessage.handler(
-          mockContext,
-          SlackSendBlockKitMessageInputSchema.parse({
-            channel: 'INVALID',
-            blocks: [{ type: 'section', text: { type: 'plain_text', text: 'Hi' } }],
-          })
-        )
-      ).rejects.toThrow('Slack sendBlockKitMessage error: channel_not_found');
     });
   });
 
