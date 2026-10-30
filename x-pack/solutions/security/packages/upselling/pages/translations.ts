@@ -30,8 +30,8 @@ export const ENTITY_ANALYTICS_TITLE = i18n.translate(
 );
 
 export const SIEM_MIGRATION_UPSELLING_PAGE_TITLE = i18n.translate(
-  'securitySolutionPackages.siemMigration.pageTitle',
+  'securitySolutionPackages.siemMigration.translatedRulesPageTitle',
   {
-    defaultMessage: 'Translate Rules',
+    defaultMessage: 'Translated rules',
   }
 );

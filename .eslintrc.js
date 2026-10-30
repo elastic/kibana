@@ -104,24 +104,12 @@ module.exports = {
       },
     },
     /**
-     * FormatJS linter for i18n code.
-     * https://formatjs.io/docs/tooling/linter
+     * `formatjs/*` rules run in oxlint (.oxlint/formatjs.mts). The plugin stays registered so
+     * `eslint-disable` directives naming its rules resolve.
      */
     {
-      files: [
-        'src/**/*.{js,mjs,ts,tsx}',
-        'x-pack/**/*.{js,mjs,ts,tsx}',
-        'packages/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/**/*.{js,mjs,ts,tsx}',
-        'src/core/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/*/packages/**/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       plugins: ['formatjs'],
-      rules: {
-        'formatjs/enforce-default-message': ['error', 'anything'],
-        'formatjs/enforce-description': 'off',
-      },
     },
 
     /**
@@ -233,15 +221,6 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: [
-        'src/platform/test/harden/*.js',
-        'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js',
-      ],
-      rules: {
-        'mocha/handle-done-callback': 'off',
-      },
-    },
-    {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-modules': [
@@ -325,7 +304,7 @@ module.exports = {
       files: [
         'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/{significant_events_app,streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
@@ -429,12 +408,7 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
       },
@@ -486,12 +460,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
       },
     },
@@ -503,17 +472,9 @@ module.exports = {
         'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
       ],
-      extends: ['plugin:mocha/recommended'],
-      plugins: ['mocha'],
+      // `mocha/*` rules run in oxlint (.oxlint/mocha.mts). The mocha env stays for `no-undef`.
       env: {
         mocha: true,
-      },
-      rules: {
-        'mocha/no-mocha-arrows': 'off',
-        'mocha/no-exports': 'off',
-        'mocha/no-setup-in-describe': 'off',
-        'mocha/no-nested-tests': 'off',
-        'mocha/no-skipped-tests': 'off',
       },
     },
     {
@@ -533,7 +494,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react/jsx-no-bind': 'error',
       },
     },
     {
@@ -723,7 +683,6 @@ module.exports = {
         ],
         // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
       },
     },
     {
@@ -736,7 +695,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react/jsx-no-bind': 'error',
       },
     },
 
@@ -839,12 +797,7 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
         'import/order': [
