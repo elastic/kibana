@@ -43,7 +43,6 @@
       "matchDepNames": [
         "clean-webpack-plugin",
         "css-loader",
-        "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -1956,15 +1955,6 @@
     {
       "groupName": "inquirer",
       "matchDepNames": ["@types/inquirer", "inquirer"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "minify",
-      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

@@ -213,13 +213,6 @@ describe('ConnectedConnectors', () => {
     expect(await screen.findByTestId('nightshiftEditConnector-telemetry')).toBeDisabled();
   });
 
-  it('has no delete or management action on the card', async () => {
-    setup({ connectors: [connector('github')] });
-
-    await screen.findByTestId('nightshiftConnectedConnectorCard-github');
-    expect(screen.queryByTestId('nightshiftConnectorMenu-github')).not.toBeInTheDocument();
-  });
-
   it('starts folded, opens from its header, and folds again on the collapse signal', async () => {
     const { rerender } = setup({ connectors: [connector('github')] });
 

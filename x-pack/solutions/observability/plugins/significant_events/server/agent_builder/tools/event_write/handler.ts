@@ -7,7 +7,10 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import { SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import {
+  operatorFallbackAssessmentNote,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+} from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import {
   assertValidBulkWriteSize,
@@ -24,20 +27,26 @@ import { mergeSignalsLatestPerRule } from './episode_context';
 import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
-  fetchActiveEventsForDedup,
+  DEFAULT_INACTIVE_LOOKBACK_MS,
+  fetchInactiveEventsForReuse,
+  fetchLiveEventsForDedup,
   markDuplicateKeys,
+  competingInactiveHeads,
+  reopenMatchingInactiveSeries,
   resolveDedupSkips,
 } from './dedup';
 import {
   applyWriteOutcomes,
   buildPendingWrite,
   computeEventFacts,
+  episodeHistory,
   loadHistory,
   shouldSkipAsNoOp,
 } from './event_facts';
 import {
   alignResults,
   type BulkResults,
+  type ClosedSeries,
   type DedupCandidate,
   type EventsWriteBulkResult,
   type EventsWriteInput,
@@ -50,6 +59,7 @@ import {
 export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
 
 const WRITE_CONCURRENCY = 10;
+const MAX_HELD_NOTE_LENGTH = 1000;
 
 /**
  * Versions a batch of significant events in one request while preserving input order in the
@@ -76,14 +86,17 @@ export async function eventsWriteBulkHandler({
   inputs,
   source,
   rejectUnknownEventIds,
+  inactiveLookbackMs = DEFAULT_INACTIVE_LOOKBACK_MS,
   logger,
 }: {
-  /** Reads prior versions and active events from `.rule-events`, and writes each new version. */
+  /** Reads prior versions and live events from `.rule-events`, and writes each new version. */
   eventSearchClient: RuleEventsClient;
   inputs: EventsWriteInput[];
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
+  /** How long a closed series stays reusable by a batch it covers (default 48 h). */
+  inactiveLookbackMs?: number;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
@@ -94,21 +107,51 @@ export async function eventsWriteBulkHandler({
   const candidates = markDuplicateKeys(buildWriteCandidates(inputs), results);
   const dedupCandidates = candidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
 
-  const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
-  const toWrite = resolveDedupSkips(candidates, activeEvents, results);
+  const liveEvents = await fetchLiveEventsForDedup(eventSearchClient, dedupCandidates);
+  const unskipped = resolveDedupSkips(candidates, liveEvents, results);
+  const inactiveEvents = await fetchInactiveEventsForReuse({
+    eventSearchClient,
+    dedupCandidates: unskipped.filter((c): c is DedupCandidate => c.mode === 'dedup'),
+    inactiveLookbackMs,
+  });
+  const competing = competingInactiveHeads(unskipped, inactiveEvents);
+  // Which closed series an operator deactivated only matters when several compete for one batch;
+  // otherwise the single match wins and the hold stage below does its own lookup.
+  const deactivatedGroupHashes =
+    competing.length === 0
+      ? new Set<string>()
+      : new Set(
+          [
+            ...(await eventSearchClient.findOperatorDeactivations({ heads: competing }))
+              .deactivations,
+          ].flatMap(([groupHash, { reason }]) => (reason === '' ? [] : [groupHash]))
+        );
+  const toWrite = markDuplicateKeys(
+    reopenMatchingInactiveSeries({
+      candidates: unskipped,
+      inactive: inactiveEvents,
+      deactivatedGroupHashes,
+    }),
+    results
+  );
 
   const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
   const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });
   const decided = decideStatuses({ candidates: known.kept, timestamp });
+  const held = await holdDeactivatedReopens({
+    candidates: decided.kept,
+    eventSearchClient,
+    logger,
+  });
 
   // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate,
   // so the no-op check and the final document agree on the same severity.
-  const eventsFacts = decided.kept.map((candidate) =>
+  const eventsFacts = held.kept.map((candidate) =>
     computeEventFacts({ candidate, timestamp, source })
   );
   const changed = keepChanged({ facts: eventsFacts });
 
-  [known, decided, changed].forEach(({ skipped }) =>
+  [known, decided, held, changed].forEach(({ skipped }) =>
     skipped.forEach((result) => {
       results[result.index] = result;
     })
@@ -189,7 +232,7 @@ const decideStatuses = ({
     const signals =
       input.event_id === undefined || !isLive
         ? input.signals ?? []
-        : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
+        : mergeSignalsLatestPerRule(episodeHistory(priorDocs), input.signals ?? [], timestamp);
     const outcome = assessMembers(signals);
     const decision = decideLifecycle({
       state: { status: latest?.status },
@@ -228,6 +271,95 @@ const decideStatuses = ({
       written: false,
       skipped: true,
       reason: 'unchanged_outcome',
+    });
+  });
+  return stage;
+};
+
+type ReopeningCandidate = ResolvedWriteCandidate & {
+  mode: 'snapshot';
+  reopensSeries: ClosedSeries;
+};
+
+/** A write that would reopen a closed series that the server matched by identity. */
+const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is ReopeningCandidate =>
+  candidate.mode === 'snapshot' &&
+  candidate.reopensSeries !== undefined &&
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === candidate.status);
+
+/**
+ * Sets aside the writes that would reopen a closed series, so the agent can read why it was closed
+ * before the series reopens. The reason is the one recorded with an Alerting v2 `deactivate` action
+ * when there is one; a deactivate without a reason is not held, because that close only copies the
+ * agent's last note. With no such action, the note on the closing version is read, but only when
+ * the deactivation lookup succeeded. A write that carries `reopen_deactivated` has read it and goes
+ * through, and so does one with no note to read (blank or the standard no-reason note). Only a
+ * new-event batch that a closed series covers can be held: an item that names a closed event itself
+ * has no series head to look up.
+ */
+const holdDeactivatedReopens = async ({
+  candidates,
+  eventSearchClient,
+  logger,
+}: {
+  candidates: ResolvedWriteCandidate[];
+  eventSearchClient: RuleEventsClient;
+  logger?: Logger;
+}): Promise<Stage<ResolvedWriteCandidate>> => {
+  const stage: Stage<ResolvedWriteCandidate> = { kept: [], skipped: [] };
+  const reopening = candidates.filter(isReopeningCandidate);
+  if (reopening.length === 0) {
+    stage.kept.push(...candidates);
+    return stage;
+  }
+
+  // Looked up even for an item that carries `reopen_deactivated`: the flag cannot be proven to
+  // follow a hold, so a reopen it lets through is logged.
+  const { deactivations, failed: lookupFailed } = await eventSearchClient.findOperatorDeactivations(
+    {
+      heads: reopening.map(({ reopensSeries: { groupHash, episodeId } }) => ({
+        groupHash,
+        episodeId,
+      })),
+    }
+  );
+  candidates.forEach((candidate) => {
+    if (!isReopeningCandidate(candidate)) {
+      stage.kept.push(candidate);
+      return;
+    }
+    const { groupHash, closedAt, closingNote } = candidate.reopensSeries;
+    const action = deactivations.get(groupHash);
+    // A user deactivate decides alone: its reason is the closer's note, and none means nothing to
+    // read, since the closing version only copies the agent's last note. With no user deactivate
+    // and a completed lookup, the closing version's note is the operator's, from the update route.
+    // A failed lookup proves nothing, so it holds nothing.
+    const fullNote = (action ? action.reason : lookupFailed ? '' : closingNote ?? '').trim();
+    const note = fullNote.slice(0, MAX_HELD_NOTE_LENGTH);
+    const truncated = fullNote.length > MAX_HELD_NOTE_LENGTH;
+    // A close that says nothing gives the agent nothing to read.
+    if (note === '' || note === operatorFallbackAssessmentNote('inactive')) {
+      stage.kept.push(candidate);
+      return;
+    }
+    const identity = `event_id=${candidate.eventId} group_hash=${groupHash}`;
+    if (candidate.input.reopen_deactivated === true) {
+      logger?.info(`reopened_after_deactivation ${identity}`);
+      stage.kept.push(candidate);
+      return;
+    }
+    logger?.info(`held_by_deactivation ${identity}`);
+    stage.skipped.push({
+      index: candidate.index,
+      event_id: candidate.eventId,
+      status: 'inactive',
+      written: false,
+      skipped: true,
+      reason: 'held_by_deactivation',
+      existing_event_id: candidate.eventId,
+      assessment_note: note,
+      ...(truncated ? { assessment_note_truncated: true as const } : {}),
+      deactivated_at: action?.deactivatedAt ?? closedAt,
     });
   });
   return stage;
