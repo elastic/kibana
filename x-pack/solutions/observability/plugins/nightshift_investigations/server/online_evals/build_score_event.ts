@@ -28,7 +28,7 @@ export type OnlineEvalScoreMetadata = Omit<
   | 'scores_dropped'
 >;
 
-export const MAX_EXPLANATION_LENGTH = 500;
+export const MAX_EXPLANATION_LENGTH = 400;
 const MAX_LABEL_LENGTH = 256;
 
 /**
