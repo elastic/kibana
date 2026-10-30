@@ -18,6 +18,16 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */
   RETRY_LOAD: 'retryLoad',
+  /** The user sets up sessions, or updates them. */
+  ENABLE_SESSIONS: 'enableSessions',
+  /** The user opens a session's details. */
+  VIEW_SESSION: 'viewSession',
+  /** The user leaves a session for the sessions list. */
+  BACK_TO_SESSIONS: 'backToSessions',
+  /** The user copies a session's ID. */
+  COPY_SESSION_ID: 'copySessionId',
+  /** The user clears the list's search and filters. */
+  CLEAR_FILTERS: 'clearFilters',
 } as const;
 
 /*
@@ -42,4 +52,24 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+} as const;
+
+export const SESSIONS_EBT_ELEMENTS = {
+  ENABLE: 'sessionsEnable',
+  UPDATE: 'sessionsUpdate',
+  RETRY: 'sessionsRetry',
+  SESSION_RETRY: 'sessionRetry',
+  SESSION_LINK: 'sessionLink',
+  ERRORS_FILTER: 'sessionsErrorsFilter',
+  DURATION_FILTER: 'sessionsDurationFilter',
+  BROWSER_FILTER: 'sessionsBrowserFilter',
+  OS_FILTER: 'sessionsOsFilter',
+  COUNTRY_FILTER: 'sessionsCountryFilter',
+  ENTRY_PAGE_FILTER: 'sessionsEntryPageFilter',
+  CLEAR_FILTERS: 'sessionsClearFilters',
+  DOCS_LINK: 'sessionsDocsLink',
+  COLUMN_SELECTOR: 'sessionsColumnSelector',
+  SESSION_BACK: 'sessionBack',
+  SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
+  SESSION_ID_COPY: 'sessionIdCopy',
 } as const;

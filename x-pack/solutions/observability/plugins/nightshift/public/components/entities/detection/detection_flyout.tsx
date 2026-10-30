@@ -34,17 +34,17 @@ import type {
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { getChangePointLabel } from '../../../common/change_point';
 import { getVerdictBadge } from './verdict';
 import { SkippedDetectionBadge } from './skipped_detection';
 import { ChangePointLensChart } from './change_point_lens_chart';
-import { EntityChip } from '../../../entity/entity_chip';
-import { EntityFlyout } from '../../../entity/entity_flyout';
-import { FlyoutSectionTitle } from '../../../common/flyout_section_title';
-import { TruncatableSummary } from '../../../common/truncatable_summary';
+import { EntityChip } from '../entity/entity_chip';
+import { EntityFlyout } from '../entity/entity_flyout';
+import { FlyoutSectionTitle } from '../../ui/flyout_section_title';
+import { TruncatableSummary } from '../../ui/truncatable_summary';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useImpactedServices } from '../../../hooks/use_impacted_services';
+import { useImpactedServices } from '../../../data/significant_events/use_impacted_services';
 import type { ResolvedImpactedService } from '../../../common/impacted_services';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
