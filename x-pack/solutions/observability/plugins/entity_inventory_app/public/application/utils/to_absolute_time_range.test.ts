@@ -37,7 +37,7 @@ describe('toAbsoluteTimeRange', () => {
   });
 
   it('returns undefined for an invalid bound', () => {
-    expect(toAbsoluteTimeRange({ from: 'not a date', to: 'now' }, NOW)).toBeUndefined();
-    expect(toAbsoluteTimeRange({ from: 'now-15m', to: 'later' }, NOW)).toBeUndefined();
+    expect(toAbsoluteTimeRange({ from: 'now-5x', to: 'now' }, NOW)).toBeUndefined();
+    expect(toAbsoluteTimeRange({ from: 'now-15m', to: 'now+1x' }, NOW)).toBeUndefined();
   });
 });
