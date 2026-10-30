@@ -58,16 +58,11 @@ export class WebCrawlersService {
   }
 
   public async create(config: WebCrawlerConfig): Promise<WebCrawler> {
-    const packageClient = this.fleet.packageService.asInternalUser;
-    const packageInfo = await packageClient.getLatestPackageInfo(CRAWLER_PACKAGE_NAME, true);
-    await packageClient.ensureInstalledPackage({
-      pkgName: CRAWLER_PACKAGE_NAME,
-      pkgVersion: packageInfo.version,
-    });
+    const version = await this.packageVersion();
 
     this.logger.info(`Creating agentless web crawler policy "${config.name}"`);
     const policy = await this.fleet.agentlessPoliciesService.createAgentlessPolicy(
-      toPolicyPayload(config, packageInfo.version)
+      toPolicyPayload(config, version)
     );
 
     return this.get(policy.id);
@@ -123,6 +118,22 @@ export class WebCrawlersService {
     });
     this.logger.info(`Requested a crawl for web crawler ${id} (action ${action.action_id})`);
     return { action_id: action.action_id };
+  }
+
+  // An already installed package (for example uploaded during development) is used as is;
+  // otherwise the latest version known to the registry is installed
+  private async packageVersion(): Promise<string> {
+    const packageClient = this.fleet.packageService.asInternalUser;
+    const installation = await packageClient.getInstallation(CRAWLER_PACKAGE_NAME);
+    if (installation?.version) {
+      return installation.version;
+    }
+    const packageInfo = await packageClient.getLatestPackageInfo(CRAWLER_PACKAGE_NAME, true);
+    await packageClient.ensureInstalledPackage({
+      pkgName: CRAWLER_PACKAGE_NAME,
+      pkgVersion: packageInfo.version,
+    });
+    return packageInfo.version;
   }
 
   private async listAgents(agentPolicyIds: string[]): Promise<Agent[]> {

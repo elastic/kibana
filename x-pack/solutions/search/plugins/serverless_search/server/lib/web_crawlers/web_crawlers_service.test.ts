@@ -70,6 +70,7 @@ const buildFleet = () => {
     },
     packageService: {
       asInternalUser: {
+        getInstallation: jest.fn().mockResolvedValue(undefined),
         getLatestPackageInfo: jest.fn().mockResolvedValue({ version: '0.1.0' }),
         ensureInstalledPackage: jest.fn().mockResolvedValue({}),
       },
@@ -169,6 +170,23 @@ describe('WebCrawlersService', () => {
         },
       },
     });
+  });
+
+  it('uses the installed package version when the package is already installed', async () => {
+    const fleet = buildFleet();
+    fleet.packageService.asInternalUser.getInstallation.mockResolvedValueOnce({ version: '0.0.9' });
+    const service = new WebCrawlersService(fleet, soClient, esClient, logger);
+
+    await service.create({
+      name: 'x',
+      output_index: 'idx',
+      domains: [{ url: 'https://a.example.com' }],
+    });
+
+    expect(fleet.packageService.asInternalUser.ensureInstalledPackage).not.toHaveBeenCalled();
+    expect(fleet.agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({ package: { name: 'crawler', version: '0.0.9' } })
+    );
   });
 
   it('updates an existing crawler policy keeping its package version', async () => {
