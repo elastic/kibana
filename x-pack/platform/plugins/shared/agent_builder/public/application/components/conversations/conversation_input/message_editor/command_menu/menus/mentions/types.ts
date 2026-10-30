@@ -10,17 +10,17 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 export type MentionKind = 'user' | 'agent';
 
-export interface UserMentionCandidate {
-  readonly kind: 'user';
+interface BaseMentionCandidate<TKind extends MentionKind> {
+  readonly kind: TKind;
   readonly id: string;
   readonly name: string;
+}
+
+export interface UserMentionCandidate extends BaseMentionCandidate<'user'> {
   readonly profile: UserProfileWithAvatar;
 }
 
-export interface AgentMentionCandidate {
-  readonly kind: 'agent';
-  readonly id: string;
-  readonly name: string;
+export interface AgentMentionCandidate extends BaseMentionCandidate<'agent'> {
   readonly agent: AgentDefinition;
 }
 
