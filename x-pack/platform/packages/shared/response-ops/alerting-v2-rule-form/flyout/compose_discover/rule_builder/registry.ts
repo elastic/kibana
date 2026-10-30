@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { RuleBuilderDefinition } from './types';
+import type { RuleBuilderCreateOption, RuleBuilderDefinition } from './types';
 import type { ThresholdFormValues } from './threshold/form_types';
 import {
   areAllStatsValid,
@@ -23,7 +23,12 @@ import { getInvalidExpressionReferences } from './threshold/validate_metric_refe
 import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
 import { BuilderRecoveryForm } from './threshold/recovery_condition_step';
 import { parseThresholdEsql } from './threshold/parse_esql';
-import { THRESHOLD_CREATE_FLYOUT_TITLE, THRESHOLD_STEP_TITLE } from './threshold/translations';
+import {
+  THRESHOLD_CREATE_FLYOUT_TITLE,
+  THRESHOLD_RULE_DESCRIPTION,
+  THRESHOLD_RULE_TITLE,
+  THRESHOLD_STEP_TITLE,
+} from './threshold/translations';
 
 const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
   def as RuleBuilderDefinition;
@@ -89,7 +94,14 @@ const getValidatedThresholdValues = (values: ThresholdFormValues): ThresholdForm
 const thresholdDefinition = defineBuilder<ThresholdFormValues>({
   type: 'threshold',
   stepTitle: THRESHOLD_STEP_TITLE,
-  createFlyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
+  createOption: {
+    title: THRESHOLD_RULE_TITLE,
+    description: THRESHOLD_RULE_DESCRIPTION,
+    iconType: 'chartThreshold',
+    order: 10,
+    flyoutTitle: THRESHOLD_CREATE_FLYOUT_TITLE,
+    dataTestSubj: 'createThresholdRuleCard',
+  },
   createDefaultState: () => ({
     ...DEFAULT_THRESHOLD_FORM_VALUES,
     stats: DEFAULT_THRESHOLD_FORM_VALUES.stats.map((s) => ({ ...s, id: generateId() })),
@@ -121,3 +133,21 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
 export const RULE_BUILDER_REGISTRY: Record<string, RuleBuilderDefinition> = {
   threshold: thresholdDefinition,
 };
+
+export const registerRuleBuilder = (definition: RuleBuilderDefinition): void => {
+  const type = definition.type.trim();
+  if (!type) {
+    throw new Error('Rule builder type must be a non-empty string');
+  }
+  if (RULE_BUILDER_REGISTRY[type]) {
+    throw new Error(`Rule builder "${type}" is already registered`);
+  }
+  RULE_BUILDER_REGISTRY[type] = type === definition.type ? definition : { ...definition, type };
+};
+
+export const getRuleBuilderCreateOptions = (): Array<RuleBuilderCreateOption & { type: string }> =>
+  Object.values(RULE_BUILDER_REGISTRY)
+    .flatMap((definition) =>
+      definition.createOption ? [{ type: definition.type, ...definition.createOption }] : []
+    )
+    .sort((a, b) => a.order - b.order || a.type.localeCompare(b.type));

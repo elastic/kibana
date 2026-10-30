@@ -79,15 +79,15 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToSequenceBuilder();
   };
-  const onCreateThresholdRuleFromOptionsFlyout = () => {
-    openCreateBuilderFlyout('threshold');
+  const onCreateBuilderRule = (type: string) => {
+    openCreateBuilderFlyout(type);
   };
 
   const emptyState = canWrite ? (
     <RuleCreateOptionsPanel
       onCreateEsqlRule={openCreateFlyout}
       onCreateWithAgent={navigateToAgentBuilder}
-      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+      onCreateBuilderRule={onCreateBuilderRule}
     />
   ) : (
     <EuiEmptyPrompt
@@ -189,7 +189,7 @@ export const RulesListPage = () => {
           onClose={handlePickerClose}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
-          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+          onCreateBuilderRule={onCreateBuilderRule}
           onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
         />
       ) : null}

@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-export type { RuleBuilderDefinition, RuleBuilderStepProps, BuilderState } from './types';
-export { RULE_BUILDER_REGISTRY } from './registry';
+export type {
+  RuleBuilderDefinition,
+  RuleBuilderCreateOption,
+  RuleBuilderStepProps,
+  BuilderState,
+} from './types';
+export {
+  RULE_BUILDER_REGISTRY,
+  registerRuleBuilder,
+  getRuleBuilderCreateOptions,
+} from './registry';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
 export type { BuilderStateUpdateOptions } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';

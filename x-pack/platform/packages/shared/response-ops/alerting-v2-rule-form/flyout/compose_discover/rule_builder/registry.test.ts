@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { RULE_BUILDER_REGISTRY } from './registry';
+import {
+  getRuleBuilderCreateOptions,
+  registerRuleBuilder,
+  RULE_BUILDER_REGISTRY,
+} from './registry';
 import {
   Aggregation,
   Comparator,
@@ -25,8 +29,56 @@ const makeValues = (overrides: Partial<ThresholdFormValues> = {}): ThresholdForm
 });
 
 describe('RULE_BUILDER_REGISTRY', () => {
-  it('exposes createFlyoutTitle for the threshold builder', () => {
-    expect(RULE_BUILDER_REGISTRY.threshold.createFlyoutTitle).toBe('Create Threshold rule');
+  it('exposes a threshold create card', () => {
+    expect(RULE_BUILDER_REGISTRY.threshold.createOption).toEqual(
+      expect.objectContaining({
+        title: 'Threshold rule',
+        flyoutTitle: 'Create Threshold rule',
+        iconType: 'chartThreshold',
+        order: 10,
+        dataTestSubj: 'createThresholdRuleCard',
+      })
+    );
+  });
+
+  it('orders create cards and rejects a duplicate type', () => {
+    expect(() =>
+      registerRuleBuilder({
+        type: ' ',
+        stepTitle: 'Empty',
+        createDefaultState: () => ({}),
+        renderStep: () => null,
+      })
+    ).toThrow(/non-empty/);
+
+    registerRuleBuilder({
+      type: '  later-builder  ',
+      stepTitle: 'Later',
+      createOption: {
+        title: 'Later',
+        description: 'Later builder',
+        iconType: 'bell',
+        order: 20,
+        flyoutTitle: 'Create Later rule',
+        dataTestSubj: 'createLaterRuleCard',
+      },
+      createDefaultState: () => ({}),
+      renderStep: () => null,
+    });
+
+    expect(getRuleBuilderCreateOptions().map((option) => option.type)).toEqual([
+      'threshold',
+      'later-builder',
+    ]);
+    expect(() =>
+      registerRuleBuilder({
+        type: 'threshold',
+        stepTitle: 'Again',
+        createDefaultState: () => ({}),
+        renderStep: () => null,
+      })
+    ).toThrow(/already registered/);
+    delete RULE_BUILDER_REGISTRY['later-builder'];
   });
 });
 

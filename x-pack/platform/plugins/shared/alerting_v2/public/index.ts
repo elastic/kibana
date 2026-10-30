@@ -6,7 +6,7 @@
  */
 
 import { Container, ContainerModule } from 'inversify';
-import { OnSetup, PluginSetup, Start } from '@kbn/core-di';
+import { OnSetup, PluginSetup, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
@@ -19,9 +19,12 @@ import { RuleTemplatesApi } from './services/rule_templates_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { createStartContract } from './start_contract';
 import { registerOnSetup } from './setup';
+import { queueRuleBuilderRegistration } from './rule_builder_registration';
+import type { AlertingV2PublicSetup } from './types';
 
 export type {
   AlertingV2AlertsProviderProps,
+  AlertingV2PublicSetup,
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
@@ -42,6 +45,9 @@ export {
 } from './hooks/use_v2_rules_tab_new_badge';
 
 const pluginModule = new ContainerModule(({ bind }) => {
+  bind(Setup).toConstantValue({
+    registerRuleBuilder: queueRuleBuilderRegistration,
+  } satisfies AlertingV2PublicSetup);
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();

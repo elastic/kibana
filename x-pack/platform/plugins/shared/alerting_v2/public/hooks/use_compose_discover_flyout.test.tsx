@@ -26,6 +26,8 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   RULE_BUILDER_REGISTRY: {
     threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
   },
+  registerRuleBuilder: jest.fn(),
+  getRuleBuilderCreateOptions: () => [],
 }));
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
