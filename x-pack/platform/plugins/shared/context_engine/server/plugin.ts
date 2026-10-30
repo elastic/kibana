@@ -40,6 +40,7 @@ import type {
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
+import { migrateLegacyAiIndices } from './ai_indices/migrate_legacy_index';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
@@ -370,9 +371,21 @@ export class ContextEnginePlugin
       return true;
     };
 
+    const legacyMigration = migrateLegacyAiIndices({
+      esClient: this.esClient,
+      logger: aiIndexLogger,
+    }).catch((err) => {
+      aiIndexLogger.error(
+        `Failed to migrate the legacy AI index registry: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    });
+
     this.aiIndexService = new AiIndexService({
       esClient: this.esClient,
       logger: aiIndexLogger,
+      legacyMigration,
       managedBootstrap: {
         isManaged: (id) => this.aiIndexRegistry.has(id),
         getManagedIds: () => this.aiIndexRegistry.getManagedIds(),

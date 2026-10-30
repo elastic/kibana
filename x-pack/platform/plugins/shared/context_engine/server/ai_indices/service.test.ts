@@ -60,7 +60,7 @@ const createConflictError = () =>
   });
 
 const DEFAULT_SPACE = 'default';
-const AI_INDICES_INDEX = '.contextengine-ai-indices';
+const AI_INDICES_INDEX = '.context-engine-ai-indices';
 
 interface SearchHitInput {
   _id: string;

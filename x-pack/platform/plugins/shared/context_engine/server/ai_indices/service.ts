@@ -111,7 +111,7 @@ const assertAiIndexAcceptsAutomation = (
 
 /**
  * Manages the AI index registry stored in the hidden
- * `.contextengine-ai-indices` system index. Reads and writes go through the
+ * `.context-engine-ai-indices` system index. Reads and writes go through the
  * internal user; access is enforced at the API layer.
  */
 export class AiIndexService {
@@ -119,20 +119,24 @@ export class AiIndexService {
   private readonly storageClient: AiIndexStorageClient;
   private readonly managedBootstrap?: AiIndexManagedBootstrap;
   private readonly logger: Logger;
+  private readonly legacyMigration?: Promise<void>;
 
   constructor({
     esClient,
     logger,
     managedBootstrap,
+    legacyMigration,
   }: {
     esClient: ElasticsearchClient;
     logger: Logger;
     managedBootstrap?: AiIndexManagedBootstrap;
+    legacyMigration?: Promise<void>;
   }) {
     this.esClient = esClient;
     this.storageClient = createAiIndexStorageClient({ esClient, logger });
     this.managedBootstrap = managedBootstrap;
     this.logger = logger;
+    this.legacyMigration = legacyMigration;
   }
 
   /** Creates a new AI index. Duplicate ids throw {@link AiIndexAlreadyExistsError}. */
@@ -433,6 +437,7 @@ export class AiIndexService {
   }
 
   private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
+    await this.legacyMigration;
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
@@ -469,6 +474,7 @@ export class AiIndexService {
       }
     | undefined
   > {
+    await this.legacyMigration;
     const response = await this.storageClient.search({
       size: 1,
       track_total_hits: false,
