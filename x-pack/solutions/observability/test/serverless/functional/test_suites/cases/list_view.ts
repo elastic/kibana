@@ -47,6 +47,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('bulk actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAllWithChecks();
+      });
+
       describe('delete', () => {
         createNCasesBeforeDeleteAllAfter(8, getPageObject, getService);
 
