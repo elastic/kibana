@@ -465,7 +465,7 @@ describe('buildTestMetadataQuery', () => {
     const query = buildTestMetadataQuery(scope, ['ftr']);
 
     expect(query).toContain('test.status IN ("failed", "timedOut")');
-    expect(query).toContain('title = MAX(test.title.keyword)');
+    expect(query).toContain('title = MAX(test.title),');
     expect(query).toContain('config_category = MAX(test_run.config.category)');
     expect(query).toContain('suite_title = MAX(suite.title.keyword)');
     expect(query).toContain('owners = VALUES(test.file.owner)');
