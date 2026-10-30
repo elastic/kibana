@@ -43,7 +43,7 @@ export class RuleDetailsPage {
     this.actionsMenuButton = this.page.testSubj.locator('rules-details-popover-button-icon');
     this.duplicateMenuItem = this.page.testSubj.locator('rules-details-duplicate-rule');
     this.confirmModalButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.backToRuleDetailsLink = this.page.testSubj.locator('ruleEditBackToRuleDetails');
+    this.backToRuleDetailsLink = this.page.testSubj.locator('appHeaderBack');
     this.alertsCount = this.page.testSubj.locator('toolbar-alerts-count');
     this.alertRuleNameCells = this.page.testSubj.locator('formatted-field-kibana.alert.rule.name');
     this.alertSeverityCells = this.page.testSubj.locator('formatted-field-kibana.alert.severity');

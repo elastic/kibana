@@ -20,6 +20,7 @@ import {
   assertAgentBuilderConversationInputEditorContains,
 } from '../../../../tasks/agent_builder';
 import { NEW_AGENT_BUILDER_ATTACHMENT_BUTTON } from '../../../../screens/agent_builder';
+import { openAppMenuOverflow } from '../../../../tasks/app_menu';
 
 const prompt = 'Analyze the attached Security detection rule and provide actionable insights.';
 
@@ -37,8 +38,9 @@ describe(
       setPreferredChatExperienceToAgent();
     });
 
-    it('should show the "Add to chat" button on the rule creation page', () => {
+    it('should show the "Add to chat" item in the "More" menu on the rule creation page', () => {
       visit(CREATE_RULE_URL);
+      openAppMenuOverflow();
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
@@ -57,12 +59,13 @@ describe(
       assertAgentBuilderConversationInputEditorContains(prompt);
     });
 
-    it('should show the "Add to chat" button on the rule editing page', () => {
+    it('should show the "Add to chat" item in the "More" menu on the rule editing page', () => {
       createRule(
         getCustomQueryRuleParams({ rule_id: 'test-rule', name: 'Test Rule', enabled: false })
       ).then((response) => {
         visitRuleEditPage(response.body.id);
       });
+      openAppMenuOverflow();
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
