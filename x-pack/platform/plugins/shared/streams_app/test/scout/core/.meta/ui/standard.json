@@ -1,5 +1,5 @@
 {
-  "sha1": "67e6a4c84878155c5da21ee14c5934d4eaef42bb",
+  "sha1": "4c8d01e48d26fa84b09dcfbdc4e24b941647f65a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -379,8 +379,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 51,
+        "column": 7
       }
     },
     {
@@ -395,7 +395,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 87,
+        "line": 89,
         "column": 20
       }
     },
@@ -411,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 109,
-        "column": 18
+        "line": 112,
+        "column": 13
       }
     },
     {

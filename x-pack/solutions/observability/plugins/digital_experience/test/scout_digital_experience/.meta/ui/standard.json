@@ -1,5 +1,5 @@
 {
-  "sha1": "a2a0b0bb87d1468b66f2417fd06bfae72fb72e60",
+  "sha1": "c6bebff579d3a7648f31eb8e93a931f931c58e7a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -59,6 +59,19 @@
       }
     },
     {
+      "id": "869c1928ccfb456-36b7023860b30b2",
+      "title": "Digital Experience application navigation opens the Overview matching the source of the application, keeping the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_navigation.spec.ts",
+        "line": 14,
+        "column": 23
+      }
+    },
+    {
       "id": "1d69dfa1eb90431-4229d9a71e1aee6",
       "title": "Digital Experience application overview renders the Classic RUM dashboard of the application",
       "expectedStatus": "passed",
@@ -98,16 +111,16 @@
       }
     },
     {
-      "id": "0afdd6ddaf5ba24-5010b35c887a477",
-      "title": "Digital Experience applications list opens an application from the list, keeping the time range",
+      "id": "0afdd6ddaf5ba24-9baac6560ae0074",
+      "title": "Digital Experience applications list lists the applications of both sources and narrows them with the filters",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/applications_list.spec.ts",
-        "line": 20,
-        "column": 10
+        "line": 19,
+        "column": 24
       }
     },
     {
@@ -137,16 +150,30 @@
       }
     },
     {
-      "id": "b97a75be98dc303-3a24edeb4e90798",
-      "title": "Digital Experience on serverless shows in the project nav without requesting Classic RUM data",
+      "id": "b97a75be98dc303-6b41f0d47752318",
+      "title": "Digital Experience on serverless lists only EDOT Browser applications without requesting Classic RUM data",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/serverless.spec.ts",
-        "line": 18,
-        "column": 10
+        "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "id": "c43b695191ca032-8d02a0fbae70808",
+      "title": "Delete the mock OTel RUM data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/global.teardown.ts",
+        "line": 12,
+        "column": 35
       }
     }
   ]
