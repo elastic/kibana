@@ -30,6 +30,7 @@ import { HostFlyout } from './flyout_v2/entity/host_flyout';
 import { UserFlyout } from './flyout_v2/entity/user_flyout';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
+import { ThreatIntelligenceTool } from './flyout_v2/document/tools/threat_intelligence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
 import { ResponseTool } from './flyout_v2/document/tools/response_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
@@ -79,6 +80,8 @@ export interface SecurityPageObjects extends PageObjects {
   correlationsTool: CorrelationsTool;
   /** Prevalence tool overlay inside the flyout v2 document flyout. */
   prevalenceTool: PrevalenceTool;
+  /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
+  threatIntelligenceTool: ThreatIntelligenceTool;
   /** Analyzer tool overlay (resolver process-tree graph) inside the flyout v2 document flyout. */
   analyzerTool: AnalyzerTool;
   /** Response section and details inside the flyout v2 document overview. */
@@ -127,6 +130,7 @@ export function extendPageObjects(
     userFlyout: createLazyPageObject(UserFlyout, page),
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),
+    threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceTool, page),
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
     responseTool: createLazyPageObject(ResponseTool, page),
     entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),

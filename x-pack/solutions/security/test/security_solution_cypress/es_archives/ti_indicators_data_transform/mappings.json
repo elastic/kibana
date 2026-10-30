@@ -1,0 +1,134 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "logs-ti_transform_test.indicator",
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "event": {
+          "properties": {
+            "category": { "type": "keyword" },
+            "dataset": { "type": "keyword" },
+            "id": { "type": "keyword" },
+            "type": { "type": "keyword" }
+          }
+        },
+        "labels": {
+          "properties": {
+            "is_ioc_transform_source": { "type": "constant_keyword", "value": "true" }
+          }
+        },
+        "threat": {
+          "properties": {
+            "feed": { "properties": { "name": { "type": "keyword" } } },
+            "indicator": {
+              "properties": {
+                "file": {
+                  "properties": {
+                    "hash": { "properties": { "sha256": { "type": "keyword" } } }
+                  }
+                },
+                "first_seen": { "type": "date" },
+                "type": { "type": "keyword" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "logs-ti_transform_test_latest.indicator",
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "event": {
+          "properties": {
+            "category": { "type": "keyword" },
+            "dataset": { "type": "keyword" },
+            "id": { "type": "keyword" },
+            "type": { "type": "keyword" }
+          }
+        },
+        "labels": {
+          "properties": {
+            "is_ioc_transform_source": { "type": "constant_keyword", "value": "false" }
+          }
+        },
+        "threat": {
+          "properties": {
+            "feed": { "properties": { "name": { "type": "keyword" } } },
+            "indicator": {
+              "properties": {
+                "file": {
+                  "properties": {
+                    "hash": { "properties": { "sha256": { "type": "keyword" } } }
+                  }
+                },
+                "first_seen": { "type": "date" },
+                "type": { "type": "keyword" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {},
+    "index": "logs-ti_custom_test.indicator",
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "event": {
+          "properties": {
+            "category": { "type": "keyword" },
+            "dataset": { "type": "keyword" },
+            "id": { "type": "keyword" },
+            "type": { "type": "keyword" }
+          }
+        },
+        "threat": {
+          "properties": {
+            "feed": { "properties": { "name": { "type": "keyword" } } },
+            "indicator": {
+              "properties": {
+                "first_seen": { "type": "date" },
+                "type": { "type": "keyword" },
+                "url": { "properties": { "full": { "type": "keyword" } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

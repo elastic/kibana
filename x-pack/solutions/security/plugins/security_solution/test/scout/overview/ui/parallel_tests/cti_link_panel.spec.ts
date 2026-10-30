@@ -27,35 +27,66 @@ const indexNames = (spaceId: string) => {
   return {
     events: `endgame-scout-cti-events-${suffix}`,
     threat: `endgame-scout-cti-threat-${suffix}`,
+    threatRaw: `endgame-scout-cti-threat-raw-${suffix}`,
+    threatLatest: `endgame-scout-cti-threat-latest-${suffix}`,
   } as const;
 };
 
-const createIndexWithDocument = async (
+const createIndexWithDocuments = async (
   esClient: EsClient,
   index: string,
   properties: Record<string, object>,
-  document: Record<string, unknown>
+  documents: Array<Record<string, unknown>>
 ): Promise<void> => {
   await esClient.indices.delete({ index, ignore_unavailable: true });
   await esClient.indices.create({ index, mappings: { properties } });
-  await esClient.index({ index, document, refresh: 'wait_for' });
+  await esClient.bulk({
+    index,
+    operations: documents.flatMap((document) => [{ index: {} }, document]),
+    refresh: 'wait_for',
+  });
+};
+
+const threatIndexProperties = {
+  '@timestamp': { type: 'date' },
+  event: { properties: { dataset: { type: 'keyword' }, id: { type: 'keyword' } } },
+  threat: { properties: { feed: { properties: { name: { type: 'keyword' } } } } },
 };
 
 const createThreatIndex = (esClient: EsClient, spaceId: string): Promise<void> =>
-  createIndexWithDocument(
-    esClient,
-    indexNames(spaceId).threat,
-    {
-      '@timestamp': { type: 'date' },
-      event: { properties: { dataset: { type: 'keyword' } } },
-      threat: { properties: { feed: { properties: { name: { type: 'keyword' } } } } },
-    },
+  createIndexWithDocuments(esClient, indexNames(spaceId).threat, threatIndexProperties, [
     {
       '@timestamp': INDICATOR_TIMESTAMP,
       event: { dataset: 'ti_abusech.malware' },
       threat: { feed: { name: FEED_NAME } },
-    }
-  );
+    },
+  ]);
+
+// Mirrors an integration with a latest transform: every ingested version lands in the raw index
+// and the transform keeps one copy per indicator in the latest index.
+const createTransformThreatIndices = async (esClient: EsClient, spaceId: string): Promise<void> => {
+  const { threatRaw, threatLatest } = indexNames(spaceId);
+  const transformIndicator = (isTransformSource: 'true' | 'false', timestamp: string) => ({
+    '@timestamp': timestamp,
+    event: { dataset: 'ti_abusech.malware', id: 'scout-transform-indicator' },
+    threat: { feed: { name: FEED_NAME } },
+    labels: { is_ioc_transform_source: isTransformSource },
+  });
+  const labelProperties = (value: 'true' | 'false') => ({
+    ...threatIndexProperties,
+    labels: {
+      properties: { is_ioc_transform_source: { type: 'constant_keyword', value } },
+    },
+  });
+
+  await createIndexWithDocuments(esClient, threatRaw, labelProperties('true'), [
+    transformIndicator('true', '2021-03-09T10:00:00.000Z'),
+    transformIndicator('true', INDICATOR_TIMESTAMP),
+  ]);
+  await createIndexWithDocuments(esClient, threatLatest, labelProperties('false'), [
+    transformIndicator('false', INDICATOR_TIMESTAMP),
+  ]);
+};
 
 spaceTest.describe(
   'Overview threat intelligence panel',
@@ -67,8 +98,9 @@ spaceTest.describe(
         await scoutSpace.setSolutionView('security');
       }
       // A per-space threat index keeps parallel workers from reading each other's indicators.
+      const { threat, threatRaw, threatLatest } = indexNames(scoutSpace.id);
       await scoutSpace.uiSettings.set({
-        [THREAT_INDEX_SETTING]: [indexNames(scoutSpace.id).threat],
+        [THREAT_INDEX_SETTING]: [threat, threatRaw, threatLatest],
       });
     });
 
@@ -77,8 +109,11 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ esClient, scoutSpace }) => {
-      const { events, threat } = indexNames(scoutSpace.id);
-      await esClient.indices.delete({ index: [events, threat], ignore_unavailable: true });
+      const { events, threat, threatRaw, threatLatest } = indexNames(scoutSpace.id);
+      await esClient.indices.delete({
+        index: [events, threat, threatRaw, threatLatest],
+        ignore_unavailable: true,
+      });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -89,11 +124,11 @@ spaceTest.describe(
       'shows the disabled module when there are no threat intel sources',
       async ({ esClient, scoutSpace, pageObjects }) => {
         // Overview shows an empty prompt until the Security data view matches an index.
-        await createIndexWithDocument(
+        await createIndexWithDocuments(
           esClient,
           indexNames(scoutSpace.id).events,
           { '@timestamp': { type: 'date' } },
-          { '@timestamp': new Date().toISOString() }
+          [{ '@timestamp': new Date().toISOString() }]
         );
 
         const { securityOverviewPage } = pageObjects;
@@ -138,6 +173,25 @@ spaceTest.describe(
         await expect(securityOverviewPage.threatIntelPanel).not.toContainText('Anomali');
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 1 indicator'
+        );
+      }
+    );
+
+    spaceTest(
+      'counts each transform indicator once alongside indicators without the transform label',
+      async ({ esClient, scoutSpace, pageObjects }) => {
+        await createTransformThreatIndices(esClient, scoutSpace.id);
+        await createThreatIndex(esClient, scoutSpace.id);
+
+        const { securityOverviewPage } = pageObjects;
+        await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
+
+        await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
+          'Showing: 2 indicators'
+        );
+        // The feed's indicator count is the only number in its row.
+        await expect(securityOverviewPage.threatIntelFeedRow(FEED_NAME)).toHaveText(
+          new RegExp(`^${FEED_NAME}\\D*2\\D*$`)
         );
       }
     );

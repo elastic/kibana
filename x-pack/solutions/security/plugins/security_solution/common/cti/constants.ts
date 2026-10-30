@@ -50,4 +50,14 @@ export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
 export const OTHER_TI_DATASET_KEY = '_others_ti_';
 
+export const IOC_TRANSFORM_SOURCE_FIELD = 'labels.is_ioc_transform_source';
+
+/**
+ * Matches raw indicator copies that an integration's latest transform also stores in a latest
+ * index. Use it in `must_not` so indicators without the label are still returned.
+ */
+export const IOC_TRANSFORM_SOURCE_QUERY = {
+  term: { [IOC_TRANSFORM_SOURCE_FIELD]: 'true' },
+} as const;
+
 export const THREAT_PIT_KEEP_ALIVE = '5m';

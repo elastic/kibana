@@ -36,6 +36,22 @@ describe('buildEventEnrichmentQuery', () => {
     );
   });
 
+  it('excludes raw indicator copies stored by integration transforms', () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(query.query?.bool?.must_not).toEqual([
+      { term: { 'labels.is_ioc_transform_source': 'true' } },
+    ]);
+  });
+
+  it('does not require the transform label, so unlabeled indicators still match', () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const query = buildEventEnrichmentQuery(options);
+    expect(JSON.stringify(query.query?.bool?.filter)).not.toContain(
+      'labels.is_ioc_transform_source'
+    );
+  });
+
   it('includes the specified timerange', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
