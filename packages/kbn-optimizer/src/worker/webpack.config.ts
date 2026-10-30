@@ -243,12 +243,17 @@ export function getWebpackConfig(
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
+        // MapLibre's module worker loads the shared module by relative filename.
+        {
+          test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+          resourceQuery: /asUrl/,
+          type: 'asset/resource',
+          sideEffects: true,
+          generator: { filename: 'maplibre-gl/[name][ext]' },
+        },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
-          include: [
-            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
-            require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
-          ],
+          include: [require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js')],
           type: 'asset/resource',
         },
         // exports the source code of the asset. Previously achievable by using raw-loader.

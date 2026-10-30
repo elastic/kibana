@@ -334,8 +334,8 @@ importers:
         specifier: 8.19.2
         version: 8.19.2(supports-color@8.1.1)
       '@elastic/ems-client':
-        specifier: 8.7.0
-        version: 8.7.0
+        specifier: 8.8.1
+        version: 8.8.1
       '@elastic/eui':
         specifier: 104.0.0-amsterdam.2
         version: 104.0.0-amsterdam.2(@elastic/datemath@5.0.3(moment@2.31.0))(@emotion/css@11.13.5(supports-color@8.1.1))(@emotion/react@11.14.0(@types/react@18.2.79)(react@17.0.2)(supports-color@8.1.1))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(typescript@5.9.3)
@@ -3658,8 +3658,8 @@ importers:
         specifier: 1.0.4
         version: 1.0.4
       maplibre-gl:
-        specifier: 5.3.0
-        version: 5.3.0
+        specifier: 6.4.1
+        version: 6.4.1
       markdown-it:
         specifier: 14.3.3
         version: 14.3.3
@@ -9185,9 +9185,9 @@ packages:
     resolution: {integrity: sha512-LMJCju/+AZkDlJArd/MYABWTDrHi4U7j3qGTKi1hYC7+67SaiYmYFItiueACQVrj2j3ECPMcguZ+7WrZeB+Z5g==}
     engines: {node: '>=20'}
 
-  '@elastic/ems-client@8.7.0':
-    resolution: {integrity: sha512-MEypIG6DFC7qqmrC8hCuGxYEpsC7nY9qCF1U5L/xvMf3eP/Ea52NKgxzvcAOfR6GrlaZJt6swouLPifhJ+f0LQ==}
-    engines: {node: '>=22'}
+  '@elastic/ems-client@8.8.1':
+    resolution: {integrity: sha512-lPnpDtPb60cIb2SRSjlxeGbrYcOJQuSDdvcRlA279OMYseU+zBcHhNsNqdph3GqvMhrt/AWRjR3fu1hbLkHdIg==}
+    engines: {node: '>=24'}
 
   '@elastic/eslint-plugin-eui@0.0.2':
     resolution: {integrity: sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==}
@@ -10512,9 +10512,9 @@ packages:
     resolution: {integrity: sha512-gqaTIGC8My3LVSnU38IwjHVKJC94HSonjvFHDk8/aSrApL8v4uWgm8zJkK7MJIIbHuNOr/+Mv2KkQKcxs6LEZA==}
     engines: {node: '>=12'}
 
-  '@mapbox/jsonlint-lines-primitives@2.0.2':
-    resolution: {integrity: sha512-rY0o9A5ECsTQRVhv7tL/OyDpGAoUB4tTvLiW1DSzQGq4bvTPhNw1VpSNjDJc5GFZ2XuyOtSWSVN05qOtcD71qQ==}
-    engines: {node: '>= 0.6'}
+  '@mapbox/jsonlint-lines-primitives@2.0.3':
+    resolution: {integrity: sha512-0SElaV0uMxEnxzBhhX9WTuPyUeMsAN/SS0i16tjuba4/mio63MG9khjC1a0JAiPGXAwvwm4UfHJURCN7nyudQg==}
+    engines: {node: '>= 22'}
 
   '@mapbox/mapbox-gl-draw@1.3.0':
     resolution: {integrity: sha512-B+KWK+dAgzLHMNyKVuuMRfjeSlQ77MhNLdfpQQpbp3pkhnrdmydDe3ixto1Ua78hktNut0WTrAaD8gYu4PVcjA==}
@@ -10530,22 +10530,33 @@ packages:
   '@mapbox/point-geometry@0.1.0':
     resolution: {integrity: sha512-6j56HdLTwWGO0fJPlrZtdU/B13q8Uwmo18Ck2GnGgN9PCFyKTZ3UbXeEdRFh18i9XQ92eH2VdtpJHpBD3aripQ==}
 
-  '@mapbox/tiny-sdf@2.0.6':
-    resolution: {integrity: sha512-qMqa27TLw+ZQz5Jk+RcwZGH7BQf5G/TrutJhspsca/3SHwmgKQ1iq+d3Jxz5oysPVYTGP6aXxCo5Lk9Er6YBAA==}
+  '@mapbox/point-geometry@1.1.0':
+    resolution: {integrity: sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ==}
 
-  '@mapbox/unitbezier@0.0.1':
-    resolution: {integrity: sha512-nMkuDXFv60aBr9soUG5q+GvZYL+2KZHVvsqFCzqnkGEf46U2fvmytHaEVc1/YZbiLn8X+eR3QzX1+dwDO1lxlw==}
+  '@mapbox/tiny-sdf@2.3.0':
+    resolution: {integrity: sha512-gBvcNDBBB66bgQYvnaJ6Jk+VCaMmVq5+IZR2kWPisT88Z8s0kBQt6hfVi8QgRW8Vpg0UWZzBA4ZSyzHHC+VeRA==}
+
+  '@mapbox/unitbezier@1.0.0':
+    resolution: {integrity: sha512-fqd515fjBmANKGGsQ286E2Wvj/XvDFpGzwJxq4CI6jMQue6Oy04uCKp+JWKF00xRTmk6cEu1jPJ9p3xqH8YWqQ==}
 
   '@mapbox/vector-tile@1.3.1':
     resolution: {integrity: sha512-MCEddb8u44/xfQ3oD+Srl/tNcQoqTw3goGk2oLsrFxOTc3dUp+kAnby3PvAeeBYSMSjSPD1nd1AJA6W49WnoUw==}
 
-  '@mapbox/whoots-js@3.1.0':
-    resolution: {integrity: sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==}
-    engines: {node: '>=6.0.0'}
+  '@mapbox/vector-tile@3.0.0':
+    resolution: {integrity: sha512-Qf10S1uIHMk20ri/IVBnpS+esUEkVaR5Hftmz88jTInrpmWgPGJfPe3LVjjlE77trLx8tH6qjTG7uWH9hIq/0Q==}
 
-  '@maplibre/maplibre-gl-style-spec@23.1.0':
-    resolution: {integrity: sha512-R6/ihEuC5KRexmKIYkWqUv84Gm+/QwsOUgHyt1yy2XqCdGdLvlBWVWIIeTZWN4NGdwmY6xDzdSGU2R9oBLNg2w==}
+  '@maplibre/geojson-vt@6.3.0':
+    resolution: {integrity: sha512-3Zw2jsU9pIJG3G2CQFbLjWj2MlAHodhD7cSY+15iywUuLmmkgzcKRnueVRZ4AcC/5wOtfhidcJAAzBpoBNs3Xg==}
+
+  '@maplibre/maplibre-gl-style-spec@26.5.0':
+    resolution: {integrity: sha512-Tli0Mi9rF3117uVFkqsysXu9TPLx3AODPmWklUjbDhR4jJ849vGT5/EqWM3dBjIQgU6xxj5SZQ9ONjibqjEP+Q==}
     hasBin: true
+
+  '@maplibre/mlt@1.3.0':
+    resolution: {integrity: sha512-7M2O7ABM80Oi8XPkfkrjKB8mOBIxGoVgkA52Mu4RMWoBvvMdagQ522+WxVYujZsMpqIr3BpzrTbXrm4k8lCzCQ==}
+
+  '@maplibre/vt-pbf@4.3.3':
+    resolution: {integrity: sha512-dEe5XUd64RQbxNxy2OzIkJnwNDWjVmSXjCd0A7zLirm7QJ/WWbmtDFIkfsiM4yt1cplqzG6oSivRYeWx1SM1yg==}
 
   '@math.gl/core@3.5.6':
     resolution: {integrity: sha512-UGCKtJUBA9MBswclK6l8DuZqLcEnqlSfI57WzSDUB/Nki4tHfmdImJyhp8ky9W4cIahV1YLMhHRK1oRpLeC1sw==}
@@ -12673,9 +12684,6 @@ packages:
   '@types/flot@0.0.31':
     resolution: {integrity: sha512-X+RcMQCqPlQo8zPT6cUFTd/PoYBShMQlHUeOXf05jWlfYnvLuRmluB9z+2EsOKFgUzqzZve5brx+gnFxBaHEUw==}
 
-  '@types/geojson-vt@3.2.5':
-    resolution: {integrity: sha512-qDO7wqtprzlpe8FfQ//ClPV9xiuoh2nkIgiouIptON9w5jvD/fA4szvP9GBlDVdJ5dldAl0kX/sy3URbWwLx0g==}
-
   '@types/geojson@7946.0.10':
     resolution: {integrity: sha512-Nmh0K3iWQJzniTuPRcJn5hxXkfB1T1pgB89SBig5PlJQU5yocazeu4jATJlaA0GYFKWMqDdvYemoSnF2pXgLVA==}
 
@@ -12787,9 +12795,6 @@ packages:
   '@types/mapbox__vector-tile@1.3.0':
     resolution: {integrity: sha512-kDwVreQO5V4c8yAxzZVQLE5tyWF+IPToAanloQaSnwfXmIcJ7cyOrv8z4Ft4y7PsLYmhWXmON8MBV8RX0Rgr8g==}
 
-  '@types/mapbox__vector-tile@1.3.4':
-    resolution: {integrity: sha512-bpd8dRn9pr6xKvuEBQup8pwQfD4VUyqO/2deGjfpe6AwC8YRlyEipvefyRJUSiCJTZuCb8Pl1ciVV5ekqJ96Bg==}
-
   '@types/markdown-it@14.2.0':
     resolution: {integrity: sha512-NoQ2yGlLWj4wpxMs+TYmRKk3thDrQ97agr7sFqfLsAlvoS8SNQuTrlObhFqG9iugdTtgOE9jpJ6FNM4ZGsa5xQ==}
 
@@ -12894,9 +12899,6 @@ packages:
 
   '@types/pbf@3.0.2':
     resolution: {integrity: sha512-EDrLIPaPXOZqDjrkzxxbX7UlJSeQVgah3i0aA4pOSzmK9zq3BIh7/MZIQxED7slJByvKM4Gc6Hypyu2lJzh3SQ==}
-
-  '@types/pbf@3.0.5':
-    resolution: {integrity: sha512-j3pOPiEcWZ34R6a6mN07mUkM4o4Lwf6hPNt8eilOeZhTFbxFXmKhvXl9Y28jotFPaI1bpPDJsbCprUoNke6OrA==}
 
   '@types/pdfkit@0.10.6':
     resolution: {integrity: sha512-o6R2fO/fhg392YNYahiaNGZ8CNdSKMmf5W0LvyjJ/63mLQEPTgl6M9vb4zKoHaGpsP43VimuBz+xgVevsPy8jA==}
@@ -13056,9 +13058,6 @@ packages:
 
   '@types/superagent@8.1.7':
     resolution: {integrity: sha512-NmIsd0Yj4DDhftfWvvAku482PZum4DBW7U51OvS8gvOkDDY0WT1jsVyDV3hK+vplrsYw8oDwi9QxOM7U68iwww==}
-
-  '@types/supercluster@7.1.3':
-    resolution: {integrity: sha512-Z0pOY34GDFl3Q6hUFYf3HkTwKEE02e7QgtJppBt+beEAxnyOpJua+voGFvxINBHa06GwLFFym7gRPY2SiKIfIA==}
 
   '@types/supertest@7.2.0':
     resolution: {integrity: sha512-uh2Lv57xvggst6lCqNdFAmDSvoMG7M/HDtX4iUCquxQ5EGPtaPM5PL5Hmi7LCvOG8db7YaCPNJEeoI8s/WzIQw==}
@@ -15749,8 +15748,8 @@ packages:
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
 
-  earcut@3.0.1:
-    resolution: {integrity: sha512-0l1/0gOjESMeQyYaK5IDiPNvFeu93Z/cO0TjZh9eZ1vyCtZnA7KMZ8rQggpsJHIbGSdrqYq9OhuveadOVHCshw==}
+  earcut@3.2.4:
+    resolution: {integrity: sha512-FHc6yNpnTORB0tM5kmZ03iD2mDuNakDE2lvf4Hw1XkfxtEHIGVi01B/GqUSwx+NcC1WGjidAfpTXzeALtPtfpg==}
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
@@ -16686,9 +16685,6 @@ packages:
     resolution: {integrity: sha512-PpscUXxO6dvvhZxtwuqiI5v+1C/IQYPJRMWoQeaF2oohJgfGYSHKVAe8L+yUqF34PH/hmq9JlwmO+juPw+95/Q==}
     hasBin: true
 
-  geojson-vt@4.0.2:
-    resolution: {integrity: sha512-AV9ROqlNqoZEIJGfm1ncNjEXfkz2hdFlZf0qkVfmkwdKa8vj7H16YUOT81rJw1rdFhyEDlN2Tds91p/glzbl5A==}
-
   get-amd-module-type@6.0.1:
     resolution: {integrity: sha512-MtjsmYiCXcYDDrGqtNbeIYdAl85n+5mSv2r3FbzER/YV3ZILw4HNNIw34HuV5pyl0jzs6GFYU1VHVEefhgcNHQ==}
     engines: {node: '>=18'}
@@ -16765,6 +16761,9 @@ packages:
   gl-matrix@3.4.3:
     resolution: {integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==}
 
+  gl-matrix@3.4.4:
+    resolution: {integrity: sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==}
+
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -16825,10 +16824,6 @@ packages:
   global-prefix@3.0.0:
     resolution: {integrity: sha512-awConJSVCHVGND6x3tmMaKcQvwXLhjdkmomy2W+Goaui8YPgYgXJZewhg3fWC+DlfqqQuWg8AwqjGTD2nAPVWg==}
     engines: {node: '>=6'}
-
-  global-prefix@4.0.0:
-    resolution: {integrity: sha512-w0Uf9Y9/nyHinEk5vMJKRie+wa4kR5hmDbEhGGds/kG1PwGLLHKRoNMeJOyCQjjBkANlnScqgzcFwGHgmgLkVA==}
-    engines: {node: '>=16'}
 
   globals@13.24.0:
     resolution: {integrity: sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==}
@@ -17346,10 +17341,6 @@ packages:
     resolution: {integrity: sha512-QQnnxNyfvmHFIsj7gkPcYymR8Jdw/o7mp5ZFihxn6h8Ci6fh3Dx4E1gPjpQEpIuPo9XVNY/ZUwh4BPMjGyL01g==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
 
-  ini@4.1.3:
-    resolution: {integrity: sha512-X7rqawQBvfdjS10YU1y1YVreA3SsLrW9dX2CewP2EbBJM4ypVNLDkO5y04gejPwKIY9lR+7r9gn3rFPt/kmWFg==}
-    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
-
   inline-style-parser@0.1.1:
     resolution: {integrity: sha512-7NXolsK4CAS5+xvdj5OMMbI962hU/wvwoxk+LWR9Ek9bVtyuuYScDN6eS0rUm6TxApFpw7CX1o4uJzcd4AyD3Q==}
 
@@ -17779,10 +17770,6 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
-  isexe@3.1.1:
-    resolution: {integrity: sha512-LpB/54B+/2J5hqQ7imZHfdU31OlgQqx7ZicVlkm9kzg9/w8GKLEcFfJl/t7DCEDueOyBAD6zCCwTO6Fzs0NoEQ==}
-    engines: {node: '>=16'}
-
   isnumber@1.0.0:
     resolution: {integrity: sha512-JLiSz/zsZcGFXPrB4I/AGBvtStkt+8QmksyZBZnVXnnK9XdTEyz0tX8CRYljtwYDuIuZzih6DpHQdi+3Q6zHPw==}
 
@@ -18202,8 +18189,8 @@ packages:
   jws@4.0.1:
     resolution: {integrity: sha512-EKI/M/yqPncGUUh44xz0PxSidXFr/+r0pA70+gIYhjv+et7yxM+s29Y+VGDkovRofQem0fs7Uvf4+YmAdyRduA==}
 
-  kdbush@4.0.2:
-    resolution: {integrity: sha512-WbCVYJ27Sz8zi9Q7Q0xHC+05iwkm3Znipc2XTlrnJbsHMYktW4hPhXUE8Ys1engBrvffoSCqbil1JQAa7clRpA==}
+  kdbush@4.1.0:
+    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
 
   kea@2.6.0:
     resolution: {integrity: sha512-+yaLyZx8h2v96aL01XIRZjqA8Qk4fIUziznSKnkjDItUU8YnH75xER6+vMHT5EHC3MJeSScxIx5UuqZl30DBdg==}
@@ -18582,10 +18569,6 @@ packages:
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
-  lru-cache@11.2.6:
-    resolution: {integrity: sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ==}
-    engines: {node: 20 || >=22}
-
   lru-cache@11.5.3:
     resolution: {integrity: sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==}
     engines: {node: 20 || >=22}
@@ -18642,8 +18625,8 @@ packages:
   mapcap@1.0.0:
     resolution: {integrity: sha512-KcNlZSlFPx+r1jYZmxEbTVymG+dIctf10WmWkuhrhrblM+KMoF77HelwihL5cxYlORye79KoR4IlOOk99lUJ0g==}
 
-  maplibre-gl@5.3.0:
-    resolution: {integrity: sha512-qru6B6jHlDPR4Q9/P4W1zEPbPofR4wwYbrrjiHKWI7yLtyXmpJ1/G1KaIYDr5uNdFbPZ7uiZAWdqtfdNLmIhGg==}
+  maplibre-gl@6.4.1:
+    resolution: {integrity: sha512-KzxQKtfBu/pSz1C+yW1hNS9eyj2h2lC7ufdAi6/SEt177n3oAfDfmUmslRfJdXY7ReAFBcnvwsqmiyoDhtA9GQ==}
     engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
   marge@1.0.1:
@@ -19704,8 +19687,8 @@ packages:
     resolution: {integrity: sha512-ClrV7pNOn7rtmoQVF4TS1vyU0WhYRnP92fzbfF75jAIwpnzdJXf8iTd4CMEqO4yUenH6NDqLiwjqlh6QgZzgLQ==}
     hasBin: true
 
-  pbf@3.3.0:
-    resolution: {integrity: sha512-XDF38WCH3z5OV/OVa8GKUNtLAyneuzbCisx7QUCF8Q6Nutx0WnJrQe5O+kOtBlLfRNUws98Y58Lblp+NJG5T4Q==}
+  pbf@5.1.2:
+    resolution: {integrity: sha512-mnvGdvOrIvJOBGUEdGkrVXjN8E/VkIJCkf2eS1DH2yv82ORUlLttmDt0rWY38yYZmVwciZwBUvHM20qxBZf40w==}
     hasBin: true
 
   pbkdf2@3.1.7:
@@ -19978,8 +19961,8 @@ packages:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
 
-  potpack@2.0.0:
-    resolution: {integrity: sha512-Q+/tYsFU9r7xoOJ+y/ZTtdVQwTWfzjbiXBDMM/JKUux3+QPP02iUuIoeBQ+Ot6oEDlC+/PGjB/5A3K7KKb7hcw==}
+  potpack@2.1.0:
+    resolution: {integrity: sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ==}
 
   powershell-utils@0.1.0:
     resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
@@ -21213,11 +21196,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  semver@7.7.4:
-    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   semver@7.8.5:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
@@ -21761,9 +21739,6 @@ packages:
     resolution: {integrity: sha512-O+PCv11lgTNJUzy49teNAWLjBZfc+A1enOwTpLlH6/rsvKcTwcdTT8m9azGkVqM7HBl5jpyZ7KTPhHweokBcdg==}
     engines: {node: '>=14.18.0'}
     deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
-
-  supercluster@8.0.1:
-    resolution: {integrity: sha512-IiOea5kJ9iqzD2t7QJq/cREyLHTtSmUT6gQsweojg9WH2sYJqZK9SswTu6jrscO6D1G5v5vYZ9ru/eq85lXeZQ==}
 
   superjson@1.10.1:
     resolution: {integrity: sha512-7fvPVDHmkTKg6641B9c6vr6Zz5CwPtF9j0XFExeLxJxrMaeLU2sqebY3/yrI3l0K5zJ+H9QA3H+lIYj5ooCOkg==}
@@ -22756,9 +22731,6 @@ packages:
   vscode-uri@3.0.8:
     resolution: {integrity: sha512-AyFQ0EVmsOZOlAnxoFOGOq1SQDWAB7C6aqMGS23svWAllfOaxbuFvcT8D1i8z3Gyn8fraVeZNNmN6e9bxxXkKw==}
 
-  vt-pbf@3.1.3:
-    resolution: {integrity: sha512-2LzDFzt0mZKZ9IpVF2r69G9bXaP2Q2sArJCmcCgvfTdCCZzSyz4aCLoQyUilu37Ll56tCblIZrXFIjNUpGIlmA==}
-
   w3c-xmlserializer@3.0.0:
     resolution: {integrity: sha512-3WFqGEgSXIyGhOmAFtlicJNMjEps8b1MG31NCA0/vOF9+nKMUW1ckhi9cnNHmf88Rzw5V+dwIwsm2C7X8k9aQg==}
     engines: {node: '>=12'}
@@ -22970,11 +22942,6 @@ packages:
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
-    hasBin: true
-
-  which@4.0.0:
-    resolution: {integrity: sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg==}
-    engines: {node: ^16.13.0 || >=18.0.0}
     hasBin: true
 
   widest-line@3.1.0:
@@ -24804,15 +24771,15 @@ snapshots:
       - '@75lb/nature'
       - supports-color
 
-  '@elastic/ems-client@8.7.0':
+  '@elastic/ems-client@8.8.1':
     dependencies:
       '@types/geojson': 7946.0.16
       '@types/topojson-client': 3.1.5
       chroma-js: 2.4.2
       lodash: 4.18.1
-      lru-cache: 11.2.6
-      maplibre-gl: 5.3.0
-      semver: 7.7.4
+      lru-cache: 11.5.3
+      maplibre-gl: 6.4.1
+      semver: 7.8.5
       topojson-client: 3.1.0
 
   '@elastic/eslint-plugin-eui@0.0.2(eslint@8.57.0(supports-color@8.1.1))':
@@ -26509,7 +26476,7 @@ snapshots:
     dependencies:
       unist-util-visit: 1.4.1
 
-  '@mapbox/jsonlint-lines-primitives@2.0.2': {}
+  '@mapbox/jsonlint-lines-primitives@2.0.3': {}
 
   '@mapbox/mapbox-gl-draw@1.3.0':
     dependencies:
@@ -26527,25 +26494,44 @@ snapshots:
 
   '@mapbox/point-geometry@0.1.0': {}
 
-  '@mapbox/tiny-sdf@2.0.6': {}
+  '@mapbox/point-geometry@1.1.0': {}
 
-  '@mapbox/unitbezier@0.0.1': {}
+  '@mapbox/tiny-sdf@2.3.0': {}
+
+  '@mapbox/unitbezier@1.0.0': {}
 
   '@mapbox/vector-tile@1.3.1':
     dependencies:
       '@mapbox/point-geometry': 0.1.0
 
-  '@mapbox/whoots-js@3.1.0': {}
-
-  '@maplibre/maplibre-gl-style-spec@23.1.0':
+  '@mapbox/vector-tile@3.0.0':
     dependencies:
-      '@mapbox/jsonlint-lines-primitives': 2.0.2
-      '@mapbox/unitbezier': 0.0.1
+      '@mapbox/point-geometry': 1.1.0
+      '@types/geojson': 7946.0.16
+      pbf: 5.1.2
+
+  '@maplibre/geojson-vt@6.3.0':
+    dependencies:
+      kdbush: 4.1.0
+
+  '@maplibre/maplibre-gl-style-spec@26.5.0':
+    dependencies:
+      '@mapbox/jsonlint-lines-primitives': 2.0.3
+      '@mapbox/unitbezier': 1.0.0
       json-stringify-pretty-compact: 4.0.0
       minimist: 1.2.8
       quickselect: 3.0.0
-      rw: 1.3.3
       tinyqueue: 3.0.0
+
+  '@maplibre/mlt@1.3.0':
+    dependencies:
+      '@mapbox/point-geometry': 1.1.0
+
+  '@maplibre/vt-pbf@4.3.3':
+    dependencies:
+      '@mapbox/point-geometry': 1.1.0
+      '@types/geojson': 7946.0.16
+      pbf: 5.1.2
 
   '@math.gl/core@3.5.6':
     dependencies:
@@ -29165,10 +29151,6 @@ snapshots:
     dependencies:
       '@types/jquery': 3.5.33
 
-  '@types/geojson-vt@3.2.5':
-    dependencies:
-      '@types/geojson': 7946.0.10
-
   '@types/geojson@7946.0.10': {}
 
   '@types/geojson@7946.0.16': {}
@@ -29292,12 +29274,6 @@ snapshots:
       '@types/mapbox__point-geometry': 0.1.4
       '@types/pbf': 3.0.2
 
-  '@types/mapbox__vector-tile@1.3.4':
-    dependencies:
-      '@types/geojson': 7946.0.10
-      '@types/mapbox__point-geometry': 0.1.4
-      '@types/pbf': 3.0.2
-
   '@types/markdown-it@14.2.0':
     dependencies:
       '@types/linkify-it': 5.0.0
@@ -29403,8 +29379,6 @@ snapshots:
   '@types/parse5@5.0.3': {}
 
   '@types/pbf@3.0.2': {}
-
-  '@types/pbf@3.0.5': {}
 
   '@types/pdfkit@0.10.6':
     dependencies:
@@ -29592,10 +29566,6 @@ snapshots:
       '@types/cookiejar': 2.1.5
       '@types/methods': 1.1.4
       '@types/node': 24.10.13
-
-  '@types/supercluster@7.1.3':
-    dependencies:
-      '@types/geojson': 7946.0.10
 
   '@types/supertest@7.2.0':
     dependencies:
@@ -32598,7 +32568,7 @@ snapshots:
 
   duplexer@0.1.2: {}
 
-  earcut@3.0.1: {}
+  earcut@3.2.4: {}
 
   eastasianwidth@0.2.0: {}
 
@@ -33913,8 +33883,6 @@ snapshots:
       get-stdin: 7.0.0
       minimist: 1.2.8
 
-  geojson-vt@4.0.2: {}
-
   get-amd-module-type@6.0.1:
     dependencies:
       ast-module-types: 6.0.1
@@ -33991,6 +33959,8 @@ snapshots:
   gl-matrix@3.3.0: {}
 
   gl-matrix@3.4.3: {}
+
+  gl-matrix@3.4.4: {}
 
   glob-parent@5.1.2:
     dependencies:
@@ -34075,12 +34045,6 @@ snapshots:
       ini: 1.3.7
       kind-of: 6.0.3
       which: 1.3.1
-
-  global-prefix@4.0.0:
-    dependencies:
-      ini: 4.1.3
-      kind-of: 6.0.3
-      which: 4.0.0
 
   globals@13.24.0:
     dependencies:
@@ -34702,8 +34666,6 @@ snapshots:
 
   ini@4.1.1: {}
 
-  ini@4.1.3: {}
-
   inline-style-parser@0.1.1: {}
 
   inline-style-prefixer@7.0.1:
@@ -35087,8 +35049,6 @@ snapshots:
   isbinaryfile@4.0.2: {}
 
   isexe@2.0.0: {}
-
-  isexe@3.1.1: {}
 
   isnumber@1.0.0: {}
 
@@ -35753,7 +35713,7 @@ snapshots:
       jwa: 2.0.1
       safe-buffer: 5.2.1
 
-  kdbush@4.0.2: {}
+  kdbush@4.1.0: {}
 
   kea@2.6.0(react-redux@7.2.8(react-dom@17.0.2(react@17.0.2))(react@17.0.2))(react@17.0.2)(redux@4.2.1)(reselect@4.1.8):
     dependencies:
@@ -36146,8 +36106,6 @@ snapshots:
 
   lru-cache@10.4.3: {}
 
-  lru-cache@11.2.6: {}
-
   lru-cache@11.5.3: {}
 
   lru-cache@5.1.1:
@@ -36193,34 +36151,25 @@ snapshots:
 
   mapcap@1.0.0: {}
 
-  maplibre-gl@5.3.0:
+  maplibre-gl@6.4.1:
     dependencies:
-      '@mapbox/geojson-rewind': 0.5.2
-      '@mapbox/jsonlint-lines-primitives': 2.0.2
-      '@mapbox/point-geometry': 0.1.0
-      '@mapbox/tiny-sdf': 2.0.6
-      '@mapbox/unitbezier': 0.0.1
-      '@mapbox/vector-tile': 1.3.1
-      '@mapbox/whoots-js': 3.1.0
-      '@maplibre/maplibre-gl-style-spec': 23.1.0
+      '@mapbox/point-geometry': 1.1.0
+      '@mapbox/tiny-sdf': 2.3.0
+      '@mapbox/unitbezier': 1.0.0
+      '@mapbox/vector-tile': 3.0.0
+      '@maplibre/geojson-vt': 6.3.0
+      '@maplibre/maplibre-gl-style-spec': 26.5.0
+      '@maplibre/mlt': 1.3.0
+      '@maplibre/vt-pbf': 4.3.3
       '@types/geojson': 7946.0.16
-      '@types/geojson-vt': 3.2.5
-      '@types/mapbox__point-geometry': 0.1.4
-      '@types/mapbox__vector-tile': 1.3.4
-      '@types/pbf': 3.0.5
-      '@types/supercluster': 7.1.3
-      earcut: 3.0.1
-      geojson-vt: 4.0.2
-      gl-matrix: 3.4.3
-      global-prefix: 4.0.0
-      kdbush: 4.0.2
+      earcut: 3.2.4
+      gl-matrix: 3.4.4
+      kdbush: 4.1.0
       murmurhash-js: 1.0.0
-      pbf: 3.3.0
-      potpack: 2.0.0
+      pbf: 5.1.2
+      potpack: 2.1.0
       quickselect: 3.0.0
-      supercluster: 8.0.1
       tinyqueue: 3.0.0
-      vt-pbf: 3.1.3
 
   marge@1.0.1:
     dependencies:
@@ -37459,9 +37408,8 @@ snapshots:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
-  pbf@3.3.0:
+  pbf@5.1.2:
     dependencies:
-      ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
 
   pbkdf2@3.1.7:
@@ -37708,7 +37656,7 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  potpack@2.0.0: {}
+  potpack@2.1.0: {}
 
   powershell-utils@0.1.0: {}
 
@@ -39128,8 +39076,6 @@ snapshots:
 
   semver@7.6.3: {}
 
-  semver@7.7.4: {}
-
   semver@7.8.5: {}
 
   send@0.19.2(supports-color@8.1.1):
@@ -39883,10 +39829,6 @@ snapshots:
       qs: 6.17.0
     transitivePeerDependencies:
       - supports-color
-
-  supercluster@8.0.1:
-    dependencies:
-      kdbush: 4.0.2
 
   superjson@1.10.1:
     dependencies:
@@ -41041,12 +40983,6 @@ snapshots:
 
   vscode-uri@3.0.8: {}
 
-  vt-pbf@3.1.3:
-    dependencies:
-      '@mapbox/point-geometry': 0.1.0
-      '@mapbox/vector-tile': 1.3.1
-      pbf: 3.2.1
-
   w3c-xmlserializer@3.0.0:
     dependencies:
       xml-name-validator: 4.0.0
@@ -41348,10 +41284,6 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
-
-  which@4.0.0:
-    dependencies:
-      isexe: 3.1.1
 
   widest-line@3.1.0:
     dependencies:
