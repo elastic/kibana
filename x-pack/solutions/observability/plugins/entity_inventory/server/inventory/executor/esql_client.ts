@@ -22,10 +22,11 @@ export interface EsqlStats {
   rowCount: number;
 }
 
-/** The columns, rows and cost of one ES|QL query. */
+/** The columns, rows, completeness and cost of one ES|QL query. */
 export interface EsqlQueryResult {
   columns: ESQLColumn[];
   rows: InventoryRow[];
+  isPartial: boolean;
   stats: EsqlStats;
 }
 
@@ -61,6 +62,7 @@ export const executeEsql = async (
   return {
     columns,
     rows,
+    isPartial: rawResponse.is_partial ?? false,
     stats: {
       took: rawResponse.took ?? null,
       documentsFound: rawResponse.documents_found ?? null,

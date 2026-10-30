@@ -40,6 +40,7 @@ describe('executeEsql', () => {
   it('turns rows into objects keyed by column name and reads the metadata', async () => {
     const client = setup({
       took: 12,
+      is_partial: false,
       documents_found: 340,
       values_loaded: 680,
       columns: [
@@ -65,6 +66,7 @@ describe('executeEsql', () => {
         { 'entity.id': 'a', cpu: 0.5, 'host.ip': ['10.0.0.1', '10.0.0.2'] },
         { 'entity.id': 'b', cpu: null, 'host.ip': '10.0.0.3' },
       ],
+      isPartial: false,
       stats: { took: 12, documentsFound: 340, valuesLoaded: 680, rowCount: 2 },
     });
   });
@@ -83,6 +85,7 @@ describe('executeEsql', () => {
     expect(result).toEqual({
       columns: [{ name: 'entity.id', type: 'keyword' }],
       rows: [],
+      isPartial: false,
       stats: { took: 1, documentsFound: 0, valuesLoaded: 0, rowCount: 0 },
     });
   });
@@ -93,6 +96,27 @@ describe('executeEsql', () => {
     const { stats } = await executeEsql(client, query);
 
     expect(stats).toEqual({ took: null, documentsFound: null, valuesLoaded: null, rowCount: 1 });
+  });
+
+  it('reports a partial result', async () => {
+    const client = setup({
+      took: 3,
+      is_partial: true,
+      columns: [{ name: 'entity.id', type: 'keyword' }],
+      values: [['a']],
+    });
+
+    const { isPartial } = await executeEsql(client, query);
+
+    expect(isPartial).toBe(true);
+  });
+
+  it('treats a response without is_partial as complete', async () => {
+    const client = setup({ columns: [{ name: 'entity.id', type: 'keyword' }], values: [['a']] });
+
+    const { isPartial } = await executeEsql(client, query);
+
+    expect(isPartial).toBe(false);
   });
 
   it('passes the abort signal to the client', async () => {
