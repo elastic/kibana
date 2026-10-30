@@ -308,7 +308,7 @@ describe('build', () => {
       'FROM context-engine-signals-* | WHERE tags == "empty_retrieval"',
       'FROM context-engine-improvements | LIMIT 10',
       'FROM traces-agent_builder.otel-default | LIMIT 10',
-      'FROM .contextengine-ai-indices | LIMIT 10',
+      'FROM .context-engine-ai-indices | LIMIT 10',
     ])('emits no signal for a read of the loop’s own indices: %s', (query) => {
       const signals = build({
         toolRows: [selfReferentialRow(query)],

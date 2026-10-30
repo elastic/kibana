@@ -40,6 +40,7 @@ import type {
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
+import { migrateLegacyAiIndices } from './ai_indices/migrate_legacy_index';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
@@ -370,9 +371,12 @@ export class ContextEnginePlugin
       return true;
     };
 
+    const internalEsClient = this.esClient;
     this.aiIndexService = new AiIndexService({
-      esClient: this.esClient,
+      esClient: internalEsClient,
       logger: aiIndexLogger,
+      migrateLegacy: () =>
+        migrateLegacyAiIndices({ esClient: internalEsClient, logger: aiIndexLogger }),
       managedBootstrap: {
         isManaged: (id) => this.aiIndexRegistry.has(id),
         getManagedIds: () => this.aiIndexRegistry.getManagedIds(),

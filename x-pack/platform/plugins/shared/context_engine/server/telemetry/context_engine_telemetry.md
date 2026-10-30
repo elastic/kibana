@@ -62,7 +62,7 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 
 ## Usage collector
 
-The collector reads up to 10,000 entries from `.contextengine-ai-indices` across all spaces as the internal user.
+The collector reads up to 10,000 entries from `.context-engine-ai-indices` across all spaces as the internal user.
 
 - A managed entry's `dest` comes from its code registration.
 - Each distinct `dest` is counted once.

@@ -60,7 +60,7 @@ const createConflictError = () =>
   });
 
 const DEFAULT_SPACE = 'default';
-const AI_INDICES_INDEX = '.contextengine-ai-indices';
+const AI_INDICES_INDEX = '.context-engine-ai-indices';
 
 interface SearchHitInput {
   _id: string;
@@ -1562,6 +1562,56 @@ describe('AiIndexService', () => {
           },
         })
       );
+    });
+  });
+
+  describe('legacy migration', () => {
+    it('runs once and gates registry reads', async () => {
+      const migrateLegacy = jest.fn().mockResolvedValue(undefined);
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        migrateLegacy,
+      });
+
+      await service.list(DEFAULT_SPACE);
+      await service.list(DEFAULT_SPACE);
+
+      expect(migrateLegacy).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails reads while migration fails and retries on the next read', async () => {
+      const migrateLegacy = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValue(undefined);
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        migrateLegacy,
+      });
+
+      await expect(service.list(DEFAULT_SPACE)).rejects.toThrow('boom');
+      expect(storageClient.search).not.toHaveBeenCalled();
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([]);
+      expect(migrateLegacy).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries after a failure that settled before any read', async () => {
+      const migrateLegacy = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValue(undefined);
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        migrateLegacy,
+      });
+      await new Promise(setImmediate);
+
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([]);
+      expect(migrateLegacy).toHaveBeenCalledTimes(2);
     });
   });
 
