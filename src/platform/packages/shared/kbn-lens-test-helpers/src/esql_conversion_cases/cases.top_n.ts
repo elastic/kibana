@@ -55,31 +55,6 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
   const outerTopNFilter = (args: Parameters<typeof outerTopNSubquery>[0]) =>
     `WHERE ${args.field} IN (${outerTopNSubquery(args)})`;
 
-  // Single Top values + Other (nested outer Other is a follow-up): groups by a typed key that is
-  // null for non-top-N values, sorts "Other" last, then restores the field as keyword labels.
-  // `rankSort` is the chart sort after the named flag. Type casts use uppercase to match
-  // `esql(...).print('basic')`.
-  const otherBucketQuery = ({
-    stats,
-    rankSort,
-    ...args
-  }: Parameters<typeof outerTopNSubquery>[0] & { stats: string; rankSort: string }) => {
-    const { field, size } = args;
-    const suffix = field.replace(/[^A-Za-z0-9_]/g, '_');
-    const key = `key_${suffix}`;
-    const named = `named_${suffix}`;
-    return [
-      `WHERE ${field} IS NOT NULL`,
-      `EVAL ${key} = CASE(${field} IN (${outerTopNSubquery(args)}), ${field}, NULL)`,
-      `STATS ${stats} BY ${key}`,
-      `EVAL ${named} = CASE(${key} IS NULL, 0::LONG, 1::LONG)`,
-      `SORT ${named} DESC, ${rankSort}`,
-      `LIMIT ${size + 1}`,
-      `EVAL ${field} = COALESCE(TO_STRING(${key}), "Other"::KEYWORD)`,
-      `DROP ${named}, ${key}`,
-    ].join(' | ');
-  };
-
   return [
     {
       group: 'top_n',
@@ -205,14 +180,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
-          field: 'host.keyword',
-          score: 'COUNT(*)',
-          sort: 'host.keyword ASC',
-          size: 3,
-          stats: 'AVG(bytes)',
-          rankSort: 'key_host_keyword ASC',
-        })}`,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS COUNT(*) BY host.keyword | SORT host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         // The dataset has 4 hosts, so size 3 yields an Other row; "Other" sorts before the
@@ -231,14 +199,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
-          field: 'host.keyword',
-          score: 'COUNT(*)',
-          sort: 'host.keyword DESC',
-          size: 3,
-          stats: 'AVG(bytes)',
-          rankSort: 'key_host_keyword DESC',
-        })}`,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS COUNT(*) BY host.keyword | SORT host.keyword DESC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, key_host_keyword DESC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         expectedLastRow: { 'host.keyword': 'Other' },
@@ -260,14 +221,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
-          field: 'host.keyword',
-          score: 'rank_host_keyword = AVG(bytes)',
-          sort: 'rank_host_keyword DESC, host.keyword ASC',
-          size: 3,
-          stats: 'AVG(bytes)',
-          rankSort: '`AVG(bytes)` DESC, key_host_keyword ASC',
-        })}`,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         expectedLastRow: { 'host.keyword': 'Other' },
@@ -289,14 +243,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
-          field: 'host.keyword',
-          score: 'rank_host_keyword = AVG(bytes)',
-          sort: 'rank_host_keyword ASC, host.keyword ASC',
-          size: 3,
-          stats: 'AVG(bytes)',
-          rankSort: '`AVG(bytes)` ASC, key_host_keyword ASC',
-        })}`,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword ASC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`AVG(bytes)\` ASC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
         expectedLastRow: { 'host.keyword': 'Other' },
@@ -322,14 +269,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${logsFrom} | ${logsWhere} | ${otherBucketQuery({
-          field: 'clientip',
-          score: 'rank_clientip = AVG(bytes)',
-          sort: 'rank_clientip DESC, clientip ASC',
-          size: 9,
-          stats: 'AVG(bytes)',
-          rankSort: '`AVG(bytes)` DESC, key_clientip ASC',
-        })}`,
+        esql: `${logsFrom} | ${logsWhere} | WHERE clientip IS NOT NULL | EVAL key_clientip = CASE(clientip IN (${logsFrom} | ${logsWhere} | WHERE clientip IS NOT NULL | STATS rank_clientip = AVG(bytes) BY clientip | SORT rank_clientip DESC, clientip ASC | LIMIT 9 | KEEP clientip), clientip, NULL) | STATS AVG(bytes) BY key_clientip | EVAL named_clientip = CASE(key_clientip IS NULL, 0::LONG, 1::LONG) | SORT named_clientip DESC, \`AVG(bytes)\` DESC, key_clientip ASC | LIMIT 10 | EVAL clientip = COALESCE(TO_STRING(key_clientip), "Other"::KEYWORD) | DROP named_clientip, key_clientip`,
         columnNames: ['AVG(bytes)', 'clientip'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], clientip: ['col1'] },
         expectedLastRow: { clientip: 'Other' },
