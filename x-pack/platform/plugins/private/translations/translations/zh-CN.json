@@ -39458,7 +39458,6 @@
     "xpack.lens.config.layerTypeColumnLabel": "类型",
     "xpack.lens.config.layerWillBeConvertedLabel": "将被转换",
     "xpack.lens.config.layerWillRemainUnchangedLabel": "将保持不变",
-    "xpack.lens.config.queryModeDescription": "此可视化中的所有数据层都将转换为 ES|QL。批注和参考线层将保持不变。",
     "xpack.lens.config.queryModeWarningDescription": "一旦您在转换为 ES|QL 后保存图表，就无法切换回去。",
     "xpack.lens.config.queryPreviewDescription": "查询预览",
     "xpack.lens.config.readMoreLinkText": "阅读更多内容。",

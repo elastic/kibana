@@ -39307,7 +39307,6 @@
     "xpack.lens.config.layerTypeColumnLabel": "Type",
     "xpack.lens.config.layerWillBeConvertedLabel": "Sera converti",
     "xpack.lens.config.layerWillRemainUnchangedLabel": "Restera inchangé",
-    "xpack.lens.config.queryModeDescription": "Toutes les couches de données de cette visualisation seront converties en ES|QL. Les couches d’annotations et de lignes de référence resteront inchangées.",
     "xpack.lens.config.queryModeWarningDescription": "Une fois que vous avez enregistré le graphique après l’avoir converti en ES|QL, vous ne pouvez plus revenir en arrière.",
     "xpack.lens.config.queryPreviewDescription": "Aperçu de la requête",
     "xpack.lens.config.readMoreLinkText": "En savoir plus",

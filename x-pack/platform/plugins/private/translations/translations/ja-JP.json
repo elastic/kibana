@@ -39471,7 +39471,6 @@
     "xpack.lens.config.layerTypeColumnLabel": "型",
     "xpack.lens.config.layerWillBeConvertedLabel": "変換されます",
     "xpack.lens.config.layerWillRemainUnchangedLabel": "変更されません",
-    "xpack.lens.config.queryModeDescription": "この可視化のすべてのデータレイヤーはES|QLに変換されます。注釈レイヤーと参照線レイヤーは変更されません。",
     "xpack.lens.config.queryModeWarningDescription": "一度ES|QLに変換してチャートを保存すると、元に戻すことはできません。",
     "xpack.lens.config.queryPreviewDescription": "クエリプレビュー",
     "xpack.lens.config.readMoreLinkText": "詳細をお読みください。",
