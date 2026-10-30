@@ -13,8 +13,8 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { TaskContext } from '../task_context';
 
-export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
-  log.info('building required artifacts for the optimizer');
+export async function buildSharedPackages({ log, quiet, dist }: TaskContext) {
+  log.info('building shared frontend artifacts required by the optimizer');
 
   const stdio: StdioOption[] = quiet
     ? ['ignore', 'pipe', 'pipe']
@@ -22,10 +22,7 @@ export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
 
   const args = ['kbn', 'build-shared'];
   if (quiet) args.push('--quiet');
-  if (dist) {
-    args.push('--dist');
-    args.push('--no-cache');
-  }
+  if (dist) args.push('--dist', '--no-cache');
 
   await execa('pnpm', args, { cwd: REPO_ROOT, stdio });
 }
