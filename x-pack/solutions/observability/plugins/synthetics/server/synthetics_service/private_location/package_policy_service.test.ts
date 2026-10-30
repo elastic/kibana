@@ -18,6 +18,8 @@ import { AGENT_POLICY_REVISION_BATCH_WINDOW_MS } from './agent_policy_revision_b
 import type { ConditionUpdate } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 import type { SyntheticsServerSetup } from '../../types';
+import { SHARD_SENTINEL_CONDITION, shardSentinelPolicyId } from './shard_sentinel';
+import { testMonitorPolicy } from './test_policy';
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -753,5 +755,110 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       'ap-ok',
       expect.anything()
     );
+  });
+});
+
+describe('PackagePolicyService shard sentinel', () => {
+  const setup = (spaceIds: string[] = ['default']) => {
+    const mocks = makeServer();
+    const fleetCreate = jest.fn().mockResolvedValue({});
+    const buildPackagePolicyFromPackage = jest.fn().mockResolvedValue(testMonitorPolicy);
+    Object.assign(mocks.server.fleet.packagePolicyService, {
+      create: fleetCreate,
+      buildPackagePolicyFromPackage,
+    });
+    mocks.getByIds.mockResolvedValue([{ id: 'ap-1', space_ids: spaceIds, revision: 7 }]);
+    return { ...mocks, fleetCreate, buildPackagePolicyFromPackage };
+  };
+
+  it.each([
+    [['default', 'space-a'], 'default'],
+    [[ALL_SPACES_ID], 'default'],
+    [['space-a'], 'space-a'],
+  ])(
+    'creates the sentinel through the agent policy space (%j -> %s) with an immediate bump',
+    async (spaceIds, expectedSpace) => {
+      const { server, fleetCreate } = setup(spaceIds);
+
+      await expect(new PackagePolicyService(server).createShardSentinel('ap-1')).resolves.toBe(
+        true
+      );
+
+      expect(fleetCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ __space: expectedSpace }),
+        { __es: true },
+        expect.objectContaining({
+          condition: SHARD_SENTINEL_CONDITION,
+          policy_ids: ['ap-1'],
+          is_managed: true,
+        }),
+        // No `bumpRevision: false`: Fleet bumps before returning, so the revision
+        // the rebalance task reads next already contains the sentinel.
+        { id: shardSentinelPolicyId('ap-1'), force: true }
+      );
+    }
+  );
+
+  it('reports a sentinel created concurrently as already there', async () => {
+    const { server, fleetCreate, fleetGetByIDs } = setup();
+    fleetCreate.mockRejectedValue(new Error('name already exists'));
+    fleetGetByIDs.mockResolvedValue([{ id: shardSentinelPolicyId('ap-1') }]);
+
+    await expect(new PackagePolicyService(server).createShardSentinel('ap-1')).resolves.toBe(false);
+  });
+
+  it('rethrows a failed create when the sentinel is still missing', async () => {
+    const { server, fleetCreate } = setup();
+    fleetCreate.mockRejectedValue(new Error('fleet down'));
+
+    await expect(new PackagePolicyService(server).createShardSentinel('ap-1')).rejects.toThrow(
+      'fleet down'
+    );
+  });
+
+  it('looks the sentinel up in every space', async () => {
+    const { server, fleetGetByIDs } = setup();
+
+    await expect(new PackagePolicyService(server).hasShardSentinel('ap-1')).resolves.toBe(false);
+
+    expect(fleetGetByIDs).toHaveBeenCalledWith({}, [shardSentinelPolicyId('ap-1')], {
+      ignoreMissing: true,
+      spaceIds: [ALL_SPACES_ID],
+      fields: ['name'],
+    });
+  });
+
+  it('deletes the sentinel, then bumps its agent policy through the agent policy space', async () => {
+    const { server, fleetDelete, bumpRevision } = setup(['space-a']);
+    fleetDelete.mockResolvedValue([{ id: shardSentinelPolicyId('ap-1'), success: true }]);
+
+    await new PackagePolicyService(server).deleteShardSentinel('ap-1');
+
+    expect(fleetDelete).toHaveBeenCalledWith({}, { __es: true }, [shardSentinelPolicyId('ap-1')], {
+      force: true,
+      spaceIds: [ALL_SPACES_ID],
+      ignoreMissing: true,
+      bumpRevision: false,
+    });
+    expect(bumpRevision).toHaveBeenCalledWith(
+      expect.objectContaining({ __space: 'space-a' }),
+      { __es: true },
+      'ap-1',
+      { asyncDeploy: true }
+    );
+  });
+
+  it('does not bump when there was no sentinel to delete', async () => {
+    const { server, bumpRevision } = setup();
+
+    await new PackagePolicyService(server).deleteShardSentinel('ap-1');
+
+    expect(bumpRevision).not.toHaveBeenCalled();
+  });
+
+  it('reads the agent policy revision', async () => {
+    const { server } = setup();
+
+    await expect(new PackagePolicyService(server).getAgentPolicyRevision('ap-1')).resolves.toBe(7);
   });
 });

@@ -8,6 +8,7 @@
 import { agentIdCondition, UNASSIGNED_CONDITION } from './assign_by_condition';
 import { BROWSER_COST_MIB, LIGHTWEIGHT_COST_MIB } from './assign_shards';
 import type { ShardedPackagePolicy } from './rebalance_writes';
+import { SHARD_SENTINEL_CONDITION, shardSentinelPolicyId } from './shard_sentinel';
 import {
   configIdOf,
   toClearedConditionUpdates,
@@ -51,6 +52,10 @@ describe('configIdOf', () => {
 
   it('returns undefined for a policy id of another location', () => {
     expect(configIdOf(`monitor-abc-other`, LOCATION)).toBeUndefined();
+  });
+
+  it('never reads the shard sentinel as a monitor, even when the location id is the agent policy id', () => {
+    expect(configIdOf(shardSentinelPolicyId(LOCATION), LOCATION)).toBeUndefined();
   });
 });
 
@@ -292,5 +297,13 @@ describe('toClearedConditionUpdates', () => {
 
   it('writes nothing when no policy has a condition', () => {
     expect(toClearedConditionUpdates([policy({ id: `m1-${LOCATION}` })]).size).toBe(0);
+  });
+
+  it('keeps the shard sentinel condition', () => {
+    expect(
+      toClearedConditionUpdates([
+        policy({ id: shardSentinelPolicyId('ap-1'), condition: SHARD_SENTINEL_CONDITION }),
+      ]).size
+    ).toBe(0);
   });
 });

@@ -22,9 +22,14 @@ import { PrivateLocationRepository } from '../../../repositories/private_locatio
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { toClientContract, updatePrivateLocationMonitors } from './helpers';
+import {
+  deleteUnusedShardSentinel,
+  toClientContract,
+  updatePrivateLocationMonitors,
+} from './helpers';
 import { getAgentPolicySpaceIds } from './add_private_location';
 import { runTaskPerPrivateLocation } from '../../../tasks/sync_private_locations_monitors_task';
+import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
@@ -320,6 +325,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
             });
             throw error;
           });
+        }
+        if (isAgentPolicyChanged) {
+          // The rebalance task puts the shard sentinel on the new agent policy.
+          void runRebalanceShardsTaskSoon({ server: routeContext.server });
+          await deleteUnusedShardSentinel(routeContext, existingLocation.attributes.agentPolicyId);
         }
       }
 

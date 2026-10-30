@@ -20,11 +20,13 @@ const POLICY = 'policy-1';
 const info = (
   lastCheckin: number,
   memoryMib: number | null = null,
-  complete = false
+  complete = false,
+  policyRevision: number | null = 1
 ): AgentInfo => ({
   lastCheckin,
   memoryMib,
   complete,
+  policyRevision,
 });
 
 const plan = (

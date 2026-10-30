@@ -11,6 +11,10 @@ import { AGENTS_INDEX, type FleetServerAgent, type PackagePolicy } from '@kbn/fl
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { tryForTime } from './retry';
+import {
+  isShardSentinelPolicyId,
+  shardSentinelPolicyId,
+} from '../../../../server/synthetics_service/private_location/shard_sentinel';
 
 /** Fleet package-policies query scoped to the synthetics package. */
 const fleetPackagePoliciesPath = (spaceId?: string) =>
@@ -20,22 +24,43 @@ const fleetPackagePoliciesPath = (spaceId?: string) =>
     'ingest-package-policies.package.name: synthetics'
   )}`;
 
+const listSyntheticsPackagePolicies = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  spaceId?: string
+): Promise<PackagePolicy[]> => {
+  const res = await apiClient.get(fleetPackagePoliciesPath(spaceId), {
+    headers,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  return (res.body as { items: PackagePolicy[] }).items;
+};
+
 /**
  * `GET /api/fleet/package_policies?...synthetics` — returns the synthetics
- * Fleet package policies. Mirrors `PrivateLocationTestService.getPackagePolicies`
- * from the FTR suites; the caller supplies elevated auth headers.
+ * Fleet package policies of monitors. Mirrors `PrivateLocationTestService.getPackagePolicies`
+ * from the FTR suites; the caller supplies elevated auth headers. Shard
+ * sentinels, which the rebalance task adds to agent policies on its own
+ * schedule under a trial license, are left out (see {@link getShardSentinel}).
  */
 export async function getSyntheticsPackagePolicies(
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   opts: { spaceId?: string } = {}
 ): Promise<PackagePolicy[]> {
-  const res = await apiClient.get(fleetPackagePoliciesPath(opts.spaceId), {
-    headers,
-    responseType: 'json',
-  });
-  expect(res).toHaveStatusCode(200);
-  return (res.body as { items: PackagePolicy[] }).items;
+  const items = await listSyntheticsPackagePolicies(apiClient, headers, opts.spaceId);
+  return items.filter(({ id }) => !isShardSentinelPolicyId(id));
+}
+
+/** The shard sentinel package policy of an agent policy, if it has one. */
+export async function getShardSentinel(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentPolicyId: string
+): Promise<PackagePolicy | undefined> {
+  const items = await listSyntheticsPackagePolicies(apiClient, headers);
+  return items.find(({ id }) => id === shardSentinelPolicyId(agentPolicyId));
 }
 
 /**
@@ -397,6 +422,13 @@ const getFleetAgentWriterClient = async (esClient: Client): Promise<Client> => {
  * (converted to `local_metadata.host.memory` bytes, the field
  * `get_agent_info.ts` reads) drives capacity-weighted placement.
  */
+/**
+ * Fake agents never acknowledge a policy, so they report a revision past any
+ * the agent policy reaches in a test; the shard-sentinel pin gate then treats
+ * them as up to date.
+ */
+const FAKE_AGENT_POLICY_REVISION = 1_000_000;
+
 export async function indexFakeFleetAgent(
   esClient: Client,
   agentPolicyId: string,
@@ -411,7 +443,7 @@ export async function indexFakeFleetAgent(
     document: {
       active: true,
       policy_id: agentPolicyId,
-      policy_revision_idx: 1,
+      policy_revision_idx: FAKE_AGENT_POLICY_REVISION,
       last_checkin_status: 'online',
       last_checkin: lastCheckin ?? new Date().toISOString(),
       enrolled_at: new Date().toISOString(),

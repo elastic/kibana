@@ -16,7 +16,12 @@ import {
 } from './add_private_location';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 
+import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
+
 jest.mock('./migrate_legacy_private_locations');
+jest.mock('../../../tasks/rebalance_private_location_shards_task', () => ({
+  runRebalanceShardsTaskSoon: jest.fn().mockResolvedValue(undefined),
+}));
 
 const agentPolicy = (space_ids?: string[]) => ({ space_ids } as AgentPolicy);
 
@@ -121,6 +126,8 @@ describe('addPrivateLocationRoute handler - space containment', () => {
 
     expect(response.badRequest).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalled();
+    // The rebalance task puts the shard sentinel on the new location's agent policy.
+    expect(runRebalanceShardsTaskSoon).toHaveBeenCalledWith({ server: routeContext.server });
   });
 
   it('allows creation when no specific space is requested (the "clear the Spaces field" behavior)', async () => {

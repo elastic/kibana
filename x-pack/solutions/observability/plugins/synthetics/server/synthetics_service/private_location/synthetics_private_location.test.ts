@@ -36,6 +36,8 @@ import {
   VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
 } from '../formatters/private_formatters/format_synthetics_policy';
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
+import { REBALANCE_SHARDS_SENTINELS_STATE_KEY } from '../../tasks/rebalance_shards_enabled';
+import { SHARD_SENTINEL_CONDITION, shardSentinelPolicyId } from './shard_sentinel';
 
 jest.mock('../../tasks/clean_up_package_policies_task', () => ({
   scheduleTestNowCleanUp: jest.fn(),
@@ -81,6 +83,18 @@ describe('SyntheticsPrivateLocation', () => {
       .mockResolvedValue(licenseMock.createLicense({ license: { type: 'enterprise' } })),
   };
 
+  // Agents at these locations already run their shard sentinel, so monitors may be pinned.
+  const readySentinelsTaskManager = {
+    get: jest.fn().mockResolvedValue({
+      state: {
+        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {
+          policyId: { agentPolicyId: 'policyId', revision: 1, ready: true },
+          'condition-location': { agentPolicyId: 'single-agent-policy', revision: 1, ready: true },
+        },
+      },
+    }),
+  };
+
   const serverMock: SyntheticsServerSetup = {
     syntheticsEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
@@ -110,7 +124,7 @@ describe('SyntheticsPrivateLocation', () => {
       savedObjects: savedObjectsServiceMock.createStartContract(),
       elasticsearch: elasticsearchServiceMock.createStart(),
     },
-    pluginsStart: { licensing: enterpriseLicensing },
+    pluginsStart: { licensing: enterpriseLicensing, taskManager: readySentinelsTaskManager },
   } as unknown as SyntheticsServerSetup;
   beforeEach(() => {
     mockBuildPackagePolicy.mockReturnValue(undefined);
@@ -1332,7 +1346,7 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
         pluginsStart: {
-          taskManager: { get: jest.fn().mockResolvedValue({ state: {} }) },
+          taskManager: readySentinelsTaskManager,
           licensing: {
             getLicense: jest
               .fn()
@@ -1410,6 +1424,13 @@ describe('SyntheticsPrivateLocation', () => {
             revision: 1,
           },
           { id: 'm2-loc-1', spaceIds: ['default'], version: 'WzAsMV0=', revision: 1 },
+          {
+            id: shardSentinelPolicyId('ap-1'),
+            condition: SHARD_SENTINEL_CONDITION,
+            spaceIds: ['default'],
+            version: 'WzAsMV0=',
+            revision: 1,
+          },
         ] as never)
         .mockResolvedValueOnce([]);
       const bulkUpdateInSpace = jest
@@ -1435,6 +1456,208 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result.cleared).toBe(1);
       expect(result.failed).toBe(0);
     });
+  });
+
+  describe('shard sentinel gate', () => {
+    const conditionLocation = {
+      id: 'condition-location',
+      label: 'Condition location',
+      agentPolicyId: 'single-agent-policy',
+      isServiceManaged: false,
+    } as unknown as PrivateLocationAttributes;
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const generate = (
+      config: HeartbeatConfig,
+      enrolled: { agentIds: string[]; completeAgentIds?: string[] },
+      existingCondition?: string
+    ) =>
+      new SyntheticsPrivateLocation(serverMock).generateNewPolicy(
+        config,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        enrolled,
+        existingCondition,
+        'awaiting_sentinel'
+      );
+
+    it('does not pin a monitor to an agent before the agents run the sentinel', async () => {
+      const policy = await generate(testConfig, { agentIds: ['agent-a', 'agent-b'] });
+
+      expect(policy?.condition).toBeUndefined();
+    });
+
+    it('keeps an existing pin whose agent is still enrolled', async () => {
+      const existingCondition = agentIdCondition('agent-b');
+
+      const policy = await generate(
+        testConfig,
+        { agentIds: ['agent-a', 'agent-b'] },
+        existingCondition
+      );
+
+      expect(policy?.condition).toBe(existingCondition);
+    });
+
+    it('drops a pin to an agent of another agent policy instead of re-pinning', async () => {
+      const policy = await generate(
+        testConfig,
+        { agentIds: ['agent-a'] },
+        agentIdCondition('old-policy-agent')
+      );
+
+      expect(policy?.condition).toBeUndefined();
+    });
+
+    it('still parks a browser monitor when no complete agent is enrolled', async () => {
+      const browserConfig = {
+        ...dummyBrowserConfig,
+        id: 'browser-id',
+      } as unknown as HeartbeatConfig;
+
+      const policy = await generate(browserConfig, { agentIds: ['basic'], completeAgentIds: [] });
+
+      expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
+    });
+
+    it.each([
+      ['no sentinel state yet', {}],
+      [
+        'the sentinel state of a previous agent policy',
+        {
+          'condition-location': { agentPolicyId: 'previous-policy', revision: 1, ready: true },
+        },
+      ],
+      [
+        'agents that have not applied the sentinel',
+        {
+          'condition-location': { agentPolicyId: 'single-agent-policy', revision: 4, ready: false },
+        },
+      ],
+    ])('creates a monitor unpinned with %s', async (_, sentinels) => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          licensing: enterpriseLicensing,
+          taskManager: {
+            get: jest.fn().mockResolvedValue({
+              state: { [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: sentinels },
+            }),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const bulkCreate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [], failed: [] });
+
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: { ...testConfig, locations: [conditionLocation] }, globalParams: {} }],
+        [conditionLocation],
+        'default',
+        []
+      );
+
+      expect(bulkCreate.mock.calls[0][0].newPolicies[0].condition).toBeUndefined();
+    });
+
+    it('leaves the sentinel out of rebalance placement, writes and totals', async () => {
+      jest.spyOn(PackagePolicyService.prototype, 'listByAgentPolicy').mockResolvedValue([
+        {
+          id: shardSentinelPolicyId('ap-1'),
+          condition: SHARD_SENTINEL_CONDITION,
+          spaceIds: ['default'],
+          version: 'WzAsMV0=',
+          revision: 1,
+          name: 'sentinel',
+          policy_ids: ['ap-1'],
+          inputs: [{ type: 'synthetics/http', enabled: true }],
+        },
+        {
+          id: 'm1-ap-1',
+          spaceIds: ['default'],
+          version: 'WzAsMV0=',
+          revision: 1,
+          name: 'm1',
+          policy_ids: ['ap-1'],
+          inputs: [{ type: 'synthetics/http', enabled: true }],
+        },
+      ]);
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        // A legacy location id is its agent policy id, which the sentinel id ends with.
+        location: { id: 'ap-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a'],
+        browserAgentIds: [],
+        signal: new AbortController().signal,
+      });
+
+      expect(bulkUpdateInSpace).toHaveBeenCalledWith({
+        spaceId: 'default',
+        policiesToUpdate: [
+          expect.objectContaining({ update: expect.objectContaining({ id: 'm1-ap-1' }) }),
+        ],
+      });
+      expect(result.total).toBe(1);
+    });
+
+    it('creates the sentinel only when it is missing', async () => {
+      const hasShardSentinel = jest
+        .spyOn(PackagePolicyService.prototype, 'hasShardSentinel')
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
+      const createShardSentinel = jest
+        .spyOn(PackagePolicyService.prototype, 'createShardSentinel')
+        .mockResolvedValue(true);
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      await expect(syntheticsPrivateLocation.ensureShardSentinel('ap-1')).resolves.toEqual({
+        created: false,
+      });
+      await expect(syntheticsPrivateLocation.ensureShardSentinel('ap-1')).resolves.toEqual({
+        created: true,
+      });
+      expect(hasShardSentinel).toHaveBeenCalledWith('ap-1');
+      expect(createShardSentinel).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['keeps', [{ id: 'other-location', agentPolicyId: 'ap-1' }], 0],
+      ['deletes', [{ id: 'other-location', agentPolicyId: 'ap-2' }], 1],
+    ])(
+      '%s the sentinel by whether a location still uses the agent policy',
+      async (_, locations, calls) => {
+        jest
+          .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+          .mockResolvedValue(locations as never);
+        const deleteShardSentinel = jest
+          .spyOn(PackagePolicyService.prototype, 'deleteShardSentinel')
+          .mockResolvedValue(undefined);
+
+        await new SyntheticsPrivateLocation(serverMock).deleteUnusedShardSentinel('ap-1');
+
+        expect(deleteShardSentinel).toHaveBeenCalledTimes(calls);
+      }
+    );
   });
 
   describe('editMonitors with an unusable Vault reference', () => {

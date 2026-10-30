@@ -22,6 +22,7 @@ import {
   planLocationRebalance,
   STALE_DATA_MS,
 } from '../synthetics_service/private_location/plan_rebalance';
+import { haveAgentsAppliedSentinel } from '../synthetics_service/private_location/shard_sentinel';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -46,8 +47,12 @@ import {
   isRebalancePrivateLocationShardsEnabled,
   REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+  REBALANCE_SHARDS_SENTINELS_STATE_KEY,
   REBALANCE_SHARDS_TASK_ID,
   REBALANCE_SHARDS_TASK_TYPE,
+  getShardSentinelStates,
+  type ShardSentinelState,
+  type ShardSentinelStates,
 } from './rebalance_shards_enabled';
 
 export { REBALANCE_SHARDS_TASK_ID };
@@ -83,6 +88,8 @@ interface RebalanceTaskState extends Record<string, unknown> {
   snapshotAt?: Record<string, number>;
   /** Telemetry only: locations already reported as broken, so a persistent fault is reported once. */
   locationIssues?: Record<string, PrivateLocationRebalanceReason>;
+  /** See {@link ShardSentinelState}. Rebuilt each active run from the current locations. */
+  shardSentinels?: ShardSentinelStates;
 }
 
 /**
@@ -163,7 +170,11 @@ export class RebalancePrivateLocationShardsTask {
 
       if (locations.length === 0) {
         return {
-          state: await this.returnedState(taskInstance, { ...PIN_DRAIN_RESET, shardingMode: mode }),
+          state: await this.returnedState(taskInstance, {
+            ...PIN_DRAIN_RESET,
+            shardingMode: mode,
+            [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {},
+          }),
           schedule,
         };
       }
@@ -181,6 +192,8 @@ export class RebalancePrivateLocationShardsTask {
       // streak restarts on the next recovery.
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
+      const priorSentinels = getShardSentinelStates(taskInstance);
+      const nextSentinels: ShardSentinelStates = {};
 
       for (const location of locations) {
         signal.throwIfAborted();
@@ -192,6 +205,10 @@ export class RebalancePrivateLocationShardsTask {
         let agentsTotal = 0;
         try {
           const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
+          // Before the health checks, so agents enrolling later get the sentinel
+          // with their first policy.
+          const sentinel = await this.getShardSentinelState(location, priorSentinels[location.id]);
+          nextSentinels[location.id] = sentinel;
 
           // Data-plane liveness veto: only worth a `synthetics-*` query when at
           // least one agent looks stale by check-in. In steady state (all fresh)
@@ -246,6 +263,22 @@ export class RebalancePrivateLocationShardsTask {
               );
             }
             continue;
+          }
+
+          if (!sentinel.ready) {
+            const ready = haveAgentsAppliedSentinel(
+              healthyAgentIds.map((agentId) => agents.get(agentId)?.policyRevision),
+              sentinel.revision
+            );
+            nextSentinels[location.id] = { ...sentinel, ready };
+            if (!ready) {
+              // Pinning before the agents run the sentinel could stop their
+              // running monitors (elastic/elastic-agent#17714); leave pins as they are.
+              this.debugLog(
+                `location ${location.id}: waiting for healthy agents to apply agent policy revision ${sentinel.revision} (shard sentinel); skipping rebalance`
+              );
+              continue;
+            }
           }
 
           this.debugLog(
@@ -333,6 +366,10 @@ export class RebalancePrivateLocationShardsTask {
           if (signal.aborted) {
             throw e;
           }
+          const priorSentinel = priorSentinels[location.id];
+          if (!nextSentinels[location.id] && priorSentinel) {
+            nextSentinels[location.id] = priorSentinel;
+          }
           this.debugLog(`Rebalance failed for location ${location.id}; skipping: ${e.message}`);
           nextIssues[location.id] = 'error';
           if (priorIssues[location.id] !== 'error') {
@@ -359,6 +396,7 @@ export class RebalancePrivateLocationShardsTask {
           shardingMode: mode,
           locationIssues: nextIssues,
           snapshotAt: nextSnapshotAt,
+          [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: nextSentinels,
         }),
         schedule,
       };
@@ -410,6 +448,35 @@ export class RebalancePrivateLocationShardsTask {
     // must stay claimable so a disabled cycle can drain leftover agent pins.
     await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /**
+   * Ensures the location's agent policy has its shard sentinel and returns the
+   * agent policy revision agents must reach before monitors are pinned there.
+   * A sentinel created now, or a location moved to another agent policy, starts
+   * over as not ready.
+   */
+  private async getShardSentinelState(
+    location: { id: string; agentPolicyId: string },
+    prior?: ShardSentinelState
+  ): Promise<ShardSentinelState> {
+    const { privateLocationAPI } = this.syntheticsMonitorClient;
+    const { agentPolicyId } = location;
+    const { created } = await privateLocationAPI.ensureShardSentinel(agentPolicyId);
+    if (!created && prior?.agentPolicyId === agentPolicyId) {
+      return prior;
+    }
+    // Read once the sentinel exists: this revision and every later one contain it.
+    const revision = await privateLocationAPI.getAgentPolicyRevision(agentPolicyId);
+    if (revision === undefined) {
+      throw new Error(`Agent policy ${agentPolicyId} not found`);
+    }
+    if (created) {
+      this.debugLog(
+        `created shard sentinel on agent policy ${agentPolicyId} (revision ${revision})`
+      );
+    }
+    return { agentPolicyId, revision, ready: false };
   }
 
   /**

@@ -120,6 +120,18 @@ const makeServer = ({
 };
 
 describe('findLeftoverPackagePolicies', () => {
+  it('never reports a shard sentinel as a leftover', async () => {
+    const { server, soClient } = makeServer({
+      policyIdPages: [['m1-loc1', 'synthetics-shard-sentinel-ap-1']],
+      monitorPages: [[monitor('m1', ['loc1'])]],
+    });
+
+    await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
+      leftoverIds: [],
+      missingLocationIds: [],
+    });
+  });
+
   it('finds nothing when every monitor has its policy', async () => {
     const { server, soClient } = makeServer({
       policyIdPages: [['m1-loc1']],

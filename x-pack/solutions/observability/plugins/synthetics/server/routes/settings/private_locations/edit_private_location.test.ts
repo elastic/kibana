@@ -10,6 +10,7 @@ import { editPrivateLocationRoute, EditPrivateLocationSchema } from './edit_priv
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { updatePrivateLocationMonitors } from './helpers';
 import { runTaskPerPrivateLocation } from '../../../tasks/sync_private_locations_monitors_task';
+import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
 import {
   getPrivateLocations,
   getPrivateLocationsForNamespaces,
@@ -17,6 +18,10 @@ import {
 
 jest.mock('../../../tasks/sync_private_locations_monitors_task', () => ({
   runTaskPerPrivateLocation: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('../../../tasks/rebalance_private_location_shards_task', () => ({
+  runRebalanceShardsTaskSoon: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../../synthetics_service/get_private_locations', () => ({
@@ -53,6 +58,9 @@ const makeRouteContext = (body: Record<string, unknown>) => {
     response,
     spaceId: 'default',
     savedObjectsClient: {},
+    syntheticsMonitorClient: {
+      privateLocationAPI: { deleteUnusedShardSentinel: jest.fn().mockResolvedValue(undefined) },
+    },
     monitorConfigRepository: {
       findDecryptedMonitors: jest.fn().mockResolvedValue([]),
     },
@@ -257,6 +265,32 @@ describe('editPrivateLocationRoute agent policy change', () => {
       (runTaskPerPrivateLocation as jest.Mock).mock.invocationCallOrder[0]
     );
     expect(updatePrivateLocationMonitors).not.toHaveBeenCalled();
+  });
+
+  it('moves the shard sentinel: nudges the rebalance task and removes the unused old one', async () => {
+    const { routeContext } = setup();
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(runRebalanceShardsTaskSoon).toHaveBeenCalledWith({ server: routeContext.server });
+    expect(
+      routeContext.syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel
+    ).toHaveBeenCalledWith('ap-1');
+  });
+
+  it('keeps the edit when removing the old shard sentinel fails', async () => {
+    const { edit, routeContext } = setup();
+    routeContext.server.logger = { warn: jest.fn() };
+    routeContext.syntheticsMonitorClient.privateLocationAPI.deleteUnusedShardSentinel.mockRejectedValueOnce(
+      new Error('fleet down')
+    );
+
+    await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).toHaveBeenCalledTimes(1);
+    expect(routeContext.server.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('agent policy ap-1: fleet down')
+    );
   });
 
   it('reverts the agent policy and rethrows when scheduling the move fails', async () => {

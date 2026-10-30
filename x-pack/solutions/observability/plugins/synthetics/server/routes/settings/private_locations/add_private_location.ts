@@ -19,6 +19,7 @@ import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
+import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
 export const PrivateLocationSchema = z.strictObject({
@@ -127,6 +128,8 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
 
     try {
       const result = await repo.createPrivateLocation(formattedLocation, newId);
+      // The rebalance task puts the shard sentinel on the agent policy.
+      void runRebalanceShardsTaskSoon({ server });
 
       return toClientContract(result);
     } catch (error) {

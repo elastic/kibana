@@ -10,6 +10,7 @@ import type { PackagePolicyPartialUpdate } from '@kbn/fleet-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
 import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
+import { isShardSentinelPolicyId } from './shard_sentinel';
 
 export { configIdOf };
 
@@ -206,13 +207,15 @@ export const toConditionUpdates = (
 /**
  * Condition-only updates that drop every existing agent pin. Used when shard
  * rebalancing is turned off so monitors go back to unfiltered (classic) scheduling.
+ * The shard sentinel keeps its condition: without it, the next pinning would
+ * stop running monitors on the agents (see `shard_sentinel.ts`).
  */
 export const toClearedConditionUpdates = (
   pkgPolicies: ShardedPackagePolicy[]
 ): Map<string, ConditionUpdate[]> => {
   const bySpace = new Map<string, ConditionUpdate[]>();
   for (const pkgPolicy of pkgPolicies) {
-    if (typeof pkgPolicy.condition !== 'string') {
+    if (typeof pkgPolicy.condition !== 'string' || isShardSentinelPolicyId(pkgPolicy.id)) {
       continue;
     }
     if (!hasVersion(pkgPolicy)) {

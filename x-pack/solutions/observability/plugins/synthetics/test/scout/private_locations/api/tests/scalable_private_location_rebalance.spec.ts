@@ -17,6 +17,7 @@ import { addMonitor, deleteMonitors } from '../../../common/fixtures/monitors';
 import {
   getPackagePolicyForMonitor,
   getAgentPolicyRevision,
+  getShardSentinel,
   indexFakeFleetAgent,
   setFleetAgentLastCheckin,
   deleteFleetAgents,
@@ -25,6 +26,7 @@ import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 import { agentIdFromCondition } from '../../../../../server/synthetics_service/private_location/assign_by_condition';
 import { STALE_CHECKIN_MS } from '../../../../../server/synthetics_service/private_location/plan_rebalance';
+import { SHARD_SENTINEL_CONDITION } from '../../../../../server/synthetics_service/private_location/shard_sentinel';
 
 const TEST_TIMEOUT = 7 * 60 * 1000;
 const MONITOR_COUNT = 8;
@@ -117,6 +119,15 @@ apiTest.describe('ScalablePrivateLocationRebalance', { tag: ['@local-stateful-cl
           initialAssignment.set(monitorId, agentId as string);
         }
       });
+
+      // Pins only land once the agents run the location's shard sentinel.
+      const sentinel = await getShardSentinel(
+        apiClient,
+        adminHeaders,
+        privateLocation.agentPolicyId
+      );
+      expect(sentinel?.condition).toBe(SHARD_SENTINEL_CONDITION);
+      expect(sentinel?.is_managed).toBe(true);
 
       const onA = [...initialAssignment.entries()].filter(([, a]) => a === agentAId);
       const onB = [...initialAssignment.entries()].filter(([, a]) => a === agentBId);

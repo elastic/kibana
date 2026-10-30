@@ -23,7 +23,7 @@ const emptyFindResponse = { total: 0, saved_objects: [], page: 1, per_page: 0 };
 const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) => {
   (migrateLegacyPrivateLocations as jest.Mock).mockResolvedValue(undefined);
   (getPrivateLocationsAndAgentPolicies as jest.Mock).mockResolvedValue({
-    locations: [{ id: locationId }],
+    locations: [{ id: locationId, agentPolicyId: 'ap-1' }],
   });
 
   // Internal (unscoped) repository sees monitors in every space.
@@ -44,12 +44,14 @@ const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) =
 
   const routeContext = {
     savedObjectsClient,
-    syntheticsMonitorClient: {},
+    syntheticsMonitorClient: {
+      privateLocationAPI: { deleteUnusedShardSentinel: jest.fn().mockResolvedValue(undefined) },
+    },
     request: { params: { id: locationId } },
     response,
     monitorConfigRepository,
     server: {
-      logger: { debug: jest.fn(), error: jest.fn() },
+      logger: { debug: jest.fn(), error: jest.fn(), warn: jest.fn() },
       coreStart: {
         savedObjects: { createInternalRepository: jest.fn().mockReturnValue(internalSOClient) },
       },
@@ -78,6 +80,20 @@ describe('deletePrivateLocationRoute', () => {
       privateLocationSavedObjectName,
       locationId,
       { force: true }
+    );
+  });
+
+  it('removes the unused shard sentinel of the deleted location, best effort', async () => {
+    const { routeContext, savedObjectsClient } = setup({ crossSpaceMonitorTotal: 0 });
+    const { deleteUnusedShardSentinel } = routeContext.syntheticsMonitorClient.privateLocationAPI;
+    deleteUnusedShardSentinel.mockRejectedValueOnce(new Error('fleet down'));
+
+    await deletePrivateLocationRoute().handler(routeContext);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalled();
+    expect(deleteUnusedShardSentinel).toHaveBeenCalledWith('ap-1');
+    expect(routeContext.server.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('agent policy ap-1: fleet down')
     );
   });
 

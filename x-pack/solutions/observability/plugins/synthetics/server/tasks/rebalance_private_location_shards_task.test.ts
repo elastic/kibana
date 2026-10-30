@@ -22,6 +22,7 @@ import {
   REBALANCE_SHARDS_ENABLED_STATE_KEY,
   REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+  REBALANCE_SHARDS_SENTINELS_STATE_KEY,
 } from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -57,11 +58,15 @@ const rebalanceResult = (over: Partial<RebalanceShardsResult> = {}): RebalanceSh
 const mockRebalanceShards = jest.fn().mockResolvedValue(rebalanceResult());
 const mockReportEvent = jest.fn();
 const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0, failed: 0 });
+const mockEnsureShardSentinel = jest.fn().mockResolvedValue({ created: false });
+const mockGetAgentPolicyRevision = jest.fn().mockResolvedValue(1);
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
     rebalanceShards: mockRebalanceShards,
     clearShardConditions: mockClearShardConditions,
+    ensureShardSentinel: mockEnsureShardSentinel,
+    getAgentPolicyRevision: mockGetAgentPolicyRevision,
   },
 } as unknown as SyntheticsMonitorClient;
 
@@ -93,11 +98,13 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
 const agentInfo = (
   lastCheckin: number,
   memoryMib: number | null = null,
-  complete = false
+  complete = false,
+  policyRevision: number | null = 1
 ): AgentInfo => ({
   lastCheckin,
   memoryMib,
   complete,
+  policyRevision,
 });
 
 const taskInstance = (
@@ -125,6 +132,8 @@ describe('RebalancePrivateLocationShardsTask', () => {
     mockGetLicense.mockResolvedValue(enterpriseLicense());
     mockRebalanceShards.mockResolvedValue(rebalanceResult());
     mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
+    mockEnsureShardSentinel.mockResolvedValue({ created: false });
+    mockGetAgentPolicyRevision.mockResolvedValue(1);
   });
 
   afterEach(() => jest.useRealTimers());
@@ -287,6 +296,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         extra: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {},
       });
     });
 
@@ -303,6 +313,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         foo: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {},
       });
     });
 
@@ -317,6 +328,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
       expect(getPrivateLocationsSpy).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(mockEnsureShardSentinel).not.toHaveBeenCalled();
       expect(result.state).toEqual(
         expect.objectContaining({ [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true })
       );
@@ -555,6 +567,131 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockRebalanceShards).toHaveBeenCalledWith(
         expect.objectContaining({ signal: abortController.signal })
       );
+    });
+  });
+
+  describe('shard sentinel', () => {
+    const sentinels = (state: Record<string, unknown>) =>
+      state[REBALANCE_SHARDS_SENTINELS_STATE_KEY] as Record<string, unknown>;
+
+    beforeEach(() => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+    });
+
+    it('creates the sentinel and leaves pins alone until every healthy agent applied it', async () => {
+      mockEnsureShardSentinel.mockResolvedValue({ created: true });
+      mockGetAgentPolicyRevision.mockResolvedValue(7);
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([
+          ['agent-1', agentInfo(NOW, null, false, 7)],
+          ['agent-2', agentInfo(NOW, null, false, 6)],
+        ])
+      );
+
+      const result = await run();
+
+      expect(mockEnsureShardSentinel).toHaveBeenCalledWith('ap-1');
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(sentinels(result.state)).toEqual({
+        'loc-1': { agentPolicyId: 'ap-1', revision: 7, ready: false },
+      });
+    });
+
+    it('counts an agent that never acknowledged a policy as not applied', async () => {
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW, null, false, null)]]));
+
+      await run();
+
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+    });
+
+    it('pins once every healthy agent reached the recorded revision', async () => {
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([
+          ['agent-1', agentInfo(NOW, null, false, 7)],
+          ['agent-2', agentInfo(NOW, null, false, 9)],
+          // Stale and not proven active: not a pin target, so it does not hold the gate.
+          ['agent-3', agentInfo(NOW - STALE_CHECKIN_MS - 1, null, false, 2)],
+        ])
+      );
+      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
+
+      const result = await run({
+        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {
+          'loc-1': { agentPolicyId: 'ap-1', revision: 7, ready: false },
+        },
+      });
+
+      expect(mockGetAgentPolicyRevision).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).toHaveBeenCalledWith(
+        expect.objectContaining({ healthyAgentIds: ['agent-1', 'agent-2'] })
+      );
+      expect(sentinels(result.state)).toEqual({
+        'loc-1': { agentPolicyId: 'ap-1', revision: 7, ready: true },
+      });
+    });
+
+    it('stays ready when a new agent has not acknowledged its policy yet', async () => {
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([
+          ['agent-1', agentInfo(NOW, null, false, 7)],
+          ['agent-new', agentInfo(NOW, null, false, null)],
+        ])
+      );
+
+      await run({
+        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {
+          'loc-1': { agentPolicyId: 'ap-1', revision: 7, ready: true },
+        },
+      });
+
+      expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['the sentinel had to be recreated', { agentPolicyId: 'ap-1' }, true],
+      ['the location moved to another agent policy', { agentPolicyId: 'ap-old' }, false],
+    ])('starts over when %s', async (_, prior, created) => {
+      mockEnsureShardSentinel.mockResolvedValue({ created });
+      mockGetAgentPolicyRevision.mockResolvedValue(12);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW, null, false, 11)]]));
+
+      const result = await run({
+        [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: {
+          'loc-1': { ...prior, revision: 3, ready: true },
+        },
+      });
+
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(sentinels(result.state)).toEqual({
+        'loc-1': { agentPolicyId: 'ap-1', revision: 12, ready: false },
+      });
+    });
+
+    it('puts the sentinel on a location before any agent is healthy', async () => {
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(new Map());
+
+      await run();
+
+      expect(mockEnsureShardSentinel).toHaveBeenCalledWith('ap-1');
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+    });
+
+    it('keeps the prior sentinel state when the sentinel cannot be checked', async () => {
+      mockEnsureShardSentinel.mockRejectedValue(new Error('fleet down'));
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+      const prior = { 'loc-1': { agentPolicyId: 'ap-1', revision: 1, ready: true } };
+
+      const result = await run({ [REBALANCE_SHARDS_SENTINELS_STATE_KEY]: prior });
+
+      expect(mockRebalanceShards).not.toHaveBeenCalled();
+      expect(sentinels(result.state)).toEqual(prior);
     });
   });
 
