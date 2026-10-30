@@ -1,5 +1,5 @@
 {
-  "sha1": "76b05343dabeb21717b540d68490620a54653746",
+  "sha1": "a27bcd83d5d331c809b7afaa8f4ee9c7bb685d64",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -944,6 +944,22 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_interrupted_executions_api.spec.ts",
         "line": 482,
         "column": 18
+      }
+    },
+    {
+      "id": "65d5e4a40b5d22b-0cf329a6c7ec439",
+      "title": "Agent Builder — Context Engine Memory end to end writes a memory in one conversation and retrieves it in another",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_memory_e2e_api.spec.ts",
+        "line": 217,
+        "column": 7
       }
     },
     {
