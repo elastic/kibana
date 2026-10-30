@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixtures';
+import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
 import type { InventoryListColumn } from '../../../inventory_api/types';
 import {
   ENTITY_TYPE_BY_CATEGORY,

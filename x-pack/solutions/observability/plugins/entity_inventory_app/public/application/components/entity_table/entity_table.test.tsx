@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildListResponseFixture, HOST_TYPE_FIXTURE } from '../../../inventory_api/fixtures';
+import { buildListResponseFixture, HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
 import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityTable } from './entity_table';

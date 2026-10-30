@@ -13,7 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
 import type { FixtureScenario } from '../../../inventory_api/fixture_client';
 import { createFixtureEntityInventoryApiClient } from '../../../inventory_api/fixture_client';
-import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixtures';
+import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
 import { createAppServicesMock } from '../../../mocks';
 import { EntityInventorySearchProvider } from '../../context/search_context';
 import { EntityTypeResults } from './entity_type_results';

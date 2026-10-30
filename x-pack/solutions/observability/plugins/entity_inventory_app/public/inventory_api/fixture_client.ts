@@ -6,10 +6,10 @@
  */
 
 import type { EntityInventoryApiClient } from './client';
-import type { FixtureScenario } from './fixtures';
-import { buildListResponseFixture, TYPES_RESPONSE_FIXTURE } from './fixtures';
+import type { FixtureScenario } from './fixture_data';
+import { buildListResponseFixture, TYPES_RESPONSE_FIXTURE } from './fixture_data';
 
-export type { FixtureScenario } from './fixtures';
+export type { FixtureScenario } from './fixture_data';
 
 export interface FixtureEntityInventoryApiClientOptions {
   /** The list response returned for every known type. Defaults to `normal`. */
