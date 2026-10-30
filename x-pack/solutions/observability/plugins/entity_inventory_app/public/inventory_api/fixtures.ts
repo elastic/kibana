@@ -91,7 +91,12 @@ const OPERATING_SYSTEMS = [
 ] as const;
 const CLOUDS = [
   { provider: 'aws', platform: 'aws_ec2', region: 'us-east-1', zone: 'us-east-1a' },
-  { provider: 'gcp', platform: 'gcp_compute_engine', region: 'europe-west1', zone: 'europe-west1-b' },
+  {
+    provider: 'gcp',
+    platform: 'gcp_compute_engine',
+    region: 'europe-west1',
+    zone: 'europe-west1-b',
+  },
   { provider: 'azure', platform: 'azure_vm', region: 'westeurope', zone: 'westeurope-1' },
 ] as const;
 

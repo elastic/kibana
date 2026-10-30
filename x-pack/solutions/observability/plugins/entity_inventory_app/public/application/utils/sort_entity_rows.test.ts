@@ -63,9 +63,12 @@ describe('sortEntityRows', () => {
       'a',
       'c',
     ]);
-    expect(ids(sortEntityRows(rows, [{ id: 'paused', direction: 'desc' }], getSortValue))).toEqual(
-      ['a', 'b', 'd', 'c']
-    );
+    expect(ids(sortEntityRows(rows, [{ id: 'paused', direction: 'desc' }], getSortValue))).toEqual([
+      'a',
+      'b',
+      'd',
+      'c',
+    ]);
   });
 
   it('sorts multi-value cells by their first value, treating empty arrays as null', () => {
@@ -100,10 +103,8 @@ describe('sortEntityRows', () => {
   });
 
   it('sorts by the value the getter derives', () => {
-    const derived = sortEntityRows(
-      rows,
-      [{ id: 'derived', direction: 'asc' }],
-      (row) => (row.name === null ? 'zzz' : row.id)
+    const derived = sortEntityRows(rows, [{ id: 'derived', direction: 'asc' }], (row) =>
+      row.name === null ? 'zzz' : row.id
     );
 
     expect(ids(derived)).toEqual(['a', 'c', 'd', 'b']);

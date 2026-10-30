@@ -64,10 +64,9 @@ export const COLUMN_LABELS: Readonly<Record<string, string>> = {
     'xpack.entityInventoryApp.entityTable.columns.cloudAccountId',
     { defaultMessage: 'Cloud account ID' }
   ),
-  'kubernetes.namespace': i18n.translate(
-    'xpack.entityInventoryApp.entityTable.columns.namespace',
-    { defaultMessage: 'Namespace' }
-  ),
+  'kubernetes.namespace': i18n.translate('xpack.entityInventoryApp.entityTable.columns.namespace', {
+    defaultMessage: 'Namespace',
+  }),
   'kubernetes.deployment.name': i18n.translate(
     'xpack.entityInventoryApp.entityTable.columns.deployment',
     { defaultMessage: 'Deployment' }
@@ -109,7 +108,8 @@ interface PageRange {
 
 export const getCompleteSummary = ({ start, end, total }: PageRange & { total: number }) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.summary.complete', {
-    defaultMessage: 'Showing {start}-{end} of {total} {total, plural, one {entity} other {entities}}',
+    defaultMessage:
+      'Showing {start}-{end} of {total} {total, plural, one {entity} other {entities}}',
     values: { start, end, total },
   });
 

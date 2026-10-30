@@ -48,7 +48,9 @@ describe('EntityTableDiagnosticsCallout', () => {
   ];
 
   it('lists every source error and unavailable column', () => {
-    render(<EntityTableDiagnosticsCallout errors={errors} unavailableColumns={unavailableColumns} />);
+    render(
+      <EntityTableDiagnosticsCallout errors={errors} unavailableColumns={unavailableColumns} />
+    );
 
     const callout = screen.getByTestId('entityInventoryDiagnosticsCallout');
     expect(callout).toHaveTextContent(DIAGNOSTICS_TITLE);

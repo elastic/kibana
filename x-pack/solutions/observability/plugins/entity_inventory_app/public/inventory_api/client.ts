@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  InventoryListRequest,
-  InventoryListResponse,
-  InventoryTypesResponse,
-} from './types';
+import type { InventoryListRequest, InventoryListResponse, InventoryTypesResponse } from './types';
 
 /** The default and maximum number of entities a `_list` request returns. */
 export const ENTITY_INVENTORY_LIST_LIMIT = 10_000;

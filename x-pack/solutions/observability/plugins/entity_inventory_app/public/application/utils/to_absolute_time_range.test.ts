@@ -20,10 +20,7 @@ describe('toAbsoluteTimeRange', () => {
 
   it('keeps the instants of an absolute range', () => {
     expect(
-      toAbsoluteTimeRange(
-        { from: '2026-10-29T08:00:00.000Z', to: '2026-10-29T09:30:00.000Z' },
-        NOW
-      )
+      toAbsoluteTimeRange({ from: '2026-10-29T08:00:00.000Z', to: '2026-10-29T09:30:00.000Z' }, NOW)
     ).toEqual({ from: '2026-10-29T08:00:00.000Z', to: '2026-10-29T09:30:00.000Z' });
   });
 

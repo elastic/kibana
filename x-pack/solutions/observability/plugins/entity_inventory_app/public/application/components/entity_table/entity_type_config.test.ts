@@ -83,9 +83,9 @@ describe('entity type config', () => {
 
     it('falls back through the name fields in order', () => {
       expect(getEntityName({ ...row, 'host.name': null }, nameFields)).toBe('web-001.internal');
-      expect(
-        getEntityName({ ...row, 'host.name': null, 'host.hostname': null }, nameFields)
-      ).toBe('abc');
+      expect(getEntityName({ ...row, 'host.name': null, 'host.hostname': null }, nameFields)).toBe(
+        'abc'
+      );
       expect(
         getEntityName(
           { ...row, 'host.name': null, 'host.hostname': null, 'host.id': null },

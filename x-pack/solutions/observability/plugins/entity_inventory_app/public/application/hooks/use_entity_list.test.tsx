@@ -23,16 +23,15 @@ const createClientMock = (
 });
 
 const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
-  renderHook(
-    () => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }),
-    {
-      wrapper: ({ children }) => (
-        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-          <EntityInventorySearchProvider entityCategory="hosts">{children}</EntityInventorySearchProvider>
-        </KibanaContextProvider>
-      ),
-    }
-  );
+  renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {
+    wrapper: ({ children }) => (
+      <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+        <EntityInventorySearchProvider entityCategory="hosts">
+          {children}
+        </EntityInventorySearchProvider>
+      </KibanaContextProvider>
+    ),
+  });
 
 describe('useEntityList', () => {
   it('lists the entities of the type over the committed range resolved to absolute bounds', async () => {

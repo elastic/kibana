@@ -41,7 +41,11 @@ describe('createFixtureEntityInventoryApiClient', () => {
   );
 
   it('includes rows with null, multi-value and fallback-name host values', async () => {
-    const { rows } = await createFixtureEntityInventoryApiClient().listEntities('host', REQUEST, {});
+    const { rows } = await createFixtureEntityInventoryApiClient().listEntities(
+      'host',
+      REQUEST,
+      {}
+    );
 
     expect(rows.some((row) => row['cloud.provider'] === null)).toBe(true);
     expect(rows.some((row) => Array.isArray(row['host.ip']))).toBe(true);
@@ -59,11 +63,9 @@ describe('createFixtureEntityInventoryApiClient', () => {
   });
 
   it('returns fewer rows than the total for the truncated scenario', async () => {
-    const list = await createFixtureEntityInventoryApiClient({ scenario: 'truncated' }).listEntities(
-      'host',
-      REQUEST,
-      {}
-    );
+    const list = await createFixtureEntityInventoryApiClient({
+      scenario: 'truncated',
+    }).listEntities('host', REQUEST, {});
 
     expect(list.truncated).toBe(true);
     expect(list.total).toBeGreaterThan(list.rows.length);
