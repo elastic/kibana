@@ -1,9 +1,25 @@
 {
-  "sha1": "2233a28504dd4ee6cc7eddaac9cd8d0bea75a382",
+  "sha1": "89c49bce16ada8f82ec695427b244da36527d2d7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "b90fa6f806c5b45-b3e54a6ce1163f9",
+      "title": "Set the default space up with the Nightshift service accounts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "9094409a4361f3f-43b3061a5b88a7d",
       "title": "/internal/nightshift/custom_context adds, keeps, edits and removes snippets",
@@ -330,8 +346,104 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 211,
+        "line": 217,
         "column": 11
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-824afc0970700c6",
+      "title": "Nightshift service account setup runs investigations in this space as the Nightshift agent account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 45,
+        "column": 50
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-227ef59fafc152f",
+      "title": "Nightshift service account setup binds every workflow of the space to that one account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 53,
+        "column": 16
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-259e0f74a466d11",
+      "title": "Nightshift service account setup names both accounts with the roles of this deployment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 66,
+        "column": 33
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-d40fef37616a115",
+      "title": "Nightshift service account setup refuses to set a space up for a caller without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-5278951377b2ae9",
+      "title": "Nightshift service account setup tells a user without manage_security that the space is set up but not theirs to change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 94,
+        "column": 75
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-4a341d3ea109230",
+      "title": "Nightshift service account setup refuses investigations in a space that was never set up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 102,
+        "column": 9
       }
     },
     {

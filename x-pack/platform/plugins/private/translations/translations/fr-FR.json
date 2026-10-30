@@ -48733,8 +48733,6 @@
     "xpack.securitySolution.timeline.kpis.sourceIpKpiTitle": "IP source",
     "xpack.securitySolution.timeline.kpis.userKpiTitle": "Utilisateurs",
     "xpack.securitySolution.timeline.modal.attachToCaseButtonLabel": "Attacher à un cas",
-    "xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel": "Attacher à un cas existant",
-    "xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel": "Attacher au nouveau cas",
     "xpack.securitySolution.timeline.modal.newTimeline": "Nouvelle chronologie",
     "xpack.securitySolution.timeline.modal.newTimelineBtn": "Nouveau",
     "xpack.securitySolution.timeline.modal.newTimelineTemplate": "Nouveau modèle de chronologie",
