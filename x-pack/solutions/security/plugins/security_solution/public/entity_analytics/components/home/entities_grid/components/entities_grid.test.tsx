@@ -15,6 +15,7 @@ import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_st
 import { EntitiesGrid } from './entities_grid';
 import type { EntitiesGridProps } from './entities_grid';
 import type { ReadAccess } from '../grid_columns';
+import type { RowActions } from './cells/row_actions_cell';
 
 jest.mock('../hooks/use_entity_grid_data', () => ({
   ...jest.requireActual('../hooks/use_entity_grid_data'),
@@ -86,6 +87,16 @@ describe('EntitiesGrid', () => {
 
     expect(screen.getByText('alpha')).toBeInTheDocument();
     expect(screen.getByText('beta')).toBeInTheDocument();
+  });
+
+  it('leaves full screen when the grid unmounts', () => {
+    const onFullScreenChange = jest.fn();
+    const { unmount } = renderGrid({ onFullScreenChange });
+    onFullScreenChange.mockClear();
+
+    unmount();
+
+    expect(onFullScreenChange).toHaveBeenCalledWith(false);
   });
 
   it('expands only the groups that have records', () => {
@@ -201,6 +212,20 @@ describe('EntitiesGrid', () => {
 
     expect(screen.getByText('No records match the current filters')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument();
+  });
+
+  it('hides "Investigate in timeline" for rows when the action is unavailable', () => {
+    const rowActions: RowActions = {
+      onInvestigateInTimeline: undefined,
+      onOpenEntityGraph: jest.fn(),
+    };
+
+    renderGrid({ rowsMode: 'individual', columns: INDIVIDUAL_ROWS_COLUMNS, rowActions });
+
+    expect(
+      screen.queryByRole('button', { name: 'Investigate in timeline' })
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Open entity graph' }).length).toBeGreaterThan(0);
   });
 
   it('says in the toolbar how many rows it shows when the view has more', () => {

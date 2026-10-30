@@ -24,6 +24,15 @@ export interface CloudOnboardingEcfStack {
   stackArn?: string;
   /** Service IDs active when the stack was last launched or updated. Used to detect staleness on session resume. */
   serviceIds?: string[];
+  /** Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated. Used to detect settings drift on session resume. */
+  serviceConfigs?: CloudOnboardingEcfServiceConfig[];
+}
+
+/** The per-service values that feed an ECF stack's parameters. */
+export interface CloudOnboardingEcfServiceConfig {
+  serviceId: string;
+  bucketArns: string[];
+  logGroupArns: string[];
 }
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
@@ -38,6 +47,19 @@ export type CloudOnboardingDeploymentAuthMethod =
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
+
+/**
+ * One row of the Service settings step as of the last deploy: an original service
+ * (`instanceId === serviceId`) or a duplicate of one (`<serviceId>__dup-<n>`).
+ */
+export interface CloudOnboardingInstance {
+  instanceId: string;
+  /** The service this instance belongs to. Policy-template key; unchanged for duplicates. */
+  serviceId: string;
+  /** Display name. */
+  name: string;
+  isDuplicate: boolean;
+}
 
 export interface CloudOnboardingDeployment {
   id: string;
@@ -60,6 +82,8 @@ export interface CloudOnboardingDeployment {
   description?: string;
   /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
   namespace?: string;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. Absent on onboardings saved before this field existed. */
+  instances?: CloudOnboardingInstance[];
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];

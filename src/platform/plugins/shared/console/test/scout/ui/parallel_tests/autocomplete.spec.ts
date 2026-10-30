@@ -31,7 +31,8 @@ const COMMENT_CONTEXTS = [
   { description: 'a multiline block comment', text: '/*\n GET /' },
 ];
 
-spaceTest.describe('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/296238
+spaceTest.describe.skip('Console autocomplete', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.console.goto();

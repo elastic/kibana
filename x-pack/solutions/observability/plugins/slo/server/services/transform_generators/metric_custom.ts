@@ -6,7 +6,7 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { is, metricCustomIndicatorSchemaZod } from '@kbn/slo-schema';
+import { is, metricCustomIndicatorSchema } from '@kbn/slo-schema';
 
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
@@ -24,7 +24,7 @@ export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?
 
 export class MetricCustomTransformGenerator extends TransformGenerator {
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
-    if (!is(metricCustomIndicatorSchemaZod, slo.indicator)) {
+    if (!is(metricCustomIndicatorSchema, slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
