@@ -97,6 +97,4 @@ fileGroups:
     - test/scout/**/*
     - types/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

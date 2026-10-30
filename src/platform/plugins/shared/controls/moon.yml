@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/controls
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/core'
   - '@kbn/embeddable-plugin'
   - '@kbn/dashboard-plugin'
@@ -66,6 +67,4 @@ fileGroups:
     - server/**/*
     - ./jest_setup.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

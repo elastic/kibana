@@ -183,6 +183,4 @@ fileGroups:
     - test/scout/**/*
     - test/scout_search_sessions/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

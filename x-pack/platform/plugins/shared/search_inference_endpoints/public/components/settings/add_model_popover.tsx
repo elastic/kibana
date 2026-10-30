@@ -13,6 +13,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { InferenceConnectorType, isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
+import { isConnectorUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
 import { getConnectorIcon } from '../../utils/connector_display';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { getModelStatus } from '../../utils/eis_utils';
@@ -64,6 +65,9 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       if (existingSet.has(connector.connectorId)) {
         return false;
       }
+      if (isConnectorUnavailableUnderRegionPolicy(connector)) {
+        return false;
+      }
       const templateRequired = isTemplateRequiredConnector(connector);
       if (allowTemplateRequiredModels !== templateRequired) {
         return false;
@@ -88,6 +92,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       return {
         label,
         key: connector.connectorId,
+        'data-test-subj': `add-model-option-${connector.connectorId}`,
         prepend: <EuiIcon type={getConnectorIcon(connector)} size="s" aria-hidden />,
         disabled: status === EisModelStatus.DeprecatedEOL,
         append: isDeprecated ? (

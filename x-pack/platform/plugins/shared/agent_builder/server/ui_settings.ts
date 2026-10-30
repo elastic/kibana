@@ -80,7 +80,7 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       schema: schema.boolean(),
       value: false,
-      experimental: true,
+      technicalPreview: true,
       requiresPageReload: false,
       readonly: false,
     },

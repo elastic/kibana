@@ -8,6 +8,7 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
 import { significantSecurityEventAttachmentReadSchema } from '../../../../../common/significant_security_event_schema';
+import { splitRemoteCluster } from '../../../../../common/remote_cluster';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildMatchesRequired } from '../common/matches_required';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
@@ -250,23 +251,46 @@ export const readCurrentRunState = async ({
     )
   );
 
+  const alertRefs = currentRun.flatMap((sse) => sse.alerts ?? []);
+  const eventRefs = currentRun.flatMap((sse) => sse.events ?? []);
+
+  // Enrollment is resolved by host name against this deployment's Fleet, so a remote host
+  // sharing a name with a local agent (`ubuntu`, `ip-10-0-0-12`) would resolve to that
+  // unrelated agent. Entities carry no provenance, so the cut is run-wide and resolves only
+  // on positive local evidence: an alert ref (always local), a local hit index, or a
+  // truncated `per_index` that may hide one. A run with no hit index has nothing to back an
+  // action, so it resolves nothing. A mixed local/remote run still resolves every host.
+  const hitIndices = [
+    ...currentRun.flatMap((sse) =>
+      (sse.hunt_result?.tier1.per_index ?? [])
+        .filter((entry) => entry.hit_count > 0)
+        .map((entry) => entry.index)
+    ),
+    ...eventRefs.map((e) => e.source_index),
+  ];
+  const hasLocalEvidence =
+    alertRefs.length > 0 ||
+    currentRun.some((sse) => sse.hunt_result?.tier1.per_index_truncated === true) ||
+    hitIndices.some((index) => splitRemoteCluster(index).cluster === undefined);
+
   const hosts: CurrentRunHost[] = [];
   for (const name of hostNames) {
-    const enrollment = await resolveHostEnrollment(name);
+    const enrollment = hasLocalEvidence
+      ? await resolveHostEnrollment(name)
+      : { enrolled: false as const };
     if (enrollment.enrolled) {
       hosts.push({
         name,
         enrolled: true,
         agentId: enrollment.agentId,
         capabilities: enrollment.capabilities,
+        capabilitiesSource: enrollment.capabilitiesSource,
       });
     } else {
       hosts.push({ name, enrolled: false, capabilities: [] });
     }
   }
 
-  const alertRefs = currentRun.flatMap((sse) => sse.alerts ?? []);
-  const eventRefs = currentRun.flatMap((sse) => sse.events ?? []);
   const processSelectors = await rehydrateProcessSelectors({
     alerts: alertRefs.map((a) => ({ alert_id: a.alert_id, index: a.index })),
     events: eventRefs.map((e) => {
@@ -289,9 +313,15 @@ export const readCurrentRunState = async ({
   // that carry `process.entity_id` or `process.pid`) on each SSE, so packaging reads the
   // evidence against what the customer's mappings say rather than a seed list. An empty
   // list means nothing in this run is host-scoped, which is the right reading when the
-  // customer has no process telemetry.
+  // customer has no process telemetry. Remote (`<cluster>:`) patterns are left out: a
+  // remote host has no local Fleet agent to act on, so its evidence is never host-scoped
+  // here, even though Tier 2 still hunts those streams.
   const matchesActionable = buildMatchesRequired([
-    ...new Set(currentRun.flatMap((sse) => sse.hunt_result?.actionable_indices ?? [])),
+    ...new Set(
+      currentRun
+        .flatMap((sse) => sse.hunt_result?.actionable_indices ?? [])
+        .filter((pattern) => splitRemoteCluster(pattern).cluster === undefined)
+    ),
   ]);
   const allEventsActionable = eventRefs.every((e) => matchesActionable(e.source_index));
   const hasProcessBearingEvent = eventRefs.some((e) => matchesActionable(e.source_index));

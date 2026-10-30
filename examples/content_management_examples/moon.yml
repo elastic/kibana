@@ -46,6 +46,4 @@ fileGroups:
     - server/**/*.ts
     - test/scout_examples/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

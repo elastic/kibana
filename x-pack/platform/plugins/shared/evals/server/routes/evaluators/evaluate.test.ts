@@ -26,6 +26,7 @@ import { awaitTraceReady, TraceReadinessError } from '../../evaluators/trace_rea
 import type { EvidenceRound, InstrumentationProfile } from '../../evaluators/evidence/types';
 import { withEvaluatorNameBaggage } from '../../evaluators/evaluator_tracing_context';
 import { registerEvaluateRoute } from './evaluate';
+import { EVALUATOR_CONCURRENCY } from './shared/execute_evaluators';
 import {
   buildClaudeCodeApiResponseDoc,
   buildClaudeCodeToolSpanDoc,
@@ -183,6 +184,47 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.status).toBe(200);
     expect(getSpaceId).toHaveBeenCalledWith(request);
     expect(asScoped).toHaveBeenCalledWith({ spaceId: 'marketing' });
+  });
+
+  it('runs evaluators with bounded concurrency, in input order, isolating failures', async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const buildTimedEvaluator = (name: string, fail = false) =>
+      buildEvaluator({
+        name,
+        kind: 'code',
+        evaluate: jest.fn(async () => {
+          inFlight += 1;
+          maxInFlight = Math.max(maxInFlight, inFlight);
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          inFlight -= 1;
+          if (fail) {
+            throw new Error(`${name} exploded`);
+          }
+          return { scores: [{ name, score: 1 }] };
+        }),
+      });
+    const names = ['e1', 'e2', 'e3', 'e4', 'e5', 'e6'];
+    const definitions = names.map((name) => buildTimedEvaluator(name, name === 'e2'));
+    const { handler } = setup({ evaluatorRegistry: buildEvaluatorRegistry(definitions) });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: CLAUDE_TRACE_ID }] },
+          evaluators: names.map((name) => ({ name })),
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(maxInFlight).toBe(EVALUATOR_CONCURRENCY);
+    const results = response.payload.results as EvaluateResponse['results'];
+    expect(results.map(({ evaluator }) => evaluator.name)).toEqual(names);
+    expect(results.map(({ status }) => status)).toEqual(['ok', 'error', 'ok', 'ok', 'ok', 'ok']);
+    expect(results[1].error?.message).toBe('e2 exploded');
   });
 
   it('returns two ok results, reuses one trace accessor, and caches inference client by connector', async () => {

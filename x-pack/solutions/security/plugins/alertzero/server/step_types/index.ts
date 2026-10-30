@@ -17,6 +17,7 @@ import {
   getTriagePlanSweepStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
+import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import {
   getSummarizeInvestigationStepDefinition,
   type SummarizeInvestigationStepDependencies,
@@ -29,8 +30,8 @@ export const registerStepDefinitions = ({
   workflowsExtensions,
   getActionsService,
   getConversations,
-  getExecution,
-  resolveConnectorId,
+  resolveChatModel,
+  getProposals,
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
@@ -41,8 +42,8 @@ export const registerStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
-  getExecution: SummarizeInvestigationStepDependencies['executeAgent'];
-  resolveConnectorId?: SummarizeInvestigationStepDependencies['resolveConnectorId'];
+  resolveChatModel: SummarizeInvestigationStepDependencies['resolveChatModel'];
+  getProposals?: SummarizeInvestigationStepDependencies['getProposals'];
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
@@ -62,10 +63,19 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
+    getResolveProposalsStepDefinition({
+      getProposalsService: () => getHuntServices().getProposalsService(),
+      getProposalPrivileges: () => getHuntServices().getProposalPrivileges(),
+      getConversations,
+      logger,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(
     getSummarizeInvestigationStepDefinition({
       getConversationClient: (request) => getConversations().getScopedClient({ request }),
-      executeAgent: (params) => getExecution(params),
-      resolveConnectorId,
+      resolveChatModel,
+      getProposals,
+      logger,
     })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
@@ -74,6 +84,7 @@ export const registerStepDefinitions = ({
 };
 
 export { getPackageReportStepDefinition } from './package_report';
+export { getResolveProposalsStepDefinition } from './resolve_proposals';
 
 export { OPT_IN_TIMEOUT_MS as REPORT_STEP_OPT_IN_TIMEOUT_MS } from './report_worker_outcome/report_worker_outcome_step';
 

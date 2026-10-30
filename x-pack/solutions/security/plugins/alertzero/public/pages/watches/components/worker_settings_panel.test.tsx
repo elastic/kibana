@@ -24,7 +24,7 @@ import {
 import { WorkerSettingsPanel } from './worker_settings_panel';
 import { getBlockingWarningReasons } from './blocking_warning_reasons';
 
-jest.mock('../../../hooks/use_hunt_threat_intel_supply', () => ({
+jest.mock('../../../hooks/hunt/use_hunt_threat_intel_supply', () => ({
   useHuntThreatIntelSupplyStatus: jest.fn(() => ({
     data: {
       huntEnabled: false,
@@ -320,7 +320,7 @@ describe('WorkerSettingsPanel header band title', () => {
 
 describe('WorkerSettingsPanel Hunt threat intel supply', () => {
   const { useHuntThreatIntelSupplyStatus } = jest.requireMock(
-    '../../../hooks/use_hunt_threat_intel_supply'
+    '../../../hooks/hunt/use_hunt_threat_intel_supply'
   ) as {
     useHuntThreatIntelSupplyStatus: jest.Mock;
   };

@@ -98,6 +98,23 @@ describe('serializeEditorContent', () => {
     expect(serializeEditorContent(div)).toBe('Hi can you tell\nme the\nwheather ?');
   });
 
+  it('skips the trailing <br> the browser adds to keep the last line visible', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('line1\nline2\n'));
+    div.appendChild(document.createElement('br'));
+
+    expect(serializeEditorContent(div)).toBe('line1\nline2\n');
+  });
+
+  it('skips a trailing <br> followed by an empty text node', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('ALL'));
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createTextNode(''));
+
+    expect(serializeEditorContent(div)).toBe('ALL');
+  });
+
   it('preserves line breaks adjacent to badges', () => {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode('Use '));

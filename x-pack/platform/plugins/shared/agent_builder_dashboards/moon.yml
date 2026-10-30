@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/i18n'
@@ -47,7 +48,6 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-transforms'
-  - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/presentation-publishing'
   - '@kbn/scout'
@@ -67,6 +67,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

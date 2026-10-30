@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
@@ -50,6 +52,14 @@ export function App() {
   );
 }
 
+function StyledComponentsThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: CoreStart['theme'] }>) {
+  const { darkMode } = useObservable(theme.theme$, theme.getTheme());
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+}
+
 export const renderApp = ({
   core,
   config,
@@ -76,7 +86,6 @@ export const renderApp = ({
   isServerless?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
-  const isDarkMode = core.theme.getTheme().darkMode;
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
@@ -113,7 +122,7 @@ export const renderApp = ({
                 }}
               >
                 <Router history={history}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
+                  <StyledComponentsThemeProvider theme={core.theme}>
                     <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
                       <PerformanceContextProvider>
                         <QueryClientProvider client={queryClient}>
@@ -124,7 +133,7 @@ export const renderApp = ({
                         </QueryClientProvider>
                       </PerformanceContextProvider>
                     </RedirectAppLinks>
-                  </EuiThemeProvider>
+                  </StyledComponentsThemeProvider>
                 </Router>
               </PluginContext.Provider>
             </KibanaContextProvider>

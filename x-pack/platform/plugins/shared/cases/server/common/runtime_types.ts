@@ -5,41 +5,40 @@
  * 2.0.
  */
 
-import type * as rt from 'io-ts';
 import { badRequest } from '@hapi/boom';
-import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
-import { pipe } from 'fp-ts/pipeable';
-
-import { exactCheck } from '@kbn/securitysolution-io-ts-utils/src/exact_check';
-import { formatErrors } from '@kbn/securitysolution-io-ts-utils/src/format_errors';
-import { throwErrors } from '../../common/api';
+import type { ZodType } from '@kbn/zod/v4';
+import { DeepStrict, stringifyZodError } from '@kbn/zod-helpers';
 
 type ErrorFactory = (message: string) => Error;
 
 export const createPlainError = (message: string) => new Error(message);
 
-export const throwBadRequestError = (errors: rt.Errors) => {
-  throw badRequest(formatErrors(errors).join());
-};
+/**
+ * Zod equivalent of `decodeOrThrow` from `./runtime_types`. Parses input
+ * against the provided schema and throws (via `createError`) when the input
+ * fails validation. Unknown keys are silently stripped — matching io-ts's
+ * `decodeOrThrow` behavior on `rt.exact` schemas. (`rt.strict` rejected
+ * excess keys; for that behavior use `decodeWithExcessOrThrowZod`.)
+ */
+export const decodeOrThrowZod =
+  <T>(schema: ZodType<T>, createError: ErrorFactory = createPlainError) =>
+  (value: unknown): T => {
+    const result = schema.safeParse(value);
+    if (result.success) return result.data;
+    throw createError(stringifyZodError(result.error));
+  };
 
 /**
- * This function will throw if a required field is missing or an excess field is present.
- * NOTE: This will only throw for an excess field if the type passed in leverages exact from io-ts.
+ * Zod equivalent of `decodeWithExcessOrThrow` from `./runtime_types`. Wraps
+ * the schema with `DeepStrict` so any unrecognized keys (at any depth) cause
+ * validation to fail with `Boom.badRequest` — matching io-ts's `exactCheck`
+ * behavior. Use this for incoming request bodies / query strings where
+ * extra keys should be rejected.
  */
-export const decodeWithExcessOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>) =>
-  (inputValue: I): A =>
-    pipe(
-      runtimeType.decode(inputValue),
-      (decoded) => exactCheck(inputValue, decoded),
-      fold(throwBadRequestError, identity)
-    );
-
-/**
- * This function will throw if a required field is missing.
- */
-export const decodeOrThrow =
-  <A, O, I>(runtimeType: rt.Type<A, O, I>, createError: ErrorFactory = createPlainError) =>
-  (inputValue: I) =>
-    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeWithExcessOrThrowZod =
+  <T>(schema: ZodType<T>) =>
+  (value: unknown): T => {
+    const result = DeepStrict(schema).safeParse(value);
+    if (result.success) return result.data as T;
+    throw badRequest(stringifyZodError(result.error));
+  };

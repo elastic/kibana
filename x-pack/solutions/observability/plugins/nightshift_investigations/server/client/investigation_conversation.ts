@@ -89,6 +89,9 @@ export const findInvestigationConversation = async (
   return conversation ? toInvestigationConversation(conversation, false) : undefined;
 };
 
+/** Severity a new investigation starts at, until the investigating agent rates it. */
+export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;
+
 /**
  * Gets the investigation conversation with this id, creating it when it does not exist yet. An
  * investigation is a public `investigation` template conversation on the Nightshift investigation
@@ -96,7 +99,8 @@ export const findInvestigationConversation = async (
  * agree on one conversation, because the id is chosen by the caller.
  *
  * The conversation is created without a title, so Agent Builder stores its placeholder and
- * generates the title from the investigation's first round.
+ * generates the title from the investigation's first round, and at `medium` severity, which the
+ * agent adjusts once it concludes.
  */
 export const getOrCreateInvestigationConversation = async ({
   conversations,
@@ -125,10 +129,13 @@ export const getOrCreateInvestigationConversation = async ({
         id,
         agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         templateId: INVESTIGATION_TEMPLATE_ID,
+        metadata: {
+          // A starting rating, so the severity shows (and can be changed) from the beginning;
+          // the agent re-rates it from its findings when it concludes.
+          severity: INITIAL_INVESTIGATION_SEVERITY,
+          ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
+        },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
-        ...(workflowExecutionId
-          ? { metadata: { workflow_execution_ids: [workflowExecutionId] } }
-          : {}),
       });
     // Agent creation can precede its visibility to the conversation API's agent lookup.
     const created = beforeCreate

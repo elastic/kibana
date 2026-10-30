@@ -89,7 +89,10 @@ export class ServiceManager {
         logger: logger.get('metering'),
       }),
       consumption: createConsumptionService(),
-      callbackDelivery: new CallbackDeliveryService({ actions }),
+      callbackDelivery: new CallbackDeliveryService({
+        actions,
+        logger: logger.get('callbacks'),
+      }),
       conversationTemplates: new ConversationTemplatesService(),
     };
 
@@ -135,6 +138,7 @@ export class ServiceManager {
     licensing,
     deploymentInfo,
     deductiveRegister,
+    isomer,
     getSmlTypeDefinition,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -267,6 +271,7 @@ export class ServiceManager {
 
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
+      isomer,
       logger: logger.get('surfaces'),
     });
 

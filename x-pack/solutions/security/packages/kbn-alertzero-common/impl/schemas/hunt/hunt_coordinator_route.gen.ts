@@ -262,6 +262,15 @@ export const HuntCoordinatorResult = lazySchema(() =>
         "The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
     /**
+     * Report IOCs excluded by adjudication, not searched by this run.
+     */
+    excluded_report_iocs: z
+      .object({
+        count: z.number().int().min(1),
+      })
+      .optional()
+      .describe('Report IOCs excluded by adjudication, not searched by this run.'),
+    /**
      * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
      */
     recommendations: z

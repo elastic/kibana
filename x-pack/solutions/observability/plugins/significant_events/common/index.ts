@@ -8,6 +8,7 @@
 export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 export type { PaginatedResponse } from './pagination';
+export type { DetectionEntity, DetectionEntitiesResponse } from './detection_entities';
 export {
   isSignificantEventsSortField,
   MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
@@ -62,6 +63,8 @@ export {
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+  type LifecycleDetectionInput,
   type SignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';
 
@@ -109,7 +112,13 @@ export {
 } from './maintenance/paused_callout_copy';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
-export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';
+export {
+  DEFAULT_RUN_LIMITS,
+  isRunQuotaReached,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  RUN_QUOTA_GROUPS,
+} from './run_quotas';
 export type {
   RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,

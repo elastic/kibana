@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/security-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/test-jest-helpers'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - shared-common
   - package
@@ -38,6 +39,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

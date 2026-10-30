@@ -45,6 +45,7 @@ import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
 const gridContainerCss = css`
+  block-size: 100%;
   padding-block-start: 12px;
   position: relative;
 `;

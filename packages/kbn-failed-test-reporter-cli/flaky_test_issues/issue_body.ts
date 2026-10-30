@@ -264,21 +264,26 @@ const titleCategory = (
 };
 
 /**
- * `Flaky Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a suite
- * title. Display only; issues are matched on their metadata, never on the title.
+ * `<Adjective> Scout API suite: Lens ESQL dashboard inline editing`, or the file name without a
+ * suite title. Display only; issues are matched on their metadata, never on the title.
  */
-export const flakySuiteIssueTitle = (
+export const suiteIssueTitle = (
+  adjective: 'Flaky' | 'Failing',
   suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
 ): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const category = titleCategory(suite.framework, suite.configCategory);
-  const lead = `Flaky ${FRAMEWORK_LABELS[suite.framework].short}${
+  const lead = `${adjective} ${FRAMEWORK_LABELS[suite.framework].short}${
     category ? ` ${category}` : ''
   } suite: `;
   // Nested describe blocks can join into a subject longer than GitHub accepts for a title
   const room = MAX_TITLE_LENGTH - lead.length;
   return lead + (subject.length > room ? `${subject.slice(0, room - 1)}…` : subject);
 };
+
+export const flakySuiteIssueTitle = (
+  suite: Pick<FlakySuite, 'filePath' | 'framework' | 'suiteTitle' | 'configCategory'>
+): string => suiteIssueTitle('Flaky', suite);
 
 /** `Skipped on \`main\` since 2026-09-09.` when the latest run of the worst test was a skip. */
 const skippedNote = (suite: FlakySuite): string | undefined => {
@@ -758,7 +763,7 @@ export const refreshFlakySuiteIssueMetadata = (
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 
-const SKIP_TIP =
+export const SKIP_TIP =
   '> [!TIP]\n' +
   "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
   'to `/skip` it, or skip the test case manually.';
