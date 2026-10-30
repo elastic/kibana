@@ -22,6 +22,7 @@ const renderSaveModal = (
   onClose: jest.MockedFunction<() => void>;
   onCopyOnSaveChange: jest.MockedFunction<(newCopyOnSave: boolean) => void>;
   onSave: jest.MockedFunction<DiscoverSessionSaveDashboardModalProps['onSave']>;
+  rerender: (nextOverrides: Partial<DiscoverSessionSaveDashboardModalProps>) => void;
 } => {
   const onClose = jest.fn();
   const onCopyOnSaveChange = jest.fn();
@@ -29,7 +30,7 @@ const renderSaveModal = (
     .fn()
     .mockResolvedValue(undefined);
 
-  render(
+  const getSaveModal = (props: Partial<DiscoverSessionSaveDashboardModalProps>) => (
     <EuiProvider>
       <I18nProvider>
         <DiscoverSessionSaveDashboardModal
@@ -43,16 +44,19 @@ const renderSaveModal = (
           onSave={onSave}
           sessionId="saved-session-id"
           title="My session"
-          {...overrides}
+          {...props}
         />
       </I18nProvider>
     </EuiProvider>
   );
 
+  const { rerender } = render(getSaveModal(overrides));
+
   return {
     onClose,
     onCopyOnSaveChange,
     onSave,
+    rerender: (nextOverrides) => rerender(getSaveModal({ ...overrides, ...nextOverrides })),
   };
 };
 
@@ -71,6 +75,15 @@ describe('DiscoverSessionSaveDashboardModal', () => {
     renderSaveModal({ isTimeBased: false });
     await screen.findByTestId('savedObjectSaveModal');
     expect(screen.queryByTestId('storeTimeWithSearch')).not.toBeInTheDocument();
+  });
+
+  it('keeps the initial store time choice when the session becomes time-based later', async () => {
+    const { rerender } = renderSaveModal({ initialTimeRestore: true, isTimeBased: false });
+    await screen.findByTestId('savedObjectSaveModal');
+
+    rerender({ isTimeBased: true });
+
+    expect(screen.getByTestId('storeTimeWithSearch')).toBeChecked();
   });
 
   it('passes modal state to onSave', async () => {
@@ -93,6 +106,22 @@ describe('DiscoverSessionSaveDashboardModal', () => {
         newTimeRestore: true,
         newTitle: 'My session',
       })
+    );
+  });
+
+  it('shows a store time error without changing the selection and lets the user turn it off', async () => {
+    const { onSave, rerender } = renderSaveModal({ initialTimeRestore: true });
+    await screen.findByTestId('savedObjectSaveModal');
+
+    rerender({ isTimeBased: false, hasTimeRestoreError: true });
+
+    const timeSwitch = screen.getByTestId('storeTimeWithSearch');
+    expect(timeSwitch).toBeInvalid();
+    expect(timeSwitch).toBeChecked();
+    await userEvent.click(timeSwitch);
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() =>
+      expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ newTimeRestore: false }))
     );
   });
 
