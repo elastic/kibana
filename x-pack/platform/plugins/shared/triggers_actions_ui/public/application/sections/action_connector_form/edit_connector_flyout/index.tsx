@@ -30,6 +30,7 @@ import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { connectorTypeIsDual } from '@kbn/connector-specs';
+import { useAccessPolicy, useObjectAccess } from '@kbn/access-control-ui';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -41,6 +42,7 @@ import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ConnectorAccessTab } from '../connector_access/connector_access_tab';
 import { ConnectorContext } from '../../../context/connector_context';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { getSpecConnectorTestExecutionParams } from '../../../lib/get_spec_connector_test_execution_params';
@@ -256,6 +258,17 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector || isRotating;
 
+  // With object-level security, the server decides whether the caller can edit a stored connector.
+  // While it is disabled, the feature privileges checked above decide alone, as before.
+  const isStoredConnector = !connector.isPreconfigured && !connector.isSystemAction;
+  const accessPolicy = useAccessPolicy(http, 'action');
+  const isAccessControlEnabled = !!accessPolicy.data?.enabled && isStoredConnector;
+  const connectorAccess = useObjectAccess(http, 'action', connector.id, {
+    isEnabled: isAccessControlEnabled,
+  });
+  const canEditConnector =
+    !isAccessControlEnabled || !!connectorAccess.data?.permissions.includes('edit');
+
   const {
     actionTypeModel,
     isLoading: isLoadingActionTypeModel,
@@ -327,6 +340,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
   const showButtons =
     canSave &&
+    canEditConnector &&
+    selectedTab !== EditConnectorTabs.Access &&
     actionTypeModel &&
     !connector.isPreconfigured &&
     !isLoadingActionTypeModel &&
@@ -674,12 +689,37 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         subFeature={actionTypeModel?.subFeature}
         isTestable={isTestable}
         hideRulesTab={hideRulesTab}
+        showAccessTab={isAccessControlEnabled}
         docsUrl={actionTypeModel?.docsUrl}
       />
       <EuiFlyoutBody>
+        {selectedTab === EditConnectorTabs.Configuration &&
+        canSave &&
+        !canEditConnector &&
+        connectorAccess.data ? (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              iconType="lock"
+              data-test-subj="connectorReadOnlyAccessCallout"
+              title={i18n.translate(
+                'xpack.triggersActionsUI.sections.editConnectorForm.readOnlyAccess',
+                {
+                  defaultMessage:
+                    "You can't edit this connector. Its owner decides who can edit it.",
+                }
+              )}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {selectedTab === EditConnectorTabs.Configuration && renderConfigurationTab()}
         {selectedTab === EditConnectorTabs.Test && renderTestTab()}
         {selectedTab === EditConnectorTabs.Rules && renderConnectorRulesList()}
+        {selectedTab === EditConnectorTabs.Access && (
+          <ConnectorAccessTab connectorId={connector.id} onAccessChange={connectorAccess.reload} />
+        )}
       </EuiFlyoutBody>
       <FlyoutFooter
         onClose={onCloseAttempt}

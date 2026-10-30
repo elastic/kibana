@@ -23,6 +23,8 @@
       "@kbn/access-control/*": ["./src/platform/packages/shared/kbn-access-control/*"],
       "@kbn/access-control-test-plugin": ["./x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin"],
       "@kbn/access-control-test-plugin/*": ["./x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin/*"],
+      "@kbn/access-control-ui": ["./src/platform/packages/shared/kbn-access-control-ui"],
+      "@kbn/access-control-ui/*": ["./src/platform/packages/shared/kbn-access-control-ui/*"],
       "@kbn/actions-plugin": ["./x-pack/platform/plugins/shared/actions"],
       "@kbn/actions-plugin/*": ["./x-pack/platform/plugins/shared/actions/*"],
       "@kbn/actions-simulators-plugin": ["./x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators"],

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/triggers_actions_ui
 dependsOn:
+  - '@kbn/access-control'
+  - '@kbn/access-control-ui'
   - '@kbn/core'
   - '@kbn/human-readable-id'
   - '@kbn/alerting-plugin'
