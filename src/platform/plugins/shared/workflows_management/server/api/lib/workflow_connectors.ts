@@ -8,10 +8,11 @@
  */
 
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { CoreAccessControlService, KibanaRequest } from '@kbn/core/server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
@@ -68,20 +69,46 @@ const getConnectorInstanceConfig = (
 };
 
 /**
- * Lists all available connector action types and their instances for the workflows feature.
+ * The unsecured client reads every connector in the space, so only the connectors the request can
+ * view are kept. In-memory connectors have no ACL, so they always stay.
+ */
+const getVisibleConnectors = async ({
+  actionsClient,
+  accessControl,
+  spaceId,
+  request,
+}: {
+  actionsClient: IUnsecuredActionsClient;
+  accessControl: CoreAccessControlService;
+  spaceId: string;
+  request: KibanaRequest;
+}): Promise<FindActionResult[]> => {
+  const connectors = await actionsClient.getAllWithAcl(brandSpaceId(spaceId));
+  const visibleConnectors = await accessControl.asScoped(request).filterVisible({
+    type: ACTION_SAVED_OBJECT_TYPE,
+    spaceId,
+    objects: connectors.map(({ connector, acl }) => ({ id: connector.id, acl, connector })),
+  });
+  return visibleConnectors.map(({ connector }) => connector);
+};
+
+/**
+ * Lists all available connector action types and the instances the request can view for the
+ * workflows feature.
  */
 export const getAvailableConnectors = async (params: {
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
+  accessControl: CoreAccessControlService;
   spaceId: string;
   request: KibanaRequest;
 }): Promise<GetAvailableConnectorsResponse> => {
-  const { getActionsClient, getActionsClientWithRequest, spaceId, request } = params;
+  const { getActionsClient, getActionsClientWithRequest, accessControl, spaceId, request } = params;
   const actionsClient = await getActionsClient();
   const actionsClientWithRequest = await getActionsClientWithRequest(request);
 
   const [connectors, actionTypes] = await Promise.all([
-    actionsClient.getAll(brandSpaceId(spaceId)),
+    getVisibleConnectors({ actionsClient, accessControl, spaceId, request }),
     actionsClientWithRequest.listTypes({
       featureId: WorkflowsConnectorFeatureId,
       includeSystemActionTypes: false,

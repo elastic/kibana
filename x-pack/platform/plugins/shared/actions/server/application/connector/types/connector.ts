@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CanonicalAcl } from '@kbn/access-control';
 import type { TypeOf } from '@kbn/config-schema';
 import type { connectorSchema, connectorWithExtraFindDataSchema } from '../schemas';
 
@@ -27,4 +28,13 @@ export interface Connector {
 
 export interface ConnectorWithExtraFindData extends Connector {
   referencedByCount: ConnectorWithExtraFindDataSchema['referencedByCount'];
+}
+
+/**
+ * A connector next to the ACL of its Saved Object, for system callers that apply object-level
+ * security themselves. In-memory connectors have no ACL.
+ */
+export interface ConnectorWithAcl {
+  connector: ConnectorWithExtraFindData;
+  acl?: CanonicalAcl;
 }

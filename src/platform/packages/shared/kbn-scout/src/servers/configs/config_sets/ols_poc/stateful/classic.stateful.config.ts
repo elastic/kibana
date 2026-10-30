@@ -9,12 +9,18 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 import { olsPocServerArgs } from '../shared';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...olsPocServerArgs],
+    // Service accounts let the suites run connectors as a Workflows service account.
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      ...olsPocServerArgs,
+      ...serviceAccountsServerArgs,
+    ],
   },
 };

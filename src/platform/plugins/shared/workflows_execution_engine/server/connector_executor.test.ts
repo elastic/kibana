@@ -20,15 +20,7 @@ describe('ConnectorExecutor', () => {
   beforeEach(() => {
     mockActionsClient = {
       execute: jest.fn(),
-      getAll: jest.fn(() =>
-        Promise.resolve([
-          {
-            id: '123e4567-e89b-12d3-a456-426614174000',
-            name: 'test-connector',
-            actionTypeId: 'http',
-          },
-        ] as ConnectorWithExtraFindData[])
-      ),
+      resolveConnectorName: jest.fn().mockResolvedValue(undefined),
       get: jest.fn().mockResolvedValue({
         id: '123e4567-e89b-12d3-a456-426614174000',
         name: 'test-connector',
@@ -94,15 +86,7 @@ describe('ConnectorExecutor', () => {
         data: { status: 200 },
       };
 
-      const mockConnectors: ConnectorWithExtraFindData[] = [
-        {
-          id: connectorId,
-          name,
-          actionTypeId: connectorType,
-        } as ConnectorWithExtraFindData,
-      ];
-
-      mockActionsClient.getAll.mockResolvedValue(mockConnectors);
+      mockActionsClient.resolveConnectorName.mockResolvedValue(connectorId);
       mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
       mockActionsClient.execute.mockResolvedValue(expectedResult);
 
@@ -114,7 +98,7 @@ describe('ConnectorExecutor', () => {
       });
 
       expect(mockActionsClient.get).toHaveBeenCalledWith({ id: name });
-      expect(mockActionsClient.getAll).toHaveBeenCalled();
+      expect(mockActionsClient.resolveConnectorName).toHaveBeenCalledWith(name);
       expect(mockActionsClient.execute).toHaveBeenCalledWith({
         actionId: connectorId,
         params: input,
@@ -124,7 +108,6 @@ describe('ConnectorExecutor', () => {
     });
 
     it('should throw error if connector not found by name', async () => {
-      mockActionsClient.getAll.mockResolvedValue([]);
       mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
 
       await expect(
@@ -135,6 +118,59 @@ describe('ConnectorExecutor', () => {
           abortController,
         })
       ).rejects.toThrow('Connector non-existent not found');
+      expect(mockActionsClient.execute).not.toHaveBeenCalled();
+    });
+
+    it('should not resolve a name when the ID lookup finds the connector', async () => {
+      const connectorId = '123e4567-e89b-12d3-a456-426614174000';
+
+      await connectorExecutor.execute({
+        connectorType,
+        connectorNameOrId: connectorId,
+        input,
+        abortController,
+      });
+
+      expect(mockActionsClient.get).toHaveBeenCalledWith({ id: connectorId });
+      expect(mockActionsClient.resolveConnectorName).not.toHaveBeenCalled();
+    });
+
+    it('should fail without running anything when a name matches several connectors', async () => {
+      const ambiguousNameError = new Error(
+        'Connector name "shared-name" matches more than one connector; use the connector ID'
+      );
+      mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
+      mockActionsClient.resolveConnectorName.mockRejectedValue(ambiguousNameError);
+
+      await expect(
+        connectorExecutor.execute({
+          connectorType,
+          connectorNameOrId: 'shared-name',
+          input,
+          abortController,
+        })
+      ).rejects.toThrow(ambiguousNameError);
+      expect(mockActionsClient.execute).not.toHaveBeenCalled();
+    });
+
+    it('should resolve each name once per workflow execution', async () => {
+      mockActionsClient.get.mockRejectedValue(new Error('Connector not found'));
+      mockActionsClient.resolveConnectorName.mockResolvedValue('resolved-connector-id');
+
+      for (let step = 0; step < 2; step++) {
+        await connectorExecutor.execute({
+          connectorType,
+          connectorNameOrId: 'my-connector',
+          input,
+          abortController,
+        });
+      }
+
+      expect(mockActionsClient.resolveConnectorName).toHaveBeenCalledTimes(1);
+      expect(mockActionsClient.execute).toHaveBeenCalledTimes(2);
+      expect(mockActionsClient.execute).toHaveBeenLastCalledWith(
+        expect.objectContaining({ actionId: 'resolved-connector-id' })
+      );
     });
 
     it('should pass abort signal to actions client', async () => {

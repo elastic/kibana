@@ -13,7 +13,6 @@ import {
   WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from '@kbn/actions-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 function getWorkflowConnectorExecutionSource(actionTypeId: string, actionId: string) {
   if (actionTypeId.replace(/^\./, '') !== 'email') {
@@ -29,7 +28,7 @@ function getWorkflowConnectorExecutionSource(actionTypeId: string, actionId: str
 export class ConnectorExecutor {
   // The lifespan of this cache is one workflow execution, then it gets destroyed
   // the probability of connectors change is pretty low in this span so it should be acceptable
-  private allConnectorsCache: Map<string, ConnectorWithExtraFindData> | undefined;
+  private readonly resolvedConnectorIds = new Map<string, string>();
 
   constructor(private actionsClient: ActionsClient) {}
 
@@ -103,13 +102,17 @@ export class ConnectorExecutor {
   }
 
   private async resolveConnectorId(connectorNameOrId: string): Promise<string> {
-    if (this.allConnectorsCache) {
-      const connector = this.allConnectorsCache.get(connectorNameOrId);
-      if (connector) {
-        return connector.id;
-      }
+    const resolvedId = this.resolvedConnectorIds.get(connectorNameOrId);
+    if (resolvedId) {
+      return resolvedId;
     }
 
+    const connectorId = await this.lookUpConnectorId(connectorNameOrId);
+    this.resolvedConnectorIds.set(connectorNameOrId, connectorId);
+    return connectorId;
+  }
+
+  private async lookUpConnectorId(connectorNameOrId: string): Promise<string> {
     // Prefer direct ID lookup: try to fetch by ID first, which is unambiguous
     try {
       const connector = await this.actionsClient.get({ id: connectorNameOrId });
@@ -118,21 +121,14 @@ export class ConnectorExecutor {
       // Not found by ID -- fall through to name-based lookup
     }
 
-    if (!this.allConnectorsCache) {
-      const allConnectors = await this.actionsClient.getAll();
-      this.allConnectorsCache = new Map(
-        allConnectors.map((connector) => [connector.id, connector])
-      );
-    }
-    const connectors = Array.from(this.allConnectorsCache.values()).filter(
-      (c: ConnectorWithExtraFindData) => c.name === connectorNameOrId
-    );
-
-    if (connectors.length === 0) {
+    // Every connector with the name counts, including those the workflow's identity cannot view,
+    // so a name never silently resolves differently for different identities. Execution then
+    // checks that the identity can use the selected connector.
+    const connectorId = await this.actionsClient.resolveConnectorName(connectorNameOrId);
+    if (!connectorId) {
       throw new Error(`Connector ${connectorNameOrId} not found`);
     }
-    // Do not throw if multiple connectors are found. We will use the first one.
 
-    return connectors[0].id;
+    return connectorId;
   }
 }
