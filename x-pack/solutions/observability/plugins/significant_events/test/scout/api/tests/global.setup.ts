@@ -94,6 +94,7 @@ globalSetupHook(
       esClient,
       samlAuth,
       isServerless: Boolean(config.serverless),
+      isCloud: config.isCloud,
       log,
     });
   }

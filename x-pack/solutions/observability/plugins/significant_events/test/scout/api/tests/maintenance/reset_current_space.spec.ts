@@ -66,6 +66,7 @@ apiTest.describe(
             esClient,
             samlAuth,
             isServerless: Boolean(config.serverless),
+            isCloud: config.isCloud,
             log,
             spaceId,
           });

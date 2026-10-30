@@ -51,9 +51,16 @@ POST /internal/significant_events/service_account/_disable
 ```
 
 This pauses the space, switches its bound workflows off, waits for their runs to stop and unbinds the
-detection engine. The workflows stay installed, with their run history, and `_enable` switches them
-back on. If the pause could not stop everything (the error names what failed), the setup is kept: call
-`_disable` again to retry.
+detection engine. The workflows stay installed, with their run history. If the pause could not stop
+everything (the error names what failed), the setup is kept: call `_disable` again to retry.
+
+The space stays paused after `_disable`. Calling `_enable` again binds it and switches the entry points
+and the investigation write-back back on, but the scheduled workflows (sync, cleanup, continuous
+onboarding, scheduled detection and review) and the rules stay off until the space is resumed:
+
+```
+POST /internal/significant_events/maintenance/_resume
+```
 
 ### Upgrading
 

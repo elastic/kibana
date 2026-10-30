@@ -34,8 +34,13 @@ export const DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE: Omit<estypes.SecurityPutRole
   applications: [
     {
       application: 'kibana-.kibana',
-      // `manage_nightshift`, which every detection engine route requires.
-      privileges: ['feature_nightshift.minimal_all'],
+      privileges: [
+        // `manage_nightshift`, which every detection engine route requires.
+        'feature_nightshift.minimal_all',
+        // The stack connectors a run may name: the LLM lookup lists them through Actions, and a
+        // connector it cannot list is reported as not found.
+        'feature_actions.read',
+      ],
       resources: ['*'],
     },
   ],

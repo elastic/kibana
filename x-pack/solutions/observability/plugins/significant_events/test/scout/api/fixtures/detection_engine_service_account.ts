@@ -28,8 +28,9 @@ const ENABLE_RETRY_INTERVAL_MS = 5_000;
 const SERVERLESS_ROLE = 'admin';
 
 /**
- * Serverless suites create their service accounts as the mock IdP's organization admin, as the
- * other service account suites do.
+ * Local Serverless suites create their service accounts as the mock IdP's organization admin, as
+ * the other service account suites do. On Cloud that development key cannot authenticate, so the
+ * admin's session creates the account.
  *
  * TODO: this may not be needed. The 403 on the token exchange that led here was the Kibana
  * certificate naming a search project (see `withUiamCertOfProject`), not who created the account,
@@ -42,7 +43,7 @@ const SERVERLESS_ROLE = 'admin';
 const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
   'essu_dev_TnpKcmMyVTFkMEo2WW5scU5XUm9PVWw2TVRNNmJqSXRVbWxTVEZNeVowNVRkMWhUVWpCd1l6SjBadz09AAAAAN10T0s=';
 
-const SERVERLESS_ACCOUNT_CREATION_HEADERS = {
+const LOCAL_SERVERLESS_ACCOUNT_CREATION_HEADERS = {
   authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
 };
 
@@ -50,6 +51,28 @@ interface ServiceAccount {
   id: string;
   name: string;
 }
+
+/** The account the detection engine runs as, if it exists: the directory is paginated. */
+const findDetectionEngineAccount = async (
+  request: ReturnType<typeof createAdminRequester>
+): Promise<ServiceAccount | undefined> => {
+  let after: string | undefined;
+  do {
+    const query = new URLSearchParams({ limit: '100', ...(after ? { after } : {}) });
+    const { serviceAccounts, nextPage } = await request<{
+      serviceAccounts: ServiceAccount[];
+      nextPage?: string;
+    }>(`${SERVICE_ACCOUNT_LIST_PATH}?${query}`, { method: 'GET' });
+    const account = serviceAccounts.find(
+      ({ name }) => name === DETECTION_ENGINE_SERVICE_ACCOUNT_NAME
+    );
+    if (account) {
+      return account;
+    }
+    after = nextPage;
+  } while (after !== undefined);
+  return undefined;
+};
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -101,6 +124,7 @@ export const setUpDetectionEngineServiceAccount = async ({
   esClient,
   samlAuth,
   isServerless,
+  isCloud,
   log,
   spaceId,
 }: {
@@ -108,6 +132,7 @@ export const setUpDetectionEngineServiceAccount = async ({
   esClient: EsClient;
   samlAuth: SamlAuth;
   isServerless: boolean;
+  isCloud: boolean;
   log: ScoutLogger;
   spaceId?: string;
 }): Promise<void> => {
@@ -120,15 +145,11 @@ export const setUpDetectionEngineServiceAccount = async ({
   const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
   const request = createAdminRequester(kbnUrl, cookieHeader);
 
-  const { serviceAccounts } = await request<{ serviceAccounts: ServiceAccount[] }>(
-    `${SERVICE_ACCOUNT_LIST_PATH}?limit=100`,
-    { method: 'GET' }
-  );
   const { id } =
-    serviceAccounts.find(({ name }) => name === DETECTION_ENGINE_SERVICE_ACCOUNT_NAME) ??
+    (await findDetectionEngineAccount(request)) ??
     (await request<ServiceAccount>(SERVICE_ACCOUNT_LIST_PATH, {
       method: 'POST',
-      ...(isServerless ? { headers: SERVERLESS_ACCOUNT_CREATION_HEADERS } : {}),
+      ...(isServerless && !isCloud ? { headers: LOCAL_SERVERLESS_ACCOUNT_CREATION_HEADERS } : {}),
       body: JSON.stringify({
         name: DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
         description: 'The service account the Nightshift detection engine runs as.',
