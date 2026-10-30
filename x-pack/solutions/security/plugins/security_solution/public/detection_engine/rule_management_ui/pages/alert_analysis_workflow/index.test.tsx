@@ -176,6 +176,14 @@ describe('AlertAnalysisWorkflowPage', () => {
     expect(listAgentsMock).not.toHaveBeenCalled();
   });
 
+  it('shows the deprecation callout', async () => {
+    renderComponent();
+
+    expect(
+      await screen.findByTestId('alertAnalysisWorkflowDeprecationCallout')
+    ).toBeInTheDocument();
+  });
+
   it('shows an error prompt and retries a failed settings request', async () => {
     const settingsRequest = jest
       .fn()
