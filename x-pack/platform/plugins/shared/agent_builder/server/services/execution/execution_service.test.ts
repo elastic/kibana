@@ -1209,7 +1209,9 @@ describe('AgentExecutionService', () => {
   });
 
   describe('executeAgent model source', () => {
-    it('runs a stored execution without inferenceFeatureId on the connector path', async () => {
+    // The runner is mocked here, so the model source itself is asserted in `execution_runner.test.ts`
+    // (`model source of a stored execution`); this pins what the service hands it for such a record.
+    it('dispatches a stored record with its connectorId and no inferenceFeatureId to the run', async () => {
       // A record as the request node stored it: a connector only, no inferenceFeatureId.
       mockExecutionClient.create.mockResolvedValueOnce({
         executionId: 'test-id',

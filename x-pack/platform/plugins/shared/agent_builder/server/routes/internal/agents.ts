@@ -25,6 +25,13 @@ import { buildEffectiveAgentAiIndices } from '../../services/agents/build_effect
 import type { AgentsServiceStart } from '../../services/agents/types';
 import { resolveAgentBuilderDefaultEndpoint } from '../../services/execution/utils';
 
+/**
+ * Whether `resolveFeatureConnector` failed because the feature has no endpoint (a 400 request
+ * error), as opposed to any other failure the caller should see.
+ */
+const isMissingFeatureEndpointError = (error: unknown): boolean =>
+  isInferenceRequestError(error) && error.meta.status === 400;
+
 const toAgentModelConnector = (
   connector: InferenceConnector | undefined
 ): Pick<GetAgentModelResponse, 'connector'> =>
@@ -199,7 +206,7 @@ export function registerInternalAgentRoutes({
         const connector = await inference
           .resolveFeatureConnector(inferenceFeatureId, request)
           .catch((error) => {
-            if (isInferenceRequestError(error)) {
+            if (isMissingFeatureEndpointError(error)) {
               return undefined;
             }
             throw error;

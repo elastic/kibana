@@ -8,7 +8,12 @@
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { createInferenceRequestError } from '@kbn/inference-common';
+import {
+  InferenceConnectorType,
+  createInferenceRequestError,
+  type InferenceConnector,
+} from '@kbn/inference-common';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerInternalAgentRoutes } from './agents';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
@@ -26,7 +31,7 @@ describe('registerInternalAgentRoutes', () => {
   let mockGet: jest.Mock;
   let mockResolveBase: jest.Mock;
   let mockGetForFeature: jest.Mock;
-  let mockResolveFeatureConnector: jest.Mock;
+  let mockResolveFeatureConnector: jest.MockedFn<InferenceServerStart['resolveFeatureConnector']>;
 
   const createMockContext = (contextEngineEnabled: boolean) => ({
     core: Promise.resolve({
@@ -266,12 +271,19 @@ describe('registerInternalAgentRoutes', () => {
       expect(handlers.has(`${internalApiPath}/agents/{id}/_model`)).toBe(true);
     });
 
+    const createConnector = (connectorId: string): InferenceConnector => ({
+      type: InferenceConnectorType.Inference,
+      name: `${connectorId} name`,
+      connectorId,
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: true,
+      isPreconfigured: true,
+    });
+
     it("reports the connector the inference plugin resolves for the agent's feature", async () => {
       mockAgentFeature('my_feature');
-      mockResolveFeatureConnector.mockResolvedValue({
-        connectorId: 'feature-1',
-        name: 'feature-1 name',
-      });
+      mockResolveFeatureConnector.mockResolvedValue(createConnector('feature-1'));
       mockEndpointsByFeature({ agent_builder: ['default'] });
 
       const result = await callModel();
@@ -297,6 +309,23 @@ describe('registerInternalAgentRoutes', () => {
 
       expect(mockGetForFeature).not.toHaveBeenCalled();
       expect(result.body).toEqual({ inference_feature_id: 'my_feature', source: 'agent_feature' });
+    });
+
+    it('surfaces a non-400 inference request error from the feature resolution', async () => {
+      mockAgentFeature('my_feature');
+      mockResolveFeatureConnector.mockRejectedValue(
+        createInferenceRequestError('Forbidden to read the feature connector', 403)
+      );
+
+      const result = await callModel();
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          type: 'customError',
+          statusCode: 403,
+          body: { message: 'Forbidden to read the feature connector' },
+        })
+      );
     });
 
     it('surfaces other feature resolution failures', async () => {

@@ -42,14 +42,25 @@ import type {
   ConversationAgentExecution,
   StoredConversationExecutionParams,
 } from '@kbn/agent-builder-server';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import { UserAttributes } from '@kbn/inference-tracing';
 import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
+  createAgentsServiceStartMock,
   createConversationClientMock,
   createEmptyConversation,
+  createMockedAgentRegistry,
+  createMockedInternalAgent,
   createRound,
 } from '../../test_utils';
+import { resolveServices as actualResolveServices } from './utils/resolve_services';
 import { pausedAndResumedRoundTimeline } from '../../test_utils/timeline';
 import { loadTracingPrivacySettings, withConverseSpan } from '../../tracing';
 import { executeAgent$, generateTitle, resolveServices } from './utils';
@@ -395,6 +406,74 @@ describe('handleAgentExecution', () => {
     expect(executeAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
     );
+  });
+
+  describe('model source of a stored execution', () => {
+    afterEach(() => {
+      resolveServicesMock.mockReset();
+    });
+
+    // Runs the real `resolveServices` against a stored record, so the source handed to the run is
+    // the one derived from `agent_params`, not a stub.
+    const runStoredStandaloneExecution = async (agentParams: Record<string, unknown>) => {
+      const agentRegistry = createMockedAgentRegistry();
+      agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'test-agent' }));
+      const agentService = createAgentsServiceStartMock();
+      agentService.getRegistry.mockResolvedValue(agentRegistry);
+      const getForFeature: jest.MockedFn<
+        SearchInferenceEndpointsPluginStart['endpoints']['getForFeature']
+      > = jest.fn();
+      resolveServicesMock.mockImplementation(actualResolveServices);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.messageComplete,
+          data: { message_id: 'm-1', message_content: '' },
+        } as ChatAgentEvent)
+      );
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.standalone,
+          agentId: 'test-agent',
+          agentParams: { nextInput: { message: 'summarize' }, ...agentParams },
+        } as never,
+        deps: {
+          ...(createDeps({ conversationClient: createConversationClientMock() }) as object),
+          agentService,
+          inference: inferenceMock.createStartContract(),
+          searchInferenceEndpoints: { endpoints: { getForFeature } },
+          security: securityServiceMock.createStart(),
+          elasticsearch: elasticsearchServiceMock.createStart(),
+        } as never,
+        request: httpServerMock.createKibanaRequest(),
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+      return { getForFeature };
+    };
+
+    it('runs a stored execution without inferenceFeatureId on the connector path', async () => {
+      const { getForFeature } = await runStoredStandaloneExecution({
+        connectorId: 'connector-1',
+      });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ defaultModel: { connectorId: 'connector-1' } })
+      );
+      expect(getForFeature).not.toHaveBeenCalled();
+    });
+
+    it('runs a stored execution carrying inferenceFeatureId on the feature path', async () => {
+      const { getForFeature } = await runStoredStandaloneExecution({
+        inferenceFeatureId: 'my_feature',
+      });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
+      );
+      expect(getForFeature).not.toHaveBeenCalled();
+    });
   });
 
   it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
