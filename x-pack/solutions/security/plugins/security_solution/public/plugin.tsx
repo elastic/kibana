@@ -961,9 +961,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.experimentalFeatures
       );
     }
-    if (startPlugins.timelines) {
-      startPlugins.timelines.setTimelineEmbeddedStore(this._store);
-    }
     return this._store;
   }
 
