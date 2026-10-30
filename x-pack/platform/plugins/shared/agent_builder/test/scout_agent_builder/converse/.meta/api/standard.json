@@ -1,5 +1,5 @@
 {
-  "sha1": "76b05343dabeb21717b540d68490620a54653746",
+  "sha1": "ecb025017276426f802a896d4cbd524776b15bb9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -727,7 +727,7 @@
     {
       "id": "69411a87481f950-e3a4852c5eeefc2",
       "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -736,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 507,
-        "column": 17
+        "line": 505,
+        "column": 18
       }
     },
     {
@@ -753,7 +753,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 568,
-        "column": 13
+        "column": 12
       }
     },
     {
@@ -768,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 627,
-        "column": 13
+        "line": 628,
+        "column": 28
       }
     },
     {
@@ -785,7 +785,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
         "line": 668,
-        "column": 32
+        "column": 15
       }
     },
     {
