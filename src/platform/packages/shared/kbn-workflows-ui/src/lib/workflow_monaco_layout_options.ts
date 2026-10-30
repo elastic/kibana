@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { transparentize } from '@elastic/eui';
+import chroma from 'chroma-js';
 import { monaco } from '@kbn/code-editor';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../hooks/use_workflows_monaco_theme';
+import type { KbnCodeEditorChromeOverrides } from '@kbn/code-editor';
 
 /** Shared Monaco layout defaults for workflow YAML surfaces (editor + read-only previews). */
 export const WORKFLOW_MONACO_LAYOUT_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
-  theme: WORKFLOWS_MONACO_EDITOR_THEME,
   minimap: { enabled: false },
   automaticLayout: true,
   lineNumbers: 'on',
@@ -84,7 +85,6 @@ export const WORKFLOW_CHANGE_HISTORY_DIFF_GLOBAL_EDITOR_OPTIONS: Pick<
 /** Shared read-only diff defaults; do not reuse the editable-editor option bundle. */
 export const WORKFLOW_CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS: monaco.editor.IStandaloneDiffEditorConstructionOptions =
   {
-    theme: WORKFLOWS_MONACO_EDITOR_THEME,
     readOnly: true,
     domReadOnly: true,
     contextmenu: false,
@@ -143,3 +143,54 @@ export const WORKFLOW_CHANGE_HISTORY_SPLIT_DIFF_EDITOR_OPTIONS: monaco.editor.IE
   // Wider than Monaco default (10) so +/- diff indicators are not flush with line numbers.
   lineDecorationsWidth: 24,
 };
+
+/**
+ * Per-instance chrome for workflows Monaco editors: widget surfaces, gutter, selection and diff
+ * colours, applied as inline CSS custom properties on the editor's own DOM nodes. It never touches
+ * the global Monaco theme, so other editors on the page are unaffected.
+ *
+ * Should be passed to `CodeEditor` via `chromeOverrides`, or to `applyKbnCodeEditorChromeOverrides` for
+ * editors created with `monaco.editor.create*` directly.
+ *
+ * Syntax (token) colors are a different layer: they come from the language's registered theme
+ * resolver and cannot be changed here.
+ */
+export const workflowsEditorChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiTheme }) => ({
+  'list.hoverForeground': euiTheme.colors.textPrimary,
+  'list.hoverBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+  'editorSuggestWidget.foreground': euiTheme.colors.textParagraph,
+  'editorSuggestWidget.background': euiTheme.colors.backgroundBasePlain,
+  'editorSuggestWidget.selectedForeground': euiTheme.colors.textPrimary,
+  'editorSuggestWidget.selectedBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+  'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.primary,
+  'editorSuggestWidget.border': euiTheme.colors.borderBaseSubdued,
+  // Code action (quick fix) widget: same surface and row colors as the suggest widget
+  'list.focusForeground': euiTheme.colors.textPrimary,
+  'list.focusBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+  'list.activeSelectionForeground': euiTheme.colors.textPrimary,
+  'list.activeSelectionBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+  'editorWidget.foreground': euiTheme.colors.textParagraph,
+  'editorWidget.background': euiTheme.colors.backgroundBasePlain,
+  'editorWidget.border': euiTheme.colors.borderBaseSubdued,
+  'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
+  'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
+  'editorHoverWidget.border': euiTheme.colors.borderBaseSubdued,
+  // Subtle highlight for hover - 0.15 alpha means 15% opacity
+  'editor.hoverHighlightBackground': chroma(transparentize(euiTheme.colors.primary, 0.15)).hex(),
+  'editorLineNumber.foreground': euiTheme.colors.textSubdued,
+  'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
+  'editorIndentGuide.background1': euiTheme.colors.backgroundLightText,
+  'editorIndentGuide.activeBackground1': euiTheme.colors.borderBaseDisabled,
+  // Transparent backgrounds, they are set by the styles of the editor container behind.
+  'editor.background': 'transparent',
+  'editor.selectionBackground': chroma(transparentize(euiTheme.colors.primary, 0.1)).hex(),
+  'editor.wordHighlightTextBackground': chroma(transparentize(euiTheme.colors.primary, 0.1)).hex(),
+  'editor.wordHighlightBackground': chroma(transparentize(euiTheme.colors.primary, 0.1)).hex(),
+  'editor.wordHighlightStrongBackground': chroma(
+    transparentize(euiTheme.colors.primary, 0.1)
+  ).hex(),
+  'editorGutter.background': 'transparent',
+  'editorGutter.foldingControlForeground': euiTheme.colors.textSubdued,
+  'diffEditor.unchangedRegionBackground': 'transparent',
+  'diffEditor.unchangedRegionForeground': euiTheme.colors.textSubdued,
+});

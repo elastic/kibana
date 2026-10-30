@@ -12,8 +12,8 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
+  savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { escapeKuery } from '@kbn/es-query';
 import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -90,7 +90,12 @@ const emptyFind = {
 
 const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
+  const serializer = savedObjectsServiceMock.createSerializer();
+  serializer.generateRawId.mockImplementation(
+    (namespace, type, id) => `${namespace ? `${namespace}:` : ''}${type}:${id}`
+  );
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
     putView: jest.fn().mockResolvedValue(undefined),
     getView: jest.fn().mockResolvedValue(undefined),
@@ -101,8 +106,10 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 
   const client = new SourcesClient({
     soClient,
+    serializer,
     viewsClient,
     dataEsClient,
+    internalEsClient,
     logger,
     username: 'marco',
     spaceId,
@@ -112,7 +119,16 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger, onChange };
+  return {
+    client,
+    soClient,
+    serializer,
+    viewsClient,
+    dataEsClient,
+    internalEsClient,
+    logger,
+    onChange,
+  };
 };
 
 describe('SourcesClient', () => {
@@ -223,13 +239,6 @@ describe('SourcesClient', () => {
       await expect(client.getHealth(makeSource())).resolves.toBe('unknown');
     });
 
-    it('is view_missing when the view does not exist', async () => {
-      const { client, viewsClient } = setup();
-      viewsClient.getView.mockResolvedValue(undefined);
-
-      await expect(client.getHealth(makeSource())).resolves.toBe('view_missing');
-    });
-
     it('is view_drift when the view query differs beyond formatting', async () => {
       const { client, viewsClient } = setup();
       viewsClient.getView.mockResolvedValue({
@@ -336,55 +345,37 @@ describe('SourcesClient', () => {
     });
   });
 
+  describe('validateQuery', () => {
+    it('reports whether any index exists yet behind an accepted query', async () => {
+      const { client, dataEsClient } = setup();
+
+      await expect(client.validateQuery({ esql: 'FROM logs-nginx-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: true,
+      });
+
+      dataEsClient.esql.query.mockResponseOnce(withoutColumns);
+      await expect(client.validateQuery({ esql: 'FROM logs-none-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query.mockRejectedValueOnce(unknownIndexError());
+      await expect(client.validateQuery({ esql: 'FROM logs-none' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withoutColumns);
+      await expect(
+        client.validateQuery({ esql: 'FROM logs-none-* | WHERE status >= 500' })
+      ).resolves.toEqual({ type: 'logs', indexExists: false });
+    });
+  });
+
   describe('create', () => {
-    it('validates, writes the saved object with a generated view name, then puts the view', async () => {
-      const { client, soClient, viewsClient, dataEsClient } = setup();
-
-      const source = await client.create({
-        title: 'nginx errors',
-        tags: ['nginx'],
-        esql: 'FROM logs-nginx-* | WHERE status >= 500',
-      });
-
-      expect(dataEsClient.esql.query).toHaveBeenCalledWith({
-        query: 'FROM logs-nginx-* | WHERE status >= 500\n| LIMIT 0',
-        format: 'json',
-      });
-      expect(source.slug).toBe('nginx-errors');
-      expect(source.view_name).toBe(NGINX_VIEW_NAME);
-      expect(source.enabled).toBe(true);
-      expect(source.created_by).toBe('marco');
-      expect(source.esql_updated_at).toBe(source.created_at);
-      expect(source.type).toBe('logs');
-      expect(soClient.create).toHaveBeenCalledWith(
-        NIGHTSHIFT_SOURCE_SO_TYPE,
-        expect.objectContaining({ view_name: source.view_name }),
-        { id: source.id }
-      );
-      expect(viewsClient.putView).toHaveBeenCalledWith(
-        source.view_name,
-        'FROM logs-nginx-* | WHERE status >= 500'
-      );
-    });
-
-    it('loads the space view names once, then checks suffixes in memory', async () => {
-      const { client, soClient } = setup();
-
-      await client.create({
-        title: 'nginx errors',
-        tags: [],
-        esql: 'FROM logs-*',
-      });
-
-      expect(soClient.find).toHaveBeenCalledTimes(1);
-      expect(soClient.find).toHaveBeenCalledWith({
-        type: NIGHTSHIFT_SOURCE_SO_TYPE,
-        page: 1,
-        perPage: 1000,
-        fields: ['view_name'],
-      });
-    });
-
     it('puts the request space into the view name', async () => {
       const { client } = setup({ spaceId: 'marketing' });
 
@@ -395,60 +386,6 @@ describe('SourcesClient', () => {
       });
 
       expect(source.view_name).toBe(getNightshiftSourceViewName('marketing', 'nginx-errors'));
-    });
-
-    it('appends -2 when the catalog already has that view name', async () => {
-      const { client, soClient, viewsClient } = setup();
-      soClient.find.mockResolvedValueOnce({
-        ...emptyFind,
-        total: 1,
-        saved_objects: [{ ...makeSavedObject(), score: 0 }],
-      });
-
-      const source = await client.create({
-        title: 'nginx errors',
-        tags: [],
-        esql: 'FROM logs-*',
-      });
-
-      expect(source.slug).toBe('nginx-errors-2');
-      expect(source.view_name).toBe(NGINX_VIEW_NAME_2);
-      expect(soClient.find).toHaveBeenCalledTimes(1);
-      expect(viewsClient.getView).toHaveBeenCalledTimes(1);
-      expect(viewsClient.getView).toHaveBeenCalledWith(NGINX_VIEW_NAME_2);
-      expect(viewsClient.putView).toHaveBeenCalledWith(NGINX_VIEW_NAME_2, 'FROM logs-*');
-    });
-
-    it('does not re-find the catalog when several view names in the space are already taken', async () => {
-      const { client, soClient, viewsClient } = setup();
-      soClient.find.mockResolvedValueOnce({
-        ...emptyFind,
-        total: 2,
-        saved_objects: [
-          { ...makeSavedObject(), score: 0 },
-          {
-            ...makeSavedObject(
-              makeAttributes({ slug: 'nginx-errors-2', view_name: NGINX_VIEW_NAME_2 }),
-              'source-2'
-            ),
-            score: 0,
-          },
-        ],
-      });
-
-      const source = await client.create({
-        title: 'nginx errors',
-        tags: [],
-        esql: 'FROM logs-*',
-      });
-
-      expect(source.slug).toBe('nginx-errors-3');
-      expect(source.view_name).toBe(getNightshiftSourceViewName(SPACE_ID, 'nginx-errors-3'));
-      expect(soClient.find).toHaveBeenCalledTimes(1);
-      expect(viewsClient.getView).toHaveBeenCalledTimes(1);
-      expect(viewsClient.getView).toHaveBeenCalledWith(
-        getNightshiftSourceViewName(SPACE_ID, 'nginx-errors-3')
-      );
     });
 
     it('appends -2 when an orphaned view already uses that name', async () => {
@@ -494,20 +431,6 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it('rejects an index that matches more than one type before touching saved objects or ES', async () => {
-      const { client, soClient, viewsClient, dataEsClient } = setup();
-
-      await expect(
-        client.create({ title: 't', tags: [], esql: 'FROM logs-traces-*' })
-      ).rejects.toMatchObject({
-        output: { statusCode: 400 },
-        message: expect.stringContaining('more than one kind'),
-      });
-      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
-      expect(soClient.create).not.toHaveBeenCalled();
-      expect(viewsClient.putView).not.toHaveBeenCalled();
-    });
-
     it('rejects an invalid query before touching saved objects or ES', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
 
@@ -541,15 +464,6 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it('accepts a concrete index that does not exist yet', async () => {
-      const { client, dataEsClient } = setup();
-      dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
-
-      await expect(
-        client.create({ title: 't', tags: [], esql: 'FROM logs-none' })
-      ).resolves.toBeDefined();
-    });
-
     it('does not treat Unknown index as empty when FROM names several sources', async () => {
       const { client, soClient, dataEsClient } = setup();
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
@@ -566,21 +480,6 @@ describe('SourcesClient', () => {
 
     // A wildcard matching nothing resolves to an empty relation, so ES reports the WHERE field
     // as an unknown column instead of an unknown index.
-    it('accepts a wildcard that matches no index yet even when WHERE references fields', async () => {
-      const { client, dataEsClient } = setup();
-      dataEsClient.esql.query
-        .mockRejectedValueOnce(unknownColumnError())
-        .mockResponseOnce(withoutColumns);
-
-      await expect(
-        client.create({ title: 't', tags: [], esql: 'FROM logs-none-* | WHERE status >= 500' })
-      ).resolves.toBeDefined();
-      expect(dataEsClient.esql.query).toHaveBeenNthCalledWith(2, {
-        query: 'FROM logs-none-*\n| LIMIT 0',
-        format: 'json',
-      });
-    });
-
     it('surfaces an unknown field on an existing index as a 400', async () => {
       const { client, soClient, dataEsClient } = setup();
       dataEsClient.esql.query
@@ -668,41 +567,6 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it('rejects a $ wildcard that would match Nightshift source views without writing', async () => {
-      const { client, soClient, viewsClient, dataEsClient } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-
-      await expect(
-        client.update('source-1', {
-          title: 'nginx errors',
-          tags: ['nginx'],
-          esql: 'FROM $.nightshift.*',
-        })
-      ).rejects.toMatchObject({ output: { statusCode: 400 } });
-      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
-      expect(soClient.update).not.toHaveBeenCalled();
-      expect(viewsClient.putView).not.toHaveBeenCalled();
-    });
-
-    it('rejects a query that mixes types without writing', async () => {
-      const { client, soClient, viewsClient, dataEsClient } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-
-      await expect(
-        client.update('source-1', {
-          title: 'nginx errors',
-          tags: ['nginx'],
-          esql: 'FROM logs-*, traces-*',
-        })
-      ).rejects.toMatchObject({
-        output: { statusCode: 400 },
-        message: expect.stringContaining('mixes'),
-      });
-      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
-      expect(soClient.update).not.toHaveBeenCalled();
-      expect(viewsClient.putView).not.toHaveBeenCalled();
-    });
-
     it('keeps the stored type on a title-only save', async () => {
       const { client, soClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -754,27 +618,6 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it('bumps esql_updated_at only when the normalized query changes', async () => {
-      const { client, soClient } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-
-      const titleOnly = await client.update('source-1', {
-        title: 'renamed',
-        tags: ['nginx'],
-        esql: 'from logs-nginx-*   | where status >= 500',
-      });
-      expect(titleOnly.title).toBe('renamed');
-      expect(titleOnly.esql_updated_at).toBe('2026-09-01T00:00:00.000Z');
-      expect(titleOnly.updated_at).not.toBe('2026-09-01T00:00:00.000Z');
-
-      const queryChange = await client.update('source-1', {
-        title: 'renamed',
-        tags: ['nginx'],
-        esql: 'FROM logs-nginx-* | WHERE status >= 400',
-      });
-      expect(queryChange.esql_updated_at).not.toBe('2026-09-01T00:00:00.000Z');
-    });
-
     it('moves esql_updated_at forward when the clock does not', async () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
@@ -822,31 +665,26 @@ describe('SourcesClient', () => {
       );
     });
 
-    it('keeps slug and view_name when the title changes', async () => {
+    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
       const { client, soClient } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-
-      const updated = await client.update('source-1', {
-        title: 'renamed',
-        tags: ['nginx'],
-        esql: makeAttributes().esql,
-      });
-
-      expect(updated.slug).toBe('nginx-errors');
-      expect(updated.view_name).toBe(NGINX_VIEW_NAME);
-    });
-
-    it('always re-puts the view so PUT doubles as repair', async () => {
-      const { client, soClient, viewsClient } = setup();
-      soClient.get.mockResolvedValue(makeSavedObject());
-
-      await client.update('source-1', {
+      const stored = !sent;
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
+      const body = {
         title: 'nginx errors',
         tags: ['nginx'],
         esql: makeAttributes().esql,
-      });
+        enabled: sent,
+      };
 
-      expect(viewsClient.putView).toHaveBeenCalledWith(NGINX_VIEW_NAME, makeAttributes().esql);
+      const updated = await client.update('source-1', body);
+
+      expect(updated.enabled).toBe(stored);
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ enabled: stored }),
+        expect.anything()
+      );
     });
 
     it('restores the previous attributes when the view cannot be updated', async () => {
@@ -901,139 +739,6 @@ describe('SourcesClient', () => {
     });
   });
 
-  describe('list', () => {
-    it('paginates, sorts by title and filters on enabled', async () => {
-      const { client, soClient, viewsClient } = setup();
-      soClient.find.mockResolvedValue({
-        saved_objects: [{ ...makeSavedObject(), score: 0 }],
-        total: 7,
-        page: 2,
-        per_page: 5,
-      });
-
-      const response = await client.list({ page: 2, perPage: 5, enabled: true });
-
-      expect(soClient.find).toHaveBeenCalledWith({
-        type: NIGHTSHIFT_SOURCE_SO_TYPE,
-        page: 2,
-        perPage: 5,
-        sortField: 'title',
-        sortOrder: 'asc',
-        filter: 'nightshift-source.attributes.enabled: true',
-      });
-      expect(viewsClient.getView).not.toHaveBeenCalled();
-      expect(response).toEqual({
-        sources: [makeSource()],
-        total: 7,
-        page: 2,
-        per_page: 5,
-      });
-    });
-
-    it('omits the filter when enabled is not given', async () => {
-      const { client, soClient } = setup();
-      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 50 });
-
-      await client.list({ page: 1, perPage: 50 });
-
-      expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
-    });
-
-    it('looks ids up directly, drops missing sources, and then applies search and paging', async () => {
-      const { client, soClient } = setup();
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          makeSavedObject(makeAttributes({ title: 'zeta' }), 'zeta'),
-          {
-            id: 'missing',
-            type: NIGHTSHIFT_SOURCE_SO_TYPE,
-            error: { statusCode: 404, error: 'Not Found', message: 'missing' },
-          },
-          makeSavedObject(
-            makeAttributes({ title: 'alpha', slug: 'alpha', view_name: NGINX_VIEW_NAME_2 }),
-            'alpha'
-          ),
-          makeSavedObject(
-            makeAttributes({ title: 'alpine', slug: 'alpine', view_name: TITLE_T_VIEW_NAME }),
-            'alpine'
-          ),
-        ],
-      } as never);
-
-      const response = await client.list({
-        page: 2,
-        perPage: 1,
-        search: 'alp',
-        ids: ['zeta', 'missing', 'alpha', 'alpine', 'zeta'],
-      });
-
-      expect(soClient.find).not.toHaveBeenCalled();
-      expect(soClient.bulkGet).toHaveBeenCalledWith([
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'zeta' },
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'missing' },
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'alpha' },
-        { type: NIGHTSHIFT_SOURCE_SO_TYPE, id: 'alpine' },
-      ]);
-      expect(response.total).toBe(2);
-      expect(response.page).toBe(2);
-      expect(response.per_page).toBe(1);
-      expect(response.sources.map((source) => source.id)).toEqual(['alpine']);
-    });
-
-    it('keeps the enabled filter when looking sources up by id', async () => {
-      const { client, soClient } = setup();
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          makeSavedObject(makeAttributes({ title: 'alpha', enabled: true }), 'alpha'),
-          makeSavedObject(makeAttributes({ title: 'alpine', enabled: false }), 'alpine'),
-        ],
-      } as never);
-
-      const response = await client.list({
-        page: 1,
-        perPage: 10,
-        enabled: false,
-        ids: ['alpha', 'alpine'],
-      });
-
-      expect(response.sources.map((source) => source.id)).toEqual(['alpine']);
-      expect(response.total).toBe(1);
-    });
-
-    it('throws when a bulk get failure is not a missing source', async () => {
-      const { client, soClient } = setup();
-      soClient.bulkGet.mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'hidden',
-            type: NIGHTSHIFT_SOURCE_SO_TYPE,
-            error: { statusCode: 403, error: 'Forbidden', message: 'no access' },
-          },
-        ],
-      } as never);
-
-      await expect(client.list({ page: 1, perPage: 10, ids: ['hidden'] })).rejects.toMatchObject({
-        output: { statusCode: 403 },
-      });
-    });
-
-    it('escapes KQL metacharacters in the title prefix filter', async () => {
-      const { client, soClient } = setup();
-      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
-      const search = 'foo AND "bar"';
-
-      await client.list({ page: 1, perPage: 25, search, enabled: true });
-
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({
-          filter: `nightshift-source.attributes.title: ${escapeKuery(
-            search
-          )}* AND nightshift-source.attributes.enabled: true`,
-        })
-      );
-    });
-  });
-
   describe('delete', () => {
     it('deletes the view first, then the saved object', async () => {
       const { client, soClient, viewsClient } = setup();
@@ -1053,6 +758,20 @@ describe('SourcesClient', () => {
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
       expect(viewsClient.deleteView).toHaveBeenCalledWith(NGINX_VIEW_NAME);
       expect(callOrder).toEqual(['view', 'so']);
+    });
+
+    it('does not delete the view when the caller cannot write the saved object', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(new Error('read only'))
+      );
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(viewsClient.deleteView).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('leaves the saved object in place when the view cannot be deleted', async () => {

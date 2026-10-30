@@ -26,31 +26,45 @@ jobs:
             const whitelist = [
               // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/ },
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/ },
-              { user: 'kibanamachine', branchPrefix: 'scout_metadata_update' },
+              { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'scout_metadata_update' },
               { user: 'kibanamachine', branchPrefix: 'update-pipeline-resource-defs', baseMatch: /^main$/ },
               { user: 'kibanamachine', branchPrefix: 'bump-versions' },
               { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
             ];
 
-            // Fetch the list of changed files in the PR
-            const files = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            });
+            core.info(`PR #${context.payload.pull_request.number} by ${user}: ${headRef} -> ${baseRef}`);
 
-            const changedFiles = files.data.map(file => file.filename);
-            core.info(`Changed files: ${changedFiles.join(', ')}`);
+            // Fetched lazily, only once a rule with paths otherwise matches
+            let changedFiles;
+            const getChangedFiles = async () => {
+              if (!changedFiles) {
+                const files = await github.paginate(github.rest.pulls.listFiles, {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.payload.pull_request.number,
+                  per_page: 100,
+                });
+                changedFiles = files.map(file => file.filename);
+                core.info(`Changed files: ${changedFiles.join(', ')}`);
+              }
+              return changedFiles;
+            };
 
-            const matches = whitelist.some((rule) => {
-              if (rule.user !== user) return false;
-              if (!headRef.startsWith(rule.branchPrefix)) return false;
-              if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return false;
-              if (rule.baseNotMatch && rule.baseNotMatch.test(baseRef)) return false;
+            const ruleMatches = async (rule) => {
+              const reject = (reason) => {
+                core.info(`Rule ${rule.user}/${rule.branchPrefix} skipped: ${reason}`);
+                return false;
+              };
 
-              // If paths is specified, verify at least one changed file matches
+              if (rule.user !== user) return reject(`user is not ${rule.user}`);
+              if (!headRef.startsWith(rule.branchPrefix)) return reject(`branch does not start with ${rule.branchPrefix}`);
+              if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return reject(`base does not match ${rule.baseMatch}`);
+              if (rule.baseNotMatch && rule.baseNotMatch.test(baseRef)) return reject(`base matches ${rule.baseNotMatch}`);
+
+              // If paths is specified, every changed file must match one of them
               if (rule.paths) {
-                const hasMatchingFile = changedFiles.some(file =>
+                const files = await getChangedFiles();
+                const allFilesMatch = files.length > 0 && files.every(file =>
                   rule.paths.some(path => {
                     // Support glob patterns
                     if (path.includes('*')) {
@@ -60,16 +74,26 @@ jobs:
                     return file === path;
                   })
                 );
-                if (!hasMatchingFile) {
-                  core.info(`File check failed for rule ${rule.user}/${rule.branchPrefix}: no changed files match paths`);
-                  return false;
-                }
+                if (!allFilesMatch) return reject(`not all changed files match ${rule.paths.join(', ')}`);
               }
 
               return true;
-            });
+            };
 
-            core.setOutput('should_approve', matches ? 'true' : 'false');
+            let matchedRule;
+            for (const rule of whitelist) {
+              if (await ruleMatches(rule)) {
+                matchedRule = rule;
+                break;
+              }
+            }
+
+            if (matchedRule) {
+              core.notice(`Approving: matched rule ${matchedRule.user}/${matchedRule.branchPrefix}`);
+            } else {
+              core.notice('Not approving: no rule matched');
+            }
+            core.setOutput('should_approve', matchedRule ? 'true' : 'false');
 
       - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
         name: Approve as github-actions[bot]

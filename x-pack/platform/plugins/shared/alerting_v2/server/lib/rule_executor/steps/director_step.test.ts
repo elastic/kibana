@@ -159,4 +159,20 @@ describe('DirectorStep', () => {
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
+  it('threads the prior state the director loaded onto state.previousAlertStateByGroupHash', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(directorService);
+
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    expect(result.state.previousAlertStateByGroupHash).toEqual(new Map());
+  });
 });

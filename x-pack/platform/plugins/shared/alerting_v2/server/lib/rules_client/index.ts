@@ -7,6 +7,7 @@
 
 export { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 export { RulesClient } from './rules_client';
+export type { CreateRulesClientOptions } from './types';
 export type {
   BulkByIdsParams,
   BulkByQueryParams,

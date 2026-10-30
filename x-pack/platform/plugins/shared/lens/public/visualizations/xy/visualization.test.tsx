@@ -2937,6 +2937,48 @@ describe('xy_visualization', () => {
   });
 
   describe('#getUserMessages', () => {
+    it.each([
+      {
+        description: 'multiple rows',
+        rows: [{ threshold: 10 }, { threshold: 20 }],
+        expectedWarningId: 'xy_esql_reference_multiple_rows',
+      },
+      {
+        description: 'no numeric value',
+        rows: [{ threshold: null }],
+        expectedWarningId: 'xy_esql_reference_invalid_value',
+      },
+    ])(
+      'warns when an ES|QL reference query returns $description',
+      ({ rows, expectedWarningId }) => {
+        const frame = createMockFramePublicAPI();
+        const datasource = createMockDatasource();
+        datasource.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+        frame.datasourceLayers = { reference: datasource.publicAPIMock };
+        frame.activeData = {
+          reference: {
+            type: 'datatable',
+            columns: [{ id: 'threshold', name: 'threshold', meta: { type: 'number' } }],
+            rows,
+          },
+        };
+        const state = {
+          ...exampleState(),
+          layers: [
+            { layerId: 'reference', layerType: 'referenceLine' as const, accessors: ['threshold'] },
+          ],
+        };
+        expect(xyVisualization.getUserMessages!(state, { frame })).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              uniqueId: expectedWarningId,
+              severity: 'warning',
+            }),
+          ])
+        );
+      }
+    );
+
     describe('errors', () => {
       let mockDatasource: ReturnType<typeof createMockDatasource>;
       let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -4761,7 +4803,7 @@ describe('xy_visualization', () => {
         expect(state.areaFill).toBeUndefined();
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
-        expect(newState.areaFill).toEqual('solid');
+        expect(newState.areaFill).toEqual('gradient');
       });
 
       it('preserves an existing areaFill when switching area subtypes', () => {

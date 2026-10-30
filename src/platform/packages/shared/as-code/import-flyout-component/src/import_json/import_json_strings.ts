@@ -34,6 +34,10 @@ export const importJsonFlyoutStrings = {
     i18n.translate('asCodeImport.importJson.fileTooLargeError', {
       defaultMessage: 'The selected file is too large. The maximum size is 1 MB.',
     }),
+  getGenericImportError: () =>
+    i18n.translate('asCodeImport.importJson.genericImportError', {
+      defaultMessage: 'An unexpected error occurred. Try again later.',
+    }),
   getTechnicalPreviewBadgeLabel: () =>
     i18n.translate('asCodeImport.importJson.technicalPreviewBadgeLabel', {
       defaultMessage: 'TECHNICAL PREVIEW',

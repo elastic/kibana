@@ -11,8 +11,9 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * Derives the next persisted watermark from a tick's outcome.
  *
  * Rules (applied in order):
- * - Aborted before StoreActionsStep (recordedAlerts undefined), or
- *   inline_stats_too_large (scan query rejected): no advance.
+ * - Aborted (the tick stopped in any step, or DispatchStep left groups unattempted),
+ *   commit_failed (an alert action write failed), or inline_stats_too_large (scan query
+ *   rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
  *   alert's timestamp (the truncation edge); the deferred tail is re-read next tick.
@@ -33,11 +34,15 @@ export const computeNextWatermark = ({
   let nextWatermark: Date;
 
   if (
-    (haltReason === 'aborted' && finalState.recordedAlerts === undefined) ||
+    haltReason === 'aborted' ||
+    haltReason === 'commit_failed' ||
     haltReason === 'inline_stats_too_large'
   ) {
-    // Pipeline stopped before any records were written — do not advance.
-    //   'aborted': TM signal or tick deadline stopped the pipeline before StoreActionsStep.
+    // Pipeline stopped before every alert was recorded — do not advance.
+    //   'aborted': TM signal or tick deadline stopped the pipeline in any step, or
+    //     DispatchStep stopped with groups never attempted; their alerts have no record yet.
+    //   'commit_failed': DispatchStep could not write alert action records and stopped
+    //     scheduling; the unrecorded groups are dispatched again next tick.
     //   'inline_stats_too_large': ES rejected the INLINE STATS pre-fetch query (sub-plan
     //     too large); scan was refused, not executed. stuckTicks increments so the
     //     pre-fetch escape hatch can eventually force-advance. Do NOT fall through to the

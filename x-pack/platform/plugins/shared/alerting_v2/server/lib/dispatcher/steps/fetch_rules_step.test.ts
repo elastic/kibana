@@ -52,7 +52,7 @@ describe('FetchRulesStep', () => {
     expect(result.data?.rules?.get('r1')?.name).toBe('Rule 1');
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
     expect(result.data?.rules?.get('r1')?.routingTags).toEqual(['sre']);
-    expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
+    expect(mockFindByIds).toHaveBeenCalledWith(['r1'], { fields: ['metadata'] });
   });
 
   it('defaults routing tags to an empty list when the rule has none', async () => {
@@ -90,7 +90,7 @@ describe('FetchRulesStep', () => {
     expect(mockFindByIds).not.toHaveBeenCalled();
   });
 
-  it('passes unique rule IDs to findAll', async () => {
+  it('passes unique rule IDs to findByIds', async () => {
     mockFindByIds.mockResolvedValue([
       {
         id: 'r1',
@@ -118,7 +118,7 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.rules?.size).toBe(2);
-    expect(mockFindByIds).toHaveBeenCalledWith(['r1', 'r2']);
+    expect(mockFindByIds).toHaveBeenCalledWith(['r1', 'r2'], { fields: ['metadata'] });
   });
 
   it('derives spaceId from namespaces for non-default spaces', async () => {
@@ -184,7 +184,7 @@ describe('FetchRulesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
+    expect(mockFindByIds).toHaveBeenCalledWith(['r1'], { fields: ['metadata'] });
     expect(result.data?.rules?.size).toBe(1);
   });
 

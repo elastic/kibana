@@ -119,7 +119,7 @@ export const auditAlertUpdateResponseFailure = (
 };
 
 /**
- * Logs a validation, precondition, or lookup failure that happens before the shared update operation runs.
+ * Logs a precondition or lookup failure that happens before the shared update operation runs.
  * A string becomes the error message; an `Error` is logged as-is.
  */
 export const auditAlertUpdatePreOperationFailure = (
@@ -129,6 +129,21 @@ export const auditAlertUpdatePreOperationFailure = (
   const error = typeof messageOrError === 'string' ? new Error(messageOrError) : messageOrError;
   const event = alertAuditEvent({ action: AlertAuditAction.UPDATE, error, bulk: true });
   auditLogger?.log(event);
+};
+
+/** Logs an alert update denied by route authorization before its handler runs. */
+export const auditAlertUpdateAuthorizationFailure = (
+  auditLogger: AuditLogger | undefined
+): void => {
+  const event = alertAuditEvent({
+    action: AlertAuditAction.UPDATE,
+    error: new Error('Required privileges were not granted'),
+    bulk: true,
+  });
+  auditLogger?.log({
+    ...event,
+    message: 'Failed attempt to update alerts because required privileges were not granted',
+  });
 };
 
 /**

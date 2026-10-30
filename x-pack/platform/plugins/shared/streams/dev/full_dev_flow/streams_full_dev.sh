@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Full local Streams backend for UI development.
 #
-# You start kind, two Tilts, serverless ES, and Kibana. This script does the
-# rest: motel, host ES alias, unit publish, local TLS hacks, and demo traffic
-# so Canvas / Discover have logs and collector metrics to show.
+# You start kind, two Tilts, serverless ES, and Kibana. Then:
+#   setup  — local patches, motel ingest + index collectors, print managed_otlp.url
+#   seed   — publish a unit, mint keys, send ~100 docs (some failure-store)
+#   test_ui_flow — prompt for a UI source endpoint + API key and send docs
 #
 # Usage:
 #   ./x-pack/platform/plugins/shared/streams/dev/full_dev_flow/streams_full_dev.sh
@@ -18,12 +19,20 @@ UNIT_ID="${STREAMS_UNIT_ID:-default}"
 UNIT_NS="${STREAMS_UNIT_NAMESPACE:-project-dev}"
 TARGET_ID="${STREAMS_TARGET_ID:-dev}"
 # observability-ci does not publish :latest for these images. Empty means
-# resolve from the controller checkout / the motel Deployment already on kind.
-# Override with STREAMS_COLLECTOR_TAG / STREAMS_MOTEL_COLLECTOR_TAG.
+# resolve from the controller checkout (helm tag or go.mod pin), a Ready
+# motel pod, or ../hosted-otel-collector HEAD. Override with STREAMS_COLLECTOR_TAG
+# / STREAMS_MOTEL_COLLECTOR_TAG.
 COLLECTOR_TAG="${STREAMS_COLLECTOR_TAG:-}"
 MOTEL_COLLECTOR_TAG="${STREAMS_MOTEL_COLLECTOR_TAG:-}"
 MOTEL_NS="motel-ingest-collector"
+INDEX_NS="motel-index-collector"
 MOTEL_PORT="${STREAMS_MOTEL_PORT:-14318}"
+MANAGED_OTLP_URL="http://localhost:${MOTEL_PORT}"
+SOURCE_ID="${STREAMS_SOURCE_ID:-input}"
+# Demo traffic: logs per env per round, records per request, seconds between rounds.
+TRAFFIC_COUNT="${STREAMS_TRAFFIC_COUNT:-30}"
+TRAFFIC_BATCH="${STREAMS_TRAFFIC_BATCH:-10}"
+TRAFFIC_EVERY="${STREAMS_TRAFFIC_EVERY:-5}"
 LOGS_DEV_DS="logs-application.otel-dev"
 LOGS_PROD_DS="logs-application.otel-prod"
 METRICS_DS="metrics-streams.otel-default"
@@ -32,6 +41,7 @@ ES_PASS="${ES_PASS:-changeme}"
 CA="${CA:-$REPO_ROOT/src/platform/packages/shared/kbn-dev-utils/certs/ca.crt}"
 
 STREAMS_CONTROLLER="${STREAMS_CONTROLLER:-$(cd "$REPO_ROOT/../streams-controller" 2>/dev/null && pwd || true)}"
+STREAMS_HOSTED_OTEL_COLLECTOR="${STREAMS_HOSTED_OTEL_COLLECTOR:-$(cd "$REPO_ROOT/../hosted-otel-collector" 2>/dev/null && pwd || true)}"
 
 mkdir -p "$STATE_DIR"
 
@@ -49,7 +59,24 @@ kubectl_ctx() {
   kubectl --context "$KUBE_CONTEXT" "$@"
 }
 
-# First non-latest streams-collector tag in the controller checkout.
+# git-<12> from the checkout HEAD (the commit after a rebase), then
+# upstream/main, then origin/main. origin/main is wrong when the checkout
+# is a fork whose main still predates kafkatopicprocessor.conditionals.
+git_image_tag() {
+  local repo="$1" sha
+  [[ -n "$repo" && -d "$repo/.git" ]] || return 0
+  sha="$(git -C "$repo" rev-parse --short=12 HEAD 2>/dev/null || true)"
+  if [[ -z "$sha" ]]; then
+    sha="$(git -C "$repo" rev-parse --short=12 upstream/main 2>/dev/null \
+      || git -C "$repo" rev-parse --short=12 origin/main 2>/dev/null \
+      || true)"
+  fi
+  [[ -n "$sha" ]] || return 0
+  printf 'git-%s' "$sha"
+}
+
+# streams-collector tag: helm pin if present, else the streams-transpiler
+# commit in go.mod (same rule the controller uses at runtime).
 controller_streams_collector_tag() {
   [[ -n "${STREAMS_CONTROLLER:-}" ]] || return 0
   python3 - "$STREAMS_CONTROLLER" <<'PY'
@@ -66,22 +93,31 @@ for rel in ("dev/values.yaml", "helm/values.yaml"):
         r"repository: docker\.elastic\.co/observability-ci/streams-collector\n\s+tag:\s+(\S+)",
         path.read_text(),
     )
-    if match and match.group(1) != "latest":
+    if match and match.group(1) not in ("", "latest"):
         print(match.group(1))
         raise SystemExit(0)
+
+go_mod = root / "go.mod"
+if go_mod.exists():
+    match = re.search(
+        r"github.com/elastic/streams-transpiler\s+v\d+\.\d+\.\d+-(?:.*\.)?\d{14}-([0-9a-f]{12})",
+        go_mod.read_text(),
+    )
+    if match:
+        print("git-" + match.group(1))
 PY
 }
 
 deploy_image_tag() {
   local ns="$1" deploy="$2" image tag
-  # Prefer a Running pod. The Deployment spec may already be a broken :latest.
+  # Only reuse a Ready container. CrashLoop pods still have phase=Running and
+  # the Deployment spec may be an image that rejects motel.yaml (for example
+  # kafkatopicprocessor without conditionals).
   image="$(kubectl_ctx -n "$ns" get pods -l "app=$deploy" -o json 2>/dev/null \
-    | jq -r '.items[] | select(.status.phase=="Running") | .spec.containers[0].image' \
+    | jq -r '.items[]
+        | select(.status.containerStatuses[0].ready == true)
+        | .spec.containers[0].image' \
     | grep -v ':latest$' | head -1 || true)"
-  if [[ -z "$image" ]]; then
-    image="$(kubectl_ctx -n "$ns" get deploy "$deploy" \
-      -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
-  fi
   [[ "$image" == *:* ]] || return 0
   tag="${image##*:}"
   [[ -n "$tag" && "$tag" != "latest" ]] || return 0
@@ -89,17 +125,18 @@ deploy_image_tag() {
 }
 
 resolve_image_tags() {
-  local helm_tag running_motel
+  local helm_tag running_motel motel_git_tag
   helm_tag="$(controller_streams_collector_tag || true)"
   if [[ -z "$COLLECTOR_TAG" ]]; then
     COLLECTOR_TAG="$helm_tag"
   fi
   if [[ -z "$MOTEL_COLLECTOR_TAG" ]]; then
     running_motel="$(deploy_image_tag "$MOTEL_NS" motel-ingest-collector || true)"
-    MOTEL_COLLECTOR_TAG="${running_motel:-$helm_tag}"
+    motel_git_tag="$(git_image_tag "${STREAMS_HOSTED_OTEL_COLLECTOR:-}" || true)"
+    MOTEL_COLLECTOR_TAG="${running_motel:-$motel_git_tag}"
   fi
   [[ -n "$MOTEL_COLLECTOR_TAG" && "$MOTEL_COLLECTOR_TAG" != "latest" ]] \
-    || die "no motel image tag (observability-ci has no :latest). Set STREAMS_MOTEL_COLLECTOR_TAG or check streams-controller helm/values.yaml"
+    || die "no motel image tag (observability-ci has no :latest). Set STREAMS_MOTEL_COLLECTOR_TAG or clone hosted-otel-collector next to kibana"
   log "image tags: streams-collector=${COLLECTOR_TAG:-<unchanged>}  hosted-otel-collector=$MOTEL_COLLECTOR_TAG"
 }
 
@@ -213,12 +250,18 @@ cmd_status() {
     missing "Service es/$TARGET_ID"
   fi
   if kubectl_ctx -n "$MOTEL_NS" get deploy motel-ingest-collector >/dev/null 2>&1; then
-    ok "motel Deployment"
+    ok "motel ingest Deployment"
   else
-    missing "motel Deployment"
+    missing "motel ingest Deployment"
+  fi
+  if kubectl_ctx -n "$INDEX_NS" get deploy motel-index-collector >/dev/null 2>&1; then
+    ok "motel index Deployment"
+  else
+    missing "motel index Deployment"
   fi
   if curl -s --max-time 1 -o /dev/null -w '%{http_code}' "http://localhost:$MOTEL_PORT" 2>/dev/null | grep -qv '^000$'; then
     ok "motel port-forward localhost:$MOTEL_PORT"
+    ok "xpack.cloud.managed_otlp.url: \"$MANAGED_OTLP_URL\""
   else
     missing "motel port-forward localhost:$MOTEL_PORT"
   fi
@@ -252,23 +295,37 @@ tag = sys.argv[2]
 text = path.read_text()
 changed = False
 
+image_repo = (
+    "    image:\n"
+    "      repository: docker.elastic.co/observability-ci/streams-collector\n"
+)
 image_block = re.search(
-    r"(    image:\n      repository: docker\.elastic\.co/observability-ci/streams-collector\n      tag: )(\S+)",
+    r"(    image:\n      repository: docker\.elastic\.co/observability-ci/streams-collector\n)(      tag: )(\S+)",
     text,
 )
-if not image_block:
-    sys.exit("could not find processing.image.tag in dev/values.yaml")
-# :latest is not published. Only rewrite when we have a real tag and it differs,
-# or when the checkout was left on latest by an older run of this script.
-if tag and image_block.group(2) != tag:
-    text = text[: image_block.start()] + image_block.group(1) + tag + text[image_block.end() :]
+if image_block:
+    current_tag = image_block.group(3)
+    if tag and current_tag != tag:
+        text = (
+            text[: image_block.start()]
+            + image_block.group(1)
+            + image_block.group(2)
+            + tag
+            + text[image_block.end() :]
+        )
+        changed = True
+        print(f"patched collector image tag -> {tag}")
+    elif current_tag == "latest" and not tag:
+        sys.exit(
+            "dev/values.yaml has streams-collector:latest (not published). "
+            "Set STREAMS_COLLECTOR_TAG or restore helm/values.yaml"
+        )
+elif image_repo in text and tag:
+    text = text.replace(image_repo, image_repo + f"      tag: {tag}\n", 1)
     changed = True
     print(f"patched collector image tag -> {tag}")
-elif image_block.group(2) == "latest" and not tag:
-    sys.exit(
-        "dev/values.yaml has streams-collector:latest (not published). "
-        "Set STREAMS_COLLECTOR_TAG or restore helm/values.yaml"
-    )
+elif "repository: docker.elastic.co/observability-ci/streams-collector" not in text:
+    sys.exit("could not find processing.image.repository in dev/values.yaml")
 
 if "elasticsearch_url_format:" not in text:
     inserted = re.sub(
@@ -318,39 +375,31 @@ if "user_facing:" not in text:
     changed = True
     print("patched user_facing telemetry")
 
+if "user: motel-index-collector" not in text:
+    marker = (
+        "            name: motel.events.metrics.{targetID}\n"
+        "            operations: [write, describe]\n"
+    )
+    acl = """            name: motel.events.metrics.{targetID}
+            operations: [write, describe]
+      - user: motel-index-collector
+        permissions:
+          - resource: topic
+            name: motel.events.metrics.{targetID}
+            operations: [read, describe]
+          - resource: group
+            name: motel-index-collector
+            operations: [read, describe]
+"""
+    if marker not in text:
+        sys.exit("could not insert motel-index-collector Kafka ACL in dev/values.yaml")
+    text = text.replace(marker, acl, 1)
+    changed = True
+    print("patched motel-index-collector Kafka read ACL")
+
 path.write_text(text)
 if not changed:
     print("controller values already patched")
-PY
-}
-
-patch_telemetry_tls() {
-  local tpl="$STREAMS_CONTROLLER/internal/workload/telemetry.tpl.yml"
-  [[ -f "$tpl" ]] || { warn "no $tpl"; return 1; }
-  if grep -q 'insecure_skip_verify: true' "$tpl"; then
-    log "telemetry.tpl.yml already has local TLS skip"
-    return 0
-  fi
-  python3 - "$tpl" <<'PY'
-from pathlib import Path
-import sys
-path = Path(sys.argv[1])
-text = path.read_text()
-old = """    headers:
-      Authorization: {{ printf "%q" .Authorization }}
-    sending_queue:
-"""
-new = """    headers:
-      Authorization: {{ printf "%q" .Authorization }}
-    tls:
-      insecure_skip_verify: true
-      server_name_override: host.docker.internal
-    sending_queue:
-"""
-if old not in text:
-    sys.exit("could not find otlp_http/streams-telemetry headers in telemetry.tpl.yml")
-path.write_text(text.replace(old, new, 1))
-print("patched", path)
 PY
 }
 
@@ -362,7 +411,6 @@ ensure_controller_patches() {
   fi
   log "patching $STREAMS_CONTROLLER (local only, do not commit/push)"
   patch_controller_values
-  patch_telemetry_tls
   if kubectl_ctx -n streams-controller get deploy streams-controller >/dev/null 2>&1; then
     log "waiting for controller Tilt to rebuild (ko watches the template)"
     kubectl_ctx -n streams-controller rollout status deploy/streams-controller --timeout=180s \
@@ -379,36 +427,87 @@ ensure_motel() {
   log "ensuring motel"
   local rendered="$STATE_DIR/motel.yaml"
   sed "s/__COLLECTOR_TAG__/$MOTEL_COLLECTOR_TAG/g" "$ASSETS/motel.yaml" > "$rendered"
-  kubectl_ctx apply -f "$rendered" >/dev/null
+  local applied
+  applied="$(kubectl_ctx apply -f "$rendered")"
   if [[ -n "${STREAMS_CONTROLLER:-}" && -x "$STREAMS_CONTROLLER/dev/registry-secret.sh" ]]; then
     NAMESPACE="$MOTEL_NS" bash "$STREAMS_CONTROLLER/dev/registry-secret.sh"
   else
     warn "could not create motel image pull secret; set STREAMS_CONTROLLER or run docker login + registry-secret.sh"
   fi
+  # A changed ConfigMap does not restart the pod, so motel would keep serving the old input paths.
+  if grep -q 'configmap/motel-ingest-collector configured' <<<"$applied"; then
+    kubectl_ctx -n "$MOTEL_NS" rollout restart deploy/motel-ingest-collector >/dev/null
+  fi
   kubectl_ctx -n "$MOTEL_NS" rollout status deploy/motel-ingest-collector --timeout=180s
   ensure_motel_forward
 }
 
+ensure_index_collector() {
+  log "ensuring motel-index-collector (Kafka metrics → $METRICS_DS)"
+  local rendered="$STATE_DIR/index.yaml"
+  sed -e "s/__COLLECTOR_TAG__/$MOTEL_COLLECTOR_TAG/g" \
+      -e "s/__TARGET_ID__/$TARGET_ID/g" \
+      "$ASSETS/index.yaml" > "$rendered"
+  local applied
+  applied="$(kubectl_ctx apply -f "$rendered")"
+  if [[ -n "${STREAMS_CONTROLLER:-}" && -x "$STREAMS_CONTROLLER/dev/registry-secret.sh" ]]; then
+    NAMESPACE="$INDEX_NS" bash "$STREAMS_CONTROLLER/dev/registry-secret.sh"
+  else
+    warn "could not create index-collector image pull secret; set STREAMS_CONTROLLER or run docker login + registry-secret.sh"
+  fi
+  # A changed ConfigMap does not restart the pod, so the collector would keep the old config.
+  if grep -q 'configmap/motel-index-collector configured' <<<"$applied"; then
+    kubectl_ctx -n "$INDEX_NS" rollout restart deploy/motel-index-collector >/dev/null
+  fi
+  kubectl_ctx -n "$INDEX_NS" rollout status deploy/motel-index-collector --timeout=180s
+}
+
+motel_reachable() {
+  curl -s --max-time 1 -o /dev/null -w '%{http_code}' "http://localhost:$MOTEL_PORT" 2>/dev/null \
+    | grep -qv '^000$'
+}
+
 ensure_motel_forward() {
-  if curl -s --max-time 1 -o /dev/null "http://localhost:$MOTEL_PORT" 2>/dev/null; then
+  if motel_reachable; then
     log "motel already reachable on localhost:$MOTEL_PORT"
     return 0
   fi
-  if curl -s --max-time 1 -o /dev/null -w '%{http_code}' "http://localhost:$MOTEL_PORT" 2>/dev/null | grep -qv '^000$'; then
-    return 0
+  local pid_file="$STATE_DIR/motel-port-forward.pid"
+  if [[ -f "$pid_file" ]]; then
+    local old_pid
+    old_pid="$(cat "$pid_file" 2>/dev/null || true)"
+    if [[ -n "${old_pid:-}" ]] && kill -0 "$old_pid" 2>/dev/null; then
+      log "waiting for existing motel port-forward (pid $old_pid)"
+    else
+      rm -f "$pid_file"
+    fi
   fi
-  log "starting motel port-forward localhost:$MOTEL_PORT → $MOTEL_NS/svc:8443"
-  kubectl_ctx -n "$MOTEL_NS" port-forward svc/motel-ingest-collector "$MOTEL_PORT:8443" \
-    >"$STATE_DIR/motel-port-forward.log" 2>&1 &
-  echo $! > "$STATE_DIR/motel-port-forward.pid"
+  if ! motel_reachable; then
+    log "starting motel port-forward localhost:$MOTEL_PORT → $MOTEL_NS/svc:8443"
+    # Survive this script exiting so setup can print the URL and return.
+    nohup kubectl --context "$KUBE_CONTEXT" -n "$MOTEL_NS" \
+      port-forward svc/motel-ingest-collector "$MOTEL_PORT:8443" \
+      >"$STATE_DIR/motel-port-forward.log" 2>&1 &
+    echo $! > "$pid_file"
+    disown $! 2>/dev/null || true
+  fi
   local i
   for i in $(seq 1 20); do
-    if curl -s --max-time 1 -o /dev/null -w '%{http_code}' "http://localhost:$MOTEL_PORT" 2>/dev/null | grep -qv '^000$'; then
+    if motel_reachable; then
       return 0
     fi
     sleep 0.5
   done
   warn "motel port-forward did not come up; see $STATE_DIR/motel-port-forward.log"
+}
+
+print_managed_otlp_setting() {
+  echo
+  echo "Add this to config/kibana.dev.yml and restart Kibana:"
+  echo
+  echo "xpack.cloud.managed_otlp.url: \"$MANAGED_OTLP_URL\""
+  echo
+  echo "OTLP sources in Map then mint endpoints under $MANAGED_OTLP_URL/inputs/otlp/<source-id>/v1/{logs,metrics,traces}."
 }
 
 mint_api_key() {
@@ -426,6 +525,51 @@ mint_api_key() {
   [[ -n "$KEY" && "$KEY" != "null" ]] || die "failed to create API key"
   printf '%s' "$KEY" > "$STATE_DIR/api_key"
   chmod 600 "$STATE_DIR/api_key"
+}
+
+mint_source_api_key() {
+  if [[ -f "$STATE_DIR/source_api_key" && -s "$STATE_DIR/source_api_key" ]]; then
+    SOURCE_KEY="$(cat "$STATE_DIR/source_api_key")"
+    log "reusing source API key in $STATE_DIR/source_api_key"
+    return 0
+  fi
+  log "creating source-scoped API key for $SOURCE_ID"
+  local body
+  body="$(kb_curl -X POST "$KIBANA_URL/internal/streams/sources/api_key" \
+    -H 'Content-Type: application/json' \
+    -d "{\"sourceId\":\"$SOURCE_ID\",\"sourceTypeSlug\":\"otlp\"}")"
+  SOURCE_KEY="$(printf '%s' "$body" | jq -r '.encodedApiKey // empty')"
+  if [[ -z "$SOURCE_KEY" || "$SOURCE_KEY" == "null" ]]; then
+    printf '%s\n' "$body" >&2
+    die "failed to mint a source API key (does elastic_serverless have ingest_source_manager / manage_own_api_key?)"
+  fi
+  printf '%s' "$SOURCE_KEY" > "$STATE_DIR/source_api_key"
+  chmod 600 "$STATE_DIR/source_api_key"
+}
+
+enable_failure_store() {
+  local ds="$1"
+  es_curl -X PUT "$ES/_data_stream/$ds/_options" \
+    -H 'Content-Type: application/json' \
+    -d '{"failure_store":{"enabled":true}}' >/dev/null 2>&1 \
+    || warn "could not enable failure store on $ds (it may not exist yet)"
+}
+
+normalize_otlp_logs_url() {
+  local url="${1%/}"
+  url="${url%/v1/metrics}"
+  url="${url%/v1/traces}"
+  url="${url%/v1/logs}"
+  printf '%s/v1/logs' "$url"
+}
+
+post_otlp_payload() {
+  local url="$1" key="${2:-}" payload="$3"
+  local args=(-sS -X POST "$url" -H 'Content-Type: application/json' -H "X-Elastic-Project-Id: $TARGET_ID")
+  if [[ -n "$key" ]]; then
+    args+=(-H "Authorization: ApiKey $key")
+  fi
+  curl "${args[@]}" -d "$payload"
 }
 
 wait_for_unit_artifact() {
@@ -461,39 +605,247 @@ publish_unit() {
   wait_for_unit_artifact
 }
 
+# Rewrites the TLS block under every Elasticsearch exporter in the artifact: the local ES CA
+# and the host.docker.internal SNI. It removes whatever tls block is there first, so running
+# it on a clean, an already patched, or a stacked artifact gives the same result. (An older
+# version appended a block on every run, and the collector then crashed on the duplicate key.)
+# Exit 0 when it changed something, 10 when the artifact was already patched.
+normalize_artifact_tls() {
+  python3 - "$1" "$CA" "$2" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+artifact, ca_path, out_path = sys.argv[1:4]
+original = Path(artifact).read_text()
+lines = original.splitlines()
+ca_lines = Path(ca_path).read_text().splitlines()
+endpoint = re.compile(r"^(\s*)endpoint: \$\{env:STREAMS_ES_ENDPOINT\}\s*$")
+out = []
+i = 0
+while i < len(lines):
+    line = lines[i]
+    out.append(line)
+    i += 1
+    match = endpoint.match(line)
+    if not match:
+        continue
+    indent = match.group(1)
+    while i < len(lines) and lines[i].rstrip() == indent + "tls:":
+        i += 1
+        while i < len(lines) and (not lines[i].strip() or lines[i].startswith(indent + " ")):
+            i += 1
+    out.append(indent + "tls:")
+    out.append(indent + "    server_name_override: host.docker.internal")
+    out.append(indent + "    ca_pem: |")
+    out.extend(indent + "        " + ca_line for ca_line in ca_lines)
+patched = "\n".join(out) + "\n"
+Path(out_path).write_text(patched)
+sys.exit(10 if patched == original.rstrip("\n") + "\n" else 0)
+PY
+}
+
+# The unit's collector Deployment. Newer controllers name it `streams-<unit>`, older ones
+# `<unit>`, so look it up by label and take the newest.
+unit_deployment() {
+  kubectl_ctx -n "$UNIT_NS" get deploy -l "app.kubernetes.io/instance=$UNIT_ID" \
+    --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1
+}
+
+# Status and logs of the newest collector pod. `logs deploy/...` would pick any pod, often
+# an older healthy one, and hide why the new one fails.
+report_unready_collector() {
+  local pod
+  pod="$(kubectl_ctx -n "$UNIT_NS" get pods -l "app.kubernetes.io/instance=$UNIT_ID" \
+    --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)"
+  warn "collector did not become ready. Newest pod: ${pod:-<none>}"
+  [[ -n "$pod" ]] || return 0
+  kubectl_ctx -n "$UNIT_NS" get "$pod" || true
+  kubectl_ctx -n "$UNIT_NS" logs "$pod" --previous --tail=30 2>/dev/null \
+    || kubectl_ctx -n "$UNIT_NS" logs "$pod" --tail=30 || true
+}
+
+# `rollout status` right after the artifact patch can run before the unit operator has applied
+# it, and then reports the stale "progress deadline exceeded" left by an earlier broken rollout.
+# A failure that comes back at once is that case, so wait and ask again. A real failure (a pod
+# that never gets ready) takes the whole timeout and is not retried.
+wait_for_collector_rollout() {
+  local attempt started
+  for attempt in 1 2 3 4 5 6; do
+    started=$SECONDS
+    kubectl_ctx -n "$UNIT_NS" rollout status "$(unit_deployment)" --timeout=180s && return 0
+    (( SECONDS - started < 20 )) || return 1
+    log "rollout status failed at once, probably a stale condition. Retrying in 10s ($attempt/6)"
+    sleep 10
+  done
+  return 1
+}
+
 patch_artifact_tls() {
   log "patching StreamUnit artifact TLS (local ES CA + host.docker.internal SNI)"
   [[ -f "$CA" ]] || die "missing Kibana CA at $CA"
   local artifact="$STATE_DIR/artifact.yaml"
   local patched="$STATE_DIR/artifact.patched.yaml"
   kubectl_ctx -n "$UNIT_NS" get "streamunit/$UNIT_ID" -o jsonpath='{.spec.artifact}' > "$artifact"
-  awk -v cert="$CA" '{print}
-    /^        endpoint: \$\{env:STREAMS_ES_ENDPOINT\}$/ {
-      print "        tls:"; print "            server_name_override: host.docker.internal"
-      print "            ca_pem: |"
-      while ((getline l < cert) > 0) print "                " l; close(cert)
-    }' "$artifact" > "$patched"
-  kubectl_ctx -n "$UNIT_NS" patch "streamunit/$UNIT_ID" --type=merge \
-    -p "{\"spec\":{\"artifact\":$(jq -Rs . < "$patched")}}" >/dev/null
+  local rc=0
+  normalize_artifact_tls "$artifact" "$patched" || rc=$?
+  case "$rc" in
+    0)
+      kubectl_ctx -n "$UNIT_NS" patch "streamunit/$UNIT_ID" --type=merge \
+        -p "{\"spec\":{\"artifact\":$(jq -Rs . < "$patched")}}" >/dev/null
+      log "artifact TLS patched"
+      ;;
+    10) log "artifact TLS is already patched, leaving it as is" ;;
+    *) die "could not normalize the artifact TLS (python exit $rc)" ;;
+  esac
   log "waiting for collector Deployment $UNIT_NS/$UNIT_ID rollout"
-  if ! kubectl_ctx -n "$UNIT_NS" rollout status "deployment/$UNIT_ID" --timeout=180s; then
-    warn "collector did not become ready. Recent logs:"
-    kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --tail=30 || true
-    die "collector rollout failed (unknown otlp_http: image is too old; set STREAMS_COLLECTOR_TAG)"
+  if ! wait_for_collector_rollout; then
+    report_unready_collector
+    die "collector rollout failed. The newest pod's status and logs are above. Older pods keep serving until it is fixed. Fix the cause and re-run; the TLS patch is safe to repeat."
   fi
 }
 
-send_logs() {
-  log "sending demo OTLP logs through motel"
-  local env
-  for env in dev prod; do
-    curl -sS -X POST "http://localhost:$MOTEL_PORT/inputs/otlphttp/input/v1/logs" \
+# Map save republishes the unit and drops the local ES TLS block.
+ensure_unit_tls() {
+  if ! kubectl_ctx -n "$UNIT_NS" get "streamunit/$UNIT_ID" >/dev/null 2>&1; then
+    die "no StreamUnit $UNIT_NS/$UNIT_ID. Save the map first."
+  fi
+  ensure_es_alias
+  patch_artifact_tls
+}
+
+# body.text is a keyword on OTEL logs, so match_phrase on a marker substring misses.
+marker_prefix_query() {
+  jq -n --arg m "$1" '{query:{prefix:{"body.text":$m}}}'
+}
+
+count_marker_docs() {
+  local marker="$1"
+  local q main fail
+  q="$(marker_prefix_query "$marker")"
+  main="$(es_curl "$ES/logs-*/_count" -H 'Content-Type: application/json' -d "$q" | jq -r '.count // 0')"
+  fail="$(es_curl "$ES/logs-*::failures/_count" -H 'Content-Type: application/json' -d "$q" \
+    | jq -r '.count // 0')"
+  printf '%s %s' "${main:-0}" "${fail:-0}"
+}
+
+wait_for_marker_docs() {
+  local marker="$1"
+  log "waiting for marker $marker in logs-* (body.text prefix; OTEL stores it as keyword)"
+  local i main fail
+  detect_es
+  for i in $(seq 1 24); do
+    read -r main fail <<<"$(count_marker_docs "$marker")"
+    if [[ "${main:-0}" -gt 0 || "${fail:-0}" -gt 0 ]]; then
+      log "$((main + fail)) docs with that marker ($main in logs-*, $fail in ::failures)"
+      es_curl "$ES/logs-*/_search?size=0" -H 'Content-Type: application/json' \
+        -d "$(jq -n --arg m "$marker" '{query:{prefix:{"body.text":$m}},aggs:{idx:{terms:{field:"_index",size:20}}}}')" \
+        | jq -r '.aggregations.idx.buckets[]? | "    \(.key)  \(.doc_count)"'
+      return 0
+    fi
+    sleep 5
+  done
+  warn "marker did not appear. Collector errors:"
+  kubectl_ctx -n "$UNIT_NS" logs "$(unit_deployment)" --since=5m \
+    | grep -E '"log.level":"(warn|error)"' | tail -20 || true
+  return 1
+}
+
+# OTEL logs flatten resource/attribute maps, so an OTLP type-conflict never
+# reaches the destination failure store. Write a bad @timestamp after the
+# valid docs have created the data stream.
+index_failure_docs() {
+  local ds="$1" env="$2" start="$3" count="${4:-5}" i
+  detect_es
+  [[ -n "$ES" ]] || die "Elasticsearch is not reachable"
+  for i in $(seq "$start" $((start + count - 1))); do
+    es_curl -X POST "$ES/$ds/_doc?refresh=true" \
       -H 'Content-Type: application/json' \
-      -H "X-Elastic-Project-Id: $TARGET_ID" \
-      -d "{\"resourceLogs\":[{\"resource\":{\"attributes\":[{\"key\":\"env\",\"value\":{\"stringValue\":\"$env\"}}]},
-         \"scopeLogs\":[{\"logRecords\":[{\"timeUnixNano\":\"$(date +%s)000000000\",
-         \"body\":{\"stringValue\":\"hi from $env\"}}]}]}]}" \
-      | grep -q 'partialSuccess' || warn "unexpected motel response for env=$env"
+      -d "$(jq -n --arg env "$env" --arg n "$i" \
+        '{
+          "@timestamp": "not-a-timestamp",
+          "body": {"text": ("failure-store doc " + $n)},
+          "resource": {"attributes": {
+            "env": $env,
+            "service.name": "streams-full-dev"
+          }}
+        }')" >/dev/null \
+      || warn "could not write failure-store doc $i to $ds"
+  done
+}
+
+send_logs() {
+  log "sending 100 docs through motel as source $SOURCE_ID (90 ok OTLP, 10 failure-store)"
+  local url payload i
+  url="$(normalize_otlp_logs_url "$MANAGED_OTLP_URL/inputs/otlp/$SOURCE_ID")"
+  motel_reachable || die "motel is not reachable on localhost:$MOTEL_PORT. Run: $0 setup"
+  payload="$(python3 <<'PY'
+import json, time
+now = int(time.time() * 1e9)
+
+def envelope(env, records):
+    return {
+        "resource": {"attributes": [
+            {"key": "env", "value": {"stringValue": env}},
+            {"key": "service.name", "value": {"stringValue": "streams-full-dev"}},
+        ]},
+        "scopeLogs": [{"logRecords": records}],
+    }
+
+def ok_record(i, env):
+    return {
+        "timeUnixNano": str(now + i),
+        "severityText": "INFO",
+        "body": {"stringValue": f"hi from {env} doc {i}"},
+        "attributes": [{"key": "doc.id", "value": {"stringValue": str(i)}}],
+    }
+
+print(json.dumps({"resourceLogs": [
+    envelope("dev", [ok_record(i, "dev") for i in range(45)]),
+    envelope("prod", [ok_record(i, "prod") for i in range(45, 90)]),
+]}))
+PY
+)"
+  post_otlp_payload "$url" "${SOURCE_KEY:-}" "$payload" \
+    | grep -q 'partialSuccess' || warn "unexpected motel response for the 90 valid docs"
+  for i in $(seq 1 24); do
+    if ds_has_docs "$LOGS_DEV_DS" && ds_has_docs "$LOGS_PROD_DS"; then
+      break
+    fi
+    sleep 1
+  done
+  enable_failure_store "$LOGS_DEV_DS"
+  enable_failure_store "$LOGS_PROD_DS"
+  log "writing 10 failure-store docs (invalid @timestamp on $LOGS_DEV_DS / $LOGS_PROD_DS)"
+  index_failure_docs "$LOGS_DEV_DS" dev 90 5
+  index_failure_docs "$LOGS_PROD_DS" prod 95 5
+}
+
+motel_logs_url() {
+  normalize_otlp_logs_url "$MANAGED_OTLP_URL/inputs/otlp/$SOURCE_ID"
+}
+
+# One OTLP/HTTP logs request through motel: $2 records for env $1, to url $3 with API key $4.
+send_log_batch() {
+  local env="$1" records="$2" url="$3" key="$4" body
+  body="$(jq -nc --arg env "$env" --argjson n "$records" --arg ts "$(date +%s)000000000" '
+    {resourceLogs: [{
+      resource: {attributes: [{key: "env", value: {stringValue: $env}}]},
+      scopeLogs: [{logRecords: [range(0; $n) | {timeUnixNano: $ts, body: {stringValue: "hi from \($env) \(.)"}}]}]
+    }]}')"
+  post_otlp_payload "$url" "$key" "$body" | grep -q 'partialSuccess'
+}
+
+# One round: $1 logs per env, in requests of $2 records, for the envs in $4, to url $3 with API key $5.
+send_traffic_round() {
+  local count="$1" batch="$2" url="$3" envs="$4" key="$5" env left n
+  for env in $envs; do
+    left="$count"
+    while (( left > 0 )); do
+      n=$(( left < batch ? left : batch ))
+      send_log_batch "$env" "$n" "$url" "$key" || { warn "motel did not accept a batch for env=$env"; return 1; }
+      left=$(( left - n ))
+    done
   done
 }
 
@@ -503,34 +855,49 @@ print_ready() {
   echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/new-experience/"
   echo "  Discover ${KIBANA_URL:-http://localhost:5601}/app/discover"
   echo "  Logs     FROM $LOGS_DEV_DS  |  FROM $LOGS_PROD_DS"
+  echo "  Failures FROM $LOGS_DEV_DS::failures  |  FROM $LOGS_PROD_DS::failures"
   echo "  Metrics  FROM $METRICS_DS"
 }
 
+ds_has_failures() {
+  local ds="$1"
+  [[ -n "$ES" ]] && es_curl "$ES/${ds}::failures/_count" 2>/dev/null | jq -e '.count > 0' >/dev/null 2>&1
+}
+
 wait_for_data() {
-  log "waiting for demo logs and collector metrics"
-  local i logs_ok=0 metrics_ok=0
+  log "waiting for demo logs, failure-store docs, and collector metrics"
+  local i logs_ok=0 fail_ok=0 metrics_ok=0
   for i in $(seq 1 24); do
     if [[ "$logs_ok" -eq 0 ]] && { ds_has_docs "$LOGS_DEV_DS" || ds_has_docs "$LOGS_PROD_DS"; }; then
       logs_ok=1
       log "demo logs are in"
     fi
+    if [[ "$fail_ok" -eq 0 ]] && { ds_has_failures "$LOGS_DEV_DS" || ds_has_failures "$LOGS_PROD_DS"; }; then
+      fail_ok=1
+      log "failure-store docs are in"
+    fi
     if [[ "$metrics_ok" -eq 0 ]] && ds_has_docs "$METRICS_DS"; then
       metrics_ok=1
       log "collector metrics are in"
     fi
-    if [[ "$logs_ok" -eq 1 && "$metrics_ok" -eq 1 ]]; then
+    if [[ "$logs_ok" -eq 1 && "$fail_ok" -eq 1 && "$metrics_ok" -eq 1 ]]; then
       print_ready
       return 0
     fi
     sleep 5
   done
   if [[ "$logs_ok" -eq 1 ]]; then
-    warn "logs landed but $METRICS_DS is still empty (collector telemetry may still be starting)"
+    [[ "$fail_ok" -eq 1 ]] || warn "logs landed but no docs in $LOGS_DEV_DS::failures or $LOGS_PROD_DS::failures"
+    if [[ "$metrics_ok" -eq 0 ]]; then
+      warn "logs landed but $METRICS_DS is still empty"
+      warn "index-collector logs:"
+      kubectl_ctx -n "$INDEX_NS" logs deploy/motel-index-collector --since=5m --tail=30 || true
+    fi
     print_ready
     return 0
   fi
   warn "no demo documents yet. Collector logs:"
-  kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --since=5m \
+  kubectl_ctx -n "$UNIT_NS" logs "$(unit_deployment)" --since=5m \
     | grep -E '"log.level":"(warn|error)"' | tail -20 || true
   die "demo data did not appear (see above)"
 }
@@ -553,18 +920,228 @@ cmd_setup() {
   ensure_controller_patches
   ensure_es_alias
   ensure_motel
+  ensure_index_collector
   log "setup done"
+  print_managed_otlp_setting
 }
 
 cmd_seed() {
   require_stack
+  ensure_controller_patches
   ensure_es_alias
-  ensure_motel_forward
+  ensure_motel
+  ensure_index_collector
   mint_api_key
   publish_unit
   patch_artifact_tls
+  mint_source_api_key
   send_logs
   wait_for_data
+}
+
+prompt_test_ui_flow_secrets() {
+  if [[ -n "${STREAMS_TEST_ENDPOINT:-}" && -n "${STREAMS_TEST_API_KEY:-}" ]]; then
+    TEST_ENDPOINT="$STREAMS_TEST_ENDPOINT"
+    TEST_API_KEY="$STREAMS_TEST_API_KEY"
+    return 0
+  fi
+  if [[ ! -t 0 ]]; then
+    die "test_ui_flow needs a terminal, or set STREAMS_TEST_ENDPOINT and STREAMS_TEST_API_KEY"
+  fi
+  printf 'Source endpoint URL (from Map, logs or base): '
+  IFS= read -r TEST_ENDPOINT
+  printf 'Source API key (encoded, from Generate key): '
+  IFS= read -rs TEST_API_KEY
+  printf '\n'
+  [[ -n "$TEST_ENDPOINT" ]] || die "empty endpoint URL"
+  [[ -n "$TEST_API_KEY" ]] || die "empty API key"
+}
+
+artifact_has_es_tls() {
+  kubectl_ctx -n "$UNIT_NS" get "streamunit/$UNIT_ID" -o jsonpath='{.spec.artifact}' 2>/dev/null \
+    | grep -q 'server_name_override: host.docker.internal'
+}
+
+collector_dropping_tls() {
+  kubectl_ctx -n "$UNIT_NS" logs "$(unit_deployment)" --since=3m 2>/dev/null \
+    | grep -q 'certificate is valid for host.docker.internal'
+}
+
+send_ui_flow_docs() {
+  local url="$1" key="$2" ok_payload="$3" fail_payload="$4" marker="${5:-}"
+  local i main fail
+  post_otlp_payload "$url" "$key" "$ok_payload" \
+    | grep -q 'partialSuccess' || die "motel rejected the 90 valid docs"
+  # Let the string `env` mapping land before the object `env` docs, otherwise
+  # the 90 valid records go to the failure store.
+  if [[ -n "$marker" ]]; then
+    for i in $(seq 1 10); do
+      read -r main fail <<<"$(count_marker_docs "$marker")"
+      if [[ "${main:-0}" -gt 0 ]]; then
+        break
+      fi
+      sleep 1
+    done
+  else
+    sleep 2
+  fi
+  post_otlp_payload "$url" "$key" "$fail_payload" \
+    | grep -q 'partialSuccess' || warn "motel rejected the 10 failure-store docs (they must still reach the collector to fail at ES)"
+}
+
+cmd_test_ui_flow() {
+  require_stack
+  ensure_motel_forward
+  motel_reachable || die "motel is not reachable on localhost:$MOTEL_PORT. Run: $0 setup"
+  # Prompt first: Generate key / Map save republishes the unit and drops TLS.
+  prompt_test_ui_flow_secrets
+  ensure_unit_tls
+  local url marker
+  url="$(normalize_otlp_logs_url "$TEST_ENDPOINT")"
+  marker="streams-ui-flow-$(date +%s)"
+  log "sending 100 OTLP logs to $url (90 ok, 10 mapping-conflict for failure store)"
+  local payload
+  payload="$(python3 - "$marker" <<'PY'
+import json, sys, time
+marker = sys.argv[1]
+now = int(time.time() * 1e9)
+
+def envelope(resource_attrs, records):
+    return {
+        "resourceLogs": [{
+            "resource": {"attributes": resource_attrs},
+            "scopeLogs": [{"logRecords": records}],
+        }]
+    }
+
+ok_records = []
+for i in range(90):
+    env = "prod" if i % 10 == 0 else "dev"
+    ok_records.append({
+        "timeUnixNano": str(now + i),
+        "severityText": "INFO",
+        "body": {"stringValue": f"{marker} doc {i} env={env}"},
+        "attributes": [{"key": "doc.id", "value": {"stringValue": str(i)}}],
+    })
+# Successful docs map resource.attributes.env as a keyword. These send env as an
+# object so Elasticsearch rejects them into the destination failure store.
+fail_records = []
+for i in range(90, 100):
+    fail_records.append({
+        "timeUnixNano": str(now + i),
+        "severityText": "ERROR",
+        "body": {"stringValue": f"{marker} failure-store doc {i}"},
+        "attributes": [{"key": "doc.id", "value": {"stringValue": str(i)}}],
+    })
+print(json.dumps({
+    "ok": envelope([
+        {"key": "service.name", "value": {"stringValue": "streams-ui-flow"}},
+        {"key": "env", "value": {"stringValue": "dev"}},
+    ], ok_records),
+    "fail": envelope([
+        {"key": "service.name", "value": {"stringValue": "streams-ui-flow"}},
+        {"key": "env", "value": {"kvlistValue": {"values": [
+            {"key": "nested", "value": {"stringValue": "mapping-conflict"}},
+        ]}}},
+    ], fail_records),
+}))
+PY
+)"
+  local ok_payload fail_payload
+  ok_payload="$(printf '%s' "$payload" | jq -c .ok)"
+  fail_payload="$(printf '%s' "$payload" | jq -c .fail)"
+  send_ui_flow_docs "$url" "$TEST_API_KEY" "$ok_payload" "$fail_payload" "$marker"
+  echo
+  echo "Sent 100 logs with marker $marker"
+  echo "  Valid:          body.text prefix \"$marker\" on the destination index"
+  echo "  Failure store:  FROM <your-dest-index>::failures  (env type conflict)"
+  if wait_for_marker_docs "$marker"; then
+    return 0
+  fi
+  if collector_dropping_tls || ! artifact_has_es_tls; then
+    warn "Map republished and dropped local ES TLS. Re-applying and sending once more."
+    ensure_unit_tls
+    send_ui_flow_docs "$url" "$TEST_API_KEY" "$ok_payload" "$fail_payload" "$marker"
+    if wait_for_marker_docs "$marker"; then
+      return 0
+    fi
+  fi
+  echo "If nothing lands, the source must be connected to a destination on the map and saved."
+  echo "Do not save Map while this command is sending — that republish wipes the TLS patch."
+  die "UI-flow docs did not appear in logs-*"
+}
+
+usage_traffic() {
+  cat <<EOF
+Usage: $0 traffic [flags]
+
+Keeps sending demo OTLP logs through motel, so the unit collector writes fresh stats
+documents. Runs until Ctrl-C unless --once is given.
+
+Flags:
+  --count N      logs per env per round        (default $TRAFFIC_COUNT)
+  --batch N      records per request           (default $TRAFFIC_BATCH)
+  --env E        prod, dev or both             (default both; env=prod routes to es-prod)
+  --every S      seconds between rounds        (default $TRAFFIC_EVERY)
+  --once         send one round and stop
+  --url URL      OTLP logs endpoint            (default the motel source $SOURCE_ID)
+  --key KEY      encoded API key for --url     (default the cached source key)
+EOF
+}
+
+cmd_traffic() {
+  local count="$TRAFFIC_COUNT" batch="$TRAFFIC_BATCH" every="$TRAFFIC_EVERY"
+  local envs="prod dev" once=0 url="" key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --count) count="${2:?--count needs a number}"; shift 2 ;;
+      --batch) batch="${2:?--batch needs a number}"; shift 2 ;;
+      --every) every="${2:?--every needs a number of seconds}"; shift 2 ;;
+      --url) url="${2:?--url needs a URL}"; shift 2 ;;
+      --key) key="${2:?--key needs an encoded API key}"; shift 2 ;;
+      --once) once=1; shift ;;
+      --env)
+        case "${2:-}" in
+          prod | dev) envs="$2" ;;
+          both) envs="prod dev" ;;
+          *) die "--env must be prod, dev or both" ;;
+        esac
+        shift 2
+        ;;
+      -h | --help) usage_traffic; return 0 ;;
+      *) usage_traffic >&2; die "unknown traffic flag: $1" ;;
+    esac
+  done
+  [[ "$count" =~ ^[1-9][0-9]*$ ]] || die "--count must be a positive number"
+  [[ "$batch" =~ ^[1-9][0-9]*$ ]] || die "--batch must be a positive number"
+  [[ "$every" =~ ^[0-9]+$ ]] || die "--every must be a number of seconds"
+  need curl
+  need jq
+  if [[ -z "$url" ]]; then
+    need kubectl
+    ensure_motel_forward
+    url="$(motel_logs_url)"
+    if [[ -z "$key" ]]; then
+      detect_kibana
+      mint_source_api_key
+      key="$SOURCE_KEY"
+    fi
+  fi
+
+  local rounds=0 sent=0 per_round
+  per_round=$(( count * $(printf '%s' "$envs" | wc -w) ))
+  trap 'echo; log "stopped after $rounds rounds, $sent logs sent"; exit 0' INT TERM
+  while true; do
+    if send_traffic_round "$count" "$batch" "$url" "$envs" "$key"; then
+      rounds=$(( rounds + 1 ))
+      sent=$(( sent + per_round ))
+      log "round $rounds: $count logs per env (${envs// /, }), batches of $batch  [$sent sent]"
+    elif [[ "$rounds" -eq 0 ]]; then
+      die "the first round failed. Is the motel port-forward up? Try: $0 status"
+    fi
+    [[ "$once" -eq 1 ]] && return 0
+    sleep "$every"
+  done
 }
 
 restore_controller_patches() {
@@ -572,7 +1149,7 @@ restore_controller_patches() {
     warn "streams-controller checkout not found; skip reverting local patches"
     return 0
   fi
-  local files=(dev/values.yaml internal/workload/telemetry.tpl.yml)
+  local files=(dev/values.yaml)
   log "reverting local controller patches: ${files[*]}"
   git -C "$STREAMS_CONTROLLER" checkout -- "${files[@]}"
 }
@@ -604,7 +1181,8 @@ cmd_reset() {
     log "deleting StreamUnit $UNIT_NS/$UNIT_ID"
     kubectl_ctx -n "$UNIT_NS" delete "streamunit/$UNIT_ID" --wait=true
   fi
-  rm -f "$STATE_DIR/api_key" "$STATE_DIR/unit.yaml" "$STATE_DIR/artifact.yaml" "$STATE_DIR/artifact.patched.yaml"
+  rm -f "$STATE_DIR/api_key" "$STATE_DIR/source_api_key" "$STATE_DIR/unit.yaml" \
+    "$STATE_DIR/artifact.yaml" "$STATE_DIR/artifact.patched.yaml"
   restore_controller_patches
   log "reset done. Reload Canvas — the graph should be empty. Re-run $0 to stand the demo unit back up."
 }
@@ -613,16 +1191,6 @@ usage() {
   cat <<EOF
 Full local Streams backend for UI development.
 
-You start kind, two Tilts, serverless ES, and Kibana. This script publishes the
-demo unit, wires motel → collector → ES, and sends traffic.
-
-Usage:
-  $0           wire the cluster + publish unit + send traffic
-  $0 status    what is running
-  $0 setup     motel, ES alias, local controller patches
-  $0 seed      publish unit + send traffic
-  $0 reset     drop Canvas unit, demo data, StreamUnit CR, and controller patches
-
 Start these yourself and leave them running:
   pnpm es serverless --projectType=observability
   pnpm serverless-oblt
@@ -630,18 +1198,27 @@ Start these yourself and leave them running:
   cd streams-controller && tilt up --port 10351
 
 Then from the Kibana checkout:
-  $0
 
-Edit unit.yaml and re-run to publish a different graph. Keep __API_KEY__
-on elasticsearch destinations.
+Usage:
+  $0 setup          local patches, motel ingest + index collectors, print managed_otlp.url
+  $0 seed           publish unit, mint dest + source API keys, send 100 docs (90 ok, 10 failures)
+  $0 test_ui_flow   prompt for a Map source endpoint + API key, send 100 docs
+  $0 traffic        keep sending demo logs until Ctrl-C (see $0 traffic --help)
+  $0 status         what is running
+  $0 reset          drop Map unit, demo data, StreamUnit CR, controller patches
+  $0                setup + seed
+
+Edit unit.yaml and re-run seed to publish a different graph. Keep __API_KEY__
+on elasticsearch destinations. Source id defaults to "input" (STREAMS_SOURCE_ID).
 
 Login: $ES_USER / $ES_PASS (local serverless defaults)
 
 Collector images do not have a :latest tag. The script uses the
-streams-collector tag from your streams-controller checkout, and the
-motel image already on the cluster. Override with STREAMS_COLLECTOR_TAG
-and STREAMS_MOTEL_COLLECTOR_TAG. Minted ES API keys stay in
-\$TMPDIR/streams-full-dev and are never committed.
+streams-collector tag from your streams-controller checkout (helm pin or
+go.mod streams-transpiler commit), and a Ready motel image on the cluster
+or git-<12> of ../hosted-otel-collector HEAD. Override with
+STREAMS_COLLECTOR_TAG and STREAMS_MOTEL_COLLECTOR_TAG. Minted ES API keys
+stay in \$TMPDIR/streams-full-dev and are never committed.
 EOF
 }
 
@@ -652,6 +1229,8 @@ main() {
     status) cmd_status ;;
     setup) cmd_setup ;;
     seed) cmd_seed ;;
+    test_ui_flow | test-ui-flow) cmd_test_ui_flow ;;
+    traffic) shift; cmd_traffic "$@" ;;
     reset) cmd_reset ;;
     all)
       cmd_setup

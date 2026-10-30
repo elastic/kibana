@@ -28,4 +28,5 @@ export {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from './helpers';

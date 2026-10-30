@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useCustomContentHtml } from './use_custom_content_html';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { CustomContentComponent } from './custom_content_component';
 import type { CustomContentRendererServices } from './types';
 
@@ -51,6 +52,20 @@ describe('CustomContentComponent', () => {
     expect(container.querySelector('[data-shared-item]')).not.toBeNull();
   });
 
+  it('keeps a 200px floor on the panel and its iframe container by default', () => {
+    const { container } = render(<CustomContentComponent {...defaultProps} />);
+    const root = container.querySelector('[data-shared-item]');
+    expect(root).toHaveStyle({ minHeight: '200px' });
+    expect(container.querySelector('iframe')?.parentElement).toHaveStyle({ minHeight: '200px' });
+  });
+
+  it('lets the host lower the floor on the panel and its iframe container', () => {
+    const { container } = render(<CustomContentComponent {...defaultProps} minHeight={0} />);
+    const root = container.querySelector('[data-shared-item]');
+    expect(root).toHaveStyle({ minHeight: '0' });
+    expect(container.querySelector('iframe')?.parentElement).toHaveStyle({ minHeight: '0' });
+  });
+
   it('reports loading state to the panel', () => {
     const onLoadingChange = jest.fn();
     mockUseCustomContentHtml.mockReturnValue({
@@ -86,6 +101,16 @@ describe('CustomContentComponent', () => {
 
     expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
       expect.objectContaining({ isInteractive: false })
+    );
+  });
+
+  it('passes the request adapter to the HTML hook', () => {
+    const requestAdapter = new RequestAdapter();
+
+    render(<CustomContentComponent {...defaultProps} requestAdapter={requestAdapter} />);
+
+    expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
+      expect.objectContaining({ requestAdapter })
     );
   });
 

@@ -94,10 +94,6 @@ export const setSignalsStatusRoute = (
           reason: 'reason' in request.body ? request.body.reason : undefined,
         });
         if (!closingReason.valid) {
-          auditAlertUpdatePreOperationFailure(
-            securitySolution?.getAuditLogger(),
-            'Invalid alert update request'
-          );
           return siemResponse.error({ statusCode: 400, body: closingReason.message });
         }
         const reason = closingReason.reason;
@@ -202,10 +198,6 @@ export const setSignalsStatusRoute = (
               ...Object.keys(passthroughRuntimeMappings ?? {}),
             ]);
             if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
-              auditAlertUpdatePreOperationFailure(
-                securitySolution?.getAuditLogger(),
-                'Invalid alert update request'
-              );
               return siemResponse.error({
                 statusCode: 400,
                 body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,

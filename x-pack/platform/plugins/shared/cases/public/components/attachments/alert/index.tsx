@@ -17,7 +17,7 @@ import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attach
 import {
   StackAlertAttachmentPayloadSchema,
   type AlertAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/alert/v2';
+} from '../../../../common/types/domain/attachment/alert/v2';
 import { toStringArray } from '../../../../common/utils/attachments';
 import * as i18n from './translations';
 import { ShowTableButton } from '../common/show_table_button';
@@ -77,6 +77,7 @@ export const getStackAlertAttachmentType = () =>
   defineAttachment({
     id: STACK_ALERT_ATTACHMENT_TYPE,
     getLabel: () => i18n.ALERT_DISPLAY_NAME,
+    getCountLabel: ({ count }) => i18n.ALERTS_COUNT(count),
     getIcon: () => 'bell',
     getCreationActivity,
     getRemovalActivity,

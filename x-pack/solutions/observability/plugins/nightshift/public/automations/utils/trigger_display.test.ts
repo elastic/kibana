@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTriggerDisplay, TRIGGER_LABEL_ORDER } from './trigger_display';
+import { getTriggerDisplay } from './trigger_display';
 
 describe('getTriggerDisplay', () => {
   it('maps each trigger row to its label and icon', () => {
@@ -13,7 +13,7 @@ describe('getTriggerDisplay', () => {
       label: 'Alert triggered',
       icon: 'logoElastic',
     });
-    expect(getTriggerDisplay({ kind: 'schedule' })).toEqual({
+    expect(getTriggerDisplay({ kind: 'schedule', schedulePreset: 'hourly' })).toEqual({
       label: 'Scheduled',
       icon: 'calendar',
     });
@@ -21,9 +21,5 @@ describe('getTriggerDisplay', () => {
       label: 'New message in channel',
       icon: 'logoSlack',
     });
-  });
-
-  it('orders alert, Slack, and scheduled triggers', () => {
-    expect(TRIGGER_LABEL_ORDER).toEqual(['Alert triggered', 'New message in channel', 'Scheduled']);
   });
 });

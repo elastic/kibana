@@ -20,6 +20,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
 } from '@kbn/management-settings-ids';
 import type { CoreStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys } from '../../query_keys';
 
@@ -27,6 +28,7 @@ export const ATTACK_DISCOVERY_WORKFLOWS_SETTING = 'securitySolution:enableAttack
 const FLEET_PACKAGE_POLICIES_PATH = '/api/fleet/package_policies';
 const UI_SETTINGS_PATH = '/internal/kibana/settings';
 const WORKFLOWS_MGET_PATH = '/api/workflows/mget';
+const DEFAULT_SPACE_WORKFLOWS_MGET_PATH = '{serverBasePath*}/api/workflows/mget';
 const ALERT_ANALYSIS_WORKFLOW_ID = 'system-security-alert-analysis';
 
 export const THREAT_REPORT_WORKFLOWS = [
@@ -122,14 +124,22 @@ export const useWorkerDependencyChecks = (workerId: string) => {
   const threatReportWorkflows = useQuery({
     queryKey: queryKeys.workerDependencies.threatReportWorkflows(spaceBasePath),
     enabled: needsThreatReports,
+    // Ingest and enrich are installed once in the default space, so they are addressed there
+    // from every space: the server base path has no `/s/{id}` prefix.
     queryFn: () =>
-      http.post<WorkflowState[]>(WORKFLOWS_MGET_PATH, {
-        version: '2023-10-31',
-        body: JSON.stringify({
-          ids: THREAT_REPORT_WORKFLOWS.map(({ id }) => id),
-          source: ['enabled'],
+      http.post<WorkflowState[]>(
+        buildPath(DEFAULT_SPACE_WORKFLOWS_MGET_PATH, {
+          serverBasePath: http.basePath.serverBasePath,
         }),
-      }),
+        {
+          prependBasePath: false,
+          version: '2023-10-31',
+          body: JSON.stringify({
+            ids: THREAT_REPORT_WORKFLOWS.map(({ id }) => id),
+            source: ['enabled'],
+          }),
+        }
+      ),
     retry: false,
     refetchOnMount: 'always',
     refetchOnWindowFocus: 'always',

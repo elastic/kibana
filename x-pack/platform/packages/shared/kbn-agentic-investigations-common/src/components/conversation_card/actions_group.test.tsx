@@ -9,14 +9,16 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Investigation } from '../../types';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { ConversationsActionsGroup } from './actions_group';
+
+const PRIVILEGE_TOOLTIP = ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired;
 
 const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigation => ({
   id: 'inv-1',
   template_id: 'investigation',
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
   worker_execution_ids: ['exec-1'],
   recordId: 'inv-1',
   pendingProposalCount: 1,
@@ -30,26 +32,28 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
 const renderGroup = (
   investigation: Investigation,
   {
-    withRecommendedAction = true,
     canManageEscalations = false,
-  }: { withRecommendedAction?: boolean; canManageEscalations?: boolean } = {}
+    canOpenInvestigationDetails,
+  }: {
+    canManageEscalations?: boolean;
+    canOpenInvestigationDetails?: boolean;
+  } = {}
 ) => {
-  const onClickRecommendedAction = jest.fn();
   const onClickAction = jest.fn();
   const onOpenChat = jest.fn();
 
   renderWithKibanaRenderContext(
     <ConversationsActionsGroup
       investigation={investigation}
-      onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
       onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
       canManageEscalations={canManageEscalations}
+      canOpenInvestigationDetails={canOpenInvestigationDetails}
     />
   );
 
-  return { onClickRecommendedAction, onClickAction, onOpenChat };
+  return { onClickAction, onOpenChat };
 };
 
 const openMenu = () => fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
@@ -64,10 +68,34 @@ describe('ConversationsActionsGroup', () => {
       expect(onOpenChat).toHaveBeenCalled();
     });
 
+    it('disables the actions menu and explains why when a reason is given', async () => {
+      renderGroup(makeInvestigation(), { canOpenInvestigationDetails: false });
+      const menuButton = screen.getByRole('button', { name: PRIVILEGE_TOOLTIP });
+
+      fireEvent.click(menuButton);
+
+      expect(menuButton).toBeDisabled();
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it('disables opening the chat and explains why when a reason is given', async () => {
+      const { onOpenChat } = renderGroup(makeInvestigation(), {
+        canOpenInvestigationDetails: false,
+      });
+      const chatButton = screen.getByRole('button', { name: 'Open in chat' });
+
+      fireEvent.click(chatButton);
+      fireEvent.mouseOver(chatButton);
+
+      expect(chatButton).toBeDisabled();
+      expect(onOpenChat).not.toHaveBeenCalled();
+      expect(await screen.findByText(PRIVILEGE_TOOLTIP)).toBeInTheDocument();
+    });
+
     it('does not put the recommended action on the card', () => {
       renderGroup(makeInvestigation());
 
-      // The decision lives in the menu, so the card cannot submit one by mis-click.
+      // The decision lives in the details flyout, so the card cannot submit one by mis-click.
       expect(screen.queryByRole('button', { name: 'Revoke sessions' })).not.toBeInTheDocument();
     });
 
@@ -81,35 +109,12 @@ describe('ConversationsActionsGroup', () => {
   });
 
   describe('in the menu', () => {
-    it('offers the recommended action while a decision is still open', () => {
-      const { onClickRecommendedAction } = renderGroup(makeInvestigation());
-      openMenu();
-
-      fireEvent.click(screen.getByText('Revoke sessions'));
-
-      expect(onClickRecommendedAction).toHaveBeenCalledWith({ id: 'inv-1' });
-    });
-
-    it('labels an action-less proposal with the generic fallback', () => {
-      renderGroup(makeInvestigation({ primaryActionLabel: undefined }));
-      openMenu();
-
-      expect(screen.getByText('Review')).toBeInTheDocument();
-    });
-
-    it('omits the recommended action on a decided investigation', () => {
-      renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+    it('does not offer the recommended action, which is decided in the details flyout', () => {
+      renderGroup(makeInvestigation());
       openMenu();
 
       expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
       expect(screen.getByText('Copy link')).toBeInTheDocument();
-    });
-
-    it('omits the recommended action when no handler is wired', () => {
-      renderGroup(makeInvestigation(), { withRecommendedAction: false });
-      openMenu();
-
-      expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
     });
 
     it('no longer duplicates opening the chat, which is on the card', () => {

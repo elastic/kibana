@@ -9,10 +9,13 @@ import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
+import { RollupPageObject } from './rollup_page';
 
-export default function ({ getService, getPageObjects }) {
+export default function (ctx) {
+  const { getService, getPageObjects } = ctx;
   const config = getService('config');
-  const PageObjects = getPageObjects(['rollup', 'common', 'security']);
+  const PageObjects = getPageObjects(['common', 'security']);
+  const rollup = new RollupPageObject(ctx);
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const kibanaServer = getService('kibanaServer');
@@ -65,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         await esNode.index(mockIndices(day, rollupSourceDataPrepend));
       }
 
-      await PageObjects.rollup.createNewRollUpJob(
+      await rollup.createNewRollUpJob(
         rollupJobName,
         rollupSourceIndexPattern,
         targetIndexName,
@@ -75,7 +78,7 @@ export default function ({ getService, getPageObjects }) {
         { time: '*/10 * * * * ?', cron: true }
       );
 
-      const jobList = await PageObjects.rollup.getJobList();
+      const jobList = await rollup.getJobList();
       expect(jobList.length).to.be(1);
     });
 

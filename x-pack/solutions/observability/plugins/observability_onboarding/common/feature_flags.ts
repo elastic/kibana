@@ -8,6 +8,8 @@
 export const IS_MANAGED_OTLP_SERVICE_ENABLED = 'observability.managedOtlpServiceEnabled';
 export const IS_MANAGED_OTLP_GA = 'observability.managedOtlpGa';
 export const IS_ADD_DATA_PAGE_V2_ENABLED = 'observability.addDataPageV2Enabled';
+// Used where LaunchDarkly is not available (self-managed, local dev). Cloud still decides per version through LaunchDarkly.
+export const ADD_DATA_PAGE_V2_ENABLED_DEFAULT = true;
 export const IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED =
   'observability.managedOtlpPrwEndpointEnabled';
 export const IS_VENDOR_ENDPOINTS_ENABLED = 'observability.vendorEndpointsEnabled';

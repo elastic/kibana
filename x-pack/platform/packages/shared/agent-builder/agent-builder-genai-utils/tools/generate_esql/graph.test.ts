@@ -25,6 +25,7 @@ jest.mock('../utils/esql', () => ({
 
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import { executeEsql } from '../utils/esql';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 const mockResolveResource = resolveResourceForEsqlWithSamplingStats as jest.MockedFn<
   typeof resolveResourceForEsqlWithSamplingStats
@@ -41,11 +42,19 @@ const fakeResource: ResolvedResourceWithSampling = {
   isTsdb: false,
 };
 
-const createMockModel = (generateResponse = GENERATE_RESPONSE) => {
+const createMockModel = (
+  generateResponse:
+    | string
+    | { content: string; additional_kwargs?: Record<string, unknown> } = GENERATE_RESPONSE
+) => {
   const docModelInvoke = jest.fn().mockResolvedValue({ commands: ['LIMIT'], functions: [] });
   const docRunnable = { withConfig: jest.fn(() => ({ invoke: docModelInvoke })) };
 
-  const generateModelInvoke = jest.fn().mockResolvedValue({ content: generateResponse });
+  const generateModelInvoke = jest
+    .fn()
+    .mockResolvedValue(
+      typeof generateResponse === 'string' ? { content: generateResponse } : generateResponse
+    );
   const generateRunnable = { invoke: generateModelInvoke };
 
   const chatModel = {
@@ -53,7 +62,7 @@ const createMockModel = (generateResponse = GENERATE_RESPONSE) => {
     withConfig: jest.fn(() => generateRunnable),
   };
 
-  return { chatModel, docModelInvoke };
+  return { chatModel, docModelInvoke, generateModelInvoke };
 };
 
 const createDocBase = () => ({ getDocumentation: jest.fn().mockReturnValue({}) });
@@ -125,6 +134,57 @@ describe('createNlToEsqlGraph — requestDocumentation node', () => {
     );
 
     expect(docBase.getDocumentation).toHaveBeenCalledWith(['LIMIT', 'PROMQL']);
+  });
+});
+
+describe('createNlToEsqlGraph — generate_esql node', () => {
+  beforeEach(() => {
+    mockResolveResource.mockResolvedValue(fakeResource);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('retries an empty completion up to maxRetries and reports that no query was generated', async () => {
+    // What a provider refusal looked like before the inference layer surfaced it: an empty
+    // message, indistinguishable from a model that simply wrote nothing.
+    const { chatModel, generateModelInvoke } = createMockModel({ content: '' });
+    const graph = buildGraph(chatModel);
+
+    const outState = await graph.invoke({ ...BASE_INPUT, maxRetries: 3 }, { recursionLimit: 25 });
+
+    expect(generateModelInvoke).toHaveBeenCalledTimes(3);
+    expect(outState.query).toBeUndefined();
+    expect(outState.error).toBe('No query was generated');
+  });
+
+  it('stops after one attempt and reports the refusal when the model refused the prompt', async () => {
+    const refusal = 'The response was stopped by the provider content filter.';
+    const { chatModel, generateModelInvoke } = createMockModel({
+      content: '',
+      additional_kwargs: { refusal },
+    });
+    const graph = buildGraph(chatModel);
+
+    const outState = await graph.invoke({ ...BASE_INPUT, maxRetries: 3 }, { recursionLimit: 25 });
+
+    expect(generateModelInvoke).toHaveBeenCalledTimes(1);
+    expect(outState.query).toBeUndefined();
+    expect(outState.error).toBe(`The model refused to generate a query: ${refusal}`);
+  });
+
+  it('keeps a query the model wrote even when the response also carries a refusal', async () => {
+    const { chatModel } = createMockModel({
+      content: GENERATE_RESPONSE,
+      additional_kwargs: { refusal: 'partial' },
+    });
+    const graph = buildGraph(chatModel);
+
+    const outState = await graph.invoke(BASE_INPUT, { recursionLimit: 25 });
+
+    expect(outState.query).toContain('FROM logs-test');
+    expect(outState.error).toBeFalsy();
   });
 });
 
@@ -216,6 +276,32 @@ describe('createNlToEsqlGraph — execute_query node', () => {
           format: 'strict_date_optional_time',
         },
       },
+    });
+  });
+
+  describe('control values', () => {
+    const HOST_QUERY = 'FROM logs-test | WHERE host.name == ?host | STATS hits = COUNT(*)';
+    const HOST_RESPONSE = `\`\`\`esql\n${HOST_QUERY}\n\`\`\``;
+    const esqlVariables = [
+      { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
+    ];
+
+    it("executes a query that uses a control with the control's value, after the time range", async () => {
+      const { chatModel } = createMockModel(HOST_RESPONSE);
+      const graph = buildGraph(chatModel);
+
+      await graph.invoke(
+        { ...BASE_INPUT, execute: 'schema', maxRetries: 1, esqlVariables },
+        { recursionLimit: 25 }
+      );
+
+      const { params } = mockedExecuteEsql.mock.calls[0][0];
+      expect(params?.slice(0, 2)).toEqual([
+        { _tstart: expect.any(String) },
+        { _tend: expect.any(String) },
+      ]);
+      expect(params?.slice(2)).toEqual([{ host: 'web-1' }]);
     });
   });
 

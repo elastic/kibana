@@ -218,10 +218,13 @@ export function testFieldUpgradesToMergedValue(
       deps,
     });
 
-    const hasRuleFieldsToPatch = Object.keys(ruleUpgradeAssets.patch).length > 0;
-
     const ruleId = ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID;
     const version = ruleUpgradeAssets.upgrade.version ?? DEFAULT_RULE_UPDATE_VERSION;
+
+    // A patch with a semantically equivalent value (e.g. `'jobA'` -> `['jobA']`) doesn't bump the revision
+    const { body: installedRule } = await detectionsApi.readRule({
+      query: { rule_id: ruleId },
+    });
 
     const response = await performUpgradePrebuiltRules(es, supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
@@ -229,7 +232,7 @@ export function testFieldUpgradesToMergedValue(
       rules: [
         {
           rule_id: ruleId,
-          revision: hasRuleFieldsToPatch ? 1 : 0,
+          revision: installedRule.revision,
           version,
           fields: {
             [diffableRuleFieldName]: {

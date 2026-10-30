@@ -16,6 +16,8 @@ import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import { rspack } from '../rspack_runtime';
 import type { ThemeTag } from '../types';
 
+const CORE_STYLES_DIR = 'src/core/packages/core/public/styles';
+
 /**
  * Shared resolve configuration for all RSPack builds.
  * Used by both main Kibana build and external plugins.
@@ -102,7 +104,7 @@ export function getSharedResolveFallback(): Record<string, false> {
  * Common SWC options for both TypeScript and JavaScript files.
  * Uses @kbn/transpiler-config for consistent settings across Babel and SWC.
  */
-function getSwcOptions(dist: boolean, hmr: boolean = false) {
+export function getSwcOptions(dist: boolean, hmr: boolean = false) {
   const sharedConfig = getSharedConfig();
 
   return {
@@ -287,7 +289,7 @@ export function getSassOptions(repoRoot: string, dist: boolean): LegacySharedOpt
     includePaths: [
       repoRoot,
       Path.resolve(repoRoot, 'node_modules'),
-      Path.resolve(repoRoot, 'src/core/public/styles'),
+      Path.resolve(repoRoot, CORE_STYLES_DIR),
       Path.resolve(repoRoot, 'packages'),
     ],
     quietDeps: true,
@@ -306,7 +308,8 @@ function getSassLoaderChain(
 ): NonNullable<RuleSetRule['use']> {
   const globalsPath = Path.resolve(
     repoRoot,
-    `src/core/public/styles/core_app/_globals_${theme}.scss`
+    CORE_STYLES_DIR,
+    `core_app/_globals_${theme}.scss`
   ).replace(/\\/g, '/');
 
   return [
@@ -387,7 +390,8 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
         options: {
           additionalData: `@import "${Path.resolve(
             repoRoot,
-            'src/core/public/styles/core_app/_globals_borealislight.scss'
+            CORE_STYLES_DIR,
+            'core_app/_globals_borealislight.scss'
           ).replace(/\\/g, '/')}";\n`,
           implementation: require('sass-embedded'),
           sassOptions: getSassOptions(repoRoot, dist),
@@ -486,6 +490,14 @@ export function getSharedModuleRules(
     getImageLoaderRule(),
     getFontLoaderRule(),
     getTextLoaderRule(),
+    // The MapLibre worker imports the shared module by relative filename.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      sideEffects: true,
+      generator: { filename: 'maplibre-gl/[name][ext]' },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];

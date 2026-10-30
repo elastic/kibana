@@ -48,7 +48,7 @@ async function main() {
   const nextBuildContainingCommit = await getQAFBuildContainingCommit(
     selectedSha,
     selectedCommitInfo.date!,
-    await getRecentCommits(50)
+    await getRecentCommits(100)
   );
   const artifactBuild = await getArtifactBuild(selectedSha);
   addBuildkiteInfoSection(
