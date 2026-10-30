@@ -177,110 +177,35 @@ export interface RegexStringSchemaType {
   codec: rt.Type<string, string, unknown>;
   pattern: string;
   message: string;
-}) =>
-  codec.superRefine((value, ctx) => {
-    if (!new RegExp(pattern).test(value)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message });
-    }
-  });
+}
 
-export const mimeTypeString = z
-  .string()
-  .max(255)
-  .superRefine((s, ctx) => {
-    if (!ALLOWED_MIME_TYPES.includes(s)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `The mime type field value ${s} is not allowed.`,
-      });
-    }
-  });
+export const regexStringRt = ({ codec, pattern, message }: RegexStringSchemaType) =>
+  new rt.Type<string, string, unknown>(
+    'RegexString',
+    codec.is,
+    (input, context) =>
+      either.chain(codec.validate(input, context), (value) => {
+        const regex = new RegExp(pattern, 'g');
 
-/**
- * Recursive JSON value type.
- */
-export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
+        if (!regex.test(value)) {
+          return rt.failure(input, context, message);
+        }
 
-export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
-  z.union([
-    z.string(),
-    z.number(),
-    z.boolean(),
-    z.null(),
-    z.array(jsonValueSchema),
-    z.record(z.string(), jsonValueSchema),
-  ])
-);
-
-/**
- * Returns true when `value` nests arrays or objects deeper than `maxDepth`. Iterative, so a
- * deeply nested input can't overflow the stack.
- */
-const exceedsJsonDepth = (value: unknown, maxDepth: number): boolean => {
-  const stack: Array<{ node: unknown; depth: number }> = [{ node: value, depth: 0 }];
-
-  for (let entry = stack.pop(); entry; entry = stack.pop()) {
-    const { node, depth } = entry;
-
-    if (typeof node === 'object' && node !== null) {
-      if (depth + 1 > maxDepth) {
-        return true;
-      }
-
-      for (const child of Object.values(node)) {
-        stack.push({ node: child, depth: depth + 1 });
-      }
-    }
-  }
-
-  return false;
-};
-
-/**
- * Bounded JSON object for request input: caps nesting depth, every nested string and array, and
- * the serialized size.
- */
-export const limitedJsonObjectSchema = ({
-  fieldName,
-  max,
-  maxDepth,
-}: Omit<LimitedSchemaType, 'min'> & { maxDepth: number }) => {
-  const limitedJsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
-    z.union([
-      z.string().max(max),
-      z.number(),
-      z.boolean(),
-      z.null(),
-      z.array(limitedJsonValueSchema).max(max),
-      z.record(z.string().max(max), limitedJsonValueSchema),
-    ])
+        return rt.success(value);
+      }),
+    rt.identity
   );
 
-  // The depth check runs before the recursive parse, which would otherwise overflow the stack.
-  return z
-    .unknown()
-    .superRefine((value, ctx) => {
-      if (exceedsJsonDepth(value, maxDepth)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `The ${fieldName} field is nested too deeply. The maximum depth is ${maxDepth}.`,
-        });
+export const mimeTypeString = new rt.Type<string, string, unknown>(
+  'mimeTypeString',
+  rt.string.is,
+  (input, context) =>
+    either.chain(rt.string.validate(input, context), (s) => {
+      if (!ALLOWED_MIME_TYPES.includes(s)) {
+        return rt.failure(input, context, `The mime type field value ${s} is not allowed.`);
       }
-    })
-    .pipe(
-      z.record(z.string().max(max), limitedJsonValueSchema).superRefine((value, ctx) => {
-        if (JSON.stringify(value).length > max) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `The ${fieldName} field is too large. The maximum serialized length is ${max}.`,
-          });
-        }
-      })
-    );
-};
+
+      return rt.success(s);
+    }),
+  rt.identity
+);

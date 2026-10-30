@@ -11,8 +11,6 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_ATTACHMENT_TYPE_LENGTH,
-  MAX_ATTACHMENT_JSON_DEPTH,
-  MAX_ATTACHMENT_JSON_LENGTH,
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
 } from '../../../constants';
@@ -23,8 +21,16 @@ import {
   paginationSchema,
 } from '../../../schema';
 import {
+  UserCommentAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  ActionsAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceSOWithoutRefsAttachmentPayloadRt,
+  PersistableStateAttachmentPayloadRt,
+  AttachmentType,
   AttachmentRt,
+  EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**
@@ -93,85 +99,41 @@ export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentReque
  * Attachments
  */
 
-const stringOrArray = (max: number) => z.union([z.array(z.string().max(max)), z.string().max(max)]);
+const BasicAttachmentRequestRt = rt.union([
+  UserCommentAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  ActionsAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  PersistableStateAttachmentPayloadRt,
+  EventAttachmentPayloadRt,
+]);
 
-const BoundedUserCommentRequestSchema = UserCommentAttachmentPayloadSchema.extend({
-  comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-  owner: z.string().max(MAX_TITLE_LENGTH),
-});
-
-const BoundedEventRequestSchema = EventAttachmentPayloadSchema.extend({
-  eventId: stringOrArray(MAX_ATTACHMENT_ID_LENGTH),
-  index: stringOrArray(MAX_INDEX_NAME_LENGTH),
-  owner: z.string().max(MAX_TITLE_LENGTH),
-});
-
-const BoundedAlertRequestSchema = AlertAttachmentPayloadSchema.extend({
-  alertId: stringOrArray(MAX_ATTACHMENT_ID_LENGTH),
-  index: stringOrArray(MAX_INDEX_NAME_LENGTH),
-  rule: z.object({
-    id: z.string().max(MAX_TITLE_LENGTH).nullable(),
-    name: z.string().max(MAX_COMMENT_LENGTH).nullable(),
+export const AttachmentRequestRt = rt.union([
+  rt.strict({
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    type: rt.literal(AttachmentType.user),
+    owner: rt.string,
   }),
-  owner: z.string().max(MAX_TITLE_LENGTH),
-});
-
-const BoundedActionsRequestSchema = ActionsAttachmentPayloadSchema.extend({
-  comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-  actions: z.object({
-    targets: z.array(
-      z.object({
-        hostname: z.string().max(255),
-        endpointId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-      })
-    ),
-    type: z.string().max(256),
+  EventAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  rt.strict({
+    type: rt.literal(AttachmentType.actions),
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    actions: rt.strict({
+      targets: rt.array(
+        rt.strict({
+          hostname: rt.string,
+          endpointId: rt.string,
+        })
+      ),
+      type: rt.string,
+    }),
+    owner: rt.string,
   }),
-  owner: z.string().max(MAX_TITLE_LENGTH),
-});
-
-const boundedExternalReferenceShape = {
-  externalReferenceAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
-  externalReferenceMetadata: limitedJsonObjectSchema({
-    fieldName: 'externalReferenceMetadata',
-    max: MAX_COMMENT_LENGTH,
-    maxDepth: MAX_ATTACHMENT_JSON_DEPTH,
-  }).nullable(),
-  owner: z.string().max(MAX_TITLE_LENGTH),
-};
-
-const BoundedExternalReferenceNoSORequestSchema =
-  ExternalReferenceNoSOAttachmentPayloadSchema.extend({
-    ...boundedExternalReferenceShape,
-    externalReferenceId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-  });
-
-const boundedStorageSO = z.object({
-  type: z.literal(ExternalReferenceStorageType.savedObject),
-  soType: z.string().max(MAX_TITLE_LENGTH),
-});
-
-const BoundedExternalReferenceSORequestSchema = ExternalReferenceSOAttachmentPayloadSchema.extend({
-  ...boundedExternalReferenceShape,
-  externalReferenceId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-  externalReferenceStorage: boundedStorageSO,
-});
-
-const BoundedExternalReferenceSOWithoutRefsRequestSchema =
-  ExternalReferenceSOWithoutRefsAttachmentPayloadSchema.extend({
-    ...boundedExternalReferenceShape,
-    externalReferenceStorage: boundedStorageSO,
-  });
-
-const BoundedPersistableStateRequestSchema = PersistableStateAttachmentPayloadSchema.extend({
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  persistableStateAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
-  persistableStateAttachmentState: limitedJsonObjectSchema({
-    fieldName: 'persistableStateAttachmentState',
-    max: MAX_ATTACHMENT_JSON_LENGTH,
-    maxDepth: MAX_ATTACHMENT_JSON_DEPTH,
-  }),
-});
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  ExternalReferenceSOAttachmentPayloadRt,
+  PersistableStateAttachmentPayloadRt,
+]);
 
 export const AttachmentRequestWithoutRefsRt = rt.union([
   BasicAttachmentRequestRt,
