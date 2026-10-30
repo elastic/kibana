@@ -75,7 +75,10 @@ const diffLayout = (
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
     try {
-      return apiHasSerializableState(child) && apiHasType(child) && child.type === currentType
+      return apiHasSerializableState(child) &&
+        child.compareSerializedState &&
+        apiHasType(child) &&
+        child.type === currentType
         ? !child.compareSerializedState(baselinePanel, currentPanel)
         : !deepEqual(baselinePanel, currentPanel);
     } catch (error) {

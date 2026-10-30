@@ -27,7 +27,6 @@ describe('Clone panel action', () => {
         latestState$: of({}),
         serializeState: () => ({}),
         applySerializedState: () => undefined,
-        compareSerializedState: () => true,
         parentApi: {
           duplicatePanel: jest.fn(),
         },

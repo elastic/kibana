@@ -47,7 +47,6 @@ const getTestEmbeddableFactory = () =>
         }),
         anyStateChange$: of(),
         applySerializedState: jest.fn(),
-        compareSerializedState: jest.fn().mockReturnValue(true),
         latestState$: of(initialState),
       });
       return {
