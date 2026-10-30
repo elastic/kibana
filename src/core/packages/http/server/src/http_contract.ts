@@ -159,7 +159,7 @@ export interface HttpSelfService {
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.string({ maxLength: 512 }),
  *   }),
  * };
  * ```
@@ -188,12 +188,16 @@ export interface HttpSelfService {
  *
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.string({ maxLength: 512 }),
  *   }),
  * };
  *
  * httpPreboot.registerRoutes('my-plugin', (router) => {
- *   router.get({ path: 'path/{id}', validate }, async (context, request, response) => {
+ *   router.get({
+ *     path: 'path/{id}',
+ *     validate,
+ *     security: { authz: { requiredPrivileges: ['my-plugin'] } },
+ *   }, async (context, request, response) => {
  *     const data = await findObject(request.params.id);
  *     if (!data) {
  *       return response.notFound();
@@ -264,7 +268,7 @@ export interface HttpServicePreboot<
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.string({ maxLength: 512 }),
  *   }),
  * };
  * ```
@@ -295,13 +299,14 @@ export interface HttpServicePreboot<
  *
  * const validate = {
  *   params: schema.object({
- *     id: schema.string(),
+ *     id: schema.string({ maxLength: 512 }),
  *   }),
  * };
  *
  * router.get({
  *   path: 'path/{id}',
- *   validate
+ *   validate,
+ *   security: { authz: { requiredPrivileges: ['my-plugin'] } },
  * },
  * async (context, request, response) => {
  *   const data = await findObject(request.params.id);
