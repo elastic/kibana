@@ -30,16 +30,24 @@ export const REAL_CHANNELS_TEXT = i18n.translate(
   }
 );
 
-export const KQL_MATCHER_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.kqlMatcher.title',
-  { defaultMessage: 'Alert values may not match this policy' }
+export const SYNTHETIC_VALUES_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.syntheticValues.title',
+  { defaultMessage: 'Alert values may differ from production' }
 );
 
-export const KQL_MATCHER_TEXT = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.kqlMatcher.text',
+export const SYNTHETIC_VALUES_TEXT = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.syntheticValues.text',
   {
     defaultMessage:
-      "The test alerts are not generated to satisfy this policy's matching query, so their values can differ from the alerts it receives in production.",
+      'The test alerts use placeholder values. Their data only holds values for the fields this policy groups by, so workflow steps that read other alert data fields get nothing.',
+  }
+);
+
+export const SYNTHETIC_VALUES_KQL_TEXT = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.syntheticValues.kqlText',
+  {
+    defaultMessage:
+      "The test alerts use placeholder values that are not generated to satisfy this policy's matching query. Their data only holds values for the fields this policy groups by, so workflow steps that read other alert data fields get nothing.",
   }
 );
 

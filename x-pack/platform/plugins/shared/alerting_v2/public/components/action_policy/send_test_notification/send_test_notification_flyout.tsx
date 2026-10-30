@@ -79,15 +79,13 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           text={labels.REAL_CHANNELS_TEXT}
           data-test-subj="sendTestNotificationRealChannelsCallout"
         />
-        {hasKqlMatcher && (
-          <Body.Callout
-            id="kqlMatcher"
-            level="info"
-            title={labels.KQL_MATCHER_TITLE}
-            text={labels.KQL_MATCHER_TEXT}
-            data-test-subj="sendTestNotificationKqlMatcherCallout"
-          />
-        )}
+        <Body.Callout
+          id="syntheticValues"
+          level="info"
+          title={labels.SYNTHETIC_VALUES_TITLE}
+          text={hasKqlMatcher ? labels.SYNTHETIC_VALUES_KQL_TEXT : labels.SYNTHETIC_VALUES_TEXT}
+          data-test-subj="sendTestNotificationSyntheticValuesCallout"
+        />
         {error && (
           <Body.Callout
             id="previewError"

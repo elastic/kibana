@@ -21,6 +21,10 @@ import {
  * match production. Group ids are prefixed with `TEST_ID_PREFIX` so a test run can never share an
  * id with a real group of the same policy. The policy KQL matcher is not applied: synthetic alerts
  * are not generated to satisfy it.
+ *
+ * The synthetic alerts share their grouping values, so this always builds exactly one group, and
+ * callers send the first one. Building several groups also needs send results per group, not only
+ * per destination.
  */
 export const buildTestScenario = (
   params: SyntheticScenarioParams

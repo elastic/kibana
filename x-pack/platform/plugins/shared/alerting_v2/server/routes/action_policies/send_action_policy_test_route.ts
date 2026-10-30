@@ -64,7 +64,7 @@ export class SendActionPolicyTestRoute extends BaseAlertingRoute {
       400: {
         body: () => errorResponseSchema,
         description:
-          'Indicates invalid parameters, destinations that do not belong to the policy, or a policy whose matcher is not supported by test notifications.',
+          'Indicates invalid parameters, or destinations that do not belong to the policy.',
       },
       403: {
         body: () => errorResponseSchema,
