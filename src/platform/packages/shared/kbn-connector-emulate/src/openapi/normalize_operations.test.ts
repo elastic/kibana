@@ -47,6 +47,19 @@ describe('toUnicodePattern', () => {
     expect(toUnicodePattern('^a\\-b$')).toBe('^a-b$');
   });
 
+  it.each([
+    ['^[\\w-_]*$', '^[\\w\\-_]*$'],
+    ['^[a-z_-\\d]+$', '^[a-z_\\-\\d]+$'],
+  ])(
+    'escapes a hyphen next to a class escape in %s, which the u flag reads as a range',
+    (source, expected) => {
+      const pattern = toUnicodePattern(source);
+
+      expect(pattern).toBe(expected);
+      expect(new RegExp(pattern, 'u').test('ab-_1')).toBe(true);
+    }
+  );
+
   it('scopes leading inline flags over the rest of the pattern', () => {
     const pattern = toUnicodePattern('(?i)^[0-9a-f]{2}\\_$');
 

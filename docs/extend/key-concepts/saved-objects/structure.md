@@ -28,7 +28,8 @@ A model version is defined by:
 const myType: SavedObjectsType = {
   name: 'test',
   modelVersions: {
-    1: {
+    1: modelVersion1,
+    2: {
       changes: [
         {
           type: 'mappings_addition',
@@ -38,7 +39,7 @@ const myType: SavedObjectsType = {
         },
         {
           type: 'data_backfill',
-          transform: someBackfillFunction,
+          backfillFn: someBackfillFunction,
         },
       ],
       schemas: {
@@ -58,7 +59,7 @@ Having multiple changes of the same type for a given version is supported by des
 *Valid definition with multiple changes of the same type:*
 
 ```ts
-const version1: SavedObjectsModelVersion = {
+const version2: SavedObjectsFullModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
@@ -73,6 +74,10 @@ const version1: SavedObjectsModelVersion = {
       },
     },
   ],
+  schemas: {
+    forwardCompatibility: fcSchema,
+    create: createSchema,
+  },
 };
 ```
 
@@ -132,7 +137,7 @@ Populates fields (indexed or not) added in the same version.
 ```ts
 let change: SavedObjectsModelDataBackfillChange = {
   type: 'data_backfill',
-  transform: (document) => {
+  backfillFn: (document) => {
     return { attributes: { someAddedField: 'defaultValue' } };
   },
 };
