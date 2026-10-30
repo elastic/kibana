@@ -79,7 +79,7 @@ describe('createPayloadCompletionProvider', () => {
     ]);
   });
 
-  it('does not suggest alert fields below an alert field', () => {
+  it('suggests nothing under alert data, which has no declared fields', () => {
     expect(getSuggestionLabels('message: "{{ inputs.payload.alerts[0].data.')).toEqual([]);
   });
 
