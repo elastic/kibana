@@ -8,6 +8,7 @@
  */
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -58,11 +59,19 @@ export async function mountApp({
 }: DashboardMountProps) {
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
 
-  const getUrlStateStorage = (history: RouteComponentProps['history']) =>
-    createKbnUrlStateStorage({
-      history,
-      useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
-    });
+  // `HashRouter`'s history instance is stable for the app's lifetime, so the storage can be
+  // created once and reused. Rebuilding it per render churns an otherwise stable prop and, since
+  // the listing's URL-synced search re-renders per keystroke, that happened on every keystroke.
+  let urlStateStorage: IKbnUrlStateStorage | undefined;
+  const getUrlStateStorage = (history: RouteComponentProps['history']) => {
+    if (!urlStateStorage) {
+      urlStateStorage = createKbnUrlStateStorage({
+        history,
+        useHash: coreServices.uiSettings.get('state:storeInSessionStorage'),
+      });
+    }
+    return urlStateStorage;
+  };
 
   const redirect = (redirectTo: RedirectToProps) => {
     let path;

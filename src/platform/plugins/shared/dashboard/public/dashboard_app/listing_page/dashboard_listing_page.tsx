@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -121,14 +121,10 @@ export const DashboardListingPage = ({
     [redirectTo]
   );
 
-  // Rebuilt per router render, and URL-synced search triggers one per keystroke.
-  const kbnUrlStateStorageRef = useRef(kbnUrlStateStorage);
-  kbnUrlStateStorageRef.current = kbnUrlStateStorage;
-
   const getDashboardUrl = useCallback(
     (id: string, timeRestore: boolean) =>
-      getDashboardListItemLink(kbnUrlStateStorageRef.current, id, timeRestore),
-    []
+      getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore),
+    [kbnUrlStateStorage]
   );
 
   const titleFilter = title ? `${title}` : '';
