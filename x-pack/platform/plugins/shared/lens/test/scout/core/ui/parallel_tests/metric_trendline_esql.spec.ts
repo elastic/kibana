@@ -123,7 +123,7 @@ spaceTest.describe(
                   data_source: {
                     type: 'esql',
                     query:
-                      'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | FORK (STATS `Total Events` = COUNT(*)) (STATS `Event Count` = COUNT(*) BY `Time Bucket` = BUCKET(@timestamp, 75, ?_tstart, ?_tend))',
+                      'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | FORK (STATS `Total Events` = COUNT(*)) (STATS `Event Count` = COUNT(*) BY `Time Bucket` = BUCKET(@timestamp, 100, ?_tstart, ?_tend))',
                   },
                   metrics: [
                     {

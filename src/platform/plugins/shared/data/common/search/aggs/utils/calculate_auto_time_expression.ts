@@ -48,6 +48,7 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
       'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: getConfig('dateFormat'),
       'dateFormat:scaled': getConfig('dateFormat:scaled'),
+      'dateFormat:tz': getConfig(UI_SETTINGS.DATEFORMAT_TZ),
     });
 
     buckets.setInterval(interval);
