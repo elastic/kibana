@@ -36,6 +36,16 @@ export interface BuildMatchGroupsQueryParams {
   afterMatchValue?: string;
   watermark?: string | null;
   pageSize?: number;
+  /** Restricts grouping to these match values (from `buildCandidateValuesQuery`). */
+  matchValues?: readonly string[];
+}
+
+export interface BuildCandidateValuesQueryParams {
+  index: string;
+  spec: MatcherSpec;
+  afterMatchValue?: string;
+  watermark?: string | null;
+  pageSize?: number;
 }
 
 export interface BuildWatermarkQueryParams {
@@ -147,6 +157,51 @@ const watermarkFilter = (watermark?: string | null): string | undefined => {
 };
 
 /**
+ * Match values that can still form a group, keyset-paginated on `match_value`.
+ * With a watermark: values carried by an entity newer than it (only new rows are
+ * read). Without one: values shared by at least two entities. Either way the
+ * aggregation holds a single count per value, so it stays small on stores where
+ * most values are unique, and `buildMatchGroupsQuery` then groups only these.
+ */
+export const buildCandidateValuesQuery = ({
+  index,
+  spec,
+  afterMatchValue,
+  watermark,
+  pageSize = MATCHER_PAGE_SIZE,
+}: BuildCandidateValuesQueryParams): string => {
+  const { entityFilters, matchValueEval, matchValueFilters } = queryPartsFor(spec);
+  const newerThan = watermarkFilter(watermark);
+  const filters = newerThan ? [...entityFilters, newerThan] : entityFilters;
+  const parts = [
+    NULLIFY_UNMAPPED_FIELDS_SETTING,
+    `FROM ${quote(index)}`,
+    `| WHERE ${filters.join('\n    AND ')}`,
+    `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
+    `| WHERE ${matchValueFilters.join('\n    AND ')}`,
+  ];
+
+  if (afterMatchValue !== undefined) {
+    parts.push(`| WHERE ${MATCH_GROUP_COLUMNS.matchValue} > ${quote(afterMatchValue)}`);
+  }
+
+  parts.push(
+    `| STATS ${MATCH_GROUP_COLUMNS.totalN} = COUNT(*) BY ${MATCH_GROUP_COLUMNS.matchValue}`
+  );
+  // New rows alone can be fewer than two: the group query counts the older members.
+  if (!newerThan) {
+    parts.push(`| WHERE ${MATCH_GROUP_COLUMNS.totalN} >= 2`);
+  }
+  parts.push(
+    `| KEEP ${MATCH_GROUP_COLUMNS.matchValue}`,
+    `| SORT ${MATCH_GROUP_COLUMNS.matchValue} ASC`,
+    `| LIMIT ${pageSize}`
+  );
+
+  return parts.join('\n');
+};
+
+/**
  * Groups entities that share a (possibly lowercased) match value. Keyset-paginated
  * on `match_value`. When `watermark` is set, only groups with at least one member
  * newer than the watermark are returned — pairing those new members with older
@@ -158,6 +213,7 @@ export const buildMatchGroupsQuery = ({
   afterMatchValue,
   watermark,
   pageSize = MATCHER_PAGE_SIZE,
+  matchValues,
 }: BuildMatchGroupsQueryParams): string => {
   const { entityFilters, matchValueEval, matchValueFilters, skipFullyResolvedGroups } =
     queryPartsFor(spec);
@@ -168,6 +224,12 @@ export const buildMatchGroupsQuery = ({
     `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
     `| WHERE ${matchValueFilters.join('\n    AND ')}`,
   ];
+
+  if (matchValues !== undefined) {
+    parts.push(
+      `| WHERE ${MATCH_GROUP_COLUMNS.matchValue} IN (${matchValues.map(quote).join(', ')})`
+    );
+  }
 
   if (afterMatchValue !== undefined) {
     parts.push(`| WHERE ${MATCH_GROUP_COLUMNS.matchValue} > ${quote(afterMatchValue)}`);

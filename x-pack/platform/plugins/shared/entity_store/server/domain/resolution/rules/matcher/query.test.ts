@@ -8,7 +8,12 @@
 import { validateQuery } from '@kbn/esql-language';
 import { RESOLUTION_RULE_IDS } from '../../../../../common/domain/resolution_rules/constants';
 import { getResolutionRuleConfig, type EsqlExpressionMatchSpec } from '../rule_registry';
-import { buildMatchGroupsQuery, buildMatcherValidationQuery, buildWatermarkQuery } from './query';
+import {
+  buildCandidateValuesQuery,
+  buildMatchGroupsQuery,
+  buildMatcherValidationQuery,
+  buildWatermarkQuery,
+} from './query';
 
 const INDEX = '.entities.v2.latest.default';
 
@@ -228,6 +233,69 @@ describe('ES|QL matcher query builder', () => {
       expect(query.startsWith(`FROM "${INDEX}"`)).toBe(true);
       expect(query).toContain('| EVAL raw_match_value = (TO_LOWER(user.name))');
       expect(query.endsWith('| KEEP match_value, raw_match_value\n| LIMIT 0')).toBe(true);
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+  });
+
+  describe('buildCandidateValuesQuery', () => {
+    it.each([
+      ['email', EMAIL],
+      ['windows SID', WINDOWS_SID],
+      ['entra GUID', ENTRA_GUID],
+      ['crowdstrike SID', CROWDSTRIKE_SID],
+      ['UPN cross-field', UPN],
+    ])('emits a valid query for %s', async (_name, spec) => {
+      const query = buildCandidateValuesQuery({ index: INDEX, spec });
+      expect(query).toMatchSnapshot();
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('without a watermark, keeps only values shared by two or more entities and no per-group lists', () => {
+      const query = buildCandidateValuesQuery({ index: INDEX, spec: EMAIL });
+      expect(query).toContain('| STATS total_n = COUNT(*) BY match_value');
+      expect(query).toContain('| WHERE total_n >= 2');
+      expect(query).not.toContain('first_seen > TO_DATETIME');
+      expect(query).not.toContain('TOP(');
+      expect(query).not.toContain('VALUES(');
+    });
+
+    it('with a watermark, reads only entities newer than it and keeps single new values', async () => {
+      const query = buildCandidateValuesQuery({
+        index: INDEX,
+        spec: EMAIL,
+        watermark: '2026-08-10T00:00:00Z',
+      });
+      expect(query).toContain('entity.lifecycle.first_seen > TO_DATETIME("2026-08-10T00:00:00Z")');
+      expect(query).not.toContain('total_n >= 2');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+
+    it('pages with an exclusive keyset on match_value', async () => {
+      const query = buildCandidateValuesQuery({
+        index: INDEX,
+        spec: EMAIL,
+        afterMatchValue: 'alice@corp.com',
+        pageSize: 5,
+      });
+      expect(query).toContain('| WHERE match_value > "alice@corp.com"');
+      expect(query).toContain('| KEEP match_value');
+      expect(query).toContain('| LIMIT 5');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+  });
+
+  describe('buildMatchGroupsQuery with candidate values', () => {
+    it('groups only the given values, filtered before STATS', async () => {
+      const query = buildMatchGroupsQuery({
+        index: INDEX,
+        spec: EMAIL,
+        matchValues: ['alice@corp.com', 'bob"x@corp.com'],
+        pageSize: 2,
+      });
+      const inClause = '| WHERE match_value IN ("alice@corp.com", "bob\\"x@corp.com")';
+      expect(query).toContain(inClause);
+      expect(query.indexOf(inClause)).toBeLessThan(query.indexOf('| STATS'));
+      expect(query).toContain('| LIMIT 2');
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
   });

@@ -24,11 +24,12 @@ import {
   ENTITY_NAMESPACE_FIELD,
   GROUP_SIZE_CEILING,
   MATCH_GROUP_COLUMNS,
+  MATCHER_CANDIDATE_PAGE_SIZE,
   MATCHER_PAGE_SIZE,
   RESOLVED_TO_FIELD,
   WATERMARK_COLUMN,
 } from './constants';
-import { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
+import { buildCandidateValuesQuery, buildMatchGroupsQuery, buildWatermarkQuery } from './query';
 
 export interface RunEsqlMatcherDeps {
   state: PerRuleState;
@@ -143,15 +144,35 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
   }
 
   const stats = emptyStats();
+  const candidatePageSize = Math.min(pageSize, MATCHER_CANDIDATE_PAGE_SIZE);
+  // No unresolved entity is newer than the watermark, so no group can have a new member.
+  const nothingNew = state.lastProcessedTimestamp !== null && maxTimestamp === null;
+  if (nothingNew) {
+    logger.debug(`${ruleId}: no entities newer than the watermark, skipping match groups`);
+  }
   let afterMatchValue: string | undefined;
 
-  do {
-    const query = buildMatchGroupsQuery({
+  while (!nothingNew && !signal.aborted) {
+    const candidates = await readCandidateValues({
+      esClient,
       index,
       spec,
       afterMatchValue,
       watermark: state.lastProcessedTimestamp,
-      pageSize,
+      pageSize: candidatePageSize,
+      signal,
+      ruleId,
+    });
+    if (candidates.length === 0) {
+      break;
+    }
+
+    const query = buildMatchGroupsQuery({
+      index,
+      spec,
+      watermark: state.lastProcessedTimestamp,
+      pageSize: candidates.length,
+      matchValues: candidates,
     });
     const response = await executeEsqlQuery({ esClient, query, signal });
     assertCompleteEsqlResults(response, ruleId);
@@ -174,11 +195,11 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       });
     }
 
-    if (rows.length < pageSize) {
+    if (candidates.length < candidatePageSize) {
       break;
     }
-    afterMatchValue = rows[rows.length - 1].matchValue;
-  } while (afterMatchValue && !signal.aborted);
+    afterMatchValue = candidates[candidates.length - 1];
+  }
 
   if (signal.aborted) {
     return state;
@@ -242,6 +263,35 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
       cascadesBlocked: stats.cascadesBlocked,
     },
   };
+}
+
+async function readCandidateValues({
+  esClient,
+  index,
+  spec,
+  afterMatchValue,
+  watermark,
+  pageSize,
+  signal,
+  ruleId,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  spec: MatcherSpec;
+  afterMatchValue: string | undefined;
+  watermark: string | null;
+  pageSize: number;
+  signal: AbortSignal;
+  ruleId: string;
+}): Promise<string[]> {
+  const query = buildCandidateValuesQuery({ index, spec, afterMatchValue, watermark, pageSize });
+  const response = await executeEsqlQuery({ esClient, query, signal });
+  assertCompleteEsqlResults(response, ruleId);
+  const matchValueIdx = requireColumn(response, MATCH_GROUP_COLUMNS.matchValue);
+  return response.values.flatMap((row) => {
+    const value = row[matchValueIdx];
+    return value == null || value === '' ? [] : [String(value)];
+  });
 }
 
 async function readWatermarkCandidate(

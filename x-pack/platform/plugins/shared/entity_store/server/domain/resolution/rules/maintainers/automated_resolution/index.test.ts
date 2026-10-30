@@ -218,6 +218,95 @@ describe('automatedResolutionMaintainerConfig', () => {
     ]);
   });
 
+  describe('failure backoff', () => {
+    const calledRuleIds = () =>
+      (runEsqlMatcherRule as jest.Mock).mock.calls.map(([deps]) => deps.ruleId);
+
+    it('records a failed built-in rule in its state and keeps its watermark', async () => {
+      (runEsqlMatcherRule as jest.Mock).mockImplementation(async ({ ruleId }) => {
+        if (ruleId === EMAIL_RULE) {
+          throw new Error('circuit_breaking_exception: Data too large');
+        }
+        return matcherState;
+      });
+      const before = Date.now();
+
+      const result = await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: watermarkedRules,
+      });
+
+      expect(result.rules[EMAIL_RULE]).toEqual({
+        ...matcherState,
+        lastError: 'circuit_breaking_exception: Data too large',
+        lastFailedAt: expect.any(String),
+        consecutiveFailures: 1,
+        nextAttemptAt: expect.any(String),
+      });
+      const waitMs = Date.parse(result.rules[EMAIL_RULE].nextAttemptAt as string) - before;
+      expect(waitMs).toBeGreaterThanOrEqual(5 * 60_000);
+      expect(waitMs).toBeLessThan(6 * 60_000);
+    });
+
+    it('skips a rule that is backing off and runs the others', async () => {
+      const backingOff = {
+        ...matcherState,
+        lastError: 'boom',
+        consecutiveFailures: 2,
+        nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+      };
+
+      const result = await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: { ...watermarkedRules, [EMAIL_RULE]: backingOff },
+      });
+
+      expect(calledRuleIds()).not.toContain(EMAIL_RULE);
+      expect(calledRuleIds().length).toBeGreaterThan(0);
+      expect(result.rules[EMAIL_RULE]).toEqual(backingOff);
+    });
+
+    it('does not let a backing-off rule hold the backfill slot', async () => {
+      const backingOffBackfill = {
+        lastProcessedTimestamp: null,
+        lastRun: null,
+        consecutiveFailures: 1,
+        nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+      };
+      const othersWatermarked = Object.fromEntries(
+        Object.entries(watermarkedRules).filter(
+          ([id]) => id !== RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE
+        )
+      );
+
+      await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: { ...othersWatermarked, [EMAIL_RULE]: backingOffBackfill },
+      });
+
+      expect(calledRuleIds()).toContain(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE);
+      expect(calledRuleIds()).not.toContain(EMAIL_RULE);
+    });
+
+    it('runs the rule again once the backoff has passed, and a success clears the streak', async () => {
+      const result = await runConfig(createEsClient(), {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          ...watermarkedRules,
+          [EMAIL_RULE]: {
+            ...matcherState,
+            lastError: 'boom',
+            consecutiveFailures: 4,
+            nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+          },
+        },
+      });
+
+      expect(calledRuleIds()).toContain(EMAIL_RULE);
+      expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
+    });
+  });
+
   it('does not start the next rule when the task has been aborted', async () => {
     const esClient = createEsClient();
     const abortCtrl = new AbortController();
