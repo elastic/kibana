@@ -7,10 +7,9 @@
 
 import { monaco } from '@kbn/code-editor';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
+import { INPUTS } from '../constants';
 import type { PayloadVariable } from '../registry';
 import { getContextVariables } from '../registry';
-
-const INPUTS = 'inputs';
 
 const buildItem = (
   variable: PayloadVariable,

@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InlineWorkflowEditor shows the default email params in the params editor 1`] = `
+"to: 
+  - \\"\\"
+subject: \\"\\"
+message: |
+  {% for alert in inputs.payload.alerts %}
+  - {{ inputs.payload.rules[alert.rule_id].name | default: \\"Alert\\" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
+  {% endfor %}
+"
+`;
+
+exports[
+  `InlineWorkflowEditor shows the default slack2.sendMessage params in the params editor 1`
+] = `
+"channel: \\"\\"
+text: |
+  {% for alert in inputs.payload.alerts %}
+  - {{ inputs.payload.rules[alert.rule_id].name | default: \\"Alert\\" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
+  {% endfor %}
+"
+`;

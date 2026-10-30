@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { getInlineActionStepDefinition } from '../registry';
+import { getInlineActionStepDefinition, INLINE_ACTION_STEP_DEFINITIONS } from '../registry';
 import type { InlineWorkflowActionDraft } from '../types';
 import type { InlineWorkflowEditorProps } from './inline_workflow_editor';
 import { InlineWorkflowEditor } from './inline_workflow_editor';
@@ -164,6 +164,15 @@ describe('InlineWorkflowEditor', () => {
     renderEditor();
     expect(screen.getByTestId('mockedCodeEditor')).toBeInTheDocument();
   });
+
+  it.each(INLINE_ACTION_STEP_DEFINITIONS.map((definition) => [definition.id, definition] as const))(
+    'shows the default %s params in the params editor',
+    (_, { id, paramsTemplate }) => {
+      renderStatefulEditor(draft({ stepType: id, params: paramsTemplate }));
+
+      expect(screen.getByTestId<HTMLTextAreaElement>('mockedCodeEditor').value).toMatchSnapshot();
+    }
+  );
 
   it('forwards the connector creation mode to the connector selector', () => {
     renderEditor({ connectorCreationConfig: { mode: 'new-tab', href: '/connectors' } });

@@ -10,6 +10,9 @@ import {
   builtinWorkflowInputDefinitions,
 } from '@kbn/workflows';
 import { getPayloadTemplateVariables } from './payload_template_variables';
+import { INLINE_ACTION_STEP_DEFINITIONS } from './registry';
+
+const TEMPLATE_VARIABLE = /{{\s*([\w.[\]]+)/g;
 
 describe('getPayloadTemplateVariables', () => {
   const schema =
@@ -43,6 +46,17 @@ describe('getPayloadTemplateVariables', () => {
 
     expect(names).toContain('inputs.payload.rules[alert.rule_id].name');
   });
+
+  it.each(INLINE_ACTION_STEP_DEFINITIONS.map(({ id, paramsTemplate }) => [id, paramsTemplate]))(
+    'lists every variable the default %s template references',
+    (_, paramsTemplate) => {
+      const names = getPayloadTemplateVariables().map(({ name }) => name);
+      const referenced = [...paramsTemplate.matchAll(TEMPLATE_VARIABLE)].map(([, name]) => name);
+
+      expect(referenced.length).toBeGreaterThan(0);
+      expect(names).toEqual(expect.arrayContaining(referenced));
+    }
+  );
 
   it('carries the schema description for each top-level field', () => {
     const variable = getPayloadTemplateVariables().find(

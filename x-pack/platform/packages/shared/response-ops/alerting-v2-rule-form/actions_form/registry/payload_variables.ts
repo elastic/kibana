@@ -11,14 +11,14 @@ import {
   builtinWorkflowInputDefinitions,
   type JsonSchema,
 } from '@kbn/workflows';
-import { INLINE_WORKFLOW_INPUTS } from '../constants';
+import { INLINE_WORKFLOW_INPUTS, INPUTS } from '../constants';
 import type { PayloadVariable } from './types';
 
 // Template context of an inline action policy workflow; only its trigger inputs are exposed.
 const WORKFLOW_CONTEXT_SCHEMA: JsonSchema = {
   type: 'object',
-  properties: { inputs: INLINE_WORKFLOW_INPUTS },
-  required: ['inputs'],
+  properties: { [INPUTS]: INLINE_WORKFLOW_INPUTS },
+  required: [INPUTS],
 };
 
 const ARRAY_INDEX = /^\d+$/;
