@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe.only('single metric', function () {
+  describe('single metric', function () {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
