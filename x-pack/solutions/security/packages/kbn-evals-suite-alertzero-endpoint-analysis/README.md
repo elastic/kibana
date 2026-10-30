@@ -9,7 +9,7 @@ IDs are imported or inherited from production, not renamed by this suite.
 | L0 | Registered worker IDs, production settings schema, production manual inputs, sweep-to-child dispatch, AlertZero proposal gate |
 | L1 | Real Agent Builder routing to a successful endpoint forensic discovery tool |
 | L2 | Current worker `structured_output` schema; chronological, nonempty host-specific timeline, grounded command and host IoCs; negative regression cases |
-| L3 | Installed worker sweep executes through the real workflow test API, dispatches the installed analysis child, observes a completed real `ai.agent`, successful OTEL tool calls joined by conversation ID, and both persisted finding attachments |
+| L3 | Installed worker sweep executes through the real workflow test API, dispatches the installed analysis child, observes a completed real `ai.agent` and both persisted finding attachments. Successful OTEL tool calls are checked only for `ai.agent` steps that emit a conversation ID; production `forensic_analysis` does not, so that check is skipped there |
 | L4 | Generic proposal gate run directly (bridge origin stamp pinned in L0); proposals API reads pending persistence, then dismisses and rereads durable `no_action` / `dismissed` state |
 
 L3/L4 do not inject workflow executors or synthetic output. The per-space Worker
