@@ -146,7 +146,9 @@ const assertValidationCalloutCount = async (
   page: ScoutPage,
   expectedCount: number
 ): Promise<void> => {
-  const validationCallouts = page.locator('.euiCallOut[data-test-subj~="mlValidationCallout"]');
+  // The subj is compound (`mlValidationCallout <status>`), the helper matches the token
+  // and keeps to the call out element itself.
+  const validationCallouts = page.components.callOut('mlValidationCallout').locator;
   await expect(validationCallouts).not.toHaveCount(0);
   await expect(validationCallouts).toHaveCount(expectedCount);
 };
