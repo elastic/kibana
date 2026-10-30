@@ -7,30 +7,16 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { omit, pick } from 'lodash';
+import { omit } from 'lodash';
 import qs from 'query-string';
 import type { SessionSortField } from '../../../../common/sessions';
 import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
-import type { DurationBucket, SessionsListUrlQuery } from '../utils/sessions_list_query';
+import type { DurationBucket, SessionsListUrlQuery } from '../../../utils/sessions_list_query';
 
 export const SESSIONS_PAGE_SIZES = [10, 25, 50, 100] as const;
 const DEFAULT_PAGE_SIZE = 25;
 /** The list API's last page. */
 const MAX_PAGE = 1000;
-
-export const SESSIONS_LIST_QUERY_KEYS = [
-  'search',
-  'browser',
-  'os',
-  'country',
-  'entryPage',
-  'hasErrors',
-  'duration',
-  'sortField',
-  'sortDirection',
-  'page',
-  'perPage',
-] as const satisfies ReadonlyArray<keyof SessionsListUrlQuery>;
 
 /** Keys that narrow the list, which `clearFilters` removes. */
 const FILTER_KEYS = [
@@ -56,10 +42,6 @@ export interface SessionsListState {
   page: number;
   perPage: number;
 }
-
-/** The list's own params in a URL query that also holds the time range and other params. */
-export const pickSessionsListQuery = (query: SessionsListUrlQuery): SessionsListUrlQuery =>
-  pick(query, SESSIONS_LIST_QUERY_KEYS);
 
 const toPage = (value: string | undefined): number => {
   const page = Number(value);

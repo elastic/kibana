@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SESSION_SORT_FIELDS, type SessionSortField } from '../../../../common/sessions';
+import { SESSION_SORT_FIELDS, type SessionSortField } from '../../common/sessions';
 
 const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
@@ -91,3 +92,21 @@ export const sessionsListQueryRt = t.partial({
 });
 
 export type SessionsListUrlQuery = t.TypeOf<typeof sessionsListQueryRt>;
+
+const SESSIONS_LIST_QUERY_KEYS = [
+  'search',
+  'browser',
+  'os',
+  'country',
+  'entryPage',
+  'hasErrors',
+  'duration',
+  'sortField',
+  'sortDirection',
+  'page',
+  'perPage',
+] as const satisfies ReadonlyArray<keyof SessionsListUrlQuery>;
+
+/** The list's own params in a URL query that also holds the time range and other params. */
+export const pickSessionsListQuery = (query: SessionsListUrlQuery): SessionsListUrlQuery =>
+  pick(query, SESSIONS_LIST_QUERY_KEYS);
