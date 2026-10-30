@@ -501,7 +501,7 @@ export const buildEvalRunEnv = ({
   Object.assign(envOverrides, profileEnvOverrides, suiteScoutEnv);
 
   if (envOverrides.TRACING_ES_URL) {
-    log.info(`Trace evaluators will query: ${envOverrides.TRACING_ES_URL}`);
+    log.info('Trace evaluators will query the TRACING_ES_URL cluster');
   }
 
   const repetitions = flagsReader.string('repetitions');
@@ -625,6 +625,7 @@ export const resolveEvalScoutTarget = (
  * `--no-skip-server` are honoured, and an unset flag is false. `--skip-server=` (empty) is rejected:
  * getopts reports it exactly like the bare flag, so it is detected in `argv`. It is usually an unset
  * shell variable (`--skip-server=$SKIP`), where silently skipping the server would be the wrong guess.
+ * Only the `=` form is detected: `--skip-server ""` (empty separate argument) still reads as the bare flag.
  */
 export const readSkipServerFlag = (
   flagsReader: FlagsReader,
