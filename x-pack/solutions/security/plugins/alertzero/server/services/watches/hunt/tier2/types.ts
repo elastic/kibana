@@ -65,8 +65,8 @@ export interface HuntBehaviorParams {
   already_searched_technique_ids?: string[];
   /**
    * Technique ids earlier runs left for a later one. One this run's extraction does not return, and
-   * that nothing searched, is reported as a retryable gap, so it stays pending instead of the run
-   * reading as complete because the model happened to name different techniques.
+   * that nothing searched, is reported as a gap, so the run does not read as complete because the
+   * model happened to name different techniques. It gets this one run and no more.
    */
   pending_technique_ids?: string[];
 }

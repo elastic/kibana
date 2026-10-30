@@ -1511,6 +1511,119 @@ describe('huntCoordinator', () => {
     });
   });
 
+  describe('a pending technique the run did not get back', () => {
+    const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    const loaded = {
+      iocs: [{ type: 'ip', value: '192.0.2.30' }],
+      techniques: ['T1078.004'],
+      text: 'report body text',
+      already_searched_technique_ids: ['T1078.004'],
+      pending_technique_ids: ['T1059', 'T1003'],
+    };
+    const budgetGap = (technique_id: string) => ({
+      reason: 'generation_budget' as const,
+      technique_id,
+      detail: `${technique_id} is still to be searched`,
+    });
+    const run = (run_id: string, trigger: 'scheduled' | 'manual' = 'scheduled') =>
+      huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        { spaceId: 'default', indexPatterns: INDEX_PATTERNS, trigger, run_id, report_id: 'rpt-1' }
+      );
+
+    it('settles the report when extraction returns none of the pending techniques', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_found',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [budgetGap('T1059'), budgetGap('T1003')],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-dropped');
+
+      expect(result.completeness).toBe('incomplete_final');
+      expect(result.pending_technique_ids).toEqual([]);
+      // The gaps are still reported, so the narrative names what was not searched.
+      expect(result.tier2?.incomplete).toEqual([budgetGap('T1059'), budgetGap('T1003')]);
+    });
+
+    it('keeps a pending technique the run extracted again but left over budget', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059' }],
+        indexed_behaviors: [],
+        incomplete: [budgetGap('T1059'), budgetGap('T1003')],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-extracted-again');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('stays retryable for a technique that still has a retryable gap, and drops only the missing one', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059', execution: { executed: false } }],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'execute_failed', technique_id: 'T1059', detail: 'failed' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-mixed');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('drops nothing on a manual run, which does not carry the earlier pending list', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_found',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [budgetGap('T1059')],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-manual-keeps', 'manual');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.pending_technique_ids).toEqual(['T1059']);
+    });
+
+    it('drops nothing when extraction could not run at all', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'no_behaviors_validated',
+        behaviors: [],
+        indexed_behaviors: [],
+        incomplete: [{ reason: 'catalog_unavailable', detail: 'no MITRE data' }],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-no-catalog');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+    });
+  });
+
   describe('merging caller inputs with the report', () => {
     const { loadReportHuntContext: mockLoadReport } = jest.requireMock(
       './common/load_report_context'

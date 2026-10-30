@@ -763,7 +763,9 @@ export const huntBehavior = async (
   const alreadySearched = new Set(alreadySearchedIds);
   // A technique an earlier run left for this one that nothing in this run accounts for: the model
   // did not name it this time (or named it below the threshold), so it was never searched. Reported
-  // as a retryable gap, so the report stays pending instead of completing because extraction varied.
+  // as a gap so the report does not read as complete because extraction varied. The coordinator
+  // gives up on it after this one run: only an extracted technique is ever searched, so a technique
+  // the model never names again would otherwise be re-reported every sweep.
   const pendingGaps = (accountedFor: ReadonlySet<string>): HuntIncompleteness[] =>
     [...new Set(pendingIds)]
       .filter((techniqueId) => !alreadySearched.has(techniqueId) && !accountedFor.has(techniqueId))
@@ -772,7 +774,7 @@ export const huntBehavior = async (
         technique_id,
         detail:
           `${technique_id} was left unsearched by an earlier run and this run's extraction did ` +
-          `not return it, so it is still to be searched.`,
+          `not return it, so it was not searched and gets no further run.`,
       }));
 
   const rowLimit = size ?? rowLimitFromParams;
@@ -864,7 +866,7 @@ export const huntBehavior = async (
               leftPending.length === 1 ? '' : 's'
             } an earlier run left unsearched ${
               leftPending.length === 1 ? 'was' : 'were'
-            } not returned either, so the report stays pending.`
+            } not returned either, so they were not searched and the report is settled.`
           : ''),
     };
   }
@@ -1280,7 +1282,7 @@ export const huntBehavior = async (
           leftPending.length > 0 &&
           incomplete.length === leftPending.length
         ? 'Nothing new was extracted to hunt, and the techniques an earlier run left unsearched ' +
-          `were not returned either, so the report stays pending.${partialSuffix}`
+          `were not returned either, so they were not searched and the report is settled.${partialSuffix}`
         : validated.length === 0
         ? 'No extracted candidate survived validation: each was either absent from the ' +
           'canonical ATT&CK catalog or offered a quote the report does not contain. ' +

@@ -231,6 +231,72 @@ describe('writeHuntEvidence against Elasticsearch', () => {
     });
   });
 
+  describe('a pending technique the next run gave up on', () => {
+    it('settles the report, clears the list and keeps the earlier hit', async () => {
+      const reportId = await newReport();
+      await write(reportId, {
+        runId: 'run-1',
+        hasConfirmedHit: true,
+        completeness: 'incomplete_retryable',
+        totalHits: 4,
+        searchedTechniqueIds: ['T1001'],
+        pendingTechniqueIds: ['T1002', 'T1003'],
+      });
+      await pause();
+
+      // The coordinator ends this run `incomplete_final`: extraction did not return the pending
+      // ids, so nothing was searched and nothing is left pending.
+      await write(reportId, {
+        runId: 'run-2',
+        hasConfirmedHit: false,
+        completeness: 'incomplete_final',
+        searchedTechniqueIds: [],
+        pendingTechniqueIds: [],
+      });
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          last_hunt_status: 'hit',
+          last_hunt_run_id: 'run-1',
+          last_hunt_event_hit_count: 4,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: [],
+          coverage_pending: false,
+        })
+      );
+    });
+
+    it('stamps a report that had no hit, so it leaves the candidate pool', async () => {
+      const reportId = await newReport();
+      await write(reportId, {
+        runId: 'run-1',
+        hasConfirmedHit: false,
+        completeness: 'incomplete_retryable',
+        searchedTechniqueIds: ['T1001'],
+        pendingTechniqueIds: ['T1002'],
+      });
+      expect((await element(reportId))?.last_hunted_at).toBeUndefined();
+
+      await write(reportId, {
+        runId: 'run-2',
+        hasConfirmedHit: false,
+        completeness: 'incomplete_final',
+        searchedTechniqueIds: [],
+        pendingTechniqueIds: [],
+      });
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          last_hunted_at: expect.any(String),
+          last_hunt_status: 'incomplete',
+          last_hunt_run_id: 'run-2',
+          pending_technique_ids: [],
+          coverage_pending: false,
+        })
+      );
+    });
+  });
+
   it('keeps the recorded pending ids when Tier 2 did not run, and replaces them when it did', async () => {
     const reportId = await newReport();
     await write(reportId, {

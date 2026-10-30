@@ -405,6 +405,28 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('`T1566`.');
   });
 
+  it('does not promise a later search for a technique the run gave up on', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        pending_technique_ids: ['T1105'],
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'not returned', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (1):** `T1105`.');
+    expect(narrative).not.toContain('`T1059`.');
+    // The gap itself is still reported.
+    expect(narrative).toContain('not returned');
+  });
+
   it('lists nothing to continue on a run that is not retryable', () => {
     const narrative = buildHuntNarrative(
       result({

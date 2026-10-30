@@ -999,6 +999,13 @@ const huntCoordinatorCore = async (
       sampleEvents,
     });
   }
+  // The ledger continues the scheduled sweep over the report's own text. A manual run replays the
+  // whole report (candidate selection lifts the hunt-once gate for it), and caller-supplied text is
+  // a different search, so neither skips what an earlier run searched or carries its pending ids.
+  const continuation =
+    trigger === 'scheduled' && callerText === undefined && reportContext
+      ? reportContext
+      : undefined;
   let tier2Raw: HuntBehaviorResult;
   try {
     tier2Raw = await huntBehavior(
@@ -1019,13 +1026,10 @@ const huntCoordinatorCore = async (
         // Every reader downstream (the allowlist, the schema probe, the publish/execute
         // gates, the hit bar) treats this as the set Tier 2 may read.
         allowed_indices: targets.tier2_targets,
-        // The ledger continues the scheduled sweep over the report's own text. A manual run
-        // replays the whole report (candidate selection lifts the hunt-once gate for it), and
-        // caller-supplied text is a different search, so neither skips what an earlier run searched.
-        ...(trigger === 'scheduled' && callerText === undefined && reportContext
+        ...(continuation
           ? {
-              already_searched_technique_ids: reportContext.already_searched_technique_ids,
-              pending_technique_ids: reportContext.pending_technique_ids,
+              already_searched_technique_ids: continuation.already_searched_technique_ids,
+              pending_technique_ids: continuation.pending_technique_ids,
             }
           : {}),
       },
@@ -1074,10 +1078,23 @@ const huntCoordinatorCore = async (
   // retired (seen live). If even one behavior grounded and executed, the text does hold
   // usable literals and the remaining ungrounded ones keep their retry.
   const nothingGroundable = tier1Raw.status === 'no_searchable_terms' && !tier2Executed;
-  const completeness = huntCompletenessOf(
-    gaps,
-    nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+  // A technique an earlier run left pending gets exactly one more run. When this run's extraction
+  // did not return it, nothing can search it (only extracted techniques are searched), so it is
+  // given up on: its gap is still reported, but it no longer keeps the report eligible, and it is
+  // not carried forward again. Without this bound the gap is re-emitted every sweep until the
+  // publish-date window closes, re-running Tier 1 and an extraction call each time.
+  const extractedTechniqueIds = new Set(
+    tier2Raw.behaviors.map(({ technique_id: techniqueId }) => techniqueId)
   );
+  const droppedTechniqueIds = new Set(
+    (continuation?.pending_technique_ids ?? []).filter(
+      (techniqueId) => !extractedTechniqueIds.has(techniqueId)
+    )
+  );
+  const completeness = huntCompletenessOf(gaps, {
+    ...(nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}),
+    finalTechniqueIds: droppedTechniqueIds,
+  });
 
   const coreResult: HuntCoordinatorCoreResult = {
     status: 'tier1_and_tier2',
@@ -1112,7 +1129,7 @@ const huntCoordinatorCore = async (
     pending_technique_ids: getPendingTechniqueIds(
       tier2Raw,
       nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
-    ),
+    ).filter((techniqueId) => !droppedTechniqueIds.has(techniqueId)),
     replayed_whole_report:
       trigger === 'manual' &&
       callerText === undefined &&

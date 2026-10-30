@@ -1814,7 +1814,7 @@ describe('huntBehavior', () => {
         expect(result.incomplete).toEqual([
           expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
         ]);
-        expect(result.next_step).toContain('stays pending');
+        expect(result.next_step).toContain('the report is settled');
         expect(result.next_step).not.toContain('No extracted candidate survived validation');
       });
 

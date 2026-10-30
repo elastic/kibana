@@ -35,7 +35,8 @@ import type {
  * that is not in the catalog, input this run truncated, and rows it could not interpret
  * all stay final: those reproduce. Retries are not bounded here, because a bound needs an
  * attempt count kept alongside the report, which is state the caller recording hunt
- * outcomes owns rather than this run.
+ * outcomes owns rather than this run. The one bound there is: a technique an earlier run left
+ * pending and this run's extraction did not return gets no further run (`finalTechniqueIds`).
  */
 const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
   'search_partial',
@@ -76,14 +77,23 @@ export const huntCompletenessOf = (
   gaps: readonly HuntIncompleteness[],
   {
     treatAsFinal,
+    finalTechniqueIds,
   }: {
     /** Reasons that are deterministic for this particular run; see `FINAL_WHEN_NOTHING_SEARCHABLE`. */
     treatAsFinal?: ReadonlySet<HuntIncompleteReason>;
+    /**
+     * Techniques this run gives up on: a gap that names one is final, whatever its reason. The
+     * gap is still reported; it just no longer keeps the report eligible for another run.
+     */
+    finalTechniqueIds?: ReadonlySet<string>;
   } = {}
 ): HuntCompleteness => {
   if (gaps.length === 0) return 'complete';
   return gaps.some(
-    ({ reason }) => isRetryableIncompleteReason(reason) && !treatAsFinal?.has(reason)
+    ({ reason, technique_id: techniqueId }) =>
+      isRetryableIncompleteReason(reason) &&
+      !treatAsFinal?.has(reason) &&
+      !(techniqueId !== undefined && finalTechniqueIds?.has(techniqueId))
   )
     ? 'incomplete_retryable'
     : 'incomplete_final';
