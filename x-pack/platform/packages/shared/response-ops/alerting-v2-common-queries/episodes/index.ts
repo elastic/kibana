@@ -16,6 +16,18 @@ export {
   normalizeEpisodeSeverity,
 } from './episode_severity';
 
+export {
+  EPISODE_SOURCE_FILTER_CLASSIC,
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+  EPISODE_SOURCE_FILTER_SYSTEM_IDS,
+  NATIVE_EPISODE_SOURCE,
+  isEpisodeSourceFilterSystemId,
+  isConnectorEpisodeSource,
+  sourceFilterIncludesClassic,
+  sourceFilterIncludesV2,
+} from './episode_source';
+export type { EpisodeSourceFilterSystemId } from './episode_source';
+
 export { asTypedEsqlQuery, rowsFromEsql, asEsqlRows } from './typed_esql_query';
 export type { TypedEsqlQuery } from './typed_esql_query';
 
