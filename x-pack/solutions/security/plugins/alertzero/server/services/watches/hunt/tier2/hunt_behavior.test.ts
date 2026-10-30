@@ -1288,6 +1288,19 @@ describe('huntBehavior', () => {
       );
     });
 
+    it('hands on the same exclusions in the published query', async () => {
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        { ...executeParams, excluded_indices: ['*secret*'] },
+        esClient
+      );
+
+      expect(result.behaviors[0].validated_esql).toContain('FROM logs-aws.cloudtrail-*, -*secret*');
+    });
+
     describe('the cross-project flag reaching the source gates', () => {
       const cpsAllowed = ['logs-aws.*', '*:logs-aws.*', 'linked:-logs-aws.cloudtrail-*'];
       const unqualifiedQuery = GROUNDED_ESQL;

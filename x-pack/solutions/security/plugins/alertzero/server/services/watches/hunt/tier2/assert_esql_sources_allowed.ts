@@ -42,9 +42,19 @@ export const assertEsqlSourcesAllowed = (
     return { ok: false, reason: 'query must start with a valid FROM' };
   }
 
+  // A quoted source can hold a whole multi-target expression (`"-unused*,private-*"`), which
+  // Elasticsearch splits on commas, so each part is judged on its own.
   const sourcesOf = (node: Parameters<typeof Walker.walk>[0]): string[] => {
     const names: string[] = [];
-    Walker.walk(node, { visitSource: ({ name }) => names.push(name) });
+    Walker.walk(node, {
+      visitSource: ({ name }) =>
+        names.push(
+          ...name
+            .split(',')
+            .map((part) => part.trim())
+            .filter((part) => part !== '')
+        ),
+    });
     return names;
   };
 

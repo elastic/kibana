@@ -42,7 +42,7 @@ import {
   HUNT_PROMPT_TEMPLATE_VERSION,
   clampHuntTemplateString,
 } from '../common/hunt_prompt_templates';
-import { prepareEsqlForExecute } from './prepare_esql_for_execute';
+import { addFromExclusions, prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
   HuntBehaviorParams,
@@ -1138,8 +1138,10 @@ export const huntBehavior = async (
         );
         return undefined;
       }
-      behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
-      if (!canExecute) return esql;
+      // The hunt reads with the universe's exclusions, so the query handed on carries them too.
+      const published = addFromExclusions(esql, excludedIndices);
+      behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${published}`;
+      if (!canExecute) return published;
       const executed = await executeValidatedEsql({
         esClient,
         logger,
@@ -1172,7 +1174,7 @@ export const huntBehavior = async (
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
       if (executed.hits) behavior.hits = executed.hits;
-      return esql;
+      return published;
     };
 
     const firstWave = await generateGroundedEsql({

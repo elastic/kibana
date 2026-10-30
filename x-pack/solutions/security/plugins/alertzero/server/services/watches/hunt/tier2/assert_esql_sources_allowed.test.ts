@@ -184,6 +184,18 @@ describe('assertEsqlSourcesAllowed', () => {
       ).toMatchObject({ ok: false });
     });
 
+    it('judges each part of a quoted multi-target source on its own', () => {
+      expect(
+        assertEsqlSourcesAllowed('FROM logs-aws.*, "-unused*,private-*" | LIMIT 1', allowed)
+      ).toMatchObject({ ok: false });
+      expect(assertEsqlSourcesAllowed('FROM "logs-aws.*,-unused*" | LIMIT 1', allowed)).toEqual({
+        ok: true,
+      });
+      expect(
+        assertEsqlSourcesAllowed('FROM "logs-aws.*,private-*" | LIMIT 1', allowed)
+      ).toMatchObject({ ok: false });
+    });
+
     it('refuses a FROM that names nothing but exclusions', () => {
       expect(assertEsqlSourcesAllowed('FROM -*secret* | LIMIT 1', allowed)).toEqual({
         ok: false,
