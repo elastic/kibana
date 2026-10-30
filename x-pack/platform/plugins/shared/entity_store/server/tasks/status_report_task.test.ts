@@ -17,10 +17,11 @@ import {
   getResolutionRulesState,
   getResolutionState,
 } from './status_report_task';
-import { createAssetManagerClient } from './factories';
+import { createAssetManagerClient, createLogsExtractionClient } from './factories';
 import {
   ENTITY_STORE_METADATA_USAGE_EVENT,
   ENTITY_STORE_ENTITY_METADATA_EVENT,
+  ENTITY_STORE_LOG_COVERAGE_EVENT,
   ENTITY_STORE_SOURCE_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
@@ -48,6 +49,7 @@ jest.mock('../telemetry/traces', () => ({
 }));
 
 const createAssetManagerClientMock = createAssetManagerClient as jest.Mock;
+const createLogsExtractionClientMock = createLogsExtractionClient as jest.Mock;
 
 const NAMESPACE = 'default';
 const METADATA_INDEX = getMetadataEntitiesDataStreamName(NAMESPACE);
@@ -668,10 +670,11 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let withContextSpy: jest.Mock;
   let soFind: jest.Mock;
   let getIndexTemplate: jest.Mock;
+  let getLocalIndexPatterns: jest.Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
-  const runStatusReportTask = async () => {
+  const runStatusReportTask = async (extraState: Record<string, unknown> = {}) => {
     const taskManager = {
       registerTaskDefinitions: jest.fn(),
     } as unknown as TaskManagerSetupContract;
@@ -699,7 +702,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     const [definitions] = (taskManager.registerTaskDefinitions as jest.Mock).mock.calls[0];
     const [taskType] = Object.keys(definitions);
     const runner = definitions[taskType].createTaskRunner({
-      taskInstance: { id: `status:${NAMESPACE}`, state: { namespace: NAMESPACE } },
+      taskInstance: {
+        id: `status:${NAMESPACE}`,
+        state: { namespace: NAMESPACE, ...extraState },
+      },
       fakeRequest: {},
       signal: new AbortController().signal,
     });
@@ -723,6 +729,12 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.count.mockImplementation(count);
     esClient.esql.query.mockImplementation(esqlQuery);
+
+    // No index patterns by default, so the log probe is skipped and sends no ES|QL.
+    getLocalIndexPatterns = jest.fn().mockResolvedValue([]);
+    createLogsExtractionClientMock.mockResolvedValue({
+      logsExtractionClient: { getLocalIndexPatterns },
+    });
 
     createAssetManagerClientMock.mockResolvedValue({
       assetManagerClient: { getStatus },
@@ -754,7 +766,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
       throw new Error('index_not_found_exception');
     });
 
-    await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+    await expect(runStatusReportTask()).resolves.toEqual({
+      state: { namespace: NAMESPACE, logCoverageTargetDocs: expect.any(Number) },
+    });
 
     const reportedMetadata = reportEvent.mock.calls.some(
       ([eventType]) => eventType === ENTITY_STORE_METADATA_USAGE_EVENT.eventType
@@ -990,6 +1004,132 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(usageSearches).toHaveLength(ALL_ENTITY_TYPES.length * 3);
   });
 
+  describe('log coverage', () => {
+    const reportedCoverage = () =>
+      reportEvent.mock.calls
+        .filter(([eventType]) => eventType === ENTITY_STORE_LOG_COVERAGE_EVENT.eventType)
+        .map(([, payload]) => payload);
+
+    it('reports a skipped outcome when there are no index patterns', async () => {
+      await runStatusReportTask();
+
+      expect(reportedCoverage()).toEqual([
+        expect.objectContaining({ namespace: NAMESPACE, outcome: 'skipped', windowHours: 12 }),
+      ]);
+    });
+
+    it('counts, samples with the configured patterns and excluded users, and reports the sources', async () => {
+      getLocalIndexPatterns.mockResolvedValue(['logs-*', 'extra-*']);
+      getStatus.mockResolvedValue({
+        status: ENTITY_STORE_STATUS.RUNNING,
+        engines: [],
+        logsExtractionConfigByType: {
+          user: { additionalIndexPatterns: ['extra-*'], excludedIndexPatterns: ['skip-*'] },
+        },
+        excludedUserNames: ['svc_backup'],
+      });
+      esqlQuery.mockImplementation(async (params: { query: string }) => {
+        if (isResolutionStateQuery(params)) return makeEsqlResponse([[1, 3]]);
+        if (params.query.includes('totalDocs')) {
+          return { columns: [{ name: 'totalDocs', type: 'long' }], values: [[1_000_000]] };
+        }
+        return {
+          columns: [
+            'sampledDocs',
+            'withUserName',
+            'withUserEmail',
+            'withUserId',
+            'withHostId',
+            'withHostName',
+            'matchesCreationRule',
+            'entity.source',
+          ].map((name) => ({ name, type: 'long' })),
+          values: [
+            [400, 390, 10, 20, 300, 350, 5, 'system.auth'],
+            [100, 0, 0, 0, 0, 0, 0, null],
+          ],
+        };
+      });
+
+      const result = await runStatusReportTask();
+
+      expect(getLocalIndexPatterns).toHaveBeenCalledWith(['extra-*'], ['skip-*']);
+      const sampleQuery = esqlQuery.mock.calls
+        .map(([params]) => params.query as string)
+        .find((query) => query.includes('sampledDocs'))!;
+      expect(sampleQuery).toContain('SAMPLE 0.05');
+      expect(sampleQuery).toContain('"svc_backup"');
+      expect(reportedCoverage()).toEqual([
+        {
+          namespace: NAMESPACE,
+          outcome: 'complete',
+          windowHours: 12,
+          durationMs: expect.any(Number),
+          totalDocs: 1_000_000,
+          sampleRate: 0.05,
+          sampledDocs: 500,
+          sources: [
+            {
+              source: 'system.auth',
+              sampledDocs: 400,
+              withUserName: 390,
+              withUserEmail: 10,
+              withUserId: 20,
+              withHostId: 300,
+              withHostName: 350,
+              matchesCreationRule: 5,
+            },
+            expect.objectContaining({ source: 'unknown', sampledDocs: 100 }),
+          ],
+        },
+      ]);
+      // A successful sample grows the next one, up to the cap.
+      expect(result).toEqual({
+        state: { namespace: NAMESPACE, logCoverageTargetDocs: 50_000 },
+      });
+    });
+
+    it('reports failed, keeps the sample size and does not fail the task when the probe breaks', async () => {
+      getLocalIndexPatterns.mockResolvedValue(['logs-*']);
+      esqlQuery.mockImplementation(async (params: { query: string }) => {
+        if (isResolutionStateQuery(params)) return makeEsqlResponse([[1, 3]]);
+        throw new Error('esql_boom');
+      });
+
+      await expect(runStatusReportTask()).resolves.toEqual({
+        state: { namespace: NAMESPACE, logCoverageTargetDocs: 50_000 },
+      });
+
+      expect(reportedCoverage()).toEqual([expect.objectContaining({ outcome: 'failed' })]);
+    });
+
+    it('reports failed when the index patterns cannot be resolved', async () => {
+      getLocalIndexPatterns.mockRejectedValue(new Error('data_view_boom'));
+
+      await runStatusReportTask();
+
+      expect(reportedCoverage()).toEqual([expect.objectContaining({ outcome: 'failed' })]);
+    });
+
+    it('reads the sample size from the task state', async () => {
+      getLocalIndexPatterns.mockResolvedValue(['logs-*']);
+      esqlQuery.mockImplementation(async (params: { query: string }) => {
+        if (isResolutionStateQuery(params)) return makeEsqlResponse([[1, 3]]);
+        return params.query.includes('totalDocs')
+          ? { columns: [{ name: 'totalDocs', type: 'long' }], values: [[100_000]] }
+          : { columns: [], values: [] };
+      });
+
+      await runStatusReportTask({ logCoverageTargetDocs: 10_000 });
+
+      const sampleQuery = esqlQuery.mock.calls
+        .map(([params]) => params.query as string)
+        .find((query) => query.includes('sampledDocs'))!;
+      // 10k target over 100k docs
+      expect(sampleQuery).toContain('SAMPLE 0.1');
+    });
+  });
+
   describe('entity metadata', () => {
     const metadataAggregations = {
       sources: {
@@ -1136,7 +1276,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
         throw new Error('esql_boom');
       });
 
-      await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+      await expect(runStatusReportTask()).resolves.toEqual({
+        state: { namespace: NAMESPACE, logCoverageTargetDocs: expect.any(Number) },
+      });
 
       const user = reportedMetadata().find((event) => event.entityType === 'user');
       expect(user).toBeDefined();
@@ -1159,7 +1301,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
         }) as never
       );
 
-      await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+      await expect(runStatusReportTask()).resolves.toEqual({
+        state: { namespace: NAMESPACE, logCoverageTargetDocs: expect.any(Number) },
+      });
 
       expect(reportedMetadata()).toHaveLength(0);
       expect(logger.warn).toHaveBeenCalledWith(
@@ -1285,7 +1429,9 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   it('keeps reporting other events when the resolution rules lookup fails', async () => {
     soFind.mockRejectedValue(new Error('so_boom'));
 
-    await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+    await expect(runStatusReportTask()).resolves.toEqual({
+      state: { namespace: NAMESPACE, logCoverageTargetDocs: expect.any(Number) },
+    });
 
     const reportedRulesState = reportEvent.mock.calls.some(
       ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT.eventType
