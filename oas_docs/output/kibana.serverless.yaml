@@ -23843,7 +23843,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most 1000 rows.
+        Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most 1000 rows. When the body carries `user_id`, rows are also limited to documents with that `user_id` or no `user_id`.
 
         The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.
 
@@ -23894,6 +23894,11 @@ paths:
                 query:
                   description: The ES|QL query to run. Its FROM decides which Elasticsearch indices are read (normally `ai-index-*`); the server adds the space filter and a row limit.
                   maxLength: 10000
+                  minLength: 1
+                  type: string
+                user_id:
+                  description: When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.
+                  maxLength: 256
                   minLength: 1
                   type: string
               required:
@@ -25001,7 +25006,7 @@ paths:
 
         Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to 500 fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.
 
-        The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.
+        The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response. When `user_id` is given, the counts are limited to documents with that `user_id` or no `user_id`.
 
         The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.
 
@@ -25014,6 +25019,14 @@ paths:
           in: path
           name: aiIndexId
           required: true
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
+        - description: When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.
+          in: query
+          name: user_id
+          required: false
           schema:
             maxLength: 256
             minLength: 1
