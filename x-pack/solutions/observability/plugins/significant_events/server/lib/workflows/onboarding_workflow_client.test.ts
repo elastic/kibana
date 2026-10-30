@@ -505,6 +505,25 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         });
       });
 
+      it('reports a run that is still queued, which has no start time yet', async () => {
+        const { client } = createStatusClient(
+          withOnboardingRuns(
+            onboardingRun({
+              startedAt: '2026-10-29T10:00:00.000Z',
+              status: ExecutionStatus.COMPLETED,
+            })
+          ),
+          [entryPointRun({ startedAt: undefined, status: ExecutionStatus.PENDING })]
+        );
+
+        const result = await client.getStatus({ request: statusRequest, sourceId: 'logs.nginx' });
+
+        expect(result).toEqual({
+          status: SignificantEventsWorkflowStatus.InProgress,
+          executionId: 'entry-1',
+        });
+      });
+
       it('reports a run that failed before it started the onboarding', async () => {
         const { client } = createStatusClient(
           withOnboardingRuns(
@@ -1101,6 +1120,19 @@ describe('SignificantEventsKIsOnboardingClient', () => {
         concurrencyGroupKey: onboardingKeyOf('logs.nginx'),
       }),
     ]);
+  });
+
+  it('lets a run of the entry point that is still queued stand for the onboarding run', async () => {
+    const { client } = createStatusClient(
+      withOnboardingRuns(
+        onboardingRun({ startedAt: '2026-10-29T10:00:00.000Z', status: ExecutionStatus.COMPLETED })
+      ),
+      [entryPointRun({ startedAt: undefined, status: ExecutionStatus.PENDING })]
+    );
+
+    const result = await client.getRecentExecutions(statusRequest);
+
+    expect(result).toEqual([expect.objectContaining({ id: 'entry-1' })]);
   });
 
   it('adds the run of the entry point of a source that has no onboarding run', async () => {

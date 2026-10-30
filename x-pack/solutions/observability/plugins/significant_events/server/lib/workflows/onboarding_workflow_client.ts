@@ -262,6 +262,17 @@ const STARTED_EXECUTION_STATUSES = Object.values(ExecutionStatus).filter(
 );
 
 /**
+ * Whether a run started after another. The engine sets `startedAt` when a run begins, so one that is
+ * still queued has none, and is the newest: it was created after whatever has started.
+ */
+const isNewerRun = (
+  run: WorkflowExecutionListItemDto,
+  other: WorkflowExecutionListItemDto
+): boolean =>
+  Number.isNaN(Date.parse(run.startedAt)) ||
+  Date.parse(other.startedAt) < Date.parse(run.startedAt);
+
+/**
  * The run that stands for the latest onboarding of a source. It is the onboarding workflow's, which
  * also covers the runs that start it without the entry point, such as continuous extraction. The
  * exception is a run of the entry point newer than that: it has not started the onboarding yet, or
@@ -274,10 +285,7 @@ export const selectLatestRun = ({
   onboarding: WorkflowExecutionListItemDto | null | undefined;
   entryPoint: WorkflowExecutionListItemDto | null | undefined;
 }): { execution: WorkflowExecutionListItemDto; isEntryPoint: boolean } | null => {
-  if (
-    entryPoint &&
-    (!onboarding || Date.parse(onboarding.startedAt) < Date.parse(entryPoint.startedAt))
-  ) {
+  if (entryPoint && (!onboarding || isNewerRun(entryPoint, onboarding))) {
     return { execution: entryPoint, isEntryPoint: true };
   }
   return onboarding ? { execution: onboarding, isEntryPoint: false } : null;
