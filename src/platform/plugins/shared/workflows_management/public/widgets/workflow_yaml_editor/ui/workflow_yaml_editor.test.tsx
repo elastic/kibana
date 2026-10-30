@@ -191,7 +191,6 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
-  useWorkflowsMonacoTheme: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
@@ -284,7 +283,6 @@ jest.mock('@kbn/monaco', () => {
         }),
       },
     },
-    defaultThemesResolvers: {},
     initializeSupportedLanguages: jest.fn(),
   };
 });

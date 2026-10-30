@@ -8,12 +8,42 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import type { monaco } from '../..';
+import type { monaco } from '../../monaco_imports';
 
-export function createTheme(
-  { colorMode, euiTheme }: UseEuiTheme,
-  backgroundColor?: string
-): monaco.editor.IStandaloneThemeData {
+/**
+ * The editor chrome every Kibana editor gets: backgrounds, gutter, widgets, selection, diff colours.
+ * Not annotated as `IColors` on purpose — the literal keys are the source of the colour-id union
+ * that `chromeOverrides` autocompletes from.
+ */
+const buildChromeColors = ({ euiTheme }: UseEuiTheme) => ({
+  'editor.foreground': euiTheme.colors.textParagraph,
+  'editor.background': euiTheme.colors.backgroundBasePlain,
+  'editorLineNumber.foreground': euiTheme.colors.textSubdued,
+  'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
+  'editorIndentGuide.background1': euiTheme.colors.lightShade,
+  'editor.selectionBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
+  'editorWidget.border': euiTheme.colors.borderBasePlain,
+  'editorWidget.background': euiTheme.colors.backgroundBaseSubdued,
+  'editorCursor.foreground': euiTheme.colors.darkestShade,
+  'editorSuggestWidget.selectedForeground': euiTheme.colors.darkestShade,
+  'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.primary,
+  'editorSuggestWidget.selectedBackground': euiTheme.colors.lightShade,
+  'list.hoverBackground': euiTheme.colors.backgroundBaseSubdued,
+  'list.highlightForeground': euiTheme.colors.primary,
+  'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
+  'editorHoverWidget.foreground': euiTheme.colors.darkestShade,
+  'editorHoverWidget.background': euiTheme.colors.backgroundBaseSubdued,
+  'diffEditor.insertedTextBackground': euiTheme.colors.borderBaseSuccess,
+  'diffEditor.removedTextBackground': euiTheme.colors.borderBaseDanger,
+  'diffEditor.insertedLineBackground': euiTheme.colors.backgroundBaseSuccess,
+  'diffEditor.removedLineBackground': euiTheme.colors.backgroundBaseDanger,
+});
+
+export type KbnCodeEditorThemeColorId = keyof ReturnType<typeof buildChromeColors>;
+
+export function createTheme(theme: UseEuiTheme): monaco.editor.IStandaloneThemeData {
+  const { colorMode, euiTheme } = theme;
+
   return {
     base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
     inherit: true,
@@ -83,31 +113,8 @@ export function createTheme(
       { token: 'text', foreground: euiTheme.colors.textHeading },
       { token: 'label', foreground: euiTheme.colors.vis.euiColorVis9 },
     ],
-    colors: {
-      'editor.foreground': euiTheme.colors.textParagraph,
-      'editor.background': backgroundColor ?? euiTheme.colors.backgroundBasePlain,
-      'editorLineNumber.foreground': euiTheme.colors.textSubdued,
-      'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
-      'editorIndentGuide.background1': euiTheme.colors.lightShade,
-      'editor.selectionBackground': euiTheme.colors.backgroundBaseInteractiveSelect,
-      'editorWidget.border': euiTheme.colors.borderBasePlain,
-      'editorWidget.background': euiTheme.colors.backgroundBaseSubdued,
-      'editorCursor.foreground': euiTheme.colors.darkestShade,
-      'editorSuggestWidget.selectedForeground': euiTheme.colors.darkestShade,
-      'editorSuggestWidget.focusHighlightForeground': euiTheme.colors.primary,
-      'editorSuggestWidget.selectedBackground': euiTheme.colors.lightShade,
-      'list.hoverBackground': euiTheme.colors.backgroundBaseSubdued,
-      'list.highlightForeground': euiTheme.colors.primary,
-      'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
-      'editorHoverWidget.foreground': euiTheme.colors.darkestShade,
-      'editorHoverWidget.background': euiTheme.colors.backgroundBaseSubdued,
-      'diffEditor.insertedTextBackground': euiTheme.colors.borderBaseSuccess,
-      'diffEditor.removedTextBackground': euiTheme.colors.borderBaseDanger,
-      'diffEditor.insertedLineBackground': euiTheme.colors.backgroundBaseSuccess,
-      'diffEditor.removedLineBackground': euiTheme.colors.backgroundBaseDanger,
-    },
+    colors: buildChromeColors(theme),
   };
 }
 
 export const buildTheme = createTheme;
-export const buildTransparentTheme = (euiTheme: UseEuiTheme) => createTheme(euiTheme, '#00000000');

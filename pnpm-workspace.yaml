@@ -273,6 +273,7 @@ packages:
   - 'packages/kbn-eslint-plugin-eslint'
   - 'packages/kbn-eslint-plugin-i18n'
   - 'packages/kbn-eslint-plugin-imports'
+  - 'packages/kbn-eslint-plugin-kbn-monaco'
   - 'packages/kbn-eslint-plugin-kbn-ui'
   - 'packages/kbn-eslint-plugin-telemetry'
   - 'packages/kbn-extract-plugin-translations'
