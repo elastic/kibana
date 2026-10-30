@@ -97,6 +97,7 @@ export function getLayerConfigs(
         reportDefinitions: series.reportDefinitions ?? {},
         selectedMetricField: series.selectedMetricField,
         showPercentileAnnotations: series.showPercentileAnnotations,
+        axisMode: series.axisMode,
       });
     }
   });
