@@ -6,7 +6,7 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
-import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../../hooks/use_fetch_significant_events';
+import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from './use_fetch_significant_events';
 import {
   DETECTION_ENTITIES_QUERY_KEY,
   EVENT_BY_ID_QUERY_KEY,

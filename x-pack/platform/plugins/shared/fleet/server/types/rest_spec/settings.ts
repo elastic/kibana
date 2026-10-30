@@ -241,7 +241,12 @@ export const PutSpaceSettingsRequestSchema = {
 export const GetEnrollmentSettingsRequestSchema = {
   query: schema.maybe(
     schema.object({
-      agentPolicyId: schema.maybe(schema.string()),
+      agentPolicyId: schema.maybe(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.enrollment_settings.agentPolicyId',
+        })
+      ),
     })
   ),
 };

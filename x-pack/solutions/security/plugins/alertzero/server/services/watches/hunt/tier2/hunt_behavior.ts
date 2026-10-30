@@ -9,7 +9,6 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { z } from '@kbn/zod/v4';
 import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -35,6 +34,14 @@ import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
 import { scopedEsqlProbeClient } from './scoped_esql_probe_client';
 import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_grounding';
+import { invokeHuntStructured } from '../common/invoke_hunt_structured';
+import {
+  HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+  HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS,
+  HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS,
+  HUNT_PROMPT_TEMPLATE_VERSION,
+  clampHuntTemplateString,
+} from '../common/hunt_prompt_templates';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
@@ -793,13 +800,27 @@ export const huntBehavior = async (
     };
   }
 
-  const structured = models.extraction.chatModel.withStructuredOutput(
-    huntBehaviorLlmExtractionSchema
-  );
   const contextBlock = renderArticleContext(articleContext);
-  const result = (await structured.invoke(
-    `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
-  )) as z.infer<typeof huntBehaviorLlmExtractionSchema>;
+  const result = await invokeHuntStructured({
+    model: models.extraction,
+    // ES|QL stays on a messages model when extraction's connector requires a
+    // template, so it can take the call if the gateway rejects that template.
+    messagesFallback: models.esql,
+    schema: huntBehaviorLlmExtractionSchema,
+    prompt: `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`,
+    logger,
+    template: {
+      id: HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+      version: HUNT_PROMPT_TEMPLATE_VERSION,
+      variables: {
+        environment_context: clampHuntTemplateString(
+          contextBlock,
+          HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS
+        ),
+        report_text: clampHuntTemplateString(text, HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS),
+      },
+    },
+  });
   const candidates = (result.candidates ?? [])
     .map((c) => ({
       technique_id: c.technique_id.toUpperCase().trim(),
@@ -1112,8 +1133,11 @@ export const huntBehavior = async (
     // filter on the shared artifacts and still not express what the sibling's technique does
     // with them. So every deferred sibling gets its own generation while budget remains. Only
     // one that loses to the budget is settled on what its survivor did: `collapsed` when the
-    // survivor published a query seen to filter on every shared artifact, since the artifacts
-    // were at least searched, and `generation_budget` otherwise, since nothing searched them.
+    // survivor published a query seen to filter on every shared artifact and that query executed
+    // with a result that says something about the environment, since the artifacts were then
+    // searched, and `generation_budget` otherwise, since nothing searched them. A survivor whose
+    // query failed, returned an inconclusive result, or never ran (no window or client) searched
+    // nothing, and recording its siblings as searched would skip them on every later run.
     const remainingBudget = Math.max(0, MAX_GENERATED_BEHAVIORS - generationTargets.length);
     const secondWave = deferredSiblings
       .map(({ behavior }) => behavior)
@@ -1125,8 +1149,10 @@ export const huntBehavior = async (
     for (const { behavior, survivor, key } of deferredSiblings) {
       if (secondWaveIds.has(behavior.technique_id)) continue;
       const survivorEsql = published.get(survivor.technique_id);
+      const survivorSearched =
+        survivor.execution?.executed === true && !survivor.execution.inconclusive_reason;
       const sharedValues = key.split('\u0000').join(', ');
-      if (survivorEsql && queryHuntsArtifacts(survivorEsql, key)) {
+      if (survivorEsql && survivorSearched && queryHuntsArtifacts(survivorEsql, key)) {
         collapsedCount += 1;
         behavior.execution = notExecuted('collapsed');
         gap(
