@@ -39,6 +39,10 @@ interface MockOverrides {
   builtInRoleMissing?: boolean;
   /** `genAiSettings:defaultAIConnector` user value already set in a space before the preflight. */
   previousDefaultConnectorBySpace?: Record<string, string>;
+  /** Spaces that already exist, keyed by id, as the spaces GET returns them. Others 404. */
+  existingSpaces?: Record<string, Record<string, unknown>>;
+  /** Receives every create (POST) and update (PUT) body sent to the spaces API. */
+  spaceWrites?: Array<{ method: string; path: string; body: Record<string, unknown> }>;
   /** Receives every `changes` body POSTed to a space's settings route, keyed by space id. */
   settingsWrites?: Array<{ spaceId: string; changes: Record<string, unknown> }>;
 }
@@ -51,6 +55,8 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     builtInRoleMissing = false,
     previousDefaultConnectorBySpace = {},
     settingsWrites = [],
+    existingSpaces,
+    spaceWrites = [],
   } = overrides;
 
   return jest.fn(async (...args: unknown[]) => {
@@ -64,7 +70,14 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
       : (first as { path: string; method?: string; body?: string });
 
     if (/^\/api\/spaces\/space\/[^/]+$/.test(path) && method === 'GET') {
-      // Every eval space already exists — space-creation is not under test here.
+      const id = decodeURIComponent(path.split('/').pop() as string);
+      // By default every eval space already exists as a Security space.
+      if (!existingSpaces) return { id, name: id, solution: 'security' };
+      if (existingSpaces[id]) return existingSpaces[id];
+      throw Object.assign(new Error('Not Found'), { status: 404 });
+    }
+    if (/^\/api\/spaces\/space(\/[^/]+)?$/.test(path) && (method === 'POST' || method === 'PUT')) {
+      spaceWrites.push({ method, path, body: JSON.parse(body ?? '{}') });
       return {};
     }
     if (/^\/api\/security\/role\/[^/]+$/.test(path) && method === 'GET') {
@@ -161,6 +174,87 @@ describe('runPreflight', () => {
   it('resolves and returns a cleanup function on a healthy stack', async () => {
     const cleanup = await run(buildMockFetch());
     expect(typeof cleanup).toBe('function');
+  });
+
+  it('creates missing eval spaces with the Security solution view', async () => {
+    const spaceWrites: MockOverrides['spaceWrites'] = [];
+    await run(
+      buildMockFetch({
+        existingSpaces: { default: { id: 'default', name: 'Default', solution: 'security' } },
+        spaceWrites,
+      })
+    );
+
+    const created = spaceWrites.filter(({ method }) => method === 'POST');
+    expect(created.map(({ body }) => body.id).sort()).toEqual(['hunt-a', 'hunt-b', 'hunt-blocked']);
+    for (const { body } of created) {
+      expect(body.solution).toBe('security');
+    }
+    expect(spaceWrites.filter(({ method }) => method === 'PUT')).toEqual([]);
+  });
+
+  it('switches existing Classic spaces, including default, to Security and preserves their fields', async () => {
+    const spaceWrites: MockOverrides['spaceWrites'] = [];
+    await run(
+      buildMockFetch({
+        existingSpaces: {
+          default: {
+            id: 'default',
+            name: 'Default',
+            color: '#00bfb3',
+            disabledFeatures: ['maps'],
+            _reserved: true,
+          },
+          'hunt-a': { id: 'hunt-a', name: 'hunt-a', disabledFeatures: [], solution: 'classic' },
+          'hunt-b': { id: 'hunt-b', name: 'hunt-b', disabledFeatures: [], solution: 'security' },
+          'hunt-blocked': { id: 'hunt-blocked', name: 'hunt-blocked', disabledFeatures: [] },
+        },
+        spaceWrites,
+      })
+    );
+
+    expect(spaceWrites.filter(({ method }) => method === 'POST')).toEqual([]);
+    const updated = spaceWrites.filter(({ method }) => method === 'PUT');
+    // `hunt-b` is already a Security space, so it is left untouched.
+    expect(updated.map(({ path }) => path).sort()).toEqual([
+      '/api/spaces/space/default',
+      '/api/spaces/space/hunt-a',
+      '/api/spaces/space/hunt-blocked',
+    ]);
+    for (const { body } of updated) {
+      expect(body.solution).toBe('security');
+    }
+    expect(updated.find(({ path }) => path.endsWith('/default'))?.body).toEqual({
+      id: 'default',
+      name: 'Default',
+      color: '#00bfb3',
+      disabledFeatures: ['maps'],
+      _reserved: true,
+      solution: 'security',
+    });
+  });
+
+  it('makes every eval space a Security space before the first AlertZero call', async () => {
+    const calls: string[] = [];
+    const inner = buildMockFetch({
+      existingSpaces: { default: { id: 'default', name: 'Default' } },
+    }) as unknown as jest.Mock;
+    const fetch = jest.fn(async (...args: unknown[]) => {
+      const first = args[0];
+      const path = typeof first === 'string' ? first : (first as { path: string }).path;
+      const method = (args[1] as { method?: string } | undefined)?.method ?? 'GET';
+      calls.push(`${method} ${path}`);
+      return inner(...args);
+    }) as unknown as HttpHandler;
+    await run(fetch);
+
+    const firstAlertZero = calls.findIndex((c) => c.includes('/internal/alertzero/'));
+    const lastSpaceWrite = calls.reduce(
+      (idx, c, i) => (/^(POST|PUT) \/api\/spaces\/space/.test(c) ? i : idx),
+      -1
+    );
+    expect(lastSpaceWrite).toBeGreaterThan(-1);
+    expect(lastSpaceWrite).toBeLessThan(firstAlertZero);
   });
 
   it('restores each space to the default connector it had before the bridge, not to null', async () => {
