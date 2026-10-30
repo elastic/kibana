@@ -435,7 +435,10 @@ export class AgentBuilderPlugin
       esClient: elasticsearch.client.asInternalUser,
       features: searchInferenceEndpoints.features,
     });
-    this.recommendedEndpointsPoller.start();
+    // Intentionally not started: the EIS-derived list is too broad with the current family
+    // heuristic, so the static recommended endpoints are used instead.
+    // See https://github.com/elastic/search-team/issues/16741
+    // this.recommendedEndpointsPoller.start();
 
     return {
       agents: {
