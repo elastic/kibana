@@ -301,11 +301,12 @@ describe('createRuleAttachmentDefinition', () => {
     });
 
     describe('Update Rule handler', () => {
-      it('calls upsertRule with the origin id', async () => {
+      it('calls upsertRule with the origin id and syncs the attachment', async () => {
         const services = createMockServices();
         const definition = createRuleAttachmentDefinition(services);
         const attachment = createAttachment({ origin: 'rule-123' });
         const registerActionButtons = jest.fn();
+        const updateOrigin = jest.fn().mockResolvedValue(undefined);
 
         render(
           <>
@@ -313,7 +314,7 @@ describe('createRuleAttachmentDefinition', () => {
               { attachment, isSidebar: false },
               {
                 registerActionButtons,
-                updateOrigin: jest.fn(),
+                updateOrigin,
                 closeCanvas: jest.fn(),
               }
             )}
@@ -329,6 +330,7 @@ describe('createRuleAttachmentDefinition', () => {
           'rule-123',
           expect.objectContaining({ metadata: attachment.data.metadata })
         );
+        expect(updateOrigin).toHaveBeenCalledWith('rule-123');
       });
     });
 

@@ -88,7 +88,20 @@ describe('ActionPoliciesApi', () => {
 
       await api.getActionPolicy('policy-1');
 
-      expect(http.get).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`);
+      expect(http.get).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
+        signal: undefined,
+      });
+    });
+
+    it('forwards the abort signal', async () => {
+      http.get.mockResolvedValue({ id: 'policy-1' });
+      const { signal } = new AbortController();
+
+      await api.getActionPolicy('policy-1', signal);
+
+      expect(http.get).toHaveBeenCalledWith(`${'/api/alerting/v2/action_policies'}/policy-1`, {
+        signal,
+      });
     });
   });
 

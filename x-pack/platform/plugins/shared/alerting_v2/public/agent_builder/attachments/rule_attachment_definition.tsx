@@ -36,7 +36,11 @@ export const createRuleAttachmentDefinition = ({
 
   canvasWidth: '40vw',
 
-  renderInlineContent: (props) => <RuleInlineContent {...props} />,
+  renderInlineContent: (props) => (
+    <Context.Provider value={container}>
+      <RuleInlineContent {...props} />
+    </Context.Provider>
+  ),
 
   renderCanvasContent: (props, callbacks) => (
     <Context.Provider value={container}>

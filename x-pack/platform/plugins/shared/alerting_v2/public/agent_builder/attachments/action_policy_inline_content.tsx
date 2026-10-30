@@ -21,16 +21,25 @@ import {
   getGroupingModeLabel,
 } from '../../components/action_policy/labels';
 import { AttachmentInfoBar } from './attachment_info_bar';
+import { showsAttachmentPersistenceNotice } from './attachment_persistence';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
+import {
+  ActionPolicyPersistenceNotice,
+  getActionPolicyRunStatus,
+  useActionPolicyPersistence,
+} from './action_policy_persistence';
 
 export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPolicyAttachment>> = ({
   attachment,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { data, origin } = attachment;
-  const isDraft = !origin;
+  const { data } = attachment;
+  const persistence = useActionPolicyPersistence(attachment);
   const isEnabled = data.enabled ?? true;
-  const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
+  const { label: status, color: statusColor } = getActionPolicyRunStatus(
+    !persistence.isPersisted,
+    isEnabled
+  );
 
   const destinationCount = data.destinations?.length ?? 0;
 
@@ -40,6 +49,12 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={containerCss}>
+      {showsAttachmentPersistenceNotice(persistence) && (
+        <EuiFlexItem grow={false}>
+          <ActionPolicyPersistenceNotice {...persistence} />
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -102,29 +117,4 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
-  if (isDraft)
-    return {
-      label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusDraft', {
-        defaultMessage: 'Draft',
-      }),
-      color: 'default',
-    };
-
-  if (isEnabled)
-    return {
-      label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusEnabled', {
-        defaultMessage: 'Enabled',
-      }),
-      color: 'success',
-    };
-
-  return {
-    label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusDisabled', {
-      defaultMessage: 'Disabled',
-    }),
-    color: 'warning',
-  };
 };

@@ -41,7 +41,11 @@ export const createActionPolicyAttachmentDefinition = ({
 
   canvasWidth: '40vw',
 
-  renderInlineContent: (props) => <ActionPolicyInlineContent {...props} />,
+  renderInlineContent: (props) => (
+    <Context.Provider value={container}>
+      <ActionPolicyInlineContent {...props} />
+    </Context.Provider>
+  ),
 
   renderCanvasContent: (props, callbacks) => (
     <Context.Provider value={container}>

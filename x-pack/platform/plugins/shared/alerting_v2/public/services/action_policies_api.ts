@@ -40,8 +40,8 @@ const buildActionPolicyPath = (id: string, action?: string): string =>
 export class ActionPoliciesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async getActionPolicy(id: string) {
-    return this.http.get<ActionPolicyResponse>(buildActionPolicyPath(id));
+  public async getActionPolicy(id: string, signal?: AbortSignal) {
+    return this.http.get<ActionPolicyResponse>(buildActionPolicyPath(id), { signal });
   }
 
   public async listActionPolicies(params: FindActionPoliciesRequest = {}) {

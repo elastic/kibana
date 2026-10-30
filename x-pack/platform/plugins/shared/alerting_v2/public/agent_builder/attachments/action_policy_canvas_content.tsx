@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
@@ -22,7 +22,21 @@ import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
+import {
+  ALL_CHANGES_SAVED_LABEL,
+  isAttachmentSaved,
+  runAttachmentSave,
+  SAVING_LABEL,
+  showsAttachmentPersistenceNotice,
+  syncAttachmentOrigin,
+} from './attachment_persistence';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
+import {
+  ACTION_POLICY_OUT_OF_SYNC_MESSAGE,
+  ActionPolicyPersistenceNotice,
+  getActionPolicyRunStatus,
+  useActionPolicyPersistence,
+} from './action_policy_persistence';
 
 const EMPTY_VALUE = '-';
 
@@ -42,10 +56,13 @@ export const ActionPolicyCanvasContent = ({
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
 
-  const { data: rawData, origin } = attachment;
+  const { data: rawData } = attachment;
   const data = rawData as ActionPolicyCanvasData;
-  // Origin is only set if the action policy has been persisted
-  const isPersisted = Boolean(origin);
+  const persistence = useActionPolicyPersistence(attachment);
+  const { isPersisted, isSaving, outOfSync } = persistence;
+  const isSaved = isAttachmentSaved(persistence);
+  const isEnabled = data.enabled ?? true;
+  const { label: status, color: statusColor } = getActionPolicyRunStatus(!isPersisted, isEnabled);
 
   const [mounted, setMounted] = useState(false);
   const [dependenciesReady, setDependenciesReady] = useState<boolean | null>(null);
@@ -94,81 +111,98 @@ export const ActionPolicyCanvasContent = ({
       return;
     }
 
+    const saveWorkflowFirst = hasDraftDependencies
+      ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+          defaultMessage: 'Save workflow before saving policy.',
+        })
+      : undefined;
+
     if (!isPersisted) {
       registerActionButtons([
         {
-          label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.createPolicy', {
-            defaultMessage: 'Create policy',
-          }),
+          label: isSaving
+            ? SAVING_LABEL
+            : i18n.translate('xpack.alertingV2.actionPolicyAttachment.createPolicy', {
+                defaultMessage: 'Create policy',
+              }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
-          disabled: hasDraftDependencies,
-          disabledReason: hasDraftDependencies
-            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
-                defaultMessage: 'Save workflow before saving policy.',
-              })
-            : undefined,
-          handler: async () => {
-            try {
-              await actionPoliciesApi.upsertActionPolicy(
-                data.id,
-                attachmentDataToActionPolicyPayload(data)
-              );
-              await updateOrigin(data.id);
-              notifications.toasts.addSuccess(
-                i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
-                  defaultMessage: 'Policy "{name}" created',
-                  values: { name: data.name },
-                })
-              );
-            } catch (e) {
-              notifications.toasts.addDanger(
-                i18n.translate('xpack.alertingV2.actionPolicyAttachment.createError', {
-                  defaultMessage: 'Failed to create policy: {error}',
-                  values: { error: e.body?.message ?? e.message },
-                })
-              );
-            }
-          },
+          disabled: isSaving || hasDraftDependencies,
+          disabledReason: isSaving ? undefined : saveWorkflowFirst,
+          handler: () =>
+            runAttachmentSave(attachment.id, async () => {
+              try {
+                await actionPoliciesApi.upsertActionPolicy(
+                  data.id,
+                  attachmentDataToActionPolicyPayload(data)
+                );
+                await syncAttachmentOrigin(attachment.id, data.id, updateOrigin);
+                notifications.toasts.addSuccess(
+                  i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
+                    defaultMessage: 'Policy "{name}" created',
+                    values: { name: data.name },
+                  })
+                );
+              } catch (e) {
+                notifications.toasts.addDanger(
+                  i18n.translate('xpack.alertingV2.actionPolicyAttachment.createError', {
+                    defaultMessage: 'Failed to create policy: {error}',
+                    values: { error: e.body?.message ?? e.message },
+                  })
+                );
+              }
+            }),
         },
       ]);
       return;
     }
 
+    const getUpdateDisabledReason = (): string | undefined => {
+      if (isSaving) {
+        return undefined;
+      }
+      if (outOfSync) {
+        return ACTION_POLICY_OUT_OF_SYNC_MESSAGE;
+      }
+      return isSaved ? ALL_CHANGES_SAVED_LABEL : saveWorkflowFirst;
+    };
+
     registerActionButtons([
       {
-        label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatePolicy', {
-          defaultMessage: 'Update Policy',
-        }),
+        label: isSaving
+          ? SAVING_LABEL
+          : i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatePolicy', {
+              defaultMessage: 'Update Policy',
+            }),
         icon: 'save',
         type: ActionButtonType.PRIMARY,
-        disabled: hasDraftDependencies,
-        disabledReason: hasDraftDependencies
-          ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
-              defaultMessage: 'Save workflow before saving policy.',
-            })
-          : undefined,
-        handler: async () => {
-          try {
-            await actionPoliciesApi.upsertActionPolicy(
-              data.id,
-              attachmentDataToActionPolicyPayload(data)
-            );
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
-                defaultMessage: 'Policy "{name}" updated',
-                values: { name: data.name },
-              })
-            );
-          } catch (e) {
-            notifications.toasts.addDanger(
-              i18n.translate('xpack.alertingV2.actionPolicyAttachment.updateError', {
-                defaultMessage: 'Failed to update policy: {error}',
-                values: { error: e.body?.message ?? e.message },
-              })
-            );
-          }
-        },
+        disabled: isSaving || outOfSync || isSaved || hasDraftDependencies,
+        disabledReason: getUpdateDisabledReason(),
+        handler: () =>
+          runAttachmentSave(attachment.id, async () => {
+            try {
+              await actionPoliciesApi.upsertActionPolicy(
+                data.id,
+                attachmentDataToActionPolicyPayload(data)
+              );
+              // upsertActionPolicy writes the saved object only. Refreshing the origin records a
+              // new origin_snapshot_at so this attachment version counts as synced.
+              await syncAttachmentOrigin(attachment.id, data.id, updateOrigin);
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
+                  defaultMessage: 'Policy "{name}" updated',
+                  values: { name: data.name },
+                })
+              );
+            } catch (e) {
+              notifications.toasts.addDanger(
+                i18n.translate('xpack.alertingV2.actionPolicyAttachment.updateError', {
+                  defaultMessage: 'Failed to update policy: {error}',
+                  values: { error: e.body?.message ?? e.message },
+                })
+              );
+            }
+          }),
       },
       {
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.viewInPolicies', {
@@ -195,10 +229,28 @@ export const ActionPolicyCanvasContent = ({
     notifications,
     data,
     hasDraftDependencies,
+    attachment.id,
+    isSaving,
+    outOfSync,
+    isSaved,
   ]);
 
   return (
     <EuiPanel paddingSize="l" hasShadow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={statusColor} data-test-subj="actionPolicyCanvasStatus">
+            {status}
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {showsAttachmentPersistenceNotice(persistence) && (
+        <>
+          <EuiSpacer size="m" />
+          <ActionPolicyPersistenceNotice {...persistence} />
+        </>
+      )}
+      <EuiSpacer size="m" />
       <EuiTitle size="s">
         <h2>{data.name ?? EMPTY_VALUE}</h2>
       </EuiTitle>

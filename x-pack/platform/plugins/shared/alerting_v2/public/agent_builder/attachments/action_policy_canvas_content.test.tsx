@@ -18,6 +18,7 @@ const flushPromises = async () => {
 };
 
 const mockUpsertActionPolicy = jest.fn().mockResolvedValue({});
+const mockGetActionPolicy = jest.fn();
 const mockGetWorkflow = jest.fn().mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
 const mockGetRule = jest.fn().mockResolvedValue({ id: 'abc', name: 'Test Rule' });
 const mockActionPolicyNavigateSync = jest.fn();
@@ -54,6 +55,7 @@ const mockWorkflowApiService = { getWorkflow: (...a: unknown[]) => mockGetWorkfl
 const mockRulesApiService = { getRule: (...a: unknown[]) => mockGetRule(...a) };
 const mockActionPoliciesApiService = {
   upsertActionPolicy: (...a: unknown[]) => mockUpsertActionPolicy(...a),
+  getActionPolicy: (...a: unknown[]) => mockGetActionPolicy(...a),
 };
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -88,14 +90,27 @@ const defaultData = {
 };
 
 const createAttachment = ({
+  id = 'att-1',
   origin,
   data,
-}: { origin?: string; data?: Record<string, unknown> } = {}) => ({
-  id: 'att-1',
+  versionData,
+}: {
+  id?: string;
+  origin?: string;
+  data?: Record<string, unknown>;
+  versionData?: {
+    version: number;
+    versionCount: number;
+    createdAt: string;
+    originSyncedAt?: string;
+  };
+} = {}) => ({
+  id,
   type: ACTION_POLICY_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin,
+  versionData,
   data: { ...defaultData, ...data } as any,
 });
 
@@ -145,6 +160,8 @@ describe('ActionPolicyCanvasContent', () => {
     jest.clearAllMocks();
     mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Test Workflow' });
     mockGetRule.mockResolvedValue({ id: 'abc', name: 'Test Rule' });
+    mockUpsertActionPolicy.mockResolvedValue({});
+    mockGetActionPolicy.mockResolvedValue({ updated_at: '2026-04-10T00:00:00.000Z' });
   });
 
   describe('rendering', () => {
@@ -232,11 +249,12 @@ describe('ActionPolicyCanvasContent', () => {
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
     });
 
-    it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
-      const { registerActionButtons } = await renderCanvas({
-        origin: 'policy-123',
-        data: { id: 'policy-123' },
-      });
+    it('Update Policy handler calls upsertActionPolicy with data.id and syncs the attachment', async () => {
+      const updateOrigin = jest.fn().mockResolvedValue(undefined);
+      const { registerActionButtons } = await renderCanvas(
+        { origin: 'policy-123', data: { id: 'policy-123' } },
+        { updateOrigin }
+      );
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const updateButton = buttons.find((b) => b.label === 'Update Policy')!;
@@ -246,6 +264,7 @@ describe('ActionPolicyCanvasContent', () => {
         'policy-123',
         expect.objectContaining({ name: 'My Policy' })
       );
+      expect(updateOrigin).toHaveBeenCalledWith('policy-123');
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
@@ -280,6 +299,177 @@ describe('ActionPolicyCanvasContent', () => {
         actionPolicyId: 'policy-123',
         host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
       });
+    });
+  });
+
+  describe('sync indication', () => {
+    const syncedVersionData = {
+      version: 1,
+      versionCount: 1,
+      createdAt: '2026-04-01T00:00:00.000Z',
+      originSyncedAt: '2026-04-01T00:00:00.000Z',
+    };
+
+    it('shows the draft status for an unsaved policy without a notice', async () => {
+      const { getByTestId, queryByTestId } = await renderCanvas();
+
+      expect(getByTestId('actionPolicyCanvasStatus')).toHaveTextContent('Draft');
+      expect(queryByTestId('attachmentPersistenceUnsavedChanges')).toBeNull();
+      expect(queryByTestId('attachmentPersistenceOutOfSync')).toBeNull();
+      expect(mockGetActionPolicy).not.toHaveBeenCalled();
+    });
+
+    it('shows the enabled status and all changes saved for a policy that still matches the save', async () => {
+      mockGetActionPolicy.mockResolvedValue({ updated_at: '2026-04-01T00:00:00.000Z' });
+      const { getByTestId, queryByTestId, registerActionButtons } = await renderCanvas({
+        origin: 'policy-123',
+        data: { id: 'policy-123', enabled: true, updated_at: '2026-04-01T00:00:00.000Z' },
+        versionData: syncedVersionData,
+      });
+
+      expect(mockGetActionPolicy).toHaveBeenCalledWith('policy-123', expect.any(AbortSignal));
+      expect(getByTestId('actionPolicyCanvasStatus')).toHaveTextContent('Enabled');
+      expect(queryByTestId('attachmentPersistenceOutOfSync')).toBeNull();
+      expect(queryByTestId('attachmentPersistenceUnsavedChanges')).toBeNull();
+      expect(getByTestId('attachmentPersistenceSaved')).toHaveTextContent('All changes saved');
+
+      const updateButton = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Update Policy'
+      );
+      expect(updateButton?.disabled).toBe(true);
+      expect(updateButton?.disabledReason).toBe('All changes saved');
+    });
+
+    it('shows all changes saved and blocks a second update once Update Policy succeeds', async () => {
+      const updateOrigin = jest.fn().mockResolvedValue({
+        success: true,
+        attachment: { origin_snapshot_at: '2026-04-03T00:00:00.000Z' },
+      });
+      const { getByTestId, queryByTestId, registerActionButtons } = await renderCanvas(
+        {
+          id: 'att-policy-update-then-saved',
+          origin: 'policy-123',
+          data: { id: 'policy-123' },
+          versionData: {
+            version: 2,
+            versionCount: 2,
+            createdAt: '2026-04-02T00:00:00.000Z',
+            originSyncedAt: '2026-04-01T00:00:00.000Z',
+          },
+        },
+        { updateOrigin }
+      );
+      expect(getByTestId('attachmentPersistenceUnsavedChanges')).toBeDefined();
+
+      const updateButton = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Update Policy'
+      )!;
+      expect(updateButton.disabled).toBe(false);
+      await act(async () => {
+        await updateButton.handler();
+      });
+      await flushPromises();
+
+      expect(updateOrigin).toHaveBeenCalledWith('policy-123');
+      expect(getByTestId('attachmentPersistenceSaved')).toHaveTextContent('All changes saved');
+      expect(queryByTestId('attachmentPersistenceUnsavedChanges')).toBeNull();
+      const updateAfterSave = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Update Policy'
+      );
+      expect(updateAfterSave?.disabled).toBe(true);
+      expect(updateAfterSave?.disabledReason).toBe('All changes saved');
+    });
+
+    it('shows the disabled status for a saved policy that is turned off', async () => {
+      const { getByTestId } = await renderCanvas({
+        origin: 'policy-123',
+        data: { id: 'policy-123', enabled: false },
+      });
+
+      expect(getByTestId('actionPolicyCanvasStatus')).toHaveTextContent('Disabled');
+    });
+
+    it('shows unsaved changes when this version is newer than the last sync', async () => {
+      const { getByTestId } = await renderCanvas({
+        origin: 'policy-123',
+        data: { id: 'policy-123' },
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      });
+
+      expect(getByTestId('attachmentPersistenceUnsavedChanges')).toHaveTextContent(
+        'Save the policy to keep these edits.'
+      );
+    });
+
+    it('shows that the attachment is not in sync and blocks update', async () => {
+      mockGetActionPolicy.mockResolvedValue({ updated_at: '2026-05-01T00:00:00.000Z' });
+      const { getByTestId, registerActionButtons } = await renderCanvas({
+        origin: 'policy-123',
+        data: { id: 'policy-123', updated_at: '2026-04-01T00:00:00.000Z' },
+        versionData: syncedVersionData,
+      });
+
+      expect(getByTestId('attachmentPersistenceOutOfSync')).toHaveTextContent('Not in sync');
+      const updateButton = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Update Policy'
+      )!;
+      expect(updateButton.disabled).toBe(true);
+      expect(updateButton.disabledReason).toContain('The saved policy has changed');
+    });
+
+    it('does not flag drift when the saved policy matches this attachment snapshot', async () => {
+      mockGetActionPolicy.mockResolvedValue({ updated_at: '2026-05-01T00:00:00.000Z' });
+      const { queryByTestId, registerActionButtons } = await renderCanvas({
+        origin: 'policy-123',
+        data: { id: 'policy-123', updated_at: '2026-05-01T00:00:00.000Z' },
+        versionData: {
+          version: 2,
+          versionCount: 2,
+          createdAt: '2026-04-02T00:00:00.000Z',
+          originSyncedAt: '2026-04-01T00:00:00.000Z',
+        },
+      });
+
+      expect(queryByTestId('attachmentPersistenceOutOfSync')).toBeNull();
+      const updateButton = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Update Policy'
+      )!;
+      expect(updateButton.disabled).toBe(false);
+    });
+
+    it('shows Saving... and disables create while the request is in flight', async () => {
+      let finishSave: (policy: Record<string, never>) => void = () => {};
+      mockUpsertActionPolicy.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finishSave = resolve;
+          })
+      );
+      const { registerActionButtons, queryByTestId } = await renderCanvas({
+        data: { id: 'pre-assigned-id' },
+      });
+      const createButton = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Create policy'
+      )!;
+      const pending = createButton.handler();
+      await flushPromises();
+
+      expect(queryByTestId('attachmentPersistenceSaving')).not.toBeNull();
+      const saving = getLastRegisteredButtons(registerActionButtons).find(
+        (button) => button.label === 'Saving...'
+      );
+      expect(saving?.disabled).toBe(true);
+
+      finishSave({});
+      await pending;
+      await flushPromises();
+
+      expect(queryByTestId('attachmentPersistenceSaving')).toBeNull();
     });
   });
 

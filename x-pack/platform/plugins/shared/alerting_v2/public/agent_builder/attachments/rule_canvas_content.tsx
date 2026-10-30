@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiPanel } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
@@ -29,7 +29,21 @@ import {
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { RulesApi } from '../../services/rules_api';
+import {
+  ALL_CHANGES_SAVED_LABEL,
+  isAttachmentSaved,
+  runAttachmentSave,
+  SAVING_LABEL,
+  showsAttachmentPersistenceNotice,
+  syncAttachmentOrigin,
+} from './attachment_persistence';
 import type { RuleAttachment } from './rule_attachment_definition';
+import {
+  getRuleRunStatus,
+  RULE_OUT_OF_SYNC_MESSAGE,
+  RulePersistenceNotice,
+  useRulePersistence,
+} from './rule_persistence';
 
 export interface RuleCanvasContentProps
   extends AttachmentRenderProps<RuleAttachment>,
@@ -49,8 +63,13 @@ export const RuleCanvasContent = ({
     [share]
   );
 
-  const { data, origin: savedObjectId } = attachment;
-  const isPersisted = isPersistedSavedObject(savedObjectId);
+  const { data } = attachment;
+  const persistence = useRulePersistence(attachment);
+  const { isPersisted, isSaving, outOfSync } = persistence;
+  const isEnabled = data.enabled ?? true;
+  const { label: status, color: statusColor } = getRuleRunStatus(!isPersisted, isEnabled);
+  const showPersistenceNotice = showsAttachmentPersistenceNotice(persistence);
+  const isSaved = isAttachmentSaved(persistence);
   const summaryRule = useMemo(() => ({ ...data, id: undefined }), [data]);
 
   const [mounted, setMounted] = React.useState(false);
@@ -68,46 +87,71 @@ export const RuleCanvasContent = ({
     if (!isPersisted) {
       registerActionButtons([
         {
-          label: i18n.translate('xpack.alertingV2.ruleAttachment.createRule', {
-            defaultMessage: 'Create rule',
-          }),
+          label: isSaving
+            ? SAVING_LABEL
+            : i18n.translate('xpack.alertingV2.ruleAttachment.createRule', {
+                defaultMessage: 'Create rule',
+              }),
           icon: 'save',
           type: ActionButtonType.PRIMARY,
-          handler: async () => {
-            const savedRule = data.id
-              ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
-              : await rulesApi.createRule(buildRulePayload(data));
-            await updateOrigin(savedRule.id);
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
-                defaultMessage: 'Rule "{name}" created',
-                values: { name: data.metadata.name },
-              })
-            );
-          },
+          disabled: isSaving,
+          handler: () =>
+            runAttachmentSave(attachment.id, async () => {
+              const savedRule = data.id
+                ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
+                : await rulesApi.createRule(buildRulePayload(data));
+              await syncAttachmentOrigin(attachment.id, savedRule.id, updateOrigin);
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
+                  defaultMessage: 'Rule "{name}" created',
+                  values: { name: data.metadata.name },
+                })
+              );
+            }),
         },
       ]);
       return;
     }
 
-    const ruleId = savedObjectId;
+    const ruleId = attachment.origin;
+    if (!ruleId) {
+      return;
+    }
+
+    const getUpdateDisabledReason = (): string | undefined => {
+      if (isSaving) {
+        return undefined;
+      }
+      if (outOfSync) {
+        return RULE_OUT_OF_SYNC_MESSAGE;
+      }
+      return isSaved ? ALL_CHANGES_SAVED_LABEL : undefined;
+    };
 
     registerActionButtons([
       {
-        label: i18n.translate('xpack.alertingV2.ruleAttachment.updateRule', {
-          defaultMessage: 'Update Rule',
-        }),
+        label: isSaving
+          ? SAVING_LABEL
+          : i18n.translate('xpack.alertingV2.ruleAttachment.updateRule', {
+              defaultMessage: 'Update Rule',
+            }),
         icon: 'save',
         type: ActionButtonType.PRIMARY,
-        handler: async () => {
-          await rulesApi.upsertRule(ruleId, buildRulePayload(data));
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
-              defaultMessage: 'Rule "{name}" updated',
-              values: { name: data.metadata.name },
-            })
-          );
-        },
+        disabled: isSaving || outOfSync || isSaved,
+        disabledReason: getUpdateDisabledReason(),
+        handler: () =>
+          runAttachmentSave(attachment.id, async () => {
+            await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+            // upsertRule writes the saved object only. Refreshing the origin records a new
+            // origin_snapshot_at so this attachment version counts as synced.
+            await syncAttachmentOrigin(attachment.id, ruleId, updateOrigin);
+            notifications.toasts.addSuccess(
+              i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
+                defaultMessage: 'Rule "{name}" updated',
+                values: { name: data.metadata.name },
+              })
+            );
+          }),
       },
       {
         label: i18n.translate('xpack.alertingV2.ruleAttachment.viewInRules', {
@@ -126,19 +170,37 @@ export const RuleCanvasContent = ({
   }, [
     mounted,
     isPersisted,
-    savedObjectId,
+    attachment.origin,
     registerActionButtons,
     updateOrigin,
     rulesApi,
     share,
     notifications,
     data,
+    attachment.id,
+    isSaving,
+    outOfSync,
+    isSaved,
   ]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <LocatorProvider locators={locators}>
         <EuiPanel paddingSize="l" hasShadow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={statusColor} data-test-subj="ruleCanvasStatus">
+                {status}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {showPersistenceNotice && (
+            <>
+              <EuiSpacer size="m" />
+              <RulePersistenceNotice {...persistence} />
+            </>
+          )}
+          <EuiSpacer size="m" />
           <RuleSummaryBody rule={summaryRule}>
             <RuleSummaryAboutSection />
             <RuleSummaryQueryPreviewSection />
@@ -149,8 +211,4 @@ export const RuleCanvasContent = ({
       </LocatorProvider>
     </QueryClientProvider>
   );
-};
-
-const isPersistedSavedObject = (savedObjectId: string | undefined): savedObjectId is string => {
-  return Boolean(savedObjectId);
 };

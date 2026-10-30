@@ -14,16 +14,21 @@ import { i18n } from '@kbn/i18n';
 import { BadgeList } from '../../components/action_policy/badge_list';
 import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { AttachmentInfoBar } from './attachment_info_bar';
+import { showsAttachmentPersistenceNotice } from './attachment_persistence';
+import { getRuleRunStatus, RulePersistenceNotice, useRulePersistence } from './rule_persistence';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({
   attachment,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { data, origin: savedObjectId } = attachment;
-  const isDraft = !savedObjectId;
+  const { data } = attachment;
+  const persistence = useRulePersistence(attachment);
   const isEnabled = data.enabled ?? true;
-  const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
+  const { label: status, color: statusColor } = getRuleRunStatus(
+    !persistence.isPersisted,
+    isEnabled
+  );
   const { description, tags } = data.metadata;
 
   const containerCss = css`
@@ -32,6 +37,12 @@ export const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> 
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={containerCss}>
+      {showsAttachmentPersistenceNotice(persistence) && (
+        <EuiFlexItem grow={false}>
+          <RulePersistenceNotice {...persistence} />
+        </EuiFlexItem>
+      )}
+
       {(description || (tags && tags.length > 0)) && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -105,29 +116,4 @@ const formatScheduleInterval = (interval: string): string => {
   } catch {
     return interval;
   }
-};
-
-const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
-  if (isDraft)
-    return {
-      label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDraft', {
-        defaultMessage: 'Draft',
-      }),
-      color: 'default',
-    };
-
-  if (isEnabled)
-    return {
-      label: i18n.translate('xpack.alertingV2.ruleAttachment.statusEnabled', {
-        defaultMessage: 'Enabled',
-      }),
-      color: 'success',
-    };
-
-  return {
-    label: i18n.translate('xpack.alertingV2.ruleAttachment.statusDisabled', {
-      defaultMessage: 'Disabled',
-    }),
-    color: 'warning',
-  };
 };
