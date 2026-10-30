@@ -50,7 +50,7 @@ export const buildUserDefinedColumnsDefinitions = (
     label,
     text: getSafeInsertText(label),
     kind: 'Variable',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.variableDefinition', {
+    detail: i18n.translate('esqlLanguage.esql.autocomplete.variableDefinition', {
       defaultMessage: `Column specified by the user within the ES|QL query`,
     }),
     category: SuggestionCategory.USER_DEFINED_COLUMN,
@@ -121,23 +121,20 @@ export function getControlSuggestion(
     ...(suggestCreation
       ? [
           {
-            label: i18n.translate('kbn-esql-language.esql.autocomplete.createControlLabel', {
+            label: i18n.translate('esqlLanguage.esql.autocomplete.createControlLabel', {
               defaultMessage: 'Create control',
             }),
             text: '',
             kind: 'Issue',
-            detail: i18n.translate('kbn-esql-language.esql.autocomplete.createControlDetailLabel', {
+            detail: i18n.translate('esqlLanguage.esql.autocomplete.createControlDetailLabel', {
               defaultMessage: 'Click to create',
             }),
             category: SuggestionCategory.CUSTOM_ACTION,
             command: {
               id: `esql.control.${type}.create`,
-              title: i18n.translate(
-                'kbn-esql-language.esql.autocomplete.createControlDetailLabel',
-                {
-                  defaultMessage: 'Click to create',
-                }
-              ),
+              title: i18n.translate('esqlLanguage.esql.autocomplete.createControlDetailLabel', {
+                defaultMessage: 'Click to create',
+              }),
               arguments: [{ triggerSource }],
             },
           } as ISuggestionItem,
@@ -146,7 +143,7 @@ export function getControlSuggestion(
     ...(variables?.length
       ? buildConstantsDefinitions(
           variables,
-          i18n.translate('kbn-esql-language.esql.autocomplete.namedParamDefinition', {
+          i18n.translate('esqlLanguage.esql.autocomplete.namedParamDefinition', {
             defaultMessage: 'Named parameter',
           }),
           undefined,
@@ -186,7 +183,7 @@ export function createInferenceEndpointToCompletionItem(
   inferenceEndpoint: InferenceEndpointAutocompleteItem
 ): ISuggestionItem {
   return {
-    detail: i18n.translate('kbn-esql-language.esql.definitions.rerankInferenceIdDoc', {
+    detail: i18n.translate('esqlLanguage.esql.definitions.rerankInferenceIdDoc', {
       defaultMessage: 'Inference endpoint used for the completion',
     }),
     kind: 'Reference',
@@ -269,7 +266,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
   return {
     label: indexName
       ? i18n.translate(
-          'kbn-esql-language.esql.autocomplete.createLookupIndexWithName',
+          'esqlLanguage.esql.autocomplete.createLookupIndexWithName',
 
           {
             defaultMessage: 'Create lookup index "{indexName}"',
@@ -277,7 +274,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
             values: { indexName },
           }
         )
-      : i18n.translate('kbn-esql-language.esql.autocomplete.createLookupIndex', {
+      : i18n.translate('esqlLanguage.esql.autocomplete.createLookupIndex', {
           defaultMessage: 'Create lookup index',
         }),
 
@@ -288,7 +285,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
     filterText: indexName,
 
     detail: i18n.translate(
-      'kbn-esql-language.esql.autocomplete.createLookupIndexDetailLabel',
+      'esqlLanguage.esql.autocomplete.createLookupIndexDetailLabel',
 
       {
         defaultMessage: 'Click to create',
@@ -301,7 +298,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionI
       id: `esql.lookup_index.create`,
 
       title: i18n.translate(
-        'kbn-esql-language.esql.autocomplete.createLookupIndexDetailLabel',
+        'esqlLanguage.esql.autocomplete.createLookupIndexDetailLabel',
 
         {
           defaultMessage: 'Click to create',

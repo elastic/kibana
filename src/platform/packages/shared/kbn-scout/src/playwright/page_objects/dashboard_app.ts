@@ -71,10 +71,6 @@ export class DashboardApp {
   private readonly addEmbeddableSuccess;
   private readonly savedSearchDocTable;
 
-  // Markdown panel
-  private readonly markdownEditorApplyButton;
-  private readonly markdownRenderer;
-
   // ES|QL / Visualize editor actions
   private readonly applyFlyoutButton;
   private readonly visualizeSaveAndReturnButton;
@@ -133,10 +129,6 @@ export class DashboardApp {
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
     this.savedSearchDocTable = this.page.testSubj.locator('embeddedSavedSearchDocTable');
 
-    // Markdown panel
-    this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
-    this.markdownRenderer = this.page.testSubj.locator('markdownRenderer');
-
     // ES|QL / Visualize editor actions
     this.applyFlyoutButton = this.page.testSubj.locator('applyFlyoutButton');
     this.visualizeSaveAndReturnButton = this.page.testSubj.locator('visualizesaveAndReturnButton');
@@ -169,6 +161,34 @@ export class DashboardApp {
     if (opts.waitForRender) {
       await this.waitForRenderComplete();
     }
+  }
+
+  async getDashboardIdFromCurrentUrl(): Promise<string | undefined> {
+    if (this.page.url().includes('/app/r?l=DASHBOARD')) {
+      await this.page.waitForURL((url) => !url.toString().includes('/app/r?l=DASHBOARD'));
+    }
+    return this.getDashboardIdFromUrl(this.page.url());
+  }
+
+  getDashboardIdFromUrl(url: string): string | undefined {
+    const urlSubstring = '#/view/';
+    const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+    if (startOfIdIndex < urlSubstring.length) {
+      return undefined;
+    }
+    const idSubstring = url.substring(startOfIdIndex);
+    const slashIndex = idSubstring.indexOf('/');
+    const queryIndex = idSubstring.indexOf('?');
+    if (slashIndex === -1 && queryIndex === -1) {
+      return idSubstring;
+    }
+    const endIndex =
+      slashIndex === -1
+        ? queryIndex
+        : queryIndex === -1
+        ? slashIndex
+        : Math.min(slashIndex, queryIndex);
+    return idSubstring.substring(0, endIndex);
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
@@ -458,27 +478,6 @@ export class DashboardApp {
    */
   async addLens(lensName: string, options?: TimeoutOptions) {
     return this.addEmbeddable(lensName, 'lens', options);
-  }
-
-  /**
-   * Adds a new Markdown panel (by value) to the dashboard.
-   *
-   * @param content - Markdown content to save
-   */
-  async addMarkdownPanel(content: string) {
-    await this.openAddPanelFlyout();
-    await this.panelSelectionSearchInput.fill('Markdown text');
-    await this.page.testSubj.click('create-action-Markdown text');
-
-    const editorInput = this.page.locator('textarea[aria-label="Dashboard markdown editor"]');
-    await expect(editorInput).toBeVisible();
-    await editorInput.fill(content);
-    await this.markdownEditorApplyButton.click();
-
-    // Scope to the renderer containing the content we just typed; the dashboard may
-    // already have other markdown panels, in which case an unfiltered `markdownRenderer`
-    // locator would resolve to multiple elements and trip strict mode.
-    await expect(this.markdownRenderer.filter({ hasText: content })).toBeVisible();
   }
 
   async addMapPanel() {

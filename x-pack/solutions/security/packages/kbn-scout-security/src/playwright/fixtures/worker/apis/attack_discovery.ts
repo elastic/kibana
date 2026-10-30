@@ -43,14 +43,13 @@ export const getAttackDiscoveryApiService = ({
   return {
     seedAttackData: async () => {
       await measurePerformanceAsync(log, 'security.attackDiscovery.seedAttackData', async () => {
+        // Unfiltered by type and owner: the seeded pair is one scheduled and one ad hoc, user-owned attack.
         const findSeededResponse = await kbnClient.request({
           method: 'GET',
           path: `${basePath}/api/attack_discovery/_find`,
           query: {
             per_page: 2,
             search: SEEDED_ATTACK_TITLE,
-            scheduled: true,
-            shared: true,
           },
         });
 

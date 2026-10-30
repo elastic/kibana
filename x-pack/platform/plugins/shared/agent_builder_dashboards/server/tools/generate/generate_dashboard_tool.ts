@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -19,10 +19,11 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
-  executeDashboardOperations,
+  arrangeDashboardLayout,
+  executeDashboardUpsert,
   getErrorMessage,
-  hasValidCreateMetadataOperations,
-  dashboardOperationSchema,
+  hasValidNewDashboardMetadata,
+  upsertDashboardSchema,
   type DashboardValidator,
 } from '@kbn/dashboard-agent-authoring';
 import {
@@ -33,35 +34,59 @@ import {
 import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
-const newDashboardMetadataErrorMessage =
-  'New dashboards require a set_metadata operation with a non-empty title.';
+const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
 const noDashboardCreatedErrorMessage =
-  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardId.';
 
+const noControlsAddedErrorMessage =
+  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardId.';
+
+/** Whether the dashboard has no panels and no controls. Empty sections do not count. */
 const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
-  panels.length === 0 && (pinnedPanels ?? []).length === 0;
+  panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
+  (pinnedPanels ?? []).length === 0;
 
-const generateDashboardSchema = z.object({
-  dashboardAttachmentId: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
-    ),
-  operations: z.array(dashboardOperationSchema).min(1),
-});
+const generateDashboardSchema = lazySchema(() =>
+  z.object({
+    dashboardId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        '(optional) The id of the dashboard to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in. An unknown id is an error.'
+      ),
+    ...upsertDashboardSchema.shape,
+    layout: z
+      .string()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
+      ),
+  })
+);
+
+const asString = (value: unknown): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+const getConfigTitle = (config: unknown): string | undefined =>
+  typeof config === 'object' && config !== null && 'title' in config
+    ? asString(config.title)
+    : undefined;
 
 /**
  * Compact projection of a dashboard payload, returned in the tool result.
  *
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
- * heavy payload into a follow-up tool call.
+ * heavy payload into a follow-up tool call. Panel titles let it tell panels apart when their ids
+ * do not describe them, and grids let it report where the layout step put panels.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -78,11 +103,12 @@ const summarizeDashboard = (
       return {
         id: widget.id,
         title: widget.title,
-        collapsed: widget.collapsed,
-        grid: widget.grid,
+        y: widget.grid.y,
+        ...(widget.collapsed ? { collapsed: true } : {}),
         panels: widget.panels.map((panel) => ({
           type: panel.type,
           id: panel.id,
+          title: getConfigTitle(panel.config),
           grid: panel.grid,
           authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
@@ -91,14 +117,16 @@ const summarizeDashboard = (
     return {
       type: widget.type,
       id: widget.id,
+      title: getConfigTitle(widget.config),
       grid: widget.grid,
       authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
-  controls: (dashboardData.pinned_panels ?? []).map((control) => {
-    const c = control as { id?: string; type?: string; config?: { title?: string } };
-    return { id: c.id, type: c.type, title: c.config?.title };
-  }),
+  controls: (dashboardData.pinned_panels ?? []).map(({ id, type, config }) => ({
+    id: asString(id),
+    type: asString(type),
+    title: getConfigTitle(config),
+  })),
 });
 
 export interface GenerateDashboardToolDeps {
@@ -108,9 +136,9 @@ export interface GenerateDashboardToolDeps {
 /**
  * Kibana dashboard generation tool.
  *
- * Wraps the environment-agnostic {@link executeDashboardOperations} core with
+ * Wraps the environment-agnostic {@link executeDashboardUpsert} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
- * - the prior payload is read server-side from `dashboardAttachmentId`,
+ * - the prior payload is read server-side from `dashboardId`, the attachment id,
  * - the generated payload is persisted as a `dashboard` attachment,
  * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
@@ -123,40 +151,43 @@ export const generateDashboardTool = ({
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Generate or update a dashboard from ordered operations.
+    description: `Create or update a dashboard by describing the desired changes, keyed by id.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+Returns the dashboard's id plus a compact summary. Pass that id as \`dashboardId\` to edit the dashboard later.
 
-Use operations[] to:
-1. set metadata
-2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), by-value panels (\`source: "config"\`: markdown or ML anomaly panels), or existing visualization attachments by id (\`source: "attachment"\`)
-3. edit existing Lens, Vega, custom content, markdown, or ML anomaly panel content
-4. update panel layouts without changing content
-5. add / remove sections, including inline section panels during add_section
-6. remove panels
-7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)`,
+- \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
+- \`sections\`: sections to create or update.
+- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id.
+- \`controls\`: filters pinned above the dashboard, to add or to replace by id.
+- \`remove\`: ids of panels, sections, or controls to remove.
+- \`layout\`: the user's own arrangement or size request. Omit it otherwise.
+
+Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). Panel positions and sizes are set automatically. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel is visible.`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, operations },
+      { dashboardId: previousAttachmentId, layout, ...upsert },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
 
-        if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
+        if (isNewDashboard && !hasValidNewDashboardMetadata(upsert)) {
           logger.error(newDashboardMetadataErrorMessage);
           return missingNewDashboardMetadataErrorResult;
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
         const {
-          dashboardData: generatedDashboardData,
+          dashboardData: validatedDashboardData,
+          created,
+          updated,
+          removed,
           failures,
           panelAuthoringNotes,
-        } = await executeDashboardOperations({
+        } = await executeDashboardUpsert({
           dashboardData: latestVersion?.data,
-          operations,
+          upsert,
           logger,
           resolvePanelContent: createPanelResolver({
             logger,
@@ -170,6 +201,19 @@ Use operations[] to:
           }),
           validator: await getDashboardValidator(),
         });
+
+        // The arranger checks its own output and writes only grids, so the result is not validated again.
+        const { dashboardData: generatedDashboardData, failure: layoutFailure } =
+          await arrangeDashboardLayout({
+            originalPanels: latestVersion?.data.panels ?? [],
+            dashboardData: validatedDashboardData,
+            instructions: layout,
+            arrangeLayout: createLayoutArranger({ modelProvider }),
+            logger,
+          });
+        if (layoutFailure) {
+          failures.push(layoutFailure);
+        }
 
         const toDashboardResult = (
           dashboardData: DashboardAttachmentData,
@@ -192,22 +236,30 @@ Use operations[] to:
                     ])
                   )
                 ),
+                created,
+                updated,
+                removed,
                 failures: failures.length > 0 ? failures : undefined,
               },
             },
           ],
         });
 
-        // Nothing survived, so no attachment version is persisted; the failures reach the agent
-        // through the tool result.
-        if (failures.length > 0 && isNewDashboard && isEmptyDashboard(generatedDashboardData)) {
+        // None of the requested panels and controls were added, so no attachment version is
+        // persisted; the failures reach the agent through the tool result. Controls the agent
+        // added on its own are left out without a failure, so the failures can be empty.
+        const requestedContent = (upsert.panels?.length ?? 0) + (upsert.controls?.length ?? 0) > 0;
+        if (isNewDashboard && requestedContent && isEmptyDashboard(generatedDashboardData)) {
           logger.info('Dashboard was not created because none of the changes were applied');
           return {
             results: [
               {
                 type: ToolResultType.error,
                 data: {
-                  message: noDashboardCreatedErrorMessage,
+                  message:
+                    failures.length > 0
+                      ? noDashboardCreatedErrorMessage
+                      : noControlsAddedErrorMessage,
                   metadata: { failures },
                 },
               },
@@ -271,7 +323,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId },
+                metadata: { dashboardId: previousAttachmentId },
               },
             },
           ],

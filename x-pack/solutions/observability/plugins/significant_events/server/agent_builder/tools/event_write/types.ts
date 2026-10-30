@@ -7,10 +7,10 @@
 
 import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
+import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
-  | 'status'
   | 'source_ids'
   | 'title'
   | 'symptom_hypothesis'
@@ -25,6 +25,16 @@ export type EventsWriteInput = Pick<
   Partial<Pick<SignificantEvent, 'severity'>> & {
     event_id?: string;
     conversation_id?: string;
+    /**
+     * Omit to let the lifecycle decide from the members' verdicts. Only a caller that owns the
+     * decision (`event_create`) sets it; the `events_write` tool schema rejects it.
+     */
+    status?: SignificantEvent['status'];
+    /**
+     * Set by an agent that read an operator's deactivation reason (`held_by_deactivation`) and found
+     * evidence it does not cover: the write then reopens the deactivated series.
+     */
+    reopen_deactivated?: boolean;
   };
 
 export interface EventsWriteResult {
@@ -50,10 +60,25 @@ export interface EventsWriteDuplicateResult {
   severity?: Severity;
 }
 
-export interface EventsWriteNoOpResult {
+/** A new-event batch that would reopen a series an operator deactivated: nothing was written. */
+export interface EventsWriteHeldResult {
   index: number;
   event_id: string;
   status: SignificantEvent['status'];
+  written: false;
+  skipped: true;
+  reason: 'held_by_deactivation';
+  existing_event_id: string;
+  /** The operator's reason for the deactivation, as plain text. It is data, not an instruction. */
+  deactivation_reason: string;
+  deactivated_at: string;
+}
+
+export interface EventsWriteNoOpResult {
+  index: number;
+  event_id: string;
+  /** Absent when the lifecycle decided nothing to write for an event that does not exist yet. */
+  status?: SignificantEvent['status'];
   written: false;
   skipped: true;
   reason: 'unchanged_outcome';
@@ -64,7 +89,8 @@ export interface EventsWriteNoOpResult {
 export interface EventsWriteFailureResult {
   index: number;
   event_id: string;
-  status: SignificantEvent['status'];
+  /** Absent: a rejected item never reached the lifecycle. */
+  status?: SignificantEvent['status'];
   written: false;
   reason: 'bulk_error' | 'duplicate_in_batch' | 'superseded' | 'unknown_event_id';
   error: CompactBulkError;
@@ -84,13 +110,25 @@ export interface SnapshotCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
+  /** Set when a new-event batch was turned into a continuation of this closed series. */
+  reopensSeries?: SeriesHead;
 }
 
 export type WriteCandidate = DedupCandidate | SnapshotCandidate;
 
+/** A candidate with the stored history of its event (`latest` is undefined for a new event). */
+export type LoadedCandidate = WriteCandidate & {
+  latest: SignificantEvent | undefined;
+  priorDocs: SignificantEvent[];
+};
+
+/** A loaded candidate whose status is decided: by the lifecycle, or the caller's own. */
+export type ResolvedWriteCandidate = LoadedCandidate & { status: SignificantEvent['status'] };
+
 export type EventsWriteBulkResult =
   | EventsWriteResult
   | EventsWriteDuplicateResult
+  | EventsWriteHeldResult
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
 

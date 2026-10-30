@@ -11,6 +11,12 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
 import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
 import { securityTool } from '../../tools/constants';
+import {
+  resolveSearchWindow,
+  searchWindowShape,
+  toEsqlTimestampClause,
+  withSearchWindowChecks,
+} from './resolve_search_window';
 
 interface InvestigationIoc {
   value: string;
@@ -44,36 +50,26 @@ const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
 ] as const;
 
 const discoverTelemetrySchema = lazySchema(() =>
-  z.object({
-    hosts: z
-      .array(z.string())
-      .optional()
-      .describe('Named host.name values extracted from the analyst question'),
-    time_window_hours: z
-      .number()
-      .int()
-      .min(1)
-      .max(720)
-      .optional()
-      .default(72)
-      .describe('Lookback window in hours for forensic reconstruction'),
-  })
+  withSearchWindowChecks(
+    z.object({
+      hosts: z
+        .array(z.string())
+        .optional()
+        .describe('Named host.name values extracted from the analyst question'),
+      ...searchWindowShape(),
+    })
+  )
 );
 
 const extractIocsSchema = lazySchema(() =>
-  z.object({
-    hosts: z
-      .array(z.string())
-      .describe('Named host.name values to extract IoCs from (at least one required)'),
-    time_window_hours: z
-      .number()
-      .int()
-      .min(1)
-      .max(720)
-      .optional()
-      .default(72)
-      .describe('Lookback window in hours for IoC extraction'),
-  })
+  withSearchWindowChecks(
+    z.object({
+      hosts: z
+        .array(z.string())
+        .describe('Named host.name values to extract IoCs from (at least one required)'),
+      ...searchWindowShape(),
+    })
+  )
 );
 
 export const endpointForensicAnalysisSkill = defineSkillType({
@@ -114,21 +110,44 @@ Do **not** load for:
 
 This skill MUST NOT invoke response actions. On response-action requests, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security; then stop.
 
+## Incident window
+
+When the request names an incident (an attack, its alerts, or a start and end time), the search is anchored on
+that incident, not on now:
+- Pass the incident's \`start\` and \`end\` (ISO-8601) to both tools, with any \`margin_hours\` the request gives.
+  Do not do date arithmetic yourself; the tools apply the margin and return the exact \`searched_window\`.
+- Evidence inside \`searched_window\` is **this incident**. Widen a query only to follow a tie from inside the
+  window — the same process tree, file, hash, destination, or account, or the initial access that led to it —
+  and say that you widened. Evidence reached that way is this incident too, even when it is earlier than the
+  window; keep its real timestamp and name the tie.
+- Evidence outside the window with no tie is **history**: report it separately, say it is outside the window,
+  and do not let it drive the assessment on its own.
+- Containment based on history needs a concrete tie to this incident — the same process tree, file, hash,
+  destination, or account seen inside the window. Name the tie. Without one, history is context, not grounds.
+- Always state the window that was searched in the answer or structured output.
+
+Only fall back to \`time_window_hours\` (a lookback from now) when no incident time is known.
+
 ## Process
 
 ### 1. Discover telemetry scope
-Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with host names and time window from the question.
+Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with the host names and either the incident
+\`start\`/\`end\` or the \`time_window_hours\` from the question.
 
 ### 2. Query with ES|QL
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
-Always scope \`@timestamp\`. Cite index and query in answers.
+Always scope \`@timestamp\` to the \`searched_window\` the discovery tool returned. Cite index and query in answers.
 
 ### 3. Patient zero
 Query process and network indices ordered by @timestamp ASC.
 Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
+Initial access often precedes the first alert by hours or days (phishing, then a dormant implant, then execution).
+When the search is anchored on an incident window, start from the earliest in-window process or file and follow
+its parent chain, dropper, or delivering connection backwards past the window start. That is a tie, so what you
+find is patient zero for this incident, not history. Say how far before the window it was.
 
 ### 4. Attack timeline
-Merge process, file, network, and registry events for the host in the time window; sort by \`@timestamp\` ascending.
+Merge process, file, network, and registry events for the host in the searched time window; sort by \`@timestamp\` ascending.
 The answer is an explicit chronological timeline — an ordered, timestamp-labeled sequence of events scoped to the
 named host — never a prose paragraph. **Only include events supported by query results.** If telemetry is sparse or
 unavailable, still lay out the ordered reconstruction as a timeline skeleton (the sequence of stages to expect for that host),
@@ -147,12 +166,14 @@ Where the timeline goes depends on how you were asked to answer:
   \`{ events }\`, where \`events\` is the ordered event array, earliest first, with each event as
   \`{ timestamp, host, description }\`. \`description\` carries the same detail you would have written
   for an analyst — do not shorten it to a label because it is going into a structured field.
+  If the schema has a searched-window field, copy the \`start\` and \`end\` of the \`searched_window\` the
+  tools returned into it.
   Do not also render the timeline in a free-text field.
 
 ### 5. IoC extraction
 After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` with the host(s) and
-time window. It returns indicators grouped by category, each a deduplicated list of \`{ value, comment }\`. Echo the
-values verbatim — never rewrite, merge, or re-categorize one.
+the same time scoping you gave the discovery tool. It returns indicators grouped by category, each a deduplicated
+list of \`{ value, comment }\`. Echo the values verbatim — never rewrite, merge, or re-categorize one.
 
 The categories are:
 - \`shas\` — file hashes
@@ -219,11 +240,15 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
       id: ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
       type: ToolType.builtin,
       description:
-        'Resolve Defend telemetry index patterns and scoped hosts for endpoint forensic reconstruction. ' +
-        'Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, or persistence tasks.',
+        'Resolve Defend telemetry index patterns, scoped hosts, and the exact time range for endpoint forensic ' +
+        'reconstruction. Pass the incident `start`/`end` when one is known; otherwise `time_window_hours` counts ' +
+        'back from now. Call this before generate_esql/execute_esql on patient-zero, timeline, lateral-movement, ' +
+        'or persistence tasks.',
       schema: discoverTelemetrySchema,
       handler: async (args, context) => {
-        const { hosts, time_window_hours: timeWindowHours } = discoverTelemetrySchema.parse(args);
+        const parsed = discoverTelemetrySchema.parse(args);
+        const { hosts } = parsed;
+        const searchedWindow = resolveSearchWindow(parsed);
 
         let availableIndices: string[] = [];
         try {
@@ -247,9 +272,14 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                 recommended_indices: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
                 available_indices: availableIndices,
                 scoped_hosts: hosts ?? [],
-                time_window_hours: timeWindowHours,
+                searched_window: searchedWindow,
                 guidance:
-                  'Next: platform.core.generate_esql then platform.core.execute_esql scoped to @timestamp and host.name.',
+                  `Next: platform.core.generate_esql then platform.core.execute_esql scoped to host.name and ` +
+                  `this exact range: ${toEsqlTimestampClause(searchedWindow)}. ${
+                    searchedWindow.anchor === 'incident'
+                      ? 'The range is the incident window. Events outside it are history, not this incident.'
+                      : 'The range is a lookback from now, not anchored on an incident.'
+                  }`,
               },
             },
           ],
@@ -260,7 +290,8 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
       id: ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
       type: ToolType.builtin,
       description:
-        'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
+        'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s), within the ' +
+        'incident `start`/`end` when given or a `time_window_hours` lookback otherwise. ' +
         'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
         `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
         'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
@@ -268,13 +299,15 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         'encryption markers, and compromised identities from your own analysis.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
-        const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
+        const parsed = extractIocsSchema.parse(args);
+        const { hosts } = parsed;
+        const searchedWindow = resolveSearchWindow(parsed);
         const hostFilter = hosts.map((h) => `"${h}"`).join(', ');
         // Sorting ascending before the limit keeps the truncated set anchored on the start of the
         // attack, so the comment each indicator keeps describes its earliest occurrence.
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
-          `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
+          `| WHERE host.name IN (${hostFilter}) AND ${toEsqlTimestampClause(searchedWindow)}`,
           `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
           `| SORT @timestamp ASC`,
           `| LIMIT 500`,
@@ -414,7 +447,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
               data: {
                 ...iocs,
                 scoped_hosts: hosts,
-                time_window_hours: timeWindowHours,
+                searched_window: searchedWindow,
                 ...(queryError ? { error: queryError } : {}),
                 guidance: queryError
                   ? 'The extraction query failed, so no categories were returned for that reason and not ' +

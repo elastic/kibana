@@ -198,8 +198,8 @@ export function useBrowseIntegrationHook({
     //      the singleton itself must still match the query.
     // Original ungrouped cards (id IS in searchResults) are kept unconditionally.
     if (searchTerm) {
-      // Split on whitespace and hyphens to match js-search's PrefixIndexStrategy tokenization,
-      // which treats "nginx-otel" as two tokens ["nginx", "otel"].
+      // Looser than useLocalSearch: splits "nginx-otel" into "nginx" and "otel" and matches each
+      // anywhere in the text, while useLocalSearch keeps it as one word and matches word starts.
       const tokens = searchTerm
         .trim()
         .toLowerCase()

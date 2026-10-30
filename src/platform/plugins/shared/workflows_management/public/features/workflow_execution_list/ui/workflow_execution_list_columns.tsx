@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
+import { executedByFallbackLabel } from '../../../entities/user_profiles';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 import {
@@ -164,7 +165,7 @@ const getExecutedByDisplayName = (
   if (profile?.user) {
     return getUserDisplayName(profile.user) || undefined;
   }
-  return ctx.showUnresolvedExecutors ? execution.executedBy : undefined;
+  return executedByFallbackLabel(execution.executedBy, ctx.showUnresolvedExecutors);
 };
 
 export const getExecutionHistoryColumns = (
@@ -200,7 +201,7 @@ export const getExecutionHistoryColumns = (
           <EuiFlexItem grow={false}>
             {execution.status === ExecutionStatus.WAITING_FOR_INPUT ? (
               <EuiBadge color="warning" data-test-subj="workflowExecutionActionRequiredBadge">
-                {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                {i18n.translate('workflows.executionListItem.actionRequiredBadge', {
                   defaultMessage: 'Action is required',
                 })}
               </EuiBadge>

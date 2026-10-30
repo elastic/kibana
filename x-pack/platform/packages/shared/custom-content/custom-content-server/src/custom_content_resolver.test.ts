@@ -70,6 +70,17 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).toContain('Output ONLY valid HTML');
     expect(systemArg).not.toContain('Liquid template syntax');
   });
+
+  it('tells the model that links are only allowed to Dashboards and Discover', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    await resolve({ prompt: 'Show a KPI card' });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Links are only allowed to Dashboards and Discover');
+    expect(systemArg).toContain('external URLs, is removed at render time');
+    expect(systemArg).not.toContain('Do NOT use <a> anchor tags');
+  });
 });
 
 describe('createCustomContentTemplateResolver — output validation', () => {
@@ -100,6 +111,38 @@ describe('createCustomContentTemplateResolver — output validation', () => {
     await expect(resolve({ prompt: 'Show a KPI' })).rejects.toThrow(
       `Generated template was rejected: exceeds the ${CUSTOM_CONTENT_MAX_TEMPLATE_BYTES}-byte limit.`
     );
+  });
+
+  it('asks the model once to fix a template that is not valid Liquid', async () => {
+    mockChatComplete
+      .mockResolvedValueOnce({ content: '<div>{% if true %}Hello</div>' })
+      .mockResolvedValueOnce({ content: '<div>{% if true %}Hello{% endif %}</div>' });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.template).toBe('<div>{% if true %}Hello{% endif %}</div>');
+    expect(mockChatComplete).toHaveBeenCalledTimes(2);
+    const retryMessages = mockChatComplete.mock.calls[1][0].messages;
+    expect(retryMessages).toHaveLength(3);
+    expect(retryMessages[1]).toMatchObject({ content: '<div>{% if true %}Hello</div>' });
+    expect(retryMessages[2].content).toContain('not valid Liquid');
+  });
+
+  it('throws when the corrected template is still not valid Liquid', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{% if true %}Hello</div>' });
+
+    await expect(resolve({ prompt: 'Show a KPI' })).rejects.toThrow(
+      'Generated template was rejected: invalid Liquid syntax'
+    );
+    expect(mockChatComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a template that is valid Liquid', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{% for r in rows %}x{% endfor %}</div>' });
+
+    await resolve({ prompt: 'Show a KPI' });
+
+    expect(mockChatComplete).toHaveBeenCalledTimes(1);
   });
 
   it('detects <SCRIPT> tags case-insensitively', async () => {
@@ -169,7 +212,7 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     [
       'a rejected query',
       responseError('verification_exception', 400, 'Unknown column [nope]'),
-      /ES\|QL query is invalid: Unknown column \[nope\].*generate_esql/,
+      /ES\|QL query is invalid: Unknown column \[nope\].*if it was generated, retry with a more specific description/,
     ],
     [
       'unparseable syntax',

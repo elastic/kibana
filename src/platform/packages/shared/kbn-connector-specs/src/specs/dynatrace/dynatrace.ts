@@ -168,7 +168,7 @@ export const Dynatrace: ConnectorSpec = {
   metadata: {
     id: '.dynatrace',
     displayName: 'Dynatrace',
-    description: i18n.translate('core.kibanaConnectorSpecs.dynatrace.metadata.description', {
+    description: i18n.translate('connectorSpecs.dynatrace.metadata.description', {
       defaultMessage:
         'Triage Dynatrace Davis problems, ingest events, query metrics and entities, and manage maintenance windows via the Environment API v2.',
     }),
@@ -188,16 +188,13 @@ export const Dynatrace: ConnectorSpec = {
         overrides: {
           meta: {
             apiToken: {
-              label: i18n.translate('core.kibanaConnectorSpecs.dynatrace.auth.apiToken.label', {
+              label: i18n.translate('connectorSpecs.dynatrace.auth.apiToken.label', {
                 defaultMessage: 'API token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.dynatrace.auth.apiToken.helpText',
-                {
-                  defaultMessage:
-                    'Paste your Dynatrace API token value only (for example dt0c01....). Do not include a prefix — the connector sends Authorization: Api-Token automatically. Required scopes: problems.read, problems.write, events.read, events.ingest, metrics.read, entities.read, settings.read, settings.write.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.dynatrace.auth.apiToken.helpText', {
+                defaultMessage:
+                  'Paste your Dynatrace API token value only (for example dt0c01....). Do not include a prefix — the connector sends Authorization: Api-Token automatically. Required scopes: problems.read, problems.write, events.read, events.ingest, metrics.read, entities.read, settings.read, settings.write.',
+              }),
               placeholder: 'dt0c01.{{YOUR_TOKEN}}',
             },
           },
@@ -212,17 +209,14 @@ export const Dynatrace: ConnectorSpec = {
         .describe('Dynatrace environment base URL (without /api/v2).')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.dynatrace.config.environmentUrl.label', {
+          label: i18n.translate('connectorSpecs.dynatrace.config.environmentUrl.label', {
             defaultMessage: 'Environment URL',
           }),
           placeholder: 'https://{environment-id}.live.dynatrace.com',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.dynatrace.config.environmentUrl.helpText',
-            {
-              defaultMessage:
-                'Environment API base URL, without /api/v2. SaaS must use https://your-environment-id.live.dynatrace.com (not the *.apps.dynatrace.com UI host). Managed: https://your-domain/e/your-environment-id. Environment ActiveGate: https://your-activegate-domain:9999/e/your-environment-id. Trial/sandbox environments still use the .live.dynatrace.com API host.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.dynatrace.config.environmentUrl.helpText', {
+            defaultMessage:
+              'Environment API base URL, without /api/v2. SaaS must use https://your-environment-id.live.dynatrace.com (not the *.apps.dynatrace.com UI host). Managed: https://your-domain/e/your-environment-id. Environment ActiveGate: https://your-activegate-domain:9999/e/your-environment-id. Trial/sandbox environments still use the .live.dynatrace.com API host.',
+          }),
         }),
     })
   ),
@@ -607,7 +601,7 @@ export const Dynatrace: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.dynatrace.test.description', {
+    description: i18n.translate('connectorSpecs.dynatrace.test.description', {
       defaultMessage: 'Verify connectivity by listing a single Dynatrace problem.',
     }),
     handler: async (ctx) => {

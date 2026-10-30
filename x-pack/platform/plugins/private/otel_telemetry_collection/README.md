@@ -51,7 +51,7 @@ xpack.otelTelemetryCollection:
 
 - **Required Plugins**: `taskManager`
 - **Optional Plugins**: `telemetry`
-- **Owner**: `@elastic/observability-bi`
+- **Owner**: `@elastic/obs-bi-team`
 
 ## Development
 

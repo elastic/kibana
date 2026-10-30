@@ -154,6 +154,91 @@ describe('entitySchema', () => {
     expect(result.success).toBe(false);
     expect(result.error?.issues.map((issue) => issue.message).join('; ')).toMatch(message);
   });
+
+  it('accepts a definition with a description', () => {
+    const description = 'A Kubernetes pod. Identified by k8s.pod.uid.';
+    expect(entitySchema.parse({ ...core, description }).description).toBe(description);
+  });
+
+  it('accepts a definition without a description', () => {
+    expect(entitySchema.parse(core).description).toBeUndefined();
+  });
+
+  it('accepts a description of 1024 characters and rejects one of 1025', () => {
+    expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1024) }).success).toBe(true);
+    expect(entitySchema.safeParse({ ...core, description: 'a'.repeat(1025) }).success).toBe(false);
+  });
+
+  describe('identityField', () => {
+    const calculated = {
+      euidRanking: { branches: [{ ranking: [[{ field: 'k8s.pod.uid' }]] }] },
+      documentsFilter: { field: 'k8s.pod.uid', exists: true },
+    };
+    const single = { singleField: 'k8s.pod.uid' };
+
+    it('accepts each variant on its own, unchanged', () => {
+      expect(entitySchema.parse({ ...core, identityField: calculated }).identityField).toEqual(
+        calculated
+      );
+      expect(entitySchema.parse({ ...core, identityField: single }).identityField).toEqual(single);
+    });
+
+    // Keys of both variants in one identity: neither variant may accept it by stripping the other's
+    // keys, since consumers hold the unparsed object and pick a variant by key presence.
+    it('rejects an identity that carries keys of both variants', () => {
+      expect(
+        entitySchema.safeParse({ ...core, identityField: { ...calculated, ...single } }).success
+      ).toBe(false);
+      expect(
+        entitySchema.safeParse({
+          ...core,
+          identityField: { ...single, euidRanking: calculated.euidRanking },
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects an unknown key in either variant', () => {
+      expect(
+        entitySchema.safeParse({ ...core, identityField: { ...calculated, typo: true } }).success
+      ).toBe(false);
+      expect(
+        entitySchema.safeParse({ ...core, identityField: { ...single, typo: true } }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('dynamic', () => {
+    const dynamic = {
+      sources: [
+        {
+          indexPattern: 'metrics-kubeletstatsreceiver.otel-default',
+          attributes: [{ name: 'namespace', field: 'k8s.namespace.name' }],
+        },
+      ],
+    };
+
+    it('accepts a dynamic block with the core only', () => {
+      expect(entitySchema.parse({ ...core, dynamic }).dynamic).toEqual(dynamic);
+    });
+
+    it('accepts both blocks', () => {
+      const parsed = entitySchema.parse({ ...core, extraction: { fields: [field] }, dynamic });
+      expect(parsed.extraction?.fields).toEqual([field]);
+      expect(parsed.dynamic).toEqual(dynamic);
+    });
+
+    it('rejects an unknown key inside dynamic', () => {
+      expect(
+        entitySchema.safeParse({ ...core, dynamic: { ...dynamic, metrics: [] } }).success
+      ).toBe(false);
+    });
+
+    it('accepts a definition with neither block', () => {
+      const parsed = entitySchema.parse(core);
+      expect(parsed.extraction).toBeUndefined();
+      expect(parsed.dynamic).toBeUndefined();
+    });
+  });
 });
 
 describe('extractionBlockSchema', () => {

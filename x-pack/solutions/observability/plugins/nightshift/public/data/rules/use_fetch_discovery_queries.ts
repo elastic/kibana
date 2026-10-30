@@ -13,8 +13,7 @@ import type {
   StreamQuery,
 } from '@kbn/significant-events-schema';
 import type { QueryStatus } from '@kbn/significant-events-plugin/common';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
-import { getQueryBucketParams } from './get_query_bucket_params';
+import { getQueryBucketParams, toTimeState } from './get_query_bucket_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
@@ -26,6 +25,7 @@ export interface SignificantEventQueryRow {
   occurrences: Array<{ x: number; y: number }>;
   change_points: QueryWithOccurrences['change_points'];
   rule_backed: boolean;
+  rule_enabled?: boolean;
 }
 
 export interface QueriesTableFetchResult {
@@ -35,15 +35,6 @@ export interface QueriesTableFetchResult {
   total: number;
 }
 
-// Resolved on every fetch, so a relative window like `now-24h` stays current across refetches.
-const toTimeState = (
-  timefilter: { calculateBounds: (range: TimeRange) => TimeRangeBounds },
-  timeRange: TimeRange
-): { start: number; end: number } | undefined => {
-  const { min, max } = timefilter.calculateBounds(timeRange);
-  return min && max ? { start: min.valueOf(), end: max.valueOf() } : undefined;
-};
-
 export const useFetchDiscoveryQueries = (
   options: {
     name?: string;
@@ -51,13 +42,29 @@ export const useFetchDiscoveryQueries = (
     page: number;
     perPage: number;
     status?: QueryStatus[];
+    /** Only these query ids. */
+    queryIds?: string[];
+    /** Only queries linked to these entity slugs, or to no live entity with `unassignedEntities`. */
+    entityIds?: string[];
+    unassignedEntities?: boolean;
     /** Fixed occurrence window; defaults to the global time filter. */
     timeRange?: TimeRange;
     enabled?: boolean;
   },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage, status, timeRange, enabled = true } = options;
+  const {
+    name,
+    query,
+    page,
+    perPage,
+    status,
+    queryIds,
+    entityIds,
+    unassignedEntities,
+    timeRange,
+    enabled = true,
+  } = options;
   const {
     significantEvents: { significantEventsRepositoryClient },
     data,
@@ -89,6 +96,9 @@ export const useFetchDiscoveryQueries = (
             page,
             perPage,
             status,
+            queryIds,
+            entityIds: entityIds?.length ? entityIds : undefined,
+            unassignedEntities: unassignedEntities || undefined,
           },
         },
         signal: signal ?? null,
@@ -104,6 +114,7 @@ export const useFetchDiscoveryQueries = (
           occurrences,
           change_points,
           rule_uuid: _ruleUuid,
+          rule_enabled,
           source_id,
           rule_backed,
           ...rest
@@ -119,6 +130,7 @@ export const useFetchDiscoveryQueries = (
             })
           ),
           rule_backed,
+          rule_enabled,
         };
       }),
     };
@@ -133,6 +145,10 @@ export const useFetchDiscoveryQueries = (
       page,
       perPage,
       status?.join(','),
+      queryIds?.join(','),
+      // The array itself, not a joined string: slugs can contain commas.
+      entityIds,
+      unassignedEntities,
       ...deps,
     ],
     queryFn: fetchDiscoveryQueries,

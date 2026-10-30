@@ -590,6 +590,20 @@ describe('service account attribution', () => {
       });
     });
 
+    it('keeps the display name a workflow recorded for a service account author', () => {
+      const actor = userMessageActor(undefined, {
+        author: { ...serviceAccount, full_name: 'Attack Discovery Review' },
+      });
+
+      expect(actor).toEqual({
+        type: EventActorType.user,
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        full_name: 'Attack Discovery Review',
+        principal_type: 'service_account',
+      });
+    });
+
     it('marks a service account owner on the fallback branch', () => {
       const conversation = baseConversation([]);
 
@@ -627,7 +641,7 @@ describe('service account attribution', () => {
 
   describe('currentUserActor', () => {
     it('marks a service account', () => {
-      expect(currentUserActor({ ...serviceAccount, isAdmin: false })).toEqual({
+      expect(currentUserActor(serviceAccount)).toEqual({
         type: EventActorType.user,
         id: 'service_account:kibana/automation',
         username: 'kibana/automation',
@@ -636,7 +650,7 @@ describe('service account attribution', () => {
     });
 
     it('falls back to the username when the principal has no stable id', () => {
-      expect(currentUserActor({ username: 'alice', isAdmin: false })).toEqual({
+      expect(currentUserActor({ username: 'alice' })).toEqual({
         type: EventActorType.user,
         id: 'alice',
         username: 'alice',

@@ -26,6 +26,7 @@ import {
   answeredPromptRequestIds,
   interruptionOfTerminal,
   isExecutionTerminalEvent,
+  isTimelineEvent,
   isToolCallStep,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
@@ -55,8 +56,12 @@ interface ExecutionPartial {
  * Reconstructs rounds from a timeline. Every terminated execution — with an outcome, failed or
  * aborted — forms a partial; a round is its executions folded in order. A pause is consumed as
  * soon as a `prompt_response` answers it, however the resume ended.
+ *
+ * Only timeline events take part in the fold; activity and custom events are excluded by class,
+ * whatever their `execution_id`.
  */
-export const eventsToRounds = (events: ConversationEvent[]): ConversationRound[] => {
+export const eventsToRounds = (allEvents: ConversationEvent[]): ConversationRound[] => {
+  const events: ConversationEvent[] = allEvents.filter(isTimelineEvent);
   const byId = new Map(events.map((event) => [event.id, event]));
   // `prompt_response` events carry no execution_id, so the join is computed once over everything.
   const answered = answeredPromptRequestIds(events);

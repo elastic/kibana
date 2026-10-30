@@ -10,12 +10,8 @@ import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
-import {
-  PREVIOUS_PERIOD_STALE_TIME_MS,
-  isDeltaStillComing,
-  parseReachesBack,
-  usePreviousPeriod,
-} from './use_previous_period';
+import { isDeltaStillComing, parseReachesBack, usePreviousPeriod } from './use_previous_period';
+import { retryUnlessTimedOut } from './tile_query_timeout';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -64,6 +60,16 @@ describe('usePreviousPeriod', () => {
     expect(callOf('PrevPeriod')[2].enabled).toBe(false);
   });
 
+  it('keys the history check by the tile, or by the guard key when tiles share one check', () => {
+    renderHook(() => usePreviousPeriod(options));
+    expect(callOf('HistoryReachesBack')[0][0]).toBe('tileHistoryReachesBack');
+
+    renderHook(() => usePreviousPeriod({ ...options, guardKey: 'shared' }));
+    expect(callOf('HistoryReachesBack')[0][0]).toBe('sharedHistoryReachesBack');
+    // The previous period stays per tile.
+    expect(callOf('PrevPeriod')[0][0]).toBe('tilePrevPeriod');
+  });
+
   it('checks the history first, and runs the previous period only once the history reaches back', () => {
     renderHook(() => usePreviousPeriod(options));
     expect(callOf('HistoryReachesBack')[2].enabled).toBe(true);
@@ -78,19 +84,30 @@ describe('usePreviousPeriod', () => {
     setQueries({ guard: settled(false) });
     const { result } = renderHook(() => usePreviousPeriod(options));
     expect(callOf('PrevPeriod')[2].enabled).toBe(false);
-    expect(result.current).toEqual({ previous: undefined, isHistoryMissing: true, isError: false });
+    expect(result.current).toEqual({
+      previous: undefined,
+      reachesBack: false,
+      isHistoryMissing: true,
+      isError: false,
+    });
   });
 
   it('returns the previous period once both queries have settled', () => {
     setQueries({ guard: settled(true), previous: settled(40) });
     const { result } = renderHook(() => usePreviousPeriod(options));
-    expect(result.current).toEqual({ previous: 40, isHistoryMissing: false, isError: false });
+    expect(result.current).toEqual({
+      previous: 40,
+      reachesBack: true,
+      isHistoryMissing: false,
+      isError: false,
+    });
   });
 
   it('decides nothing while the history check is in flight or shows another range', () => {
     setQueries({ guard: { ...settled(false), isFetching: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
+      reachesBack: undefined,
       isHistoryMissing: false,
       isError: false,
     });
@@ -114,32 +131,37 @@ describe('usePreviousPeriod', () => {
     expect(renderHook(() => usePreviousPeriod(options)).result.current.previous).toBeUndefined();
   });
 
-  it('shows nothing after an error, even when the cache still holds data (a failed refetch)', () => {
+  it('shows no delta after an error, even when the cache still holds data (a failed refetch)', () => {
+    // The history check answered, so the sparkline can still follow it: only the delta is lost.
     setQueries({ guard: settled(true), previous: { ...settled(40), isError: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
+      reachesBack: true,
       isHistoryMissing: false,
       isError: true,
     });
 
+    // A failed history check leaves nothing to follow.
     setQueries({ guard: { ...settled(false), isError: true } });
     expect(renderHook(() => usePreviousPeriod(options)).result.current).toEqual({
       previous: undefined,
+      reachesBack: undefined,
       isHistoryMissing: false,
       isError: true,
     });
   });
 
-  it('keeps the previous period fresh for 30 minutes and does not refetch on focus', () => {
+  it('keeps both queries for an hour and does not refetch on focus', () => {
     renderHook(() => usePreviousPeriod(options));
-    expect(PREVIOUS_PERIOD_STALE_TIME_MS).toBe(30 * 60_000);
     [callOf('HistoryReachesBack'), callOf('PrevPeriod')].forEach((call) =>
       expect(call[2]).toEqual(
         expect.objectContaining({
-          staleTime: PREVIOUS_PERIOD_STALE_TIME_MS,
+          staleTime: 60 * 60_000,
+          cacheTime: 60 * 60_000,
           refetchOnWindowFocus: false,
           keepPreviousData: true,
-          retry: 1,
+          // One retry, but none after a timeout.
+          retry: retryUnlessTimedOut,
         })
       )
     );

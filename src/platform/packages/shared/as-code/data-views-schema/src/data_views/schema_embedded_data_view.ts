@@ -51,7 +51,11 @@ export const dataViewSpecSchema = z
     time_field: timeFieldSchema,
     allow_hidden_indices: allowHiddenIndicesSchema,
     field_filters: fieldFiltersSchema,
-    field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
+    field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional().meta({
+      title: 'Field settings',
+      description:
+        'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, or format. To define a runtime field, use the runtime field name and set `type`.',
+    }),
   })
   .strict()
   .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' });

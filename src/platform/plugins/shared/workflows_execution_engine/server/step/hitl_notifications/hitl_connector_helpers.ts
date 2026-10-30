@@ -31,6 +31,7 @@ export function slackApiChannelTarget(channel: string): SlackApiChannelTarget {
 }
 
 export const SERVICENOW_COMMENT_MAX_LENGTH = 4000;
+export const TEAMS_CONTENT_MAX_LENGTH = 10000;
 
 /** Keeps `suffix` intact and shortens `prompt` so the joined text fits `maxLength`. */
 export function fitHitlTextPreservingSuffix(
@@ -95,6 +96,19 @@ export function renderServiceNowField(
   return rendered;
 }
 
+/** Renders a required Teams channel field and rejects a blank result. */
+export function renderTeamsField(
+  value: string,
+  renderTemplate: (template: string) => string,
+  field: 'team-id' | 'channel-id'
+): string {
+  const rendered = renderTemplate(value).trim();
+  if (rendered.length === 0) {
+    throw new Error(`HITL Teams "${field}" rendered empty`);
+  }
+  return rendered;
+}
+
 /** Builds Actions params for a ServiceNow `addComment` call. */
 export function buildServiceNowAddCommentInput(table: string, sysId: string, comment: string) {
   return {
@@ -103,6 +117,38 @@ export function buildServiceNowAddCommentInput(table: string, sysId: string, com
       table,
       sysId,
       comment,
+    },
+  };
+}
+
+/** Makes step text safe to place next to an HTML anchor. Teams renders the body as HTML. */
+export function escapeTeamsHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** Teams message HTML. The channel renders this as an anchor. */
+export function teamsHtmlLink(label: string, url: string): string {
+  return `<a href="${escapeTeamsHtml(url)}">${escapeTeamsHtml(label)}</a>`;
+}
+
+/** Builds Actions params for a Microsoft Teams `sendChannelMessage` call. */
+export function buildTeamsSendChannelMessageInput(
+  teamId: string,
+  channelId: string,
+  content: string,
+  contentType: 'text' | 'html' = 'html'
+) {
+  return {
+    subAction: 'sendChannelMessage' as const,
+    subActionParams: {
+      teamId,
+      channelId,
+      content,
+      contentType,
     },
   };
 }

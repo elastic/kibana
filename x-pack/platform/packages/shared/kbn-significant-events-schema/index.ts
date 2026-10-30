@@ -8,25 +8,33 @@
 export {
   type EsqlQuery,
   type QueriesGetResponse,
-  type QueriesOccurrencesGetResponse,
   type QueryFeature,
   type QueryLink,
   type QueryType,
+  type SignificantEventType,
   type StreamQuery,
   CRITICAL_SEVERITY_THRESHOLD,
   HIGH_SEVERITY_THRESHOLD,
   QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
+  SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
+  SIGNIFICANT_EVENT_TYPE_ERROR,
+  SIGNIFICANT_EVENT_TYPE_OPERATIONAL,
+  SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
+  SIGNIFICANT_EVENT_TYPE_SECURITY,
+  SIGNIFICANT_EVENT_TYPES,
   bulkStreamQueryInputSchema,
   esqlQuerySchema,
   isExpirable,
   isExpired,
   queryFeatureSchema,
   queryTypeSchema,
+  significantEventTypeSchema,
   upsertStreamQueryRequestSchema,
 } from './src/queries';
 
 export type {
+  EventDeactivation,
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
@@ -67,6 +75,8 @@ export {
   toBaseFeature,
 } from './src/feature';
 
+export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/feature_aggregation';
+
 export { FeatureAccumulator } from './src/feature_accumulator';
 
 export type { IterationResult } from './src/api/features';
@@ -75,6 +85,7 @@ export { tokenCountSchema, iterationResultSchema } from './src/api/features';
 
 export {
   type Detection,
+  type DetectionSkip,
   type ChangePointType,
   CHANGE_POINT_TYPES,
   type KnowledgeIndicator,
@@ -99,16 +110,35 @@ export {
   severitySchema,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   getSeverityLabel,
   detectionSchema,
+  detectionSkipSchema,
+  skipMarkerSchema,
+  type SkipMarker,
+  describeSkip,
+  PROBE_STATUSES,
+  type ProbeStatus,
+  type BaselineDecision,
+  SKIP_REASONS,
+  type SkipReason,
+  NEEDS_AGENT_REASONS,
+  type NeedsAgentReason,
+  baselineObservationSchema,
+  type BaselineObservation,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
+  signalInputEntrySchema,
+  type SignalInputEntry,
   SIGNAL_VERDICTS,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
+  MAX_DEACTIVATION_REASON_LENGTH,
+  INACTIVE_SERIES_LOOKBACK_HOURS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   resolveSignificantEventsTuningConfig,
@@ -120,11 +150,9 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_ASSESSMENT_NOTE_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
+  NARRATIVE_AGREEMENT_RULE,
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,
@@ -142,6 +170,12 @@ export { KIsOnboardingStep, KIS_ONBOARDING_IN_PROGRESS_STATUSES } from './src/on
 export type { SignificantEventsWorkflowStatusResult } from './src/workflows';
 
 export { SignificantEventsWorkflowStatus } from './src/workflows';
+
+export {
+  type SourceWriteConflictReason,
+  isRetryableSourceWriteConflict,
+  isSourceWriteConflictReason,
+} from './src/source_write_conflict';
 
 export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_error';
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';

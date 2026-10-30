@@ -24,7 +24,9 @@ import {
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
+  presentSlug,
+  restrictCatalogToReadable,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 
@@ -33,7 +35,9 @@ export const SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID =
 
 const featureSimilaritySearchSchema = lazySchema(() =>
   z.object({
-    slug: nightshiftSourceSlugField('Disabled sources are included.'),
+    slug: nightshiftSourceSlugField(
+      'Source being analyzed; the search itself spans every source you can read. Disabled sources are included.'
+    ),
     candidates: z
       .array(featureCandidateSchema)
       .max(MAX_SEARCH_CANDIDATES)
@@ -73,14 +77,20 @@ export const createFeatureSimilaritySearchTool = ({
         });
         await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features are read as the internal user, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);
+        const readableCatalog = await restrictCatalogToReadable(
+          catalog,
+          scopedClients.sourcesClient
+        );
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();
 
         const groups = await searchFeaturesForCandidates({
           kiClient,
-          sourceId: source.id,
+          sourceIds: [...readableCatalog.byId.keys()],
+          currentSourceId: source.id,
+          getSourceSlug: (id) => presentSlug(catalog, id),
           candidates,
         });
         const sourceRef = toSourceRef(source);

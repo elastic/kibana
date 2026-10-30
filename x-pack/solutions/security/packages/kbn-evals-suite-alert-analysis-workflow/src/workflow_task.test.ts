@@ -7,7 +7,7 @@
 
 import { extractAgentConversationIds } from '@kbn/security-evals-workflow-traces';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { readVerdict } from './workflow_task';
+import { readVerdict, readVerdicts } from './workflow_task';
 
 const step = (overrides: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({
@@ -157,5 +157,45 @@ describe('readVerdict for a prompt', () => {
     ];
 
     expect(readVerdict(steps, alertId)).toBeUndefined();
+  });
+});
+
+describe('readVerdicts', () => {
+  const filterStep = (batchVerdicts: Array<Record<string, string>>) =>
+    step({
+      stepId: 'filter_verdicts_to_batch',
+      stepType: 'data.set',
+      output: { batch_verdicts: batchVerdicts },
+    });
+
+  it('grades the verdicts the batch filter accepted, not a classification reply that also echoed a foreign id', () => {
+    const steps = [
+      // Batch 1's reply echoes b2 (another batch's alert); the filter drops it.
+      step({
+        output: {
+          structured_output: {
+            verdicts: [
+              { id: 'a1', classification: 'false_positive' },
+              { id: 'b2', classification: 'true_positive' },
+            ],
+          },
+        },
+      }),
+      filterStep([{ id: 'a1', classification: 'false_positive' }]),
+      // Batch 2 returned nothing for b2.
+      step({ output: { structured_output: { verdicts: [] } } }),
+      filterStep([]),
+    ];
+
+    expect([...readVerdicts(steps).keys()]).toEqual(['a1']);
+  });
+
+  it('collects the accepted verdicts of every batch', () => {
+    const steps = [
+      filterStep([{ id: 'a1', classification: 'false_positive' }]),
+      filterStep([{ id: 'b2', classification: 'true_positive' }]),
+    ];
+
+    expect([...readVerdicts(steps).keys()]).toEqual(['a1', 'b2']);
   });
 });

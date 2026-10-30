@@ -69,7 +69,7 @@ export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
       {formattedResults?.examples && <ExamplesList examples={formattedResults.examples} />}
       {mapsService && formattedResults?.pointsLayer && (
         <ExpandedRowPanel className={'dvPanel__wrapper dvMap__wrapper'} grow={true}>
-          <mapsService.PassiveMap passiveLayer={formattedResults.pointsLayer} />
+          <mapsService.PassiveMap passiveLayer={formattedResults.pointsLayer} viewMode="view" />
         </ExpandedRowPanel>
       )}
     </ExpandedRowContent>

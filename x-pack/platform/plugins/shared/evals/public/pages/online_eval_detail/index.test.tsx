@@ -21,7 +21,7 @@ import {
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
-
+import { useActiveSpaceId } from '../../hooks/use_active_space_id';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
@@ -30,6 +30,7 @@ jest.mock('../../hooks/use_online_eval_workflows');
 jest.mock('../../hooks/use_evals_permissions');
 jest.mock('../../hooks/use_evals_api');
 jest.mock('../../hooks/use_model_connectors');
+jest.mock('../../hooks/use_active_space_id');
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
   LensConfigBuilder: jest.fn().mockImplementation(() => ({
@@ -57,6 +58,7 @@ const mockedUseUpdateOnlineEvalWorkflow = jest.mocked(useUpdateOnlineEvalWorkflo
 const mockedUseEvalsPermissions = jest.mocked(useEvalsPermissions);
 const mockedUseEvalsTraceFetcher = jest.mocked(useEvalsTraceFetcher);
 const mockedUseModelConnectors = jest.mocked(useModelConnectors);
+const mockedUseActiveSpaceId = jest.mocked(useActiveSpaceId);
 
 const lensEmbeddableComponent = jest.fn((props: { attributes?: unknown }) => (
   <div data-test-subj="mockLensEmbeddable">{JSON.stringify(props.attributes)}</div>
@@ -99,6 +101,7 @@ describe('OnlineEvalDetailPage', () => {
     } as unknown as ReturnType<typeof useKibana>);
 
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
+    mockedUseActiveSpaceId.mockReturnValue({ spaceId: 'space-a', isLoading: false });
     mockedUseEvalsTraceFetcher.mockReturnValue(jest.fn());
     mockedUseOnlineEvalWorkflow.mockReturnValue({
       data: {
@@ -168,7 +171,7 @@ describe('OnlineEvalDetailPage', () => {
     lensEmbeddableComponent.mockClear();
   });
 
-  it('passes monitor.id filter to both Lens panels', async () => {
+  it('passes monitor.id and active space filter to both Lens panels', async () => {
     renderPage();
 
     await waitFor(() => {
@@ -182,10 +185,23 @@ describe('OnlineEvalDetailPage', () => {
       attributes: { query: { expression: string } };
     };
 
+    const expectedExpression = 'monitor.id: "workflow-1" and space_ids: "space-a"';
     expect(firstLensProps).toBeDefined();
     expect(secondLensProps).toBeDefined();
-    expect(firstLensProps.attributes.query.expression).toBe('monitor.id: "workflow-1"');
-    expect(secondLensProps.attributes.query.expression).toBe('monitor.id: "workflow-1"');
+    expect(firstLensProps.attributes.query.expression).toBe(expectedExpression);
+    expect(secondLensProps.attributes.query.expression).toBe(expectedExpression);
+  });
+
+  it('does not render Lens panels until the active space is resolved', async () => {
+    mockedUseActiveSpaceId.mockReturnValue({ spaceId: undefined, isLoading: true });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(dataViewsCreate).toHaveBeenCalled();
+    });
+    expect(await screen.findByText('Preparing data view...')).toBeInTheDocument();
+    expect(lensEmbeddableComponent).not.toHaveBeenCalled();
   });
 
   it('renders rows from the online scores route response', async () => {

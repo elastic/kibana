@@ -92,6 +92,14 @@ export type IdentifierTypeEnum = typeof IdentifierType.enum;
 export const IdentifierTypeEnum = IdentifierType.enum;
 
 /**
+ * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
+ */
+export const EntityViewMode = lazySchema(() => z.enum(['single', 'resolved']));
+export type EntityViewMode = z.infer<typeof EntityViewMode>;
+export type EntityViewModeEnum = typeof EntityViewMode.enum;
+export const EntityViewModeEnum = EntityViewMode.enum;
+
+/**
  * A generic representation of a document contributing to a Risk Score.
  */
 export const RiskScoreInput = lazySchema(() =>

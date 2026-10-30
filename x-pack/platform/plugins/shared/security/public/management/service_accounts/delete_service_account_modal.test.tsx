@@ -9,10 +9,10 @@ import { EuiProvider } from '@elastic/eui';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { DeleteServiceAccountModal } from './delete_service_account_modal';
-import type { ServiceAccountBoundWorkload } from '../../service_accounts';
 
 const serviceAccount = { id: 'kibana/workflow-runner', name: 'workflow-runner' };
 

@@ -21,10 +21,10 @@ import {
 } from '../../../common/utils/attachments';
 import type { AttachmentAttributes, Case } from '../../../common/types/domain';
 import {
-  CaseRt,
   CaseStatuses,
   UserActionActions,
   UserActionTypes,
+  CaseSchema,
 } from '../../../common/types/domain';
 
 import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
@@ -32,7 +32,6 @@ import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
 import { createCaseError } from '../error';
-import { decodeOrThrow } from '../runtime_types';
 import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
@@ -47,12 +46,14 @@ import {
   getIDsAndIndicesAsArrays,
   countEventsForID,
 } from '../utils';
+import { decodeOrThrowZod } from '../runtime_types';
 import { extractCommentContent, isUnifiedPayloadCommentAttachment } from '../attachments/comment';
 import type {
   AttachmentAttributesV2,
   UnifiedAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
+import type { AttachmentSavedObjectTransformedV2 } from '../types/attachments_v2';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & UnifiedAttachmentPayload>;
@@ -102,11 +103,11 @@ export class CaseCommentModel {
   public async updateComment({
     updateRequest,
     updatedAt,
-    owner,
+    currentAttachment,
   }: {
     updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
     updatedAt: string;
-    owner: string;
+    currentAttachment: AttachmentSavedObjectTransformedV2;
   }): Promise<CaseCommentModel> {
     try {
       // The PUT route checks the payload shape, type and owner only, so without this a caller
@@ -130,16 +131,13 @@ export class CaseCommentModel {
       const patchCommentText = getCommentTextFromPayload(queryRestAttributes);
 
       if (patchCommentText != null) {
-        const currentComment = await this.params.services.attachmentService.getter.get({
-          savedObjectId: id,
-        });
-        const currentCommentText = extractCommentContent(currentComment.attributes);
+        const currentCommentText = extractCommentContent(currentAttachment.attributes);
 
         const updatedReferences = getOrUpdateLensReferences(
           this.params.lensEmbeddableFactory,
           patchCommentText,
           {
-            references: currentComment.references,
+            references: currentAttachment.references,
             attributes: { comment: currentCommentText },
           }
         );
@@ -160,11 +158,16 @@ export class CaseCommentModel {
             updated_by: this.params.user,
           },
           options,
+          savedObjectType: currentAttachment.type as AttachmentSavedObjectType,
         }),
         this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
       ]);
 
-      await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
+      await commentableCase.createUpdateCommentUserAction(
+        comment,
+        updateRequest,
+        currentAttachment.attributes.owner
+      );
 
       return commentableCase;
     } catch (error) {
@@ -271,6 +274,7 @@ export class CaseCommentModel {
 
   /**
    * Create a new comment on the appropriate case. This updates the case's updated_at and updated_by fields.
+   * `attachment` is `undefined` when every referenced id is already on the case.
    */
   public async createComment({
     createdDate,
@@ -280,7 +284,7 @@ export class CaseCommentModel {
     createdDate: string;
     commentReq: UnifiedAttachmentPayload;
     id: string;
-  }): Promise<CaseCommentModel> {
+  }): Promise<{ model: CaseCommentModel; attachment?: AttachmentSavedObjectTransformedV2 }> {
     try {
       await this.validateCreateCommentRequest([commentReq]);
       const attachmentsWithoutDuplicates = await this.filterDuplicatedAttachments([
@@ -288,7 +292,7 @@ export class CaseCommentModel {
       ]);
 
       if (attachmentsWithoutDuplicates.length === 0) {
-        return this;
+        return { model: this };
       }
 
       const { id: commentId, ...attachment } = attachmentsWithoutDuplicates[0];
@@ -318,7 +322,7 @@ export class CaseCommentModel {
         this.createCommentUserAction(comment, attachment),
       ]);
 
-      return commentableCase;
+      return { model: commentableCase, attachment: comment };
     } catch (error) {
       throw createCaseError({
         message: `Failed creating a comment on a commentable case, case id: ${this.caseInfo.id}: ${error}`,
@@ -339,6 +343,10 @@ export class CaseCommentModel {
 
     const dedupedAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
+    // Attack ids are document ids from a different index than alerts and events, so they get
+    // their own intra-request set — an attack must never be dropped because an alert in the same
+    // request happened to share its id.
+    const attackIdsAlreadySeen = new Set<string>();
 
     // Dedup helper for unified alert/event attachments. The unified contract for
     // metadata.index is "scalar broadcast OR 1-to-1 array of matching length"; an array
@@ -412,6 +420,24 @@ export class CaseCommentModel {
       }
     );
 
+    // Attacks are a Security-only type, so only pay for the lookup when the request carries one.
+    const requestedAttackIds = [
+      ...new Set(
+        attachments.flatMap((attachment) =>
+          isAttackAttachmentType(attachment.type) && 'attachmentId' in attachment
+            ? getIDsAndIndicesAsArrays(attachment).ids
+            : []
+        )
+      ),
+    ];
+    const attacksAttachedToCase =
+      requestedAttackIds.length > 0
+        ? await this.params.services.attachmentService.getter.getAttachedAttackIds({
+            caseId: this.caseInfo.id,
+            attackIds: requestedAttackIds,
+          })
+        : new Set<string>();
+
     attachments.forEach((attachment) => {
       if (isAlertAttachmentType(attachment.type)) {
         if (!('attachmentId' in attachment)) {
@@ -420,6 +446,27 @@ export class CaseCommentModel {
         const deduped = dedupeUnifiedAttachment(attachment, alertsAttachedToCase);
         if (deduped) {
           dedupedAttachments.push(deduped);
+        }
+        return;
+      }
+
+      if (isAttackAttachmentType(attachment.type)) {
+        if (!('attachmentId' in attachment)) {
+          throw Boom.badRequest(`Attack attachment is missing required field 'attachmentId'`);
+        }
+
+        // An attack carries exactly one id, so there is nothing to filter *within* the
+        // attachment: it is either already on the case and dropped whole, or kept untouched.
+        // Running it through `dedupeUnifiedAttachment` would also widen `attachmentId` to an
+        // array, which the attack payload schema rejects.
+        const { ids } = getIDsAndIndicesAsArrays(attachment);
+        const isDuplicate = ids.some(
+          (id) => attacksAttachedToCase.has(id) || attackIdsAlreadySeen.has(id)
+        );
+        ids.forEach((id) => attackIdsAlreadySeen.add(id));
+
+        if (!isDuplicate) {
+          dedupedAttachments.push(attachment);
         }
         return;
       }
@@ -659,7 +706,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return decodeOrThrow(CaseRt)(caseResponse);
+      return decodeOrThrowZod(CaseSchema)(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,
@@ -669,18 +716,21 @@ export class CaseCommentModel {
     }
   }
 
+  /**
+   * Creates the attachments that aren't duplicates. `attachments` holds the saved objects that were created.
+   */
   public async bulkCreate({
     attachments,
   }: {
     attachments: CommentRequestWithId;
-  }): Promise<CaseCommentModel> {
+  }): Promise<{ model: CaseCommentModel; attachments: AttachmentSavedObjectTransformedV2[] }> {
     try {
       await this.validateCreateCommentRequest(attachments);
 
       const attachmentWithoutDuplicateAlerts = await this.filterDuplicatedAttachments(attachments);
 
       if (attachmentWithoutDuplicateAlerts.length === 0) {
-        return this;
+        return { model: this, attachments: [] };
       }
 
       await this.ensureIndexedAttachmentsValid(attachmentWithoutDuplicateAlerts);
@@ -706,8 +756,8 @@ export class CaseCommentModel {
         date: new Date().toISOString(),
       });
 
-      const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
-        (attachment) => !isSavedObjectErrorResult(attachment)
+      const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.flatMap(
+        (attachment) => (isSavedObjectErrorResult(attachment) ? [] : [attachment])
       );
 
       const withoutErrors = (items: CommentRequestWithId) =>
@@ -731,7 +781,7 @@ export class CaseCommentModel {
         this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts)),
       ]);
 
-      return commentableCase;
+      return { model: commentableCase, attachments: savedObjectsWithoutErrors };
     } catch (error) {
       throw createCaseError({
         message: `Failed bulk creating attachments on a commentable case, case id: ${this.caseInfo.id}: ${error}`,

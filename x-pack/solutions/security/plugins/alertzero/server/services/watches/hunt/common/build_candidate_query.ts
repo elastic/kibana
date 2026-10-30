@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { HUNT_USABLE_FILTER } from '@kbn/alertzero-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
@@ -13,18 +14,23 @@ import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
 
 export interface CandidateQueryParams {
   trigger: 'manual' | 'scheduled';
-  /** For manual bypass: hunt exactly these report ids (bypasses hunt-once gate, still excludes open proposals). */
+  /** For manual bypass: hunt exactly these report ids (bypasses hunt-once gate, still requires hunt-usable and excludes open proposals). */
   report_ids?: string[];
   spaceId: string;
   /** 1-10, default 10. */
   limit?: number;
+  /**
+   * Default 30; applies only when no report ids are named. Not clamped here: the route schema
+   * (1 to 3650) is the only caller's gate.
+   */
+  lookbackDays?: number;
 }
 
 export interface CandidateQueryResult {
   ids: string[];
   skipped: Array<{
     id: string;
-    reason: 'open_proposal' | 'already_hunted' | 'not_found';
+    reason: 'open_proposal' | 'already_hunted' | 'not_found' | 'not_usable';
   }>;
   total: number;
   truncated: boolean;
@@ -32,6 +38,9 @@ export interface CandidateQueryResult {
 
 /** Injected rather than imported so the route owns the proposals-service wiring and tests can stub it. */
 export type OpenProposalConversationIdsReader = (spaceId: string) => Promise<Set<string>>;
+
+/** The route schema owns the bounds and default; this only covers callers that bypass it. */
+const DEFAULT_CANDIDATE_LOOKBACK_DAYS = 30;
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 10;
@@ -58,6 +67,33 @@ const failClosed = (logger: Logger, context: string, err: unknown): never => {
   throw err;
 };
 
+/**
+ * A 200 can still be a partial answer, and this selector reads the hit page *as* the
+ * eligible pool — so a lost shard shrinks the pool with no sign that it did. The
+ * paging loop reads a short page as a spent pool and stops early, and a named report
+ * whose shard failed is reported `not_found` although it exists. Fail closed for the
+ * same reason the reports index is not `ignore_unavailable`: an outage must never be
+ * indistinguishable from a sweep that found nothing to hunt.
+ */
+const assertCompleteAnswer = (
+  logger: Logger,
+  response: estypes.SearchResponse,
+  label: string
+): void => {
+  const failedShards = response._shards?.failed ?? 0;
+  if (response.timed_out === true || failedShards > 0) {
+    throw failClosed(
+      logger,
+      `the ${label} answered only partially`,
+      new Error(
+        response.timed_out === true
+          ? `the ${label} timed out`
+          : `${failedShards} of ${response._shards?.total} shards failed on the ${label}`
+      )
+    );
+  }
+};
+
 export const buildCandidateQuery = async (
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -66,18 +102,23 @@ export const buildCandidateQuery = async (
 ): Promise<CandidateQueryResult> => {
   const { trigger, report_ids, spaceId, limit: rawLimit } = params;
   const limit = Math.min(rawLimit ?? DEFAULT_LIMIT, MAX_LIMIT);
+  const lookbackDays = params.lookbackDays ?? DEFAULT_CANDIDATE_LOOKBACK_DAYS;
 
   const namedIds =
     trigger === 'manual' && report_ids && report_ids.length > 0 ? report_ids : undefined;
 
-  const filterClauses: Array<Record<string, unknown>> = [buildHuntSpaceFilterTerms(spaceId)];
+  const filterClauses: estypes.QueryDslQueryContainer[] = [
+    buildHuntSpaceFilterTerms(spaceId),
+    HUNT_USABLE_FILTER,
+  ];
 
   if (namedIds) {
     // Manual bypass lifts the hunt-once gate for these ids (replay semantics); the
-    // open-proposal guard below still applies.
+    // hunt-usable bar above and the open-proposal guard below still apply.
     filterClauses.push({ ids: { values: namedIds } });
   } else {
-    // Scheduled trigger: hunt-once gate, only reports never hunted in this space.
+    // Scheduled trigger: the gate is two clauses, usable (above) and never hunted in
+    // this space (below).
     //
     // Hunt outcomes live in the per-space nested `evidence[]` array on
     // `.kibana-threat-reports` (mapping v30 merged the former top-level
@@ -100,6 +141,27 @@ export const buildCandidateQuery = async (
                   ],
                 },
               },
+            },
+          },
+        ],
+      },
+    });
+
+    // Publish-date lookback. `should` with `minimum_should_match: 1` lets a report with
+    // `content.published_at` be judged on it alone, while a report without one falls back
+    // to ingest time. The fallback is permanent, not a migration shim: it covers documents
+    // ingested before the field existed and RSS entries whose feed gave no date, which
+    // never get the field. Named ids skip this clause so an analyst can replay an old report.
+    const lookbackRange = { gte: `now-${lookbackDays}d` };
+    filterClauses.push({
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          { range: { 'content.published_at': lookbackRange } },
+          {
+            bool: {
+              filter: [{ range: { '@timestamp': lookbackRange } }],
+              must_not: [{ exists: { field: 'content.published_at' } }],
             },
           },
         ],
@@ -158,29 +220,36 @@ export const buildCandidateQuery = async (
     }
   };
 
-  /**
-   * A 200 can still be a partial answer, and this selector reads the hit page *as* the
-   * eligible pool — so a lost shard shrinks the pool with no sign that it did. The
-   * paging loop below reads a short page as a spent pool and stops early, and a named
-   * report whose shard failed is reported `not_found` although it exists. Fail closed
-   * for the same reason the reports index is not `ignore_unavailable`: an outage must
-   * never be indistinguishable from a sweep that found nothing to hunt.
-   */
   const searchPage = async (excludedIds: string[]) => {
     const response = await runSearch(excludedIds);
-    const failedShards = response._shards?.failed ?? 0;
-    if (response.timed_out === true || failedShards > 0) {
-      throw failClosed(
-        logger,
-        'the candidate search answered only partially',
-        new Error(
-          response.timed_out === true
-            ? 'the candidate search timed out'
-            : `${failedShards} of ${response._shards?.total} shards failed on the candidate search`
-        )
-      );
-    }
+    assertCompleteAnswer(logger, response, 'candidate search');
     return response;
+  };
+
+  const lookupExistingIds = async (missingIds: string[]): Promise<Set<string>> => {
+    let response: estypes.SearchResponse;
+    try {
+      response = await esClient.search({
+        index: HUNT_REPORTS_INDEX,
+        size: missingIds.length,
+        ignore_unavailable: false,
+        track_total_hits: false,
+        _source: false,
+        query: {
+          bool: {
+            filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: missingIds } }],
+          },
+        },
+      });
+    } catch (err) {
+      throw failClosed(logger, 'ES named report lookup failed', err);
+    }
+    assertCompleteAnswer(logger, response, 'named report lookup');
+    return new Set(
+      (response.hits.hits ?? [])
+        .map((h) => h._id)
+        .filter((id): id is string => typeof id === 'string')
+    );
   };
 
   // A report whose Hunt Proposal is still awaiting a decision is excluded from selection,
@@ -225,7 +294,9 @@ export const buildCandidateQuery = async (
       examined.push(id);
       if (
         openProposalConversationIds &&
-        openProposalConversationIds.has(buildHuntInvestigationConversationId(id))
+        openProposalConversationIds.has(
+          buildHuntInvestigationConversationId({ spaceId, reportId: id })
+        )
       ) {
         skipped.push({ id, reason: 'open_proposal' });
         continue;
@@ -245,13 +316,17 @@ export const buildCandidateQuery = async (
     if (ids.length >= limit) break;
   }
 
-  // Named ids that matched nothing are reported rather than silently dropped: from the
-  // caller's side an unknown id and an id in another space are both "not selected".
+  // Named ids the filtered search did not return are reported rather than silently
+  // dropped. One ids-only lookup splits them: an id that exists in this space but fails
+  // the hunt-usable bar is `not_usable`, one that does not exist is `not_found`. From the
+  // caller's side an unknown id and an id in another space are both `not_found`.
   if (namedIds) {
     const matched = new Set(examined);
-    for (const requested of namedIds) {
-      if (!matched.has(requested)) {
-        skipped.push({ id: requested, reason: 'not_found' });
+    const missingIds = namedIds.filter((id) => !matched.has(id));
+    if (missingIds.length > 0) {
+      const existingIds = await lookupExistingIds(missingIds);
+      for (const id of missingIds) {
+        skipped.push({ id, reason: existingIds.has(id) ? 'not_usable' : 'not_found' });
       }
     }
   }

@@ -6,18 +6,22 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Change } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/code-editor';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  monaco,
+} from '@kbn/code-editor';
 import {
   computeWorkflowYamlDiffStats,
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
+  workflowsEditorChromeOverrides,
   type WorkflowYamlDiffStats,
 } from '@kbn/workflows-ui';
 
@@ -96,6 +100,7 @@ const MonacoDiffViewer: React.FC<{
   parts: Change[];
 }> = ({ beforeYaml, afterYaml, parts }) => {
   const styles = useMemoCss(componentStyles);
+  const euiThemeContext = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
   const [isActive, setIsActive] = useState(false);
@@ -123,7 +128,12 @@ const MonacoDiffViewer: React.FC<{
     setIsActive(false);
   }, []);
 
-  useWorkflowsMonacoTheme();
+  // The diff editor is created directly with `monaco.editor.createDiffEditor`, so nothing else
+  // guarantees the global Kibana theme is registered before it mounts. Declared before the
+  // editor-creating effect so it runs first.
+  useEffect(() => {
+    initializeRegisteredLanguagesTheme(euiThemeContext);
+  }, [euiThemeContext]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -133,7 +143,7 @@ const MonacoDiffViewer: React.FC<{
     const modifiedModel = monaco.editor.createModel(afterYaml, 'yaml');
 
     const diffEditor = monaco.editor.createDiffEditor(container, {
-      theme: WORKFLOWS_MONACO_EDITOR_THEME,
+      theme: CODE_EDITOR_DEFAULT_THEME_ID,
       readOnly: true,
       renderSideBySide: false,
       minimap: { enabled: false },
@@ -189,6 +199,22 @@ const MonacoDiffViewer: React.FC<{
       editorRef.current = null;
     };
   }, [beforeYaml, afterYaml, minimumLineCount, contextLineCount]);
+
+  // Per-instance chrome (widget surfaces, gutter, diff colours). Keyed on the same inputs that
+  // re-create the editor above, plus the EUI theme so a light/dark switch re-applies without
+  // re-creating the editor.
+  useEffect(() => {
+    const node = editorRef.current?.getContainerDomNode();
+    if (!node) return;
+
+    const chrome = applyKbnCodeEditorChromeOverrides(
+      [node],
+      workflowsEditorChromeOverrides,
+      euiThemeContext
+    );
+
+    return () => chrome.dispose();
+  }, [beforeYaml, afterYaml, minimumLineCount, contextLineCount, euiThemeContext]);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -247,10 +273,10 @@ const MonacoDiffViewer: React.FC<{
             onClick={isExpanded ? handleCollapse : handleExpand}
           >
             {isExpanded
-              ? i18n.translate('workflowsManagement.attachmentRenderers.diff.showLess', {
+              ? i18n.translate('workflows.attachmentRenderers.diff.showLess', {
                   defaultMessage: 'Show less',
                 })
-              : i18n.translate('workflowsManagement.attachmentRenderers.diff.showMore', {
+              : i18n.translate('workflows.attachmentRenderers.diff.showMore', {
                   defaultMessage:
                     'Show {hiddenLines, plural, one {# more line} other {# more lines}}',
                   values: { hiddenLines },
@@ -276,14 +302,14 @@ const DiffInlineContent: React.FC<{
 
   const displayName =
     name ??
-    i18n.translate('workflowsManagement.attachmentRenderers.diff.defaultName', {
+    i18n.translate('workflows.attachmentRenderers.diff.defaultName', {
       defaultMessage: 'Workflow',
     });
 
   if (beforeYaml === afterYaml) {
     return (
       <EuiText size="s" color="subdued" css={styles.noChanges}>
-        {i18n.translate('workflowsManagement.attachmentRenderers.diff.noChanges', {
+        {i18n.translate('workflows.attachmentRenderers.diff.noChanges', {
           defaultMessage: 'No changes detected',
         })}
       </EuiText>
@@ -371,11 +397,11 @@ export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<Work
   {
     getLabel: (attachment) =>
       attachment.data.name
-        ? i18n.translate('workflowsManagement.attachmentRenderers.diff.labelWithName', {
+        ? i18n.translate('workflows.attachmentRenderers.diff.labelWithName', {
             defaultMessage: '{name} changes',
             values: { name: attachment.data.name },
           })
-        : i18n.translate('workflowsManagement.attachmentRenderers.diff.label', {
+        : i18n.translate('workflows.attachmentRenderers.diff.label', {
             defaultMessage: 'Workflow changes',
           }),
     getIcon: () => 'compare',

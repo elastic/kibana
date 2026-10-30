@@ -79,6 +79,8 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
+  SECRET_CONNECTION = `/internal/synthetics/settings/secret_connection`,
+  FLEET_SECRET_STORAGE_STATUS = `/internal/synthetics/settings/fleet_secret_storage_status`,
   MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
   CLUSTER_SETTINGS_PRIVILEGES = `/internal/synthetics/settings/cluster_privileges`,
 

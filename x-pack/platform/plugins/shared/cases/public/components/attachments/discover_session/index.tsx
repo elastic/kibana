@@ -9,7 +9,7 @@ import React from 'react';
 import {
   DiscoverSessionAttachmentPayloadSchema,
   type SavedObjectReferenceMetadata,
-} from '../../../../common/types/domain_zod/attachment/saved_object/v2';
+} from '../../../../common/types/domain/attachment/saved_object/v2';
 import {
   DISCOVER_SESSION_ATTACHMENT_TYPE,
   DISCOVER_SESSION_SO_TYPE,
@@ -67,4 +67,5 @@ export const getDiscoverSessionAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: DiscoverSessionAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.DISCOVER_SESSIONS_COUNT(count),
   });

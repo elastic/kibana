@@ -41,6 +41,4 @@ fileGroups:
     - server/**/*
     - .storybook/**/*.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
