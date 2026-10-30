@@ -295,7 +295,7 @@ export const buildXYExpression = (
   const isValidAnnotation = (a: EventAnnotationConfig) =>
     isManualPointAnnotationConfig(a) ||
     isRangeAnnotationConfig(a) ||
-    (isQueryAnnotationConfig(a) && a.filter?.query !== '') ||
+    (isQueryAnnotationConfig(a) && Boolean(a.filter) && a.filter.query !== '') ||
     (isEsqlAnnotationConfig(a) &&
       Boolean(a.query.esql.trim() && a.timeColumn && (!('endTimeColumn' in a) || a.endTimeColumn)));
 
