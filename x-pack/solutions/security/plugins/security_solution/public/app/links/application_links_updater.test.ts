@@ -123,6 +123,25 @@ describe('ApplicationLinksUpdater', () => {
       expect(result).toEqual([expect.objectContaining({ ...link, unauthorized: true })]);
     });
 
+    it('hides a link from the nav and search when its replacing capability exists', () => {
+      const links: AppLinkItems = [{ ...link, hiddenWhenCapabilityExists: 'casesV4' }];
+      const params = createMockParams({
+        capabilities: { casesV4: { read_cases: true } } as unknown as Capabilities,
+      });
+
+      expect(appLinks.processAppLinks(links, params)).toEqual([
+        expect.objectContaining({ sideNavDisabled: true, globalSearchDisabled: true }),
+      ]);
+    });
+
+    it('keeps a link visible when its replacing capability does not exist', () => {
+      const links: AppLinkItems = [{ ...link, hiddenWhenCapabilityExists: 'casesV4' }];
+
+      expect(appLinks.processAppLinks(links, createMockParams())).toEqual([
+        expect.not.objectContaining({ sideNavDisabled: true }),
+      ]);
+    });
+
     it('should filter out a link based on uiSettingsClient', () => {
       const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
 

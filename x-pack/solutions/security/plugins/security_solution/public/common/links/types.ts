@@ -110,6 +110,11 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
+   * Keeps the link navigable but hides it from the navigation and global search when this
+   * capability exists, e.g. a page another app now owns that this link only redirects to.
+   */
+  hiddenWhenCapabilityExists?: string;
+  /**
    * Icon that is displayed on the side navigation menu.
    */
   sideNavIcon?: IconType;

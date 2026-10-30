@@ -458,7 +458,7 @@ describe('disabled features consolidated from several categories', () => {
     })),
   ];
 
-  const getDisabledFeatures = async (disabledFeatures: string[]) => {
+  const createClient = (disabledFeatures: string[]) => {
     const consolidatedFeaturesStart = featuresPluginMock.createStart();
     consolidatedFeaturesStart.getKibanaFeatures.mockReturnValue(
       consolidatedFeatures as unknown as KibanaFeature[]
@@ -479,8 +479,36 @@ describe('disabled features consolidated from several categories', () => {
       consolidatedFeaturesStart,
       undefined
     );
-    return (await client.get('space')).disabledFeatures;
+    return { client, repository };
   };
+
+  const getDisabledFeatures = async (disabledFeatures: string[]) =>
+    (await createClient(disabledFeatures).client.get('space')).disabledFeatures;
+
+  const saveDisabledFeatures = async (stored: string[], incoming: string[]) => {
+    const { client, repository } = createClient(stored);
+    await client.update('space', {
+      id: asSpaceId('space'),
+      name: 'space',
+      disabledFeatures: incoming,
+    });
+    const [[, , attributes]] = repository.update.mock.calls as unknown as Array<
+      [string, string, { disabledFeatures: string[] }]
+    >;
+    return attributes.disabledFeatures;
+  };
+
+  test('keeps a stored one-category choice when the space is saved again', async () => {
+    expect(await saveDisabledFeatures(['observability_cases'], [])).toEqual([
+      'observability_cases',
+    ]);
+  });
+
+  test('stores every replaced feature when the consolidated feature is disabled', async () => {
+    expect((await saveDisabledFeatures([], ['cases_all'])).sort()).toEqual(
+      ['cases_all', 'observability_cases', 'securitySolution_cases'].sort()
+    );
+  });
 
   test('keeps the consolidated feature enabled when only one category disabled its feature', async () => {
     expect(await getDisabledFeatures(['observability_cases'])).toEqual([]);

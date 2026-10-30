@@ -332,7 +332,13 @@ export class SpacesClient implements ISpacesClient {
       space
     )
       ? { ...space, disabledFeatures: existingSpaceDisabledFeatures }
-      : space;
+      : {
+          ...space,
+          disabledFeatures: this.keepConsolidatedDeprecatedFeatures(
+            existingSpaceDisabledFeatures,
+            space.disabledFeatures
+          ),
+        };
 
     // Preserve existing leading/trailing whitespace (backwards compatibility for legacy spaces),
     // but trim if a new name is being set to prevent introducing new whitespace.
@@ -460,6 +466,28 @@ export class SpacesClient implements ISpacesClient {
       );
     });
     return Array.from(new Set(replaced));
+  }
+
+  /**
+   * A space shows consolidated features in place of the deprecated ones they replace, so saving it
+   * would otherwise drop which of them were disabled. Keeps those choices so they still apply if
+   * the consolidated feature is turned off again: stored deprecated features stay while their
+   * consolidated replacement is enabled, and disabling the replacement disables all of them.
+   */
+  private keepConsolidatedDeprecatedFeatures(stored: string[], incoming: string[]): string[] {
+    const disabled = new Set(incoming);
+    for (const [replacementId, sourcesByCategory] of this.deprecatedFeaturesSources) {
+      if (sourcesByCategory.size < 2) {
+        continue;
+      }
+      const sources = Array.from(sourcesByCategory.values()).flatMap((ids) => Array.from(ids));
+      if (disabled.has(replacementId)) {
+        sources.forEach((id) => disabled.add(id));
+      } else {
+        sources.filter((id) => stored.includes(id)).forEach((id) => disabled.add(id));
+      }
+    }
+    return Array.from(disabled);
   }
 
   private collectDeprecatedFeaturesSources(features: KibanaFeature[]) {

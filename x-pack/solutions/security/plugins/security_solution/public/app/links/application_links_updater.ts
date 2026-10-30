@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { get } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
@@ -120,6 +121,14 @@ class ApplicationLinksUpdater {
       } else if (!hasCapabilities(capabilities, link.capabilities)) {
         // Required capabilities exist but are not granted
         extraProps.unauthorized = true;
+      }
+
+      if (
+        link.hiddenWhenCapabilityExists &&
+        get(capabilities, link.hiddenWhenCapabilityExists) !== undefined
+      ) {
+        extraProps.sideNavDisabled = true;
+        extraProps.globalSearchDisabled = true;
       }
 
       const processedAppLink: LinkItem = { ...link, ...extraProps };
