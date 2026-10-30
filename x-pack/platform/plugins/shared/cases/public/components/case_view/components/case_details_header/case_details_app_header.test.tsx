@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
+import { CaseSettingsPopover } from './case_settings_popover';
 import { renderWithTestingProviders } from '../../../../common/mock';
 import { basicCase } from '../../../../containers/mock';
 import { useGetCaseConnectors } from '../../../../containers/use_get_case_connectors';
@@ -33,14 +34,10 @@ jest.mock('../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
 
-const mockCaseSettingsPopover = jest.fn();
-
-jest.mock('./case_settings_popover', () => ({
-  CaseSettingsPopover: (props: Record<string, unknown>) => {
-    mockCaseSettingsPopover(props);
-    return <div data-test-subj="case-settings-popover" />;
-  },
-}));
+jest.mock('./case_settings_popover', () => {
+  const actual = jest.requireActual('./case_settings_popover');
+  return { CaseSettingsPopover: jest.fn(actual.CaseSettingsPopover) };
+});
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
@@ -141,26 +138,69 @@ describe('CaseDetailsAppHeader', () => {
     });
   });
 
-  it('keeps the settings popover anchored to the overflow button after the overflow menu closes', async () => {
-    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+  describe('settings popover opened from the overflow menu', () => {
+    const { innerWidth: initialInnerWidth } = window;
 
-    await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
-    fireEvent.click(
-      within(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.popover)).getByTestId(
-        'case-settings-button'
-      )
-    );
+    const resizeWindow = (width: number) => {
+      act(() => {
+        window.innerWidth = width;
+        window.dispatchEvent(new Event('resize'));
+      });
+    };
 
-    await waitFor(() =>
-      expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.popover)).not.toBeInTheDocument()
-    );
+    const openSettingsFromOverflowMenu = async () => {
+      await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+      fireEvent.click(
+        within(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.popover)).getByTestId(
+          'case-settings-button'
+        )
+      );
 
-    // The menu item that triggered the action is gone by now; the anchor must still be mounted so the
-    // popover does not jump to the top-left corner when it repositions (e.g. after toggling a setting).
-    expect(await screen.findByTestId('case-settings-popover')).toBeInTheDocument();
-    const { anchorElement } = mockCaseSettingsPopover.mock.lastCall[0];
-    expect(anchorElement).toHaveAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
-    expect(anchorElement.isConnected).toBe(true);
+      await waitFor(() =>
+        expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.popover)).not.toBeInTheDocument()
+      );
+      expect(await screen.findByTestId('case-settings-popover')).toBeInTheDocument();
+    };
+
+    afterEach(() => {
+      window.innerWidth = initialInnerWidth;
+    });
+
+    it('keeps the settings popover anchored to the overflow button after the overflow menu closes', async () => {
+      renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+      await openSettingsFromOverflowMenu();
+
+      // The menu item that triggered the action is gone by now; the anchor must still be mounted so the
+      // popover does not jump to the top-left corner when it repositions (e.g. after toggling a setting).
+      const anchorElement = jest.mocked(CaseSettingsPopover).mock.lastCall?.[0].anchorElement;
+      expect(anchorElement).toHaveAttribute(
+        'data-test-subj',
+        APP_MENU_TEST_SUBJECTS.overflowButton
+      );
+      expect(anchorElement?.isConnected).toBe(true);
+    });
+
+    it('keeps the overflow button on the page when settings are reopened after the app menu layout changes', async () => {
+      renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+      const initialOverflowButton = await screen.findByTestId(
+        APP_MENU_TEST_SUBJECTS.overflowButton
+      );
+      await openSettingsFromOverflowMenu();
+
+      // Switching to the collapsed layout remounts the "More" button, which closes the settings popover.
+      resizeWindow(400);
+      await waitFor(() => expect(initialOverflowButton.isConnected).toBe(false));
+      await waitFor(() =>
+        expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument()
+      );
+
+      const remountedOverflowButton = screen.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton);
+      await openSettingsFromOverflowMenu();
+
+      expect(remountedOverflowButton.isConnected).toBe(true);
+    });
   });
 
   it('adds the case to chat from the chat actions dropdown', async () => {
