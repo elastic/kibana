@@ -7,8 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
-import type { AlertEvent, AlertEventRule } from '../types/alert_types';
+import { get } from 'lodash';
+import type {
+  AlertHit,
+  AlertInstanceContext,
+  CombinedSummarizedAlerts,
+} from '@kbn/alerting-plugin/server/types';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
+import type { AlertEvent, AlertEventHit, AlertEventRule } from '../types/alert_types';
+
+const attachContext = (
+  hits: AlertHit[],
+  contextByAlertUuid?: Record<string, AlertInstanceContext>
+): AlertEventHit[] => {
+  if (!contextByAlertUuid) {
+    return hits;
+  }
+
+  return hits.map((hit) => {
+    const uuid = get(hit, ALERT_UUID);
+    if (typeof uuid !== 'string') {
+      return hit;
+    }
+    const context = contextByAlertUuid[uuid];
+    if (context === undefined) {
+      return hit;
+    }
+    return { ...hit, context };
+  });
+};
 
 /**
  * Builds the alert event structure used in workflow execution.
@@ -20,13 +47,17 @@ export function buildAlertEvent(params: {
   rule: AlertEventRule;
   ruleUrl?: string;
   spaceId: string;
+  contextByAlertUuid?: Record<string, AlertInstanceContext>;
 }): AlertEvent {
   return {
-    alerts: [
-      ...(params.alerts.new?.data ?? []),
-      ...(params.alerts.ongoing?.data ?? []),
-      ...(params.alerts.recovered?.data ?? []),
-    ],
+    alerts: attachContext(
+      [
+        ...(params.alerts.new?.data ?? []),
+        ...(params.alerts.ongoing?.data ?? []),
+        ...(params.alerts.recovered?.data ?? []),
+      ],
+      params.contextByAlertUuid
+    ),
     rule: {
       id: params.rule.id,
       name: params.rule.name,

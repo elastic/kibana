@@ -30,8 +30,12 @@ export interface AlertEventRule {
   ruleTypeId: string;
 }
 
+export type AlertEventHit = AlertHit & {
+  context?: Record<string, unknown>;
+};
+
 export interface AlertEvent {
-  alerts: AlertHit[];
+  alerts: AlertEventHit[];
   rule: AlertEventRule;
   ruleUrl?: string;
   spaceId: string;

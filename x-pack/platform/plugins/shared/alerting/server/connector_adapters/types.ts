@@ -6,7 +6,7 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RuleTypeParams, SanitizedRule } from '../../common';
+import type { AlertInstanceContext, RuleTypeParams, SanitizedRule } from '../../common';
 import type { CombinedSummarizedAlerts } from '../types';
 
 type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags' | 'consumer'> & {
@@ -18,12 +18,18 @@ export interface ConnectorAdapterParams {
   [x: string]: unknown;
 }
 
-interface BuildActionParamsArgs<RuleActionParams> {
+export interface BuildActionParamsArgs<RuleActionParams> {
   alerts: CombinedSummarizedAlerts;
   rule: Rule;
   params: RuleActionParams;
   spaceId: string;
   ruleUrl?: string;
+  /**
+   * Per-alert action context from `alert.getContext()`, keyed by
+   * `kibana.alert.uuid` and alert instance id so both lifecycle and
+   * persistence rule types can be joined to summarized AAD hits.
+   */
+  contextByAlertUuid?: Record<string, AlertInstanceContext>;
 }
 
 export interface ConnectorAdapter<

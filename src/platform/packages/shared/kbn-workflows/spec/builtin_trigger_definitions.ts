@@ -88,7 +88,8 @@ export const builtInTriggerDefinitions: BaseTriggerDefinition[] = [
       details:
         'When an alert trigger fires, the event data is available via `{{ event }}` (NOT `triggers.event`). ' +
         '`event.alerts` is an array of alert objects, `event.rule` contains the rule metadata (id, name, tags), ' +
-        'and `event.spaceId` is the space where the event was emitted.',
+        '`event.spaceId` is the space where the event was emitted, and `event.alerts[].context` is the ' +
+        'rule-type action context from `alert.getContext()` when the workflow was triggered as a system action.',
       examples: [
         `triggers:
   - type: alert`,
@@ -107,7 +108,7 @@ steps:
       - name: log_each_alert
         type: console
         with:
-          message: "Alert ID: {{ foreach.item._id }}"`,
+          message: "Alert ID: {{ foreach.item._id }} {{ foreach.item.context.message }}"`,
       ],
     },
   },
