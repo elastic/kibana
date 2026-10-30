@@ -38,7 +38,6 @@ type CapturedHandler = (
 const rule = createRuleResponse({
   id: 'rule-1',
   enabled: true,
-  metadata: { template: { id: 'template-1' } },
 });
 
 const eventOfType = (type: RuleEvent['type'], payload: RuleEventPayload): RuleEvent => ({
@@ -105,7 +104,12 @@ describe('RuleTelemetrySubscriber', () => {
         subscriber.start();
 
         await handler(type)(
-          eventOfType(type, { ruleId: 'rule-1', spaceId: 'default', rule }),
+          eventOfType(type, {
+            ruleId: 'rule-1',
+            spaceId: 'default',
+            rule,
+            templateId: 'template-1',
+          }),
           context
         );
 

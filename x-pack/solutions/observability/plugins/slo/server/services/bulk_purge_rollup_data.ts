@@ -7,11 +7,7 @@
 
 import { assertNever } from '@kbn/std';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
-import type {
-  BulkPurgeRollupParams,
-  BulkPurgeRollupResponse,
-} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
+import type { BulkPurgeRollupParams, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
@@ -67,7 +63,7 @@ export class BulkPurgeRollupData {
       case 'fixed_age':
         const duration = purgePolicy.age;
         inputIsInvalid = slos.some((slo) => {
-          if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
+          if (slo.timeWindow.type === 'calendarAligned') {
             return moment(Date.now())
               .subtract(duration.asSeconds(), 's')
               .isAfter(moment(Date.now()).startOf(slo.timeWindow.duration.unit));
@@ -79,7 +75,7 @@ export class BulkPurgeRollupData {
       case 'fixed_time':
         const timestampMoment = moment(purgePolicy.timestamp);
         inputIsInvalid = slos.some((slo) => {
-          if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
+          if (slo.timeWindow.type === 'calendarAligned') {
             return timestampMoment.isAfter(
               moment(Date.now()).startOf(slo.timeWindow.duration.unit)
             );

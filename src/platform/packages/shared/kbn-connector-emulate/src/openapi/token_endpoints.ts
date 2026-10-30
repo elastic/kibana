@@ -12,10 +12,44 @@ import { compileUrlMatcher } from './match_operation';
 import { isRecord } from './schema_walk';
 import type { ContractOperation, OpenApiDocument, OperationServer, Violation } from './types';
 
-// The mock accepts any token, so the issued ones are fixed.
+// The mock accepts any token, so the issued ones are fixed, apart from the scopes they carry.
 const ACCESS_TOKEN = 'contract-mock-access-token';
 const REFRESH_TOKEN = 'contract-mock-refresh-token';
 const ID_TOKEN = 'contract-mock-id-token';
+
+/** Space-delimited scopes, as OAuth 2 requests and JWT claims carry them (RFC 6749 §3.3). */
+const parseScopes = (value: unknown): string[] =>
+  typeof value === 'string' ? value.split(/\s+/).filter(Boolean) : [];
+
+// Tokens granted specific scopes carry them, base64url-encoded, so scope checks can read them.
+const withScopes = (token: string, scopes: readonly string[]): string =>
+  scopes.length === 0
+    ? token
+    : `${token}.${Buffer.from(JSON.stringify(scopes)).toString('base64url')}`;
+
+const scopesOf = (token: string, prefix: string): string[] | undefined => {
+  if (!token.startsWith(`${prefix}.`)) {
+    return undefined;
+  }
+  try {
+    const scopes: unknown = JSON.parse(
+      Buffer.from(token.slice(prefix.length + 1), 'base64url').toString('utf8')
+    );
+    return Array.isArray(scopes) && scopes.every((scope) => typeof scope === 'string')
+      ? scopes
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * The scopes an access token issued by the mock was granted; undefined for tokens the mock
+ * didn't issue (e.g. static bearer tokens from connector config) and tokens issued without a
+ * scope, which get the vendor's default scopes.
+ */
+export const grantedScopes = (token: string): readonly string[] | undefined =>
+  scopesOf(token, ACCESS_TOKEN);
 
 // RFC 7523, which service accounts (e.g. Google's) use to trade a signed JWT for a token.
 const JWT_BEARER = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
@@ -187,6 +221,27 @@ const issued = (body: Record<string, unknown>): TokenExchange => ({
   violations: [],
 });
 
+// RFC 6749 §6: a refresh may ask for fewer scopes than the original grant, never more, and the
+// new refresh token keeps the original grant. Refresh tokens the mock didn't issue for specific
+// scopes (`grant` undefined) aren't checked.
+const refresh = (grant: string[] | undefined, requested: string[]): TokenExchange => {
+  const added = grant ? requested.filter((scope) => !grant.includes(scope)) : [];
+  if (added.length > 0) {
+    return oauthError(400, 'invalid_scope', `The refresh token wasn't granted ${added.join(' ')}`, [
+      'body',
+      'scope',
+    ]);
+  }
+  const scopes = requested.length > 0 ? requested : grant ?? [];
+  return issued({
+    access_token: withScopes(ACCESS_TOKEN, scopes),
+    token_type: 'Bearer',
+    expires_in: 3600,
+    refresh_token: withScopes(REFRESH_TOKEN, grant ?? []),
+    ...(scopes.length > 0 ? { scope: scopes.join(' ') } : {}),
+  });
+};
+
 const hasClientCredentials = (form: URLSearchParams, authorization: string | undefined) =>
   form.has('client_id') || /^basic\s+\S/i.test(authorization ?? '');
 
@@ -246,18 +301,27 @@ export const respondToTokenRequest = (
     if (!claims) {
       return oauthError(400, 'invalid_grant', 'The assertion is not a JWT', ['body', 'assertion']);
     }
-    // Google issues an ID token instead when the assertion asks for one.
+    // Google issues an ID token instead when the assertion asks for one. Google puts the scopes
+    // in the assertion's claims; RFC 7523 also allows them as the request's `scope`.
+    const claimed = parseScopes(claims.scope);
+    const scopes = claimed.length > 0 ? claimed : parseScopes(form.get('scope'));
     const token =
       typeof claims.target_audience === 'string'
         ? { id_token: ID_TOKEN }
-        : { access_token: ACCESS_TOKEN, token_type: 'Bearer' };
+        : { access_token: withScopes(ACCESS_TOKEN, scopes), token_type: 'Bearer' };
     return issued({ ...token, expires_in: 3600 });
   }
+  const requested = parseScopes(form.get('scope'));
+  if (grant === 'refresh_token') {
+    return refresh(scopesOf(form.get('refresh_token') ?? '', REFRESH_TOKEN), requested);
+  }
   return issued({
-    access_token: ACCESS_TOKEN,
+    access_token: withScopes(ACCESS_TOKEN, requested),
     token_type: 'Bearer',
     expires_in: 3600,
-    ...(grant === 'client_credentials' ? {} : { refresh_token: REFRESH_TOKEN }),
-    ...(form.get('scope') ? { scope: form.get('scope') } : {}),
+    ...(grant === 'client_credentials'
+      ? {}
+      : { refresh_token: withScopes(REFRESH_TOKEN, requested) }),
+    ...(requested.length > 0 ? { scope: requested.join(' ') } : {}),
   });
 };

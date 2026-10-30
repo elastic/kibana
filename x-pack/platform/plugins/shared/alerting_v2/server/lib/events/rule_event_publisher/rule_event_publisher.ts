@@ -28,11 +28,17 @@ import {
  * Rule carried in a rule-lifecycle event. `rule` is the domain model (the API
  * response); it is optional only for the bulk-delete fallback where the
  * pre-delete state could not be read.
+ *
+ * `templateId` is the stored `metadata.template.id`. It is carried here because
+ * the public response deliberately omits it while telemetry still reports it.
+ * Required (not optional) so every emit site states it explicitly and a new
+ * site cannot silently drop it.
  */
 export interface EventRule {
   ruleId: string;
   spaceId: string;
   rule?: RuleResponse;
+  templateId?: string;
 }
 
 /**
@@ -99,12 +105,13 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
   }
 
   private toEventPayload(eventRule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule } = eventRule;
+    const { ruleId, spaceId, rule, templateId } = eventRule;
     return {
       ruleId,
       spaceId,
       ...(correlationId ? { correlationId } : {}),
       ...(rule ? { rule } : {}),
+      ...(templateId ? { templateId } : {}),
     };
   }
 

@@ -24,6 +24,7 @@ export {
   PROPOSAL_APPROVE_URL,
   PROPOSAL_BY_ID_URL,
   PROPOSAL_DISMISS_URL,
+  PROPOSAL_REOPEN_URL,
   PROPOSAL_REVISIONS_URL,
   PROPOSAL_CHARTS_SUMMARY_URL,
 } from './src/constants';
@@ -43,6 +44,7 @@ export {
   isTodoProposal,
   isExpired,
   isProposalSettling,
+  isAwaitingRetry,
   isTerminal,
   OPEN_PROPOSAL_STATUSES,
   SETTLED_PROPOSAL_STATUSES,

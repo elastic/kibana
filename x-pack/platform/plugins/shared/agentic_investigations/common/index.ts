@@ -23,15 +23,22 @@ export {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_REFERENCES,
+  MAX_EVIDENCE_REFERENCE_URL_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   evidenceChartSchema,
+  evidenceReferenceSchema,
   investigationEvidenceSchema,
+  isEvidenceLinkReference,
 } from './evidence';
 export type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  EvidenceLinkReference,
+  EvidenceQueryReference,
+  EvidenceReference,
   InvestigationEvidence,
 } from './evidence';
 
@@ -47,12 +54,14 @@ export {
   IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
+  IMPACT_PILLS_PAGE_SIZE,
   IMPACT_PROPOSAL_SUMMARY_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_PILLS_REACH,
   MAX_IMPACT_TOOL_ENTITIES,
   SET_IMPACT_TOOL_ID,
   attachImpactRequestSchema,
@@ -151,6 +160,7 @@ export {
   INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_SEVERITY_COUNTS_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_READ,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
 export type {
@@ -160,6 +170,12 @@ export type {
 
 export { isInvestigationSeverity } from './investigations/severity';
 export { isInvestigationTitlePending } from './investigations/title';
+export {
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
+  investigationRunFailedEventSchema,
+} from './investigations/run_failure';
+export type { InvestigationRunFailedEventData } from './investigations/run_failure';
 
 // Query API shapes. Types only, like subjects and hypotheses: the schemas stay in the entity
 // barrel so the page load bundle does not carry them.

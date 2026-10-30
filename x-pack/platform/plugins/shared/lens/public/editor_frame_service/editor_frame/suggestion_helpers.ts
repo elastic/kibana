@@ -27,6 +27,7 @@ import type {
   DatasourceStates,
   VisualizationState,
   DataViewsState,
+  DefaultVisualizationOverrides,
 } from '@kbn/lens-common';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type { LensDispatch } from '../../state_management';
@@ -54,6 +55,7 @@ export function getSuggestions({
   mainPalette,
   allowMixed,
   query,
+  defaultVisualizationOverrides,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -69,6 +71,7 @@ export function getSuggestions({
   allowMixed?: boolean;
   /** Optional query (e.g. ES|QL) for context-aware suggestions (e.g. prefer line for time series). */
   query?: AggregateQuery;
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -176,7 +179,8 @@ export function getSuggestions({
             activeData,
             allowMixed,
             datasourceId,
-            query
+            query,
+            defaultVisualizationOverrides?.[visualizationId as keyof DefaultVisualizationOverrides]
           );
         });
     })
@@ -248,7 +252,8 @@ function getVisualizationSuggestions(
   activeData?: Record<string, Datatable>,
   allowMixed?: boolean,
   datasourceId?: string,
-  query?: AggregateQuery
+  query?: AggregateQuery,
+  defaultOverrides?: DefaultVisualizationOverrides[keyof DefaultVisualizationOverrides]
 ) {
   try {
     const isSubtypeSupported =
@@ -265,6 +270,7 @@ function getVisualizationSuggestions(
         allowMixed,
         datasourceId,
         query,
+        defaultOverrides,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

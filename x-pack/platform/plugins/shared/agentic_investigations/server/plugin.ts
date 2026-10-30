@@ -16,6 +16,7 @@ import {
 import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgenticInvestigationsConfig } from './config';
+import { resolveLinkActor } from './escalations/services/link_actor';
 import { registerFeatures } from './features';
 import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
@@ -306,11 +307,20 @@ export class AgenticInvestigationsPlugin
             spaceId: this.getSpaceId(request),
             logger: this.logger,
           }),
+        getLinkActor: (request) =>
+          resolveLinkActor({
+            request,
+            security: coreStart.security,
+            esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          }),
       });
     }
 
     this.impactPillsService = new ImpactPillsService({
-      getImpactClient,
+      esClient,
+      logger: this.logger,
+      getImpactService: () => this.requireImpactService(),
+      privileges: startPrivileges,
       getSpaceId: (request) => this.getSpaceId(request),
       getProposals: () => plugins.proposals,
       getEscalationsService: () => this.escalationsService,

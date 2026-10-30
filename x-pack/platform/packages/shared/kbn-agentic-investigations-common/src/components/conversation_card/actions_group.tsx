@@ -16,8 +16,6 @@ import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;
-  onClickRecommendedAction?: ({ id }: { id: Investigation['id'] }) => void;
-
   onClickAction: BaseActionsProps['onClickAction'];
   /** Opens this investigation's chat. Supplied by the caller, which owns the route. */
   onOpenChat: () => void;
@@ -26,6 +24,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
+  /** When false the chat control and the menu are disabled, with a tooltip naming the privilege. */
+  canOpenInvestigationDetails?: boolean;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
   /**
@@ -39,16 +39,16 @@ export interface ConversationsActionsGroupProps {
 
 /**
  * The card's trailing controls: opening the chat, which an analyst does constantly, and
- * the menu holding everything that changes the record — including the recommended
- * action, so the card surfaces navigation rather than a decision.
+ * the menu holding everything that changes the record. The recommended action is decided in
+ * the details flyout, so the card surfaces navigation rather than a decision.
  */
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
   ({
     investigation,
-    onClickRecommendedAction,
     onClickAction,
     onOpenChat,
     chatHref,
+    canOpenInvestigationDetails = true,
     canManageEscalations,
     canCloseInvestigation,
     onCopyLink,
@@ -76,8 +76,14 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             size="s"
             iconType="productAgent"
             withToolTip
+            toolTipContent={
+              canOpenInvestigationDetails
+                ? undefined
+                : ACTIONS_TRANSLATIONS.tooltips.proposalsAgentBuilderPrivilegeRequired
+            }
+            isDisabled={!canOpenInvestigationDetails}
             aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            href={chatHref}
+            href={canOpenInvestigationDetails ? chatHref : undefined}
             onClick={handleChatClick}
             data-test-subj="conversationCardOpenInChat"
           />
@@ -86,10 +92,10 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           <BaseActions
             investigation={investigation}
             onClickAction={onClickAction}
-            onClickRecommendedAction={onClickRecommendedAction}
             canManageEscalations={canManageEscalations}
             canCloseInvestigation={canCloseInvestigation}
             onCopyLink={onCopyLink}
+            canOpenInvestigationDetails={canOpenInvestigationDetails}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
