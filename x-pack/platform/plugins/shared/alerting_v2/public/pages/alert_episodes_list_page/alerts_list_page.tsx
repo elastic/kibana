@@ -68,6 +68,21 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import { EpisodesKpis } from '@kbn/alerting-v2-episodes-ui/components/episodes_kpis';
+import { EpisodesHistogram } from '@kbn/alerting-v2-episodes-ui/components/episodes_histogram';
+import { ClassicAlertDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/classic_alert_details_flyout';
+import { useEpisodesBulkActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_bulk_actions';
+import { alertEpisodeToDataTableRecord } from '@kbn/alerting-v2-episodes-ui/utils/alert_episode_to_data_table_record';
+import { dataTableRecordToEpisode } from '@kbn/alerting-v2-episodes-ui/utils/data_table_record_to_episode';
+import {
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
+import {
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '@kbn/alerting-v2-episodes-ui/utils/filter_alert_actions_by_privilege';
 import {
   DEFAULT_EPISODES_TABLE_SORT,
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
@@ -81,25 +96,10 @@ import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
-import { EpisodesKpis } from './components/episodes_kpis';
-import { EpisodesHistogram } from './components/episodes_histogram';
-import { alertEpisodeToDataTableRecord } from './utils';
-import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
-import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { getQueryFilterState } from './utils/episodes_query_filter';
-import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
-import {
-  canOpenDiscover,
-  getDiscoverHrefForAlertEventsHistory,
-  getDiscoverHrefForRuleAndAlertTimestamp,
-} from '../../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_alert_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
 

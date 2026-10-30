@@ -18,10 +18,13 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import {
-  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
-  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  getNightshiftBoundHookWorkflowId,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { getTelemetryTargets } from '../../telemetry_targets';
+import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import knowledgeCortexSection from './instructions/knowledge_cortex.text';
@@ -95,27 +98,27 @@ export interface InvestigationAgentTypeOptions {
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
+  telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
-  /**
-   * The id of the workflow the agent runs for a hook. A space set up with the Nightshift service
-   * account runs its hooks through entry points bound to that account; elsewhere the global hook
-   * runs as whoever runs the agent.
-   */
-  resolveHookWorkflowId?: ResolveHookWorkflowId;
   logger?: Logger;
 }
 
-/** Resolves a global hook workflow id to the one the agent runs in this space. */
-export type ResolveHookWorkflowId = (
-  hookWorkflowId: string,
-  ctx: AgentConfigContext
-) => Promise<string>;
-
-const GLOBAL_HOOKS = {
-  materializeWorkflowId: NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
-  optimizeWorkflowId: NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
-};
+/**
+ * The hook workflows the agent runs in a space. Every space runs them through the entry points
+ * bound to its agent service account, installed by setup; a space without them cannot run
+ * Nightshift at all.
+ */
+const hooksFor = (spaceId: string) => ({
+  materializeWorkflowId: getNightshiftBoundHookWorkflowId(
+    NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+    spaceId
+  ),
+  optimizeWorkflowId: getNightshiftBoundHookWorkflowId(
+    NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+    spaceId
+  ),
+});
 
 const appendCustomContext = async ({
   instructions: baseInstructions,
@@ -156,13 +159,16 @@ export const buildNightshiftAgentConfiguration = ({
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
+  telemetryConfig,
   getCustomContextInstructions,
-  resolveHookWorkflowId,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
 }): AgentTypeDefinition['baseConfiguration'] => {
-  const configurationFor = ({ materializeWorkflowId, optimizeWorkflowId }: typeof GLOBAL_HOOKS) =>
+  const configurationFor = ({
+    materializeWorkflowId,
+    optimizeWorkflowId,
+  }: ReturnType<typeof hooksFor>) =>
     ({
       instructions: agentInstructions,
       skill_ids: [],
@@ -176,7 +182,17 @@ export const buildNightshiftAgentConfiguration = ({
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+      connector_ids: telemetryConfig
+        ? [
+            ...new Set(
+              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+                connectorId ? [connectorId] : []
+              )
+            ),
+          ]
+        : telemetryConnectorId
+        ? [telemetryConnectorId]
+        : [],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
@@ -195,19 +211,9 @@ export const buildNightshiftAgentConfiguration = ({
         : {}),
     } satisfies AgentBaseConfiguration);
 
-  // Static unless something varies by space or request.
-  if (!getCustomContextInstructions && !resolveHookWorkflowId) {
-    return configurationFor(GLOBAL_HOOKS);
-  }
-
+  // The hooks are per space, so the configuration always resolves per request.
   return async (ctx) => {
-    const [materializeWorkflowId, optimizeWorkflowId] = resolveHookWorkflowId
-      ? await Promise.all([
-          resolveHookWorkflowId(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID, ctx),
-          resolveHookWorkflowId(NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID, ctx),
-        ])
-      : [GLOBAL_HOOKS.materializeWorkflowId, GLOBAL_HOOKS.optimizeWorkflowId];
-    const baseConfiguration = configurationFor({ materializeWorkflowId, optimizeWorkflowId });
+    const baseConfiguration = configurationFor(hooksFor(ctx.spaceId));
     return getCustomContextInstructions
       ? {
           ...baseConfiguration,
@@ -225,7 +231,7 @@ export const buildNightshiftAgentConfiguration = ({
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * described in `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
@@ -255,8 +261,8 @@ export const registerInvestigationAgentType = (
     investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
+    telemetryConfig,
     getCustomContextInstructions,
-    resolveHookWorkflowId,
     logger,
   }: InvestigationAgentTypeOptions
 ): void => {
@@ -269,8 +275,8 @@ export const registerInvestigationAgentType = (
       investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
+      telemetryConfig,
       getCustomContextInstructions,
-      resolveHookWorkflowId,
       logger,
     })
   );
