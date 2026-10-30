@@ -14,9 +14,6 @@ import type {
 } from '@kbn/core/server';
 
 import type { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } from './types';
-import { timelineSearchStrategyProvider } from './search_strategy/timeline';
-import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
-import { indexFieldsProvider } from './search_strategy/index_fields';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema } from './config';
 
@@ -34,23 +31,8 @@ export class TimelinesPlugin
     );
   }
 
-  public setup(core: CoreSetup<StartPlugins, TimelinesPluginStart>, plugins: SetupPlugins) {
+  public setup(_core: CoreSetup<StartPlugins, TimelinesPluginStart>, _plugins: SetupPlugins) {
     this.logger.debug('timelines: Setup');
-
-    const IndexFields = indexFieldsProvider(core.getStartServices);
-    // Register search strategy
-    void core.getStartServices().then(([_, depsStart]) => {
-      const TimelineSearchStrategy = timelineSearchStrategyProvider(depsStart.data, this.logger);
-      const TimelineEqlSearchStrategy = timelineEqlSearchStrategyProvider(depsStart.data);
-
-      plugins.data.search.registerSearchStrategy('indexFields', IndexFields);
-      plugins.data.search.registerSearchStrategy('timelineSearchStrategy', TimelineSearchStrategy);
-      plugins.data.search.registerSearchStrategy(
-        'timelineEqlSearchStrategy',
-        TimelineEqlSearchStrategy
-      );
-    });
-
     return {};
   }
 
