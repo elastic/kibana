@@ -164,9 +164,12 @@ describe('Create Remote cluster', () => {
           await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
           act(() => jest.advanceTimersByTime(100));
 
-          const globalError = screen.getByTestId('remoteClusterFormGlobalError');
-          expect(within(globalError).getByRole('status')).toHaveTextContent(
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveTextContent(
             'Some fields require your attention.'
+          );
+          expect(screen.getByTestId('remoteClusterFormErrorAnnouncement')).toHaveAttribute(
+            'aria-live',
+            'assertive'
           );
         } finally {
           jest.useRealTimers();

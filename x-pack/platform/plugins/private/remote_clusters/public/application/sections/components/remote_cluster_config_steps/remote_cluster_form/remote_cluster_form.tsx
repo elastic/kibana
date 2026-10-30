@@ -19,6 +19,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
@@ -49,7 +50,6 @@ const defaultClusterValues: ClusterPayload = {
   proxySocketConnections: 18,
   serverName: '',
 };
-const ERROR_FOCUS_DELAY_MS = 100;
 interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
@@ -95,7 +95,6 @@ export const RemoteClusterForm: React.FC<Props> = ({
   const [areErrorsVisible, setAreErrorsVisible] = useState(false);
   const [formHasBeenSubmited, setFormHasBeenSubmited] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  const focusInvalidFieldTimeoutRef = useRef<number | undefined>(undefined);
   const errorTitle = i18n.translate('xpack.remoteClusters.remoteClusterForm.errorTitle', {
     defaultMessage: 'Some fields require your attention.',
   });
@@ -135,12 +134,9 @@ export const RemoteClusterForm: React.FC<Props> = ({
   const handleNext = () => {
     if (hasErrors()) {
       flushSync(() => setAreErrorsVisible(true));
-      focusInvalidFieldTimeoutRef.current = window.setTimeout(() => {
-        focusInvalidFieldTimeoutRef.current = undefined;
-        const firstInvalidField =
-          formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
-        firstInvalidField?.focus();
-      }, ERROR_FOCUS_DELAY_MS);
+      const firstInvalidField =
+        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+      firstInvalidField?.focus();
       return;
     }
     setFormHasBeenSubmited(true);
@@ -203,15 +199,6 @@ export const RemoteClusterForm: React.FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
-
-  useEffect(
-    () => () => {
-      if (focusInvalidFieldTimeoutRef.current !== undefined) {
-        window.clearTimeout(focusInvalidFieldTimeoutRef.current);
-      }
-    },
-    []
-  );
 
   const onSkipUnavailableChange = useCallback(
     (e: EuiSwitchEvent) => {
@@ -305,11 +292,14 @@ export const RemoteClusterForm: React.FC<Props> = ({
     }
     return (
       <>
-        <KbnDangerCallout
-          announceOnMount
-          title={errorTitle}
-          data-test-subj="remoteClusterFormGlobalError"
-        />
+        <KbnDangerCallout title={errorTitle} data-test-subj="remoteClusterFormGlobalError" />
+        <EuiLiveAnnouncer
+          role="alert"
+          aria-live="assertive"
+          data-test-subj="remoteClusterFormErrorAnnouncement"
+        >
+          {errorTitle}
+        </EuiLiveAnnouncer>
         <EuiSpacer size="m" />
       </>
     );
