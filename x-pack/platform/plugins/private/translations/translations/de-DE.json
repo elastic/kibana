@@ -48958,8 +48958,6 @@
     "xpack.securitySolution.timeline.kpis.sourceIpKpiTitle": "Quell-IPs",
     "xpack.securitySolution.timeline.kpis.userKpiTitle": "Nutzer",
     "xpack.securitySolution.timeline.modal.attachToCaseButtonLabel": "An Fall anhängen",
-    "xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel": "An bestehenden Fall anhängen",
-    "xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel": "An neuen Fall anhängen",
     "xpack.securitySolution.timeline.modal.newTimeline": "Neue Zeitleiste",
     "xpack.securitySolution.timeline.modal.newTimelineBtn": "Neu",
     "xpack.securitySolution.timeline.modal.newTimelineTemplate": "Neue Timeline-Vorlage",

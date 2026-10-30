@@ -1092,7 +1092,7 @@ x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
-x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
+x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution @elastic/nightshift
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -3887,6 +3887,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
 /.agents/skills/evals-create-suite/** @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 /.agents/skills/evals-write-spec/** @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
+/.agents/skills/redux-toolkit-best-practices/** @elastic/kibana-dashboards
 
 # Security team skills: API authorization, CodeQL, and privilege deprecation guidance.
 /.agents/skills/api-authz/** @elastic/kibana-security
