@@ -81,12 +81,14 @@ export interface AffectedMonitor {
   reason: AffectedMonitorReason;
 }
 
-/** Response of saving a connection: its status, plus the monitors a new restriction affects. */
-export interface SecretConnectionSaveResult extends SecretConnectionStatus {
-  affectedMonitors?: AffectedMonitor[];
-  // Can exceed `affectedMonitors.length`, which is capped.
-  affectedMonitorCount?: number;
+/** Monitors that Heartbeat would refuse to run with a connection, capped, plus the full count. */
+export interface AffectedMonitorsResult {
+  monitors: AffectedMonitor[];
+  total: number;
 }
+
+/** Per connection name, for the saved connections that have allowed monitor hosts. */
+export type SecretConnectionAffectedMonitors = Record<string, AffectedMonitorsResult>;
 
 /** Outcome of `POST /_test`: whether Kibana could reach Vault and authenticate. */
 export interface SecretConnectionTestResult {

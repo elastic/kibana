@@ -19,6 +19,14 @@ const mockServices = {
   application: { capabilities: { uptime: { canManageSecretConnections: true } } },
 };
 
+const mockGetAffected = jest.fn();
+const mockPreview = jest.fn();
+jest.mock('../../../state/settings/api', () => ({
+  getAffectedMonitors: (...args: unknown[]) => mockGetAffected(...args),
+  previewAffectedMonitors: (...args: unknown[]) => mockPreview(...args),
+  testSecretConnection: jest.fn(),
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: mockServices }),
 }));
@@ -50,6 +58,8 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
     jest.clearAllMocks();
     mockGet.mockResolvedValue([savedConnection]);
     mockPut.mockResolvedValue({});
+    mockGetAffected.mockResolvedValue({});
+    mockPreview.mockResolvedValue({ monitors: [], total: 0 });
   });
 
   it('does not save while the host being entered is invalid, and keeps it visible', async () => {
@@ -104,32 +114,85 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
     expect(screen.queryByText(INVALID_HOST_ERROR)).not.toBeInTheDocument();
   });
 
-  it('warns which monitors can no longer use the connection after saving a restriction', async () => {
-    mockPut.mockResolvedValue({
-      ...savedConnection,
-      affectedMonitors: [
-        { name: 'checkout', reason: 'host' },
-        { name: 'login', reason: 'monitor_type' },
-      ],
-      affectedMonitorCount: 3,
+  describe('monitors affected by the allowed hosts', () => {
+    it('shows which monitors would report down while the hosts are edited', async () => {
+      mockPreview.mockResolvedValue({
+        monitors: [
+          { name: 'checkout', reason: 'host' },
+          { name: 'login', reason: 'monitor_type' },
+        ],
+        total: 3,
+      });
+      await openEditFlyout();
+
+      await userEvent.type(hostsInput(), 'api.example.com{enter}');
+
+      const callout = await screen.findByTestId('syntheticsVaultAffectedMonitorsCallout');
+      expect(callout).toHaveTextContent('3 monitors will report down');
+      expect(callout).toHaveTextContent('checkout (other host)');
+      expect(callout).toHaveTextContent('login (browser monitor)');
+      expect(callout).toHaveTextContent('and 1 more');
+      expect(mockPreview).toHaveBeenLastCalledWith({
+        name: 'prod',
+        allowedMonitorHosts: ['api.example.com'],
+      });
     });
-    await openEditFlyout();
 
-    await userEvent.type(hostsInput(), 'api.example.com{enter}');
-    await userEvent.click(screen.getByTestId('syntheticsVaultSaveConnection'));
+    it('says when no existing monitor is affected', async () => {
+      await openEditFlyout();
 
-    await waitFor(() => expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalled());
-    const { text } = mockServices.notifications.toasts.addWarning.mock.calls[0][0];
-    expect(text).toContain('3 monitors');
-    expect(text).toContain('checkout (other host), login (browser monitor) and 1 more');
-  });
+      await userEvent.type(hostsInput(), 'api.example.com{enter}');
 
-  it('does not warn when no monitor is affected', async () => {
-    await openEditFlyout();
+      expect(await screen.findByTestId('syntheticsVaultAffectedMonitorsNone')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('syntheticsVaultAffectedMonitorsCallout')
+      ).not.toBeInTheDocument();
+    });
 
-    await userEvent.click(screen.getByTestId('syntheticsVaultSaveConnection'));
+    it('says when it could not check', async () => {
+      mockPreview.mockRejectedValue(new Error('boom'));
+      await openEditFlyout();
 
-    await waitFor(() => expect(mockPut).toHaveBeenCalledTimes(1));
-    expect(mockServices.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      await userEvent.type(hostsInput(), 'api.example.com{enter}');
+
+      expect(
+        await screen.findByTestId('syntheticsVaultAffectedMonitorsFailed')
+      ).toBeInTheDocument();
+    });
+
+    it('does not ask while there are no hosts', async () => {
+      await openEditFlyout();
+
+      await waitFor(() => expect(mockGet).toHaveBeenCalled());
+      expect(mockPreview).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('syntheticsVaultAffectedMonitorsNone')).not.toBeInTheDocument();
+    });
+
+    it('shows the current state in the connection table', async () => {
+      mockGet.mockResolvedValue([
+        {
+          ...savedConnection,
+          config: {
+            ...savedConnection.config,
+            allowedMonitorHosts: ['api.example.com', 'b.example.com'],
+          },
+        },
+        { ...savedConnection, name: 'staging' },
+      ]);
+      mockGetAffected.mockResolvedValue({
+        prod: { monitors: [{ name: 'checkout', reason: 'host' }], total: 1 },
+      });
+      render(
+        <I18nProvider>
+          <SecretConnectionPanel />
+        </I18nProvider>
+      );
+
+      expect(await screen.findByTestId('syntheticsVaultHostsBadge')).toHaveTextContent('2 hosts');
+      expect(await screen.findByTestId('syntheticsVaultAffectedMonitorsBadge')).toHaveTextContent(
+        '1 monitor down'
+      );
+      expect(screen.getByTestId('syntheticsVaultAnyHost')).toHaveTextContent('Any host');
+    });
   });
 });

@@ -30,6 +30,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
@@ -44,11 +45,9 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
-  AffectedMonitor,
-  AffectedMonitorReason,
   HashiCorpVaultConfig,
   HashiCorpVaultSecrets,
-  SecretConnectionSaveResult,
+  SecretConnectionAffectedMonitors,
   SecretConnectionStatus,
   SecretConnectionTestResult,
   SecretProviderType,
@@ -61,7 +60,12 @@ import {
   normalizeAllowedMonitorHost,
 } from '../../../../../../common/lib/allowed_monitor_hosts';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
-import { testSecretConnection } from '../../../state/settings/api';
+import { getAffectedMonitors, testSecretConnection } from '../../../state/settings/api';
+import {
+  AffectedMonitorsBadge,
+  AffectedMonitorsPreview,
+  useAffectedMonitorsPreview,
+} from './affected_monitors';
 
 // Selectable secret-provider backends. Only HashiCorp Vault is implemented today;
 // adding a provider means adding an option here and a matching field section below.
@@ -142,42 +146,13 @@ const toConnectionPayload = (
   };
 };
 
-const AFFECTED_REASON_LABELS: Record<AffectedMonitorReason, string> = {
-  monitor_type: i18n.translate('xpack.synthetics.secretConnection.affectedReason.monitorType', {
-    defaultMessage: 'browser monitor',
-  }),
-  redirects: i18n.translate('xpack.synthetics.secretConnection.affectedReason.redirects', {
-    defaultMessage: 'follows redirects',
-  }),
-  host: i18n.translate('xpack.synthetics.secretConnection.affectedReason.host', {
-    defaultMessage: 'other host',
-  }),
-};
-
-const affectedMonitorsText = (
-  connection: string,
-  monitors: AffectedMonitor[],
-  total: number
-): string =>
-  i18n.translate('xpack.synthetics.secretConnection.affectedMonitorsText', {
-    defaultMessage:
-      '{total, plural, one {# monitor} other {# monitors}} using "{connection}" will report down: {monitors}{more, plural, =0 {} other { and # more}}. Browser monitors, monitors that follow redirects and monitors that target a host that is not on the list cannot use a connection with allowed monitor hosts.',
-    values: {
-      total,
-      connection,
-      monitors: monitors
-        .map(({ name, reason }) => `${name} (${AFFECTED_REASON_LABELS[reason]})`)
-        .join(', '),
-      more: Math.max(total - monitors.length, 0),
-    },
-  });
-
 export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
   const canManage = (application?.capabilities.uptime.canManageSecretConnections ??
     false) as boolean;
 
   const [connections, setConnections] = useState<SecretConnectionStatus[]>([]);
+  const [affectedBySaved, setAffectedBySaved] = useState<SecretConnectionAffectedMonitors>({});
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -186,6 +161,10 @@ export const SecretConnectionPanel = () => {
   const [hostError, setHostError] = useState<string | undefined>();
   // Text typed into the allowed hosts field that was not turned into a host yet.
   const [hostInput, setHostInput] = useState('');
+  const affectedPreview = useAffectedMonitorsPreview(
+    editing?.name.trim() ?? '',
+    editing?.allowedMonitorHosts ?? []
+  );
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
@@ -227,6 +206,10 @@ export const SecretConnectionPanel = () => {
     try {
       const res = await http.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION);
       setConnections(Array.isArray(res) ? res : []);
+      // Advisory and slower than the list, so it fills in when it arrives.
+      getAffectedMonitors()
+        .then(setAffectedBySaved)
+        .catch(() => setAffectedBySaved({}));
     } catch (e) {
       // Surface the failure rather than showing an empty list (which reads as
       // "no connections configured").
@@ -287,21 +270,8 @@ export const SecretConnectionPanel = () => {
         type: editing.type,
         ...toConnectionPayload({ ...editing, allowedMonitorHosts }),
       };
-      const result = await http.put<SecretConnectionSaveResult>(
-        SYNTHETICS_API_URLS.SECRET_CONNECTION,
-        { body: JSON.stringify(body) }
-      );
+      await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);
-      if (result?.affectedMonitors?.length) {
-        notifications?.toasts.addWarning({
-          title: AFFECTED_MONITORS_TITLE,
-          text: affectedMonitorsText(
-            body.name,
-            result.affectedMonitors,
-            result.affectedMonitorCount ?? result.affectedMonitors.length
-          ),
-        });
-      }
       closeFlyout();
       await load();
     } catch (e) {
@@ -341,6 +311,39 @@ export const SecretConnectionPanel = () => {
     {
       name: AUTH_METHOD_LABEL,
       render: (c: SecretConnectionStatus) => c.config?.authMethod ?? '',
+    },
+    {
+      name: ALLOWED_MONITOR_HOSTS_LABEL,
+      render: (c: SecretConnectionStatus) => {
+        const hosts = c.config?.allowedMonitorHosts ?? [];
+        if (hosts.length === 0) {
+          return (
+            <EuiText size="s" color="subdued" data-test-subj="syntheticsVaultAnyHost">
+              {ANY_MONITOR_HOST_LABEL}
+            </EuiText>
+          );
+        }
+        const affected = c.name ? affectedBySaved[c.name] : undefined;
+        return (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={hosts.join(', ')}>
+                <EuiBadge color="hollow" tabIndex={0} data-test-subj="syntheticsVaultHostsBadge">
+                  {i18n.translate('xpack.synthetics.secretConnection.hostsBadge', {
+                    defaultMessage: '{count, plural, one {# host} other {# hosts}}',
+                    values: { count: hosts.length },
+                  })}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+            {affected && affected.total > 0 && (
+              <EuiFlexItem grow={false}>
+                <AffectedMonitorsBadge result={affected} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       name: ACTIONS_LABEL,
@@ -603,6 +606,12 @@ export const SecretConnectionPanel = () => {
                     }}
                   />
                 </EuiFormRow>
+                {editing.allowedMonitorHosts.length > 0 && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <AffectedMonitorsPreview state={affectedPreview} />
+                  </>
+                )}
                 {testResult && (
                   <>
                     <EuiSpacer size="l" />
@@ -744,6 +753,9 @@ const ALLOWED_MONITOR_HOSTS_LABEL = i18n.translate(
     defaultMessage: 'Allowed monitor hosts',
   }
 );
+const ANY_MONITOR_HOST_LABEL = i18n.translate('xpack.synthetics.secretConnection.anyMonitorHost', {
+  defaultMessage: 'Any host',
+});
 const ALLOWED_MONITOR_HOSTS_PLACEHOLDER = i18n.translate(
   'xpack.synthetics.secretConnection.allowedMonitorHostsPlaceholder',
   {
@@ -805,12 +817,6 @@ const TEST_NOTE = i18n.translate('xpack.synthetics.secretConnection.testNote', {
   defaultMessage:
     'Test connection checks that Kibana can reach and authenticate with Vault. At runtime, Heartbeat resolves secrets from the private location’s network, so make sure it can reach this address too.',
 });
-const AFFECTED_MONITORS_TITLE = i18n.translate(
-  'xpack.synthetics.secretConnection.affectedMonitorsTitle',
-  {
-    defaultMessage: 'Some monitors can no longer use this connection',
-  }
-);
 const SAVED_TOAST = i18n.translate('xpack.synthetics.secretConnection.savedToast', {
   defaultMessage: 'Vault connection saved',
 });

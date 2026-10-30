@@ -12,6 +12,8 @@ import { syntheticsSecretConnectionType } from '../../../../common/types/saved_o
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import {
   deleteSecretConnectionRoute,
+  getAffectedMonitorsRoute,
+  previewAffectedMonitorsRoute,
   saveSecretConnectionRoute,
   testSecretConnectionRoute,
 } from './secret_connection';
@@ -40,6 +42,7 @@ const setup = ({
   secretConnections = {},
   globalParams = {},
   monitors = [],
+  connections = [],
 }: {
   body?: Record<string, unknown>;
   params?: Record<string, string>;
@@ -47,6 +50,7 @@ const setup = ({
   secretConnections?: { enabled?: boolean; allowedHosts?: string[] };
   globalParams?: Record<string, string>;
   monitors?: Array<Record<string, unknown>>;
+  connections?: Array<{ name: string; config: HashiCorpVaultConfig }>;
 }) => {
   // Like the real client: a hidden type that was not included is reported as not found.
   const encryptedClient = (includedHiddenTypes: string[] = []) => ({
@@ -64,7 +68,20 @@ const setup = ({
     request: { body, params },
     response,
     spaceId: 'default',
-    savedObjectsClient: { create, delete: deleteFn },
+    savedObjectsClient: {
+      create,
+      delete: deleteFn,
+      createPointInTimeFinder: jest.fn(() => ({
+        async *find() {
+          yield {
+            saved_objects: connections.map(({ name, config }) => ({
+              attributes: { name, type: 'hashicorp_vault', config },
+            })),
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      })),
+    },
     syntheticsMonitorClient: {
       getSyntheticsParams: jest.fn().mockResolvedValue({ default: globalParams }),
     },
@@ -319,49 +336,73 @@ describe('saving allowed monitor hosts', () => {
     expect(create.mock.calls[0][1].config).not.toHaveProperty('allowedMonitorHosts');
   });
 
-  describe('monitors the restriction affects', () => {
-    const monitors = [
-      { name: 'ok', type: 'http', urls: 'https://api.example.com/v1', max_redirects: '0' },
-      { name: 'other-host', type: 'http', urls: 'https://other.example/v1', max_redirects: '0' },
-      { name: 'redirects', type: 'http', urls: 'https://api.example.com', max_redirects: '3' },
-      { name: 'proxy', type: 'http', urls: 'https://api.example.com', proxy_url: 'http://p.x:80' },
-      { name: 'login', type: 'browser' },
-      { name: 'tcp-via-param', type: 'tcp', hosts: '${tcpHost}:443' },
-      { name: 'no-connection', type: 'http', urls: 'https://other.example', max_redirects: '0' },
-    ].map((monitor) => ({
-      ...monitor,
-      // The first six use the connection, the last one does not.
-      password:
-        monitor.name === 'no-connection'
-          ? 'plain'
-          : monitor.name === 'tcp-via-param'
-          ? '${secret}'
-          : 'vault://prod@app#password',
-    }));
-    const globalParams = { secret: 'vault://prod@app#key', tcpHost: 'x.example.com' };
+  it('does not look at monitors, so it never waits for the check', async () => {
+    const { routeContext } = setup({
+      body: body(['api.example.com']),
+      monitors: [{ name: 'checkout', type: 'http', urls: 'https://other.example' }],
+    });
+
+    const result = (await save(routeContext)) as any;
+
+    expect(routeContext.monitorConfigRepository.findDecryptedMonitors).not.toHaveBeenCalled();
+    expect(result).not.toHaveProperty('affectedMonitors');
+  });
+});
+
+describe('affected monitors routes', () => {
+  const monitors = [
+    { name: 'ok', type: 'http', urls: 'https://api.example.com/v1', max_redirects: '0' },
+    { name: 'other-host', type: 'http', urls: 'https://other.example/v1', max_redirects: '0' },
+    { name: 'redirects', type: 'http', urls: 'https://api.example.com', max_redirects: '3' },
+    { name: 'proxy', type: 'http', urls: 'https://api.example.com', proxy_url: 'http://p.x:80' },
+    { name: 'login', type: 'browser' },
+    { name: 'tcp-via-param', type: 'tcp', hosts: '${tcpHost}:443' },
+    { name: 'no-connection', type: 'http', urls: 'https://other.example', max_redirects: '0' },
+  ].map((monitor) => ({
+    ...monitor,
+    // All but the last use the connection: directly, or through a parameter.
+    password:
+      monitor.name === 'no-connection'
+        ? 'plain'
+        : monitor.name === 'tcp-via-param'
+        ? '${secret}'
+        : 'vault://prod@app#password',
+  }));
+  const globalParams = { secret: 'vault://prod@app#key', tcpHost: 'x.example.com' };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('POST (preview)', () => {
+    const preview = (routeContext: unknown) =>
+      previewAffectedMonitorsRoute().handler(routeContext as any);
+    const previewBody = (allowedMonitorHosts: string[]) => ({ name: 'prod', allowedMonitorHosts });
 
     it('lists the monitors that use the connection and would be refused', async () => {
       const { routeContext } = setup({
-        body: body(['api.example.com']),
+        body: previewBody(['api.example.com']),
         monitors,
         globalParams,
       });
 
-      const result = (await save(routeContext)) as any;
+      const result = (await preview(routeContext)) as any;
 
-      expect(result.affectedMonitors).toEqual([
-        { name: 'other-host', reason: 'host' },
-        { name: 'redirects', reason: 'redirects' },
-        { name: 'proxy', reason: 'host' },
-        { name: 'login', reason: 'monitor_type' },
-        { name: 'tcp-via-param', reason: 'host' },
-      ]);
-      expect(result.affectedMonitorCount).toBe(5);
+      expect(result).toEqual({
+        monitors: [
+          { name: 'other-host', reason: 'host' },
+          { name: 'redirects', reason: 'redirects' },
+          { name: 'proxy', reason: 'host' },
+          { name: 'login', reason: 'monitor_type' },
+          { name: 'tcp-via-param', reason: 'host' },
+        ],
+        total: 5,
+      });
     });
 
     it('finds browser monitors that get the reference through merged parameters', async () => {
       const { routeContext } = setup({
-        body: body(['api.example.com']),
+        body: previewBody(['api.example.com']),
         // Browser monitors read parameters as params.name, so none of these has the reference in
         // a saved field. Global parameters are merged under the monitor's own.
         globalParams: { dbPassword: 'vault://prod@app#password' },
@@ -373,9 +414,9 @@ describe('saving allowed monitor hosts', () => {
         ],
       });
 
-      const result = (await save(routeContext)) as any;
+      const result = (await preview(routeContext)) as any;
 
-      expect(result.affectedMonitors).toEqual([
+      expect(result.monitors).toEqual([
         { name: 'uses-global', reason: 'monitor_type' },
         { name: 'local-reference', reason: 'monitor_type' },
       ]);
@@ -383,7 +424,7 @@ describe('saving allowed monitor hosts', () => {
 
     it('finds monitors when a parameter they use holds quotes or backslashes', async () => {
       const { routeContext } = setup({
-        body: body(['api.example.com']),
+        body: previewBody(['api.example.com']),
         globalParams: { secret: 'vault://prod@app#key', pw: 'a"b\\c', host: 'other.example' },
         monitors: [
           {
@@ -396,76 +437,98 @@ describe('saving allowed monitor hosts', () => {
         ],
       });
 
-      const result = (await save(routeContext)) as any;
+      const result = (await preview(routeContext)) as any;
 
-      expect(result.affectedMonitors).toEqual([{ name: 'tricky', reason: 'host' }]);
+      expect(result.monitors).toEqual([{ name: 'tricky', reason: 'host' }]);
     });
 
-    it('does not let a slow lookup hold up the save', async () => {
-      jest.useFakeTimers();
-      try {
-        const { routeContext, create } = setup({ body: body(['api.example.com']) });
-        routeContext.monitorConfigRepository.findDecryptedMonitors.mockReturnValue(
-          new Promise(() => {})
-        );
+    it('caps the listed monitors but counts them all', async () => {
+      const many = Array.from({ length: 25 }, (_, i) => ({
+        name: `m${i}`,
+        type: 'http',
+        urls: 'https://other.example',
+        max_redirects: '0',
+        password: 'vault://prod@app#password',
+      }));
+      const { routeContext } = setup({ body: previewBody(['api.example.com']), monitors: many });
 
-        const pending = save(routeContext);
-        await jest.advanceTimersByTimeAsync(AFFECTED_MONITORS_TIMEOUT_MS);
-        const result = (await pending) as any;
+      const result = (await preview(routeContext)) as any;
 
-        expect(create).toHaveBeenCalledTimes(1);
-        expect(result).not.toHaveProperty('affectedMonitors');
-        expect(routeContext.server.logger.warn).toHaveBeenCalledWith(
-          expect.stringContaining('timed out')
-        );
-      } finally {
-        jest.useRealTimers();
-      }
+      expect(result.monitors).toHaveLength(20);
+      expect(result.total).toBe(25);
     });
 
-    it('does not look at monitors when the list is unchanged', async () => {
+    it('does not scan for a restriction of another connection', async () => {
       const { routeContext } = setup({
-        body: body(['api.example.com']),
-        stored: {
-          config: { ...storedConfig, allowedMonitorHosts: ['API.example.com'] },
-          secrets: { token: 'stored' },
-        },
+        body: { name: 'staging', allowedMonitorHosts: ['api.example.com'] },
         monitors,
         globalParams,
       });
 
-      const result = (await save(routeContext)) as any;
-
-      expect(routeContext.monitorConfigRepository.findDecryptedMonitors).not.toHaveBeenCalled();
-      expect(result).not.toHaveProperty('affectedMonitors');
+      expect(await preview(routeContext)).toEqual({ monitors: [], total: 0 });
     });
 
-    it('does not look at monitors when the restriction is removed', async () => {
+    it('gives up on a slow lookup instead of leaving the request hanging', async () => {
+      jest.useFakeTimers();
+      try {
+        const { routeContext } = setup({ body: previewBody(['api.example.com']) });
+        routeContext.monitorConfigRepository.findDecryptedMonitors.mockReturnValue(
+          new Promise(() => {})
+        );
+
+        const pending = preview(routeContext);
+        const outcome = pending.then(
+          () => 'resolved',
+          (e: Error) => e.message
+        );
+        await jest.advanceTimersByTimeAsync(AFFECTED_MONITORS_TIMEOUT_MS);
+
+        expect(await outcome).toContain('timed out');
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+  });
+
+  describe('GET (saved connections)', () => {
+    const getAffected = (routeContext: unknown) =>
+      getAffectedMonitorsRoute().handler(routeContext as any);
+
+    it('reports only the saved connections that have allowed hosts, in one scan', async () => {
       const { routeContext } = setup({
-        body: body([]),
-        stored: {
-          config: { ...storedConfig, allowedMonitorHosts: ['api.example.com'] },
-          secrets: { token: 'stored' },
-        },
         monitors,
+        globalParams,
+        connections: [
+          { name: 'prod', config: { ...storedConfig, allowedMonitorHosts: ['api.example.com'] } },
+          { name: 'staging', config: storedConfig },
+        ],
       });
 
-      await save(routeContext);
+      const result = (await getAffected(routeContext)) as any;
 
+      expect(Object.keys(result)).toEqual(['prod']);
+      expect(result.prod.total).toBe(5);
+      expect(routeContext.monitorConfigRepository.findDecryptedMonitors).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not scan monitors when no connection has allowed hosts', async () => {
+      const { routeContext } = setup({
+        monitors,
+        connections: [{ name: 'prod', config: storedConfig }],
+      });
+
+      expect(await getAffected(routeContext)).toEqual({});
       expect(routeContext.monitorConfigRepository.findDecryptedMonitors).not.toHaveBeenCalled();
     });
 
-    it('still saves when the monitors cannot be checked', async () => {
-      const { routeContext, create } = setup({ body: body(['api.example.com']), monitors });
-      routeContext.monitorConfigRepository.findDecryptedMonitors.mockRejectedValue(
-        new Error('boom')
-      );
+    it('responds 404 while secret connections are disabled', async () => {
+      const { routeContext, response } = setup({ secretConnections: { enabled: false } });
 
-      const result = (await save(routeContext)) as any;
+      await getAffected(routeContext);
 
-      expect(create).toHaveBeenCalledTimes(1);
-      expect(result).not.toHaveProperty('affectedMonitors');
-      expect(routeContext.server.logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE },
+      });
     });
   });
 });

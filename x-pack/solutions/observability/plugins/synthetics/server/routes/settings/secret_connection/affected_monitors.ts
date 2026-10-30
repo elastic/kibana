@@ -9,7 +9,10 @@ import { isIP } from 'net';
 import { isPlainObject, omit } from 'lodash';
 import type { RouteContext } from '../../types';
 import type { SyntheticsMonitor } from '../../../../common/runtime_types';
-import type { AffectedMonitor, AffectedMonitorReason } from '../../../../common/runtime_types';
+import type {
+  AffectedMonitorReason,
+  AffectedMonitorsResult,
+} from '../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { normalizeAllowedMonitorHost } from '../../../../common/lib/allowed_monitor_hosts';
 import { getParamsForSpace } from '../../../synthetics_service/formatters/param_utils';
@@ -101,28 +104,28 @@ export const getAllowedHostsRefusal = (
   return targets.every(isAllowed) ? undefined : 'host';
 };
 
-export interface AffectedMonitors {
-  monitors: AffectedMonitor[];
-  total: number;
+/** A connection and the hosts monitors using it would be limited to. */
+export interface AllowedHostsCheck {
+  name: string;
+  allowedMonitorHosts: readonly string[];
 }
 
-// The check is advisory and runs inside the save request, so a large space must not make a
-// saved change look like it failed.
+// The check is advisory and the UI asks for it while an admin edits, so a large space must not
+// leave a request hanging.
 export const AFFECTED_MONITORS_TIMEOUT_MS = 8000;
 
 /**
- * Monitors of the space that use the connection, directly or through a parameter, and would be
- * refused by Heartbeat once it is limited to `allowedHosts`. Rejects after
- * {@link AFFECTED_MONITORS_TIMEOUT_MS}.
+ * For each connection, the monitors of the space that use it, directly or through a parameter,
+ * and would be refused by Heartbeat once it is limited to its allowed hosts. One pass over the
+ * monitors answers for all of them. Rejects after {@link AFFECTED_MONITORS_TIMEOUT_MS}.
  */
-export const findMonitorsAffectedByAllowedHosts = (
+export const findAffectedMonitors = (
   routeContext: Pick<
     RouteContext,
     'syntheticsMonitorClient' | 'monitorConfigRepository' | 'spaceId'
   >,
-  connectionName: string,
-  allowedMonitorHosts: readonly string[]
-): Promise<AffectedMonitors> => {
+  checks: readonly AllowedHostsCheck[]
+): Promise<Record<string, AffectedMonitorsResult>> => {
   let timer: NodeJS.Timeout | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(
@@ -130,10 +133,9 @@ export const findMonitorsAffectedByAllowedHosts = (
       AFFECTED_MONITORS_TIMEOUT_MS
     );
   });
-  return Promise.race([
-    scanAffectedMonitors(routeContext, connectionName, allowedMonitorHosts),
-    timeout,
-  ]).finally(() => clearTimeout(timer));
+  return Promise.race([scanAffectedMonitors(routeContext, checks), timeout]).finally(() =>
+    clearTimeout(timer)
+  );
 };
 
 const scanAffectedMonitors = async (
@@ -142,17 +144,24 @@ const scanAffectedMonitors = async (
     monitorConfigRepository,
     spaceId,
   }: Pick<RouteContext, 'syntheticsMonitorClient' | 'monitorConfigRepository' | 'spaceId'>,
-  connectionName: string,
-  allowedMonitorHosts: readonly string[]
-): Promise<AffectedMonitors> => {
+  checks: readonly AllowedHostsCheck[]
+): Promise<Record<string, AffectedMonitorsResult>> => {
   const [paramsBySpace, savedMonitors] = await Promise.all([
     syntheticsMonitorClient.getSyntheticsParams({ spaceId }),
     monitorConfigRepository.findDecryptedMonitors({ spaceId }),
   ]);
   const params = getParamsForSpace(paramsBySpace, spaceId);
-  const allowed = new Set(allowedMonitorHosts.map(canonicalHost));
+  const allowedByConnection = new Map(
+    checks.map(({ name, allowedMonitorHosts }) => [
+      name,
+      new Set(allowedMonitorHosts.map(canonicalHost)),
+    ])
+  );
+  const affected = new Map<string, AffectedMonitorsResult['monitors']>(
+    checks.map(({ name }) => [name, []])
+  );
+  const totals = new Map<string, number>(checks.map(({ name }) => [name, 0]));
 
-  const affected: AffectedMonitor[] = [];
   for (const savedMonitor of savedMonitors) {
     const attributes = normalizeSecrets(savedMonitor).attributes as unknown as Record<
       string,
@@ -171,9 +180,22 @@ const scanAffectedMonitors = async (
         attributes as unknown as SyntheticsMonitor
       ).params;
     }
-    if (!referencedConnectionNames(resolved).has(connectionName)) continue;
-    const reason = getAllowedHostsRefusal(resolved, allowed);
-    if (reason) affected.push({ name: String(attributes[ConfigKey.NAME]), reason });
+    const used = referencedConnectionNames(resolved);
+    for (const [name, allowed] of allowedByConnection) {
+      if (!used.has(name)) continue;
+      const reason = getAllowedHostsRefusal(resolved, allowed);
+      if (!reason) continue;
+      totals.set(name, (totals.get(name) ?? 0) + 1);
+      const listed = affected.get(name) ?? [];
+      if (listed.length < MAX_LISTED_AFFECTED_MONITORS) {
+        listed.push({ name: String(attributes[ConfigKey.NAME]), reason });
+      }
+    }
   }
-  return { monitors: affected.slice(0, MAX_LISTED_AFFECTED_MONITORS), total: affected.length };
+  return Object.fromEntries(
+    checks.map(({ name }) => [
+      name,
+      { monitors: affected.get(name) ?? [], total: totals.get(name) ?? 0 },
+    ])
+  );
 };

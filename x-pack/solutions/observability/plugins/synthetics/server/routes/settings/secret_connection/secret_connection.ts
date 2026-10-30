@@ -9,7 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
-  SecretConnectionSaveResult,
+  AffectedMonitorsResult,
+  SecretConnectionAffectedMonitors,
   SecretConnectionStatus,
   SecretConnectionTestResult,
   SecretProviderType,
@@ -32,8 +33,7 @@ import {
   toStatus,
   whenSecretConnectionsEnabled,
 } from './connection_utils';
-import type { AffectedMonitors } from './affected_monitors';
-import { findMonitorsAffectedByAllowedHosts } from './affected_monitors';
+import { findAffectedMonitors } from './affected_monitors';
 import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
 import {
   getAllowedHosts,
@@ -42,8 +42,8 @@ import {
   isLoopbackHost,
   LOOPBACK_NOT_TESTABLE_MESSAGE,
 } from './address_guard';
-import type { SaveBody, TestBody } from './schemas';
-import { SaveBodySchema, TestBodySchema } from './schemas';
+import type { AffectedMonitorsBody, SaveBody, TestBody } from './schemas';
+import { AffectedMonitorsBodySchema, SaveBodySchema, TestBodySchema } from './schemas';
 import { testHashiCorpVault } from './vault_client';
 
 /** GET: list all Vault connections (secret-free). */
@@ -56,133 +56,146 @@ export const getSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
   handler: whenSecretConnectionsEnabled(async (routeContext) => listConnections(routeContext)),
 });
 
+/**
+ * GET /_affected_monitors: for each saved connection with allowed monitor hosts, the monitors
+ * Heartbeat refuses to run with it. Advisory: nothing is scanned unless a connection has a
+ * restriction, and one pass answers for all of them.
+ */
+export const getAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionAffectedMonitors
+> = () => ({
+  method: 'GET',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
+  validate: {},
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const restricted = (await listConnections(routeContext)).flatMap(({ name, config }) =>
+      name && config?.allowedMonitorHosts?.length
+        ? [{ name, allowedMonitorHosts: config.allowedMonitorHosts }]
+        : []
+    );
+    return restricted.length ? findAffectedMonitors(routeContext, restricted) : {};
+  }),
+});
+
+/** POST /_affected_monitors: the same for hosts that are being edited. Never persists anything. */
+export const previewAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
+  AffectedMonitorsResult
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
+  validate: { body: AffectedMonitorsBodySchema },
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const { name, allowedMonitorHosts } = routeContext.request.body as AffectedMonitorsBody;
+    const results = await findAffectedMonitors(routeContext, [{ name, allowedMonitorHosts }]);
+    return results[name];
+  }),
+});
+
 /** PUT: create or update a connection (keyed by name). Blank secrets are kept. */
 export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
-  SecretConnectionSaveResult
+  SecretConnectionStatus
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION,
   validate: { body: SaveBodySchema },
   requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
-  handler: whenSecretConnectionsEnabled(async (routeContext) => {
-    const { request, response, savedObjectsClient, server, spaceId } = routeContext;
-    const body = request.body as SaveBody;
-    // Stored as Heartbeat compares them: lowercase, without a trailing dot or duplicates.
-    const { allowedMonitorHosts: submittedHosts, ...baseConfig } = body.config;
-    const allowedMonitorHosts = normalizeAllowedMonitorHosts(submittedHosts);
-    const config = allowedMonitorHosts.length ? { ...baseConfig, allowedMonitorHosts } : baseConfig;
-    if (!isAddressHostAllowed(body.config.address, getAllowedHosts(server.config))) {
-      return response.badRequest({
-        body: { message: hostNotAllowedMessage(body.config.address) },
-      });
-    }
-    const type: SecretProviderType = body.type ?? SECRET_PROVIDER_HASHICORP_VAULT;
-
-    if (body.config.authMethod === 'approle' && !body.config.roleId) {
-      return response.badRequest({ body: { message: 'approle auth requires a role_id' } });
-    }
-
-    const id = secretConnectionId(body.name, spaceId);
-    const encryptedClient = getSecretConnectionEncryptedClient(server.encryptedSavedObjects);
-    let existing: SyntheticsSecretConnection | undefined;
-    try {
-      const decrypted =
-        await encryptedClient.getDecryptedAsInternalUser<SyntheticsSecretConnection>(
-          syntheticsSecretConnectionType,
-          id,
-          { namespace: spaceId }
-        );
-      existing = decrypted.attributes;
-    } catch (e) {
-      // Only a genuine "not found" means this is a brand-new connection. Any other
-      // error (decrypt failure, ES outage, key rotation) must NOT be swallowed:
-      // treating it as "new" would let a blank-secret edit overwrite the stored
-      // credential with `undefined` and silently destroy it.
-      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw e;
+  handler: whenSecretConnectionsEnabled(
+    async ({ request, response, savedObjectsClient, server, spaceId }) => {
+      const body = request.body as SaveBody;
+      // Stored as Heartbeat compares them: lowercase, without a trailing dot or duplicates.
+      const { allowedMonitorHosts: submittedHosts, ...baseConfig } = body.config;
+      const allowedMonitorHosts = normalizeAllowedMonitorHosts(submittedHosts);
+      const config = allowedMonitorHosts.length
+        ? { ...baseConfig, allowedMonitorHosts }
+        : baseConfig;
+      if (!isAddressHostAllowed(body.config.address, getAllowedHosts(server.config))) {
+        return response.badRequest({
+          body: { message: hostNotAllowedMessage(body.config.address) },
+        });
       }
-      existing = undefined;
-    }
+      const type: SecretProviderType = body.type ?? SECRET_PROVIDER_HASHICORP_VAULT;
 
-    // Re-pointing an existing connection (address, auth method, TLS) must not reuse the
-    // stored secret, or a write user could aim it at their own endpoint.
-    const providedSecret =
-      body.config.authMethod === 'token' ? body.secrets?.token : body.secrets?.secretId;
-    const credentialSensitiveChange =
-      !!existing && isCredentialSensitiveChange(existing.config, config);
-    if (credentialSensitiveChange && !providedSecret) {
-      return response.badRequest({ body: { message: SECRET_REENTRY_REQUIRED_MESSAGE } });
-    }
+      if (body.config.authMethod === 'approle' && !body.config.roleId) {
+        return response.badRequest({ body: { message: 'approle auth requires a role_id' } });
+      }
 
-    // Preserve the stored secret on a blank edit only when nothing credential-sensitive changed.
-    const secrets = credentialSensitiveChange
-      ? { token: body.secrets?.token, secretId: body.secrets?.secretId }
-      : {
-          token: body.secrets?.token || existing?.secrets?.token,
-          secretId: body.secrets?.secretId || existing?.secrets?.secretId,
-        };
-
-    // C9: a new connection must carry a usable credential — otherwise it saves,
-    // propagates, and only fails later at the agent.
-    const effectiveSecret = body.config.authMethod === 'token' ? secrets.token : secrets.secretId;
-    if (!existing && !effectiveSecret) {
-      return response.badRequest({
-        body: {
-          message:
-            body.config.authMethod === 'token'
-              ? 'A token is required to create a token-auth connection'
-              : 'A secret_id is required to create an approle connection',
-        },
-      });
-    }
-    // Non-secret marker so the (non-decrypting) list read can report "secret saved".
-    const hasSecret =
-      body.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
-
-    const attributes: SyntheticsSecretConnection = {
-      name: body.name,
-      type,
-      config,
-      refreshedAt: new Date().toISOString(),
-      secrets,
-      hasSecret,
-    };
-
-    await savedObjectsClient.create<SyntheticsSecretConnection>(
-      syntheticsSecretConnectionType,
-      attributes,
-      { id, overwrite: true, initialNamespaces: [spaceId] }
-    );
-    await propagate(server, spaceId);
-
-    // Advisory only: a failure to work out who is affected must not fail the save.
-    let affected: AffectedMonitors | undefined;
-    const previousHosts = new Set(
-      normalizeAllowedMonitorHosts(existing?.config.allowedMonitorHosts)
-    );
-    const hostsChanged =
-      allowedMonitorHosts.length !== previousHosts.size ||
-      allowedMonitorHosts.some((host) => !previousHosts.has(host));
-    if (allowedMonitorHosts.length > 0 && hostsChanged) {
+      const id = secretConnectionId(body.name, spaceId);
+      const encryptedClient = getSecretConnectionEncryptedClient(server.encryptedSavedObjects);
+      let existing: SyntheticsSecretConnection | undefined;
       try {
-        affected = await findMonitorsAffectedByAllowedHosts(
-          routeContext,
-          body.name,
-          allowedMonitorHosts
-        );
+        const decrypted =
+          await encryptedClient.getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+            syntheticsSecretConnectionType,
+            id,
+            { namespace: spaceId }
+          );
+        existing = decrypted.attributes;
       } catch (e) {
-        server.logger.warn(
-          `Could not check which monitors are affected by the allowed monitor hosts of Vault connection "${body.name}": ${e.message}`
-        );
+        // Only a genuine "not found" means this is a brand-new connection. Any other
+        // error (decrypt failure, ES outage, key rotation) must NOT be swallowed:
+        // treating it as "new" would let a blank-secret edit overwrite the stored
+        // credential with `undefined` and silently destroy it.
+        if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          throw e;
+        }
+        existing = undefined;
       }
+
+      // Re-pointing an existing connection (address, auth method, TLS) must not reuse the
+      // stored secret, or a write user could aim it at their own endpoint.
+      const providedSecret =
+        body.config.authMethod === 'token' ? body.secrets?.token : body.secrets?.secretId;
+      const credentialSensitiveChange =
+        !!existing && isCredentialSensitiveChange(existing.config, config);
+      if (credentialSensitiveChange && !providedSecret) {
+        return response.badRequest({ body: { message: SECRET_REENTRY_REQUIRED_MESSAGE } });
+      }
+
+      // Preserve the stored secret on a blank edit only when nothing credential-sensitive changed.
+      const secrets = credentialSensitiveChange
+        ? { token: body.secrets?.token, secretId: body.secrets?.secretId }
+        : {
+            token: body.secrets?.token || existing?.secrets?.token,
+            secretId: body.secrets?.secretId || existing?.secrets?.secretId,
+          };
+
+      // C9: a new connection must carry a usable credential — otherwise it saves,
+      // propagates, and only fails later at the agent.
+      const effectiveSecret = body.config.authMethod === 'token' ? secrets.token : secrets.secretId;
+      if (!existing && !effectiveSecret) {
+        return response.badRequest({
+          body: {
+            message:
+              body.config.authMethod === 'token'
+                ? 'A token is required to create a token-auth connection'
+                : 'A secret_id is required to create an approle connection',
+          },
+        });
+      }
+      // Non-secret marker so the (non-decrypting) list read can report "secret saved".
+      const hasSecret =
+        body.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
+
+      const attributes: SyntheticsSecretConnection = {
+        name: body.name,
+        type,
+        config,
+        refreshedAt: new Date().toISOString(),
+        secrets,
+        hasSecret,
+      };
+
+      await savedObjectsClient.create<SyntheticsSecretConnection>(
+        syntheticsSecretConnectionType,
+        attributes,
+        { id, overwrite: true, initialNamespaces: [spaceId] }
+      );
+      await propagate(server, spaceId);
+
+      return toStatus(attributes);
     }
-    return {
-      ...toStatus(attributes),
-      ...(affected?.total
-        ? { affectedMonitors: affected.monitors, affectedMonitorCount: affected.total }
-        : {}),
-    };
-  }),
+  ),
 });
 
 /** DELETE /{name}: remove a connection. */
