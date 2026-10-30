@@ -216,7 +216,12 @@ export class WorkflowExecutionPage {
     return usesFlyoutTree ? this.getFlyoutStep(path) : this.getLegacyStep(path);
   }
 
-  private async getFlyoutStep(path: string): Promise<Locator> {
+  async toggleStepExpansion(path: string): Promise<void> {
+    const chevron = await this.getFlyoutStep(path, 'chevron');
+    await chevron.click();
+  }
+
+  private async getFlyoutStep(path: string, target: 'name' | 'chevron' = 'name'): Promise<Locator> {
     const nodes = path.split('>').map((substring) => substring.trim());
     let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
 
@@ -241,6 +246,11 @@ export class WorkflowExecutionPage {
           found = true;
           if (i === nodes.length - 1) {
             await this.dismissToasts();
+            if (target === 'chevron') {
+              return listItem
+                .locator('> [data-test-subj="step-execution-tree-item-label"]')
+                .getByTestId('workflowStepTreeChevron');
+            }
             // The row is the full width of the run. Its center sits under the step
             // overlay, so a click there never reaches the tree. The name is on the left.
             return nameLocator;
