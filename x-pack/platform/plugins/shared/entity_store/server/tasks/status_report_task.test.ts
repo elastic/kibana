@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -984,8 +985,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     });
     // Three usage searches per type. The metadata searches are counted in their own tests.
     const usageSearches = esClient.search.mock.calls.filter(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ([params]: any) => !params?.aggs?.withoutSource && !params?.runtime_mappings
+      ([params]) => !params?.aggs?.withoutSource && !params?.runtime_mappings
     );
     expect(usageSearches).toHaveLength(ALL_ENTITY_TYPES.length * 3);
   });
@@ -1039,13 +1039,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
         .map(([, payload]) => payload);
 
     beforeEach(() => {
-      esClient.search.mockImplementation(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (async (params: any) =>
-          params?.aggs?.withoutSource
-            ? { aggregations: metadataAggregations }
-            : { aggregations: {} }) as never
-      );
+      esClient.search.mockImplementation((async (params?: estypes.SearchRequest) =>
+        params?.aggs?.withoutSource
+          ? { aggregations: metadataAggregations }
+          : { aggregations: {} }) as never);
       getIndexTemplate.mockResolvedValue({
         index_templates: [
           { index_template: { _meta: { managed_by: 'fleet', package: { name: 'okta' } } } },
@@ -1151,13 +1148,10 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     });
 
     it('does not report metadata when the cheap pass search fails', async () => {
-      esClient.search.mockImplementation(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (async (params: any) => {
-          if (params?.aggs?.withoutSource) throw new Error('search_boom');
-          return { aggregations: {} };
-        }) as never
-      );
+      esClient.search.mockImplementation((async (params?: estypes.SearchRequest) => {
+        if (params?.aggs?.withoutSource) throw new Error('search_boom');
+        return { aggregations: {} };
+      }) as never);
 
       await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
 
