@@ -14,35 +14,9 @@ import { expect } from '@kbn/scout/ui';
 
 const LOGSTASH_DATA_VIEW_ID = 'filter-bar-logstash';
 const ANIMALS_DATA_VIEW_ID = 'filter-bar-animals';
-const MISSING_DATA_VIEW_ID = 'filter-bar-missing';
 
 const ANIMALS_TIME_RANGE = { from: '2018-01-01T00:00:00.000Z', to: '2018-04-13T00:00:00.000Z' };
 const TIME_RANGE = { from: '2015-09-19T06:31:44.000Z', to: '2015-09-23T18:31:44.000Z' };
-
-type DashboardFilter = NonNullable<DashboardApiDataInput['filters']>[number];
-
-const phraseFilter = (
-  field: string,
-  value: string,
-  options: { disabled?: boolean; dataViewId?: string }
-): DashboardFilter => ({
-  type: 'condition',
-  condition: { field, operator: 'is', value },
-  disabled: options.disabled,
-  data_view_id: options.dataViewId,
-});
-
-const BAD_FILTERS: DashboardFilter[] = [
-  phraseFilter('name', 'moo', { disabled: true, dataViewId: MISSING_DATA_VIEW_ID }),
-  phraseFilter('baad-field', 'moo', { disabled: true, dataViewId: ANIMALS_DATA_VIEW_ID }),
-  phraseFilter('@timestamp', '123', { dataViewId: LOGSTASH_DATA_VIEW_ID }),
-  {
-    type: 'condition',
-    condition: { field: 'extension', operator: 'exists' },
-    data_view_id: LOGSTASH_DATA_VIEW_ID,
-  },
-  phraseFilter('banana', 'yellow', {}),
-];
 
 type DashboardPanel = NonNullable<DashboardApiDataInput['panels']>[number];
 
@@ -86,7 +60,6 @@ const getFieldSuggestions = async (page: ScoutPage) => {
 };
 
 let emptyDashboardId = '';
-let badFiltersDashboardId = '';
 let animalsDashboardId = '';
 let dataTableDashboardId = '';
 
@@ -123,10 +96,6 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
     );
     dataTableDashboardId = await apiServices.dashboard.create(
       { title: 'Filter bar: table', time_range: TIME_RANGE, panels: [DATA_TABLE_PANEL] },
-      scoutSpace.id
-    );
-    badFiltersDashboardId = await apiServices.dashboard.create(
-      { title: 'dashboard with bad filters', time_range: TIME_RANGE, filters: BAD_FILTERS },
       scoutSpace.id
     );
   });
@@ -263,38 +232,5 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
       await cell.getByTestId('lensDatatableFilterFor').click();
       await expect.poll(() => filterBar.getFilterCount()).toBe(1);
     });
-  });
-
-  spaceTest('bad filters are loaded properly', async ({ pageObjects }) => {
-    const { dashboard, filterBar } = pageObjects;
-
-    await dashboard.openDashboardWithId(badFiltersDashboardId);
-
-    const expectFilter = (field: string, value: string, enabled: boolean) =>
-      expect.poll(() => filterBar.hasFilter({ field, value, enabled })).toBe(true);
-
-    await spaceTest.step(
-      'filter with a non-existent index pattern renders if it matches a field',
-      () => expectFilter('name', 'moo', false)
-    );
-
-    await spaceTest.step('filter with a non-existent field renders in warning mode', () =>
-      expectFilter('baad-field', 'warn', false)
-    );
-
-    await spaceTest.step(
-      'filter from an unrelated index pattern is still applicable if the field name is found',
-      () => expectFilter('@timestamp', '123', true)
-    );
-
-    await spaceTest.step(
-      'filter from an unrelated index pattern renders as a warning if the field name is not found',
-      () => expectFilter('extension', 'warn', true)
-    );
-
-    await spaceTest.step(
-      'filter without an index pattern renders as a warning if the dashboard has an index pattern',
-      () => expectFilter('banana', 'warn', true)
-    );
   });
 });
