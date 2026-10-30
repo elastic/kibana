@@ -176,6 +176,17 @@ describe('rule conflicts', () => {
     expect(client.create).toHaveBeenCalled();
   });
 
+  it('rejects moving a rule to a profile of another type, as Elasticsearch does', async () => {
+    const client = createClient(settings);
+
+    const updating = updateRule(client, 'catalogs', {
+      ...catalogsRule,
+      boost_profile: '_last-7-days',
+    });
+    await expect(updating).rejects.toThrow("can't change to a boost profile of another type");
+    expect(client.create).not.toHaveBeenCalled();
+  });
+
   it("doesn't compare an updated rule with its saved version", async () => {
     const client = createClient(settings);
 

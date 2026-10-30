@@ -151,6 +151,7 @@ export const ProfileChangesModal = ({
             <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  size="s"
                   onClick={() => setIsNaming(false)}
                   flush="left"
                   disabled={isSaving}
@@ -163,6 +164,7 @@ export const ProfileChangesModal = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  size="s"
                   type="submit"
                   form={formId}
                   fill
@@ -219,6 +221,7 @@ export const ProfileChangesModal = ({
             <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  size="s"
                   onClick={onCancel}
                   flush="left"
                   disabled={isSaving}
@@ -235,6 +238,7 @@ export const ProfileChangesModal = ({
                     action, and a new profile the alternative. */}
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      size="s"
                       onClick={() => setIsNaming(true)}
                       disabled={isSaving}
                       data-test-subj="boostProfileSaveAsNew"
@@ -246,6 +250,7 @@ export const ProfileChangesModal = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      size="s"
                       fill
                       onClick={onOverwrite}
                       isLoading={savingAs === 'overwrite'}

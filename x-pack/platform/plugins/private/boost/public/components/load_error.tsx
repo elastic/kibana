@@ -28,7 +28,7 @@ export const LoadError = ({ error, onRetry }: LoadErrorProps) => (
     }
     body={<p>{error.message}</p>}
     actions={
-      <EuiButton onClick={onRetry}>
+      <EuiButton size="s" onClick={onRetry}>
         {i18n.translate('xpack.boost.page.retryButton', { defaultMessage: 'Try again' })}
       </EuiButton>
     }

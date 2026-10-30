@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { resolveRule } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
@@ -14,6 +14,7 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
 import { formatDataSourceCount } from '../format';
 import { ChangeTable } from '../change_table';
+import { ConfirmModal } from '../confirm_modal';
 import { MODAL_WIDTH } from '../modal_width';
 import { RuleChangeList } from '../rule_change_list';
 import { TargetName } from '../rules/target_name';
@@ -53,7 +54,6 @@ export const DeleteProfileModal = ({
   onDeleted,
 }: DeleteProfileModalProps) => {
   const { notifications } = useBoostServices();
-  const titleId = useGeneratedHtmlId();
   const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfile();
   const { name, type } = profile;
 
@@ -107,9 +107,7 @@ export const DeleteProfileModal = ({
   ].join(' ');
 
   return (
-    <EuiConfirmModal
-      aria-labelledby={titleId}
-      titleProps={{ id: titleId }}
+    <ConfirmModal
       title={i18n.translate('xpack.boost.profilesTab.deleteModalTitle', {
         defaultMessage: 'Delete boost profile "{profileName}"?',
         values: { profileName: name },
@@ -145,15 +143,17 @@ export const DeleteProfileModal = ({
       }
       buttonColor="danger"
       isLoading={isDeleting}
-      maxWidth={MODAL_WIDTH}
+      width={MODAL_WIDTH}
       data-test-subj="deleteBoostProfileModal"
     >
       {deletedRules.length === 0 ? (
-        <p>
-          {i18n.translate('xpack.boost.profilesTab.deleteModalBody', {
-            defaultMessage: "This permanently deletes the profile. You can't undo this action.",
-          })}
-        </p>
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.boost.profilesTab.deleteModalBody', {
+              defaultMessage: "This permanently deletes the profile. You can't undo this action.",
+            })}
+          </p>
+        </EuiText>
       ) : (
         <>
           <EuiText size="s">
@@ -204,6 +204,6 @@ export const DeleteProfileModal = ({
           />
         </>
       )}
-    </EuiConfirmModal>
+    </ConfirmModal>
   );
 };

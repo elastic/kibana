@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
+import { useAllowsMultipleTargets } from '../../prototype/prototype_settings';
 import { formatHiddenTargets } from '../hidden_data';
 import { SupersedingRuleTip, TargetName } from './target_name';
 
@@ -53,6 +54,28 @@ const SELECTED_TITLES: Readonly<Record<BoostProfileType, { one: string; other: s
     }),
   },
 };
+
+const formatMatchCount = (matches: number, outranked: number): string =>
+  outranked > 0
+    ? i18n.translate('xpack.boost.ruleMatches.outranked', {
+        defaultMessage: '{matches, plural, one {# match} other {# matches}}, {outranked} outranked',
+        values: { matches, outranked },
+      })
+    : i18n.translate('xpack.boost.ruleMatches.matchCount', {
+        defaultMessage: '{matches, plural, one {# match} other {# matches}}',
+        values: { matches },
+      });
+
+const formatSelectedCount = (selected: number, outranked: number): string =>
+  outranked > 0
+    ? i18n.translate('xpack.boost.ruleMatches.selectedOutranked', {
+        defaultMessage: '{selected} selected, {outranked} outranked',
+        values: { selected, outranked },
+      })
+    : i18n.translate('xpack.boost.ruleMatches.selectedCount', {
+        defaultMessage: '{selected} selected',
+        values: { selected },
+      });
 
 /**
  * How many data sources a rule applies to, as a link to the list of what it matches, which shows
@@ -92,6 +115,7 @@ export const MatchesPopover = ({
 }: MatchesPopoverProps) => {
   const { euiTheme } = useEuiTheme();
   const scrollStyles = useEuiOverflowScroll('y', true);
+  const allowsMultipleTargets = useAllowsMultipleTargets();
   const [isOpen, setIsOpen] = useState(false);
   const { matches, matchedNames, appliesTo, supersededBy } = coverage;
   const outranked = matches - appliesTo;
@@ -107,6 +131,11 @@ export const MatchesPopover = ({
         values: { pattern },
       })
     : SELECTED_TITLES[type ?? 'indices'][patterns.length === 1 ? 'one' : 'other'];
+  const count = hasPattern
+    ? formatMatchCount(matches, outranked)
+    : allowsMultipleTargets
+    ? formatSelectedCount(matches, outranked)
+    : undefined;
   const shownNames = matchedNames.filter((name) => !hiddenNames?.has(name));
   const hiddenCount = matchedNames.length - shownNames.length;
 
@@ -139,24 +168,18 @@ export const MatchesPopover = ({
           title
         )}
         {/* How many the rule matches, and how many of those higher-ranked rules take. It's set in
-            the regular weight, since it's in the title. */}
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={{ fontWeight: euiTheme.font.weight.regular }}
-          data-test-subj="boostRuleMatchCount"
-        >
-          {outranked > 0
-            ? i18n.translate('xpack.boost.ruleMatches.outranked', {
-                defaultMessage:
-                  '{matches, plural, one {# match} other {# matches}}, {outranked} outranked',
-                values: { matches, outranked },
-              })
-            : i18n.translate('xpack.boost.ruleMatches.matchCount', {
-                defaultMessage: '{matches, plural, one {# match} other {# matches}}',
-                values: { matches },
-              })}
-        </EuiText>
+            the regular weight, since it's in the title. Selected targets leave it out while a rule
+            selects only one, since it would always be 1. */}
+        {count && (
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={{ fontWeight: euiTheme.font.weight.regular }}
+            data-test-subj="boostRuleMatchCount"
+          >
+            {count}
+          </EuiText>
+        )}
       </EuiPopoverTitle>
       <div
         tabIndex={0}

@@ -362,6 +362,25 @@ const assertNoRuleConflict = async (client: SavedObjectsClientContract, rule: Bo
   }
 };
 
+/** Rejects moving a rule to a profile of another type, which Elasticsearch rejects too. */
+const assertSameProfileType = async (client: SavedObjectsClientContract, rule: BoostRuleInput) => {
+  const [customProfiles, customRules] = await Promise.all([
+    getCustomProfiles(client),
+    getCustomRules(client),
+  ]);
+  const profileTypes = new Map(
+    [...BUILTIN_PROFILES, ...customProfiles].map(({ name, type }) => [name, type])
+  );
+  const savedRule = customRules.find(({ name }) => name === rule.name);
+  const savedType = savedRule && profileTypes.get(savedRule.boost_profile);
+  if (savedType && profileTypes.get(rule.boost_profile) !== savedType) {
+    throw new BoostRequestError(
+      400,
+      `Boost rule [${rule.name}] can't change to a boost profile of another type.`
+    );
+  }
+};
+
 const saveRule = async (
   client: SavedObjectsClientContract,
   rule: BoostRuleInput,
@@ -422,6 +441,7 @@ export const updateRule = async (
   }
   await assertCustomRuleExists(client, name);
   await assertProfileExists(client, rule.boost_profile);
+  await assertSameProfileType(client, rule);
   await assertNoRuleConflict(client, rule);
   await saveRule(client, rule, true);
 };

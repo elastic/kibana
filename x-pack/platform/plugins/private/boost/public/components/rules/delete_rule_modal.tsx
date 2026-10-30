@@ -6,20 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiConfirmModal,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { resolveRule } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteRule } from '../../hooks/use_boost_state';
 import { ChangeTable } from '../change_table';
+import { ConfirmModal } from '../confirm_modal';
 import { formatDataSourceCount } from '../format';
 import { MODAL_WIDTH } from '../modal_width';
 import { TargetName } from './target_name';
@@ -56,7 +50,6 @@ export const DeleteRuleModal = ({
 }: DeleteRuleModalProps) => {
   const { euiTheme } = useEuiTheme();
   const { notifications } = useBoostServices();
-  const titleId = useGeneratedHtmlId();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
 
   const { profileType, affected } = useMemo(() => {
@@ -81,9 +74,7 @@ export const DeleteRuleModal = ({
   const hasAffected = affected.length > 0;
 
   return (
-    <EuiConfirmModal
-      aria-labelledby={titleId}
-      titleProps={{ id: titleId }}
+    <ConfirmModal
       title={i18n.translate('xpack.boost.rulesTab.deleteModalTitle', {
         defaultMessage: 'Delete boost rule "{name}"?',
         values: { name: ruleName },
@@ -112,7 +103,7 @@ export const DeleteRuleModal = ({
       buttonColor="danger"
       isLoading={isDeleting}
       // As wide as the other modals that list what a change affects, when there's a list.
-      maxWidth={hasAffected ? MODAL_WIDTH : undefined}
+      width={hasAffected ? MODAL_WIDTH : undefined}
       data-test-subj="deleteBoostRuleModal"
     >
       <EuiText size="s">
@@ -167,6 +158,6 @@ export const DeleteRuleModal = ({
           </EuiPanel>
         </>
       )}
-    </EuiConfirmModal>
+    </ConfirmModal>
   );
 };

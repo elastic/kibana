@@ -7,7 +7,6 @@
 
 import React, { useState } from 'react';
 import {
-  EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiHorizontalRule,
@@ -15,6 +14,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSwitch,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -24,6 +24,7 @@ import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
 import { i18n } from '@kbn/i18n';
 import { BOOST_RESTORE_API_PATH } from '../../common/constants';
 import type { PrototypeSettings } from '../../common/prototype_settings';
+import { ConfirmModal } from '../components/confirm_modal';
 import { setPrototypeSettings, usePrototypeSettings } from './prototype_settings';
 
 interface PrototypeMenuProps {
@@ -39,7 +40,6 @@ const PROTOTYPE_MENU_LABEL = i18n.translate('xpack.boost.prototype.menuLabel', {
 /** Global header menu of prototype-only actions. */
 export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenuProps) => {
   const popoverId = useGeneratedHtmlId({ prefix: 'boostPrototypeMenu' });
-  const modalTitleId = useGeneratedHtmlId();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -140,9 +140,7 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
       </EuiPopover>
 
       {isModalVisible && (
-        <EuiConfirmModal
-          aria-labelledby={modalTitleId}
-          titleProps={{ id: modalTitleId }}
+        <ConfirmModal
           title={i18n.translate('xpack.boost.prototype.restoreModalTitle', {
             defaultMessage: 'Restore prototype defaults?',
           })}
@@ -157,13 +155,15 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
           buttonColor="danger"
           isLoading={isRestoring}
         >
-          <p>
-            {i18n.translate('xpack.boost.prototype.restoreModalBody', {
-              defaultMessage:
-                'This discards all boost changes, restores the sample boost profiles and rules, turns off the prototype settings, and re-creates any missing sample indices and data streams. It affects everyone using this deployment. The page reloads afterward.',
-            })}
-          </p>
-        </EuiConfirmModal>
+          <EuiText size="s">
+            <p>
+              {i18n.translate('xpack.boost.prototype.restoreModalBody', {
+                defaultMessage:
+                  'This discards all boost changes, restores the sample boost profiles and rules, turns off the prototype settings, and re-creates any missing sample indices and data streams. It affects everyone using this deployment. The page reloads afterward.',
+              })}
+            </p>
+          </EuiText>
+        </ConfirmModal>
       )}
     </>
   );

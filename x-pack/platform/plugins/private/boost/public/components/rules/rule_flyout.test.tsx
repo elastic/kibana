@@ -124,12 +124,16 @@ describe('RuleFlyout profile picker', () => {
     ).toHaveTextContent('Indices');
   });
 
-  it('lists profiles of both types when editing a custom rule', async () => {
+  it("lists only profiles of the rule's type when editing, since Elasticsearch can't switch it", async () => {
     const { getInput } = renderFlyout();
 
     await userEvent.click(getInput());
 
-    expect(screen.getByText('Data streams')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'zeta-search' })).toBeInTheDocument();
+    expect(screen.queryByText('Data streams')).not.toBeInTheDocument();
+    expect(screen.getByTestId('boostRuleProfile').closest('.euiFormRow')).toHaveTextContent(
+      "Lists only indices profiles, since a rule can't switch types after it's created."
+    );
   });
 
   it('can be emptied with select-all and Delete, and restores the last profile on blur', async () => {

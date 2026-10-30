@@ -176,6 +176,18 @@ const PROFILE_HELP_TEXT = i18n.translate('xpack.boost.ruleForm.profileDescriptio
     'Profile selection determines whether this rule applies to indices or data streams.',
 });
 
+// When editing, which lists only profiles of the rule's type.
+const EDIT_PROFILE_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.editIndicesProfileDescription', {
+    defaultMessage:
+      "Lists only indices profiles, since a rule can't switch types after it's created.",
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.editDataStreamsProfileDescription', {
+    defaultMessage:
+      "Lists only data stream profiles, since a rule can't switch types after it's created.",
+  }),
+};
+
 // The same before a profile is chosen, when the tooltip says why the targets are disabled.
 const TARGETS_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
   indices: i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
@@ -385,20 +397,22 @@ export const RuleFlyout = ({
     }
   };
 
-  const profileOptions: Array<EuiComboBoxOptionOption<string>> = PROFILE_TYPES.map(
-    (profileType) => ({
-      label: PROFILE_TYPE_LABELS[profileType],
-      isGroupLabelOption: true,
-      options: profiles
-        .filter((profile) => profile.type === profileType)
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(({ name, is_builtin: isBuiltin }) => ({
-          label: name,
-          value: name,
-          append: isBuiltin ? <EuiBadge>{MANAGED_BADGE_LABEL}</EuiBadge> : undefined,
-        })),
-    })
-  );
+  // Elasticsearch can't move a rule to a profile of another type, so editing lists only its own.
+  const savedProfileType = rule && profilesByName.get(rule.boost_profile)?.type;
+  const profileOptions: Array<EuiComboBoxOptionOption<string>> = PROFILE_TYPES.filter(
+    (profileType) => !savedProfileType || profileType === savedProfileType
+  ).map((profileType) => ({
+    label: PROFILE_TYPE_LABELS[profileType],
+    isGroupLabelOption: true,
+    options: profiles
+      .filter((profile) => profile.type === profileType)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(({ name, is_builtin: isBuiltin }) => ({
+        label: name,
+        value: name,
+        append: isBuiltin ? <EuiBadge>{MANAGED_BADGE_LABEL}</EuiBadge> : undefined,
+      })),
+  }));
 
   // The plain-text selection shows its option's append inside the field, before the arrow.
   const selectedProfileType = profilesByName.get(draft.profileName)?.type;
@@ -627,7 +641,7 @@ export const RuleFlyout = ({
           </EuiLink>
         </EuiText>
       }
-      helpText={PROFILE_HELP_TEXT}
+      helpText={savedProfileType ? EDIT_PROFILE_HELP_TEXTS[savedProfileType] : PROFILE_HELP_TEXT}
       isInvalid={Boolean(visibleErrors.profile)}
       error={visibleErrors.profile && PROFILE_REQUIRED_MESSAGE}
       fullWidth

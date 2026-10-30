@@ -17,6 +17,7 @@ import {
   createDefaultRules,
 } from '../../../common/presets';
 import type { BoostProfile, BoostRule } from '../../../common/types';
+import { setPrototypeSettings } from '../../prototype/prototype_settings';
 import { RulesTab, getProfileRulesLocation } from './rules_tab';
 
 jest.mock('../../hooks/use_boost_services', () => ({
@@ -221,11 +222,26 @@ describe('RulesTab matches', () => {
     await userEvent.click(picked.getByTestId('boostRuleMatches'));
 
     const popover = within(screen.getByRole('dialog'));
-    expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('2 matches, 1 outranked');
     expect(popover.getByText('Using selected indices')).toBeInTheDocument();
+    // While a rule selects only one target, a count of what it selects would always be 1.
+    expect(popover.queryByTestId('boostRuleMatchCount')).not.toBeInTheDocument();
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
     // The rule's name is left to the icon's tooltip, keeping the list to the targets.
     expect(popover.queryByText('products-first')).not.toBeInTheDocument();
+  });
+
+  it('counts what a rule selects when rules can select several targets', async () => {
+    void setPrototypeSettings({ allows_multiple_targets: true });
+    try {
+      renderTab('/rules');
+      await userEvent.click(getRow('picked').getByTestId('boostRuleMatches'));
+
+      expect(
+        within(screen.getByRole('dialog')).getByTestId('boostRuleMatchCount')
+      ).toHaveTextContent('2 selected, 1 outranked');
+    } finally {
+      void setPrototypeSettings({ allows_multiple_targets: false });
+    }
   });
 
   it('names a higher-ranked rule in the tooltip of the icon after its target', async () => {
