@@ -75,7 +75,7 @@ export const AutomationsPanel = ({
   const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
 
   const canCreateWorkflow = application.capabilities.workflowsManagement?.createWorkflow === true;
 
@@ -268,6 +268,7 @@ export const AutomationsPanel = ({
                     isReadOnly={isManaged}
                     isBusy={isBusy}
                     canRun={canExecuteWorkflow}
+                    canConfigure={canUpdateWorkflow && !isManaged}
                     onDelete={() => deleteAutomation(automation.value)}
                   />
                   {index < automations.length - 1 && <EuiSpacer size="s" />}

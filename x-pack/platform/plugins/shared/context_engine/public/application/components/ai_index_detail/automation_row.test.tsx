@@ -86,6 +86,23 @@ jest.mock('./workflow_yaml_preview_flyout', () => ({
   ),
 }));
 
+jest.mock('./automation_configure_flyout', () => ({
+  AutomationConfigureFlyout: ({
+    workflowId,
+    onClose,
+  }: {
+    workflowId: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="contextAutomationConfigureFlyoutStub">
+      <span>{workflowId}</span>
+      <button type="button" onClick={onClose}>
+        Close configure
+      </button>
+    </div>
+  ),
+}));
+
 jest.mock('./automation_delete_confirm_modal', () => ({
   AutomationDeleteConfirmModal: ({
     onCancel,
@@ -134,6 +151,7 @@ const createDefaultProps = (
   isReadOnly: false,
   isBusy: false,
   canRun: false,
+  canConfigure: false,
   onDelete: jest.fn().mockResolvedValue(true),
   ...overrides,
 });
@@ -343,5 +361,37 @@ describe('AutomationRow', () => {
 
     expect(mockRunAutomation).toHaveBeenCalledWith('workflow-value-id', { ticketId: 'T-1' });
     expect(screen.queryByTestId('contextRunWorkflowInputsModalStub')).not.toBeInTheDocument();
+  });
+
+  describe('Configure', () => {
+    const configurable = {
+      canConfigure: true,
+      workflowSummary: createWorkflowSummary({ definition: workflowWithoutManualInputs }),
+    };
+
+    it('opens the configure flyout for the workflow from the gear button', () => {
+      renderAutomationRow(configurable);
+
+      fireEvent.click(screen.getByTestId('contextConfigureAutomationButton'));
+
+      expect(screen.getByTestId('contextAutomationConfigureFlyoutStub')).toHaveTextContent(
+        'workflow-value-id'
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Close configure' }));
+      expect(screen.queryByTestId('contextAutomationConfigureFlyoutStub')).not.toBeInTheDocument();
+    });
+
+    it('hides the gear when the user cannot change the workflow', () => {
+      renderAutomationRow({ ...configurable, canConfigure: false });
+
+      expect(screen.queryByTestId('contextConfigureAutomationButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the gear until the workflow definition loads', () => {
+      renderAutomationRow({ canConfigure: true, workflowSummary: createWorkflowSummary() });
+
+      expect(screen.queryByTestId('contextConfigureAutomationButton')).not.toBeInTheDocument();
+    });
   });
 });

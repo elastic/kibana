@@ -27,8 +27,14 @@ import { useRunAutomation } from '../../hooks/use_run_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { ItemRow } from '../item_row';
 import { ItemRowIcon } from '../item_row_icon';
+import { AutomationConfigureFlyout } from './automation_configure_flyout';
 import { AutomationDeleteConfirmModal } from './automation_delete_confirm_modal';
 import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
+
+const configureLabel = i18n.translate(
+  'xpack.contextEngine.aiIndexDetail.automations.configureAction',
+  { defaultMessage: 'Configure' }
+);
 
 interface AutomationRowProps {
   automation: AiIndexAutomation;
@@ -37,6 +43,8 @@ interface AutomationRowProps {
   isReadOnly: boolean;
   isBusy: boolean;
   canRun: boolean;
+  /** The user may change the workflow, so its parameters can be edited. */
+  canConfigure: boolean;
   onDelete: () => Promise<boolean>;
 }
 
@@ -47,12 +55,14 @@ export const AutomationRow = ({
   isReadOnly,
   isBusy,
   canRun,
+  canConfigure,
   onDelete,
 }: AutomationRowProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = useState(false);
+  const [isConfigureOpen, setIsConfigureOpen] = useState(false);
   const { runAutomation, isLoading } = useRunAutomation();
   const displayName = workflowSummary?.name ?? automation.value;
   const enabled = workflowSummary?.enabled;
@@ -102,30 +112,47 @@ export const AutomationRow = ({
         label={displayName}
         icon={<ItemRowIcon iconType="workflow" />}
         actions={
-          <EuiPopover
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-            isOpen={isMenuOpen}
-            closePopover={() => setIsMenuOpen(false)}
-            aria-label={actionsAriaLabel}
-            button={
-              <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="ellipsis"
-                  color="text"
-                  aria-label={actionsAriaLabel}
-                  onClick={() => setIsMenuOpen((open) => !open)}
-                  data-test-subj="contextAutomationRowActionsButton"
-                  {...getEbtProps({
-                    element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                    action: CONTEXT_ENGINE_UI_EBT.action.automations.ROW_ACTIONS_MENU,
-                  })}
-                />
-              </EuiToolTip>
-            }
-          >
-            <EuiContextMenuPanel items={menuItems} />
-          </EuiPopover>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            {canConfigure && hasWorkflowDefinition ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={configureLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="gear"
+                    color="text"
+                    aria-label={configureLabel}
+                    onClick={() => setIsConfigureOpen(true)}
+                    data-test-subj="contextConfigureAutomationButton"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                isOpen={isMenuOpen}
+                closePopover={() => setIsMenuOpen(false)}
+                aria-label={actionsAriaLabel}
+                button={
+                  <EuiToolTip content={actionsAriaLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="ellipsis"
+                      color="text"
+                      aria-label={actionsAriaLabel}
+                      onClick={() => setIsMenuOpen((open) => !open)}
+                      data-test-subj="contextAutomationRowActionsButton"
+                      {...getEbtProps({
+                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                        action: CONTEXT_ENGINE_UI_EBT.action.automations.ROW_ACTIONS_MENU,
+                      })}
+                    />
+                  </EuiToolTip>
+                }
+              >
+                <EuiContextMenuPanel items={menuItems} />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         data-test-subj="contextAiIndexAutomationRow"
       >
@@ -155,6 +182,14 @@ export const AutomationRow = ({
           workflowId={automation.value}
           workflowName={displayName}
           onClose={() => setIsPreviewOpen(false)}
+        />
+      ) : null}
+      {isConfigureOpen ? (
+        <AutomationConfigureFlyout
+          workflowId={automation.value}
+          workflowName={displayName}
+          editHref={editHref}
+          onClose={() => setIsConfigureOpen(false)}
         />
       ) : null}
       {isDeleteModalOpen ? (
