@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { RulesClient } from '../../../../rules_client/rules_client';
@@ -12,7 +13,13 @@ import { getRulesClientMockParams } from '../../../../test_utils';
 import type { RuleTypeParams } from '../../../../../common';
 import { RecoveredActionGroup } from '../../../../../common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
@@ -3986,6 +3993,186 @@ describe('bulkEdit()', () => {
         expect.any(Array),
         expect.objectContaining({ action: 'rule_update' })
       );
+    });
+  });
+
+  describe('rule key connector access', () => {
+    const NEW_API_KEY = Buffer.from('111:abc').toString('base64');
+    const OTHER_API_KEY = Buffer.from('456:def').toString('base64');
+    const frequency = { notifyWhen: 'onActiveAlert' as const, summary: false, throttle: null };
+    const addTags = [{ field: 'tags' as const, operation: 'add' as const, value: ['test-1'] }];
+
+    const ruleWithConnector = (
+      id: string,
+      connectorId: string,
+      apiKey = MOCK_API_KEY
+    ): SavedObject<RawRule> => ({
+      ...existingDecryptedRule,
+      id,
+      attributes: {
+        ...existingDecryptedRule.attributes,
+        enabled: true,
+        apiKey,
+        actions: [
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: {},
+            uuid: `uuid-${id}`,
+            frequency,
+          },
+        ],
+      },
+      references: [{ name: 'action_0', type: 'action', id: connectorId }],
+    });
+    const getWrittenIds = () =>
+      (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{ id: string }>).map(
+        ({ id }) => id
+      );
+    const getInvalidatedKeys = () =>
+      (bulkMarkApiKeysForInvalidation as jest.Mock).mock.calls.flatMap(
+        ([{ apiKeys }]: [{ apiKeys: string[] }]) => apiKeys
+      );
+
+    beforeEach(() => {
+      (bulkMarkApiKeysForInvalidation as jest.Mock).mockReset();
+      actionsClient.getBulk.mockResolvedValue([
+        createMockConnector({ id: '1', actionTypeId: 'test', name: 'a' }),
+        createMockConnector({ id: '2', actionTypeId: 'test', name: 'b' }),
+      ]);
+      createAPIKeyMock.mockResolvedValue({
+        apiKeysEnabled: true,
+        result: { id: '111', api_key: 'abc' },
+      });
+      mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithConnector('1', '1')] });
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [ruleWithConnector('1', '1')],
+      });
+    });
+
+    test('makes no extra call for unrestricted connectors', async () => {
+      const {
+        options,
+        actionsClient: callerActionsClient,
+        getActionsClientWithRequest,
+      } = await setupRuleKeyConnectorAccess(rulesClientParams, []);
+
+      const result = await new RulesClient(options).bulkEdit({ filter: '', operations: addTags });
+
+      expect(callerActionsClient.getRestrictedConnectorIds).toHaveBeenCalledWith(['1']);
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(result.errors).toEqual([]);
+      expect(getWrittenIds()).toEqual(['1']);
+    });
+
+    test('validates the new key of an edit that changes no action', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+
+      const result = await new RulesClient(options).bulkEdit({
+        filter: '',
+        operations: [{ field: 'apiKey', operation: 'set' }],
+      });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.bulkCreate.mock.invocationCallOrder[0]
+      );
+      expect(result.errors).toEqual([]);
+      expect(getWrittenIds()).toEqual(['1']);
+      expect(getInvalidatedKeys()).toEqual([MOCK_API_KEY]);
+    });
+
+    test('validates the new key against the connectors the edit adds', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, enabled: true },
+          },
+        ],
+      });
+
+      await new RulesClient(options).bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [{ group: 'default', id: '1', params: {}, frequency }],
+          },
+        ],
+      });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: CALLER_PRINCIPAL,
+      });
+    });
+
+    test('fails only the rule whose new key is refused and invalidates that key', async () => {
+      const {
+        options,
+        actionsClient: callerActionsClient,
+        keyActionsClient,
+      } = await setupRuleKeyConnectorAccess(rulesClientParams, []);
+      callerActionsClient.getRestrictedConnectorIds.mockImplementation(async (ids) => ids);
+      keyActionsClient.ensureConnectorsUsable.mockImplementation(async ([connectorId]) => {
+        if (connectorId === '2') {
+          throw Boom.forbidden(`Unable to use connector "2"`, { connectorId: '2' });
+        }
+      });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [ruleWithConnector('1', '1'), ruleWithConnector('2', '2', OTHER_API_KEY)],
+      });
+
+      const result = await new RulesClient(options).bulkEdit({ filter: '', operations: addTags });
+
+      expect(result.errors).toEqual([
+        {
+          message: `The rule's API key cannot use connector "2"`,
+          rule: { id: '2', name: 'my rule name' },
+        },
+      ]);
+      expect(getWrittenIds()).toEqual(['1']);
+      expect(getInvalidatedKeys()).toEqual(expect.arrayContaining([NEW_API_KEY, MOCK_API_KEY]));
+      expect(getInvalidatedKeys()).not.toContain(OTHER_API_KEY);
+    });
+
+    test('keeps a caller-owned key that is refused', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      refuseConnector(keyActionsClient, '1');
+      isAuthenticationTypeApiKeyMock.mockReturnValue(true);
+      getAuthenticationApiKeyMock.mockReturnValue({
+        apiKeysEnabled: true,
+        result: { id: '789', name: 'caller', api_key: 'ghi' },
+      });
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...ruleWithConnector('1', '1'),
+            attributes: { ...ruleWithConnector('1', '1').attributes, apiKeyCreatedByUser: true },
+          },
+        ],
+      });
+
+      const result = await new RulesClient(options).bulkEdit({ filter: '', operations: addTags });
+
+      expect(result.errors).toEqual([
+        expect.objectContaining({ message: `The rule's API key cannot use connector "1"` }),
+      ]);
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: undefined,
+      });
+      expect(getInvalidatedKeys()).toEqual([]);
     });
   });
 });

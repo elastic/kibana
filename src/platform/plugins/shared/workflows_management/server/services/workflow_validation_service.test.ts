@@ -8,7 +8,7 @@
  */
 
 import { of } from 'rxjs';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -43,10 +43,10 @@ const makeDeps = (
   { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
-  actionsClient: { getAll: jest.Mock };
+  actionsClient: { getAllWithAcl: jest.Mock };
   actionsClientWithRequest: { listTypes: jest.Mock };
 } => {
-  const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+  const actionsClient = { getAllWithAcl: jest.fn().mockResolvedValue([]) };
   const actionsClientWithRequest = {
     listTypes: jest.fn().mockResolvedValue(listedConnectorTypes),
   };
@@ -69,6 +69,7 @@ const makeDeps = (
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
+          security: securityServiceMock.createStart(),
         } as any),
       licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
@@ -134,7 +135,7 @@ describe('WorkflowValidationService', () => {
 
       const result = await service.getAvailableConnectors('my-space', request);
 
-      expect(actionsClient.getAll).toHaveBeenCalledWith('my-space');
+      expect(actionsClient.getAllWithAcl).toHaveBeenCalledWith('my-space');
       expect(actionsClientWithRequest.listTypes).toHaveBeenCalled();
       expect(result).toEqual({ connectorTypes: {}, totalConnectors: 0 });
     });
@@ -150,7 +151,7 @@ describe('WorkflowValidationService', () => {
 
       expect(schema).toBeDefined();
       expect(typeof (schema as any).parse).toBe('function');
-      expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+      expect(actionsClient.getAllWithAcl).toHaveBeenCalledTimes(1);
     });
   });
 

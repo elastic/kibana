@@ -370,6 +370,36 @@ describe('ScopedAclService', () => {
           .asScoped(request)
           .filterVisible({ type: TYPE, spaceId: 'default', objects })
       ).resolves.toEqual([objects[0], objects[2]]);
+      // Like a search, a list does not audit every object it leaves out.
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('lets recovery see everything, and audits it once for the list', async () => {
+      asPrincipal(STRANGER);
+      grantedActions = new Set([...grantedActions, RECOVERY_ACTION]);
+      const objects = [
+        { id: 'private-1', acl: PRIVATE_ACL },
+        { id: 'private-2', acl: PRIVATE_ACL },
+      ];
+
+      await expect(
+        createAclService()
+          .asScoped(request)
+          .filterVisible({ type: TYPE, spaceId: 'default', objects })
+      ).resolves.toEqual(objects);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toBe('access_control_admin_override');
+    });
+
+    it('makes no lookup when nothing is restricted', async () => {
+      const objects = [{ id: 'public' }];
+
+      await expect(
+        createAclService()
+          .asScoped(request)
+          .filterVisible({ type: TYPE, spaceId: 'default', objects })
+      ).resolves.toBe(objects);
+      expect(checkPrivileges.atSpace).not.toHaveBeenCalled();
     });
   });
 

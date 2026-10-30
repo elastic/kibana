@@ -21,6 +21,9 @@ import {
   createNewAPIKeySet,
   scheduleTask,
   bulkMigrateLegacyActions,
+  getReferencedConnectorIds,
+  validateNewRuleKeyConnectorAccess,
+  validateRuleKeyConnectorAccess,
 } from '../../../../rules_client/lib';
 import { authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -165,6 +168,25 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
           apiKeyOwnership: { apiKeyCreatedByUser: attributes.apiKeyCreatedByUser },
         })
       : ({} as Awaited<ReturnType<typeof createNewAPIKeySet>>);
+
+    // A retained key is checked too, since connector access may have changed since it was created.
+    const connectorIds = getReferencedConnectorIds(alert.references);
+    if (existingApiKey) {
+      await validateRuleKeyConnectorAccess(context, {
+        spaceId: context.spaceId,
+        connectorIds,
+        apiKey: existingApiKey,
+        uiamApiKey: attributes.uiamApiKey,
+        uiamApiKeyExternal: attributes.uiamApiKeyExternal,
+        createdInThisRequest: false,
+      });
+    } else {
+      await validateNewRuleKeyConnectorAccess(context, {
+        spaceId: context.spaceId,
+        connectorIds,
+        keySet: apiKeyAttributes,
+      });
+    }
 
     const updateAttributes = updateMeta(context, {
       ...(existingApiKey ? attributes : omit(attributes, API_KEY_ATTRIBUTES_TO_STRIP)),

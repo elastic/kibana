@@ -43,6 +43,9 @@ import {
   updateMetaAttributes,
   bulkMigrateLegacyActions,
   migrateLegacyLastRunOutcomeMsg,
+  getReferencedConnectorIds,
+  validateNewRuleKeyConnectorAccess,
+  validateRuleKeyConnectorAccess,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -269,6 +272,24 @@ const bulkEnableRulesWithOCC = async (
                   refresh: false,
                 })
               : undefined;
+
+            const connectorIds = getReferencedConnectorIds(rule.references);
+            if (newApiKeyAttributes) {
+              await validateNewRuleKeyConnectorAccess(context, {
+                spaceId: context.spaceId,
+                connectorIds,
+                keySet: newApiKeyAttributes,
+              });
+            } else {
+              await validateRuleKeyConnectorAccess(context, {
+                spaceId: context.spaceId,
+                connectorIds,
+                apiKey: rule.attributes.apiKey,
+                uiamApiKey: rule.attributes.uiamApiKey,
+                uiamApiKeyExternal: rule.attributes.uiamApiKeyExternal,
+                createdInThisRequest: false,
+              });
+            }
 
             const updatedAttributes = updateMetaAttributes(context, {
               ...(newApiKeyAttributes

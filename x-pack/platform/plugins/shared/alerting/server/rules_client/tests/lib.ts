@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { securityServiceMock } from '@kbn/core/server/mocks';
+import { actionsClientMock, type ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -18,6 +20,44 @@ import { RecoveredActionGroup } from '../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const mockedDateString = '2019-02-12T21:01:22.479Z';
+
+export const CALLER_PRINCIPAL = { type: 'user', id: 'u_caller' } as const;
+
+/**
+ * Enables object-level security for rule keys: the caller's actions client reports the given
+ * connectors as restricted, and each key request gets `keyActionsClient`.
+ */
+export const setupRuleKeyConnectorAccess = async <Params extends jest.Mocked<ConstructorOptions>>(
+  rulesClientParams: Params,
+  restrictedConnectorIds: string[]
+) => {
+  const actionsClient = (await rulesClientParams.getActionsClient()) as ActionsClientMock;
+  actionsClient.getRestrictedConnectorIds.mockResolvedValue(restrictedConnectorIds);
+
+  const { accessControl } = securityServiceMock.createStart();
+  accessControl.isEnabled.mockReturnValue(true);
+  const scopedAccessControl = securityServiceMock.createScopedAccessControl();
+  scopedAccessControl.getPrincipal.mockResolvedValue(CALLER_PRINCIPAL);
+  accessControl.asScoped.mockReturnValue(scopedAccessControl);
+
+  const keyActionsClient = actionsClientMock.create();
+  const getActionsClientWithRequest = jest.fn().mockResolvedValue(keyActionsClient);
+
+  return {
+    options: { ...rulesClientParams, accessControl, getActionsClientWithRequest },
+    actionsClient,
+    keyActionsClient,
+    getActionsClientWithRequest,
+  };
+};
+
+/**
+ * Makes the key's actions client refuse a connector the way the actions plugin does.
+ */
+export const refuseConnector = (keyActionsClient: ActionsClientMock, connectorId: string) =>
+  keyActionsClient.ensureConnectorsUsable.mockRejectedValue(
+    Boom.forbidden(`Unable to use connector "${connectorId}"`, { connectorId })
+  );
 
 export function setGlobalDate() {
   const mockedDate = new Date(mockedDateString);

@@ -718,6 +718,9 @@ export class ActionsPlugin
           await this.clientLeasePool.evict(connectorId);
         },
         securityService: core.security,
+        internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
+          ACTION_SAVED_OBJECT_TYPE,
+        ]),
       });
     };
 
@@ -1182,6 +1185,9 @@ export class ActionsPlugin
               getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
             evictClientPool,
             securityService: coreStart.security,
+            internalSavedObjectsRepository: savedObjects.createInternalRepository([
+              ACTION_SAVED_OBJECT_TYPE,
+            ]),
           });
         },
         listTypes: (featureId?: string) => {

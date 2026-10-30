@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -912,6 +918,106 @@ describe('bulkUpdateRules', () => {
         [expect.objectContaining({ objectId: 'id-1' })],
         expect.objectContaining({ action: RuleChangeTrackingAction.ruleUpdate })
       );
+    });
+  });
+
+  describe('rule key connector access', () => {
+    const NEW_KEY = Buffer.from('key-id:key-value').toString('base64');
+    const itemWithConnector = (id: string, connectorId: string) =>
+      item(id, {
+        actions: [
+          {
+            group: 'default',
+            id: connectorId,
+            params: {},
+            frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
+          },
+        ],
+      });
+    const getWrittenIds = () =>
+      (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{ id: string }>).map(
+        ({ id }) => id
+      );
+    const getInvalidatedKeys = () =>
+      (bulkMarkApiKeysForInvalidation as jest.Mock).mock.calls.flatMap(
+        ([{ apiKeys }]: [{ apiKeys: string[] }]) => apiKeys
+      );
+
+    beforeEach(() => {
+      actionsClient.getBulk.mockResolvedValue([
+        createMockConnector({ id: '1', actionTypeId: 'test', name: 'a' }),
+        createMockConnector({ id: '2', actionTypeId: 'test', name: 'b' }),
+      ]);
+    });
+
+    test('makes no extra call for unrestricted connectors', async () => {
+      const {
+        options,
+        actionsClient: callerActionsClient,
+        getActionsClientWithRequest,
+      } = await setupRuleKeyConnectorAccess(rulesClientParams, []);
+      mockPit([so('id-1', { enabled: true, apiKey: 'old-1' })]);
+
+      const result = await new RulesClient(options).bulkUpdateRules({
+        rules: [itemWithConnector('id-1', '1')],
+      });
+
+      expect(callerActionsClient.getRestrictedConnectorIds).toHaveBeenCalledWith(['1']);
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(result.successfulIds).toEqual(['id-1']);
+    });
+
+    test('saves a rule whose new key can use its restricted connector', async () => {
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        '1',
+      ]);
+      mockPit([so('id-1', { enabled: true, apiKey: 'old-1' })]);
+
+      const result = await new RulesClient(options).bulkUpdateRules({
+        rules: [itemWithConnector('id-1', '1')],
+      });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['1'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.bulkCreate.mock.invocationCallOrder[0]
+      );
+      expect(result.successfulIds).toEqual(['id-1']);
+      expect(getInvalidatedKeys()).toEqual(['old-1']);
+    });
+
+    test('fails only the rule whose new key is refused, keeping its previous key', async () => {
+      const {
+        options,
+        actionsClient: callerActionsClient,
+        keyActionsClient,
+      } = await setupRuleKeyConnectorAccess(rulesClientParams, []);
+      callerActionsClient.getRestrictedConnectorIds.mockImplementation(async (ids) => ids);
+      keyActionsClient.ensureConnectorsUsable.mockImplementation(async ([connectorId]) => {
+        if (connectorId === '2') {
+          throw Boom.forbidden(`Unable to use connector "2"`, { connectorId: '2' });
+        }
+      });
+      mockPit([
+        so('id-1', { enabled: true, apiKey: 'old-1' }),
+        so('id-2', { enabled: true, apiKey: 'old-2' }),
+      ]);
+
+      const result = await new RulesClient(options).bulkUpdateRules({
+        rules: [itemWithConnector('id-1', '1'), itemWithConnector('id-2', '2')],
+      });
+
+      expect(result.errors).toEqual([
+        expect.objectContaining({
+          message: `The rule's API key cannot use connector "2"`,
+          rule: expect.objectContaining({ id: 'id-2' }),
+        }),
+      ]);
+      expect(result.successfulIds).toEqual(['id-1']);
+      expect(getWrittenIds()).toEqual(['id-1']);
+      expect(getInvalidatedKeys()).toEqual(expect.arrayContaining([NEW_KEY, 'old-1']));
+      expect(getInvalidatedKeys()).not.toContain('old-2');
     });
   });
 });

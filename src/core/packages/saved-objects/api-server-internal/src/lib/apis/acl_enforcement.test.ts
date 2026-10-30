@@ -247,7 +247,7 @@ describe('object-level security in the repository', () => {
         ['visible', 409],
         ['other', 409],
       ]);
-      expect(client.mget.mock.calls[0][0].docs?.map((doc) => doc._source)).toEqual([
+      expect(client.mget.mock.calls[0][0]?.docs?.map((doc) => doc._source)).toEqual([
         { includes: ['type', 'namespaces', 'acl'] },
         { includes: ['type', 'namespaces', 'acl'] },
         { includes: ['type', 'namespaces'] },

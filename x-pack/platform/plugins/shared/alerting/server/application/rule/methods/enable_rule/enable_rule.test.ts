@@ -8,7 +8,13 @@
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { ApiKeyType } from '../../../../task_runner/types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+import {
+  CALLER_PRINCIPAL,
+  getBeforeSetup,
+  refuseConnector,
+  setGlobalDate,
+  setupRuleKeyConnectorAccess,
+} from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import {
@@ -945,6 +951,133 @@ describe('enable()', () => {
     await rulesClient.enableRule({ id: '1' });
     expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledTimes(0);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+  });
+
+  describe('rule key connector access', () => {
+    const references = [
+      { type: 'action', id: 'restricted', name: 'action_0' },
+      { type: 'action', id: 'public', name: 'action_1' },
+    ];
+    const newKey = { id: '123', name: '123', api_key: 'abc' };
+
+    beforeEach(() => {
+      rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: true, result: newKey });
+    });
+
+    test('makes no extra call when every connector is unrestricted', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRuleWithoutApiKey,
+        references,
+      });
+      const { options, actionsClient, getActionsClientWithRequest } =
+        await setupRuleKeyConnectorAccess(rulesClientParams, []);
+
+      await new RulesClient(options).enableRule({ id: '1' });
+
+      expect(actionsClient.getRestrictedConnectorIds).toHaveBeenCalledWith([
+        'restricted',
+        'public',
+      ]);
+      expect(getActionsClientWithRequest).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    });
+
+    test('validates a new key as the caller before the rule is written', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRuleWithoutApiKey,
+        references,
+      });
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        'restricted',
+      ]);
+
+      await new RulesClient(options).enableRule({ id: '1' });
+
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['restricted'], {
+        principal: CALLER_PRINCIPAL,
+      });
+      expect(keyActionsClient.ensureConnectorsUsable.mock.invocationCallOrder[0]).toBeLessThan(
+        unsecuredSavedObjectsClient.create.mock.invocationCallOrder[0]
+      );
+    });
+
+    test('refuses a new key and invalidates it', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRuleWithoutApiKey,
+        references,
+      });
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        'restricted',
+      ]);
+      refuseConnector(keyActionsClient, 'restricted');
+
+      await expect(new RulesClient(options).enableRule({ id: '1' })).rejects.toThrow(
+        `The rule's API key cannot use connector "restricted"`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [Buffer.from('123:abc').toString('base64')] },
+        expect.any(Object),
+        expect.any(Object)
+      );
+    });
+
+    test('validates a retained key with its own principal', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRule,
+        references,
+      });
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        'restricted',
+      ]);
+
+      await new RulesClient(options).enableRule({ id: '1' });
+
+      expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['restricted'], {
+        principal: undefined,
+      });
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    });
+
+    test('refuses a retained key without invalidating it', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRule,
+        references,
+      });
+      const { options, keyActionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
+        'restricted',
+      ]);
+      refuseConnector(keyActionsClient, 'restricted');
+
+      await expect(new RulesClient(options).enableRule({ id: '1' })).rejects.toThrow(
+        `The rule's API key cannot use connector "restricted"`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+
+    test('validates a restricted connector the caller cannot see', async () => {
+      // The rule references a connector that is hidden from the caller: it is still classified
+      // and checked as the key.
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRuleWithoutApiKey,
+        references: [{ type: 'action', id: 'hidden', name: 'action_0' }],
+      });
+      const { options, actionsClient, keyActionsClient } = await setupRuleKeyConnectorAccess(
+        rulesClientParams,
+        ['hidden']
+      );
+
+      await new RulesClient(options).enableRule({ id: '1' });
+
+      expect(actionsClient.getRestrictedConnectorIds).toHaveBeenCalledWith(['hidden']);
+      expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['hidden'], {
+        principal: CALLER_PRINCIPAL,
+      });
+    });
   });
 
   describe('missing UIAM API key tagging', () => {

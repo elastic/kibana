@@ -20,6 +20,7 @@ import {
   createNewAPIKeySet,
   extractReferences,
   validateActions,
+  validateRuleKeyConnectorAccess,
 } from '../../../../rules_client/lib';
 import { apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import type { BulkOperationError } from '../../../../rules_client/types';
@@ -84,6 +85,15 @@ export const prepareRule = async <Params extends RuleParams>({
         apiKey: apiKeyProps.apiKey ?? null,
         uiamApiKey: apiKeyProps.uiamApiKey ?? null,
         apiKeyCreatedByUser: apiKeyProps.apiKeyCreatedByUser ?? null,
+      });
+      // A refused key is invalidated below, with the other keys of rules that failed.
+      await validateRuleKeyConnectorAccess(context, {
+        spaceId: context.spaceId,
+        connectorIds: data.actions.map((action) => action.id),
+        apiKey: apiKeyProps.apiKey,
+        uiamApiKey: apiKeyProps.uiamApiKey,
+        uiamApiKeyExternal: apiKeyProps.uiamApiKeyExternal,
+        createdInThisRequest: !apiKeyProps.apiKeyCreatedByUser,
       });
     }
 

@@ -9,6 +9,7 @@
  * Get all actions with in-memory connectors
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { CanonicalAcl } from '@kbn/access-control';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -25,7 +26,7 @@ import {
   isSandboxCapableConnector,
 } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
-import type { ConnectorWithExtraFindData } from '../../types';
+import type { ConnectorWithAcl, ConnectorWithExtraFindData } from '../../types';
 import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
 import { attachInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 import type { GetAllUnsecuredParams } from './types/params';
@@ -40,6 +41,12 @@ interface GetAllHelperOpts {
   savedObjectsClient: SavedObjectClientForFind;
   connectorTypeRegistry: ActionTypeRegistry;
   sandboxCapableOnly?: boolean;
+}
+
+interface GetAllHelperResult {
+  connectors: ConnectorWithExtraFindData[];
+  /** ACLs of the stored connectors, by connector ID. */
+  acls: Map<string, CanonicalAcl>;
 }
 
 export async function getAll({
@@ -59,7 +66,7 @@ export async function getAll({
     throw error;
   }
 
-  return await getAllHelper({
+  const { connectors } = await getAllHelper({
     auditLogger: context.auditLogger,
     esClient: context.scopedClusterClient.asInternalUser,
     inMemoryConnectors: includeSystemActions
@@ -71,9 +78,28 @@ export async function getAll({
     connectorTypeRegistry: context.actionTypeRegistry,
     sandboxCapableOnly,
   });
+  return connectors;
 }
 
-export async function getAllUnsecured({
+export async function getAllUnsecured(
+  params: GetAllUnsecuredParams
+): Promise<ConnectorWithExtraFindData[]> {
+  const { connectors } = await getAllUnsecuredHelper(params);
+  return connectors;
+}
+
+/**
+ * Lists the connectors of a space whatever any caller can view, each with the ACL of its Saved
+ * Object, so that a system caller can apply object-level security for a request itself.
+ */
+export async function getAllUnsecuredWithAcl(
+  params: GetAllUnsecuredParams
+): Promise<ConnectorWithAcl[]> {
+  const { connectors, acls } = await getAllUnsecuredHelper(params);
+  return connectors.map((connector) => ({ connector, acl: acls.get(connector.id) }));
+}
+
+async function getAllUnsecuredHelper({
   esClient,
   inMemoryConnectors,
   internalSavedObjectsRepository,
@@ -81,7 +107,7 @@ export async function getAllUnsecured({
   logger,
   spaceId,
   connectorTypeRegistry,
-}: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
+}: GetAllUnsecuredParams): Promise<GetAllHelperResult> {
   const isUnsetOrDefaultSpace = !spaceId || spaceId === 'default';
   const namespace = isUnsetOrDefaultSpace ? undefined : spaceId;
 
@@ -107,8 +133,9 @@ async function getAllHelper({
   savedObjectsClient,
   connectorTypeRegistry,
   sandboxCapableOnly = false,
-}: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
+}: GetAllHelperOpts): Promise<GetAllHelperResult> {
   const connectorIdsWithIdentity = new Set<string>();
+  const acls = new Map<string, CanonicalAcl>();
   const connectorIdsWithEventsEnabled = new Set(
     inMemoryConnectors
       .filter((connector) => connector.isInboundEventsEnabled === true)
@@ -119,6 +146,9 @@ async function getAllHelper({
   ).saved_objects.map((rawAction) => {
     if (hasInboundEventIdentityAttributes(rawAction.attributes)) {
       connectorIdsWithIdentity.add(rawAction.id);
+    }
+    if (rawAction.acl) {
+      acls.set(rawAction.id, rawAction.acl);
     }
     const connector = connectorFromSavedObject(
       rawAction,
@@ -184,11 +214,14 @@ async function getAllHelper({
 
   validateConnectors(connectors, logger);
 
-  return attachInboundEventsEnabled({
-    connectors,
-    connectorIdsWithIdentity,
-    connectorIdsWithEventsEnabled,
-  });
+  return {
+    connectors: attachInboundEventsEnabled({
+      connectors,
+      connectorIdsWithIdentity,
+      connectorIdsWithEventsEnabled,
+    }),
+    acls,
+  };
 }
 
 const validateConnectors = (connectors: ConnectorWithExtraFindData[], logger: Logger) => {
