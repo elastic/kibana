@@ -87,7 +87,9 @@ export const lensPanelContentSchema = lazySchema(() =>
     renderer: z
       .literal('lens')
       .optional()
-      .describe('(optional) Render with Lens. Lens is the default when renderer is omitted.'),
+      .describe(
+        "(optional) Render with Lens. When omitted, a new panel uses Lens and an edit keeps the panel's own renderer (Lens or Vega)."
+      ),
     chartType: z
       .nativeEnum(SupportedChartType)
       .optional()
@@ -98,7 +100,7 @@ export const lensPanelContentSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe(
-        '(optional) Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
+        '(optional) Existing Lens panels only; ignored on a Vega panel. Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
       ),
   })
 );

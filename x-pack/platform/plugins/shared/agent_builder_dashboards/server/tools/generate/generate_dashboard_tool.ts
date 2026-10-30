@@ -58,7 +58,7 @@ const generateDashboardSchema = lazySchema(() =>
       .max(256)
       .optional()
       .describe(
-        '(optional) The id of the dashboard to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+        '(optional) The id of the dashboard to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in. An unknown id is an error.'
       ),
     ...upsertDashboardSchema.shape,
     layout: z
@@ -153,16 +153,16 @@ export const generateDashboardTool = ({
     type: ToolType.builtin,
     description: `Create or update a dashboard by describing the desired changes, keyed by id.
 
-Returns the dashboard's id plus a compact summary (not the full payload). Pass that id as \`dashboardId\` to edit the dashboard later; do not copy the payload into follow-up tool calls.
+Returns the dashboard's id plus a compact summary. Pass that id as \`dashboardId\` to edit the dashboard later.
 
 - \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
 - \`sections\`: sections to create or update.
-- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
-- \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider) to add, or to replace by id.
+- \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id.
+- \`controls\`: filters pinned above the dashboard, to add or to replace by id.
 - \`remove\`: ids of panels, sections, or controls to remove.
 - \`layout\`: the user's own arrangement or size request. Omit it otherwise.
 
-Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel instead of updating one is visible. A panel only moved or resized by the layout step is not listed as updated.`,
+Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). Panel positions and sizes are set automatically. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel is visible.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardId: previousAttachmentId, layout, ...upsert },

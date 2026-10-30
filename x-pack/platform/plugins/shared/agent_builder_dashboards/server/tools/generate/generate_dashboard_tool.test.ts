@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -434,5 +435,34 @@ describe('generateDashboardTool handler', () => {
         },
       });
     });
+  });
+});
+
+describe('generateDashboardTool descriptions', () => {
+  const tool = generateDashboardTool({ getDashboardValidator: jest.fn() });
+
+  interface DescribedNode {
+    description?: string;
+  }
+  const { properties } = z.toJSONSchema(tool.schema, { io: 'input' }) as unknown as {
+    properties: {
+      controls: DescribedNode;
+    };
+  };
+
+  it('keeps the tool description within the 1,024 characters function-calling APIs accept', () => {
+    expect(tool.description.length).toBeLessThanOrEqual(1024);
+    expect(tool.description).toContain('Pass that id as `dashboardId`');
+  });
+
+  it('says that changes apply one by one and failures are listed', () => {
+    expect(tool.description).toContain('Changes are applied one by one');
+    expect(tool.description).toContain('resend only the failed ones');
+  });
+
+  it('says which controls are left out without a failure', () => {
+    expect(properties.controls.description).toContain(
+      'silently, unless `user_requested` is true or it replaces an existing control'
+    );
   });
 });

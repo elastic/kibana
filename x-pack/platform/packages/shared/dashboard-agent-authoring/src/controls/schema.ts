@@ -43,7 +43,12 @@ const controlLayoutFields = {
 
 const userRequestedFields = {
   user_requested: lazySchema(() =>
-    z.boolean().optional().describe('True only when the user asked explicitly for the controls.')
+    z
+      .boolean()
+      .optional()
+      .describe(
+        'True only when the user asked explicitly for the controls. A control that cannot be added is then reported in `failures` instead of left out silently.'
+      )
   ),
 };
 
@@ -55,7 +60,7 @@ const controlIdFields = {
       .max(256)
       .optional()
       .describe(
-        'Control id. An existing control id replaces that control with this definition in place; a new id adds a control with this id. Omit it to add a control with a generated readable id, shown in the result.'
+        'Control id. An existing control id replaces that control in place with this definition, so omitted fields take their defaults; a new id adds a control with this id. Omit it to add a control with a generated readable id, shown in the result.'
       )
   ),
 };
