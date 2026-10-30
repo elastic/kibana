@@ -326,20 +326,12 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
 
   const autoRefresh = useMemo<AutoRefreshSettings>(
     () => ({
-      // In auto-refresh-only mode the settings panel is unreachable behind `readOnly`,
-      // so the play/pause control has to be visible from the start.
-      isEnabled: isAutoRefreshOnlyMode || isAutoRefreshEnabled,
+      isEnabled: isAutoRefreshEnabled,
       isPaused: refreshInterval.pause,
       intervalMs: refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS,
       intervalDisplayUnit,
     }),
-    [
-      isAutoRefreshOnlyMode,
-      isAutoRefreshEnabled,
-      refreshInterval.pause,
-      refreshInterval.value,
-      intervalDisplayUnit,
-    ]
+    [isAutoRefreshEnabled, refreshInterval.pause, refreshInterval.value, intervalDisplayUnit]
   );
 
   const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(

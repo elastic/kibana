@@ -6,7 +6,7 @@
  */
 
 import '@testing-library/jest-dom';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -239,6 +239,41 @@ describe('<DatePickerWrapper />', () => {
 
     expect(refreshListener).toHaveBeenCalledTimes(1);
     refreshSubscription.unsubscribe();
+  });
+
+  test('should let the auto-refresh toggle be turned off in auto-refresh-only mode', () => {
+    (useRefreshIntervalUpdates as jest.Mock).mockReturnValue({ pause: false, value: 10000 });
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(jest.fn()));
+
+    render(<DatePickerWrapper isAutoRefreshOnly showRefresh />);
+
+    const { settings, onSettingsChange } = MockedDateRangePicker.mock.calls[0][0];
+    expect(settings.autoRefresh?.isEnabled).toBe(true);
+
+    act(() => {
+      onSettingsChange?.({
+        ...settings,
+        autoRefresh: {
+          isEnabled: false,
+          isPaused: false,
+          intervalMs: 10000,
+          intervalDisplayUnit: 's',
+        },
+      });
+    });
+
+    const latestCall =
+      MockedDateRangePicker.mock.calls[MockedDateRangePicker.mock.calls.length - 1];
+    expect(latestCall[0].settings.autoRefresh?.isEnabled).toBe(false);
+  });
+
+  test('should show the auto-refresh toggle as off when the refresh interval is paused', () => {
+    (useRefreshIntervalUpdates as jest.Mock).mockReturnValue({ pause: true, value: 10000 });
+    (useDatePickerContext as jest.Mock).mockImplementation(mockContextFactory(jest.fn()));
+
+    render(<DatePickerWrapper isAutoRefreshOnly showRefresh />);
+
+    expect(MockedDateRangePicker.mock.calls[0][0].settings.autoRefresh?.isEnabled).toBe(false);
   });
 
   test('should show the full picker when a time range is shown', () => {
