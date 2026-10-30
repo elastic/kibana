@@ -39,12 +39,22 @@ import {
   agentBuilderSmokeTestsSteps,
   aiInfraGenAiSteps,
   buildFipsImage,
+  buildCloudFipsImageSteps,
+  buildCloudImageSteps,
+  buildProjectSteps,
   checkNextDocs,
   checkOasSnapshot,
   checkSavedObjects,
   cpsTests,
+  deployCloudSteps,
+  deployProjectSteps,
+  entityStorePerformanceSteps,
   fleetCypressSteps,
+  ftrBenchSteps,
+  jestBenchSteps,
   localCheck,
+  pageLoadBenchSteps,
+  postBuildSteps,
   prBaseEnv,
   prBaseSteps,
   renderSteps,
@@ -54,6 +64,7 @@ import {
   scoutFleetRealAgentSteps,
   storybooks,
   verifyFipsEnabled,
+  warmStartMemoryBenchSteps,
   workflowsOomTestingSteps,
   ai4dsocSteps,
   aiAssistantSteps,
@@ -328,9 +339,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/build_cloud_image.yml', cancelable)
-      );
+      pipeline.push(renderSteps(buildCloudImageSteps(), cancelOnGate));
     }
 
     if (
@@ -339,9 +348,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/build_cloud_fips_image.yml', cancelable)
-      );
+      pipeline.push(renderSteps(buildCloudFipsImageSteps(), cancelOnGate));
     }
 
     if (
@@ -349,7 +356,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml', cancelable));
+      pipeline.push(renderSteps(deployCloudSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
@@ -357,12 +364,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:entity-store-performance')) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/trigger_entity_store_performance.yml',
-          cancelable
-        )
-      );
+      pipeline.push(renderSteps(entityStorePerformanceSteps(), cancelOnGate));
     }
 
     if (
@@ -373,11 +375,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
         GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc'))
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml', cancelable)
-      );
+      pipeline.push(renderSteps(deployProjectSteps(), cancelOnGate));
     } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml', cancelable));
+      pipeline.push(renderSteps(buildProjectSteps(), cancelOnGate));
     }
 
     if (
@@ -752,24 +752,20 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml', cancelable));
+      pipeline.push(renderSteps(jestBenchSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml', cancelable));
+      pipeline.push(renderSteps(ftrBenchSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:bench-page-load')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/page_load_bench.yml', cancelable)
-      );
+      pipeline.push(renderSteps(pageLoadBenchSteps(), cancelOnGate));
     }
 
     // Run the warm-start memory check systematically; it is non-blocking.
     if (!scoutTestsOnly) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/warm_start_memory_bench.yml', cancelable)
-      );
+      pipeline.push(renderSteps(warmStartMemoryBenchSteps(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
@@ -777,7 +773,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     // post_build is not cancelable — cleanup/reporting should always run
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    pipeline.push(renderSteps(postBuildSteps()));
 
     flushCancelOnGateFailureMetadata();
     emitPipeline(pipeline);

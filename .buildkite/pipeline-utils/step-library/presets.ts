@@ -35,11 +35,13 @@ export type Zone =
 
 // Add a machine type here when a ported step first uses it.
 export type MachineType =
+  | 'c4d-standard-16'
   | 'n2-highcpu-8'
   | 'n2-highmem-4'
   | 'n2-standard-2'
   | 'n2-standard-4'
   | 'n2-standard-8'
+  | 'n2-standard-16'
   | 'n2d-custom-16-32768'
   | 'n2d-standard-2'
   | 'n2d-standard-8'
@@ -102,7 +104,18 @@ export const retry = {
 
 export const hyperdiskBalanced = { diskType: 'hyperdisk-balanced' } as const;
 
+export const k8sMinimalAgent = (): AgentConfig => ({
+  provider: 'k8s',
+  image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
+  imageUID: 1000,
+});
+
 export const onDemandAgent = (machineType: MachineType): AgentConfig => ({ machineType });
+
+export const preemptibleAgent = (machineType: MachineType): AgentConfig => ({
+  machineType,
+  preemptible: true,
+});
 
 // For a non-preemptible agent restricted to these zones.
 export const agentZones = (zones: readonly Zone[]): Pick<AgentConfig, 'zones'> => ({
@@ -110,8 +123,7 @@ export const agentZones = (zones: readonly Zone[]): Pick<AgentConfig, 'zones'> =
 });
 
 export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): AgentConfig => ({
-  machineType,
-  preemptible: true,
+  ...preemptibleAgent(machineType),
   spotZones: zones.join(','),
 });
 

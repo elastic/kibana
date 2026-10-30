@@ -36,7 +36,6 @@ steps:
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     timeout_in_minutes: 15
     env:
-      STORE_CACHE: 'true'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_UNIT_MAX_MINUTES: '15.0'
       LIMIT_CONFIG_TYPE: 'unit'

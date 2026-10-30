@@ -14,14 +14,27 @@ import { renderSteps } from './render.ts';
 import { normalizeSemantics } from './semantic_normalization.ts';
 import { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
 import { buildFipsImage } from './steps/build_fips_image.ts';
+import { buildCloudFipsImageSteps } from './steps/build_cloud_fips_image.ts';
+import { buildCloudImageSteps } from './steps/build_cloud_image.ts';
+import { buildProjectSteps } from './steps/build_project.ts';
 import { checkNextDocs } from './steps/check_next_docs.ts';
 import { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
 import { checkSavedObjects } from './steps/check_saved_objects.ts';
 import { cpsTests } from './steps/cps_testing.ts';
+import { deployCloudSteps } from './steps/deploy_cloud.ts';
+import { deployProjectSteps } from './steps/deploy_project.ts';
+import { entityStorePerformanceSteps as entityStoreSteps } from './steps/trigger_entity_store_performance.ts';
 import { agentBuilderSmokeTestsSteps } from './steps/agent_builder_smoke_tests.ts';
 import { aiInfraGenAiSteps } from './steps/ai_infra_gen_ai.ts';
+import {
+  ftrBenchSteps,
+  jestBenchSteps,
+  pageLoadBenchSteps,
+  warmStartMemoryBenchSteps,
+} from './steps/benchmarks.ts';
 import { fleetCypressSteps } from './steps/fleet_cypress.ts';
 import { localCheck } from './steps/local_check.ts';
+import { postBuildSteps } from './steps/post_build.ts';
 import { renovateValidation } from './steps/renovate.ts';
 import { responseOpsCasesSteps } from './steps/response_ops_cases.ts';
 import { responseOpsSteps } from './steps/response_ops.ts';
@@ -71,24 +84,24 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/ai_infra_gen_ai'), steps: aiInfraGenAiSteps },
   yamlFragment('pull_request/api_contracts'),
   { ...yamlFragment('pull_request/base'), steps: prBaseSteps, env: prBaseEnv },
-  yamlFragment('pull_request/build_cloud_fips_image'),
-  yamlFragment('pull_request/build_cloud_image'),
-  yamlFragment('pull_request/build_project'),
+  { ...yamlFragment('pull_request/build_cloud_fips_image'), steps: buildCloudFipsImageSteps },
+  { ...yamlFragment('pull_request/build_cloud_image'), steps: buildCloudImageSteps },
+  { ...yamlFragment('pull_request/build_project'), steps: buildProjectSteps },
   { ...yamlFragment('pull_request/check_next_docs'), steps: checkNextDocs },
   { ...yamlFragment('pull_request/check_oas_snapshot'), steps: checkOasSnapshot },
   { ...yamlFragment('pull_request/check_saved_objects'), steps: checkSavedObjects },
   yamlFragment('pull_request/code_quality'),
   { ...yamlFragment('pull_request/cps_testing'), steps: cpsTests },
-  yamlFragment('pull_request/deploy_cloud'),
-  yamlFragment('pull_request/deploy_project'),
+  { ...yamlFragment('pull_request/deploy_cloud'), steps: deployCloudSteps },
+  { ...yamlFragment('pull_request/deploy_project'), steps: deployProjectSteps },
   { ...yamlFragment('pull_request/fips'), steps: buildFipsImage },
   { ...yamlFragment('pull_request/fleet_cypress'), steps: fleetCypressSteps },
-  yamlFragment('pull_request/ftr_bench'),
-  yamlFragment('pull_request/jest_bench'),
+  { ...yamlFragment('pull_request/ftr_bench'), steps: ftrBenchSteps },
+  { ...yamlFragment('pull_request/jest_bench'), steps: jestBenchSteps },
   yamlFragment('pull_request/kbn_handlebars'),
   { ...yamlFragment('pull_request/local_check'), steps: localCheck },
-  yamlFragment('pull_request/page_load_bench'),
-  yamlFragment('pull_request/post_build'),
+  { ...yamlFragment('pull_request/page_load_bench'), steps: pageLoadBenchSteps },
+  { ...yamlFragment('pull_request/post_build'), steps: postBuildSteps },
   yamlFragment('pull_request/prompt_changes'),
   { ...yamlFragment('pull_request/renovate'), steps: renovateValidation },
   { ...yamlFragment('pull_request/response_ops'), steps: responseOpsSteps },
@@ -109,11 +122,10 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/security_solution/osquery_cypress'), steps: osqueryCypressSteps },
   { ...yamlFragment('pull_request/security_solution/rule_management'), steps: ruleManagementSteps },
   { ...yamlFragment('pull_request/security_solution/scout_edr_real_fleet'), steps: scoutEdrRealFleetSteps },
-  yamlFragment('pull_request/store_moon_cache'),
   { ...yamlFragment('pull_request/storybooks'), steps: storybooks },
   yamlFragment('pull_request/sync_model_labels'),
-  yamlFragment('pull_request/trigger_entity_store_performance'),
-  yamlFragment('pull_request/warm_start_memory_bench'),
+  { ...yamlFragment('pull_request/trigger_entity_store_performance'), steps: entityStoreSteps },
+  { ...yamlFragment('pull_request/warm_start_memory_bench'), steps: warmStartMemoryBenchSteps },
   { ...yamlFragment('pull_request/workflows_oom_testing'), steps: workflowsOomTestingSteps },
 ];
 

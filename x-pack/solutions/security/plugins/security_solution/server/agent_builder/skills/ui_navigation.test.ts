@@ -7,29 +7,29 @@
 
 import {
   ENTITY_RESOLUTION_GROUP_TAB,
-  WATCHLISTS_FLYOUT_KEY,
+  EDIT_WATCHLIST_URL_PARAM,
   ENTITY_ANALYTICS_HOME_TABLE_SCOPE,
   ENTITY_RESOLUTION_PANEL,
   buildResolutionFlyoutTemplate,
-  buildWatchlistEditFlyoutTemplate,
+  buildWatchlistEditPath,
 } from './ui_navigation';
 import {
   HostPanelKey,
   UserPanelKey,
   ServicePanelKey,
-  WatchlistsFlyoutKey,
 } from '../../../public/flyout/entity_details/shared/constants';
 import { HostDetailsPanelKey } from '../../../public/flyout/entity_details/host_details_left';
 import { UserDetailsPanelKey } from '../../../public/flyout/entity_details/user_details_left';
 import { ServiceDetailsPanelKey } from '../../../public/flyout/entity_details/service_details_left';
 import { EntityDetailsLeftPanelTab } from '../../../public/flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../../public/entity_analytics/components/home/constants';
+import { EDIT_WATCHLIST_URL_PARAM as PUBLIC_EDIT_WATCHLIST_URL_PARAM } from '../../../public/entity_analytics/components/watchlists/flyout/constants';
 
 // ui_navigation.ts can't import across the server/public boundary, so it hardcodes copies of these
 // flyout/panel keys. These checks fail if a client-side rename drifts from the copies.
 describe('hardcoded flyout/panel keys stay in sync with their public constants', () => {
   it('flyout/tab/scope keys match the values hardcoded in ui_navigation.ts', () => {
-    expect(WatchlistsFlyoutKey).toBe(WATCHLISTS_FLYOUT_KEY);
+    expect(PUBLIC_EDIT_WATCHLIST_URL_PARAM).toBe(EDIT_WATCHLIST_URL_PARAM);
     expect(EntityDetailsLeftPanelTab.RESOLUTION_GROUP).toBe(ENTITY_RESOLUTION_GROUP_TAB);
     expect(ENTITY_ANALYTICS_TABLE_ID).toBe(ENTITY_ANALYTICS_HOME_TABLE_SCOPE);
   });
@@ -73,13 +73,16 @@ describe('buildResolutionFlyoutTemplate', () => {
   });
 });
 
-describe('buildWatchlistEditFlyoutTemplate', () => {
-  it('builds the watchlists-flyout edit template with a placeholder id', () => {
-    expect(buildWatchlistEditFlyoutTemplate()).toEqual({
-      right: {
-        id: 'watchlists-flyout',
-        params: { mode: 'edit', watchlistId: '<WATCHLIST_ID>' },
-      },
-    });
+describe('buildWatchlistEditPath', () => {
+  it('builds the watchlists tab path with a placeholder edit id', () => {
+    expect(buildWatchlistEditPath()).toBe(
+      '/app/security/entity_analytics_management/watchlists?editWatchlistId=<WATCHLIST_ID>'
+    );
+  });
+
+  it('substitutes the given watchlist id', () => {
+    expect(buildWatchlistEditPath('wl-123')).toBe(
+      '/app/security/entity_analytics_management/watchlists?editWatchlistId=wl-123'
+    );
   });
 });
