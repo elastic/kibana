@@ -24,6 +24,10 @@ export const LOAD_TIME_LABEL = i18n.translate('xpack.digitalExperience.loadTime.
   defaultMessage: 'Load time (p75)',
 });
 
+export const SESSIONS_LABEL = i18n.translate('xpack.digitalExperience.sessions.label', {
+  defaultMessage: 'Sessions',
+});
+
 export const SOURCE_LABELS: Record<ApplicationSource, string> = {
   otel: i18n.translate('xpack.digitalExperience.applications.source.otel', {
     defaultMessage: 'EDOT Browser',

@@ -13,18 +13,17 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, WRITE_HUNT_EVIDENCE_URL } from '../../../common/constants';
-import {
-  isReportVisibleToSpace,
-  writeHuntEvidence,
-} from '../../services/watches/hunt/common/write_hunt_evidence';
+import { isReportVisibleToSpace } from '../../services/watches/hunt/common/report_visibility';
+import { writeHuntEvidence } from '../../services/watches/hunt/common/write_hunt_evidence';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 export { WRITE_HUNT_EVIDENCE_URL };
 
 /**
- * Stamps the hunt-once gate on a report, called by `hunt.yaml` only after `run_hunt_coordinator`
- * reports `completed_successfully`. Deliberately its own route rather than folded into the
+ * Records a finished hunt on a report, called by `hunt.yaml` after `run_hunt_coordinator` returns a
+ * result: stamps the hunt-once gate when the run settles it and updates the coverage ledger either
+ * way. Deliberately its own route rather than folded into the
  * coordinator's own response path: the engine can fail the `run_hunt_coordinator` step (timeout,
  * response-size cap) after the coordinator's handler has already run, and a plain in-process write
  * there is not cancelled by that failure -- it would stamp a report the workflow itself goes on to
@@ -63,21 +62,37 @@ export const registerWriteHuntEvidenceRoute = ({
           const spaceId = getSpaceId(request);
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
 
-          const { reportId, runId, hasConfirmedHit, completeness, totalHits } = request.body;
+          const {
+            reportId,
+            runId,
+            hasConfirmedHit,
+            completeness,
+            totalHits,
+            searchedTechniqueIds,
+            pendingTechniqueIds,
+            replayedWholeReport,
+          } = request.body;
 
           const visible = await isReportVisibleToSpace(reportsEsClient, { spaceId, reportId });
           if (!visible) {
             return response.notFound({ body: { message: `Report ${reportId} not found` } });
           }
 
-          await writeHuntEvidence(reportsEsClient, {
-            spaceId,
-            reportId,
-            runId,
-            hasConfirmedHit,
-            completeness,
-            totalHits,
-          });
+          await writeHuntEvidence(
+            reportsEsClient,
+            {
+              spaceId,
+              reportId,
+              runId,
+              hasConfirmedHit,
+              completeness,
+              totalHits,
+              searchedTechniqueIds,
+              pendingTechniqueIds,
+              replayedWholeReport,
+            },
+            logger
+          );
 
           const body: WriteHuntEvidenceResponse = { acknowledged: true };
           return response.ok({ body });

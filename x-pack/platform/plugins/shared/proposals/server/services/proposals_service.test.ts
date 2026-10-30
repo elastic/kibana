@@ -1447,6 +1447,7 @@ describe('ProposalsService', () => {
           decision: 'approved',
           status: 'executing',
           decidedBy: analyst('analyst'),
+          decisionMode: 'manual',
         },
         SPACE_ID
       );
@@ -1455,6 +1456,7 @@ describe('ProposalsService', () => {
       expect(proposal.decidedBy).toEqual(
         expect.objectContaining({ username: 'analyst', profileUid: 'analyst-uid' })
       );
+      expect(proposal.decisionMode).toBe('manual');
       // Stamped by the service, so the recorded moment is the moment written.
       expect(proposal.decidedAt).toEqual(expect.any(String));
     });
@@ -1503,6 +1505,7 @@ describe('ProposalsService', () => {
       // Settled, but nobody decided it.
       expect(proposal.decision).toBeUndefined();
       expect(proposal.decidedBy).toBeUndefined();
+      expect(proposal.decisionMode).toBeUndefined();
     });
 
     it('should not stamp decidedAt while the proposal is still awaiting', async () => {
@@ -1826,6 +1829,7 @@ describe('ProposalsService', () => {
           status: 'failed',
           decidedBy: analyst('analyst'),
           decidedAt: '2026-09-02T00:00:00.000Z',
+          decisionMode: 'auto',
           executionError: 'action exploded',
           rationale: 'Looks right',
         })
@@ -1852,6 +1856,7 @@ describe('ProposalsService', () => {
       expect(cloneArgs.document.decision).toBeUndefined();
       expect(cloneArgs.document.decidedBy).toBeUndefined();
       expect(cloneArgs.document.decidedAt).toBeUndefined();
+      expect(cloneArgs.document.decisionMode).toBeUndefined();
       expect(cloneArgs.document.executionError).toBeUndefined();
       expect(cloneArgs.document.rationale).toBeUndefined();
     });
