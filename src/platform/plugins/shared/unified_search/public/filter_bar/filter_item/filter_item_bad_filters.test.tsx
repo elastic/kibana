@@ -115,25 +115,25 @@ describe('FilterItemComponent with bad filters', () => {
 
   it('known data view, field missing: rendered with warning', () => {
     const { subjects, labelStatus, errorMessage } = renderFilter(
-      buildPhraseFilter('baad-field', 'kibana.org', { index: LOGSTASH_DATA_VIEW_ID })
+      buildPhraseFilter('unknownField', 'kibana.org', { index: LOGSTASH_DATA_VIEW_ID })
     );
 
     expect(labelStatus).toBe('warn');
-    expect(errorMessage).toBe('Field baad-field not found in data view logstash-*');
+    expect(errorMessage).toBe('Field unknownField not found in data view logstash-*');
     expect(subjects).toEqual(
-      expect.arrayContaining(['filter-key-baad-field', 'filter-value-warn', 'filter-enabled'])
+      expect.arrayContaining(['filter-key-unknownField', 'filter-value-warn', 'filter-enabled'])
     );
   });
 
   it('unknown data view, field not found: rendered with warning', () => {
     const { subjects, labelStatus, errorMessage } = renderFilter(
-      buildPhraseFilter('extension', 'jpg', { index: UNKNOWN_DATA_VIEW_ID })
+      buildPhraseFilter('unknownField', 'kibana.org', { index: UNKNOWN_DATA_VIEW_ID })
     );
 
     expect(labelStatus).toBe('warn');
     expect(errorMessage).toContain('exist in the current view');
     expect(subjects).toEqual(
-      expect.arrayContaining(['filter-key-extension', 'filter-value-warn', 'filter-enabled'])
+      expect.arrayContaining(['filter-key-unknownField', 'filter-value-warn', 'filter-enabled'])
     );
   });
 });
