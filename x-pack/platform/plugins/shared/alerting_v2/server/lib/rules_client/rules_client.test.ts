@@ -3317,10 +3317,17 @@ describe('RulesClient', () => {
 
       // Rotation updates the existing task in place (preserving its schedule
       // interval) and regenerates the key while invalidating the old one.
+      // `includeRunningTasks` keeps the rotation independent of the rule's run
+      // cadence: a task that is mid-run rotates instead of being skipped.
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '5m' },
-        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
+        expect.objectContaining({
+          request,
+          regenerateApiKey: true,
+          cloneApiKey: true,
+          includeRunningTasks: true,
+        })
       );
 
       // Only audit metadata is stamped — no rule state is changed.
@@ -3414,8 +3421,10 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
-      // A running task is skipped by bulkUpdateSchedules — absent from both
-      // `tasks` and `errors`. Its real status is then observed via bulkGet.
+      // `includeRunningTasks` means a mid-run task is normally rotated, but it can
+      // still be skipped if it moved into `running` after the update read it.
+      // A skipped task is absent from both `tasks` and `errors`, so its real
+      // status is then observed via bulkGet.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
       taskManager.bulkGet.mockResolvedValueOnce(
         taskStatusResult([{ id: 'task:fallback', status: 'running' }])
