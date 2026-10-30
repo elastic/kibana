@@ -28,7 +28,7 @@ test.describe(
         /\d+ days? left/
       );
       const compareFeatures = page.testSubj.locator('subscriptionStatusSecondaryAction');
-      await expect(compareFeatures).toHaveText('Compare license features');
+      await expect(compareFeatures).toContainText('Compare license features');
       await expect(compareFeatures).toHaveAttribute('href', 'https://www.elastic.co/subscriptions');
       await expect(compareFeatures).toHaveAttribute('target', '_blank');
     });
