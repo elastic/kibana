@@ -152,6 +152,85 @@ describe('score_resolution_entities', () => {
     );
   });
 
+  it('scores each page of a full run by the range of targets it covers', async () => {
+    (esClient.search as jest.Mock)
+      .mockResolvedValueOnce({
+        aggregations: {
+          by_resolution_target: {
+            buckets: [
+              { key: { resolution_target_id: 'user:target-a' } },
+              { key: { resolution_target_id: 'user:target-b' } },
+            ],
+            after_key: { resolution_target_id: 'user:target-b' },
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        aggregations: {
+          by_resolution_target: {
+            buckets: [{ key: { resolution_target_id: 'user:target-c' } }],
+          },
+        },
+      });
+
+    await collectPages(
+      calculateResolutionEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 10_000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        alertFilters: [],
+      })
+    );
+
+    const queries = (esClient.esql.query as jest.Mock).mock.calls.map(([{ query }]) => query);
+    expect(queries).toHaveLength(2);
+    expect(queries[0]).toContain(
+      'WHERE resolution_target_id IS NOT NULL AND resolution_target_id <= "user:target-b"'
+    );
+    expect(queries[1]).toContain(
+      'WHERE resolution_target_id IS NOT NULL AND resolution_target_id > "user:target-b" AND resolution_target_id <= "user:target-c"'
+    );
+  });
+
+  it('keeps the explicit ID list when scoring requested targets only', async () => {
+    (esClient.search as jest.Mock).mockResolvedValue({
+      aggregations: {
+        by_resolution_target: {
+          buckets: [{ key: { resolution_target_id: 'user:target-1' } }],
+        },
+      },
+    });
+
+    await collectPages(
+      calculateResolutionEntityScores({
+        esClient,
+        crudClient,
+        logger,
+        entityType: EntityType.user,
+        alertsIndex: '.alerts-security.alerts-default',
+        lookupIndex: '.entity_analytics.risk_score.lookup-default',
+        pageSize: 10_000,
+        sampleSize: 1000,
+        now: '2026-01-01T00:00:00.000Z',
+        calculationRunId: 'run-1',
+        watchlistConfigs: new Map(),
+        alertFilters: [],
+        targetEntityIds: ['user:target-1'],
+      })
+    );
+
+    const [[{ query }]] = (esClient.esql.query as jest.Mock).mock.calls;
+    expect(query).toContain('WHERE resolution_target_id IN ("user:target-1")');
+  });
+
   it('throws when member fetch receives more than the capped ids', async () => {
     await expect(
       fetchResolutionGroupMemberIds({

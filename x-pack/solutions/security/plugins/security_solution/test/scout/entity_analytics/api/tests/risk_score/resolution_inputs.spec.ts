@@ -29,8 +29,11 @@ const SOURCE_INDEX = 'risk-resolution-inputs-source';
 const RISK_SCORE_INDEX = 'risk-score.risk-score-default';
 const TARGET_HOST = 'risk-resolution-target';
 const ALIAS_HOST = 'risk-resolution-alias';
+// In no resolution group, but its ID sorts inside the target's page range.
+const PLAIN_HOST = 'risk-resolution-plain';
 const TARGET_ID = `host:${TARGET_HOST}`;
 const ALIAS_ID = `host:${ALIAS_HOST}`;
+const PLAIN_ID = `host:${PLAIN_HOST}`;
 const RULE_NAME = 'Risk resolution inputs rule';
 // Rule execution, alert polling and a synchronous maintainer run don't fit the 60s default.
 const TEST_TIMEOUT_MS = 180_000;
@@ -142,7 +145,7 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
       index: RISK_SCORE_INDEX,
       refresh: true,
       ignore_unavailable: true,
-      query: { terms: { 'host.risk.id_value': [TARGET_ID, ALIAS_ID] } },
+      query: { terms: { 'host.risk.id_value': [TARGET_ID, ALIAS_ID, PLAIN_ID] } },
     });
     await esClient.indices.delete({ index: SOURCE_INDEX, ignore_unavailable: true });
     await apiClient
@@ -156,11 +159,12 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
   });
 
   apiTest(
-    "includes every group member's alerts, with their own timestamps",
+    "scores only the group's members, with each alert's own timestamp",
     async ({ apiClient, esClient }) => {
       await seedHostEntity(esClient, { entityId: TARGET_ID, hostName: TARGET_HOST });
+      await seedHostEntity(esClient, { entityId: PLAIN_ID, hostName: PLAIN_HOST });
       await seedAliasHostEntity(esClient);
-      for (const hostName of [TARGET_HOST, ALIAS_HOST]) {
+      for (const hostName of [TARGET_HOST, ALIAS_HOST, PLAIN_HOST]) {
         await esClient.index({
           index: SOURCE_INDEX,
           refresh: 'wait_for',
@@ -174,11 +178,11 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
         body: {
           type: 'query',
           name: RULE_NAME,
-          description: 'Raises one alert for each host in the resolution group',
+          description: 'Raises one alert for each host',
           risk_score: 50,
           severity: 'medium',
           index: [SOURCE_INDEX],
-          query: `host.name: ("${TARGET_HOST}" or "${ALIAS_HOST}")`,
+          query: `host.name: ("${TARGET_HOST}" or "${ALIAS_HOST}" or "${PLAIN_HOST}")`,
           from: 'now-1d',
           interval: '1h',
           enabled: true,
@@ -186,7 +190,7 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
       });
       expect(ruleResponse).toHaveStatusCode(200);
       ruleId = ruleResponse.body.id;
-      await waitForAlerts(esClient, 2);
+      await waitForAlerts(esClient, 3);
 
       await triggerMaintainerRun(apiClient, internalHeaders, 'risk-score', { sync: true });
 
@@ -224,6 +228,19 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
         expect(alertTimestamps.has(input.id)).toBe(true);
         expect(input.timestamp).toBe(alertTimestamps.get(input.id));
       }
+
+      const plainResolutionScores = await esClient.count({
+        index: RISK_SCORE_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.risk.id_value': PLAIN_ID } },
+              { term: { 'host.risk.score_type': 'resolution' } },
+            ],
+          },
+        },
+      });
+      expect(plainResolutionScores.count).toBe(0);
     }
   );
 });
