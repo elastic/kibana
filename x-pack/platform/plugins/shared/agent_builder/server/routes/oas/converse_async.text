@@ -59,6 +59,39 @@ Schema:
 
 ---
 
+`model_reasoning_chunk`
+
+Streams partial reasoning (thinking) text returned by the model provider, when the model emits reasoning.
+
+Schema:
+```json
+{
+  "message_id": "uuid",
+  "text_chunk": "partial reasoning text"
+}
+```
+
+**Note:** `message_id` matches the `message_id` of the `message_chunk` events streamed for the same model response.
+
+---
+
+`model_reasoning`
+
+Returns the full reasoning text of one model response, once the response is complete. It is persisted as a `model_reasoning` step of the round. Model reasoning is never sent back to the model.
+
+Schema:
+```json
+{
+  "message_id": "uuid",
+  "reasoning": "full reasoning text",
+  "tool_call_group_id": "uuid"
+}
+```
+
+**Note:** `tool_call_group_id` is only set when the model response requested tool calls.
+
+---
+
 `tool_call`
 
 Triggers when a tool is invoked.
@@ -167,12 +200,13 @@ Schema:
 
 A typical conversation round emits events in this sequence:
 
-1. `reasoning` (potentially multiple, some transient)
-2. `tool_call` (if tools are used)
-3. `tool_progress` (zero or more progress updates)
-4. `tool_result` (when tool completes)
-5. `thinking_complete`
-6. `message_chunk` (multiple, as text streams)
-7. `message_complete`
-8. `round_complete`
+1. `model_reasoning_chunk` (multiple, if the model emits reasoning), then `model_reasoning`
+2. `reasoning` (potentially multiple, some transient)
+3. `tool_call` (if tools are used)
+4. `tool_progress` (zero or more progress updates)
+5. `tool_result` (when tool completes)
+6. `thinking_complete`
+7. `message_chunk` (multiple, as text streams)
+8. `message_complete`
+9. `round_complete`
 

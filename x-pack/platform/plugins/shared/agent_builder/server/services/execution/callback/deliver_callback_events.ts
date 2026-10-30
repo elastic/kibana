@@ -22,6 +22,7 @@ import {
   isExecutionStartedEvent,
   isExecutionTerminalEvent,
   isMessageChunkEvent,
+  isModelReasoningChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
   type RoundCompleteEvent,
@@ -108,6 +109,7 @@ export const deliverCallbackEvents = ({
         filter(
           (event) =>
             !isMessageChunkEvent(event) &&
+            !isModelReasoningChunkEvent(event) &&
             !isExecutionStartedEvent(event) &&
             // Terminal timeline events (terminated / failed / aborted) are never delivered as
             // events: the completion payload and the failure callback are the terminal

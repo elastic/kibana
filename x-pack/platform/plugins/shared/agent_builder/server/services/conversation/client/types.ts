@@ -10,6 +10,7 @@ import type {
   ToolCallWithResult,
   ConversationRoundStepMixin,
   ReasoningStep,
+  ModelReasoningStep,
   CompactionStep,
   SubstitutionStep,
   InjectedContextStep,
@@ -190,6 +191,7 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 export type PersistentConversationRoundStep =
   | PersistentToolCallStep
   | ReasoningStep
+  | ModelReasoningStep
   | CompactionStep
   | BackgroundAgentCompleteStep
   | TodosStep

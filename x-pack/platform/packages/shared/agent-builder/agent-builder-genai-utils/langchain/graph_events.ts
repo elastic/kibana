@@ -10,6 +10,8 @@ import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
+  ModelReasoningChunkEvent,
+  ModelReasoningEvent,
   ThinkingCompleteEvent,
   ToolCallEvent,
   PromptRequestEvent,
@@ -155,6 +157,33 @@ export const createReasoningEvent = (
       reasoning,
       transient,
       tool_call_id: toolCallId,
+      tool_call_group_id: toolCallGroupId,
+    },
+  };
+};
+
+export const createModelReasoningChunkEvent = (
+  chunk: string,
+  { messageId = 'unknown' }: { messageId?: string } = {}
+): ModelReasoningChunkEvent => {
+  return {
+    type: ChatEventType.modelReasoningChunk,
+    data: {
+      message_id: messageId,
+      text_chunk: chunk,
+    },
+  };
+};
+
+export const createModelReasoningEvent = (
+  reasoning: string,
+  { messageId = 'unknown', toolCallGroupId }: { messageId?: string; toolCallGroupId?: string } = {}
+): ModelReasoningEvent => {
+  return {
+    type: ChatEventType.modelReasoning,
+    data: {
+      message_id: messageId,
+      reasoning,
       tool_call_group_id: toolCallGroupId,
     },
   };

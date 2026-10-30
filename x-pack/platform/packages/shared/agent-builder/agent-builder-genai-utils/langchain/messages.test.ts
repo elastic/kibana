@@ -6,11 +6,13 @@
  */
 
 import type { ToolMessage } from '@langchain/core/messages';
+import { AIMessageChunk } from '@langchain/core/messages';
 
 import {
   createToolCallMessage,
   createToolResultMessage,
   createUserMessage,
+  extractReasoningContent,
   extractToolReturn,
   wrapToolResultContent,
 } from './messages';
@@ -71,6 +73,40 @@ describe('extractToolReturn', () => {
 
     const result = extractToolReturn(mockMessage);
     expect(result).toEqual(mockMessage.artifact);
+  });
+});
+
+describe('extractReasoningContent', () => {
+  it('returns the reasoning content carried in additional_kwargs', () => {
+    const message = new AIMessageChunk({
+      content: 'answer',
+      additional_kwargs: { reasoning_content: 'thoughts' },
+    });
+    expect(extractReasoningContent(message)).toBe('thoughts');
+  });
+
+  it('returns the concatenated reasoning of aggregated chunks', () => {
+    const aggregated = new AIMessageChunk({
+      content: '',
+      additional_kwargs: { reasoning_content: 'Let me ' },
+    }).concat(
+      new AIMessageChunk({ content: 'Hi', additional_kwargs: { reasoning_content: 'think.' } })
+    );
+    expect(extractReasoningContent(aggregated)).toBe('Let me think.');
+  });
+
+  it('returns undefined when there is no usable reasoning content', () => {
+    expect(extractReasoningContent(new AIMessageChunk({ content: 'answer' }))).toBeUndefined();
+    expect(
+      extractReasoningContent(
+        new AIMessageChunk({ content: '', additional_kwargs: { reasoning_content: '' } })
+      )
+    ).toBeUndefined();
+    expect(
+      extractReasoningContent(
+        new AIMessageChunk({ content: '', additional_kwargs: { reasoning_content: 42 } })
+      )
+    ).toBeUndefined();
   });
 });
 
