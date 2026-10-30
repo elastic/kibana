@@ -51,6 +51,9 @@ type UnifiedSearchState = Pick<
   'filters' | 'query' | 'refresh_interval' | 'time_range'
 >;
 
+// a dashboard without a query shows the default one, which has no expression
+const isEmptyQuery = (query: DashboardState['query']) => !query?.expression;
+
 /** Unsaved-changes comparators of the unified search state; time and refresh count only with time restore on. */
 export const getUnifiedSearchComparators = (
   isTimeRestore: () => boolean
@@ -61,7 +64,7 @@ export const getUnifiedSearchComparators = (
       toStoredFilters(b, logger) ?? [],
       COMPARE_ALL_OPTIONS
     ),
-  query: 'deepEquality',
+  query: (a, b) => (isEmptyQuery(a) && isEmptyQuery(b)) || fastIsEqual(a, b),
   refresh_interval: (a, b) => (isTimeRestore() ? fastIsEqual(a, b) : true),
   time_range: (a, b) =>
     !isTimeRestore() || (areTimesEqual(a?.from, b?.from) && areTimesEqual(a?.to, b?.to)),
