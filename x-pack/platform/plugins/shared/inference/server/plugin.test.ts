@@ -16,7 +16,7 @@ import {
   InferenceTaskErrorCode,
   type InferenceConnector,
 } from '@kbn/inference-common';
-import type { InferenceSetupDependencies } from './types';
+import type { FeatureEndpointResolver, InferenceSetupDependencies } from './types';
 import {
   createInferenceStreamingResolver,
   InferencePlugin,
@@ -33,13 +33,18 @@ jest.mock('./inference_client', () => ({
 }));
 
 jest.mock('./util/get_connector_by_id', () => ({
-  ...jest.requireActual('./util/get_connector_by_id'),
+  ...jest.requireActual<typeof import('./util/get_connector_by_id')>('./util/get_connector_by_id'),
   getConnectorById: jest.fn(),
 }));
 
 const createClientMock = jest.mocked(createClient);
 const createChatModelMock = jest.mocked(createChatModel);
 const getConnectorByIdMock = jest.mocked(getConnectorById);
+
+type FeatureEndpointResolverMock = jest.MockedFunction<FeatureEndpointResolver>;
+
+const createFeatureEndpointResolverMock = (): FeatureEndpointResolverMock =>
+  jest.fn<ReturnType<FeatureEndpointResolver>, Parameters<FeatureEndpointResolver>>();
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -333,7 +338,7 @@ describe('InferencePlugin.start resolveFeatureConnector', () => {
 
   let plugin: InferencePlugin;
 
-  const startPlugin = (resolver?: jest.Mock) => {
+  const startPlugin = (resolver?: FeatureEndpointResolverMock) => {
     plugin = createPlugin(false);
     const { registerFeatureEndpointResolver } = plugin.setup(
       coreMock.createSetup(),
@@ -355,9 +360,11 @@ describe('InferencePlugin.start resolveFeatureConnector', () => {
 
   it("returns the connector of the feature's top endpoint", async () => {
     getConnectorByIdMock.mockResolvedValue(connector);
-    const resolver = jest
-      .fn()
-      .mockResolvedValue({ connectorId: 'top', reasoning: { effort: 'low' }, temperature: 0.2 });
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue({
+      connectorId: 'top',
+      reasoning: { effort: 'low' },
+      temperature: 0.2,
+    });
     const { start, coreStart, actions } = startPlugin(resolver);
 
     await expect(start.resolveFeatureConnector('my_feature', request)).resolves.toBe(connector);
@@ -374,7 +381,7 @@ describe('InferencePlugin.start resolveFeatureConnector', () => {
   });
 
   it('rejects with a 400 request error when the feature has no endpoint', async () => {
-    const resolver = jest.fn().mockResolvedValue(undefined);
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue(undefined);
     const { start } = startPlugin(resolver);
 
     await expect(start.resolveFeatureConnector('my_feature', request)).rejects.toMatchObject({
