@@ -28,7 +28,7 @@ const findActionPoliciesSchema = lazySchema(() =>
       .max(512)
       .optional()
       .describe(
-        '(optional) Keywords to match against the policy name, such as a name, matcher, or destination. Omit to list all policies.'
+        '(optional) Keywords matched against the policy name and description only. Omit to list all policies.'
       ),
     page: z
       .number()
