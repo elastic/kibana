@@ -18,10 +18,13 @@ import {
 } from '@kbn/agentic-investigations-plugin/common';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import {
-  NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
-  NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+  getNightshiftBoundHookWorkflowId,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { getTelemetryTargets } from '../../telemetry_targets';
+import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import knowledgeCortexSection from './instructions/knowledge_cortex.text';
@@ -95,10 +98,27 @@ export interface InvestigationAgentTypeOptions {
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
+  telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
 }
+
+/**
+ * The hook workflows the agent runs in a space. Every space runs them through the entry points
+ * bound to its agent service account, installed by setup; a space without them cannot run
+ * Nightshift at all.
+ */
+const hooksFor = (spaceId: string) => ({
+  materializeWorkflowId: getNightshiftBoundHookWorkflowId(
+    NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+    spaceId
+  ),
+  optimizeWorkflowId: getNightshiftBoundHookWorkflowId(
+    NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+    spaceId
+  ),
+});
 
 const appendCustomContext = async ({
   instructions: baseInstructions,
@@ -139,62 +159,79 @@ export const buildNightshiftAgentConfiguration = ({
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
+  telemetryConfig,
   getCustomContextInstructions,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
 }): AgentTypeDefinition['baseConfiguration'] => {
-  const baseConfiguration = {
-    instructions: agentInstructions,
-    skill_ids: [],
-    tools: [
-      {
-        tool_ids: [
-          ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
-          ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
-          ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-        ],
-      },
-    ],
-    enable_elastic_capabilities: false,
-    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
-    ...(() => {
-      // Decision trees are no longer a separate before-agent hook: they hydrate as a third
-      // parallel branch of the combined materialize workflow, which already carries the
-      // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
-      // it runs in a different conversation. `decisionTreesEnabled` implies `cortexEnabled`,
-      // so it adds nothing to either gate below.
-      const beforeAgentWorkflowIds =
-        sandboxEnabled && (cortexEnabled || memoryEnabled)
-          ? [NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]
-          : [];
-      return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
-    })(),
-    // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
-    // workflow, so listing the reinforce workflow here as well would reinforce every round
-    // twice — two ai.agent runs, up to 900s each, writing the same trees.
-    ...(cortexEnabled || memoryEnabled
-      ? { post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] }
-      : {}),
-  } satisfies AgentBaseConfiguration;
+  const configurationFor = ({
+    materializeWorkflowId,
+    optimizeWorkflowId,
+  }: ReturnType<typeof hooksFor>) =>
+    ({
+      instructions: agentInstructions,
+      skill_ids: [],
+      tools: [
+        {
+          tool_ids: [
+            ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+            ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
+            ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+          ],
+        },
+      ],
+      enable_elastic_capabilities: false,
+      connector_ids: telemetryConfig
+        ? [
+            ...new Set(
+              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+                connectorId ? [connectorId] : []
+              )
+            ),
+          ]
+        : telemetryConnectorId
+        ? [telemetryConnectorId]
+        : [],
+      ...(() => {
+        // Decision trees are no longer a separate before-agent hook: they hydrate as a third
+        // parallel branch of the combined materialize workflow, which already carries the
+        // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
+        // it runs in a different conversation. `decisionTreesEnabled` implies `cortexEnabled`,
+        // so it adds nothing to either gate below.
+        const beforeAgentWorkflowIds =
+          sandboxEnabled && (cortexEnabled || memoryEnabled) ? [materializeWorkflowId] : [];
+        return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
+      })(),
+      // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
+      // workflow, so listing the reinforce workflow here as well would reinforce every round
+      // twice — two ai.agent runs, up to 900s each, writing the same trees.
+      ...(cortexEnabled || memoryEnabled
+        ? { post_execution_workflow_ids: [optimizeWorkflowId] }
+        : {}),
+    } satisfies AgentBaseConfiguration);
 
-  return getCustomContextInstructions
-    ? async (ctx) => ({
-        ...baseConfiguration,
-        instructions: await appendCustomContext({
-          instructions: baseConfiguration.instructions,
-          ctx,
-          getCustomContextInstructions,
-          logger,
-        }),
-      })
-    : baseConfiguration;
+  // The hooks are per space, so the configuration always resolves per request.
+  return async (ctx) => {
+    const baseConfiguration = configurationFor(hooksFor(ctx.spaceId));
+    return getCustomContextInstructions
+      ? {
+          ...baseConfiguration,
+          instructions: await appendCustomContext({
+            instructions: baseConfiguration.instructions,
+            ctx,
+            getCustomContextInstructions,
+            logger,
+          }),
+        }
+      : baseConfiguration;
+  };
 };
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * described in `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
@@ -224,6 +261,7 @@ export const registerInvestigationAgentType = (
     investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
+    telemetryConfig,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -237,6 +275,7 @@ export const registerInvestigationAgentType = (
       investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
+      telemetryConfig,
       getCustomContextInstructions,
       logger,
     })

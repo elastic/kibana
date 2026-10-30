@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { validateVaultAddress } from './address_guard';
-import { SECRET_CONNECTION_NAME_REGEX } from '../../../synthetics_service/formatters/vault_param_formatter';
+import { SECRET_CONNECTION_NAME_REGEX } from '../../../../common/lib/vault_reference';
 
 // Upper bound for any single connection string; these flow into SO docs and the
 // delivered policy blob, so keep them bounded (AGENTS.md).
@@ -46,3 +46,14 @@ export const SaveBodySchema = schema.object({
 });
 
 export type SaveBody = TypeOf<typeof SaveBodySchema>;
+
+export const TestBodySchema = schema.object({
+  // When editing a saved connection with the secret left blank, `name` lets the
+  // server fall back to the stored secret so Test works without re-entry.
+  name: schema.maybe(schema.string({ maxLength: MAX_LEN })),
+  type: schema.maybe(schema.literal('hashicorp_vault')),
+  config: HashiCorpVaultConfigSchema,
+  secrets: schema.maybe(HashiCorpVaultSecretsSchema),
+});
+
+export type TestBody = TypeOf<typeof TestBodySchema>;

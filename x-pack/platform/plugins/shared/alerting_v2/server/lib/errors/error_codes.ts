@@ -555,10 +555,20 @@ export const ALERTING_LOG_CODES = {
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
-   * A rule saved object was persisted but its paired Task Manager call
-   * failed, leaving the rule's task state diverged from its saved object.
+   * A rule's Task Manager task state diverged from its saved object and was
+   * not repaired: removing an executor task failed, so the task may outlive
+   * its rule or its disabled state. The executor halts such a task on each run,
+   * and the caller is not told. Failed schedule attempts are not drift: see
+   * `RULE_TASK_SCHEDULE_FAILED`.
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+  /**
+   * Scheduling the executor task of a rule failed during a bulk create or a
+   * bulk enable. The change was backed out (a created rule is rolled back, an
+   * enabled rule stays disabled) and the caller gets a per-rule error, so rule
+   * and task state stay consistent. This is a failed operation, not drift.
+   */
+  RULE_TASK_SCHEDULE_FAILED: 'RULE_TASK_SCHEDULE_FAILED',
   /**
    * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
    * for one or more rules — e.g. the per-task-type key grant was rejected. The
@@ -653,6 +663,12 @@ export const ALERTING_LOG_CODES = {
     'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
   /** `manage_rule` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `attach_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_RULE_FAILED: 'AGENT_BUILDER_ATTACH_RULE_FAILED',
+  /** `attach_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED: 'AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED',
+  /** `find_action_policies` tool failed; returns an error result. */
+  AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED: 'AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
@@ -672,6 +688,13 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * A background task that could not be removed.
+   * if the task exists from an earlier start it
+   * keeps running until the next removal attempt.
+   * The task type is carried in `labels.task_id`.
+   */
+  TASKS_REMOVE_FAILED: 'TASKS_REMOVE_FAILED',
   /**
    * The pending API-key invalidation background task run failed. Keys queued
    * for invalidation remain until the next scheduled run.

@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 /**
  * Type-agnostic primitives for inline panel content resolution: the resolution
@@ -40,7 +41,19 @@ export interface PanelAuthoringNote {
  * Per-renderer modules extend this with a `renderer` discriminator and their
  * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
  */
+/**
+ * Gives the values of the dashboard's ES|QL controls that the queries refer to, ready to bind. Lazy,
+ * since reading a control's value can take a request, so a panel asks only for what it runs.
+ * `anyVariable` is for a query that is not written yet, which can refer to any of them.
+ */
+export type ResolveEsqlVariables = (
+  queries: readonly string[],
+  options?: { anyVariable?: boolean }
+) => Promise<ESQLControlVariable[]>;
+
 export interface PanelResolutionRequestBase {
   /** Present when editing an existing panel; upsert has checked it matches the renderer. */
   existingPanel?: AttachmentPanel;
+  /** Gives the values of the dashboard's ES|QL controls that a query refers to (`?name`). */
+  resolveEsqlVariables?: ResolveEsqlVariables;
 }

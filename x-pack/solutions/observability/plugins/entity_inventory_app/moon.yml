@@ -30,6 +30,11 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/datemath'
   - '@kbn/data-views-plugin'
+  - '@kbn/typed-react-router-config'
+  - '@kbn/deeplinks-observability'
+  - '@kbn/share-plugin'
+  - '@kbn/ebt-click'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod

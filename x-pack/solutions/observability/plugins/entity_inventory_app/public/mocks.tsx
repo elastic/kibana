@@ -9,6 +9,7 @@ import React from 'react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryAppStartDependencies } from './types';
 
@@ -24,7 +25,7 @@ export const createStartDependenciesMock = (): EntityInventoryAppStartDependenci
     navigation: { PageTemplate: MockPageTemplate, registerSections: jest.fn() },
   } as unknown as ObservabilitySharedPluginStart;
 
-  return { observabilityShared, unifiedSearch };
+  return { observabilityShared, share: sharePluginMock.createStartContract(), unifiedSearch };
 };
 
 /** Core start mock whose rendering context also supplies the chrome that `AppHeader` reads. */

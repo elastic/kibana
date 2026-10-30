@@ -58,9 +58,15 @@ describe('resolveSelectiveTestingChanges', () => {
 
   it('keeps the entire pinned group but excludes earlier queued changes as main advances', () => {
     git('update-ref', 'refs/heads/main', originalBase);
-    expect(resolveSelectiveTestingChanges(groupBase, true)).toEqual(['first.ts', 'second.ts']);
+    expect(resolveSelectiveTestingChanges(groupBase, 'merge-queue')).toEqual([
+      'first.ts',
+      'second.ts',
+    ]);
     git('update-ref', 'refs/heads/main', groupHead);
-    expect(resolveSelectiveTestingChanges(groupBase, true)).toEqual(['first.ts', 'second.ts']);
+    expect(resolveSelectiveTestingChanges(groupBase, 'merge-queue')).toEqual([
+      'first.ts',
+      'second.ts',
+    ]);
     expect(console.log).toHaveBeenCalledWith(
       `Selective testing comparison: base=${groupBase} head=${groupHead} changedFiles=2`
     );
@@ -70,24 +76,25 @@ describe('resolveSelectiveTestingChanges', () => {
     [undefined, 'BUILDKITE_MERGE_QUEUE_BASE_COMMIT is not set'],
     ['main', 'BUILDKITE_MERGE_QUEUE_BASE_COMMIT must be a full commit SHA'],
   ])('fails for a missing or invalid pinned base (%s)', (base, message) => {
-    expect(() => resolveSelectiveTestingChanges(base, true)).toThrow(message);
+    expect(() => resolveSelectiveTestingChanges(base, 'merge-queue')).toThrow(message);
   });
 
-  it.each([true, false])('propagates Git lookup failures (merge queue: %s)', (isMergeQueue) => {
-    expect(() => resolveSelectiveTestingChanges('f'.repeat(40), isMergeQueue)).toThrow(
-      'Command failed: git rev-parse'
-    );
-  });
+  it.each(['merge-queue', 'on-merge', 'pr'] as const)(
+    'propagates Git lookup failures (%s)',
+    (kind) => {
+      expect(() => resolveSelectiveTestingChanges('f'.repeat(40), kind)).toThrow(
+        'Command failed: git rev-parse'
+      );
+    }
+  );
 
-  it.each([true, false])(
-    'propagates changed-file detection failures (merge queue: %s)',
-    (isMergeQueue) => {
+  it.each(['merge-queue', 'on-merge', 'pr'] as const)(
+    'propagates changed-file detection failures (%s)',
+    (kind) => {
       jest.spyOn(gitStrategy, 'listChangedFiles').mockImplementationOnce(() => {
         throw new Error('git diff failed');
       });
-      expect(() => resolveSelectiveTestingChanges(groupBase, isMergeQueue)).toThrow(
-        'git diff failed'
-      );
+      expect(() => resolveSelectiveTestingChanges(groupBase, kind)).toThrow('git diff failed');
     }
   );
 
@@ -96,8 +103,25 @@ describe('resolveSelectiveTestingChanges', () => {
     const divergentBase = commitFile('unrelated.ts');
     git('checkout', '--detach', groupHead);
 
-    expect(() => resolveSelectiveTestingChanges(divergentBase, true)).toThrow(
+    expect(() => resolveSelectiveTestingChanges(divergentBase, 'merge-queue')).toThrow(
       `${divergentBase} is not an ancestor of HEAD=${groupHead}`
+    );
+  });
+
+  it('uses the pinned on-merge base and rejects non-ancestors', () => {
+    expect(resolveSelectiveTestingChanges(groupBase, 'on-merge')).toEqual([
+      'first.ts',
+      'second.ts',
+    ]);
+
+    git('checkout', '--detach', originalBase);
+    const divergentBase = commitFile('unrelated.ts');
+    git('checkout', '--detach', groupHead);
+    expect(() => resolveSelectiveTestingChanges(divergentBase, 'on-merge')).toThrow(
+      `on-merge-selection base=${divergentBase} is not an ancestor of HEAD=${groupHead}`
+    );
+    expect(() => resolveSelectiveTestingChanges('main', 'on-merge')).toThrow(
+      'on-merge-selection base must be a full commit SHA'
     );
   });
 
@@ -106,7 +130,7 @@ describe('resolveSelectiveTestingChanges', () => {
     const divergentBase = commitFile('unrelated.ts');
     git('checkout', '--detach', groupHead);
 
-    expect(resolveSelectiveTestingChanges(divergentBase, false)).toEqual([
+    expect(resolveSelectiveTestingChanges(divergentBase, 'pr')).toEqual([
       'first.ts',
       'package.json',
       'second.ts',
