@@ -85,6 +85,9 @@ jest.mock('../data/maintenance/use_significant_events_maintenance', () => ({
 jest.mock('../components/search_bar', () => ({ SignificantEventsSearchBar: () => null }));
 jest.mock('./onboarding/generate_split_button', () => ({ GenerateSplitButton: () => null }));
 jest.mock('./find_significant_events_button', () => ({ FindSignificantEventsButton: () => null }));
+jest.mock('./recommended_sources/recommended_sources_table', () => ({
+  RecommendedSourcesTable: () => <div data-test-subj="recommendedSourcesTableStub" />,
+}));
 jest.mock('./sources_table', () => ({
   SourcesTable: ({
     sources,
@@ -212,6 +215,18 @@ describe('SourcesView routes', () => {
     expect(screen.getByTestId('significantEventsAppSourcesLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
     expect(screen.queryByText('0 sources')).not.toBeInTheDocument();
+  });
+
+  it('shows the empty prompt and recommended sources to a manager with no sources', () => {
+    mockSources = [];
+    renderSources('/sources');
+
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('Create your first source')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
+      'Recommended sources'
+    );
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
   });
 
   it('waits for the source list before resolving a deep link', async () => {

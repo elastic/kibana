@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -37,6 +45,8 @@ import {
   SOURCES_TABLE_SEARCH_PLACEHOLDER,
   SOURCE_NOT_FOUND_TOAST_TITLE,
 } from './translations';
+import { RecommendedSourcesTable } from './recommended_sources/recommended_sources_table';
+import { RECOMMENDED_SOURCES_TITLE } from './recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
   import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
@@ -269,24 +279,44 @@ export function SourcesView() {
           </EuiFlexItem>
         ) : hasNoSources ? (
           <EuiFlexItem>
-            <EuiEmptyPrompt
-              data-test-subj="significantEventsAppSourcesEmptyPrompt"
-              iconType="database"
-              title={<h2>{canManage ? EMPTY_STATE_TITLE : READ_ONLY_EMPTY_STATE_TITLE}</h2>}
-              body={<p>{EMPTY_STATE_BODY}</p>}
-              actions={
-                canManage && (
-                  <EuiButton
-                    data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
-                    fill
-                    iconType="plus"
-                    onClick={openCreateFlyout}
-                  >
-                    {CREATE_SOURCE_BUTTON_LABEL}
-                  </EuiButton>
-                )
-              }
-            />
+            {canManage ? (
+              <EuiFlexGroup direction="column" gutterSize="xl">
+                <EuiFlexItem grow={false}>
+                  <EuiEmptyPrompt
+                    data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                    iconType="database"
+                    title={<h2>{EMPTY_STATE_TITLE}</h2>}
+                    body={<p>{EMPTY_STATE_BODY}</p>}
+                    actions={
+                      <EuiButton
+                        data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
+                        fill
+                        iconType="plus"
+                        onClick={openCreateFlyout}
+                      >
+                        {CREATE_SOURCE_BUTTON_LABEL}
+                      </EuiButton>
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2 data-test-subj="nightshiftRecommendedSourcesTitle">
+                      {RECOMMENDED_SOURCES_TITLE}
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <RecommendedSourcesTable entry="sources_page" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiEmptyPrompt
+                data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                iconType="database"
+                title={<h2>{READ_ONLY_EMPTY_STATE_TITLE}</h2>}
+                body={<p>{EMPTY_STATE_BODY}</p>}
+              />
+            )}
           </EuiFlexItem>
         ) : (
           <>

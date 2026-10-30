@@ -8,6 +8,7 @@
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 
 export const NIGHTSHIFT_EBT_ACTIONS = {
+  ADD_RECOMMENDED_SOURCES: 'addRecommendedSources',
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
   VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',
@@ -20,12 +21,14 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   COLLAPSE_DETECTIONS: 'collapseDetections',
   CLONE_AUTOMATION: 'cloneAutomation',
   CREATE_AUTOMATION: 'createAutomation',
+  CREATE_DRAFT_SOURCE: 'createDraftSource',
   DELETE_AUTOMATION: 'deleteAutomation',
   DELETE_RULES: 'deleteRules',
   OPEN_RULE_IN_DISCOVER: 'openRuleInDiscover',
   CLEAR_RULES_SELECTION: 'clearRulesSelection',
   CLEAR_RULES_SEARCH: 'clearRulesSearch',
   EDIT_AUTOMATION: 'editAutomation',
+  ENABLE_DETECTION: 'enableDetection',
   EXPAND_IMPACTED_SERVICES: 'expandImpactedServices',
   EXPAND_DETECTIONS: 'expandDetections',
   FILTER_BY_IMPACTED_SERVICES: 'filterByImpactedServices',
@@ -92,6 +95,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   EVENT_FLYOUT_DETECTIONS: 'nightshiftEventFlyoutDetections',
   EVENT_FLYOUT_INVESTIGATION: 'nightshiftEventFlyoutInvestigation',
   PAGE_HEADER: 'nightshiftPageHeader',
+  RECOMMENDED_SOURCES_TABLE: 'nightshiftRecommendedSourcesTable',
   SETTINGS: 'nightshiftSettings',
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',

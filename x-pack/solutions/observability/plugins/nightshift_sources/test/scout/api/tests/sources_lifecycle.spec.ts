@@ -9,7 +9,11 @@ import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { RoleSessionCredentials } from '@kbn/scout-oblt';
-import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
+import {
+  getNightshiftSourceViewName,
+  type NightshiftSource,
+  type RecommendedSourcesResponse,
+} from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_MANAGER_ROLE,
   apiTest,
@@ -21,6 +25,7 @@ import {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   listedIds,
   readView,
@@ -52,6 +57,47 @@ apiTest.describe(
         await deleteTestIndex(esClient, index);
       }
     });
+
+    apiTest(
+      'lists the Logs recommendation until a matching source exists',
+      async ({ apiClient, apiServices }) => {
+        const spaceId = `ns-recommended-${suffix}`;
+        await apiServices.spaces.create({ id: spaceId, name: spaceId });
+        try {
+          const hasLogsRecommendation = async (): Promise<boolean> => {
+            const response = await listRecommendedSources(apiClient, manager.cookieHeader, {
+              spaceId,
+            });
+            expect(response).toHaveStatusCode(200);
+            const { recommendations } = response.body as RecommendedSourcesResponse;
+            return recommendations.some(({ id }) => id === 'logs');
+          };
+
+          expect(await hasLogsRecommendation()).toBe(true);
+
+          const created = await createSource(
+            apiClient,
+            manager.cookieHeader,
+            {
+              title: `${TITLE_PREFIX}-${suffix}-recommended`,
+              esql: 'FROM logs*',
+            },
+            { spaceId }
+          );
+          expect(created).toHaveStatusCode(200);
+          const sourceId = (created.body.source as NightshiftSource).id;
+
+          try {
+            expect(await hasLogsRecommendation()).toBe(false);
+          } finally {
+            await deleteSourceChecked(apiClient, manager.cookieHeader, sourceId, { spaceId });
+          }
+          expect(await hasLogsRecommendation()).toBe(true);
+        } finally {
+          await apiServices.spaces.delete(spaceId);
+        }
+      }
+    );
 
     apiTest(
       'creates a source, tracks view health, repairs through PUT and deletes',
