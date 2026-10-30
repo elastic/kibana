@@ -10,7 +10,6 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { setAvailableLocales } from '@kbn/i18n';
 
 import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
@@ -471,10 +470,6 @@ describe('useUserProfileForm', () => {
       return renderHook(() => useUserProfileForm({ user, data }), { wrapper: loadedWrapper });
     };
 
-    afterEach(() => {
-      setAvailableLocales([]);
-    });
-
     it('should report display_language_changed event when locale is changed on submit', async () => {
       const data: UserProfileData = {
         userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
@@ -510,8 +505,7 @@ describe('useUserProfileForm', () => {
       expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('should not send the fallback locale when saving with the language picker hidden', async () => {
-      setAvailableLocales([]);
+    it('should not send the fallback locale when no locale is stored', async () => {
       const data: UserProfileData = {
         userSettings: { darkMode: 'light', contrastMode: 'standard' },
       };
@@ -553,7 +547,7 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {
         userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'de-DE' },
       };
-      const { result } = await renderWithLoadedProfile(data);
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
       await act(async () => {
         await result.current.setFieldValue('data.userSettings.locale', 'fr-FR');

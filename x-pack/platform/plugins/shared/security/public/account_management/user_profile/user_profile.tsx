@@ -998,11 +998,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         // The route can reject a stored locale, or the form's fallback for a profile without one,
         // when the deployment does not allow switching to it. Send the locale only when changed.
         const { locale, ...userSettingsWithoutLocale } = values.data.userSettings;
-        let userSettings: Partial<typeof values.data.userSettings> = values.data.userSettings;
+        let profileData: Partial<typeof values.data> = values.data;
         if (locale === initialValues.data?.userSettings.locale) {
-          userSettings = userSettingsWithoutLocale;
+          profileData = { ...values.data, userSettings: userSettingsWithoutLocale };
         }
-        const profileData = { ...values.data, userSettings };
         submitActions.push(
           update(
             values.avatarType === 'image'

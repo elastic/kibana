@@ -165,9 +165,9 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   /**
-   * Updates user profile data of the current user, posting only `data`. The server merges it
-   * into the stored profile, so fields left out of `data` are not re-validated.
-   * @param data Application data to be merged with existing data.
+   * Updates user profile data of the current user, posting only `data` so stored fields are not
+   * re-validated.
+   * @param data Application data to be written (merged with existing data).
    */
   public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
     const previous = this._userProfile$.getValue();
