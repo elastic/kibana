@@ -33,6 +33,13 @@ const unifiedComment = {
   data: { content: 'a comment' },
 };
 
+const extraReference = { type: 'test-type', id: 'extra-ref-id', name: 'extra-ref' };
+const currentAttachment = {
+  ...mockCaseComments[0],
+  attributes: { ...mockCaseComments[0].attributes, owner: SECURITY_SOLUTION_OWNER },
+  references: [...mockCaseComments[0].references, extraReference],
+};
+
 const unifiedAlertComment = {
   type: SECURITY_ALERT_ATTACHMENT_TYPE,
   owner: SECURITY_SOLUTION_OWNER,
@@ -1020,7 +1027,7 @@ describe('CaseCommentModel', () => {
           ...unifiedComment,
         },
         updatedAt: createdDate,
-        owner: SECURITY_SOLUTION_OWNER,
+        currentAttachment,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -1050,7 +1057,7 @@ describe('CaseCommentModel', () => {
           ...unifiedComment,
         },
         updatedAt: createdDate,
-        owner: SECURITY_SOLUTION_OWNER,
+        currentAttachment,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -1081,7 +1088,7 @@ describe('CaseCommentModel', () => {
           ...unifiedAlertComment,
         },
         updatedAt: createdDate,
-        owner: SECURITY_SOLUTION_OWNER,
+        currentAttachment,
       });
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
@@ -1108,11 +1115,45 @@ describe('CaseCommentModel', () => {
             },
           },
           updatedAt: createdDate,
-          owner: SECURITY_SOLUTION_OWNER,
+          currentAttachment,
         })
       ).resolves.not.toThrow();
 
+      // The Lens path carries over the current attachment's non-Lens references.
+      const [{ options }] = clientArgs.services.attachmentService.update.mock.calls[0];
+      expect(options?.references).not.toContainEqual(extraReference);
+    });
+
+    it('builds Lens references from the current attachment without reading it again', async () => {
+      await model.updateComment({
+        updateRequest: {
+          id: 'comment-id',
+          version: 'comment-version',
+          ...unifiedComment,
+        },
+        updatedAt: createdDate,
+        currentAttachment,
+      });
+
+      const [{ options }] = clientArgs.services.attachmentService.update.mock.calls[0];
+      expect(options?.references).toContainEqual(extraReference);
       expect(clientArgs.services.attachmentService.getter.get).not.toHaveBeenCalled();
+    });
+
+    it('passes the current saved object type to the attachment service', async () => {
+      await model.updateComment({
+        updateRequest: {
+          id: 'comment-id',
+          version: 'comment-version',
+          ...unifiedComment,
+        },
+        updatedAt: createdDate,
+        currentAttachment,
+      });
+
+      expect(clientArgs.services.attachmentService.update).toHaveBeenCalledWith(
+        expect.objectContaining({ savedObjectType: currentAttachment.type })
+      );
     });
   });
 
@@ -1270,7 +1311,7 @@ describe('CaseCommentModel', () => {
             ...unifiedAttackComment,
           },
           updatedAt: createdDate,
-          owner: SECURITY_SOLUTION_OWNER,
+          currentAttachment,
         })
       ).rejects.toThrow('not authorized');
 
@@ -1294,7 +1335,7 @@ describe('CaseCommentModel', () => {
             ...unifiedAlertComment,
           },
           updatedAt: createdDate,
-          owner: SECURITY_SOLUTION_OWNER,
+          currentAttachment,
         })
       ).rejects.toThrow('not authorized');
 
@@ -1314,7 +1355,7 @@ describe('CaseCommentModel', () => {
             ...unifiedEventComment,
           },
           updatedAt: createdDate,
-          owner: SECURITY_SOLUTION_OWNER,
+          currentAttachment,
         })
       ).rejects.toThrow('document not found');
 
@@ -1324,7 +1365,7 @@ describe('CaseCommentModel', () => {
 
   describe('attack deduplication', () => {
     it('drops an attack that is already attached to the case', async () => {
-      clientArgs.services.attachmentService.getter.getAllAttackIds.mockResolvedValueOnce(
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
         new Set(['attack-id-1'])
       );
 
@@ -1336,7 +1377,7 @@ describe('CaseCommentModel', () => {
     });
 
     it('drops an attack that is already attached to the case on createComment', async () => {
-      clientArgs.services.attachmentService.getter.getAllAttackIds.mockResolvedValueOnce(
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
         new Set(['attack-id-1'])
       );
 
@@ -1400,12 +1441,35 @@ describe('CaseCommentModel', () => {
       expect(attachments).toHaveLength(2);
     });
 
+    it('looks up only the attack ids the request carries', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment },
+          { id: 'comment-3', ...unifiedAttackComment, attachmentId: 'attack-id-2' },
+          { id: 'comment-4', ...unifiedAlertComment, attachmentId: 'alert-id-1' },
+        ],
+      });
+
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledWith({
+        caseId: theCase.id,
+        attackIds: ['attack-id-1', 'attack-id-2'],
+      });
+    });
+
     it('does not look up attached attacks when the request carries none', async () => {
       await model.bulkCreate({
         attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
       });
 
-      expect(clientArgs.services.attachmentService.getter.getAllAttackIds).not.toHaveBeenCalled();
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).not.toHaveBeenCalled();
     });
   });
 

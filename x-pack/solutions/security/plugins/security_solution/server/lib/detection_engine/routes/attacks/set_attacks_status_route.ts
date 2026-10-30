@@ -88,10 +88,6 @@ export const setAttacksStatusRoute = (
 
         const closingReason = await validateClosingReason({ core, status, reason });
         if (!closingReason.valid) {
-          auditAlertUpdatePreOperationFailure(
-            (await context.securitySolution)?.getAuditLogger(),
-            'Invalid alert update request'
-          );
           reportAttacksApiCallError(
             telemetrySender,
             telemetryFields,

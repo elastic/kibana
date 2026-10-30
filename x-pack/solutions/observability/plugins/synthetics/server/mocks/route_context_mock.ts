@@ -9,20 +9,20 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
 import type { SyntheticsServerSetup } from '../types';
-import { SyntheticsService } from '../synthetics_service/synthetics_service';
+import { ServiceManagedLocations } from '../synthetics_service/service_managed_locations';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getServerMock } from './server_mock';
 
 export const getRouteContextMock = () => {
   const serverMock: SyntheticsServerSetup = getServerMock();
 
-  const syntheticsService = new SyntheticsService(serverMock);
+  const serviceManagedLocations = new ServiceManagedLocations(serverMock);
   const monitorConfigRepo = new MonitorConfigRepository(
     serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
     serverMock.encryptedSavedObjects.getClient()
   );
 
-  const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+  const syntheticsMonitorClient = new SyntheticsMonitorClient(serviceManagedLocations, serverMock);
 
   return {
     routeContext: {
@@ -33,7 +33,7 @@ export const getRouteContextMock = () => {
         serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
       monitorConfigRepository: monitorConfigRepo,
     } as any,
-    syntheticsService,
+    serviceManagedLocations,
     serverMock,
   };
 };

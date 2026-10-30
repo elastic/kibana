@@ -20,7 +20,6 @@ const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
   public readonly mapsPlugin;
-  public readonly mapRenderComplete;
   public readonly saveAndReturnButton;
   public readonly saveButton;
   public readonly addLayerButton;
@@ -38,13 +37,11 @@ export class MapsPage {
   private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
-  public readonly inspector: InspectorPage;
+  private readonly inspector: InspectorPage;
 
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
     this.mapsPlugin = this.page.locator('#maps-plugin');
-    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
-    this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
     this.addLayerButton = this.page.testSubj.locator('addLayerButton');
@@ -66,7 +63,7 @@ export class MapsPage {
 
   async gotoNewMap() {
     await this.page.gotoApp('maps/map');
-    await this.waitForRenderComplete();
+    await this.waitForLayersToLoad();
   }
 
   /** Opens the AppHeader overflow menu when Full screen is not inline. */
@@ -85,14 +82,29 @@ export class MapsPage {
     await this.saveButton.click();
   }
 
-  async waitForRenderComplete() {
-    // first wait for the top level container to be present
-    await this.mapsPlugin.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    // then wait for the map to be fully rendered
-    return this.mapRenderComplete.waitFor({
-      state: 'attached',
-      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-    });
+  async expectOnMapPage() {
+    await expect
+      .poll(() => this.mapContainer.isVisible(), { timeout: DEFAULT_MAP_LOADING_TIMEOUT })
+      .toBe(true);
+  }
+
+  /**
+   * Verifies Elastic Maps Service (EMS) is reachable by opening the EMS boundaries layer wizard
+   * and checking that the EMS file select is enabled. Throws if EMS is not available.
+   */
+  async expectEmsToBeAvailable() {
+    await this.gotoNewMap();
+    await this.openAddLayerFlyout();
+    await this.page.testSubj.click('emsBoundaries');
+    const emsFileSelect = this.page.testSubj.locator('emsFileSelect');
+    try {
+      await emsFileSelect.waitFor({ state: 'visible', timeout: 120000 }); // large timeout for EMS request
+      await expect(emsFileSelect.locator('input')).toBeEnabled();
+    } catch (e) {
+      throw new Error(
+        `Test requires access to Elastic Maps Service (EMS). EMS is not available: ${e.message}`
+      );
+    }
   }
 
   async selectLayerWizardByTitle(title: string) {
@@ -149,13 +161,13 @@ export class MapsPage {
     await this.documentsItem.click();
     await this.selectGeoIndexPatternLayer(indexPattern);
     await this.importFileButton.click();
-    await this.waitForRenderComplete();
+    await this.waitForLayersToLoad();
     await this.saveAndReturnButton.click();
   }
 
   /** Waits until map layers are loaded. */
   async waitForLayersToLoad() {
-    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.expectOnMapPage();
 
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
     // visible before that, so gate on this signal before checking loading state.
@@ -284,8 +296,14 @@ export class MapsPage {
   /**
    * Opens the inspector, selects a request by name, reads its raw JSON response,
    * closes the inspector, and returns the parsed response body.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller types
+   *   right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
-  async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
+  async getResponse(
+    requestName: string,
+    waitForFocusQuiet: boolean = false
+  ): ReturnType<typeof this.inspector.getResponse> {
     await this.inspector.open();
     try {
       await this.inspector.openInspectorRequestsView();
@@ -295,7 +313,7 @@ export class MapsPage {
 
       return await this.inspector.getResponse();
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -303,10 +321,14 @@ export class MapsPage {
    * Opens the inspector, switches to the Requests view, optionally selects `requestName`,
    * switches to the statistics tab, calls `getStat` to read a value, closes the inspector,
    * and returns the result.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller types
+   *   right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
   private async getRequestStat(
     getStat: () => Promise<string>,
-    requestName?: string
+    requestName?: string,
+    waitForFocusQuiet: boolean = false
   ): Promise<string> {
     await this.inspector.open();
     try {
@@ -319,7 +341,7 @@ export class MapsPage {
       await this.inspector.openRequestsStatisticsTab();
       return await getStat();
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -327,16 +349,23 @@ export class MapsPage {
    * Opens the inspector, reads "Hits" from the statistics tab of the optionally
    * selected `requestName`, closes the inspector, and returns the value.
    */
-  async getHits(requestName?: string): Promise<string> {
-    return this.getRequestStat(() => this.inspector.getHits(), requestName);
+  async getHits(requestName?: string, waitForFocusQuiet: boolean = false): Promise<string> {
+    return this.getRequestStat(() => this.inspector.getHits(), requestName, waitForFocusQuiet);
   }
 
   /**
    * Opens the inspector, reads "Request timestamp" from the statistics tab of the
    * optionally selected `requestName`, closes the inspector, and returns the value.
    */
-  async getRequestTimestamp(requestName?: string): Promise<string> {
-    return this.getRequestStat(() => this.inspector.getRequestTimestamp(), requestName);
+  async getRequestTimestamp(
+    requestName?: string,
+    waitForFocusQuiet: boolean = false
+  ): Promise<string> {
+    return this.getRequestStat(
+      () => this.inspector.getRequestTimestamp(),
+      requestName,
+      waitForFocusQuiet
+    );
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */
@@ -356,6 +385,17 @@ export class MapsPage {
     await this.page.testSubj.click('mapSettingSubmitButton');
   }
 
+  async setAbsoluteRange(from: string, to: string) {
+    await this.datePicker.setAbsoluteRange({ from, to });
+    await this.waitForLayersToLoad();
+  }
+
+  /** Re-submits the current query, which forces the map to refresh. */
+  async refreshQuery() {
+    await this.queryBar.submitQuery();
+    await this.waitForLayersToLoad();
+  }
+
   /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
   async setAndSubmitQuery(query: string) {
     await this.queryBar.setQuery(query);
@@ -367,10 +407,16 @@ export class MapsPage {
    * Opens the inspector, switches to the "Map details" view, reads the Mapbox GL
    * style JSON from the mapboxStyleContainer, closes the inspector, and returns the
    * parsed style object.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller acts on the
+   *   page right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
-  async getMapboxStyle(): Promise<Record<string, any>> {
+  async getMapboxStyle(waitForFocusQuiet: boolean = false): Promise<Record<string, any>> {
     await this.inspector.open();
     try {
+      // openInspectorView skips the view switch when the chooser is not rendered yet,
+      // which leaves the default view open and the mapboxStyleTab missing.
+      await this.inspector.viewChooser.waitFor({ state: 'visible' });
       await this.inspector.openInspectorView('Map details');
       await this.page.testSubj.click('mapboxStyleTab');
       const container = this.page.testSubj.locator('mapboxStyleContainer');
@@ -382,7 +428,7 @@ export class MapsPage {
       const json = await container.locator('code').innerText();
       return JSON.parse(json);
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -394,6 +440,13 @@ export class MapsPage {
     const origView = await this.getView();
     await this.getLayerToggleButton(layerName).click();
     await this.page.testSubj.click('fitToBoundsButton');
+    await this.waitForMapPanAndZoom(origView);
+  }
+
+  /** Clicks the global "Fit to data" button and waits for the map to pan/zoom to the new extent. */
+  async clickFitToData() {
+    const origView = await this.getView();
+    await this.page.testSubj.click('fitToData');
     await this.waitForMapPanAndZoom(origView);
   }
 
@@ -414,7 +467,28 @@ export class MapsPage {
     await this.waitForLayersToLoad();
   }
 
-  /** Closes the currently open layer settings panel. */
+  /** Opens the layer settings panel, sets the layer filter query, and applies it. */
+  async setLayerQuery(layerName: string, query: string) {
+    await this.openLayerPanel(layerName);
+    await this.page.testSubj.click('mapLayerPanelOpenFilterEditorButton');
+    const queryInput = this.page.locator(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
+    );
+    await queryInput.clear();
+    await queryInput.pressSequentially(query);
+    // Dismiss any open autocomplete dropdown before clicking submit.
+    await queryInput.press('Escape');
+    await this.page.testSubj.click('mapFilterEditorSubmitButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Applies the edits made in the open layer settings panel and closes it. */
+  async keepLayerPanelChanges() {
+    await this.page.getByRole('button', { name: 'Keep changes' }).click();
+    await this.waitForLayersToLoad();
+  }
+
+  /** Closes the currently open layer settings panel. Discards any unsaved edits. */
   async closeLayerPanel() {
     await this.page.testSubj.click('layerPanelCancelButton');
     await this.waitForLayersToLoad();
@@ -435,6 +509,20 @@ export class MapsPage {
     await queryInput.press('Escape');
     await this.page.testSubj.click('mapWhereFilterEditorSubmitButton');
     await this.waitForLayersToLoad();
+  }
+
+  /** Expands the layer control (legend) if it is collapsed. */
+  async openLegend() {
+    const toc = this.page.testSubj.locator('mapLayerTOC');
+    if (!(await toc.isVisible())) {
+      await this.page.testSubj.click('mapExpandLayerControlButton');
+      await expect(toc).toBeVisible();
+    }
+  }
+
+  /** Returns the locator for the error icon shown in the TOC entry of `layerName`. */
+  getLayerErrorIcon(layerName: string) {
+    return this.page.testSubj.locator(`layerTocErrorIcon${layerName.replace(/\s+/g, '_')}`);
   }
 
   /** Opens the layer panel for `layerName`, clicks Remove, confirms, and waits for the layer to disappear. */

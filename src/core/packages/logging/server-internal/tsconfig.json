@@ -16,6 +16,7 @@
     "@kbn/config-schema",
     "@kbn/core-base-server-internal",
     "@kbn/core-logging-common-internal",
+    "@kbn/logging-ecs",
     "@kbn/core-logging-server",
     "@kbn/logging-mocks",
     "@kbn/std",

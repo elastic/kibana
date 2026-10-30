@@ -7,7 +7,7 @@
 
 import { analyzeSourceQuery } from '@kbn/nightshift-shared';
 
-/** Form rule for a source query. Structural errors come back before the one-type check. */
+/** Browser-side rules for a source query. Structural errors come back before the one-type check. */
 export const validateSourceEsql = (esql: string): string | true => {
   const analysis = analyzeSourceQuery({ esql });
   return 'error' in analysis ? analysis.error : true;

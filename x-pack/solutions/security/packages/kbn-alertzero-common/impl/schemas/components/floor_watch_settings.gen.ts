@@ -37,6 +37,26 @@ export const LookbackHours = lazySchema(() => z.number().int().min(1).max(168));
 export type LookbackHours = z.infer<typeof LookbackHours>;
 
 /**
+ * Lowest alert severity the sweep triages. Alerts below it are never sent to the Worker, so `low` triages every alert.
+ */
+export const MinSeverity = lazySchema(() => z.enum(['low', 'medium', 'high', 'critical']));
+export type MinSeverity = z.infer<typeof MinSeverity>;
+export type MinSeverityEnum = typeof MinSeverity.enum;
+export const MinSeverityEnum = MinSeverity.enum;
+
+/**
+ * Whether the sweep skips building-block alerts. An EQL sequence still gets triaged through its own alert, which is not a building block.
+ */
+export const ExcludeBuildingBlocks = lazySchema(() => z.boolean());
+export type ExcludeBuildingBlocks = z.infer<typeof ExcludeBuildingBlocks>;
+
+/**
+ * Alerts from rules carrying any of these tags are never sent to the Worker.
+ */
+export const ExcludedRuleTags = lazySchema(() => z.array(z.string().min(1).max(256)).max(50));
+export type ExcludedRuleTags = z.infer<typeof ExcludedRuleTags>;
+
+/**
  * Complete Worker-specific settings for the Alert Triage Worker, owned by Floor Watch. Sent whole on write; a replacement missing a field is rejected.
  */
 export const AlertTriageWorkerExtras = lazySchema(() =>
@@ -45,6 +65,9 @@ export const AlertTriageWorkerExtras = lazySchema(() =>
       autoCloseConfidenceScoreMinThreshold: AutoCloseConfidenceScoreMinThreshold,
       budgetPerHour: BudgetPerHour,
       lookbackHours: LookbackHours,
+      minSeverity: MinSeverity,
+      excludeBuildingBlocks: ExcludeBuildingBlocks,
+      excludedRuleTags: ExcludedRuleTags,
     })
     .strict()
 );

@@ -14,9 +14,10 @@ import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import {
   INVESTIGATION_IOCS_ATTACHMENT_TEST_ID,
   InvestigationIocsInlineContent,
-  parseIocCategoryRows,
 } from './investigation_iocs_inline_content';
 import type { InvestigationIocsAttachment, InvestigationIocsAttachmentData } from './types';
+
+const LONG_SHA = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 const renderContent = (data: InvestigationIocsAttachmentData) => {
   const props = {
@@ -34,37 +35,69 @@ const renderContent = (data: InvestigationIocsAttachmentData) => {
   );
 };
 
+const expand = () => userEvent.click(screen.getByTestId('investigationIocsToggle'));
+
 describe('InvestigationIocsInlineContent', () => {
-  it('renders one row per filled category with badges for each indicator', () => {
+  it('collapses to a summary of indicator and type counts by default', () => {
     renderContent({
-      shas: [
-        {
-          value: 'abc123',
-          comment: 'seen as dropped update.dll on WKSTN-RECV01',
-        },
-      ],
-      ips: [{ value: '185.220.101.42:443' }],
+      shas: [{ value: LONG_SHA }],
+      ips: [{ value: '185.220.101.42:443' }, { value: '10.0.0.10' }],
     });
 
     expect(screen.getByTestId(INVESTIGATION_IOCS_ATTACHMENT_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId('investigationIocsSummary')).toHaveTextContent(
+      'Indicators of compromise: 3 indicators across 2 types'
+    );
+    expect(screen.getByTestId('investigationIocsToggle')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByRole('table', { hidden: true }).closest('[inert]')).not.toBeNull();
+  });
+
+  it('uses singular wording for one indicator of one type', () => {
+    renderContent({ shas: [{ value: LONG_SHA }] });
+
+    expect(screen.getByTestId('investigationIocsSummary')).toHaveTextContent(
+      'Indicators of compromise: 1 indicator across 1 type'
+    );
+  });
+
+  it('renders one row per filled category with a copyable badge per indicator once expanded', async () => {
+    renderContent({
+      shas: [{ value: 'abc123', comment: 'seen as dropped update.dll on WKSTN-RECV01' }],
+      ips: [{ value: '185.220.101.42:443' }],
+    });
+
+    await expand();
+
+    expect(screen.getByTestId('investigationIocsToggle')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('table').closest('[inert]')).toBeNull();
     expect(screen.getByText('IOC type')).toBeInTheDocument();
     expect(screen.getByText('SHA256')).toBeInTheDocument();
     expect(screen.getByText('IP addresses')).toBeInTheDocument();
-    expect(screen.getByText('abc123')).toBeInTheDocument();
-    expect(screen.getByText('185.220.101.42:443')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy abc123' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy 185.220.101.42:443' })).toBeInTheDocument();
     expect(screen.queryByText('Ransom notes')).not.toBeInTheDocument();
   });
 
-  it('shows the indicator comment in a tooltip', async () => {
-    const user = userEvent.setup();
+  it('shows the full value and its comment in the tooltip', async () => {
     renderContent({
-      shas: [{ value: 'abc123', comment: 'seen as dropped update.dll on WKSTN-RECV01' }],
+      shas: [{ value: LONG_SHA, comment: 'seen as dropped update.dll on WKSTN-RECV01' }],
     });
 
-    await user.hover(screen.getByText('abc123'));
-    expect(
-      await screen.findByText('seen as dropped update.dll on WKSTN-RECV01')
-    ).toBeInTheDocument();
+    await expand();
+    await userEvent.hover(screen.getByTestId('investigationIocBadge-0'));
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent(LONG_SHA);
+    expect(tooltip).toHaveTextContent('seen as dropped update.dll on WKSTN-RECV01');
+  });
+
+  it('shows just the full value in the tooltip when there is no comment', async () => {
+    renderContent({ shas: [{ value: LONG_SHA }] });
+
+    await expand();
+    await userEvent.hover(screen.getByTestId('investigationIocBadge-0'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(LONG_SHA);
   });
 
   it('renders an empty state when no category has indicators', () => {
@@ -72,21 +105,6 @@ describe('InvestigationIocsInlineContent', () => {
     expect(
       screen.getByText('No indicators were extracted from the available telemetry.')
     ).toBeInTheDocument();
-  });
-
-  it('omits empty and malformed categories', () => {
-    expect(
-      parseIocCategoryRows({
-        shas: [{ value: 'abc123' }],
-        ips: [],
-        file_paths: [{ value: '' }, 'nope'],
-      })
-    ).toEqual([
-      {
-        id: 'shas',
-        typeLabel: 'SHA256',
-        items: [{ value: 'abc123' }],
-      },
-    ]);
+    expect(screen.queryByTestId('investigationIocsToggle')).not.toBeInTheDocument();
   });
 });

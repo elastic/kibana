@@ -71,10 +71,6 @@ export class DashboardApp {
   private readonly addEmbeddableSuccess;
   private readonly savedSearchDocTable;
 
-  // Markdown panel
-  private readonly markdownEditorApplyButton;
-  private readonly markdownRenderer;
-
   // ES|QL / Visualize editor actions
   private readonly applyFlyoutButton;
   private readonly visualizeSaveAndReturnButton;
@@ -132,10 +128,6 @@ export class DashboardApp {
     this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
     this.addEmbeddableSuccess = this.page.testSubj.locator('addEmbeddableToDashboardSuccess');
     this.savedSearchDocTable = this.page.testSubj.locator('embeddedSavedSearchDocTable');
-
-    // Markdown panel
-    this.markdownEditorApplyButton = this.page.testSubj.locator('markdownEditorApplyButton');
-    this.markdownRenderer = this.page.testSubj.locator('markdownRenderer');
 
     // ES|QL / Visualize editor actions
     this.applyFlyoutButton = this.page.testSubj.locator('applyFlyoutButton');
@@ -486,27 +478,6 @@ export class DashboardApp {
    */
   async addLens(lensName: string, options?: TimeoutOptions) {
     return this.addEmbeddable(lensName, 'lens', options);
-  }
-
-  /**
-   * Adds a new Markdown panel (by value) to the dashboard.
-   *
-   * @param content - Markdown content to save
-   */
-  async addMarkdownPanel(content: string) {
-    await this.openAddPanelFlyout();
-    await this.panelSelectionSearchInput.fill('Markdown text');
-    await this.page.testSubj.click('create-action-Markdown text');
-
-    const editorInput = this.page.locator('textarea[aria-label="Dashboard markdown editor"]');
-    await expect(editorInput).toBeVisible();
-    await editorInput.fill(content);
-    await this.markdownEditorApplyButton.click();
-
-    // Scope to the renderer containing the content we just typed; the dashboard may
-    // already have other markdown panels, in which case an unfiltered `markdownRenderer`
-    // locator would resolve to multiple elements and trip strict mode.
-    await expect(this.markdownRenderer.filter({ hasText: content })).toBeVisible();
   }
 
   async addMapPanel() {

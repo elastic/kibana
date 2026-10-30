@@ -15,10 +15,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  ENTITY_ANOMALIES_SECTION_TITLE,
-  ENTITY_ANOMALIES_OVERVIEW_TIMEFRAME,
-} from './translations';
+import { ENTITY_ANOMALIES_SECTION_TITLE } from './translations';
+import { getAnomaliesTimeframeLabel } from './get_anomalies_timeframe_label';
 import {
   ANOMALIES_SECTION_TEST_ID,
   ANOMALIES_SECTION_ACCORDION_BUTTON_TEST_ID,
@@ -42,6 +40,7 @@ export const EMPTY_ANOMALY_OVERVIEW: GetAnomalyOverviewResponse = {
 interface AnomaliesSectionProps {
   data: GetAnomalyOverviewResponse;
   entityId: string;
+  scopeId?: string;
   isPreviewMode?: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hideHeaderIcons?: boolean;
@@ -77,7 +76,7 @@ export const AnomaliesSection: React.FC<AnomaliesSectionProps> = (props) => {
               font-size: ${updatedAtFontSize};
             `}
           >
-            {ENTITY_ANOMALIES_OVERVIEW_TIMEFRAME}
+            {getAnomaliesTimeframeLabel(props.scopeId)}
           </span>
         }
       >

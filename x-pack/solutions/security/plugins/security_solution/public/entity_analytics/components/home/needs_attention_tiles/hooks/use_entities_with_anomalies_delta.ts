@@ -7,12 +7,11 @@
 
 import { useMemo } from 'react';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import { buildAnomaliesHistoryReachesBackQuery } from '../queries/history_reaches_back';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
 
@@ -41,13 +40,18 @@ export const useEntitiesWithAnomaliesDelta = ({
   count,
 }: AnomaliesDeltaOptions): {
   delta: number | undefined;
+  /** The count over the previous period, which the sparkline starts from. */
+  previous: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
   reachesBack: boolean | undefined;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
   const index = resolvedIndex?.indexName;
   const isLoadingInputs = isIndexLoading || isJobsLoading;
@@ -61,12 +65,12 @@ export const useEntitiesWithAnomaliesDelta = ({
         ? buildEntitiesWithAnomaliesCountQuery(
             index,
             timeRange,
-            buildEntityFilterClauses(entityFilters),
+            entityFilterClauses,
             jobIds,
             'previous'
           )
         : null,
-    [index, jobIds, timeRange, entityFilters]
+    [index, jobIds, timeRange, entityFilterClauses]
   );
 
   const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
@@ -79,6 +83,7 @@ export const useEntitiesWithAnomaliesDelta = ({
 
   return {
     delta: previous !== undefined ? count - previous : undefined,
+    previous,
     isHistoryMissing,
     reachesBack,
     isDeltaLoading: isDeltaStillComing({

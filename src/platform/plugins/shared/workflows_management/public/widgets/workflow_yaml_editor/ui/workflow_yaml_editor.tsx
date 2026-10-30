@@ -15,11 +15,12 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Document } from 'yaml';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isTriggerType, WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
-import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/workflows-ui';
+import { WORKFLOW_MONACO_LAYOUT_OPTIONS, workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
@@ -192,6 +193,12 @@ export interface WorkflowYAMLEditorProps {
    * execution. The proposal shows once the parent opens the Workflow tab.
    */
   onAgentProposalHeld?: () => void;
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images). */
+  initialAgentAttachments?: ConversationAttachment[];
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -204,6 +211,9 @@ export const WorkflowYAMLEditor = ({
   hideEditorTools = false,
   onValidationPanelHeightChange,
   onAgentProposalHeld,
+  initialAgentMessage,
+  initialAgentAttachments,
+  autoOpenAgentChat,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -316,7 +326,6 @@ export const WorkflowYAMLEditor = ({
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
-  useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
 
   // Lifecycle
@@ -400,6 +409,9 @@ export const WorkflowYAMLEditor = ({
     canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
     onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
     workflowTabYaml,
+    initialAgentMessage,
+    initialAgentAttachments,
+    autoOpenAgentChat,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -979,6 +991,7 @@ export const WorkflowYAMLEditor = ({
             onChange={onChange}
             onSyncStateChange={onSyncStateChange}
             options={options}
+            chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
             value={workflowYaml}
             enableFindAction={true}

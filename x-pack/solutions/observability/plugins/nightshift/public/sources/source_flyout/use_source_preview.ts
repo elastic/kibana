@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { appendLimitToQuery, getESQLResults } from '@kbn/esql-utils';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
@@ -17,7 +18,8 @@ const PREVIEW_ROW_LIMIT = 100;
 /**
  * Sample rows of a source query over the app time range. Idle while the query is empty. `runId`
  * and `refreshCount` are part of the cache key, so each run of the same query, and each explicit
- * time range refresh over unchanged absolute bounds, fetches again.
+ * time range refresh over unchanged absolute bounds, fetches again. Routes across all linked
+ * projects, as validation and onboarding do, so the preview shows the data the source reads.
  */
 export function useSourcePreview({
   esql,
@@ -42,6 +44,7 @@ export function useSourcePreview({
         signal,
         dropNullColumns: true,
         filter: { range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } } },
+        projectRouting: PROJECT_ROUTING.ALL,
       });
       return {
         columns: response.columns.map(({ name }) => name),

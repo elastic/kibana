@@ -62,6 +62,7 @@ export const useCaseViewHeader = ({
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
     runWorkflow,
+    telemetry: workflowTelemetry,
     filterWorkflow: workflowFilterWorkflow,
     sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
@@ -217,6 +218,7 @@ export const useCaseViewHeader = ({
       filterWorkflow={workflowFilterWorkflow}
       sortWorkflow={workflowSortWorkflow}
       onClose={closeRunWorkflowModal}
+      telemetry={workflowTelemetry}
     />
   ) : null;
 

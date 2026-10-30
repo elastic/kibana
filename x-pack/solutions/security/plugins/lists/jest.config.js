@@ -12,7 +12,7 @@ module.exports = {
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/lists',
   coverageReporters: ['text', 'html'],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/lists'],
 };

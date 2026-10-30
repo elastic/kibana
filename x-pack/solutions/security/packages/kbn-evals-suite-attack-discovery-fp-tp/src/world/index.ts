@@ -19,18 +19,30 @@ export type { FpTpEntityRoleKey } from './chain_entities';
 export {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_BASE_TIME,
+  FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_INDEX,
+  FP_TP_RAW_EVENT_INDEX_PREFIX,
+  FP_TP_RAW_EVENT_INDEX_TEMPLATE,
+  FP_TP_RAW_EVENT_INGEST_PIPELINE,
+  FP_TP_RAW_EVENT_PAGE_SIZE,
   FP_TP_RAW_EVENT_WINDOW_MS,
+  FP_TP_REASONING_FEATURE_ID,
   FP_TP_TWIN_SEED_LABEL,
+  fpTpAdhocAttackIndexForSpace,
+  fpTpAlertsIndexForSpace,
+  fpTpEntityReadAliasForSpace,
+  toServerlessEventIndex,
 } from './constants';
 export { toEntityCrudRequest } from './entity_crud';
 export type { FpTpEntityCrudRequest, FpTpEntityCrudType } from './entity_crud';
 export {
+  FP_TP_TRUNCATING_BENIGN_EVENT_COUNT,
   withEntitiesFrom,
   withMissingCitedAlert,
   withoutAttackDiscovery,
   withoutEntities,
   withoutEvents,
+  withTruncatingBenignEvents,
 } from './evidence_states';
 export { asRecord, withFieldMessage } from './event_message';
 export { joinKibanaUrl } from './join_kibana_url';
@@ -45,22 +57,52 @@ export {
   withProcessParent,
 } from './mutations';
 export {
+  FP_TP_RAW_EVENT_TEMPLATE_PRIORITY,
+  FP_TP_RAW_EVENT_TOTAL_FIELDS_LIMIT,
+  ensureFpTpRawEventIndices,
+  ensureFpTpRawEventPipeline,
+  ensureFpTpRawEventStore,
+  ensureFpTpRawEventTemplate,
+  rawEventIndexMappings,
+  rawEventIndexNames,
+  rawEventIndexSettings,
+  rawEventIngestPipeline,
+} from './raw_events';
+export {
+  assertBulkOk,
   buildLiveSeedPlan,
   cleanupManualSeedLive,
+  cleanupServerlessSeed,
+  createEntity,
+  deleteDocumentsById,
+  deleteEntitiesOnHosts,
+  deleteEntity,
   ensureFpTpSeedPrerequisites,
+  kbnErrorMessage,
   seedFixture,
   seedTwinLive,
+  seedTwinLiveServerless,
+  seededRawEventsInSpaceQuery,
+  buildServerlessPlan,
   twinToWorld,
+  toAnonymizedAlerts,
+  toValidateAttackDiscovery,
+  assertClassicSpace,
+  assertServerlessSpace,
+  writeIdentityFields,
 } from './seed_live';
 export type {
   FpTpLiveKbnRequest,
   FpTpLiveSeedPlan,
   FpTpLiveSeedSummary,
   FpTpSeededFixture,
+  FpTpServerlessSeedPlan,
+  FpTpValidateInputs,
 } from './seed_live';
+export { createLiveKbnRequest } from './live_kbn_request';
 export { toSeededEvidence } from './seeded_evidence';
 export type { FpTpSeededEvidence } from './seeded_evidence';
-export { shiftTwinToNow } from './shift_timestamps';
+export { shiftTimestamps, shiftTwinToNow } from './shift_timestamps';
 export type { FpTpGold, FpTpIndexedEntity, FpTpMustRetrieve, FpTpTwin, FpTpWorld } from './types';
 export { toRunMarker, uniquify } from './uniquify';
 export { deriveFpTpOutcome, FP_TP_VERDICT_RULES } from './verdict_rules';
