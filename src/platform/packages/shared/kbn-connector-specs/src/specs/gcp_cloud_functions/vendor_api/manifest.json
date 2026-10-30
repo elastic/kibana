@@ -4,14 +4,14 @@
       {
         "method": "get",
         "path": "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}",
-        "source": "runV2"
+        "source": "run_v2"
       }
     ],
     "invoke": [
       {
         "method": "get",
         "path": "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}",
-        "source": "runV2"
+        "source": "run_v2"
       }
     ],
     "listFunctions": [
@@ -29,12 +29,12 @@
           "style": "cursor"
         },
         "path": "/v2/projects/{projectsId}/locations/{locationsId}/services",
-        "source": "runV2"
+        "source": "run_v2"
       }
     ]
   },
   "sources": {
-    "runV2": {
+    "run_v2": {
       "apiVersion": "v2",
       "fetchedAt": "2026-10-07T20:20:12.745Z",
       "format": "discovery",

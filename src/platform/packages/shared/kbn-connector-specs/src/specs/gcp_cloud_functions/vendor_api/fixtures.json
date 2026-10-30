@@ -2,7 +2,7 @@
   "invoke": {
     "responses": [
       {
-        "source": "runV2",
+        "source": "run_v2",
         "method": "GET",
         "path": "/v2/projects/{projectsId}/locations/{locationsId}/services/{servicesId}",
         "status": 200,
