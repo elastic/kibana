@@ -98,6 +98,26 @@ export const CONTESTED_FIXTURE_IDS = [
   'fp-low-value-archive',
 ] as const;
 
+/**
+ * Fixtures where `exception` is a defensible fix alongside the golden label. Across 25-33
+ * golden runs on 7 models (since 2026-10-11) these fixtures scored at or near 0 on their
+ * label, and `exception` was the most common answer on most of them: each cluster's hosts
+ * are few and stable, so an `is_one_of` exception covers them, and the prompt's
+ * exception-first order (rule_tuning_review.yaml:341) ranks it above threshold, schedule,
+ * risk_score and manual. `ChangeTypeAccuracyDefensible` scores `exception` as correct here;
+ * `ChangeTypeAccuracy` keeps the strict label so history stays comparable.
+ */
+export const DEFENSIBLE_EXCEPTION_FIXTURE_IDS = [
+  'fp-threshold-auditflood',
+  'fp-threshold-bruteforce-burst',
+  'fp-schedule-offhours-batch',
+  'fp-schedule-stale-logins',
+  'fp-low-value-risk',
+  'fp-low-value-archive',
+  'fp-unfixable-noise',
+  'fp-unfixable-telemetry',
+] as const;
+
 /** Tag prefix the workflow writes to harvested alerts. Isolated to the eval namespace. */
 export const EVAL_TAG_PREFIX = 'eval-rule-tuning';
 

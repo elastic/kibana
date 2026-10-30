@@ -10,6 +10,7 @@ import {
   CHANGE_TYPES,
   CONFIDENCE_LEVELS,
   CONTESTED_FIXTURE_IDS,
+  DEFENSIBLE_EXCEPTION_FIXTURE_IDS,
   EXCEPTION_OPERATOR_PAYLOAD,
   PROPOSED_SEVERITIES,
   type ChangeType,
@@ -108,6 +109,41 @@ export const changeTypeAccuracyUncontested: Evaluator = {
       label: predicted ?? 'none',
       explanation: `predicted="${predicted ?? 'none'}" expected="${goldenLabel ?? 'none'}"`,
       metadata: { predicted: predicted ?? null, expected: goldenLabel ?? null },
+    };
+  },
+};
+
+/**
+ * `ChangeTypeAccuracy` with `exception` also accepted on DEFENSIBLE_EXCEPTION_FIXTURE_IDS,
+ * where the strict label is unreachable under the exception-first prompt. Scored on all
+ * fixtures, so its n matches `ChangeTypeAccuracy` and the two means compare directly.
+ */
+export const changeTypeAccuracyDefensible: Evaluator = {
+  name: 'ChangeTypeAccuracyDefensible',
+  kind: 'CODE',
+  direction: 'maximize',
+  evaluate: async ({ output, expected, metadata }) => {
+    const fixtureId = (metadata as { fixtureId?: string } | undefined)?.fixtureId;
+    const predicted = asProposal(output).change_type;
+    const goldenLabel = asExpected(expected)?.change_type;
+    const exceptionAccepted =
+      fixtureId != null &&
+      (DEFENSIBLE_EXCEPTION_FIXTURE_IDS as readonly string[]).includes(fixtureId);
+    const correct =
+      predicted != null &&
+      (predicted === goldenLabel || (exceptionAccepted && predicted === 'exception'));
+
+    return {
+      score: correct ? 1 : 0,
+      label: predicted ?? 'none',
+      explanation: `predicted="${predicted ?? 'none'}" expected="${goldenLabel ?? 'none'}"${
+        exceptionAccepted ? ' (exception also accepted)' : ''
+      }`,
+      metadata: {
+        predicted: predicted ?? null,
+        expected: goldenLabel ?? null,
+        exceptionAccepted,
+      },
     };
   },
 };

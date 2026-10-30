@@ -11,6 +11,7 @@ golden tuning path.
 | Evaluator | Kind | Gate or smoke |
 |-----------|------|---------------|
 | `ChangeTypeAccuracy` | CODE (binary) | **gate** — predicted tuning path == golden label, all fixtures |
+| `ChangeTypeAccuracyDefensible` | CODE (binary) | same as `ChangeTypeAccuracy`, but `exception` also counts on the 8 fixtures in `DEFENSIBLE_EXCEPTION_FIXTURE_IDS`, whose strict labels no model reached in 25-33 golden runs under the exception-first prompt |
 | `ChangeTypeAccuracyUncontested` | CODE (binary) | **gate** — same question on the fixtures whose labels are agreed (33/39); contested fixtures score N/A, so the run's N/A count states the coverage gap |
 | `TuningQuality` | LLM judge | **gate** — summary grounded in the seeded FP evidence |
 | `Tool Routing` | CODE (trace) | **gate** — the agent actually retrieved the alerts (`investigate-rule.get_alerts_by_ids`); N/A when no span is reachable |

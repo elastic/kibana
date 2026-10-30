@@ -48,6 +48,7 @@ import { runRuleTuningWorkflow, type RuleTuningVerdict } from '../src/workflow_t
 import {
   changeTypeAccuracy,
   changeTypeAccuracyUncontested,
+  changeTypeAccuracyDefensible,
   validProposal,
 } from '../src/evaluators';
 import {
@@ -497,6 +498,7 @@ evaluate.describe(
         const selectedEvaluators = selectEvaluators([
           changeTypeAccuracy,
           changeTypeAccuracyUncontested,
+          changeTypeAccuracyDefensible,
           validProposal,
           createToolRoutingEvaluator({ traceEsClient, log, fetch }),
           tuningQualityJudge,

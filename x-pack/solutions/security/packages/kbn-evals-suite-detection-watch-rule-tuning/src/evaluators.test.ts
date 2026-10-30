@@ -6,7 +6,12 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { changeTypeAccuracy, changeTypeAccuracyUncontested, validProposal } from './evaluators';
+import {
+  changeTypeAccuracy,
+  changeTypeAccuracyDefensible,
+  changeTypeAccuracyUncontested,
+  validProposal,
+} from './evaluators';
 import {
   explainMissingProposal,
   isAwaitingApproval,
@@ -56,6 +61,38 @@ describe('rule-tuning evaluators', () => {
       } as never);
       expect(result.score).toBe(0);
       expect(result.label).toBe('none');
+    });
+  });
+
+  describe('changeTypeAccuracyDefensible', () => {
+    const verdict = (change_type: ChangeType): RuleTuningVerdict => ({
+      change_type,
+      executionId: 'exec-defensible',
+      executionStatus: 'completed' as never,
+    });
+    const score = async (predicted: ChangeType, fixtureId: string, expected: ChangeType) =>
+      (
+        await changeTypeAccuracyDefensible.evaluate!({
+          output: verdict(predicted),
+          expected: { change_type: expected },
+          metadata: { fixtureId, ruleType: 'query', expected },
+        } as never)
+      ).score;
+
+    it('accepts exception on a defensible-exception fixture', async () => {
+      expect(await score('exception', 'fp-threshold-auditflood', 'threshold')).toBe(1);
+    });
+
+    it('still accepts the golden label on a defensible-exception fixture', async () => {
+      expect(await score('threshold', 'fp-threshold-auditflood', 'threshold')).toBe(1);
+    });
+
+    it('rejects other wrong answers on a defensible-exception fixture', async () => {
+      expect(await score('query', 'fp-threshold-auditflood', 'threshold')).toBe(0);
+    });
+
+    it('does not accept exception on fixtures outside the list', async () => {
+      expect(await score('exception', 'fp-overbroad-query', 'query')).toBe(0);
     });
   });
 

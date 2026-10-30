@@ -7,7 +7,12 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { CHANGE_TYPES, CONTESTED_FIXTURE_IDS, EXCEPTION_OPERATOR_PAYLOAD } from './constants';
+import {
+  CHANGE_TYPES,
+  CONTESTED_FIXTURE_IDS,
+  DEFENSIBLE_EXCEPTION_FIXTURE_IDS,
+  EXCEPTION_OPERATOR_PAYLOAD,
+} from './constants';
 
 /**
  * Characterization tests for the rule-tuning eval suite.
@@ -231,6 +236,19 @@ describe('rule-tuning coverage characterization', () => {
     for (const changeType of CHANGE_TYPES) {
       expect(counts.get(changeType) ?? 0).toBeGreaterThan(0);
     }
+  });
+
+  it('keeps DEFENSIBLE_EXCEPTION_FIXTURE_IDS well-formed against the live fixture set', () => {
+    const labels = goldenLabels();
+    const ids = [...DEFENSIBLE_EXCEPTION_FIXTURE_IDS];
+    for (const id of ids) {
+      if (!labels.has(id)) {
+        throw new Error(`DEFENSIBLE_EXCEPTION_FIXTURE_IDS references unknown fixture ${id}`);
+      }
+      // Listing an exception-labelled fixture would make the allowance a no-op and hide a typo.
+      expect(labels.get(id)).not.toBe('exception');
+    }
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('keeps CONTESTED_FIXTURE_IDS well-formed against the live fixture set', () => {
