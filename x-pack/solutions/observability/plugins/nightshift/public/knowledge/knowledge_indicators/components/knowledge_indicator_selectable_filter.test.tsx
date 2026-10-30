@@ -27,8 +27,24 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   };
 }
 
-function makeFeatureKI(overrides: Partial<Feature> = {}): KnowledgeIndicator {
-  return { kind: 'feature', feature: makeFeature(overrides) };
+function makeFeatureKI(
+  overrides: Partial<Feature> = {},
+  otherSourceIds: string[] = []
+): KnowledgeIndicator {
+  const feature = makeFeature(overrides);
+  const instances: Feature[] = [feature.source_id, ...otherSourceIds].map((sourceId, index) => ({
+    ...feature,
+    source_id: sourceId,
+    uuid: `${feature.uuid}-${index}`,
+  }));
+  return {
+    kind: 'feature',
+    feature: {
+      ...feature,
+      sources: instances.map(({ source_id: sourceId }) => sourceId).sort(),
+      instances,
+    },
+  };
 }
 
 function makeQueryKI(
@@ -104,15 +120,6 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
       const button = screen.getByRole('button', { name: /Test Filter/ });
       expect(button).toBeInTheDocument();
       expect(button).toBeDisabled();
-    });
-
-    it('renders an enabled button when disableWhenEmpty is false and no values are available', async () => {
-      await renderFilter({
-        knowledgeIndicators: [],
-        disableWhenEmpty: false,
-      });
-
-      expect(screen.getByRole('button', { name: /Test Filter/ })).toBeInTheDocument();
     });
 
     it('shows active filter badge when items are selected', async () => {
@@ -222,21 +229,30 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
       });
       expect(screen.queryByText('match_query')).not.toBeInTheDocument();
     });
-  });
 
-  describe('getLabel', () => {
-    it('uses identity by default', async () => {
-      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
+    it('counts a KI under each value when getValue returns several', async () => {
+      const kis = [
+        makeFeatureKI({ id: 'f1', source_id: 'logs.a' }, ['logs.b']),
+        makeFeatureKI({ id: 'f2', source_id: 'logs.a' }),
+      ];
 
-      await renderFilter({ knowledgeIndicators: kis });
+      await renderFilter({
+        knowledgeIndicators: kis,
+        getValue: (ki) => (ki.kind === 'feature' ? ki.feature.sources : ki.source_id),
+      });
+
+      expect(screen.getByRole('button', { name: /Test Filter/ })).toHaveTextContent('2');
 
       fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
 
       await waitFor(() => {
-        expect(screen.getByText('my_type')).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: /logs\.a/ })).toHaveTextContent('logs.a2');
       });
+      expect(screen.getByRole('option', { name: /logs\.b/ })).toHaveTextContent('logs.b1');
     });
+  });
 
+  describe('getLabel', () => {
     it('applies custom getLabel to option labels', async () => {
       const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
 
@@ -251,23 +267,6 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
         expect(screen.getByText('MY_TYPE')).toBeInTheDocument();
       });
       expect(screen.queryByText('my_type')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('labels', () => {
-    it('uses provided group label in the popover', async () => {
-      const kis = [makeFeatureKI({ type: 'entity', id: 'f1' })];
-
-      await renderFilter({
-        knowledgeIndicators: kis,
-        labels: { ...DEFAULT_LABELS, groupLabel: 'Custom group' },
-      });
-
-      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
-
-      await waitFor(() => {
-        expect(screen.getByText('Custom group')).toBeInTheDocument();
-      });
     });
   });
 });

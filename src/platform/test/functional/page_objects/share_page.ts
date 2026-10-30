@@ -17,15 +17,18 @@ export class SharePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly appMenu = this.ctx.getPageObject('appMenu');
 
-  /**
-   * @description attempt to close the share modal, if it's open
-   */
+  /** Close the share modal if it appears, and wait until it is gone. */
   async closeShareModal() {
-    if (await this.isShareModalOpen()) {
-      await this.find.clickByCssSelector(
-        '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
-      );
-    }
+    if (!(await this.testSubjects.waitForExists('shareContextModal'))) return;
+
+    await this.retry.try(async () => {
+      if (await this.isShareModalOpen()) {
+        await this.find.clickByCssSelector(
+          '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
+        );
+      }
+      await this.testSubjects.missingOrFail('shareContextModal');
+    });
   }
 
   async clickTab(content: string) {

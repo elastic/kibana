@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Connector } from '@kbn/search-connectors';
-import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { docLinks } from '../../../../../common/doc_links';
