@@ -7,6 +7,10 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
+import toolCallHealthSystemText from './tool_call_health/system_prompt.text';
+import toolCallHealthUserText from './tool_call_health/user_prompt.text';
+import recallUsageSystemText from './recall_usage/system_prompt.text';
+import recallUsageUserText from './recall_usage/user_prompt.text';
 
 /**
  * LLM-as-judge prompts ported from Elastic's private `deductive` repo (commit
@@ -517,43 +521,6 @@ export const AntiLeakageJudgePrompt = createPrompt({
   } as const)
   .get();
 
-const TOOL_CALL_HEALTH_SYSTEM = `You are auditing the TOOL USE of an AI alert-investigation agent.
-Read its numbered tool-call trajectory and identify every call that FAILED and every call that
-returned NO DATA. Judge from the call's arguments and its result, not from whether the tool
-reported success: a tool can answer "success" and still have failed the agent's purpose.
-
-## FAILED
-The call did not do what the agent was trying to do. Examples:
-- an error message, stack trace, timeout, permission or authentication failure, or a non-zero \`exit_code\`;
-- a query rejected or mangled by a syntax error, an unknown index/field/column, or a bad argument;
-- a read of a file or path that does not exist;
-- a "success" response that carries only metadata or a warning and none of the requested content.
-
-## NO DATA
-The call ran correctly but came back empty, so the agent learned nothing from it. Examples:
-- an empty list (for instance a list of indices, data streams, files or fields with no entries);
-- zero rows, zero hits or an empty \`{}\` / \`[]\` result, or "no results found";
-- a response containing only column headers or metadata.
-
-A call is either FAILED or NO DATA, never both: if it failed, do not also list it as empty.
-
-## Do NOT count
-- A call whose empty result is the expected, informative answer to a deliberate absence check
-  (for example "were there any errors in this window?" returning none), because that is real
-  evidence, not wasted effort.
-- A call that returned useful data, even if part of it is noisy or truncated.
-- Calls you cannot assess because the result text is cut off. Judge only what is visible.
-
-Refer to calls by the step number printed in the trajectory.`;
-
-const TOOL_CALL_HEALTH_USER = `## Question (context only)
-{{{question}}}
-
-## Tool-call trajectory (everything the agent called, in order)
-{{{trajectory}}}
-
-List the failed and the no-data calls, then call the \`score\` tool.`;
-
 const TOOL_CALL_ISSUE_SCHEMA = {
   type: 'array',
   items: {
@@ -578,8 +545,8 @@ export const ToolCallHealthJudgePrompt = createPrompt({
   ),
 })
   .version({
-    system: { mustache: { template: TOOL_CALL_HEALTH_SYSTEM } },
-    template: { mustache: { template: TOOL_CALL_HEALTH_USER } },
+    system: { mustache: { template: toolCallHealthSystemText } },
+    template: { mustache: { template: toolCallHealthUserText } },
     tools: {
       score: {
         description: 'Return the failed and the no-data tool calls.',
@@ -604,49 +571,6 @@ export const ToolCallHealthJudgePrompt = createPrompt({
 
 export const CORTEX_INFLUENCE_TYPES = ['none', 'confirmatory', 'redirected'] as const;
 
-const RECALL_USAGE_SYSTEM = `You are auditing how an AI alert-investigation agent used RECALLED knowledge.
-Its sandbox holds two kinds of recall files that past investigations wrote down:
-- CORTEX files under \`cortex/\`: accumulated investigation knowledge.
-- SEMANTIC-MEMORY files under \`memories/\`.
-Reading one of them is not evidence gathered now. You are told which such files the agent opened;
-judge from the numbered trajectory what it did with them.
-
-## 1. Cortex influence
-Did what the agent read in a cortex file change the direction of the investigation?
-- \`none\`: no cortex file was opened, or the agent's hypotheses and queries would have been the same
-  without it (it was ignored, skimmed, or irrelevant).
-- \`confirmatory\`: the file supported a direction the agent already had; it did not change it.
-- \`redirected\`: after reading it, the agent changed course because of it: it adopted a hypothesis,
-  dropped one, or ran queries it names or clearly derives from the file, which it had not been pursuing before.
-Compare the agent's steps BEFORE and AFTER the read. A direction that appears only after the read and
-traces to the file's content is redirected; one the agent was already following is confirmatory.
-
-## 2. Memories cited in the final answer
-List the \`memories/\` files whose content the FINAL REPORT relies on or cites: the report states a
-fact, cause, or recommendation that comes from that memory file. Do not list a memory that was only
-opened and not used in the report, and do not list files that were not opened. Use the exact paths
-you were given.`;
-
-const RECALL_USAGE_USER = `## Question (context only)
-{{{question}}}
-
-## Cortex files the agent opened
-{{{cortexReads}}}
-
-## Memory files the agent opened
-{{{memoryReads}}}
-
-## Final report (conclusion, hypotheses, recommendations)
-{{{answer}}}
-
-## Report's own selected evidence
-{{{evidence}}}
-
-## Tool-call trajectory (everything the agent called, in order)
-{{{trajectory}}}
-
-Judge the cortex influence and which memories the final report cites, then call the \`score\` tool.`;
-
 export const RecallUsageJudgePrompt = createPrompt({
   name: 'nightshift_recall_usage_judge',
   description:
@@ -663,8 +587,8 @@ export const RecallUsageJudgePrompt = createPrompt({
   ),
 })
   .version({
-    system: { mustache: { template: RECALL_USAGE_SYSTEM } },
-    template: { mustache: { template: RECALL_USAGE_USER } },
+    system: { mustache: { template: recallUsageSystemText } },
+    template: { mustache: { template: recallUsageUserText } },
     tools: {
       score: {
         description: 'Return the cortex influence and the memories the final report cites.',
