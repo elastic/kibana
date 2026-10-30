@@ -452,7 +452,7 @@ describe('rule_tuning_review proposal text', () => {
       }
     );
     expect(unsupported).toContain(
-      'No backtest is available for this change.\nThe preview cannot apply an exception to an ES|QL rule, which has no filters.'
+      'No backtest is available for this change.\nThe backtest simulates an exception as a query filter, and an ES|QL rule has no place for one'
     );
     expect(
       renderComment(

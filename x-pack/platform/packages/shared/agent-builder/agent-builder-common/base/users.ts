@@ -39,4 +39,5 @@ export const isUserProfileId = (id: string | undefined): id is string =>
  */
 export interface CurrentUser extends UserIdAndName {
   isAdmin: boolean;
+  canManageSecurity?: boolean;
 }

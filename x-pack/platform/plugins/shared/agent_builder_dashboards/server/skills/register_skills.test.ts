@@ -39,6 +39,11 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
+  it('passes the dashboard attachment id as dashboardId', () => {
+    expect(skill.content).toContain('`dashboardId` accepts dashboard attachment ids');
+    expect(skill.content).toContain('pass the returned `data.attachment_id` as `dashboardId`');
+  });
+
   it('finds unnamed data in one broad index search without probing it', () => {
     expect(skill.content).toContain(
       'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'

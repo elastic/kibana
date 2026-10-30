@@ -209,6 +209,23 @@ steps:
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
 
+  # The draft has no index list of its own: its sources are the `FROM` clause, which
+  # the preview checks for `read` before running so that an index the worker cannot
+  # see is named rather than counted as zero. Index names are lowercase by rule, so
+  # the query is downcased to find the command whatever its case, and a source may
+  # be quoted (`FROM "logs-*"`), so the quotes come off too.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.draft_ready.output.ok == true }}"
+    with:
+      csv: >-
+        {%- assign parts = steps.draft_creation.output.structured_output.rule.query | downcase | split: 'from ' -%}
+        {%- assign sources = parts[1] | default: '' | split: '|' | first | split: 'metadata' | first | split: ',' -%}
+        {%- for source in sources -%}
+        {%- assign name = source | remove: '"' | strip -%}
+        {%- if name != '' -%},{{ name | json }}{%- endif -%}
+        {%- endfor -%}
+
   - name: preview_creation
     type: workflow.execute
     if: "${{ steps.draft_ready.output.ok == true }}"
@@ -217,6 +234,7 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        indices: "${{ steps.probe_indices.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
         preview_body:
           name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
           description: "{{ steps.draft_creation.output.structured_output.rule.description }}"
@@ -297,7 +315,7 @@ steps:
           ```
 
           **Backtest**
-          {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          {% if steps.preview_creation.output.unreadable_indices != blank %}Not run: the Rule Coverage worker's service account cannot read these drafted rule indices: `{{ steps.preview_creation.output.unreadable_indices }}`. The worker reads only the default security index patterns, so a draft on other indices cannot be backtested. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.no_matching_indices == true %}Not run: no index the Rule Coverage worker can read matches the drafted rule's index patterns. Either they do not exist, or the worker's service account cannot read them: it reads only the default security index patterns. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{% if steps.preview_creation.output.alert_limit_reached == true %}At least {% endif %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% if steps.preview_creation.output.alert_limit_reached == true %} The preview stopped at the rule's maximum alerts per execution, so the real number is higher.{% endif %}{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.no_matching_indices != true and steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
           Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
 
           **On approval**
