@@ -14,7 +14,6 @@ export class DashboardAddPanelService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly flyout = this.ctx.getService('flyout');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly browser = this.ctx.getService('browser');
@@ -23,8 +22,7 @@ export class DashboardAddPanelService extends FtrService {
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
     await this.testSubjects.click('dashboardAddFromLibraryButton');
-    // Give some time for the animation to complete
-    await this.common.sleep(500);
+    await this.testSubjects.existOrFail('dashboardAddPanel', { timeout: 20_000 });
   }
 
   async clickCreateNewLink() {
@@ -146,13 +144,7 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.ensureAddPanelIsShowing');
     const isOpen = await this.isAddPanelOpen();
     if (!isOpen) {
-      await this.retry.try(async () => {
-        await this.clickOpenAddPanel();
-        const isNowOpen = await this.isAddPanelOpen();
-        if (!isNowOpen) {
-          throw new Error('Add panel still not open, trying again.');
-        }
-      });
+      await this.clickOpenAddPanel();
     }
   }
 
