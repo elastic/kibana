@@ -117,7 +117,7 @@ apiTest.describe('links - create', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toMatch(/links.*array|array.*links/i);
+    expect(response.body.message).toMatch(/links[\s\S]*array|array[\s\S]*links/i);
   });
 
   apiTest('validation - returns 400 when a link has an invalid type', async ({ apiClient }) => {

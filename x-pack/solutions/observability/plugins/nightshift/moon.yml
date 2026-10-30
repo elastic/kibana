@@ -79,7 +79,6 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/shared-ux-router'
-  - '@kbn/shared-ux-utility'
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
@@ -92,6 +91,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod

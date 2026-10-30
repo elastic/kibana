@@ -52,7 +52,6 @@ export function validateNoVirtualVersionDowngrade({
         typeName: name,
         message: `SO type '${name}' virtual version was downgraded from '${fromVersion}' to '${toVersion}'.`,
         fixHint: `Existing model versions must never be removed. Restore the missing model version(s) so the virtual version is at least '${fromVersion}'.`,
-        docsAnchor: '#defining-model-versions',
       }))
     );
   }
