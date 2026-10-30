@@ -28,6 +28,7 @@ import {
   loadVaultConfig,
   readSuiteSecretFromDevVault,
   stripTrailingSlash,
+  redactUrlCredentials,
   probeHttp,
   isExportProfileImplicitLocal,
   resolveDefaultJudgeConnectorId,
@@ -334,13 +335,11 @@ export const resolveProfileEnvOverrides = async ({
   ) {
     const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
-    const tracingReachable = tracingEsUrl
-      ? await probeHttp(stripTrailingSlash(tracingEsUrl))
-      : true;
-
-    if (!tracingReachable) {
+    if (tracingEsUrl && !(await probeHttp(stripTrailingSlash(tracingEsUrl)))) {
       log.warning(
-        `Export profile "local" was auto-selected but TRACING_ES_URL is not reachable (${tracingEsUrl}). ` +
+        `Export profile "local" was auto-selected but TRACING_ES_URL is not reachable (${redactUrlCredentials(
+          tracingEsUrl
+        )}). ` +
           'Continuing without external trace queries. To require export, pass --export-profile local.'
       );
       delete profileEnvOverrides.TRACING_ES_URL;

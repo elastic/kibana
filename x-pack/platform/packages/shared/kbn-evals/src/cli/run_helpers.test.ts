@@ -474,7 +474,9 @@ describe('resolveProfileEnvOverrides', () => {
   });
 
   it('drops an unreachable TRACING_ES_URL that came from the auto-selected local profile', async () => {
-    jest.mocked(envFromExportProfile).mockReturnValue({ TRACING_ES_URL: 'http://127.0.0.1:1' });
+    jest
+      .mocked(envFromExportProfile)
+      .mockReturnValue({ TRACING_ES_URL: 'http://elastic:s3cret@127.0.0.1:1' });
     const warning = jest.spyOn(log, 'warning').mockImplementation(() => true);
     jest.mocked(defaultExportProfile).mockReturnValue('local');
 
@@ -486,6 +488,8 @@ describe('resolveProfileEnvOverrides', () => {
 
     expect(profileEnvOverrides).not.toHaveProperty('TRACING_ES_URL');
     expect(warning).toHaveBeenCalledTimes(1);
+    expect(String(warning.mock.calls[0][0])).toContain('127.0.0.1:1');
+    expect(String(warning.mock.calls[0][0])).not.toContain('s3cret');
     warning.mockRestore();
   });
 
