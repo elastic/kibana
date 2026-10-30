@@ -273,7 +273,6 @@ steps:
                   updates:
                     status: closed
                     close_reason: other
-                    verdict: "Analyst declined the tuning review."
                 on-failure:
                   continue: true
 
@@ -1375,9 +1374,6 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        # No raw change type: the default arm accepts values the arms do not
-        # name, and an unrecognised one would leave a gap in the sentence.
-        verdict: "Analyst approved the tuning proposal."
     on-failure:
       continue: true
 
@@ -1401,7 +1397,6 @@ steps:
       updates:
         status: closed
         close_reason: other
-        verdict: "The tuning proposal was dismissed."
     on-failure:
       continue: true
 
