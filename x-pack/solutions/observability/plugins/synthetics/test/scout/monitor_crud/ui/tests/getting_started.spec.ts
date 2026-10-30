@@ -13,6 +13,7 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
+    await syntheticsServices.enable();
     await syntheticsServices.deleteMonitors();
     const location = await syntheticsServices.ensurePrivateLocationExists();
     locationLabel = location.label;
@@ -31,10 +32,6 @@ test.describe('GettingStarted', { tag: tags.stateful.classic }, () => {
     await test.step('navigate to monitor management and login', async () => {
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.syntheticsApp.navigateToGettingStarted();
-    });
-
-    await test.step('enable monitor management', async () => {
-      await pageObjects.syntheticsApp.enableMonitorManagement(true);
     });
 
     await test.step('shows validation error on submit', async () => {
