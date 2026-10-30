@@ -46,14 +46,16 @@ export const getUpdateProposalStepDefinition = ({
         // `decidedBy` means nobody answered the gate, so the Worker running it
         // auto-approved; only then is the Worker the decider, and only then is
         // the decision recorded as automatic.
+        const { decidedBy: respondedBy } = input;
+        const answered = !!respondedBy;
         const decisionMode =
-          input.decision === undefined ? undefined : input.decidedBy ? 'manual' : 'auto';
+          input.decision === undefined ? undefined : answered ? 'manual' : 'auto';
         const decidedBy =
           input.decision === undefined
             ? undefined
-            : input.decidedBy
+            : answered
             ? (await resolveUser(request)) ?? {
-                username: input.decidedBy,
+                username: respondedBy,
                 fullName: null,
                 email: null,
               }

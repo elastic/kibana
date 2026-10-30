@@ -20,9 +20,9 @@ export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
 
 /**
  * How the decision was reached: `manual` when someone answered the gate, `auto`
- * when it was auto-approved and nobody was asked, so `auto` is always an
- * approval. Set with the decision and immutable with it. Absent while
- * undecided, and on proposals decided before it was recorded.
+ * when nobody did. The gate decides on its own only by auto-approving, so in
+ * practice `auto` comes with `approved`. Written with the decision. It does not
+ * change after that. Absent only while undecided.
  */
 export const proposalDecisionModeSchema = lazySchema(() => z.enum(['manual', 'auto']));
 export type ProposalDecisionMode = z.infer<typeof proposalDecisionModeSchema>;
