@@ -12,6 +12,7 @@ import type {
 } from '../hunt_coordinator';
 import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
+import { isRetryableIncompleteReason } from './completeness';
 import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
@@ -297,13 +298,37 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
       ? result.has_confirmed_hit
         ? '**Coverage: incomplete, retryable.** The confirmed hit stands, but part of the search did not run for a transient reason, so this run is not a statement about everything the report describes.'
         : '**Coverage: incomplete, retryable.** Part of the search did not run for a transient reason, so the report is not marked as hunted, stays eligible for a later sweep, and this run is not a statement that the environment is clean.'
-      : '**Coverage: incomplete.** Part of the search cannot run in this space, and repeating the run would not change that; the report is retired, but this run is not a statement that the environment is clean.',
+      : '**Coverage: incomplete.** Part of the search did not run, and repeating the run is not expected to change that; the report is retired, but this run is not a statement that the environment is clean.',
   ];
   for (const gap of gaps) {
     const key = `${gap.reason}:${gap.detail}`;
     if (seen.has(key)) continue;
     seen.add(key);
     lines.push(`- ${gap.reason.replace(/_/g, ' ')}: ${gap.detail}`);
+  }
+  // Name what a later run will pick up, so an analyst reading a recorded hit knows which part of
+  // the report is still unsearched. Only retryable gaps, and only the techniques the run carries
+  // forward: a final one, or one the run gave up on, is never searched.
+  const carriedForward =
+    result.pending_technique_ids === undefined ? undefined : new Set(result.pending_technique_ids);
+  const stillToSearch = [
+    ...new Set(
+      gaps
+        .filter(
+          ({ reason, technique_id: techniqueId }) =>
+            techniqueId &&
+            isRetryableIncompleteReason(reason) &&
+            (carriedForward === undefined || carriedForward.has(techniqueId))
+        )
+        .map(({ technique_id: techniqueId }) => techniqueId as string)
+    ),
+  ];
+  if (result.completeness === 'incomplete_retryable' && stillToSearch.length > 0) {
+    lines.push(
+      `**Still to be searched (${stillToSearch.length}):** ${codeList(
+        stillToSearch
+      )}. A later sweep continues with these while the report is still inside the sweep's publish-date window; techniques this run already searched are not repeated.`
+    );
   }
   return lines;
 };
