@@ -18,7 +18,7 @@ import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
 
-jest.mock('../../app/app_header', () => ({
+jest.mock('../../components/app_header', () => ({
   NightshiftAppHeader: () => <div data-test-subj="nightshiftAppHeaderStub" />,
 }));
 jest.mock('../../data/detection_overview/use_detection_overview');
@@ -34,6 +34,7 @@ jest.mock('./rules/rules_tab', () => ({
 jest.mock('./signals/signals_tab', () => ({
   SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
+jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {

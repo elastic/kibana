@@ -94,6 +94,10 @@ export async function hydrateOnboardingSession(
         // Absent on onboardings saved before these fields existed; the default is then prefilled.
         ...(item.integrationName ? { integrationName: item.integrationName } : {}),
         ...(item.description ? { description: item.description } : {}),
+        ...(item.namespace ? { namespace: item.namespace } : {}),
+        // Left out (not an empty list) on onboardings saved before the instances were stored:
+        // with `instances` absent, the duplicates are still recovered from the saved `serviceVars`.
+        ...(item.instances?.length ? { instances: item.instances } : {}),
         serviceVars: item.serviceVars ?? {},
       })
     );
@@ -167,6 +171,11 @@ export async function hydrateOnboardingSession(
             item.ecfStacks
               .filter((s) => s.serviceIds !== undefined)
               .map((s) => [s.family, s.serviceIds])
+          ),
+          launchedConfigs: Object.fromEntries(
+            item.ecfStacks
+              .filter((s) => s.serviceConfigs !== undefined)
+              .map((s) => [s.family, s.serviceConfigs])
           ),
         })
       );

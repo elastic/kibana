@@ -20,12 +20,16 @@ source .buildkite/scripts/common/util.sh
     kibana-deploy-project-from-pr | \
     kibana-chromium-linux-build | \
     kibana-console-definitions-sync | \
+    kibana-emergency-release | \
     kibana-es-ql-grammar-sync | \
     kibana-opentelemetry-semantic-conventions-sync | \
     kibana-purge-cloud-deployments | \
     kibana-renovate-helper | \
+    kibana-report-flaky-tests | \
     kibana-scout-update-metadata | \
-    kibana-serverless-release-readiness)
+    kibana-serverless-release-readiness | \
+    kibana-tests | \
+    kibana-tests-emergency)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
       ;;
     *)

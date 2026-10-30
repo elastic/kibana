@@ -11,8 +11,8 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   is,
-  apmTransactionDurationIndicatorSchemaZod,
-  apmTransactionErrorRateIndicatorSchemaZod,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -30,8 +30,8 @@ export function ApmIndicatorOverview({ slo }: Props) {
 
   const indicator = slo.indicator;
   if (
-    !is(apmTransactionDurationIndicatorSchemaZod, indicator) ||
-    !is(apmTransactionErrorRateIndicatorSchemaZod, indicator)
+    !is(apmTransactionDurationIndicatorSchema, indicator) ||
+    !is(apmTransactionErrorRateIndicatorSchema, indicator)
   ) {
     return null;
   }

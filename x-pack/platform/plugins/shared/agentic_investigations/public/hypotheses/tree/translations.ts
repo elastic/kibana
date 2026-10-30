@@ -108,6 +108,12 @@ export const VIEW_ALERT_LABEL = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.node.viewAlert',
   { defaultMessage: 'View alert' }
 );
+export const viewAlertsLabel = (count: number): string =>
+  i18n.translate('xpack.agenticInvestigations.hypothesisTree.node.viewAlerts', {
+    defaultMessage: 'View {count} alerts',
+    values: { count },
+  });
+
 export const OPEN_SLACK_THREAD_LABEL = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.node.openSlackThread',
   { defaultMessage: 'Open in Slack' }
