@@ -129,6 +129,22 @@ describe('flyoutV2 URL param', () => {
       expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
     });
 
+    it('returns null when a required field is missing', () => {
+      const raw = encode([{ kind: 'document', documentId: 'abc' }]);
+      expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
+    });
+
+    it('returns null when the chain has more than two descriptors', () => {
+      const descriptor = { kind: 'rule', ruleId: 'r1' };
+      const raw = encode([descriptor, descriptor, descriptor]);
+      expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
+    });
+
+    it('returns null when a string field exceeds the length bound', () => {
+      const raw = encode([{ kind: 'rule', ruleId: 'a'.repeat(1025) }]);
+      expect(decodeFlyoutV2UrlParam(raw)).toBeNull();
+    });
+
     it('never throws on any input', () => {
       const inputs = [null, undefined, '', 'garbage', '!@#$', '()', '!()'];
       for (const input of inputs) {
@@ -170,7 +186,6 @@ describe('flyoutV2 URL param', () => {
           documentId: 'd',
           indexName: 'i',
           scopeId: 's',
-          isRulePreview: false,
         },
       ],
       [
@@ -197,21 +212,11 @@ describe('flyoutV2 URL param', () => {
       ['attack', { kind: 'attack' as const, attackId: 'a1', indexName: '.alerts-*' }],
       [
         'attackCorrelations',
-        {
-          kind: 'attackCorrelations' as const,
-          attackId: 'a1',
-          indexName: '.alerts-*',
-          alertIds: ['id1', 'id2'],
-        },
+        { kind: 'attackCorrelations' as const, attackId: 'a1', indexName: '.alerts-*' },
       ],
       [
         'attackEntities',
-        {
-          kind: 'attackEntities' as const,
-          attackId: 'a1',
-          indexName: '.alerts-*',
-          alertIds: ['id1'],
-        },
+        { kind: 'attackEntities' as const, attackId: 'a1', indexName: '.alerts-*' },
       ],
       ['host', { kind: 'host' as const, hostName: 'my-host', entityId: 'eid', scopeId: 's' }],
       ['user', { kind: 'user' as const, userName: 'alice', entityId: 'eid' }],
@@ -236,6 +241,7 @@ describe('flyoutV2 URL param', () => {
           entityType: 'user',
           value: 'alice',
           entityId: 'eid',
+          scopeId: 's',
         },
       ],
       [
@@ -321,12 +327,26 @@ describe('flyoutV2 URL param', () => {
 
     it('round-trips [attack tool, attack child]', () => {
       const value: FlyoutV2UrlParamValue = [
-        { kind: 'attackCorrelations', attackId: 'a1', indexName: '.alerts-*', alertIds: ['x'] },
+        { kind: 'attackCorrelations', attackId: 'a1', indexName: '.alerts-*' },
         { kind: 'attack', attackId: 'a1', indexName: '.alerts-*' },
       ];
       const encoded = encodeFlyoutV2UrlParam(value);
       const decoded = decodeFlyoutV2UrlParam(encoded);
       expect(decoded).toEqual(value);
+    });
+
+    it('still decodes attack tool links that carry the legacy alertIds field, dropping it', () => {
+      const encoded = encodeFlyoutV2UrlParam([
+        {
+          kind: 'attackEntities',
+          attackId: 'a1',
+          indexName: '.alerts-*',
+          alertIds: ['x'],
+        } as FlyoutV2UrlParamValue[number],
+      ]);
+      expect(decodeFlyoutV2UrlParam(encoded)).toEqual([
+        { kind: 'attackEntities', attackId: 'a1', indexName: '.alerts-*' },
+      ]);
     });
 
     it('preserves array order (first entry is the tool, second is the child)', () => {

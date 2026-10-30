@@ -143,6 +143,7 @@ export class TaskRunner<
   private logger: Logger;
   private taskInstance: RuleTaskInstance;
   private ruleConsumer: string | null;
+  private apiKeyCreatedByUser: boolean;
   private ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
@@ -211,6 +212,7 @@ export class TaskRunner<
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
+    this.apiKeyCreatedByUser = false;
     this.ruleMonitoring = new RuleMonitoringService();
     this.ruleRunning = new RuleRunningHandler(
       this.internalSavedObjectsRepository,
@@ -786,6 +788,7 @@ export class TaskRunner<
       const ruleData = await withAlertingSpan('alerting:update-missing-uiam-api-key-tag', () =>
         updateRuleMissingUiamKeyTag(this.context, ruleId, spaceId, loadedRuleData)
       );
+      this.apiKeyCreatedByUser = ruleData.rawRule.apiKeyCreatedByUser ?? false;
 
       // Check that this task is current
       const scheduledTaskId = ruleData.rawRule.scheduledTaskId;
@@ -1062,6 +1065,7 @@ export class TaskRunner<
         ruleTypeId: this.ruleType.id,
         logger: this.logger,
         stackTraceLog: this.stackTraceLog,
+        apiKeyCreatedByUser: this.apiKeyCreatedByUser,
         originalState,
       }),
       schedule: getSchedule({

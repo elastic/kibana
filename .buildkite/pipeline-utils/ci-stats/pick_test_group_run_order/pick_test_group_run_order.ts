@@ -20,13 +20,14 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import { recordOnMergeShadow } from './on_merge_shadow.ts';
 import {
   queryMoonJestUnitSelection,
   queryMoonTestSelection,
 } from '../../affected-packages/moon_test_tasks.ts';
 import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
-import { getFtrRelevantModules, shouldSkipFtrTests } from './selective_ftr.ts';
+import { getFtrSkipModules } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
@@ -51,7 +52,10 @@ export async function pickTestGroupRunOrder() {
   const config = loadRunOrderConfig();
 
   const selectiveChangedFiles = config.useSelectiveTesting
-    ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
+    ? resolveSelectiveTestingChanges(
+        config.selectionBase,
+        config.isMergeQueue ? 'merge-queue' : 'pr'
+      )
     : null;
 
   if (selectiveChangedFiles !== null && isScoutPathOnlyDiff(selectiveChangedFiles)) {
@@ -92,13 +96,23 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
 
-  if (selectiveChangedFiles !== null) {
-    const directlyAffected = await getFtrRelevantModules(selectiveChangedFiles);
+  if (config.isOnMerge && config.onMergeSelectiveMode === 'shadow') {
+    await recordOnMergeShadow(bk, {
+      jestUnitConfigs,
+      jestIntegrationConfigs,
+      ftrConfigCount: [...ftrManifestEntriesByQueue.values()].reduce(
+        (count, entries) => count + entries.length,
+        0
+      ),
+    });
+  }
 
-    if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
+  if (selectiveChangedFiles !== null) {
+    const ftrSkipModules = await getFtrSkipModules(selectiveChangedFiles);
+    if (ftrSkipModules !== null) {
       console.log(
         `Skipping FTR configs — diff cannot affect FTR: ${
-          directlyAffected.size ? [...directlyAffected].join(', ') : '(irrelevant paths only)'
+          ftrSkipModules.length ? ftrSkipModules.join(', ') : '(irrelevant paths only)'
         }`
       );
       bk.setAnnotation(
@@ -279,7 +293,7 @@ function collectFunctionalGroups(
     for (const group of groups) {
       if (!group.names.length) continue;
 
-      const key = `ftr_configs_${configCounter++}`;
+      const key = `${STEP_KEYS.FTR_CONFIG_PREFIX}${configCounter++}`;
       const isSingle = group.names.length === 1;
       const sortBy = isSingle ? group.names[0] : ++groupCounter;
       const title = isSingle ? group.names[0] : `FTR Configs #${sortBy}`;
