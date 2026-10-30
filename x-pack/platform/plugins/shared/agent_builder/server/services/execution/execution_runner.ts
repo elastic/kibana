@@ -180,6 +180,7 @@ const handleConversationExecution = async ({
   const {
     agentId = agentBuilderDefaultAgentId,
     connectorId,
+    inferenceFeatureId,
     conversationId,
     structuredOutput,
     outputSchema,
@@ -269,9 +270,10 @@ const handleConversationExecution = async ({
       workflowExecutionId,
     });
 
-    const { modelProvider, selectedConnectorId } = await resolveServices({
+    const { modelProvider, defaultModel } = await resolveServices({
       agentId,
       connectorId,
+      inferenceFeatureId,
       telemetryMetadata: roundTelemetryMetadata,
       request,
       ...deps,
@@ -289,7 +291,7 @@ const handleConversationExecution = async ({
       outputSchema,
       abortSignal,
       conversation,
-      defaultConnectorId: selectedConnectorId,
+      defaultModel,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
       reasoningLevel,
@@ -652,6 +654,8 @@ const handleStandaloneExecution = async ({
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
   const {
+    connectorId,
+    inferenceFeatureId,
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
@@ -671,9 +675,10 @@ const handleStandaloneExecution = async ({
     workflowExecutionId,
   });
 
-  const { selectedConnectorId } = await resolveServices({
+  const { defaultModel } = await resolveServices({
     agentId,
-    connectorId: execution.agentParams.connectorId,
+    connectorId,
+    inferenceFeatureId,
     telemetryMetadata: roundTelemetryMetadata,
     request,
     ...deps,
@@ -688,7 +693,7 @@ const handleStandaloneExecution = async ({
     outputSchema,
     abortSignal,
     conversation: undefined,
-    defaultConnectorId: selectedConnectorId,
+    defaultModel,
     telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
     reasoningLevel,

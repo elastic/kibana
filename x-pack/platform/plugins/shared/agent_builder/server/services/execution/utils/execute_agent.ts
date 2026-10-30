@@ -17,7 +17,11 @@ import type {
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
+import type {
+  ExecutionConversationAccess,
+  ModelSource,
+  RunAgentFn,
+} from '@kbn/agent-builder-server';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type {
   ChatCompletionReasoningEffort,
@@ -36,7 +40,7 @@ export const executeAgent$ = ({
   origin,
   author,
   abortSignal,
-  defaultConnectorId,
+  defaultModel,
   telemetryMetadata,
   maxContentLength,
   reasoningLevel,
@@ -61,7 +65,7 @@ export const executeAgent$ = ({
   origin?: ExecutionConversationOrigin;
   author?: ConversationRoundAuthor;
   abortSignal?: AbortSignal;
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
   reasoningLevel?: ChatCompletionReasoningEffort;
@@ -81,7 +85,7 @@ export const executeAgent$ = ({
       agentId,
       executionId,
       abortSignal,
-      defaultConnectorId,
+      defaultModel,
       telemetryMetadata,
       maxContentLength,
       reasoningLevel,

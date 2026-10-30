@@ -248,7 +248,8 @@ export interface AgentHandlerContext {
    */
   deployment: DeploymentContext;
   /**
-   * The resolved connector ID for this execution, if any.
+   * The connector this execution was explicitly asked to run on, if any. Undefined when the model
+   * comes from an inference feature or from the Agent Builder default.
    */
   defaultConnectorId?: string;
   /**

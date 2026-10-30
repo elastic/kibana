@@ -70,6 +70,13 @@ export type ModelProviderFactoryFn = (
 ) => ModelProvider;
 
 /**
+ * Maps the connector-only `defaultConnectorId` contract still exposed to tool runs and the plugin
+ * API onto a model source; `undefined` keeps the provider on its own default.
+ */
+export const connectorModelSource = (connectorId?: string): ModelSource | undefined =>
+  connectorId ? { connectorId } : undefined;
+
+/**
  * What a scoped model is built from: a model source, plus whether the provider-level reasoning
  * applies to it. Reasoning is only ever applied to connector-sourced models: a feature owns its
  * own reasoning settings, which the inference plugin applies.

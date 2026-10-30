@@ -6,45 +6,43 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  securityServiceMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import {
   AgentBuilderErrorCode,
   createAgentNotFoundError,
   createAgentUnavailableError,
 } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
-import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import {
   createAgentsServiceStartMock,
   createMockedAgentRegistry,
   createMockedInternalAgent,
 } from '../../../test_utils/agents';
+import { createModelProvider } from '../runner/model_provider';
 import { resolveServices } from './resolve_services';
 
-const AGENT_FEATURE_ID = 'my_solution_agent';
+jest.mock('../runner/model_provider', () => ({
+  createModelProvider: jest.fn(),
+}));
 
-const createConnector = (connectorId: string): InferenceConnector => ({
-  type: InferenceConnectorType.Inference,
-  name: connectorId,
-  connectorId,
-  config: {},
-  capabilities: {},
-  isInferenceEndpoint: true,
-  isPreconfigured: true,
-});
+const createModelProviderMock = jest.mocked(createModelProvider);
+
+const AGENT_FEATURE_ID = 'my_solution_agent';
 
 const createDeps = ({
   connectorId,
   inferenceFeatureId,
-  featureEndpoints = [],
-  agentFeatureEndpoints = [],
+  agentInferenceFeatureId,
 }: {
   connectorId?: string;
   inferenceFeatureId?: string;
-  featureEndpoints?: string[];
-  agentFeatureEndpoints?: string[];
+  agentInferenceFeatureId?: string;
 } = {}) => {
   const agentRegistry = createMockedAgentRegistry();
   agentRegistry.get.mockResolvedValue(
@@ -52,7 +50,9 @@ const createDeps = ({
       id: 'private-agent',
       configuration: {
         tools: [],
-        ...(inferenceFeatureId !== undefined ? { inference_feature_id: inferenceFeatureId } : {}),
+        ...(agentInferenceFeatureId !== undefined
+          ? { inference_feature_id: agentInferenceFeatureId }
+          : {}),
       },
     })
   );
@@ -61,13 +61,7 @@ const createDeps = ({
   const getForFeature: jest.MockedFn<
     SearchInferenceEndpointsPluginStart['endpoints']['getForFeature']
   > = jest.fn();
-  getForFeature.mockImplementation(async (featureId) => ({
-    endpoints: (featureId === AGENT_FEATURE_ID ? agentFeatureEndpoints : featureEndpoints).map(
-      createConnector
-    ),
-    warnings: [],
-    soEntryFound: false,
-  }));
+  getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
   const searchInferenceEndpoints: SearchInferenceEndpointsPluginStart = {
     features: {
       register: jest.fn(),
@@ -83,19 +77,26 @@ const createDeps = ({
     deps: {
       agentId: 'private-agent',
       connectorId,
+      inferenceFeatureId,
       telemetryMetadata: undefined,
       request: httpServerMock.createKibanaRequest(),
       logger: loggingSystemMock.createLogger(),
       inference: inferenceMock.createStartContract(),
       agentService,
       searchInferenceEndpoints,
-      security: {} as any,
-      elasticsearch: {} as any,
+      security: securityServiceMock.createStart(),
+      elasticsearch: elasticsearchServiceMock.createStart(),
     },
   };
 };
 
 describe('resolveServices', () => {
+  const modelProvider = { getDefaultModel: jest.fn() } as unknown as ModelProvider;
+
+  beforeEach(() => {
+    createModelProviderMock.mockReturnValue(modelProvider);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -134,70 +135,68 @@ describe('resolveServices', () => {
     }
   );
 
-  it('uses the explicit connectorId without resolving the feature endpoints', async () => {
+  it('returns a connector source for an explicit connectorId without reading the agent feature', async () => {
     const { agentRegistry, deps, getForFeature } = createDeps({
       connectorId: 'connector-1',
-      inferenceFeatureId: AGENT_FEATURE_ID,
-      agentFeatureEndpoints: ['agent-endpoint-1'],
+      inferenceFeatureId: 'override_feature',
+      agentInferenceFeatureId: AGENT_FEATURE_ID,
     });
 
-    const { selectedConnectorId } = await resolveServices(deps);
+    const resolved = await resolveServices(deps);
 
-    expect(selectedConnectorId).toBe('connector-1');
+    expect(resolved).toEqual({ modelProvider, defaultModel: { connectorId: 'connector-1' } });
+    expect(createModelProviderMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: deps.request,
+        defaultModel: { connectorId: 'connector-1' },
+      })
+    );
     expect(getForFeature).not.toHaveBeenCalled();
     expect(agentRegistry.get).toHaveBeenCalledTimes(1);
     expect(agentRegistry.get).toHaveBeenCalledWith('private-agent');
   });
 
-  it('uses the first endpoint resolved for the Agent Builder feature', async () => {
+  it("returns the override feature ahead of the agent's inference_feature_id", async () => {
     const { deps, getForFeature } = createDeps({
-      featureEndpoints: ['endpoint-1', 'endpoint-2'],
+      inferenceFeatureId: 'override_feature',
+      agentInferenceFeatureId: AGENT_FEATURE_ID,
     });
 
-    const { selectedConnectorId } = await resolveServices(deps);
+    const resolved = await resolveServices(deps);
 
-    expect(selectedConnectorId).toBe('endpoint-1');
-    expect(getForFeature).toHaveBeenCalledWith(AGENT_BUILDER_INFERENCE_FEATURE_ID, deps.request);
+    expect(resolved).toEqual({ modelProvider, defaultModel: { featureId: 'override_feature' } });
+    expect(createModelProviderMock).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultModel: { featureId: 'override_feature' } })
+    );
+    expect(getForFeature).not.toHaveBeenCalled();
   });
 
-  it("uses the first endpoint configured for the agent's inference feature", async () => {
+  it("returns the agent's inference_feature_id as a feature source", async () => {
     const { agentRegistry, deps, getForFeature } = createDeps({
-      inferenceFeatureId: AGENT_FEATURE_ID,
-      agentFeatureEndpoints: ['agent-endpoint-1', 'agent-endpoint-2'],
-      featureEndpoints: ['endpoint-1'],
+      agentInferenceFeatureId: AGENT_FEATURE_ID,
     });
 
-    const { selectedConnectorId } = await resolveServices(deps);
+    const resolved = await resolveServices(deps);
 
-    expect(selectedConnectorId).toBe('agent-endpoint-1');
+    expect(resolved).toEqual({ modelProvider, defaultModel: { featureId: AGENT_FEATURE_ID } });
+    expect(createModelProviderMock).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultModel: { featureId: AGENT_FEATURE_ID } })
+    );
     expect(agentRegistry.get).toHaveBeenCalledTimes(1);
     expect(agentRegistry.get).toHaveBeenCalledWith('private-agent');
-    expect(agentRegistry.has).not.toHaveBeenCalled();
-    expect(getForFeature).toHaveBeenCalledTimes(1);
-    expect(getForFeature).toHaveBeenCalledWith(AGENT_FEATURE_ID, deps.request, {
-      onlyReturnConfigured: true,
-    });
+    expect(getForFeature).not.toHaveBeenCalled();
   });
 
-  it("falls back to the Agent Builder feature when the agent's feature has no model", async () => {
-    const { deps } = createDeps({
-      inferenceFeatureId: AGENT_FEATURE_ID,
-      featureEndpoints: ['endpoint-1'],
-    });
+  it('returns no source when neither a connector nor a feature applies and does not call getForFeature', async () => {
+    const { deps, getForFeature } = createDeps();
 
-    const { selectedConnectorId } = await resolveServices(deps);
+    const resolved = await resolveServices(deps);
 
-    expect(selectedConnectorId).toBe('endpoint-1');
-    expect(deps.logger.warn).toHaveBeenCalledWith(
-      `No model available for inference feature "${AGENT_FEATURE_ID}" declared by agent "private-agent", falling back to the default model`
+    expect(resolved).toEqual({ modelProvider, defaultModel: undefined });
+    expect(createModelProviderMock).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultModel: undefined })
     );
-  });
-
-  it('throws when no connector is available', async () => {
-    const { deps } = createDeps();
-
-    await expect(resolveServices(deps)).rejects.toThrow(
-      'No connector available for chat execution'
-    );
+    expect(getForFeature).not.toHaveBeenCalled();
+    expect(deps.logger.warn).not.toHaveBeenCalled();
   });
 });

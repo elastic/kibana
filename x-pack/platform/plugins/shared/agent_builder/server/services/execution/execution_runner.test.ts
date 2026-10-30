@@ -209,7 +209,7 @@ const stubResolveServices = (
 ): void => {
   resolveServicesMock.mockResolvedValue({
     conversationClient,
-    selectedConnectorId: 'connector-1',
+    defaultModel: { connectorId: 'connector-1' },
     modelProvider: createModelProviderMock(),
   } as never);
 };
@@ -325,6 +325,78 @@ describe('handleAgentExecution', () => {
     );
   });
 
+  it('passes the resolved defaultModel to the agent run', async () => {
+    const conversationClient = createConversationClientMock();
+    resolveServicesMock.mockResolvedValue({
+      defaultModel: { featureId: 'my_feature' },
+      modelProvider: createModelProviderMock(),
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          connectorId: 'connector-1',
+          inferenceFeatureId: 'my_feature',
+        },
+      } as never,
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: 'test-agent',
+        connectorId: 'connector-1',
+        inferenceFeatureId: 'my_feature',
+      })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
+    );
+    expect(executeAgentMock.mock.calls[0][0]).not.toHaveProperty('defaultConnectorId');
+  });
+
+  it('passes the resolved defaultModel to a conversation run', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      agent_id: 'test-agent',
+      user: { id: 'owner-id', username: 'owner' },
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.replaceRoundEvents.mockResolvedValue(conversation);
+    resolveServicesMock.mockResolvedValue({
+      defaultModel: { featureId: 'my_feature' },
+      modelProvider: createModelProviderMock(),
+    } as never);
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    const events$ = await runHandle({
+      agentParams: { inferenceFeatureId: 'my_feature' },
+      conversationClient,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ inferenceFeatureId: 'my_feature' })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultModel: { featureId: 'my_feature' } })
+    );
+  });
+
   it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
     const conversation = createEmptyConversation({
       id: 'conversation-1',
@@ -429,7 +501,7 @@ describe('handleAgentExecution', () => {
     executeAgentMock.mockReturnValue(of(roundCompleteEvent));
     resolveServicesMock.mockResolvedValue({
       conversationClient,
-      selectedConnectorId: 'connector-1',
+      defaultModel: { connectorId: 'connector-1' },
       modelProvider: createModelProviderMock(),
     } as never);
 
@@ -723,7 +795,7 @@ describe('handleAgentExecution', () => {
       executeAgentMock.mockReturnValue(of(roundCompleteEvent));
       resolveServicesMock.mockResolvedValue({
         conversationClient,
-        selectedConnectorId: 'connector-1',
+        defaultModel: { connectorId: 'connector-1' },
         modelProvider: createModelProviderMock(),
       } as never);
 
@@ -840,7 +912,7 @@ describe('handleAgentExecution', () => {
       );
       resolveServicesMock.mockResolvedValue({
         ...(exposeConversationClient ? { conversationClient } : {}),
-        selectedConnectorId: 'connector-1',
+        defaultModel: { connectorId: 'connector-1' },
         modelProvider: createModelProviderMock(),
       } as never);
 
@@ -927,7 +999,7 @@ describe('handleAgentExecution', () => {
       );
       resolveServicesMock.mockResolvedValue({
         conversationClient,
-        selectedConnectorId: 'connector-1',
+        defaultModel: { connectorId: 'connector-1' },
         modelProvider: createModelProviderMock(),
       } as never);
 

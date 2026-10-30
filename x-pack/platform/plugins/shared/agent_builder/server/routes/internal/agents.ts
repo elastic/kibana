@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { agentIdMaxLength } from '@kbn/agent-builder-common/agents';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
+import { isInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -22,7 +23,12 @@ import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 import { isContextEngineEnabled } from '../agents';
 import { buildEffectiveAgentAiIndices } from '../../services/agents/build_effective_agent_ai_indices';
 import type { AgentsServiceStart } from '../../services/agents/types';
-import { resolveExecutionConnectorId } from '../../services/execution/utils';
+import { resolveAgentBuilderDefaultEndpoint } from '../../services/execution/utils';
+
+const toAgentModelConnector = (
+  connector: InferenceConnector | undefined
+): Pick<GetAgentModelResponse, 'connector'> =>
+  connector ? { connector: { id: connector.connectorId, name: connector.name } } : {};
 
 interface InheritedAiIndicesResolveResult {
   inherited: string[];
@@ -181,24 +187,38 @@ export function registerInternalAgentRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (_ctx, request, response) => {
-      const [, { searchInferenceEndpoints }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
       const agent = await registry.get(request.params.id);
       const inferenceFeatureId = agent.configuration.inference_feature_id;
 
-      const { connector, source } = await resolveExecutionConnectorId({
-        inferenceFeatureId,
+      if (inferenceFeatureId !== undefined) {
+        // A run hands the feature to the inference plugin as is, so this mirrors its resolution:
+        // a feature with no endpoint has no model to report, and the run does not fall back.
+        const connector = await inference
+          .resolveFeatureConnector(inferenceFeatureId, request)
+          .catch((error) => {
+            if (isInferenceRequestError(error)) {
+              return undefined;
+            }
+            throw error;
+          });
+        return response.ok<GetAgentModelResponse>({
+          body: {
+            inference_feature_id: inferenceFeatureId,
+            ...toAgentModelConnector(connector),
+            source: 'agent_feature',
+          },
+        });
+      }
+
+      const connector = await resolveAgentBuilderDefaultEndpoint({
         request,
         searchInferenceEndpoints,
       });
-
       return response.ok<GetAgentModelResponse>({
-        body: {
-          ...(inferenceFeatureId !== undefined ? { inference_feature_id: inferenceFeatureId } : {}),
-          ...(connector ? { connector: { id: connector.connectorId, name: connector.name } } : {}),
-          source: source === 'agent_feature' ? 'agent_feature' : 'default',
-        },
+        body: { ...toAgentModelConnector(connector), source: 'default' },
       });
     })
   );
