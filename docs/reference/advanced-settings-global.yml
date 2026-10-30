@@ -33,6 +33,23 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: "contextEngine:memoryEnabled"
+        id: context-engine-memory-enabled
+        description: |
+          When on, turns on [memory](docs-content://explore-analyze/ai-features/context-engine/concepts.md#memory) for [Context Engine](docs-content://explore-analyze/ai-features/context-engine.md) AI indices.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
   - group: Universal Alerting
     id: kibana-alerting-v2-global-settings
     settings:
@@ -55,6 +72,27 @@ groups:
         note: |
           :applies_to: security: ga
           This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.
+
+  - group: "{{esql}} Data Federation"
+    id: kibana-data-federation-global-settings
+    settings:
+
+      - setting: "dataFederation:enabled"
+        id: data-federation-enabled
+        description: |
+          When on, {{product.kibana}} shows the [{{esql}} Data Federation](elasticsearch://reference/query-languages/esql/esql-data-federation.md) management UI. Turning this setting off hides the UI but doesn't affect existing data sources or datasets. You can still manage them through the API and reference datasets in {{esql}} queries. Refresh the page to apply the change.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+        note: |
+          :applies_to: {stack: preview 9.6+}
+          {{esql}} Data Federation requires an Enterprise [subscription](https://www.elastic.co/subscriptions).
 
   - group: Custom branding
     id: kibana-custom-branding-settings

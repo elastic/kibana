@@ -727,6 +727,88 @@ groups:
           :applies_to: {stack: preview 9.6+, serverless: preview}
           The `ai:anonymizationSettings` setting is no longer listed in Advanced Settings. Configure it on the **Anonymization** management page. The setting itself still exists and can be set through the Advanced Settings API or `uiSettings.overrides` in `kibana.yml`.
 
+      - setting: "agentBuilder:apiDiscovery"
+        id: agent-builder-api-discovery
+        description: |
+          When on, [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md) can browse the full {{product.elasticsearch}} and {{product.kibana}} API surface to find operations. For details, refer to [API discovery](docs-content://explore-analyze/ai-features/agent-builder/tools/builtin-tools-reference.md#api-discovery).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
+      - setting: "agentBuilder:bashSupport"
+        id: agent-builder-bash-support
+        description: |
+          When on, [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md) can use an experimental bash tool. Use this setting only for controlled experimentation.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
+      - setting: "agentBuilder:experimentalFeatures"
+        id: agent-builder-experimental-features
+        description: |
+          When on, turns on experimental features for [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview =9.4, experimental 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
+      - setting: "agentBuilder:includeFrozenByDefault"
+        id: agent-builder-include-frozen-by-default
+        description: |
+          When on, the [built-in Elastic Agent Builder tools](docs-content://explore-analyze/ai-features/agent-builder/tools/builtin-tools-reference.md) include data from the [frozen tier](docs-content://manage-data/lifecycle/data-tiers.md#frozen-tier) by default.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.4+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
+      - setting: "contextEngine:enabled"
+        id: context-engine-enabled
+        description: |
+          When on, turns on [Context Engine](docs-content://explore-analyze/ai-features/context-engine.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: experimental 9.5+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            elasticsearch: ga
+            observability: ga
+            vectordb: ga
+
   - group: Presentation Labs
     id: presentation-labs
     settings:
