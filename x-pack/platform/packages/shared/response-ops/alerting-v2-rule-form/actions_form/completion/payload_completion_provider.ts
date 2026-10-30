@@ -8,19 +8,9 @@
 import { monaco } from '@kbn/code-editor';
 import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { PayloadVariable } from '../registry';
-import { DISPATCH_PAYLOAD_VARIABLES, PAYLOAD_ALERT_FIELDS } from '../registry';
+import { getContextVariables } from '../registry';
 
-// All dispatcher payload variables are nested under `context.inputs.payload` at render time.
-const TOP_LEVEL_PREFIX = 'inputs.payload.';
-
-// The single wrapper key exposed directly under `inputs`.
-const PAYLOAD_WRAPPER: readonly PayloadVariable[] = [
-  {
-    path: 'payload',
-    detail: 'object',
-    documentation: 'Dispatcher payload for the action group.',
-  },
-];
+const INPUTS = 'inputs';
 
 const buildItem = (
   variable: PayloadVariable,
@@ -42,18 +32,13 @@ const getParentPath = (pathSegments: string[] | null, lastPathSegment: string | 
   return lastPathSegment === null ? pathSegments : pathSegments.slice(0, -1);
 };
 
-const isAlertContext = (parent: string[]): boolean =>
-  parent.length >= 4 &&
-  parent[0] === 'inputs' &&
-  parent[1] === 'payload' &&
-  parent[2] === 'alerts' &&
-  /^\d+$/.test(parent[3]);
-
-const isPayloadContext = (parent: string[]): boolean =>
-  parent.length === 2 && parent[0] === 'inputs' && parent[1] === 'payload';
-
-const isInputsContext = (parent: string[]): boolean =>
-  parent.length === 1 && parent[0] === 'inputs';
+// With no path typed yet, suggest every input field under its full `inputs.<input>.` prefix.
+const getTopLevelItems = (range: monaco.IRange): monaco.languages.CompletionItem[] =>
+  getContextVariables([INPUTS]).flatMap(({ path: input }) =>
+    getContextVariables([INPUTS, input]).map((variable) =>
+      buildItem(variable, range, `${INPUTS}.${input}.`)
+    )
+  );
 
 export const createPayloadCompletionProvider = (): monaco.languages.CompletionItemProvider => ({
   triggerCharacters: ['{', '.'],
@@ -81,20 +66,11 @@ export const createPayloadCompletionProvider = (): monaco.languages.CompletionIt
       endColumn: position.column,
     };
 
-    let candidates: readonly PayloadVariable[];
-    let prefix = '';
-    if (isAlertContext(parent)) {
-      candidates = PAYLOAD_ALERT_FIELDS;
-    } else if (isPayloadContext(parent)) {
-      candidates = DISPATCH_PAYLOAD_VARIABLES;
-    } else if (isInputsContext(parent)) {
-      candidates = PAYLOAD_WRAPPER;
-    } else if (parent.length === 0) {
-      candidates = DISPATCH_PAYLOAD_VARIABLES;
-      prefix = TOP_LEVEL_PREFIX;
-    } else {
-      return { suggestions: [] };
+    if (parent.length === 0) {
+      return { suggestions: getTopLevelItems(range) };
     }
-    return { suggestions: candidates.map((variable) => buildItem(variable, range, prefix)) };
+    return {
+      suggestions: getContextVariables(parent).map((variable) => buildItem(variable, range)),
+    };
   },
 });

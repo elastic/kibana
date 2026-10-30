@@ -12,6 +12,7 @@ import { CodeEditor, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useRef } from 'react';
 import { createPayloadCompletionProvider } from '../completion/payload_completion_provider';
+import { getVariableInsertText } from '../helpers/get_variable_insert_text';
 import { getPayloadTemplateVariables } from '../registry';
 
 const PAYLOAD_COMPLETION_PROVIDER = createPayloadCompletionProvider();
@@ -36,23 +37,50 @@ interface ParamsEditorProps {
 
 export const ParamsEditor = ({ value, onChange, height = 200, errors = [] }: ParamsEditorProps) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  // Monaco reports a 1:1 selection before the editor is first focused, which is not a real cursor.
+  const hasFocusedRef = useRef(false);
 
   const onEditorMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
+    hasFocusedRef.current = false;
+    editor.onDidFocusEditorText(() => {
+      hasFocusedRef.current = true;
+    });
   }, []);
 
   const onSelectVariable = useCallback(
     ({ name }: ActionVariable) => {
-      const templatedVariable = `{{ ${name} }}`;
       const editor = editorRef.current;
-      const selection = editor?.getSelection();
-      if (!editor || !selection) {
-        onChange(`${value}${templatedVariable}`);
+      const model = editor?.getModel();
+      if (!editor || !model) {
+        onChange(`${value}${getVariableInsertText(name, value, '')}`);
         return;
       }
-      editor.executeEdits(EDITOR_EDIT_SOURCE, [
-        { range: selection, text: templatedVariable, forceMoveMarkers: true },
-      ]);
+
+      const end = model.getFullModelRange().getEndPosition();
+      const range: monaco.IRange = (hasFocusedRef.current && editor.getSelection()) || {
+        startLineNumber: end.lineNumber,
+        startColumn: end.column,
+        endLineNumber: end.lineNumber,
+        endColumn: end.column,
+      };
+      const source = model.getValue();
+      const startOffset = model.getOffsetAt({
+        lineNumber: range.startLineNumber,
+        column: range.startColumn,
+      });
+      const endOffset = model.getOffsetAt({
+        lineNumber: range.endLineNumber,
+        column: range.endColumn,
+      });
+      const text = getVariableInsertText(
+        name,
+        source.slice(0, startOffset),
+        source.slice(endOffset)
+      );
+
+      editor.executeEdits(EDITOR_EDIT_SOURCE, [{ range, text, forceMoveMarkers: true }]);
+      editor.setPosition(model.getPositionAt(startOffset + text.length));
       editor.focus();
     },
     [onChange, value]

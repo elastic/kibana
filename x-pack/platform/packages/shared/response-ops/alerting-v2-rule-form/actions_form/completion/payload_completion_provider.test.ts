@@ -52,4 +52,22 @@ describe('createPayloadCompletionProvider', () => {
   it('does not suggest alert fields under the removed inputs.payload.episodes path', () => {
     expect(getSuggestionLabels('message: "{{ inputs.payload.episodes[0].')).toEqual([]);
   });
+
+  it('suggests the trigger inputs under inputs', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.')).toEqual(['payload']);
+  });
+
+  it('suggests payload fields with their full path before any path is typed', () => {
+    expect(getSuggestionLabels('message: "{{ ')).toEqual([
+      'inputs.payload.id',
+      'inputs.payload.policyId',
+      'inputs.payload.groupKey',
+      'inputs.payload.alerts',
+      'inputs.payload.rules',
+    ]);
+  });
+
+  it('does not suggest alert fields below an alert field', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.payload.alerts[0].data.')).toEqual([]);
+  });
 });

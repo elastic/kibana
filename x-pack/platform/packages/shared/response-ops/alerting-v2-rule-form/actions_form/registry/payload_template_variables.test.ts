@@ -32,6 +32,12 @@ describe('getPayloadTemplateVariables', () => {
     expect(variable?.description).toContain('{% for alert in inputs.payload.alerts %}');
   });
 
+  it('marks alert fields the schema does not require as optional', () => {
+    const variable = getPayloadTemplateVariables().find(({ name }) => name === 'alert.severity');
+
+    expect(variable?.description).toContain('Severity of the alert (optional)');
+  });
+
   it('lists rule metadata fields keyed by the alert rule id', () => {
     const names = getPayloadTemplateVariables().map(({ name }) => name);
 

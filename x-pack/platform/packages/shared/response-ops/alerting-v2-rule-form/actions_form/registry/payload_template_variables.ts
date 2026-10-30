@@ -7,16 +7,18 @@
 
 import type { ActionVariable } from '@kbn/alerting-types';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
-  builtinWorkflowInputDefinitions,
-  type JsonSchema,
-} from '@kbn/workflows';
+import { getContextVariables } from './payload_variables';
 
-const PAYLOAD_PATH = 'inputs.payload';
+const INPUTS = 'inputs';
+const PAYLOAD_PATH = `${INPUTS}.payload`;
 // Matches the loop variable used by the default inline action templates.
 const ALERT_LOOP_VARIABLE = 'alert';
 const ALERTS_LOOP = `{% for ${ALERT_LOOP_VARIABLE} in ${PAYLOAD_PATH}.alerts %}`;
+const ALERT_RULE_ID = `${ALERT_LOOP_VARIABLE}.rule_id`;
+
+// Any array index resolves to the alert item schema, and any map key to the rule value schema.
+const ALERT_ITEM_PATH = [INPUTS, 'payload', 'alerts', '0'];
+const RULE_VALUE_PATH = [INPUTS, 'payload', 'rules', ALERT_RULE_ID];
 
 const withinAlertsLoop = (description: string): string =>
   i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.params.alertsLoopVariable', {
@@ -24,50 +26,36 @@ const withinAlertsLoop = (description: string): string =>
     values: { description, loop: ALERTS_LOOP },
   });
 
-const toVariables = (
-  properties: Record<string, JsonSchema> | undefined,
+const toActionVariables = (
+  path: readonly string[],
   buildName: (key: string) => string,
   buildDescription: (description: string) => string = (description) => description
 ): ActionVariable[] =>
-  Object.entries(properties ?? {}).map(([key, { description = '' }]) => ({
+  getContextVariables(path).map(({ path: key, documentation = '' }) => ({
     name: buildName(key),
-    description: buildDescription(description),
+    description: buildDescription(documentation),
   }));
-
-const getArrayItemSchema = (schema: JsonSchema | undefined): JsonSchema | undefined =>
-  Array.isArray(schema?.items) ? schema?.items[0] : schema?.items;
-
-const getMapValueSchema = (schema: JsonSchema | undefined): JsonSchema | undefined => {
-  const additionalProperties = schema?.additionalProperties;
-  return typeof additionalProperties === 'object' ? additionalProperties : undefined;
-};
 
 /**
  * Returns the Liquid template variables available to inline action policy workflows,
- * derived from the `alertingV2NotificationGroup` dispatch payload schema.
+ * derived from the workflow's trigger inputs schema.
  */
 export const getPayloadTemplateVariables = (): ActionVariable[] => {
-  const schema =
-    builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
-  if (!schema) {
-    return [];
-  }
+  const inputVariables = getContextVariables([INPUTS]).flatMap(({ path: input }) =>
+    toActionVariables([INPUTS, input], (key) => `${INPUTS}.${input}.${key}`)
+  );
 
-  const { properties } = schema;
-
-  const payloadVariables = toVariables(properties, (key) => `${PAYLOAD_PATH}.${key}`);
-
-  const alertVariables = toVariables(
-    getArrayItemSchema(properties?.alerts)?.properties,
+  const alertVariables = toActionVariables(
+    ALERT_ITEM_PATH,
     (key) => `${ALERT_LOOP_VARIABLE}.${key}`,
     withinAlertsLoop
   );
 
-  const ruleVariables = toVariables(
-    getMapValueSchema(properties?.rules)?.properties,
-    (key) => `${PAYLOAD_PATH}.rules[${ALERT_LOOP_VARIABLE}.rule_id].${key}`,
+  const ruleVariables = toActionVariables(
+    RULE_VALUE_PATH,
+    (key) => `${PAYLOAD_PATH}.rules[${ALERT_RULE_ID}].${key}`,
     withinAlertsLoop
   );
 
-  return [...payloadVariables, ...alertVariables, ...ruleVariables];
+  return [...inputVariables, ...alertVariables, ...ruleVariables];
 };

@@ -5,92 +5,95 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import {
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+  builtinWorkflowInputDefinitions,
+  type JsonSchema,
+} from '@kbn/workflows';
+import { INLINE_WORKFLOW_INPUTS } from '../constants';
 import type { PayloadVariable } from './types';
 
-// Mirrors `ActionPolicyWorkflowPayload` from server/lib/dispatcher/types.ts.
-// These are the children of `context.inputs.payload` at workflow render time — the dispatcher
-// schedules the workflow with `{ payload }`, so templates use `{{ inputs.payload.policyId }}`, etc.
-// Keep in sync when the dispatcher payload changes.
-export const DISPATCH_PAYLOAD_VARIABLES: readonly PayloadVariable[] = [
-  {
-    path: 'id',
-    detail: 'string',
-    documentation: 'Action group id (unique per dispatch).',
-  },
-  {
-    path: 'policyId',
-    detail: 'string',
-    documentation: 'Action policy id that produced this dispatch.',
-  },
-  {
-    path: 'groupKey',
-    detail: 'Record<string, unknown>',
-    documentation: 'Map of grouping field values for the dispatched group.',
-  },
-  {
-    path: 'alerts',
-    detail: 'ActionPolicyWorkflowPayloadAlert[]',
-    documentation: 'Alerts included in this dispatch.',
-  },
-  {
-    path: 'rules',
-    detail: 'Record<string, { name: string }>',
-    documentation:
-      'Rule metadata keyed by rule id. Covers all rules present in `alerts`. Access via `rules[alert.rule_id].name`.',
-  },
-];
+// Template context of an inline action policy workflow; only its trigger inputs are exposed.
+const WORKFLOW_CONTEXT_SCHEMA: JsonSchema = {
+  type: 'object',
+  properties: { inputs: INLINE_WORKFLOW_INPUTS },
+  required: ['inputs'],
+};
 
-// Mirrors `ActionPolicyWorkflowPayloadAlert` from server/lib/dispatcher/types.ts — keep in sync.
-export const PAYLOAD_ALERT_FIELDS: readonly PayloadVariable[] = [
-  {
-    path: 'last_event_timestamp',
-    detail: 'string',
-    documentation: 'Timestamp of the most recent event in this alert.',
-  },
-  {
-    path: 'rule_id',
-    detail: 'string',
-    documentation: 'ID of the rule that produced this alert.',
-  },
-  {
-    path: 'source',
-    detail: 'string',
-    documentation: 'Origin of the alert events for this alert (e.g. `internal`).',
-  },
-  {
-    path: 'space_id',
-    detail: 'string',
-    documentation: 'ID of the space the alert belongs to.',
-  },
-  {
-    path: 'group_hash',
-    detail: 'string',
-    documentation: 'Hash identifying the alert group.',
-  },
-  {
-    path: 'alert_id',
-    detail: 'string',
-    documentation: 'Unique identifier for this alert.',
-  },
-  {
-    path: 'alert_url',
-    detail: 'string',
-    documentation: 'Absolute URL of the alert details page in Kibana.',
-  },
-  {
-    path: 'alert_status',
-    detail: "'inactive' | 'pending' | 'active' | 'recovering'",
-    documentation: 'Current lifecycle status of the alert.',
-  },
-  {
-    path: 'severity',
-    detail: "'info' | 'low' | 'medium' | 'high' | 'critical'",
-    documentation: 'Severity of the alert. Optional — may be absent if not set by the rule.',
-  },
-  {
-    path: 'data',
-    detail: 'Record<string, unknown>',
-    documentation:
-      'Additional alert/event data attached to the alert. Arbitrary Record<string, unknown> — field autocomplete is not available inside `data`.',
-  },
-];
+const ARRAY_INDEX = /^\d+$/;
+
+const resolveInputDefinitionRef = (schema: JsonSchema | undefined): JsonSchema | undefined => {
+  const ref = schema?.$ref;
+  if (!ref?.startsWith(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX)) {
+    return schema;
+  }
+  return builtinWorkflowInputDefinitions[
+    ref.slice(KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX.length)
+  ];
+};
+
+const getArrayItemSchema = (schema: JsonSchema): JsonSchema | undefined =>
+  Array.isArray(schema.items) ? schema.items[0] : schema.items;
+
+const getMapValueSchema = (schema: JsonSchema): JsonSchema | undefined =>
+  typeof schema.additionalProperties === 'object' ? schema.additionalProperties : undefined;
+
+// Array indexes resolve to the item schema; unknown keys resolve to the map value schema.
+const getChildSchema = (
+  schema: JsonSchema | undefined,
+  segment: string
+): JsonSchema | undefined => {
+  if (!schema) {
+    return undefined;
+  }
+  if (ARRAY_INDEX.test(segment) && schema.items) {
+    return resolveInputDefinitionRef(getArrayItemSchema(schema));
+  }
+  const { properties } = schema;
+  const property =
+    properties && Object.hasOwn(properties, segment) ? properties[segment] : undefined;
+  return resolveInputDefinitionRef(property ?? getMapValueSchema(schema));
+};
+
+const describeType = (schema: JsonSchema): string => {
+  if (schema.enum) {
+    return schema.enum
+      .map((value) => (typeof value === 'string' ? `'${value}'` : String(value)))
+      .join(' | ');
+  }
+  const types = Array.isArray(schema.type) ? schema.type : [schema.type ?? 'unknown'];
+  return types
+    .map((type) => {
+      const itemSchema =
+        type === 'array' ? resolveInputDefinitionRef(getArrayItemSchema(schema)) : undefined;
+      return itemSchema ? `${describeType(itemSchema)}[]` : type;
+    })
+    .join(' | ');
+};
+
+const describeField = (description: string, isOptional: boolean): string =>
+  isOptional
+    ? i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.params.optionalVariable', {
+        defaultMessage: '{description} (optional)',
+        values: { description },
+      })
+    : description;
+
+/**
+ * Returns the variables nested under `path` in the inline action policy workflow context
+ * (e.g. `['inputs', 'payload']`), derived from the workflow's trigger inputs schema.
+ */
+export const getContextVariables = (path: readonly string[]): PayloadVariable[] => {
+  const schema = path.reduce<JsonSchema | undefined>(getChildSchema, WORKFLOW_CONTEXT_SCHEMA);
+  const required = new Set(schema?.required);
+
+  return Object.entries(schema?.properties ?? {}).map(([key, property]) => {
+    const resolved = resolveInputDefinitionRef(property) ?? property;
+    return {
+      path: key,
+      detail: describeType(resolved),
+      documentation: describeField(resolved.description ?? '', !required.has(key)),
+    };
+  });
+};
