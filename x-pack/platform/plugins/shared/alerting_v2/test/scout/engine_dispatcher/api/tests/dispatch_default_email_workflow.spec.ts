@@ -28,14 +28,15 @@ const ACTION_POLICY_ID = 'dispatch-default-email-policy';
 const ACTION_POLICY_TRIGGER = 'action_policy';
 const RULE_NAME = 'Scout default email rule';
 const HOSTS = ['host-default-email-a', 'host-default-email-b'];
-// The `date` filter formats in the Kibana server's time zone, which the spec cannot know,
-// so event times are masked and only their format is checked.
-const EVENT_TIME = /Last event \d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/g;
-
 interface DispatchedAlert {
   alert_id: string;
   alert_url: string;
+  last_event_timestamp: string;
 }
+
+// The time an alert's block should show: its last event timestamp formatted in UTC, no matter what time zone the Kibana server runs in.
+const toUtcEventTime = ({ last_event_timestamp: timestamp }: DispatchedAlert): string =>
+  new Date(timestamp).toISOString().slice(0, 16).replace('T', ' ');
 
 // Running the workflow needs the dispatcher to mint a UIAM API key, which requires
 // `xpack.task_manager.grant_uiam_api_keys=true`. MKI sets it, so this runs on cloud
@@ -150,16 +151,16 @@ apiTest.describe(
         const [first, second] = alerts;
 
         // The first two lines of each alert end with `\`, a Markdown line break.
-        expect(message.replace(EVENT_TIME, 'Last event <time> UTC')).toBe(
+        expect(message).toBe(
           [
             '**2 alerts**',
             '',
             `**${RULE_NAME}** — Active\\`,
-            `Last event <time> UTC · [View in app](${first.alert_url})\\`,
+            `Last event ${toUtcEventTime(first)} UTC · [View in app](${first.alert_url})\\`,
             `Alert id: ${first.alert_id}`,
             '',
             `**${RULE_NAME}** — Active\\`,
-            `Last event <time> UTC · [View in app](${second.alert_url})\\`,
+            `Last event ${toUtcEventTime(second)} UTC · [View in app](${second.alert_url})\\`,
             `Alert id: ${second.alert_id}`,
             '',
           ].join('\n')

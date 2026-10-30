@@ -17,7 +17,7 @@ message: |
   {% endif -%}
   {%- for alert in inputs.payload.alerts -%}
   **{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}** — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}\\
-  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC" }} · [View in app]({{ alert.alert_url }})\\
+  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC", 0 }} · [View in app]({{ alert.alert_url }})\\
   Alert id: {{ alert.alert_id }}
   {% unless forloop.last %}
   {% endunless -%}
@@ -34,7 +34,7 @@ text: |
   {% endif -%}
   {%- for alert in inputs.payload.alerts -%}
   *{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}* — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}
-  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC" }} · <{{ alert.alert_url }}|View in app>
+  Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC", 0 }} · <{{ alert.alert_url }}|View in app>
   Alert id: {{ alert.alert_id }}
   {% unless forloop.last %}
   {% endunless -%}

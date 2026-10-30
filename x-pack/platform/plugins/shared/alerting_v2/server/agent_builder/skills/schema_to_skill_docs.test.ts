@@ -889,9 +889,7 @@ describe('schema_to_skill_docs', () => {
 
       // Same options as the templating engine of the workflows execution engine.
       const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
-      // The `date` filter formats in the server's local time zone, so the timestamp is built
-      // from local time to render the same on every machine.
-      const lastEventTimestamp = new Date(2026, 9, 30, 13, 42).toISOString();
+      const lastEventTimestamp = '2026-10-30T13:42:00.000Z';
       const alertUrl = (alertId: string): string =>
         `https://kibana.example.com/app/observability/alerting/alerts/${alertId}`;
       const payload = {
