@@ -28,6 +28,15 @@ declare module 'monaco-editor/platform/undoRedo/common/undoRedo.js' {
   export const IUndoRedoService: symbol;
 }
 
+declare module 'monaco-editor/editor/common/languages/supports/tokenization.js' {
+  export interface TokenThemeInstance {
+    /** Resolves a token's style metadata. `encodedLanguageId` only sets the metadata's language bits. */
+    match(encodedLanguageId: number, token: string): number;
+  }
+
+  export const TokenTheme: { prototype: TokenThemeInstance };
+}
+
 declare module 'monaco-editor/platform/actions/common/actions.js' {
   export interface MenuItem {
     command?: {
