@@ -586,7 +586,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *   path: 'path/{id}',
    *   validate: {
    *     params: schema.object({
-   *       id: schema.string({ maxLength: 512 }),
+   *       id: schema.savedObjectId(),
    *     }),
    *     query: schema.object({}),
    *     body: schema.object({}),

@@ -159,7 +159,7 @@ export interface HttpSelfService {
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const validate = {
  *   params: schema.object({
- *     id: schema.string({ maxLength: 512 }),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  * ```
@@ -188,7 +188,7 @@ export interface HttpSelfService {
  *
  * const validate = {
  *   params: schema.object({
- *     id: schema.string({ maxLength: 512 }),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  *
@@ -281,7 +281,7 @@ export interface HttpServicePreboot<
  * import { schema, TypeOf } from '@kbn/config-schema';
  * const validate = {
  *   params: schema.object({
- *     id: schema.string({ maxLength: 512 }),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  * ```
@@ -312,7 +312,7 @@ export interface HttpServicePreboot<
  *
  * const validate = {
  *   params: schema.object({
- *     id: schema.string({ maxLength: 512 }),
+ *     id: schema.savedObjectId(),
  *   }),
  * };
  *

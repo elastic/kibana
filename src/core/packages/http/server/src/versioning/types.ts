@@ -148,11 +148,11 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *           params: schema.object({
  *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
  *           }),
- *           body: schema.object({ foo: schema.string({ maxLength: 2000 }) }),
+ *           body: schema.object({ foo: schema.description() }),
  *         },
  *         response: {
  *           200: {
- *             body: () => schema.object({ foo: schema.string({ maxLength: 2000 }) }),
+ *             body: () => schema.object({ foo: schema.description() }),
  *           },
  *         },
  *       },
@@ -173,11 +173,11 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *           params: schema.object({
  *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
  *           }),
- *           body: schema.object({ fooString: schema.string({ maxLength: 2000 }) }),
+ *           body: schema.object({ fooString: schema.description() }),
  *         },
  *         response: {
  *           200: {
- *             body: () => schema.object({ fooName: schema.string({ maxLength: 2000 }) }),
+ *             body: () => schema.object({ fooName: schema.description() }),
  *           },
  *         },
  *       },
@@ -186,7 +186,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *       return res.ok({ body: { fooName: req.body.fooString } });
  *     }
  *   )
- *   // BREAKING CHANGE: fooString maxLength drops from 2000 to 1000
+ *   // BREAKING CHANGE: fooString maxLength drops from the description() default to 1000
  *   .addVersion(
  *     {
  *       version: '3',
@@ -198,11 +198,11 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *           params: schema.object({
  *             id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
  *           }),
- *           body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+ *           body: schema.object({ fooString: schema.description({ maxLength: 1000 }) }),
  *         },
  *         response: {
  *           200: {
- *             body: () => schema.object({ fooName: schema.string({ maxLength: 1000 }) }),
+ *             body: () => schema.object({ fooName: schema.description({ maxLength: 1000 }) }),
  *           },
  *         },
  *       },

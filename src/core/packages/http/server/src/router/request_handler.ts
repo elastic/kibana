@@ -33,7 +33,7 @@ import type { KibanaResponseFactory } from './response_factory';
  *     // defines a validation schema for a named segment of the route path
  *     validate: {
  *       params: schema.object({
- *         id: schema.string({ maxLength: 512 }),
+ *         id: schema.savedObjectId(),
  *       }),
  *     },
  *     security: { authz: { requiredPrivileges: ['my-app'] } },
