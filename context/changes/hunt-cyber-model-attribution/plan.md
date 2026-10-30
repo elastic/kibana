@@ -255,13 +255,13 @@ issues until Steph confirms.
 
 #### Automated
 
-- [x] 1.1 Hunt lib jest passes
-- [x] 1.2 Hunt common jest unchanged and passing
-- [x] 1.3 New assertions fail when either change is reverted
+- [x] 1.1 Hunt lib jest passes — 740019541abc
+- [x] 1.2 Hunt common jest unchanged and passing — 740019541abc
+- [x] 1.3 New assertions fail when either change is reverted — 740019541abc
 
 #### Manual
 
-- [x] 1.4 Diff touches only the four named files
+- [x] 1.4 Diff touches only the four named files — 740019541abc
 
 ### Phase 2: Gates and PR
 
