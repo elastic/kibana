@@ -95,36 +95,36 @@ const mergeInto = (
  * replaces a value.
  */
 export const mergeRows = (results: PlanResult[], columns: OutputColumn[]): MergeResult => {
-  const ordered = [...results].sort((a, b) => a.plan.index - b.plan.index);
+  const orderedPlans = [...results].sort((a, b) => a.plan.index - b.plan.index);
   const entities = new Map<string, EntityState>();
   const provenance: Provenance = {};
   let droppedRows = 0;
 
-  ordered.forEach(({ plan, rows }) => {
+  orderedPlans.forEach(({ plan, rows }) => {
     rows.forEach((row) => {
-      const id = row[ENTITY_ID_COLUMN];
-      if (typeof id !== 'string') {
+      const entityId = row[ENTITY_ID_COLUMN];
+      if (typeof entityId !== 'string') {
         droppedRows += 1;
         return;
       }
-      const state: EntityState = entities.get(id) ?? {
+      const state: EntityState = entities.get(entityId) ?? {
         row: {},
         lastSeen: null,
         attributeSeen: new Map(),
       };
 
-      if (!entities.has(id)) {
-        entities.set(id, state);
-        provenance[id] = {};
+      if (!entities.has(entityId)) {
+        entities.set(entityId, state);
+        provenance[entityId] = {};
       }
 
-      mergeInto(state, row, columns, provenance[id], plan.indexPattern);
+      mergeInto(state, row, columns, provenance[entityId], plan.indexPattern);
     });
   });
 
   return {
     rows: [...entities.values()].map(({ row }) => row),
-    columns: typeColumns(ordered, columns),
+    columns: typeColumns(orderedPlans, columns),
     provenance,
     droppedRows,
   };
