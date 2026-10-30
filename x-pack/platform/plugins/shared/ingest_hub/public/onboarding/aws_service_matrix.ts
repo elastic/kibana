@@ -810,6 +810,16 @@ export function applyDeploymentMethodView(
 // ── Main builder ─────────────────────────────────────────────────────────────
 
 /**
+ * Fleet treats a var_group option with a cloud `provider` as the Cloud Connector option, so an
+ * option with `provider: 'aws'` is the manifest's signal of Identity Federation support.
+ */
+export function hasIdentityFederationVarGroup(varGroups: PackageInfo['var_groups']): boolean {
+  return (varGroups ?? []).some((group) =>
+    (group.options ?? []).some((option) => option.provider === 'aws')
+  );
+}
+
+/**
  * Merge the static routing table with data from any Fleet package manifest.
  * Derives signalTypes, dataStreams, inputs, requiredConfig, optionalConfig, varDefsByInput,
  * varDefsByDataStream, defaultEnabled, and identityFederationSupported from the manifest.
@@ -952,11 +962,11 @@ export function buildAwsServiceMatrix(
           // pt.inputs[] is empty for input packages, so the normal inputTitles loop below
           // never fires. Store pt.title here so getInputDisplayLabel can return it.
           if ((pt as any).title) inputTitles[ptInputType] = (pt as any).title as string;
-          // Input packages (e.g. otelcol) have no pt.inputs[] so the IDF derivation below
-          // cannot run and leaves identityFederationSupported as undefined. The gate is
-          // !== false, so undefined would incorrectly show IDF. Default to false until the
-          // package manifest explicitly signals support.
-          identityFederationSupported = false;
+          // Input packages have no pt.inputs[], so the per-input IDF derivation below cannot run;
+          // their manifest signals support through a var_group option with a cloud provider.
+          identityFederationSupported = hasIdentityFederationVarGroup(
+            (pt as any).var_groups ?? packageInfo.var_groups
+          );
         }
 
         // Derive union requiredConfig / optionalConfig.

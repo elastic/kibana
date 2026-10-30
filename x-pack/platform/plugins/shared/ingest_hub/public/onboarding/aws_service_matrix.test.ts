@@ -345,8 +345,65 @@ describe('AWS service matrix', () => {
       expect(ec2Otel.inputTitles?.otelcol).toBe('AWS EC2 OpenTelemetry Metrics');
     });
 
-    it('defaults identityFederationSupported to false (input packages have no pt.inputs[])', () => {
+    it('sets identityFederationSupported to false without a cloud-provider var_group option', () => {
       expect(ec2Otel.identityFederationSupported).toBe(false);
+    });
+
+    describe('with an Identity Federation var_group option (aws_cloudwatch_input_otel >= 0.8.0)', () => {
+      const IDF_VAR_GROUPS = [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn', 'supports_identity_federation'],
+              hide_in_deployment_modes: ['default'],
+              provider: 'aws',
+              iac_template_url:
+                'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate',
+            },
+            { name: 'direct_access_key', title: 'Direct Access Keys', vars: ['access_key_id'] },
+          ],
+        },
+      ];
+
+      it('derives true from package-level var_groups', () => {
+        const [entry] = buildAwsServiceMatrix(
+          { aws_cloudwatch_input_otel: { ...INPUT_PKG, var_groups: IDF_VAR_GROUPS } as any },
+          EC2_OTEL_STATIC
+        );
+        expect(entry.identityFederationSupported).toBe(true);
+      });
+
+      it('derives true from policy-template-level var_groups', () => {
+        const pkg = {
+          ...INPUT_PKG,
+          policy_templates: [{ ...INPUT_PKG.policy_templates[0], var_groups: IDF_VAR_GROUPS }],
+        };
+        const [entry] = buildAwsServiceMatrix(
+          { aws_cloudwatch_input_otel: pkg as any },
+          EC2_OTEL_STATIC
+        );
+        expect(entry.identityFederationSupported).toBe(true);
+      });
+
+      it('stays false when no option carries a cloud provider', () => {
+        const keysOnly = [
+          {
+            ...IDF_VAR_GROUPS[0],
+            options: IDF_VAR_GROUPS[0].options.filter((o) => o.name !== 'identity_federation'),
+          },
+        ];
+        const [entry] = buildAwsServiceMatrix(
+          { aws_cloudwatch_input_otel: { ...INPUT_PKG, var_groups: keysOnly } as any },
+          EC2_OTEL_STATIC
+        );
+        expect(entry.identityFederationSupported).toBe(false);
+      });
     });
 
     it('injects data_stream.dataset with default = PT name into varDefsByDataStream', () => {
