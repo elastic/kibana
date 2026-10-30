@@ -46,6 +46,7 @@ export {
   PRODUCER_TRACE,
   DEEP_TRACE,
   OTEL_SERVICE,
+  LATENCY_TRACE,
 } from './constants';
 export type { DiscoverPageObjects } from '../../../common/ui/fixtures';
 export { setupTracesExperience, teardownTracesExperience } from './setup';
@@ -58,3 +59,4 @@ export {
   otelTrace,
 } from './synthtrace/complete_traces_experience';
 export { indexUnprocessedOtelTrace } from './synthtrace/otel_unprocessed';
+export { latencyMapTraces } from './synthtrace/latency_map_traces';
