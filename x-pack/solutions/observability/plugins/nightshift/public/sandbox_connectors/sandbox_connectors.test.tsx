@@ -72,14 +72,21 @@ const setup = ({
   });
   const agents = {
     get: jest.fn(async () => agent()),
-    addConnectorToAgent: jest.fn(async ({ connectorId }: { connectorId: string }) => {
-      assigned = [...assigned, connectorId];
-      return agent();
-    }),
-    removeConnectorFromAgent: jest.fn(async ({ connectorId }: { connectorId: string }) => {
-      assigned = assigned.filter((id) => id !== connectorId);
-      return agent();
-    }),
+    // Only the investigator's assignments are rendered; the assistant mirrors them.
+    addConnectorToAgent: jest.fn(
+      async ({ agentId, connectorId }: { agentId: string; connectorId: string }) => {
+        if (agentId === 'nightshift.investigation') assigned = [...assigned, connectorId];
+        return agent();
+      }
+    ),
+    removeConnectorFromAgent: jest.fn(
+      async ({ agentId, connectorId }: { agentId: string; connectorId: string }) => {
+        if (agentId === 'nightshift.investigation') {
+          assigned = assigned.filter((id) => id !== connectorId);
+        }
+        return agent();
+      }
+    ),
   };
   if (agentError) agents.get.mockRejectedValueOnce(agentError);
   const http = { delete: jest.fn().mockResolvedValue({}) };
@@ -231,7 +238,12 @@ describe('SandboxConnectorsTable', () => {
 
     await expectRemoved(agents, 'github');
     await waitFor(() => expect(http.delete).toHaveBeenCalledWith('/api/actions/connector/github'));
-    expect(agents.removeConnectorFromAgent.mock.invocationCallOrder[0]).toBeLessThan(
+    // Both agents drop it before the connector is deleted.
+    expect(agents.removeConnectorFromAgent).toHaveBeenCalledWith({
+      agentId: 'nightshift.assistant',
+      connectorId: 'github',
+    });
+    expect(agents.removeConnectorFromAgent.mock.invocationCallOrder[1]).toBeLessThan(
       http.delete.mock.invocationCallOrder[0]
     );
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));

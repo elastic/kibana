@@ -295,17 +295,7 @@ export class NightshiftInvestigationsPlugin
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
       if (plugins.sandbox?.isAvailable) {
-        registerAssistantAgentType(plugins.agentBuilder, {
-          ...nightshiftAgentOptions,
-          // Users assign connectors to the investigator in Agent Builder; the hidden assistant
-          // inherits them. The sandbox still checks each one against the caller's actions client.
-          getInvestigatorConnectorIds: async ({ request }) => {
-            if (!this.agentBuilder) return [];
-            const registry = await this.agentBuilder.agents.getRegistry({ request });
-            const { configuration } = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-            return configuration.connector_ids ?? [];
-          },
-        });
+        registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
         this.assistantEnabled = true;
       }
 

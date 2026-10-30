@@ -54,14 +54,21 @@ const setup = ({
   });
   const agents = {
     get: jest.fn(async () => agent()),
-    addConnectorToAgent: jest.fn(async ({ connectorId }: { connectorId: string }) => {
-      assigned = [...assigned, connectorId];
-      return agent();
-    }),
-    removeConnectorFromAgent: jest.fn(async ({ connectorId }: { connectorId: string }) => {
-      assigned = assigned.filter((id) => id !== connectorId);
-      return agent();
-    }),
+    // Only the investigator's assignments are rendered; the assistant mirrors them.
+    addConnectorToAgent: jest.fn(
+      async ({ agentId, connectorId }: { agentId: string; connectorId: string }) => {
+        if (agentId === 'nightshift.investigation') assigned = [...assigned, connectorId];
+        return agent();
+      }
+    ),
+    removeConnectorFromAgent: jest.fn(
+      async ({ agentId, connectorId }: { agentId: string; connectorId: string }) => {
+        if (agentId === 'nightshift.investigation') {
+          assigned = assigned.filter((id) => id !== connectorId);
+        }
+        return agent();
+      }
+    ),
   };
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
   const services = {
@@ -106,6 +113,7 @@ const setup = ({
 };
 
 const agentCall = (connectorId: string) => ({ agentId: 'nightshift.investigation', connectorId });
+const assistantCall = (connectorId: string) => ({ agentId: 'nightshift.assistant', connectorId });
 
 describe('InvestigationAgentAddConnectorMenu', () => {
   it('opens the connector library from the menu and assigns a connector with its switch', async () => {
@@ -133,6 +141,9 @@ describe('InvestigationAgentAddConnectorMenu', () => {
       expect(agents.addConnectorToAgent).toHaveBeenCalledWith(agentCall('datadog'))
     );
     await waitFor(() =>
+      expect(agents.addConnectorToAgent).toHaveBeenCalledWith(assistantCall('datadog'))
+    );
+    await waitFor(() =>
       expect(screen.getByRole('switch', { name: 'Connector datadog' })).toBeChecked()
     );
   });
@@ -146,6 +157,9 @@ describe('InvestigationAgentAddConnectorMenu', () => {
 
     await waitFor(() =>
       expect(agents.removeConnectorFromAgent).toHaveBeenCalledWith(agentCall('github'))
+    );
+    await waitFor(() =>
+      expect(agents.removeConnectorFromAgent).toHaveBeenCalledWith(assistantCall('github'))
     );
   });
 

@@ -11,8 +11,7 @@ import type {
   AgentConfigContext,
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
-import { createAgentNotFoundError } from '@kbn/agent-builder-common';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -117,54 +116,6 @@ describe('Nightshift assistant agent type', () => {
 
     expect(assistant.connector_ids).toEqual(['legacy', 'c0', 'orca']);
     expect(assistant.connector_ids).toEqual(investigator.connector_ids);
-  });
-
-  it("inherits the connectors assigned to the investigator in the request's space", async () => {
-    const getInvestigatorConnectorIds = jest.fn(async () => ['github', 'telemetry']);
-
-    const { connector_ids: connectorIds } = await configurationFor(
-      getAssistantAgentType({ ...options, getInvestigatorConnectorIds }),
-      'team-space'
-    );
-
-    expect(connectorIds).toEqual(['telemetry', 'github']);
-    expect(getInvestigatorConnectorIds).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'team-space' })
-    );
-  });
-
-  it('keeps its own connectors when the investigator is not installed', async () => {
-    const logger = loggingSystemMock.createLogger();
-
-    const { connector_ids: connectorIds } = await configurationFor(
-      getAssistantAgentType({
-        ...options,
-        logger,
-        getInvestigatorConnectorIds: async () => {
-          throw createAgentNotFoundError({ agentId: 'nightshift.investigation' });
-        },
-      })
-    );
-
-    expect(connectorIds).toEqual(['telemetry']);
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('keeps its own connectors and warns when the investigator cannot be read', async () => {
-    const logger = loggingSystemMock.createLogger();
-
-    const { connector_ids: connectorIds } = await configurationFor(
-      getAssistantAgentType({
-        ...options,
-        logger,
-        getInvestigatorConnectorIds: async () => {
-          throw new Error('boom');
-        },
-      })
-    );
-
-    expect(connectorIds).toEqual(['telemetry']);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
   it('points to the workspace files instead of embedding their guidance', () => {

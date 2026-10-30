@@ -14,6 +14,10 @@ import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
 import { ConnectorLibraryFlyout } from './connector_library_flyout';
 import { ConnectorTypePickerFlyout } from './connector_type_picker_flyout';
+import {
+  addConnectorToNightshiftAgents,
+  removeConnectorFromNightshiftAgents,
+} from './nightshift_agent_connectors';
 
 export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
 
@@ -75,8 +79,9 @@ export function useAgentConnectors(): {
   const update = useMutation<unknown, Error, { connector: ConnectorRef; add: boolean }>({
     mutationFn: ({ connector, add }) => {
       if (!agents) throw new Error('Agent Builder is unavailable');
-      const params = { agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID, connectorId: connector.id };
-      return add ? agents.addConnectorToAgent(params) : agents.removeConnectorFromAgent(params);
+      return add
+        ? addConnectorToNightshiftAgents(agents, connector.id)
+        : removeConnectorFromNightshiftAgents(agents, connector.id);
     },
     onSuccess: (_result, { connector, add }) => {
       notifications.toasts.addSuccess({
