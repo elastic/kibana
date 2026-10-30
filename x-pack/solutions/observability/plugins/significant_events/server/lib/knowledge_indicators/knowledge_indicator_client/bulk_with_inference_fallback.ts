@@ -178,3 +178,23 @@ export async function bulkCreateWithInferenceFallback(
   logger.debug('Bulk write fallback without embedding succeeded');
   return fallback;
 }
+
+/**
+ * Runs {@link bulkCreateWithInferenceFallback} over an attempt that also reports what it
+ * applied, and returns the counts of the attempt that settled the write. Lets a caller
+ * that holds the source write lease take it inside `attempt`, so the lease is released
+ * between attempts rather than held across the inference backoff.
+ */
+export async function bulkCountsWithInferenceFallback<T>(
+  logger: Logger,
+  attempt: (opts: { includeEmbedding: boolean }) => Promise<{ counts: T; response: BulkResponse }>,
+  initialCounts: T
+): Promise<T> {
+  let counts = initialCounts;
+  await bulkCreateWithInferenceFallback(logger, async (opts) => {
+    const result = await attempt(opts);
+    counts = result.counts;
+    return result.response;
+  });
+  return counts;
+}

@@ -34,15 +34,11 @@ jest.mock('../../significant_events/latest_source_query', () => {
 
 jest.mock('../../significant_events/run_esql_query');
 
-jest.mock('./bulk_with_inference_fallback', () => {
-  const actual = jest.requireActual('./bulk_with_inference_fallback');
-  return {
-    ...actual,
-    bulkCreateWithInferenceFallback: jest.fn(async (_logger, attempt) =>
-      attempt({ includeEmbedding: true })
-    ),
-  };
-});
+// Resolve backoff sleeps instantly so the inference retry path runs without waiting.
+jest.mock('timers/promises', () => ({
+  ...jest.requireActual('timers/promises'),
+  setTimeout: jest.fn().mockResolvedValue(undefined),
+}));
 
 import { executeAndDecodeSource, queryEsql } from '../../significant_events/latest_source_query';
 import { runEsqlQuery } from '../../significant_events/run_esql_query';
@@ -335,6 +331,47 @@ describe('KnowledgeIndicatorClient.bulk', () => {
       expect(spy).toHaveBeenCalledWith(SOURCE, expect.any(Function), {
         allowDisabled: false,
       });
+    });
+  });
+
+  describe('source write lease', () => {
+    it('releases the lease between inference retries instead of holding it across the backoff', async () => {
+      const leaseEvents: string[] = [];
+      const withSourceWrite: NonNullable<KnowledgeIndicatorClientDeps['withSourceWrite']> = async (
+        _sourceId,
+        run
+      ) => {
+        leaseEvents.push('acquire');
+        try {
+          return await run();
+        } finally {
+          leaseEvents.push('release');
+        }
+      };
+      const { client, create } = makeClient({ withSourceWrite });
+      create.mockResolvedValueOnce({
+        errors: true,
+        items: [{ create: { status: 429, error: { type: 'inference_failure', reason: 'busy' } } }],
+      });
+
+      const result = await client.bulk(SOURCE, [
+        {
+          index: {
+            feature: {
+              id: 'feat-1',
+              type: 'entity',
+              description: 'desc',
+              properties: {},
+              confidence: 80,
+            },
+          },
+        },
+      ]);
+
+      expect(result).toEqual({ applied: 1, skipped: 0 });
+      expect(create).toHaveBeenCalledTimes(2);
+      // Every acquire is closed before the next one, so the backoff waited unleased.
+      expect(leaseEvents).toEqual(['acquire', 'release', 'acquire', 'release']);
     });
   });
 
