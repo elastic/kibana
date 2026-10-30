@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -157,7 +158,7 @@ apiTest.describe(
     apiTest(
       'aggregates the Other bucket over the remaining documents like the DSL terms query',
       async ({ esClient }) => {
-        const index = 'lens-esql-other-bucket-aggregation';
+        const index = `lens-esql-other-bucket-${randomUUID()}`;
         const hostField = 'host.keyword';
         const bytesField = 'bytes';
         const size = 3;
