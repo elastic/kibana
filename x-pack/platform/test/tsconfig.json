@@ -163,6 +163,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-common",
     "@kbn/alerting-v2-schemas",
-    "@kbn/core-chrome-browser-components"
+    "@kbn/core-chrome-browser-components",
+    "@kbn/content-list-common"
   ]
 }
