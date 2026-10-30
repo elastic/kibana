@@ -271,7 +271,7 @@ steps:
       conversation_id: "{{ inputs.investigationConversationId }}"
       updates:
         status: closed
-        close_reason: benign
+        close_reason: "{% if inputs.huntStatus == 'retired_incomplete' %}other{% else %}benign{% endif %}"
         summary: "{{ steps.decide_and_package.output.closureSummary }}"
     on-failure:
       continue: true
@@ -284,7 +284,7 @@ steps:
     with:
       event: worker_investigation_closed
       investigation_id: "{{ inputs.investigationConversationId }}"
-      close_reason: benign
+      close_reason: "{{ steps.dismiss_investigation_if_clean.output.metadata.close_reason }}"
 
   # The one place the dismiss outcome is read: status, reason and summary below key off this
   # flag so the three cannot drift apart. False when the step was skipped (no error entry).
@@ -328,7 +328,7 @@ steps:
         {%- elsif steps.decide_and_package.error.message != nil and steps.decide_and_package.error.message != empty -%}
         {{ steps.decide_and_package.error.message }}
         {%- elsif variables.dismiss_close_failed == true -%}
-        could not close the Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
+        could not close the Investigation{% if inputs.huntStatus != 'retired_incomplete' %} as benign{% endif %} ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. It will not be swept again on its own; a manual run targeting this reportId retries the close
         {%- elsif variables.dispatch_failed_count > 0 -%}
         {{ variables.dispatch_failed_count }} of {{ steps.decide_and_package.output.proposals | size }} gate dispatch(es) failed to launch
         {%- endif -%}
@@ -357,13 +357,13 @@ steps:
         {% if variables.package_status != 'success' and packaged.status != 'packaged' -%}
         Packaging did not complete: {{ variables.package_reason }}. No proposals were created and the Investigation stays open{% if inputs.huntStatus == 'partial' and inputs.hasConfirmedHit != true %}; a later sweep hunts this report again{% else %} for a retry{% endif %}.
         {% elsif packaged.dismiss == true and variables.dismiss_close_failed == true -%}
-        No confirmed hits, but packaging could not close this Investigation as benign ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
+        No confirmed hits, but packaging could not close this Investigation{% if inputs.huntStatus != 'retired_incomplete' %} as benign{% endif %} ({{ steps.dismiss_investigation_if_clean.error.message }}), so it is still open. A manual run targeting this reportId retries the close.
         {% elsif packaged.dismissHold == 'open_proposal' -%}
-        No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it as benign. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        No confirmed hits this run, but the Investigation still has a Proposal from an earlier run that is pending or executing, so packaging left it open rather than closing it. Decide the existing Proposal first{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismissHold == 'check_failed' -%}
         No confirmed hits this run, but packaging could not verify whether the Investigation has an open Proposal, so it left the Investigation open rather than risk closing it over one{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.dismiss == true -%}
-        No confirmed hits, so packaging closed this Investigation as benign{% if inputs.huntStatus == 'retired_incomplete' %}, but part of the report could not be searched and the report is retired without a full search{% if inputs.coverageGaps != nil and inputs.coverageGaps != empty %}; the Investigation summary names what was not searched{% endif %}{% endif %}{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}{% if inputs.huntStatus == 'retired_incomplete' %}; recorded{% else %} and recorded{% endif %} {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
+        No confirmed hits, so packaging closed this Investigation as {% if inputs.huntStatus == 'retired_incomplete' %}other rather than benign, because part of the report could not be searched and the report is retired without a full search{% else %}benign{% endif %}{% if inputs.huntStatus == 'retired_incomplete' %}{% if inputs.coverageGaps != nil and inputs.coverageGaps != empty %}; the Investigation summary names what was not searched{% endif %}{% endif %}{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}{% if inputs.huntStatus == 'retired_incomplete' %}; recorded{% else %} and recorded{% endif %} {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}.
         {% elsif packaged.mintSuppression == 'check_failed' -%}
         This run found something mint-worthy, but packaging could not verify which Proposals already exist, so no new one was created this time{% if packaged.coverage.written != nil and packaged.coverage.written != empty %}; recorded {{ packaged.coverage.written | size }} coverage knowledge item{% if packaged.coverage.written.size != 1 %}s{% endif %} for Detection Watch{% endif %}. The next scheduled sweep will not retry this report on its own -- this run's hunt already marked it hunted -- so a manual run targeting this reportId is what actually retries it.
         {% elsif packaged.proposals == empty and coveredCount > 0 -%}

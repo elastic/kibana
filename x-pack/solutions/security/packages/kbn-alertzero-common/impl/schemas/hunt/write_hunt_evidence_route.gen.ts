@@ -70,6 +70,15 @@ export type WriteHuntEvidenceRequestBodyInput = z.input<typeof WriteHuntEvidence
 export const WriteHuntEvidenceResponse = lazySchema(() =>
   z.object({
     acknowledged: z.boolean(),
+    /**
+     * True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep.
+     */
+    settledByCap: z
+      .boolean()
+      .optional()
+      .describe(
+        "True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep."
+      ),
   })
 );
 export type WriteHuntEvidenceResponse = z.infer<typeof WriteHuntEvidenceResponse>;

@@ -35,7 +35,7 @@ describe('Continuous Threat Hunt close reports', () => {
   describeCloseReports({
     closeReports: [
       {
-        closeReason: 'benign',
+        closeReason: '{{ steps.dismiss_investigation_if_clean.output.metadata.close_reason }}',
         closeStep: 'dismiss_investigation_if_clean',
         definition: ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW,
         reportStep: 'report_investigation_closed_benign',

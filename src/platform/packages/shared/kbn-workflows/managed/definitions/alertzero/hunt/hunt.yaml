@@ -340,7 +340,9 @@ steps:
       # absence of a finding means:
       # - `success` is reserved for `completeness == complete`: the run covered what it was asked to.
       # - `retired_incomplete`: `incomplete_final` with no confirmed hit, and the evidence write
-      #   succeeded. The write stamps the hunt-once gate, so no later sweep selects this report; the
+      #   succeeded; or an `incomplete_retryable` run with no confirmed hit that the write settled
+      #   because the coverage ledger is full (`settledByCap`), which retires the report the same
+      #   way. The write stamps the hunt-once gate, so no later sweep selects this report; the
       #   absence of a hit is a settled result, but not a clean verdict, because part of the report
       #   deterministically cannot be searched. Packaging closes the Investigation and says so.
       #   Neither `success` (it would claim an environment never fully searched is clean) nor
@@ -354,7 +356,7 @@ steps:
       result_status: |-
         {%- if steps.read_hunt_result.output.data.result.completeness == "complete" -%}
         success
-        {%- elsif steps.read_hunt_result.output.data.state == 'completed' and steps.read_hunt_result.output.data.result.completeness == "incomplete_final" and steps.read_hunt_result.output.data.result.has_confirmed_hit != true and steps.write_evidence.error == nil -%}
+        {%- elsif steps.read_hunt_result.output.data.state == 'completed' and steps.read_hunt_result.output.data.result.has_confirmed_hit != true and steps.write_evidence.error == nil and (steps.read_hunt_result.output.data.result.completeness == "incomplete_final" or (steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" and steps.write_evidence.output.settledByCap == true)) -%}
         retired_incomplete
         {%- elsif steps.read_hunt_result.output.data.state == 'completed' -%}
         partial
@@ -381,6 +383,8 @@ steps:
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "complete" -%}
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" and steps.read_hunt_result.output.data.result.has_confirmed_hit == true -%}
         The confirmed hit {% if steps.write_evidence.error == nil %}was recorded on the report{% else %}could not be recorded on the report ({{ steps.write_evidence.error.message }}){% endif %}, but part of the hunt did not run ({{ steps.read_hunt_result.output.data.result.message }}), so this run is not a statement about everything the report describes.
+        {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" and steps.write_evidence.error == nil and steps.write_evidence.output.settledByCap == true -%}
+        The hunt was incomplete ({{ steps.read_hunt_result.output.data.result.message }}) and the report's coverage ledger is full, so the report is retired without having been fully searched; its executed searches are recorded and its evidence is marked incomplete rather than clean.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_retryable" -%}
         The hunt was incomplete but retryable ({{ steps.read_hunt_result.output.data.result.message }}), so the report is not marked as hunted and stays eligible for a later sweep.
         {%- elsif steps.read_hunt_result.output.data.result.completeness == "incomplete_final" and steps.write_evidence.error != nil -%}

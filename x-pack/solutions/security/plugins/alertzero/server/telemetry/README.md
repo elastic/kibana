@@ -300,7 +300,7 @@ Emitted by Hunt packaging for one threat report, once packaging has run.
 | `has_confirmed_hit` | boolean | yes | Whether the hunt cleared the confirmed-hit bar |
 | `tier2_invoked` | boolean | no | Whether the hunt ran Tier 2 (behavioral queries). Absent when the Worker did not pass it |
 | `package_status` | keyword | yes | Packaging's own status: `success` or `run_incomplete` |
-| `closed_clean` | boolean | yes | Whether a run with no confirmed hit closed the Investigation as benign (true for `retired_incomplete` too) |
+| `closed_clean` | boolean | yes | Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for `retired_incomplete`, which is true too |
 | `proposals_prepared` | long | yes | Proposals packaging prepared and launched a gate for |
 | `proposals_dispatch_failed` | long | yes | Proposal gates that failed to launch |
 | `mint_suppression` | keyword | yes | Why packaging held back its Proposals: `none`, `existing_proposals` or `check_failed` |
