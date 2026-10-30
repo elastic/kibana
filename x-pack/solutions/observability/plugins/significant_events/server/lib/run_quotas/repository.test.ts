@@ -125,14 +125,14 @@ describe('run quota settings repository', () => {
 
     await expect(
       patchRunQuotaSettings(repository, {
-        activateLimits: { investigation: 3 },
+        activateLimits: { ki_extraction: 3 },
       })
     ).resolves.toEqual({
       enabled: true,
       limits: {
         detection: 15,
-        investigation: 3,
-        ki_extraction: 0,
+        investigation: 0,
+        ki_extraction: 3,
         future_group: 9,
       },
     });
@@ -141,8 +141,8 @@ describe('run quota settings repository', () => {
       enabled: true,
       limits: {
         detection: 0,
-        investigation: 3,
-        ki_extraction: 0,
+        investigation: 30,
+        ki_extraction: 3,
         future_group: 9,
       },
     });

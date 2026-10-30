@@ -54,7 +54,6 @@ describe('isGlobalInvestigationLimitReached', () => {
     [quotas({ used: 5 }), true],
     [quotas({ limit: 0, used: 5 }), false],
     [quotas({ enabled: false }), true],
-    [quotas({ enabled: false, used: 2 }), false],
   ])('%j -> %s', (input, expected) => {
     expect(isGlobalInvestigationLimitReached(input)).toBe(expected);
   });

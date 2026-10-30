@@ -146,6 +146,7 @@ describe('Significant Events run quota routes', () => {
       { activateLimits: { detection: 0 } },
       { activateLimits: { memory: 1 } },
       { enabled: true, activateLimits: { detection: 15 } },
+      { activateLimits: { detection: 15 }, limits: { detection: 5 } },
     ]) {
       expect(putRoute.params.safeParse({ body }).success).toBe(false);
     }

@@ -10,6 +10,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   consumeRunQuota,
   createRunQuotaInternalRepository,
+  dayKey,
   releaseRunQuota,
 } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
@@ -21,7 +22,7 @@ jest.mock('./lib/run_quotas', () => ({
   consumeRunQuota: jest.fn(),
   createRunQuotaInternalRepository: jest.fn(),
   releaseRunQuota: jest.fn(),
-  dayKey: jest.fn(() => '2026-10-29'),
+  dayKey: jest.fn(),
   resolveDailyWindow: jest.fn(),
 }));
 
@@ -30,6 +31,7 @@ jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
 const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
 const releaseRunQuotaMock = jest.mocked(releaseRunQuota);
 const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
+const dayKeyMock = jest.mocked(dayKey);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
 
@@ -128,6 +130,7 @@ describe('SignificantEventsPlugin setup', () => {
     const registerInvestigationQuota = jest.fn();
     const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
     createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
+    dayKeyMock.mockReturnValueOnce('2026-10-29').mockReturnValueOnce('2026-10-30');
     const plugin = createPlugin();
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
     const server = plugin.server;

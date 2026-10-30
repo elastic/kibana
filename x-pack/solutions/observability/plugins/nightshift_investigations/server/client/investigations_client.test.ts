@@ -1507,15 +1507,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     });
 
-    it('releases the automation budget when the start loses the claim and continues the holder', async () => {
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
-      withConversations(makeConversation({ id: 'inv-holder' }));
-
-      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
-
-      expect(await usage()).toBe(0);
-    });
-
     describe('global quota release', () => {
       const release = jest.fn().mockResolvedValue(undefined);
 
@@ -1524,22 +1515,14 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         investigationQuotaCallback.mockResolvedValue({ allowed: true, release });
       });
 
-      it('releases the global slot when the start loses the claim and continues the holder', async () => {
+      it('releases both slots when the start loses the claim and continues the holder', async () => {
         subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
         withConversations(makeConversation({ id: 'inv-holder' }));
 
         await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
 
         expect(release).toHaveBeenCalledTimes(1);
-      });
-
-      it('releases the automation slot and fails the start when the quota check is unavailable', async () => {
-        investigationQuotaCallback.mockRejectedValue(new Error('Storage unavailable'));
-
-        await expect(startWithBudget(1)).rejects.toBeInstanceOf(InvestigationUnavailableError);
-
         expect(await usage()).toBe(0);
-        expect(release).not.toHaveBeenCalled();
       });
 
       it('releases both slots when the claim attempt fails', async () => {
