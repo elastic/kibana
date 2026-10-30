@@ -11,6 +11,7 @@ import {
   GEN_AI_USAGE_INPUT_TOKENS,
   GEN_AI_USAGE_OUTPUT_TOKENS,
   KIND,
+  PARENT_ID,
   SPAN_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
@@ -289,6 +290,35 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
       const options = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
       expect(options?.skipProcessorEventFilter).toBe(true);
+    });
+  });
+
+  describe('focused document reservation', () => {
+    it('does not search for ancestors when the trace fits in maxTraceItems', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+        makeSearchResponse(
+          [
+            {
+              fields: { [SPAN_ID]: ['focused'], [PARENT_ID]: ['missing-upstream'] },
+              sort: [0, 0, 'focused'],
+              _source: {},
+            },
+          ],
+          1
+        )
+      );
+
+      const result = await getUnifiedTraceItemsPaginated({
+        ...defaultParams,
+        focusedDocId: 'focused',
+        maxTraceItems: 10,
+      });
+
+      expect(mockApmEventClient.search).toHaveBeenCalledTimes(1);
+      expect((mockApmEventClient.search as jest.Mock).mock.calls[0][0]).toBe(
+        'get_unified_trace_items'
+      );
+      expect(result.hits).toHaveLength(1);
     });
   });
 });

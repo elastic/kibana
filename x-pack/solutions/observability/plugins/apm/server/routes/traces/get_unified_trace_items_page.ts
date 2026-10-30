@@ -229,7 +229,7 @@ export async function getUnifiedTraceItemsPaginated({
     ecsOnly,
   });
 
-  if (!focusedDocId) {
+  if (!focusedDocId || result.total <= maxTraceItems) {
     return result;
   }
 
