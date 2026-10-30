@@ -27,8 +27,8 @@ export interface TermsConversionContext {
   /** Number of terms buckets on the layer, including this column. */
   termsBucketCount: number;
   /**
-   * When true, `otherBucket` on this column can be expressed: the only Top values dimension,
-   * aggregated first (alone or above a date histogram).
+   * When true, `otherBucket` on this column can be expressed: the column is the first bucket
+   * (single Top values, Top values above a date histogram, or the outer of two Top values).
    */
   supportsOtherBucket?: boolean;
 }
