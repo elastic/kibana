@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -360,6 +361,110 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — optimistic concurrency', () => {
+    const conflict = () =>
+      SavedObjectsErrorHelpers.createConflictError(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1'
+      );
+
+    beforeEach(() => {
+      jest.spyOn(Math, 'random').mockReturnValue(0);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('writes with the version returned by the read', async () => {
+      const attrs = makeAttributes();
+      soClient.get.mockResolvedValue({ ...makeSOResponse('deploy-1', attrs), version: 'v1' });
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.objectContaining({ id: 'deploy-1', overwrite: true, version: 'v1' })
+      );
+    });
+
+    it('re-reads and re-applies the update over the fresh document after a conflict', async () => {
+      const stale = makeAttributes({ services: ['cloudtrail'] });
+      const fresh = makeAttributes({
+        services: ['cloudtrail'],
+        deploymentName: 'written-by-other',
+      });
+      soClient.get
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', stale), version: 'v1' })
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', fresh), version: 'v2' });
+      soClient.create
+        .mockRejectedValueOnce(conflict())
+        .mockImplementationOnce(async (_type, attributes) =>
+          makeSOResponse('deploy-1', attributes as CloudOnboardingDeploymentSOAttributes)
+        );
+
+      const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        status: 'deploying',
+      });
+
+      expect(soClient.create).toHaveBeenCalledTimes(2);
+      expect(soClient.create).toHaveBeenLastCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ status: 'deploying', deploymentName: 'written-by-other' }),
+        expect.objectContaining({ version: 'v2' })
+      );
+      expect(result.status).toBe('deploying');
+      expect(result.deploymentName).toBe('written-by-other');
+    });
+
+    it('still drops stale record keys when retrying after a conflict', async () => {
+      const first = makeAttributes({ policyIdsByInstance: { a: 'p1', b: 'p2' } });
+      const second = makeAttributes({ policyIdsByInstance: { a: 'p1', b: 'p2', c: 'p3' } });
+      soClient.get
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', first), version: 'v1' })
+        .mockResolvedValueOnce({ ...makeSOResponse('deploy-1', second), version: 'v2' });
+      soClient.create
+        .mockRejectedValueOnce(conflict())
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', second));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        policyIdsByInstance: { a: 'p1' },
+      });
+
+      expect(soClient.create.mock.calls[1][1]).toEqual(
+        expect.objectContaining({ policyIdsByInstance: { a: 'p1' } })
+      );
+    });
+
+    it('throws the conflict error once attempts are exhausted', async () => {
+      soClient.get.mockResolvedValue({
+        ...makeSOResponse('deploy-1', makeAttributes()),
+        version: 'v1',
+      });
+      soClient.create.mockRejectedValue(conflict());
+
+      await expect(
+        cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' })
+      ).rejects.toThrow(/conflict/i);
+      expect(soClient.create).toHaveBeenCalledTimes(5);
+    });
+
+    it('does not retry non-conflict errors', async () => {
+      soClient.get.mockResolvedValue({
+        ...makeSOResponse('deploy-1', makeAttributes()),
+        version: 'v1',
+      });
+      soClient.create.mockRejectedValue(new Error('boom'));
+
+      await expect(
+        cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' })
+      ).rejects.toThrow('boom');
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('instances', () => {
     const original = {
       instanceId: 'cloudtrail',
@@ -480,6 +585,7 @@ describe('cloudOnboardingDeploymentService', () => {
       it('resets status to pending and increments attemptCount', async () => {
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2 });
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.create.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',
@@ -499,6 +605,7 @@ describe('cloudOnboardingDeploymentService', () => {
         const serviceVars = { cloudtrail: { regions: ['us-east-1'] } };
         const retriedAttrs = makeAttributes({ status: 'pending', attemptCount: 2, serviceVars });
         soClient.get.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
+        soClient.create.mockResolvedValue(makeSOResponse('deploy-1', retriedAttrs));
 
         const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
           status: 'pending',

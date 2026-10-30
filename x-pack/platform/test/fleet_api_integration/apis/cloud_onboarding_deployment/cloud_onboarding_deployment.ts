@@ -629,6 +629,29 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.serviceVars).to.eql(serviceVars);
       });
 
+      it('should not lose concurrent updates to different fields', async () => {
+        const updates = [
+          { deploymentName: 'concurrent-stack' },
+          { statusMessage: 'concurrent-message' },
+          { description: 'concurrent-description' },
+        ];
+
+        await Promise.all(
+          updates.map((update) =>
+            supertest
+              .put(`${BASE_URL}/${deploymentId}`)
+              .set('kbn-xsrf', 'xxxx')
+              .send(update)
+              .expect(200)
+          )
+        );
+
+        const { body } = await supertest.get(`${BASE_URL}/${deploymentId}`).expect(200);
+        expect(body.item.deploymentName).to.be('concurrent-stack');
+        expect(body.item.statusMessage).to.be('concurrent-message');
+        expect(body.item.description).to.be('concurrent-description');
+      });
+
       describe('instances', () => {
         const original = {
           instanceId: 'cloudwatch_metrics',
