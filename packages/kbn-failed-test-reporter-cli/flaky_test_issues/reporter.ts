@@ -476,7 +476,8 @@ export const reportFlakySuiteIssues = async (
   };
 
   /**
-   * Metadata first. The body's text stays as filed, this report's numbers go in the
+   * Metadata first: the failed-test alert the comment runs in elastic/kibana reads the report
+   * count from it. The body's text stays as filed, this report's numbers go in the
    * comment. A comment that then fails is not retried: the metadata already records it, so the
    * next qualifying report comments instead. Recording it after the comment would take another
    * edit, and a failure there would mean a duplicate comment rather than a missed one.
