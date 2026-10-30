@@ -14,6 +14,9 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { SolutionProfileScope } from './solution_profile_scope';
 
 jest.mock('../app/use_available_owners');
+jest.mock('../../containers/use_get_available_owners', () => ({
+  useGetAvailableOwners: () => ({ isLoading: false }),
+}));
 
 const useAvailableCasesOwnersMock = useAvailableCasesOwners as jest.Mock;
 
@@ -64,5 +67,14 @@ describe('SolutionProfileScope', () => {
 
     expect(screen.queryByTestId('cases-settings-solution-select')).not.toBeInTheDocument();
     expect(screen.getByTestId('owner')).toHaveTextContent('securitySolution');
+  });
+
+  it('says so when the user has no solution settings', () => {
+    useAvailableCasesOwnersMock.mockReturnValue([]);
+    renderScope([]);
+
+    expect(
+      screen.getByText("You don't have access to the settings of any solution.")
+    ).toBeInTheDocument();
   });
 });

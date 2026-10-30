@@ -8,17 +8,28 @@
 import type { FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { EuiFormRow, EuiLoadingSpinner, EuiPanel, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSuperSelect,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseOwnerScope } from '../cases_context/case_owner_scope';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useGetAvailableOwners } from '../../containers/use_get_available_owners';
 import { getOwnerLabel } from '../../common/top_level_app';
 
 const SOLUTION_PARAM = 'solution';
 
 const SOLUTION_LABEL = i18n.translate('xpack.cases.configure.solutionProfile.label', {
   defaultMessage: 'Solution',
+});
+
+const NO_SOLUTIONS = i18n.translate('xpack.cases.configure.solutionProfile.noSolutions', {
+  defaultMessage: "You don't have access to the settings of any solution.",
 });
 
 const SOLUTION_HELP = i18n.translate('xpack.cases.configure.solutionProfile.help', {
@@ -33,6 +44,7 @@ const SOLUTION_HELP = i18n.translate('xpack.cases.configure.solutionProfile.help
 export const SolutionProfileScope: FC<{ children: ReactNode }> = ({ children }) => {
   const { owner } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(['read']);
+  const { isLoading } = useGetAvailableOwners({ enabled: owner.length === 0 });
   const history = useHistory();
   const { search } = useLocation();
   const requested = new URLSearchParams(search).get(SOLUTION_PARAM);
@@ -51,7 +63,11 @@ export const SolutionProfileScope: FC<{ children: ReactNode }> = ({ children }) 
   }
 
   if (availableOwners.length === 0) {
-    return <EuiLoadingSpinner size="l" />;
+    return isLoading ? (
+      <EuiLoadingSpinner size="l" />
+    ) : (
+      <EuiEmptyPrompt iconType="lock" body={<p>{NO_SOLUTIONS}</p>} />
+    );
   }
 
   const selected =

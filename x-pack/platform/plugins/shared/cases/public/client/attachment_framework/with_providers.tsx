@@ -6,17 +6,33 @@
  */
 
 import type { ComponentType, FC, ReactNode } from 'react';
-import React, { isValidElement, lazy } from 'react';
+import React, { isValidElement, lazy, useContext } from 'react';
+import { PREFIX_TO_OWNER_MAP } from '../../../common/constants/attachments';
+import { CasesContext } from '../../components/cases_context/context';
 import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import type { AttachmentAction, RegisteredUnifiedAttachmentType } from './types';
 
 type Providers = ComponentType<{ children: ReactNode }>;
 
-const ProvidersInTopLevelApp: FC<{ providers: Providers; children: ReactNode }> = ({
-  providers: TypeProviders,
-  children,
-}) => (isTopLevelAppEnabled() ? <TypeProviders>{children}</TypeProviders> : <>{children}</>);
-ProvidersInTopLevelApp.displayName = 'ProvidersInTopLevelApp';
+/**
+ * A solution's own app already provides its renderers' context. They need the type's providers in
+ * the top-level app, or when a case of another solution holds the attachment (attached while the
+ * top-level app was on, then viewed in a solution app after turning it off).
+ */
+const ProvidersOutsideSolution: FC<{
+  providers: Providers;
+  typeOwner: string | undefined;
+  children: ReactNode;
+}> = ({ providers: TypeProviders, typeOwner, children }) => {
+  const context = useContext(CasesContext);
+  const inOwnSolution = typeOwner != null && (context?.owner ?? []).includes(typeOwner);
+  return isTopLevelAppEnabled() || !inOwnSolution ? (
+    <TypeProviders>{children}</TypeProviders>
+  ) : (
+    <>{children}</>
+  );
+};
+ProvidersOutsideSolution.displayName = 'ProvidersOutsideSolution';
 
 /**
  * Wraps every renderer of an attachment type in the type's `providers`. Wrapped components are
@@ -27,6 +43,7 @@ export const withAttachmentProviders = <T extends RegisteredUnifiedAttachmentTyp
   if (!providers) {
     return type;
   }
+  const typeOwner = PREFIX_TO_OWNER_MAP[type.id.split('.')[0]];
 
   const wrapped = new WeakMap<object, ComponentType<never>>();
   const wrap = <C extends ComponentType<never>>(Component: C, asLazy: boolean): C => {
@@ -37,9 +54,9 @@ export const withAttachmentProviders = <T extends RegisteredUnifiedAttachmentTyp
     const Wrapped: FC<Record<string, unknown>> = (props) => {
       const Inner = Component as ComponentType<Record<string, unknown>>;
       return (
-        <ProvidersInTopLevelApp providers={providers}>
+        <ProvidersOutsideSolution providers={providers} typeOwner={typeOwner}>
           <Inner {...props} />
-        </ProvidersInTopLevelApp>
+        </ProvidersOutsideSolution>
       );
     };
     Wrapped.displayName = 'AttachmentProviders';
@@ -50,7 +67,11 @@ export const withAttachmentProviders = <T extends RegisteredUnifiedAttachmentTyp
 
   const wrapNode = <N,>(node: N): N =>
     isValidElement(node)
-      ? ((<ProvidersInTopLevelApp providers={providers}>{node}</ProvidersInTopLevelApp>) as N)
+      ? ((
+          <ProvidersOutsideSolution providers={providers} typeOwner={typeOwner}>
+            {node}
+          </ProvidersOutsideSolution>
+        ) as N)
       : node;
   const wrapAction = <A extends AttachmentAction | null>(action: A): A =>
     action && 'render' in action ? { ...action, render: () => wrapNode(action.render()) } : action;

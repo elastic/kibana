@@ -11,6 +11,8 @@ import { render, screen } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
 import * as topLevelApp from '../../common/top_level_app';
 import { withAttachmentProviders } from './with_providers';
+import type { CasesContextValue } from '../../components/cases_context/context';
+import { CasesContext } from '../../components/cases_context/context';
 import type { UnifiedReferenceAttachmentType, UnifiedReferenceAttachmentViewProps } from './types';
 
 const SolutionContext = React.createContext('none');
@@ -23,7 +25,7 @@ const Renderer: FC = () => (
 const LazyRenderer = lazy(async () => ({ default: Renderer }));
 
 const attachmentType: UnifiedReferenceAttachmentType = {
-  id: 'solution.alert',
+  id: 'security.alert',
   schema: z.object({}),
   getIcon: () => 'bell',
   getLabel: () => 'Alert',
@@ -32,7 +34,7 @@ const attachmentType: UnifiedReferenceAttachmentType = {
   providers: Providers,
 };
 
-const renderActivity = (type: UnifiedReferenceAttachmentType) => {
+const renderActivity = (type: UnifiedReferenceAttachmentType, owner: string[] = []) => {
   const { children: Children } = type.getCreationActivity(
     {} as UnifiedReferenceAttachmentViewProps
   );
@@ -40,9 +42,11 @@ const renderActivity = (type: UnifiedReferenceAttachmentType) => {
     throw new Error('expected a renderer');
   }
   return render(
-    <Suspense fallback={null}>
-      <Children {...({} as UnifiedReferenceAttachmentViewProps)} />
-    </Suspense>
+    <CasesContext.Provider value={{ owner } as unknown as CasesContextValue}>
+      <Suspense fallback={null}>
+        <Children {...({} as UnifiedReferenceAttachmentViewProps)} />
+      </Suspense>
+    </CasesContext.Provider>
   );
 };
 
@@ -73,11 +77,18 @@ describe('withAttachmentProviders', () => {
     expect(screen.getByTestId('context')).toHaveTextContent('solution');
   });
 
-  it('leaves renderers to the host app context when the top-level app is off', async () => {
+  it("leaves renderers to their own solution's context when the top-level app is off", async () => {
     jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(false);
-    renderActivity(withAttachmentProviders(attachmentType));
+    renderActivity(withAttachmentProviders(attachmentType), ['securitySolution']);
 
     expect(await screen.findByTestId('context')).toHaveTextContent('none');
+  });
+
+  it("wraps renderers on another solution's case after the top-level app is turned off", async () => {
+    jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(false);
+    renderActivity(withAttachmentProviders(attachmentType), ['observability']);
+
+    expect(await screen.findByTestId('context')).toHaveTextContent('solution');
   });
 
   it('keeps wrapped renderers stable across calls so they do not remount', () => {
