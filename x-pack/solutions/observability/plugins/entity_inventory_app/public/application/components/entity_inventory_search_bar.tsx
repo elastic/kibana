@@ -12,14 +12,14 @@ import { ENTITY_INVENTORY_APP_NAME } from '../constants';
 import type { EntityInventorySearchSubmitPayload } from '../context/entity_inventory_search_context';
 import { useEntityInventorySearch } from '../context/entity_inventory_search_context';
 import { useEntityInventoryDataView } from '../hooks/use_entity_inventory_data_view';
-import { useEntityInventoryKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../translations';
 
 export const EntityInventorySearchBar = () => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { unifiedSearch },
-  } = useEntityInventoryKibana();
+  } = useKibana();
   const { entityCategory, query, filters, dateRange, setFilters, submit } =
     useEntityInventorySearch();
   const { dataView } = useEntityInventoryDataView();

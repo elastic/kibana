@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EntityInventoryAppServices } from '../../types';
+import type { EntityInventoryAppStartDependencies } from '../types';
 
-/** Binds `useKibana` to this plugin's services type so callers get typed `services` without repeating the generic. */
-export const useEntityInventoryKibana = () => useKibana<EntityInventoryAppServices>();
+export type StartServices = CoreStart & EntityInventoryAppStartDependencies;
+
+const useTypedKibana = () => useKibana<StartServices>();
+
+export { useTypedKibana as useKibana };

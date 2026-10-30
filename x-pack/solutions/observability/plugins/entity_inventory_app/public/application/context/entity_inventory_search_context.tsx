@@ -11,7 +11,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
-import { useEntityInventoryKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
 
@@ -44,7 +44,7 @@ export const EntityInventorySearchProvider = ({
 }) => {
   const {
     services: { notifications, uiSettings },
-  } = useEntityInventoryKibana();
+  } = useKibana();
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);

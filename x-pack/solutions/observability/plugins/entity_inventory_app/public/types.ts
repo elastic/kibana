@@ -6,7 +6,6 @@
  */
 
 import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
-import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -19,8 +18,6 @@ export interface EntityInventoryAppStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
-
-export type EntityInventoryAppServices = CoreStart & EntityInventoryAppStartDependencies;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppPublicSetup {}
