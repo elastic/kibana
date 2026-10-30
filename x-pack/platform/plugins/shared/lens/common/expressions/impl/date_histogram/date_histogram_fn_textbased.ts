@@ -6,7 +6,7 @@
  */
 
 import type { DatatableUtilitiesService, ParsedInterval } from '@kbn/data-plugin/common';
-import { parseEsInterval } from '@kbn/data-plugin/common';
+import { InvalidEsCalendarIntervalError, parseEsInterval } from '@kbn/data-plugin/common';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment-timezone';
 import type { DateHistogramTextBasedExpressionFunction } from '../../defs/date_histogram/types';
@@ -15,39 +15,84 @@ function offsetMs(timestamp: number, timeZone: string): number {
   return moment.tz(timestamp, timeZone).utcOffset() * 60 * 1000;
 }
 
+function utcToLocal(timestamp: number, timeZone: string): number {
+  return timestamp + offsetMs(timestamp, timeZone);
+}
+
+function localToUtc(localMs: number, timeZone: string): number {
+  const wallClock = moment.utc(localMs).format('YYYY-MM-DDTHH:mm:ss.SSS');
+  return moment.tz(wallClock, timeZone).valueOf();
+}
+
 function fixedIntervalMs(interval: ParsedInterval): number {
   return moment.duration(interval.value, interval.unit).asMilliseconds();
 }
 
+function parseEsqlHistogramInterval(intervalString: string): ParsedInterval | undefined {
+  try {
+    return parseEsInterval(intervalString);
+  } catch (error) {
+    if (error instanceof InvalidEsCalendarIntervalError) {
+      return { value: error.value, unit: error.unit, type: 'calendar' };
+    }
+    return undefined;
+  }
+}
+
+function calendarMomentUnit(unit: ParsedInterval['unit']): moment.unitOfTime.DurationConstructor {
+  return (unit === 'w' ? 'isoWeek' : unit) as moment.unitOfTime.DurationConstructor;
+}
+
+function calendarUnitIndex(value: moment.Moment, unit: ParsedInterval['unit']): number {
+  switch (unit) {
+    case 'w':
+      return value.isoWeek() - 1;
+    case 'M':
+      return value.month();
+    case 'y':
+      return value.year();
+    default:
+      return 0;
+  }
+}
+
 /**
  * Timezone offset shifts UTC onto a local timeline so `floor(t / interval)`
- * lands on local midnights/hours. Subtracting the offset at the result converts
- * back to UTC (the destination offset can differ across DST).
+ * lands on local midnights/hours. The snapped local instant is then parsed
+ * back as wall-clock time in the histogram timezone (the destination offset
+ * can differ across DST).
  *
- * bucket_key = floor((value + offset) / interval) * interval - offset
+ * bucket_key = localToUtc(floor(utcToLocal(value) / interval) * interval)
  *
  * @see https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-datehistogram-aggregation#time-zone
  */
 function snapToEsBucket(timestamp: number, interval: ParsedInterval, timeZone: string): number {
   if (interval.type === 'calendar') {
-    return moment.tz(timestamp, timeZone).startOf(interval.unit).valueOf();
+    const unit = calendarMomentUnit(interval.unit);
+    const snapped = moment.tz(timestamp, timeZone).startOf(unit);
+    if (interval.value > 1) {
+      snapped.subtract(calendarUnitIndex(snapped, interval.unit) % interval.value, unit);
+    }
+    return snapped.valueOf();
   }
 
   const intervalMs = fixedIntervalMs(interval);
-  const local = timestamp + offsetMs(timestamp, timeZone);
-  const snapped = Math.floor(local / intervalMs) * intervalMs;
-  return snapped - offsetMs(snapped, timeZone);
+  const snappedLocal = Math.floor(utcToLocal(timestamp, timeZone) / intervalMs) * intervalMs;
+  return localToUtc(snappedLocal, timeZone);
 }
 
 function addInterval(timestamp: number, interval: ParsedInterval, timeZone: string): number {
   if (interval.type === 'calendar') {
-    return moment.tz(timestamp, timeZone).add(interval.value, interval.unit).valueOf();
+    return moment
+      .tz(timestamp, timeZone)
+      .add(interval.value, calendarMomentUnit(interval.unit))
+      .valueOf();
   }
 
   const intervalMs = fixedIntervalMs(interval);
-  const local = timestamp + offsetMs(timestamp, timeZone);
-  const next = Math.floor(local / intervalMs) * intervalMs + intervalMs;
-  return next - offsetMs(next, timeZone);
+  const nextLocal =
+    Math.floor(utcToLocal(timestamp, timeZone) / intervalMs) * intervalMs + intervalMs;
+  return localToUtc(nextLocal, timeZone);
 }
 
 const isFullyContained = (
@@ -131,10 +176,8 @@ export const dateHistogramTextBasedFn =
     // Bucket boundaries must match the timezone ES|QL BUCKET uses so calendar intervals stay aligned.
     const timeZone = meta.timeZone || contextTimeZone;
 
-    let interval: ParsedInterval;
-    try {
-      interval = parseEsInterval(intervalString);
-    } catch {
+    const interval = parseEsqlHistogramInterval(intervalString);
+    if (!interval) {
       return input;
     }
 
