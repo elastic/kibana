@@ -53,6 +53,7 @@ const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   status: keywordField('status'),
   triggeredBy: keywordField('triggeredBy'),
   executedBy: keywordField('executedBy'),
+  'executedByUser.name': keywordField('executedByUser.name'),
   createdBy: keywordField('createdBy'),
   isTestRun: booleanField('isTestRun'),
   spaceId: keywordField('spaceId'),

@@ -90,4 +90,11 @@ describe('useWorkflowExecutionsSearch', () => {
     expect(params?.executedBy).toBeUndefined();
     expect(params?.kql).toBe('(NOT executedBy: elastic)');
   });
+
+  it('sends a "Triggered by" display-name filter as KQL on executedByUser.name', async () => {
+    const params = await renderSearchHook([phraseFilter('executedByUser.name', 'Jane Doe')]);
+
+    expect(params?.executedBy).toBeUndefined();
+    expect(params?.kql).toBe('(executedByUser.name: "Jane Doe")');
+  });
 });

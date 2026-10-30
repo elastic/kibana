@@ -10,9 +10,11 @@
 import React, { useCallback, useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import {
   WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
@@ -20,6 +22,7 @@ import {
 } from './workflow_executions_data_view';
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
+  EXECUTED_BY_FILTER_FIELD,
   EXECUTION_FILTERS_STORAGE_KEY,
 } from './workflow_executions_page_constants';
 import {
@@ -59,6 +62,28 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     const spaceId = useSpaceId();
     const api = useWorkflowsApi();
     const { canReadManagedWorkflowExecution } = useWorkflowsCapabilities();
+    const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
+
+    // When executor identities are hidden, the "Triggered by" control is removed entirely —
+    // including from URL-provided state — so executor names are never listed as options.
+    const defaultControls = useMemo(
+      () =>
+        showExecutor
+          ? DEFAULT_EXECUTION_PAGE_FILTERS
+          : DEFAULT_EXECUTION_PAGE_FILTERS.filter(
+              ({ field_name: fieldName }) => fieldName !== EXECUTED_BY_FILTER_FIELD
+            ),
+      [showExecutor]
+    );
+    const visibleControlsUrlState = useMemo(
+      () =>
+        showExecutor
+          ? controlsUrlState
+          : controlsUrlState?.filter(
+              ({ field_name: fieldName }) => fieldName !== EXECUTED_BY_FILTER_FIELD
+            ),
+      [controlsUrlState, showExecutor]
+    );
 
     // The options lists read the execution data as the current user, which ignores workflow access
     // control, so they are scoped to the workflows the user can read until that data enforces it.
@@ -141,9 +166,9 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     return (
       <div data-test-subj="workflowExecutionsFilters">
         <FilterControls
-          controlsUrlState={controlsUrlState}
+          controlsUrlState={visibleControlsUrlState}
           dataViewSpec={dataViewSpec}
-          defaultControls={DEFAULT_EXECUTION_PAGE_FILTERS}
+          defaultControls={defaultControls}
           filters={filters}
           maxControls={4}
           onFiltersChange={onFiltersChange}

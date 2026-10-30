@@ -139,6 +139,14 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+/** Identity snapshot of the user who triggered an execution, captured at trigger time. */
+export interface WorkflowExecutionExecutedByUser {
+  /** Display name: the user's full name when set, otherwise the username. */
+  name: string;
+  username: string;
+  profileUid?: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -164,6 +172,8 @@ export interface EsWorkflowExecution {
   createdBy?: string; // Keep for backwards compatibility with existing documents
   effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Identity snapshot of the user who triggered the workflow, captured at trigger time. */
+  executedByUser?: WorkflowExecutionExecutedByUser;
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;

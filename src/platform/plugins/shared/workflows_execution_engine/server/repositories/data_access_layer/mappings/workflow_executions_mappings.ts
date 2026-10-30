@@ -31,6 +31,13 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS = {
     stepId: mappings.keyword(),
     createdBy: mappings.keyword(),
     executedBy: mappings.keyword(),
+    executedByUser: mappings.object({
+      properties: {
+        name: mappings.keyword(),
+        username: mappings.keyword(),
+        profileUid: mappings.keyword(),
+      },
+    }),
     effectiveIdentity: mappings.object({
       properties: { type: mappings.keyword(), id: mappings.keyword() },
     }),

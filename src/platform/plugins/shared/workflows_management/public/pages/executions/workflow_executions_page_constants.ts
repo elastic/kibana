@@ -25,6 +25,8 @@ export const EXECUTION_TABLE_SORT_FIELD_MAP: Record<string, string> = {
   duration: 'duration',
 };
 
+export const EXECUTED_BY_FILTER_FIELD = 'executedByUser.name';
+
 export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: i18n.translate('workflows.executionsPage.filterStatus', {
@@ -44,7 +46,9 @@ export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
     title: i18n.translate('workflows.executionsPage.filterExecutedBy', {
       defaultMessage: 'Triggered by',
     }),
-    field_name: 'executedBy',
+    // The display-name snapshot persisted on the execution document; filtering by it keeps
+    // the options list human-readable without any client-side profile lookup.
+    field_name: EXECUTED_BY_FILTER_FIELD,
   },
   {
     title: i18n.translate('workflows.executionsPage.filterTrigger', {
