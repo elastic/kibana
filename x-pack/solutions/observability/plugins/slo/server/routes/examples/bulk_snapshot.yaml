@@ -13,11 +13,8 @@ requestBody:
                 instanceId: host.name:web-01
 responses:
   '200':
-    description: Successful response
     content:
       application/json:
-        schema:
-          $ref: ../oas_schemas.yaml#/snapshot_response
         examples:
           bulkSnapshotResponse:
             summary: Bulk snapshot response with mixed success and per-instance error
@@ -45,7 +42,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
           badRequestExample:
             summary: Bad request
@@ -58,7 +55,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
@@ -71,7 +68,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden

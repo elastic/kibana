@@ -29,11 +29,8 @@ requestBody:
               frequency: 5m
 responses:
   '200':
-    description: Successful request
     content:
       application/json:
-        schema:
-          $ref: ../oas_schemas.yaml#/create_slo_response
         examples:
           createSloResponse:
             summary: Create SLO response
@@ -44,7 +41,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
           badRequestExample:
             summary: Bad request
@@ -57,7 +54,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
@@ -70,7 +67,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden
@@ -83,7 +80,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/409_response
+          $ref: ../oas_error_schemas.yaml#/409_response
         examples:
           conflictExample:
             summary: Conflict

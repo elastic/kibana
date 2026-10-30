@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import { updateSLOParamsSchema } from '@kbn/slo-schema';
+import { updateSLOParamsSchema, updateSLOResponseSchema } from '@kbn/slo-schema';
 import { UpdateSLO } from '../services';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -27,6 +27,9 @@ export const updateSLORoute = createSloServerRoute({
     },
   },
   params: updateSLOParamsSchema,
+  responses: {
+    200: { description: 'Successful request', body: () => updateSLOResponseSchema },
+  },
   handler: async ({
     context,
     params,
