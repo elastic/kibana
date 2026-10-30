@@ -20,6 +20,7 @@ import type { StartServices } from '../hooks/use_kibana';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppStartDependencies } from '../types';
 import { entityInventoryRouter } from '../routes/config';
+import { createFixtureEntityInventoryApiClient } from '../inventory_api/fixture_client';
 
 interface EntityInventoryShellProps {
   PageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
@@ -69,7 +70,12 @@ export function renderApp(
 ) {
   const { PageTemplate } = plugins.observabilityShared.navigation;
 
-  const services: StartServices = { ...core, ...plugins };
+  // Fixture data backs the inventory until the entity inventory routes exist (#6304).
+  const services: StartServices = {
+    ...core,
+    ...plugins,
+    inventoryApi: createFixtureEntityInventoryApiClient(),
+  };
 
   ReactDOM.render(
     core.rendering.addContext(
