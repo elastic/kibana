@@ -47,6 +47,7 @@ describe('AgentActivityFlyout', () => {
   const mockOnAbortSuccess = jest.fn();
   const mockAbortUpgrade = jest.fn();
   const mockAbortUnenroll = jest.fn();
+  const mockAbortUninstall = jest.fn();
   const mockSetSearch = jest.fn();
   const mockSetSelectedStatus = jest.fn();
   const mockOpenManageAutoUpgradeModal = jest.fn();
@@ -794,5 +795,100 @@ describe('AgentActivityFlyout', () => {
       result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
     ).toEqual('Upgrading 5 agents to version 8.5.0');
     expect(result.getByText('Agent 1 is not upgradeable')).toBeInTheDocument();
+  });
+
+  describe('UNINSTALL actions', () => {
+    const uninstallAction = {
+      actionId: 'uninstall-1',
+      nbAgentsActionCreated: 2,
+      nbAgentsAck: 0,
+      type: 'UNINSTALL',
+      nbAgentsActioned: 2,
+      status: 'IN_PROGRESS',
+      startTime: '2099-09-15T10:00:00.000Z',
+      expiration: '2099-09-16T10:00:00.000Z',
+      creationTime: '2099-09-15T09:00:00.000Z',
+      nbAgentsFailed: 0,
+    };
+
+    const mockStatus = (action: Record<string, unknown>) =>
+      mockUseActionStatus.mockReturnValue({
+        currentActions: [action],
+        abortUpgrade: mockAbortUpgrade,
+        abortUnenroll: mockAbortUnenroll,
+        abortUninstall: mockAbortUninstall,
+        isFirstLoading: false,
+      });
+
+    it('should render a scheduled uninstall as pending with its execution time and cancel it', async () => {
+      mockStatus(uninstallAction);
+      const result = testRenderer.render(component());
+
+      expect(result.getByTestId('uninstallPendingTitle').textContent).toContain(
+        'Uninstall pending: 2 agents'
+      );
+      expect(result.getByTestId('uninstallPendingDescription').textContent).toContain(
+        'Scheduled for'
+      );
+
+      await act(async () => {
+        fireEvent.click(result.getByTestId('abortUninstallBtn'));
+      });
+      expect(mockAbortUninstall).toHaveBeenCalledWith(
+        expect.objectContaining({ actionId: 'uninstall-1' })
+      );
+    });
+
+    it('should not offer cancel once the grace period has passed', () => {
+      mockStatus({ ...uninstallAction, startTime: '2022-09-15T10:00:00.000Z' });
+      const result = testRenderer.render(component());
+
+      expect(result.queryByTestId('abortUninstallBtn')).not.toBeInTheDocument();
+      expect(result.queryByTestId('uninstallPendingTitle')).not.toBeInTheDocument();
+    });
+
+    it('should render a completed uninstall', () => {
+      mockStatus({
+        ...uninstallAction,
+        status: 'COMPLETE',
+        nbAgentsAck: 2,
+        startTime: '2022-09-15T10:00:00.000Z',
+        completionTime: '2022-09-15T11:00:00.000Z',
+      });
+      const result = testRenderer.render(component());
+
+      expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+        '2 agents uninstalled'
+      );
+    });
+
+    it('should render an expired uninstall', () => {
+      mockStatus({
+        ...uninstallAction,
+        status: 'EXPIRED',
+        startTime: '2022-09-15T10:00:00.000Z',
+        expiration: '2022-09-16T10:00:00.000Z',
+        creationTime: '2022-09-15T09:00:00.000Z',
+      });
+      const result = testRenderer.render(component());
+
+      expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+        'Agent uninstall expired'
+      );
+    });
+
+    it('should render a cancelled uninstall', () => {
+      mockStatus({
+        ...uninstallAction,
+        status: 'CANCELLED',
+        startTime: '2022-09-15T10:00:00.000Z',
+        cancellationTime: '2022-09-15T10:30:00.000Z',
+      });
+      const result = testRenderer.render(component());
+
+      expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+        'Agent uninstall cancelled'
+      );
+    });
   });
 });

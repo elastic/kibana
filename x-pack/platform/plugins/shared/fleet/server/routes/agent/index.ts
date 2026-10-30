@@ -70,6 +70,9 @@ import {
   PostAgentRestartRequestSchema,
   PostAgentRestartResponseSchema,
   PostBulkAgentRestartRequestSchema,
+  PostAgentUninstallRequestSchema,
+  PostAgentUninstallResponseSchema,
+  PostBulkAgentUninstallRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   PostCancelActionRequestSchema,
   PostNewAgentActionResponseSchema,
@@ -124,6 +127,7 @@ import {
 } from './change_privilege_level_handlers';
 import { bulkRollbackAgentHandler, rollbackAgentHandler } from './rollback_handlers';
 import { bulkRestartAgentsHandler, restartAgentHandler } from './restart_handler';
+import { bulkUninstallAgentsHandler, uninstallAgentHandler } from './uninstall_handler';
 import { generateReportHandler } from './generate_report_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -1817,5 +1821,163 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       bulkRestartAgentsHandler
+    );
+
+  // Uninstall agent
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.UNINSTALL_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Uninstall an agent`,
+      description: `Schedule the uninstall of an Elastic Agent from its host. The agent must advertise uninstall support and be unenrolled first (pending uninstall). The uninstall runs after a grace period of 1 to 24 hours (default 1 hour) during which it can be cancelled. The request fails when the agent is not eligible, is unprivileged, or is enrolled in a hosted agent policy.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+        availability: {
+          since: '9.7.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: PostAgentUninstallRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PostAgentUninstallResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          actionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+      },
+      uninstallAgentHandler
+    );
+
+  // Bulk uninstall agents
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.BULK_UNINSTALL_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Bulk uninstall agents`,
+      description: `Schedule the uninstall of multiple Elastic Agents from their hosts. Agents that do not support uninstall, are unprivileged, have not been unenrolled first, or are enrolled in a hosted policy are excluded from the action and receive individual error results.`,
+      options: {
+        tags: ['oas-tag:Elastic Agent actions'],
+        availability: {
+          since: '9.7.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: PostBulkAgentUninstallRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => PostAgentUninstallResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkUninstallAgentsRequest: {
+                      value: {
+                        agents: ['agent-1', 'agent-2'],
+                        delay_seconds: 7200,
+                        batchSize: 100,
+                        includeInactive: false,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          actionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+      },
+      bulkUninstallAgentsHandler
     );
 };

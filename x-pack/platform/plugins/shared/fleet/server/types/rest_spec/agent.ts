@@ -18,6 +18,11 @@ import {
   FLEET_SCHEMA_NAME_MAX_LENGTH,
 } from '../../constants';
 
+import {
+  UNINSTALL_DELAY_DEFAULT_SECONDS,
+  UNINSTALL_DELAY_MAX_SECONDS,
+  UNINSTALL_DELAY_MIN_SECONDS,
+} from '../../../common/services';
 import { NewAgentActionSchema } from '../models';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
@@ -1089,6 +1094,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('ROLLBACK'),
         schema.literal('REMOVE_COLLECTOR'),
         schema.literal('RESTART'),
+        schema.literal('UNINSTALL'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {
@@ -1238,6 +1244,39 @@ export const PostAgentRestartResponseSchema = ActionIdOrMessageSchema;
 export const PostBulkAgentRestartRequestSchema = {
   body: schema.object({
     agents: bulkAgentsSchema(),
+    batchSize: schema.maybe(schema.number({ min: 1 })),
+    includeInactive: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+const UninstallDelaySecondsSchema = schema.number({
+  min: UNINSTALL_DELAY_MIN_SECONDS,
+  max: UNINSTALL_DELAY_MAX_SECONDS,
+  meta: {
+    description: `Grace period in seconds before the uninstall runs, between ${UNINSTALL_DELAY_MIN_SECONDS} (1 hour) and ${UNINSTALL_DELAY_MAX_SECONDS} (24 hours). The uninstall can be cancelled during this period. Defaults to ${UNINSTALL_DELAY_DEFAULT_SECONDS}.`,
+  },
+});
+
+export const PostAgentUninstallRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({
+      maxLength: AGENT_ID_MAX_LENGTH,
+      meta: { description: 'The agent ID to uninstall' },
+    }),
+  }),
+  body: schema.nullable(
+    schema.object({
+      delay_seconds: schema.maybe(UninstallDelaySecondsSchema),
+    })
+  ),
+};
+
+export const PostAgentUninstallResponseSchema = ActionIdOrMessageSchema;
+
+export const PostBulkAgentUninstallRequestSchema = {
+  body: schema.object({
+    agents: bulkAgentsSchema(),
+    delay_seconds: schema.maybe(UninstallDelaySecondsSchema),
     batchSize: schema.maybe(schema.number({ min: 1 })),
     includeInactive: schema.boolean({ defaultValue: false }),
   }),

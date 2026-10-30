@@ -67,6 +67,7 @@ export function searchHitToAgent(
     enrolled_at: hit._source?.enrolled_at!,
     unenrolled_at: hit._source?.unenrolled_at!,
     unenrollment_started_at: hit._source?.unenrollment_started_at,
+    uninstall_pending: hit._source?.uninstall_pending,
     audit_unenrolled_reason: hit._source?.audit_unenrolled_reason!,
     upgraded_at: hit._source?.upgraded_at,
     upgrade_started_at: hit._source?.upgrade_started_at,

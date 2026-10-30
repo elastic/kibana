@@ -8,6 +8,7 @@
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 
+import { AgentListPage } from './agent_list_page';
 import { BrowseIntegrationPage } from './browse_integrations_page';
 import { CopyIntegrationPage } from './copy_integration_page';
 import { CreateIntegrationLandingPage } from './create_integration_landing_page';
@@ -16,6 +17,7 @@ import { IntegrationHomePage } from './integration_home';
 import { ManageIntegrationsTablePage } from './manage_integrations_table_page';
 
 export interface StreamsPageObjects extends PageObjects {
+  agentList: AgentListPage;
   browseIntegrations: BrowseIntegrationPage;
   createIntegrationLanding: CreateIntegrationLandingPage;
   fleetHome: FleetHomePage;
@@ -27,6 +29,7 @@ export interface StreamsPageObjects extends PageObjects {
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): StreamsPageObjects {
   return {
     ...pageObjects,
+    agentList: createLazyPageObject(AgentListPage, page),
     browseIntegrations: createLazyPageObject(BrowseIntegrationPage, page),
     copyIntegration: createLazyPageObject(CopyIntegrationPage, page),
     createIntegrationLanding: createLazyPageObject(CreateIntegrationLandingPage, page),

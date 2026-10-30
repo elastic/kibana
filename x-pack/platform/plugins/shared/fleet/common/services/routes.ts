@@ -386,6 +386,9 @@ export const agentRouteService = {
   postBulkAgentRollback: () => AGENT_API_ROUTES.BULK_ROLLBACK_PATTERN,
   postAgentRestart: (agentId: string) => buildPath(AGENT_API_ROUTES.RESTART_PATTERN, { agentId }),
   postBulkAgentRestart: () => AGENT_API_ROUTES.BULK_RESTART_PATTERN,
+  postAgentUninstall: (agentId: string) =>
+    buildPath(AGENT_API_ROUTES.UNINSTALL_PATTERN, { agentId }),
+  postBulkAgentUninstall: () => AGENT_API_ROUTES.BULK_UNINSTALL_PATTERN,
   postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
   getAgentEffectiveConfig: (agentId: string) =>
     buildPath(AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN, { agentId }),

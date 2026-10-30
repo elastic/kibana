@@ -47,6 +47,16 @@ export {
   MINIMUM_RESTART_AGENT_VERSION,
 } from './is_agent_restart_supported';
 export {
+  getAgentUninstallIneligibleReason,
+  isAgentUninstallCapable,
+  isAgentUninstallSupported,
+  isUninstallDelayValid,
+  UNINSTALL_DELAY_DEFAULT_SECONDS,
+  UNINSTALL_DELAY_MAX_SECONDS,
+  UNINSTALL_DELAY_MIN_SECONDS,
+} from './is_agent_uninstall_supported';
+export type { AgentUninstallIneligibleReason } from './is_agent_uninstall_supported';
+export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,
   isAgentEligibleForMigration,

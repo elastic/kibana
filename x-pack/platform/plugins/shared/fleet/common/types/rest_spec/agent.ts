@@ -201,6 +201,32 @@ export interface PostBulkAgentRestartResponse {
   actionId: string;
 }
 
+export interface PostAgentUninstallRequest {
+  params: {
+    agentId: string;
+  };
+  body?: {
+    delay_seconds?: number;
+  };
+}
+
+export interface PostAgentUninstallResponse {
+  actionId: string;
+}
+
+export interface PostBulkAgentUninstallRequest {
+  body: {
+    agents: string[] | string;
+    delay_seconds?: number;
+    batchSize?: number;
+    includeInactive?: boolean;
+  };
+}
+
+export interface PostBulkAgentUninstallResponse {
+  actionId: string;
+}
+
 export interface PostAgentReassignRequest {
   params: {
     agentId: string;

@@ -47,6 +47,7 @@ export const FlyoutBody: React.FunctionComponent<{
   currentActions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   abortUnenroll: (action: ActionStatus) => Promise<void>;
+  abortUninstall: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => Promise<void>;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 
@@ -59,6 +60,7 @@ export const FlyoutBody: React.FunctionComponent<{
   currentActions,
   abortUpgrade,
   abortUnenroll,
+  abortUninstall,
   onClickViewAgents,
   onClickManageAutoUpgradeAgents,
   areActionsFullyLoaded,
@@ -169,6 +171,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={inProgressActions}
                 abortUpgrade={abortUpgrade}
                 abortUnenroll={abortUnenroll}
+                abortUninstall={abortUninstall}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
@@ -184,6 +187,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={todayActions}
                 abortUpgrade={abortUpgrade}
                 abortUnenroll={abortUnenroll}
+                abortUninstall={abortUninstall}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
@@ -195,6 +199,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 actions={otherDays[day]}
                 abortUpgrade={abortUpgrade}
                 abortUnenroll={abortUnenroll}
+                abortUninstall={abortUninstall}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />

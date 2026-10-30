@@ -18,13 +18,20 @@ import {
   isAgentEligibleForMigration,
   isAgentEligibleForPrivilegeLevelChange,
   isAgentRequestDiagnosticsSupported,
+  getAgentUninstallIneligibleReason,
   isAgentRestartSupported,
+  isAgentUninstallCapable,
   isAgentUpgrading,
 } from '../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../types';
-import { useAuthz, useLicense, useRestartAgentAction } from '../../../hooks';
+import {
+  useAuthz,
+  useLicense,
+  useRestartAgentAction,
+  useUninstallAgentAction,
+} from '../../../hooks';
 import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../services';
 
 import type { MenuItem } from '../components/hierarchical_actions_menu';
@@ -45,6 +52,7 @@ export interface SingleAgentMenuCallbacks {
   onChangeAgentPrivilegeLevelClick: () => void;
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
+  onUninstallActionClick: () => void;
   onRollbackClick: () => void;
   onRestartClick: () => void;
   onRemoveCollectorClick?: () => void;
@@ -68,6 +76,7 @@ export function useSingleAgentMenuItems({
   const authz = useAuthz();
   const licenseService = useLicense();
   const { isRestartAgentActionEnabled } = useRestartAgentAction();
+  const { isUninstallAgentActionEnabled } = useUninstallAgentAction();
 
   const isAgentless = agentPolicy?.supports_agentless === true;
   const isUnenrolling = agent.status === 'unenrolling';
@@ -395,24 +404,59 @@ export function useSingleAgentMenuItems({
         'data-test-subj': 'agentUnenrollBtn',
       });
 
-      // Uninstall agent
+      // Uninstall agent: schedule the remote uninstall for agents advertising support for it,
+      // otherwise fall back to showing the manual uninstall command.
       if (agent.policy_id) {
-        securityChildren.push({
-          id: 'uninstall',
-          name: (
-            <FormattedMessage
-              id="xpack.fleet.agentList.getUninstallCommand"
-              defaultMessage="Uninstall agent"
-            />
-          ),
-          icon: 'minusCircle',
-          iconColor: 'danger',
-          disabled: !agent.active,
-          onClick: () => {
-            callbacks.onUninstallClick();
-          },
-          'data-test-subj': 'uninstallAgentMenuItem',
-        });
+        if (isUninstallAgentActionEnabled && isAgentUninstallCapable(agent)) {
+          const ineligibleReason = getAgentUninstallIneligibleReason(agent);
+          securityChildren.push({
+            id: 'uninstall-action',
+            name: (
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.uninstallOneButton"
+                    defaultMessage="Uninstall agent"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge label="Beta" size="s" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            icon: 'minusCircle',
+            iconColor: 'danger',
+            disabled: ineligibleReason !== undefined,
+            toolTipContent: ineligibleReason ? (
+              <FormattedMessage
+                id="xpack.fleet.agentList.uninstallDisabledTooltip"
+                defaultMessage="{reason, select, not_unenrolled {Unenroll first. An agent must be unenrolled before it can be uninstalled.} unprivileged {Unprivileged agents cannot be uninstalled remotely.} other {This agent cannot be uninstalled remotely.}}"
+                values={{ reason: ineligibleReason }}
+              />
+            ) : undefined,
+            onClick: () => {
+              callbacks.onUninstallActionClick();
+            },
+            'data-test-subj': 'agentUninstallActionBtn',
+          });
+        } else {
+          securityChildren.push({
+            id: 'uninstall',
+            name: (
+              <FormattedMessage
+                id="xpack.fleet.agentList.getUninstallCommand"
+                defaultMessage="Uninstall agent"
+              />
+            ),
+            icon: 'minusCircle',
+            iconColor: 'danger',
+            disabled: !agent.active,
+            onClick: () => {
+              callbacks.onUninstallClick();
+            },
+            'data-test-subj': 'uninstallAgentMenuItem',
+          });
+        }
       }
     }
 
@@ -447,6 +491,7 @@ export function useSingleAgentMenuItems({
     isUnenrolling,
     authz.fleet.readAgentPolicies,
     isRestartAgentActionEnabled,
+    isUninstallAgentActionEnabled,
   ]);
 
   return menuItems;

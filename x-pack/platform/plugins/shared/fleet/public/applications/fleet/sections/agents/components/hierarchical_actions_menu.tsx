@@ -33,6 +33,8 @@ export interface MenuItem {
   iconColor?: EuiIconProps['color'];
   /** Whether the item is disabled */
   disabled?: boolean;
+  /** Tooltip shown on hover, typically to explain why the item is disabled */
+  toolTipContent?: React.ReactNode;
   /** Click handler for action items (not used if children are present) */
   onClick?: (event: React.MouseEvent) => void;
   /** Nested menu items - if present, this item becomes a submenu trigger */
@@ -126,6 +128,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
               <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
             ) : undefined,
             disabled: item.disabled,
+            toolTipContent: item.toolTipContent,
             panel: itemPath,
             'data-test-subj': item['data-test-subj'],
           };
@@ -137,6 +140,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
             <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
           ) : undefined,
           disabled: item.disabled,
+          toolTipContent: item.toolTipContent,
           onClick: (event: React.MouseEvent) => {
             if (item.onClick) {
               item.onClick(event);

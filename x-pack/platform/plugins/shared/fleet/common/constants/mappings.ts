@@ -163,6 +163,9 @@ export const AGENT_MAPPINGS = {
                 upgradeable: {
                   type: 'boolean',
                 },
+                uninstallable: {
+                  type: 'boolean',
+                },
                 version: {
                   type: 'text',
                   properties: {
@@ -296,6 +299,9 @@ export const AGENT_MAPPINGS = {
     },
     unenrollment_started_at: {
       type: 'date',
+    },
+    uninstall_pending: {
+      type: 'boolean',
     },
     unenrolled_reason: {
       type: 'keyword',

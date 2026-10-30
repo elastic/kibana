@@ -699,4 +699,52 @@ describe('AgentDetailsActionMenu', () => {
       expect(res).toBe(null);
     });
   });
+
+  describe('Uninstall agent action', () => {
+    const uninstallableMetadata = { elastic: { agent: { version: '9.7.0', uninstallable: true } } };
+    const policy = { is_managed: false } as AgentPolicy;
+
+    async function renderSecurityMenu(agent: Record<string, unknown>) {
+      const { utils } = renderActions({
+        agent: { active: true, status: 'online', policy_id: 'policy-1', ...agent } as any,
+        agentPolicy: policy,
+      });
+      await navigateToSubmenu(utils, 'Security and removal');
+      return utils;
+    }
+
+    it('should open the uninstall modal for an unenrolled, uninstallable agent', async () => {
+      const utils = await renderSecurityMenu({
+        uninstall_pending: true,
+        local_metadata: uninstallableMetadata,
+      });
+
+      const item = utils.getByTestId('agentUninstallActionBtn');
+      expect(item).toBeEnabled();
+      expect(item).toHaveTextContent('Beta');
+
+      fireEvent.click(item);
+
+      expect(await utils.findByTestId('agentUninstallModal')).toBeInTheDocument();
+    });
+
+    it('should disable the action while the agent is still enrolled', async () => {
+      const utils = await renderSecurityMenu({
+        uninstall_pending: false,
+        local_metadata: uninstallableMetadata,
+      });
+
+      expect(utils.getByTestId('agentUninstallActionBtn')).toBeDisabled();
+    });
+
+    it('should show the manual uninstall command item for agents without the flag', async () => {
+      const utils = await renderSecurityMenu({
+        uninstall_pending: true,
+        local_metadata: { elastic: { agent: { version: '9.7.0' } } },
+      });
+
+      expect(utils.queryByTestId('agentUninstallActionBtn')).not.toBeInTheDocument();
+      expect(utils.getByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
+    });
+  });
 });
