@@ -40,7 +40,7 @@ export type SubscriptionStatus =
       meter?: SubscriptionStatusMeter;
       description?: string;
       primaryAction: SubscriptionStatusAction;
-      /** Tinted for informational actions, filled (the default) for calls to action. */
+      /** Tinted for users who can't change the subscription, filled (the default) otherwise. Only tinted external actions show the external icon. */
       primaryActionStyle?: 'fill' | 'tinted';
       secondaryAction?: SubscriptionStatusAction;
       projectType?: string;
