@@ -213,7 +213,9 @@ describe('LatencyMap', () => {
     expect(yAxisLabelFormatter(23)).toBe('≥10ms');
     const xLabels = Array.from({ length: 40 }, (_, column) => xAxisLabelFormatter(timeAt(column)));
     // The chart thins the columns' labels to the ones that fit.
-    expect(xLabels.every((label) => /^\d\d:\d\d$/.test(label))).toBe(true);
+    // Columns that do not span whole minutes read with seconds, so that no two read alike.
+    expect(xLabels.every((label) => /^\d\d:\d\d(:\d\d)?$/.test(label))).toBe(true);
+    expect(new Set(xLabels).size).toBe(40);
   });
 
   it('says so when the range has no spans, and reports it loaded', async () => {

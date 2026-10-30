@@ -136,7 +136,9 @@ export function LatencyHeatmap({
           stroke: colors.selectionStroke,
           strokeWidth: 2,
         },
-        brushTool: { visible: true, fill: colors.selectionStroke },
+        // The chart's grips inside the box (two bars next to its walls) read as a text selection
+        // while brushing; the handles of the committed selection are our own.
+        brushTool: { visible: false },
       },
     }),
     [colors]
