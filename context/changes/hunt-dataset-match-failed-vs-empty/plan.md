@@ -405,22 +405,22 @@ scope unless product asks for a one-off.
 
 #### Automated
 
-- [x] 2.1 Resolve / narrative / related jest pass
-- [x] 2.2 alertzero type_check passes
+- [x] 2.1 Resolve / narrative / related jest pass — dd4c6deaeff0
+- [x] 2.2 alertzero type_check passes — dd4c6deaeff0
 
 #### Manual
 
-- [x] 2.3 Guard order: failed before missing-model and no_tier2_targets
-- [x] 2.4 Narrative does not blame missing Efficient when a match model was selected and failed
+- [x] 2.3 Guard order: failed before missing-model and no_tier2_targets — dd4c6deaeff0
+- [x] 2.4 Narrative does not blame missing Efficient when a match model was selected and failed — dd4c6deaeff0
 
 ### Phase 3: Regression tests, live repro, gates, PR
 
 #### Automated
 
-- [ ] 3.1 Coordinator + match + resolve jest suites pass
-- [ ] 3.2 Scoped branch check / eslint / type_check green
+- [x] 3.1 Coordinator + match + resolve jest suites pass
+- [x] 3.2 Scoped branch check / eslint / type_check green
 
 #### Manual
 
-- [ ] 3.3 Live failure repro: no evidence stamp; report still eligible
+- [x] 3.3 Live failure repro: no evidence stamp; report still eligible
 - [ ] 3.4 Draft PR open; security-team#20615 commented with PR URL; Beads notes updated

@@ -444,6 +444,52 @@ describe('huntCoordinator', () => {
         expect(result.completed_successfully).toBe(true);
       });
 
+      it('stays retryable as no_inference when the efficient model was asked and the call failed', async () => {
+        nothingElsePointsAnywhere();
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'connector down' });
+
+        const result = await run('run-efficient-match-failed');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.tier2_skip_detail).toBe('connector down');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+        expect(result.message).toContain('dataset-match model call failed');
+        expect(result.narrative).toContain('the model call that chooses where to hunt failed');
+        expect(result.narrative).not.toContain('Efficient tier had no model');
+      });
+
+      it('stays retryable as no_inference when the cyber model was asked and the call failed', async () => {
+        nothingElsePointsAnywhere();
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'template rejected' });
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-match-failed',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockModelMatch.mock.calls[0][0].model).toBe(cyber);
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.tier2_skip_detail).toBe('template rejected');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+      });
+
       it.each([
         [
           'the report matched a dataset',

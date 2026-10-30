@@ -440,7 +440,9 @@ describe('matchDatasetsWithModel', () => {
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
     ).resolves.toEqual({ status: 'failed', message: expect.any(String) });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('no usable structured output'));
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('no usable structured output')
+    );
   });
 
   it('returns failed and warns when structured output parsing fails', async () => {
