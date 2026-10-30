@@ -16,6 +16,7 @@ properties:
       For owners that do not support observable extraction (currently Observability), an omitted
       value resolves to `false` regardless of the space configuration.
       Only Security can store `true`. For Stack and Observability, a request that would store `true`
-      fails with a 400 error. A request that keeps an already stored `true` is accepted.
+      fails with a 400 error. This includes a `true` that comes from a template or the space
+      configuration. An update that keeps an already stored `true` is accepted.
     type: boolean
     example: true
