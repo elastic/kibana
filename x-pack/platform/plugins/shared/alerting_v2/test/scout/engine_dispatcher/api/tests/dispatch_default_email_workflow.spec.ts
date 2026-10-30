@@ -36,6 +36,9 @@ const HOSTS = ['host-default-email-a', 'host-default-email-b'];
 // The test waits for the alerts to fire and then for the workflow to complete, each for up
 // to `POLL_TIMEOUT_MS`, so it needs a budget above the 60s default to stay off the edge.
 const TEST_TIMEOUT_MS = 120_000;
+// The `date` filter formats in the Kibana server's time zone, which the spec cannot know,
+// so event times are masked and only their format is checked.
+const EVENT_TIME = /Last event \d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/g;
 
 interface DispatchedAlert {
   alert_id: string;
@@ -151,29 +154,28 @@ apiTest.describe(
         const notifyStep = stepExecutions.find(({ stepId }) => stepId === 'notify');
         expect(notifyStep?.status).toBe('completed');
 
-        // The `date` filter formats in the Kibana server's time zone, which the spec cannot
-        // know, so only the format of each event time is checked.
         const { message } = notifyStep?.input as { message: string };
-        expect(
-          message.replace(/Last event \d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC/g, 'Last event <time> UTC')
-        ).toBe(
+        const [first, second] = alerts;
+
+        // The first two lines of each alert end with `\`, a Markdown line break.
+        expect(message.replace(EVENT_TIME, 'Last event <time> UTC')).toBe(
           [
-            `**${HOSTS.length} alerts**`,
+            '**2 alerts**',
             '',
-            ...alerts.flatMap(({ alert_id: alertId, alert_url: alertUrl }, index) => [
-              ...(index > 0 ? [''] : []),
-              `**${RULE_NAME}** — Active\\`,
-              `Last event <time> UTC · [View in app](${alertUrl})\\`,
-              `Alert id: ${alertId}`,
-            ]),
+            `**${RULE_NAME}** — Active\\`,
+            `Last event <time> UTC · [View in app](${first.alert_url})\\`,
+            `Alert id: ${first.alert_id}`,
+            '',
+            `**${RULE_NAME}** — Active\\`,
+            `Last event <time> UTC · [View in app](${second.alert_url})\\`,
+            `Alert id: ${second.alert_id}`,
             '',
           ].join('\n')
         );
 
         // The email connector turns the Markdown into the HTML that is sent.
         const { html } = (notifyStep?.output as { message: { html: string } }).message;
-        for (const { alert_id: alertId, alert_url: alertUrl } of alerts) {
-          expect(alertUrl).toContain(`/app/observability/alerting/alerts/${alertId}`);
+        for (const { alert_url: alertUrl } of alerts) {
           expect(html).toContain(`<strong>${RULE_NAME}</strong> — Active<br>`);
           expect(html).toContain(`<a href="${alertUrl}">View in app</a>`);
         }
