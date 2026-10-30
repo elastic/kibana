@@ -6,7 +6,7 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * LLM-as-judge prompts ported from Elastic's private `deductive` repo (commit
@@ -511,6 +511,192 @@ export const AntiLeakageJudgePrompt = createPrompt({
             },
           },
           required: ['leaked_root_cause', 'reasoning'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+const TOOL_CALL_HEALTH_SYSTEM = `You are auditing the TOOL USE of an AI alert-investigation agent.
+Read its numbered tool-call trajectory and identify every call that FAILED and every call that
+returned NO DATA. Judge from the call's arguments and its result, not from whether the tool
+reported success: a tool can answer "success" and still have failed the agent's purpose.
+
+## FAILED
+The call did not do what the agent was trying to do. Examples:
+- an error message, stack trace, timeout, permission or authentication failure, or a non-zero \`exit_code\`;
+- a query rejected or mangled by a syntax error, an unknown index/field/column, or a bad argument;
+- a read of a file or path that does not exist;
+- a "success" response that carries only metadata or a warning and none of the requested content.
+
+## NO DATA
+The call ran correctly but came back empty, so the agent learned nothing from it. Examples:
+- an empty list (for instance a list of indices, data streams, files or fields with no entries);
+- zero rows, zero hits or an empty \`{}\` / \`[]\` result, or "no results found";
+- a response containing only column headers or metadata.
+
+A call is either FAILED or NO DATA, never both: if it failed, do not also list it as empty.
+
+## Do NOT count
+- A call whose empty result is the expected, informative answer to a deliberate absence check
+  (for example "were there any errors in this window?" returning none), because that is real
+  evidence, not wasted effort.
+- A call that returned useful data, even if part of it is noisy or truncated.
+- Calls you cannot assess because the result text is cut off. Judge only what is visible.
+
+Refer to calls by the step number printed in the trajectory.`;
+
+const TOOL_CALL_HEALTH_USER = `## Question (context only)
+{{{question}}}
+
+## Tool-call trajectory (everything the agent called, in order)
+{{{trajectory}}}
+
+List the failed and the no-data calls, then call the \`score\` tool.`;
+
+const TOOL_CALL_ISSUE_SCHEMA = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      step: { type: 'number', description: 'The trajectory step number of the call.' },
+      reason: { type: 'string', description: 'One short sentence on what went wrong.' },
+    },
+    required: ['step', 'reason'],
+  },
+} as const;
+
+export const ToolCallHealthJudgePrompt = createPrompt({
+  name: 'nightshift_tool_call_health_judge',
+  description:
+    'tool_calls_failed / tool_calls_empty judge: which tool calls failed or returned no data, including "successful" calls that did not achieve their purpose.',
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      trajectory: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: TOOL_CALL_HEALTH_SYSTEM } },
+    template: { mustache: { template: TOOL_CALL_HEALTH_USER } },
+    tools: {
+      score: {
+        description: 'Return the failed and the no-data tool calls.',
+        schema: {
+          type: 'object',
+          properties: {
+            failed_calls: {
+              ...TOOL_CALL_ISSUE_SCHEMA,
+              description: 'Calls that failed to do what the agent intended.',
+            },
+            empty_calls: {
+              ...TOOL_CALL_ISSUE_SCHEMA,
+              description: 'Calls that ran correctly but returned no data.',
+            },
+          },
+          required: ['failed_calls', 'empty_calls'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+export const CORTEX_INFLUENCE_TYPES = ['none', 'confirmatory', 'redirected'] as const;
+
+const RECALL_USAGE_SYSTEM = `You are auditing how an AI alert-investigation agent used RECALLED knowledge.
+Its sandbox holds two kinds of recall files that past investigations wrote down:
+- CORTEX files under \`cortex/\`: accumulated investigation knowledge.
+- SEMANTIC-MEMORY files under \`memories/\`.
+Reading one of them is not evidence gathered now. You are told which such files the agent opened;
+judge from the numbered trajectory what it did with them.
+
+## 1. Cortex influence
+Did what the agent read in a cortex file change the direction of the investigation?
+- \`none\`: no cortex file was opened, or the agent's hypotheses and queries would have been the same
+  without it (it was ignored, skimmed, or irrelevant).
+- \`confirmatory\`: the file supported a direction the agent already had; it did not change it.
+- \`redirected\`: after reading it, the agent changed course because of it: it adopted a hypothesis,
+  dropped one, or ran queries it names or clearly derives from the file, which it had not been pursuing before.
+Compare the agent's steps BEFORE and AFTER the read. A direction that appears only after the read and
+traces to the file's content is redirected; one the agent was already following is confirmatory.
+
+## 2. Memories cited in the final answer
+List the \`memories/\` files whose content the FINAL REPORT relies on or cites: the report states a
+fact, cause, or recommendation that comes from that memory file. Do not list a memory that was only
+opened and not used in the report, and do not list files that were not opened. Use the exact paths
+you were given.`;
+
+const RECALL_USAGE_USER = `## Question (context only)
+{{{question}}}
+
+## Cortex files the agent opened
+{{{cortexReads}}}
+
+## Memory files the agent opened
+{{{memoryReads}}}
+
+## Final report (conclusion, hypotheses, recommendations)
+{{{answer}}}
+
+## Report's own selected evidence
+{{{evidence}}}
+
+## Tool-call trajectory (everything the agent called, in order)
+{{{trajectory}}}
+
+Judge the cortex influence and which memories the final report cites, then call the \`score\` tool.`;
+
+export const RecallUsageJudgePrompt = createPrompt({
+  name: 'nightshift_recall_usage_judge',
+  description:
+    'cortex_changed_direction / memories_cited_in_answer judge: did cortex files change the investigation direction, and which memories does the final report cite.',
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      cortexReads: z.string(),
+      memoryReads: z.string(),
+      answer: z.string(),
+      evidence: z.string(),
+      trajectory: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: RECALL_USAGE_SYSTEM } },
+    template: { mustache: { template: RECALL_USAGE_USER } },
+    tools: {
+      score: {
+        description: 'Return the cortex influence and the memories the final report cites.',
+        schema: {
+          type: 'object',
+          properties: {
+            cortex_influence: {
+              type: 'string',
+              enum: CORTEX_INFLUENCE_TYPES as unknown as string[],
+              description: 'How the cortex files affected the investigation direction.',
+            },
+            cortex_reasoning: {
+              type: 'string',
+              description:
+                'One or two sentences citing the steps before and after the cortex read.',
+            },
+            memories_cited: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Paths of the memory files the final report relies on or cites.',
+            },
+            memories_reasoning: {
+              type: 'string',
+              description: 'One or two sentences on what in the report comes from which memory.',
+            },
+          },
+          required: [
+            'cortex_influence',
+            'cortex_reasoning',
+            'memories_cited',
+            'memories_reasoning',
+          ],
         },
       },
     },
