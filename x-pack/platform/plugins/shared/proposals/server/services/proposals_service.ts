@@ -41,6 +41,7 @@ import type {
   ProposalChartsSummaryQuery,
   ProposalChartsSummaryResponse,
   ProposalDecision,
+  ProposalDecisionMode,
   ProposalFilters,
   ProposalStatus,
   ProposalUser,
@@ -97,6 +98,7 @@ export interface UpdateProposalParams {
   status?: ProposalStatus;
   decision?: ProposalDecision;
   decidedBy?: ProposalUser;
+  decisionMode?: ProposalDecisionMode;
   dismissReason?: DismissReason;
   rationale?: string;
   executionError?: string;
@@ -678,7 +680,10 @@ export class ProposalsService {
       decision,
       ...(settledAt !== undefined ? { decidedAt: settledAt } : {}),
       ...(params.decision !== undefined
-        ? { decidedBy: params.decidedBy ?? proposal.decidedBy }
+        ? {
+            decidedBy: params.decidedBy ?? proposal.decidedBy,
+            decisionMode: params.decisionMode,
+          }
         : {}),
       ...(params.dismissReason !== undefined ? { dismissReason: params.dismissReason } : {}),
       ...(params.rationale !== undefined ? { rationale: params.rationale } : {}),
@@ -744,6 +749,7 @@ export class ProposalsService {
       supersededBy: undefined,
       decidedBy: undefined,
       decidedAt: undefined,
+      decisionMode: undefined,
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
@@ -970,6 +976,7 @@ export class ProposalsService {
       decision: undefined,
       decidedBy: undefined,
       decidedAt: undefined,
+      decisionMode: undefined,
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,

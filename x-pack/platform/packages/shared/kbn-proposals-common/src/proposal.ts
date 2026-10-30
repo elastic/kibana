@@ -7,7 +7,7 @@
 
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
@@ -17,6 +17,15 @@ import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants'
  */
 export const proposalDecisionSchema = z.enum(['approved', 'dismissed']);
 export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
+
+/**
+ * How the decision was reached: `manual` when someone answered the gate, `auto`
+ * when nobody did. The gate decides on its own only by auto-approving, so in
+ * practice `auto` comes with `approved`. Written with the decision. It does not
+ * change after that. Absent only while undecided.
+ */
+export const proposalDecisionModeSchema = lazySchema(() => z.enum(['manual', 'auto']));
+export type ProposalDecisionMode = z.infer<typeof proposalDecisionModeSchema>;
 
 /**
  * Where the proposal got to, independent of what was decided. `no_action`
@@ -144,93 +153,96 @@ export const proposalUserSchema = z.object({
 });
 export type ProposalUser = z.infer<typeof proposalUserSchema>;
 
-export const proposalSchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  spaceId: z.string().max(MAX_ID_LENGTH),
-  /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  /**
-   * Short label naming what is proposed. Plain text, not markdown: `comment` is
-   * already the body. Required like `comment`, and resolved on write — the
-   * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
-   * so every reader renders this field instead of re-deriving a fallback chain.
-   */
-  title: z.string().max(MAX_TITLE_LENGTH),
-  /** Markdown explaining what is being proposed. Every proposal carries one. */
-  comment: z.string().max(MAX_COMMENT_LENGTH),
+export const proposalSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    spaceId: z.string().max(MAX_ID_LENGTH),
+    /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    /**
+     * Short label naming what is proposed. Plain text, not markdown: `comment` is
+     * already the body. Required like `comment`, and resolved on write — the
+     * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
+     * so every reader renders this field instead of re-deriving a fallback chain.
+     */
+    title: z.string().max(MAX_TITLE_LENGTH),
+    /** Markdown explaining what is being proposed. Every proposal carries one. */
+    comment: z.string().max(MAX_COMMENT_LENGTH),
 
-  /**
-   * Managed action workflow this proposal would execute. Absent for
-   * non-action proposals. Immutable: a different action is a different
-   * proposal.
-   */
-  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Inputs for the action workflow. Frozen once the proposal is decided. */
-  actionInput: boundedActionInput.optional(),
+    /**
+     * Managed action workflow this proposal would execute. Absent for
+     * non-action proposals. Immutable: a different action is a different
+     * proposal.
+     */
+    actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Inputs for the action workflow. Frozen once the proposal is decided. */
+    actionInput: boundedActionInput.optional(),
 
-  status: proposalStatusSchema,
-  /** Absent while the proposal is still awaiting a human. */
-  decision: proposalDecisionSchema.optional(),
-  /**
-   * Set when this proposal was replaced — by a retry after a failed action, or
-   * by an analyst-requested revision. Points at the successor so the queue can
-   * show one live proposal per subject rather than every attempt.
-   */
-  supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
-  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
-  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
-  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
-  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
-  revision: z.number().int().min(1).optional(),
-  /** Snapshotted from the triggering context at creation; never re-scored. */
-  impact: proposalImpactSchema,
-  confidence: proposalConfidenceSchema,
-  /**
-   * Resolved from the action workflow's metadata at creation, so it is absent
-   * on a proposal that carries no action.
-   */
-  category: proposalCategorySchema.optional(),
-  origin: proposalOriginSchema,
-  /** Decision deadline, evaluated on read rather than swept into a status. */
-  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    status: proposalStatusSchema,
+    /** Absent while the proposal is still awaiting a human. */
+    decision: proposalDecisionSchema.optional(),
+    /**
+     * Set when this proposal was replaced — by a retry after a failed action, or
+     * by an analyst-requested revision. Points at the successor so the queue can
+     * show one live proposal per subject rather than every attempt.
+     */
+    supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+    /** First proposal in the chain; equal to `id` on the root and never rewritten. */
+    rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
+    supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+    /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
+    revision: z.number().int().min(1).optional(),
+    /** Snapshotted from the triggering context at creation; never re-scored. */
+    impact: proposalImpactSchema,
+    confidence: proposalConfidenceSchema,
+    /**
+     * Resolved from the action workflow's metadata at creation, so it is absent
+     * on a proposal that carries no action.
+     */
+    category: proposalCategorySchema.optional(),
+    origin: proposalOriginSchema,
+    /** Decision deadline, evaluated on read rather than swept into a status. */
+    expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  decidedBy: proposalUserSchema.optional(),
-  decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-  dismissReason: dismissReasonSchema.optional(),
-  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-  executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
-  /**
-   * The `executionError` of the attempt this proposal re-offers: copied from
-   * the predecessor when a failed proposal is cloned, then carried through
-   * revisions untouched, since revising runs nothing. It therefore names the
-   * last attempt that actually ran and failed, which sits further back than
-   * `supersedes` once a clone has been revised. Absent while nothing in the
-   * chain has run and failed — a consumer must not read absence as "the
-   * previous attempt succeeded".
-   *
-   * A deliberate denormalisation of something the chain can already derive.
-   * The queue answers "did the last attempt fail, and how" on every row it
-   * renders, and deriving it would cost one extra fetch per row. It holds one
-   * failure only: "failed three times" is `revision` plus a chain query.
-   */
-  previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+    decidedBy: proposalUserSchema.optional(),
+    decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    decisionMode: proposalDecisionModeSchema.optional(),
+    dismissReason: dismissReasonSchema.optional(),
+    rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+    executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+    /**
+     * The `executionError` of the attempt this proposal re-offers: copied from
+     * the predecessor when a failed proposal is cloned, then carried through
+     * revisions untouched, since revising runs nothing. It therefore names the
+     * last attempt that actually ran and failed, which sits further back than
+     * `supersedes` once a clone has been revised. Absent while nothing in the
+     * chain has run and failed — a consumer must not read absence as "the
+     * previous attempt succeeded".
+     *
+     * A deliberate denormalisation of something the chain can already derive.
+     * The queue answers "did the last attempt fail, and how" on every row it
+     * renders, and deriving it would cost one extra fetch per row. It holds one
+     * failure only: "failed three times" is `revision` plus a chain query.
+     */
+    previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
-  /** Gating execution to resume. Absent when no workflow is waiting. */
-  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * Stamped by `releaseGate` — the approve and dismiss routes — before it
-   * resumes the gate, and refused by `revise()` from then on: the gate adopts
-   * the chain head before it writes the decision, so a revision landing in
-   * between would be what the approval executes. Absent on a gate resumed
-   * through any other surface and on every auto-approval, so it says nothing
-   * about who decided or how.
-   */
-  gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    /** Gating execution to resume. Absent when no workflow is waiting. */
+    workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * Stamped by `releaseGate` — the approve and dismiss routes — before it
+     * resumes the gate, and refused by `revise()` from then on: the gate adopts
+     * the chain head before it writes the decision, so a revision landing in
+     * between would be what the approval executes. Absent on a gate resumed
+     * through any other surface and on every auto-approval, so it says nothing
+     * about who decided or how.
+     */
+    gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
-  createdBy: proposalUserSchema.optional(),
-});
+    createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
+    createdBy: proposalUserSchema.optional(),
+  })
+);
 export type Proposal = z.infer<typeof proposalSchema>;
 
 /** Catalog metadata resolved on read. */
