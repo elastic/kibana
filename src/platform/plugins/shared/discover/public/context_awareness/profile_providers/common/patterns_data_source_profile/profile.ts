@@ -43,7 +43,7 @@ export const createPatternsDataSourceProfileProvider = (
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
-        const { rowHeight, density } = params;
+        const { rowHeight, density, histogramComparisonSelection } = params;
         const { patternColumns, sparklineColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
           return prev(params);
@@ -65,7 +65,15 @@ export const createPatternsDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                createElement(SparklineCellRenderer, { ...props, services, density }),
+                createElement(SparklineCellRenderer, {
+                  ...props,
+                  services,
+                  density,
+                  isSelected:
+                    histogramComparisonSelection !== undefined &&
+                    props.row.flattened[histogramComparisonSelection.column] ===
+                      histogramComparisonSelection.value,
+                }),
             }),
           {}
         );

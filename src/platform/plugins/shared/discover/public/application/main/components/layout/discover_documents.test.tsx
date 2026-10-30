@@ -14,6 +14,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
+import * as histogramComparisonState from './histogram_comparison/use_histogram_comparison_state';
 import {
   dataViewMock,
   dataViewMockWithTimeField,
@@ -29,6 +30,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import type { CellRenderersExtensionParams } from '../../../../context_awareness/types';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -65,6 +67,7 @@ async function mountComponent({
   isEsqlMode,
   dataView = dataViewMock,
   isChartAvailable,
+  isHistogramComparisonAvailable,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
@@ -72,6 +75,7 @@ async function mountComponent({
   isEsqlMode?: boolean;
   dataView?: typeof dataViewMock;
   isChartAvailable?: boolean;
+  isHistogramComparisonAvailable?: boolean;
 }) {
   if (!toolkit) {
     ({ toolkit } = await setup());
@@ -118,6 +122,7 @@ async function mountComponent({
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
     isChartAvailable,
+    isHistogramComparisonAvailable,
   };
 
   return renderWithI18n(
@@ -368,6 +373,7 @@ describe('Discover documents layout', () => {
         toolkit,
         dataView: dataViewMockWithTimeField,
         isChartAvailable: true,
+        isHistogramComparisonAvailable: true,
       });
 
       await waitFor(() => {
@@ -375,8 +381,6 @@ describe('Discover documents layout', () => {
         expect(discoverGridProps?.histogramComparisonEnabled).toBe(true);
         expect(discoverGridProps?.visibleRowLeadingControls).toBeUndefined();
       });
-      const { getRowClassName } = discoverGridMock.mock.lastCall?.[0] ?? {};
-      expect(getRowClassName?.(buildDataTableRecord(esHitsMock[0]))).toBeUndefined();
     });
 
     it('does not pass the compare action while the cascade layout is active', async () => {
@@ -418,6 +422,22 @@ describe('Discover documents layout', () => {
 
       expect(discoverGridMock.mock.lastCall?.[0]?.histogramComparisonEnabled).toBe(false);
     });
+
+    it('does not pass the compare action when the chart cannot show a comparison', async () => {
+      const { toolkit } = await setup();
+      usePatternQuery(toolkit);
+
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+        dataView: dataViewMockWithTimeField,
+        isChartAvailable: true,
+        isHistogramComparisonAvailable: false,
+      });
+
+      expect(discoverGridMock.mock.lastCall?.[0]?.histogramComparisonEnabled).toBe(false);
+    });
   });
 
   describe('context awareness', () => {
@@ -435,6 +455,44 @@ describe('Discover documents layout', () => {
       });
 
       expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalled();
+    });
+
+    it('passes the histogram comparison selection to cell renderers', async () => {
+      const services = createDiscoverServicesMock();
+      const { profilesManagerMock, rootProfileProviderMock } = createContextAwarenessMocks();
+      const seenParams: CellRenderersExtensionParams[] = [];
+      const getCellRenderers = rootProfileProviderMock.profile.getCellRenderers as jest.Mock;
+      getCellRenderers.mockImplementation(() => (params: CellRenderersExtensionParams) => {
+        seenParams.push(params);
+        return {};
+      });
+      services.profilesManager = profilesManagerMock;
+      await services.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
+      const selection = {
+        key: 'pattern',
+        label: 'Failed login',
+        column: 'Pattern',
+        value: 'Failed login',
+        documentQuery: 'FROM logs',
+      };
+      const spy = jest
+        .spyOn(histogramComparisonState, 'useHistogramComparisonState')
+        .mockReturnValue({ selection });
+
+      const { toolkit } = await setup({ services });
+      await mountComponent({
+        fetchStatus: FetchStatus.COMPLETE,
+        hits: esHitsMock,
+        toolkit,
+        isChartAvailable: true,
+        isHistogramComparisonAvailable: true,
+      });
+
+      expect(seenParams.at(-1)?.histogramComparisonSelection).toEqual({
+        column: 'Pattern',
+        value: 'Failed login',
+      });
+      spy.mockRestore();
     });
   });
 });

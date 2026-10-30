@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -52,11 +52,6 @@ export const HistogramComparisonBadge = ({
       responsive={false}
       data-test-subj="unifiedHistogramComparison"
     >
-      {status === 'loading' && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="s" data-test-subj="unifiedHistogramComparisonLoading" />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false} css={badgeItemCss}>
         <EuiBadge
           color="hollow"

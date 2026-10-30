@@ -15,7 +15,6 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  type UseEuiTheme,
 } from '@elastic/eui';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -96,8 +95,6 @@ import { SaveDiscoverTableButton } from './save_discover_table_button';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 import { useHistogramComparisonState } from './histogram_comparison/use_histogram_comparison_state';
 
-const HISTOGRAM_COMPARISON_ROW_CLASS = 'dscDocuments__histogramComparisonRow';
-
 // export needs for testing
 export const onResize = (
   colSettings: { columnId: string; width: number | undefined },
@@ -113,12 +110,14 @@ function DiscoverDocumentsComponent({
   onAddFilter,
   onFieldEdited,
   isChartAvailable,
+  isHistogramComparisonAvailable,
 }: {
   renderViewModeToggle: RenderViewModeToggle;
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   onFieldEdited?: (options: { editedDataView: DataView }) => void;
   isChartAvailable?: boolean;
+  isHistogramComparisonAvailable?: boolean;
 }) {
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
   const styles = useMemoCss(componentStyles);
@@ -177,7 +176,11 @@ function DiscoverDocumentsComponent({
     }))().replaceDefaultChart;
   }, [getChartSectionConfiguration, isEsqlMode]);
   const histogramComparisonEnabled =
-    Boolean(isChartAvailable) && defaultHistogramAvailable && !breakdownField && !hideChart;
+    Boolean(isChartAvailable) &&
+    Boolean(isHistogramComparisonAvailable) &&
+    defaultHistogramAvailable &&
+    !breakdownField &&
+    !hideChart;
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
   const currentDataSource = useCurrentDataSource();
@@ -460,22 +463,7 @@ function DiscoverDocumentsComponent({
     requestParams.searchSessionId,
     requestParams.timeRangeAbsolute,
   ]);
-  const cellRendererParams: CellRenderersExtensionParams = useMemo(
-    () => ({
-      dataView,
-      density: cellRendererDensity,
-      rowHeight: cellRendererRowHeight,
-      searchContext,
-      // Spinner while the grid is fetching; warning icon if it finished without context.
-      isDataLoading,
-    }),
-    [cellRendererDensity, cellRendererRowHeight, dataView, isDataLoading, searchContext]
-  );
-
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
-    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
-  }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
     () => (
@@ -623,15 +611,33 @@ function DiscoverDocumentsComponent({
     esqlVariables,
     defaultHistogramAvailable: gridHistogramComparisonEnabled,
   });
-  const getRowClassName = useCallback(
-    (record: DataTableRecord) =>
-      histogramComparisonSelection &&
-      record.flattened[histogramComparisonSelection.column] === histogramComparisonSelection.value
-        ? HISTOGRAM_COMPARISON_ROW_CLASS
+  const cellRendererParams: CellRenderersExtensionParams = useMemo(
+    () => ({
+      dataView,
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
+      searchContext,
+      // Spinner while the grid is fetching; warning icon if it finished without context.
+      isDataLoading,
+      histogramComparisonSelection: histogramComparisonSelection
+        ? {
+            column: histogramComparisonSelection.column,
+            value: histogramComparisonSelection.value,
+          }
         : undefined,
-    [histogramComparisonSelection]
+    }),
+    [
+      cellRendererDensity,
+      cellRendererRowHeight,
+      dataView,
+      histogramComparisonSelection,
+      isDataLoading,
+      searchContext,
+    ]
   );
-
+  const cellRenderers = useMemo(() => {
+    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
+  }, [cellRendererParams, getCellRenderersAccessor]);
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -709,7 +715,6 @@ function DiscoverDocumentsComponent({
               ) : undefined
             }
             histogramComparisonEnabled={gridHistogramComparisonEnabled}
-            getRowClassName={getRowClassName}
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
@@ -757,14 +762,10 @@ const componentStyles = {
     height: '100%',
     width: '100%',
   }),
-  dataTable: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: '100%',
-      maxWidth: '100%',
-      height: '100%',
-      overflow: 'hidden',
-      [`.${HISTOGRAM_COMPARISON_ROW_CLASS}`]: {
-        backgroundColor: euiTheme.colors.backgroundBaseAccent,
-      },
-    }),
+  dataTable: css({
+    width: '100%',
+    maxWidth: '100%',
+    height: '100%',
+    overflow: 'hidden',
+  }),
 };

@@ -330,6 +330,10 @@ export interface CellRenderersExtensionParams {
    * True while the grid's primary search is in flight.
    */
   isDataLoading?: boolean;
+  /**
+   * The pattern currently drawn on the histogram, used to color its sparkline.
+   */
+  histogramComparisonSelection?: Pick<HistogramComparisonSelection, 'column' | 'value'>;
 }
 
 /**

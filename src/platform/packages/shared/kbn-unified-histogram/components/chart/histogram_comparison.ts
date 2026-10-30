@@ -51,6 +51,12 @@ const getHistogramComparisonLayers = (attributes: LensAttributes) => {
 export const canApplyHistogramComparison = (attributes: LensAttributes): boolean =>
   getHistogramComparisonLayers(attributes) !== undefined;
 
+/** True when the live chart is available and can draw the stacked comparison. */
+export const chartSupportsHistogramComparison = (
+  isChartAvailable: boolean,
+  attributes: LensAttributes | undefined
+): boolean => isChartAvailable && Boolean(attributes && canApplyHistogramComparison(attributes));
+
 /** Draws the split table as two stacked series in place of the single total series. */
 export const applyHistogramComparisonAttributes = ({
   attributes,

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import {
@@ -17,6 +19,7 @@ import type { ContextAwarenessToolkit } from '../../../toolkit';
 import {
   createPatternsHistogramComparison,
   getComparableCategorizeColumn,
+  getPatternsRowAdditionalLeadingControls,
   publishPatternsHistogramComparison,
 } from './histogram_comparison';
 
@@ -103,5 +106,53 @@ describe('patterns histogram comparison', () => {
 
     expect(publishPatternsHistogramComparison(toolkit, undefined)).toBe(false);
     expect(state$.getValue()).toEqual(PATTERNS_HISTOGRAM_COMPARISON_STATE_DEFAULTS);
+  });
+
+  it('uses a stop tooltip while the pattern is selected', () => {
+    const { toolkit } = createToolkit();
+    const getControls = getPatternsRowAdditionalLeadingControls;
+    if (!getControls) {
+      throw new Error('Pattern comparison controls are not registered');
+    }
+    const controls = getControls(() => [], { toolkit } as Parameters<typeof getControls>[1])({
+      dataView,
+      query,
+      histogramComparisonEnabled: true,
+    });
+    const compareControl = controls?.[0];
+    if (!compareControl) {
+      throw new Error('Compare control was not created');
+    }
+    const Control = ({
+      label,
+      tooltipContent,
+    }: {
+      label: string;
+      tooltipContent?: React.ReactNode;
+    }) => <button aria-label={label}>{tooltipContent}</button>;
+    const record = {
+      flattened: { 'CATEGORIZE(message)': '.*?Failed login.*?' },
+    } as unknown as Parameters<typeof compareControl.render>[1]['record'];
+    const renderControl = () => compareControl.render(Control, { record, rowIndex: 0 });
+
+    const view = render(renderControl());
+    expect(screen.getByRole('button', { name: 'Compare with total' }).textContent).toContain(
+      'total document volume'
+    );
+
+    act(() => {
+      publishPatternsHistogramComparison(toolkit, {
+        label: '.*?Failed login.*?',
+        column: 'CATEGORIZE(message)',
+        value: '.*?Failed login.*?',
+        query,
+        dataView,
+      });
+    });
+    view.rerender(renderControl());
+
+    expect(screen.getByRole('button', { name: 'Stop comparing with total' })).toHaveTextContent(
+      'Stop comparing this pattern with total document volume.'
+    );
   });
 });

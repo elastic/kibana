@@ -511,10 +511,6 @@ interface InternalUnifiedDataTableProps {
    */
   gridStyleOverride?: EuiDataGridStyle;
   /**
-   * Optional callback returning a class name for a displayed row, merged into `gridStyle.rowClasses`.
-   */
-  getRowClassName?: (record: DataTableRecord) => string | undefined;
-  /**
    * Optional row line height override. Default is 1.6em.
    */
   rowLineHeightOverride?: string;
@@ -671,7 +667,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       consumer = 'discover',
       componentsTourSteps,
       gridStyleOverride,
-      getRowClassName,
       rowLineHeightOverride,
       customGridColumnsConfiguration,
       enableComparisonMode,
@@ -1024,28 +1019,8 @@ const InternalUnifiedDataTable = React.forwardRef<
         ...gridStyleOverride,
       };
 
-      if (!getRowClassName) {
-        return style;
-      }
-
-      const rowClasses = { ...gridStyleOverride?.rowClasses };
-      displayedRows.forEach((record, rowIndex) => {
-        const rowClassName = getRowClassName(record);
-        if (rowClassName) {
-          rowClasses[rowIndex] = rowClasses[rowIndex]
-            ? `${rowClasses[rowIndex]} ${rowClassName}`
-            : rowClassName;
-        }
-      });
-
-      return { ...style, rowClasses };
-    }, [
-      dataGridDensity,
-      onChangeDataGridDensity,
-      gridStyleOverride,
-      getRowClassName,
-      displayedRows,
-    ]);
+      return style;
+    }, [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]);
 
     /**
      * Cell rendering

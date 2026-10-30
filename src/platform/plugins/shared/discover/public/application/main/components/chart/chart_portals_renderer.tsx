@@ -201,7 +201,11 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
   const comparison = useHistogramComparison({
     query: chartProps?.fetchParams.query,
     esqlVariables: chartProps?.fetchParams.esqlVariables,
-    defaultHistogramAvailable: Boolean(chartProps?.isChartAvailable && !chartProps.chart?.hidden),
+    defaultHistogramAvailable: Boolean(
+      chartProps?.isChartAvailable &&
+        chartProps.isHistogramComparisonAvailable &&
+        !chartProps.chart?.hidden
+    ),
   });
 
   if (!unifiedHistogram.isInitialized) {

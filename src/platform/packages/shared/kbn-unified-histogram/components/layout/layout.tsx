@@ -37,6 +37,10 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
    */
   isChartAvailable?: boolean;
   /**
+   * True when the rendered chart can draw a stacked comparison.
+   */
+  isHistogramComparisonAvailable?: boolean;
+  /**
    * Context object for the hits count -- leave undefined to hide the hits count
    */
   hits?: UnifiedHistogramHitsContext;
@@ -65,6 +69,7 @@ export const UnifiedHistogramLayout = ({
   unifiedHistogramChart,
   chart,
   isChartAvailable,
+  isHistogramComparisonAvailable,
   hits,
   topPanelHeight,
   defaultTopPanelHeight: originalDefaultTopPanelHeight,
@@ -115,8 +120,11 @@ export const UnifiedHistogramLayout = ({
     <>
       {!shouldHideMainPanel && (
         <InPortal node={mainPanelNode}>
-          {React.isValidElement<{ isChartAvailable?: boolean }>(children)
-            ? React.cloneElement(children, { isChartAvailable })
+          {React.isValidElement<{
+            isChartAvailable?: boolean;
+            isHistogramComparisonAvailable?: boolean;
+          }>(children)
+            ? React.cloneElement(children, { isChartAvailable, isHistogramComparisonAvailable })
             : children}
         </InPortal>
       )}

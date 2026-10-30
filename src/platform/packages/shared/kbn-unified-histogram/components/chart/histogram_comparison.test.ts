@@ -11,6 +11,7 @@ import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
   applyHistogramComparisonAttributes,
   canApplyHistogramComparison,
+  chartSupportsHistogramComparison,
 } from './histogram_comparison';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -105,5 +106,16 @@ describe('histogram comparison attributes', () => {
     };
     mismatchedVisualization.layers[0].layerId = 'other';
     expect(canApplyHistogramComparison(mismatchedLayer)).toBe(false);
+  });
+
+  it('requires both an available chart and a stacked comparison shape', () => {
+    expect(chartSupportsHistogramComparison(true, attributes)).toBe(true);
+    expect(chartSupportsHistogramComparison(false, attributes)).toBe(false);
+
+    const line = structuredClone(attributes);
+    const visualization = line.state.visualization as { layers: Array<{ seriesType: string }> };
+    visualization.layers[0].seriesType = 'line';
+    expect(chartSupportsHistogramComparison(true, line)).toBe(false);
+    expect(chartSupportsHistogramComparison(true, undefined)).toBe(false);
   });
 });

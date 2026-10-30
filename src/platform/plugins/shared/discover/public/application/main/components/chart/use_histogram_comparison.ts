@@ -33,7 +33,7 @@ const selectedPatternLabel = i18n.translate('discover.histogramComparison.select
 export const useHistogramComparison = (
   context: HistogramComparisonContext
 ): UnifiedHistogramChartProps['comparison'] => {
-  const { data, expressions } = useDiscoverServices();
+  const { data } = useDiscoverServices();
   const { scopedProfilesManager } = useScopedServices();
   const publishHistogramComparison = useProfileAccessor('publishHistogramComparison');
   const controller = useHistogramComparisonController(context);
@@ -63,7 +63,6 @@ export const useHistogramComparison = (
           abortSignal: signal,
           inspectorAdapters: { requests: requestAdapter },
           data,
-          expressions,
           scopedProfilesManager,
           esqlVariables,
           esqlApproximation: Boolean(isApproximate),
@@ -75,5 +74,5 @@ export const useHistogramComparison = (
         }));
       },
     };
-  }, [controller, data, expressions, publishHistogramComparison, scopedProfilesManager, selection]);
+  }, [controller, data, publishHistogramComparison, scopedProfilesManager, selection]);
 };

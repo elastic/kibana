@@ -156,6 +156,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
     isChartAvailable: checkChartAvailability({ chart, dataSource: fetchDataSource }),
+    isHistogramComparisonAvailable: true,
     withLensActions,
     renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
     fetch$: getFetch$Mock(),
@@ -492,13 +493,13 @@ describe('Chart', () => {
       onClear: jest.fn(),
     });
     const expectComparisonStatus = (status: 'loading' | 'applied' | 'unavailable') => {
-      const loading = screen.queryByTestId('unifiedHistogramComparisonLoading');
+      const badge = screen.queryByTestId('unifiedHistogramComparisonBadge');
       const note = screen.queryByTestId('unifiedHistogramComparisonNote');
       if (status === 'loading') {
-        expect(loading).toBeInTheDocument();
+        expect(badge).toBeInTheDocument();
+        expect(note).not.toBeInTheDocument();
         return;
       }
-      expect(loading).not.toBeInTheDocument();
       if (status === 'unavailable') {
         expect(note).toHaveTextContent('Comparison is unavailable.');
         return;
@@ -658,20 +659,24 @@ describe('Chart', () => {
       expectComparisonStatus('loading');
     });
 
-    it('shows the selection in a toolbar badge that tracks the comparison status', async () => {
+    it('shows the selection in a toolbar badge before the chart actions, without a loading indicator', async () => {
       const comparison = createComparison();
       await mountHistogramComparison(comparison);
 
-      expect(screen.getByTestId('unifiedHistogramComparisonBadge')).toHaveTextContent(
-        'Failed login'
-      );
-      expect(screen.getByTestId('unifiedHistogramComparisonLoading')).toBeInTheDocument();
+      const badge = screen.getByTestId('unifiedHistogramComparisonBadge');
+      expect(badge).toHaveTextContent('Failed login');
+      expect(badge.closest('[data-toolbar-section="right"]')).toBeTruthy();
+      expect(badge.closest('[data-toolbar-section="left"]')).toBeNull();
+      expect(screen.queryByTestId('unifiedHistogramComparisonNote')).not.toBeInTheDocument();
+      const editButton = screen.getByTestId('unifiedHistogramEditFlyoutVisualization');
+      const saveButton = screen.getByTestId('unifiedHistogramSaveVisualization');
+      expect(badge.compareDocumentPosition(editButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(badge.compareDocumentPosition(saveButton)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 
       await act(async () => {
         lastLensProps().onLoad?.(false, histogramAdapters());
       });
 
-      expect(screen.queryByTestId('unifiedHistogramComparisonLoading')).not.toBeInTheDocument();
       expect(screen.queryByTestId('unifiedHistogramComparisonNote')).not.toBeInTheDocument();
     });
 

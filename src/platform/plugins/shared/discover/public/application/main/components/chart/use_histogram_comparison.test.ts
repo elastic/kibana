@@ -26,7 +26,7 @@ const mockController: HistogramComparisonController = {
 };
 
 jest.mock('../../../../hooks/use_discover_services', () => ({
-  useDiscoverServices: () => ({ data: {}, expressions: {} }),
+  useDiscoverServices: () => ({ data: {} }),
 }));
 
 jest.mock('../../../../components/scoped_services_provider', () => ({

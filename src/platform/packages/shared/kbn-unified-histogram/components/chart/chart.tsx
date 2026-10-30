@@ -10,7 +10,15 @@
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiDelayRender,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
@@ -71,6 +79,10 @@ import {
 
 export interface UnifiedHistogramChartProps {
   isChartAvailable: boolean;
+  /**
+   * True when the rendered chart can draw a stacked comparison.
+   */
+  isHistogramComparisonAvailable: boolean;
   hiddenPanel?: boolean;
   services: UnifiedHistogramServices;
   lensVisService: LensVisService;
@@ -137,6 +149,7 @@ const HistogramMemoized = memo(Histogram);
 
 export function UnifiedHistogramChart({
   isChartAvailable,
+  isHistogramComparisonAvailable,
   services,
   hits,
   chart,
@@ -444,13 +457,6 @@ export function UnifiedHistogramChart({
           />
         )}
       </div>,
-      chartVisible && comparison ? (
-        <HistogramComparisonBadge
-          description={comparison.description}
-          status={comparisonStatus?.key === comparison.key ? comparisonStatus.status : 'loading'}
-          onClear={comparison.onClear}
-        />
-      ) : null,
     ],
     [
       chartVisible,
@@ -460,8 +466,6 @@ export function UnifiedHistogramChart({
       breakdown,
       dataSource,
       onBreakdownFieldChange,
-      comparison,
-      comparisonStatus,
     ]
   );
 
@@ -538,12 +542,32 @@ export function UnifiedHistogramChart({
           rightSide: chartVisible ? actions : [],
           additionalControls: {
             prependRight: (
-              <span style={{ marginRight: 4 }}>
-                <ApproximationBadge
-                  isApproximationApplied={chartVisible && isApproximationApplied}
-                  data-test-subj="unifiedHistogramApproximationApplied"
-                />
-              </span>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                css={css({ marginRight: euiTheme.size.xs })}
+              >
+                <EuiFlexItem grow={false}>
+                  <ApproximationBadge
+                    isApproximationApplied={chartVisible && isApproximationApplied}
+                    data-test-subj="unifiedHistogramApproximationApplied"
+                  />
+                </EuiFlexItem>
+                {chartVisible && isHistogramComparisonAvailable && comparison ? (
+                  <EuiFlexItem grow={false}>
+                    <HistogramComparisonBadge
+                      description={comparison.description}
+                      status={
+                        comparisonStatus?.key === comparison.key
+                          ? comparisonStatus.status
+                          : 'loading'
+                      }
+                      onClear={comparison.onClear}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
             ),
           },
         }}

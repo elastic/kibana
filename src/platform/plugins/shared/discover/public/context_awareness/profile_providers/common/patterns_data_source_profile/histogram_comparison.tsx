@@ -42,6 +42,13 @@ const orderedFilterTooltip = i18n.translate('discover.patternsProfile.compareWit
     'Compare this pattern with total document volume. The comparison counts messages that match the pattern’s words in order.',
 });
 
+const stopComparingTooltip = i18n.translate(
+  'discover.patternsProfile.stopComparingWithTotalTooltip',
+  {
+    defaultMessage: 'Stop comparing this pattern with total document volume.',
+  }
+);
+
 const variablesFingerprint = (variables: HistogramComparisonContext['esqlVariables']): string =>
   JSON.stringify(variables ?? []);
 
@@ -193,7 +200,7 @@ export const getPatternsRowAdditionalLeadingControls: DataSourceProfileProvider[
           <CompareWithTotalControl
             Control={Control}
             column={column}
-            label={formatPatternLabel(record.flattened[column])!}
+            value={record.flattened[column]}
             query={query}
             dataView={params.dataView}
             esqlVariables={params.esqlVariables}
@@ -208,7 +215,7 @@ export const getPatternsRowAdditionalLeadingControls: DataSourceProfileProvider[
 const CompareWithTotalControl = ({
   Control,
   column,
-  label,
+  value,
   query,
   dataView,
   esqlVariables,
@@ -216,14 +223,18 @@ const CompareWithTotalControl = ({
 }: {
   Control: Parameters<RowControlColumn['render']>[0];
   column: string;
-  label: string;
+  value: unknown;
   query: HistogramComparisonTableSelection['query'];
   dataView: HistogramComparisonTableSelection['dataView'];
   esqlVariables: HistogramComparisonTableSelection['esqlVariables'];
   toolkit: ContextAwarenessToolkit;
 }) => {
+  const label = formatPatternLabel(value);
   const adapter = toolkit.getStateAdapter(PATTERNS_HISTOGRAM_COMPARISON_STATE_DEF);
   const state = useObservable(adapter.getState$(), adapter.getState());
+  if (!label) {
+    return null;
+  }
   const selected =
     state.column === column &&
     state.value === label &&
@@ -233,10 +244,10 @@ const CompareWithTotalControl = ({
   return (
     <Control
       data-test-subj="discoverCompareWithTotal"
-      iconType="chartBarVerticalStack"
+      iconType={selected ? 'eyeSlash' : 'eye'}
       color={selected ? 'primary' : 'text'}
       label={selected ? stopComparingLabel : compareWithTotalLabel}
-      tooltipContent={orderedFilterTooltip}
+      tooltipContent={selected ? stopComparingTooltip : orderedFilterTooltip}
       onClick={() => {
         publishPatternsHistogramComparison(
           toolkit,

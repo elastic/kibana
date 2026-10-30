@@ -24,6 +24,15 @@ import {
   type GroupHistogramComparison,
 } from './use_row_header_components';
 
+jest.mock(
+  '../../../../../../context_awareness/profile_providers/common/sparkline_data_source_profile/sparkline_cell_renderer',
+  () => ({
+    SparklineRenderer: ({ isSelected }: { isSelected?: boolean }) => (
+      <div data-test-subj="cascadeSparkline" data-selected={String(Boolean(isSelected))} />
+    ),
+  })
+);
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   copyToClipboard: jest.fn(),
@@ -136,13 +145,19 @@ describe('useEsqlDataCascadeRowHeaderComponents', () => {
   describe('histogram comparison', () => {
     const categorizeQueryMeta: ESQLStatsQueryMeta = {
       groupByFields: [{ field: 'Pattern', type: 'categorize' }],
-      appliedFunctions: [],
+      appliedFunctions: [
+        { identifier: 'Count', aggregation: 'count' },
+        { identifier: 'Sparkline', aggregation: 'sparkline' },
+      ],
     };
     const patternRowData: ESQLDataGroupNode = {
       id: 'row-pattern',
       groupColumn: 'Pattern',
       groupValue: 'user .* logged in',
-      aggregatedValues: {},
+      aggregatedValues: {
+        Count: 3000,
+        Sparkline: [1, 2],
+      },
     };
 
     const ComparisonTestComponent = ({
@@ -152,9 +167,9 @@ describe('useEsqlDataCascadeRowHeaderComponents', () => {
       histogramComparison?: GroupHistogramComparison;
       testRowData?: ESQLDataGroupNode;
     }) => {
-      const { rowActions, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
+      const { rowActions, rowHeaderMeta, rowHeaderTitle } = useEsqlDataCascadeRowHeaderComponents(
         categorizeQueryMeta,
-        [],
+        ['Count', 'Sparkline'],
         function () {},
         new Map(),
         histogramComparison
@@ -164,16 +179,26 @@ describe('useEsqlDataCascadeRowHeaderComponents', () => {
       return (
         <>
           {rowHeaderTitle({ rowData: testRowData, nodePath: ['Pattern'] })}
-          {actions.map((action) => (
-            <button
-              key={action['data-test-subj']}
-              aria-label={action['aria-label']}
-              data-test-subj={action['data-test-subj']}
-              onClick={action.onClick}
-            >
-              {action.label}
-            </button>
-          ))}
+          <div data-test-subj="row-sections">
+            {rowHeaderMeta({ rowData: testRowData, rowDepth: 0, nodePath: ['Pattern'] }).map(
+              (slot, index) => (
+                <React.Fragment key={index}>{slot}</React.Fragment>
+              )
+            )}
+          </div>
+          <div data-test-subj="row-actions">
+            {actions.map((action) => (
+              <button
+                key={action['data-test-subj']}
+                aria-label={action['aria-label']}
+                data-test-subj={action['data-test-subj']}
+                data-icon-type={action.iconType}
+                onClick={action.onClick}
+              >
+                {action.label}
+              </button>
+            ))}
+          </div>
         </>
       );
     };
@@ -187,30 +212,34 @@ describe('useEsqlDataCascadeRowHeaderComponents', () => {
       ).toBeInTheDocument();
     });
 
-    it('renders a compare action before the row menu and toggles the row', async () => {
+    it('renders an eye action before the row menu and toggles the row', async () => {
       const toggle = jest.fn();
       render(
         <ComparisonTestComponent histogramComparison={{ isSelected: () => false, toggle }} />,
         { wrapper: TestProvider }
       );
 
-      const [compareButton, menuButton] = screen.getAllByRole('button');
-      expect(compareButton).toHaveAccessibleName('Compare with total');
-      expect(compareButton).toHaveTextContent('Compare');
-      expect(menuButton).toHaveAttribute(
-        'data-test-subj',
-        'row-pattern-dscCascadeRowContextActionButton'
+      const actions = screen.getByTestId('row-actions');
+      const compareButton = screen.getByTestId('row-pattern-dscCascadeRowCompareWithTotalButton');
+      const menuButton = screen.getByTestId('row-pattern-dscCascadeRowContextActionButton');
+      expect(actions).toContainElement(compareButton);
+      expect(compareButton.compareDocumentPosition(menuButton)).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING
       );
+      expect(compareButton).toHaveAccessibleName('Compare with total');
+      expect(compareButton).toHaveAttribute('data-icon-type', 'eye');
+      expect(compareButton).not.toHaveTextContent('Compare');
       expect(
         screen.queryByTestId('row-pattern-dscCascadeRowComparingBadge')
       ).not.toBeInTheDocument();
+      expect(screen.getByTestId('cascadeSparkline')).toHaveAttribute('data-selected', 'false');
 
       await userEvent.click(compareButton);
 
       expect(toggle).toHaveBeenCalledWith(patternRowData);
     });
 
-    it('marks the selected row and offers to stop comparing', () => {
+    it('offers to stop comparing on the selected row', () => {
       render(
         <ComparisonTestComponent
           histogramComparison={{ isSelected: () => true, toggle: jest.fn() }}
@@ -218,12 +247,13 @@ describe('useEsqlDataCascadeRowHeaderComponents', () => {
         { wrapper: TestProvider }
       );
 
-      expect(screen.getByTestId('row-pattern-dscCascadeRowComparingBadge')).toHaveTextContent(
-        'Comparing'
-      );
-      expect(screen.getByRole('button', { name: 'Stop comparing with total' })).toHaveTextContent(
-        'Stop comparing'
-      );
+      expect(
+        screen.queryByTestId('row-pattern-dscCascadeRowComparingBadge')
+      ).not.toBeInTheDocument();
+      const stopButton = screen.getByRole('button', { name: 'Stop comparing with total' });
+      expect(stopButton).toHaveAttribute('data-icon-type', 'eyeSlash');
+      expect(stopButton).not.toHaveTextContent('Stop comparing');
+      expect(screen.getByTestId('cascadeSparkline')).toHaveAttribute('data-selected', 'true');
     });
 
     it('does not offer a comparison on mobile, where the cascade hides actions in a menu', () => {

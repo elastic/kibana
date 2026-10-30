@@ -389,14 +389,6 @@ const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noV
   defaultMessage: '(blank)',
 });
 
-const compareLabel = i18n.translate('discover.dataCascade.row.action.compare', {
-  defaultMessage: 'Compare',
-});
-
-const stopComparingLabel = i18n.translate('discover.dataCascade.row.action.stopComparing', {
-  defaultMessage: 'Stop comparing',
-});
-
 const compareWithTotalLabel = i18n.translate('discover.dataCascade.row.action.compareWithTotal', {
   defaultMessage: 'Compare with total',
 });
@@ -407,10 +399,6 @@ const stopComparingWithTotalLabel = i18n.translate(
     defaultMessage: 'Stop comparing with total',
   }
 );
-
-const comparingLabel = i18n.translate('discover.dataCascade.row.comparingBadge', {
-  defaultMessage: 'Comparing',
-});
 
 const getArrayBadgeDisplayValue = (value: string | number) =>
   typeof value === 'number' ? value : value || NO_VALUE_PLACEHOLDER;
@@ -449,28 +437,10 @@ export function useEsqlDataCascadeRowHeaderComponents(
       const type = editorQueryMeta.groupByFields.find((field) => field.field === rowGroup)?.type;
 
       if (type && /categorize/i.test(type)) {
-        const pattern = (
+        return (
           <div data-test-subj={`${rowData.id}-dscCascadeRowTitlePatternCellRenderer`}>
             {getPatternCellRenderer(rowData.groupValue, false)}
           </div>
-        );
-
-        if (!histogramComparison?.isSelected(rowData)) {
-          return pattern;
-        }
-
-        return (
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="primary"
-                data-test-subj={`${rowData.id}-dscCascadeRowComparingBadge`}
-              >
-                {comparingLabel}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem css={rowHeaderTitleStyles.textWrapper}>{pattern}</EuiFlexItem>
-          </EuiFlexGroup>
         );
       }
 
@@ -485,7 +455,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
         </EuiText>
       );
     },
-    [editorQueryMeta.groupByFields, histogramComparison]
+    [editorQueryMeta.groupByFields]
   );
 
   /**
@@ -514,7 +484,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
             return (
               <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false} css={{ width: '100px', minHeight: euiTheme.size.l }}>
-                  <SparklineRenderer charts={services.charts} values={aggregatedValue} />
+                  <SparklineRenderer
+                    charts={services.charts}
+                    isSelected={histogramComparison?.isSelected(rowData) ?? false}
+                    values={aggregatedValue}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );
@@ -562,6 +536,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
       columnTypes,
       editorQueryMeta,
       euiTheme.size.l,
+      histogramComparison,
       selectedColumns,
       services.charts,
     ]
@@ -589,8 +564,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
       return [
         {
-          iconType: 'chartBarVerticalStack',
-          label: selected ? stopComparingLabel : compareLabel,
+          iconType: selected ? 'eyeSlash' : 'eye',
           'aria-label': selected ? stopComparingWithTotalLabel : compareWithTotalLabel,
           'data-test-subj': `${rowData.id}-dscCascadeRowCompareWithTotalButton`,
           onClick: () => histogramComparison.toggle(rowData),
