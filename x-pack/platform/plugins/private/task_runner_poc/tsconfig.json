@@ -11,8 +11,13 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/deeplinks-analytics",
+    "@kbn/es-errors",
+    "@kbn/features-plugin",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-page-kibana-template"
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*"

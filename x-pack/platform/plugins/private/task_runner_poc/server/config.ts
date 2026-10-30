@@ -23,4 +23,5 @@ export type TaskRunnerPocConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<TaskRunnerPocConfig> = {
   schema: configSchema,
+  exposeToBrowser: { projectId: true },
 };

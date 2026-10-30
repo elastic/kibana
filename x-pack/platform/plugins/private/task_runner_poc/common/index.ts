@@ -9,3 +9,32 @@ export const PLUGIN_ID = 'taskRunnerPoc';
 export const PLUGIN_NAME = 'Task runner (POC)';
 
 export const INTERNAL_API_BASE_PATH = '/internal/task_runner_poc';
+export const INTERNAL_API_VERSION = '1';
+
+export const API_PRIVILEGES = {
+  read: 'read_task_runner_poc',
+  manage: 'manage_task_runner_poc',
+} as const;
+
+export const TASK_TYPE = 'esql_summary';
+export const RESULT_INDEX = 'tr-results';
+
+export const DEFAULT_QUERY =
+  'FROM logs-* | STATS errors = COUNT(*) WHERE log.level == "error" BY service.name';
+
+export const JOB_ID_PATTERN = /^job_[A-Za-z0-9]+$/;
+export const TASK_ID_PATTERN = /^job_[A-Za-z0-9]+:[0-9]+$/;
+
+export type {
+  CreateJobBody,
+  CreateJobResponse,
+  Execution,
+  ExecutionStatus,
+  Job,
+  JobList,
+  ResultDocument,
+  Task,
+  TaskList,
+  TaskRef,
+  TaskStatus,
+} from './types';
