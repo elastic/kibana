@@ -15,6 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ActionType } from '@kbn/actions-types';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectorTypes } from './use_fetch_sandbox_connector_types';
@@ -22,6 +23,7 @@ import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
 import { SourceCard } from './source_card';
 import { getSourceCardItem } from './source_card_item';
+import { getInitialSandboxConnector } from './initial_sandbox_connector';
 import { sourceGridStyles } from './source_grid_styles';
 
 export function ConnectorTypePickerFlyout({
@@ -34,7 +36,7 @@ export function ConnectorTypePickerFlyout({
   const { triggersActionsUi } = useKibana().services;
   const { data: types, isLoading, error, refetch } = useFetchSandboxConnectorTypes();
   const refresh = useRefreshSandboxConnectors();
-  const [creatingTypeId, setCreatingTypeId] = useState<string | undefined>();
+  const [creatingType, setCreatingType] = useState<ActionType | undefined>();
   const titleId = useGeneratedHtmlId();
 
   return (
@@ -86,7 +88,7 @@ export function ConnectorTypePickerFlyout({
                       }),
                       icon: 'plugs',
                       disabledReason: enabledCheck.isEnabled ? undefined : enabledCheck.message,
-                      onClick: () => setCreatingTypeId(actionType.id),
+                      onClick: () => setCreatingType(actionType),
                       'data-test-subj': `${actionType.id}-select`,
                     }}
                   />
@@ -96,10 +98,10 @@ export function ConnectorTypePickerFlyout({
           ) : null}
         </EuiFlyoutBody>
       </EuiFlyout>
-      {creatingTypeId &&
+      {creatingType &&
         triggersActionsUi?.getAddConnectorFlyout({
-          initialConnector: { actionTypeId: creatingTypeId },
-          onClose: () => setCreatingTypeId(undefined),
+          initialConnector: getInitialSandboxConnector(creatingType),
+          onClose: () => setCreatingType(undefined),
           onConnectorCreated: (connector) => {
             onConnectorCreated(connector);
             refresh();
