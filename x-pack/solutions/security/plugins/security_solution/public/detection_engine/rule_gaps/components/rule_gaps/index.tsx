@@ -26,6 +26,7 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
+import { getLastUpdated } from '@kbn/securitysolution-timeline-components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -214,7 +215,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: 'now-24h',
     end: 'now',
   });
-  const { timelines, uiSettings } = useKibana().services;
+  const { uiSettings } = useKibana().services;
   const excludedReasonsFromAdvancedSettings = uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
   const {
     rulesPrivileges: {
@@ -378,7 +379,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          {timelines.getLastUpdated({
+          {getLastUpdated({
             showUpdating: isLoading,
             updatedAt: dataUpdatedAt,
           })}

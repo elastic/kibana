@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ReactElement } from 'react';
 import type { SensorAPI } from '@hello-pangea/dnd';
 import type { Store } from 'redux-v4';
 import type { CoreStart } from '@kbn/core/public';
@@ -14,7 +13,6 @@ import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { UseAddToTimeline, UseAddToTimelineProps } from './hooks/use_add_to_timeline';
 import type { HoverActionsConfig } from './components/hover_actions';
-import type { LastUpdatedAtProps } from './components/last_updated';
 
 export interface TimelinesUIStart {
   /**
@@ -23,7 +21,6 @@ export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTimelineReducer: () => any;
-  getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
   setTimelineEmbeddedStore: (store: Store) => void;
