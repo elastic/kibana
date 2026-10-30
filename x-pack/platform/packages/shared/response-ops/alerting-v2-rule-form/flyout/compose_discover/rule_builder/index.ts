@@ -10,8 +10,8 @@ export { RULE_BUILDER_REGISTRY } from './registry';
 export { BuilderStateProvider, useBuilderState } from './builder_state_context';
 export type { BuilderStateUpdateOptions } from './builder_state_context';
 export { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step';
-export { buildThresholdEsql } from './threshold/build_esql';
-export { parseThresholdEsql, parseDiscoverQueryForBuilder } from './threshold/parse_esql';
+export { buildThresholdEsql } from '@kbn/alerting-v2-rule-builders';
+export { parseThresholdEsql, parseDiscoverQueryForBuilder } from '@kbn/alerting-v2-rule-builders';
 export type {
   ThresholdFormValues,
   StatDefinition,
@@ -20,5 +20,5 @@ export type {
   Aggregation,
   Comparator,
   ConditionOperator,
-} from './threshold/form_types';
-export { DEFAULT_THRESHOLD_FORM_VALUES, generateId } from './threshold/form_types';
+} from '@kbn/alerting-v2-rule-builders';
+export { DEFAULT_THRESHOLD_FORM_VALUES, generateId } from '@kbn/alerting-v2-rule-builders';

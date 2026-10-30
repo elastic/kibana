@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Aggregation } from './form_types';
+import { Aggregation } from '@kbn/alerting-v2-rule-builders';
 import { createMetricSuggestionsProvider } from './suggestions_provider';
 
 describe('createMetricSuggestionsProvider', () => {

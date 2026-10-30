@@ -23,7 +23,7 @@ import {
   Comparator,
   DEFAULT_THRESHOLD_FORM_VALUES,
   type ThresholdFormValues,
-} from './form_types';
+} from '@kbn/alerting-v2-rule-builders';
 import type { FormValues } from '../../../../form/types';
 import type { ComposeDiscoverState } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';

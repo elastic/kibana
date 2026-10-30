@@ -32,12 +32,6 @@ import {
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { getDatasets } from '@kbn/esql-utils';
 import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
-import type { FormValues } from '../../../../form/types';
-import { useResolveTimeField } from '../../use_resolve_time_field';
-import { useDataFields } from '../../../../form/hooks/use_data_fields';
-import { useIndexSources } from '../../../../form/hooks/use_index_sources';
-import type { RuleBuilderStepProps } from '../types';
-import { useBuilderState } from '../builder_state_context';
 import type {
   ThresholdFormValues,
   StatDefinition,
@@ -45,7 +39,7 @@ import type {
   AlertCondition,
   Aggregation,
   Comparator,
-} from './form_types';
+} from '@kbn/alerting-v2-rule-builders';
 import {
   AGGREGATIONS_REQUIRING_FIELD,
   DEFAULT_STAT,
@@ -64,11 +58,18 @@ import {
   isSeveritySupported,
   hasReservedSeverityLabel,
   getReservedSeverityLabelSources,
-} from './form_types';
-import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
+} from '@kbn/alerting-v2-rule-builders';
+import { buildThresholdEsql, buildRecoveryBlock } from '@kbn/alerting-v2-rule-builders';
+import { splitQuery } from '@kbn/alerting-v2-rule-builders';
+import { getInvalidExpressionReferences } from '@kbn/alerting-v2-rule-builders';
+import type { FormValues } from '../../../../form/types';
+import { useResolveTimeField } from '../../use_resolve_time_field';
+import { useDataFields } from '../../../../form/hooks/use_data_fields';
+import { useIndexSources } from '../../../../form/hooks/use_index_sources';
+import type { RuleBuilderStepProps } from '../types';
+import { useBuilderState } from '../builder_state_context';
 import { EvaluationExpressionField } from './evaluation_expression_field';
 import { SeveritySection } from './severity_section';
-import { splitQuery } from '../../use_heuristic_split';
 import { OPTIONAL_LABEL } from '../../../../form/optional_field_label';
 import {
   AGGREGATION_OPTIONS,
@@ -78,7 +79,6 @@ import {
   STAT_FIELD_REQUIRED_ERROR,
   STAT_LABEL_REQUIRED_ERROR,
 } from './translations';
-import { getInvalidExpressionReferences } from './validate_metric_references';
 
 export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,

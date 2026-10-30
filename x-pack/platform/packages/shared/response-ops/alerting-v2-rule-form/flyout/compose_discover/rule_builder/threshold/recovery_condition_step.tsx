@@ -25,19 +25,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
-import type { FormValues } from '../../../../form/types';
-import type { CustomRecoveryRenderProps } from '../../types';
-import { useBuilderState } from '../builder_state_context';
-import type { ThresholdFormValues, RecoveryCondition, RecoveryConfig } from './form_types';
+import type {
+  ThresholdFormValues,
+  RecoveryCondition,
+  RecoveryConfig,
+} from '@kbn/alerting-v2-rule-builders';
 import {
   Comparator,
   DEFAULT_RECOVERY_CONDITION,
   deriveRecoveryConditions,
   generateId,
   reconcileAlertConditionMetrics,
-} from './form_types';
+} from '@kbn/alerting-v2-rule-builders';
+import { buildRecoveryBlock } from '@kbn/alerting-v2-rule-builders';
+import type { FormValues } from '../../../../form/types';
+import type { CustomRecoveryRenderProps } from '../../types';
+import { useBuilderState } from '../builder_state_context';
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
-import { buildRecoveryBlock } from './build_esql';
 
 export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
   const {
