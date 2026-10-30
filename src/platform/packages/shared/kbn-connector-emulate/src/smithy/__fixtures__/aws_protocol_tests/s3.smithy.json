@@ -1,0 +1,1080 @@
+{
+ "smithy": "2.0",
+ "shapes": {
+  "aws.protocoltests.config#AwsConfig": {
+   "type": "structure",
+   "members": {
+    "clockTime": {
+     "target": "smithy.api#Timestamp"
+    },
+    "scopedConfig": {
+     "target": "aws.protocoltests.config#ScopedConfig"
+    }
+   }
+  },
+  "aws.protocoltests.config#ClientConfig": {
+   "type": "structure",
+   "members": {
+    "aws_access_key_id": {
+     "target": "smithy.api#String"
+    },
+    "aws_secret_access_key": {
+     "target": "smithy.api#String"
+    },
+    "aws_session_token": {
+     "target": "smithy.api#String"
+    },
+    "region": {
+     "target": "smithy.api#String"
+    },
+    "s3": {
+     "target": "aws.protocoltests.config#S3Config"
+    },
+    "retry_config": {
+     "target": "aws.protocoltests.config#RetryConfig"
+    },
+    "aws_profile": {
+     "target": "smithy.api#String"
+    }
+   }
+  },
+  "aws.protocoltests.config#ConfigFile": {
+   "type": "map",
+   "key": {
+    "target": "smithy.api#String"
+   },
+   "value": {
+    "target": "aws.protocoltests.config#FileConfigSettings"
+   }
+  },
+  "aws.protocoltests.config#EnvironmentConfig": {
+   "type": "structure",
+   "members": {
+    "AWS_ACCESS_KEY_ID": {
+     "target": "smithy.api#String"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+     "target": "smithy.api#String"
+    },
+    "AWS_DEFAULT_REGION": {
+     "target": "smithy.api#String"
+    },
+    "AWS_RETRY_MODE": {
+     "target": "aws.protocoltests.config#RetryMode"
+    },
+    "AWS_SESSION_TOKEN": {
+     "target": "smithy.api#String"
+    },
+    "AWS_PROFILE": {
+     "target": "smithy.api#String"
+    }
+   }
+  },
+  "aws.protocoltests.config#ErrorCodeParams": {
+   "type": "structure",
+   "members": {
+    "code": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "type": {
+     "target": "smithy.api#String"
+    }
+   }
+  },
+  "aws.protocoltests.config#FileConfigSettings": {
+   "type": "structure",
+   "members": {
+    "aws_access_key_id": {
+     "target": "smithy.api#String"
+    },
+    "aws_secret_access_key": {
+     "target": "smithy.api#String"
+    },
+    "aws_session_token": {
+     "target": "smithy.api#String"
+    },
+    "region": {
+     "target": "smithy.api#String"
+    },
+    "s3": {
+     "target": "aws.protocoltests.config#S3Config"
+    },
+    "retry_mode": {
+     "target": "aws.protocoltests.config#RetryMode"
+    },
+    "max_attempts": {
+     "target": "smithy.api#Short"
+    }
+   }
+  },
+  "aws.protocoltests.config#OperationConfig": {
+   "type": "structure",
+   "members": {
+    "s3": {
+     "target": "aws.protocoltests.config#S3Config"
+    }
+   }
+  },
+  "aws.protocoltests.config#RetryConfig": {
+   "type": "structure",
+   "members": {
+    "mode": {
+     "target": "aws.protocoltests.config#RetryMode"
+    },
+    "max_attempts": {
+     "target": "smithy.api#Short"
+    }
+   }
+  },
+  "aws.protocoltests.config#RetryMode": {
+   "type": "enum",
+   "members": {
+    "LEGACY": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "legacy"
+     }
+    },
+    "STANDARD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "standard"
+     }
+    },
+    "ADAPTIVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "adaptive"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.config#S3AddressingStyle": {
+   "type": "enum",
+   "members": {
+    "AUTO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "auto"
+     }
+    },
+    "PATH": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "path"
+     }
+    },
+    "VIRTUAL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "virtual"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.config#S3Config": {
+   "type": "structure",
+   "members": {
+    "addressing_style": {
+     "target": "aws.protocoltests.config#S3AddressingStyle"
+    },
+    "use_accelerate_endpoint": {
+     "target": "smithy.api#Boolean"
+    },
+    "use_dualstack_endpoint": {
+     "target": "smithy.api#Boolean"
+    }
+   }
+  },
+  "aws.protocoltests.config#ScopedConfig": {
+   "type": "structure",
+   "members": {
+    "environment": {
+     "target": "aws.protocoltests.config#EnvironmentConfig"
+    },
+    "configFile": {
+     "target": "aws.protocoltests.config#ConfigFile"
+    },
+    "credentialsFile": {
+     "target": "aws.protocoltests.config#ConfigFile"
+    },
+    "client": {
+     "target": "aws.protocoltests.config#ClientConfig"
+    },
+    "operation": {
+     "target": "aws.protocoltests.config#OperationConfig"
+    }
+   }
+  },
+  "com.amazonaws.s3#AccountId": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#AmazonS3": {
+   "type": "service",
+   "version": "2006-03-01",
+   "operations": [
+    {
+     "target": "com.amazonaws.s3#DeleteObjectTagging"
+    },
+    {
+     "target": "com.amazonaws.s3#GetBucketLocation"
+    },
+    {
+     "target": "com.amazonaws.s3#GetObject"
+    },
+    {
+     "target": "com.amazonaws.s3#ListObjectsV2"
+    }
+   ],
+   "traits": {
+    "aws.api#service": {
+     "sdkId": "S3",
+     "arnNamespace": "s3",
+     "cloudFormationName": "S3",
+     "cloudTrailEventSource": "s3.amazonaws.com",
+     "endpointPrefix": "s3"
+    },
+    "aws.auth#sigv4": {
+     "name": "s3"
+    },
+    "aws.protocols#restXml": {
+     "noErrorWrapping": true
+    },
+    "smithy.api#tags": [
+     "aws-service-test"
+    ],
+    "smithy.api#title": "Amazon Simple Storage Service",
+    "smithy.api#xmlNamespace": {
+     "uri": "http://s3.amazonaws.com/doc/2006-03-01/"
+    }
+   }
+  },
+  "com.amazonaws.s3#BucketLocationConstraint": {
+   "type": "enum",
+   "members": {
+    "us_west_2": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "us-west-2",
+      "smithy.api#suppress": [
+       "EnumShape"
+      ]
+     }
+    }
+   }
+  },
+  "com.amazonaws.s3#BucketName": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#CommonPrefix": {
+   "type": "structure",
+   "members": {
+    "Prefix": {
+     "target": "com.amazonaws.s3#Prefix"
+    }
+   }
+  },
+  "com.amazonaws.s3#CommonPrefixList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.s3#CommonPrefix"
+   }
+  },
+  "com.amazonaws.s3#DeleteObjectTagging": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.s3#DeleteObjectTaggingRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.s3#DeleteObjectTaggingOutput"
+   },
+   "traits": {
+    "smithy.api#http": {
+     "method": "DELETE",
+     "uri": "/{Bucket}/{Key+}?tagging",
+     "code": 204
+    },
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "S3EscapeObjectKeyInUriLabel",
+      "documentation": "    S3 clients should escape special characters in Object Keys\n    when the Object Key is used as a URI label binding.\n",
+      "protocol": "aws.protocols#restXml",
+      "method": "DELETE",
+      "uri": "/my%20key.txt",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "tagging"
+      ],
+      "params": {
+       "Bucket": "mybucket",
+       "Key": "my key.txt"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2"
+        }
+       }
+      }
+     },
+     {
+      "id": "S3EscapePathObjectKeyInUriLabel",
+      "documentation": "    S3 clients should preserve an Object Key representing a path\n    when the Object Key is used as a URI label binding, but still\n    escape special characters.\n",
+      "protocol": "aws.protocols#restXml",
+      "method": "DELETE",
+      "uri": "/foo/bar/my%20key.txt",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "tagging"
+      ],
+      "params": {
+       "Bucket": "mybucket",
+       "Key": "foo/bar/my key.txt"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2"
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  "com.amazonaws.s3#DeleteObjectTaggingOutput": {
+   "type": "structure",
+   "members": {
+    "VersionId": {
+     "target": "com.amazonaws.s3#ObjectVersionId",
+     "traits": {
+      "smithy.api#httpHeader": "x-amz-version-id"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.s3#DeleteObjectTaggingRequest": {
+   "type": "structure",
+   "members": {
+    "Bucket": {
+     "target": "com.amazonaws.s3#BucketName",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "Key": {
+     "target": "com.amazonaws.s3#ObjectKey",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "VersionId": {
+     "target": "com.amazonaws.s3#ObjectVersionId",
+     "traits": {
+      "smithy.api#httpQuery": "versionId"
+     }
+    },
+    "ExpectedBucketOwner": {
+     "target": "com.amazonaws.s3#AccountId",
+     "traits": {
+      "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.s3#Delimiter": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#DisplayName": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#ETag": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#EncodingType": {
+   "type": "enum",
+   "members": {
+    "url": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "url",
+      "smithy.api#suppress": [
+       "EnumShape"
+      ]
+     }
+    }
+   }
+  },
+  "com.amazonaws.s3#FetchOwner": {
+   "type": "boolean"
+  },
+  "com.amazonaws.s3#GetBucketLocation": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.s3#GetBucketLocationRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.s3#GetBucketLocationOutput"
+   },
+   "traits": {
+    "aws.customizations#s3UnwrappedXmlOutput": {},
+    "smithy.api#http": {
+     "uri": "/{Bucket}?location",
+     "method": "GET"
+    },
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "GetBucketLocationUnwrappedOutput",
+      "documentation": "    S3 clients should use the @s3UnwrappedXmlOutput trait to determine\n    that the response shape is not wrapped in a restxml operation-level XML node.\n",
+      "code": 200,
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<LocationConstraint xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">us-west-2</LocationConstraint>",
+      "params": {
+       "LocationConstraint": "us-west-2"
+      },
+      "protocol": "aws.protocols#restXml"
+     }
+    ]
+   }
+  },
+  "com.amazonaws.s3#GetBucketLocationOutput": {
+   "type": "structure",
+   "members": {
+    "LocationConstraint": {
+     "target": "com.amazonaws.s3#BucketLocationConstraint"
+    }
+   },
+   "traits": {
+    "smithy.api#xmlName": "LocationConstraint"
+   }
+  },
+  "com.amazonaws.s3#GetBucketLocationRequest": {
+   "type": "structure",
+   "members": {
+    "Bucket": {
+     "target": "com.amazonaws.s3#BucketName",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   }
+  },
+  "com.amazonaws.s3#GetObject": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.s3#GetObjectRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.s3#GetObjectOutput"
+   },
+   "traits": {
+    "smithy.api#http": {
+     "uri": "/{Bucket}/{Key+}",
+     "method": "GET"
+    },
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "S3PreservesLeadingDotSegmentInUriLabel",
+      "documentation": "    S3 clients should not remove dot segments from request paths.\n",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/../key.txt",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "params": {
+       "Bucket": "mybucket",
+       "Key": "../key.txt"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "virtual"
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "S3PreservesEmbeddedDotSegmentInUriLabel",
+      "documentation": "    S3 clients should not remove dot segments from request paths.\n",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/foo/../key.txt",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "params": {
+       "Bucket": "mybucket",
+       "Key": "foo/../key.txt"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "virtual"
+         }
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  "com.amazonaws.s3#GetObjectOutput": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "com.amazonaws.s3#GetObjectRequest": {
+   "type": "structure",
+   "members": {
+    "Bucket": {
+     "target": "com.amazonaws.s3#BucketName",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "Key": {
+     "target": "com.amazonaws.s3#ObjectKey",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "com.amazonaws.s3#ID": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#IsTruncated": {
+   "type": "boolean"
+  },
+  "com.amazonaws.s3#KeyCount": {
+   "type": "integer"
+  },
+  "com.amazonaws.s3#LastModified": {
+   "type": "timestamp"
+  },
+  "com.amazonaws.s3#ListObjectsV2": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.s3#ListObjectsV2Request"
+   },
+   "output": {
+    "target": "com.amazonaws.s3#ListObjectsV2Output"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.s3#NoSuchBucket"
+    }
+   ],
+   "traits": {
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/{Bucket}?list-type=2",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "inputToken": "ContinuationToken",
+     "outputToken": "NextContinuationToken",
+     "pageSize": "MaxKeys"
+    },
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "S3DefaultAddressing",
+      "documentation": "S3 clients should map the default addressing style to virtual host.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2"
+        }
+       }
+      }
+     },
+     {
+      "id": "S3VirtualHostAddressing",
+      "documentation": "S3 clients should support the explicit virtual host addressing style.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "virtual"
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "S3PathAddressing",
+      "documentation": "S3 clients should support the explicit path addressing style.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/mybucket",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "s3.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "path"
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "S3VirtualHostDualstackAddressing",
+      "documentation": "S3 clients should support the explicit virtual host\naddressing style with Dualstack.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.dualstack.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "virtual",
+          "use_dualstack_endpoint": true
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "S3VirtualHostAccelerateAddressing",
+      "documentation": "S3 clients should support the explicit virtual host\naddressing style with S3 Accelerate.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3-accelerate.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "virtual",
+          "use_accelerate_endpoint": true
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "S3VirtualHostDualstackAccelerateAddressing",
+      "documentation": "S3 clients should support the explicit virtual host\naddressing style with Dualstack and S3 Accelerate.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3-accelerate.dualstack.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "virtual",
+          "use_dualstack_endpoint": true,
+          "use_accelerate_endpoint": true
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "S3OperationAddressingPreferred",
+      "documentation": "S3 clients should resolve to the addressing style of the\noperation if defined on both the client and operation.",
+      "protocol": "aws.protocols#restXml",
+      "method": "GET",
+      "uri": "/",
+      "host": "s3.us-west-2.amazonaws.com",
+      "resolvedHost": "mybucket.s3.us-west-2.amazonaws.com",
+      "body": "",
+      "queryParams": [
+       "list-type=2"
+      ],
+      "params": {
+       "Bucket": "mybucket"
+      },
+      "vendorParamsShape": "aws.protocoltests.config#AwsConfig",
+      "vendorParams": {
+       "scopedConfig": {
+        "client": {
+         "region": "us-west-2",
+         "s3": {
+          "addressing_style": "path"
+         }
+        },
+        "operation": {
+         "s3": {
+          "addressing_style": "virtual"
+         }
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  "com.amazonaws.s3#ListObjectsV2Output": {
+   "type": "structure",
+   "members": {
+    "IsTruncated": {
+     "target": "com.amazonaws.s3#IsTruncated"
+    },
+    "Contents": {
+     "target": "com.amazonaws.s3#ObjectList",
+     "traits": {
+      "smithy.api#xmlFlattened": {}
+     }
+    },
+    "Name": {
+     "target": "com.amazonaws.s3#BucketName"
+    },
+    "Prefix": {
+     "target": "com.amazonaws.s3#Prefix"
+    },
+    "Delimiter": {
+     "target": "com.amazonaws.s3#Delimiter"
+    },
+    "MaxKeys": {
+     "target": "com.amazonaws.s3#MaxKeys"
+    },
+    "CommonPrefixes": {
+     "target": "com.amazonaws.s3#CommonPrefixList",
+     "traits": {
+      "smithy.api#xmlFlattened": {}
+     }
+    },
+    "EncodingType": {
+     "target": "com.amazonaws.s3#EncodingType"
+    },
+    "KeyCount": {
+     "target": "com.amazonaws.s3#KeyCount"
+    },
+    "ContinuationToken": {
+     "target": "com.amazonaws.s3#Token"
+    },
+    "NextContinuationToken": {
+     "target": "com.amazonaws.s3#NextToken"
+    },
+    "StartAfter": {
+     "target": "com.amazonaws.s3#StartAfter"
+    }
+   }
+  },
+  "com.amazonaws.s3#ListObjectsV2Request": {
+   "type": "structure",
+   "members": {
+    "Bucket": {
+     "target": "com.amazonaws.s3#BucketName",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {}
+     }
+    },
+    "Delimiter": {
+     "target": "com.amazonaws.s3#Delimiter",
+     "traits": {
+      "smithy.api#httpQuery": "delimiter"
+     }
+    },
+    "EncodingType": {
+     "target": "com.amazonaws.s3#EncodingType",
+     "traits": {
+      "smithy.api#httpQuery": "encoding-type"
+     }
+    },
+    "MaxKeys": {
+     "target": "com.amazonaws.s3#MaxKeys",
+     "traits": {
+      "smithy.api#httpQuery": "max-keys"
+     }
+    },
+    "Prefix": {
+     "target": "com.amazonaws.s3#Prefix",
+     "traits": {
+      "smithy.api#httpQuery": "prefix"
+     }
+    },
+    "ContinuationToken": {
+     "target": "com.amazonaws.s3#Token",
+     "traits": {
+      "smithy.api#httpQuery": "continuation-token"
+     }
+    },
+    "FetchOwner": {
+     "target": "com.amazonaws.s3#FetchOwner",
+     "traits": {
+      "smithy.api#httpQuery": "fetch-owner"
+     }
+    },
+    "StartAfter": {
+     "target": "com.amazonaws.s3#StartAfter",
+     "traits": {
+      "smithy.api#httpQuery": "start-after"
+     }
+    },
+    "RequestPayer": {
+     "target": "com.amazonaws.s3#RequestPayer",
+     "traits": {
+      "smithy.api#httpHeader": "x-amz-request-payer"
+     }
+    },
+    "ExpectedBucketOwner": {
+     "target": "com.amazonaws.s3#AccountId",
+     "traits": {
+      "smithy.api#httpHeader": "x-amz-expected-bucket-owner"
+     }
+    }
+   }
+  },
+  "com.amazonaws.s3#MaxKeys": {
+   "type": "integer"
+  },
+  "com.amazonaws.s3#NextToken": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#NoSuchBucket": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "S3OperationNoErrorWrappingResponse",
+      "documentation": "    S3 operations return Error XML nodes unwrapped by\n    the ErrorResponse XML node.\n",
+      "protocol": "aws.protocols#restXml",
+      "code": 400,
+      "headers": {
+       "Content-Type": "application/xml"
+      },
+      "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error>\n\t<Type>Sender</Type>\n\t<Code>NoSuchBucket</Code>\n</Error>",
+      "bodyMediaType": "application/xml"
+     }
+    ]
+   }
+  },
+  "com.amazonaws.s3#Object": {
+   "type": "structure",
+   "members": {
+    "Key": {
+     "target": "com.amazonaws.s3#ObjectKey"
+    },
+    "LastModified": {
+     "target": "com.amazonaws.s3#LastModified"
+    },
+    "ETag": {
+     "target": "com.amazonaws.s3#ETag"
+    },
+    "Size": {
+     "target": "com.amazonaws.s3#Size"
+    },
+    "StorageClass": {
+     "target": "com.amazonaws.s3#ObjectStorageClass"
+    },
+    "Owner": {
+     "target": "com.amazonaws.s3#Owner"
+    }
+   }
+  },
+  "com.amazonaws.s3#ObjectKey": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1
+    }
+   }
+  },
+  "com.amazonaws.s3#ObjectList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.s3#Object"
+   }
+  },
+  "com.amazonaws.s3#ObjectStorageClass": {
+   "type": "enum",
+   "members": {
+    "STANDARD": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "STANDARD"
+     }
+    },
+    "REDUCED_REDUNDANCY": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "REDUCED_REDUNDANCY"
+     }
+    },
+    "GLACIER": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "GLACIER"
+     }
+    },
+    "STANDARD_IA": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "STANDARD_IA"
+     }
+    },
+    "ONEZONE_IA": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ONEZONE_IA"
+     }
+    },
+    "INTELLIGENT_TIERING": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "INTELLIGENT_TIERING"
+     }
+    },
+    "DEEP_ARCHIVE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DEEP_ARCHIVE"
+     }
+    },
+    "OUTPOSTS": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "OUTPOSTS"
+     }
+    }
+   }
+  },
+  "com.amazonaws.s3#ObjectVersionId": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#Owner": {
+   "type": "structure",
+   "members": {
+    "DisplayName": {
+     "target": "com.amazonaws.s3#DisplayName"
+    },
+    "ID": {
+     "target": "com.amazonaws.s3#ID"
+    }
+   }
+  },
+  "com.amazonaws.s3#Prefix": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#RequestPayer": {
+   "type": "enum",
+   "members": {
+    "requester": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "requester",
+      "smithy.api#suppress": [
+       "EnumShape"
+      ]
+     }
+    }
+   }
+  },
+  "com.amazonaws.s3#Size": {
+   "type": "integer"
+  },
+  "com.amazonaws.s3#StartAfter": {
+   "type": "string"
+  },
+  "com.amazonaws.s3#Token": {
+   "type": "string"
+  }
+ }
+}
