@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import React, { useState } from 'react';
-import { getInlineActionStepDefinition, INLINE_ACTION_STEP_DEFINITIONS } from '../registry';
+import { getInlineActionStepDefinition } from '../registry';
 import type { InlineWorkflowActionDraft } from '../types';
 import type { InlineWorkflowEditorProps } from './inline_workflow_editor';
 import { InlineWorkflowEditor } from './inline_workflow_editor';
@@ -88,6 +88,7 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 const EMAIL_TEMPLATE = getInlineActionStepDefinition('email')?.paramsTemplate ?? '';
+const SLACK_TEMPLATE = getInlineActionStepDefinition('slack2.sendMessage')?.paramsTemplate ?? '';
 
 const draft = (overrides: Partial<InlineWorkflowActionDraft> = {}): InlineWorkflowActionDraft => ({
   id: 'step-1',
@@ -165,14 +166,35 @@ describe('InlineWorkflowEditor', () => {
     expect(screen.getByTestId('mockedCodeEditor')).toBeInTheDocument();
   });
 
-  it.each(INLINE_ACTION_STEP_DEFINITIONS.map((definition) => [definition.id, definition] as const))(
-    'shows the default %s params in the params editor',
-    (_, { id, paramsTemplate }) => {
-      renderStatefulEditor(draft({ stepType: id, params: paramsTemplate }));
+  it('shows the default email params in the params editor', () => {
+    renderStatefulEditor(draft());
 
-      expect(screen.getByTestId<HTMLTextAreaElement>('mockedCodeEditor').value).toMatchSnapshot();
-    }
-  );
+    expect(screen.getByTestId<HTMLTextAreaElement>('mockedCodeEditor').value)
+      .toMatchInlineSnapshot(`
+      "to: 
+        - \\"\\"
+      subject: \\"\\"
+      message: |
+        {% for alert in inputs.payload.alerts %}
+        - {{ inputs.payload.rules[alert.rule_id].name | default: \\"Alert\\" }} ({{ alert.alert_status }}): {{ alert.alert_url }}
+        {% endfor %}
+      "
+    `);
+  });
+
+  it('shows the default Slack params in the params editor', () => {
+    renderStatefulEditor(draft({ stepType: 'slack2.sendMessage', params: SLACK_TEMPLATE }));
+
+    expect(screen.getByTestId<HTMLTextAreaElement>('mockedCodeEditor').value)
+      .toMatchInlineSnapshot(`
+      "channel: \\"\\"
+      text: |
+        {% for alert in inputs.payload.alerts %}
+        - {{ inputs.payload.rules[alert.rule_id].name | default: \\"Alert\\" }} ({{ alert.alert_status }}): <{{ alert.alert_url }}|View alert>
+        {% endfor %}
+      "
+    `);
+  });
 
   it('forwards the connector creation mode to the connector selector', () => {
     renderEditor({ connectorCreationConfig: { mode: 'new-tab', href: '/connectors' } });
