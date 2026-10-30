@@ -61,6 +61,9 @@ import {
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
+  CloudOnboardingDeploymentSchemaV3,
+  CloudOnboardingDeploymentSchemaV4,
+  CloudOnboardingDeploymentSchemaV5,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -774,6 +777,7 @@ export const getSavedObjectTypes = (
             },
           },
           oauth2: { type: 'object', dynamic: false },
+          kerberos: { type: 'object', dynamic: false },
           partition: { type: 'keyword' },
           random: {
             dynamic: false,
@@ -1035,6 +1039,21 @@ export const getSavedObjectTypes = (
           ],
           schemas: {
             // `oauth2` is known to this version: it is kept when reading a newer document
+            forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                kerberos: { type: 'object', dynamic: false },
+              },
+            },
+          ],
+          schemas: {
+            // `kerberos` is known to this version: it is kept when reading a newer document
             forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
             create: schema.object({}, { unknowns: 'allow' }),
           },
@@ -2165,6 +2184,40 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV2,
+          },
+        },
+        3: {
+          // Added integrationName + description. No mappings_addition — neither field is
+          // indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV3.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV3,
+          },
+        },
+        4: {
+          // Added namespace. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV4.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV4,
+          },
+        },
+        5: {
+          // Added instances. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV5,
           },
         },
       },

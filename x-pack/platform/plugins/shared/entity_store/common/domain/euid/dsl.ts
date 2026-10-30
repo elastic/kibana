@@ -7,8 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { EntityDefinitionOfAnyType, FieldEvaluation } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import type { EntityDefinitionWithoutId, FieldEvaluation } from '../definitions/entity_schema';
+import {
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import {
   applyWhenConditionTrueSetFields,
@@ -41,7 +45,7 @@ import {
  * ```
  */
 export function getEuidDslDocumentsContainsIdFilter(
-  entityDefinition: EntityDefinitionOfAnyType
+  entityDefinition: EntityDefinitionWithoutId
 ): QueryDslQueryContainer {
   const { identityField } = entityDefinition;
   if (isSingleFieldIdentity(identityField)) {
@@ -92,7 +96,7 @@ export function getEuidDslDocumentsContainsIdFilter(
  *   and `whenConditionTrueSetFieldsPreAgg`.
  */
 export function getEuidDslFilterBasedOnDocument(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   doc: any,
   { excludeHigherRankedFields = true }: { excludeHigherRankedFields?: boolean } = {}
 ): QueryDslQueryContainer | undefined {
@@ -120,11 +124,13 @@ export function getEuidDslFilterBasedOnDocument(
     const evaluated = applyFieldEvaluations(doc, fieldEvaluations);
     doc = { ...doc, ...evaluated };
   }
-  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsPreAgg);
+  const preAggFieldOverrides = getPreAggFieldOverrides(entityDefinition);
+  if (preAggFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, preAggFieldOverrides);
   }
-  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, entityDefinition.whenConditionTrueSetFieldsAfterStats);
+  const postStatsFieldOverrides = getPostStatsFieldOverrides(entityDefinition);
+  if (postStatsFieldOverrides?.length) {
+    applyWhenConditionTrueSetFields(doc, postStatsFieldOverrides);
   }
   if (!documentPassesCalculatedIdentityPipelineGate(doc, entityDefinition)) {
     return undefined;
@@ -215,7 +221,7 @@ export function getEuidDslFilterBasedOnDocument(
  *   enough identifying information.
  */
 export function getEuidDslFilterBasedOnEntityRecord(
-  entityDefinition: EntityDefinitionOfAnyType,
+  entityDefinition: EntityDefinitionWithoutId,
   record: any
 ): QueryDslQueryContainer | undefined {
   if (!record) {
@@ -259,7 +265,9 @@ export function getEuidDslFilterBasedOnEntityRecord(
 
   // A record only holds the fields the definition stores. Requiring an unstored identity field
   // to be missing would match no document, since that field is on the source documents.
-  const storedFields = new Set(entityDefinition.fields.map(({ destination }) => destination));
+  const storedFields = new Set(
+    (entityDefinition.extraction?.fields ?? []).map(({ destination }) => destination)
+  );
   const toBeFilteredOut = getFieldsToBeFilteredOut(effectiveRanking, fieldsToBeFilteredOn).filter(
     (field) => !evaluatedDestinations.has(field) && storedFields.has(field)
   );

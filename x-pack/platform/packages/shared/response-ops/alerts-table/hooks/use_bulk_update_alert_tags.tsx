@@ -50,7 +50,7 @@ export const useBulkUpdateAlertTags = ({
       onSuccess: (_, params) => {
         toasts.addSuccess(
           i18n.translate(
-            'xpack.triggersActionsUI.rules.updateTagsConfirmationModal.successNotification.descriptionText',
+            'xpack.responseOpsAlertsTable.rules.updateTagsConfirmationModal.successNotification.descriptionText',
             {
               defaultMessage: 'Updated tags for {uuidsCount, plural, one {alert} other {alerts}}',
               values: { uuidsCount: params.alertIds.length },
@@ -62,7 +62,7 @@ export const useBulkUpdateAlertTags = ({
       onError: (_err, params) => {
         toasts.addDanger(
           i18n.translate(
-            'xpack.triggersActionsUI.rules.updateTagsConfirmationModal.errorNotification.descriptionText',
+            'xpack.responseOpsAlertsTable.rules.updateTagsConfirmationModal.errorNotification.descriptionText',
             {
               defaultMessage:
                 'Failed to update tags for {uuidsCount, plural, one {alert} other {alerts}}',

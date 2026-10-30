@@ -15,6 +15,8 @@ export {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
   SERVERLESS_NODES,
+  ES_SERVERLESS_REPO_KIBANA,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
   LINKED_CLUSTER_PORT_OFFSET,
   getServerlessNodes,
   getSharedServerlessParams,
@@ -30,8 +32,13 @@ export {
   readRolesFromResource,
   readRolesDescriptorsFromResource,
 } from './src/utils';
+export { getUiamContainers } from './src/utils/docker_uiam';
 export type { ArtifactLicense } from './src/artifact';
-export { SERVERLESS_ROLES_ROOT_PATH, STATEFUL_ROLES_ROOT_PATH } from './src/paths';
+export {
+  SERVERLESS_ROLES_ROOT_PATH,
+  STATEFUL_ROLES_ROOT_PATH,
+  SERVERLESS_SECRETS_DIR,
+} from './src/paths';
 export {
   EIS_QA_URL,
   EIS_ES_ARG,

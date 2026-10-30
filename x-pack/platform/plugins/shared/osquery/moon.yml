@@ -94,12 +94,15 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/core-chrome-browser-mocks'
+  - '@kbn/app-menu'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -110,6 +113,4 @@ fileGroups:
     - test/scout/**/*
     - common/schemas/*/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

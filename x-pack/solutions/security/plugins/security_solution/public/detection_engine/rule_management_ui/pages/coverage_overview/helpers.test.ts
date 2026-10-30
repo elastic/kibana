@@ -8,7 +8,11 @@
 import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import { getCoverageOverviewFilterMock } from '../../../../../common/api/detection_engine/rule_management/coverage_overview/coverage_overview_route.mock';
 import { ruleActivityFilterDefaultOptions } from './constants';
-import { extractSelected, populateSelected } from './helpers';
+import {
+  extractSelected,
+  filterInvalidlyMappedRulesByFramework,
+  populateSelected,
+} from './helpers';
 
 describe('helpers', () => {
   describe('extractSelected', () => {
@@ -40,6 +44,44 @@ describe('helpers', () => {
         { label: 'enabled', checked: 'on' },
         { label: 'disabled' },
       ]);
+    });
+  });
+
+  describe('filterInvalidlyMappedRulesByFramework', () => {
+    const invalidlyMappedRules = {
+      enabledRules: [
+        { id: 'both', name: 'Both', invalidMitreIds: ['T9999', 'AML.T9999'] },
+        { id: 'atlas-only', name: 'Atlas only', invalidMitreIds: ['AML.TA9999'] },
+      ],
+      disabledRules: [
+        { id: 'enterprise-only', name: 'Enterprise only', invalidMitreIds: ['T1234'] },
+      ],
+    };
+
+    it('keeps only enterprise IDs and drops rules left without IDs', () => {
+      expect(filterInvalidlyMappedRulesByFramework(invalidlyMappedRules, 'enterprise')).toEqual({
+        enabledRules: [{ id: 'both', name: 'Both', invalidMitreIds: ['T9999'] }],
+        disabledRules: [
+          { id: 'enterprise-only', name: 'Enterprise only', invalidMitreIds: ['T1234'] },
+        ],
+      });
+    });
+
+    it('keeps only atlas IDs and drops rules left without IDs', () => {
+      expect(filterInvalidlyMappedRulesByFramework(invalidlyMappedRules, 'atlas')).toEqual({
+        enabledRules: [
+          { id: 'both', name: 'Both', invalidMitreIds: ['AML.T9999'] },
+          { id: 'atlas-only', name: 'Atlas only', invalidMitreIds: ['AML.TA9999'] },
+        ],
+        disabledRules: [],
+      });
+    });
+
+    it('returns empty lists when there is no data', () => {
+      expect(filterInvalidlyMappedRulesByFramework(undefined, 'atlas')).toEqual({
+        enabledRules: [],
+        disabledRules: [],
+      });
     });
   });
 });

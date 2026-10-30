@@ -248,6 +248,8 @@ export interface SimilarCasesProps extends ApiProps {
   caseId: string;
   perPage: number;
   page: number;
+  sortField?: SortFieldCase;
+  sortOrder?: SortOrder;
 }
 
 export interface ApiProps {

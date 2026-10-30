@@ -58,7 +58,6 @@ describe('ExportJsonFlyoutContent', () => {
         dataTestSubjPrefix="test"
         downloadExportJson={jest.fn()}
         getExportJson={() => ({ title: 'My object' })}
-        isTechnicalPreview={false}
         prepareExportJson={async (state) => ({ data: state, warnings: [] })}
       />
     );

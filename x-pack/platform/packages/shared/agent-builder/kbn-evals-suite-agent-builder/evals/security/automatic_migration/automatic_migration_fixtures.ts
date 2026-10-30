@@ -21,6 +21,7 @@ export interface SeededMigrationFixtures {
     completed: number;
     partial: number;
     untranslatable: number;
+    missingIndex: number;
     failed: number;
     pending: number;
   };
@@ -36,6 +37,8 @@ interface SeedOptions {
   partial?: number;
   /** Untranslatable rules (translation_result: 'untranslatable', status: 'completed') */
   untranslatable?: number;
+  /** Partially translated rules whose ES|QL query still has the `[indexPattern]` placeholder */
+  missingIndex?: number;
   failed?: number;
   pending?: number;
   /** Seed `last_execution.is_stopped: true` to produce a STOPPED migration status. */
@@ -97,6 +100,7 @@ export async function seedRuleMigration({
   completed = 2,
   partial = 0,
   untranslatable = 0,
+  missingIndex = 0,
   failed = 1,
   pending = 0,
   isStopped = false,
@@ -104,13 +108,14 @@ export async function seedRuleMigration({
 }: SeedOptions): Promise<SeedResult> {
   try {
     const migrationId = randomUUID();
-    const total = completed + partial + untranslatable + failed + pending;
+    const total = completed + partial + untranslatable + missingIndex + failed + pending;
     const now = new Date().toISOString();
 
     interface RuleSpec {
       status: string;
       translation_result?: string;
       title: string;
+      esqlQuery?: string;
     }
     const ruleSpecs: RuleSpec[] = [
       ...Array.from({ length: failed }, (_, i) => ({
@@ -136,9 +141,15 @@ export async function seedRuleMigration({
         translation_result: 'untranslatable',
         title: `Eval rule untranslatable ${i + 1}`,
       })),
+      ...Array.from({ length: missingIndex }, (_, i) => ({
+        status: 'completed',
+        translation_result: 'partial',
+        title: `Eval rule missing index ${i + 1}`,
+        esqlQuery: 'FROM [indexPattern] | LIMIT 10',
+      })),
     ];
 
-    const ruleDocs = ruleSpecs.flatMap(({ status, translation_result, title }) => [
+    const ruleDocs = ruleSpecs.flatMap(({ status, translation_result, title, esqlQuery }) => [
       { create: { _index: RULES_INDEX } },
       {
         '@timestamp': now,
@@ -160,7 +171,7 @@ export async function seedRuleMigration({
                 description: 'Translated test rule for eval seeding',
                 severity: 'medium',
                 risk_score: 47,
-                query: 'FROM logs-* | LIMIT 10',
+                query: esqlQuery ?? 'FROM logs-* | LIMIT 10',
                 query_language: 'esql',
               },
             }
@@ -201,7 +212,7 @@ export async function seedRuleMigration({
       fixtures: {
         migrationId,
         migrationName: name,
-        ruleCounts: { total, completed, partial, untranslatable, failed, pending },
+        ruleCounts: { total, completed, partial, untranslatable, missingIndex, failed, pending },
       },
       cleanup: async () => {
         try {

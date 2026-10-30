@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import {
   ConversationAccessControlMode,
+  isAgentNotFoundError,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
 import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
+import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { InvestigationNotFoundError } from './errors';
 
@@ -19,6 +22,7 @@ import { InvestigationNotFoundError } from './errors';
 export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
+  telemetryTarget?: string;
   /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
   title: string;
   /** `metadata.status`; a missing status reads as open. */
@@ -48,6 +52,9 @@ const toInvestigationConversation = (
   }
   return {
     id: conversation.id,
+    telemetryTarget: telemetryTargetNameSchema
+      .optional()
+      .parse(conversation.metadata?.telemetry_target),
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
     workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
@@ -87,6 +94,9 @@ export const findInvestigationConversation = async (
   return conversation ? toInvestigationConversation(conversation, false) : undefined;
 };
 
+/** Severity a new investigation starts at, until the investigating agent rates it. */
+export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;
+
 /**
  * Gets the investigation conversation with this id, creating it when it does not exist yet. An
  * investigation is a public `investigation` template conversation on the Nightshift investigation
@@ -94,27 +104,60 @@ export const findInvestigationConversation = async (
  * agree on one conversation, because the id is chosen by the caller.
  *
  * The conversation is created without a title, so Agent Builder stores its placeholder and
- * generates the title from the investigation's first round.
+ * generates the title from the investigation's first round, and at `medium` severity, which the
+ * agent adjusts once it concludes.
  */
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
+  workflowExecutionId,
+  beforeCreate,
+  telemetryTarget,
 }: {
   conversations: ConversationPublicClient;
   id: string;
+  /**
+   * The run creating it. Recorded in the creating write, so the investigation never reads as not
+   * in progress between its creation and the run being recorded on it.
+   */
+  workflowExecutionId?: string;
+  beforeCreate?: () => Promise<void>;
+  telemetryTarget?: string;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
     return existing;
   }
 
+  await beforeCreate?.();
   try {
-    const created = await conversations.create({
-      id,
-      agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-      templateId: INVESTIGATION_TEMPLATE_ID,
-      accessControl: { access_mode: ConversationAccessControlMode.Public },
-    });
+    const create = () =>
+      conversations.create({
+        id,
+        agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        templateId: INVESTIGATION_TEMPLATE_ID,
+        metadata: {
+          // A starting rating, so the severity shows (and can be changed) from the beginning;
+          // the agent re-rates it from its findings when it concludes.
+          severity: INITIAL_INVESTIGATION_SEVERITY,
+          ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
+          ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
+        },
+        accessControl: { access_mode: ConversationAccessControlMode.Public },
+      });
+    // Agent creation can precede its visibility to the conversation API's agent lookup.
+    const created = beforeCreate
+      ? await pRetry(create, {
+          retries: 9,
+          factor: 1,
+          minTimeout: 300,
+          onFailedAttempt: (error) => {
+            if (!isAgentNotFoundError(error)) {
+              throw error;
+            }
+          },
+        })
+      : await create();
     return toInvestigationConversation(created, true);
   } catch (error) {
     if (!isConversationAlreadyExistsError(error)) {

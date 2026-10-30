@@ -1,5 +1,5 @@
 {
-  "sha1": "c70a8c021d0e4e1a9091a2ea2ac7ff180294a6fd",
+  "sha1": "cefe8f48743406e12cdf46fe625e651fd644a387",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -400,57 +400,53 @@
     {
       "id": "b7d416b796838f5-e5bd5cf338bcc23",
       "title": "Alerting Rule newly created rule has api_key_owner",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 67,
+        "column": 14
       }
     },
     {
       "id": "b7d416b796838f5-5d78285e8f5bb4f",
       "title": "Alerting Rule The rule runs and event log shows success",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 69,
-        "column": 40
+        "line": 75,
+        "column": 14
       }
     },
     {
       "id": "b7d416b796838f5-eafab7767d29f6e",
       "title": "Alerting Rule when rule is updated, apiKey and uiamApiKey are queued for invalidation",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 79,
-        "column": 12
+        "line": 85,
+        "column": 5
       }
     },
     {
       "id": "b7d416b796838f5-94ea894c179baba",
       "title": "Alerting Rule when rule is deleted, apiKey and uiamApiKey are queued for invalidation",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting/test/scout/api/tests/rules.spec.ts",
-        "line": 104,
-        "column": 42
+        "line": 109,
+        "column": 56
       }
     },
     {

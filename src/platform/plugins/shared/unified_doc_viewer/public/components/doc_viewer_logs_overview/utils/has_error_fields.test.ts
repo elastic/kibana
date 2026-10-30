@@ -515,6 +515,40 @@ describe('hasErrorFields', () => {
     });
   });
 
+  describe('severity_text (OTel)', () => {
+    it('returns true when severity_text is an error level and a message is present without log.level', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [fieldConstants.OTEL_SEVERITY_TEXT_FIELD]: 'ERROR',
+        [fieldConstants.MESSAGE_FIELD]: 'Payment failed',
+      };
+
+      expect(hasErrorFields(doc)).toBe(true);
+    });
+
+    it('returns true when log.level and message are null and body.text carries the message', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [fieldConstants.LOG_LEVEL_FIELD]: null as unknown as string,
+        [fieldConstants.MESSAGE_FIELD]: null as unknown as string,
+        [fieldConstants.OTEL_SEVERITY_TEXT_FIELD]: 'ERROR',
+        [fieldConstants.OTEL_MESSAGE_FIELD]: 'OTel request failed',
+      };
+
+      expect(hasErrorFields(doc)).toBe(true);
+    });
+
+    it('returns false when severity_text is not an error level and there is no error event type', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [fieldConstants.OTEL_SEVERITY_TEXT_FIELD]: 'INFO',
+        [fieldConstants.MESSAGE_FIELD]: 'Payment succeeded',
+      };
+
+      expect(hasErrorFields(doc)).toBe(false);
+    });
+  });
+
   describe('combined fields', () => {
     it('returns true when multiple error fields are present with error log level', () => {
       const doc: LogDocumentOverview = {

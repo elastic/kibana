@@ -27,6 +27,9 @@ import {
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
 const OWNER = 'securitySolution';
+// Stand-in for `.alerts-security.alerts-default` (no alert document is ever indexed here) so the
+// case status sync cannot race the alerting framework's bootstrap of that index.
+const ALERT_INDEX = '.alerts-test-cases-security-alerts';
 const postCaseReq = getPostCaseRequest({ owner: OWNER });
 const postCommentAlertReqRealOwner = { ...postCommentAlertReq, owner: OWNER };
 
@@ -50,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'alert-doc-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-1', name: 'Suspicious activity' },
               },
               owner: OWNER,
@@ -75,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'alert-so-check',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-2', name: 'Rule 2' },
               },
               owner: OWNER,
@@ -116,7 +119,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('creates a unified alert with array attachmentId (de-duped doc ids)', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const index = '.alerts-security.alerts-default';
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
@@ -127,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
               metadata: {
                 // The attachmentId / index pair is enforced to be the same length
                 // by the dedup guard in case_with_comments.ts.
-                index: [index, index, index],
+                index: [ALERT_INDEX, ALERT_INDEX, ALERT_INDEX],
                 rule: { id: 'rule-3', name: 'Rule 3' },
               },
               owner: OWNER,
@@ -151,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'alert-read-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-r1', name: 'Rule R1' },
               },
               owner: OWNER,
@@ -180,7 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'alert-total-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-t1', name: 'Rule T1' },
               },
               owner: OWNER,
@@ -189,7 +191,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'alert-total-2',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-t1', name: 'Rule T1' },
               },
               owner: OWNER,
@@ -207,7 +209,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('lists unified alerts via GET /:caseId/alerts', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        const index = '.alerts-security.alerts-default';
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
@@ -216,7 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: ['alert-list-1', 'alert-list-2'],
               metadata: {
-                index: [index, index],
+                index: [ALERT_INDEX, ALERT_INDEX],
                 rule: { id: 'rule-l', name: 'Rule L' },
               },
               owner: OWNER,
@@ -245,7 +246,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: 'security.alert' as const,
                 attachmentId: 'shared-alert-id',
                 metadata: {
-                  index: '.alerts-security.alerts-default',
+                  index: ALERT_INDEX,
                   rule: { id: 'rule-shared', name: 'Shared' },
                 },
                 owner: OWNER,
@@ -260,7 +261,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: 'security.alert' as const,
                 attachmentId: 'shared-alert-id',
                 metadata: {
-                  index: '.alerts-security.alerts-default',
+                  index: ALERT_INDEX,
                   rule: { id: 'rule-shared', name: 'Shared' },
                 },
                 owner: OWNER,
@@ -298,7 +299,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'unified-mix-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-mix', name: 'Rule mix' },
               },
               owner: OWNER,
@@ -331,7 +332,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'unified-alert-id',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-mix', name: 'Rule mix' },
               },
               owner: OWNER,
@@ -365,7 +366,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'cross-format-id',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-cross', name: 'Cross' },
               },
               owner: OWNER,
@@ -393,7 +394,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'alert-delete-1',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-d', name: 'Rule D' },
               },
               owner: OWNER,
@@ -434,7 +435,7 @@ export default ({ getService }: FtrProviderContext): void => {
               type: 'security.alert' as const,
               attachmentId: 'survives-delete',
               metadata: {
-                index: '.alerts-security.alerts-default',
+                index: ALERT_INDEX,
                 rule: { id: 'rule-s', name: 'Rule S' },
               },
               owner: OWNER,

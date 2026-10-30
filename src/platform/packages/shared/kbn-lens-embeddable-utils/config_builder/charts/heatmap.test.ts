@@ -113,3 +113,161 @@ test('generates metric chart config', async () => {
     }
   `);
 });
+
+test('hides the legend when configured', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      legend: { show: false },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      legend: expect.objectContaining({ isVisible: false }),
+    })
+  );
+});
+
+test('writes a custom percent palette when cell colors are provided', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      color: {
+        type: 'dynamic',
+        range: 'percentage',
+        steps: [
+          { color: '#d6e8f5', gte: 0, lt: 100 / 3 },
+          { color: '#8ec4ea', gte: 100 / 3, lt: 200 / 3 },
+          { color: '#1ba9f5', gte: 200 / 3, lte: 100 },
+        ],
+      },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      palette: {
+        type: 'palette',
+        name: 'custom',
+        accessor: 'metric_formula_accessor',
+        params: {
+          name: 'custom',
+          reverse: false,
+          rangeType: 'percent',
+          rangeMin: 0,
+          rangeMax: 100,
+          continuity: 'none',
+          stops: [
+            { color: '#d6e8f5', stop: 100 / 3 },
+            { color: '#8ec4ea', stop: 200 / 3 },
+            { color: '#1ba9f5', stop: 100 },
+          ],
+          colorStops: [
+            { color: '#d6e8f5', stop: 0 },
+            { color: '#8ec4ea', stop: 100 / 3 },
+            { color: '#1ba9f5', stop: 200 / 3 },
+          ],
+        },
+      },
+    })
+  );
+});
+
+test('keeps the default palette when color is auto', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      color: { type: 'auto' },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).not.toHaveProperty('palette');
+});
+
+test('sorts the vertical axis when configured', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      ySort: 'asc',
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      gridConfig: expect.objectContaining({
+        ySortPredicate: 'asc',
+      }),
+    })
+  );
+});
+
+test('shows axis labels when configured', async () => {
+  const { state } = await buildHeatmap(
+    {
+      chartType: 'heatmap',
+      title: 'test',
+      dataset: {
+        esql: 'from test | count=count() by @timestamp, category',
+      },
+      breakdown: 'category',
+      xAxis: '@timestamp',
+      value: 'count',
+      axisLabel: { xAxis: true, yAxis: true },
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  expect(state.visualization).toEqual(
+    expect.objectContaining({
+      gridConfig: expect.objectContaining({
+        isXAxisLabelVisible: true,
+        isXAxisTitleVisible: false,
+        isYAxisLabelVisible: true,
+        isYAxisTitleVisible: false,
+      }),
+    })
+  );
+});

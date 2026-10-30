@@ -11,6 +11,7 @@ import {
   kafkaAuthType,
   kafkaCompressionType,
   kafkaConnectionType,
+  kafkaKerberosAuthType,
   kafkaOAuth2GrantType,
   kafkaOAuth2SignatureAlgorithm,
   kafkaPartitionType,
@@ -60,6 +61,22 @@ const secretRefSchema = schema.oneOf([
   }),
   schema.string(),
 ]);
+
+// an update removes a secret by setting it to `null`: leaving it out keeps the saved one
+const nullableSecretRefSchema = schema.oneOf([
+  schema.literal(null),
+  schema.object({
+    id: schema.string(),
+    hash: schema.maybe(schema.string()),
+  }),
+  schema.string(),
+]);
+
+const BeatsUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
+  })
+);
 
 /**
  * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
@@ -151,6 +168,7 @@ const BeatsUpdateSchema = {
   name: schema.maybe(schema.string()),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
+  secrets: BeatsUpdateSecretsSchema,
 };
 
 const PresetSchema = schema.oneOf([
@@ -212,8 +230,8 @@ const RemoteElasticSearchUpdateSchema = {
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
-      service_token: schema.maybe(secretRefSchema),
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      service_token: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -242,11 +260,6 @@ const LogstashUpdateSchema = {
     schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
       minSize: 1,
       maxSize: MAX_HOSTS,
-    })
-  ),
-  secrets: schema.maybe(
-    schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
 };
@@ -322,6 +335,59 @@ const KafkaOAuth2Schema = schema.object({
   claims: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
+/**
+ * Settings of the Kerberos authentication method, they follow the `kerberos` settings of the Kafka
+ * output of Beats. The password is in `secrets`. The paths are paths on the host of the agent.
+ */
+const KafkaKerberosSchema = schema.object({
+  auth_type: schema.oneOf(
+    [schema.literal(kafkaKerberosAuthType.Keytab), schema.literal(kafkaKerberosAuthType.Password)],
+    {
+      meta: {
+        description:
+          'How the agent authenticates with Kerberos: a keytab file, or a username and password.',
+      },
+    }
+  ),
+  config_path: schema.string({
+    minLength: 1,
+    meta: {
+      description: 'Path to the Kerberos configuration file (`krb5.conf`) on the agent host.',
+    },
+  }),
+  keytab: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Path to the keytab file on the agent host. Required when `auth_type` is `keytab`.',
+      },
+    })
+  ),
+  username: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.',
+      },
+    })
+  ),
+  service_name: schema.maybe(
+    schema.string({ meta: { description: 'Kerberos service name of the Kafka brokers.' } })
+  ),
+  realm: schema.string({
+    minLength: 1,
+    meta: { description: 'Kerberos realm. This is usually the domain name in uppercase.' },
+  }),
+  enable_krb5_fast: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether to use Kerberos FAST authentication. This can conflict with some Active Directory installations. It defaults to `false` when not set.',
+      },
+    })
+  ),
+});
+
 export const KafkaSchema = {
   ...BeatsBaseSchema,
   // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
@@ -383,6 +449,7 @@ export const KafkaSchema = {
     ])
   ),
   oauth2: schema.maybe(schema.oneOf([schema.literal(null), KafkaOAuth2Schema])),
+  kerberos: schema.maybe(schema.oneOf([schema.literal(null), KafkaKerberosSchema])),
   partition: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaPartitionType.Random),
@@ -416,6 +483,7 @@ export const KafkaSchema = {
           client_certificate_key: schema.maybe(secretRefSchema),
         })
       ),
+      kerberos: schema.maybe(schema.object({ password: schema.maybe(secretRefSchema) })),
     })
   ),
 };
@@ -438,6 +506,19 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Kerberos),
       schema.literal(kafkaAuthType.OAuth2),
     ])
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      password: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: nullableSecretRefSchema })),
+      oauth2: schema.maybe(
+        schema.object({
+          client_secret: schema.maybe(secretRefSchema),
+          client_certificate_key: schema.maybe(secretRefSchema),
+        })
+      ),
+      kerberos: schema.maybe(schema.object({ password: schema.maybe(secretRefSchema) })),
+    })
   ),
 };
 
@@ -703,6 +784,26 @@ const OtlpSecretsSchema = schema.maybe(
   })
 );
 
+const OtlpUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    otlp_exporter: schema.maybe(
+      schema.object({
+        tls: schema.maybe(
+          schema.object({
+            key_pem: schema.maybe(nullableSecretRefSchema),
+            tpm: schema.maybe(
+              schema.object({
+                owner_auth: schema.maybe(nullableSecretRefSchema),
+                auth: schema.maybe(nullableSecretRefSchema),
+              })
+            ),
+          })
+        ),
+      })
+    ),
+  })
+);
+
 export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
@@ -719,7 +820,7 @@ export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
-  secrets: OtlpSecretsSchema,
+  secrets: OtlpUpdateSecretsSchema,
 };
 
 export const OutputSchema = schema.discriminatedUnion('type', [

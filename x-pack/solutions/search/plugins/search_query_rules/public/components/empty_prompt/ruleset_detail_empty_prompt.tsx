@@ -56,12 +56,12 @@ export const RulesetDetailEmptyPrompt: React.FC<RulesetDetailEmptyPromptProps> =
           <EuiText textAlign="center" size="s" color="subdued">
             {isFilter ? (
               <FormattedMessage
-                id="xpack.searchQueryRules.rulesetDetailEmptyPrompt.filterTitle"
+                id="xpack.queryRules.rulesetDetailEmptyPrompt.filterTitle"
                 defaultMessage="No rules match your search"
               />
             ) : (
               <FormattedMessage
-                id="xpack.searchQueryRules.rulesetDetailEmptyPrompt.title"
+                id="xpack.queryRules.rulesetDetailEmptyPrompt.title"
                 defaultMessage="Add your first rule"
               />
             )}

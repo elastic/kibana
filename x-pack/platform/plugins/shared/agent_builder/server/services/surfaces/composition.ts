@@ -6,26 +6,27 @@
  */
 
 import { formatValidationError } from '@elastic/isomer-sdk';
+import { splitAuthoredMarkdown } from '@elastic/isomer-sdk/markdown';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
   getLatestVersion,
   getVersion,
+  toAttachment,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
-  getCustomElementAttribute,
   renderAttachmentElement,
-  splitCustomElements,
   type RenderAttachmentElementAttributes,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import type {
+  AttachmentSurfaceCompositionContext,
   SurfaceComposition,
   SurfaceNode,
   MarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import { isomerRuntime } from './pack';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -41,23 +42,10 @@ interface AttachmentNode extends RenderAttachmentElementAttributes {
 /** The response message split into its markdown and its attachment tags, in order. */
 type MessageNode = SurfaceNode | AttachmentNode;
 
-const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
-  const attachmentId = getCustomElementAttribute(tag, attributes.attachmentId);
-  if (!attachmentId) {
-    return;
-  }
-
-  return {
-    type: 'attachment',
-    attachmentId,
-    version: getCustomElementAttribute(tag, attributes.version),
-  };
-};
-
 /**
- * Splits a message into nodes: its markdown becomes `markdown` nodes, and each
- * `<render_attachment>` tag becomes an `attachment` node at the same position. Tags without an
- * id are dropped.
+ * Splits a message into nodes with {@link splitAuthoredMarkdown}: its markdown becomes `markdown`
+ * nodes, and each `<render_attachment>` tag becomes an `attachment` node. Tags without an id are
+ * dropped.
  *
  * For example, `Here is the note: <render_attachment id="a1" /> Anything else?` splits into:
  *
@@ -70,17 +58,15 @@ const toAttachmentNode = (tag: string): AttachmentNode | undefined => {
  * ```
  */
 const toMessageNodes = (message: string): MessageNode[] =>
-  splitCustomElements(message, tagName).flatMap((segment, index): MessageNode[] => {
-    if (segment.type === 'text') {
-      // Text after a tag on the same line drops the space that separates it from the tag. The
-      // first line otherwise keeps its indentation, which an indented code block needs.
-      const text = index > 0 ? segment.text.replace(/^[ \t]+/, '') : segment.text;
-
-      return [{ type: 'markdown', text: text.replace(/^\s*\n/, '').trimEnd() }];
+  splitAuthoredMarkdown(message, { elements: [tagName] }).flatMap((segment): MessageNode[] => {
+    if (segment.type === 'markdown') {
+      return [{ type: 'markdown', text: segment.source }];
     }
 
-    const node = toAttachmentNode(segment.tag);
-    return node ? [node] : [];
+    const { [attributes.attachmentId]: attachmentId, [attributes.version]: version } =
+      segment.attributes;
+
+    return attachmentId ? [{ type: 'attachment', attachmentId, version }] : [];
   });
 
 /**
@@ -100,19 +86,22 @@ const toHeadingNode = ({ title, subtitle }: SurfaceComposition): MarkdownNode[] 
  * `toSurfaceComposition` that fails or returns an invalid composition is a bug in its mapping, so
  * it's left out with a warning, and the rest of the message still renders.
  */
-const resolveAttachmentNode = (
+const resolveAttachmentNode = async (
   node: AttachmentNode,
   {
     attachments,
     attachmentsService,
+    context,
     logger,
+    runtime,
   }: {
-    /** The conversation's attachments, as carried by `round_complete`. */
     attachments: VersionedAttachment[];
     attachmentsService: AttachmentServiceStart;
+    context: AttachmentSurfaceCompositionContext;
     logger: Logger;
+    runtime: KibanaIsomerRuntime;
   }
-): SurfaceNode[] => {
+): Promise<SurfaceNode[]> => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
 
   if (!attachment) {
@@ -146,12 +135,12 @@ const resolveAttachmentNode = (
   }
 
   try {
-    const composition = toSurfaceComposition(attachmentVersion.data, {
-      attachment,
-      version: attachmentVersion.version,
-    });
+    const composition = await toSurfaceComposition(
+      toAttachment(attachment, attachmentVersion),
+      context
+    );
 
-    const { valid, errors } = isomerRuntime.validate(composition);
+    const { valid, errors } = runtime.validate(composition);
 
     if (!valid) {
       const reasons = errors.map(formatValidationError).join('; ');
@@ -178,26 +167,28 @@ const resolveAttachmentNode = (
  * and each `<render_attachment>` tag is replaced, in place, by what its type's
  * `toSurfaceComposition` returns.
  */
-export const buildComposition = ({
+export const buildComposition = async ({
   round: { response },
   attachments,
   attachmentsService,
+  context,
   logger,
+  runtime,
 }: {
   round: ConversationRound;
-  /** The conversation's attachments, as carried by `round_complete`. */
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
+  context: AttachmentSurfaceCompositionContext;
   logger: Logger;
-}): SurfaceComposition => ({
-  type: 'view',
-  body: toMessageNodes(response.message).flatMap((node): SurfaceNode[] =>
-    node.type === 'attachment'
-      ? resolveAttachmentNode(node, {
-          attachments,
-          attachmentsService,
-          logger,
-        })
-      : [node]
-  ),
-});
+  runtime: KibanaIsomerRuntime;
+}): Promise<SurfaceComposition> => {
+  const nodes = await Promise.all(
+    toMessageNodes(response.message).map((node): Promise<SurfaceNode[]> | SurfaceNode[] =>
+      node.type === 'attachment'
+        ? resolveAttachmentNode(node, { attachments, attachmentsService, context, logger, runtime })
+        : [node]
+    )
+  );
+
+  return { type: 'view', body: nodes.flat() };
+};

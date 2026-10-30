@@ -30,6 +30,7 @@ export const registerSearchRoute = (
     .get({
       path: basePath,
       summary: 'Search Discover sessions',
+      operationId: 'search-discover-sessions',
       description:
         'Returns a paginated summary list of Discover sessions. Use `GET /api/discover_sessions/{id}` for the full session state.',
       ...routeConfig,
@@ -37,6 +38,10 @@ export const registerSearchRoute = (
     .addVersion(
       {
         version: routeVersion,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).searchDiscoverSessionsOASOperationObject,
+        },
         validate: {
           request: {
             query: discoverSessionSearchRequestParamsSchema,

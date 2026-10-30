@@ -755,7 +755,12 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
       const userDefinition = getBuiltInEntityDefinition('user');
       const withoutStoredEmail = {
         ...userDefinition,
-        fields: userDefinition.fields.filter(({ destination }) => destination !== 'user.email'),
+        extraction: {
+          ...userDefinition.extraction,
+          fields: userDefinition.extraction.fields.filter(
+            ({ destination }) => destination !== 'user.email'
+          ),
+        },
       };
       const record = { entity: { namespace: 'okta' }, user: { id: 'u1' } };
 

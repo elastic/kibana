@@ -12,6 +12,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { ApiKeyService } from './api_key_service';
 
 const createMockInvalidationDeps = () => ({
@@ -192,6 +193,21 @@ describe('ApiKeyService', () => {
       await expect(service.create('My Policy')).rejects.toThrow(
         'UIAM API keys should only be used in serverless environments'
       );
+    });
+
+    it('rejects a raw Cloud API key with a bad request', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_raw-cloud-secret' },
+      });
+      const security = createMockSecurityService({ authenticationType: 'api_key', uiam: true });
+      const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
+      const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
+
+      await expect(service.create('My Policy')).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
+      });
+      expect(security.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
     });
 
     it('throws when authorization header has no credentials', async () => {

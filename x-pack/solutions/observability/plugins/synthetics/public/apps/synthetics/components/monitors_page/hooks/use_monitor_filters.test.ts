@@ -14,7 +14,7 @@ import {
   useMonitorIdFilter,
   useOverviewAlertsKuery,
 } from './use_monitor_filters';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 
 const localMonitorIdQuery = (
   queryIds: string[],
@@ -36,7 +36,7 @@ describe('useMonitorFilters', () => {
   const selSPy = jest.spyOn(redux, 'useSelector');
 
   it('should return an empty array when no parameters are provided', () => {
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([]);
   });
@@ -48,7 +48,7 @@ describe('useMonitorFilters', () => {
       status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }] },
     });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([]);
   });
@@ -58,7 +58,7 @@ describe('useMonitorFilters', () => {
     paramSpy.mockReturnValue({ projects: ['project1', 'project2'] } as any);
     selSPy.mockReturnValue({ status: { allIds: [] } });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([
       { field: 'monitor.project.id', values: ['project1', 'project2'] },
@@ -73,7 +73,7 @@ describe('useMonitorFilters', () => {
     } as any);
     selSPy.mockReturnValue({ status: { allIds: [] } });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([
       { field: 'tags', values: ['tag1', 'tag2'] },
@@ -87,7 +87,7 @@ describe('useMonitorFilters', () => {
     selSPy.mockReturnValue({ status: { allIds: [] } });
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: true }), {
-      wrapper: WrappedHelper,
+      wrapper: HookWrapper,
     });
 
     expect(result.current).toEqual([{ field: 'kibana.space_ids', values: ['space1'] }]);
@@ -98,7 +98,7 @@ describe('useMonitorFilters', () => {
     paramSpy.mockReturnValue({} as any);
     selSPy.mockReturnValue({ status: { allIds: [] } });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([{ field: 'meta.space_id', values: ['space2'] }]);
   });
@@ -113,7 +113,7 @@ describe('useMonitorFilters', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([]);
   });
@@ -128,7 +128,7 @@ describe('useMonitorFilters', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([{ field: 'monitor.project.id', values: ['projectA'] }]);
   });
@@ -146,7 +146,7 @@ describe('useMonitorFilters', () => {
     });
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: true }), {
-      wrapper: WrappedHelper,
+      wrapper: HookWrapper,
     });
 
     expect(result.current).toEqual([{ field: 'kibana.space_ids', values: ['space1'] }]);
@@ -164,7 +164,7 @@ describe('useMonitorFilters', () => {
       status: { allIds: [{ monitorQueryId: 'id1' }] },
     });
 
-    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorFilters({}), { wrapper: HookWrapper });
 
     expect(result.current).toEqual([{ field: 'observer.geo.name', values: ['location1'] }]);
   });
@@ -179,7 +179,7 @@ describe('useMonitorFilters', () => {
     } as any);
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: false }), {
-      wrapper: WrappedHelper,
+      wrapper: HookWrapper,
     });
 
     expect(result.current).toEqual([
@@ -204,7 +204,7 @@ describe('useMonitorIdFilter', () => {
     paramSpy.mockReturnValue({} as any);
     selSPy.mockReturnValue({ status: { allIds: [] } });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toBeUndefined();
   });
@@ -215,7 +215,7 @@ describe('useMonitorIdFilter', () => {
       status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id2' }] },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(localMonitorIdQuery(['id1', 'id2']));
   });
@@ -229,7 +229,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(localMonitorIdQuery(['id2']));
   });
@@ -243,7 +243,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     // id4 is up but not in allIds (e.g. excluded by a schedule filter); id1 is
     // in allIds but not up — only the intersection should come through.
@@ -259,7 +259,7 @@ describe('useMonitorIdFilter', () => {
       status: { allIds: [{ monitorQueryId: 'id1' }, { monitorQueryId: 'id3' }] },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(localMonitorIdQuery(['id1', 'id3']));
   });
@@ -273,7 +273,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(localMonitorIdQuery(['id2']));
   });
@@ -287,7 +287,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(localMonitorIdQuery(['id2']));
   });
@@ -296,7 +296,7 @@ describe('useMonitorIdFilter', () => {
     paramSpy.mockReturnValue({ statusFilter: 'stale' } as any);
     selSPy.mockReturnValue({ status: { allIds: [{ monitorQueryId: 'id1' }], staleIds: [] } });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     const ids = result.current?.terms?.['monitor.id'] as string[];
     expect(ids).toHaveLength(1);
@@ -312,7 +312,7 @@ describe('useMonitorIdFilter', () => {
     selSPy.mockReturnValue({ status: { allIds: [{ monitorQueryId: 'id1' }], staleIds: [] } });
 
     const { result, rerender } = renderHook(() => useMonitorIdFilter(), {
-      wrapper: WrappedHelper,
+      wrapper: HookWrapper,
     });
     const firstIds = result.current?.terms?.['monitor.id'];
     rerender();
@@ -353,7 +353,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual({
       bool: {
@@ -389,7 +389,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual({
       bool: {
@@ -428,7 +428,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(
       localMonitorIdQuery(['hb-1'], [{ term: { 'observer.name': 'asia_japan' } }])
@@ -444,7 +444,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(
       localMonitorIdQuery(
@@ -476,7 +476,7 @@ describe('useMonitorIdFilter', () => {
     });
 
     const { result } = renderHook(() => useMonitorIdFilter({ forAlerts: true }), {
-      wrapper: WrappedHelper,
+      wrapper: HookWrapper,
     });
 
     expect(result.current).toEqual({
@@ -505,7 +505,7 @@ describe('useMonitorIdFilter', () => {
     });
 
     const { result } = renderHook(() => useMonitorIdFilter({ forChart: true }), {
-      wrapper: WrappedHelper,
+      wrapper: HookWrapper,
     });
 
     expect(result.current).toEqual({
@@ -561,7 +561,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual({
       bool: {
@@ -602,7 +602,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual({
       bool: {
@@ -634,7 +634,7 @@ describe('useMonitorIdFilter', () => {
       },
     });
 
-    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useMonitorIdFilter(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual({
       bool: {
@@ -686,7 +686,7 @@ describe('useOverviewAlertsKuery', () => {
       },
     });
 
-    const { result } = renderHook(() => useOverviewAlertsKuery(), { wrapper: WrappedHelper });
+    const { result } = renderHook(() => useOverviewAlertsKuery(), { wrapper: HookWrapper });
 
     expect(result.current).toEqual(
       'kibana.alert.status: ("active" or "recovered") and observer.geo.name: "Japan" and kibana.space_ids: "space1"'

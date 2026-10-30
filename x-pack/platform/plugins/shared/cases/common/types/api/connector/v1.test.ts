@@ -6,17 +6,12 @@
  */
 
 import {
-  ConnectorMappingResponseRt,
-  FindActionConnectorResponseRt,
-  GetCaseConnectorsResponseRt,
-} from './v1';
-import {
   ConnectorMappingResponseSchema,
   FindActionConnectorResponseSchema,
   GetCaseConnectorsResponseSchema,
-} from '../../api_zod/connector/v1';
+} from './v1';
 
-describe('FindActionConnectorResponseRt', () => {
+describe('FindActionConnectorResponseSchema', () => {
   const response = [
     {
       id: 'test',
@@ -43,42 +38,19 @@ describe('FindActionConnectorResponseRt', () => {
   ];
 
   it('has expected attributes in request', () => {
-    const query = FindActionConnectorResponseRt.decode(response);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: response,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = FindActionConnectorResponseRt.decode([
-      {
-        ...response[0],
-        foo: 'bar',
-      },
-    ]);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: [response[0]],
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
     const result = FindActionConnectorResponseSchema.safeParse(response);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(response);
   });
 
-  it('zod: strips unknown fields', () => {
+  it('strips unknown fields', () => {
     const result = FindActionConnectorResponseSchema.safeParse([{ ...response[0], foo: 'bar' }]);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual([response[0]]);
   });
 });
 
-describe('GetCaseConnectorsResponseRt', () => {
+describe('GetCaseConnectorsResponseSchema', () => {
   const externalService = {
     connector_id: 'servicenow-1',
     connector_name: 'My SN connector',
@@ -111,60 +83,12 @@ describe('GetCaseConnectorsResponseRt', () => {
   };
 
   it('has expected attributes in request', () => {
-    const query = GetCaseConnectorsResponseRt.decode(defaultReq);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultReq,
-    });
-  });
-
-  it('removes foo:bar attributes from request', () => {
-    const query = GetCaseConnectorsResponseRt.decode({
-      'servicenow-1': { ...defaultReq['servicenow-1'], externalService, foo: 'bar' },
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultReq,
-    });
-  });
-
-  it('removes foo:bar attributes from externalService object', () => {
-    const query = GetCaseConnectorsResponseRt.decode({
-      'servicenow-1': {
-        ...defaultReq['servicenow-1'],
-        externalService: { ...externalService, foo: 'bar' },
-      },
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultReq,
-    });
-  });
-
-  it('removes foo:bar attributes from push object', () => {
-    const query = GetCaseConnectorsResponseRt.decode({
-      'servicenow-1': {
-        ...defaultReq['servicenow-1'],
-        push: { ...defaultReq['servicenow-1'].push, foo: 'bar' },
-      },
-    });
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: defaultReq,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
     const result = GetCaseConnectorsResponseSchema.safeParse(defaultReq);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(defaultReq);
   });
 
-  it('zod: strips unknown fields', () => {
+  it('strips unknown fields', () => {
     const result = GetCaseConnectorsResponseSchema.safeParse({
       'servicenow-1': { ...defaultReq['servicenow-1'], foo: 'bar' },
     });
@@ -173,7 +97,7 @@ describe('GetCaseConnectorsResponseRt', () => {
   });
 });
 
-describe('ConnectorMappingResponseRt', () => {
+describe('ConnectorMappingResponseSchema', () => {
   const mappings = [
     {
       action_type: 'overwrite',
@@ -187,53 +111,8 @@ describe('ConnectorMappingResponseRt', () => {
     },
   ];
 
-  describe('ConnectorMappingResponseRt', () => {
+  describe('ConnectorMappingResponseSchema', () => {
     it('has expected attributes in response', () => {
-      const query = ConnectorMappingResponseRt.decode({ id: 'test', version: 'test', mappings });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { id: 'test', version: 'test', mappings },
-      });
-    });
-
-    it('removes foo:bar attributes from the response', () => {
-      const query = ConnectorMappingResponseRt.decode({
-        id: 'test',
-        version: 'test',
-        mappings: [
-          { ...mappings[0] },
-          {
-            action_type: 'append',
-            source: 'description',
-            target: 'not_mapped',
-            foo: 'bar',
-          },
-        ],
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { id: 'test', version: 'test', mappings },
-      });
-    });
-
-    it('removes foo:bar attributes from the mappings', () => {
-      const query = ConnectorMappingResponseRt.decode({
-        id: 'test',
-        version: 'test',
-        mappings,
-        foo: 'bar',
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { id: 'test', version: 'test', mappings },
-      });
-    });
-
-    it('zod: has expected attributes in response', () => {
       const result = ConnectorMappingResponseSchema.safeParse({
         id: 'test',
         version: 'test',
@@ -243,7 +122,7 @@ describe('ConnectorMappingResponseRt', () => {
       expect(result.data).toStrictEqual({ id: 'test', version: 'test', mappings });
     });
 
-    it('zod: strips unknown fields', () => {
+    it('strips unknown fields', () => {
       const result = ConnectorMappingResponseSchema.safeParse({
         id: 'test',
         version: 'test',

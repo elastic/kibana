@@ -23,7 +23,7 @@ const renderDate = (value: string, className?: string) =>
 describe('KiFormattedDate', () => {
   it('renders relative date for valid ISO values', () => {
     const { container } = renderDate('2026-01-15T12:00:00.000Z');
-    expect(container.querySelector('span[tabindex="0"]')).toBeInTheDocument();
+    expect(container.querySelector('span[tabindex="-1"]')).toBeInTheDocument();
   });
 
   it('falls back to the raw value for invalid dates', () => {

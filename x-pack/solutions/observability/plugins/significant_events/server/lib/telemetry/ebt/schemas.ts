@@ -599,6 +599,7 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
     type: 'keyword',
     _meta: {
       description: 'The status value set on the significant event',
+      optional: true,
     },
   },
   written: {

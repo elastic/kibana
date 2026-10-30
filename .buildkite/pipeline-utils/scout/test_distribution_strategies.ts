@@ -16,6 +16,7 @@ import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite/index.t
 import { getKibanaDir } from '../utils.ts';
 import { expandAgentQueue } from '../agent_images.ts';
 import { collectEnvFromLabels } from '../pr_labels.ts';
+import { SCOUT_STEP_KEYS } from './step_keys.ts';
 
 function envVarsIfSet(envVarNames: string[]): Record<string, string> {
   const collectedVars: Record<string, string> = {};
@@ -81,7 +82,14 @@ async function distributeScoutTestsOnLanes() {
   }
 
   const steps: BuildkiteCommandStep[] = [];
-  const loadInfoByStepKey: Record<string, { label: string; loadGroups: LoadGroup[] }> = {};
+  const loadInfoByStepKey: Record<
+    string,
+    {
+      label: string;
+      loadGroups: LoadGroup[];
+      playwright?: ScoutTestTrack['metadata']['playwright'];
+    }
+  > = {};
   const testLaneLoadsFilePath = path.relative(getKibanaDir(), SCOUT_TEST_LANE_LOADS_PATH);
 
   testTracksDefinitionPaths
@@ -91,7 +99,7 @@ async function distributeScoutTestsOnLanes() {
         track.lanes.flatMap((lane) => ({ ...track.metadata, lane }))
       )
     )
-    .forEach(({ testTarget, server, lane }) => {
+    .forEach(({ testTarget, server, playwright, lane }) => {
       // Define the effective lane number. `lane.number` is only accurate in reference to the originating test track
       const effectiveLaneNumber = steps.length + 1;
       const loadGroups = getLaneLoadGroups(lane, server);
@@ -113,7 +121,7 @@ async function distributeScoutTestsOnLanes() {
         ...collectEnvFromLabels(),
       };
 
-      const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
+      const stepKey = `${SCOUT_STEP_KEYS.LANE_PREFIX}${effectiveLaneNumber}`;
       const configSets = loadGroups.map(({ configSet }) => configSet).join(', ');
       const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${configSets}`;
 
@@ -133,8 +141,9 @@ async function distributeScoutTestsOnLanes() {
         },
       });
 
-      // Lane load information to be referenced by the agent (IDs in particular)
-      loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups };
+      // Lane load information to be referenced by the agent (IDs in particular). Playwright
+      // options travel here rather than in the step env, which Buildkite would interpolate.
+      loadInfoByStepKey[stepKey] = { label: stepLabel, loadGroups, playwright };
     });
 
   if (steps.length === 0) {
@@ -155,7 +164,7 @@ async function distributeScoutTestsOnLanes() {
       .forEach((stepKey) => lanesGroupStepDependencies.push(stepKey));
   } else {
     // Default dependencies
-    lanesGroupStepDependencies.push('build_scout_tests');
+    lanesGroupStepDependencies.push(SCOUT_STEP_KEYS.BUILDER);
   }
 
   bk.setMetadata(
