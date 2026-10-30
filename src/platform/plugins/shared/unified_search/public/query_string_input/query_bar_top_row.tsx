@@ -379,6 +379,7 @@ export const QueryBarTopRow = React.memo(
     props: QueryBarTopRowProps<QT>
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
+    const isEsqlLayoutStacked = useIsWithinBreakpoints(['xs', 's', 'm']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
@@ -1500,7 +1501,10 @@ export const QueryBarTopRow = React.memo(
         {!isScreenshotMode &&
           (shouldRenderESQLUi ? (
             <>
-              <EuiFlexGroup {...queryBarFlexGroupProps}>
+              <EuiFlexGroup
+                {...queryBarFlexGroupProps}
+                direction={isEsqlLayoutStacked ? 'column' : 'row'}
+              >
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 <EuiFlexItem>
                   <QuickSearchVisor
