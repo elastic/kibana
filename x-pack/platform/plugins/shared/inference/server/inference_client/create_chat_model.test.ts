@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { InferenceTaskErrorCode } from '@kbn/inference-common';
+import {
+  InferenceConnectorType,
+  InferenceTaskErrorCode,
+  type InferenceConnector,
+} from '@kbn/inference-common';
 import { createChatModel } from './create_chat_model';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { InferenceServerClient } from '../types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('./create_client');
 import { createClient } from './create_client';
-const createClientMock = createClient as unknown as jest.MockedFn<typeof createClient>;
+// `createChatModel` only calls the unbound overload of `createClient`
+const createClientMock = createClient as unknown as jest.MockedFn<
+  (options: Parameters<typeof createClient>[0]) => InferenceServerClient
+>;
 
 jest.mock('../util/get_connector_by_id');
 import { getConnectorById } from '../util/get_connector_by_id';
@@ -188,9 +196,25 @@ describe('createChatModel', () => {
     });
 
     it('passes featureId to the InferenceChatModel and no reasoning from the feature', async () => {
-      const inferenceClient = { chatComplete: jest.fn() } as any;
+      const inferenceClient: jest.Mocked<InferenceServerClient> = {
+        chatComplete: jest.fn(),
+        output: jest.fn(),
+        prompt: jest.fn(),
+        on: jest.fn(),
+        bindTo: jest.fn(),
+        listConnectors: jest.fn(),
+        getConnectorById: jest.fn(),
+      };
       createClientMock.mockReturnValue(inferenceClient);
-      const connector = Symbol('connector') as any;
+      const connector: InferenceConnector = {
+        type: InferenceConnectorType.OpenAI,
+        name: 'Top connector',
+        connectorId: 'c',
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      };
       getConnectorByIdMock.mockResolvedValue(connector);
       const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
         connectorId: 'c',
