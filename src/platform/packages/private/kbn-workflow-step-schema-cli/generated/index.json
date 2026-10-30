@@ -206,6 +206,7 @@
     "cases.closeCase",
     "cases.createCase",
     "cases.createCaseFromTemplate",
+    "cases.deleteAttachments",
     "cases.deleteCases",
     "cases.deleteObservable",
     "cases.findCases",
@@ -627,6 +628,7 @@
     "nightshift.decisionTreePrepare",
     "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.followUpRecoveredAlert",
     "nightshift.handleInvestigationFailure",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
@@ -760,6 +762,7 @@
     "security.enableRule",
     "security.getAlertEntities",
     "security.getNotes",
+    "security.matchAttackFingerprints",
     "security.patchRule",
     "security.renderAlertNarrative",
     "security.setAlertStatus",
@@ -834,6 +837,7 @@
     "shodan.getHostInfo",
     "shodan.getServices",
     "shodan.searchHosts",
+    "significantEvents.classifyDetections",
     "significantEvents.resolveModel",
     "slack",
     "slack2.addReaction",
@@ -1066,11 +1070,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "70c2911c8a3e0e59fda3b59c5a42006e59260ea24ed61bf9c233f781cd01dc0d"
+      "sha256": "35758d9e3a2899cb8736f2607e85b81a391583c315ce40befd4798ed37704570"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "fff298a1439c4de8a68be021ed7cde19388223905357ff720bf8e3cc8e9617fc"
+      "sha256": "2f88620033235dc400a06986dc44814f503eb054d4eacdc2cd8ac97aed784e27"
     }
   }
 }
