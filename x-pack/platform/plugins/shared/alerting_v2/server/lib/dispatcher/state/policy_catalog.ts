@@ -50,4 +50,11 @@ export class PolicyCatalog {
   public apiKeyOf(id: ActionPolicyId): string | undefined {
     return this.byId.get(id)?.apiKey;
   }
+
+  /** Throttle strategy of the policy; undefined when it has no throttle or is missing from the catalog. */
+  public throttleStrategyOf(
+    id: ActionPolicyId
+  ): NonNullable<ActionPolicy['throttle']>['strategy'] | undefined {
+    return this.byId.get(id)?.throttle?.strategy;
+  }
 }

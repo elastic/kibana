@@ -9,10 +9,11 @@ import type { IEvent } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { EventLogServiceContract } from '../../../services/event_log_service/event_log_service';
-import { DispatchOutcome, type RuleCatalog } from '../../state';
+import { DispatchOutcome, type PolicyCatalog, type RuleCatalog } from '../../state';
 import type {
   ActionGroup,
   ActionGroupId,
+  ActionPolicy,
   ActionPolicyId,
   Alert,
   DispatchFailure,
@@ -54,6 +55,8 @@ interface PolicySummaryDispatcherFields {
   action_group_ids: string[];
   workflow_ids: string[];
   workflow_execution_ids: string[];
+  grouping_mode: ActionPolicy['grouping']['mode'];
+  throttle_strategy?: NonNullable<ActionPolicy['throttle']>['strategy'];
 }
 
 interface UnmatchedDispatcherFields {
@@ -94,6 +97,7 @@ export function emitExecutionHistory({
   unmatched,
   outcome,
   rules,
+  policies,
   timestamp,
   executionUuid,
 }: {
@@ -103,6 +107,7 @@ export function emitExecutionHistory({
   unmatched: readonly Alert[];
   outcome: DispatchOutcome;
   rules: RuleCatalog;
+  policies: PolicyCatalog;
   timestamp: string;
   executionUuid: string;
 }): void {
@@ -114,6 +119,7 @@ export function emitExecutionHistory({
       summary,
       action: ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
       rules,
+      policies,
     });
   }
 
@@ -125,6 +131,7 @@ export function emitExecutionHistory({
       summary,
       action: ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
       rules,
+      policies,
     });
   }
 
@@ -147,6 +154,7 @@ function emitPolicySummary({
   summary,
   action,
   rules,
+  policies,
 }: {
   eventLogService: EventLogServiceContract;
   timestamp: string;
@@ -154,6 +162,7 @@ function emitPolicySummary({
   summary: PolicySummary;
   action: ActionPolicyEventAction;
   rules: RuleCatalog;
+  policies: PolicyCatalog;
 }): void {
   const ruleIds = Array.from(summary.ruleIds);
   const { refs, spillOver } = buildPolicyAndRuleRefs(
@@ -162,6 +171,7 @@ function emitPolicySummary({
     ruleIds,
     rules
   );
+  const throttleStrategy = policies.throttleStrategyOf(summary.policyId);
 
   eventLogService.logEvent(
     buildEvent({
@@ -179,6 +189,8 @@ function emitPolicySummary({
         action_group_ids: Array.from(summary.actionGroupIds),
         workflow_ids: Array.from(summary.workflowIds),
         workflow_execution_ids: Array.from(summary.workflowExecutionIds),
+        grouping_mode: policies.groupingModeOf(summary.policyId),
+        ...(throttleStrategy ? { throttle_strategy: throttleStrategy } : {}),
       },
     })
   );

@@ -37,4 +37,10 @@ describe('PolicyCatalog', () => {
     expect(catalog.apiKeyOf('p1')).toBe('key-1');
     expect(catalog.apiKeyOf('p2')).toBeUndefined();
   });
+
+  it('resolves the throttle strategy', () => {
+    expect(catalog.throttleStrategyOf('p1')).toBeUndefined();
+    expect(catalog.throttleStrategyOf('p2')).toBeUndefined();
+    expect(catalog.throttleStrategyOf('missing')).toBeUndefined();
+  });
 });
