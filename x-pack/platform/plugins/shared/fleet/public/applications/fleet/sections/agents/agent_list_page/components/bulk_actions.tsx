@@ -19,7 +19,13 @@ import {
   HierarchicalActionsMenu,
 } from '../../components';
 import type { MenuItem } from '../../components';
-import { useAuthz, useLicense, useRestartAgentAction, useStartServices } from '../../../../hooks';
+import {
+  useAuthz,
+  useLicense,
+  useRestartAgentAction,
+  useStartServices,
+  useUninstallAgentAction,
+} from '../../../../hooks';
 import {
   LICENSE_FOR_SCHEDULE_UPGRADE,
   AGENTS_PREFIX,
@@ -32,6 +38,7 @@ import { useExportCSV } from '../hooks/export_csv';
 import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
 import { AgentRestartModal } from '../../components/agent_restart_modal';
+import { AgentUninstallModal } from '../../components/agent_uninstall_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
@@ -73,6 +80,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const authz = useAuthz();
   const { reporting } = useStartServices();
   const { isRestartAgentActionEnabled } = useRestartAgentAction();
+  const { isUninstallAgentActionEnabled } = useUninstallAgentAction();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const doesLicenseAllowRollback = licenseService.hasAtLeast(LICENSE_FOR_AGENT_ROLLBACK);
@@ -100,6 +108,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     useState<boolean>(false);
   const [isRollbackModalOpen, setIsRollbackModalOpen] = useState<boolean>(false);
   const [isRestartModalOpen, setIsRestartModalOpen] = useState<boolean>(false);
+  const [isUninstallModalOpen, setIsUninstallModalOpen] = useState<boolean>(false);
   const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
@@ -303,6 +312,34 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             } as MenuItem,
           ]
         : []),
+      ...(isUninstallAgentActionEnabled
+        ? [
+            {
+              id: 'uninstall',
+              name: (
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.uninstallAgents"
+                      defaultMessage="Uninstall {agentCount, plural, one {# agent} other {# agents}}"
+                      values={{ agentCount }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge label="Beta" size="s" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              icon: 'minusCircle',
+              iconColor: 'danger',
+              disabled: !authz.fleet.allAgents,
+              onClick: () => {
+                setIsUninstallModalOpen(true);
+              },
+              'data-test-subj': 'agentBulkActionsUninstall',
+            } as MenuItem,
+          ]
+        : []),
       // Upgrade management submenu
       {
         id: 'upgrade-management',
@@ -445,6 +482,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     agents,
     exportMenuItem,
     isRestartAgentActionEnabled,
+    isUninstallAgentActionEnabled,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(
@@ -597,6 +635,17 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agentCount={agentCount}
             onClose={() => {
               setIsRestartModalOpen(false);
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isUninstallModalOpen && (
+        <EuiPortal>
+          <AgentUninstallModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsUninstallModalOpen(false);
             }}
           />
         </EuiPortal>

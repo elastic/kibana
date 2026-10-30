@@ -214,6 +214,83 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Restart 2 agents').closest('button')!).toBeEnabled();
     });
 
+    it('should show uninstall agents item with a Beta badge and open the confirmation modal', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+      });
+
+      await act(async () => {
+        fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+      });
+
+      const item = results.getByTestId('agentBulkActionsUninstall');
+      expect(item).toBeEnabled();
+      expect(item).toHaveTextContent('Uninstall 2 agents');
+      expect(item).toHaveTextContent('Beta');
+
+      await act(async () => {
+        fireEvent.click(item);
+      });
+
+      expect(results.getByTestId('agentUninstallModal')).toBeInTheDocument();
+      expect(results.getByTestId('agentUninstallModalDescription')).toHaveTextContent(
+        'This will affect 2 agents'
+      );
+    });
+
+    it('should disable the uninstall agents item without fleet agents all privileges', async () => {
+      jest.mocked(useAuthz).mockReturnValue({
+        fleet: { allAgents: false, readAgents: true },
+        integrations: {},
+      } as any);
+      try {
+        const results = render({
+          ...defaultProps,
+          selectedAgents: [{ id: 'agent1' }] as Agent[],
+        });
+
+        await act(async () => {
+          fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+        });
+
+        expect(results.getByTestId('agentBulkActionsUninstall')).toBeDisabled();
+      } finally {
+        jest.mocked(useAuthz).mockReturnValue({
+          fleet: { allAgents: true, readAgents: true },
+          integrations: {},
+        } as any);
+      }
+    });
+
+    it('should not show the uninstall agents item when the feature flag is off', async () => {
+      mockUseStartServices.mockReturnValue({
+        notifications: { toasts: { addError: jest.fn() } },
+        docLinks: { links: { fleet: {}, logstash: {}, kibana: {}, observability: {} } },
+        cloud: { isServerlessEnabled: true },
+        reporting: {},
+        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
+      });
+      try {
+        const results = render({
+          ...defaultProps,
+          selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+        });
+
+        await act(async () => {
+          fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+        });
+
+        expect(results.queryByTestId('agentBulkActionsUninstall')).not.toBeInTheDocument();
+      } finally {
+        mockStartServices(true);
+      }
+    });
+
     it('should show security and removal submenu items', async () => {
       mockedUseLicence.mockReturnValue({
         hasAtLeast: (licenseType: string) => licenseType === 'enterprise',

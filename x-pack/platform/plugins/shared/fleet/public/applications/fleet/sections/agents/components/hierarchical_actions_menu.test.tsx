@@ -249,6 +249,34 @@ describe('HierarchicalActionsMenu', () => {
       });
     });
 
+    it('should show the tooltip content for a disabled item', async () => {
+      const utils = renderer.render(
+        <HierarchicalActionsMenu
+          items={[
+            {
+              id: 'blocked',
+              name: 'Blocked action',
+              disabled: true,
+              toolTipContent: 'Unenroll first',
+              onClick: mockOnClick,
+              'data-test-subj': 'blockedActionBtn',
+            },
+          ]}
+          isOpen={true}
+          data-test-subj="testMenuBtn"
+        />
+      );
+
+      const item = utils.getByTestId('blockedActionBtn');
+      expect(item).toBeDisabled();
+
+      fireEvent.mouseOver(item.parentElement ?? item);
+      await waitFor(() => expect(utils.getByText('Unenroll first')).toBeInTheDocument());
+
+      fireEvent.click(item);
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
+
     it('should support deeply nested submenus', async () => {
       const utils = renderer.render(
         <HierarchicalActionsMenu

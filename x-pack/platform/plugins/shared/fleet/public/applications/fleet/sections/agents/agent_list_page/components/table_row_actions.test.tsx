@@ -16,6 +16,7 @@ import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useAgentVersion } from '../../../../../../hooks/use_agent_version';
 import { useLicense } from '../../../../../../hooks/use_license';
 import { useRestartAgentAction } from '../../../../../../hooks/use_restart_agent_action';
+import { useUninstallAgentAction } from '../../../../../../hooks/use_uninstall_agent_action';
 
 import { TableRowActions } from './table_row_actions';
 
@@ -24,12 +25,14 @@ jest.mock('../../../../../../hooks/use_authz');
 jest.mock('../../../../../../hooks/use_agent_version');
 jest.mock('../../../../../../hooks/use_license');
 jest.mock('../../../../../../hooks/use_restart_agent_action');
+jest.mock('../../../../../../hooks/use_uninstall_agent_action');
 
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 const mockedUseAuthz = jest.mocked(useAuthz);
 const mockedUseAgentVersion = jest.mocked(useAgentVersion);
 const mockedUseLicense = useLicense as jest.MockedFunction<typeof useLicense>;
 const mockedUseRestartAgentAction = jest.mocked(useRestartAgentAction);
+const mockedUseUninstallAgentAction = jest.mocked(useUninstallAgentAction);
 
 function renderTableRowActions({
   agent,
@@ -55,6 +58,7 @@ function renderTableRowActions({
       onViewAgentJsonClick={jest.fn()}
       onRollbackClick={jest.fn()}
       onRestartClick={jest.fn()}
+      onUninstallActionClick={jest.fn()}
       onViewAgentPolicyClick={jest.fn()}
     />
   );
@@ -110,6 +114,7 @@ describe('TableRowActions', () => {
     } as any);
     mockedUseAgentVersion.mockReturnValue('8.10.2');
     mockedUseRestartAgentAction.mockReturnValue({ isRestartAgentActionEnabled: true });
+    mockedUseUninstallAgentAction.mockReturnValue({ isUninstallAgentActionEnabled: true });
   });
 
   describe('Menu structure', () => {
@@ -773,6 +778,105 @@ describe('TableRowActions', () => {
     });
   });
 
+  describe('Remote uninstall action', () => {
+    const uninstallableMetadata = { elastic: { agent: { version: '9.7.0', uninstallable: true } } };
+    const policy = { is_managed: false } as AgentPolicy;
+
+    async function renderSecurityMenu(agent: Record<string, unknown>) {
+      const onUninstallActionClick = jest.fn();
+      const onGetUninstallCommandClick = jest.fn();
+      const renderer = createFleetTestRendererMock();
+      const utils = renderer.render(
+        <TableRowActions
+          agent={{ active: true, status: 'online', policy_id: 'policy-1', ...agent } as any}
+          agentPolicy={policy}
+          onAddRemoveTagsClick={jest.fn()}
+          onReassignClick={jest.fn()}
+          onRequestDiagnosticsClick={jest.fn()}
+          onUnenrollClick={jest.fn()}
+          onUpgradeClick={jest.fn()}
+          onGetUninstallCommandClick={onGetUninstallCommandClick}
+          onMigrateAgentClick={jest.fn()}
+          onChangeAgentPrivilegeLevelClick={jest.fn()}
+          onViewAgentJsonClick={jest.fn()}
+          onRollbackClick={jest.fn()}
+          onRestartClick={jest.fn()}
+          onUninstallActionClick={onUninstallActionClick}
+          onViewAgentPolicyClick={jest.fn()}
+        />
+      );
+      fireEvent.click(utils.getByTestId('agentActionsBtn'));
+      await navigateToSubmenu(utils, 'Security and removal');
+      return { utils, onUninstallActionClick, onGetUninstallCommandClick };
+    }
+
+    it('shows an enabled Uninstall agent item with a Beta badge for an unenrolled, uninstallable agent', async () => {
+      const { utils, onUninstallActionClick, onGetUninstallCommandClick } =
+        await renderSecurityMenu({
+          uninstall_pending: true,
+          local_metadata: uninstallableMetadata,
+        });
+
+      const item = utils.getByTestId('agentUninstallActionBtn');
+      expect(item).toBeEnabled();
+      expect(item).toHaveTextContent('Beta');
+      expect(utils.queryByTestId('uninstallAgentMenuItem')).not.toBeInTheDocument();
+
+      fireEvent.click(item);
+      expect(onUninstallActionClick).toHaveBeenCalledTimes(1);
+      expect(onGetUninstallCommandClick).not.toHaveBeenCalled();
+    });
+
+    it('disables the item and explains why while the agent is still enrolled', async () => {
+      const { utils, onUninstallActionClick } = await renderSecurityMenu({
+        uninstall_pending: false,
+        local_metadata: uninstallableMetadata,
+      });
+
+      const item = utils.getByTestId('agentUninstallActionBtn');
+      expect(item).toBeDisabled();
+
+      fireEvent.mouseOver(item.parentElement ?? item);
+      await waitFor(() => expect(utils.getByText(/Unenroll first/)).toBeInTheDocument());
+
+      fireEvent.click(item);
+      expect(onUninstallActionClick).not.toHaveBeenCalled();
+    });
+
+    it('disables the item for unprivileged agents', async () => {
+      const { utils } = await renderSecurityMenu({
+        uninstall_pending: true,
+        local_metadata: {
+          elastic: { agent: { version: '9.7.0', uninstallable: true, unprivileged: true } },
+        },
+      });
+
+      expect(utils.getByTestId('agentUninstallActionBtn')).toBeDisabled();
+    });
+
+    it('falls back to the manual uninstall command for agents without the flag', async () => {
+      const { utils, onGetUninstallCommandClick } = await renderSecurityMenu({
+        uninstall_pending: true,
+        local_metadata: { elastic: { agent: { version: '9.7.0' } } },
+      });
+
+      expect(utils.queryByTestId('agentUninstallActionBtn')).not.toBeInTheDocument();
+      fireEvent.click(utils.getByTestId('uninstallAgentMenuItem'));
+      expect(onGetUninstallCommandClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to the manual uninstall command when the feature flag is off', async () => {
+      mockedUseUninstallAgentAction.mockReturnValue({ isUninstallAgentActionEnabled: false });
+      const { utils } = await renderSecurityMenu({
+        uninstall_pending: true,
+        local_metadata: uninstallableMetadata,
+      });
+
+      expect(utils.queryByTestId('agentUninstallActionBtn')).not.toBeInTheDocument();
+      expect(utils.getByTestId('uninstallAgentMenuItem')).toBeInTheDocument();
+    });
+  });
+
   describe('agentless agents', () => {
     it('should not render any action except view agent', async () => {
       const { utils } = renderTableRowActions({
@@ -852,6 +956,7 @@ describe('TableRowActions', () => {
           onViewAgentJsonClick={jest.fn()}
           onRollbackClick={jest.fn()}
           onRestartClick={onRestartClick}
+          onUninstallActionClick={jest.fn()}
           onViewAgentPolicyClick={jest.fn()}
         />
       );

@@ -10,6 +10,7 @@ export * from './agent_reassign_policy_modal';
 export * from './agent_health';
 export * from './agent_unenroll_modal';
 export * from './agent_restart_modal';
+export * from './agent_uninstall_modal';
 export * from './agent_remove_collector_modal';
 export * from './agent_upgrade_modal';
 export * from './fleet_server_callouts';

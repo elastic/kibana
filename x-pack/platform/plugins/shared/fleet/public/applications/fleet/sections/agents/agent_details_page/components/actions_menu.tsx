@@ -30,6 +30,7 @@ import {
 import { UninstallCommandFlyout } from '../../../../components';
 import { AgentRollbackModal } from '../../components/agent_rollback_modal';
 import { AgentRestartModal } from '../../components/agent_restart_modal';
+import { AgentUninstallModal } from '../../components/agent_uninstall_modal';
 import { AgentPolicyYamlFlyout } from '../../../../components';
 
 import { AgentDetailsJsonFlyout } from './agent_details_json_flyout';
@@ -62,6 +63,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
     const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
     const [isRestartModalOpen, setIsRestartModalOpen] = useState(false);
+    const [isUninstallModalOpen, setIsUninstallModalOpen] = useState(false);
     const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState(false);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -96,6 +98,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
         onRollbackClick: () => setIsRollbackModalOpen(true),
         onRestartClick: () => setIsRestartModalOpen(true),
+        onUninstallActionClick: () => setIsUninstallModalOpen(true),
         onRemoveCollectorClick: () => setIsRemoveCollectorModalOpen(true),
       }),
       [onAddRemoveTagsClick]
@@ -228,6 +231,18 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               agentCount={1}
               onClose={() => {
                 setIsRestartModalOpen(false);
+                refreshAgent();
+              }}
+            />
+          </EuiPortal>
+        )}
+        {isUninstallModalOpen && (
+          <EuiPortal>
+            <AgentUninstallModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => {
+                setIsUninstallModalOpen(false);
                 refreshAgent();
               }}
             />

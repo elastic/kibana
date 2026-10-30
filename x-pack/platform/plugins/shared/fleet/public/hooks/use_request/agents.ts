@@ -33,6 +33,10 @@ import type {
   PostAgentRestartResponse,
   PostBulkAgentRestartRequest,
   PostBulkAgentRestartResponse,
+  PostAgentUninstallRequest,
+  PostAgentUninstallResponse,
+  PostBulkAgentUninstallRequest,
+  PostBulkAgentUninstallResponse,
   PostGenerateAgentsReportRequest,
   PostGenerateAgentsReportResponse,
 } from '../../../common/types';
@@ -536,6 +540,24 @@ export function sendPostAgentRestart(agentId: string) {
 export function sendPostBulkAgentRestart(body: PostBulkAgentRestartRequest['body']) {
   return sendRequestForRq<PostBulkAgentRestartResponse>({
     path: agentRouteService.postBulkAgentRestart(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostAgentUninstall(agentId: string, body?: PostAgentUninstallRequest['body']) {
+  return sendRequestForRq<PostAgentUninstallResponse>({
+    path: agentRouteService.postAgentUninstall(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostBulkAgentUninstall(body: PostBulkAgentUninstallRequest['body']) {
+  return sendRequestForRq<PostBulkAgentUninstallResponse>({
+    path: agentRouteService.postBulkAgentUninstall(),
     method: 'post',
     version: API_VERSIONS.public.v1,
     body,

@@ -34,6 +34,7 @@ const mockCallbacks: SingleAgentMenuCallbacks = {
   onChangeAgentPrivilegeLevelClick: jest.fn(),
   onUnenrollClick: jest.fn(),
   onUninstallClick: jest.fn(),
+  onUninstallActionClick: jest.fn(),
   onRollbackClick: jest.fn(),
   onRestartClick: jest.fn(),
   onViewAgentPolicyClick: jest.fn(),
@@ -548,5 +549,97 @@ describe('useSingleAgentMenuItems', () => {
     );
     expect(result.current).toHaveLength(1);
     expect(result.current[0].id).toBe('view-json');
+  });
+
+  describe('Uninstall agent', () => {
+    const uninstallableMetadata = { elastic: { agent: { version: '9.7.0', uninstallable: true } } };
+
+    const getSecurityChildren = (items: ReturnType<typeof useSingleAgentMenuItems>) =>
+      items.find((item) => item.id === 'security')?.children ?? [];
+
+    const renderItems = (agent: Agent) =>
+      renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent,
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      ).result.current;
+
+    it('shows the manual uninstall command item for agents without the uninstallable flag', () => {
+      const children = getSecurityChildren(
+        renderItems(createMockAgent({ policy_id: 'policy-1', uninstall_pending: true }))
+      );
+
+      expect(children.find((item) => item.id === 'uninstall')).toBeDefined();
+      expect(children.find((item) => item.id === 'uninstall-action')).toBeUndefined();
+    });
+
+    it('shows an enabled remote uninstall item for an unenrolled, uninstallable agent', () => {
+      const children = getSecurityChildren(
+        renderItems(
+          createMockAgent({
+            policy_id: 'policy-1',
+            uninstall_pending: true,
+            local_metadata: uninstallableMetadata,
+          })
+        )
+      );
+
+      const item = children.find((child) => child.id === 'uninstall-action');
+      expect(item).toBeDefined();
+      expect(item?.disabled).toBe(false);
+      expect(item?.toolTipContent).toBeUndefined();
+      expect(children.find((child) => child.id === 'uninstall')).toBeUndefined();
+
+      item?.onClick?.({} as any);
+      expect(mockCallbacks.onUninstallActionClick).toHaveBeenCalledTimes(1);
+      expect(mockCallbacks.onUninstallClick).not.toHaveBeenCalled();
+    });
+
+    it('disables the remote uninstall item with a tooltip while the agent is still enrolled', () => {
+      const children = getSecurityChildren(
+        renderItems(
+          createMockAgent({
+            policy_id: 'policy-1',
+            uninstall_pending: false,
+            local_metadata: uninstallableMetadata,
+          })
+        )
+      );
+
+      const item = children.find((child) => child.id === 'uninstall-action');
+      expect(item?.disabled).toBe(true);
+      expect(item?.toolTipContent).toBeDefined();
+    });
+
+    it('disables the remote uninstall item for unprivileged agents', () => {
+      const children = getSecurityChildren(
+        renderItems(
+          createMockAgent({
+            policy_id: 'policy-1',
+            uninstall_pending: true,
+            local_metadata: {
+              elastic: { agent: { version: '9.7.0', uninstallable: true, unprivileged: true } },
+            },
+          })
+        )
+      );
+
+      const item = children.find((child) => child.id === 'uninstall-action');
+      expect(item?.disabled).toBe(true);
+      expect(item?.toolTipContent).toBeDefined();
+    });
+
+    it('does not show any uninstall item for an agent without a policy', () => {
+      const children = getSecurityChildren(
+        renderItems(
+          createMockAgent({ uninstall_pending: true, local_metadata: uninstallableMetadata })
+        )
+      );
+
+      expect(children.find((child) => child.id === 'uninstall-action')).toBeUndefined();
+      expect(children.find((child) => child.id === 'uninstall')).toBeUndefined();
+    });
   });
 });
