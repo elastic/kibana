@@ -32,10 +32,13 @@ export interface TaskRef {
 export interface Job {
   jobId: string;
   projectId: string;
+  /** The explicit flow that owns the job; null for a standalone job. */
   flowId: string | null;
   taskType: string;
+  workerType: string;
   params: Partial<EsqlSummaryParams>;
   every: string | null;
+  runAt: string | null;
   timeout: string;
   maxExecutions: number;
   createdAt: string;
@@ -61,9 +64,11 @@ export interface Execution {
 export interface Task {
   taskId: string;
   projectId: string;
-  flowId: string | null;
+  /** Never null: the job's flow, or the implicit flow created when a standalone job fired. */
+  flowId: string;
   jobId: string;
   taskType: string;
+  workerType: string;
   params: Partial<EsqlSummaryParams>;
   status: TaskStatus;
   execution: number;
@@ -75,6 +80,7 @@ export interface Task {
   nextExecutionAt: string | null;
   durationMs: number | null;
   workerId: string | null;
+  /** The last finished execution's error; kept while retrying, null once one succeeds. */
   error: string | null;
   retryable: boolean | null;
   result: { rows?: number } | null;
@@ -85,8 +91,10 @@ export interface TaskList {
   tasks: Task[];
 }
 
+/** A repeated idempotency key returns the first response again, `taskId` included. */
 export interface CreateJobResponse {
   jobId: string;
+  /** Null for a scheduled job or a future `runAt`. */
   taskId: string | null;
 }
 
@@ -101,7 +109,7 @@ export type EsqlValue =
 export interface ResultDocument {
   '@timestamp': string;
   projectId: string;
-  flowId: string | null;
+  flowId: string;
   jobId: string;
   taskId: string;
   execution: number;
@@ -113,9 +121,13 @@ export interface ResultDocument {
   truncated: boolean;
 }
 
-/** Body of the plugin's create-job route. Without `everySeconds` the job is one-shot. */
+/**
+ * Body of the plugin's create-job route. Without `everySeconds` the job is one-shot. `runAt`
+ * (ISO 8601) fires a one-shot job once at that time, or sets a scheduled job's first occurrence.
+ */
 export interface CreateJobBody {
   query: string;
   everySeconds?: number;
+  runAt?: string;
   idempotencyKey?: string;
 }

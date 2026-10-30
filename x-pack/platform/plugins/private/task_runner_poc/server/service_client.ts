@@ -24,6 +24,7 @@ export interface ServiceCreateJobRequest {
   params: EsqlSummaryParams;
   apiKey: string;
   every?: string;
+  runAt?: string;
   timeout?: string;
   maxExecutions?: number;
   idempotencyKey?: string;

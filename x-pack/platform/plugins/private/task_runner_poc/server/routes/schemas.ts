@@ -36,5 +36,12 @@ export const createJobBodySchema = schema.object({
       validate: (value) => (Number.isInteger(value) ? undefined : 'must be a whole number'),
     })
   ),
+  runAt: schema.maybe(
+    schema.string({
+      maxLength: 64,
+      validate: (value) =>
+        Number.isNaN(Date.parse(value)) ? 'must be an ISO 8601 date-time' : undefined,
+    })
+  ),
   idempotencyKey: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
 });

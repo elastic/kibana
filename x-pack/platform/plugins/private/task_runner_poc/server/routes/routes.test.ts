@@ -156,6 +156,59 @@ describe('job routes', () => {
     expect(lastFetch().body).toMatchObject({ every: '10s', idempotencyKey: 'kbn-def' });
   });
 
+  it('keeps a future runAt job key valid for an hour past runAt', async () => {
+    const { fetchMock, apiKeys, call, lastFetch } = setup();
+    fetchMock.mockResolvedValue(serviceResponse(202, { jobId: JOB_ID, taskId: null }));
+    const runAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+
+    const response = await call('post', '/jobs', {
+      body: { query: 'FROM logs-*', runAt: runAt.toISOString() },
+    });
+
+    expect(response.payload).toEqual({ jobId: JOB_ID, taskId: null });
+    expect(apiKeys.grantAsInternalUser.mock.calls[0][1]).toMatchObject({
+      expiration: `${2 * 3600 + 3600}s`,
+    });
+    expect(lastFetch().body).toMatchObject({ runAt: runAt.toISOString() });
+    expect(lastFetch().body).not.toHaveProperty('every');
+  });
+
+  it('gives a past runAt the same 1h key as a job that fires right away', async () => {
+    const { fetchMock, apiKeys, call, lastFetch } = setup();
+    fetchMock.mockResolvedValue(serviceResponse(202, { jobId: JOB_ID, taskId: TASK_ID }));
+
+    await call('post', '/jobs', { body: { query: 'FROM logs-*', runAt: '2020-01-01T00:00:00Z' } });
+
+    expect(apiKeys.grantAsInternalUser.mock.calls[0][1]).toMatchObject({ expiration: '1h' });
+    expect(lastFetch().body).toMatchObject({ runAt: '2020-01-01T00:00:00.000Z' });
+  });
+
+  it('sends runAt as the first occurrence of a scheduled job, with a key that never expires', async () => {
+    const { fetchMock, apiKeys, call, lastFetch } = setup();
+    fetchMock.mockResolvedValue(serviceResponse(202, { jobId: JOB_ID, taskId: null }));
+    const runAt = new Date(Date.now() + 60_000).toISOString();
+
+    await call('post', '/jobs', { body: { query: 'FROM logs-*', everySeconds: 30, runAt } });
+
+    expect(apiKeys.grantAsInternalUser.mock.calls[0][1]).not.toHaveProperty('expiration');
+    expect(lastFetch().body).toMatchObject({ every: '30s', runAt });
+  });
+
+  it('returns the first response again for a repeated idempotency key', async () => {
+    const { fetchMock, call } = setup();
+    fetchMock.mockImplementation(async () =>
+      serviceResponse(202, { jobId: JOB_ID, taskId: TASK_ID })
+    );
+    const body = { query: 'FROM logs-*', idempotencyKey: 'kbn-same' };
+
+    const first = await call('post', '/jobs', { body });
+    const second = await call('post', '/jobs', { body });
+
+    expect(second.payload).toEqual(first.payload);
+    const sentKeys = fetchMock.mock.calls.map(([, init]) => JSON.parse(String(init?.body)));
+    expect(sentKeys.map((sent) => sent.idempotencyKey)).toEqual(['kbn-same', 'kbn-same']);
+  });
+
   it('generates an idempotency key when the caller sends none', async () => {
     const { fetchMock, call, lastFetch } = setup();
     fetchMock.mockResolvedValue(serviceResponse(202, { jobId: JOB_ID, taskId: TASK_ID }));
@@ -377,5 +430,12 @@ describe('route access and validation', () => {
     expect(() => createJobBodySchema.validate({ query: 'FROM x', everySeconds: 10 })).not.toThrow();
     expect(() => createJobBodySchema.validate({ query: 'FROM x', everySeconds: 1.5 })).toThrow();
     expect(() => createJobBodySchema.validate({ query: 'FROM x', everySeconds: 0 })).toThrow();
+  });
+
+  it('accepts only date-times for runAt', () => {
+    expect(() =>
+      createJobBodySchema.validate({ query: 'FROM x', runAt: '2026-11-04T02:00:00.000Z' })
+    ).not.toThrow();
+    expect(() => createJobBodySchema.validate({ query: 'FROM x', runAt: 'tomorrow' })).toThrow();
   });
 });

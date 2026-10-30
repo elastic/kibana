@@ -22,7 +22,19 @@ import type { RouteDependencies } from './types';
 
 const JOB_TIMEOUT = '60s';
 const JOB_MAX_EXECUTIONS = 3;
-const ONE_SHOT_KEY_EXPIRATION = '1h';
+const ONE_SHOT_KEY_LIFETIME_SECONDS = 3600;
+
+/**
+ * A scheduled job's key never expires. A one-shot job's key lasts an hour past the time it
+ * fires, which covers the task timeout and its retries.
+ */
+const keyExpiration = (scheduled: boolean, runAtMs: number | undefined, nowMs: number) => {
+  if (scheduled) {
+    return undefined;
+  }
+  const delaySeconds = runAtMs === undefined ? 0 : Math.max(0, Math.ceil((runAtMs - nowMs) / 1000));
+  return delaySeconds === 0 ? '1h' : `${delaySeconds + ONE_SHOT_KEY_LIFETIME_SECONDS}s`;
+};
 
 export const registerJobRoutes = ({
   router,
@@ -44,10 +56,13 @@ export const registerJobRoutes = ({
         const { query, everySeconds } = request.body;
         const idempotencyKey = request.body.idempotencyKey ?? `kbn-${uuidv4()}`;
         const scheduled = everySeconds !== undefined;
+        const runAtMs =
+          request.body.runAt === undefined ? undefined : Date.parse(request.body.runAt);
+        const runAt = runAtMs === undefined ? undefined : new Date(runAtMs).toISOString();
         try {
           const apiKey = await grantTaskApiKey(await getApiKeys(), request, {
             name: scheduled ? 'task_runner_poc scheduled job' : 'task_runner_poc one-shot job',
-            expiration: scheduled ? undefined : ONE_SHOT_KEY_EXPIRATION,
+            expiration: keyExpiration(scheduled, runAtMs, Date.now()),
             metadata: { projectId, idempotencyKey },
           });
           const created = await serviceClient.createJob({
@@ -55,14 +70,16 @@ export const registerJobRoutes = ({
             params: { query, resultIndex: RESULT_INDEX },
             apiKey: apiKey.encoded,
             ...(scheduled ? { every: `${everySeconds}s` } : {}),
+            ...(runAt ? { runAt } : {}),
             timeout: JOB_TIMEOUT,
             maxExecutions: JOB_MAX_EXECUTIONS,
             idempotencyKey,
           });
+          const firesAt = runAt ? `, first firing at ${runAt}` : '';
           logger.info<TaskRunnerLogMeta>(
             scheduled
-              ? `Created scheduled job ${created.jobId} (every ${everySeconds}s)`
-              : `Created one-shot job ${created.jobId}`,
+              ? `Created scheduled job ${created.jobId} (every ${everySeconds}s${firesAt})`
+              : `Created one-shot job ${created.jobId}${runAt ? ` (fires at ${runAt})` : ''}`,
             identityMeta(
               { projectId, jobId: created.jobId, taskId: created.taskId },
               { action: 'job-created', outcome: 'success' }
