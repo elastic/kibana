@@ -46,7 +46,8 @@ const getEscalationsHeroTitle = ({
   }
 
   const body = i18n.translate('xpack.alertzero.escalationsHeader.openCountTitle', {
-    defaultMessage: '{count, plural, one {# open escalation} other {# open escalations}}',
+    defaultMessage:
+      '{count, plural, =0 {No open escalations} one {# open escalation} other {# open escalations}}',
     values: { count: openCount },
   });
 
