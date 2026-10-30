@@ -74,10 +74,6 @@ export interface IocFlyoutApi {
  * (`flyoutProviders` + `overlays.openSystemFlyout`), the flyout properties, and building the
  * `IOCDetails` record from the indicator, so call sites don't repeat them.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useIocFlyoutApi = (): IocFlyoutApi => {
