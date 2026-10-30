@@ -352,6 +352,29 @@ describe('detection rule workflows', () => {
       expect(inputs.actionInput).toBe('${{ steps.draft_creation.output.structured_output.rule }}');
     });
 
+    // A failed diagnosis must reach the analyst and still fail the review: the fallback
+    // posts the error to the investigation, and without `continue` the engine re-throws.
+    it('tells the investigation when the diagnosis fails, and still fails the review', () => {
+      const { steps } = parse(
+        getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
+      ) as WorkflowYaml;
+      const diagnose = flattenSteps(steps as unknown as NestedStep[]).find(
+        ({ name }) => name === 'diagnose_rule'
+      );
+      const { continue: shouldContinue, fallback } = (diagnose?.['on-failure'] ?? {}) as {
+        continue?: boolean;
+        fallback?: NestedStep[];
+      };
+      const [post] = fallback ?? [];
+
+      expect(shouldContinue).toBeUndefined();
+      expect(post?.type).toBe('ai.conversation.add_user_message');
+      expect(post?.with?.conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+      expect(String(post?.with?.message)).toContain('{{ error.message }}');
+    });
+
     // Every change type decides at the proposal gate, which runs the action as
     // the approver.
     it('gates the review through the investigation proposal workflow', () => {
@@ -1988,6 +2011,8 @@ describe('detection rule workflows', () => {
       it('reports launches and in-flight reviews instead of decisions', () => {
         const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
         const outputs = emit.with as Record<string, string>;
+        const readFailure = tuningSteps.find(({ name }) => name === 'resolve_read_failure')!;
+        const { failed: readFailed } = readFailure.with as Record<string, string>;
 
         expect(tuningSteps.map(({ name }) => name)).not.toContain('summarize_decisions');
         expect(Object.keys(outputs).sort()).toEqual([
@@ -1999,9 +2024,10 @@ describe('detection rule workflows', () => {
         ]);
         expect(outputs.reviews_requested).toContain('steps.resolve_fanout_rows.output.rows');
         expect(outputs.reviews_in_flight).toContain('steps.collect_active_rules.output.expected');
-        expect(outputs.harvest_failed).toContain('steps.list_enabled_rules.error != null');
-        expect(outputs.harvest_failed).toContain('steps.screen_rule_fp_rates.error != null');
-        expect(outputs.harvest_failed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
+        expect(outputs.harvest_failed).toBe('${{ steps.resolve_read_failure.output.failed }}');
+        expect(readFailed).toContain('steps.list_enabled_rules.error != null');
+        expect(readFailed).toContain('steps.screen_rule_fp_rates.error != null');
+        expect(readFailed).toContain('steps.harvest_fp_alerts_by_rule.error != null');
         expect(outputs.lookup_failed).toContain('steps.list_active_reviews.error != null');
         expect(outputs.rules_truncated).toBe(
           '${{ steps.resolve_enabled_rules.output.truncated | default: false }}'
