@@ -14,6 +14,7 @@ import type { ActionStatus } from '../../../../../types';
 import { isScheduledAction } from './agent_activity_helper';
 import { UpgradeInProgressActivityItem } from './upgrade_in_progress_activity_item';
 import { UnenrollInProgressActivityItem } from './unenroll_in_progress_activity_item';
+import { UninstallInProgressActivityItem } from './uninstall_in_progress_activity_item';
 import { ActivityItem } from './activity_item';
 
 export const ActivitySection: React.FunctionComponent<{
@@ -21,6 +22,7 @@ export const ActivitySection: React.FunctionComponent<{
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   abortUnenroll: (action: ActionStatus) => Promise<void>;
+  abortUninstall: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 }> = ({
@@ -28,6 +30,7 @@ export const ActivitySection: React.FunctionComponent<{
   actions,
   abortUpgrade,
   abortUnenroll,
+  abortUninstall,
   onClickViewAgents,
   onClickManageAutoUpgradeAgents,
 }) => {
@@ -68,6 +71,18 @@ export const ActivitySection: React.FunctionComponent<{
             <UnenrollInProgressActivityItem
               action={currentAction}
               abortUnenroll={abortUnenroll}
+              key={currentAction.actionId}
+              onClickViewAgents={onClickViewAgents}
+            />
+          );
+        }
+        // Same grace-period rule as UNENROLL: only a scheduled (future start_time) uninstall is
+        // pending and cancellable.
+        if (currentAction.type === 'UNINSTALL' && isScheduledAction(currentAction)) {
+          return (
+            <UninstallInProgressActivityItem
+              action={currentAction}
+              abortUninstall={abortUninstall}
               key={currentAction.actionId}
               onClickViewAgents={onClickViewAgents}
             />

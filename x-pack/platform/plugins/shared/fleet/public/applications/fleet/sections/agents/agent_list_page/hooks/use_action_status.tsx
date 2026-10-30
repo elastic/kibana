@@ -132,10 +132,45 @@ export function useActionStatus(
     [loadActions, notifications.toasts, overlays, onAbortSuccess]
   );
 
+  const abortUninstall = useCallback(
+    async (action: ActionStatus) => {
+      try {
+        const confirmRes = await overlays.openConfirm(
+          i18n.translate('xpack.fleet.currentUninstall.confirmDescription', {
+            defaultMessage:
+              'This action will cancel the scheduled uninstall of {nbAgents, plural, one {# agent} other {# agents}}. The agents stay unenrolled and installed, and will not ship data until they are recovered or uninstalled.',
+            values: {
+              nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
+            },
+          }),
+          {
+            title: i18n.translate('xpack.fleet.currentUninstall.confirmTitle', {
+              defaultMessage: 'Cancel uninstall?',
+            }),
+          }
+        );
+
+        if (!confirmRes) {
+          return;
+        }
+        await sendPostCancelAction(action.actionId);
+        await Promise.all([loadActions(), onAbortSuccess()]);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.currentUninstall.abortRequestError', {
+            defaultMessage: 'An error happened while cancelling the uninstall',
+          }),
+        });
+      }
+    },
+    [loadActions, notifications.toasts, overlays, onAbortSuccess]
+  );
+
   return {
     currentActions,
     abortUpgrade,
     abortUnenroll,
+    abortUninstall,
     isFirstLoading,
     areActionsFullyLoaded,
   };

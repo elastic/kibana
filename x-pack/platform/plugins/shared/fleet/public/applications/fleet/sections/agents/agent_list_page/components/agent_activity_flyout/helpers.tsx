@@ -86,6 +86,11 @@ const actionNames: {
     completedText: 'restarted',
     cancelledText: 'restart',
   },
+  UNINSTALL: {
+    inProgressText: 'Uninstalling',
+    completedText: 'uninstalled',
+    cancelledText: 'uninstall',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
