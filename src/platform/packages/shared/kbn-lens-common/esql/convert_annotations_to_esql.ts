@@ -17,6 +17,9 @@ import {
 import type { IndexPatternMap } from '../types';
 import { LENS_LAYER_TYPES } from '../visualizations/constants';
 
+// Matches the implicit ES|QL default; explicit so the cap is visible and editable after conversion
+export const CONVERTED_ANNOTATION_QUERY_LIMIT = 1000;
+
 interface AnnotationLayerShape {
   layerType?: string;
   indexPatternId?: string;
@@ -98,6 +101,9 @@ const toEsqlAnnotation = (
     `FROM ${indexPatternTitle}`,
     ...(condition ? [`WHERE ${condition}`] : []),
     `KEEP ${keptFields.map((field) => sanitazeESQLInput(field)).join(', ')}`,
+    // Newest events win when the limit truncates the result, instead of an arbitrary subset
+    `SORT ${sanitazeESQLInput(timeField)} DESC`,
+    `LIMIT ${CONVERTED_ANNOTATION_QUERY_LIMIT}`,
   ].join(' | ');
 
   const {
