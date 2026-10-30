@@ -9,7 +9,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
-import { encodeFlyout, FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
+import { FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
   encodeFlyoutV2UrlParam,
   FLYOUT_DESCRIPTOR_KIND,
@@ -206,31 +206,14 @@ export const buildEntityFlyoutV2NavigationState = (
 };
 
 const getEntityAnalyticsNavigationPathWithFlyout = (
-  flyout: EntityAnalyticsFlyoutNavigationState,
-  isNewFlyoutEnabled: boolean,
-  descriptors?: FlyoutV2UrlParamValue | null
+  descriptors: FlyoutV2UrlParamValue | null
 ): string | undefined => {
+  if (!descriptors) return undefined;
+
   const searchParams = getEntityAnalyticsStateSearchParams();
+  // Drop any legacy expandable-flyout param so it can't be restored on top of the new flyout.
   searchParams.delete(FLYOUT_PARAM_KEY);
-  searchParams.delete(FLYOUT_V2_URL_PARAM);
-
-  if (isNewFlyoutEnabled) {
-    if (!descriptors) return undefined;
-    searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
-    return `?${searchParams.toString()}`;
-  }
-
-  const encodedFlyoutSearch = encodeFlyout(flyout);
-  if (encodedFlyoutSearch == null) {
-    return undefined;
-  }
-
-  const flyoutValue = new URLSearchParams(encodedFlyoutSearch).get(FLYOUT_PARAM_KEY);
-  if (flyoutValue == null) {
-    return undefined;
-  }
-
-  searchParams.set(FLYOUT_PARAM_KEY, flyoutValue);
+  searchParams.set(FLYOUT_V2_URL_PARAM, encodeFlyoutV2UrlParam(descriptors));
   return `?${searchParams.toString()}`;
 };
 
@@ -501,9 +484,9 @@ export const getServiceNameForServiceDetailsUrl = (row: SecurityEntityExploreRow
 };
 
 /**
- * Opens Entity Analytics home with a serialized expandable-flyout state (same URL shape as the
- * product Entity Analytics page). Used from Agent Builder canvas where the in-page flyout
- * provider is not mounted on the attachment surface.
+ * Opens Entity Analytics home with the given entity flyout state, encoded in the new flyout URL
+ * param (same URL shape as the product Entity Analytics page). Used from Agent Builder canvas
+ * where the in-page flyout provider is not mounted on the attachment surface.
  */
 export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   application,
@@ -513,7 +496,6 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
   chrome,
   openSidebarConversation,
   searchSession,
-  isNewFlyoutEnabled = false,
 }: {
   application: ApplicationStart;
   appId: string;
@@ -526,11 +508,10 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
    * navigating. See `clearSearchSessionBeforeSecurityNavigation` below for the rationale.
    */
   searchSession?: ISessionService;
-  /** Whether to encode the destination using the new EUI flyout URL contract. */
-  isNewFlyoutEnabled?: boolean;
 }): void => {
-  const descriptors = isNewFlyoutEnabled ? buildEntityFlyoutV2NavigationState(flyout) : null;
-  const path = getEntityAnalyticsNavigationPathWithFlyout(flyout, isNewFlyoutEnabled, descriptors);
+  const path = getEntityAnalyticsNavigationPathWithFlyout(
+    buildEntityFlyoutV2NavigationState(flyout)
+  );
   if (path == null) {
     return;
   }

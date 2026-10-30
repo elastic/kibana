@@ -33,8 +33,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const pageObjects = getPageObjects(['common', 'header', 'expandedFlyoutGraph', 'timePicker']);
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'expandedFlyoutGraph',
+    'entityFlyout',
+    'timePicker',
+  ]);
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
+  const entityFlyout = pageObjects.entityFlyout;
 
   describe('Security Entity Analytics - Entity Flyout Graph', function () {
     this.tags(['cloud_security_posture_graph_viz']);
@@ -45,11 +52,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
-        // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
-        // user-panel) and asserts on legacy test subjects (`rightSection`). Disable the new flyout
-        // so those legacy panels render instead of being consumed by the flyout v2 legacy-URL
-        // interop, which translates the `flyout` param into the new (EUI) flyout.
-        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -67,7 +69,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         'securitySolution:enableAssetInventory': false,
         'securitySolution:entityStoreEnableV2': false,
       });
-      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     describe('entity relationships', () => {
@@ -117,8 +118,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         //   Relationship nodes (4): one per distinct actor group/relationship type
 
         // Navigate directly to the entity analytics home page with the entity flyout
-        // open for origin-pinned-server (host type). The flyout URL parameter opens
-        // the flyout without needing to interact with the datagrid.
+        // open for origin-pinned-server (host type). The legacy `flyout` URL parameter is
+        // translated by the flyout v2 legacy-URL interop into the new (EUI) host flyout, so it
+        // opens without needing to interact with the datagrid.
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'securitySolution',
           '/entity_analytics_home_page',
@@ -127,8 +129,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Wait for the host entity flyout right panel to open
-        await testSubjects.existOrFail('rightSection', { timeout: 15000 });
+        // Wait for the host entity flyout to open
+        await entityFlyout.assertEntityPanelIsOpen('host');
 
         // Expand the Visualizations section in the flyout if it is collapsed
         // (same pattern as NetworkEventsPageObject.flyout.expandVisualizations)
@@ -228,8 +230,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Close the grouped preview panel and fit the graph into view
-        await expandedFlyoutGraph.closePreviewSection();
+        // Go back from the grouped node panel to the graph and fit the graph into view
+        await expandedFlyoutGraph.goBackToGraph();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // --- Phase 3+4 combined assertion ---
@@ -275,8 +277,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Wait for the user entity flyout right panel to open
-        await testSubjects.existOrFail('rightSection', { timeout: 15000 });
+        // Wait for the user entity flyout to open
+        await entityFlyout.assertEntityPanelIsOpen('user');
 
         // Expand the Visualizations section in the flyout if it is collapsed
         const vizContent = await testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
@@ -328,7 +330,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           )
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await expandedFlyoutGraph.closePreviewSection();
+        await expandedFlyoutGraph.goBackToGraph();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // Phase 2 assertions:
@@ -380,7 +382,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           )
         ).click();
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await expandedFlyoutGraph.closePreviewSection();
+        await expandedFlyoutGraph.goBackToGraph();
         await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
         // Back to the original 3 nodes:
@@ -430,7 +432,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           );
           await pageObjects.header.waitUntilLoadingHasFinished();
 
-          await testSubjects.existOrFail('rightSection', { timeout: 15000 });
+          await entityFlyout.assertEntityPanelIsOpen('user');
 
           const vizContent = await testSubjects.find(VISUALIZATIONS_SECTION_CONTENT_TEST_ID);
           const isVizVisible = (await vizContent.getSize()).height > 0;

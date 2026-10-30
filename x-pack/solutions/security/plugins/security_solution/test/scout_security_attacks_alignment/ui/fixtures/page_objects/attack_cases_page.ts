@@ -206,7 +206,7 @@ export class AttackCasesPage {
   public readonly removeOnlyButton: Locator;
   public readonly removeWithRelatedButton: Locator;
 
-  // Attack details flyout (legacy expandable flyout, i.e. `enableNewFlyout: false`)
+  // Attack details flyout
   public readonly attackDetailsFlyoutBody: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -323,7 +323,7 @@ export class AttackCasesPage {
       'remove-with-related-modal-remove-with-related'
     );
 
-    this.attackDetailsFlyoutBody = page.testSubj.locator('attack-details-flyout-body');
+    this.attackDetailsFlyoutBody = page.testSubj.locator('attack-flyout-body');
   }
 
   /**
