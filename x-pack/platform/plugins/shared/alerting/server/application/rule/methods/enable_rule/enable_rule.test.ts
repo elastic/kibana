@@ -148,6 +148,33 @@ describe('enable()', () => {
         ruleTypeId: 'myType',
       });
     });
+
+    test('rejects enabling the rule when the rule type params authorizer denies the persisted params', async () => {
+      // Simulates params persisted through a path that skips the authorizer (e.g. import).
+      const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRule,
+        attributes: { ...existingRule.attributes, params: persistedParams },
+      });
+      const authorizeParams = jest
+        .fn()
+        .mockRejectedValue(new Error('Unauthorized to enable a privileged param'));
+      (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+        authorize: { params: { authorize: authorizeParams } },
+      });
+
+      await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to enable a privileged param"`
+      );
+
+      expect(authorizeParams).toHaveBeenCalledWith(
+        persistedParams,
+        expect.objectContaining({ request: rulesClientParams.request })
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    });
   });
 
   describe('auditLogger', () => {
