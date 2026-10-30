@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const themeRuleGroupBuilderFactory =
-  (postfix: string = '') =>
-  (tokens: string[], color: string, isBold: boolean = false) =>
-    tokens.map((i) => ({
-      token: i + postfix,
-      foreground: color,
-      fontStyle: isBold ? 'bold' : '',
-    }));
+/** The one Monaco theme Kibana defines. Every editor uses it; chrome differs per instance. */
+export const CODE_EDITOR_DEFAULT_THEME_ID = 'codeEditorDefaultTheme' as const;
