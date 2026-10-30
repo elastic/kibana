@@ -7,7 +7,10 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
-import { getBoundedResponsePreview } from '@kbn/langchain/server';
+import {
+  getBoundedResponsePreview,
+  isContentFilteredModelResponseError,
+} from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../../types';
@@ -195,6 +198,16 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         unrefinedResults,
       };
     } catch (error) {
+      // The provider's content filter stopped the response. The same prompt is filtered again on
+      // every attempt, so retrying only burns LLM calls: stop the graph on the first occurrence.
+      if (isContentFilteredModelResponseError(error)) {
+        logger?.debug(
+          () =>
+            `generate node is stopping the graph: the model provider's content filter stopped attempt ${generationAttempts}`
+        );
+        throw error;
+      }
+
       const parsingError = isEmptyModelResponseError(error)
         ? getEmptyModelResponseError({
             cause: error,

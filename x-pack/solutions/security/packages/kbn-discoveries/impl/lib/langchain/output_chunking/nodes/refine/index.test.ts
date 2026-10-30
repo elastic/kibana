@@ -6,7 +6,11 @@
  */
 
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import { EmptyModelResponseError, type ActionsClientLlm } from '@kbn/langchain/server';
+import {
+  ContentFilteredModelResponseError,
+  EmptyModelResponseError,
+  type ActionsClientLlm,
+} from '@kbn/langchain/server';
 import type { ZodType } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
@@ -489,6 +493,46 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state.errors[0]).toContain(EMPTY_MODEL_RESPONSE_ERROR_MARKER);
     expect(state.errors[0]).toContain('test-connector-id');
     expect(state.errors[0]).toContain('prompt tokens: 128390');
+  });
+
+  it('stops the graph by rethrowing a content-filtered error instead of recording an error to retry', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    const contentFiltered = new ContentFilteredModelResponseError({
+      connectorId: 'test-connector-id',
+      contentLength: 12,
+      model: 'test-model',
+      responseBody: '{"insights": [',
+    });
+    mockInvoke.mockRejectedValue(contentFiltered);
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await expect(refineNode(initialGraphState)).rejects.toBe(contentFiltered);
+  });
+
+  it('keeps the retry behavior for a response that cannot be parsed', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockResolvedValue('this is not json');
+
+    const refineNode = getRefineNode({
+      llm: mockLlm,
+      logger: mockLogger,
+
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await refineNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
   });
 
   it('returns refined results when combined responses pass validation', async () => {

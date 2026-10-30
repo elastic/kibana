@@ -7,6 +7,7 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
+import { isContentFilteredModelResponseError } from '@kbn/langchain/server';
 import {
   attackDiscoveryRefineTemplateRequest,
   type AttackDiscoveryTemplateCompletion,
@@ -150,6 +151,16 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
+      // The provider's content filter stopped the response. The same prompt is filtered again on
+      // every attempt, so retrying only burns LLM calls: stop the graph on the first occurrence.
+      if (isContentFilteredModelResponseError(error)) {
+        logger?.debug(
+          () =>
+            `refine node is stopping the graph: the model provider's content filter stopped attempt ${generationAttempts}`
+        );
+        throw error;
+      }
+
       const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
 

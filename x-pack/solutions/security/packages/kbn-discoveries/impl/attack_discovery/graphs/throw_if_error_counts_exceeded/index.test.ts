@@ -6,9 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { EmptyModelResponseError } from '@kbn/langchain/server';
+import { ContentFilteredModelResponseError, EmptyModelResponseError } from '@kbn/langchain/server';
 import { getEmptyModelResponseError } from '../../../lib/langchain/output_chunking/nodes/helpers/empty_model_response';
-import { throwIfErrorCountsExceeded } from '.';
+import { throwContentFilteredErrorWithGuidance, throwIfErrorCountsExceeded } from '.';
 
 const mockLogger = {
   debug: jest.fn(),
@@ -268,5 +268,54 @@ describe('throwIfErrorCountsExceeded', () => {
         })
       ).toThrow();
     });
+  });
+});
+
+describe('throwContentFilteredErrorWithGuidance', () => {
+  const contentFiltered = new ContentFilteredModelResponseError({
+    connectorId: 'connector-1',
+    contentLength: 0,
+    responseBody: '',
+    model: 'gpt-x',
+  });
+
+  it('names the provider and model and suggests a different model', () => {
+    let thrown: unknown;
+    try {
+      throwContentFilteredErrorWithGuidance({
+        error: contentFiltered,
+        logger: mockLogger,
+        model: 'gpt-x',
+        provider: 'openai',
+      });
+    } catch (e) {
+      thrown = e;
+    }
+
+    const { message } = thrown as Error;
+    expect(message).toContain('openai');
+    expect(message).toContain('gpt-x');
+    expect(message).toContain('content filter');
+    expect(message).toContain('Select a different model');
+  });
+
+  it('does NOT advise sending fewer alerts', () => {
+    let message = '';
+    try {
+      throwContentFilteredErrorWithGuidance({ error: contentFiltered, provider: 'openai' });
+    } catch (e) {
+      message = (e as Error).message;
+    }
+
+    expect(message).not.toMatch(/send(ing)? fewer alerts(?! to this model is unlikely)/i);
+    expect(message).toContain('unlikely to help');
+  });
+
+  it('rethrows any other error untouched', () => {
+    const other = new Error('Failed to generate a valid response');
+
+    expect(() =>
+      throwContentFilteredErrorWithGuidance({ error: other, provider: 'openai' })
+    ).toThrow(other);
   });
 });

@@ -14,6 +14,7 @@ import {
   attackDiscoveryTemplateOmissionMessage,
   capAttackDiscoveryTemplateCount,
   resolveAttackDiscoveryTemplateCompletion,
+  throwContentFilteredErrorWithGuidance,
 } from '@kbn/discoveries';
 import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
@@ -176,14 +177,19 @@ export const invokeAttackDiscoveryGraph = async ({
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');
 
-  const result: AttackDiscoveryGraphState = await graph.invoke(
-    {},
-    {
-      callbacks: [...(traceOptions?.tracers ?? [])],
-      runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
-      tags,
-    }
-  );
+  let result: AttackDiscoveryGraphState;
+  try {
+    result = await graph.invoke(
+      {},
+      {
+        callbacks: [...(traceOptions?.tracers ?? [])],
+        runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
+        tags,
+      }
+    );
+  } catch (error) {
+    return throwContentFilteredErrorWithGuidance({ error, logger, model, provider: llmType });
+  }
 
   const {
     insights: attackDiscoveries,

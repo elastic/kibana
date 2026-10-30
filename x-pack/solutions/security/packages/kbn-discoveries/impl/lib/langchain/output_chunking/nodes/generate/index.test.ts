@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
+  ContentFilteredModelResponseError,
   EmptyModelResponseError,
   MAX_RESPONSE_PREVIEW_LENGTH,
   type ActionsClientLlm,
@@ -525,6 +526,46 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors[0]).toContain('test-connector-id');
     expect(state.errors[0]).toContain('test-model');
     expect(state.errors[0]).toContain('prompt tokens: 128390');
+  });
+
+  it('stops the graph by rethrowing a content-filtered error instead of recording an error to retry', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    const contentFiltered = new ContentFilteredModelResponseError({
+      connectorId: 'test-connector-id',
+      contentLength: 12,
+      model: 'test-model',
+      responseBody: '{"insights": [',
+    });
+    mockInvoke.mockRejectedValue(contentFiltered);
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    await expect(generateNode(initialGraphState)).rejects.toBe(contentFiltered);
+  });
+
+  it('keeps the retry behavior for a response that cannot be parsed', async () => {
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, generationSchema }).chain
+      .invoke as jest.Mock;
+    mockInvoke.mockResolvedValue('this is not json');
+
+    const generateNode = getGenerateNode({
+      llm: mockLlm,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await generateNode(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
   });
 
   it('returns unrefined results when combined responses pass validation', async () => {

@@ -8,6 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
+import {
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+} from '@kbn/langchain/server';
 
 /** EIS template id. The file is `prompt-templates/attack-discovery/1.yaml` in eis-gateway. */
 export const ATTACK_DISCOVERY_TEMPLATE_ID = '.attack-discovery';
@@ -162,6 +166,21 @@ export const createAttackDiscoveryTemplateCompletion = ({
       },
       ...(timeout !== undefined ? { timeout } : {}),
     });
+    // This path bypasses the LLM wrapper, so it needs its own content-filter check: a filtered
+    // completion is the same non-retryable failure whether or not partial content came back.
+    if (isContentFilterFinishReason(response.finish_reason)) {
+      const content = response.content ?? '';
+      const error = new ContentFilteredModelResponseError({
+        completionTokens: response.tokens?.completion,
+        connectorId,
+        contentLength: content.length,
+        model: response.model,
+        promptTokens: response.tokens?.prompt,
+        responseBody: content,
+      });
+      logger?.error(error);
+      throw error;
+    }
     return response.content ?? '';
   };
 };

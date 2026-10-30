@@ -13,7 +13,10 @@ import { invokeAttackDiscoveryGraphWithAlerts } from './invoke_graph_with_alerts
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { getDefaultAttackDiscoveryGraph } from '.';
-import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
+import {
+  throwContentFilteredErrorWithGuidance,
+  throwIfErrorCountsExceeded,
+} from './throw_if_error_counts_exceeded';
 
 jest.mock('@kbn/langchain/server');
 jest.mock('@kbn/langchain/server/tracers/langsmith');
@@ -450,6 +453,36 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
           prompts: mockPrompts,
         })
       ).rejects.toThrow('Maximum generation attempts (10) reached.');
+    });
+  });
+
+  describe('content filter', () => {
+    it('routes a graph failure through throwContentFilteredErrorWithGuidance with the provider and model', async () => {
+      const graphError = new Error('content filtered');
+      mockGraphInvoke.mockRejectedValue(graphError);
+      (throwContentFilteredErrorWithGuidance as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('guidance');
+      });
+
+      await expect(
+        invokeAttackDiscoveryGraphWithAlerts({
+          actionsClient: mockActionsClient,
+          alerts: mockAlerts,
+          apiConfig: {
+            action_type_id: '.gen-ai',
+            connector_id: 'test-connector',
+            model: 'gpt-x',
+          },
+          connectorTimeout: 60000,
+          esClient: mockEsClient,
+          logger: mockLogger,
+          prompts: mockPrompts,
+        })
+      ).rejects.toThrow('guidance');
+
+      expect(throwContentFilteredErrorWithGuidance).toHaveBeenCalledWith(
+        expect.objectContaining({ error: graphError, model: 'gpt-x', provider: 'gen-ai' })
+      );
     });
   });
 

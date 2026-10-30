@@ -46,3 +46,5 @@ export type {
   AttackDiscoveryTemplatePhase,
   AttackDiscoveryTemplateRequest,
 } from './template_completion';
+
+export { throwContentFilteredErrorWithGuidance } from './throw_if_error_counts_exceeded';
