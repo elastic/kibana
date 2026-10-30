@@ -1049,6 +1049,17 @@ describe('toImpactEntities', () => {
     ).toEqual([{ id: 'service:checkout', name: 'checkout', type: 'service', evidence }]);
   });
 
+  it('keeps the Knowledge Indicator and source an entity was stored with', () => {
+    expect(
+      toImpactEntities(
+        [{ name: 'checkout' }],
+        [{ id: 'checkout', name: 'checkout', featureId: 'feature-1', streamName: 'logs.checkout' }]
+      )
+    ).toEqual([
+      { id: 'checkout', name: 'checkout', featureId: 'feature-1', streamName: 'logs.checkout' },
+    ]);
+  });
+
   it('does not carry evidence over to an entity that was not stored', () => {
     expect(
       toImpactEntities([{ name: 'new' }], [{ id: 'other', evidence: { description: 'x' } }])

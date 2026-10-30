@@ -98,8 +98,8 @@ const MAX_ATTEMPTS = 2;
 type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
 
 /**
- * The entities to store. An entity the record lists again keeps the id, type and evidence already
- * stored for it: the model sees entities by name, but a stored id can differ from its name (an
+ * The entities to store. An entity the record lists again keeps the id, type, links and evidence
+ * already stored for it: the model sees entities by name, but a stored id can differ from its name (an
  * Entity Store id), and the id is what the UI opens the entity by. A write replaces the whole list.
  */
 export const toImpactEntities = (
@@ -115,7 +115,16 @@ export const toImpactEntities = (
     const id = known?.id ?? entityIdFor(name);
     const kept = evidence ?? known?.evidence;
     const kind = type ?? known?.type;
-    return { id, name, ...(kind ? { type: kind } : {}), ...(kept ? { evidence: kept } : {}) };
+    // The Knowledge Indicator and source links (`featureId`, `streamName`) are not the model's to
+    // set, and a write replaces the list, so they are carried over from what is stored.
+    return {
+      ...(known?.featureId ? { featureId: known.featureId } : {}),
+      ...(known?.streamName ? { streamName: known.streamName } : {}),
+      id,
+      name,
+      ...(kind ? { type: kind } : {}),
+      ...(kept ? { evidence: kept } : {}),
+    };
   });
 };
 
