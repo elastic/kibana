@@ -85,6 +85,13 @@ export {
 } from './src/sources/view_name';
 
 export {
+  RECOMMENDED_SOURCES,
+  normalizeSourceEsql,
+  type RecommendedSource,
+  type RecommendedSourcesResponse,
+} from './src/sources/recommended_sources';
+
+export {
   MAX_NIGHTSHIFT_SOURCE_SLUGS,
   MAX_SOURCE_DESCRIPTION_LENGTH,
   MAX_SOURCE_ESQL_LENGTH,

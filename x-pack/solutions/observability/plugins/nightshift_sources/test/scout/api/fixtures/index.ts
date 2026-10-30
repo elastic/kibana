@@ -21,6 +21,7 @@ export {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   listedIds,
   readView,

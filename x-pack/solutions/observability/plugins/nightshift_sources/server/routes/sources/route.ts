@@ -15,6 +15,7 @@ import {
   validateSourceQueryRequestSchema,
   type DeleteSourceResponse,
   type ListSourcesResponse,
+  type RecommendedSourcesResponse,
   type SourceMutationResponse,
   type SourceWithHealth,
   type ValidateSourceQueryResponse,
@@ -44,6 +45,24 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
     const client = await getSourcesClient({ request });
     const { page, per_page: perPage, search, enabled, ids } = params.query;
     return client.list({ page, perPage, search, enabled, ids });
+  },
+});
+
+const listRecommendedSourcesRoute = createNightshiftSourcesServerRoute({
+  endpoint: 'GET /internal/nightshift/sources/_recommended',
+  options: {
+    access: 'internal',
+    summary: 'List recommended Nightshift sources',
+    description: 'Returns the preset sources the current space does not have yet.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({ request, getSourcesClient }): Promise<RecommendedSourcesResponse> => {
+    const client = await getSourcesClient({ request });
+    return { recommendations: await client.listRecommended() };
   },
 });
 
@@ -217,6 +236,7 @@ const disableSourceRoute = createNightshiftSourcesServerRoute({
 
 export const sourcesRoutes = {
   ...listSourcesRoute,
+  ...listRecommendedSourcesRoute,
   ...createSourceRoute,
   ...validateSourceQueryRoute,
   ...getSourceRoute,

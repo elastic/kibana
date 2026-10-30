@@ -88,6 +88,16 @@ const emptyFind = {
   per_page: 1,
 };
 
+const makeFindResponse = (...attributes: NightshiftSourceAttributes[]) => ({
+  saved_objects: attributes.map((sourceAttributes, index) => ({
+    ...makeSavedObject(sourceAttributes, `source-${index + 1}`),
+    score: 0,
+  })),
+  total: attributes.length,
+  page: 1,
+  per_page: 100,
+});
+
 const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
   const serializer = savedObjectsServiceMock.createSerializer();
@@ -132,6 +142,36 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 };
 
 describe('SourcesClient', () => {
+  describe('listRecommended', () => {
+    it('includes the Logs preset when the space has no sources', async () => {
+      const { client } = setup();
+
+      const recommendations = await client.listRecommended();
+
+      expect(recommendations.some(({ id }) => id === 'logs')).toBe(true);
+    });
+
+    it('hides the Logs preset when a source has the same normalized query', async () => {
+      const { client, soClient } = setup();
+      soClient.find.mockResolvedValue(makeFindResponse(makeAttributes({ esql: 'from   LOGS*' })));
+
+      const recommendations = await client.listRecommended();
+
+      expect(recommendations.some(({ id }) => id === 'logs')).toBe(false);
+    });
+
+    it('hides the Logs preset when the matching source is disabled', async () => {
+      const { client, soClient } = setup();
+      soClient.find.mockResolvedValue(
+        makeFindResponse(makeAttributes({ esql: 'FROM logs*', enabled: false }))
+      );
+
+      const recommendations = await client.listRecommended();
+
+      expect(recommendations.some(({ id }) => id === 'logs')).toBe(false);
+    });
+  });
+
   describe('assertReadable', () => {
     const hasPrivileges = (client: ReturnType<typeof setup>['dataEsClient'], granted: boolean) =>
       client.security.hasPrivileges.mockResolvedValue({
