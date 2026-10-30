@@ -1356,6 +1356,26 @@ describe('StatusRuleExecutor', () => {
         });
       });
 
+      it('joins every location label when a monitor is pending in several locations', () => {
+        const firstConfig = mockPendingConfigs[FIRST_CONFIG_ID];
+        const secondLocationConfig = {
+          ...firstConfig,
+          locationId: MOCK_SECOND_LOCATION.id,
+          monitorInfo: {
+            ...firstConfig.monitorInfo,
+            observer: { geo: { name: MOCK_SECOND_LOCATION.name } },
+          },
+        };
+
+        const summary = statusRule.getUngroupedPendingSummary({
+          statusConfigs: [firstConfig, secondLocationConfig],
+        });
+
+        const expected = `${MOCK_FIRST_LOCATION.name} and ${MOCK_SECOND_LOCATION.name}`;
+        expect(summary.locationName).toBe(expected);
+        expect(summary.locationNames).toBe(expected);
+      });
+
       it('uses the location label from monitor info since pending configs have no ping', async () => {
         const { latestPing, ...pendingConfigWithoutPing } = mockPendingConfigs[FIRST_CONFIG_ID];
 

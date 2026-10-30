@@ -116,6 +116,7 @@ export const registerSyntheticsStatusCheckRule = (
         stalePendingConfigs,
         prevDownConfigs,
         prevPendingConfigs,
+        downConfigs,
         upConfigs,
       });
 

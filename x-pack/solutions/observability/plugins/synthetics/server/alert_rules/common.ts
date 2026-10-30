@@ -207,6 +207,7 @@ export const setRecoveredAlertsContext = ({
   stalePendingConfigs = {},
   prevDownConfigs = {},
   prevPendingConfigs = {},
+  downConfigs = {},
   upConfigs,
   dateFormat,
   tz,
@@ -226,6 +227,7 @@ export const setRecoveredAlertsContext = ({
   stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'];
   prevDownConfigs?: AlertOverviewStatus['downConfigs'];
   prevPendingConfigs?: AlertOverviewStatus['pendingConfigs'];
+  downConfigs?: AlertOverviewStatus['downConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
@@ -318,7 +320,15 @@ export const setRecoveredAlertsContext = ({
       }
       // Cannot display link message for deleted monitors or deleted locations
       linkMessage = '';
-    } else if (wasPending) {
+    } else if (
+      wasPending &&
+      locationIds.some(
+        (locationId) =>
+          downConfigs[`${configId}-${locationId}`] || upConfigs[`${configId}-${locationId}`]
+      )
+    ) {
+      // Only say data is back when this run has a result for the monitor. A pending alert also
+      // recovers when the monitor is disabled or "no data" alerts are turned off.
       recoveryStatus = PENDING_RECOVERY_STATUS;
       recoveryReason = PENDING_RECOVERY_REASON;
     }

@@ -1162,6 +1162,11 @@ describe('setRecoveredAlertsContext for pending alerts', () => {
     },
   };
 
+  // A down result this run means data came back, even if below the down threshold
+  const currentDownConfigs = {
+    [`${configId}-${privateLocationId}`]: {},
+  } as unknown as AlertOverviewStatus['downConfigs'];
+
   const getAlertsClientMock = (alertId: string) => ({
     report: jest.fn(),
     getAlertLimitValue: jest.fn().mockReturnValue(10),
@@ -1201,6 +1206,7 @@ describe('setRecoveredAlertsContext for pending alerts', () => {
       stalePendingConfigs: {},
       prevDownConfigs: {},
       prevPendingConfigs,
+      downConfigs: currentDownConfigs,
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
@@ -1232,6 +1238,7 @@ describe('setRecoveredAlertsContext for pending alerts', () => {
       stalePendingConfigs: {},
       prevDownConfigs: {},
       prevPendingConfigs,
+      downConfigs: currentDownConfigs,
       upConfigs: {},
       dateFormat,
       tz: 'UTC',
@@ -1245,6 +1252,32 @@ describe('setRecoveredAlertsContext for pending alerts', () => {
         locationNames: privateLocationLabel,
         recoveryStatus: 'is no longer pending',
         recoveryReason: 'the monitor is reporting data again',
+      }),
+    });
+  });
+
+  it('restores the location label but keeps the default reason when no data came back', () => {
+    const alertsClientMock = getAlertsClientMock(configId);
+    setRecoveredAlertsContext({
+      alertsClient: alertsClientMock,
+      basePath,
+      spaceId: 'default',
+      staleDownConfigs: {},
+      stalePendingConfigs: {},
+      prevDownConfigs: {},
+      prevPendingConfigs,
+      upConfigs: {},
+      dateFormat,
+      tz: 'UTC',
+      groupByLocation: false,
+    });
+
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
+      id: configId,
+      context: expect.objectContaining({
+        locationName: privateLocationLabel,
+        recoveryStatus: 'has recovered',
+        recoveryReason: 'the alert condition is no longer met',
       }),
     });
   });

@@ -600,6 +600,13 @@ export class StatusRuleExecutor {
       params: this.params,
       reason: 'pending',
     });
+    if (statusConfigs.length > 1) {
+      const locationNames = statusConfigs
+        .map(({ locationId, monitorInfo: info }) => info.observer.geo.name || locationId)
+        .join(` ${AND_LABEL} `);
+      baseSummary.locationName = locationNames;
+      baseSummary.locationNames = locationNames;
+    }
 
     return baseSummary;
   }
