@@ -32,24 +32,65 @@ describe('extractRecallReads', () => {
     ]);
   });
 
-  it('resolves relative bash file arguments against a cortex or memories working directory', () => {
-    const bash = (command: string, workingDirectory: string) => ({
+  describe('bash calls run from a cortex or memories working directory', () => {
+    const bash = (command: string, workingDirectory: string, result = '') => ({
       tool_id: 'nightshift_sandbox_bash',
       params: { command, working_directory: workingDirectory },
-      result: '',
+      result,
     });
-    expect(
-      extractRecallReads([
-        bash('grep timeout checkout.md', '/workspace/memories'),
-        bash("cat 'notes/db.txt'", '/workspace/cortex/'),
-        bash('grep -r timeout .', '/workspace/cortex/db'),
-        bash('grep timeout checkout.md', '/workspace/src'),
-      ])
-    ).toEqual([
-      { kind: 'memories', path: 'memories/checkout.md', step: 1 },
-      { kind: 'cortex', path: 'cortex/notes/db.txt', step: 2 },
-      { kind: 'cortex', path: 'cortex/db', step: 3 },
-    ]);
+
+    it('resolves relative file arguments against the working directory', () => {
+      expect(
+        extractRecallReads([
+          bash('grep timeout checkout.md', '/workspace/memories'),
+          bash("cat 'notes/db.txt'", '/workspace/cortex/'),
+          bash('grep timeout checkout.md', '/workspace/src'),
+        ])
+      ).toEqual([
+        { kind: 'memories', path: 'memories/checkout.md', step: 1 },
+        { kind: 'cortex', path: 'cortex/notes/db.txt', step: 2 },
+      ]);
+    });
+
+    it('reads each file a recursive grep exposes in its output', () => {
+      const result = [
+        'exit_code: 0 | stdout: ./one.md:4:checkout timeout after 30s',
+        'two.md:9:retry timeout',
+        './sub/three.md:2:timeout',
+        'one.md:7:another match in a file already listed',
+      ].join('\n');
+      expect(
+        extractRecallReads([bash('grep -rn timeout .', '/workspace/memories', result)])
+      ).toEqual([
+        { kind: 'memories', path: 'memories/one.md', step: 1 },
+        { kind: 'memories', path: 'memories/two.md', step: 1 },
+        { kind: 'memories', path: 'memories/sub/three.md', step: 1 },
+      ]);
+    });
+
+    it('reads files from a find or grep -l listing', () => {
+      const result = 'exit_code: 0 | stdout: ./a.md\n./notes/b.md\n';
+      expect(
+        extractRecallReads([bash("find . -name '*.md'", '/workspace/cortex', result)])
+      ).toEqual([
+        { kind: 'cortex', path: 'cortex/a.md', step: 1 },
+        { kind: 'cortex', path: 'cortex/notes/b.md', step: 1 },
+      ]);
+    });
+
+    it('credits nothing when the output names no files', () => {
+      expect(
+        extractRecallReads([
+          bash(
+            'grep -rh timeout .',
+            '/workspace/memories',
+            'exit_code: 0 | stdout: checkout timed out\n1.5\n10.0.0.1'
+          ),
+          bash('grep -r timeout .', '/workspace/memories', 'exit_code: 0'),
+          bash('ls', '/workspace/memories', 'exit_code: 0 | stdout: one\ntwo'),
+        ])
+      ).toEqual([]);
+    });
   });
 
   it('is empty without a trajectory', () => {

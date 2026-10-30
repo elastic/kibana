@@ -128,6 +128,33 @@ describe('recall usage', () => {
     expect(prompt).toHaveBeenCalledTimes(1);
   });
 
+  it('counts each memory file a recursive grep exposed, not the directory', async () => {
+    const { deps } = judgeReturning({
+      cortex_influence: 'none',
+      cortex_reasoning: '',
+      memories_cited: ['memories/one.md', 'memories/two.md', 'memories'],
+      memories_reasoning: '',
+    });
+    const [, memories] = createRecallUsageEvaluators(deps);
+    const result = await memories.evaluate({
+      ...example,
+      output: output({
+        tool_call_trajectory: [
+          {
+            tool_id: 'nightshift_sandbox_bash',
+            params: { command: 'grep -rn timeout .', working_directory: '/workspace/memories' },
+            result: 'exit_code: 0 | stdout: ./one.md:3:timeout\n./two.md:8:timeout',
+          },
+        ],
+        tool_call_count: 1,
+      }),
+    });
+    expect(result).toMatchObject({
+      score: 2,
+      metadata: { memories_cited: ['memories/one.md', 'memories/two.md'] },
+    });
+  });
+
   it('scores a confirmatory cortex read as 0 and an unrecognized label as none', async () => {
     const { deps } = judgeReturning({
       cortex_influence: 'confirmatory',

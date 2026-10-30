@@ -33,26 +33,44 @@ interface RecallPath {
   path: string;
 }
 
+/** `renderResult` prefixes the first line of a bash result with its exit code. */
+const RESULT_PREFIX_RE = /^exit_code: \d+ \| stdout: ?/;
+
+/** A result line that starts with a file name: `grep -r` output (`./a.md:3:text`) or a `find` / `ls` listing. */
+const RESULT_FILE_RE = /^(?:\.\/)?((?:[\w.-]+\/)*[\w.-]+\.[a-z][a-z0-9]*)(?::|$)/i;
+
 /**
  * A bash command run from inside `cortex/` or `memories/` reads those files by relative name
- * (`grep timeout checkout.md`), so resolve each file argument against the working directory. A
- * command naming no file (`grep -r timeout .`, `ls`) read the directory itself.
+ * (`grep timeout checkout.md`), so resolve each file argument against the working directory.
+ * A command naming no file (`grep -r timeout .`, `find . -name '*.md'`) is read from its output
+ * instead, one file per result line, so only files the output actually exposes are credited. A
+ * truncated or filename-free output (`ls`, `grep -h`) exposes none, and none are guessed.
  */
-const readsFromWorkingDirectory = (command: string, workingDirectory: string): RecallPath[] => {
+const readsFromWorkingDirectory = (
+  command: string,
+  result: string,
+  workingDirectory: string
+): RecallPath[] => {
   const match = RECALL_DIRECTORY_RE.exec(workingDirectory);
   if (!match) return [];
   const [, rawDirectory, kind] = match;
   const directory = rawDirectory.replace(/\/+$/, '');
-  const files = command
+  const resolve = (files: string[]): RecallPath[] =>
+    files.map((file) => ({ kind: kind as RecallKind, path: `${directory}/${file}` }));
+  const argumentFiles = command
     .split(/[\s|;&<>()]+/)
     .map((token) => token.replace(/^['"]|['"]$/g, ''))
     .filter((token) => RELATIVE_FILE_RE.test(token));
-  return files.length > 0
-    ? files.map((file) => ({ kind: kind as RecallKind, path: `${directory}/${file}` }))
-    : [{ kind: kind as RecallKind, path: directory }];
+  if (argumentFiles.length > 0) return resolve(argumentFiles);
+  return resolve(
+    result.split('\n').flatMap((line) => {
+      const [, file] = RESULT_FILE_RE.exec(line.replace(RESULT_PREFIX_RE, '').trim()) ?? [];
+      return file ? [file] : [];
+    })
+  );
 };
 
-const recallPathsOf = ({ tool_id: toolId, params }: TrajectoryStep): RecallPath[] => {
+const recallPathsOf = ({ tool_id: toolId, params, result }: TrajectoryStep): RecallPath[] => {
   if (toolId === VIEW_FILE_TOOL_ID && typeof params.file_path === 'string') {
     return [...params.file_path.matchAll(RECALL_PATH_RE)].map(([, path, kind]) => ({
       kind: kind as RecallKind,
@@ -65,7 +83,7 @@ const recallPathsOf = ({ tool_id: toolId, params }: TrajectoryStep): RecallPath[
       path,
     }));
     return typeof params.working_directory === 'string'
-      ? [...named, ...readsFromWorkingDirectory(params.command, params.working_directory)]
+      ? [...named, ...readsFromWorkingDirectory(params.command, result, params.working_directory)]
       : named;
   }
   return [];
