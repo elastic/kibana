@@ -116,7 +116,6 @@ describe('registerEntityAttachment impact entity opener', () => {
         typeof registerEntityAttachment
       >[0]['experimentalFeatures'],
       resolveSecurityCanvasContext: jest.fn(),
-      uiSettings: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['uiSettings'],
       rendering: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['rendering'],
       spaces,
       registerImpactEntityOpener,
