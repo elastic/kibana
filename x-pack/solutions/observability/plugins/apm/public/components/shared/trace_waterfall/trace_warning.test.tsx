@@ -50,7 +50,7 @@ describe('TraceWarning', () => {
   });
 
   it('renders a warning for a missing selected transaction, and shows the fallback trace', () => {
-    render(
+    renderWithContext(
       <TraceWaterfallContext.Provider
         value={{ traceState: TraceDataState.MissingEntry } as TraceWaterfallContextProps}
       >
