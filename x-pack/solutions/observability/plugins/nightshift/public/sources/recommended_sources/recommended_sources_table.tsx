@@ -28,14 +28,18 @@ import { useCreateSources } from '../../data/sources/use_create_sources';
 import { useRecommendedSources } from '../../data/sources/use_recommended_sources';
 import type { SourceFormValues } from '../source_flyout/source_flyout';
 import {
+  ADD_SELECTED_SOURCES_LABEL,
   CREATE_SOURCE_LABEL,
   EMPTY_RECOMMENDATIONS_HINT,
+  EMPTY_SOURCES_RECOMMENDATIONS_HINT,
   ENABLE_DETECTION_LABEL,
   INTRODUCTION,
   LOAD_ERROR_BODY,
   LOAD_ERROR_TITLE,
   QUERY_COLUMN_HEADER,
   RETRY_LABEL,
+  SOURCES_INTRODUCTION,
+  SOURCES_TABLE_CAPTION,
   TABLE_CAPTION,
   TITLE_COLUMN_HEADER,
 } from './translations';
@@ -78,8 +82,11 @@ const toRecommendedDraft = ({
 });
 
 export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEntry }) => {
+  const isSourcesPage = entry === 'sources_page';
   const recommendations = useRecommendedSources();
-  const createSources = useCreateSources();
+  const createSources = useCreateSources({
+    successContext: isSourcesPage ? 'sources' : 'detection',
+  });
   const [drafts, setDrafts] = useState<SourceDraft[]>([]);
   const [selectedDraftIds, setSelectedDraftIds] = useState<string[]>([]);
   const [flyout, setFlyout] = useState<FlyoutState>();
@@ -164,7 +171,7 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
     setSelectedDraftIds((current) => [...current, draftId]);
   };
 
-  const enableDetection = async () => {
+  const createSelectedSources = async () => {
     const submittedDraftIds = new Set(selectedDrafts.map(({ draftId }) => draftId));
     const { failed } = await createSources.mutateAsync(
       selectedDrafts.map(({ draftId, title, description, tags, esql }) => ({
@@ -192,7 +199,7 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
     <>
       <EuiPanel hasBorder data-test-subj="nightshiftRecommendedSourcesTable">
         <EuiText size="s">
-          <p>{INTRODUCTION}</p>
+          <p>{isSourcesPage ? SOURCES_INTRODUCTION : INTRODUCTION}</p>
         </EuiText>
         <EuiSpacer size="m" />
 
@@ -224,7 +231,7 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
 
             {drafts.length > 0 ? (
               <EuiInMemoryTable
-                tableCaption={TABLE_CAPTION}
+                tableCaption={isSourcesPage ? SOURCES_TABLE_CAPTION : TABLE_CAPTION}
                 itemId="draftId"
                 items={drafts}
                 columns={columns}
@@ -232,7 +239,9 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
               />
             ) : (
               <EuiText size="s" color="subdued">
-                <p>{EMPTY_RECOMMENDATIONS_HINT}</p>
+                <p>
+                  {isSourcesPage ? EMPTY_SOURCES_RECOMMENDATIONS_HINT : EMPTY_RECOMMENDATIONS_HINT}
+                </p>
               </EuiText>
             )}
           </>
@@ -257,13 +266,15 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="check"
+              iconType={isSourcesPage ? 'plus' : 'check'}
               isDisabled={selectedDrafts.length === 0 || createSources.isLoading}
               isLoading={createSources.isLoading}
-              onClick={() => void enableDetection()}
+              onClick={() => void createSelectedSources()}
               data-test-subj="nightshiftRecommendedSourcesEnableButton"
               {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.ENABLE_DETECTION,
+                action: isSourcesPage
+                  ? NIGHTSHIFT_EBT_ACTIONS.ADD_RECOMMENDED_SOURCES
+                  : NIGHTSHIFT_EBT_ACTIONS.ENABLE_DETECTION,
                 element: NIGHTSHIFT_EBT_ELEMENTS.RECOMMENDED_SOURCES_TABLE,
                 detail: JSON.stringify({
                   entry,
@@ -273,7 +284,7 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
                 }),
               })}
             >
-              {ENABLE_DETECTION_LABEL}
+              {isSourcesPage ? ADD_SELECTED_SOURCES_LABEL : ENABLE_DETECTION_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

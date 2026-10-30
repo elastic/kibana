@@ -71,14 +71,14 @@ const makeSource = (id: string): NightshiftSource => ({
   esql_updated_at: '2026-10-30T00:00:00.000Z',
 });
 
-const renderTable = () =>
+const renderTable = (entry: 'detections_page' | 'sources_page' = 'detections_page') =>
   render(
     <QueryClientProvider
       client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
     >
       <I18nProvider>
         <EuiProvider>
-          <RecommendedSourcesTable entry="detections_page" />
+          <RecommendedSourcesTable entry={entry} />
         </EuiProvider>
       </I18nProvider>
     </QueryClientProvider>
@@ -117,6 +117,28 @@ describe('RecommendedSourcesTable', () => {
       'Logs',
       'Metrics',
     ]);
+  });
+
+  it('uses source-specific action and success copy on the Sources page', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ source: makeSource('logs') })
+      .mockResolvedValueOnce({ source: makeSource('metrics') });
+    renderTable('sources_page');
+    await waitFor(() =>
+      expect(screen.getByTestId('checkboxSelectRow-recommended-logs')).toBeChecked()
+    );
+
+    const submitButton = screen.getByTestId('nightshiftRecommendedSourcesEnableButton');
+    expect(submitButton).toHaveTextContent('Add selected sources');
+    expect(submitButton).toHaveAttribute('data-ebt-action', 'addRecommendedSources');
+    fireEvent.click(submitButton);
+
+    await waitFor(() =>
+      expect(mockToasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Added 2 sources',
+        text: undefined,
+      })
+    );
   });
 
   it('removes created drafts and keeps a failed draft selected', async () => {

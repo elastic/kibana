@@ -22,7 +22,11 @@ export interface CreateSourcesResult {
 }
 
 /** Creates onboarding drafts in order, then refreshes the source catalog once. */
-export const useCreateSources = () => {
+export const useCreateSources = ({
+  successContext,
+}: {
+  successContext: 'detection' | 'sources';
+}) => {
   const {
     notifications: { toasts },
     nightshiftSources,
@@ -52,7 +56,10 @@ export const useCreateSources = () => {
     onSuccess: async ({ created, failed }, drafts) => {
       if (created.length > 0) {
         toasts.addSuccess({
-          title: getDetectionEnabledToastTitle(created.length),
+          title:
+            successContext === 'detection'
+              ? getDetectionEnabledToastTitle(created.length)
+              : getSourcesAddedToastTitle(created.length),
           text: isPaused ? ONBOARDING_PAUSED_TOAST_TEXT : undefined,
         });
       }
@@ -71,6 +78,12 @@ export const useCreateSources = () => {
 const getDetectionEnabledToastTitle = (count: number) =>
   i18n.translate('xpack.nightshift.recommendedSources.detectionEnabledToastTitle', {
     defaultMessage: 'Detection enabled for {count, plural, one {# source} other {# sources}}',
+    values: { count },
+  });
+
+const getSourcesAddedToastTitle = (count: number) =>
+  i18n.translate('xpack.nightshift.recommendedSources.sourcesAddedToastTitle', {
+    defaultMessage: 'Added {count, plural, one {# source} other {# sources}}',
     values: { count },
   });
 
