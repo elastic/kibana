@@ -42,9 +42,3 @@ export type {
 export type { CreateStateContainerOptions } from './create_state_container';
 
 export { createStateContainer, defaultFreeze } from './create_state_container';
-
-export {
-  createStateContainerReactHelpers,
-  useContainerSelector,
-  useContainerState,
-} from './create_state_container_react_helpers';

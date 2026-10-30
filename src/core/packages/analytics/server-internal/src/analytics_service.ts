@@ -12,7 +12,7 @@ import apm from 'elastic-apm-node';
 import { trace } from '@opentelemetry/api';
 import type { AnalyticsClient } from '@elastic/ebt/client';
 import { createAnalytics } from '@elastic/ebt/client';
-import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
+import { registerPerformanceMetricEventType } from '@kbn/ebt-tools/src/performance_metric_events';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
   AnalyticsServiceSetup,
