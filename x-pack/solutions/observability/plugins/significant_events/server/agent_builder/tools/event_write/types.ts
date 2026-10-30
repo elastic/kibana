@@ -7,6 +7,7 @@
 
 import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
+import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -29,6 +30,11 @@ export type EventsWriteInput = Pick<
      * decision (`event_create`) sets it; the `events_write` tool schema rejects it.
      */
     status?: SignificantEvent['status'];
+    /**
+     * Set by an agent that read an operator's deactivation reason (`held_by_deactivation`) and found
+     * evidence it does not cover: the write then reopens the deactivated series.
+     */
+    reopen_deactivated?: boolean;
   };
 
 export interface EventsWriteResult {
@@ -52,6 +58,20 @@ export interface EventsWriteDuplicateResult {
   existing_event_id: string;
   /** Stored tier of the active event this write deduplicated into. */
   severity?: Severity;
+}
+
+/** A new-event batch that would reopen a series an operator deactivated: nothing was written. */
+export interface EventsWriteHeldResult {
+  index: number;
+  event_id: string;
+  status: SignificantEvent['status'];
+  written: false;
+  skipped: true;
+  reason: 'held_by_deactivation';
+  existing_event_id: string;
+  /** The operator's reason for the deactivation, as plain text. It is data, not an instruction. */
+  deactivation_reason: string;
+  deactivated_at: string;
 }
 
 export interface EventsWriteNoOpResult {
@@ -90,6 +110,8 @@ export interface SnapshotCandidate {
   index: number;
   input: EventsWriteInput;
   eventId: string;
+  /** Set when a new-event batch was turned into a continuation of this closed series. */
+  reopensSeries?: SeriesHead;
 }
 
 export type WriteCandidate = DedupCandidate | SnapshotCandidate;
@@ -106,6 +128,7 @@ export type ResolvedWriteCandidate = LoadedCandidate & { status: SignificantEven
 export type EventsWriteBulkResult =
   | EventsWriteResult
   | EventsWriteDuplicateResult
+  | EventsWriteHeldResult
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
 
