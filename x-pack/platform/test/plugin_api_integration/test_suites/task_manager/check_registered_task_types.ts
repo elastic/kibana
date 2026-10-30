@@ -74,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         'ProductDocBase:UninstallAll',
         'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
         'SampleDataIngest:InstallSampleData',
+        'Synthetics:Bump-Agent-Policy-Revision',
         'Synthetics:Clean-Up-Package-Policies',
         'Synthetics:Rebalance-Private-Location-Shards',
         'Synthetics:Sync-Global-Params-Private-Locations',

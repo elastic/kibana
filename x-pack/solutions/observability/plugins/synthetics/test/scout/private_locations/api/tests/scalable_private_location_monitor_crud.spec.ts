@@ -20,9 +20,8 @@ import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 
 /**
  * A condition-sharded private location (Enterprise/trial license) routes every
- * write through `PackagePolicyService`'s batched Fleet agent-policy revision
- * bump (`agent_policy_revision_batcher.ts`), unlike an unsharded location,
- * which goes through Fleet's own immediate bump. This suite covers that path
+ * write through `PackagePolicyService`'s scheduled Fleet agent-policy revision
+ * bump (`agent_policy_revision_bump_task.ts`). This suite covers that path
  * -- create, update, and delete -- with real HTTP and real auth.
  *
  * That gap is not hypothetical: `bumpAgentPolicyRevision` briefly resolved its

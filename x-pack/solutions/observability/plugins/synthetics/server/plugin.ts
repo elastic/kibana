@@ -39,7 +39,7 @@ import {
 } from './tasks/sync_private_locations_monitors_task';
 import { RebalancePrivateLocationShardsTask } from './tasks/rebalance_private_location_shards_task';
 import { ensureCleanUpTaskScheduled } from './tasks/clean_up_package_policies_task';
-import { flushPendingAgentPolicyRevisionBumps } from './synthetics_service/private_location/package_policy_service';
+import { registerAgentPolicyRevisionBumpTask } from './synthetics_service/private_location/agent_policy_revision_bump_task';
 import { getTransforms as getStatsTransforms } from '../common/embeddables/stats_overview/get_transforms';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
 import { getTransforms as getMonitorsTransforms } from '../common/embeddables/monitors_overview/get_transforms';
@@ -135,6 +135,8 @@ export class Plugin implements PluginType {
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
 
+    registerAgentPolicyRevisionBumpTask(this.server, plugins.taskManager);
+
     // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
     plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
       title: 'Synthetics stats overview',
@@ -204,21 +206,5 @@ export class Plugin implements PluginType {
     this.telemetry?.loadLicenseInfo(coreStart.elasticsearch.client.asInternalUser).catch(() => {});
   }
 
-  public async stop() {
-    // No server means setup never ran, so nothing was ever batched.
-    if (!this.server) {
-      return;
-    }
-
-    // Scalable private-location package policies are written with
-    // `bumpRevision: false` and rely on a debounced batch to bump the agent
-    // policy afterwards. Dropping a pending batch here would leave those
-    // policies attached to an un-bumped agent policy, so Fleet would never
-    // redeploy and the monitors would silently never reach an agent.
-    try {
-      await flushPendingAgentPolicyRevisionBumps(this.server);
-    } catch (error) {
-      this.logger.error('Failed to flush pending agent policy revision bumps on stop', { error });
-    }
-  }
+  public stop() {}
 }

@@ -14,7 +14,7 @@ import {
   FAILED_RUN_RETRY_DELAY_MS,
   MAX_FAILED_RUN_RETRIES,
 } from './sync_private_locations_monitors_task';
-import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/agent_policy_revision_bump_task';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
@@ -26,8 +26,8 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { mockEncryptedSO } from '../synthetics_service/utils/mocks';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 
-jest.mock('../synthetics_service/private_location/package_policy_service', () => ({
-  ...jest.requireActual('../synthetics_service/private_location/package_policy_service'),
+jest.mock('../synthetics_service/private_location/agent_policy_revision_bump_task', () => ({
+  ...jest.requireActual('../synthetics_service/private_location/agent_policy_revision_bump_task'),
   bumpAgentPolicyRevision: jest.fn().mockResolvedValue(undefined),
 }));
 
