@@ -6,6 +6,7 @@
  */
 
 import {
+  assertBenignAnalysis,
   assertPersistedProposal,
   assertStructuredEvidence,
   assertAnalysisExecution,
@@ -14,6 +15,7 @@ import {
 } from './assertions';
 import {
   analysisInputValidator,
+  analysisOutputValidator,
   assertAlertZeroContracts,
   flattenSteps,
   gateWorkflowId,
@@ -431,6 +433,44 @@ describe('AlertZero L2 deterministic evidence', () => {
       expect(() =>
         assertAnalysisExecution([stepWith(findings())], { ...expected, conclusive: false })
       ).not.toThrow();
+    });
+    it('reports a schema-invalid output once, not once per sub-assertion', () => {
+      const { rationale, ...invalid } = containedFindings();
+      expect(rationale).toBeDefined();
+      const schemaMessage = analysisOutputValidator.safeParse(invalid).error?.message ?? '';
+      expect(schemaMessage).not.toBe('');
+      let thrown = '';
+      try {
+        assertAnalysisExecution([stepWith(invalid)], expected);
+      } catch (error) {
+        thrown = (error as Error).message;
+      }
+      expect(thrown.split(schemaMessage)).toHaveLength(2);
+      expect(thrown).toBe(schemaMessage);
+    });
+  });
+  describe('assertBenignAnalysis', () => {
+    const benign = { ...findings(), verdict: 'not_an_incident' };
+    it('passes a benign verdict with no disruptive action', () => {
+      expect(() => assertBenignAnalysis(benign, [expected.endpointId])).not.toThrow();
+    });
+    it('fails a confirmed_incident verdict', () => {
+      expect(() =>
+        assertBenignAnalysis({ ...benign, verdict: 'confirmed_incident' }, [expected.endpointId])
+      ).toThrow(/Benign host labelled as an incident/);
+    });
+    it('fails a disruptive action on the benign fixture', () => {
+      expect(() =>
+        assertBenignAnalysis(
+          { ...benign, propose: true, recommendedActions: [isolateAction(expected.endpointId)] },
+          [expected.endpointId]
+        )
+      ).toThrow(/disruptive_action_on_inconclusive_investigation/);
+    });
+    it('reports the verdict failure together with the disruptive action', () => {
+      expect(() => assertBenignAnalysis(containedFindings(), [expected.endpointId])).toThrow(
+        /disruptive_action_on_inconclusive_investigation.*Benign host labelled as an incident/s
+      );
     });
   });
 });

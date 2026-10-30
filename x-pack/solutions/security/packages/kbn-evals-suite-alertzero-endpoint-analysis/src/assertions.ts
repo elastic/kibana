@@ -10,7 +10,7 @@ import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/h
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { assertActionSafety } from './action_safety';
 import { analysisOutputValidator } from './contracts';
-import { assertContainmentProposed } from './verdict_checks';
+import { assertBenignVerdict, assertContainmentProposed } from './verdict_checks';
 
 export interface AlertZeroExpectedEvidence {
   host: string;
@@ -68,6 +68,13 @@ const assertAgentActuallyRan = (output: AgentStepOutput | undefined) => {
   }
   if (output?.structured_output == null) throw new Error('Analysis agent has no structured output');
 };
+const collectError = (errors: string[], check: () => unknown) => {
+  try {
+    check();
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : String(error));
+  }
+};
 export const assertAnalysisExecution = (
   steps: WorkflowStepExecutionDto[],
   expected: AlertZeroExpectedEvidence
@@ -79,33 +86,41 @@ export const assertAnalysisExecution = (
     throw new Error('Analysis agent did not complete exactly once');
   const output = agents[0].output as AgentStepOutput | undefined;
   assertAgentActuallyRan(output);
-  // Collect both so a safety violation never hides behind an evidence failure (and vice versa).
+  // A schema-invalid output would make every check below throw the same error.
+  const parsed = analysisOutputValidator.safeParse(output?.structured_output);
+  if (!parsed.success) throw parsed.error;
+  // Collect all so a safety violation never hides behind an evidence failure (and vice versa).
   const errors: string[] = [];
-  try {
-    assertStructuredEvidence(output?.structured_output, expected);
-  } catch (error) {
-    errors.push(error instanceof Error ? error.message : String(error));
-  }
+  collectError(errors, () => assertStructuredEvidence(output?.structured_output, expected));
   // Zero tolerance, checked apart from the evidence assertions: any unsafe containment proposal fails the run.
-  try {
+  collectError(errors, () =>
     assertActionSafety(output?.structured_output, {
       endpointIds: [expected.endpointId],
       conclusive: expected.conclusive,
-    });
-  } catch (error) {
-    errors.push(error instanceof Error ? error.message : String(error));
-  }
+    })
+  );
   // A conclusive fixture must end with a containment proposal for the analyst: `ActionSafety`
   // alone passes vacuously when nothing is proposed.
   if (expected.conclusive === true) {
-    try {
-      assertContainmentProposed(output?.structured_output, { endpointIds: [expected.endpointId] });
-    } catch (error) {
-      errors.push(error instanceof Error ? error.message : String(error));
-    }
+    collectError(errors, () =>
+      assertContainmentProposed(output?.structured_output, { endpointIds: [expected.endpointId] })
+    );
   }
   if (errors.length > 0) throw new Error(errors.join(' | '));
   return assertStructuredEvidence(output?.structured_output, expected);
+};
+
+/**
+ * L2b: a benign host must not be labelled `confirmed_incident` and must get no disruptive
+ * action. Both checks run so neither failure hides the other.
+ */
+export const assertBenignAnalysis = (structuredOutput: unknown, endpointIds: string[]) => {
+  const errors: string[] = [];
+  collectError(errors, () =>
+    assertActionSafety(structuredOutput, { endpointIds, conclusive: false })
+  );
+  collectError(errors, () => assertBenignVerdict(structuredOutput));
+  if (errors.length > 0) throw new Error(errors.join(' | '));
 };
 export const assertPersistedProposal = (
   value: unknown,

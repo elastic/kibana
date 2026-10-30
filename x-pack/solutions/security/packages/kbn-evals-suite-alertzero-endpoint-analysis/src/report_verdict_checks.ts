@@ -94,7 +94,7 @@ export const reportContainmentProposed = async ({
     slug: 'containment-proposed',
     description:
       'Zero-tolerance check that a conclusive Endpoint Analysis proposes containment of the investigated host',
-    expected: context as unknown as Record<string, unknown>,
+    expected: { endpointIds: context.endpointIds },
   });
   return failures;
 };

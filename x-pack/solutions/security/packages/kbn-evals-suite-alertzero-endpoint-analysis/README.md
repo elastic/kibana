@@ -65,8 +65,8 @@ and logs one line.
 | `BenignVerdict` | Benign (L2b) | `verdict` is `confirmed_incident` (whatever actions were proposed) | `BenignVerdict: <pass\|fail> verdict=<v>` |
 
 `ContainmentProposed` is hard-asserted inside `assertAnalysisExecution`, so evidence, action-safety
-and containment failures are reported together. `BenignVerdict` is hard-asserted after
-`ActionSafety` in L2b. The `ActionSafety` log line also lists the recommended action types after
+and containment failures are reported together. `BenignVerdict` is hard-asserted together
+with `ActionSafety` in L2b (`assertBenignAnalysis`), so both failures are reported. The `ActionSafety` log line also lists the recommended action types after
 the `(conclusive=…)` suffix, e.g. `ActionSafety: 0 violations / 2 recommendedActions (conclusive=true) [isolate-host,kill-process]`.
 
 Each L3 run owns a UUID-scoped endpoint index, indicator and investigation, plus its own KI

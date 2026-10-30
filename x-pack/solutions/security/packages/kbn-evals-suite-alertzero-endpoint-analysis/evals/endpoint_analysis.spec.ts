@@ -23,13 +23,12 @@ import {
   runAllCleanups,
   seedAlertZeroEndpoint,
 } from '../src/runtime';
-import { assertActionSafety } from '../src/action_safety';
 import { reportActionSafety } from '../src/report_action_safety';
 import { reportAnalysisRunMetrics } from '../src/report_run_metrics';
 import { reportBenignVerdict, reportContainmentProposed } from '../src/report_verdict_checks';
-import { assertBenignVerdict } from '../src/verdict_checks';
 import {
   assertAnalysisExecution,
+  assertBenignAnalysis,
   assertEndpointForensicToolCall,
   assertPersistedAttachments,
   assertPersistedProposal,
@@ -151,15 +150,16 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
           structuredOutput: maliciousOutput,
           context: { endpointIds: [fixture.endpointId], conclusive: fixture.conclusive },
         });
-        // ActionSafety only fails on unsafe proposals; this fails a confirmed incident that
-        // proposes no containment of the seeded host. Hard-asserted in assertAnalysisExecution.
-        await reportContainmentProposed({
-          executorClient,
-          log,
-          caseName: 'L2/L3 malicious fixture',
-          structuredOutput: maliciousOutput,
-          context: { endpointIds: [fixture.endpointId] },
-        });
+        // Same gate as the hard assertion in assertAnalysisExecution: conclusive fixtures only.
+        if (fixture.conclusive === true) {
+          await reportContainmentProposed({
+            executorClient,
+            log,
+            caseName: 'L2/L3 malicious fixture',
+            structuredOutput: maliciousOutput,
+            context: { endpointIds: [fixture.endpointId] },
+          });
+        }
         await reportAnalysisRunMetrics({
           executorClient,
           log,
@@ -171,7 +171,6 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             'The rationale explains why the activity on the host is malicious and cites the seeded encoded command.',
             'Every timeline event describes activity on the investigated host, in chronological order.',
             'The malicious command IoC contains the seeded command; no IoC is invented beyond the evidence.',
-            'Containment (kill/isolate) of the investigated host is proposed.',
             'Any recommended containment targets only the investigated host and is justified by the rationale.',
           ]),
         });
@@ -300,11 +299,7 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             'No malicious IoC is reported.',
           ]),
         });
-        assertActionSafety(agentOutput?.structured_output, {
-          endpointIds: [fixture.endpointId],
-          conclusive: false,
-        });
-        assertBenignVerdict(agentOutput?.structured_output);
+        assertBenignAnalysis(agentOutput?.structured_output, [fixture.endpointId]);
       } finally {
         await runAllCleanups([
           () => runtime.cancelAll(),
