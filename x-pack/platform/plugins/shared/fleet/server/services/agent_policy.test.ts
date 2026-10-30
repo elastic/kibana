@@ -13,7 +13,7 @@ import { of } from 'rxjs';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { createSavedObjectClientMock } from '../mocks';
@@ -1125,6 +1125,7 @@ describe('Agent policy', () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
           id: 'package-1',
+          version: 'WzEsMV0=',
           policy_id: ['policy_1'],
           policy_ids: ['policy_1', 'int_policy_2'],
         },
@@ -1137,38 +1138,65 @@ describe('Agent policy', () => {
           id: 'package-3',
         },
       ] as any);
-      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
-        updatedPolicies: [{ id: 'package-1' }] as any,
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValue({
+        updatedPolicies: [{ id: 'package-1' }],
         failedPolicies: [],
       });
-      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+      await agentPolicyService.delete(soClient, esClient, 'policy_1', {
+        user: { username: 'test-user' } as AuthenticatedUser,
+      });
       expect(mockedPackagePolicyService.delete).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         ['package-2', 'package-3'],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        [
-          {
-            id: 'package-1',
+      expect(mockedPackagePolicyService.bulkUpdatePartial).toHaveBeenCalledWith(expect.anything(), [
+        {
+          id: 'package-1',
+          version: 'WzEsMV0=',
+          attributes: {
             policy_id: 'int_policy_2',
             policy_ids: ['int_policy_2'],
+            updated_at: expect.any(String),
+            updated_by: 'test-user',
           },
-        ]
-      );
+        },
+      ]);
+      expect(mockedPackagePolicyService.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should set updated_by to system on shared package policies when no user is passed', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          version: 'WzEsMV0=',
+          policy_ids: ['policy_1', 'int_policy_2'],
+        },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValue({
+        updatedPolicies: [{ id: 'package-1' }] as any,
+        failedPolicies: [],
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+
+      expect(mockedPackagePolicyService.bulkUpdatePartial).toHaveBeenCalledWith(expect.anything(), [
+        expect.objectContaining({
+          id: 'package-1',
+          attributes: expect.objectContaining({ updated_by: 'system' }),
+        }),
+      ]);
     });
 
     it('should remove the agent policy from shared package policies before deleting the others', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-1', version: 'WzEsMV0=', policy_ids: ['policy_1', 'policy_2'] },
         { id: 'package-2', policy_ids: ['policy_1'] },
       ] as any);
       const callOrder: string[] = [];
-      mockedPackagePolicyService.bulkUpdate.mockImplementationOnce(async () => {
-        callOrder.push('bulkUpdate');
+      mockedPackagePolicyService.bulkUpdatePartial.mockImplementationOnce(async () => {
+        callOrder.push('bulkUpdatePartial');
         return { updatedPolicies: [{ id: 'package-1' }] as any, failedPolicies: [] };
       });
       mockedPackagePolicyService.delete.mockImplementationOnce(async () => {
@@ -1178,20 +1206,20 @@ describe('Agent policy', () => {
 
       await agentPolicyService.delete(soClient, esClient, 'policy_1');
 
-      expect(callOrder).toEqual(['bulkUpdate', 'delete']);
+      expect(callOrder).toEqual(['bulkUpdatePartial', 'delete']);
     });
 
     it('should not delete the agent policy when removing it from shared package policies fails', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-1', version: 'WzEsMV0=', policy_ids: ['policy_1', 'policy_2'] },
         { id: 'package-2', policy_ids: ['policy_1'] },
       ] as any);
-      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValueOnce({
         updatedPolicies: [],
         failedPolicies: [
           {
-            packagePolicy: { id: 'package-1' } as any,
-            error: new FleetError('Package system-2.20.0 not found'),
+            update: { id: 'package-1', version: 'WzEsMV0=', attributes: {} },
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
           },
         ],
       });
@@ -1199,7 +1227,7 @@ describe('Agent policy', () => {
       esClient.deleteByQuery.mockClear();
 
       await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
-        'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: Package system-2.20.0 not found'
+        'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: version conflict'
       );
 
       expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
@@ -1207,14 +1235,34 @@ describe('Agent policy', () => {
       expect(soClient.delete).not.toHaveBeenCalled();
     });
 
-    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
+    it('should not change any package policy when a shared package policy has no version', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
       ] as any);
-      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+      mockedPackagePolicyService.bulkUpdatePartial.mockClear();
+      mockedPackagePolicyService.delete.mockClear();
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
+        'Cannot delete agent policy [policy_1]: shared package policy [package-1] has no version'
+      );
+
+      expect(mockedPackagePolicyService.bulkUpdatePartial).not.toHaveBeenCalled();
+      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', version: 'WzEsMV0=', policy_ids: ['policy_1', 'policy_2'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValueOnce({
         updatedPolicies: [],
         failedPolicies: [
-          { packagePolicy: { id: 'package-1' } as any, error: new FleetError('failed') },
+          {
+            update: { id: 'package-1', version: 'WzEsMV0=', attributes: {} },
+            error: { error: 'Conflict', message: 'failed', statusCode: 409 },
+          },
         ],
       });
 
