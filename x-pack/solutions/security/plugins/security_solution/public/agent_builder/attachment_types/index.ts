@@ -35,6 +35,11 @@ type UnknownAttachmentWithLabel = Attachment<
   { attachmentLabel?: string } & Record<string, unknown>
 >;
 
+type AlertsBatchAttachment = Attachment<
+  string,
+  { alertIds?: unknown[]; tags?: unknown[]; attachmentLabel?: string }
+>;
+
 interface AttachmentTypeConfig {
   type: SecurityAgentBuilderAttachments;
   label: string;
@@ -80,21 +85,22 @@ export const registerAttachmentUiDefinitions = ({
     ...createAttachmentTypeConfig(ALERT_ATTACHMENT_CONFIG.label, ALERT_ATTACHMENT_CONFIG.icon),
   });
 
-  attachments.addAttachmentType<Attachment<string, { alertIds?: unknown[] }>>(
-    SecurityAgentBuilderAttachments.alerts,
-    {
-      getLabel: (attachment) => {
-        const count = attachment.data?.alertIds?.length ?? 0;
-        return count > 0
-          ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
-              defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
-              values: { count },
-            })
-          : ALERTS_DEFAULT_LABEL;
-      },
-      getIcon: () => 'bell',
-    }
-  );
+  attachments.addAttachmentType<AlertsBatchAttachment>(SecurityAgentBuilderAttachments.alerts, {
+    getLabel: (attachment) => {
+      // The label renders synchronously, so a batch referenced by tag cannot count its alerts.
+      if (attachment.data?.tags?.length) {
+        return attachment.data.attachmentLabel ?? ALERTS_DEFAULT_LABEL;
+      }
+      const count = attachment.data?.alertIds?.length ?? 0;
+      return count > 0
+        ? i18n.translate('xpack.securitySolution.agentBuilder.attachments.alerts.countLabel', {
+            defaultMessage: '{count} {count, plural, one {alert} other {alerts}}',
+            values: { count },
+          })
+        : ALERTS_DEFAULT_LABEL;
+    },
+    getIcon: () => 'bell',
+  });
 };
 
 /**

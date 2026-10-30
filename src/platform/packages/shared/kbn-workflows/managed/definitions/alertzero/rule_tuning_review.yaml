@@ -128,6 +128,11 @@ consts:
   applied_tag: detection-watch:tuning-applied
   acknowledged_tag: detection-watch:tuning-acknowledged
   no_items: []
+  # Mirror the platform exception schema's maxItems for an exception's entries and
+  # for one entry's `values`. Applied by bound_exception_entries, not in the agent
+  # schema (see the note above exception_entries).
+  max_exception_entries: 100
+  max_exception_values: 1000
   # Mirrors ALERTS_BATCH_MAX_SIZE. `security.alerts` rejects a longer `alertIds`
   # list. The attachment shows the first 20 ids. The proposal text does not.
   alerts_per_attachment: 20
@@ -212,7 +217,7 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      fp_summary: "{% if inputs.total_alert_count > 0 %}Analysts closed {{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet.{% else %}Analysts closed {{ inputs.fp_count }} alerts as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
+      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) were judged false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are new since the last tuning review. Some were closed by analysts and some were classified by Alert Triage and may still be open.{% else %}{{ inputs.fp_count }} alerts were judged false positives, closed by analysts or classified by Alert Triage, in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
   # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
   # mode skips this step and goes directly to diagnosis.
@@ -229,19 +234,16 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-            # Raised before any diagnosis, so the comment's own heading is the only
-            # name this proposal has.
+            # Raised before any diagnosis, so there is no diagnosed title to name it by.
             title: Review rule for tuning
             comment: |-
-              **Review rule for tuning?**
-
               {{ steps.compose_evidence.output.rule_line }}
 
               **Why this rule was picked**
               {{ steps.compose_evidence.output.fp_summary }}
 
               **On approval**
-              If you approve, the agent studies these false positives and makes a tuning proposal. You must approve this second proposal before the agent changes the rule. If you dismiss, the alerts are marked as reviewed and the review ends.
+              If you approve, the agent studies these false positives and proposes a change to the rule. The rule changes only if you also approve that proposal. If you dismiss, the review ends. These false positives are not reviewed again. New false positives can start a new review.
             impact: low
             # No action, so no inherited category, and the queue drops an
             # uncategorised proposal. Grouped with the tuning proposal that follows.
@@ -273,7 +275,6 @@ steps:
                   updates:
                     status: closed
                     close_reason: other
-                    verdict: "Analyst declined the tuning review."
                 on-failure:
                   continue: true
 
@@ -385,15 +386,16 @@ steps:
         Use the [/investigate-rule](skill://investigate-rule) skill to investigate
         rule_id "{{ steps.fetch_rule.output.rule_id }}" ({{ steps.fetch_rule.output.name }}).
 
-        {{ inputs.fp_count }} alerts from this rule were closed as false positives
-        during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
+        {{ inputs.fp_count }} alerts from this rule were judged false positives
+        (closed by analysts, or classified by Alert Triage and possibly still open) during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
         {%- if inputs.fp_count > inputs.alert_ids.size %} (newest {{ inputs.alert_ids.size }} of {{ inputs.fp_count }}){%- endif %}:
         ["{{ inputs.alert_ids | join: '", "' }}"]
 
         Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
         tool, passing the rule's investigation_fields as additional_fields, and use
-        them as the confirmed false positives grounding the diagnosis; do not
-        re-derive the closed set. Return one structured tuning recommendation.
+        them as the false positives grounding the diagnosis, checking each alert's
+        status and tags before treating it as analyst-confirmed; do not
+        re-derive the set. Return one structured tuning recommendation.
 
         These ids are the whole dataset, so do not run the security.alerts queries:
         they would re-fetch alerts already in hand. Base the volume and entity
@@ -458,7 +460,9 @@ steps:
         to the recommendation; confidence is how sure you are that the change removes
         the false positives without losing detections.
 
-        Write every text field of the proposal in ASD-STE100 Simplified Technical English.
+        Write every text field of the proposal in ASD-STE100 Simplified Technical English:
+        sentences of 20 words or less, active voice, one topic for each sentence, no em
+        dashes. Write fp_pattern and reasoning as markdown.
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -478,14 +482,15 @@ steps:
               confidence:
                 type: string
                 enum: [low, medium, high]
-              # Bounds mirror the platform exception schema, which the action and
-              # the step validate against. An unbounded recommendation here is
-              # rejected when the proposal is created, so the review fails and the
-              # alerts wait for the next sweep instead of reaching an analyst.
+              # Field-level bounds mirror the platform exception schema, which the
+              # action and the step validate against. No maxItems on this array or on
+              # `values` on purpose: Gemini answers 400 to this schema when either cap
+              # is present next to the per-field bounds. Both caps are applied after
+              # parsing, in bound_exception_entries (consts.max_exception_entries and
+              # consts.max_exception_values), before any step consumes the entries.
               exception_entries:
                 type: array
                 minItems: 1
-                maxItems: 100
                 items:
                   oneOf:
                     - type: object
@@ -518,7 +523,6 @@ steps:
                             minLength: 1
                             maxLength: 1024
                           minItems: 1
-                          maxItems: 1000
                       required: [field, operator, values]
                     - type: object
                       properties:
@@ -654,6 +658,59 @@ steps:
   # can be backtested the same way a query change is below. Only the entries matter here;
   # eligibility to actually run the backtest is decided by can_preview_query_change, same
   # gate the query arm uses, since both reuse the same preview mechanism.
+  # The agent schema carries no maxItems (Gemini rejects the schema with either
+  # cap present, see the note above exception_entries), so a recommendation can
+  # exceed the platform bounds. Entries are ANDed, so an over-cap entry list or a
+  # sliced is_not_one_of values list would silently broaden the exception: the
+  # dropped constraints would make entities the recommendation excluded eligible
+  # for suppression. An oversized exception therefore fails the run (fail-closed,
+  # see reject_oversized_exception below) instead of being truncated.
+  - name: check_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      # Renders exactly "true" when the recommendation exceeds either platform
+      # bound, however many violations there are: the gate compares with == 'true',
+      # so per-violation output ("truetrue") would skip the fail-closed gate.
+      overflow: >-
+        {%- assign entries = steps.diagnose_rule.output.structured_output.exception_entries -%}{%- assign exceeded = false -%}{%- if entries.size > consts.max_exception_entries -%}{%- assign exceeded = true -%}{%- endif -%}{%- for entry in entries -%}{%- if entry.values != nil and entry.values.size > consts.max_exception_values -%}{%- assign exceeded = true -%}{%- endif -%}{%- endfor -%}{%- if exceeded -%}true{%- endif -%}
+
+  # Fail-closed: an oversized exception must never reach the filter step, the
+  # attachment, the proposal text or the action. The run fails before
+  # bound_exception_entries runs, so no truncated variant of the recommendation
+  # is proposed or persisted. The failing run leaves the alerts unreviewed (the
+  # tag steps are skipped), so the next sweep retries the rule.
+  - name: reject_oversized_exception
+    type: workflow.fail
+    if: "${{ steps.check_exception_entries.output.overflow == 'true' }}"
+    with:
+      message: "diagnose_rule proposed an exception exceeding the platform bounds (more than {{ consts.max_exception_entries }} entries or more than {{ consts.max_exception_values }} values in one entry); refusing to truncate it into a broader exception"
+
+  # Caps the agent's exception entries (and each entry's values) to the platform
+  # bounds. Reached only when check_exception_entries reported no overflow, so
+  # the caps never drop a constraint; they exist to normalize, not to truncate.
+  - name: bound_exception_entries
+    type: data.set
+    if: >-
+      ${{ steps.fetch_rule.error == null
+        and steps.fetch_rule.output.enabled == true
+        and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
+    with:
+      entries_json: |-
+        [
+        {%- for entry in steps.diagnose_rule.output.structured_output.exception_entries limit: consts.max_exception_entries -%}
+        {%- unless forloop.first -%},{%- endunless -%}
+        {%- if entry.values -%}
+        {"field":{{ entry.field | json }},"operator":{{ entry.operator | json }},"values":{{ entry.values | slice: 0, consts.max_exception_values | json }}}
+        {%- else -%}
+        {{ entry | json }}
+        {%- endif -%}
+        {%- endfor -%}
+        ]
+
   - name: build_exception_filter
     type: security.buildExceptionEntriesFilter
     if: >-
@@ -662,7 +719,7 @@ steps:
         and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
     with:
       existing_filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
-      entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+      entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
     on-failure:
       continue: true
 
@@ -743,6 +800,14 @@ steps:
         {%- assign period = cs | times: runs -%}
         {{- period | times: 1.0 | divided_by: ps | ceil | at_least: 1 -}}
 
+  # A rule with a data view searches the view's indices and ignores its own `index`,
+  # so only a rule without one has an index list worth checking.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.fetch_rule.output.data_view_id == blank }}"
+    with:
+      index: "${{ steps.fetch_rule.output.index | default: consts.no_items }}"
+
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
   # slot and a lost resume strands this run in waiting_for_child.
@@ -756,6 +821,13 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        # An ES|QL rule names its indices in the query and a data view rule in the
+        # view, so neither has an `index` to check; both rely on the preview's own
+        # missing-indices warning instead. The threat index is searched either way.
+        indices: >-
+          ${{ steps.probe_indices.output.index
+            | default: consts.no_items
+            | concat: steps.fetch_rule.output.threat_index }}
         preview_body:
           type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
@@ -888,14 +960,20 @@ steps:
       proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
+      unreadable_indices: "{{ steps.run_previews.output.unreadable_indices }}"
+      no_matching_indices: >-
+        ${{ steps.run_previews.output.no_matching_indices == true
+          or steps.run_previews.output.proposed_no_matching_indices == true }}
+      current_limit_reached: "${{ steps.run_previews.output.alert_limit_reached == true }}"
+      proposed_limit_reached: "${{ steps.run_previews.output.proposed_alert_limit_reached == true }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
   # keeps only what the decision needs. `ai.conversation.add_user_message` appends
   # a user_message without running the investigation agent. Called directly rather
   # than through the journal note workflow, because this run allows one synchronous child per wake-up
-  # cycle and the proposal gate below is that child. User messages render as plain
-  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
-  # analyst still sees it.
+  # cycle and the proposal gate below is that child. The chat renders markdown in
+  # user messages. If a note fails, compose_proposal keeps that text so the analyst
+  # still sees it.
   - name: post_fp_pattern
     type: ai.conversation.add_user_message
     if: >-
@@ -905,7 +983,8 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        False positive pattern for {{ steps.fetch_rule.output.name }}:
+        **False positive pattern**
+        **Rule:** {{ steps.fetch_rule.output.name }}
 
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
     on-failure:
@@ -920,7 +999,10 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+        **Tuning reasoning**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Change type:** `{{ steps.diagnose_rule.output.structured_output.change_type }}`
+        **Confidence:** {{ steps.diagnose_rule.output.structured_output.confidence }}
 
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
     on-failure:
@@ -936,26 +1018,24 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+        **Risk score change**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Severity:** `{{ steps.fetch_rule.output.severity }}` → `{{ steps.diagnose_rule.output.structured_output.proposed_severity }}`
 
-        A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
+        A risk score change does not change which alerts fire. If you approve, future alerts of the rule get the new severity. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
     on-failure:
       continue: true
 
   - name: compose_proposal
     type: data.set
     with:
-      # The same expression the comment's heading uses, lifted out so the
-      # proposal carries it as a field the queue can render as plain text.
       # Truncated because the diagnosis schema does not bound its title and the
-      # proposal step rejects anything longer; the comment below keeps it whole.
+      # proposal step rejects anything longer.
       title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
       comment: |-
-        **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
-
         {{ steps.compose_evidence.output.rule_line }}
 
-        **Why this rule needs tuning**
+        **Why this rule was picked**
         {{ steps.compose_evidence.output.fp_summary }}
         {% if inputs.fp_count > inputs.alert_ids.size %}
         The agent examined the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives. Your decision tags these {{ inputs.alert_ids.size }} alerts. The tag also removes the older alerts from future sweeps.
@@ -988,7 +1068,7 @@ steps:
         ```
         {% when "exception" %}
         Proposed exception:
-        {% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}
+        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
         - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
         {% endfor %}
         Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
@@ -1025,6 +1105,17 @@ steps:
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
+        {% if steps.record_preview_outcome.output.unreadable_indices != blank %}
+        The backtest did not run: the Rule Tuning worker's service account cannot read these rule indices: `{{ steps.record_preview_outcome.output.unreadable_indices }}`.
+        The worker reads only the default security index patterns, so a rule on other indices cannot be backtested.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {% elsif steps.record_preview_outcome.output.no_matching_indices == true %}
+        The backtest did not run: no index the Rule Tuning worker can read matches the rule's index patterns, so there is no data to count alerts in.
+        Either the indices do not exist, or the worker's service account cannot read them: it reads only the default security index patterns, so a rule on other indices cannot be backtested.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {% else %}
         The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions with interval {{ steps.fetch_rule.output.interval }}
         and lookback {{ steps.fetch_rule.output.from }}. It ends at the newest false positive, {{ inputs.last_fp_at }}.
         This time span is usually much shorter than the span of the false positives.
@@ -1032,20 +1123,25 @@ steps:
         The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
         {% endif %}
 
-        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
-        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{% if steps.record_preview_outcome.output.current_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{% if steps.record_preview_outcome.output.proposed_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        {% if steps.record_preview_outcome.output.current_limit_reached == true or steps.record_preview_outcome.output.proposed_limit_reached == true %}
+        A count marked "at least" stopped at the rule's maximum alerts per execution ({{ steps.fetch_rule.output.max_signals }}), so the real number is higher.
+        {% endif %}
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
+        {% endif %}
         {% else %}
         No backtest is available for this change.
         {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
         The preview does not support saved query rules or machine learning rules.
         {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
-        The preview cannot apply an exception to an ES|QL rule, which has no filters.
+        The backtest simulates an exception as a query filter, and an ES|QL rule has no place for one, so it cannot simulate this change. The rule itself still honours the exception when it runs.
+        To check the effect yourself, ask the agent in this investigation to preview the rule's query with the exception's conditions excluded.
         {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
         The agent could not convert the proposed exception into a preview filter.
         {% else %}
@@ -1126,7 +1222,7 @@ steps:
               data:
                 name: "Tuning: {{ steps.fetch_rule.output.name }}"
                 description: "Exception proposed by the rule tuning workflow after reviewing {{ inputs.fp_count }} false-positive alerts."
-                entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
               description: "Proposed exception for rule: {{ steps.fetch_rule.output.name }}"
               render_inline: true
             on-failure:
@@ -1147,7 +1243,7 @@ steps:
                   name: "Tuning: {{ steps.fetch_rule.output.name }}"
                   description: "Added by the rule tuning workflow after {{ inputs.fp_count }} false positives were reviewed."
                   # `${{ }}` keeps the entries as objects.
-                  entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
+                  entries: "${{ steps.bound_exception_entries.output.entries_json | json_parse }}"
                 # Same as a query edit: an exception changes how many alerts the
                 # rule produces, so it can lose a detection. Re-ranking cannot,
                 # which is why the risk score arm is lower.
@@ -1366,9 +1462,6 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        # No raw change type: the default arm accepts values the arms do not
-        # name, and an unrecognised one would leave a gap in the sentence.
-        verdict: "Analyst approved the tuning proposal."
     on-failure:
       continue: true
 
@@ -1392,7 +1485,6 @@ steps:
       updates:
         status: closed
         close_reason: other
-        verdict: "The tuning proposal was dismissed."
     on-failure:
       continue: true
 
@@ -1452,7 +1544,8 @@ steps:
           and steps.propose_manual.output.decision != 'approved'
           and steps.resolve_applied.output.landed != true }}
       backtest_ran: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true }}"
-      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
+      # A proposed count that stopped at max_signals is a floor, so it cannot show a reduction.
+      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_limit_reached != true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
       rule_unavailable: "${{ steps.fetch_rule.error != null or steps.fetch_rule.output.enabled != true }}"
       # The rule's own type; the step maps it to the event's vocabulary.
       rule_type: "{{ steps.fetch_rule.output.type }}"

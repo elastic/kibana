@@ -8,6 +8,8 @@ import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
+import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type { ProcessingStepPosition } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import type {
   CanvasCreateHistoryHandlers,
   CanvasFlyoutKind,
@@ -102,6 +104,10 @@ export const useCanvasRoutingFlyout = () => {
   return useCanvasStateSelector((state) => state.context.editingRoute);
 };
 
+export const useCanvasProcessingFlyout = () => {
+  return useCanvasStateSelector((state) => state.context.processingFlyout);
+};
+
 export const useCanvasEvents = () => {
   const service = CanvasStateContext.useActorRef();
 
@@ -134,6 +140,15 @@ export const useCanvasEvents = () => {
       },
       closeRoutingFlyout: () => {
         service.send({ type: 'routing.edit.close' });
+      },
+      openProcessingFlyout: (slot: ProcessingNodeRef, position?: ProcessingStepPosition) => {
+        service.send({ type: 'processing.open', slot, position });
+      },
+      openLineProcessingFlyout: (line: UnitLine) => {
+        service.send({ type: 'processing.open', line });
+      },
+      closeProcessingFlyout: () => {
+        service.send({ type: 'processing.close' });
       },
     }),
     [service]
