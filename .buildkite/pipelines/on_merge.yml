@@ -1,6 +1,8 @@
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
+  # off | shadow; shadow records what selective testing would run while every suite still runs in full.
+  ON_MERGE_SELECTIVE_MODE: 'shadow'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -18,8 +20,10 @@ steps:
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
+    key: pick_test_group_run_order
+    depends_on: pre_build
     agents:
-      image: family/kibana-minimal-ubuntu-2604
+      image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -37,19 +41,6 @@ steps:
 
   - wait: ~
     depends_on: pre_build
-
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    depends_on:
-      - terrazzo-initial-pipeline-upload
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-highcpu-8
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution

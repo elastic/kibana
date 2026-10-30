@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 import { coreServices, dataService, serverlessService } from '../../services/kibana_services';
 import { getDashboardBreadcrumb } from '../_dashboard_app_strings';
@@ -53,13 +54,8 @@ export const DashboardListingPage = ({
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      try {
-        const isInNoDataState = await isDashboardAppInNoDataState();
-        if (isMounted) setShowNoDataPage(isInNoDataState);
-      } catch (error) {
-        // show the listing if the no data state can not be determined
-        if (isMounted) setShowNoDataPage(false);
-      }
+      const isInNoDataState = await isDashboardAppInNoDataState();
+      setShowNoDataPage(isInNoDataState && isMounted);
     })();
     return () => {
       isMounted = false;
@@ -139,6 +135,24 @@ export const DashboardListingPage = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Both feed `DashboardListing`'s tab definitions; an unstable identity there remounts the active tab.
+  const goToDashboard = useCallback(
+    (id?: string, viewMode?: ViewMode) => {
+      redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
+    },
+    [redirectTo]
+  );
+
+  // Rebuilt per router render, and URL-synced search triggers one per keystroke.
+  const kbnUrlStateStorageRef = useRef(kbnUrlStateStorage);
+  kbnUrlStateStorageRef.current = kbnUrlStateStorage;
+
+  const getDashboardUrl = useCallback(
+    (id: string, timeRestore: boolean) =>
+      getDashboardListItemLink(kbnUrlStateStorageRef.current, id, timeRestore),
+    []
+  );
+
   if (showNoDataPage === undefined || isFindingTitle) {
     return null;
   }
@@ -152,12 +166,8 @@ export const DashboardListingPage = ({
         <DashboardListing
           useSessionStorageIntegration={true}
           initialFilter={initialFilter ?? redirectTitle ?? ''}
-          goToDashboard={(id, viewMode) => {
-            redirectTo({ destination: 'dashboard', id, editMode: viewMode === 'edit' });
-          }}
-          getDashboardUrl={(id, timeRestore) => {
-            return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
-          }}
+          goToDashboard={goToDashboard}
+          getDashboardUrl={getDashboardUrl}
           getTabs={getListingTabs}
         />
       )}

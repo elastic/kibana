@@ -13,10 +13,14 @@ import type { UsePackageIconType } from '../../../../../hooks';
 import { usePackageIconType } from '../../../../../hooks';
 import { Loading } from '../../../../../components';
 
+// Width in px of the icon panel: a 6x base icon plus XL padding on both sides.
+// Exported so layouts that sit beside the panel can stay aligned with it.
+export const getIconPanelWidth = (sizeBase: string, sizeXL: string) =>
+  parseFloat(sizeBase) * 6 + parseFloat(sizeXL) * 2;
+
 const Panel = styled(EuiPanel)`
   padding: ${(props) => props.theme.eui.euiSizeXL};
-  width: ${(props) =>
-    parseFloat(props.theme.eui.euiSize) * 6 + parseFloat(props.theme.eui.euiSizeXL) * 2}px;
+  width: ${(props) => getIconPanelWidth(props.theme.eui.euiSize, props.theme.eui.euiSizeXL)}px;
   svg,
   img {
     height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
