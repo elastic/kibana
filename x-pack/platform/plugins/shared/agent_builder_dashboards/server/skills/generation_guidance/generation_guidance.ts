@@ -29,7 +29,7 @@ When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHA
 
 The tool schema describes each field. The rules below cover what the schema cannot express.
 
-Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool applies them together, so each change is checked against the dashboard as it was before the call. Place panels in a new section in the same call that creates it.
+Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool checks each change against the dashboard as it was before the call and against the rest of the call, then applies the changes one by one: failed ones are listed in \`failures\` and the rest are kept. Place panels in a new section in the same call that creates it.
 
 For a new dashboard, set both \`title\` and \`description\`.
 

@@ -141,7 +141,9 @@ const toEditResolutionRequest = (
       esql,
       chartType,
       preserveESQL,
-      applyChartRules: content.renderer === 'vega' ? undefined : content.applyChartRules,
+      // Chart rules are Lens-only, so a Vega panel edited with `renderer` omitted ignores them.
+      applyChartRules:
+        renderer === 'vega' || content.renderer === 'vega' ? undefined : content.applyChartRules,
     },
   };
 };
