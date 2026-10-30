@@ -41,7 +41,7 @@ jest.mock('./common/resolve_index_scope', () => ({
 
 jest.mock('./common/match_hunt_datasets', () => ({
   ...jest.requireActual('./common/match_hunt_datasets'),
-  matchDatasetsWithModel: jest.fn().mockResolvedValue(undefined),
+  matchDatasetsWithModel: jest.fn().mockResolvedValue({ status: 'empty' }),
 }));
 
 jest.mock('./common/load_report_context', () => ({
@@ -1946,7 +1946,7 @@ describe('huntCoordinator', () => {
     beforeEach(() => {
       mockT2.mockClear();
       mockModelMatch.mockClear();
-      mockModelMatch.mockResolvedValue(undefined);
+      mockModelMatch.mockResolvedValue({ status: 'empty' });
     });
 
     it('unions the report match, the indices Tier 1 hit, and the actionable indices, and records each source', async () => {
@@ -2035,6 +2035,7 @@ describe('huntCoordinator', () => {
       });
       mockT1.mockResolvedValueOnce(tier1Clean());
       mockModelMatch.mockResolvedValueOnce({
+        status: 'matched',
         matches: [oktaDataset],
         confidence: 0.9,
         scored: [{ dataset: 'okta.system', confidence: 0.9 }],

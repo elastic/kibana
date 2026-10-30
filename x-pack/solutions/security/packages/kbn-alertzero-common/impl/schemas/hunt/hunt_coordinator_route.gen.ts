@@ -231,6 +231,15 @@ export const HuntCoordinatorResult = lazySchema(() =>
       .optional(),
     tier2_skipped_reason: z.string().optional(),
     /**
+     * Why Tier 2 was skipped, when the reason alone is ambiguous. Set when no_inference means the dataset-match model call failed rather than that no model was configured.
+     */
+    tier2_skip_detail: z
+      .string()
+      .optional()
+      .describe(
+        'Why Tier 2 was skipped, when the reason alone is ambiguous. Set when no_inference means the dataset-match model call failed rather than that no model was configured.'
+      ),
+    /**
      * Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.
      */
     unavailable_model_tiers: z

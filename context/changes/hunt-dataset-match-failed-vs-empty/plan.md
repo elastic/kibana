@@ -394,24 +394,24 @@ scope unless product asks for a one-off.
 
 #### Automated
 
-- [x] 1.1 Match unit tests pass for matched / empty / failed
-- [x] 1.2 No collapsed `undefined` returns for the three mapped paths
+- [x] 1.1 Match unit tests pass for matched / empty / failed — e88595a5cce4
+- [x] 1.2 No collapsed `undefined` returns for the three mapped paths — e88595a5cce4
 
 #### Manual
 
-- [x] 1.3 Diff review: only catch → failed; empty-input and filtered-empty → empty
+- [x] 1.3 Diff review: only catch → failed; empty-input and filtered-empty → empty — e88595a5cce4
 
 ### Phase 2: Propagate failure to coordinator and narrative
 
 #### Automated
 
-- [ ] 2.1 Resolve / narrative / related jest pass
-- [ ] 2.2 alertzero type_check passes
+- [x] 2.1 Resolve / narrative / related jest pass
+- [x] 2.2 alertzero type_check passes
 
 #### Manual
 
-- [ ] 2.3 Guard order: failed before missing-model and no_tier2_targets
-- [ ] 2.4 Narrative does not blame missing Efficient when a match model was selected and failed
+- [x] 2.3 Guard order: failed before missing-model and no_tier2_targets
+- [x] 2.4 Narrative does not blame missing Efficient when a match model was selected and failed
 
 ### Phase 3: Regression tests, live repro, gates, PR
 
