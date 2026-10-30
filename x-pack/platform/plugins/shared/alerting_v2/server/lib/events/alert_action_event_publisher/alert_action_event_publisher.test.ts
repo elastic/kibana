@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { EventBus } from '../event_bus';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createAlertActionEventPublisher } from './alert_action_event_publisher.mock';
@@ -66,11 +65,10 @@ describe('AlertActionEventPublisher', () => {
 
   let publisher: AlertActionEventPublisher;
   let eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
-  let mockLogger: jest.Mocked<Logger>;
   let request: KibanaRequest;
 
   beforeEach(() => {
-    ({ publisher, eventBus, mockLogger } = createAlertActionEventPublisher());
+    ({ publisher, eventBus } = createAlertActionEventPublisher());
     request = httpServerMock.createKibanaRequest();
   });
 
@@ -357,27 +355,6 @@ describe('AlertActionEventPublisher', () => {
       ]);
 
       expect(publishedOrigin()).toEqual({ actor: 'internal', channel: 'system' });
-    });
-  });
-
-  describe('publish failures', () => {
-    it('logs and continues when publishing a domain event throws', () => {
-      eventBus.publish.mockImplementation(() => {
-        throw new Error('bus down');
-      });
-
-      expect(() =>
-        publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })])
-      ).not.toThrow();
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to publish alert action domain event',
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_PUBLISH_FAILED,
-          }),
-        })
-      );
     });
   });
 });

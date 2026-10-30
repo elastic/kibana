@@ -76,9 +76,7 @@ export const alertActionAppliedTelemetryDataSchema = lazySchema(() =>
       .int()
       .min(1)
       .max(MAX_BULK_ITEMS)
-      .describe(
-        'Number of successfully applied alerts for this action, space, and rule. A bulk call that spans rules reports one event per rule.'
-      ),
+      .describe('Each applied alert is reported as its own event, so this count is 1.'),
   })
 );
 

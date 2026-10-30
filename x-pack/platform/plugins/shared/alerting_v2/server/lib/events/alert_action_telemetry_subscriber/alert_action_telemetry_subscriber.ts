@@ -7,7 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -15,8 +14,8 @@ import {
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { EbtServiceToken } from '../../services/ebt_service/tokens';
 import {
-  reportAppliedAlertActions,
-  type AppliedAlertAction,
+  ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE,
+  buildAlertActionAppliedEventData,
 } from '../../telemetry/alert_action_ebt_event';
 import {
   AlertingDomainEventBusToken,
@@ -61,17 +60,12 @@ const REPORTED_ALERT_ACTION_EVENT_TYPES = Object.keys(ACTION_TYPE_BY_DOMAIN_EVEN
  * Singleton bus subscriber that reports alert-action domain events as
  * event-based telemetry (EBT) through the {@link EbtServiceContract}.
  *
- * The bus delivers one event per alert. Telemetry is one event per action
- * type, space, and rule, so this subscriber buffers the events delivered in
- * one turn and reports them on the next `setImmediate`. `alert_count` is that
- * group's size. Assign and clear-assignee share `assign`.
+ * One domain event is one telemetry event. Assign and clear-assignee share
+ * `assign`. `rule_id` is omitted when the alert has no rule id.
  */
 @injectable()
 export class AlertActionTelemetrySubscriber {
   #subscriptions: Subscription[] = [];
-  #pending: AppliedAlertAction[] = [];
-  #flushScheduled = false;
-  #accepting = false;
 
   private readonly logger: LoggerServiceContract;
 
@@ -93,21 +87,16 @@ export class AlertActionTelemetrySubscriber {
       return;
     }
 
-    this.#accepting = true;
-
     for (const eventType of REPORTED_ALERT_ACTION_EVENT_TYPES) {
       this.#subscriptions.push(
         this.bus.subscribe<AlertActionEvent>(eventType, (event, context) =>
-          this.#enqueue(event, context)
+          this.#reportAlertAction(event, context)
         )
       );
     }
   }
 
   public stop(): void {
-    this.#accepting = false;
-    this.#pending = [];
-
     for (const subscription of this.#subscriptions) {
       subscription.unsubscribe();
     }
@@ -115,45 +104,16 @@ export class AlertActionTelemetrySubscriber {
     this.#subscriptions = [];
   }
 
-  #enqueue(event: AlertActionEvent, { origin }: AlertingPublisherContext): void {
-    if (!this.#accepting) {
-      return;
-    }
+  #reportAlertAction(event: AlertActionEvent, { origin }: AlertingPublisherContext): void {
+    const actionType = ACTION_TYPE_BY_DOMAIN_EVENT[event.type];
 
-    this.#pending.push({
-      actionType: ACTION_TYPE_BY_DOMAIN_EVENT[event.type],
-      spaceId: event.spaceId,
-      ruleId: event.ruleId,
-      origin,
-    });
-
-    if (this.#flushScheduled) {
-      return;
-    }
-
-    this.#flushScheduled = true;
-    // Handlers for one publish run in the same turn. Reporting on the next
-    // turn groups them into one EBT event per action type, space, and rule.
-    setImmediate(() => this.#flush());
-  }
-
-  #flush(): void {
-    this.#flushScheduled = false;
-    const pending = this.#pending;
-    this.#pending = [];
-
-    if (!this.#accepting || pending.length === 0) {
-      return;
-    }
-
-    try {
-      reportAppliedAlertActions(this.ebtService, pending);
-    } catch (error) {
-      this.logger.error({
-        message: () => 'Failed to report alert action telemetry',
-        error,
-        code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
-      });
-    }
+    this.ebtService.reportEvent(
+      ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE[actionType],
+      buildAlertActionAppliedEventData({
+        spaceId: event.spaceId,
+        ruleId: event.ruleId,
+        origin,
+      })
+    );
   }
 }

@@ -351,12 +351,6 @@ export const ALERTING_LOG_CODES = {
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
   /**
-   * Publishing one alert-action domain event failed. The action is already
-   * persisted, so the publisher logs the failure and continues with the rest
-   * of the batch.
-   */
-  EVENTS_ALERT_ACTION_PUBLISH_FAILED: 'EVENTS_ALERT_ACTION_PUBLISH_FAILED',
-  /**
    * The action policy client could not read the policies around a bulk write
    * or a bulk delete. The write already succeeded; its domain events are
    * published with the policy ids only, so subscribers receive no policy fields.

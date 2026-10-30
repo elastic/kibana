@@ -92,17 +92,9 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
     const actor = request.isFakeRequest ? 'internal' : 'user';
     const context: AlertingPublisherContext = { request, origin: toEventOrigin(actor, request) };
     for (const action of actions) {
-      try {
-        const event = this.buildEvent(action);
-        if (event) {
-          this.eventBus.publish(event, context);
-        }
-      } catch (error) {
-        this.logger.error({
-          message: () => 'Failed to publish alert action domain event',
-          error,
-          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_PUBLISH_FAILED,
-        });
+      const event = this.buildEvent(action);
+      if (event) {
+        this.eventBus.publish(event, context);
       }
     }
   }

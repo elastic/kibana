@@ -8,7 +8,6 @@
 import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
 import type { EventOrigin } from '../event_origin/origin_schemas';
-import type { EbtServiceContract } from '../services/ebt_service/ebt_service';
 import {
   ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE,
   ALERT_ACTIVATE_ACTION_APPLIED_EBT_EVENT_TYPE,
@@ -97,8 +96,7 @@ const alertActionAppliedEventSchema: EventTypeOpts<AlertActionAppliedEbtData>['s
   alert_count: {
     type: 'long',
     _meta: {
-      description:
-        'Number of successfully applied alerts for this action, space, and rule. A bulk call that spans rules reports one event per rule.',
+      description: 'Each applied alert is reported as its own event, so this count is 1.',
       optional: false,
     },
   },
@@ -111,88 +109,14 @@ export const alertActionTelemetryEvents: Array<EventTypeOpts<AlertActionAppliedE
     schema: alertActionAppliedEventSchema,
   }));
 
-/** An applied alert action reduced to the fields telemetry is allowed to read. */
-export interface AppliedAlertAction {
-  readonly actionType: string;
-  readonly spaceId: string;
-  readonly ruleId: string | null;
-  readonly origin: EventOrigin;
-}
-
-interface AlertActionTelemetryGroup {
-  actionType: AlertEpisodeActionType;
+/** Projects an alert-action telemetry payload. `rule_id` is omitted when it is null. */
+export const buildAlertActionAppliedEventData = (event: {
   spaceId: string;
   ruleId: string | null;
   origin: EventOrigin;
-  alertCount: number;
-}
-
-const reportedActionTypes: ReadonlySet<string> = new Set(REPORTED_ALERT_ACTION_TYPES);
-
-const isReportedActionType = (actionType: string): actionType is AlertEpisodeActionType =>
-  reportedActionTypes.has(actionType);
-
-/**
- * One event per action type, space, rule, and origin. A bulk call that spans
- * rules reports one event per rule, and `alert_count` is that group's size, so
- * `rule_id` stays the rule that produced those alerts. Assign and
- * clear-assignee share `assign`.
- *
- * Action types outside {@link REPORTED_ALERT_ACTION_TYPES} are omitted, so
- * `alert_count` counts reported actions only.
- */
-const groupAppliedAlertActions = (
-  actions: readonly AppliedAlertAction[]
-): AlertActionTelemetryGroup[] => {
-  const groups = new Map<string, AlertActionTelemetryGroup>();
-
-  for (const action of actions) {
-    if (!isReportedActionType(action.actionType)) {
-      continue;
-    }
-
-    const { actor, channel, app = '' } = action.origin;
-    // Action types, space ids, rule ids, and origin fields cannot contain NUL.
-    const key = `${action.actionType}\0${action.spaceId}\0${
-      action.ruleId ?? ''
-    }\0${actor}\0${channel}\0${app}`;
-    const existing = groups.get(key);
-    if (existing) {
-      existing.alertCount += 1;
-      continue;
-    }
-
-    groups.set(key, {
-      actionType: action.actionType,
-      spaceId: action.spaceId,
-      ruleId: action.ruleId,
-      origin: action.origin,
-      alertCount: 1,
-    });
-  }
-
-  return [...groups.values()];
-};
-
-/** Projects an alert-action telemetry payload. `rule_id` is omitted when it is null. */
-export const buildAlertActionAppliedEventData = (
-  group: Pick<AlertActionTelemetryGroup, 'spaceId' | 'ruleId' | 'origin' | 'alertCount'>
-): AlertActionAppliedEbtData => ({
-  space_id: group.spaceId,
-  ...(group.ruleId != null ? { rule_id: group.ruleId } : {}),
-  origin: group.origin,
-  alert_count: group.alertCount,
+}): AlertActionAppliedEbtData => ({
+  space_id: event.spaceId,
+  ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
+  origin: event.origin,
+  alert_count: 1,
 });
-
-/** Reports one EBT event per action type, space, rule, and origin. */
-export const reportAppliedAlertActions = (
-  ebtService: EbtServiceContract,
-  actions: readonly AppliedAlertAction[]
-): void => {
-  for (const group of groupAppliedAlertActions(actions)) {
-    ebtService.reportEvent(
-      ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE[group.actionType],
-      buildAlertActionAppliedEventData(group)
-    );
-  }
-};

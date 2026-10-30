@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
@@ -63,15 +62,9 @@ const acked = (overrides: Partial<AlertActionEventEnvelope> = {}): EpisodeAckedE
   ...overrides,
 });
 
-/** One turn for the subscriber's grouped flush, which runs on `setImmediate`. */
-const flushAsync = async (): Promise<void> => {
-  await new Promise((resolve) => setImmediate(resolve));
-};
-
 describe('AlertActionTelemetrySubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
   let ebtService: jest.Mocked<EbtServiceContract>;
-  let mockLogger: jest.Mocked<Logger>;
   let subscriber: AlertActionTelemetrySubscriber;
   let context: AlertingPublisherContext;
 
@@ -86,8 +79,7 @@ describe('AlertActionTelemetrySubscriber', () => {
   beforeEach(() => {
     bus = createEventBusMock<AlertingDomainEvent, AlertingPublisherContext>();
     ebtService = createMockEbtService();
-    const { loggerService, mockLogger: logger } = createLoggerService();
-    mockLogger = logger;
+    const { loggerService } = createLoggerService();
     subscriber = new AlertActionTelemetrySubscriber(bus, ebtService, loggerService);
     context = {
       request: httpServerMock.createKibanaRequest() as KibanaRequest,
@@ -116,11 +108,10 @@ describe('AlertActionTelemetrySubscriber', () => {
   describe('event dispatch', () => {
     const apiOrigin = { actor: 'user', channel: 'api' } as const;
 
-    it('reports one event with alert_count 1 for a single action', async () => {
+    it('reports one event per triggered action', async () => {
       subscriber.start();
 
       await handler()(acked(), context);
-      await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
@@ -134,35 +125,25 @@ describe('AlertActionTelemetrySubscriber', () => {
       );
     });
 
-    it('reports one event whose alert_count is the number of actions for one rule', async () => {
+    it('reports each alert in a batch as its own event', async () => {
       subscriber.start();
 
-      await handler()(acked({ episodeId: 'episode-1' }), context);
-      await handler()(acked({ episodeId: 'episode-2' }), context);
-      await handler()(acked({ episodeId: 'episode-3' }), context);
-      await flushAsync();
-
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ rule_id: 'rule-1', alert_count: 3 })
-      );
-    });
-
-    it('reports one event per rule in a batch', async () => {
-      subscriber.start();
-
-      await handler()(acked({ ruleId: 'rule-a', episodeId: 'episode-1' }), context);
-      await handler()(acked({ ruleId: 'rule-a', episodeId: 'episode-2' }), context);
-      await handler()(acked({ ruleId: 'rule-b', episodeId: 'episode-3' }), context);
-      await flushAsync();
+      await handler()(acked({ episodeId: 'episode-1', ruleId: 'rule-a' }), context);
+      await handler()(acked({ episodeId: 'episode-2', ruleId: 'rule-a' }), context);
+      await handler()(acked({ episodeId: 'episode-3', ruleId: 'rule-b' }), context);
 
       expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
         {
           space_id: 'default',
           rule_id: 'rule-a',
           origin: apiOrigin,
-          alert_count: 2,
+          alert_count: 1,
+        },
+        {
+          space_id: 'default',
+          rule_id: 'rule-a',
+          origin: apiOrigin,
+          alert_count: 1,
         },
         {
           space_id: 'default',
@@ -173,7 +154,7 @@ describe('AlertActionTelemetrySubscriber', () => {
       ]);
     });
 
-    it('reports assign and clear-assignee as one assign event', async () => {
+    it('reports assign and clear-assignee as separate assign events', async () => {
       subscriber.start();
 
       await handler(EPISODE_ASSIGNED_EVENT_TYPE)(
@@ -193,16 +174,26 @@ describe('AlertActionTelemetrySubscriber', () => {
         },
         context
       );
-      await flushAsync();
 
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
+      expect(ebtService.reportEvent).toHaveBeenCalledTimes(2);
+      expect(ebtService.reportEvent).toHaveBeenNthCalledWith(
+        1,
         ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.assign,
         {
           space_id: 'default',
           rule_id: 'rule-1',
           origin: apiOrigin,
-          alert_count: 2,
+          alert_count: 1,
+        }
+      );
+      expect(ebtService.reportEvent).toHaveBeenNthCalledWith(
+        2,
+        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.assign,
+        {
+          space_id: 'default',
+          rule_id: 'rule-1',
+          origin: apiOrigin,
+          alert_count: 1,
         }
       );
     });
@@ -211,7 +202,6 @@ describe('AlertActionTelemetrySubscriber', () => {
       subscriber.start();
 
       await handler()(acked({ ruleId: null }), context);
-      await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
@@ -230,75 +220,10 @@ describe('AlertActionTelemetrySubscriber', () => {
         ...context,
         origin: { actor: 'internal', channel: 'system' },
       });
-      await flushAsync();
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
         expect.objectContaining({ origin: { actor: 'internal', channel: 'system' } })
-      );
-    });
-
-    it('does not merge events that arrive in different turns', async () => {
-      subscriber.start();
-
-      await handler()(acked({ episodeId: 'episode-1' }), context);
-      await flushAsync();
-      await handler()(acked({ episodeId: 'episode-2' }), context);
-      await flushAsync();
-
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(2);
-      expect(ebtService.reportEvent).toHaveBeenNthCalledWith(
-        1,
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ alert_count: 1 })
-      );
-      expect(ebtService.reportEvent).toHaveBeenNthCalledWith(
-        2,
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ alert_count: 1 })
-      );
-    });
-
-    it('keeps events with different origins in separate reports', async () => {
-      subscriber.start();
-
-      await handler()(acked({ episodeId: 'episode-1' }), context);
-      await handler()(acked({ episodeId: 'episode-2' }), {
-        ...context,
-        origin: { actor: 'internal', channel: 'system' },
-      });
-      await flushAsync();
-
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(2);
-      expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
-        expect.objectContaining({ origin: apiOrigin, alert_count: 1 }),
-        expect.objectContaining({
-          origin: { actor: 'internal', channel: 'system' },
-          alert_count: 1,
-        }),
-      ]);
-    });
-
-    it('logs a telemetry failure and does not throw', async () => {
-      const failure = new Error('telemetry down');
-      ebtService.reportEvent.mockImplementation(() => {
-        throw failure;
-      });
-      subscriber.start();
-
-      await handler()(acked(), context);
-      await flushAsync();
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to report alert action telemetry',
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
-          }),
-          error: expect.objectContaining({
-            stack_trace: expect.stringContaining('telemetry down'),
-          }),
-        })
       );
     });
   });
@@ -324,15 +249,6 @@ describe('AlertActionTelemetrySubscriber', () => {
 
     it('is safe to call when no subscriptions are active', () => {
       expect(() => subscriber.stop()).not.toThrow();
-    });
-
-    it('drops a buffered batch that has not been reported yet', async () => {
-      subscriber.start();
-      await handler()(acked(), context);
-      subscriber.stop();
-      await flushAsync();
-
-      expect(ebtService.reportEvent).not.toHaveBeenCalled();
     });
   });
 });
