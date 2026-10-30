@@ -1076,8 +1076,6 @@ steps:
 
                   Nothing was proposed. The investigation is closed and the gap will not be checked again.
 
-          # Verdicts are capped at 10,000 characters, and a longer one fails the close, so
-          # the reason is cut to 2000.
           - name: close_investigation_no_rule
             type: ai.conversation.metadata.patch
             with:
@@ -1085,7 +1083,6 @@ steps:
               updates:
                 status: closed
                 close_reason: other
-                verdict: "No rule could be drafted for the gap. {{ steps.run_rule_creation.output.skip_reason | truncate: 2000 }}"
             on-failure:
               continue: true
 
@@ -1119,7 +1116,6 @@ steps:
 
                   Nothing was proposed. The gap stays pending, and the next sweep tries again.
 
-          # Cut the reason as in `close_investigation_no_rule`.
           - name: close_investigation_retry
             type: ai.conversation.metadata.patch
             with:
@@ -1127,7 +1123,6 @@ steps:
               updates:
                 status: closed
                 close_reason: other
-                verdict: "No usable rule was drafted. The next sweep tries again. {{ steps.run_rule_creation.output.skip_reason | truncate: 2000 }}"
             on-failure:
               continue: true
 
