@@ -129,10 +129,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
           maxRetriesReached,
         });
 
-        // `...state` deliberately keeps the accumulated `combinedRefinements`: this attempt produced
-        // no content, so there is nothing to add and nothing to invalidate. The catch block below
-        // follows the same rule via getCombinedAfterFailedAttempt, so an empty completion leaves the
-        // same state whether the LLM guard threw or this node noticed it.
+        // keeps the accumulated text; same rule as the catch block (getCombinedAfterFailedAttempt)
         return {
           ...state,
           insights: useUnrefinedResults ? unrefinedResults : null,
@@ -249,9 +246,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
-        // the failure produced no content; getCombinedAfterFailedAttempt then keeps the accumulated
-        // refinements instead of dropping them (see its doc comment).
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
         combinedRefinements: getCombinedAfterFailedAttempt({
           combinedGenerations: combinedRefinements,
           combinedResponse,

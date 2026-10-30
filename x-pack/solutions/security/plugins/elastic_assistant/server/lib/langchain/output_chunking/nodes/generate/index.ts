@@ -174,9 +174,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
-        // the failure produced no content (for example an empty completion); keep the accumulated
-        // generations instead of dropping them.
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
         combinedGenerations: getCombinedAfterFailedAttempt({
           combinedGenerations,
           combinedResponse,

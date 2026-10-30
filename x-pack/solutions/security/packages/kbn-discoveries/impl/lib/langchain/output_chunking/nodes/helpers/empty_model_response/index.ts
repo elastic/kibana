@@ -15,9 +15,7 @@ import {
  * model returns no content. `throwIfErrorCountsExceeded` matches on it to report the real cause
  * instead of prescribing a remedy that cannot work.
  *
- * It is the leading phrase of the message `EmptyModelResponseError` is built from, imported rather
- * than copied: a local copy would drift out of sync with the error text and stop matching, silently
- * reverting the remedy to "send fewer alerts". The coupling is asserted in this module's test.
+ * Imported from @kbn/langchain so the match cannot drift; the coupling is asserted in this module's test.
  */
 export const EMPTY_MODEL_RESPONSE_ERROR_MARKER = EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX;
 
@@ -30,10 +28,7 @@ export { isEmptyModelResponseError };
 /**
  * Builds the persisted error entry for a model response that contained no content.
  *
- * An empty response is a model or connector failure, not a "generation": it must be recorded as an
- * error so the attempt ledger is accurate, and it must not be classified as a repeated generation
- * (three identical empty responses used to discard the accumulated state without recording
- * anything, so the reported failure count was lower than the number of failed attempts).
+ * Recorded as an error, never as a generation, so it is not counted as a repeated generation.
  */
 export const getEmptyModelResponseError = ({
   cause,

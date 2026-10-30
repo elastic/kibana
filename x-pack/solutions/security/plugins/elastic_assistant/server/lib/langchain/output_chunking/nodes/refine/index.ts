@@ -187,9 +187,7 @@ export const getRefineNode = <T extends GraphInsightTypes>({
       return {
         ...state,
         insights: useUnrefinedResults ? unrefinedResults : null,
-        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
-        // the failure produced no content (for example an empty completion); keep the accumulated
-        // refinements instead of dropping them.
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
         combinedRefinements: getCombinedAfterFailedAttempt({
           combinedGenerations: combinedRefinements,
           combinedResponse,

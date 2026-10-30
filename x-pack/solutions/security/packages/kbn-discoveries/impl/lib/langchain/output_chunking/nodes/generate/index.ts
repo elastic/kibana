@@ -109,10 +109,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
             `generate node received an empty response (${llmType}) on attempt ${generationAttempts}; recording an error instead of treating it as a repeated generation`
         );
 
-        // `...state` deliberately keeps the accumulated `combinedGenerations`: this attempt produced
-        // no content, so there is nothing to add and nothing to invalidate. The catch block below
-        // follows the same rule via getCombinedAfterFailedAttempt, so an empty completion leaves the
-        // same state whether the LLM guard threw or this node noticed it.
+        // keeps the accumulated text; same rule as the catch block (getCombinedAfterFailedAttempt)
         return {
           ...state,
           errors: [
@@ -219,9 +216,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
       return {
         ...state,
-        // `combinedResponse` is only assigned once the response was combined, so it is still '' when
-        // the failure produced no content; getCombinedAfterFailedAttempt then keeps the accumulated
-        // generations instead of dropping them (see its doc comment).
+        // '' when this attempt produced no content (see getCombinedAfterFailedAttempt)
         combinedGenerations: getCombinedAfterFailedAttempt({
           combinedGenerations,
           combinedResponse,
