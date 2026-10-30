@@ -12,10 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
-import {
-  EntityInventorySearchProvider,
-  useEntityInventorySearch,
-} from './search_context';
+import { EntityInventorySearchProvider, useEntityInventorySearch } from './search_context';
 
 const renderSearchHook = () => {
   const core = coreMock.createStart();
