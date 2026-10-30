@@ -16,6 +16,7 @@ jest.mock('../../common/inference_client/bind_client');
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import { createRegexWorkerServiceMock } from '../test_utils';
+import type { InferenceServerClient } from '../types';
 
 const bindClientMock = bindClient as jest.MockedFn<typeof bindClient>;
 const createInferenceClientMock = createInferenceClient as jest.MockedFn<
@@ -174,8 +175,16 @@ describe('createClient', () => {
     });
 
     it('binds a featureId so chatComplete is called with featureId and no connectorId', async () => {
-      const chatCompleteMock = jest.fn().mockResolvedValue({ content: '', toolCalls: [] });
-      createInferenceClientMock.mockReturnValue({ chatComplete: chatCompleteMock } as any);
+      const unboundClient: jest.Mocked<InferenceServerClient> = {
+        chatComplete: jest.fn().mockResolvedValue({ content: '', toolCalls: [] }),
+        output: jest.fn(),
+        prompt: jest.fn(),
+        on: jest.fn(),
+        bindTo: jest.fn(),
+        listConnectors: jest.fn(),
+        getConnectorById: jest.fn(),
+      };
+      createInferenceClientMock.mockReturnValue(unboundClient);
       bindClientMock.mockImplementation(
         jest.requireActual<typeof import('../../common/inference_client/bind_client')>(
           '../../common/inference_client/bind_client'
@@ -199,11 +208,12 @@ describe('createClient', () => {
         messages: [],
       });
 
-      expect(chatCompleteMock).toHaveBeenCalledTimes(1);
-      expect(chatCompleteMock).toHaveBeenCalledWith(
+      expect(unboundClient.chatComplete).toHaveBeenCalledTimes(1);
+      expect(unboundClient.chatComplete).toHaveBeenCalledWith(
         expect.objectContaining({ featureId: 'my_feature', messages: [] })
       );
-      expect(chatCompleteMock.mock.calls[0][0].connectorId).toBeUndefined();
+      const [chatCompleteOptions] = unboundClient.chatComplete.mock.calls[0];
+      expect(chatCompleteOptions.connectorId).toBeUndefined();
     });
   });
 });

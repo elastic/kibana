@@ -186,6 +186,31 @@ describe('createOutputApi', () => {
       });
     });
 
+    it('keeps forwarding featureId instead of connectorId on the retry call', async () => {
+      chatComplete.mockRejectedValueOnce(validationError);
+      chatComplete.mockResolvedValueOnce(
+        Promise.resolve({ content: 'retried content', toolCalls: [unvalidatedFailedToolCall] })
+      );
+
+      const output = createOutputApi(chatComplete);
+
+      // a feature-bound server client forwards `featureId` in place of `connectorId`
+      await output({
+        id: 'retry-id',
+        stream: false,
+        featureId: 'my_feature',
+        input: 'input message',
+        retry: {
+          onValidationError: true,
+        },
+      } as unknown as OutputOptions);
+
+      expect(chatComplete).toHaveBeenCalledTimes(2);
+      const [retryOptions] = chatComplete.mock.calls[1];
+      expect(retryOptions).toEqual(expect.objectContaining({ featureId: 'my_feature' }));
+      expect(retryOptions).not.toHaveProperty('connectorId');
+    });
+
     it('retries the number of specified attempts', async () => {
       chatComplete.mockRejectedValue(validationError);
 
