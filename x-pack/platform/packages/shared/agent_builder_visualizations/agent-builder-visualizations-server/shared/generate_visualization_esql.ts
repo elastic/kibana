@@ -9,6 +9,7 @@ import type { EsqlEsqlColumnInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlAdditionalInstructions } from './esql_instructions';
@@ -48,6 +49,8 @@ interface GenerateVisualizationEsqlParams {
    * only affects the validation run. Defaults to the last 24 hours.
    */
   timeRange?: TimeRange;
+  /** The values of the dashboard controls the query may refer to (`?name`), bound when a candidate is executed. */
+  esqlVariables?: ESQLControlVariable[];
   /**
    * Renderer-specific guidance appended to the shared ES|QL instructions, e.g.
    * Vega's dotless column names.
@@ -120,6 +123,7 @@ export const generateVisualizationEsql = async ({
   logger,
   esClient,
   timeRange,
+  esqlVariables,
   extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
   const instructions = buildEsqlAdditionalInstructions(index);
@@ -135,6 +139,7 @@ export const generateVisualizationEsql = async ({
       : instructions,
     execute: 'schema' as const,
     ...(timeRange ? { timeRange } : {}),
+    ...(esqlVariables?.length ? { esqlVariables } : {}),
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
