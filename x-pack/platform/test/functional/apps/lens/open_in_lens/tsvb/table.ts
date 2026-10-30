@@ -100,9 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should allow converting a count aggregation', async () => {
-      await retry.try(async () => {
-        expect(await visualize.hasNavigateToLensButton()).to.be(true);
-      });
+      expect(await visualize.hasNavigateToLensButton()).to.be(true);
     });
 
     it('should convert last value mode to reduced time range', async () => {

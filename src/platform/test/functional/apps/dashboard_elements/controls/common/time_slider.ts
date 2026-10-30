@@ -17,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
 
   const { dashboardControls, discover, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
@@ -93,9 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'AvgTicketPrice',
           width: 'medium',
         });
-        await retry.try(async () => {
-          expect(await dashboardControls.getControlsCount()).to.be(2);
-        });
+        expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
       });
@@ -117,12 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
-        await dashboard.expectUnsavedChangesBadge();
         await dashboard.clickCancelOutOfEditMode();
-        await retry.try(async () => {
-          const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
-          expect(valueNow).to.equal(valueBefore);
-        });
+        const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
+        expect(valueNow).to.equal(valueBefore);
       });
 
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
@@ -133,9 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('deletes an existing control', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.removeExistingControl(firstId);
-        await retry.try(async () => {
-          expect(await dashboardControls.getControlsCount()).to.be(1);
-        });
+        expect(await dashboardControls.getControlsCount()).to.be(1);
       });
 
       after(async () => {

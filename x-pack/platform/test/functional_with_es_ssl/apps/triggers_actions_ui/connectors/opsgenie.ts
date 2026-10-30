@@ -71,10 +71,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        await retry.try(async () => {
-          const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-          expect(searchResultsBeforeEdit.length).to.eql(1);
-        });
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
         await actions.opsgenie.updateConnectorFields({
@@ -106,10 +104,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        await retry.try(async () => {
-          const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-          expect(searchResultsBeforeEdit.length).to.eql(1);
-        });
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -136,10 +132,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        await retry.try(async () => {
-          const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-          expect(searchResultsBeforeEdit.length).to.eql(1);
-        });
+        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+        expect(searchResultsBeforeEdit.length).to.eql(1);
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -188,7 +182,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('messageInput');
           await retry.waitFor('message input to be displayed', async () => {
             await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
-            return await testSubjects.waitForExists('messageInput');
+            return await testSubjects.exists('messageInput');
           });
 
           expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');

@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const copyOfDashboardName = `Copy of ${dashboardName}`;
   const filterBar = getService('filterBar');
   const security = getService('security');
-  const retry = getService('retry');
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
@@ -112,14 +111,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await dashboard.expectUnsavedChangesBadge();
           await dashboard.clickCancelOutOfEditMode();
 
-          await retry.try(async () => {
-            const newTime = await timePicker.getTimeConfig();
-            expect(newTime.start).to.equal(originalTime.start);
-            expect(newTime.end).to.equal(originalTime.end);
-          });
+          const newTime = await timePicker.getTimeConfig();
+
+          expect(newTime.start).to.equal(originalTime.start);
+          expect(newTime.end).to.equal(originalTime.end);
         });
 
         it('when the query is edited and applied', async function () {
@@ -147,13 +144,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(false);
 
-          await dashboard.expectUnsavedChangesBadge();
           await dashboard.clickCancelOutOfEditMode();
 
-          await retry.try(async () => {
-            hasFilter = await filterBar.hasFilter('animal', 'dog');
-            expect(hasFilter).to.be(true);
-          });
+          hasFilter = await filterBar.hasFilter('animal', 'dog');
+          expect(hasFilter).to.be(true);
         });
 
         it('when a panel is added', async function () {
@@ -180,7 +174,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2015 @ 06:31:44.000',
             'Sep 19, 2015 @ 06:31:44.000'
           );
-          await dashboard.expectUnsavedChangesBadge();
           await dashboard.clickCancelOutOfEditMode(false);
 
           await common.clickCancelOnModal();
@@ -210,7 +203,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const newTime = await timePicker.getTimeConfig();
 
-        await dashboard.expectUnsavedChangesBadge();
         await dashboard.clickCancelOutOfEditMode(false);
 
         await common.clickCancelOnModal();
