@@ -10,10 +10,13 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_INFERENCE_FEATURE_ID,
 } from '@kbn/agent-builder-common/constants';
+import type { ModelSource } from '@kbn/agent-builder-server/runner';
 import type { TrackingService } from '../../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { createModelProvider, createModelProviderFactory } from './model_provider';
@@ -50,11 +53,11 @@ const createTrackingServiceMock = (): jest.Mocked<Pick<TrackingService, 'trackLL
 const setupDeps = ({
   mainEndpoints = [{ connectorId: 'default-connector' }],
   fastEndpoints = [],
-  defaultConnectorId,
+  defaultModel,
 }: {
   mainEndpoints?: EndpointMock[];
   fastEndpoints?: EndpointMock[];
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
 } = {}) => {
   const request = httpServerMock.createKibanaRequest();
   const logger = loggingSystemMock.createLogger();
@@ -68,7 +71,7 @@ const setupDeps = ({
   return {
     inference,
     request,
-    defaultConnectorId,
+    defaultModel,
     trackingService,
     logger,
     searchInferenceEndpoints,
@@ -100,6 +103,32 @@ const setupChatAndClient = (inference: ReturnType<typeof inferenceMock.createSta
   inference.getClient.mockReturnValue(inferenceClient as any);
 
   return { chatModel, inferenceClient, getConnectorById };
+};
+
+/**
+ * Mocks the feature path: `getChatModel` resolves to a chat model exposing the feature's resolved
+ * connector through `getConnector()`, and `getClient` returns a feature-bound client.
+ */
+const setupFeatureChatAndClient = (
+  inference: ReturnType<typeof inferenceMock.createStartContract>,
+  { connectorId = 'feature-connector' }: { connectorId?: string } = {}
+) => {
+  const featureConnector = createConnectorMock({ connectorId });
+  const chatModel = {
+    kind: 'feature-chat-model',
+    getConnector: () => featureConnector,
+  } as unknown as InferenceChatModel;
+  const chatCompleteMock = jest.fn().mockResolvedValue(undefined);
+  const inferenceClient = {
+    chatComplete: chatCompleteMock,
+    bindTo: jest.fn(),
+    getConnectorById: jest.fn().mockResolvedValue(createConnectorMock()),
+  } as unknown as BoundInferenceClient;
+
+  inference.getChatModel.mockResolvedValue(chatModel);
+  inference.getClient.mockReturnValue(inferenceClient);
+
+  return { chatModel, inferenceClient, chatCompleteMock, featureConnector };
 };
 
 describe('createModelProvider', () => {
@@ -176,8 +205,8 @@ describe('createModelProvider', () => {
       expect(deps.inference.getChatModel).toHaveBeenCalledTimes(1);
     });
 
-    it('uses the explicit defaultConnectorId option without resolving feature endpoints', async () => {
-      const deps = setupDeps({ defaultConnectorId: 'explicit-connector' });
+    it('uses the explicit connectorId source without resolving feature endpoints', async () => {
+      const deps = setupDeps({ defaultModel: { connectorId: 'explicit-connector' } });
       setupChatAndClient(deps.inference);
 
       const provider = createModelProvider(deps);
@@ -187,6 +216,120 @@ describe('createModelProvider', () => {
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'explicit-connector' })
       );
+    });
+
+    it('builds the default model from a featureId via getChatModel and a feature-bound client', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      const { chatModel, inferenceClient } = setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      const model = await provider.getDefaultModel();
+
+      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(1);
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ request: deps.request, featureId: 'my_feature' })
+      );
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.not.objectContaining({ connectorId: expect.anything() })
+      );
+      expect(deps.inference.getClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: deps.request,
+          bindTo: expect.objectContaining({
+            featureId: 'my_feature',
+            metadata: { connectorTelemetry: MODEL_TELEMETRY_METADATA },
+          }),
+        })
+      );
+      expect(deps.inference.getClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bindTo: expect.not.objectContaining({ connectorId: expect.anything() }),
+        })
+      );
+      expect(model.chatModel).toBe(chatModel);
+      expect(model.inferenceClient).toBe(inferenceClient);
+    });
+
+    it('does not inject reasoning into a feature-sourced default model', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      const { chatCompleteMock } = setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      const model = await provider.getDefaultModel();
+      await model.inferenceClient.chatComplete({ messages: [] });
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: expect.not.objectContaining({ reasoning: expect.anything() }),
+        })
+      );
+      // The feature-bound client is returned as is: no reasoning wrapper around chatComplete.
+      expect(chatCompleteMock).toHaveBeenCalledWith({ messages: [] });
+      expect(chatCompleteMock).toHaveBeenCalledWith(
+        expect.not.objectContaining({ reasoning: expect.anything() })
+      );
+    });
+
+    it('drops the caller reasoning level with a warning on a feature-sourced default', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      await provider.getDefaultModel();
+      await provider.getDefaultModel();
+
+      expect(deps.logger.warn).toHaveBeenCalledTimes(1);
+      expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('my_feature'));
+      expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('high'));
+    });
+
+    it('does not warn on a feature-sourced default when no reasoning level is set', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.getDefaultModel();
+
+      expect(deps.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns the resolved connector from the chat model on the feature path', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      const { featureConnector, inferenceClient } = setupFeatureChatAndClient(deps.inference, {
+        connectorId: 'resolved-feature-connector',
+      });
+
+      const provider = createModelProvider(deps);
+      const model = await provider.getDefaultModel();
+
+      expect(model.connector).toBe(featureConnector);
+      expect(model.connector.connectorId).toBe('resolved-feature-connector');
+      expect(inferenceClient.getConnectorById).not.toHaveBeenCalled();
+    });
+
+    it('records usage against the feature resolved connector id', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.getDefaultModel();
+
+      const completionCallback = getCompletionCallback(deps.inference);
+      completionCallback({
+        model: 'gpt-4o',
+        tokens: { prompt: 10, completion: 20, total: 30 },
+      });
+
+      expect(provider.getUsageStats()).toEqual({
+        calls: [
+          {
+            connectorId: 'feature-connector',
+            tokens: { prompt: 10, completion: 20, total: 30 },
+            model: 'gpt-4o',
+          },
+        ],
+      });
     });
   });
 
@@ -295,6 +438,103 @@ describe('createModelProvider', () => {
       await provider.selectModel({ effortLevel: 'low' });
 
       expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the feature-sourced default model for low effort when no fast endpoint exists', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' }, fastEndpoints: [] });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      const lowEffortModel = await provider.selectModel({ effortLevel: 'low' });
+      const defaultModel = await provider.getDefaultModel();
+
+      expect(lowEffortModel).toBe(defaultModel);
+      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(1);
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my_feature' })
+      );
+      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledTimes(1);
+      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+        deps.request,
+        { onlyReturnConfigured: true }
+      );
+    });
+
+    it('returns the fast connector model for low effort when a fast endpoint exists', async () => {
+      const deps = setupDeps({
+        defaultModel: { featureId: 'my_feature' },
+        fastEndpoints: [{ connectorId: 'fast-connector' }],
+      });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      const lowEffortModel = await provider.selectModel({ effortLevel: 'low' });
+      const defaultModel = await provider.getDefaultModel();
+
+      // The fast connector model and the feature model are memoized under distinct keys.
+      expect(lowEffortModel).not.toBe(defaultModel);
+      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(2);
+      expect(deps.inference.getChatModel).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          connectorId: 'fast-connector',
+          chatModelOptions: expect.not.objectContaining({ reasoning: expect.anything() }),
+        })
+      );
+      expect(deps.inference.getChatModel).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ featureId: 'my_feature' })
+      );
+    });
+  });
+
+  describe('hasFastModel', () => {
+    it('is false when no dedicated fast endpoint is configured', async () => {
+      const deps = setupDeps({ fastEndpoints: [] });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+
+      await expect(provider.hasFastModel()).resolves.toBe(false);
+    });
+
+    it('is true when a distinct fast endpoint exists next to a connector-sourced default', async () => {
+      const deps = setupDeps({ fastEndpoints: [{ connectorId: 'fast-connector' }] });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+
+      await expect(provider.hasFastModel()).resolves.toBe(true);
+      // A connector-sourced default is compared by id: no model needs to be built.
+      expect(deps.inference.getChatModel).not.toHaveBeenCalled();
+    });
+
+    it('is false when the fast endpoint is the feature resolved connector', async () => {
+      const deps = setupDeps({
+        defaultModel: { featureId: 'my_feature' },
+        fastEndpoints: [{ connectorId: 'feature-connector' }],
+      });
+      setupFeatureChatAndClient(deps.inference, { connectorId: 'feature-connector' });
+
+      const provider = createModelProvider(deps);
+
+      await expect(provider.hasFastModel()).resolves.toBe(false);
+    });
+
+    it('is true when a distinct fast endpoint exists next to a feature-sourced default', async () => {
+      const deps = setupDeps({
+        defaultModel: { featureId: 'my_feature' },
+        fastEndpoints: [{ connectorId: 'fast-connector' }],
+      });
+      setupFeatureChatAndClient(deps.inference, { connectorId: 'feature-connector' });
+
+      const provider = createModelProvider(deps);
+
+      await expect(provider.hasFastModel()).resolves.toBe(true);
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my_feature' })
+      );
     });
   });
 
@@ -522,7 +762,10 @@ describe('createModelProviderFactory', () => {
       searchInferenceEndpoints: deps.searchInferenceEndpoints,
     });
 
-    const provider = factory({ request: deps.request, defaultConnectorId: 'override-connector' });
+    const provider = factory({
+      request: deps.request,
+      defaultModel: { connectorId: 'override-connector' },
+    });
     await provider.getDefaultModel();
 
     expect(deps.inference.getChatModel).toHaveBeenCalledWith(
