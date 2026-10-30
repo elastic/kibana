@@ -121,6 +121,8 @@ export const BasicEndpointExceptionDataSchema = schema.object(
  */
 export class BaseValidator {
   private readonly endpointAuthzPromise: ReturnType<EndpointAppContextService['getEndpointAuthz']>;
+  /** Cached for the lifetime of the validator (one request): import validates every item against it. */
+  private accessibleSpaceIdsPromise: Promise<string[]> | undefined;
   protected readonly logger: Logger;
 
   constructor(
@@ -415,9 +417,17 @@ export class BaseValidator {
       );
     }
 
-    const accessibleSpaces = await this.endpointAppContext.getAccessibleSpaces(this.request);
+    if (!this.accessibleSpaceIdsPromise) {
+      this.accessibleSpaceIdsPromise = this.endpointAppContext
+        .getAccessibleSpaces(this.request)
+        .then((accessibleSpaces) => accessibleSpaces.map((space) => space.id))
+        .catch((error) => {
+          this.accessibleSpaceIdsPromise = undefined;
+          throw error;
+        });
+    }
 
-    return accessibleSpaces.map((space) => space.id);
+    return this.accessibleSpaceIdsPromise;
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
@@ -578,6 +588,10 @@ export class BaseValidator {
           comments: _item.comments,
           listId: _item.list_id,
         };
+
+        // Validators can run long synchronous work (e.g. libyara compile), and the items may not
+        // trigger any I/O: release the event loop between items so Kibana keeps serving requests.
+        await new Promise<void>((resolve) => setImmediate(resolve));
 
         try {
           await validator(item);

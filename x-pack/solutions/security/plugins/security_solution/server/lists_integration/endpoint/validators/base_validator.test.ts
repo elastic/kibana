@@ -660,6 +660,21 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         expect(validateFn).toHaveBeenCalledTimes(1);
         expect(importItems).toEqual(expectedItems);
       });
+
+      it('should release the event loop between items', async () => {
+        const events: string[] = [];
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          events.push(`validate ${item.name}`);
+          setImmediate(() => events.push(`event loop after ${item.name}`));
+        });
+
+        await validator._validatePreImportItems(
+          { items: [item1Mock(), item2Mock()], lists: [] },
+          validateFn
+        );
+
+        expect(events).toEqual(['validate name 1', 'event loop after name 1', 'validate name 2']);
+      });
     });
 
     describe('#validateCanImportGlobalArtifacts()', () => {
@@ -700,6 +715,31 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           await expect(
             validator._validateImportOwnerSpaceIds(exceptionLikeItem)
           ).resolves.toBeUndefined();
+        });
+
+        it('should retrieve accessible spaces only once per validator instance', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await validator._validateImportOwnerSpaceIds(exceptionLikeItem);
+          await validator._validateImportOwnerSpaceIds(exceptionLikeItem);
+
+          expect(endpointAppContextServices.getAccessibleSpaces).toHaveBeenCalledTimes(1);
+        });
+
+        it('should retrieve accessible spaces again after a failed attempt', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+          (endpointAppContextServices.getAccessibleSpaces as jest.Mock).mockRejectedValueOnce(
+            new Error('spaces unavailable')
+          );
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            'spaces unavailable'
+          );
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+
+          expect(endpointAppContextServices.getAccessibleSpaces).toHaveBeenCalledTimes(2);
         });
 
         it('should error when owner space is not accessible', async () => {
