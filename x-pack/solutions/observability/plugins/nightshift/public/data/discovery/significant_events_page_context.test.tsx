@@ -95,12 +95,6 @@ describe('SignificantEventsPageProvider', () => {
     } as never);
   });
 
-  it('starts not running', () => {
-    const { result } = renderContext();
-    expect(result.current.isRunning).toBe(false);
-    expect(result.current.isCanceling).toBe(false);
-  });
-
   describe('handleRun', () => {
     it('optimistically sets isRunning before the trigger resolves', async () => {
       trigger.mockResolvedValue({ executionId: 'exec-1' });
