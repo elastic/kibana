@@ -10,6 +10,7 @@
 import { subj } from '@kbn/test-subj-selector';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ElementHandle, Page } from 'playwright';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { Retry } from '..';
 
 interface WaitForRenderArgs {
@@ -39,7 +40,10 @@ export class KibanaPage {
   }
 
   async waitForListViewTable() {
-    await this.page.waitForSelector(subj('table-is-ready'), { state: 'visible' });
+    await this.page.waitForSelector(
+      `${subj('table-is-ready')}, ${subj(CONTENT_LIST_TEST_SUBJECTS.table)}`,
+      { state: 'visible' }
+    );
   }
 
   async backToDashboardListing() {

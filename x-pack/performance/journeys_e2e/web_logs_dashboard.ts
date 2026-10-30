@@ -14,7 +14,6 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard'],
   }),
-  dashboardName: 'Web Logs Dashboard',
-  dashboardLinkSubj: 'dashboardListingTitleLink-[Logs]-Web-Traffic',
+  dashboardTitle: '[Logs] Web Traffic',
   visualizationCount: 11,
 });
