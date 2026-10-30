@@ -24,6 +24,11 @@ import { NoDirectHandlebarsImportRule } from './src/rules/no_direct_handlebars_i
 import { NoDirectMonacoImportRule } from './src/rules/no_direct_monaco_import';
 import { NoUndeclaredPluginTargetRule } from './src/rules/no_undeclared_plugin_target';
 import { NoReduxToolkitV2ImportsRule } from './src/rules/no_redux_toolkit_v2_imports';
+import { RestrictedReduxImportsRule } from './src/rules/restricted_redux_imports';
+import {
+  NoReduxToolkitMiddlewareSpreadRule,
+  NoReduxToolkitStateReassignmentRule,
+} from './src/rules/redux_toolkit';
 
 const plugin = eslintCompatPlugin({
   meta: { name: '@kbn/imports' },
@@ -40,6 +45,9 @@ const plugin = eslintCompatPlugin({
     no_direct_monaco_import: NoDirectMonacoImportRule,
     no_undeclared_plugin_target: NoUndeclaredPluginTargetRule,
     no_redux_toolkit_v2_imports: NoReduxToolkitV2ImportsRule,
+    restricted_redux_imports: RestrictedReduxImportsRule,
+    no_redux_toolkit_middleware_spread: NoReduxToolkitMiddlewareSpreadRule,
+    no_redux_toolkit_state_reassignment: NoReduxToolkitStateReassignmentRule,
   },
 });
 

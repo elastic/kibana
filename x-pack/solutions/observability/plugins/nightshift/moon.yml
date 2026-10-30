@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/actions-types'
   - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/agent-builder-plugin'
   - '@kbn/alerts-ui-shared'
@@ -60,6 +61,7 @@ dependsOn:
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
   - '@kbn/licensing-plugin'
+  - '@kbn/logging'
   - '@kbn/management-settings-ids'
   - '@kbn/nightshift-ai'
   - '@kbn/nightshift-decision-trees'

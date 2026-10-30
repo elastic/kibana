@@ -40,8 +40,10 @@ export class FetchPoliciesStep implements DispatcherStep {
       return { type: 'continue', data: { policies: PolicyCatalog.empty() } };
     }
 
+    const spaceIds = [...new Set(triage.dispatchable.map(({ space_id: spaceId }) => spaceId))];
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
+      spaceIds,
     });
 
     const policies = new Map<ActionPolicyId, ActionPolicy>();
