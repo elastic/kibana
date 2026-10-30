@@ -156,13 +156,21 @@ describe('registerHuntIndexScopeRoute', () => {
 
   it('tells scope resolution whether cross-project search is on', async () => {
     const off = makeDeps();
-    await off.handler(off.context, httpServerMock.createKibanaRequest(), httpServerMock.createResponseFactory());
+    await off.handler(
+      off.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
     expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ crossProjectSearch: false })
     );
 
     const on = makeDeps({ cpsEnabled: true });
-    await on.handler(on.context, httpServerMock.createKibanaRequest(), httpServerMock.createResponseFactory());
+    await on.handler(
+      on.context,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
     expect(resolveHuntScopeMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ crossProjectSearch: true })
     );
