@@ -117,7 +117,8 @@ const getPanelElement = (ref: React.Ref<HTMLDivElement>): HTMLDivElement | null 
  * - a plain click outside the selected panels, or pressing Escape, clears the selection
  * - a plain click on a panel's drag area (title bar or move icon) that does not become a drag briefly
  *   shows a "how to select" hint on that panel
- * Returns the rectangle currently being drawn and the panel rectangle to show the hint on, if any.
+ * Returns the rectangle currently being drawn (viewport coordinates) and the rectangle of the panel to
+ * show the hint on (relative to the grid root), if any.
  */
 export const usePanelSelectionGestures = ({
   layoutRef,
@@ -172,9 +173,16 @@ export const usePanelSelectionGestures = ({
     const showSelectHint = (panelId: string) => {
       const element = getPanelElement(panelRefs.current[panelId]);
       if (!element) return;
+      // Relative to the grid root, so the hint scrolls with the panel instead of being repositioned
+      const rootRect = root.getBoundingClientRect();
       const { left, top, right, bottom } = element.getBoundingClientRect();
       if (hideHintTimeout) clearTimeout(hideHintTimeout);
-      setSelectHintRect({ left, top, right, bottom });
+      setSelectHintRect({
+        left: left - rootRect.left,
+        top: top - rootRect.top,
+        right: right - rootRect.left,
+        bottom: bottom - rootRect.top,
+      });
       hideHintTimeout = setTimeout(hideSelectHint, SELECT_HINT_DURATION_MS);
     };
 
@@ -317,14 +325,12 @@ export const usePanelSelectionGestures = ({
     document.addEventListener('click', onDocumentClick, { capture: true });
     document.addEventListener('click', onDocumentClickBubbled);
     document.addEventListener('keydown', onDocumentKeyDown);
-    document.addEventListener('scroll', hideSelectHint, { capture: true, passive: true }); // the hint is fixed-positioned
     return () => {
       root.removeEventListener('mousedown', onRootMouseDown, { capture: true });
       document.removeEventListener('mousedown', onDocumentMouseDown, { capture: true });
       document.removeEventListener('click', onDocumentClick, { capture: true });
       document.removeEventListener('click', onDocumentClickBubbled);
       document.removeEventListener('keydown', onDocumentKeyDown);
-      document.removeEventListener('scroll', hideSelectHint, { capture: true });
       hideSelectHint();
       stopAutoScroll();
       setMarqueePreview([]);

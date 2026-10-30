@@ -21,7 +21,7 @@ const hintLabel = i18n.translate('dashboard.panelSelectHint.label', {
   values: { modifierKey: isMac ? 'Cmd' : 'Ctrl' },
 });
 
-/** Short-lived badge explaining the selection gesture, shown at the top of the clicked panel */
+/** Short-lived badge explaining the selection gesture, shown over the title bar of the clicked panel */
 export const PanelSelectHint = ({ rect }: { rect: SelectionRect | undefined }) => {
   const styles = useMemoCss(panelSelectHintStyles);
   const { euiTheme } = useEuiTheme();
@@ -46,11 +46,13 @@ const fadeIn = keyframes({
 const panelSelectHintStyles = {
   hint: ({ euiTheme }: UseEuiTheme) =>
     css({
-      position: 'fixed',
+      // positioned in the grid root, so it scrolls together with the panel
+      position: 'absolute',
       pointerEvents: 'none',
-      zIndex: euiTheme.levels.toast,
-      // anchored at the panel's top center, pushed down below the title bar
-      transform: `translate(-50%, ${euiTheme.size.xxl})`,
+      // above the panels but below the sticky top nav (levels.mask), so it slides under the query bar
+      zIndex: euiTheme.levels.menu,
+      // centered on the panel's title bar strip (size.xl tall, like the select checkbox), titled or not
+      transform: `translate(-50%, calc(${euiTheme.size.xl} / 2 - 50%))`,
       animation: `${fadeIn} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
     }),
 };

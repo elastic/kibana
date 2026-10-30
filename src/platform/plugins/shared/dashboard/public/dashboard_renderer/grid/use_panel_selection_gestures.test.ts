@@ -265,4 +265,23 @@ describe('usePanelSelectionGestures', () => {
       expect(getSelection()).toEqual(['panel2']);
     });
   });
+
+  describe('select hint', () => {
+    it('places the hint on the clicked panel, relative to the grid, and keeps it while scrolling', () => {
+      setBoundingRect(root, { left: 10, top: 40, right: 1000, bottom: 1000 });
+      setBoundingRect(panels.panel2, { left: 210, top: 140, right: 310, bottom: 240 });
+      const header = createElement(panels.panel2, 'div', { class: 'embPanel__header' });
+      const { result } = renderGestures();
+
+      click(header);
+      fireEvent.scroll(document);
+
+      expect(result.current.selectHintRect).toEqual({
+        left: 200,
+        top: 100,
+        right: 300,
+        bottom: 200,
+      });
+    });
+  });
 });
