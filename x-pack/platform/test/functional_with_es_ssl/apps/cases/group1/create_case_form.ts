@@ -22,6 +22,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const config = getService('config');
     const comboBox = getService('comboBox');
+    const retry = getService('retry');
     const header = getPageObject('header');
 
     beforeEach(async () => {
@@ -93,10 +94,12 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         'The length of the tag is too long. The maximum length is 256 characters.'
       );
 
-      const category = await testSubjects.find('caseCategory');
-      expect(await category.getVisibleText()).contain(
-        'The length of the category is too long. The maximum length is 50 characters.'
-      );
+      await retry.try(async () => {
+        const category = await testSubjects.find('caseCategory');
+        expect(await category.getVisibleText()).contain(
+          'The length of the category is too long. The maximum length is 50 characters.'
+        );
+      });
     });
 
     describe('Assignees', function () {

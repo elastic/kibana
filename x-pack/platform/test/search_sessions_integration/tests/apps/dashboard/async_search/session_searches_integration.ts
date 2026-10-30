@@ -84,9 +84,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.openPopover();
       await searchSessions.viewSearchSessions();
 
-      const searchSessionList = await searchSessionsManagement.getList();
-      const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-      expect(searchSessionItem.searchesCount).to.be(1);
+      const searchSessionItem = await retry.try(async () => {
+        const searchSessionList = await searchSessionsManagement.getList();
+        const item = searchSessionList.find((session) => session.id === savedSessionId)!;
+        expect(item.searchesCount).to.be(1);
+        return item;
+      });
 
       await searchSessionItem.extend();
 
@@ -123,9 +126,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.openPopover();
       await searchSessions.viewSearchSessions();
 
-      const searchSessionList = await searchSessionsManagement.getList();
-      const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-      expect(searchSessionItem.searchesCount).to.be(1);
+      const searchSessionItem = await retry.try(async () => {
+        const searchSessionList = await searchSessionsManagement.getList();
+        const item = searchSessionList.find((session) => session.id === savedSessionId)!;
+        expect(item.searchesCount).to.be(1);
+        return item;
+      });
       await searchSessionItem.delete();
 
       const searchNotFoundError = await searchSessions
@@ -169,9 +175,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();
 
-        let searchSessionList = await searchSessionsManagement.getList();
-        let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-        expect(searchSessionItem.searchesCount).to.be(1);
+        let searchSessionItem = await retry.try(async () => {
+          const searchSessionList = await searchSessionsManagement.getList();
+          const item = searchSessionList.find((session) => session.id === savedSessionId)!;
+          expect(item.searchesCount).to.be(1);
+          return item;
+        });
         await new Promise((resolve) => setTimeout(resolve, 10000));
 
         await searchSessionItem.view();
@@ -187,9 +196,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();
 
-        searchSessionList = await searchSessionsManagement.getList();
-        searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-        expect(searchSessionItem.searchesCount).to.be(2);
+        searchSessionItem = await retry.try(async () => {
+          const searchSessionList = await searchSessionsManagement.getList();
+          const item = searchSessionList.find((session) => session.id === savedSessionId)!;
+          expect(item.searchesCount).to.be(2);
+          return item;
+        });
 
         await searchSessionItem.view();
         expect(await toasts.getCount()).to.be(0); // there should be no warnings

@@ -504,7 +504,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // test that there are 39 tiles now
-      expect(await lens.getMetricTiles()).to.have.length(N_TILES);
+      await retry.try(async () => {
+        expect(await lens.getMetricTiles()).to.have.length(N_TILES);
+      });
 
       await find.clickByCssSelector(
         'select[data-test-subj="indexPattern-collapse-by"] > option[value="sum"]'
