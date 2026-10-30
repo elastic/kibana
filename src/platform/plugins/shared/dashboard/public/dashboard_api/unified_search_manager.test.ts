@@ -8,6 +8,7 @@
  */
 
 import { BehaviorSubject, Subject, take } from 'rxjs';
+import { areComparatorsEqual } from '@kbn/presentation-publishing';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import {
@@ -150,7 +151,9 @@ describe('initializeUnifiedSearchManager', () => {
     });
   });
   describe('getUnifiedSearchComparators', () => {
-    const { query: compareQuery } = getUnifiedSearchComparators(() => false);
+    const { query: queryComparator } = getUnifiedSearchComparators(() => false);
+    const compareQuery = (last: DashboardState['query'], current: DashboardState['query']) =>
+      areComparatorsEqual({ query: queryComparator }, { query: last }, { query: current });
     const emptyQuery: DashboardState['query'] = { language: 'kql', expression: '' };
     const kqlQuery: DashboardState['query'] = { language: 'kql', expression: 'status: active' };
 
