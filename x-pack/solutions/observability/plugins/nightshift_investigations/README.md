@@ -113,7 +113,7 @@ xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
 
 ```
 POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
-GET  /internal/nightshift/investigations/service_account           # status, agentBuilder:read
+GET  /internal/nightshift/investigations/service_account           # status, read_nightshift
 POST /internal/nightshift/investigations/service_account/_disable  # teardown
 ```
 
