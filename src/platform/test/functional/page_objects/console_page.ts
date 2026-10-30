@@ -298,11 +298,10 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickClearInput() {
-    const hasClearButton = await this.testSubjects.exists('clearConsoleInput');
-
-    if (hasClearButton) {
-      await this.testSubjects.click('clearConsoleInput');
-    }
+    await this.testSubjects.click('clearConsoleInput');
+    await this.retry.waitFor('console input to be empty', async () => {
+      return (await this.getEditorText()).trim() === '';
+    });
   }
 
   public async clickClearOutput() {

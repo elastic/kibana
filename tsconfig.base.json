@@ -1573,6 +1573,8 @@
       "@kbn/ipynb/*": ["./x-pack/solutions/search/packages/kbn-ipynb/*"],
       "@kbn/item-buffer": ["./src/platform/packages/private/kbn-item-buffer"],
       "@kbn/item-buffer/*": ["./src/platform/packages/private/kbn-item-buffer/*"],
+      "@kbn/jest": ["./src/platform/packages/shared/kbn-jest"],
+      "@kbn/jest/*": ["./src/platform/packages/shared/kbn-jest/*"],
       "@kbn/jest-benchmarks": ["./src/platform/packages/shared/kbn-jest-benchmarks"],
       "@kbn/jest-benchmarks/*": ["./src/platform/packages/shared/kbn-jest-benchmarks/*"],
       "@kbn/jest-serializers": ["./src/platform/packages/private/kbn-jest-serializers"],

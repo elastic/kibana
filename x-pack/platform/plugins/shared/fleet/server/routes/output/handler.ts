@@ -107,7 +107,7 @@ export const putOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
-    const { id: bodyId, ...updateBody } = request.body;
+    const { id: bodyId, ...updateBody } = request.body as Partial<Output> & { id?: string };
     if (bodyId !== undefined && bodyId !== request.params.outputId) {
       return response.badRequest({
         body: {
