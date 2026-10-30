@@ -8,9 +8,21 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { CoreStart } from '@kbn/core/server';
 import { composeHydrateNotificationContext } from '../lib/hydrate_notification';
+import {
+  isValidOtelTraceId,
+  toDeterministicTraceId,
+  withNightshiftBackgroundSpan,
+} from '../tracing';
 
-export const composeHydrateNotificationsStepDefinition = () =>
+export const composeHydrateNotificationsStepDefinition = ({
+  getSavedObjects,
+  getUiSettings,
+}: {
+  getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
+  getUiSettings?: () => CoreStart['uiSettings'] | undefined;
+} = {}) =>
   createServerStepDefinition({
     id: 'nightshift.composeHydrateNotifications',
     label: 'Compose Nightshift Hydrate Notifications',
@@ -56,6 +68,8 @@ export const composeHydrateNotificationsStepDefinition = () =>
           version: z.literal(1),
           data: z.object({
             recalled_ids: z.array(z.string()).max(100),
+            materialize_execution_id: z.string().optional(),
+            background_trace_id: z.string().optional(),
           }),
         }),
       }),
@@ -64,6 +78,32 @@ export const composeHydrateNotificationsStepDefinition = () =>
       const { model_context: modelContext } = composeHydrateNotificationContext({
         writers: context.input.writers,
       });
+      const workflowCtx = context.contextManager.getContext();
+      const executionId = workflowCtx?.execution?.id;
+      const spaceId = workflowCtx?.workflow?.spaceId ?? 'default';
+      const isUuidExecutionId =
+        typeof executionId === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(executionId);
+      const candidateTraceId = isUuidExecutionId ? toDeterministicTraceId(executionId) : undefined;
+      const hasValidOtelTraceId = isValidOtelTraceId(candidateTraceId);
+      if (hasValidOtelTraceId && executionId) {
+        await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.composeHydrateNotifications',
+            traceId: candidateTraceId,
+            spaceId,
+            workflowExecutionId: executionId,
+            request: context.contextManager?.getFakeRequest?.(),
+            getSavedObjects,
+            getUiSettings,
+            logger: context.logger,
+            attributes: {
+              'nightshift.recalled_ids': JSON.stringify(context.input.recalled_ids),
+            },
+          },
+          async () => undefined
+        );
+      }
       return {
         output: {
           ...(modelContext ? { model_context: modelContext } : {}),
@@ -72,6 +112,12 @@ export const composeHydrateNotificationsStepDefinition = () =>
               version: 1 as const,
               data: {
                 recalled_ids: context.input.recalled_ids,
+                ...(hasValidOtelTraceId && executionId
+                  ? {
+                      materialize_execution_id: executionId,
+                      background_trace_id: candidateTraceId,
+                    }
+                  : {}),
               },
             },
           },

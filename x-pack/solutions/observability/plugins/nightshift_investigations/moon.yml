@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
+  - '@kbn/inference-tracing'
 tags:
   - plugin
   - prod
