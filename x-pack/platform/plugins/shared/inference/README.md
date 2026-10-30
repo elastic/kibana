@@ -208,6 +208,12 @@ const chatModel = await myStartDeps.inference.getChatModel({
 });
 ```
 
+To know which connector a feature runs on without calling the model, `resolveFeatureConnector(featureId, request)` resolves the feature's top endpoint and returns its connector. It fails the same way `chatComplete({ featureId })` does: a request error (400) when the feature has no endpoint, an internal error when no resolver is registered.
+
+```ts
+const connector = await myStartDeps.inference.resolveFeatureConnector('my_feature', request);
+```
+
 #### Streaming mode
 
 Passing `stream: true` when calling the API enables streaming mode.

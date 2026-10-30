@@ -220,6 +220,20 @@ export interface InferenceServerStart {
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
 
   /**
+   * Resolves the connector a feature's top endpoint runs on, without calling the model.
+   * Throws the same errors as `chatComplete({ featureId })`: a request error (400) when the
+   * feature has no endpoint, and an internal error when no feature endpoint resolver is registered.
+   *
+   * @param featureId - The inference feature to resolve the connector for
+   * @param request - The Kibana request to scope the operation to
+   * @returns A promise that resolves to the connector of the feature's top endpoint
+   */
+  resolveFeatureConnector: (
+    featureId: string,
+    request: KibanaRequest
+  ) => Promise<InferenceConnector>;
+
+  /**
    * Returns a list of all available inference connectors.
    *
    * @param request - The Kibana request to scope the operation to
