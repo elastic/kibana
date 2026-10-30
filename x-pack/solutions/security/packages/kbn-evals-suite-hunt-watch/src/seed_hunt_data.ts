@@ -175,8 +175,9 @@ const iocDumpAddresses = (): string[] =>
 /**
  * A blocklist-style report with one more searchable IOC than a hunt accepts. The coordinator hunts
  * the first `MAX_HUNT_REPORT_IOCS` and records the rest as an `input_truncated` gap, which is
- * deterministic (`incomplete_final`): the run ends `partial` at the `hunt` stage, evidence is
- * written as incomplete rather than clean, and the report retires. The body names no technique
+ * deterministic (`incomplete_final`): the hunt child emits `retired_incomplete`, evidence is
+ * written as incomplete rather than clean, packaging closes the Investigation as benign with the
+ * retired summary, and the report retires. The body names no technique
  * and no principal, so Tier 2 has nothing to derive and the row stays about the IOC bound.
  */
 export const buildIocDumpReportDoc = (timestamp: string) => ({

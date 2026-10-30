@@ -57,14 +57,14 @@ export const dedupeCoverageGaps = (
   const seen = new Set<string>();
   const deduped: PackageReportCoverageGap[] = [];
   for (const gap of input) {
+    const key = `${gap.reason}|${gap.detail}|${gap.technique_id ?? ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     const detail = truncateAtWord(gap.detail, MAX_GAP_DETAIL_CHARS);
     const techniqueId =
       gap.technique_id === undefined
         ? undefined
         : truncateAtWord(gap.technique_id, MAX_GAP_TECHNIQUE_CHARS);
-    const key = `${gap.reason}|${detail}|${techniqueId ?? ''}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
     deduped.push({
       reason: gap.reason,
       detail,
@@ -114,6 +114,11 @@ export const describeGaps = (
     if (next + (isLast ? 0 : note.length) > maxChars) break;
     kept.push(item);
     used = next;
+  }
+  if (kept.length === 0) {
+    const note = items.length > 1 ? ` (+${items.length - 1} more)` : '';
+    const first = truncateAtWord(items[0], Math.max(0, maxChars - note.length));
+    return first ? `${first}${note}` : undefined;
   }
   const more = items.length - kept.length;
   return `${kept.join(', ')}${more > 0 ? ` (+${more} more)` : ''}`;

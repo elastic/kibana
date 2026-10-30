@@ -55,6 +55,15 @@ describe('dedupeCoverageGaps', () => {
     expect(gaps[0].technique_id?.length).toBeLessThanOrEqual(64);
   });
 
+  it('keys dedupe on the raw strings before truncating them', () => {
+    const prefix = 'word '.repeat(45);
+    const { gaps } = dedupeCoverageGaps([
+      { reason: 'unknown_technique_id', detail: `${prefix}T1` },
+      { reason: 'unknown_technique_id', detail: `${prefix}T2` },
+    ]);
+    expect(gaps).toHaveLength(2);
+  });
+
   it('flags a list that arrived at the cap as a lower bound', () => {
     const input = Array.from({ length: 100 }, (_, index) => ({
       reason: 'collapsed',
@@ -107,6 +116,17 @@ describe('describeGap', () => {
     const described = describeGaps(deduped, 100) ?? '';
     expect(described.length).toBeLessThanOrEqual(100);
     expect(described).toMatch(/\(unknown technique id\) \(\+\d+ more\)$/);
+  });
+
+  it('truncates the first item when it alone exceeds maxChars', () => {
+    const deduped = dedupeCoverageGaps([
+      { reason: 'unknown_technique_id', detail: 'word '.repeat(35) },
+      { reason: 'input_truncated', detail: 'x' },
+    ]);
+    const described = describeGaps(deduped, 60);
+    expect(described).toBeDefined();
+    expect(described?.length).toBeLessThanOrEqual(60);
+    expect(described).toMatch(/\(\+1 more\)$/);
   });
 
   it('describes nothing for no gaps', () => {

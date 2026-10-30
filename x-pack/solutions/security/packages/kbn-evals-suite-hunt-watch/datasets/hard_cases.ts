@@ -148,15 +148,15 @@ export const hardCases: HuntWatchExample[] = [
   },
   {
     // One IOC over `MAX_HUNT_REPORT_IOCS`: the coordinator hunts the prefix and records the rest as
-    // `input_truncated`, a gap no later run can close, so the run is `partial` at `hunt`, the
-    // report retires with evidence marked incomplete, and no Proposal is minted on a clean prefix.
+    // `input_truncated`, a gap no later run can close, so the hunt child emits `retired_incomplete`,
+    // packaging closes the Investigation as benign with the retired summary, the report retires
+    // with evidence marked incomplete, and the branch ends `completed`.
     id: 'hard-partial-ioc-dump',
     cohort: 'hard',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.iocDump] },
     output: {
       expected: {
-        outcome: ['partial'],
-        incompleteStage: 'hunt',
+        outcome: ['completed'],
         indexScopeBlocked: false,
         reports: [
           {
@@ -166,9 +166,7 @@ export const hardCases: HuntWatchExample[] = [
             pendingProposals: 0,
             evidenceWritten: true,
             sseAttachment: false,
-            // Opened before the hunt and left open: an `incomplete_final` hunt writes evidence
-            // but records no verdict, so nothing closes it.
-            investigationStatus: 'open',
+            investigationStatus: 'closed',
           },
         ],
       },

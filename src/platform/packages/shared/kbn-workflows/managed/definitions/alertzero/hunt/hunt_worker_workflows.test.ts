@@ -1366,14 +1366,17 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
     expect(message).toContain('Closed this Investigation as benign.');
   });
 
-  it('says the Investigation summary names the gaps only when the hunt reported some', () => {
-    const withGaps = conclusion(
-      retiredContext('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])
-    );
-    const withoutGaps = conclusion(retiredContext('retired_incomplete'));
-    expect(withGaps).toContain('The Investigation summary names what was not searched.');
-    expect(withoutGaps).not.toContain('names what was not searched');
-    expect(withoutGaps).toContain('The report will not be swept again on its own');
+  // Whether the Investigation summary names the gaps depends on packaging having closed it, which
+  // only the packaging summary knows (a held or failed close still returns `packaged`).
+  it('leaves the claim about naming the gaps to the packaging summary', () => {
+    const gaps = [{ reason: 'input_truncated', detail: 'x' }];
+    for (const message of [
+      conclusion(retiredContext('retired_incomplete', gaps)),
+      conclusion(retiredContext('retired_incomplete')),
+    ]) {
+      expect(message).not.toContain('names what was not searched');
+      expect(message).toContain('The report will not be swept again on its own');
+    }
   });
 
   it('never claims coverage items were recorded, which the Worker cannot see', () => {
