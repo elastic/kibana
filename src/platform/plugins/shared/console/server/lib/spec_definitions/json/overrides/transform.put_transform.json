@@ -19,8 +19,7 @@
         "aggregations": {
           "__template": {
             "NAME": {}
-          },
-          "__scope_link": "GLOBAL.aggregations"
+          }
         }
       },
       "source": {

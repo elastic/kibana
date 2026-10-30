@@ -30,7 +30,7 @@
         "properties": {
           "*": {
             "type": "",
-            "path": "",
+            "rename_from": "",
             "format": ""
           }
         },
