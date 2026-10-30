@@ -1271,6 +1271,39 @@ describe('huntBehavior', () => {
       expect(debugSpy).not.toHaveBeenCalledWith(expect.stringContaining('ungrounded query'));
     });
 
+    describe('the cross-project flag reaching the source gates', () => {
+      const cpsAllowed = ['logs-aws.*', '*:logs-aws.*', 'linked:-logs-aws.cloudtrail-*'];
+      const unqualifiedQuery = GROUNDED_ESQL;
+
+      it('refuses an unqualified source that fans out to an excluded project', async () => {
+        generateByTechnique({ 'T1078.004': unqualifiedQuery });
+
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...executeParams, allowed_indices: cpsAllowed, cross_project_search: true },
+          esClient
+        );
+
+        expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_out_of_scope');
+        expect(executeEsqlMock).not.toHaveBeenCalled();
+      });
+
+      it('keeps the same source local, and allowed, when the flag is off', async () => {
+        generateByTechnique({ 'T1078.004': unqualifiedQuery });
+
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...executeParams, allowed_indices: cpsAllowed },
+          esClient
+        );
+
+        expect(result.behaviors[0].execution?.inconclusive_reason).not.toBe('query_out_of_scope');
+        expect(executeEsqlMock).toHaveBeenCalled();
+      });
+    });
+
     it.each(UNGROUNDED_QUERY_FIXTURES)(
       '$name: rescues through the real wrapper on the retry',
       async ({ reportText, evidenceQuote, iocValues, query, rewrittenQuery }) => {

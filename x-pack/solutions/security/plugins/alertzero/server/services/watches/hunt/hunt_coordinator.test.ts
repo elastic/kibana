@@ -682,6 +682,7 @@ describe('huntCoordinator', () => {
           'logs-endpoint.events.process-default*',
           '*:logs-endpoint.events.process-default*',
         ],
+        cross_project_search: true,
       }),
       esClient,
       undefined
