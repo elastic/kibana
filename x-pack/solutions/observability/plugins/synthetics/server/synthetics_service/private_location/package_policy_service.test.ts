@@ -37,6 +37,8 @@ const makeServer = () => {
   });
   const unsafeClient = { asScopedToNamespace };
   const getUnsafeInternalClient = jest.fn(() => unsafeClient);
+  const internalRepository = { __internalRepository: true };
+  const createInternalRepository = jest.fn(() => internalRepository);
   const fleetBulkCreate = jest.fn().mockResolvedValue({ created: [], failed: [] });
   const fleetBulkUpdate = jest.fn().mockResolvedValue({ updatedPolicies: [], failedPolicies: [] });
   const fleetGetByIDs = jest.fn().mockResolvedValue([]);
@@ -58,16 +60,17 @@ const makeServer = () => {
       agentPolicyService: { getByIds, bumpRevision },
     },
     coreStart: {
-      savedObjects: { getUnsafeInternalClient, createInternalRepository: () => ({}) },
+      savedObjects: { getUnsafeInternalClient, createInternalRepository },
       elasticsearch: { client: { asInternalUser: { __es: true } } },
     },
   } as unknown as SyntheticsServerSetup;
 
   return {
     server,
-    unsafeClient,
     asScopedToNamespace,
     getUnsafeInternalClient,
+    internalRepository,
+    createInternalRepository,
     fleetBulkCreate,
     fleetBulkUpdate,
     fleetGetByIDs,
@@ -85,8 +88,13 @@ const agentPolicy = (spaceIds?: string[]): AgentPolicy =>
 
 describe('PackagePolicyService.getByIds', () => {
   it('uses one unscoped bulk get across unique spaces and forwards requested fields', async () => {
-    const { server, unsafeClient, asScopedToNamespace, getUnsafeInternalClient, fleetGetByIDs } =
-      makeServer();
+    const {
+      server,
+      internalRepository,
+      createInternalRepository,
+      getUnsafeInternalClient,
+      fleetGetByIDs,
+    } = makeServer();
 
     await new PackagePolicyService(server).getByIds({
       spaceId: 'space-one',
@@ -95,12 +103,31 @@ describe('PackagePolicyService.getByIds', () => {
       fields: ['name', 'condition'],
     });
 
-    expect(getUnsafeInternalClient).toHaveBeenCalledTimes(1);
-    expect(asScopedToNamespace).not.toHaveBeenCalled();
-    expect(fleetGetByIDs).toHaveBeenCalledWith(unsafeClient, ['policy-one', 'policy-two'], {
+    expect(createInternalRepository).toHaveBeenCalledTimes(1);
+    expect(getUnsafeInternalClient).not.toHaveBeenCalled();
+    expect(fleetGetByIDs).toHaveBeenCalledWith(internalRepository, ['policy-one', 'policy-two'], {
       ignoreMissing: true,
       spaceIds: ['space-one', DEFAULT_SPACE_ID, 'space-two'],
       fields: ['name', 'condition'],
+    });
+  });
+
+  // The unsafe internal client's spaces extension resolves `*` with a
+  // credential-less `_has_privileges` call (401), so an all-spaces lookup must
+  // go through the extension-free internal repository.
+  it('reads all-spaces lookups through the internal repository, not the unsafe client', async () => {
+    const { server, internalRepository, getUnsafeInternalClient, fleetGetByIDs } = makeServer();
+
+    await new PackagePolicyService(server).getByIds({
+      spaceId: ALL_SPACES_ID,
+      packagePolicyIds: ['policy-one'],
+      additionalSpaceIds: [ALL_SPACES_ID, 'space-two'],
+    });
+
+    expect(getUnsafeInternalClient).not.toHaveBeenCalled();
+    expect(fleetGetByIDs).toHaveBeenCalledWith(internalRepository, ['policy-one'], {
+      ignoreMissing: true,
+      spaceIds: [ALL_SPACES_ID, DEFAULT_SPACE_ID, 'space-two'],
     });
   });
 });
