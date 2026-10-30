@@ -12,7 +12,7 @@ import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../hooks/use_automations';
 
 jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
-jest.mock('../../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({

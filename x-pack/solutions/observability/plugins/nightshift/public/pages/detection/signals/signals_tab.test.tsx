@@ -19,8 +19,8 @@ import { SignalsTab } from './signals_tab';
 const mockAddWarning = jest.fn();
 const mockTimeRangeChange = jest.fn();
 
-jest.mock('../../../common/format_timestamp', () => ({
-  ...jest.requireActual('../../../common/format_timestamp'),
+jest.mock('../../../hooks/use_format_timestamp', () => ({
+  ...jest.requireActual('../../../hooks/use_format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/detection/detection_details_flyout', () => ({

@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Redirect, useHistory, useParams } from 'react-router-dom';
-import { NightshiftAppHeader } from '../app/app_header';
+import { NightshiftAppHeader } from '../components/app_header';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeTabsAvailability } from './hooks/use_knowledge_tabs_availability';
 import {

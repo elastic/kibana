@@ -15,7 +15,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import type { Detection } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { getChangePointLabel } from '../../../common/change_point';
 import { DetectionDiscoveryStatus } from '../../../components/entities/detection/detection_discovery_status';

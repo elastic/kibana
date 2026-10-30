@@ -8,7 +8,6 @@
 export {
   type EsqlQuery,
   type QueriesGetResponse,
-  type QueriesOccurrencesGetResponse,
   type QueryFeature,
   type QueryLink,
   type QueryType,

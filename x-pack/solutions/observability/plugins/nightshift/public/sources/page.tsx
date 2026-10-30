@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback } from 'react';
-import { NightshiftAppHeader } from '../app/app_header';
+import { NightshiftAppHeader } from '../components/app_header';
 import { getWorkflowFailureMessage } from '../common/errors';
 import { SignificantEventsPageProvider } from '../data/discovery/significant_events_page_context';
 import { useBlocksNewActivity } from '../data/maintenance/use_significant_events_maintenance';

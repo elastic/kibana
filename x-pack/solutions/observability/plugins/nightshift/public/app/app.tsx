@@ -33,14 +33,14 @@ import {
   type InvestigationViewSource,
 } from '../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
-import { useInvestigationSections } from '../hooks/use_investigation_sections';
+import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
   type InvestigationListHandle,
-} from '../investigation/investigation_list';
-import { isInvestigationSectionVisible } from '../investigation/investigation_section';
-import { InvestigationSeverityTiles } from '../investigation/investigation_severity_tiles';
-import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
+} from '../components/entities/investigation/investigation_list';
+import { isInvestigationSectionVisible } from '../components/entities/investigation/investigation_section';
+import { InvestigationSeverityTiles } from '../components/entities/investigation/investigation_severity_tiles';
+import { useFlyoutShareUrlCustomAction } from '../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,

@@ -41,7 +41,7 @@ jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../data/run_quotas/use_significant_events_run_quotas', () => ({
   useRunQuotas: jest.fn(),
 }));
-jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({

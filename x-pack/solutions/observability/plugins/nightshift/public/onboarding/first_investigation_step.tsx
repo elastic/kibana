@@ -31,7 +31,7 @@ import type {
   OnboardingSuggestion,
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { useStartInvestigation } from '../hooks/use_start_investigation';
+import { useStartInvestigation } from '../data/investigations/use_start_investigation';
 import { useStartOnboardingSuggestions } from './use_onboarding';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
 

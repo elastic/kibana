@@ -39,7 +39,7 @@ import { buildFeatureDiscoverParams } from '../../../../common/discover_helpers'
 import { getKnowledgeIndicatorTitle } from '../../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../../../../common/get_confidence_color';
 import { FlyoutMetadataCard } from '../../../../components/ui/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../../common/flyout_toolbar_header';
+import { FlyoutToolbarHeader } from '../../../../components/ui/flyout_toolbar_header';
 import { SeverityBadge } from '../../../../components/ui/severity_badge';
 import { DurabilityBadge } from '../durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../utils/get_knowledge_indicator_expires_at';

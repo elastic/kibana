@@ -31,8 +31,8 @@ import React, {
   type UIEvent,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { NightshiftAppHeader } from '../../app/app_header';
-import type { NightshiftAppHeaderProps } from '../../app/app_header';
+import { NightshiftAppHeader } from '../../components/app_header';
+import type { NightshiftAppHeaderProps } from '../../components/app_header';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import {
   NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
