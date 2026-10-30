@@ -419,6 +419,28 @@ describe('ActionsClientLlm', () => {
         expect(mockLogger.error).toHaveBeenCalledTimes(1);
       });
 
+      it('falls back to the configured model when the empty response omits it', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '',
+          tokens: { completion: 0, prompt: 10, total: 10 },
+          toolCalls: [],
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          model: 'configured-model',
+        });
+
+        const error = await actionsClientLlm._call(prompt).catch((e) => e);
+
+        expect(error).toBeInstanceOf(EmptyModelResponseError);
+        expect(error.message).toContain('configured-model');
+      });
+
       it('treats a whitespace-only response as an empty response', async () => {
         (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
           content: '   \n',

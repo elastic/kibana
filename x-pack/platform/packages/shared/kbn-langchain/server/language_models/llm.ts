@@ -153,7 +153,7 @@ export class ActionsClientLlm extends LLM {
         this.#throwIfResponseIsEmpty({
           completionTokens: result.tokens?.completion,
           content: result.content,
-          model: result.model,
+          model: result.model ?? this.model,
           promptTokens: result.tokens?.prompt,
           toolCallCount: result.toolCalls?.length,
         });
