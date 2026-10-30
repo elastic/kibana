@@ -9,7 +9,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 
 import {
   EuiText,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiCallOut,
   EuiTextColor,
   EuiDescriptionList,
@@ -114,6 +114,6 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
       )}
     </Fragment>
   ) : (
-    <EuiLoadingLogo logo="logoKibana" size="xl" />
+    <EuiLoadingSpinner size="xl" />
   );
 });

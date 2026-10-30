@@ -14,7 +14,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
@@ -149,7 +149,7 @@ export function ServiceDashboards() {
     <EuiPanel hasBorder={true}>
       {status === FETCH_STATUS.LOADING ? (
         <EuiEmptyPrompt
-          icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+          icon={<EuiLoadingSpinner size="xl" />}
           title={
             <h4>
               {i18n.translate('xpack.apm.serviceDashboards.loadingServiceDashboards', {

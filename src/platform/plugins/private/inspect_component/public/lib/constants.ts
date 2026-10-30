@@ -318,7 +318,6 @@ export const EUI_COMPONENTS_DOCS_MAP = new Map<string, string>([
   ['EuiListGroupItem', '/components/display/list-group/#EuiListGroupItem'],
   ['EuiLoadingChart', '/components/display/loading/#chart'],
   ['EuiLoadingElastic', '/components/display/loading/#elastic'],
-  ['EuiLoadingLogo', '/components/display/loading/#logos'],
   ['EuiLoadingSpinner', '/components/display/loading/#spinner'],
   ['EuiMarkdownEditor', '/components/editors-and-syntax/markdown/editor'],
   ['EuiMarkdownFormat', '/components/editors-and-syntax/markdown/format'],

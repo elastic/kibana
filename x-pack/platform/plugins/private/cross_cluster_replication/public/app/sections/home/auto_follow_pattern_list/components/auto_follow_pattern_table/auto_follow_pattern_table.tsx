@@ -9,7 +9,7 @@ import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiInMemoryTableProps, EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { EuiInMemoryTable, EuiLink, EuiLoadingLogo, EuiOverlayMask, EuiHealth } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiLoadingSpinner, EuiOverlayMask, EuiHealth } from '@elastic/eui';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   AutoFollowPatternDeleteProvider,
@@ -292,7 +292,7 @@ export class AutoFollowPatternTable extends PureComponent<
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingLogo logo="logoKibana" size="xl" />
+          <EuiLoadingSpinner size="xl" />
         </EuiOverlayMask>
       );
     }

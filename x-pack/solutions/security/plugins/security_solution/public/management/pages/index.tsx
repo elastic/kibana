@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { NotesContainer } from './notes';
@@ -107,7 +107,7 @@ export const ManagementContainer = memo(() => {
     return (
       <ManagementEmptyStateWrapper>
         <EuiEmptyPrompt
-          icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+          icon={<EuiLoadingSpinner size="xl" />}
           title={
             <h2>
               {i18n.translate(

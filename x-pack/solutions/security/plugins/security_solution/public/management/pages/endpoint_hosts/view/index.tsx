@@ -15,7 +15,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   type EuiSelectableProps,
   type CriteriaWithPagination,
   type EuiSuperDatePickerProps,
@@ -589,7 +589,7 @@ export const EndpointList = () => {
         return (
           <ManagementEmptyStateWrapper>
             <EuiEmptyPrompt
-              icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+              icon={<EuiLoadingSpinner size="xl" />}
               title={
                 <h2>
                   {i18n.translate(

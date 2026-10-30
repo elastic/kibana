@@ -14,7 +14,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   useEuiTheme,
   EuiPanel,
 } from '@elastic/eui';
@@ -106,7 +106,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
   if (typeof dataView === 'undefined') {
     return (
       <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        icon={<EuiLoadingSpinner size="xl" />}
         title={<h2>{PLUGIN_NAME}</h2>}
         body={<p>Loading...</p>}
       />

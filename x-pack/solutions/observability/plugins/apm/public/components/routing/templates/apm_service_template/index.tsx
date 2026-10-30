@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
@@ -227,8 +227,7 @@ function TemplateWithContext({
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiSpacer size="l" />
-              <EuiLoadingLogo
-                logo="logoObservability"
+              <EuiLoadingSpinner
                 size="l"
                 data-test-subj="apmMainTemplateServiceAgentLoader"
               />

@@ -17,7 +17,7 @@ import { DeprecationCallout } from '../components';
 
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiPageSection,
   EuiPageHeader,
@@ -504,7 +504,7 @@ export class JobCreateUi extends Component {
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingLogo logo="logoKibana" size="xl" />
+          <EuiLoadingSpinner size="xl" />
         </EuiOverlayMask>
       );
     }

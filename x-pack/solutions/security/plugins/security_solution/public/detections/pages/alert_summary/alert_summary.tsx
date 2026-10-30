@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_SUMMARY } from '../../../app/translations';
@@ -40,7 +40,7 @@ export const AlertSummaryPage = memo(() => {
       return (
         <EuiEmptyPrompt
           data-test-subj={LOADING_INTEGRATIONS_TEST_ID}
-          icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+          icon={<EuiLoadingSpinner size="xl" />}
           title={<h2>{LOADING_INTEGRATIONS}</h2>}
         />
       );

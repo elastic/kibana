@@ -19,15 +19,13 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiHorizontalRule,
-  EuiLoadingLogo,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
-  type EuiSwitchEvent,
-} from '@elastic/eui';
+  type EuiSwitchEvent } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { extractQueryParams, indices } from '../../../shared_imports';
@@ -840,7 +838,7 @@ export class FollowerIndexForm extends PureComponent<Props, State> {
     if (apiStatus === API_STATUS.SAVING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingLogo logo="logoKibana" size="xl" />
+          <EuiLoadingSpinner size="xl" />
         </EuiOverlayMask>
       );
     }

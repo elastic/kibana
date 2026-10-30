@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiIcon,
   EuiMarkdownFormat,
@@ -51,7 +51,7 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
   <EuiEmptyPrompt
     data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.SCANNING_VULNERABILITIES}
     color="plain"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    icon={<EuiLoadingSpinner size="xl" />}
     title={
       <h2>
         <FormattedMessage
@@ -212,7 +212,7 @@ const CnvmIndexTimeout = () => (
   <EuiEmptyPrompt
     data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
     color="plain"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    icon={<EuiLoadingSpinner size="xl" />}
     title={
       <h2>
         <FormattedMessage

@@ -21,13 +21,11 @@ import {
   EuiForm,
   EuiFormHelpText,
   EuiFormRow,
-  EuiLoadingLogo,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+  EuiTitle } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
@@ -776,7 +774,7 @@ export class AutoFollowPatternForm extends PureComponent<Props, State> {
     if (apiStatus === API_STATUS.SAVING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingLogo logo="logoKibana" size="xl" />
+          <EuiLoadingSpinner size="xl" />
         </EuiOverlayMask>
       );
     }

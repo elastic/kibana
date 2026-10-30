@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingLogo, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { IOCRightPanelKey } from '../../../../flyout/ioc_details/constants/panel_keys';
@@ -67,7 +67,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
   }, [enableNewFlyout, indicator, openIocFlyout, openFlyout]);
 
   if (isLoading) {
-    return <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />;
+    return <EuiLoadingSpinner data-test-subj={LOADING_LOGO_TEST_ID} size="xl" />;
   }
 
   return (

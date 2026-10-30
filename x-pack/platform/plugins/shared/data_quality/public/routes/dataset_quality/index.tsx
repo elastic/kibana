@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import type { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,7 +41,7 @@ const ConnectedContent = React.memo(() => {
   ) : (
     <>
       <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        icon={<EuiLoadingSpinner size="xl" />}
         title={
           <FormattedMessage
             id="xpack.dataQuality.Initializing"

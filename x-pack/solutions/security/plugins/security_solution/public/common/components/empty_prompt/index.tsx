@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingLogo } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 const EmptyPromptLazy = lazy(() => import('./empty_prompt'));
 
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
 export const EmptyPrompt = ({ onSkip }: { onSkip?: () => void }) => (
-  <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" css={centerLogoStyle} />}>
+  <Suspense fallback={<EuiLoadingSpinner size="xl" css={centerLogoStyle} />}>
     <EmptyPromptLazy onSkip={onSkip} />
   </Suspense>
 );

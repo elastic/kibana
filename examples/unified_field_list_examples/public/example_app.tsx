@@ -15,7 +15,7 @@ import {
   EuiPageBody,
   EuiTitle,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -76,7 +76,7 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   if (typeof dataView === 'undefined') {
     return (
       <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        icon={<EuiLoadingSpinner size="xl" />}
         title={<h2>{PLUGIN_NAME}</h2>}
         body={<p>Loading...</p>}
       />

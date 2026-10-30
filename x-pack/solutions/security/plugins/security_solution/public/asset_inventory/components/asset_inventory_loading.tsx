@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { AssetInventoryTitle } from './asset_inventory_title';
 import { CenteredWrapper } from './onboarding/centered_wrapper';
 import { TEST_SUBJ_LOADING } from '../constants';
@@ -19,7 +19,7 @@ export const AssetInventoryLoading = () => (
       <AssetInventoryTitle />
       <EuiSpacer size="l" />
       <CenteredWrapper>
-        <EuiLoadingLogo logo="logoSecurity" size="xl" data-test-subj={TEST_SUBJ_LOADING} />
+        <EuiLoadingSpinner size="xl" data-test-subj={TEST_SUBJ_LOADING} />
       </CenteredWrapper>
     </EuiFlexItem>
   </EuiFlexGroup>

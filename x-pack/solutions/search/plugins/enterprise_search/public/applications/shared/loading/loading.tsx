@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiLoadingLogo, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import * as Styles from './styles';
 
@@ -15,7 +15,7 @@ export const Loading: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   return (
     <div css={Styles.enterpriseSearchLoading(euiTheme)} data-test-subj="enterpriseSearchLoading">
-      <EuiLoadingLogo size="xl" logo="logoElasticsearch" data-test-subj="euiLoadingLogo" />
+      <EuiLoadingSpinner size="xl" data-test-subj="euiLoadingLogo" />
     </div>
   );
 };

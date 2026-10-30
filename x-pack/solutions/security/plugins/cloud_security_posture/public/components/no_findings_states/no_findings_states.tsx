@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiButton,
   EuiEmptyPrompt,
   EuiIcon,
@@ -89,7 +89,7 @@ const Indexing = () => (
   <EuiEmptyPrompt
     data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING}
     color="plain"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    icon={<EuiLoadingSpinner size="xl" />}
     title={
       <h2>
         <FormattedMessage
@@ -113,7 +113,7 @@ const IndexTimeout = () => (
   <EuiEmptyPrompt
     data-test-subj={NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
     color="plain"
-    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    icon={<EuiLoadingSpinner size="xl" />}
     title={
       <h2>
         <FormattedMessage

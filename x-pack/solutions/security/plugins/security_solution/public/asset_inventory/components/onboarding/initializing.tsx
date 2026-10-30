@@ -12,7 +12,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiText,
   EuiIcon,
 } from '@elastic/eui';
@@ -32,7 +32,7 @@ export const Initializing = () => {
         <CenteredWrapper>
           <EuiEmptyPrompt
             data-test-subj={TEST_SUBJ_ONBOARDING_INITIALIZING}
-            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+            icon={<EuiLoadingSpinner size="xl" />}
             title={
               <h2>
                 <FormattedMessage

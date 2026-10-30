@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import type { DatasetQualityDetailsController } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality_details';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
@@ -38,7 +38,7 @@ const ConnectedContent = React.memo(() => {
   ) : (
     <>
       <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        icon={<EuiLoadingSpinner size="xl" />}
         title={
           <FormattedMessage
             id="xpack.dataQuality.details.Initializing"

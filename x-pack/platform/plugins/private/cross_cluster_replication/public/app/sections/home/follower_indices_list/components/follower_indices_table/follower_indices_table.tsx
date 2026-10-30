@@ -13,7 +13,7 @@ import type {
   EuiInMemoryTableProps,
   EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
-import { EuiHealth, EuiInMemoryTable, EuiLink, EuiLoadingLogo, EuiOverlayMask } from '@elastic/eui';
+import { EuiHealth, EuiInMemoryTable, EuiLink, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
@@ -286,7 +286,7 @@ export class FollowerIndicesTable extends PureComponent<
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingLogo logo="logoKibana" size="xl" />
+          <EuiLoadingSpinner size="xl" />
         </EuiOverlayMask>
       );
     }

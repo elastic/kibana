@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import {
@@ -39,7 +39,7 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
         isEmptyState
         emptyPageBody={
           <EuiPageTemplate.EmptyPrompt color="transparent">
-            <EuiLoadingLogo data-test-subj={LOADING_LOGO_TEST_ID} logo="logoSecurity" size="xl" />
+            <EuiLoadingSpinner data-test-subj={LOADING_LOGO_TEST_ID} size="xl" />
           </EuiPageTemplate.EmptyPrompt>
         }
       />

@@ -13,7 +13,7 @@ import {
   EuiDescriptionListTitle,
   EuiEmptyPrompt,
   EuiImage,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +31,7 @@ import noResultsIllustrationLight from './assets/no_results_light.svg';
 export const MetricsTableLoadingContent = () => (
   <EuiEmptyPrompt
     data-test-subj="metricsTableLoadingContent"
-    icon={<EuiLoadingLogo logo="logoMetrics" size="xl" />}
+    icon={<EuiLoadingSpinner size="xl" />}
     title={
       <h2>
         <FormattedMessage

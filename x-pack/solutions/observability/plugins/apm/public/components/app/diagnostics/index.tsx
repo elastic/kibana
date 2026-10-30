@@ -8,7 +8,7 @@
 import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { z } from '@kbn/zod/v4';
-import { EuiButton, EuiCallOut, EuiLoadingLogo, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLoadingSpinner, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -108,7 +108,7 @@ export function DiagnosticsTemplate({ children }: { children: React.ReactChild }
   if (isLoading) {
     return (
       <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+        icon={<EuiLoadingSpinner size="xl" />}
         title={
           <h2>
             {i18n.translate('xpack.apm.diagnostics.loading', {

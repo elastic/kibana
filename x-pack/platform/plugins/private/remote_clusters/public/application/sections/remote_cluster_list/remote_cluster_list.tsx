@@ -13,7 +13,7 @@ import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
 import {
   EuiButton,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiPageSection,
@@ -114,7 +114,7 @@ export class RemoteClusterList extends Component<Props> {
     if (isCopyingCluster || isRemovingCluster) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingLogo logo="logoKibana" size="xl" />
+          <EuiLoadingSpinner size="xl" />
         </EuiOverlayMask>
       );
     }

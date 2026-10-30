@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageHeader } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
@@ -52,7 +52,7 @@ const overviewUnavailablePrompt = (
 const overviewLoadingPrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceOverviewLoading"
-    icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+    icon={<EuiLoadingSpinner size="xl" />}
     title={
       <h2>
         {i18n.translate('xpack.digitalExperience.application.overview.loading', {

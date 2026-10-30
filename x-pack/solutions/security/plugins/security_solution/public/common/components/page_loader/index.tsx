@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 
 export const PageLoader = () => (
-  <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />} />
+  <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />
 );

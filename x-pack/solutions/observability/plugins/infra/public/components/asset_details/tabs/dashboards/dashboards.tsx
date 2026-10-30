@@ -14,7 +14,7 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
@@ -198,7 +198,7 @@ export function Dashboards() {
     return (
       <EuiPanel hasBorder>
         <EuiEmptyPrompt
-          icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+          icon={<EuiLoadingSpinner size="xl" />}
           title={
             <h4>
               {i18n.translate('xpack.infra.customDashboards.loadingCustomDashboards', {

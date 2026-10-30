@@ -183,7 +183,6 @@ const EUI_COMPONENTS: ReadonlySet<string> = new Set([
   'EuiListGroupItem',
   'EuiLoadingChart',
   'EuiLoadingElastic',
-  'EuiLoadingLogo',
   'EuiLoadingSpinner',
   'EuiMarkdownContext',
   'EuiMarkdownEditor',

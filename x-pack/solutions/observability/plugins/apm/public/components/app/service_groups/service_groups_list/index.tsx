@@ -6,7 +6,7 @@
  */
 import {
   EuiEmptyPrompt,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -69,7 +69,7 @@ export function ServiceGroupsList() {
   if (isLoading) {
     return (
       <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+        icon={<EuiLoadingSpinner size="xl" />}
         title={
           <h2>
             {i18n.translate('xpack.apm.servicesGroups.loadingServiceGroups', {

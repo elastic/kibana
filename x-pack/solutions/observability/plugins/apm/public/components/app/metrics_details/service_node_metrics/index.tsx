@@ -12,7 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -202,7 +202,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
 
       {isLoading && (
         <EuiEmptyPrompt
-          icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+          icon={<EuiLoadingSpinner size="xl" />}
           title={
             <h2>
               {i18n.translate('xpack.apm.serviceMetrics.loading', {

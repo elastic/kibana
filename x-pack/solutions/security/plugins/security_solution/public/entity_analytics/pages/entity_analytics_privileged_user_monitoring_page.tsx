@@ -10,7 +10,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingLogo,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -215,7 +215,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
             />
             <EuiFlexGroup alignItems="center" justifyContent="center" css={fullHeightCSS}>
               <EuiFlexItem grow={false}>
-                <EuiLoadingLogo logo="logoSecurity" size="xl" />
+                <EuiLoadingSpinner size="xl" />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
@@ -283,7 +283,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
                       />
                     </h2>
                   }
-                  icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+                  icon={<EuiLoadingSpinner size="xl" />}
                   body={
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.initEngine.description"
