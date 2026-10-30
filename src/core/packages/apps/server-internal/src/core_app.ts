@@ -11,6 +11,7 @@ import { stringify } from 'querystring';
 import type { Env, IConfigService } from '@kbn/config';
 import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
@@ -481,17 +482,22 @@ export class CoreAppsService {
       );
     });
 
+    const pluginAssets = new Map<string, string>();
     for (const [pluginName, pluginInfo] of uiPlugins.internal) {
-      if (!pluginInfo.publicAssetsDir) continue;
-      /**
-       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
-       * Eventually we only want to serve from the sha scoped path
-       */
+      if (pluginInfo.publicAssetsDir) {
+        pluginAssets.set(pluginName, pluginInfo.publicAssetsDir);
+      }
+    }
+
+    if (pluginAssets.size > 0) {
+      /** Serve both sha-scoped and legacy URLs until plugin code has migrated. */
       [
-        core.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
-        `/plugins/${pluginName}/assets/{path*}`,
+        core.http.staticAssets.prependServerPath('/plugins/{pluginName}/assets/{path*}'),
+        '/plugins/{pluginName}/assets/{path*}',
       ].forEach((path) => {
-        core.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
+        core.http.registerStaticDir(path, (request) => {
+          return pluginAssets.get(request.params.pluginName) ?? Boom.notFound();
+        });
       });
     }
   }
