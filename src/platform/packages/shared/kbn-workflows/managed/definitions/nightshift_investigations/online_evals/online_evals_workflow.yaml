@@ -7,7 +7,9 @@ description: >
 enabled: true
 settings:
   timeout: '15m'
-  # One run per investigation at a time, in arrival order, so rounds are scored in order.
+  # One run per investigation at a time, in arrival order, so rounds are scored in order. The
+  # queue keeps the engine defaults: at most 100 waiting runs, each skipped after 24h, and a
+  # skipped run sends no score or failure event.
   concurrency:
     key: 'online-evals:{{ inputs.investigation_id }}'
     strategy: queue
@@ -57,15 +59,11 @@ triggers:
           type: string
           maxLength: 256
           description: The connector every judge calls.
-      # Required because the step inputs below render a missing value as an empty string, which
-      # the score step rejects for dates.
       required:
         - investigation_id
         - round_id
         - round_kind
         - investigation_started_at
-        - investigation_ended_at
-        - investigation_execution_id
         - judge_connector_id
       additionalProperties: false
 
@@ -86,5 +84,6 @@ steps:
         - name: nightshift_conclusion_quality
       judge_connector_id: '{{ inputs.judge_connector_id }}'
       investigation_started_at: '{{ inputs.investigation_started_at }}'
-      investigation_ended_at: '{{ inputs.investigation_ended_at }}'
-      investigation_execution_id: '{{ inputs.investigation_execution_id }}'
+      # `${{ }}` passes a missing optional input as undefined; `{{ }}` would pass an empty string.
+      investigation_ended_at: '${{ inputs.investigation_ended_at }}'
+      investigation_execution_id: '${{ inputs.investigation_execution_id }}'
