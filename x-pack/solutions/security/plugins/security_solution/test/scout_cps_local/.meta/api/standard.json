@@ -1,5 +1,5 @@
 {
-  "sha1": "9268346bf4cdb7a0ac8488f352f6496de99aa93a",
+  "sha1": "8f6656df11ba16ccbfb64de00f54b1b6fb3a99af",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,8 +70,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 9
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-c30a0b9df7cde34",
+      "title": "Hunt Watch - index scope and worker coverage across projects does not report an unqualified pattern missing when only the linked project has its data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 175,
+        "column": 5
       }
     },
     {
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 174,
-        "column": 5
+        "line": 218,
+        "column": 7
       }
     },
     {
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 197,
-        "column": 6
+        "line": 240,
+        "column": 5
       }
     },
     {
@@ -112,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 235,
+        "line": 278,
         "column": 32
       }
     },
@@ -126,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
-        "line": 253,
-        "column": 36
+        "line": 296,
+        "column": 35
       }
     },
     {
