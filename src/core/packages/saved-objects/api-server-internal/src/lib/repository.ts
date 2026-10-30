@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AclChange } from '@kbn/access-control';
 import type { Logger } from '@kbn/logging';
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -61,6 +62,8 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAclOptions,
+  SavedObjectsChangeAclResponse,
   SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
@@ -103,6 +106,7 @@ import {
 import { createRepositoryHelpers } from './utils';
 import { performChangeOwnership } from './apis/change_ownership';
 import { performChangeAccessMode } from './apis/change_access_mode';
+import { performChangeAcl } from './apis/change_acl';
 
 /**
  * Constructor options for {@link SavedObjectsRepository}
@@ -249,13 +253,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObject<T>> {
     const timer = this.serverTiming?.start('so-create', type);
     try {
-      return await performCreate(
-        {
-          type,
-          attributes,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performCreate(
+          {
+            type,
+            attributes,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -271,12 +277,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const timer = this.serverTiming?.start('so-bulk-create');
     try {
-      return await performBulkCreate(
-        {
-          objects,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performBulkCreate(
+          {
+            objects,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -310,13 +318,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
     const timer = this.serverTiming?.start('so-delete', type);
     try {
-      return await performDelete(
-        {
-          type,
-          id,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performDelete(
+          {
+            type,
+            id,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -332,12 +342,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsBulkDeleteResponse> {
     const timer = this.serverTiming?.start('so-bulk-delete');
     try {
-      return await performBulkDelete(
-        {
-          objects,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performBulkDelete(
+          {
+            objects,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -416,12 +428,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsBulkResponse<T>> {
     const timer = this.serverTiming?.start('so-bulk-get');
     try {
-      return await performBulkGet(
-        {
-          objects,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performBulkGet(
+          {
+            objects,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -437,12 +451,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
     const timer = this.serverTiming?.start('so-bulk-resolve');
     try {
-      return await performBulkResolve(
-        {
-          objects,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performBulkResolve(
+          {
+            objects,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -459,13 +475,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObject<T>> {
     const timer = this.serverTiming?.start('so-get', type);
     try {
-      return await performGet(
-        {
-          type,
-          id,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performGet(
+          {
+            type,
+            id,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -482,13 +500,15 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsResolveResponse<T>> {
     const timer = this.serverTiming?.start('so-resolve', type);
     try {
-      return await performResolve(
-        {
-          type,
-          id,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performResolve(
+          {
+            type,
+            id,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -506,14 +526,16 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsUpdateResponse<T>> {
     const timer = this.serverTiming?.start('so-update', type);
     try {
-      return await performUpdate(
-        {
-          type,
-          id,
-          attributes,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performUpdate(
+          {
+            type,
+            id,
+            attributes,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -529,12 +551,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ) {
     const timer = this.serverTiming?.start('so-collect-refs');
     try {
-      return await performCollectMultiNamespaceReferences(
-        {
-          objects,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performCollectMultiNamespaceReferences(
+          {
+            objects,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -575,12 +599,14 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     const timer = this.serverTiming?.start('so-bulk-update');
     try {
-      return await performBulkUpdate(
-        {
-          objects,
-          options,
-        },
-        this.apiExecutionContext
+      return await this.helpers.acl.runInAuditScope(() =>
+        performBulkUpdate(
+          {
+            objects,
+            options,
+          },
+          this.apiExecutionContext
+        )
       );
     } finally {
       timer?.end();
@@ -740,6 +766,25 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     const timer = this.serverTiming?.start('so-change-access');
     try {
       return await performChangeAccessMode({ objects, options }, this.apiExecutionContext);
+    } finally {
+      timer?.end();
+    }
+  }
+
+  /**
+   * {@inheritDoc ISavedObjectsRepository.changeAcl}
+   */
+  async changeAcl(
+    type: string,
+    id: string,
+    change: AclChange,
+    options: SavedObjectsChangeAclOptions
+  ): Promise<SavedObjectsChangeAclResponse> {
+    const timer = this.serverTiming?.start('so-change-acl', type);
+    try {
+      return await this.helpers.acl.runInAuditScope(() =>
+        performChangeAcl({ type, id, change, options }, this.apiExecutionContext)
+      );
     } finally {
       timer?.end();
     }

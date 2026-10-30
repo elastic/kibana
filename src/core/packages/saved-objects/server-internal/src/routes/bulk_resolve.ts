@@ -23,6 +23,7 @@ import {
   catchAndReturnBoomErrors,
   logWarnOnExternalRequest,
   throwIfAnyTypeNotVisibleByAPI,
+  stripAcl,
 } from './utils';
 
 interface RouteDependencies {
@@ -88,7 +89,7 @@ Under certain circumstances, when Kibana is upgraded, saved object migrations ma
       const result = await savedObjects.client.bulkResolve(request.body, {
         migrationVersionCompatibility: 'compatible',
       });
-      return response.ok({ body: result });
+      return response.ok({ body: stripAcl(result) });
     })
   );
 };

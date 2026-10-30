@@ -35,6 +35,7 @@ import type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsAclExtensionFactory,
   SavedObjectsExtensions,
   SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
@@ -126,6 +127,7 @@ export class SavedObjectsService
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
+  private aclExtensionFactory?: SavedObjectsAclExtensionFactory;
   private accessControlTransforms?: SavedObjectsAccessControlTransforms;
 
   private migrator$ = new Subject<IKibanaMigrator>();
@@ -224,6 +226,15 @@ export class SavedObjectsService
           throw new Error('spaces extension is already set, and can only be set once');
         }
         this.spacesExtensionFactory = factory;
+      },
+      setAclExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setAclExtension` after service startup.');
+        }
+        if (this.aclExtensionFactory) {
+          throw new Error('acl extension is already set, and can only be set once');
+        }
+        this.aclExtensionFactory = factory;
       },
       setAccessControlTransforms: (transforms) => {
         if (this.started) {
@@ -384,6 +395,7 @@ export class SavedObjectsService
       encryptionExtensionFactory: this.encryptionExtensionFactory,
       securityExtensionFactory: this.securityExtensionFactory,
       spacesExtensionFactory: this.spacesExtensionFactory,
+      aclExtensionFactory: this.aclExtensionFactory,
     });
 
     if (this.clientFactoryProvider) {

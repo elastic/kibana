@@ -36,6 +36,7 @@ export const performCollectMultiNamespaceReferences = async <T>(
     getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
     createPointInTimeFinder: commonHelper.createPointInTimeFinder.bind(commonHelper),
     securityExtension,
+    aclHelper: helpers.acl,
     objects,
     options: { ...options, namespace },
   });

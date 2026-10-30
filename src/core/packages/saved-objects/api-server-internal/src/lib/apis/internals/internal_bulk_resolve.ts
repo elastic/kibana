@@ -32,6 +32,7 @@ import {
   type WithAuditName,
   SavedObjectsErrorHelpers,
   isSavedObjectErrorResult,
+  getAclObjectKey,
 } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
@@ -88,7 +89,11 @@ export async function internalBulkResolve<T>(
   const { incrementCounterInternal, objects, options = {} } = params;
 
   const { registry, allowedTypes, client, serializer } = apiExecutionContext;
-  const { common: commonHelper, migration: migrationHelper } = apiExecutionContext.helpers;
+  const {
+    common: commonHelper,
+    migration: migrationHelper,
+    acl: aclHelper,
+  } = apiExecutionContext.helpers;
   const { securityExtension } = apiExecutionContext.extensions;
 
   if (objects.length === 0) {
@@ -110,6 +115,7 @@ export async function internalBulkResolve<T>(
   );
 
   const docsToBulkGet: Array<{ _id: string; _index: string }> = [];
+  const docObjects: Array<{ type: string; id: string }> = [];
   const aliasInfoArray: Array<AliasInfo | undefined> = [];
   validObjects.forEach(({ value: { type, id } }, i) => {
     const objectIndex = commonHelper.getIndexForType(type);
@@ -118,6 +124,7 @@ export async function internalBulkResolve<T>(
       _id: serializer.generateRawId(namespace, type, id),
       _index: objectIndex,
     });
+    docObjects.push({ type, id });
     const aliasDoc = aliasDocs[i];
     if (aliasDoc?.found) {
       const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source![LEGACY_URL_ALIAS_TYPE];
@@ -127,6 +134,7 @@ export async function internalBulkResolve<T>(
           _id: serializer.generateRawId(namespace, type, legacyUrlAlias.targetId),
           _index: objectIndex,
         });
+        docObjects.push({ type, id: legacyUrlAlias.targetId });
         const { targetId, purpose } = legacyUrlAlias;
         aliasInfoArray.push({ targetId, purpose });
         return;
@@ -151,6 +159,22 @@ export async function internalBulkResolve<T>(
   ) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
+
+  // An exact or alias match the caller cannot view counts as missing before outcomes are computed,
+  // so that neither a conflict nor an alias outcome reveals it.
+  // shortcut: this check runs before the security extension authorizes the results, so a caller
+  // without recovery primed may cost a second privilege request. Revisit with the move to a single
+  // Security-owned authorizer.
+  const aclDecisions = await aclHelper.authorize(
+    'view',
+    namespace,
+    docObjects.flatMap(({ type, id }, index) => {
+      const doc = bulkGetResponse?.body.docs[index];
+      return doc && 'found' in doc && doc.found ? [{ type, id, source: doc._source }] : [];
+    })
+  );
+  const isVisible = (type: string, id: string) =>
+    aclDecisions.get(getAclObjectKey(type, id))?.status !== 'not_found';
 
   let getResponseIndex = 0;
   let aliasInfoIndex = 0;
@@ -186,10 +210,16 @@ export async function internalBulkResolve<T>(
     }
     const foundExactMatch =
       // @ts-expect-error MultiGetHit._source is optional
-      exactMatchDoc.found && rawDocExistsInNamespace(registry, exactMatchDoc, namespace);
+      exactMatchDoc.found &&
+      // @ts-expect-error MultiGetHit._source is optional
+      rawDocExistsInNamespace(registry, exactMatchDoc, namespace) &&
+      isVisible(either.value.type, either.value.id);
     const foundAliasMatch =
       // @ts-expect-error MultiGetHit._source is optional
-      aliasMatchDoc?.found && rawDocExistsInNamespace(registry, aliasMatchDoc, namespace);
+      aliasMatchDoc?.found &&
+      // @ts-expect-error MultiGetHit._source is optional
+      rawDocExistsInNamespace(registry, aliasMatchDoc, namespace) &&
+      isVisible(either.value.type, aliasInfo!.targetId);
 
     const { type, id } = either.value;
     let result: SavedObjectsResolveResponse<T> | null = null;

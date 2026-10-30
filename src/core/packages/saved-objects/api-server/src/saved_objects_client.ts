@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AclChange } from '@kbn/access-control';
 import type { SavedObject, SavedObjectsRawDocSource } from '..';
 import type {
   SavedObjectsBaseOptions,
@@ -50,6 +51,8 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAclOptions,
+  SavedObjectsChangeAclResponse,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
@@ -494,4 +497,22 @@ export interface SavedObjectsClientContract {
     objects: SavedObjectsChangeAccessControlObject[],
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
+
+  /**
+   * Changes the platform object-level access of an object: replaces its general access and named
+   * grants, claims an object without an owner, or transfers ownership. This is the only way to change
+   * an ACL after creation. The caller must be able to view the object and to perform the change.
+   *
+   * @param type - The type of the object
+   * @param id - The ID of the object
+   * @param change - The access change
+   * @param options {@link SavedObjectsChangeAclOptions} - must include the version the change was prepared against
+   * @returns the {@link SavedObjectsChangeAclResponse}
+   */
+  changeAcl(
+    type: string,
+    id: string,
+    change: AclChange,
+    options: SavedObjectsChangeAclOptions
+  ): Promise<SavedObjectsChangeAclResponse>;
 }

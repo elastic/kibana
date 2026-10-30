@@ -15,7 +15,7 @@ describe('getDefaultSecurityImplementation', () => {
   let implementation: CoreSecurityDelegateContract;
 
   beforeEach(() => {
-    implementation = getDefaultSecurityImplementation();
+    implementation = getDefaultSecurityImplementation(() => undefined);
   });
 
   describe('authc.getCurrentUser', () => {

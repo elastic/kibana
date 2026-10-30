@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AclInput } from '@kbn/access-control';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectAccessControl, SavedObjectReference } from '../..';
 
@@ -72,4 +73,11 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    * using the current user's profile ID.
    */
   accessControl?: Pick<SavedObjectAccessControl, 'accessMode'>;
+
+  /**
+   * Requested platform object-level access for a new object of a type with an access policy. The
+   * caller becomes the owner. Creation fails rather than storing the object with broader access.
+   * Not allowed when overwriting an existing object, whose access is always preserved.
+   */
+  initialAcl?: AclInput;
 }

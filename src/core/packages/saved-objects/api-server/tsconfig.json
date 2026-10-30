@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-saved-objects-common",
+    "@kbn/access-control",
   ],
   "exclude": [
     "target/**/*",

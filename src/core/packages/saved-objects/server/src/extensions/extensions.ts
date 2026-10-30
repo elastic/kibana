@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ISavedObjectsAclExtension } from './acl';
 import type { ISavedObjectsEncryptionExtension } from './encryption';
 import type { ISavedObjectsSecurityExtension } from './security';
 import type { ISavedObjectsSpacesExtension } from './spaces';
@@ -24,8 +25,11 @@ export interface SavedObjectsExtensions {
   securityExtension?: ISavedObjectsSecurityExtension;
   /** The spaces extension - handles retrieving the current space and retrieving available spaces */
   spacesExtension?: ISavedObjectsSpacesExtension;
+  /** The ACL extension - enforces platform object-level security for types with an access policy */
+  aclExtension?: ISavedObjectsAclExtension;
 }
 
 export const ENCRYPTION_EXTENSION_ID = 'encryptedSavedObjects' as const;
 export const SECURITY_EXTENSION_ID = 'security' as const;
 export const SPACES_EXTENSION_ID = 'spaces' as const;
+export const ACL_EXTENSION_ID = 'acl' as const;

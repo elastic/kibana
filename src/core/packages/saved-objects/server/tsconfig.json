@@ -11,6 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/access-control",
     "@kbn/utility-types",
     "@kbn/config-schema",
     "@kbn/logging",

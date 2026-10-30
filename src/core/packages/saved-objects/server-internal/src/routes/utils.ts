@@ -187,3 +187,31 @@ export function logWarnOnExternalRequest(params: LogWarnOnExternalRequest) {
     logger.warn(`The ${method} saved object API ${path} is deprecated.`);
   }
 }
+
+/**
+ * Removes access control lists from a Saved Objects HTTP response: a saved object, a bulk or find
+ * result, or a resolve result. Only the access control API shows ACLs, and only to access managers.
+ */
+export const stripAcl = <T>(result: T): T => {
+  if (Array.isArray(result)) {
+    return result.map(stripAcl) as T;
+  }
+
+  if (!result || typeof result !== 'object') {
+    return result;
+  }
+
+  const {
+    acl,
+    saved_object: savedObject,
+    saved_objects: savedObjects,
+    resolved_objects: resolvedObjects,
+    ...rest
+  } = result as Record<string, unknown>;
+  return {
+    ...rest,
+    ...(savedObject !== undefined && { saved_object: stripAcl(savedObject) }),
+    ...(savedObjects !== undefined && { saved_objects: stripAcl(savedObjects) }),
+    ...(resolvedObjects !== undefined && { resolved_objects: stripAcl(resolvedObjects) }),
+  } as T;
+};

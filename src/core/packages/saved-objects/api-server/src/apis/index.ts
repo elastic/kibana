@@ -90,5 +90,6 @@ export type {
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsChangeAccessModeOptions,
 } from './change_access_control';
+export type { SavedObjectsChangeAclOptions, SavedObjectsChangeAclResponse } from './change_acl';
 export type { SavedObjectsSearchOptions, SavedObjectsSearchResponse } from './search';
 export type { SavedObjectsEsqlOptions, SavedObjectsEsqlResponse } from './esql';

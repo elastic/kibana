@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AccessPolicy } from '@kbn/access-control';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type {
@@ -34,6 +35,7 @@ export class SecurityService
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;
   private readonly workloadTypes = new WorkloadTypeRegistry();
+  private getAccessPolicy: (type: string) => AccessPolicy | undefined = () => undefined;
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -120,8 +122,17 @@ export class SecurityService
     if (!this.securityApi) {
       this.log.warn('Security API was not registered, using default implementation');
     }
-    const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
+    const apiContract =
+      this.securityApi ?? getDefaultSecurityImplementation((type) => this.getAccessPolicy(type));
     return convertSecurityApi(apiContract, this.workloadTypes);
+  }
+
+  /**
+   * Sets where access policies come from. Saved Objects start after security, so the default
+   * object-level security implementation reads policies lazily.
+   */
+  public setAccessPolicyProvider(getAccessPolicy: (type: string) => AccessPolicy | undefined) {
+    this.getAccessPolicy = getAccessPolicy;
   }
 
   public stop() {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AclChange } from '@kbn/access-control';
 import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsClientContract,
@@ -48,6 +49,8 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeAclOptions,
+  SavedObjectsChangeAclResponse,
   SavedObjectsChangeOwnershipOptions,
   SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
@@ -257,5 +260,15 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return this._repository.changeAccessMode(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.changeAcl} */
+  changeAcl(
+    type: string,
+    id: string,
+    change: AclChange,
+    options: SavedObjectsChangeAclOptions
+  ): Promise<SavedObjectsChangeAclResponse> {
+    return this._repository.changeAcl(type, id, change, options);
   }
 }

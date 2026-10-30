@@ -31,6 +31,7 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => 
     isImportableAndExportable: jest.fn(),
     getNameAttribute: jest.fn(),
     supportsAccessControl: jest.fn(),
+    getAccessPolicy: jest.fn(),
     isAccessControlEnabled: jest.fn(),
     setAccessControlEnabled: jest.fn(),
   });

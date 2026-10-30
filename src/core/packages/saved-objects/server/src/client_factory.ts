@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectsAclExtension } from './extensions/acl';
 import type { ISavedObjectsEncryptionExtension } from './extensions/encryption';
 import type { SavedObjectsExtensions } from './extensions/extensions';
 import type { ISavedObjectsSecurityExtension } from './extensions/security';
@@ -56,6 +57,16 @@ export type SavedObjectsEncryptionExtensionFactory = SavedObjectsExtensionFactor
 export type SavedObjectsSecurityExtensionFactory = SavedObjectsExtensionFactory<
   ISavedObjectsSecurityExtension | undefined
 >; // May be undefined if RBAC is disabled
+
+/**
+ * Describes the factory used to create instances of the Saved Objects ACL Extension. It returns
+ * `undefined` when it cannot enforce object-level security for the request, and Core then uses an
+ * extension that fails closed.
+ * @public
+ */
+export type SavedObjectsAclExtensionFactory = SavedObjectsExtensionFactory<
+  ISavedObjectsAclExtension | undefined
+>;
 
 /**
  * Describes the factory used to create instances of the Saved Objects Spaces Extension.

@@ -15,6 +15,7 @@
  * See https://github.com/elastic/kibana/issues/149098.
  */
 
+import type { CanonicalAcl } from '@kbn/access-control';
 import type { SavedObjectsMigrationVersion, SavedObjectError } from './saved_objects';
 
 /**
@@ -136,6 +137,12 @@ export interface SavedObject<T = unknown> {
    * the object (or an admin), even if other users are granted write access via a role.
    */
   accessControl?: SavedObjectAccessControl;
+
+  /**
+   * Platform object-level access control list, as Elasticsearch indexed it. Only Saved Objects
+   * clients see it: HTTP APIs and exports leave it out.
+   */
+  acl?: CanonicalAcl;
 }
 
 /**

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AccessPolicy } from '@kbn/access-control';
 import type { SavedObjectsType } from './saved_objects_type';
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
@@ -105,4 +106,9 @@ export interface ISavedObjectTypeRegistry {
    * Returns whether the type supports access control.
    */
   supportsAccessControl(type: string): boolean;
+
+  /**
+   * Returns the platform object-level security policy of the type, if it declares one.
+   */
+  getAccessPolicy(type: string): AccessPolicy | undefined;
 }

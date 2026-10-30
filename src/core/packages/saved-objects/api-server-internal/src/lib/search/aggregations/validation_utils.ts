@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACL_FIELD } from '@kbn/access-control';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import { fieldDefined, hasFilterKeyError } from '../utils/filter_utils';
 
@@ -30,7 +31,8 @@ export const isRootLevelAttribute = (
   }
 
   const [type, firstPath, ...otherPaths] = splits;
-  if (allowedTypes.includes(firstPath)) {
+  // Access control lists are visible to access managers only, so they cannot be aggregated.
+  if (allowedTypes.includes(firstPath) || firstPath === ACL_FIELD) {
     return false;
   }
   return (

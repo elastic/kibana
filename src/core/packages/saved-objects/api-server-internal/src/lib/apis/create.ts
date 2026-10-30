@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { normalizeAclSource } from '@kbn/access-control';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,
@@ -23,7 +24,13 @@ import type { CreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
-import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
+import {
+  getSavedObjectNamespaces,
+  getCurrentTime,
+  getExpectedVersionProperties,
+  normalizeNamespace,
+  setManaged,
+} from './utils';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -53,6 +60,7 @@ export const performCreate = async <T>(
     serializer: serializerHelper,
     migration: migrationHelper,
     user: userHelper,
+    acl: aclHelper,
   } = helpers;
   const { securityExtension } = extensions;
 
@@ -67,6 +75,7 @@ export const performCreate = async <T>(
     refresh = DEFAULT_REFRESH_SETTING,
     initialNamespaces,
     version,
+    initialAcl,
   } = options;
   const { migrationVersionCompatibility } = options;
   if (!allowedTypes.includes(type)) {
@@ -129,6 +138,9 @@ export const performCreate = async <T>(
         createdBy,
         accessMode,
       });
+  } else {
+    // Overwrites keep the legacy access control even when the client skips the security extension.
+    accessControlToWrite = preflightResult?.existingDocument?._source?.accessControl;
   }
 
   const authorizationResult = await securityExtension?.authorizeCreate({
@@ -148,10 +160,34 @@ export const performCreate = async <T>(
     },
   });
 
+  // An occupied ID the caller cannot view is reported as missing, with or without overwrite, and
+  // overwriting a visible object needs edit. This runs before the conflict below, so the caller
+  // learns only that a hidden ID is unavailable.
+  const occupyingDocument =
+    preflightResult?.existingDocument ?? preflightResult?.error?.conflictingDocument;
+  if (occupyingDocument) {
+    await aclHelper.enforce(overwrite ? 'edit' : 'view', namespace, {
+      type,
+      id,
+      source: occupyingDocument._source,
+    });
+  }
+
   if (preflightResult?.error) {
     // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
   }
+
+  // An overwrite always keeps the stored access, and only access changes can replace it.
+  const existingAcl = normalizeAclSource(preflightResult?.existingDocument?._source);
+  if (preflightResult?.existingDocument && initialAcl) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'Cannot set the initial access of an object that already exists'
+    );
+  }
+  const aclToWrite = preflightResult?.existingDocument
+    ? existingAcl
+    : await aclHelper.getInitialAcl(type, namespace, initialAcl);
 
   // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
@@ -178,6 +214,7 @@ export const performCreate = async <T>(
     ...(updatedBy && { updated_by: updatedBy }),
     ...(Array.isArray(references) && { references }),
     ...(accessControlToWrite && { accessControl: accessControlToWrite }),
+    ...(aclToWrite && { acl: aclToWrite }),
   });
 
   /**
@@ -190,17 +227,25 @@ export const performCreate = async <T>(
 
   const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
+  // With object-level security, the write must hit the document that was authorized: an overwrite
+  // is bound to it, and a create that found no document must not replace one created concurrently.
+  const isAclEnforced = aclHelper.isEnforced(type);
+  const existingDocument = preflightResult?.existingDocument;
   const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,
     index: commonHelper.getIndexForType(type),
     refresh,
     document: raw._source,
-    ...(overwrite && version ? decodeRequestVersion(version) : {}),
+    ...(overwrite && version
+      ? decodeRequestVersion(version)
+      : isAclEnforced && existingDocument
+      ? getExpectedVersionProperties(undefined, existingDocument)
+      : {}),
     require_alias: true,
   };
 
   const { body, statusCode, headers } =
-    id && overwrite
+    id && overwrite && (!isAclEnforced || existingDocument || version)
       ? await client.index(requestParams as IndexRequest, { meta: true })
       : await client.create(requestParams as CreateRequest, { meta: true });
 

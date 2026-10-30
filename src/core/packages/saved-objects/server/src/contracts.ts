@@ -19,6 +19,7 @@ import type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsAclExtensionFactory,
 } from './client_factory';
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
@@ -91,6 +92,11 @@ export interface SavedObjectsServiceSetup {
    * Sets the {@link SavedObjectsSpacesExtensionFactory spaces extension factory}.
    */
   setSpacesExtension: (factory: SavedObjectsSpacesExtensionFactory) => void;
+
+  /**
+   * Sets the {@link SavedObjectsAclExtensionFactory ACL extension factory}.
+   */
+  setAclExtension: (factory: SavedObjectsAclExtensionFactory) => void;
 
   /**
    * Sets the {@link SavedObjectsAccessControlTransforms access control transforms}.

@@ -76,6 +76,8 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
   }
 
   const types = castArray(type).filter((t) => allowedTypes.includes(t));
+  // Raw queries bypass the read filters, so object-level security cannot protect them.
+  helpers.acl.rejectUnsupported(types, 'search');
   if (types.length === 0) {
     return createEmptySearchResponse();
   }

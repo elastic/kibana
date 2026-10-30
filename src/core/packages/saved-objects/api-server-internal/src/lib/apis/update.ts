@@ -86,6 +86,7 @@ export const executeUpdate = async <T>(
     migration: migrationHelper,
     validation: validationHelper,
     user: userHelper,
+    acl: aclHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
@@ -138,6 +139,14 @@ export const executeUpdate = async <T>(
   // doc not in namespace, or doc not found but we're not upserting => throw 404
   if (docOutsideNamespace || (docNotFound && !upsert)) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+  }
+
+  if (!docNotFound) {
+    await aclHelper.enforce('edit', namespace, {
+      type,
+      id,
+      source: preflightDocResult.rawDocSource?._source,
+    });
   }
 
   if (upsert && preflightDocNSResult?.checkResult === 'not_found') {
@@ -196,6 +205,9 @@ export const executeUpdate = async <T>(
       });
     }
 
+    // An upsert that creates the object follows the creation rules, with default access.
+    const aclToWrite = await aclHelper.getInitialAcl(type, namespace);
+
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
     const migratedUpsert = migrationHelper.migrateInputDocument({
@@ -211,6 +223,7 @@ export const executeUpdate = async <T>(
       ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
       ...(accessControlToWrite && { accessControl: accessControlToWrite }),
+      ...(aclToWrite && { acl: aclToWrite }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
     const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
