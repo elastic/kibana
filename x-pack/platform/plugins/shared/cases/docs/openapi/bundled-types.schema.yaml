@@ -6134,7 +6134,7 @@ components:
               required: false
               type: text
           observableTypes: []
-          extractObservables: true
+          extractObservables: false
           workflowTags:
             - soc-triage
           owner: cases
@@ -6242,7 +6242,7 @@ components:
             description: A description of the template.
             tags:
               - Template tag 1
-        extractObservables: true
+        extractObservables: false
         workflowTags:
           - soc-triage
         owner: cases
@@ -6312,7 +6312,7 @@ components:
             label: my-toggle
             required: false
             type: toggle
-        extractObservables: true
+        extractObservables: false
         workflowTags:
           - soc-triage
           - enrichment
