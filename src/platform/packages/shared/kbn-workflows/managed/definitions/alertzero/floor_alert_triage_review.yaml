@@ -209,31 +209,31 @@ steps:
           message: >-
             Another closure proposal for the same pattern was created first. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s were{% else %} was{% endif %} added to it, in Investigation {{ steps.join_on_collision.output.conversation_id }}, and its review decides.
 
-      # Same as a join made when the batch ran: the alerts go into the owner's Investigation and the
-      # owner hears why. Alerts the owner already held add nothing, so nothing is posted for them.
+      # Same as a join made when the batch ran: the owner's Investigation tag puts the alerts in its
+      # Investigation and the owner hears why. They keep this Investigation's tag too. Alerts the
+      # owner already held add nothing, so nothing is posted for them.
       - name: count_joined_alerts
         type: data.set
         with:
           joined_alert_count: "${{ steps.join_on_collision.output.alert_ids | size }}"
 
-      - name: attach_joined_alerts
+      - name: tag_joined_alerts
         type: foreach
-        foreach: "${{ steps.join_on_collision.output.alert_ids | chunk: 20 | json }}"
+        foreach: "${{ steps.join_on_collision.output.alert_ids | chunk: 500 | json }}"
         steps:
-          - name: attach_joined_alert_chunk
-            type: ai.attachment.add
+          - name: tag_joined_alert_chunk
+            type: kibana.SetAlertTags
             on-failure:
               retry:
                 max-attempts: 3
                 delay: 5s
               continue: true
             with:
-              conversation_id: "{{ steps.join_on_collision.output.conversation_id }}"
-              type: security.alerts
-              render_inline: true
-              data:
-                alertIds: "${{ foreach.item }}"
-              description: "Alerts added to this closure proposal"
+              ids: "${{ foreach.item }}"
+              tags:
+                tags_to_add:
+                  - "az:triage_investigation:{{ steps.join_on_collision.output.conversation_id }}"
+                tags_to_remove: []
 
       - name: post_comment_joined_owner
         type: ai.conversation.add_user_message
