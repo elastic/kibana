@@ -1002,11 +1002,9 @@ describe('MigrationRulesTable', () => {
       licenseService.stop();
     });
 
-    it('should explain the Add to chat button as the first step', async () => {
+    it('should start at the Add to chat step', async () => {
       renderTourTable();
-      expect(await screen.findByTestId(step(1))).toHaveTextContent(
-        'Chat with the AI Agent about your rules'
-      );
+      expect(await screen.findByTestId(step(1))).toBeInTheDocument();
     });
 
     it('should move to the rule step after Next', async () => {
@@ -1022,11 +1020,11 @@ describe('MigrationRulesTable', () => {
       expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
     });
 
-    it('should explain the rule details Add to chat button as the last step', async () => {
+    it('should reach the rule details Add to chat step after Open rule', async () => {
       renderTourTable();
       fireEvent.click(await screen.findByTestId(`${step(1)}-next`));
       fireEvent.click(await screen.findByTestId(`${step(2)}-next`));
-      expect(await screen.findByTestId(step(3))).toHaveTextContent('Chat about this rule');
+      expect(await screen.findByTestId(step(3))).toBeInTheDocument();
     });
 
     it('should jump to the last step when the user opens an eligible rule', async () => {

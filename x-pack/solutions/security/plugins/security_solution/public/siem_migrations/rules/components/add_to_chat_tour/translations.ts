@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const BULK_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.addToChatTour.bulkStepTitle',
   {
-    defaultMessage: 'Chat with the AI Agent about your rules',
+    defaultMessage: 'Chat with the AI Agent about your translated rules',
   }
 );
 
@@ -40,7 +40,7 @@ export const RULE_STEP_DESCRIPTION = i18n.translate(
 export const FLYOUT_STEP_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.addToChatTour.flyoutStepTitle',
   {
-    defaultMessage: 'Chat about this rule',
+    defaultMessage: 'Chat about this rule translation',
   }
 );
 
@@ -48,7 +48,7 @@ export const FLYOUT_STEP_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.addToChatTour.flyoutStepDescription',
   {
     defaultMessage:
-      'Add to chat attaches only this rule. Ask the AI Agent to explain the translation or fix the query.',
+      'Add to chat attaches only this rule. Ask the AI Agent to add/change an index pattern or fix any issues with the query.',
   }
 );
 
