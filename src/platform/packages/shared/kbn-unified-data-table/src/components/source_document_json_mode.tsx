@@ -18,11 +18,8 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import {
-  formatFieldStringValueWithHighlights,
-  getIgnoredReason,
-  getDataViewFieldFromDataSource,
-} from '@kbn/discover-utils';
+import { getIgnoredReason, getDataViewFieldFromDataSource } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import type { DataSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../utils/get_render_cell_value';

@@ -10,11 +10,9 @@
 import {
   METRICS_GRID_SETTINGS_DEFAULTS,
   type MetricsGridSettings,
-} from '@kbn/discover-utils/src/data_types/metrics/metrics_grid_settings';
-import {
   METRICS_GRID_SORT_DEFAULTS,
   type MetricsGridSort,
-} from '@kbn/discover-utils/src/data_types/metrics/metrics_grid_sort';
+} from '@kbn/discover-utils';
 import type { ProfileStateDefinition } from '../profile_state';
 import { ProfileStateType } from '../profile_state';
 

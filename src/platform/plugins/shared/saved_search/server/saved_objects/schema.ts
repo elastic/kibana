@@ -9,10 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  HistogramPercentileValue,
-  HistogramVisualizationValue,
-} from '@kbn/discover-utils/src/data_types/metrics/metrics_grid_settings';
+import { HistogramPercentileValue, HistogramVisualizationValue } from '@kbn/discover-utils';
 import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 import { FunctionNames } from '@kbn/esql-language';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';

@@ -10,7 +10,7 @@
 import React from 'react';
 import type { CSSObject } from '@emotion/react';
 import type { LogDocumentOverview } from '@kbn/discover-utils';
-import { LogLevelBadge } from '@kbn/discover-utils';
+import { LogLevelBadge } from '@kbn/discover-utils/components';
 
 const dataTestSubj = 'unifiedDocViewLogsOverviewLogLevel';
 const badgeCss: CSSObject = { maxWidth: '100px' };

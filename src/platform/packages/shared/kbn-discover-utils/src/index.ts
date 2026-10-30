@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Everything exported from here must stay free of React, EUI and other browser-only
+// libraries so that server code can import `@kbn/discover-utils` without loading them.
+// React components, hooks and React/EUI-dependent helpers live in `@kbn/discover-utils/components`.
+
 export * from './constants';
 export * as fieldConstants from './field_constants';
-export * from './hooks';
 export * from './utils';
 export * from './data_types';
 
-export * from './components/custom_control_columns';
-export { ErrorCallout } from './components/error_callout';
-export type { ErrorCalloutProps } from './components/error_callout';
 export { AppMenuRegistry } from './components/app_menu/app_menu_registry';
 export type {
   DiscoverAppMenuItemType,
