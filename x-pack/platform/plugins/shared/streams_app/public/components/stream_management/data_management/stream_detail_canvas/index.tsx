@@ -890,6 +890,14 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
   };
 };
 
+const getEndpointHost = (endpoint: string): string => {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
+};
+
 export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
@@ -900,26 +908,33 @@ export const buildConfiguredDestinationNode = (
     'xpack.streams.canvas.configuredDestinationNode.noSourceLabel',
     { defaultMessage: 'No source' }
   );
-  if (destination.type === 's3') {
+  if (destination.type !== 'elasticsearch') {
     return {
       id: configuredDestinationNodeId(destination.id),
       type: DESTINATION_NODE_TYPE,
       position: { x: 0, y: 0 },
       deletable: true,
       ariaLabel: hasConnectedSource
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3AriaLabel', {
+        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.nonLocalAriaLabel', {
             defaultMessage: 'Destination: {name}, {signal}',
             values: { name: destination.name, signal },
           })
-        : i18n.translate('xpack.streams.canvas.configuredDestinationNode.s3NoSourceAriaLabel', {
-            defaultMessage: 'Destination: {name}, {signal}, no source',
-            values: { name: destination.name, signal },
-          }),
+        : i18n.translate(
+            'xpack.streams.canvas.configuredDestinationNode.nonLocalNoSourceAriaLabel',
+            {
+              defaultMessage: 'Destination: {name}, {signal}, no source',
+              values: { name: destination.name, signal },
+            }
+          ),
       data: {
         destinationId: destination.id,
         signals: destination.signals,
         title: destination.name,
-        subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
+        subtitle: !hasConnectedSource
+          ? noSourceLabel
+          : destination.type === 's3'
+          ? destination.bucket
+          : getEndpointHost(destination.endpoint),
       },
     };
   }

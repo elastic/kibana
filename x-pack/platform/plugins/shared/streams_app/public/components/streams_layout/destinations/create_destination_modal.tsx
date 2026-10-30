@@ -62,6 +62,9 @@ interface CreateDestinationModalProps {
     | 's3Form'
     | 's3Errors'
     | 'setS3Form'
+    | 'remoteElasticsearchForm'
+    | 'remoteElasticsearchErrors'
+    | 'setRemoteElasticsearchForm'
   >;
   onClose: () => void;
 }
@@ -93,6 +96,9 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
     s3Form,
     s3Errors,
     setS3Form,
+    remoteElasticsearchForm,
+    remoteElasticsearchErrors,
+    setRemoteElasticsearchForm,
   } = destinations;
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationModalTitle' });
   const destinationNameErrorText =
@@ -106,7 +112,7 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         })
       : destinationNameError === 'tooLong'
       ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
-          defaultMessage: 'This name is too long for an S3 destination.',
+          defaultMessage: 'This name is too long for this destination type.',
         })
       : destinationNameError === 'credentialConflict'
       ? i18n.translate('xpack.streams.destinations.destinationNameCredentialConflictErrorMessage', {
@@ -240,6 +246,9 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
                           s3Form={s3Form}
                           s3Errors={s3Errors}
                           onS3Change={setS3Form}
+                          remoteElasticsearchForm={remoteElasticsearchForm}
+                          remoteElasticsearchErrors={remoteElasticsearchErrors}
+                          onRemoteElasticsearchChange={setRemoteElasticsearchForm}
                           onBlur={validateCreationForm}
                         />
                       )}

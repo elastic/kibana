@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
-import { LocalElasticsearchFields } from './local_elasticsearch_fields';
+import { EuiSpacer } from '@elastic/eui';
+import { ElasticsearchRoutingFields } from './elasticsearch_routing_fields';
+import { RemoteElasticsearchConnectionFields } from './remote_elasticsearch_connection_fields';
 import { S3Fields } from './s3_fields';
 import type {
   DestinationCreationFormErrors,
   DestinationStorageKind,
   ElasticsearchDestinationFormData,
+  RemoteElasticsearchConnectionErrors,
+  RemoteElasticsearchDestinationFormData,
   S3DestinationFormData,
   S3FieldsErrors,
 } from './types';
@@ -36,6 +40,9 @@ interface DestinationTypeFieldsProps {
   s3Form: S3DestinationFormData;
   s3Errors: S3FieldsErrors;
   onS3Change: (changes: Partial<S3DestinationFormData>) => void;
+  remoteElasticsearchForm: RemoteElasticsearchDestinationFormData;
+  remoteElasticsearchErrors: RemoteElasticsearchConnectionErrors;
+  onRemoteElasticsearchChange: (changes: Partial<RemoteElasticsearchDestinationFormData>) => void;
   onBlur: () => void;
 }
 
@@ -48,11 +55,43 @@ export const DestinationTypeFields = ({
   s3Form,
   s3Errors,
   onS3Change,
+  remoteElasticsearchForm,
+  remoteElasticsearchErrors,
+  onRemoteElasticsearchChange,
   ...fields
 }: DestinationTypeFieldsProps) => {
   switch (storageKind) {
     case 'local_elasticsearch':
-      return <LocalElasticsearchFields {...fields} />;
+      return <ElasticsearchRoutingFields variant="local" {...fields} />;
+    case 'remote_elasticsearch':
+      return (
+        <>
+          <RemoteElasticsearchConnectionFields
+            endpoint={remoteElasticsearchForm.endpoint}
+            apiKey={remoteElasticsearchForm.apiKey}
+            errors={remoteElasticsearchErrors}
+            disabled={fields.disabled}
+            onChange={onRemoteElasticsearchChange}
+            onBlur={fields.onBlur}
+          />
+          <EuiSpacer size="m" />
+          <ElasticsearchRoutingFields
+            variant="remote"
+            auto={remoteElasticsearchForm.auto}
+            logsIndex={remoteElasticsearchForm.logsIndex}
+            metricsIndex={remoteElasticsearchForm.metricsIndex}
+            tracesIndex={remoteElasticsearchForm.tracesIndex}
+            staticIndexesError={fields.staticIndexesError}
+            logsIndexError={fields.logsIndexError}
+            metricsIndexError={fields.metricsIndexError}
+            tracesIndexError={fields.tracesIndexError}
+            disabled={fields.disabled}
+            onAutoChange={(auto) => onRemoteElasticsearchChange({ auto })}
+            onIndexesChange={onRemoteElasticsearchChange}
+            onBlur={fields.onBlur}
+          />
+        </>
+      );
     case 'external_storage':
       return (
         <S3Fields

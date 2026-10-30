@@ -21,8 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
-import { AMAZON_S3_LABEL, LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
-import type { DestinationType } from './types';
+import {
+  AMAZON_S3_LABEL,
+  LOCAL_ELASTICSEARCH_LABEL,
+  REMOTE_ELASTICSEARCH_LABEL,
+} from './destination_type_config';
+import { REMOTE_ELASTICSEARCH_TYPE, type DestinationType } from './types';
 
 interface DestinationsToolbarProps {
   query: string;
@@ -37,6 +41,7 @@ interface DestinationsToolbarProps {
 
 const TYPE_OPTIONS: Array<SourceFilterOption<DestinationType>> = [
   { key: 'elasticsearch', label: LOCAL_ELASTICSEARCH_LABEL },
+  { key: REMOTE_ELASTICSEARCH_TYPE, label: REMOTE_ELASTICSEARCH_LABEL },
   { key: 's3', label: AMAZON_S3_LABEL },
 ];
 

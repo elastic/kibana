@@ -8,7 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   STREAMS_DEFAULT_UNIT_ID,
@@ -26,9 +26,15 @@ import {
   getDestinationCreateSpecs,
   getUnitDestinations,
   toDestinationViewModel,
+  toRemoteElasticsearchDestinationViewModel,
   toS3DestinationViewModel,
+  type UnitDestination,
   withUnitDestinations,
 } from '../destination_models';
+import {
+  createRemoteElasticsearchUnitDestination,
+  remoteElasticsearchCredentialName,
+} from '../remote_elasticsearch_destination_models';
 import { createS3UnitDestination, s3CredentialNames } from '../s3_destination_models';
 import {
   createDestinationApiKeyServices,
@@ -42,8 +48,13 @@ import type {
   DestinationSignal,
   DestinationStorageKind,
   DestinationViewModel,
+  RemoteElasticsearchDestinationFormData,
 } from '../types';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from '../types';
+import {
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_S3_DESTINATION_FORM,
+} from '../types';
 import { removeComponentFromPipelines } from '../../../../services/unit_connections';
 import type { Unit } from '../../../../services/unit_repository';
 import { getFormattedError } from '../../../../util/errors';
@@ -127,6 +138,7 @@ export type DestinationsStateEvent =
       accessKeyId?: string;
       secretAccessKey?: string;
     }
+  | ({ type: 'remoteElasticsearch.change' } & Partial<RemoteElasticsearchDestinationFormData>)
   | { type: 'creationForm.blur' }
   | { type: 'modal.openCreate' }
   | { type: 'modal.closeCreate' }
@@ -169,6 +181,66 @@ const getCreationFormErrors = ({
   formData: DestinationCreationFormData;
   unitDefinition: Unit;
 }): DestinationCreationFormErrors => getDestinationCreationFormErrors({ formData, unitDefinition });
+
+/** Values for the unit PUT `secrets`. The created node references them by credential name. */
+const getCreateSecrets = (
+  formData: DestinationCreationFormData,
+  destinationId: string
+): StreamsUnit.Secrets | undefined => {
+  switch (formData.storageKind) {
+    case 'external_storage': {
+      const names = s3CredentialNames(destinationId);
+      return {
+        [names.accessKeyId]: formData.s3.accessKeyId.trim(),
+        [names.secretAccessKey]: formData.s3.secretAccessKey.trim(),
+      };
+    }
+    case 'remote_elasticsearch':
+      return {
+        [remoteElasticsearchCredentialName(destinationId)]:
+          formData.remoteElasticsearch.apiKey.trim(),
+      };
+    case 'local_elasticsearch':
+      return undefined;
+    default: {
+      const storageKind: never = formData.storageKind;
+      throw new Error(`Unexpected storage kind ${storageKind}`);
+    }
+  }
+};
+
+/** Adds a node built from the form, for types that persist without a Kibana-minted key. */
+const stageCreatedDestination = (
+  context: DestinationsStateContext,
+  toViewModel: (node: UnitDestination) => DestinationViewModel,
+  createNode: (id: string, name: string, formData: DestinationCreationFormData) => UnitDestination
+): Partial<DestinationsStateContext> => {
+  if (!context.creationContext) {
+    return {};
+  }
+  const { formData } = context.creationContext;
+  const name = formData.destinationName.trim();
+  const id = createDestinationId({
+    name,
+    existingIds: collectUnitComponentIds(context.unitDefinition.unit),
+  });
+  const node = createNode(id, name, formData);
+  return {
+    creationContext: {
+      ...context.creationContext,
+      createdDestinations: [toViewModel(node)],
+      // A failed local key mint leaves its pending ids behind, and a later persist failure would
+      // otherwise revoke them.
+      pendingDestinations: undefined,
+    },
+    unitDefinition: withUnitDestinations(context.unitDefinition, [
+      ...getUnitDestinations(context.unitDefinition),
+      node,
+    ]),
+    persistenceError: undefined,
+    apiKeyError: undefined,
+  };
+};
 
 /** Keep an empty name quiet until the name field has already shown a required error. */
 const withoutUnrevealedRequiredErrors = (
@@ -255,6 +327,7 @@ export const destinationsStateMachine = setup({
           storageKind: 'local_elasticsearch' as const,
           destinationName: '',
           elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
+          remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
           s3: { ...EMPTY_S3_DESTINATION_FORM },
         },
         formErrors: {},
@@ -287,6 +360,8 @@ export const destinationsStateMachine = setup({
             context.creationContext.formErrors
           ),
         },
+        // Remote mints no key, so a stale local mint error is dropped. S3 keeps its existing behavior.
+        ...(event.storageKind === 'remote_elasticsearch' ? { apiKeyError: undefined } : {}),
       };
     }),
     updateDestinationName: assign(({ context, event }) => {
@@ -384,39 +459,55 @@ export const destinationsStateMachine = setup({
         },
       };
     }),
-    stageCreatedS3Destination: assign(({ context }) => {
-      if (!context.creationContext) {
+    updateRemoteElasticsearchForm: assign(({ context, event }) => {
+      if (event.type !== 'remoteElasticsearch.change' || !context.creationContext) {
         return {};
       }
-      const { destinationName, s3 } = context.creationContext.formData;
-      const name = destinationName.trim();
-      const id = createDestinationId({
-        name,
-        existingIds: collectUnitComponentIds(context.unitDefinition.unit),
-      });
-      const node = createS3UnitDestination({
-        id,
-        name,
-        region: s3.region.trim(),
-        bucket: s3.bucket.trim(),
-        prefix: s3.prefix.trim(),
-      });
+      const formData: DestinationCreationFormData = {
+        ...context.creationContext.formData,
+        remoteElasticsearch: {
+          ...context.creationContext.formData.remoteElasticsearch,
+          ...(event.endpoint !== undefined ? { endpoint: event.endpoint } : {}),
+          ...(event.apiKey !== undefined ? { apiKey: event.apiKey } : {}),
+          ...(event.auto !== undefined ? { auto: event.auto } : {}),
+          ...(event.logsIndex !== undefined ? { logsIndex: event.logsIndex } : {}),
+          ...(event.metricsIndex !== undefined ? { metricsIndex: event.metricsIndex } : {}),
+          ...(event.tracesIndex !== undefined ? { tracesIndex: event.tracesIndex } : {}),
+        },
+      };
       return {
         creationContext: {
           ...context.creationContext,
-          createdDestinations: [toS3DestinationViewModel(node)],
-          // A failed Elasticsearch key mint leaves its pending ids behind, and a later
-          // S3 persist failure would otherwise revoke them.
-          pendingDestinations: undefined,
+          formData,
+          formErrors: withoutUnrevealedRequiredErrors(
+            getCreationFormErrors({
+              formData,
+              unitDefinition: context.unitDefinition,
+            }),
+            context.creationContext.formErrors
+          ),
         },
-        unitDefinition: withUnitDestinations(context.unitDefinition, [
-          ...getUnitDestinations(context.unitDefinition),
-          node,
-        ]),
-        persistenceError: undefined,
-        apiKeyError: undefined,
       };
     }),
+    stageCreatedS3Destination: assign(({ context }) =>
+      stageCreatedDestination(context, toS3DestinationViewModel, (id, name, { s3 }) =>
+        createS3UnitDestination({
+          id,
+          name,
+          region: s3.region.trim(),
+          bucket: s3.bucket.trim(),
+          prefix: s3.prefix.trim(),
+        })
+      )
+    ),
+    stageCreatedRemoteElasticsearchDestination: assign(({ context }) =>
+      stageCreatedDestination(
+        context,
+        toRemoteElasticsearchDestinationViewModel,
+        (id, name, { remoteElasticsearch }) =>
+          createRemoteElasticsearchUnitDestination({ id, name, ...remoteElasticsearch })
+      )
+    ),
     assignPendingDestination: assign(({ context }) => {
       if (!context.creationContext) {
         return {};
@@ -507,20 +598,12 @@ export const destinationsStateMachine = setup({
         if (!context.creationContext || !destinationIds?.length) {
           throw new Error('Expected created destinations');
         }
-        const { storageKind, s3 } = context.creationContext.formData;
-        const names = s3CredentialNames(destinationIds[0]);
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
           destinationIds,
           intent: 'create',
-          secrets:
-            storageKind === 'external_storage'
-              ? {
-                  [names.accessKeyId]: s3.accessKeyId.trim(),
-                  [names.secretAccessKey]: s3.secretAccessKey.trim(),
-                }
-              : undefined,
+          secrets: getCreateSecrets(context.creationContext.formData, destinationIds[0]),
         };
       }
     ),
@@ -588,6 +671,10 @@ export const destinationsStateMachine = setup({
                       accessKeyId: '',
                       secretAccessKey: '',
                     },
+                    remoteElasticsearch: {
+                      ...context.creationContext.formData.remoteElasticsearch,
+                      apiKey: '',
+                    },
                   },
                 }
               : undefined,
@@ -632,6 +719,10 @@ export const destinationsStateMachine = setup({
       ),
     isExternalStorage: ({ context }) =>
       context.creationContext?.formData.storageKind === 'external_storage',
+    isRemoteElasticsearch: ({ context }) =>
+      context.creationContext?.formData.storageKind === 'remote_elasticsearch',
+    isLocalElasticsearch: ({ context }) =>
+      context.creationContext?.formData.storageKind === 'local_elasticsearch',
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
     unitSaveIsIdle: stateIn('#destinationsUnitSaveIdle'),
@@ -681,6 +772,7 @@ export const destinationsStateMachine = setup({
             'destinationName.change': { actions: 'updateDestinationName' },
             'elasticsearch.change': { actions: 'updateElasticsearchForm' },
             's3.change': { actions: 'updateS3Form' },
+            'remoteElasticsearch.change': { actions: 'updateRemoteElasticsearchForm' },
             'creationForm.blur': { actions: 'validateCreationForm' },
             'destination.create': [
               {
@@ -689,8 +781,13 @@ export const destinationsStateMachine = setup({
                 actions: ['stageCreatedS3Destination', 'notifyParentCreate'],
               },
               {
+                target: 'persisting',
+                guard: and(['isRemoteElasticsearch', 'canCreateDestination', 'unitSaveIsIdle']),
+                actions: ['stageCreatedRemoteElasticsearchDestination', 'notifyParentCreate'],
+              },
+              {
                 target: 'mintingApiKey',
-                guard: and(['canCreateDestination', 'unitSaveIsIdle', not('isExternalStorage')]),
+                guard: and(['isLocalElasticsearch', 'canCreateDestination', 'unitSaveIsIdle']),
                 actions: 'assignPendingDestination',
               },
               { actions: 'validateCreationForm' },
