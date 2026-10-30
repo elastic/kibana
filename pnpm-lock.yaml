@@ -428,8 +428,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.33.0
-        version: 4.33.0(monaco-editor@0.56.0)
+        specifier: 4.34.0
+        version: 4.34.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -452,8 +452,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@elastic/schemas':
-        specifier: 0.10.0
-        version: 0.10.0
+        specifier: 0.11.0
+        version: 0.11.0
       '@elastic/search-ui':
         specifier: 1.24.2
         version: 1.24.2
@@ -5519,6 +5519,9 @@ importers:
       '@kbn/eslint-plugin-imports':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-imports
+      '@kbn/eslint-plugin-kbn-monaco':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-kbn-monaco
       '@kbn/eslint-plugin-kbn-ui':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-kbn-ui
@@ -6678,8 +6681,8 @@ importers:
         specifier: 7.0.3
         version: 7.0.3(styled-components@5.3.11(@babel/core@7.29.7(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react-is@18.3.1)(react@18.2.0))
       json-schema-typed:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 9.0.0
+        version: 9.0.0
       keyv:
         specifier: 5.6.0
         version: 5.6.0
@@ -6707,9 +6710,6 @@ importers:
       marge:
         specifier: 1.0.1
         version: 1.0.1
-      mini-css-extract-plugin:
-        specifier: 2.9.1
-        version: 2.9.1(webpack@5.96.1)
       minimist:
         specifier: 1.2.8
         version: 1.2.8
@@ -6798,8 +6798,8 @@ importers:
         specifier: 1.22.13
         version: 1.22.13
       resolve.exports:
-        specifier: 2.0.3
-        version: 2.0.3
+        specifier: 2.0.4
+        version: 2.0.4
       rxjs-marbles:
         specifier: 7.0.1
         version: 7.0.1(rxjs@7.8.2)(supports-color@10.2.2)
@@ -6842,9 +6842,6 @@ importers:
       table:
         specifier: 6.9.0
         version: 6.9.0
-      terser-webpack-plugin:
-        specifier: 5.3.17
-        version: 5.3.17(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack@5.96.1)
       tough-cookie:
         specifier: 6.0.0
         version: 6.0.0
@@ -7025,6 +7022,8 @@ importers:
   packages/kbn-eslint-plugin-i18n: {}
 
   packages/kbn-eslint-plugin-imports: {}
+
+  packages/kbn-eslint-plugin-kbn-monaco: {}
 
   packages/kbn-eslint-plugin-kbn-ui: {}
 
@@ -11244,8 +11243,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.33.0':
-    resolution: {integrity: sha512-S+ceGgCwEOougTdYvykdeGUWq5dBGrXcc2Ul2Cw/mLRUV0ElYZycpnPcjoOsdhpwJZdoetcuZG4QLnm1N4RHZw==}
+  '@elastic/monaco-esql@4.34.0':
+    resolution: {integrity: sha512-5fI1zfp4IPeROP6CGpb/FtdBDeKNRRY9oAjYZZIMTKTi/eLAYGDOAfCLvoZOY0ganWRWiPn0QaxcaS7APND68A==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11294,8 +11293,8 @@ packages:
   '@elastic/request-crypto@2.0.4':
     resolution: {integrity: sha512-15BH4l6BhHG73WEbeNLghEtAxI/zezFFdiOCx5ubsdxfuXh8tFV2XaRYkWgieTGAXCML9GSlztt1Ewf8WxsoPw==}
 
-  '@elastic/schemas@0.10.0':
-    resolution: {integrity: sha512-NBQJNDJ5rRvLOApi2Hjb75uns0cUsN6QdnVWs5X/a77OoK5soDIR7CpwzFlNsNwwttM+/NODgqyl3A005B0Fng==}
+  '@elastic/schemas@0.11.0':
+    resolution: {integrity: sha512-hQ9VLf2uBE2OTmwN6svVlmvBmDLX4LEEEUTX1hmEn48weyB5X40xaCO3fdbX5qR+VtFWE0svo3jDCRcwAxFhbg==}
     engines: {node: '>=20'}
 
   '@elastic/search-ui-app-search-connector@1.24.1':
@@ -20274,6 +20273,9 @@ packages:
   json-schema-typed@8.0.2:
     resolution: {integrity: sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA==}
 
+  json-schema-typed@9.0.0:
+    resolution: {integrity: sha512-t+dkn3pLaz7ku3ELaBKBSQNjd0Sir5zR7Y4CpAR5a+UEH60NefBEAhAgJuWqDH5o4HDfH+EQjmXeQMLc+Xnbdg==}
+
   json-schema@0.4.0:
     resolution: {integrity: sha512-es94M3nTIfsEPisRafak+HDLfHXnKBhV3vU5eqPcS3flIWqcxJWgXHXiey3YrpaNsanY5ei1VoYEbOzijuq9BA==}
 
@@ -21144,12 +21146,6 @@ packages:
   min-indent@1.0.1:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
-
-  mini-css-extract-plugin@2.9.1:
-    resolution: {integrity: sha512-+Vyi+GCCOHnrJ2VPS+6aPoXN2k2jgUzDRhTFLjjTBn23qyXJXkjUWQgTL+mXpF5/A8ixLdCc6kWsoeOjKGejKQ==}
-    engines: {node: '>= 12.13.0'}
-    peerDependencies:
-      webpack: ^5.0.0
 
   minimalistic-assert@1.0.1:
     resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
@@ -23161,8 +23157,8 @@ packages:
     resolution: {integrity: sha512-ZuF55hVUQaaczgOIwqWzkEcEidmlD/xl44x1UZnhOXcYuFN2S6+rcxpG+C1N3So0wvNI3DmJICUFfu2SxhBmvg==}
     deprecated: https://github.com/lydell/resolve-url#deprecated
 
-  resolve.exports@2.0.3:
-    resolution: {integrity: sha512-OcXjMsGdhL4XnbShKpAcSqPMzQoYkYyhbEaeSko47MjRP9NfEQMhZkXL1DoFlt9LWQn4YttrdnV6X2OiyzBi+A==}
+  resolve.exports@2.0.4:
+    resolution: {integrity: sha512-zepuGL0ulf+nt+XaFrlKeaiTJeyPFPLLY62+ncq1/VTHBdt3HsfXOH60priZ6tnXQozdGcDeIF5JVTanvIcYWQ==}
     engines: {node: '>=10'}
 
   resolve@1.22.13:
@@ -27430,7 +27426,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.33.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.34.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.34.0
       monaco-editor: 0.56.0
@@ -27558,7 +27554,7 @@ snapshots:
       '@types/node-jose': 1.1.10
       node-jose: 2.2.0
 
-  '@elastic/schemas@0.10.0':
+  '@elastic/schemas@0.11.0':
     optionalDependencies:
       zod: 4.6.5
 
@@ -37770,7 +37766,7 @@ snapshots:
       jest-util: 29.7.0
       jest-validate: 29.7.0
       resolve: 1.22.13
-      resolve.exports: 2.0.3
+      resolve.exports: 2.0.4
       slash: 3.0.0
 
   jest-runner@29.7.0(supports-color@10.2.2):
@@ -38029,6 +38025,8 @@ snapshots:
   json-schema-traverse@1.0.0: {}
 
   json-schema-typed@8.0.2: {}
+
+  json-schema-typed@9.0.0: {}
 
   json-schema@0.4.0: {}
 
@@ -39161,12 +39159,6 @@ snapshots:
     optional: true
 
   min-indent@1.0.1: {}
-
-  mini-css-extract-plugin@2.9.1(webpack@5.96.1):
-    dependencies:
-      schema-utils: 4.5.0
-      tapable: 2.3.3
-      webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
 
@@ -41555,7 +41547,7 @@ snapshots:
 
   resolve-url@0.2.1: {}
 
-  resolve.exports@2.0.3: {}
+  resolve.exports@2.0.4: {}
 
   resolve@1.22.13:
     dependencies:
