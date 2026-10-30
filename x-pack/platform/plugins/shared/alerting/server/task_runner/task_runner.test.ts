@@ -2327,6 +2327,29 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error', 'user-key']);
   });
 
+  test('should tag a 401 thrown by the rule type executor with auth-error', async () => {
+    // The executor error reaches getState wrapped in an ErrorWithReason, unlike the
+    // getExecutorServices failures above, so this covers the unwrapping.
+    ruleType.executor.mockImplementation(async () => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = createTaskRunner();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const runnerResult = await taskRunner.run();
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggerMeta = logger.error.mock.calls[0][1];
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error', 'auth-error']);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
+  });
+
   test('should set unexpected errors as framework-error', async () => {
     jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new Error('test');
