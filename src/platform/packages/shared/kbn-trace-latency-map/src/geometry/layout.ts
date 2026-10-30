@@ -13,8 +13,11 @@ import { MAX_TIME_BINS } from '../query/duration_rows';
 export const LAYOUT = {
   /** Height of the whole chart, axes included, when the host gives none. */
   defaultHeight: 200,
-  /** Width the chart gives the duration labels. Fixed, so the plot does not shift with them. */
-  yAxisLabelWidth: 64,
+  /**
+   * Width the chart gives the duration labels. Fixed, so the plot does not shift with them: the
+   * widest label (`≥99.9ms`, three significant digits, about 42px at 10px) with a little room.
+   */
+  yAxisLabelWidth: 46,
   /** Space between cells, in pixels: the chart's grid line, left transparent. */
   cellGap: 1,
   /** Space above the plot, so that the label of the top row is not cut by the chart's edge. */
