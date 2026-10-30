@@ -125,13 +125,37 @@ describe('splitFiltersByFields', () => {
     });
   });
 
-  it('keeps the filters that name no field', () => {
+  it('keeps a query string filter, whose normalized `meta.key` is `query`', () => {
     const filter: Filter = {
-      meta: { type: FILTERS.QUERY_STRING },
+      meta: { type: FILTERS.QUERY_STRING, key: 'query', value: 'host.name: a' },
       query: { query_string: { query: 'host.name: a' } },
     };
 
-    expect(splitFiltersByFields([filter], ENTITY_FIELDS).applicable).toEqual([filter]);
+    expect(splitFiltersByFields([filter], ENTITY_FIELDS)).toEqual({
+      applicable: [filter],
+      ignoredFields: [],
+    });
+  });
+
+  it('keeps a custom filter, whose normalized `meta.key` is its DSL key', () => {
+    const filter: Filter = {
+      meta: { type: FILTERS.CUSTOM, key: 'bool', value: '{}' },
+      query: { bool: { filter: [] } },
+    };
+
+    expect(splitFiltersByFields([filter], ENTITY_FIELDS)).toEqual({
+      applicable: [filter],
+      ignoredFields: [],
+    });
+  });
+
+  it('keeps the filters that name no field', () => {
+    const filter: Filter = { meta: { type: FILTERS.MATCH_ALL }, query: { match_all: {} } };
+
+    expect(splitFiltersByFields([filter], ENTITY_FIELDS)).toEqual({
+      applicable: [filter],
+      ignoredFields: [],
+    });
   });
 
   it('leaves an ES|QL expression without the unknown column', () => {
@@ -160,6 +184,7 @@ describe('useSearchBarExpression', () => {
     const { result } = renderHook(() => useSearchBarExpression(entityDataView));
 
     expect(result.current.ignoredFields).toEqual(['kibana.alert.workflow_status']);
+    expect(result.current.applicableFilters).toEqual([mockGlobalFilters[0]]);
     expect(result.current.searchExpression).toContain('entity.id');
     expect(result.current.searchExpression).toContain('KQL(');
     expect(result.current.searchExpression).not.toContain('workflow_status');
@@ -169,6 +194,7 @@ describe('useSearchBarExpression', () => {
     const { result } = renderHook(() => useSearchBarExpression(undefined));
 
     expect(result.current.ignoredFields).toEqual([]);
+    expect(result.current.applicableFilters).toEqual(mockGlobalFilters);
     expect(result.current.searchExpression).toContain('workflow_status');
   });
 
@@ -178,6 +204,10 @@ describe('useSearchBarExpression', () => {
 
     const { result } = renderHook(() => useSearchBarExpression(entityDataView));
 
-    expect(result.current).toEqual({ searchExpression: undefined, ignoredFields: [] });
+    expect(result.current).toEqual({
+      searchExpression: undefined,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
   });
 });

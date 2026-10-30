@@ -533,10 +533,17 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     ]
   );
 
-  const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const { searchExpression, ignoredFields: ignoredFilterFields } = useSearchBarExpression(
-    isDataViewLoading ? undefined : dataView
-  );
+  const {
+    searchExpression,
+    applicableFilters,
+    ignoredFields: ignoredFilterFields,
+  } = useSearchBarExpression(isDataViewLoading ? undefined : dataView);
+  // The DSL query takes the same filters as the ES|QL one: a filter on a field the entity docs lack
+  // matches nothing in DSL, which would empty the counts and the grouped views.
+  const { filterQuery: esFilter } = useGlobalFilterQuery({
+    dataView,
+    filtersOverride: applicableFilters,
+  });
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(

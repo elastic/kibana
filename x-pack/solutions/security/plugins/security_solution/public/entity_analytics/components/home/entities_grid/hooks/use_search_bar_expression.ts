@@ -18,7 +18,7 @@ const getFilterFields = (filter: Filter): string[] => {
   if (isCombinedFilter(filter)) {
     return filter.meta.params.flatMap(getFilterFields);
   }
-  const field = getFilterField(filter) ?? filter.meta?.key;
+  const field = getFilterField(filter);
   return field ? [field] : [];
 };
 
@@ -48,7 +48,11 @@ export const splitFiltersByFields = (
  */
 export const useSearchBarExpression = (
   dataView?: DataView
-): { searchExpression: string | undefined; ignoredFields: string[] } => {
+): {
+  searchExpression: string | undefined;
+  applicableFilters: Filter[];
+  ignoredFields: string[];
+} => {
   const getGlobalFilters = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalFilters = useDeepEqualSelector(getGlobalFilters);
@@ -62,6 +66,7 @@ export const useSearchBarExpression = (
     const { esqlExpression: filterBarExpr } = convertFiltersToESQLExpression(applicable);
     return {
       searchExpression: joinAnd(filterBarExpr, convertQueryToESQLExpression(globalQuery)),
+      applicableFilters: applicable,
       ignoredFields,
     };
   }, [globalFilters, globalQuery, dataView]);
