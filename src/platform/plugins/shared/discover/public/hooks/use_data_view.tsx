@@ -11,15 +11,17 @@ import { useEffect, useState } from 'react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
+/** Loads a view by ID or resolves an inline spec, exposing any loading error. */
 export const useDataView = ({ index }: { index: string | DataViewSpec }) => {
-  const { dataViews } = useDiscoverServices();
+  const { dataViews, inlineDataViews } = useDiscoverServices();
   const [dataView, setDataView] = useState<DataView>();
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    const promise = typeof index === 'object' ? dataViews.create(index) : dataViews.get(index);
+    const promise =
+      typeof index === 'object' ? inlineDataViews.resolve(index) : dataViews.get(index);
     promise.then(setDataView).catch(setError);
-  }, [dataViews, index]);
+  }, [dataViews, inlineDataViews, index]);
 
   return { dataView, error };
 };

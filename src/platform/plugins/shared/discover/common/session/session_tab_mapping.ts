@@ -128,21 +128,12 @@ export const fromStoredSessionSearchAndTable = (
   tab: DiscoverSessionTab | DiscoverSessionTabAttributes,
   searchSource: SerializedSearchSourceFields
 ): DiscoverSessionApiTabBase => {
+  // ES|QL ignores stored filters, which may contain stale or malformed data.
   if (isOfAggregateQueryType(searchSource.query)) {
     return fromStoredSearchAndTable(tab, searchSource);
   }
 
-  const transformedTab = fromStoredSearchAndTable(tab, pinnedFiltersToAppFilters(searchSource));
-  if (isDiscoverSessionEsqlTab(transformedTab)) {
-    return transformedTab;
-  }
-
-  const { index } = searchSource;
-  const inlineDataViewId = index && typeof index !== 'string' ? index.id : undefined;
-  return {
-    ...transformedTab,
-    filters: omitInlineDataViewIdFromFilters(transformedTab.filters, inlineDataViewId),
-  };
+  return fromStoredSearchAndTable(tab, pinnedFiltersToAppFilters(searchSource));
 };
 
 /** Keeps pinned conditions in session exports without changing the original filters. */
@@ -157,23 +148,4 @@ export const pinnedFiltersToAppFilters = (searchSource: SerializedSearchSourceFi
     ...searchSource,
     filter: filters.map(unpinFilter),
   };
-};
-
-/** Omits references to the current inline view, leaving references to other views unchanged. */
-const omitInlineDataViewIdFromFilters = (
-  filters: DiscoverSessionApiClassicTab['filters'],
-  inlineDataViewId: string | undefined
-) => {
-  if (inlineDataViewId === undefined) {
-    return filters;
-  }
-
-  return filters.map((filter) => {
-    if (filter.data_view_id !== inlineDataViewId) {
-      return filter;
-    }
-
-    const { data_view_id: _inlineDataViewId, ...filterWithoutDataViewId } = filter;
-    return filterWithoutDataViewId;
-  });
 };

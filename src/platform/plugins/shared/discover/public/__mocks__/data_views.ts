@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { dataViewComplexMock } from './data_view_complex';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
@@ -48,3 +51,37 @@ export function createDiscoverDataViewsMock() {
 }
 
 export const dataViewsMock = createDiscoverDataViewsMock();
+
+/** Mirrors the ID-based instance cache of DataViewsService.create, without fetching fields. */
+export const createDataViewsCacheMock = () => {
+  const cache = new Map<string, DataView | Promise<DataView>>();
+
+  const create = jest.fn(async (spec: DataViewSpec) => {
+    if (!spec.id) {
+      return new DataView({ spec, fieldFormats: fieldFormatsMock });
+    }
+
+    const cachedDataView = cache.get(spec.id);
+
+    if (cachedDataView) {
+      return cachedDataView;
+    }
+
+    const dataView = new DataView({ spec, fieldFormats: fieldFormatsMock });
+    cache.set(spec.id, dataView);
+
+    return dataView;
+  });
+
+  const clearInstanceCache = jest.fn((id?: string) => {
+    if (id) {
+      cache.delete(id);
+
+      return;
+    }
+
+    cache.clear();
+  });
+
+  return { cache, create, clearInstanceCache };
+};

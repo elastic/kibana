@@ -13,7 +13,6 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DiscoverSessionApiResponse } from './schema';
 import { createStoredDiscoverSession } from './stored_session';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
-import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
 export const createDiscoverSession = async (
   requestContext: RequestHandlerContext,
@@ -22,7 +21,7 @@ export const createDiscoverSession = async (
   const { attributes, references } = transformDiscoverSessionIn(data);
 
   const savedObject = await createStoredDiscoverSession(requestContext, {
-    attributes: assignStoredInlineDataViewIds(attributes),
+    attributes,
     references,
   });
 

@@ -14,6 +14,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { EsqlSource } from '@kbn/data-source';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
@@ -174,6 +175,60 @@ describe('initialize fetch', () => {
     expect(signal).toBeDefined();
     cleanupFetch?.();
     expect(signal?.aborted).toBe(true);
+  });
+});
+
+describe('initialize fetch parent filters', () => {
+  const waitOneTick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  it('remaps parent filters before applying and publishing them', async () => {
+    const searchSource = createSearchSourceMock({ index: dataViewMock });
+    const parentSearchSource = createSearchSourceMock({});
+    searchSource.setParent(parentSearchSource);
+    searchSource.fetch$ = jest
+      .fn()
+      .mockImplementation(() => of({ rawResponse: { hits: { hits: [], total: 0 } } }));
+    const savedSearch = {
+      id: 'mock-id',
+      title: 'saved search',
+      sort: [] as Array<[string, string]>,
+      searchSource,
+      viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      managed: false,
+    };
+    const mocked = getMockedSearchApi({ searchSource, savedSearch });
+    const legacyFilter: Filter = { meta: { index: 'legacy-id' }, query: { match_all: {} } };
+    const remappedFilter: Filter = { meta: { index: 'inline-id' }, query: { match_all: {} } };
+    const parentApi = {
+      filters$: new BehaviorSubject<Filter[] | undefined>([legacyFilter]),
+      query$: new BehaviorSubject<Query | undefined>(undefined),
+      timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+    };
+    const remapParentFilters = jest.fn((filters: Filter[] | undefined) =>
+      filters?.map((filter) => (filter === legacyFilter ? remappedFilter : filter))
+    );
+
+    const { cleanup } = initializeFetch({
+      api: { ...mocked.api, parentApi },
+      stateManager: mocked.stateManager,
+      discoverServices: discoverServiceMock,
+      scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      }),
+      refreshTrigger$: new BehaviorSubject<void>(undefined),
+      ...mocked.setters,
+      setApproximationApplied: jest.fn(),
+      remapParentFilters,
+    });
+    await waitOneTick();
+    await waitOneTick();
+
+    expect(remapParentFilters).toHaveBeenCalledWith([legacyFilter]);
+    expect(parentSearchSource.getField('filter')).toEqual([remappedFilter]);
+    expect(mocked.api.fetchContext$.getValue()?.filters).toEqual([remappedFilter]);
+    expect(parentApi.filters$.getValue()).toEqual([legacyFilter]);
+    cleanup();
   });
 });
 

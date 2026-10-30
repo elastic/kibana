@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { differenceBy } from 'lodash';
+import { differenceBy, uniqBy } from 'lodash';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import { createInternalStateAsyncThunk } from '../utils';
 
@@ -78,7 +78,10 @@ export const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string
 
     dispatch(
       setAdHocDataViews(
-        prevAdHocDataViews.map((dataView) => (dataView.id === prevId ? newDataView : dataView))
+        uniqBy(
+          prevAdHocDataViews.map((dataView) => (dataView.id === prevId ? newDataView : dataView)),
+          'id'
+        )
       )
     );
     dispatch(
