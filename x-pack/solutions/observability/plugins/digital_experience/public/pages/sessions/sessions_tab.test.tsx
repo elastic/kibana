@@ -400,7 +400,7 @@ describe('SessionsTab', () => {
       'User',
       'Journey',
       'Duration',
-      'Pages',
+      'Page views',
       'Clicks',
       'Errors',
     ]);
@@ -416,7 +416,7 @@ describe('SessionsTab', () => {
       'User',
       'Journey',
       'Duration',
-      'Pages',
+      'Page views',
       'Errors',
       'Location',
       'LCP',
@@ -450,6 +450,35 @@ describe('SessionsTab', () => {
 
     await waitFor(() => expect(searchParams(history).page).toBeUndefined());
     expect(searchParams(history).rangeFrom).toBe('now-24h');
+  });
+
+  it('keeps the page that Back restores with an earlier time range', async () => {
+    respondWith({ list: listResponse({ total: 60 }) });
+    const history = renderTab({ search: '&page=2' });
+    await screen.findByTestId('digitalExperienceSessionRow-session-1');
+
+    // A new range resets the page, then Back returns to the old range on page 2.
+    jest.mocked(useTimeRange).mockReturnValue({
+      timeRange: { rangeFrom: 'now-24h', rangeTo: 'now' },
+      isTimeRangeInUrl: true,
+      setTimeRange: jest.fn(),
+    });
+    act(() => {
+      history.push(`/shop/sessions?rangeFrom=now-24h&rangeTo=now&source=otel&page=2`);
+    });
+    await waitFor(() => expect(searchParams(history).page).toBeUndefined());
+
+    jest.mocked(useTimeRange).mockReturnValue({
+      timeRange: { rangeFrom: 'now-15m', rangeTo: 'now' },
+      isTimeRangeInUrl: true,
+      setTimeRange: jest.fn(),
+    });
+    act(() => {
+      history.goBack();
+    });
+
+    await waitFor(() => expect(searchParams(history).rangeFrom).toBe('now-15m'));
+    expect(searchParams(history).page).toBe('2');
   });
 
   it('says the environment filter does not apply to sessions yet', async () => {
@@ -501,6 +530,15 @@ describe('SessionsTab', () => {
 
     expect(await screen.findByTestId('digitalExperienceSessionsFailedSummaries')).toHaveTextContent(
       '3 sessions in this time range could not be summarized'
+    );
+  });
+
+  it('says sessions that could not be summarized cannot be checked for errors', async () => {
+    respondWith({ list: listResponse({ failedSummaries: 2 }) });
+    renderTab({ search: '&hasErrors=true' });
+
+    expect(await screen.findByTestId('digitalExperienceSessionsFailedSummaries')).toHaveTextContent(
+      'whether they had errors is unknown'
     );
   });
 

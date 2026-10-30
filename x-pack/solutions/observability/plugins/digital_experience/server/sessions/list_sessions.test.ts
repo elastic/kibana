@@ -153,6 +153,32 @@ describe('buildListSessionsRequest', () => {
     expect(request.aggs?.failed_summaries.filter).toEqual({ bool: { filter: [failed] } });
   });
 
+  it('narrows the failed summaries by facets and duration, but not by errors they lack', () => {
+    const request = buildListSessionsRequest({
+      ...baseParams,
+      facets: { browsers: 'Chrome' },
+      filters: { hasErrors: true, minDurationMs: 300_000 },
+    });
+
+    expect(request.aggs?.failed_summaries.filter).toEqual({
+      bool: {
+        filter: [
+          { term: { 'user_agent.browser': 'Chrome' } },
+          { range: { failed_summary_duration_ms: { gte: 300_000 } } },
+          { exists: { field: 'error.message' } },
+        ],
+      },
+    });
+    expect(Object.keys(request.runtime_mappings ?? {})).toEqual(['failed_summary_duration_ms']);
+  });
+
+  it('maps the failed summary duration only when a duration range is set', () => {
+    expect(buildListSessionsRequest(baseParams).runtime_mappings).toBeUndefined();
+    expect(
+      buildListSessionsRequest({ ...baseParams, filters: { hasErrors: true } }).runtime_mappings
+    ).toBeUndefined();
+  });
+
   it('computes the bounce rate over sessions with a page view', () => {
     const request = buildListSessionsRequest(baseParams);
     expect(request.aggs?.kpis.aggs?.with_page_views).toEqual({

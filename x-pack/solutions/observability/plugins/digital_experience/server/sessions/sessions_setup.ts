@@ -14,8 +14,10 @@ import type {
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { escapeRegExp } from 'lodash';
+import { setTimeout as sleep } from 'timers/promises';
 import {
   SESSIONS_DEFAULT_FREQUENCY,
+  SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_MANAGED_BY,
   SESSIONS_SOURCE_INDICES,
@@ -252,11 +254,47 @@ export const enableSessions = async ({
     }
   }
 
+  // Created here rather than by the transform once it starts, so the index exists when enabling
+  // returns and the list can read it; the index template gives it its mappings. As the current
+  // user, checked above for `create_index`: Elasticsearch ignores secondary authorization here.
+  const user = esClient.asCurrentUser;
+  if (!(await user.indices.exists({ index: SESSIONS_INDEX }))) {
+    await user.indices.create({ index: SESSIONS_INDEX });
+  }
+
   await Promise.all(
     desired.map(({ transform_id: transformId }) =>
       client.transform.startTransform({ transform_id: transformId }, { ignore: [409] })
     )
   );
+
+  await waitUntilSearchable(user);
+};
+
+/** How long, and how often, enabling checks that the sessions dest index accepts searches. */
+const SEARCHABLE_TIMEOUT_MS = 30_000;
+const SEARCHABLE_RETRY_MS = 250;
+
+/**
+ * The UI lists sessions as soon as enabling returns, but a just-created dest index answers
+ * searches with a 503 (no shard available) for a moment, even once its health is yellow. Waits
+ * until a count stops answering 503, or gives up after the timeout, as the first list read can
+ * still be retried.
+ */
+const waitUntilSearchable = async (client: ElasticsearchClient): Promise<void> => {
+  const deadline = Date.now() + SEARCHABLE_TIMEOUT_MS;
+  while (true) {
+    try {
+      await client.count({ index: SESSIONS_INDEX, ignore_unavailable: true });
+      return;
+    } catch (error) {
+      const unavailable = isResponseError(error) && error.statusCode === 503;
+      if (!unavailable || Date.now() >= deadline) {
+        return;
+      }
+    }
+    await sleep(SEARCHABLE_RETRY_MS);
+  }
 };
 
 const HEALTH_RANK: Record<SessionsTransformHealth, number> = {

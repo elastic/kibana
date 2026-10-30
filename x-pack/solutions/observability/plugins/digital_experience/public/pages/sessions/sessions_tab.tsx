@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import { omitBy, isUndefined } from 'lodash';
 import {
   EuiButton,
@@ -157,17 +158,19 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
     hiddenByDefault: SESSIONS_HIDDEN_BY_DEFAULT,
   });
 
-  // A new time range lists other sessions, so a later page may not exist anymore: start over.
+  // A new time range lists other sessions, so a later page may not exist anymore: start over. Not
+  // when Back or Forward (a POP) restores a range, as that URL's page goes with it.
+  const history = useHistory();
   const previousTimeRange = useRef(timeRange);
   useEffect(() => {
     if (previousTimeRange.current === timeRange) {
       return;
     }
     previousTimeRange.current = timeRange;
-    if (state.page > 0) {
+    if (state.page > 0 && history.action !== 'POP') {
       update({ page: undefined }, true);
     }
-  }, [timeRange, state.page, update]);
+  }, [timeRange, state.page, update, history]);
 
   const {
     value: response,
@@ -270,11 +273,23 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
           <KbnWarningCallout
             data-test-subj="digitalExperienceSessionsFailedSummaries"
             size="s"
-            title={i18n.translate('xpack.digitalExperience.sessions.failedSummariesTitle', {
-              defaultMessage:
-                '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals.',
-              values: { count: response.failedSummaries },
-            })}
+            title={
+              // They are counted by search, facets and duration, but can't be checked for errors.
+              state.hasErrors
+                ? i18n.translate(
+                    'xpack.digitalExperience.sessions.failedSummariesWithErrorsFilterTitle',
+                    {
+                      defaultMessage:
+                        '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals, and whether {count, plural, one {it} other {they}} had errors is unknown.',
+                      values: { count: response.failedSummaries },
+                    }
+                  )
+                : i18n.translate('xpack.digitalExperience.sessions.failedSummariesTitle', {
+                    defaultMessage:
+                      '{count, plural, one {# session} other {# sessions}} in this time range could not be summarized, so {count, plural, one {it is} other {they are}} missing from the list and totals.',
+                    values: { count: response.failedSummaries },
+                  })
+            }
           />
           <EuiSpacer size="m" />
         </>

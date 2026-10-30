@@ -215,6 +215,53 @@ describe('sessions setup', () => {
       expect(esClient.asInternalUser.transform.putTransform).not.toHaveBeenCalled();
     });
 
+    it('waits until the new dest index accepts searches, so the list can read it right away', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      // The index calls run as the current user: Elasticsearch ignores secondary authorization there.
+      const client = esClient.asCurrentUser;
+      client.indices.exists.mockResolvedValue(false);
+      client.count.mockRejectedValueOnce(esError(503)).mockResolvedValueOnce({ count: 0 } as never);
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+
+      // Created before the transforms start, so it exists when enabling returns.
+      expect(client.indices.create).toHaveBeenCalledWith({
+        index: 'digital-experience-sessions-1',
+      });
+      const [create] = client.indices.create.mock.invocationCallOrder;
+      const [start] =
+        esClient.asSecondaryAuthUser.transform.startTransform.mock.invocationCallOrder;
+      expect(create).toBeLessThan(start);
+      expect(client.count).toHaveBeenCalledTimes(2);
+      expect(client.count).toHaveBeenCalledWith({
+        index: 'digital-experience-sessions-1',
+        ignore_unavailable: true,
+      });
+      const [firstCount] = client.count.mock.invocationCallOrder;
+      expect(firstCount).toBeGreaterThan(start);
+    });
+
+    it('keeps an existing dest index', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      esClient.asCurrentUser.indices.exists.mockResolvedValue(true);
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+
+      expect(esClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('does not wait on errors other than an unavailable index', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      esClient.asCurrentUser.count.mockRejectedValue(esError(403));
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+
+      expect(esClient.asCurrentUser.count).toHaveBeenCalledTimes(1);
+    });
+
     it('installs one transform per partition', async () => {
       grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);

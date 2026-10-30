@@ -135,24 +135,45 @@ const facetFilters = (
     .filter((name) => name !== exclude && facets[name])
     .map((name) => ({ term: { [SESSION_FACET_FIELDS[name]]: facets[name] } }));
 
-const sessionFilters = ({
-  hasErrors,
-  minDurationMs,
-  maxDurationMs,
-}: SessionListFilters = {}): QueryDslQueryContainer[] => {
-  const filters: QueryDslQueryContainer[] = hasErrors ? [{ term: { has_error: true } }] : [];
-  if (minDurationMs !== undefined || maxDurationMs !== undefined) {
-    filters.push({
-      range: {
-        duration_ms: {
-          ...(minDurationMs !== undefined ? { gte: minDurationMs } : {}),
-          ...(maxDurationMs !== undefined ? { lt: maxDurationMs } : {}),
+const durationRange = (
+  field: string,
+  { minDurationMs, maxDurationMs }: SessionListFilters = {}
+): QueryDslQueryContainer[] =>
+  minDurationMs !== undefined || maxDurationMs !== undefined
+    ? [
+        {
+          range: {
+            [field]: {
+              ...(minDurationMs !== undefined ? { gte: minDurationMs } : {}),
+              ...(maxDurationMs !== undefined ? { lt: maxDurationMs } : {}),
+            },
+          },
         },
-      },
-    });
-  }
-  return filters;
+      ]
+    : [];
+
+const sessionFilters = (filters: SessionListFilters = {}): QueryDslQueryContainer[] => [
+  ...(filters.hasErrors ? [{ term: { has_error: true } }] : []),
+  ...durationRange('duration_ms', filters),
+];
+
+/**
+ * The dest pipeline sets `duration_ms`, so a summary it failed on may lack it; its start and end
+ * come from the transform. Mapped at search time only when a duration range is set.
+ */
+const FAILED_SUMMARY_DURATION_FIELD = 'failed_summary_duration_ms';
+const FAILED_SUMMARY_DURATION_MAPPING = {
+  [FAILED_SUMMARY_DURATION_FIELD]: {
+    type: 'long' as const,
+    script: {
+      source:
+        "if (doc['start_time'].size() > 0 && doc['end_time'].size() > 0) { emit(doc['end_time'].value.toInstant().toEpochMilli() - doc['start_time'].value.toInstant().toEpochMilli()); }",
+    },
+  },
 };
+
+const hasDurationRange = ({ minDurationMs, maxDurationMs }: SessionListFilters = {}) =>
+  minDurationMs !== undefined || maxDurationMs !== undefined;
 
 const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
   filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
@@ -208,13 +229,22 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     from,
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
+    ...(hasDurationRange(params.filters)
+      ? { runtime_mappings: FAILED_SUMMARY_DURATION_MAPPING }
+      : {}),
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
     post_filter: listedFilter(params),
     aggs: {
       ...facetAggs,
       kpis: { filter: listedFilter(params), aggs: kpiAggs },
+      // Narrowed like the list, by search, facets and duration, but not by errors: `has_error`
+      // is set by the pipeline that failed on them.
       failed_summaries: {
-        filter: allOf([...facetFilters(params.facets), FAILED_SUMMARY]),
+        filter: allOf([
+          ...facetFilters(params.facets),
+          ...durationRange(FAILED_SUMMARY_DURATION_FIELD, params.filters),
+          FAILED_SUMMARY,
+        ]),
       },
     },
   };
