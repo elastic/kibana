@@ -19,6 +19,7 @@ import {
   dataRegexReplaceStepDefinition,
   dataStringifyJsonStepDefinition,
 } from './data';
+import { getLastRunStepDefinition } from './workflow';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 
 export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
@@ -32,4 +33,5 @@ export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRe
   serverStepRegistry.register(dataConcatStepDefinition);
   serverStepRegistry.register(dataParseJsonStepDefinition);
   serverStepRegistry.register(dataStringifyJsonStepDefinition);
+  serverStepRegistry.register(getLastRunStepDefinition);
 };

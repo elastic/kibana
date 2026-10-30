@@ -33,7 +33,4 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(async () =>
     (await isEnabled()) ? (await loadDefinitions()).deleteKiStepDefinition : undefined
   );
-  workflowsExtensions.registerStepDefinition(async () =>
-    (await isEnabled()) ? (await loadDefinitions()).getLastRunStepDefinition : undefined
-  );
 };
