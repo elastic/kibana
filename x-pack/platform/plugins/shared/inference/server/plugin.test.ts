@@ -18,14 +18,16 @@ import {
   resolveOnFailureMode,
   resolveReplacementsEncryptionKey,
 } from './plugin';
-import { createClient } from './inference_client';
+import { createChatModel, createClient } from './inference_client';
 
 jest.mock('./inference_client', () => ({
   ...jest.requireActual('./inference_client'),
   createClient: jest.fn(),
+  createChatModel: jest.fn(),
 }));
 
 const createClientMock = jest.mocked(createClient);
+const createChatModelMock = jest.mocked(createChatModel);
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -253,5 +255,54 @@ describe('InferencePlugin.start getClient', () => {
     const { resolveFeatureEndpoint } = await getClientOptions();
 
     expect(resolveFeatureEndpoint).toBeUndefined();
+  });
+});
+
+describe('InferencePlugin.start getChatModel', () => {
+  const request = httpServerMock.createKibanaRequest();
+
+  const getChatModelOptions = async (
+    target: { connectorId: string } | { featureId: string },
+    resolver?: jest.Mock
+  ) => {
+    const plugin = createPlugin(false);
+    const { registerFeatureEndpointResolver } = plugin.setup(
+      coreMock.createSetup(),
+      setupDependencies
+    );
+    if (resolver) {
+      registerFeatureEndpointResolver(resolver);
+    }
+    await plugin
+      .start(coreMock.createStart(), { actions: actionsMock.createStart() })
+      .getChatModel({ request, ...target, chatModelOptions: {} });
+    await plugin.stop();
+    expect(createChatModelMock).toHaveBeenCalledTimes(1);
+    return createChatModelMock.mock.calls[0][0];
+  };
+
+  afterEach(() => {
+    createChatModelMock.mockReset();
+  });
+
+  it('passes the registered feature endpoint resolver to getChatModel', async () => {
+    const resolver = jest.fn().mockResolvedValue({ connectorId: 'top' });
+    const { resolveFeatureEndpoint, featureId, connectorId } = await getChatModelOptions(
+      { featureId: 'my_feature' },
+      resolver
+    );
+
+    expect(featureId).toBe('my_feature');
+    expect(connectorId).toBeUndefined();
+    expect(resolveFeatureEndpoint).toBeDefined();
+    await expect(resolveFeatureEndpoint?.('my_feature')).resolves.toEqual({ connectorId: 'top' });
+    expect(resolver).toHaveBeenCalledWith('my_feature', request);
+  });
+
+  it('forwards the connectorId to getChatModel', async () => {
+    const { featureId, connectorId } = await getChatModelOptions({ connectorId: 'my-connector' });
+
+    expect(connectorId).toBe('my-connector');
+    expect(featureId).toBeUndefined();
   });
 });

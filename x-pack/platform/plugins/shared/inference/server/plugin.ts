@@ -382,10 +382,7 @@ export class InferencePlugin
 
       getChatModel: async (options) => {
         return createChatModel({
-          request: options.request,
-          connectorId: options.connectorId,
-          chatModelOptions: options.chatModelOptions,
-          callbacks: options.callbacks,
+          ...options,
           ...getAnonymizationOptions(options.request),
           actions: pluginsStart.actions,
           regexWorker: this.regexWorker!,
@@ -398,6 +395,7 @@ export class InferencePlugin
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
           resolveConnectorId: createConnectorIdResolver(options.request),
           shouldStreamInferenceEndpoint: createStreamingResolver(options.request),
+          resolveFeatureEndpoint: createFeatureEndpointResolver(options.request),
         });
       },
 

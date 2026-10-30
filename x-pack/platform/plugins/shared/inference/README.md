@@ -198,6 +198,16 @@ const chatResponse = await inferenceClient.chatComplete({
 });
 ```
 
+`getChatModel` accepts a `featureId` the same way. The feature's top endpoint is resolved once to load the connector returned by `getConnector()`, and every call then goes through `chatComplete({ featureId })`: the feature's `reasoning` applies and `chatModelOptions.reasoning` is ignored, while the other `chatModelOptions` (such as `temperature`) are forwarded as usual.
+
+```ts
+const chatModel = await myStartDeps.inference.getChatModel({
+  request,
+  featureId: 'my_feature',
+  chatModelOptions: {},
+});
+```
+
 #### Streaming mode
 
 Passing `stream: true` when calling the API enables streaming mode.

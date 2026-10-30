@@ -202,6 +202,20 @@ export interface InferenceServerStart {
    *    temperature: 0.3,
    *   }
    * });
+   * ```
+   *
+   * A chat model can also be built from a `featureId`. The feature's top endpoint is resolved
+   * once to load the connector exposed by `getConnector()`, and every call then goes through
+   * `chatComplete({ featureId })`, so the feature's `reasoning` applies.
+   *
+   * @example
+   * ```ts
+   * const chatModel = await myStartDeps.inference.getChatModel({
+   *   request,
+   *   featureId: 'my-feature-id',
+   *   chatModelOptions: {},
+   * });
+   * ```
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
 
@@ -294,16 +308,14 @@ export interface InferenceServerStart {
 
 /**
  * Options to create an inference chat model using the {@link InferenceServerStart.getChatModel} API.
+ *
+ * The model is given either as a `connectorId` or as a `featureId` (see {@link InferenceModelTarget}).
  */
-export interface CreateChatModelOptions {
+export type CreateChatModelOptions = {
   /**
    * The request to scope the client to.
    */
   request: KibanaRequest;
-  /**
-   * The id of the GenAI connector to use.
-   */
-  connectorId: string;
   /**
    * Callback to be used by the client to report lifecycle events.
    */
@@ -312,4 +324,4 @@ export interface CreateChatModelOptions {
    * Additional parameters to be passed down to the model constructor.
    */
   chatModelOptions: Omit<InferenceChatModelBaseParams, 'connector' | 'logger'>;
-}
+} & InferenceModelTarget;

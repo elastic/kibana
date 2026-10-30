@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InferenceTaskErrorCode } from '@kbn/inference-common';
 import { createChatModel } from './create_chat_model';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
@@ -134,6 +135,117 @@ describe('createChatModel', () => {
       chatComplete: inferenceClient.chatComplete,
       connector,
       temperature: 0.3,
+    });
+  });
+
+  describe('when built from a featureId', () => {
+    const createFromFeature = ({
+      resolveFeatureEndpoint,
+      chatModelOptions = {},
+    }: {
+      resolveFeatureEndpoint?: jest.Mock;
+      chatModelOptions?: Parameters<typeof createChatModel>[0]['chatModelOptions'];
+    }) =>
+      createChatModel({
+        request,
+        featureId: 'my_feature',
+        resolveFeatureEndpoint,
+        actions,
+        logger,
+        chatModelOptions,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache: new InferenceEndpointIdCache(),
+      });
+
+    it('resolves the feature endpoint and loads its connector when built from a featureId', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({ connectorId: 'top-connector' });
+
+      await createFromFeature({ resolveFeatureEndpoint });
+
+      expect(resolveFeatureEndpoint).toHaveBeenCalledTimes(1);
+      expect(resolveFeatureEndpoint).toHaveBeenCalledWith('my_feature');
+      expect(getConnectorByIdMock).toHaveBeenCalledTimes(1);
+      expect(getConnectorByIdMock).toHaveBeenCalledWith({
+        connectorId: 'top-connector',
+        actions,
+        request,
+        esClient: mockEsClient,
+        logger,
+      });
+    });
+
+    it('passes the feature endpoint resolver to the client so each call resolves the feature', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({ connectorId: 'top-connector' });
+
+      await createFromFeature({ resolveFeatureEndpoint });
+
+      expect(createClientMock).toHaveBeenCalledTimes(1);
+      expect(createClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({ resolveFeatureEndpoint })
+      );
+    });
+
+    it('passes featureId to the InferenceChatModel and no reasoning from the feature', async () => {
+      const inferenceClient = { chatComplete: jest.fn() } as any;
+      createClientMock.mockReturnValue(inferenceClient);
+      const connector = Symbol('connector') as any;
+      getConnectorByIdMock.mockResolvedValue(connector);
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'c',
+        reasoning: { effort: 'low' },
+        temperature: 0.3,
+      });
+
+      await createFromFeature({ resolveFeatureEndpoint });
+
+      expect(InferenceChatModelMock).toHaveBeenCalledTimes(1);
+      const constructorParams = InferenceChatModelMock.mock.calls[0][0] as unknown as Record<
+        string,
+        unknown
+      >;
+      expect(constructorParams).toEqual({
+        chatComplete: inferenceClient.chatComplete,
+        connector,
+        featureId: 'my_feature',
+      });
+      expect(constructorParams).not.toHaveProperty('reasoning');
+      expect(constructorParams).not.toHaveProperty('temperature');
+    });
+
+    it('keeps the temperature given in chatModelOptions on the feature path', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'c',
+        temperature: 0.3,
+      });
+
+      await createFromFeature({ resolveFeatureEndpoint, chatModelOptions: { temperature: 0.9 } });
+
+      expect(InferenceChatModelMock).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'my_feature', temperature: 0.9 })
+      );
+    });
+
+    it('rejects with a request error when the feature has no endpoint', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue(undefined);
+
+      await expect(createFromFeature({ resolveFeatureEndpoint })).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        status: 400,
+        message: expect.stringContaining('No endpoint is available for feature "my_feature"'),
+      });
+      expect(getConnectorByIdMock).not.toHaveBeenCalled();
+      expect(InferenceChatModelMock).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an internal error when no resolver is registered', async () => {
+      await expect(createFromFeature({})).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: expect.stringContaining('no feature endpoint resolver is registered'),
+      });
+      expect(getConnectorByIdMock).not.toHaveBeenCalled();
+      expect(InferenceChatModelMock).not.toHaveBeenCalled();
     });
   });
 });
