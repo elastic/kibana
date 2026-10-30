@@ -32,7 +32,8 @@ import type { Formatters } from '../../../hooks/use_formatters';
 import { ANONYMOUS_USER } from '../../../labels';
 import { clientOf, locationOf } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
-import { SESSIONS_PAGE_SIZES, type SessionsListState } from '../hooks/use_sessions_list_query';
+import type { SessionsListState } from '../hooks/use_sessions_list_query';
+import { SESSIONS_PAGE_SIZES } from '../../../utils/sessions_list_query';
 import { JourneyTrail } from './journey_trail';
 
 /** Elasticsearch `index.max_result_window` default: the list pages no further. */
