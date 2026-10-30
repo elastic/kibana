@@ -30,7 +30,8 @@ export interface BuildWorkflowExecutionDocumentParams {
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
-  authenticatedUser: ResolvedExecutionIdentity | undefined;
+  /** Identity of the user who triggered the execution; `undefined` when none could be resolved. */
+  executorIdentity: ResolvedExecutionIdentity | undefined;
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
@@ -55,7 +56,7 @@ export const buildWorkflowExecutionDocument = (
     spaceId,
     context,
     defaultTriggeredBy,
-    authenticatedUser,
+    executorIdentity,
     now,
     maxEventChainDepth,
     getConcurrencyGroupKey,
@@ -83,7 +84,7 @@ export const buildWorkflowExecutionDocument = (
   );
   const dispatchEventId =
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
-  const missingIdentity = authenticatedUser == null;
+  const missingIdentity = executorIdentity == null;
   const workflowExecution: WorkflowExecutionForInputRendering = {
     id: generateUuid(),
     spaceId,
@@ -96,8 +97,8 @@ export const buildWorkflowExecutionDocument = (
     context: executionContext,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
-    executedBy: authenticatedUser?.executedBy ?? UNKNOWN_EXECUTION_IDENTITY,
-    ...(authenticatedUser ? { executedByUser: authenticatedUser.user } : {}),
+    executedBy: executorIdentity?.executedBy ?? UNKNOWN_EXECUTION_IDENTITY,
+    ...(executorIdentity ? { executedByUser: executorIdentity.user } : {}),
     ...(inheritedIdentity
       ? { effectiveIdentity: inheritedIdentity }
       : workflow.definition?.settings?.run_as
