@@ -32,6 +32,7 @@ export const ChangePointGridRenderer = ({
   fetch$,
   searchContext,
   onRenderedChange,
+  registerChartApi,
 }: {
   esql: string;
   cards: ChangePointCardModel[];
@@ -43,6 +44,7 @@ export const ChangePointGridRenderer = ({
     query?: Query;
   };
   onRenderedChange: (rendered: boolean) => void;
+  registerChartApi: React.ComponentProps<typeof ChangePointLensChart>['registerChartApi'];
 }) => {
   const { euiTheme } = useEuiTheme();
   const seriesColumns = getChangePointSeriesColumns(esql);
@@ -128,6 +130,7 @@ export const ChangePointGridRenderer = ({
             showPanelActions={false}
             searchContext={searchContext}
             renderGeneration={renderGeneration}
+            registerChartApi={registerChartApi}
             onRenderedChange={(rendered) =>
               reportChartRendered(renderGeneration, getCardKey(card, index), rendered)
             }

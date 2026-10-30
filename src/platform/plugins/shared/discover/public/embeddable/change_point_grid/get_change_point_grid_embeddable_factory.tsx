@@ -14,17 +14,21 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
+  apiPublishesDataLoading,
+  combineCompatibleChildrenApis,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  type CanCancelRequests,
   type HasTypeDisplayName,
   type PublishesBlockingError,
   type PublishesDataLoading,
-  type PublishesDataViews,
+  type PublishesDataSources,
   type PublishesEsql,
   type PublishesRendered,
   type PublishesWritableTimeRange,
@@ -35,8 +39,9 @@ import type {
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
 import type { UnifiedHistogramFetch$Arguments } from '@kbn/unified-histogram/types';
+import { omit } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, merge, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, ReplaySubject } from 'rxjs';
 import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '../../../common';
 import { ACTION_EXPLORE_DATA } from '../constants';
 import type { DiscoverServices } from '../../build_services';
@@ -64,10 +69,11 @@ const getDefaultPanelTitle = (esql: string): string => {
 
 type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   HasTypeDisplayName &
+  CanCancelRequests &
   PublishesDataLoading &
   PublishesBlockingError &
   PublishesRendered &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesEsql &
   PublishesWritableTimeRange & {
     searchContext$: PublishingSubject<ChangePointGridSearchRequest | undefined>;
@@ -91,13 +97,37 @@ export const getChangePointGridEmbeddableFactory = ({
     const esql$ = new BehaviorSubject<AggregateQuery[]>([{ esql: initialState.esql }]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const applyDashboardContext = initialState.apply_dashboard_context !== false;
+    const searchLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const rendered$ = new BehaviorSubject(false);
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     const disabledActionIds$ = new BehaviorSubject<string[] | undefined>([ACTION_EXPLORE_DATA]);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const refresh$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1);
     const setRendered = (rendered: boolean) => rendered$.next(rendered);
+
+    // The mini Lens charts run their own queries after the main search. They are not dashboard
+    // children, so the panel tracks and cancels them itself.
+    const chartApis$ = new BehaviorSubject<Record<string, CanCancelRequests>>({});
+    let chartApiCount = 0;
+    const registerChartApi = (chartApi: CanCancelRequests) => {
+      const id = `chart-${chartApiCount++}`;
+      chartApis$.next({ ...chartApis$.getValue(), [id]: chartApi });
+      return () => chartApis$.next(omit(chartApis$.getValue(), id));
+    };
+    const loadingSubscription = combineLatest([
+      searchLoading$,
+      combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
+        { children$: chartApis$ },
+        'dataLoading$',
+        apiPublishesDataLoading,
+        undefined,
+        (values) => values.some(Boolean)
+      ),
+    ]).subscribe(([searchLoading, chartsLoading]) =>
+      dataLoading$.next(Boolean(searchLoading || chartsLoading))
+    );
+    let cancelSearch: (reason?: AbortReason) => void = () => {};
 
     const stateApi = initializeStateApi<ChangePointGridEmbeddableState>({
       uuid,
@@ -130,7 +160,7 @@ export const getChangePointGridEmbeddableFactory = ({
       defaultTitle$,
       dataLoading$,
       rendered$,
-      dataViews$,
+      dataSources$,
       disabledActionIds$,
       blockingError$,
       esql$,
@@ -138,9 +168,15 @@ export const getChangePointGridEmbeddableFactory = ({
       searchContext$,
       applyDashboardContext,
       getTypeDisplayName: () => defaultTitle,
+      cancelRequests: (reason?: AbortReason) => {
+        cancelSearch(reason);
+        Object.values(chartApis$.getValue()).forEach((chartApi) => chartApi.cancelRequests(reason));
+        // Nothing else renders until the next search, so do not hold up dashboard render-complete.
+        rendered$.next(true);
+      },
     });
 
-    const { cleanup } = initializeChangePointGridFetch({
+    const { cleanup: cleanupFetch, cancelRequests: cancelFetch } = initializeChangePointGridFetch({
       api,
       state: initialState,
       discoverServices,
@@ -154,12 +190,17 @@ export const getChangePointGridEmbeddableFactory = ({
         if (loading) {
           rendered$.next(false);
         }
-        dataLoading$.next(loading);
+        searchLoading$.next(loading);
       },
-      setDataViews: (dataViews) => dataViews$.next(dataViews),
+      setDataViews: (dataViews) => dataSources$.next(dataViews),
       setSearchError: (error) => blockingError$.next(error),
       setApproximationApplied: (applied) => approximationApplied$.next(applied),
     });
+    cancelSearch = cancelFetch;
+    const cleanup = () => {
+      loadingSubscription.unsubscribe();
+      cleanupFetch();
+    };
 
     return {
       api,
@@ -202,6 +243,7 @@ export const getChangePointGridEmbeddableFactory = ({
               query: searchContext.inputQuery,
             }}
             onRenderedChange={setRendered}
+            registerChartApi={registerChartApi}
           />
         );
       },

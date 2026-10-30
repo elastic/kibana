@@ -87,11 +87,10 @@ describe('initializeChangePointGridFetch', () => {
       },
       ebtManager: { createScopedEBTManager: jest.fn() },
       data: {},
-      expressions: {},
       dataSourceService: { unregisterEsqlSource: jest.fn() },
     } as unknown as DiscoverServices;
 
-    const { cleanup } = initializeChangePointGridFetch({
+    const { cleanup, cancelRequests } = initializeChangePointGridFetch({
       api: {},
       state: panelState as never,
       discoverServices,
@@ -107,6 +106,7 @@ describe('initializeChangePointGridFetch', () => {
     cleanupFetch = cleanup;
     return {
       cleanup,
+      cancelRequests,
       setDataLoading,
       setDataViews,
       setSearchError,
@@ -213,6 +213,24 @@ describe('initializeChangePointGridFetch', () => {
     cleanupFetch?.();
     cleanupFetch = undefined;
     expect(jest.mocked(fetchEsql).mock.calls[1][0].abortSignal?.aborted).toBe(true);
+  });
+
+  it('stops loading without an error when the search is cancelled', async () => {
+    const { cancelRequests, setDataLoading, setSearchError } = start();
+    fetchContext$.next(dashboardContext);
+    await Promise.resolve();
+    const signal = jest.mocked(fetchEsql).mock.calls[0][0].abortSignal;
+
+    cancelRequests();
+    expect(signal?.aborted).toBe(true);
+
+    rejectSearch(new Error('aborted'));
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(setSearchError).not.toHaveBeenCalledWith(expect.any(Error));
+    expect(setDataLoading).toHaveBeenLastCalledWith(false);
   });
 
   it('discards a stale ES|QL source when resolutions complete out of order', async () => {

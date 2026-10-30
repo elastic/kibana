@@ -299,6 +299,34 @@ describe('ChangePointLensChart', () => {
     expect(onRenderedChange).toHaveBeenCalledTimes(callsAfterUnmount);
   });
 
+  it('registers a cancellable Lens API and unregisters it on unmount', () => {
+    const lensApi = { cancelRequests: jest.fn() };
+    const unregister = jest.fn();
+    const registerChartApi = jest.fn(() => unregister);
+    const EmbeddableSpy = ({ onApiAvailable }: { onApiAvailable?: (api: unknown) => void }) => {
+      React.useEffect(() => {
+        onApiAvailable?.(lensApi);
+      }, [onApiAvailable]);
+      return <div data-test-subj="lensEmbeddable" />;
+    };
+    useChangePointLensProps.mockReturnValue({ lensProps: stubLensProps, buildError: undefined });
+
+    const { unmount } = render(
+      <ChangePointLensChart
+        {...baseProps}
+        registerChartApi={registerChartApi}
+        services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
+      />
+    );
+
+    expect(registerChartApi).toHaveBeenCalledTimes(1);
+    expect(registerChartApi).toHaveBeenCalledWith(lensApi);
+    expect(unregister).not.toHaveBeenCalled();
+
+    unmount();
+    expect(unregister).toHaveBeenCalledTimes(1);
+  });
+
   it('reports a chart as rendered when it is out of view or failed to build', () => {
     const onRenderedChange = jest.fn();
     useChangePointLensProps.mockReturnValue({

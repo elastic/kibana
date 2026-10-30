@@ -11,6 +11,7 @@ import { buildChangePointCards, type ChangePointCardModel } from '@kbn/change-po
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { unregisterFromDataViewsCache } from '@kbn/data-source';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetch$ } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 import { CHANGE_POINT_GRID_MAX_SERIES } from '../../../common';
@@ -105,7 +106,6 @@ export const initializeChangePointGridFetch = ({
         abortSignal: currentAbortController.signal,
         inspectorAdapters: {},
         data: discoverServices.data,
-        expressions: discoverServices.expressions,
         scopedProfilesManager,
         esqlVariables: searchRequest.esqlVariables,
         searchSessionId: searchRequest.searchSessionId,
@@ -154,6 +154,10 @@ export const initializeChangePointGridFetch = ({
         discoverServices.dataSourceService.unregisterEsqlSource(esqlSourceId);
         unregisterFromDataViewsCache(esqlSourceId);
       }
+    },
+    cancelRequests: (reason?: AbortReason) => {
+      abortController?.abort(reason);
+      abortController = undefined;
     },
   };
 };

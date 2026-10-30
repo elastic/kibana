@@ -17,7 +17,11 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { apiPublishesRendered } from '@kbn/presentation-publishing';
+import {
+  apiCanCancelRequests,
+  apiPublishesRendered,
+  type CanCancelRequests,
+} from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -98,6 +102,8 @@ export interface ChangePointLensChartProps
   onRenderedChange?: (rendered: boolean) => void;
   /** Changes identity when the dashboard grid replaces the card list, so a chart reports for the new search. */
   renderGeneration?: object;
+  /** Hands the Lens API to the dashboard panel so it can cancel and track this chart's requests. Returns the unregister function. */
+  registerChartApi?: (api: CanCancelRequests) => () => void;
 }
 
 export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
@@ -115,6 +121,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   searchContext,
   onRenderedChange,
   renderGeneration,
+  registerChartApi,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -208,6 +215,13 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     });
     return () => subscription.unsubscribe();
   }, [lensApi, reportsRender]);
+
+  useEffect(() => {
+    if (!registerChartApi || !apiCanCancelRequests(lensApi)) {
+      return;
+    }
+    return registerChartApi(lensApi);
+  }, [lensApi, registerChartApi]);
 
   useEffect(() => {
     const report = onRenderedChangeRef.current;
@@ -304,7 +318,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const chart = lensProps ? (
     <EmbeddableComponent
       {...lensProps}
-      onApiAvailable={onRenderedChange ? handleApiAvailable : undefined}
+      onApiAvailable={onRenderedChange || registerChartApi ? handleApiAvailable : undefined}
       extraActions={showPanelActions ? extraActions : undefined}
       {...(fetchParams.abortController ? { abortController: fetchParams.abortController } : {})}
       disabledActions={showPanelActions ? DEFAULT_DISABLED_ACTIONS : undefined}

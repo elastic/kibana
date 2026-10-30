@@ -28,6 +28,7 @@ jest.mock('@kbn/esql-utils', () => ({
 const searchContext = {
   filters: [],
 };
+const registerChartApi = jest.fn(() => () => {});
 
 const renderGrid = (props: Partial<React.ComponentProps<typeof ChangePointGridRenderer>> = {}) => {
   const onRenderedChange = props.onRenderedChange ?? jest.fn();
@@ -42,6 +43,7 @@ const renderGrid = (props: Partial<React.ComponentProps<typeof ChangePointGridRe
           fetch$={new ReplaySubject(1)}
           searchContext={searchContext}
           onRenderedChange={onRenderedChange}
+          registerChartApi={registerChartApi}
           {...props}
         />
       </I18nProvider>
@@ -66,6 +68,9 @@ describe('ChangePointGridRenderer', () => {
 
     expect(screen.getAllByTestId('changePointMiniChart')).toHaveLength(2);
     expect(jest.mocked(ChangePointLensChart).mock.calls[0][0].showPanelActions).toBe(false);
+    expect(jest.mocked(ChangePointLensChart).mock.calls[0][0].registerChartApi).toBe(
+      registerChartApi
+    );
   });
 
   it('shows an empty state when there are no cards', () => {
@@ -86,6 +91,7 @@ describe('ChangePointGridRenderer', () => {
             fetch$={new ReplaySubject(1)}
             searchContext={searchContext}
             onRenderedChange={onRenderedChange}
+            registerChartApi={registerChartApi}
           />
         </I18nProvider>
       </EuiProvider>
@@ -124,6 +130,7 @@ describe('ChangePointGridRenderer', () => {
             fetch$={new ReplaySubject(1)}
             searchContext={searchContext}
             onRenderedChange={onRenderedChange}
+            registerChartApi={registerChartApi}
           />
         </I18nProvider>
       </EuiProvider>

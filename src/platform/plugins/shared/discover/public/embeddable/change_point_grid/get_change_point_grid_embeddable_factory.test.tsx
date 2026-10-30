@@ -18,8 +18,12 @@ import { ChangePointGridRenderer } from './change_point_grid_renderer';
 import { getChangePointGridEmbeddableFactory } from './get_change_point_grid_embeddable_factory';
 import { initializeChangePointGridFetch } from './initialize_change_point_grid_fetch';
 
+const mockCancelSearch = jest.fn();
 jest.mock('./initialize_change_point_grid_fetch', () => ({
-  initializeChangePointGridFetch: jest.fn(() => ({ cleanup: jest.fn() })),
+  initializeChangePointGridFetch: jest.fn(() => ({
+    cleanup: jest.fn(),
+    cancelRequests: mockCancelSearch,
+  })),
 }));
 
 jest.mock('./change_point_grid_renderer', () => ({
@@ -66,7 +70,7 @@ describe('getChangePointGridEmbeddableFactory', () => {
     const [{ setDataViews }] = jest.mocked(initializeChangePointGridFetch).mock.calls[0];
     const dataView = { id: 'logs-*' };
     setDataViews([dataView as never]);
-    expect(api.dataViews$.getValue()).toEqual([dataView]);
+    expect(api.dataSources$.getValue()).toEqual([dataView]);
 
     render(<Component />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
@@ -177,5 +181,70 @@ describe('getChangePointGridEmbeddableFactory', () => {
     expect(api.rendered$.getValue()).toBe(false);
     setDataLoading(false);
     expect(api.rendered$.getValue()).toBe(false);
+  });
+
+  it('keeps loading while mini charts load and cancels them with the search', async () => {
+    mockCancelSearch.mockClear();
+    const parentApi = {} as PresentationContainer;
+    const uuid = 'change-point-grid';
+    const factory = getChangePointGridEmbeddableFactory({
+      discoverServices: discoverServiceMock,
+    });
+    const { api, Component } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: mockInitializeDrilldownsManager,
+      uuid,
+      parentApi,
+      initialState: {
+        esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',
+        apply_dashboard_context: true,
+      },
+      finalizeApi: (apiRegistration) => ({
+        ...apiRegistration,
+        uuid,
+        type: factory.type,
+        parentApi,
+        phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
+      }),
+    });
+    const [{ setDataLoading, cards$, searchContext$ }] = jest
+      .mocked(initializeChangePointGridFetch)
+      .mock.calls.at(-1)!;
+    searchContext$.next({
+      timeRange: { from: '2020-01-01T00:00:00.000Z', to: '2020-01-02T00:00:00.000Z' },
+      filters: [],
+      esqlVariables: [],
+      isApproximate: false,
+      projectRouting: undefined,
+    });
+    cards$.next([]);
+    render(<Component />);
+    await waitFor(() => {
+      expect(jest.mocked(ChangePointGridRenderer).mock.calls.at(-1)?.[0].registerChartApi).toEqual(
+        expect.any(Function)
+      );
+    });
+    const { registerChartApi } = jest.mocked(ChangePointGridRenderer).mock.calls.at(-1)![0];
+
+    const loadingChart = { cancelRequests: jest.fn(), dataLoading$: new BehaviorSubject(true) };
+    const removedChart = { cancelRequests: jest.fn(), dataLoading$: new BehaviorSubject(false) };
+    const unregisterLoadingChart = registerChartApi!(loadingChart);
+    registerChartApi!(removedChart)();
+
+    setDataLoading(false);
+    expect(api.dataLoading$.getValue()).toBe(true);
+
+    api.cancelRequests();
+    expect(mockCancelSearch).toHaveBeenCalledTimes(1);
+    expect(loadingChart.cancelRequests).toHaveBeenCalledTimes(1);
+    expect(removedChart.cancelRequests).not.toHaveBeenCalled();
+    expect(api.rendered$.getValue()).toBe(true);
+
+    loadingChart.dataLoading$.next(false);
+    expect(api.dataLoading$.getValue()).toBe(false);
+
+    loadingChart.dataLoading$.next(true);
+    expect(api.dataLoading$.getValue()).toBe(true);
+    unregisterLoadingChart();
+    expect(api.dataLoading$.getValue()).toBe(false);
   });
 });
