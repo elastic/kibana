@@ -17,6 +17,7 @@ import {
   buildInvestigationConversation,
   buildInvestigationRound,
 } from '../decision_trees/investigation_round';
+import type { ReinforcementRunRegistry } from '../decision_trees/reinforcement_runs';
 import { investigationRoundInputsSchema, loadInvestigationRound } from '../investigation_round';
 import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
 
@@ -24,9 +25,11 @@ const MAX_INPUT_CHARS = 100_000;
 
 export const decisionTreeReinforceStepDefinition = ({
   getAgentBuilder,
+  reinforcementRuns,
   isEnabled,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
+  reinforcementRuns: ReinforcementRunRegistry;
   isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
@@ -121,27 +124,36 @@ export const decisionTreeReinforceStepDefinition = ({
           ? { tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }] }
           : undefined;
 
-      // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
-      const { result } = await agentBuilder.agents.runAgent({
-        request,
-        agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-        interactive: { enabled: false },
-        defaultConnectorId: connectorId || undefined,
-        abortSignal: context.abortSignal,
-        telemetryMetadata: {
-          pluginId: 'nightshift_investigation_memory',
-          aggregateBy: 'nightshift',
-          productSolution: 'observability',
-          productFeature: 'nightshift',
-          interactionId: context.contextManager.getContext().execution.id,
-        },
-        agentParams: {
-          conversation,
-          nextInput: { message },
-          ...(configurationOverrides ? { configurationOverrides } : {}),
-        },
-      });
+      // Lets a later round of the investigation find the trees this run writes, including one it
+      // creates that the investigator never opened.
+      const unregister = conversationId
+        ? reinforcementRuns.register(conversation.id, conversationId)
+        : undefined;
+      try {
+        // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
+        const { result } = await agentBuilder.agents.runAgent({
+          request,
+          agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+          interactive: { enabled: false },
+          defaultConnectorId: connectorId || undefined,
+          abortSignal: context.abortSignal,
+          telemetryMetadata: {
+            pluginId: 'nightshift_investigation_memory',
+            aggregateBy: 'nightshift',
+            productSolution: 'observability',
+            productFeature: 'nightshift',
+            interactionId: context.contextManager.getContext().execution.id,
+          },
+          agentParams: {
+            conversation,
+            nextInput: { message },
+            ...(configurationOverrides ? { configurationOverrides } : {}),
+          },
+        });
 
-      return { output: { message: result.round.response.message } };
+        return { output: { message: result.round.response.message } };
+      } finally {
+        unregister?.();
+      }
     },
   });

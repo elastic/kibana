@@ -97,6 +97,7 @@ export const createSubmitOptimizerResultTool = ({
   getUsername,
   peekLearnings,
   drainLearnings,
+  getInvestigationId,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
@@ -108,6 +109,8 @@ export const createSubmitOptimizerResultTool = ({
   peekLearnings?: (conversationId: string) => LearningRecord[];
   /** Takes and clears the learnings this conversation recorded this turn. */
   drainLearnings?: (conversationId: string) => LearningRecord[];
+  /** The investigation this reinforcement run works for, keyed by the run's own conversation id. */
+  getInvestigationId?: (conversationId: string) => string | undefined;
   logger: Logger;
 }): BuiltinToolDefinition<typeof submitSchema> => ({
   id: DECISION_TREE_SUBMIT_TOOL_ID,
@@ -157,6 +160,7 @@ export const createSubmitOptimizerResultTool = ({
 
     const store = getStore(context.esClient.asCurrentUser, context.request);
     const author = getUsername?.(context.request) || 'system';
+    const investigationId = getInvestigationId?.(rawConversationId);
     // Peek until every submission is accepted. Draining first would drop this turn's learnings
     // when the agent has to fix a rejected file and call submit again.
     const turnLearnings = peekLearnings?.(conversationId) ?? [];
@@ -168,6 +172,7 @@ export const createSubmitOptimizerResultTool = ({
         author,
         summary: params.summary,
         learnings: turnLearnings,
+        investigationId,
       });
       drainLearnings?.(conversationId);
       return {
@@ -197,6 +202,7 @@ export const createSubmitOptimizerResultTool = ({
             store,
             author,
             summary: params.summary,
+            investigationId,
             learnings: turnLearnings.filter(
               (learning) =>
                 learning.tree_id !== undefined &&
@@ -269,6 +275,7 @@ const persistSubmission = async ({
   author,
   summary,
   learnings,
+  investigationId,
 }: {
   submission: z.infer<typeof submissionSchema>;
   session: SandboxSession;
@@ -276,6 +283,7 @@ const persistSubmission = async ({
   author: string;
   summary: string;
   learnings: LearningRecord[];
+  investigationId?: string;
 }): Promise<SubmissionOutcome> => {
   const { tree_id: treeId, file_path: filePath, evidence_gatherer_metadata: metadata } = submission;
 
@@ -346,6 +354,7 @@ const persistSubmission = async ({
     summary,
     learnings,
     evidenceGathererMetadata: metadata,
+    investigationId,
   });
 
   return {
@@ -384,11 +393,13 @@ const persistLearningsWithoutEdits = async ({
   author,
   summary,
   learnings,
+  investigationId,
 }: {
   store: DecisionTreeStore;
   author: string;
   summary: string;
   learnings: LearningRecord[];
+  investigationId?: string;
 }): Promise<string[]> => {
   const byTree = new Map<string, LearningRecord[]>();
   for (const learning of learnings) {
@@ -420,6 +431,7 @@ const persistLearningsWithoutEdits = async ({
       summary,
       learnings: treeLearnings,
       evidenceGathererMetadata: existing.evidence_gatherer_metadata,
+      investigationId,
     });
     attached.push(treeId);
   }

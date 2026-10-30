@@ -58,6 +58,7 @@ import {
 import { composeHydrateNotificationsStepDefinition } from '../server/step_definitions/compose_hydrate_notifications';
 import { cortexHydrateStepDefinition } from '../server/step_definitions/cortex_hydrate';
 import { cortexOptimizeStepDefinition } from '../server/step_definitions/cortex_optimize';
+import { createReinforcementRunRegistry } from '../server/decision_trees/reinforcement_runs';
 import { decisionTreeHydrateStepDefinition } from '../server/step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from '../server/step_definitions/decision_tree_prepare';
 import { decisionTreeReinforceStepDefinition } from '../server/step_definitions/decision_tree_reinforce';
@@ -316,6 +317,7 @@ export const createNightshiftWorkflowFixture = ({
     }),
     decisionTreeReinforceStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
+      reinforcementRuns: createReinforcementRunRegistry(),
       isEnabled: () => decisionTreesEnabled,
     }),
   ];

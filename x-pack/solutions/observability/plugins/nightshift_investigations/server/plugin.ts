@@ -80,6 +80,7 @@ import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
+import { createReinforcementRunRegistry } from './decision_trees/reinforcement_runs';
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
@@ -165,6 +166,7 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private decisionTreesEnabled = false;
+  private readonly reinforcementRuns = createReinforcementRunRegistry();
   private assistantEnabled = false;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
@@ -379,6 +381,7 @@ export class NightshiftInvestigationsPlugin
             ),
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
+            getInvestigationId: this.reinforcementRuns.getInvestigationId,
             logger: decisionTreeLogger,
           })) {
             plugins.agentBuilder.tools.register(tool);
@@ -523,6 +526,7 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeReinforceStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            reinforcementRuns: this.reinforcementRuns,
             isEnabled: () => this.decisionTreesEnabled,
           })
         );

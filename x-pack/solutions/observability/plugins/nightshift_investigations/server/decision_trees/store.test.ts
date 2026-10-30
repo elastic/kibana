@@ -202,6 +202,79 @@ describe('commit', () => {
       'E1: Query checkout logs in logs-*',
     ]);
   });
+
+  it('stamps the version with the investigation it was written from', async () => {
+    const esClient = createEsClient();
+
+    await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'system',
+      summary: 'Initial tree.',
+      learnings: [],
+      evidenceGathererMetadata: [],
+      investigationId: 'inv-1',
+    });
+
+    const [versionCall, headCall] = esClient.index.mock.calls;
+    expect(versionCall[0].document.attributes.investigation_id).toBe('inv-1');
+    // The head is shared by every investigation that touches the tree.
+    expect(headCall[0].document.attributes).not.toHaveProperty('investigation_id');
+  });
+
+  it('leaves the version unstamped for a commit outside an investigation', async () => {
+    const esClient = createEsClient();
+
+    await createStore(esClient).commit({
+      treeId: 'symptom:checkout-high-latency',
+      markdown: MARKDOWN,
+      tree: TREE,
+      reinforced: false,
+      author: 'jdoe',
+      summary: 'Edited by hand.',
+      learnings: [],
+      evidenceGathererMetadata: [],
+    });
+
+    expect(esClient.index.mock.calls[0][0].document.attributes).not.toHaveProperty(
+      'investigation_id'
+    );
+  });
+});
+
+describe('listTreeIdsForInvestigation', () => {
+  it("returns each tree the investigation's versions belong to once", async () => {
+    const esClient = createEsClient();
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          { _source: { attributes: { tree_id: 'symptom:checkout-high-latency' } } },
+          { _source: { attributes: { tree_id: 'symptom:checkout-high-latency' } } },
+          { _source: { attributes: { tree_id: 'symptom:payment-errors' } } },
+        ],
+      },
+    });
+
+    const treeIds = await createStore(esClient).listTreeIdsForInvestigation('inv-1');
+
+    expect(treeIds).toEqual(['symptom:checkout-high-latency', 'symptom:payment-errors']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              { term: { type: 'decision_tree_version' } },
+              { term: { 'attributes.investigation_id': 'inv-1' } },
+              { term: { 'attributes.space_id': 'default' } },
+            ],
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
 });
 
 describe('list', () => {

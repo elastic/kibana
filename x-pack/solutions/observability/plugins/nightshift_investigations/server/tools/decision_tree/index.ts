@@ -53,12 +53,15 @@ export const createDecisionTreeTools = ({
   connectorNames,
   getSpaceId,
   getUsername,
+  getInvestigationId,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   connectorNames: readonly string[];
   getSpaceId: (request: KibanaRequest) => string;
   getUsername?: (request: KibanaRequest) => string | undefined;
+  /** The investigation a reinforcement run works for, keyed by the run's own conversation id. */
+  getInvestigationId?: (conversationId: string) => string | undefined;
   logger: Logger;
 }): Array<BuiltinToolDefinition<never>> => {
   const getTreeStore = (esClient: ElasticsearchClient, request: KibanaRequest) =>
@@ -100,6 +103,7 @@ export const createDecisionTreeTools = ({
       getUsername,
       peekLearnings,
       drainLearnings,
+      getInvestigationId,
       logger,
     }),
   ] as Array<BuiltinToolDefinition<never>>;
