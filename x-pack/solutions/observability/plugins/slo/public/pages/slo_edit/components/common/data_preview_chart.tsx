@@ -36,11 +36,10 @@ import type { GetPreviewDataResponse } from '@kbn/slo-schema';
 import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useFormValues } from '../../hooks/use_form_values';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
-import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
-import type { CreateSLOForm } from '../../types';
+import { useIndicatorSectionValidation } from '../../hooks/use_section_form_validation';
 
 interface DataPreviewChartProps {
   formatPattern?: string;
@@ -60,23 +59,19 @@ export function DataPreviewChart({
   thresholdMessage,
   ignoreMoreThan100,
 }: DataPreviewChartProps) {
-  const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
-  const { isIndicatorSectionValid } = useSectionFormValidation({
-    getFieldState,
-    getValues,
-    formState,
-    watch,
-  });
+  const isIndicatorSectionValid = useIndicatorSectionValidation();
 
   const [range, _] = useState({
     from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
   });
 
-  const indicator = watch('indicator');
-  const groupBy = watch('groupBy');
-  const projectRoutings = watch('settings.projectRoutings');
+  const [indicator, groupBy, projectRoutings] = useFormValues([
+    'indicator',
+    'groupBy',
+    'settings.projectRoutings',
+  ]);
 
   const {
     data: previewData,
