@@ -13,7 +13,8 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { getESQLControlVariablesFromState } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
@@ -144,33 +145,10 @@ export const parseControlGroupJson = (
   }
 };
 
-/**
- * @param panels - The control panels state, which may be null.
- * @description Extracts ESQL variables from the control panels state.
- * Each ESQL control panel is expected to have a `variableName`, `variableType`, and `selectedOptions`.
- * Returns an array of `ESQLControlVariable` objects.
- * If `panels` is null or empty, it returns an empty array.
- * @returns An array of ESQLControlVariable objects.
- */
+/** The variables published by the ES|QL controls among the control panels, which may be null. */
 export const extractEsqlVariables = (
   panels: ControlPanelsState<OptionsListESQLControlState> | null
-): ESQLControlVariable[] => {
-  if (!panels || Object.keys(panels).length === 0) {
-    return [];
-  }
-  const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
-    if (panel.type === ESQL_CONTROL) {
-      const isSingleSelect = panel.single_select ?? true;
-      const selectedValues = panel.selected_options || [];
-
-      acc.push({
-        key: panel.variable_name,
-        type: panel.variable_type as ESQLVariableType,
-        value: isSingleSelect ? selectedValues[0] ?? '' : selectedValues,
-      });
-    }
-    return acc;
-  }, []);
-
-  return variables;
-};
+): ESQLControlVariable[] =>
+  getESQLControlVariablesFromState(
+    Object.values(panels ?? {}).filter(({ type }) => type === ESQL_CONTROL)
+  );

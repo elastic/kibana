@@ -35,9 +35,16 @@ const resolveCustomContentState = async (
   generateEsql: CustomContentEsqlGenerator
 ): Promise<CustomContentState> => {
   const { nlQuery, esql, hasData, index, existingPanel } = request;
-  const { esqlVariables } = request;
-  const generate = (existingQueries: string[]) =>
-    generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries, esqlVariables });
+  // A control's column type is looked up only for a variable that the queries use.
+  const getEsqlVariables = (queries: ReadonlyArray<string | null | undefined>) =>
+    request.resolveEsqlVariables?.(queries.filter((query): query is string => !!query));
+  const generate = async (existingQueries: string[]) =>
+    generateEsql({
+      nlQuery: nlQuery ?? '',
+      index,
+      existingQueries,
+      esqlVariables: await getEsqlVariables([esql, ...existingQueries]),
+    });
 
   if (!existingPanel) {
     // The agent always states hasData: a static panel (false) has no query unless one is supplied.
@@ -51,7 +58,7 @@ const resolveCustomContentState = async (
     const { template } = await resolveTemplate({
       prompt: nlQuery,
       esqlQuery: query,
-      esqlVariables,
+      esqlVariables: query ? await getEsqlVariables([query]) : undefined,
     });
     return { esql_query: toEsqlQueryState(query), template };
   }
@@ -70,7 +77,8 @@ const resolveCustomContentState = async (
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
-    esqlVariables,
+    esqlVariables:
+      isQueryChanging && mergedEsqlQuery ? await getEsqlVariables([mergedEsqlQuery]) : undefined,
   });
   return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };

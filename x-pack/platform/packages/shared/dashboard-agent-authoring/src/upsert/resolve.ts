@@ -6,17 +6,15 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import {
-  getEsqlVariables,
-  getEsqlVariablesForSection,
+  createEsqlVariablesResolver,
   resolveControls,
   type IdentifiedControl,
   type PlannedControl,
 } from '../controls';
 import type { PanelContentSource, ResolvePanelContent } from '../panels';
-import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
+import type { PanelContent, PanelContentAttempt, ResolveEsqlVariables } from '../resolve_panel';
 import type {
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
@@ -47,7 +45,7 @@ export interface ResolvedChanges {
 const resolveContent = (
   content: PanelContentSource,
   { resolvePanelContent, resolveAttachmentPanel }: PanelResolvers,
-  esqlVariables: ESQLControlVariable[]
+  resolveEsqlVariables: ResolveEsqlVariables
 ): PanelContentAttempt | Promise<PanelContentAttempt> => {
   switch (content.source) {
     case 'config':
@@ -55,7 +53,7 @@ const resolveContent = (
     case 'attachment':
       return resolveAttachmentPanel(content.attachmentId);
     case 'request':
-      return resolvePanelContent({ ...content.request, esqlVariables });
+      return resolvePanelContent({ ...content.request, resolveEsqlVariables });
   }
 };
 
@@ -90,26 +88,19 @@ export const resolvePlan = async ({
   resolvers: PanelResolvers;
   logger: Logger;
 }): Promise<ResolvedChanges> => {
-  const needsEsqlVariables = panels.some(({ content }) => content?.source === 'request');
-  const esqlVariables = needsEsqlVariables
-    ? await getEsqlVariables({
-        pinnedPanels: existingControls,
-        panels: existingPanels,
-        timeRange,
-        resolveColumnType: resolvers.resolveEsqlControlColumnType,
-      })
-    : [];
+  const getEsqlVariablesResolver = createEsqlVariablesResolver({
+    pinnedPanels: existingControls,
+    panels: existingPanels,
+    timeRange,
+    resolveColumnType: resolvers.resolveEsqlControlColumnType,
+  });
   const sectionIdByPanelId = getSectionIdByPanelId({ panels: existingPanels });
   const [attempts, resolvedControls] = await Promise.all([
     Promise.all(
       panels.map(({ id, target, content }) => {
         if (!content) return undefined;
         const section = target === undefined ? sectionIdByPanelId.get(id) : target;
-        return resolveContent(
-          content,
-          resolvers,
-          getEsqlVariablesForSection(esqlVariables, section)
-        );
+        return resolveContent(content, resolvers, getEsqlVariablesResolver(section));
       })
     ),
     resolveControls({

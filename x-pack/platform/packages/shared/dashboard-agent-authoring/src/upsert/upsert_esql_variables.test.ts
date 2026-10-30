@@ -37,6 +37,23 @@ const lensPanel: AttachmentPanel = {
   grid: { ...grid, y: 9 },
 };
 
+const bytesPanel: AttachmentPanel = {
+  ...customContentPanel,
+  config: { esql_query: ['FROM logs | WHERE bytes > ?bytes'], template: '<div>old</div>' },
+};
+
+const bytesControl = {
+  id: 'control-bytes',
+  type: ESQL_CONTROL,
+  config: {
+    variable_name: 'bytes',
+    variable_type: 'values',
+    selected_options: ['100'],
+    control_type: 'VALUES_FROM_QUERY',
+    esql_query: 'FROM logs | STATS BY bytes',
+  },
+};
+
 const hostControl = {
   id: 'control-host',
   type: ESQL_CONTROL,
@@ -77,8 +94,15 @@ const restyle = (id: string) => ({
   content: { source: 'request', renderer: 'custom_content', query: 'use a darker background' },
 });
 
+/** The variables the `callIndex`th panel request asks for, for a panel that runs `queries`. */
+const variablesAskedBy = async (
+  resolvePanelContent: jest.MockedFunction<ResolvePanelContent>,
+  callIndex = 0,
+  queries: string[] = []
+) => resolvePanelContent.mock.calls[callIndex][0].resolveEsqlVariables?.(queries);
+
 describe('executeDashboardUpsert, ES|QL control values for custom content', () => {
-  it('gives an edited custom content panel the values of the dashboard controls', async () => {
+  it('lets an edited custom content panel ask for the values of the dashboard controls', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(
@@ -87,15 +111,12 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       [restyle('cc-1')]
     );
 
-    expect(resolvePanelContent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        renderer: 'custom_content',
-        esqlVariables: [{ key: 'host', value: 'web-1', type: 'values' }],
-      })
-    );
+    expect(await variablesAskedBy(resolvePanelContent)).toEqual([
+      { key: 'host', value: 'web-1', type: 'values' },
+    ]);
   });
 
-  it('gives a new custom content panel the values too, since its own query can use a control', async () => {
+  it('does the same for a new panel, since its own query can use a control', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(resolvePanelContent, { title: 'Test', panels: [], pinned_panels: [hostControl] }, [
@@ -111,11 +132,9 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       },
     ]);
 
-    expect(resolvePanelContent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        esqlVariables: [{ key: 'host', value: 'web-1', type: 'values' }],
-      })
-    );
+    expect(await variablesAskedBy(resolvePanelContent)).toEqual([
+      { key: 'host', value: 'web-1', type: 'values' },
+    ]);
   });
 
   it('gives a panel the controls unpinned into the grid, and those of its own section only', async () => {
@@ -152,117 +171,90 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       [restyle('cc-1'), restyle('cc-a'), restyle('cc-b')]
     );
 
-    const keysOf = (panelId: string) => {
-      const index = ['cc-1', 'cc-a', 'cc-b'].indexOf(panelId);
-      return resolvePanelContent.mock.calls[index][0].esqlVariables?.map(({ key }) => key);
-    };
-    expect(keysOf('cc-1')).toEqual(['host', 'region']);
-    expect(keysOf('cc-a')).toEqual(['host', 'region', 'env']);
-    expect(keysOf('cc-b')).toEqual(['host', 'region']);
+    const keysOf = async (callIndex: number) =>
+      (await variablesAskedBy(resolvePanelContent, callIndex))?.map(({ key }) => key);
+    expect(await keysOf(0)).toEqual(['host', 'region']);
+    expect(await keysOf(1)).toEqual(['host', 'region', 'env']);
+    expect(await keysOf(2)).toEqual(['host', 'region']);
   });
 
-  it('resolves the column type with the time range the call sets, else the dashboard one', async () => {
-    const resolvePanelContent = createResolver();
-    const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
-    const dashboardData = {
-      title: 'Test',
-      time_range: { from: 'now-7d', to: 'now' },
-      panels: [customContentPanel],
-      pinned_panels: [
-        {
-          id: 'control-bytes',
-          type: ESQL_CONTROL,
-          config: {
-            variable_name: 'bytes',
-            variable_type: 'values',
-            selected_options: ['100'],
-            control_type: 'VALUES_FROM_QUERY',
-            esql_query: 'FROM logs | WHERE @timestamp > ?_tstart | STATS BY bytes',
-          },
-        },
-      ],
-    };
-    const run = (upsertParams: Record<string, unknown>) =>
+  describe('the column type of a query-based control', () => {
+    const run = ({
+      resolvePanelContent = createResolver(),
+      resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long'),
+      time_range,
+      panels = [restyle('cc-1')],
+    }: {
+      resolvePanelContent?: ReturnType<typeof createResolver>;
+      resolveEsqlControlColumnType?: jest.Mock;
+      time_range?: { from: string; to: string };
+      panels?: Array<{ id: string; content: Record<string, unknown> }>;
+    } = {}) =>
       executeDashboardUpsert({
-        dashboardData,
-        upsert: { ...upsertParams, panels: [restyle('cc-1')] } as never,
+        dashboardData: {
+          title: 'Test',
+          time_range: { from: 'now-7d', to: 'now' },
+          panels: [bytesPanel],
+          pinned_panels: [bytesControl],
+        },
+        upsert: { ...(time_range ? { time_range } : {}), panels } as never,
         logger,
         resolvePanelContent,
         resolveEsqlControlColumnType,
       });
 
-    await run({});
-    await run({ time_range: { from: 'now-1h', to: 'now' } });
+    it('casts the selection by the column type the resolver finds, when a query uses the variable', async () => {
+      const resolvePanelContent = createResolver();
 
-    expect(resolveEsqlControlColumnType.mock.calls.map(([{ timeRange }]) => timeRange)).toEqual([
-      { from: 'now-7d', to: 'now' },
-      { from: 'now-1h', to: 'now' },
-    ]);
-  });
+      await run({ resolvePanelContent });
 
-  it('casts the selection of a query-based control by the column type the resolver finds', async () => {
-    const resolvePanelContent = createResolver();
-    const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
-
-    await executeDashboardUpsert({
-      dashboardData: {
-        title: 'Test',
-        panels: [customContentPanel],
-        pinned_panels: [
-          {
-            id: 'control-bytes',
-            type: ESQL_CONTROL,
-            config: {
-              variable_name: 'bytes',
-              variable_type: 'values',
-              selected_options: ['100'],
-              control_type: 'VALUES_FROM_QUERY',
-              esql_query: 'FROM logs | STATS BY bytes',
-            },
-          },
-        ],
-      },
-      upsert: { panels: [restyle('cc-1')] } as never,
-      logger,
-      resolvePanelContent,
-      resolveEsqlControlColumnType,
+      expect(
+        await variablesAskedBy(resolvePanelContent, 0, ['FROM logs | WHERE bytes > ?bytes'])
+      ).toEqual([{ key: 'bytes', value: 100, type: 'values' }]);
     });
 
-    expect(resolvePanelContent).toHaveBeenCalledWith(
-      expect.objectContaining({ esqlVariables: [{ key: 'bytes', value: 100, type: 'values' }] })
-    );
-  });
+    it('looks nothing up until a panel asks, and not for a query that does not use the variable', async () => {
+      const resolvePanelContent = createResolver();
+      const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
 
-  it('does not look up anything when no panel is resolved from a request', async () => {
-    const resolveEsqlControlColumnType = jest.fn();
+      await run({ resolvePanelContent, resolveEsqlControlColumnType });
+      expect(resolveEsqlControlColumnType).not.toHaveBeenCalled();
 
-    await executeDashboardUpsert({
-      dashboardData: {
-        title: 'Test',
-        panels: [customContentPanel],
-        pinned_panels: [
-          {
-            id: 'control-bytes',
-            type: ESQL_CONTROL,
-            config: {
-              variable_name: 'bytes',
-              variable_type: 'values',
-              selected_options: ['100'],
-              control_type: 'VALUES_FROM_QUERY',
-              esql_query: 'FROM logs | STATS BY bytes',
-            },
-          },
-        ],
-      },
-      upsert: { panels: [] } as never,
-      logger,
-      resolveEsqlControlColumnType,
+      await variablesAskedBy(resolvePanelContent, 0, ['FROM logs | STATS count() BY host']);
+      expect(resolveEsqlControlColumnType).not.toHaveBeenCalled();
     });
 
-    expect(resolveEsqlControlColumnType).not.toHaveBeenCalled();
+    it('looks up the type once however many times a panel asks', async () => {
+      const resolvePanelContent = createResolver();
+      const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
+      const queries = ['FROM logs | WHERE bytes > ?bytes'];
+
+      await run({ resolvePanelContent, resolveEsqlControlColumnType });
+      await variablesAskedBy(resolvePanelContent, 0, queries);
+      await variablesAskedBy(resolvePanelContent, 0, queries);
+
+      expect(resolveEsqlControlColumnType).toHaveBeenCalledTimes(1);
+    });
+
+    it('resolves the type with the time range the call sets, else the dashboard one', async () => {
+      const queries = ['FROM logs | WHERE bytes > ?bytes'];
+      const timeRangeUsedBy = async (time_range?: { from: string; to: string }) => {
+        const resolvePanelContent = createResolver();
+        const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
+        await run({ resolvePanelContent, resolveEsqlControlColumnType, time_range });
+        await variablesAskedBy(resolvePanelContent, 0, queries);
+        return resolveEsqlControlColumnType.mock.calls[0][0].timeRange;
+      };
+
+      expect(await timeRangeUsedBy()).toEqual({ from: 'now-7d', to: 'now' });
+      expect(await timeRangeUsedBy({ from: 'now-1h', to: 'now' })).toEqual({
+        from: 'now-1h',
+        to: 'now',
+      });
+    });
   });
 
-  it('gives an empty list when the dashboard has no ES|QL controls', async () => {
+  it('gives a panel the resolver even when the dashboard has no ES|QL controls', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(
@@ -275,20 +267,10 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       [restyle('cc-1')]
     );
 
-    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ esqlVariables: [] });
+    expect(await variablesAskedBy(resolvePanelContent)).toEqual([]);
   });
 
-  it('gives an empty list when the dashboard has no controls at all', async () => {
-    const resolvePanelContent = createResolver();
-
-    await upsert(resolvePanelContent, { title: 'Test', panels: [customContentPanel] }, [
-      restyle('cc-1'),
-    ]);
-
-    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ esqlVariables: [] });
-  });
-
-  it('gives them to every kind of panel, for whichever uses them', async () => {
+  it('gives it to every kind of panel, for whichever uses it', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(
@@ -297,10 +279,10 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       [{ id: 'lens-1', content: { source: 'request', renderer: 'lens', query: 'make it a bar' } }]
     );
 
-    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({
-      renderer: 'lens',
-      esqlVariables: [{ key: 'host', value: 'web-1' }],
-    });
+    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ renderer: 'lens' });
+    expect(await variablesAskedBy(resolvePanelContent)).toEqual([
+      { key: 'host', value: 'web-1', type: 'values' },
+    ]);
   });
 
   it('gives each custom content panel of one call the same values', async () => {
@@ -320,8 +302,8 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     );
 
     expect(resolvePanelContent).toHaveBeenCalledTimes(2);
-    resolvePanelContent.mock.calls.forEach(([request]) =>
-      expect(request).toMatchObject({ esqlVariables: [{ key: 'host', value: 'web-1' }] })
+    expect(await variablesAskedBy(resolvePanelContent, 0)).toEqual(
+      await variablesAskedBy(resolvePanelContent, 1)
     );
   });
 });

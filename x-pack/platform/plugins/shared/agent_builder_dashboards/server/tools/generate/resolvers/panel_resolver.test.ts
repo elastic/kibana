@@ -80,7 +80,7 @@ describe('createPanelResolver', () => {
       renderer: 'custom_content',
       nlQuery: 'hits for the selected host',
       hasData: true,
-      esqlVariables,
+      resolveEsqlVariables: jest.fn().mockResolvedValue(esqlVariables),
     });
 
     expect(mockedGenerateCustomContentEsql).toHaveBeenCalledWith(
