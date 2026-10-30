@@ -4,21 +4,21 @@
       {
         "method": "post",
         "path": "/alerts",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "createSilence": [
       {
         "method": "post",
         "path": "/silences",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "expireSilence": [
       {
         "method": "delete",
         "path": "/silence/{silenceID}",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "getPrometheusSeries": [
@@ -26,21 +26,21 @@
         "method": "get",
         "pagination": "none",
         "path": "/series",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ],
     "getSilence": [
       {
         "method": "get",
         "path": "/silence/{silenceID}",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "getStatus": [
       {
         "method": "get",
         "path": "/status",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "listAlertGroups": [
@@ -48,7 +48,7 @@
         "method": "get",
         "pagination": "none",
         "path": "/alerts/groups",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "listAlerts": [
@@ -56,14 +56,14 @@
         "method": "get",
         "pagination": "none",
         "path": "/alerts",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "listPrometheusAlerts": [
       {
         "method": "get",
         "path": "/alerts",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ],
     "listPrometheusLabelValues": [
@@ -71,21 +71,21 @@
         "method": "get",
         "pagination": "none",
         "path": "/label/{name}/values",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ],
     "listPrometheusRules": [
       {
         "method": "get",
         "path": "/rules",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ],
     "listPrometheusTargets": [
       {
         "method": "get",
         "path": "/targets",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ],
     "listSilences": [
@@ -93,32 +93,32 @@
         "method": "get",
         "pagination": "none",
         "path": "/silences",
-        "source": "alertmanagerV2"
+        "source": "alertmanager_v2"
       }
     ],
     "queryPrometheus": [
       {
         "method": "get",
         "path": "/query",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ],
     "queryRangePrometheus": [
       {
         "method": "get",
         "path": "/query_range",
-        "source": "prometheusV1"
+        "source": "prometheus_v1"
       }
     ]
   },
   "sources": {
-    "alertmanagerV2": {
+    "alertmanager_v2": {
       "apiVersion": "0.0.1",
       "fetchedAt": "2026-10-07T20:49:14.924Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/prometheus/alertmanager/main/api/v2/openapi.yaml"
     },
-    "prometheusV1": {
+    "prometheus_v1": {
       "apiVersion": "0.0.1-undefined",
       "fetchedAt": "2026-10-07T20:57:05.786Z",
       "format": "openapi",

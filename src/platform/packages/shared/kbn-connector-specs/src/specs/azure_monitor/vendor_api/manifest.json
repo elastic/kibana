@@ -4,49 +4,49 @@
       {
         "method": "post",
         "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}/changestate",
-        "source": "alertsManagement"
+        "source": "alerts_management"
       }
     ],
     "createOrUpdateAlertProcessingRule": [
       {
         "method": "put",
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AlertsManagement/actionRules/{alertProcessingRuleName}",
-        "source": "alertProcessingRules"
+        "source": "alert_processing_rules"
       }
     ],
     "getAlert": [
       {
         "method": "get",
         "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}",
-        "source": "alertsManagement"
+        "source": "alerts_management"
       }
     ],
     "getAlertHistory": [
       {
         "method": "get",
         "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}/history",
-        "source": "alertsManagement"
+        "source": "alerts_management"
       }
     ],
     "getAlertSummary": [
       {
         "method": "get",
         "path": "/{scope}/providers/Microsoft.AlertsManagement/alertsSummary",
-        "source": "alertsManagement"
+        "source": "alerts_management"
       }
     ],
     "getMetricAlertRule": [
       {
         "method": "get",
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
-        "source": "metricAlerts"
+        "source": "metric_alerts"
       }
     ],
     "getMetricAlertStatus": [
       {
         "method": "get",
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}/status",
-        "source": "metricAlerts"
+        "source": "metric_alerts"
       }
     ],
     "listActionGroups": [
@@ -54,7 +54,7 @@
         "method": "get",
         "pagination": "none",
         "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/actionGroups",
-        "source": "actionGroups"
+        "source": "action_groups"
       }
     ],
     "listActivityLogAlerts": [
@@ -68,7 +68,7 @@
           "style": "next_url"
         },
         "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/activityLogAlerts",
-        "source": "activityLogAlerts"
+        "source": "activity_log_alerts"
       }
     ],
     "listAlerts": [
@@ -86,7 +86,7 @@
           "style": "next_url"
         },
         "path": "/{scope}/providers/Microsoft.AlertsManagement/alerts",
-        "source": "alertsManagement"
+        "source": "alerts_management"
       }
     ],
     "listMetricAlertRules": [
@@ -100,7 +100,7 @@
           "style": "next_url"
         },
         "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/metricAlerts",
-        "source": "metricAlerts"
+        "source": "metric_alerts"
       },
       {
         "method": "get",
@@ -112,7 +112,7 @@
           "style": "next_url"
         },
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
-        "source": "metricAlerts"
+        "source": "metric_alerts"
       }
     ],
     "listScheduledQueryRules": [
@@ -126,7 +126,7 @@
           "style": "next_url"
         },
         "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/scheduledQueryRules",
-        "source": "scheduledQueryRules"
+        "source": "scheduled_query_rules"
       },
       {
         "method": "get",
@@ -138,7 +138,7 @@
           "style": "next_url"
         },
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/scheduledQueryRules",
-        "source": "scheduledQueryRules"
+        "source": "scheduled_query_rules"
       }
     ],
     "queryActivityLog": [
@@ -156,7 +156,7 @@
           "style": "next_url"
         },
         "path": "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/eventtypes/management/values",
-        "source": "activityLogs"
+        "source": "activity_logs"
       }
     ],
     "queryMetrics": [
@@ -172,62 +172,62 @@
       {
         "method": "patch",
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AlertsManagement/actionRules/{alertProcessingRuleName}",
-        "source": "alertProcessingRules"
+        "source": "alert_processing_rules"
       }
     ],
     "setMetricAlertRuleEnabled": [
       {
         "method": "patch",
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts/{ruleName}",
-        "source": "metricAlerts"
+        "source": "metric_alerts"
       }
     ],
     "setScheduledQueryRuleEnabled": [
       {
         "method": "patch",
         "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/scheduledQueryRules/{ruleName}",
-        "source": "scheduledQueryRules"
+        "source": "scheduled_query_rules"
       }
     ]
   },
   "sources": {
-    "actionGroups": {
+    "action_groups": {
       "apiVersion": "2021-09-01",
       "fetchedAt": "2026-10-07T20:19:42.493Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2021-09-01/actionGroups_API.json"
     },
-    "activityLogAlerts": {
+    "activity_log_alerts": {
       "apiVersion": "2020-10-01",
       "fetchedAt": "2026-10-07T20:19:42.491Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2020-10-01/activityLogAlerts_API.json"
     },
-    "activityLogs": {
+    "activity_logs": {
       "apiVersion": "2015-04-01",
       "fetchedAt": "2026-10-07T20:19:42.491Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2015-04-01/activityLogs_API.json"
     },
-    "alertProcessingRules": {
+    "alert_processing_rules": {
       "apiVersion": "2021-08-08",
       "fetchedAt": "2026-10-07T20:19:42.490Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertProcessingRules/stable/2021-08-08/AlertProcessingRules.json"
     },
-    "alertsManagement": {
+    "alerts_management": {
       "apiVersion": "2019-03-01",
       "fetchedAt": "2026-10-07T20:58:09.584Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/alertsmanagement/resource-manager/Microsoft.AlertsManagement/AlertsManagement/stable/2019-03-01/AlertsManagement.json"
     },
-    "logAnalyticsQuery": {
+    "log_analytics_query": {
       "apiVersion": "v1",
       "fetchedAt": "2026-10-07T20:19:42.493Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/data-plane/OperationalInsights/stable/v1/OperationalInsights.json"
     },
-    "metricAlerts": {
+    "metric_alerts": {
       "apiVersion": "2024-03-01-preview",
       "fetchedAt": "2026-10-07T20:19:42.492Z",
       "format": "swagger",
@@ -239,7 +239,7 @@
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/monitor/resource-manager/Microsoft.Insights/Insights/stable/2023-10-01/metrics_API.json"
     },
-    "scheduledQueryRules": {
+    "scheduled_query_rules": {
       "apiVersion": "2021-08-01",
       "fetchedAt": "2026-10-07T20:19:42.493Z",
       "format": "swagger",
