@@ -7,13 +7,11 @@
 
 import type { Store, Unsubscribe } from 'redux-v4';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { getLastUpdatedLazy } from './methods';
 import type { TimelinesStartPlugins, TimelinesUIStart } from './types';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import type { HoverActionsConfig } from './components/hover_actions';
 import { getHoverActions } from './components/hover_actions';
 import { timelineReducer } from './store/timeline/reducer';
-import type { LastUpdatedAtProps } from './components';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
@@ -36,9 +34,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getTimelineReducer: () => {
         return timelineReducer;
-      },
-      getLastUpdated: (props: LastUpdatedAtProps) => {
-        return getLastUpdatedLazy(props);
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;
