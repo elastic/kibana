@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, act } from '@testing-library/react';
+import { fireEvent, act, waitFor } from '@testing-library/react';
 
 import type { Agent } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -65,6 +65,12 @@ async function navigateToSubmenu(
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 }
+
+const makeUninstallableAgent = (id: string): Agent =>
+  ({
+    id,
+    local_metadata: { elastic: { agent: { uninstallable: true } } },
+  } as Partial<Agent> as Agent);
 
 describe('AgentBulkActions', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
@@ -221,7 +227,7 @@ describe('AgentBulkActions', () => {
 
       const results = render({
         ...defaultProps,
-        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+        selectedAgents: [makeUninstallableAgent('agent1'), { id: 'agent2' }] as Agent[],
       });
 
       await act(async () => {
@@ -251,7 +257,7 @@ describe('AgentBulkActions', () => {
       try {
         const results = render({
           ...defaultProps,
-          selectedAgents: [{ id: 'agent1' }] as Agent[],
+          selectedAgents: [makeUninstallableAgent('agent1')],
         });
 
         await act(async () => {
@@ -265,6 +271,42 @@ describe('AgentBulkActions', () => {
           integrations: {},
         } as any);
       }
+    });
+
+    it('should disable the uninstall agents item with a tooltip when no selected agent supports it', async () => {
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+      });
+
+      await act(async () => {
+        fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+      });
+
+      const item = results.getByTestId('agentBulkActionsUninstall');
+      expect(item).toBeDisabled();
+
+      fireEvent.mouseOver(item.parentElement ?? item);
+      await waitFor(() =>
+        expect(
+          results.getByText('None of the selected agents support remote uninstall.')
+        ).toBeInTheDocument()
+      );
+    });
+
+    it('should enable the uninstall agents item for a query selection', async () => {
+      const results = render({
+        ...defaultProps,
+        selectionMode: 'query',
+        currentQuery: 'status:online',
+        nAgentsInTable: 25,
+      });
+
+      await act(async () => {
+        fireEvent.click(results.getByTestId('agentBulkActionsButton'));
+      });
+
+      expect(results.getByTestId('agentBulkActionsUninstall')).toBeEnabled();
     });
 
     it('should not show the uninstall agents item when the feature flag is off', async () => {

@@ -32,6 +32,7 @@ import {
   LICENSE_FOR_AGENT_MIGRATION,
   LICENSE_FOR_AGENT_ROLLBACK,
 } from '../../../../../../../common/constants';
+import { isAgentUninstallCapable } from '../../../../../../../common/services';
 import { getCommonTags } from '../utils';
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
 import { useExportCSV } from '../hooks/export_csv';
@@ -124,6 +125,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   }, [currentQuery, totalManagedAgentIds]);
 
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
+  // A query selection can't be checked up front, so the server skips the ineligible agents.
+  const hasUninstallCapableAgents =
+    typeof agents === 'string' || agents.some((agent) => isAgentUninstallCapable(agent));
   const agentCount =
     selectionMode === 'manual'
       ? selectedAgents.length
@@ -332,7 +336,14 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
               ),
               icon: 'minusCircle',
               iconColor: 'danger',
-              disabled: !authz.fleet.allAgents,
+              disabled: !authz.fleet.allAgents || !hasUninstallCapableAgents,
+              toolTipContent:
+                authz.fleet.allAgents && !hasUninstallCapableAgents ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentBulkActions.uninstallNoCapableAgentsTooltip"
+                    defaultMessage="None of the selected agents support remote uninstall."
+                  />
+                ) : undefined,
               onClick: () => {
                 setIsUninstallModalOpen(true);
               },
@@ -483,6 +494,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     exportMenuItem,
     isRestartAgentActionEnabled,
     isUninstallAgentActionEnabled,
+    hasUninstallCapableAgents,
   ]);
 
   const getSelectedTagsFromAgents = useMemo(
