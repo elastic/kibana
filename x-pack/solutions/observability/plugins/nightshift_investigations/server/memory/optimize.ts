@@ -15,6 +15,10 @@ import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { formatPageRefs, previewText } from './log_format';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { extractWorkspaceReads, extractWorkspaceReadsFromToolCalls } from '../investigation_round';
+import {
+  describeFollowUpVerdict,
+  type FollowUpVerdict,
+} from '../round_verdict/follow_up_verdict';
 import { hasToolEvidence, renderMemoryTranscript, type TranscriptStep } from './transcript';
 import type { MemoryPageStore, MemoryPageWrite, VersionedMemoryPage } from './page_store';
 import {
@@ -28,6 +32,9 @@ import { type MemoryPage } from '../../common/memory';
 import { canonicalizeTags, MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const MAX_EXTRACTIONS = 3;
+
+const CONTRADICTED_MEMORY_REVIEW =
+  'A recalled memory that supported the contradicted cause is harmful.';
 
 export const MEMORY_CRITIQUE_SYSTEM_PROMPT = `You are an impartial analyst-LLM.
 
@@ -1040,6 +1047,7 @@ export const optimizeMemory = async ({
   conversationId,
   logger,
   signal,
+  verdict,
 }: {
   store: MemoryPageStore;
   recalledIds: string[];
@@ -1054,6 +1062,8 @@ export const optimizeMemory = async ({
   conversationId?: string;
   logger: Logger;
   signal?: AbortSignal;
+  /** Set for an investigation's follow-up rounds; a first round is learned from as is. */
+  verdict?: FollowUpVerdict;
 }): Promise<MemoryOptimizeSummary> => {
   logger.debug(
     `Memory optimize start recalledIds=${recalledIds.length} ` +
@@ -1082,13 +1092,16 @@ export const optimizeMemory = async ({
     ? extractWorkspaceReads(investigation)
     : extractWorkspaceReadsFromToolCalls(toolCalls);
   const openedMemoryIds = new Set(reads.memoryIds);
-  const transcript = renderMemoryTranscript({
+  const roundTranscript = renderMemoryTranscript({
     task,
     answer: assistantMessage,
     investigation,
     toolCalls,
     evidenceOnly: true,
   });
+  const transcript = verdict
+    ? `${roundTranscript}\n\n${describeFollowUpVerdict(verdict, CONTRADICTED_MEMORY_REVIEW)}`
+    : roundTranscript;
   const evidenceTranscript = renderMemoryTranscript({
     task,
     investigation,
@@ -1107,6 +1120,13 @@ export const optimizeMemory = async ({
         `opened=${openedMemoryIds.size} transcriptChars=${transcript.length}`
     );
     labels = await proposeLabels({ transcript, recalledMemories, openedMemoryIds });
+    // A follow-up that proved nothing cannot show a memory was right, only that one was wrong.
+    if (verdict && !verdict.causalConfirmed && labels.useful.length > 0) {
+      logger.debug(
+        `Memory critique dropped useful=[${labels.useful.join(', ')}]: the follow-up proved nothing`
+      );
+      labels = { ...labels, useful: [] };
+    }
     logger.debug(
       `Memory critique LLM done ${Date.now() - critiqueStarted}ms ` +
         `useful=[${labels.useful.join(', ') || '(none)'}] ` +

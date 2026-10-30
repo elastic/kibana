@@ -26,6 +26,7 @@ import { SANDBOX_TOOL_IDS } from '../agents/investigation';
 import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { loadInvestigationRound } from '../investigation_round';
+import type { FollowUpVerdict } from '../round_verdict/follow_up_verdict';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -132,6 +133,7 @@ export const runCortexOptimize = async ({
   getInference,
   getSavedObjects,
   getUiSettings,
+  verdict,
   logger,
 }: {
   request: KibanaRequest;
@@ -142,6 +144,7 @@ export const runCortexOptimize = async ({
   esClient: ElasticsearchClient;
   spaceId: string;
   interactionId: string;
+  verdict?: FollowUpVerdict;
   signal?: AbortSignal;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   analytics: AnalyticsServiceSetup;
@@ -216,5 +219,6 @@ export const runCortexOptimize = async ({
       logger,
     }),
     logger,
+    verdict,
   });
 };

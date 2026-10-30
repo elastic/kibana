@@ -71,7 +71,7 @@ describe('buildReinforcementPrompt', () => {
     expect(message).toContain(scripts.followupExtend);
   });
 
-  it('never asks a follow-up to reinforce a path as causal', () => {
+  it('never asks a follow-up without a verdict to reinforce a path as causal', () => {
     const message = buildReinforcementPrompt({
       ...base,
       turnKind: 'feedback_reinforcement',
@@ -79,6 +79,60 @@ describe('buildReinforcementPrompt', () => {
     });
 
     expect(message).not.toContain(scripts.reinforce);
+    expect(message).not.toContain('Verdict on this follow-up');
+  });
+
+  it('asks a follow-up that proved the root cause to reinforce it', () => {
+    const message = buildReinforcementPrompt({
+      ...base,
+      turnKind: 'feedback_reinforcement',
+      trees: [tree()],
+      verdict: {
+        isFeedback: true,
+        causalConfirmed: true,
+        causalSummary: 'The 2.14.0 deploy exhausted the connection pool.',
+        learning: 'Check deploys before scaling.',
+      },
+    });
+
+    expect(message).toContain(scripts.reinforce);
+    expect(message).toContain(
+      'Verdict on this follow-up:\nThe 2.14.0 deploy exhausted the connection pool.'
+    );
+    expect(message).toContain(
+      'What the human taught the investigator:\nCheck deploys before scaling.'
+    );
+  });
+
+  it('shows a follow-up what it contradicted, but only asks it to extend the tree', () => {
+    const message = buildReinforcementPrompt({
+      ...base,
+      turnKind: 'feedback_reinforcement',
+      trees: [tree()],
+      verdict: {
+        isFeedback: true,
+        causalConfirmed: false,
+        causalSummary: 'Errors stopped while the deploy was still running.',
+        learning: '',
+      },
+    });
+
+    expect(message).toContain(scripts.followupExtend);
+    expect(message).toContain(
+      'Verdict on this follow-up:\nErrors stopped while the deploy was still running.'
+    );
+    expect(message).not.toContain('What the human taught');
+  });
+
+  it('gives a first round no verdict section', () => {
+    const message = buildReinforcementPrompt({
+      ...base,
+      trees: [tree()],
+      verdict: { isFeedback: true, causalConfirmed: true, causalSummary: 'x', learning: '' },
+    });
+
+    expect(message).toContain(scripts.initialMerge);
+    expect(message).not.toContain('Verdict on this follow-up');
   });
 
   // The investigation reaches the agent as conversation history, not inside this message.

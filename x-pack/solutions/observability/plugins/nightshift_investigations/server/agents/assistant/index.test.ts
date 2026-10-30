@@ -62,15 +62,26 @@ describe('Nightshift assistant agent type', () => {
     );
   });
 
-  it('shares the investigator configuration except for its instructions', async () => {
+  it('shares the investigator configuration except for its instructions and recovery tool', async () => {
     const { instructions, ...assistant } = await configurationFor(getAssistantAgentType(options));
-    const { instructions: investigatorInstructions, ...investigator } = await configurationFor(
+    const {
+      instructions: investigatorInstructions,
+      tools: investigatorTools,
+      ...investigator
+    } = await configurationFor(
       getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
     );
 
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
-    expect(assistant).toEqual(investigator);
+    // Only investigations get alert recoveries.
+    expect(assistant).toEqual({
+      ...investigator,
+      tools: investigatorTools?.map(({ tool_ids: toolIds }) => ({
+        tool_ids: toolIds.filter((id) => id !== 'nightshift_record_recovery_outcome'),
+      })),
+    });
+    expect(investigatorTools?.[0]?.tool_ids).toContain('nightshift_record_recovery_outcome');
     expect(assistant).toMatchObject({
       connector_ids: ['telemetry'],
       workflow_ids: [

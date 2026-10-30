@@ -61,6 +61,8 @@ import { cortexOptimizeStepDefinition } from '../server/step_definitions/cortex_
 import { decisionTreeHydrateStepDefinition } from '../server/step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from '../server/step_definitions/decision_tree_prepare';
 import { labelRoundStepDefinition } from '../server/step_definitions/label_round';
+import { classifyFollowUpStepDefinition } from '../server/step_definitions/classify_follow_up';
+import type { CausalCheckResult } from '../server/round_verdict';
 import type { InvestigationRoundKind } from '../server/client/round_kind';
 import { decisionTreeReinforceStepDefinition } from '../server/step_definitions/decision_tree_reinforce';
 import { ensureInvestigationAgentStepDefinition } from '../server/step_definitions/ensure_investigation_agent';
@@ -134,6 +136,8 @@ export interface NightshiftWorkflowFixtureOptions {
    * error reading it fails with.
    */
   roundKind?: InvestigationRoundKind | Error;
+  /** What the causal check returns for a follow-up, or the error it fails with. */
+  causalCheck?: CausalCheckResult | Error;
 }
 
 /** One `runAgent` invocation as the fake recorded it. */
@@ -205,6 +209,7 @@ const setHealthyBoundary = (): void => {
     message: 'reinforcement turn prompt',
     treeCount: 3,
     turnKind: 'initial_investigation',
+    offerLearningTools: false,
   });
 };
 
@@ -213,6 +218,12 @@ export const createNightshiftWorkflowFixture = ({
   memoryEnabled = true,
   decisionTreesEnabled = true,
   roundKind = 'initial',
+  causalCheck = {
+    isFeedback: false,
+    causalConfirmed: false,
+    causalSummary: '',
+    learning: '',
+  },
 }: NightshiftWorkflowFixtureOptions = {}): NightshiftWorkflowFixture => {
   setHealthyBoundary();
 
@@ -261,7 +272,12 @@ export const createNightshiftWorkflowFixture = ({
     return { result: { round: { response: { message: 'reinforced' } } } };
   });
   const ensureAgent = jest.fn().mockResolvedValue(undefined);
-  const agentBuilder = { agents: { ensure: ensureAgent, runAgent } };
+  const agentBuilder = {
+    agents: { ensure: ensureAgent, runAgent },
+    conversations: {
+      getScopedClient: jest.fn(async () => ({ get: jest.fn(async () => ({ rounds: [] })) })),
+    },
+  };
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
@@ -315,7 +331,17 @@ export const createNightshiftWorkflowFixture = ({
         }
         return roundKind;
       },
-      isEnabled: () => decisionTreesEnabled,
+      isEnabled: () => cortexEnabled || memoryEnabled || decisionTreesEnabled,
+    }),
+    classifyFollowUpStepDefinition({
+      getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
+      createCausalCheck: async () => async () => {
+        if (causalCheck instanceof Error) {
+          throw causalCheck;
+        }
+        return causalCheck;
+      },
+      isEnabled: () => cortexEnabled || memoryEnabled || decisionTreesEnabled,
     }),
     decisionTreePrepareStepDefinition({
       getTelemetryConnectorId: () => undefined,

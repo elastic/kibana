@@ -609,4 +609,93 @@ describe('optimizeCortex', () => {
     expect(store.upsert).not.toHaveBeenCalled();
     expect(telemetry.reportEditsApplied).not.toHaveBeenCalled();
   });
+
+  describe('on a follow-up', () => {
+    const existing = {
+      id: 'cortex_service_otel-demo-cart',
+      title: 'Cart',
+      entity_type: 'service' as const,
+      status: 'tentative' as const,
+      corroborations: 1,
+      updated_at: '2026-09-09T12:00:00.000Z',
+      slug: 'otel-demo-cart',
+      content: 'Cart uses Redis.',
+    };
+    const createStore = (): CortexPageStore => ({
+      list: jest.fn().mockResolvedValue({
+        pages: [existing],
+        stats: { total: 1, established: 0, total_corroborations: 1 },
+      }),
+      get: jest.fn().mockResolvedValue(existing),
+      upsert: jest.fn().mockResolvedValue({}),
+      create: jest.fn(),
+      corroborate: jest.fn().mockResolvedValue({}),
+      archive: jest.fn().mockResolvedValue({}),
+      pruneDuplicates: jest.fn().mockResolvedValue(0),
+    });
+    const edits = [
+      {
+        action: 'upsert' as const,
+        entity_type: 'service' as const,
+        slug: 'otel-demo-cart',
+        title: 'Cart',
+        content: 'Cart uses Redis and flagd.',
+      },
+      {
+        action: 'corroborate' as const,
+        entity_type: 'service' as const,
+        slug: 'otel-demo-cart',
+        title: 'Cart',
+      },
+    ];
+    const optimize = (store: CortexPageStore, verdict: Parameters<typeof optimizeCortex>[0]['verdict']) => {
+      const proposeEdits = jest.fn().mockResolvedValue({ edits });
+      return optimizeCortex({
+        store,
+        telemetry: createTelemetry(),
+        logger: loggerMock.create(),
+        userMessage: 'It was the flagd rollout.',
+        assistantMessage: 'Confirmed.',
+        toolCalls: [],
+        proposeEdits,
+        verdict,
+      }).then(() => proposeEdits.mock.calls[0][0].transcript as string);
+    };
+
+    it('corroborates and promotes only when the follow-up proved the cause', async () => {
+      const store = createStore();
+      const transcript = await optimize(store, {
+        isFeedback: true,
+        causalConfirmed: true,
+        causalSummary: 'The flagd rollout caused it.',
+      });
+
+      expect(transcript).toContain(
+        '## Outcome of this follow-up\nThe follow-up proved the root cause.\nThe flagd rollout caused it.'
+      );
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'established', corroborations: 2 })
+      );
+    });
+
+    it('rewrites but never corroborates or promotes when it proved nothing', async () => {
+      const store = createStore();
+      const transcript = await optimize(store, {
+        isFeedback: true,
+        causalConfirmed: false,
+        causalSummary: 'Errors stopped while the rollout was still running.',
+      });
+
+      expect(transcript).toContain('Errors stopped while the rollout was still running.');
+      expect(transcript).toContain('archive any this outcome shows to be wrong');
+      expect(store.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: 'Cart uses Redis and flagd.',
+          status: 'tentative',
+          corroborations: 1,
+        })
+      );
+      expect(store.corroborate).not.toHaveBeenCalled();
+    });
+  });
 });

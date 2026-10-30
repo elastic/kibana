@@ -16,6 +16,10 @@ import { usesKnowledge } from '../agents/agent_policy';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
 import { runMemoryOptimize } from '../memory/register_memory';
+import {
+  followUpVerdictFromInputs,
+  followUpVerdictInputsSchema,
+} from '../round_verdict/follow_up_verdict';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { withTimeout } from './with_timeout';
 
@@ -76,6 +80,7 @@ export const memoryOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
+      ...followUpVerdictInputsSchema,
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
@@ -136,6 +141,12 @@ export const memoryOptimizeStepDefinition = ({
               requestedConnectorId: context.input.connector_id,
               roundConnectorId: context.input.round_connector_id,
               interactionId: workflowExecutionId,
+              verdict: followUpVerdictFromInputs({
+                roundKind: context.input.round_kind,
+                isFeedback: context.input.is_feedback,
+                causalConfirmed: context.input.causal_confirmed,
+                causalSummary: context.input.causal_summary,
+              }),
             }),
           OPTIMIZE_TIMEOUT_MS,
           `Memory optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`,

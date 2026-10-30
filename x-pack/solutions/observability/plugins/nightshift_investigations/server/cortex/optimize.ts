@@ -18,6 +18,10 @@ import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { isSeededWorkspaceAccess } from '../investigation_round';
+import {
+  describeFollowUpVerdict,
+  type FollowUpVerdict,
+} from '../round_verdict/follow_up_verdict';
 import type { CortexPageStore } from './page_store';
 import {
   canonicalizeSlug,
@@ -32,6 +36,9 @@ const MAX_TOOL_CALL_PARAMS_CHARS = 1_000;
 const MAX_TOOL_CALL_RESULT_CHARS = 2_000;
 const MAX_TOOL_CALL_PARAM_ARRAY_ITEMS = 20;
 const MAX_PROPOSALS = 8;
+
+const CONTRADICTED_CORTEX_REVIEW =
+  'Review the pages that rest on the contradicted cause, and archive any this outcome shows to be wrong.';
 
 export interface CortexEditProposal {
   action: CortexEditAction;
@@ -284,11 +291,14 @@ export const applyCortexEdits = async ({
   edits,
   telemetry,
   logger,
+  allowCorroboration = true,
 }: {
   store: CortexPageStore;
   edits: CortexEditProposal[];
   telemetry: CortexTelemetry;
   logger: Logger;
+  /** False when the round proved nothing, so nothing it touches moves toward established. */
+  allowCorroboration?: boolean;
 }): Promise<void> => {
   const { pages } = await store.list();
   logger.info(`Applying ${edits.length} Cortex edit(s)`);
@@ -315,7 +325,7 @@ export const applyCortexEdits = async ({
       }
       const id = toCortexKiId(edit.entity_type, slug);
       if (edit.action === 'corroborate') {
-        if (touchedIds.has(id)) {
+        if (touchedIds.has(id) || !allowCorroboration) {
           continue;
         }
         const updated = await store.corroborate(id);
@@ -342,14 +352,20 @@ export const applyCortexEdits = async ({
       // single run can never publish a fact as established. A page already touched this run keeps
       // its status, so a page revived earlier in the run is not promoted on its old count.
       const alreadyTouched = touchedIds.has(id);
-      const confirms = existing !== undefined && existing.status !== 'archived' && !alreadyTouched;
+      const confirms =
+        allowCorroboration &&
+        existing !== undefined &&
+        existing.status !== 'archived' &&
+        !alreadyTouched;
       const corroborations = confirms ? existing.corroborations + 1 : existing?.corroborations;
       touchedIds.add(id);
       const status = !existing
         ? 'tentative'
         : alreadyTouched
         ? existing.status
-        : statusAfterCorroboration(existing.status, corroborations ?? 0);
+        : confirms || existing.status === 'archived'
+        ? statusAfterCorroboration(existing.status, corroborations ?? 0)
+        : existing.status;
       await store.upsert({
         entityType: edit.entity_type,
         slug,
@@ -375,6 +391,7 @@ export const optimizeCortex = async ({
   toolCalls,
   telemetry,
   logger,
+  verdict,
 }: {
   store: CortexPageStore;
   proposeEdits: ProposeCortexEdits;
@@ -383,6 +400,8 @@ export const optimizeCortex = async ({
   toolCalls: InvestigationToolCall[];
   telemetry: CortexTelemetry;
   logger: Logger;
+  /** Set for an investigation's follow-up rounds; a first round is learned from as is. */
+  verdict?: FollowUpVerdict;
 }): Promise<void> => {
   await store.pruneDuplicates();
   const { pages: allPages } = await store.list();
@@ -399,6 +418,7 @@ export const optimizeCortex = async ({
     '',
     '## Assistant',
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
+    ...(verdict ? ['', describeFollowUpVerdict(verdict, CONTRADICTED_CORTEX_REVIEW)] : []),
   ].join('\n');
 
   const { edits } = await proposeEdits({ transcript, catalog: pages });
@@ -407,5 +427,11 @@ export const optimizeCortex = async ({
     return;
   }
 
-  await applyCortexEdits({ store, edits, telemetry, logger });
+  await applyCortexEdits({
+    store,
+    edits,
+    telemetry,
+    logger,
+    allowCorroboration: verdict ? verdict.causalConfirmed : true,
+  });
 };

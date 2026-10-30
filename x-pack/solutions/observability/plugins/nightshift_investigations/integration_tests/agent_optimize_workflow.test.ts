@@ -231,6 +231,140 @@ describe('agent optimize workflow, a round with no kind', () => {
   });
 });
 
+describe("agent optimize workflow, a follow-up's verdict", () => {
+  const followUp = (
+    roundKind: 'follow_up' | 'alert_recovery',
+    toolCalls: Array<Record<string, unknown>> = TOOL_CALLS
+  ) => ({
+    ...ELIGIBLE_ROUND_INPUTS,
+    round_id: 'round-2',
+    tool_calls: toolCalls,
+    workflow_context: {
+      ...ELIGIBLE_ROUND_INPUTS.workflow_context,
+      'nightshift.round': { version: 1, data: { round_kind: roundKind } },
+    },
+  });
+  const confirmed = {
+    isFeedback: true,
+    causalConfirmed: true,
+    causalSummary: 'The inventory 2.14.0 deploy exhausted the pool.',
+    learning: 'Check deploys before scaling.',
+  };
+
+  it('hands every learner the verdict the causal check reached on a reply', async () => {
+    const fixture = createNightshiftWorkflowFixture({
+      roundKind: 'follow_up',
+      causalCheck: confirmed,
+    });
+    jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+      skipped: false,
+      message: 'reinforcement turn prompt',
+      treeCount: 1,
+      turnKind: 'feedback_reinforcement',
+      offerLearningTools: true,
+    });
+
+    await fixture.runOptimize(followUp('follow_up'));
+
+    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    expect(fixture.stepOutput('classify_round')).toEqual({
+      round_kind: 'follow_up',
+      is_feedback: true,
+      causal_confirmed: true,
+      causal_summary: confirmed.causalSummary,
+      learning: confirmed.learning,
+      source: 'causal_check',
+    });
+    const learnerVerdict = {
+      isFeedback: true,
+      causalConfirmed: true,
+      causalSummary: confirmed.causalSummary,
+    };
+    expect(jest.mocked(runCortexOptimize).mock.calls[0][0].verdict).toEqual(learnerVerdict);
+    expect(jest.mocked(runMemoryOptimize).mock.calls[0][0].verdict).toEqual(learnerVerdict);
+    expect(jest.mocked(prepareReinforcementTurn).mock.calls[0][0].verdict).toEqual(confirmed);
+    expect(fixture.agentRuns[0].agentParams.configurationOverrides).toEqual({
+      tools: [{ tool_ids: expect.arrayContaining(['nightshift_record_system_learning']) }],
+    });
+  });
+
+  it("reads a recovery round's recorded outcome without the causal check", async () => {
+    const fixture = createNightshiftWorkflowFixture({
+      roundKind: 'alert_recovery',
+      causalCheck: new Error('the causal check must not run for a recovery'),
+    });
+
+    await fixture.runOptimize(
+      followUp('alert_recovery', [
+        ...TOOL_CALLS,
+        {
+          tool_id: 'nightshift_record_recovery_outcome',
+          tool_call_id: 'call-3',
+          params: {
+            verdict: 'contradicted',
+            resolved_by: 'self_resolved',
+            resolution: 'Errors stopped while 2.14.0 was still running.',
+            hypotheses: [{ candidate: 'inventory 2.14.0 rollout', outcome: 'contradicted' }],
+          },
+        },
+      ])
+    );
+
+    expect(fixture.stepOutput('classify_round')).toMatchObject({
+      round_kind: 'alert_recovery',
+      is_feedback: true,
+      causal_confirmed: false,
+      source: 'recovery_outcome',
+    });
+    expect(jest.mocked(runCortexOptimize).mock.calls[0][0].verdict).toMatchObject({
+      isFeedback: true,
+      causalConfirmed: false,
+      causalSummary: expect.stringContaining('Contradicted by the recovery'),
+    });
+  });
+
+  // Losing the verdict must leave the learners where they were before verdicts: never confirmed.
+  it('still runs every learner, with nothing confirmed, when the causal check fails', async () => {
+    const fixture = createNightshiftWorkflowFixture({
+      roundKind: 'follow_up',
+      causalCheck: new Error('model overloaded'),
+    });
+
+    await fixture.runOptimize(followUp('follow_up'));
+
+    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    expect(fixture.stepOutput('classify_round')).toMatchObject({ source: 'none' });
+    expect(jest.mocked(runCortexOptimize).mock.calls[0][0].verdict).toEqual({
+      isFeedback: false,
+      causalConfirmed: false,
+      causalSummary: '',
+    });
+    expect(fixture.agentRuns).toHaveLength(1);
+  });
+
+  it('gives a first round no verdict to gate on', async () => {
+    const fixture = createNightshiftWorkflowFixture();
+
+    await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
+
+    expect(fixture.stepOutput('classify_round')).toMatchObject({ source: 'initial_round' });
+    expect(jest.mocked(runCortexOptimize).mock.calls[0][0].verdict).toBeUndefined();
+    expect(jest.mocked(runMemoryOptimize).mock.calls[0][0].verdict).toBeUndefined();
+  });
+
+  // A skipped verdict step leaves its outputs unset; the optimizers must still accept the inputs.
+  it('still optimizes a round with no conversation, which gets no verdict step', async () => {
+    const fixture = createNightshiftWorkflowFixture();
+    const { conversation_id: _omitted, ...withoutConversation } = ELIGIBLE_ROUND_INPUTS;
+
+    await fixture.runOptimize(withoutConversation);
+
+    expect(fixture.stepExecutions('classify_round')).toHaveLength(0);
+    expect(fixture.stepOutput<{ status: string }>('optimize_cortex')).toEqual({ status: 'ok' });
+    expect(fixture.stepOutput<{ status: string }>('optimize_memory')).toEqual({ status: 'ok' });
+  });
+});
+
 describe('agent optimize workflow, rounds that must not reinforce', () => {
   // `prepare_turn` is the eligibility gate: it answers `skipped`, and both agent steps read that
   // answer. The workflow still installs with Cortex or Memory alone, so this runs on installs that

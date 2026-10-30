@@ -78,6 +78,7 @@ describe('prepareReinforcementTurn', () => {
         skipped: false,
         treeCount: 1,
         turnKind: 'initial_investigation',
+        offerLearningTools: false,
       });
       expect(turn.skipped === false && turn.message).toContain(scripts.initialMerge);
     });
@@ -124,6 +125,26 @@ describe('prepareReinforcementTurn', () => {
       const turn = await prepare({ roundKind, toolCalls: [readTree('disk-pressure')] });
 
       expect(turn).toMatchObject({ skipped: false, treeCount: 1 });
+    });
+
+    it('offers the learning tools only when the round gave feedback', async () => {
+      const toolCalls = [readTree('disk-pressure')];
+      await expect(prepare({ roundKind, toolCalls })).resolves.toMatchObject({
+        offerLearningTools: false,
+      });
+
+      const turn = await prepare({
+        roundKind,
+        toolCalls,
+        verdict: {
+          isFeedback: true,
+          causalConfirmed: true,
+          causalSummary: 'The disk filled up.',
+          learning: '',
+        },
+      });
+      expect(turn).toMatchObject({ offerLearningTools: true });
+      expect(turn.skipped === false && turn.message).toContain(scripts.reinforce);
     });
 
     // A recovery or a reply has nothing new to seed a tree from.

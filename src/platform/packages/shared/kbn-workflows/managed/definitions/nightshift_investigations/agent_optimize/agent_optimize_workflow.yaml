@@ -98,6 +98,27 @@ steps:
       conversation_id: '{{ inputs.conversation_id }}'
       # Optimize still extracts from the transcript when sandbox-api is down.
       required: false
+  # Decides once, before any learner runs, whether the round confirmed, contradicted, or said
+  # nothing about the earlier root cause, so Cortex, Memory and the trees learn from one verdict.
+  # A lost verdict counts as no verdict, never as a confirmation, so it must not stop the learners.
+  - name: classify_round
+    type: nightshift.classifyFollowUp
+    if: '${{ inputs.conversation_id != null }}'
+    # Above the step's own 90s bound on its one LLM call.
+    timeout: 120s
+    with:
+      prompt: '{{ inputs.prompt }}'
+      response: '{{ inputs.response }}'
+      conversation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      agent_id: '{{ inputs.agent_id }}'
+      round_kind: '{{ inputs.workflow_context["nightshift.round"].data.round_kind }}'
+      connector_id: '{{ inputs.connector_id }}'
+      round_connector_id: '{{ inputs.round_connector_id }}'
+      tool_calls: '${{ inputs.tool_calls }}'
+      tool_results: '${{ inputs.tool_results }}'
+    on-failure:
+      continue: true
   - name: optimize_workspaces
     type: parallel
     mode: settled
@@ -124,6 +145,10 @@ steps:
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
               tool_results: '${{ inputs.tool_results }}'
+              round_kind: '{{ inputs.workflow_context["nightshift.round"].data.round_kind }}'
+              is_feedback: '${{ steps.classify_round.output.is_feedback }}'
+              causal_confirmed: '${{ steps.classify_round.output.causal_confirmed }}'
+              causal_summary: '{{ steps.classify_round.output.causal_summary }}'
       - name: memory
         steps:
           - name: optimize_memory
@@ -142,6 +167,10 @@ steps:
               # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
               tool_calls: '${{ inputs.tool_calls }}'
               tool_results: '${{ inputs.tool_results }}'
+              round_kind: '{{ inputs.workflow_context["nightshift.round"].data.round_kind }}'
+              is_feedback: '${{ steps.classify_round.output.is_feedback }}'
+              causal_confirmed: '${{ steps.classify_round.output.causal_confirmed }}'
+              causal_summary: '{{ steps.classify_round.output.causal_summary }}'
 
   # Decision-tree reinforcement is a sequential phase, not a third branch: it runs an agent
   # for up to 900s, and a parallel branch has no per-branch timeout of its own — it inherits
@@ -165,6 +194,10 @@ steps:
       # and JSON.parse in preprocess falls back to [], so every round distills from scratch.
       tool_calls: '${{ inputs.tool_calls }}'
       tool_results: '${{ inputs.tool_results }}'
+      is_feedback: '${{ steps.classify_round.output.is_feedback }}'
+      causal_confirmed: '${{ steps.classify_round.output.causal_confirmed }}'
+      causal_summary: '{{ steps.classify_round.output.causal_summary }}'
+      learning: '{{ steps.classify_round.output.learning }}'
 
   # Mirrors the investigation and reinforcement workflows: the reinforcement agent runs on
   # the model the round used, with `connector_id` still the strict override for a manual run.
@@ -200,6 +233,7 @@ steps:
       round_id: '{{ inputs.round_id }}'
       message: '{{ steps.prepare_turn.output.message }}'
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}'
+      offer_learning_tools: '${{ steps.prepare_turn.output.offer_learning_tools }}'
       connector_id: '{{ steps.resolve_model.output.connector_id }}'
       tool_calls: '${{ inputs.tool_calls }}'
       tool_results: '${{ inputs.tool_results }}'

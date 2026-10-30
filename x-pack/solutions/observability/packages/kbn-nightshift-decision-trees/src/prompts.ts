@@ -163,6 +163,7 @@ export const buildTurnPrompt = ({
   activeRemediations,
   connectorNames,
   referencedMemories,
+  verdict,
   script,
 }: {
   editableTreePaths: string[];
@@ -171,10 +172,18 @@ export const buildTurnPrompt = ({
   activeRemediations?: string[];
   connectorNames: string[];
   referencedMemories?: string;
+  /** What a follow-up confirmed or showed to be wrong. Omitted when it said neither. */
+  verdict?: { causalSummary: string; learning?: string };
   script: string;
 }): string => {
   const bulletsOrNone = (items: string[]): string =>
     items.length > 0 ? items.map((item) => `- ${item}`).join('\n') : '- None';
+  const verdictSection = verdict
+    ? `Verdict on this follow-up:
+${verdict.causalSummary}
+${verdict.learning ? `\nWhat the human taught the investigator:\n${verdict.learning}\n` : ''}
+`
+    : '';
 
   return `Decision-tree files available for edit:
 ${bulletsOrNone(editableTreePaths)}
@@ -193,6 +202,6 @@ ${connectorNames.length > 0 ? connectorNames.join(', ') : 'None'}
 Referenced memories:
 ${referencedMemories || 'None'}
 
-${script}
+${verdictSection}${script}
 `;
 };

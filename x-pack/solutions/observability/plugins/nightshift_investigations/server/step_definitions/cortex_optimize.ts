@@ -15,6 +15,10 @@ import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
 import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
+import {
+  followUpVerdictFromInputs,
+  followUpVerdictInputsSchema,
+} from '../round_verdict/follow_up_verdict';
 import { withTimeout } from './with_timeout';
 
 /**
@@ -68,6 +72,7 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
+      ...followUpVerdictInputsSchema,
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -104,6 +109,12 @@ export const cortexOptimizeStepDefinition = ({
             roundIndex: context.input.round_index,
             requestedConnectorId: context.input.connector_id,
             roundConnectorId: context.input.round_connector_id,
+            verdict: followUpVerdictFromInputs({
+              roundKind: context.input.round_kind,
+              isFeedback: context.input.is_feedback,
+              causalConfirmed: context.input.causal_confirmed,
+              causalSummary: context.input.causal_summary,
+            }),
             logger,
             getAgentBuilder,
             getInference,
