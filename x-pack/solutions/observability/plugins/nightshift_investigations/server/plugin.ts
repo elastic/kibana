@@ -88,9 +88,13 @@ import {
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   registerInvestigationAgentType,
 } from './agents/investigation';
+import { registerFindingsRecorder } from './findings_recorder';
+import { createRecorderProposals } from './findings_recorder/proposals_adapter';
+import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
+import { createTimeConverterTool } from './tools/time_converter/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -101,7 +105,10 @@ import {
   createSandboxOutputRedactorProvider,
   withSandboxOutputRedaction,
 } from './tools/sandbox_bash/sandbox_output_redaction';
-import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
+import {
+  checkSandboxAccess,
+  createSandboxToolAvailability,
+} from './tools/sandbox_bash/sandbox_tool_availability';
 import {
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
@@ -289,6 +296,63 @@ export class NightshiftInvestigationsPlugin
         telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
+      if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
+        const getRecorderOutputRedactor = createSandboxOutputRedactorProvider({
+          getDeps: () => ({ actions: this.actionsStart }),
+        });
+        // Records summary, severity, hypotheses and impact from outside the agent, so the
+        // investigator needs no recording tools. Every dependency is read lazily: hooks are
+        // registered in setup() but only run once the plugin has started.
+        registerFindingsRecorder({
+          agentBuilder: plugins.agentBuilder,
+          deps: {
+            getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+            getAgenticInvestigations: () => this.agenticInvestigations,
+            // The final pass proposes actions for a person to decide, as the investigator's
+            // `proposals.create` tool did, and sees which ones the conversation already has.
+            getProposals: () =>
+              this.proposals
+                ? createRecorderProposals({
+                    proposals: this.proposals,
+                    getSpaceId: (request) =>
+                      this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+                  })
+                : undefined,
+            // The final pass reads the investigation's own workspace (read-only), through the
+            // same gate and output redaction as the investigator's tools.
+            // The final pass proposes actions for a person to decide, as the investigator's
+            // `proposals.create` tool did, and sees which ones the conversation already has.
+            getWorkspace: async ({ request, conversationId, allowedConnectorIds }) => {
+              const sandboxStart = getGatedSandboxStart();
+              if (!sandboxStart) return undefined;
+              // The same per-request check the investigator's sandbox tools pass: a user who may
+              // not use the sandbox must not have its files read on their behalf either.
+              const access = await checkSandboxAccess({
+                request,
+                featureFlags: this.featureFlags,
+                security: this.securityStart,
+              });
+              if (access.status !== 'available') return undefined;
+              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+              const redactor = await getRecorderOutputRedactor({
+                request,
+                allowedConnectorIds,
+                resolvedCredentials: new Map(),
+              });
+              return createRecorderWorkspace({
+                session: sandboxStart.getSessionForSpace(spaceId, conversationId),
+                redactor,
+              });
+            },
+            logger: this.logger.get('findings_recorder'),
+          },
+          logger: this.logger.get('findings_recorder'),
+        });
+      }
+      plugins.agentBuilder.tools.register(createTimeConverterTool());
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }

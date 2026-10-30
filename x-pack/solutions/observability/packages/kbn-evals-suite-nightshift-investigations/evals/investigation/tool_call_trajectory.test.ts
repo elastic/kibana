@@ -7,7 +7,7 @@
 
 import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
-import { extractToolCallTrajectory } from './tool_call_trajectory';
+import { extractFinalResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 
 let nextId = 0;
 
@@ -85,5 +85,21 @@ describe('extractToolCallTrajectory', () => {
       { steps: [toolCallStep('tool_b', {}, { text: 'second' })] },
     ]);
     expect(trajectory.map((step) => step.tool_id)).toEqual(['tool_a', 'tool_b']);
+  });
+});
+
+describe('extractFinalResponse', () => {
+  it('returns undefined when the last round has no response', () => {
+    expect(extractFinalResponse([])).toBeUndefined();
+    expect(extractFinalResponse([{ response: { message: '' } }] as never)).toBeUndefined();
+  });
+
+  it('returns the message of the last round', () => {
+    expect(
+      extractFinalResponse([
+        { response: { message: 'first' } },
+        { response: { message: 'Root cause: bad deploy' } },
+      ] as never)
+    ).toBe('Root cause: bad deploy');
   });
 });

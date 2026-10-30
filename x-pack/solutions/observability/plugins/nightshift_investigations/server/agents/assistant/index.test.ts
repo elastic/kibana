@@ -62,7 +62,7 @@ describe('Nightshift assistant agent type', () => {
     );
   });
 
-  it('shares the investigator configuration except for its instructions', async () => {
+  it('shares the investigator hooks and connectors, but keeps Agent Builder tools and prompt', async () => {
     const { instructions, ...assistant } = await configurationFor(getAssistantAgentType(options));
     const { instructions: investigatorInstructions, ...investigator } = await configurationFor(
       getInvestigationAgentType({ ...options, decisionTreesEnabled: true })
@@ -70,7 +70,6 @@ describe('Nightshift assistant agent type', () => {
 
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
-    expect(assistant).toEqual(investigator);
     expect(assistant).toMatchObject({
       connector_ids: ['telemetry'],
       workflow_ids: [
@@ -83,6 +82,11 @@ describe('Nightshift assistant agent type', () => {
         getNightshiftBoundHookWorkflowId(NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID, 'default'),
       ],
     });
+    expect(assistant.connector_ids).toEqual(investigator.connector_ids);
+    expect(assistant.workflow_ids).toEqual(investigator.workflow_ids);
+    expect(assistant.post_execution_workflow_ids).toEqual(investigator.post_execution_workflow_ids);
+    expect(assistant.tools?.[0]?.tool_ids).toContain('proposals.create');
+    expect(investigator.tools?.[0]?.tool_ids).not.toContain('proposals.create');
   });
 
   it('points to the workspace files instead of embedding their guidance', () => {

@@ -18,6 +18,7 @@ import { PROPOSALS_MANAGED_WORKFLOW_OWNER_ID } from './constants';
 import { registerFeatures } from './features';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerRoutes } from './routes/register_routes';
+import { createProposalCreator } from './services/create_proposal';
 import { ProposalsService } from './services/proposals_service';
 import { createProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
@@ -171,6 +172,11 @@ export class ProposalsPlugin
     return {
       getProposalsService: () => this.requireProposalsService(),
       getProposalPrivileges: () => this.requireProposalPrivileges(),
+      createProposal: createProposalCreator({
+        getProposalsService: () => this.requireProposalsService(),
+        getWorkflowsApi: () => this.requireWorkflowsApi(),
+        privileges: this.requireProposalPrivileges(),
+      }).create,
     };
   }
 
