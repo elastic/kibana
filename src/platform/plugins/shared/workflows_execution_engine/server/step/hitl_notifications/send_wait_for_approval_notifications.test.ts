@@ -8,6 +8,7 @@
  */
 
 import { hasExternalHitlChannels } from './has_external_hitl_channels';
+import { escapeSlackMrkdwnText, SLACK_SECTION_TEXT_MAX_LENGTH } from './hitl_connector_helpers';
 import {
   buildWaitForApprovalResumeLinks,
   sendWaitForApprovalNotifications,
@@ -118,6 +119,49 @@ describe('send_wait_for_approval_notifications', () => {
       renderTemplate: (template: string) => template,
       abortController: new AbortController(),
     };
+
+    it('escapes Slack step text and labels without changing the resume links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message: 'See <https://evil.example|click>',
+        approveLabel: 'Approve|https://evil.example',
+        channels: {
+          slack: { 'connector-id': 'slack-webhook-1' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.message).toBe(
+        'See &lt;https:\u2060//evil.example|click&gt;\n\n<https://kibana.example/approve|Approve\uff5chttps:\u2060//evil.example>  <https://kibana.example/reject|Decline>'
+      );
+    });
+
+    it('shortens an escaped Slack API section to 3000 characters and keeps both buttons', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+      const message = 'host <node> & status ok\n'.repeat(100);
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message,
+        channels: {
+          slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      const escaped = escapeSlackMrkdwnText(message);
+      const blocks = JSON.parse(execute.mock.calls[0][0].input.subActionParams.text).blocks;
+      const section = blocks.find((block: { type: string }) => block.type === 'section');
+      const actions = blocks.find((block: { type: string }) => block.type === 'actions');
+
+      expect(escaped.length).toBeGreaterThan(SLACK_SECTION_TEXT_MAX_LENGTH);
+      expect(section.text.text.length).toBeLessThanOrEqual(SLACK_SECTION_TEXT_MAX_LENGTH);
+      expect(escaped.startsWith(section.text.text)).toBe(true);
+      expect(section.text.text).not.toMatch(/&(?!amp;|lt;|gt;)/);
+      expect(actions.elements).toHaveLength(2);
+    });
 
     it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });

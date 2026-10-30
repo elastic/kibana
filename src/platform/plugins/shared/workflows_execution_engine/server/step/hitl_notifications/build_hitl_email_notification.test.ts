@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { default as MarkdownIt } from 'markdown-it';
 import {
   absoluteUrlToKibanaFooterPath,
   buildDefaultHitlApprovalEmailMessage,
@@ -67,6 +68,126 @@ describe('build_hitl_email_notification', () => {
           formUrl: 'https://kibana.example/form',
         })
       ).toBe('Please respond\n\n[Open form](https://kibana.example/form)');
+    });
+
+    it('keeps step text and labels from adding a link beside the ones we generate', () => {
+      expect(
+        buildDefaultHitlInputEmailMessage({
+          stepMessage: 'See [click](https://evil.example)',
+          formUrl: 'https://kibana.example/form',
+        })
+      ).toBe(
+        'See \\[click\\](https:\u2060//evil.example)\n\n[Open form](https://kibana.example/form)'
+      );
+      expect(
+        buildDefaultHitlApprovalEmailMessage({
+          message: 'Approve?',
+          approveLabel: 'Approve](https://evil.example)',
+          rejectLabel: 'Decline',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        })
+      ).toBe(
+        'Approve?\n\n[Approve\\](https:\u2060//evil.example)](https://kibana.example/approve)  [Decline](https://kibana.example/reject)'
+      );
+    });
+
+    it('keeps a newline in an approval label inside the generated link', () => {
+      expect(
+        buildDefaultHitlApprovalEmailMessage({
+          message: 'Line one\nhttps://elastic.co',
+          approveLabel: 'Approve\nhttps://evil.example',
+          rejectLabel: 'Decline\r\nnow',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        })
+      ).toBe(
+        'Line one\nhttps:\u2060//elastic.co\n\n[Approve https:\u2060//evil.example](https://kibana.example/approve)  [Decline now](https://kibana.example/reject)'
+      );
+    });
+
+    it('leaves a path and a plain angle bracket unchanged while blocking scheme autolinks', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const source = buildDefaultHitlApprovalEmailMessage({
+        message: 'C:\\temp and a < b <https://evil.example> <mailto:a@b.co>',
+        approveLabel: 'Approve\\',
+        rejectLabel: 'Decline',
+        approveUrl: 'https://kibana.example/approve',
+        rejectUrl: 'https://kibana.example/reject',
+      });
+
+      expect(source).toContain(
+        'C:\\temp and a < b \\<https:\u2060//evil.example> \\<mailto:a@b.co>'
+      );
+      expect(source).toContain('[Approve\\\\](https://kibana.example/approve)');
+      expect(
+        [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1])
+      ).toEqual(['https://kibana.example/approve', 'https://kibana.example/reject']);
+    });
+
+    it('does not let a backslash or a protocol-relative URL add a link', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const hrefs = (message: string) => {
+        const source = buildDefaultHitlApprovalEmailMessage({
+          message,
+          approveLabel: 'Approve',
+          rejectLabel: 'Decline',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        });
+        return [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1]);
+      };
+
+      expect(hrefs('\\[Approve\\](//evil.example)')).toEqual([
+        'https://kibana.example/approve',
+        'https://kibana.example/reject',
+      ]);
+      expect(hrefs('\\\\[Approve](//evil.example)')).toEqual([
+        'https://kibana.example/approve',
+        'https://kibana.example/reject',
+      ]);
+      expect(hrefs('[Approve](//evil.example)')).toEqual([
+        'https://kibana.example/approve',
+        'https://kibana.example/reject',
+      ]);
+    });
+
+    it('keeps both resume links when step text opens a code fence', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const hrefs = (source: string) =>
+        [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1]);
+
+      for (const fence of ['```', '~~~']) {
+        const source = buildDefaultHitlApprovalEmailMessage({
+          message: `Please review\n${fence}`,
+          approveLabel: 'Approve',
+          rejectLabel: 'Decline',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        });
+
+        expect(markdown.render(source)).not.toContain('<pre');
+        expect(hrefs(source)).toEqual([
+          'https://kibana.example/approve',
+          'https://kibana.example/reject',
+        ]);
+      }
+    });
+
+    it('keeps both resume links when both labels end in a backtick', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const source = buildDefaultHitlApprovalEmailMessage({
+        message: 'Approve?',
+        approveLabel: 'Approve`',
+        rejectLabel: 'Decline`',
+        approveUrl: 'https://kibana.example/approve',
+        rejectUrl: 'https://kibana.example/reject',
+      });
+
+      expect(markdown.render(source)).not.toContain('<code');
+      expect(
+        [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1])
+      ).toEqual(['https://kibana.example/approve', 'https://kibana.example/reject']);
     });
 
     it('builds waitForApproval markdown with approve and reject links', () => {

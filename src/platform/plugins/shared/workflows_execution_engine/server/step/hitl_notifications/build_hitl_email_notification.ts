@@ -10,6 +10,11 @@
 import type { HitlEmailChannelSchema } from '@kbn/workflows';
 import { DEFAULT_HITL_INPUT_OPEN_FORM_LABEL } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
+import {
+  escapeHitlEmailLinkLabel,
+  escapeHitlEmailMarkdown,
+  flattenHitlLinkLabel,
+} from './hitl_connector_helpers';
 import { buildWorkflowExecutionAppPath } from '../../utils/get_kibana_url';
 
 export type HitlEmailChannelConfig = z.infer<typeof HitlEmailChannelSchema>;
@@ -47,7 +52,7 @@ export function buildDefaultHitlInputEmailMessage({
   stepMessage: string;
   formUrl: string;
 }): string {
-  const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
+  const prompt = stepMessage.length > 0 ? `${escapeHitlEmailMarkdown(stepMessage)}\n\n` : '';
   return `${prompt}[${DEFAULT_HITL_INPUT_OPEN_FORM_LABEL}](${formUrl})`;
 }
 
@@ -64,8 +69,12 @@ export function buildDefaultHitlApprovalEmailMessage({
   approveUrl: string;
   rejectUrl: string;
 }): string {
-  const prompt = message.length > 0 ? `${message}\n\n` : '';
-  return `${prompt}[${approveLabel}](${approveUrl})  [${rejectLabel}](${rejectUrl})`;
+  const prompt = message.length > 0 ? `${escapeHitlEmailMarkdown(message)}\n\n` : '';
+  return `${prompt}[${escapeHitlEmailLinkLabel(
+    flattenHitlLinkLabel(approveLabel)
+  )}](${approveUrl})  [${escapeHitlEmailLinkLabel(
+    flattenHitlLinkLabel(rejectLabel)
+  )}](${rejectUrl})`;
 }
 
 /** Fails delivery when a configured email channel has no recipients left after rendering. */

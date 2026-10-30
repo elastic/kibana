@@ -27,9 +27,12 @@ import {
   buildSlack2SendMessageInput,
   buildTeamsSendChannelMessageInput,
   escapeServiceNowCommentText,
+  escapeSlackMrkdwnText,
+  escapeSlackMrkdwnUrl,
   escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
+  fitSlackMrkdwnSectionText,
   renderServiceNowField,
   renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -41,10 +44,6 @@ import {
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['channels']>;
-
-function escapeSlackMrkdwnUrl(url: string): string {
-  return url.replace(/&/g, '&amp;');
-}
 
 function buildDefaultInputServiceNowComment({
   stepMessage,
@@ -81,7 +80,7 @@ function buildDefaultInputSlackMessage({
   stepMessage: string;
   formUrl: string;
 }): string {
-  const prompt = stepMessage.length > 0 ? `${stepMessage}\n\n` : '';
+  const prompt = stepMessage.length > 0 ? `${escapeSlackMrkdwnText(stepMessage)}\n\n` : '';
   return `${prompt}<${escapeSlackMrkdwnUrl(formUrl)}|${DEFAULT_HITL_INPUT_OPEN_FORM_LABEL}>`;
 }
 
@@ -105,7 +104,9 @@ function buildDefaultInputSlackApiBlocks({
   stepMessage: string;
   formUrl: string;
 }) {
-  const blocks = buildInputSlackApiBlocksFromMessage(stepMessage);
+  const blocks = buildInputSlackApiBlocksFromMessage(
+    fitSlackMrkdwnSectionText(escapeSlackMrkdwnText(stepMessage))
+  );
 
   blocks.push({
     type: 'actions',
