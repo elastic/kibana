@@ -1332,18 +1332,6 @@ describe('SearchMethodsService', () => {
         });
       });
 
-      it('does not log requests when no adapter is provided', async () => {
-        mockTwoPages();
-
-        const result = await service.dslPaginated(paginatedParams, {
-          inspector: { title: 'No adapter' },
-        });
-        const nextPage = await result.pagination.nextPage();
-
-        expect(nextPage).not.toBeNull();
-        expect(mockSearch).toHaveBeenCalledTimes(2);
-      });
-
       it('logs an error when a page fails', async () => {
         mockSearch.mockReturnValue(throwError(() => new Error('Search failed')));
         const requestResponder = createMockRequestResponder();

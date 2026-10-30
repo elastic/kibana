@@ -39,8 +39,7 @@ export interface IBaseSearchOptions {
    * Inspector integration options for tracking requests
    */
   inspector?: {
-    /** Requests are not tracked when no adapter is provided */
-    adapter?: RequestAdapter;
+    adapter: RequestAdapter;
     title: string;
     description?: string;
     getRequestStats?: () => RequestStatistics;

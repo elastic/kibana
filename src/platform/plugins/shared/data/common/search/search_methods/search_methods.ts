@@ -89,7 +89,7 @@ export class SearchMethodsService implements ISearchMethods {
       'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY
     );
 
-    const requestResponder = options?.inspector?.adapter?.start(options.inspector.title, {
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
     });
 
@@ -187,7 +187,7 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildEqlRequest(params, options);
     const searchOptions = this.mapEqlOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY);
 
-    const requestResponder = options?.inspector?.adapter?.start(options.inspector.title, {
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
     });
 
@@ -222,7 +222,7 @@ export class SearchMethodsService implements ISearchMethods {
     const request = this.buildSqlRequest(params, options);
     const searchOptions = this.mapSqlOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY);
 
-    const requestResponder = options?.inspector?.adapter?.start(options.inspector.title, {
+    const requestResponder = options?.inspector?.adapter.start(options.inspector.title, {
       description: options.inspector.description,
     });
 
@@ -281,7 +281,7 @@ export class SearchMethodsService implements ISearchMethods {
     inspector: IDslSearchOptions['inspector'],
     searchSessionId?: string
   ): Promise<any> {
-    const requestResponder = inspector?.adapter?.start(inspector.title, {
+    const requestResponder = inspector?.adapter.start(inspector.title, {
       description: inspector.description,
       searchSessionId,
     });
