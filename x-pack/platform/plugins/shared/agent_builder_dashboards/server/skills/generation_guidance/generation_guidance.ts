@@ -29,7 +29,7 @@ When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHA
 
 The tool schema describes each field. The rules below cover what the schema cannot express.
 
-Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool applies them together, so each change is checked against the dashboard as it was before the call. Place panels in a new section in the same call that creates it.
+Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool checks each change against the dashboard as it was before the call and against the rest of the call, then applies the changes one by one: failed ones are listed in \`failures\` and the rest are kept. Place panels in a new section in the same call that creates it.
 
 For a new dashboard, set both \`title\` and \`description\`.
 
@@ -61,7 +61,7 @@ A custom content panel with live data does not need a query from you. Always set
 
 To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
 
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateESQL: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
+To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
 
 Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 

@@ -14,7 +14,7 @@ import {
   anomalySwimLaneViewBySchema,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineConfigPanelKind } from '../panel_kind';
 
 /**
@@ -35,33 +35,37 @@ import { defineConfigPanelKind } from '../panel_kind';
 
 // ─── Anomaly Charts ───────────────────────────────────────────────────────────
 
-export const anomalyChartsPanelConfigSchema = z.object({
-  ...anomalyChartsEmbeddableStateSchema.shape,
-  // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
-  severity_threshold: z
-    .union([
-      z
-        .number()
-        .min(0)
-        .max(100)
-        .describe(
-          'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
-        ),
-      z.array(severityThresholdSchema).max(5),
-    ])
-    .optional()
-    .describe(
-      'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
-    ),
-});
+export const anomalyChartsPanelConfigSchema = lazySchema(() =>
+  z.object({
+    ...anomalyChartsEmbeddableStateSchema.shape,
+    // Agent-facing number plus the embeddable array form (e.g. forwarded attachments).
+    severity_threshold: z
+      .union([
+        z
+          .number()
+          .min(0)
+          .max(100)
+          .describe(
+            'Minimum anomaly score (0–100) to display. Omit to show all scores. Typical values: 25 (minor+), 50 (major+), 75 (critical only).'
+          ),
+        z.array(severityThresholdSchema).max(5),
+      ])
+      .optional()
+      .describe(
+        'Minimum anomaly score to display. A number N means scores >= N. An array of { min, max? } ranges is also accepted (for example from an ML chart attachment).'
+      ),
+  })
+);
 
-export const anomalyChartsPanelContentSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('ml_anomaly_charts'),
-  config: anomalyChartsPanelConfigSchema.describe(
-    'Anomaly charts panel configuration. Provide job_ids obtained from prior ML tool results or conversation context. On an existing panel, fully replaces its config.'
-  ),
-});
+export const anomalyChartsPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('ml_anomaly_charts'),
+    config: anomalyChartsPanelConfigSchema.describe(
+      'Anomaly charts panel configuration. Provide job_ids obtained from prior ML tool results or conversation context. On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const anomalyChartsPanelKind = defineConfigPanelKind({
   type: 'ml_anomaly_charts',
@@ -89,13 +93,15 @@ export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type',
   anomalySwimlaneViewByConfigSchema,
 ]);
 
-export const anomalySwimlanePanelContentSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('ml_anomaly_swimlane'),
-  config: anomalySwimlaneConfigSchema.describe(
-    'Anomaly swim lane configuration. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity. On an existing panel, fully replaces its config.'
-  ),
-});
+export const anomalySwimlanePanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('ml_anomaly_swimlane'),
+    config: anomalySwimlaneConfigSchema.describe(
+      'Anomaly swim lane configuration. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity. On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const anomalySwimlanePanelKind = defineConfigPanelKind({
   type: 'ml_anomaly_swimlane',
@@ -116,13 +122,15 @@ export const singleMetricViewerConfigSchema = singleMetricViewerEmbeddableStateS
     ),
 });
 
-export const singleMetricViewerPanelContentSchema = z.object({
-  source: z.literal('config'),
-  type: z.literal('ml_single_metric_viewer'),
-  config: singleMetricViewerConfigSchema.describe(
-    'Single metric viewer configuration. job_ids must contain exactly one job ID. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity. On an existing panel, fully replaces its config.'
-  ),
-});
+export const singleMetricViewerPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('ml_single_metric_viewer'),
+    config: singleMetricViewerConfigSchema.describe(
+      'Single metric viewer configuration. job_ids must contain exactly one job ID. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity. On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const singleMetricViewerPanelKind = defineConfigPanelKind({
   type: 'ml_single_metric_viewer',
