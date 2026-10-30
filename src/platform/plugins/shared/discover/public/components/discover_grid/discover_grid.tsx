@@ -103,8 +103,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         return undefined;
       }
 
-      // Each control needs its own flex item, otherwise they stack vertically in the toolbar.
-      // Fixed child slots keep the group by selector mounted when the custom controls toggle.
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {customExternalAdditionalControls && (
