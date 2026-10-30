@@ -33,6 +33,7 @@ export const renderApp = (
         api={createApi(coreStart.http)}
         share={share}
         toasts={coreStart.notifications.toasts}
+        openConfirm={coreStart.overlays.openConfirm}
         projectId={projectId}
         canWrite={coreStart.application.capabilities[PLUGIN_ID]?.write === true}
       />

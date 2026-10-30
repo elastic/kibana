@@ -16,11 +16,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { Task } from '../../common';
+import type { Job, Task } from '../../common';
 import type { TaskRunnerApi } from '../api';
 import { errorMessage } from '../api';
 import { resultInDiscoverUrl } from '../lib/discover';
 import { formatDuration, formatTime } from '../lib/format';
+import { jobKindText } from '../lib/jobs';
 import { StatusBadge } from './status_badge';
 import type { OutputState } from './task_details';
 import { TaskDetails } from './task_details';
@@ -29,6 +30,10 @@ interface TasksTableProps {
   api: TaskRunnerApi;
   share: SharePluginStart;
   tasks: Task[] | undefined;
+  /** When given, adds a Job column showing how each task's job fires. */
+  jobsById?: Map<string, Job>;
+  noItemsMessage?: string;
+  'data-test-subj'?: string;
 }
 
 const executionText = (task: Task): string => {
@@ -38,7 +43,14 @@ const executionText = (task: Task): string => {
     : text;
 };
 
-export const TasksTable = ({ api, share, tasks }: TasksTableProps) => {
+export const TasksTable = ({
+  api,
+  share,
+  tasks,
+  jobsById,
+  noItemsMessage = 'No tasks yet. Submit a query to create one.',
+  'data-test-subj': dataTestSubj = 'taskRunnerPocTasksTable',
+}: TasksTableProps) => {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [outputs, setOutputs] = useState<Record<string, OutputState>>({});
 
@@ -108,6 +120,21 @@ export const TasksTable = ({ api, share, tasks }: TasksTableProps) => {
         </EuiToolTip>
       ),
     },
+    ...(jobsById
+      ? [
+          {
+            name: 'Job',
+            width: '110px',
+            render: (task: Task) => (
+              <EuiToolTip content={task.jobId}>
+                <EuiText size="s" color="subdued" tabIndex={0}>
+                  {jobKindText(jobsById.get(task.jobId)) ?? '—'}
+                </EuiText>
+              </EuiToolTip>
+            ),
+          },
+        ]
+      : []),
     { name: 'Execution', width: '190px', render: executionText },
     { field: 'startedAt', name: 'Started', width: '140px', render: formatTime },
     { field: 'durationMs', name: 'Duration', width: '90px', render: formatDuration },
@@ -162,10 +189,8 @@ export const TasksTable = ({ api, share, tasks }: TasksTableProps) => {
       columns={columns}
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       loading={tasks === undefined}
-      noItemsMessage={
-        tasks === undefined ? 'Loading tasks…' : 'No tasks yet. Submit a query to create one.'
-      }
-      data-test-subj="taskRunnerPocTasksTable"
+      noItemsMessage={tasks === undefined ? 'Loading tasks…' : noItemsMessage}
+      data-test-subj={dataTestSubj}
     />
   );
 };

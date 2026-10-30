@@ -65,6 +65,13 @@ export class TaskRunnerServiceClient {
     await this.request<undefined>('DELETE', `/jobs/${encodeURIComponent(jobId)}`);
   }
 
+  public listJobTasks(jobId: string, limit?: number): Promise<TaskList> {
+    return this.request<TaskList>(
+      'GET',
+      `/jobs/${encodeURIComponent(jobId)}/tasks${limitQuery(limit)}`
+    );
+  }
+
   public listTasks(limit?: number): Promise<TaskList> {
     return this.request<TaskList>('GET', `/tasks${limitQuery(limit)}`);
   }

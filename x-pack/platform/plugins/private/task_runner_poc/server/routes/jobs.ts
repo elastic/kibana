@@ -133,6 +133,29 @@ export const registerJobRoutes = ({
     );
 
   router.versioned
+    .get({
+      path: `${INTERNAL_API_BASE_PATH}/jobs/{jobId}/tasks`,
+      access: 'internal',
+      summary: "List one job's recent tasks",
+      security: { authz: { requiredPrivileges: [API_PRIVILEGES.read] } },
+    })
+    .addVersion(
+      {
+        version: INTERNAL_API_VERSION,
+        validate: { request: { params: jobIdParamsSchema, query: limitQuerySchema } },
+      },
+      async (_context, request, response) => {
+        try {
+          return response.ok({
+            body: await serviceClient.listJobTasks(request.params.jobId, request.query.limit),
+          });
+        } catch (error) {
+          return errorToResponse(response, error);
+        }
+      }
+    );
+
+  router.versioned
     .delete({
       path: `${INTERNAL_API_BASE_PATH}/jobs/{jobId}`,
       access: 'internal',

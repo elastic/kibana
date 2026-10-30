@@ -2,7 +2,7 @@
 
 Branch `task-runner-poc-plugin` in the Kibana worktree `/Users/cbanta/Developer/kibana/multi-tenant-task-manager/worktrees/ws3-kibana-plugin`, off `upstream/main`. Local commits only.
 
-**October 30: stages A (server routes) and B (the page) are done**, built against the contract at task-runner `f1c2ac5`. They're tested with unit tests, the Prism mock, and tenant A's real Elasticsearch for the output. Stage C (scheduled jobs in the UI) isn't started; the server side already accepts `everySeconds` and `runAt`.
+**October 30: stages A (server routes), B (the page), and C (scheduled jobs) are done**, built against the contract at task-runner `f1c2ac5`. They're tested with unit tests, the Prism mock, and tenant A's real Elasticsearch for the output. Not yet tested against the real control plane on `localhost:8800`; that waits for WS1's stage C.
 
 ## Done
 
@@ -21,12 +21,13 @@ Internal versioned routes (version `1`) under `/internal/task_runner_poc`:
 | `POST /jobs` | manage | Grants an API key for the current user, then calls the service's `POST /jobs` |
 | `GET /jobs?limit` | read | Lists the project's jobs |
 | `GET /jobs/{jobId}` | read | Gets one job |
+| `GET /jobs/{jobId}/tasks?limit` | read | Lists one job's recent tasks |
 | `DELETE /jobs/{jobId}` | manage | Deletes a job (204) |
 | `GET /tasks?limit` | read | Lists recent tasks |
 | `GET /tasks/{taskId}` | read | Gets one task; the `:` in the ID is URL-encoded on the way to the service |
 | `GET /tasks/{taskId}/output` | read | Reads the task's result document from `tr-results` (`_id` = taskId) with the **current user's** Elasticsearch client |
 
-- **Create body:** `{ query, everySeconds?, runAt?, idempotencyKey? }`. The plugin fills in `taskType: esql_summary`, `params.resultIndex: tr-results`, `timeout: 60s`, and `maxExecutions: 3`. `everySeconds` becomes `every: "{n}s"`, and `runAt` is normalized to ISO 8601. A missing `idempotencyKey` becomes `kbn-{uuid}`.
+- **Create body:** `{ query, everySeconds?, runAt?, idempotencyKey? }`. The plugin fills in `taskType: esql_summary`, `params.resultIndex: tr-results`, `timeout: 60s`, and `maxExecutions: 3`. `everySeconds` (a whole number from 1 to 86,400, the contract's 1 second to 24 hours) becomes `every: "{n}s"`. `runAt` must be at most 30 days ahead and is normalized to ISO 8601. Both limits are checked before any API key is granted. A missing `idempotencyKey` becomes `kbn-{uuid}`.
 - **API key lifetime:**
   - One-shot job: 1 hour. With a future `runAt`, 1 hour past `runAt`, which covers the timeout and retries.
   - Scheduled job: never expires (see security shortcuts).
@@ -60,11 +61,25 @@ Internal versioned routes (version `1`) under `/internal/task_runner_poc`:
   - Every execution with its worker, start, duration, and error.
   - For a succeeded task, the output table built from the result document's `columns` and `values`, with "N rows" or "Showing X of rowCount rows", plus a note when the output was truncated.
 
+### Stage C: scheduled jobs
+
+- **New job form:**
+  - **Repeat every** (a switch plus a seconds field, 1 to 86,400) creates a scheduled job with `every`.
+  - **Run at** (a switch plus a date-time picker, at most 30 days ahead) sends `runAt`. Alone, the job fires once at that time; with Repeat every, it's the first occurrence.
+  - The button reads **Run now**, **Create job** (Run at only), or **Create scheduled job**. It's disabled while the input is invalid, and the field shows why.
+  - `taskId` is null for these jobs, so the toast says when the job fires ("It fires every 10s, first at …" or "It fires once at …") instead of naming a task.
+- **Scheduled jobs list:**
+  - Polls `GET /jobs` every 2 seconds and shows jobs with `every`, plus one-shot jobs still waiting for their `runAt` (`nextFireAt` set).
+  - Columns: query, how the job fires ("every 10s" or "once at …"), `nextFireAt`, running or idle, and the last task's status and finish time.
+  - Expanding a job polls `GET /jobs/{jobId}/tasks` (10 most recent) and shows them in the same tasks table, output included.
+  - **Delete** asks for confirmation, then calls the service's delete. It's disabled without the `All` privilege. The Elasticsearch API key isn't invalidated (see security shortcuts).
+- **Tasks list:** a **Job** column shows how each task's job fires ("every 10s" or "one-shot"), from the polled jobs list. It shows "—" when the job is no longer listed; the tooltip has the job ID.
+
 ## Verified (October 30)
 
 - **Checks:**
   - Type check: exit 0.
-  - Jest: 26 route tests pass (`server/routes/routes.test.ts`).
+  - Jest: 41 tests pass (29 route tests in `server/routes/routes.test.ts`, 12 form and job-helper tests in `public/lib/new_job.test.ts`).
   - ESLint and oxlint: clean.
 - **curl through Kibana against Prism (`f1c2ac5`):**
   - Create one-shot, and scheduled with `runAt`: 200. Prism accepted both request bodies.
@@ -72,6 +87,7 @@ Internal versioned routes (version `1`) under `/internal/task_runner_poc`:
   - List and get jobs: 200, with `workerType` and `runAt` present. Delete: 204.
   - List and get tasks: 200, with the task ID's `%3A` encoding.
   - Prism stopped: `GET /tasks` returns 502 `unreachable`.
+  - Stage C: `GET /jobs/{jobId}/tasks`: 200 (and 400 for a bad job ID). `runAt` 31 days ahead and `everySeconds: 86401`: 400, with no API key granted.
 - **Output route against tenant A's Elasticsearch:**
   - I indexed a test document with a unique `taskId`, read it through Kibana (200), checked a missing one returns 404, and deleted the document.
   - The Discover query (`FROM tr-results | WHERE taskId == …`) finds it.
@@ -82,11 +98,20 @@ Internal versioned routes (version `1`) under `/internal/task_runner_poc`:
   - **Run now** shows a success toast.
   - The result-document Discover link opens Discover with one hit.
   - No plugin console errors. Kibana's own CSP notice about an inline script appears on every page.
+- **Stage C in the browser against the mock:**
+  - The scheduled jobs list shows the mock's scheduled job (every 10s, next fire time, idle, last task succeeded).
+  - Expanding it shows its recent task, and the row stays expanded through refreshes.
+  - The tasks list's Job column shows "every 10s" and "one-shot" for the mock's tasks.
+  - Repeat every 0 disables the button. Repeat every 10 with Run at sends `{"everySeconds":10,"runAt":"…"}` and toasts "Created scheduled job … It fires every 10s, first at …".
+  - Delete opens the confirmation; confirming sends `DELETE /jobs/{jobId}` (204) and toasts "Deleted job …".
 - **Cleanup:**
-  - Invalidated the 5 API keys Kibana granted during mock testing, one of them a never-expiring scheduled-job key.
+  - Invalidated every API key Kibana granted during mock testing: 5 in stage B and 1 in stage C. Two were never-expiring scheduled-job keys.
   - Kibana and Prism are stopped.
 
-Not verified: the real control plane, a real worker writing a result, and a user with only the `Read` privilege in the browser (covered by unit tests on the route privileges).
+Not verified:
+- The real control plane: real `nextFireAt` and `running` values, and whether a deleted job disappears from `GET /jobs`. The mock always returns the same examples, so a deleted job stays listed.
+- A real worker writing a result.
+- A user with only the `Read` privilege in the browser (covered by unit tests on the route privileges).
 
 ## How to try it
 
@@ -132,7 +157,9 @@ Not verified: the real control plane, a real worker writing a result, and a user
    B=http://localhost:5601/internal/task_runner_poc
    curl -s "${H[@]}" -X POST $B/jobs -d '{"query":"FROM logs-* | STATS errors = COUNT(*) WHERE log.level == \"error\" BY service.name"}'
    curl -s "${H[@]}" -X POST $B/jobs -d '{"query":"FROM logs-* | LIMIT 5","everySeconds":10}'
+   curl -s "${H[@]}" -X POST $B/jobs -d "{\"query\":\"FROM logs-* | LIMIT 5\",\"everySeconds\":30,\"runAt\":\"$(date -u -v+5M +%Y-%m-%dT%H:%M:%SZ)\"}"
    curl -s "${H[@]}" "$B/jobs?limit=10"
+   curl -s "${H[@]}" "$B/jobs/job_01JBX3K1ZP7Q2W4E6R8T0Y1U3I/tasks?limit=10"
    curl -s "${H[@]}" "$B/tasks?limit=10"
    curl -s "${H[@]}" "$B/tasks/job_01JBX4Q7M2ZK8V3N5R6T9W0YAB%3A1793631815000"
    curl -s "${H[@]}" "$B/tasks/job_01JBX4Q7M2ZK8V3N5R6T9W0YAB%3A1793631815000/output"   # 404 unless tr-results has that document
@@ -155,13 +182,16 @@ Not verified: the real control plane, a real worker writing a result, and a user
 - The plugin picks the job's `timeout` (60s) and `maxExecutions` (3); the page doesn't expose them.
 - A one-shot key lasts 1 hour past when the job fires. A task that keeps retrying past that would fail on credentials.
 - The tasks list shows whatever `GET /tasks` returns, newest first, up to 50. The Prism example list includes a `tenant-b` task, which is a mock artifact; the real service scopes by project.
+- The scheduled jobs list is the first 50 jobs from `GET /jobs`, keeping those with `every` or a `nextFireAt`. A one-shot job leaves the list once it has fired, since the contract sets its `nextFireAt` to null. Deleting a pending one-shot job cancels it, per the contract.
+- The tasks list's Job column looks the job up in that same list of 50, so it shows "—" for a job that isn't in it.
+- The Run at picker uses the browser's time zone and sends UTC. It defaults to 5 minutes from now, on the minute.
 - The Discover link for the query uses the last 30 days; the seed data is about 13 hours of `logs-demo-default`.
 - UI strings are plain English, not i18n. The app is in the Management category of the classic nav; spaces with a solution nav find it through the global search bar or the URL.
 - No `CODEOWNERS` or plugin-list doc entries; those matter only for CI, which this branch never sees.
 
 ## Security shortcuts (for the roadmap)
 
-- Scheduled-job keys never expire, and nothing invalidates a key in Elasticsearch when its job is deleted. The service deletes its copy in Redis, but the key stays valid. See the `apiKeyId` item below.
+- Scheduled-job keys never expire, and nothing invalidates a key in Elasticsearch when its job is deleted. **A deleted scheduled job's key stays valid in Elasticsearch indefinitely**; the service deletes only its copy in Redis. A deleted pending one-shot job's key stays valid until it expires (1 hour past `runAt`). See the `apiKeyId` item below.
 - One-shot keys expire on their own but aren't invalidated when the task finishes.
 - A repeated idempotency key (a retried request) still grants a new key before calling the service. The service discards it and returns the first response, so the extra key is never used or invalidated, and for a scheduled job it never expires.
 - The shared secret is a static bearer token in `kibana.yml`.
@@ -169,7 +199,10 @@ Not verified: the real control plane, a real worker writing a result, and a user
 
 ## Open questions
 
-- None blocking.
+None blocking. To confirm against the real control plane:
+
+- Does `GET /jobs` keep listing one-shot jobs after they fire? The page hides them either way.
+- After a delete, do the job's past tasks still appear in `GET /tasks`? The contract doesn't say. The confirmation only says what the contract does: the job stops firing, and a task in flight finishes normally.
 
 ## Contract change requests
 

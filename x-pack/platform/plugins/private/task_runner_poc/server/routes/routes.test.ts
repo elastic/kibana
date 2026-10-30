@@ -312,6 +312,21 @@ describe('job routes', () => {
     );
   });
 
+  it("lists one job's tasks with a limit", async () => {
+    const { fetchMock, call, lastFetch } = setup();
+    fetchMock.mockResolvedValue(serviceResponse(200, { tasks: [{ taskId: TASK_ID }] }));
+
+    const response = await call('get', '/jobs/{jobId}/tasks', {
+      params: { jobId: JOB_ID },
+      query: { limit: 10 },
+    });
+
+    expect(response.payload).toEqual({ tasks: [{ taskId: TASK_ID }] });
+    expect(lastFetch().url).toBe(
+      `http://task-runner.test:8800/v1/projects/tenant-a/jobs/${JOB_ID}/tasks?limit=10`
+    );
+  });
+
   it('deletes a job', async () => {
     const { fetchMock, call, lastFetch } = setup();
     fetchMock.mockResolvedValue(serviceResponse(204));
@@ -411,6 +426,7 @@ describe('route access and validation', () => {
     for (const path of [
       '/jobs',
       '/jobs/{jobId}',
+      '/jobs/{jobId}/tasks',
       '/tasks',
       '/tasks/{taskId}',
       '/tasks/{taskId}/output',
@@ -437,5 +453,24 @@ describe('route access and validation', () => {
       createJobBodySchema.validate({ query: 'FROM x', runAt: '2026-11-04T02:00:00.000Z' })
     ).not.toThrow();
     expect(() => createJobBodySchema.validate({ query: 'FROM x', runAt: 'tomorrow' })).toThrow();
+  });
+
+  it('rejects a runAt more than 30 days ahead', () => {
+    const daysAhead = (days: number) =>
+      new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+
+    expect(() =>
+      createJobBodySchema.validate({ query: 'FROM x', runAt: daysAhead(29) })
+    ).not.toThrow();
+    expect(() => createJobBodySchema.validate({ query: 'FROM x', runAt: daysAhead(31) })).toThrow(
+      'must be at most 30 days ahead'
+    );
+  });
+
+  it('accepts every from 1 second to 24 hours', () => {
+    expect(() =>
+      createJobBodySchema.validate({ query: 'FROM x', everySeconds: 86_400 })
+    ).not.toThrow();
+    expect(() => createJobBodySchema.validate({ query: 'FROM x', everySeconds: 86_401 })).toThrow();
   });
 });
