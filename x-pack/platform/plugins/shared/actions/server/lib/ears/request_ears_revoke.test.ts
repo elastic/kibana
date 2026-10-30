@@ -81,10 +81,22 @@ describe('requestEarsRevoke', () => {
     expect(mockRequest).not.toHaveBeenCalled();
   });
 
-  it('resolves without error on a 200 response', async () => {
+  it('resolves with the EARS request id on a 200 response', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 200,
+      data: {},
+      headers: { 'x-cloud-request-id': 'req-123' },
+    } as unknown as AxiosResponse);
+
     await expect(
       requestEarsRevoke('my-provider', logger, { token: 'some-token' }, configurationUtilities)
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ earsRequestId: 'req-123' });
+  });
+
+  it('resolves without a request id when the response has no x-cloud-request-id header', async () => {
+    await expect(
+      requestEarsRevoke('my-provider', logger, { token: 'some-token' }, configurationUtilities)
+    ).resolves.toEqual({ earsRequestId: undefined });
   });
 
   it('throws when the EARS revoke endpoint returns a non-200 status', async () => {
@@ -96,5 +108,21 @@ describe('requestEarsRevoke', () => {
     await expect(
       requestEarsRevoke('my-provider', logger, { token: 'bad-token' }, configurationUtilities)
     ).rejects.toThrow('Failed to revoke token via auth redirect service');
+  });
+
+  it('throws an EarsRequestError carrying the status and request id on a non-200 response', async () => {
+    mockRequest.mockResolvedValueOnce({
+      status: 502,
+      data: {},
+      headers: { 'x-cloud-request-id': 'req-502' },
+    } as unknown as AxiosResponse);
+
+    await expect(
+      requestEarsRevoke('my-provider', logger, { token: 'bad-token' }, configurationUtilities)
+    ).rejects.toMatchObject({
+      name: 'EarsRequestError',
+      status: 502,
+      earsRequestId: 'req-502',
+    });
   });
 });
