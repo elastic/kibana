@@ -22,10 +22,53 @@ const BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
 const RECALL_PATH_RE = /(?:^|[\s'"=/])((cortex|memories)\/[^\s'"|;&<>)]+)/g;
 
-const haystackOf = ({ tool_id: toolId, params }: TrajectoryStep): string | undefined => {
-  if (toolId === VIEW_FILE_TOOL_ID && typeof params.file_path === 'string') return params.file_path;
-  if (toolId === BASH_TOOL_ID && typeof params.command === 'string') return params.command;
-  return undefined;
+/** A recall directory the bash call ran in, such as `/workspace/memories` or `/workspace/cortex/db`. */
+const RECALL_DIRECTORY_RE = /(?:^|\/)((cortex|memories)(?:\/[^\s'"]*)?)\/?$/;
+
+/** A relative file argument such as `checkout.md` or `notes/db.txt`. */
+const RELATIVE_FILE_RE = /^(?![-/~$.])[\w./-]+\.[a-z0-9]+$/i;
+
+interface RecallPath {
+  kind: RecallKind;
+  path: string;
+}
+
+/**
+ * A bash command run from inside `cortex/` or `memories/` reads those files by relative name
+ * (`grep timeout checkout.md`), so resolve each file argument against the working directory. A
+ * command naming no file (`grep -r timeout .`, `ls`) read the directory itself.
+ */
+const readsFromWorkingDirectory = (command: string, workingDirectory: string): RecallPath[] => {
+  const match = RECALL_DIRECTORY_RE.exec(workingDirectory);
+  if (!match) return [];
+  const [, rawDirectory, kind] = match;
+  const directory = rawDirectory.replace(/\/+$/, '');
+  const files = command
+    .split(/[\s|;&<>()]+/)
+    .map((token) => token.replace(/^['"]|['"]$/g, ''))
+    .filter((token) => RELATIVE_FILE_RE.test(token));
+  return files.length > 0
+    ? files.map((file) => ({ kind: kind as RecallKind, path: `${directory}/${file}` }))
+    : [{ kind: kind as RecallKind, path: directory }];
+};
+
+const recallPathsOf = ({ tool_id: toolId, params }: TrajectoryStep): RecallPath[] => {
+  if (toolId === VIEW_FILE_TOOL_ID && typeof params.file_path === 'string') {
+    return [...params.file_path.matchAll(RECALL_PATH_RE)].map(([, path, kind]) => ({
+      kind: kind as RecallKind,
+      path,
+    }));
+  }
+  if (toolId === BASH_TOOL_ID && typeof params.command === 'string') {
+    const named = [...params.command.matchAll(RECALL_PATH_RE)].map(([, path, kind]) => ({
+      kind: kind as RecallKind,
+      path,
+    }));
+    return typeof params.working_directory === 'string'
+      ? [...named, ...readsFromWorkingDirectory(params.command, params.working_directory)]
+      : named;
+  }
+  return [];
 };
 
 /**
@@ -36,10 +79,8 @@ const haystackOf = ({ tool_id: toolId, params }: TrajectoryStep): string | undef
 export const extractRecallReads = (trajectory: TrajectoryStep[] | undefined): RecallRead[] => {
   const reads = new Map<string, RecallRead>();
   (trajectory ?? []).forEach((step, index) => {
-    const haystack = haystackOf(step);
-    if (!haystack) return;
-    for (const [, path, kind] of haystack.matchAll(RECALL_PATH_RE)) {
-      if (!reads.has(path)) reads.set(path, { kind: kind as RecallKind, path, step: index + 1 });
+    for (const { kind, path } of recallPathsOf(step)) {
+      if (!reads.has(path)) reads.set(path, { kind, path, step: index + 1 });
     }
   });
   return [...reads.values()];

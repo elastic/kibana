@@ -32,6 +32,26 @@ describe('extractRecallReads', () => {
     ]);
   });
 
+  it('resolves relative bash file arguments against a cortex or memories working directory', () => {
+    const bash = (command: string, workingDirectory: string) => ({
+      tool_id: 'nightshift_sandbox_bash',
+      params: { command, working_directory: workingDirectory },
+      result: '',
+    });
+    expect(
+      extractRecallReads([
+        bash('grep timeout checkout.md', '/workspace/memories'),
+        bash("cat 'notes/db.txt'", '/workspace/cortex/'),
+        bash('grep -r timeout .', '/workspace/cortex/db'),
+        bash('grep timeout checkout.md', '/workspace/src'),
+      ])
+    ).toEqual([
+      { kind: 'memories', path: 'memories/checkout.md', step: 1 },
+      { kind: 'cortex', path: 'cortex/notes/db.txt', step: 2 },
+      { kind: 'cortex', path: 'cortex/db', step: 3 },
+    ]);
+  });
+
   it('is empty without a trajectory', () => {
     expect(extractRecallReads(undefined)).toEqual([]);
   });

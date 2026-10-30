@@ -390,6 +390,13 @@ const toolCallIssueResult = (
   metadata: { steps: issues.map(({ step }) => step), total_tool_calls: output.tool_call_count },
 });
 
+/** The task keeps only the trajectory prefix that fits its size budget, so it can be shorter than the run. */
+const isTrajectoryTruncated = ({
+  tool_call_trajectory: trajectory,
+  tool_call_count: toolCallCount,
+}: InvestigationTaskOutput): boolean =>
+  toolCallCount !== undefined && (trajectory?.length ?? 0) < toolCallCount;
+
 /**
  * `tool_calls_failed` and `tool_calls_empty`, from one LLM read of the trajectory. The default
  * error format isn't enough: a tool can report success while returning only metadata and an empty
@@ -426,6 +433,13 @@ export const createToolCallHealthEvaluators = (deps: JudgeDeps): InvestigationEv
       const judge = buildJudgeInputs(input, output, expected, metadata);
       if (!judge.trajectory) {
         return { score: null, label: 'n/a', explanation: NO_TRAJECTORY_EXPLANATION };
+      }
+      if (isTrajectoryTruncated(output)) {
+        return {
+          score: null,
+          label: 'n/a',
+          explanation: `Only ${output.tool_call_trajectory?.length} of ${output.tool_call_count} tool calls were captured, so a count of failed or empty calls would miss the rest.`,
+        };
       }
       const health = await assess(output, judge.question, judge.trajectory);
       return toolCallIssueResult(pick(health), output, noun);

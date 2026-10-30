@@ -82,6 +82,20 @@ describe('tool call health', () => {
   });
 });
 
+describe('tool call health on a truncated trajectory', () => {
+  it('abstains, without calling the judge, when fewer calls were captured than were made', async () => {
+    const { deps, prompt } = judgeReturning({ failed_calls: [], empty_calls: [] });
+    for (const evaluator of createToolCallHealthEvaluators(deps)) {
+      const result = await evaluator.evaluate({
+        ...example,
+        output: output({ tool_call_count: 40 }),
+      });
+      expect(result).toMatchObject({ score: null, label: 'n/a' });
+    }
+    expect(prompt).not.toHaveBeenCalled();
+  });
+});
+
 describe('recall usage', () => {
   const recallOutput = (overrides: Partial<InvestigationTaskOutput> = {}) =>
     output({
