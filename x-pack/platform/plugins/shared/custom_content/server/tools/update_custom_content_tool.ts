@@ -124,6 +124,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
             events,
             logger,
             esClient,
+            esqlVariables: currentData?.esql_variables,
             noQueryHint:
               'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
           }),
@@ -153,6 +154,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
+          esqlVariables: currentData?.esql_variables,
         }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);

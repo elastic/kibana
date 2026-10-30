@@ -7,6 +7,7 @@
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -118,6 +119,8 @@ export interface GenerateEsqlOptions {
    * Defaults to last 24 hours if not provided.
    */
   timeRange?: TimeRange;
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when a candidate is executed. */
+  esqlVariables?: ESQLControlVariable[];
   /**
    * If true, omits the instruction to use named parameters (?_tstart, ?_tend)
    * for time range filtering in generated queries.
@@ -152,6 +155,7 @@ export const generateEsql = async ({
   maxRetries = 3,
   rowLimit,
   timeRange: inputTimeRange,
+  esqlVariables,
   disableNamedParams,
   includeDatasets = false,
   includeViews = false,
@@ -268,6 +272,7 @@ export const generateEsql = async ({
             rowLimit,
             disableNamedParams,
             timeRange,
+            esqlVariables,
             // Empty when index is known — graph runs request_documentation in-graph with resource context.
             actions: precomputedDocAction ? [precomputedDocAction] : [],
           },

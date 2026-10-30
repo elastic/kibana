@@ -77,6 +77,8 @@ export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_whe
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
 export { buildMetricsInfoQuery } from './utils/append_to_query/append_metrics_info';
 
+export { getESQLControlVariablesFromState } from './utils/get_esql_control_variables';
+export { castESQLValue } from './utils/cast_esql_value';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
