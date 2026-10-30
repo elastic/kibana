@@ -13,6 +13,7 @@ import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
+import { createGetClassicRuleTypeMigration } from '../agent_builder/common/classic_rule_type_migration';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { createAlertingV2Availability } from '../agent_builder/skills/alerting_v2_availability';
@@ -139,6 +140,9 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
     const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
     const spaces = container.get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+    const classicAlerting = container.get(
+      PluginStart<AlertingServerStartDependencies['alerting']>('alerting')
+    );
     const cloudToken = PluginSetup<NonNullable<AlertingServerSetupDependencies['cloud']>>('cloud');
     const projectType = container.isBound(cloudToken)
       ? container.get(cloudToken).serverless.projectType
@@ -156,6 +160,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         projectType,
       }),
       validateWorkflow: (yaml, sid, req) => workflowsManagementApi.validateWorkflow(yaml, sid, req),
+      getClassicRulesClient: (request) => classicAlerting.getRulesClientWithRequest(request),
+      getClassicRuleTypeMigration: createGetClassicRuleTypeMigration(classicAlerting),
     });
   });
 }

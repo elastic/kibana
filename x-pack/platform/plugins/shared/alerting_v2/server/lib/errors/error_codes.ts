@@ -665,6 +665,10 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `attach_rule` tool failed; returns an error result. */
   AGENT_BUILDER_ATTACH_RULE_FAILED: 'AGENT_BUILDER_ATTACH_RULE_FAILED',
+  /** `get_classic_rule` tool failed unexpectedly; returns an error result. */
+  AGENT_BUILDER_GET_CLASSIC_RULE_FAILED: 'AGENT_BUILDER_GET_CLASSIC_RULE_FAILED',
+  /** `get_migration_draft` tool failed unexpectedly; returns an error result. */
+  AGENT_BUILDER_GET_MIGRATION_DRAFT_FAILED: 'AGENT_BUILDER_GET_MIGRATION_DRAFT_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
