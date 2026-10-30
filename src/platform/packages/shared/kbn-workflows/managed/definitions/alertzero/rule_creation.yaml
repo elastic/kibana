@@ -2,8 +2,8 @@ version: "1"
 name: Detection Rule Creation Worker
 description: >
   Drafts an ES|QL detection rule for a reported gap, previews it, and records the
-  draft as a proposal on the caller's investigation. The rule is created disabled only
-  once an analyst approves, under the approver's identity.
+  draft as a proposal on the caller's investigation. The rule is created and enabled
+  only once an analyst approves, under the approver's identity.
 enabled: true
 tags:
   - security
@@ -48,6 +48,13 @@ triggers:
           description: >-
             Investigation the proposal is recorded on. The caller opened it for the gap,
             so the analyst sees a single record whichever route the gap takes.
+        review_context:
+          type: string
+          maxLength: 20000
+          description: >-
+            Markdown sections from the caller: the check's one-sentence summary and
+            the gap with its evidence. The proposal shows them in place of its own
+            gap section, so it has the same structure as the caller's other proposals.
       required: [investigation_id]
       additionalProperties: false
 outputs:
@@ -94,10 +101,11 @@ steps:
         security.create_detection_rule to create a new ES|QL rule draft now. The
         supplied context is sufficient; do not ask a follow-up question.
 
-        ATT&CK technique: {{ inputs.technique }}
-        Detection gap: {{ inputs.gap_description }}
+        {% if inputs.technique != blank %}ATT&CK technique: {{ inputs.technique }}
+        {% endif %}Detection gap: {{ inputs.gap_description }}
         Evidence: {{ inputs.evidence }}
-        Confidence: {{ inputs.confidence }}
+        {% if inputs.confidence != blank %}Confidence: {{ inputs.confidence }}
+        {% endif %}
 
         Echo the tool's returned rule fields under "rule" and the attachment
         metadata alongside it. Never return id or rule_id. If the tool did not
@@ -201,6 +209,23 @@ steps:
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
 
+  # The draft has no index list of its own: its sources are the `FROM` clause, which
+  # the preview checks for `read` before running so that an index the worker cannot
+  # see is named rather than counted as zero. Index names are lowercase by rule, so
+  # the query is downcased to find the command whatever its case, and a source may
+  # be quoted (`FROM "logs-*"`), so the quotes come off too.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.draft_ready.output.ok == true }}"
+    with:
+      csv: >-
+        {%- assign parts = steps.draft_creation.output.structured_output.rule.query | downcase | split: 'from ' -%}
+        {%- assign sources = parts[1] | default: '' | split: '|' | first | split: 'metadata' | first | split: ',' -%}
+        {%- for source in sources -%}
+        {%- assign name = source | remove: '"' | strip -%}
+        {%- if name != '' -%},{{ name | json }}{%- endif -%}
+        {%- endfor -%}
+
   - name: preview_creation
     type: workflow.execute
     if: "${{ steps.draft_ready.output.ok == true }}"
@@ -209,6 +234,7 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        indices: "${{ steps.probe_indices.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
         preview_body:
           name: "{{ steps.draft_creation.output.structured_output.rule.name }}"
           description: "{{ steps.draft_creation.output.structured_output.rule.description }}"
@@ -273,24 +299,27 @@ steps:
           **Create a new ES|QL detection rule for this gap**
 
           **Rule:** {{ steps.draft_creation.output.structured_output.rule.name }}
+          **Recommended action:** Create the rule
+
+          {% if inputs.review_context != blank %}{{ inputs.review_context }}
+          {% else %}**Detection gap**
+          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
+          {% endif %}{{ inputs.gap_description }}
+          {% endif %}
+          **Proposed rule**
+          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
           {{ steps.draft_creation.output.structured_output.rule.description }}
 
           ```esql
           {{ steps.draft_creation.output.structured_output.rule.query }}
           ```
 
-          **Detection gap**
-          {% if inputs.technique != null and inputs.technique != '' %}ATT&CK technique: {{ inputs.technique }}
-          {% endif %}{{ inputs.gap_description }}
-
-          **Preview:** {% if steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs{% else %}inconclusive{% endif %}{% if steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
-          Preview errors: {{ steps.preview_creation.output.error_text }}{% endif %}
-          **Severity:** {{ steps.draft_creation.output.structured_output.rule.severity }}. **Risk score:** {{ steps.draft_creation.output.structured_output.rule.risk_score }}.
-
-          **Draft:** [agent conversation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }})
+          **Backtest**
+          {% if steps.preview_creation.output.unreadable_indices != blank %}Not run: the Rule Coverage worker's service account cannot read these drafted rule indices: `{{ steps.preview_creation.output.unreadable_indices }}`. The worker reads only the default security index patterns, so a draft on other indices cannot be backtested. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.no_matching_indices == true %}Not run: no index the Rule Coverage worker can read matches the drafted rule's index patterns. Either they do not exist, or the worker's service account cannot read them: it reads only the default security index patterns. To check the draft yourself, ask the agent in this investigation to preview it.{% elsif steps.preview_creation.output.succeeded == true and steps.preview_creation.output.is_aborted == false %}{% if steps.preview_creation.output.alert_limit_reached == true %}At least {% endif %}{{ steps.preview_creation.output.alert_count }} expected matches over {{ inputs.preview_invocation_count }} simulated runs.{% if steps.preview_creation.output.alert_limit_reached == true %} The preview stopped at the rule's maximum alerts per execution, so the real number is higher.{% endif %}{% else %}Inconclusive.{% endif %}{% if steps.preview_creation.output.no_matching_indices != true and steps.preview_creation.output.error_text != null and steps.preview_creation.output.error_text != '' %}
+          Backtest errors: {{ steps.preview_creation.output.error_text }}{% endif %}
 
           **On approval**
-          If you approve, the agent creates the rule in the disabled state under your identity. Review the rule and enable it on the rules page. If you dismiss, the agent discards the draft.
+          If you approve, the agent creates and enables the rule under your identity, so it starts running on its next scheduled interval. If you dismiss, the agent discards the draft.
         actionWorkflowId: system-alertzero-action-create-rule
         actionInput: "${{ steps.draft_creation.output.structured_output.rule }}"
         impact: low

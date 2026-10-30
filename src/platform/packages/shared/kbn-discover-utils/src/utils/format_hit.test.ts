@@ -20,6 +20,7 @@ import { formatHitReact } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
+import { MAX_RENDERED_FIELD_VALUE_LENGTH } from './truncate_field_value';
 
 describe('formatHitReact', () => {
   let row: DataTableRecord;
@@ -124,6 +125,17 @@ describe('formatHitReact', () => {
       ['message', 'formatted:foobar', 'message'],
       ['and 3 more fields', '', null],
     ]);
+  });
+
+  it('passes the max display length to formatFieldValueReact', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+
+    formatHitReact(row, dataViewMock, () => true, 220, fieldFormatsMock, undefined);
+
+    expect(formatFieldValueReactSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH })
+    );
+    formatFieldValueReactSpy.mockRestore();
   });
 
   it('should not include fields not mentioned in fieldsToShow', () => {

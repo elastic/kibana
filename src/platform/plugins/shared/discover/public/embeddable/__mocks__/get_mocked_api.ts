@@ -38,7 +38,7 @@ export const getMockedSearchApi = ({
     api: {
       uuid: 'testEmbeddable',
       savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      dataSources$: new BehaviorSubject<DataView[] | undefined>([
         searchSource.getField('index') ?? dataViewMock,
       ]),
       title$: new BehaviorSubject<string | undefined>(undefined),

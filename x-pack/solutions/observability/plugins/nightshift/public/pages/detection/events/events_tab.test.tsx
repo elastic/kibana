@@ -20,8 +20,8 @@ const mockRefreshEvents = jest.fn();
 const mockTimeRangeChange = jest.fn();
 const mockAddWarning = jest.fn();
 
-jest.mock('../../../common/format_timestamp', () => ({
-  ...jest.requireActual('../../../common/format_timestamp'),
+jest.mock('../../../hooks/use_format_timestamp', () => ({
+  ...jest.requireActual('../../../hooks/use_format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/significant_event/event_flyout', () => ({
@@ -272,15 +272,20 @@ describe('EventsTab', () => {
     expect(screen.getByTestId('nightshiftDetectionEventsSearch')).toHaveValue('');
   });
 
-  it('keeps a pending search on the next tab when the tab switches inside the debounce', () => {
+  it('writes a pending search before a tab switch so Back restores the source tab', () => {
     const history = renderTab('/detections/events?entity=checkout');
     fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
       target: { value: 'timeout' },
     });
-    act(() => history.push('/detections/rules?entity=checkout'));
-    cleanup();
 
-    expect(history.location.pathname).toBe('/detections/rules');
+    expect(history.location.pathname).toBe('/detections/events');
+    expect(new URLSearchParams(history.location.search).get('search')).toBe('timeout');
+
+    act(() => history.push(`/detections/rules${history.location.search}`));
+    cleanup();
+    act(() => history.goBack());
+
+    expect(history.location.pathname).toBe('/detections/events');
     const params = new URLSearchParams(history.location.search);
     expect(params.get('search')).toBe('timeout');
     expect(params.get('entity')).toBe('checkout');

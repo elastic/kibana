@@ -148,7 +148,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       }
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
         initialDataView ? [initialDataView] : undefined
       );
 
@@ -171,7 +171,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             )
             .subscribe((nextSelectedDataView) => {
               if (nextSelectedDataView) {
-                dataViews$.next([nextSelectedDataView]);
+                dataSources$.next([nextSelectedDataView]);
               }
             })
         );
@@ -246,7 +246,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             },
           });
         },
-        dataViews$,
+        dataSources$,
       });
 
       const reload$ = fetch$(api).pipe(
@@ -308,7 +308,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           const [viewMode, dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
               viewMode$,
-              api.dataViews$,
+              api.dataSources$,
               api.query$,
               api.viewType$,
               api.showDistributions$

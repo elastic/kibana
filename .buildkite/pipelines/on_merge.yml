@@ -1,6 +1,8 @@
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'
+  # off | shadow; shadow records what selective testing would run while every suite still runs in full.
+  ON_MERGE_SELECTIVE_MODE: 'shadow'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -18,10 +20,13 @@ steps:
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
+    key: pick_test_group_run_order
+    depends_on: pre_build
     agents:
-      provider: k8s
-      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-      imageUID: 1000
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -29,24 +34,6 @@ steps:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
       FTR_TEST_CHANNELS: ci-on-commit
-    plugins:
-      - sparse-checkout#v1.6.0:
-          no_cone: true
-          paths:
-            - '/.buildkite/'
-            - '/.nvmrc'
-            - '/package.json'
-            - '/tsconfig.base.json'
-            - '/versions.json'
-            - '**/jest.config.js'
-            - '**/jest.integration.config.js'
-            - '**/*.test.js'
-            - '**/*.test.mjs'
-            - '**/*.test.ts'
-            - '**/*.test.tsx'
-          cleanup_sparse_state: true
-          post_checkout:
-            unshallow: true
     retry:
       automatic:
         - exit_status: '*'
@@ -54,19 +41,6 @@ steps:
 
   - wait: ~
     depends_on: pre_build
-
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    depends_on:
-      - terrazzo-initial-pipeline-upload
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-highcpu-8
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution

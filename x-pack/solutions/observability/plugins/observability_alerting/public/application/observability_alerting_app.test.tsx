@@ -27,6 +27,7 @@ import {
   closeAddToCaseModal,
 } from '@kbn/alerting-v2-episodes-ui/actions';
 import { INVESTIGATE_EPISODE_ACTION_ID } from '../actions/investigate_episode_action';
+import { VIEW_V1_ALERT_IN_APP_ACTION_ID } from '../actions/view_in_app';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -146,6 +147,7 @@ const mockTriggersActionsUi = {
       <HostTabs tabs={tabs} />
     </>
   )),
+  getAlertFormatter: jest.fn(),
 };
 
 const v1RulesCapabilities = {
@@ -231,13 +233,13 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('provides only the investigate action when the cases plugin is unavailable', async () => {
+  it('provides the investigate and view in app actions when the cases plugin is unavailable', async () => {
     const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
         'data-action-ids',
-        INVESTIGATE_EPISODE_ACTION_ID
+        `${INVESTIGATE_EPISODE_ACTION_ID},${VIEW_V1_ALERT_IN_APP_ACTION_ID}`
       );
     });
   });
@@ -258,7 +260,7 @@ describe('ObservabilityAlertingApp', () => {
     await waitFor(() => {
       expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
         'data-action-ids',
-        `${INVESTIGATE_EPISODE_ACTION_ID},${ADD_TO_CASE_EPISODE_ACTION_ID}`
+        `${INVESTIGATE_EPISODE_ACTION_ID},${VIEW_V1_ALERT_IN_APP_ACTION_ID},${ADD_TO_CASE_EPISODE_ACTION_ID}`
       );
     });
   });
@@ -300,6 +302,7 @@ describe('ObservabilityAlertingApp', () => {
         },
       })
     );
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
   it('shows both rules tabs for a mixed v1 and v2 user on the classic rules page', async () => {
@@ -322,6 +325,11 @@ describe('ObservabilityAlertingApp', () => {
     );
     expect(getByTestId('v1RulesTab')).toHaveAttribute('aria-selected', 'true');
     expect(getByTestId('v2RulesTab')).toHaveAttribute('aria-selected', 'false');
+    expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showClassicBadge: true,
+      })
+    );
   });
 
   it('hides the rules tab bar for a v1-only user', async () => {
@@ -334,6 +342,7 @@ describe('ObservabilityAlertingApp', () => {
       expect(getByTestId('classicRulesPage')).toBeInTheDocument();
     });
     expect(queryAllByRole('tab')).toHaveLength(0);
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls[0][0].showClassicBadge).toBe(false);
   });
 
   it('renders RulesPage at /rules/universal with observability host', async () => {

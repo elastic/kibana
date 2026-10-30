@@ -18,6 +18,7 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { StreamsClient } from '../lib/streams/client';
+import type { UnitStatsClient } from '../lib/unit_stats/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
@@ -37,6 +38,7 @@ export interface RouteHandlerScopedClients {
   canEncrypt: boolean;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
+  unitStatsClient: UnitStatsClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   licensing: LicensingPluginStart;

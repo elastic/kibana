@@ -508,7 +508,7 @@ export function UnifiedHistogramChart({
     actions.push({
       label: editLabel,
       toolTipContent: editLabel,
-      iconType: 'lensApp',
+      iconType: 'pencil',
       'data-test-subj': 'unifiedHistogramEditVisualization',
       onClick: onEditVisualization,
     });

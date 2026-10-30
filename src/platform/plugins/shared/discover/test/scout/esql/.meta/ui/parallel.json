@@ -1,5 +1,5 @@
 {
-  "sha1": "5dbf2b2234c74ed687e292b6aa35b290de2fa10b",
+  "sha1": "c3eef27a606db3efead8d9f43700c88a4c4323f4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -90,65 +90,65 @@
     {
       "id": "1c089c23a3a34ee-c086c6dd3ca9c78",
       "title": "Discover session API — visualization persistence preserves a saved Line histogram through a session API round trip",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
         "line": 199,
-        "column": 71
+        "column": 25
       }
     },
     {
       "id": "1c089c23a3a34ee-81bc50dd8256a34",
       "title": "Discover session API — visualization persistence preserves a histogram breakdown and its legend through a session API round trip",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
         "line": 245,
-        "column": 37
+        "column": 39
       }
     },
     {
       "id": "1c089c23a3a34ee-b267b371abd83b2",
       "title": "Discover session API — visualization persistence preserves a Treemap Lens suggestion through a session API round trip",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 288,
+        "line": 289,
         "column": 26
       }
     },
     {
       "id": "1c089c23a3a34ee-0276bd7bb738e93",
       "title": "Discover session API — visualization persistence preserves a legacy single-field breakdown through UI save and an API round trip",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 336,
-        "column": 26
+        "line": 338,
+        "column": 19
       }
     },
     {
       "id": "1c089c23a3a34ee-9dd6fd97c2e1ecd",
       "title": "Discover session API — visualization persistence preserves legacy legend values through UI save and an API round trip",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/discover_session_vis_context.spec.ts",
-        "line": 379,
+        "line": 383,
         "column": 24
       }
     },

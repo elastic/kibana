@@ -11,7 +11,12 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import type { DataSource } from '@kbn/data-source';
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  XYDataLayerConfig,
+  XYVisualizationState,
+} from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -37,6 +42,17 @@ export interface HistogramProps {
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
+
+const getRenderedSeriesType = ({
+  visualizationType,
+  state,
+}: LensProps['attributes']): string | undefined => {
+  if (visualizationType !== 'lnsXY') {
+    return undefined;
+  }
+  const { layers } = state.visualization as XYVisualizationState;
+  return layers.find((layer): layer is XYDataLayerConfig => 'seriesType' in layer)?.seriesType;
+};
 
 export function Histogram({
   services: { lens, uiSettings },
@@ -104,6 +120,7 @@ export function Histogram({
         data-time-range={timeRangeText}
         data-request-data={requestData}
         data-suggestion-type={visContext.suggestionType}
+        data-series-type={getRenderedSeriesType(lensProps.attributes)}
         css={chartCss}
       >
         <lens.EmbeddableComponent
