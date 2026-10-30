@@ -14,6 +14,9 @@ jest.mock('@kbn/ml-anomaly-utils', () => ({
     if (score < 1) return '< 1';
     return Math.round(score).toString();
   },
+}));
+
+jest.mock('@kbn/ml-anomaly-utils/use_severity_color', () => ({
   useSeverityColor: (score: number) => {
     if (score >= 75) return '#ff0000';
     if (score >= 50) return '#ff9900';
