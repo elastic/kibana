@@ -6,7 +6,11 @@
  */
 
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
+import toolCallHealthSystemText from './tool_call_health/system_prompt.text';
+import toolCallHealthUserText from './tool_call_health/user_prompt.text';
+import recallUsageSystemText from './recall_usage/system_prompt.text';
+import recallUsageUserText from './recall_usage/user_prompt.text';
 
 /**
  * LLM-as-judge prompts ported from Elastic's private `deductive` repo (commit
@@ -511,6 +515,112 @@ export const AntiLeakageJudgePrompt = createPrompt({
             },
           },
           required: ['leaked_root_cause', 'reasoning'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+const TOOL_CALL_ISSUE_SCHEMA = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      step: { type: 'number', description: 'The trajectory step number of the call.' },
+      reason: { type: 'string', description: 'One short sentence on what went wrong.' },
+    },
+    required: ['step', 'reason'],
+  },
+} as const;
+
+export const ToolCallHealthJudgePrompt = createPrompt({
+  name: 'nightshift_tool_call_health_judge',
+  description:
+    'tool_calls_failed / tool_calls_empty judge: which tool calls failed or returned no data, including "successful" calls that did not achieve their purpose.',
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      trajectory: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: toolCallHealthSystemText } },
+    template: { mustache: { template: toolCallHealthUserText } },
+    tools: {
+      score: {
+        description: 'Return the failed and the no-data tool calls.',
+        schema: {
+          type: 'object',
+          properties: {
+            failed_calls: {
+              ...TOOL_CALL_ISSUE_SCHEMA,
+              description: 'Calls that failed to do what the agent intended.',
+            },
+            empty_calls: {
+              ...TOOL_CALL_ISSUE_SCHEMA,
+              description: 'Calls that ran correctly but returned no data.',
+            },
+          },
+          required: ['failed_calls', 'empty_calls'],
+        },
+      },
+    },
+  } as const)
+  .get();
+
+export const CORTEX_INFLUENCE_TYPES = ['none', 'confirmatory', 'redirected'] as const;
+
+export const RecallUsageJudgePrompt = createPrompt({
+  name: 'nightshift_recall_usage_judge',
+  description:
+    'cortex_changed_direction / memories_cited_in_answer judge: did cortex files change the investigation direction, and which memories does the final report cite.',
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      cortexReads: z.string(),
+      memoryReads: z.string(),
+      answer: z.string(),
+      evidence: z.string(),
+      trajectory: z.string(),
+    })
+  ),
+})
+  .version({
+    system: { mustache: { template: recallUsageSystemText } },
+    template: { mustache: { template: recallUsageUserText } },
+    tools: {
+      score: {
+        description: 'Return the cortex influence and the memories the final report cites.',
+        schema: {
+          type: 'object',
+          properties: {
+            cortex_influence: {
+              type: 'string',
+              enum: CORTEX_INFLUENCE_TYPES as unknown as string[],
+              description: 'How the cortex files affected the investigation direction.',
+            },
+            cortex_reasoning: {
+              type: 'string',
+              description:
+                'One or two sentences citing the steps before and after the cortex read.',
+            },
+            memories_cited: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Paths of the memory files the final report relies on or cites.',
+            },
+            memories_reasoning: {
+              type: 'string',
+              description: 'One or two sentences on what in the report comes from which memory.',
+            },
+          },
+          required: [
+            'cortex_influence',
+            'cortex_reasoning',
+            'memories_cited',
+            'memories_reasoning',
+          ],
         },
       },
     },

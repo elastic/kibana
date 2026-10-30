@@ -46,6 +46,17 @@ export interface TrajectoryStep {
   result: string;
 }
 
+/** Model usage and wall-clock time summed over every round of the investigation's conversation. */
+export interface InvestigationUsage {
+  /** Total input tokens, including the cached ones. */
+  input_tokens: number;
+  /** Input tokens served from the provider's cache, a subset of `input_tokens`. */
+  cached_input_tokens: number;
+  output_tokens: number;
+  llm_calls: number;
+  latency_ms: number;
+}
+
 /**
  * What the investigation recorded, read from the shared investigations API
  * (`GET /internal/investigations/investigations/{id}`): the agent's summary ("what happened") and
@@ -77,4 +88,7 @@ export interface InvestigationTaskOutput {
   execution_error?: string;
   decision_trees_accessed?: AccessedDecisionTree[];
   tool_call_trajectory?: TrajectoryStep[];
+  /** Counted before `tool_call_trajectory` is bounded, so it can exceed that list's length. */
+  tool_call_count?: number;
+  usage?: InvestigationUsage;
 }

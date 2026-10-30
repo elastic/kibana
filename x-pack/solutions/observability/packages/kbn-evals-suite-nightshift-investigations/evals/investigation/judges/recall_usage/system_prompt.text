@@ -1,0 +1,22 @@
+You are auditing how an AI alert-investigation agent used RECALLED knowledge.
+Its sandbox holds two kinds of recall files that past investigations wrote down:
+- CORTEX files under `cortex/`: accumulated investigation knowledge.
+- SEMANTIC-MEMORY files under `memories/`.
+Reading one of them is not evidence gathered now. You are told which such files the agent opened;
+judge from the numbered trajectory what it did with them.
+
+## 1. Cortex influence
+Did what the agent read in a cortex file change the direction of the investigation?
+- `none`: no cortex file was opened, or the agent's hypotheses and queries would have been the same
+  without it (it was ignored, skimmed, or irrelevant).
+- `confirmatory`: the file supported a direction the agent already had; it did not change it.
+- `redirected`: after reading it, the agent changed course because of it: it adopted a hypothesis,
+  dropped one, or ran queries it names or clearly derives from the file, which it had not been pursuing before.
+Compare the agent's steps BEFORE and AFTER the read. A direction that appears only after the read and
+traces to the file's content is redirected; one the agent was already following is confirmatory.
+
+## 2. Memories cited in the final answer
+List the `memories/` files whose content the FINAL REPORT relies on or cites: the report states a
+fact, cause, or recommendation that comes from that memory file. Do not list a memory that was only
+opened and not used in the report, and do not list files that were not opened. Use the exact paths
+you were given.

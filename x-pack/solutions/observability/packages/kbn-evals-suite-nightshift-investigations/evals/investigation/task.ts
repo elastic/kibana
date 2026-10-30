@@ -15,6 +15,7 @@ import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
 import { extractToolCallTrajectory } from './tool_call_trajectory';
+import { countToolCalls, extractUsage } from './usage';
 import type {
   InvestigationExample,
   InvestigationReport,
@@ -221,6 +222,8 @@ export const runInvestigation = async (
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
     }
     output.conversation_round_count = conversation.rounds.length;
+    output.usage = extractUsage(conversation.rounds);
+    output.tool_call_count = countToolCalls(conversation.rounds);
     output.traceId = conversation.rounds
       .flatMap(({ trace_id: traceId }) => (typeof traceId === 'string' ? [traceId] : traceId ?? []))
       .filter(Boolean)
