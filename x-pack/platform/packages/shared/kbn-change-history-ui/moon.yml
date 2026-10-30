@@ -24,6 +24,9 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/storybook'
+  - '@kbn/code-editor'
+  - '@kbn/css-utils'
+  - '@kbn/monaco'
 tags:
   - shared-browser
   - package

@@ -40,7 +40,8 @@ const getHistoryStartedAt = (timestamps: string[]): Date | undefined => {
 
 export function ChangeHistoryModal(): JSX.Element | null {
   const { euiTheme } = useEuiTheme();
-  const { adapter, objectId, labels, supports, telemetry } = useChangeHistoryConfig();
+  const { adapter, objectId, labels, supports, telemetry, onSelectChange } =
+    useChangeHistoryConfig();
   const { isOpen, closeModal } = useChangeHistoryModal();
   const modalTitleId = useGeneratedHtmlId();
 
@@ -109,8 +110,9 @@ export function ChangeHistoryModal(): JSX.Element | null {
       setCompareOverride(undefined);
       setSelectedChangeId(item.id);
       reportChangeSelected(item, 'user_click');
+      onSelectChange?.(item);
     },
-    [lockSelectionDecision, reportChangeSelected]
+    [lockSelectionDecision, onSelectChange, reportChangeSelected]
   );
 
   const requestCompareToVersion = useCallback(

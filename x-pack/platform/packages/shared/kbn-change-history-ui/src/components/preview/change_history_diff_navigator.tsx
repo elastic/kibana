@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
@@ -16,21 +14,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { changeHistoryPreviewTypography } from './change_history_preview_typography';
 
-export const WORKFLOW_CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT = '54px';
+export const CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT = '54px';
 
-export interface WorkflowChangeHistoryDiffNavigatorProps {
+export interface ChangeHistoryDiffNavigatorProps {
   currentIndex: number;
   totalChanges: number;
   onPrevious: () => void;
   onNext: () => void;
 }
 
-export const WorkflowChangeHistoryDiffNavigator = ({
+export const ChangeHistoryDiffNavigator = ({
   currentIndex,
   totalChanges,
   onPrevious,
   onNext,
-}: WorkflowChangeHistoryDiffNavigatorProps): JSX.Element => {
+}: ChangeHistoryDiffNavigatorProps): JSX.Element => {
   const styles = useMemoCss(componentStyles);
 
   const hasChanges = totalChanges > 0;
@@ -38,13 +36,16 @@ export const WorkflowChangeHistoryDiffNavigator = ({
   const isFirst = !hasChanges || currentIndex <= 0;
   const isLast = !hasChanges || currentIndex >= totalChanges - 1;
 
-  const previousChangeLabel = i18n.translate('workflows.changeHistory.diffNavigator.previous', {
-    defaultMessage: 'Previous change',
-  });
-  const nextChangeLabel = i18n.translate('workflows.changeHistory.diffNavigator.next', {
+  const previousChangeLabel = i18n.translate(
+    'xpack.changeHistoryUi.preview.diffNavigator.previous',
+    {
+      defaultMessage: 'Previous change',
+    }
+  );
+  const nextChangeLabel = i18n.translate('xpack.changeHistoryUi.preview.diffNavigator.next', {
     defaultMessage: 'Next change',
   });
-  const noChangesLabel = i18n.translate('workflows.changeHistory.diffNavigator.noChanges', {
+  const noChangesLabel = i18n.translate('xpack.changeHistoryUi.preview.diffNavigator.noChanges', {
     defaultMessage: 'No changes',
   });
 
@@ -52,10 +53,11 @@ export const WorkflowChangeHistoryDiffNavigator = ({
     <EuiFlexGroup
       css={styles.toolbar}
       gutterSize="s"
+      className={'diffNavigatorToolbar'}
       alignItems="center"
       responsive={false}
       wrap={false}
-      data-test-subj="workflowChangeHistoryDiffNavigator"
+      data-test-subj="changeHistoryDiffNavigator"
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={previousChangeLabel} disableScreenReaderOutput>
@@ -67,7 +69,7 @@ export const WorkflowChangeHistoryDiffNavigator = ({
             aria-label={previousChangeLabel}
             onClick={onPrevious}
             disabled={isFirst}
-            data-test-subj="workflowChangeHistoryDiffNavigatorPrevious"
+            data-test-subj="changeHistoryDiffNavigatorPrevious"
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -76,7 +78,7 @@ export const WorkflowChangeHistoryDiffNavigator = ({
         <EuiText css={styles.label} size="s" component="span">
           {hasChanges ? (
             <FormattedMessage
-              id="workflows.changeHistory.diffNavigator.label"
+              id="xpack.changeHistoryUi.preview.diffNavigator.label"
               defaultMessage="{current} of {total} changes"
               values={{
                 current: <strong>{displayIndex}</strong>,
@@ -99,7 +101,7 @@ export const WorkflowChangeHistoryDiffNavigator = ({
             aria-label={nextChangeLabel}
             onClick={onNext}
             disabled={isLast}
-            data-test-subj="workflowChangeHistoryDiffNavigatorNext"
+            data-test-subj="changeHistoryDiffNavigatorNext"
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -113,7 +115,7 @@ const componentStyles = {
       display: 'inline-flex',
       alignItems: 'center',
       boxSizing: 'border-box',
-      height: WORKFLOW_CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
+      height: CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
       padding: `0 ${euiTheme.size.s}`,
       borderRadius: '10px',
       border: euiTheme.border.thin,
