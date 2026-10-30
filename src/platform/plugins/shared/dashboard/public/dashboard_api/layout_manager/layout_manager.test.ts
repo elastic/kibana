@@ -99,6 +99,7 @@ describe('layout manager', () => {
     latestState$: of(panel1.config),
     serializeState: () => titleManager.getLatestState(),
     applySerializedState: jest.fn(),
+    compareSerializedState: jest.fn().mockReturnValue(true),
   };
 
   const section1 = {

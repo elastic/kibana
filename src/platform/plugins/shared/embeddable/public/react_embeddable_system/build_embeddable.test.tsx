@@ -25,6 +25,7 @@ const testEmbeddableFactory: EmbeddablePublicDefinition<{ name: string; bork: st
       }),
       anyStateChange$: of(),
       applySerializedState: jest.fn(),
+      compareSerializedState: jest.fn().mockReturnValue(true),
       latestState$: of(initialState),
     });
     return {
@@ -58,6 +59,7 @@ it('should return Component and componentApi', async () => {
         "_subscribe": [Function],
       },
       "applySerializedState": [MockFunction],
+      "compareSerializedState": [MockFunction],
       "hasLockedHoverActions$": BehaviorSubject {
         "_value": false,
         "closed": false,

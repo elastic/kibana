@@ -8,11 +8,7 @@
  */
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import {
-  apiComparesSerializedState,
-  apiHasType,
-  diffComparators,
-} from '@kbn/presentation-publishing';
+import { apiHasSerializableState, apiHasType, diffComparators } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { getLayoutChanges } from './layout_manager/are_layouts_equal';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
@@ -79,7 +75,7 @@ const diffLayout = (
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
     try {
-      return apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
+      return apiHasSerializableState(child) && apiHasType(child) && child.type === currentType
         ? !child.compareSerializedState(baselinePanel, currentPanel)
         : !deepEqual(baselinePanel, currentPanel);
     } catch (error) {

@@ -217,6 +217,7 @@ const testControlFactory: EmbeddablePublicDefinition<OptionsListESQLControlState
         ...finalizeApi({
           serializeState: () => initialState,
           applySerializedState: jest.fn(),
+          compareSerializedState: jest.fn().mockReturnValue(true),
           anyStateChange$: EMPTY,
           latestState$: of(initialState),
         }),

@@ -113,9 +113,7 @@ export {
 } from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
-  apiComparesSerializedState,
   apiHasSerializableState,
-  type ComparesSerializedState,
   type HasSerializableState,
 } from './interfaces/has_serializable_state';
 export {
