@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import {
   type ExecutedByFilterOption,
@@ -28,6 +29,7 @@ import {
 } from './workflow_execution_list_filters';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
+import { getExecutedByLabel, getExecutedByProfiles } from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 import { WorkflowExecutionListFooter } from '../../workflow_execution_list/ui/workflow_execution_list_footer';
 
@@ -50,6 +52,7 @@ export interface WorkflowExecutionListProps {
 // TODO: use custom table? add pagination and search
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 'm' };
+const EMPTY_EXECUTED_BY_USER_PROFILES = new Map<string, UserProfileWithAvatar>();
 
 export const WorkflowExecutionList = ({
   filters,
@@ -90,16 +93,29 @@ export const WorkflowExecutionList = ({
     });
     return names;
   }, [executions]);
+  const executedByUserProfiles = useMemo(
+    () =>
+      showExecutor
+        ? getExecutedByProfiles(executions?.results ?? [])
+        : EMPTY_EXECUTED_BY_USER_PROFILES,
+    [executions, showExecutor]
+  );
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     return executedByValuesToResolve.flatMap((executedBy) => {
-      const label =
-        executedByDisplayNames.get(executedBy) ??
-        (showUnresolvedExecutors ? executedBy : undefined);
+      const label = getExecutedByLabel(
+        executedByUserProfiles.get(executedBy),
+        executedByDisplayNames.get(executedBy) ?? (showUnresolvedExecutors ? executedBy : undefined)
+      );
 
       return label ? [{ label, value: executedBy }] : [];
     });
-  }, [executedByDisplayNames, executedByValuesToResolve, showUnresolvedExecutors]);
+  }, [
+    executedByDisplayNames,
+    executedByUserProfiles,
+    executedByValuesToResolve,
+    showUnresolvedExecutors,
+  ]);
 
   useEffect(() => {
     if (scrollableContentRef.current) {
@@ -180,10 +196,11 @@ export const WorkflowExecutionList = ({
                   isTestRun={execution.isTestRun}
                   startedAt={toValidDate(execution.startedAt)}
                   duration={execution.duration}
-                  executedByLabel={
+                  executedByLabel={getExecutedByLabel(
+                    executedByUserProfiles.get(execution.executedBy ?? ''),
                     execution.executedByDisplayName ??
-                    (showUnresolvedExecutors ? execution.executedBy : undefined)
-                  }
+                      (showUnresolvedExecutors ? execution.executedBy : undefined)
+                  )}
                   triggeredBy={execution.triggeredBy}
                   showExecutor={showExecutor}
                   selected={execution.id === selectedId}

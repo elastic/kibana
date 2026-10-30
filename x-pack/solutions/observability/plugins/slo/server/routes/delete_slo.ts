@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { deleteSLOParamsSchema } from '@kbn/slo-schema';
 import { DeleteSLO } from '../services';
 import { createSloServerRoute } from './utils/create_slo_server_route';
@@ -12,7 +13,14 @@ import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
 export const deleteSLORoute = createSloServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id} 2023-10-31',
-  options: { access: 'public' },
+  options: {
+    access: 'public',
+    summary: 'Delete an SLO',
+    description:
+      'You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'deleteSloOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/delete_slo.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_write'],
@@ -28,6 +36,7 @@ export const deleteSLORoute = createSloServerRoute({
       transformManager,
       summaryTransformManager,
       rulesClient,
+      telemetry,
     } = await getScopedClients({ request, logger });
 
     const deleteSLO = new DeleteSLO(
@@ -36,7 +45,8 @@ export const deleteSLORoute = createSloServerRoute({
       summaryTransformManager,
       scopedClusterClient,
       rulesClient,
-      logger
+      logger,
+      telemetry
     );
 
     await deleteSLO.execute(params.path.id);

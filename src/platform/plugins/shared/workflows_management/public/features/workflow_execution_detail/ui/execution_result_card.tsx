@@ -25,6 +25,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { ServiceAccountName } from '../../../entities/service_accounts';
+import { executedByFallbackLabel, getExecutedByLabel } from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
@@ -44,6 +45,8 @@ const i18nTexts = {
 interface ExecutionResultCardProps {
   workflowExecution: WorkflowExecutionDto;
   failedPosition: FailedStepPosition | null;
+  /** Set when the run is paused on waitForInput. Result links to that step. */
+  waitingStepExecutionId?: string;
   onFocusFailedStep: (stepExecutionId: string) => void;
 }
 
@@ -51,6 +54,7 @@ interface ExecutionResultCardProps {
 export const ExecutionResultCard = ({
   workflowExecution,
   failedPosition,
+  waitingStepExecutionId,
   onFocusFailedStep,
 }: ExecutionResultCardProps) => {
   const { euiTheme } = useEuiTheme();
@@ -63,8 +67,11 @@ export const ExecutionResultCard = ({
   const { cloud } = useKibana().services;
   const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
   const resolvedExecutedBy = showExecutor
-    ? workflowExecution.executedByDisplayName ||
-      (showUnresolvedExecutors ? executedByValue : undefined)
+    ? getExecutedByLabel(
+        workflowExecution.executedByProfile,
+        workflowExecution.executedByDisplayName ||
+          executedByFallbackLabel(executedByValue, showUnresolvedExecutors)
+      )
     : undefined;
   const executedByDisplay = resolvedExecutedBy || '-';
 
@@ -134,6 +141,23 @@ export const ExecutionResultCard = ({
                     : i18n.translate('workflows.executionFlyout.result.failed', {
                         defaultMessage: 'Failed',
                       })}
+                </EuiLink>
+              ) : waitingStepExecutionId ? (
+                <EuiLink
+                  color="warning"
+                  data-test-subj="workflowExecutionFlyoutResultLink"
+                  onClick={() => {
+                    onFocusFailedStep(waitingStepExecutionId);
+                  }}
+                  css={{
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {i18n.translate('workflows.executionFlyout.result.provideActionLinkText', {
+                    defaultMessage: 'Provide action',
+                  })}
                 </EuiLink>
               ) : (
                 <EuiText

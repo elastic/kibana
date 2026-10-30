@@ -22,9 +22,9 @@ import {
   WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
-import { withExecutedByDisplayNames } from '../../lib/resolve_executed_by_display_name';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
+import { resolveExecutedByProfiles } from '../utils/resolve_executed_by_profiles';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
@@ -255,19 +255,21 @@ export function registerGetWorkflowExecutionsRoute({
             sortOrder: request.query.sortOrder,
             searchAfter,
           };
-          const executionsPage = await api.getWorkflowExecutions({ ...params, request }, spaceId);
-          const { userProfile } = await workflowsService.getCoreStart();
+          const executions = await api.getWorkflowExecutions({ ...params, request }, spaceId);
+          const results = await resolveExecutedByProfiles(
+            { workflowsService, logger },
+            executions.results
+          );
           return response.ok({
-            body: executionsPage.results
-              ? {
-                  ...executionsPage,
-                  ...(await withExecutedByDisplayNames({
-                    userProfile,
-                    results: executionsPage.results,
-                    logger,
-                  })),
-                }
-              : executionsPage,
+            body: {
+              ...executions,
+              results,
+              executedByDisplayNames: Object.fromEntries(
+                results.flatMap(({ executedBy: executor, executedByDisplayName }) =>
+                  executor && executedByDisplayName ? [[executor, executedByDisplayName]] : []
+                )
+              ),
+            },
           });
         } catch (error) {
           return handleRouteError(response, error);

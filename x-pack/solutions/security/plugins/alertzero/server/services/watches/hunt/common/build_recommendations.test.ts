@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { generateRecommendations, templateRecommendations } from './build_recommendations';
+import { HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS } from './hunt_prompt_templates';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -368,5 +369,31 @@ describe('generateRecommendations', () => {
       context: 'irrelevant',
     });
     expect(lines).toEqual(templateRecommendations(baseResult()));
+  });
+
+  it('clamps the recommendations template context to the gateway bound', async () => {
+    const chatComplete = jest.fn().mockResolvedValue({
+      content: '{"recommendations":[]}',
+    });
+    const model = {
+      chatModel: { withStructuredOutput: jest.fn() },
+      inferenceClient: { chatComplete },
+      connector: {
+        connectorId: 'daybreak',
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      },
+    } as unknown as ScopedModel;
+
+    await generateRecommendations({
+      model,
+      logger,
+      result: baseResult(),
+      context: 'C'.repeat(HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS + 25),
+    });
+
+    expect(chatComplete.mock.calls[0][0].template.variables.context).toHaveLength(
+      HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS
+    );
+    expect(chatComplete.mock.calls[0][0].template.id).toBe('.hunt-recommendations');
   });
 });

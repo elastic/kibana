@@ -31,7 +31,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import {
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
@@ -91,6 +91,7 @@ export const EventsTable = ({
       {
         field: 'title',
         name: EVENT_COLUMN_LABEL,
+        width: '320px',
         render: (title: string, event: SignificantEventResponse) => (
           <div
             css={css`
@@ -98,10 +99,14 @@ export const EventsTable = ({
             `}
           >
             <EuiText size="s">
-              <strong>{title}</strong>
+              <EuiTextBlockTruncate lines={2} cloneElement>
+                <strong title={title}>{title}</strong>
+              </EuiTextBlockTruncate>
             </EuiText>
             <EuiText size="xs" color="subdued">
-              <EuiTextBlockTruncate lines={2}>{event.summary}</EuiTextBlockTruncate>
+              <EuiTextBlockTruncate lines={2} title={event.summary}>
+                {event.summary}
+              </EuiTextBlockTruncate>
             </EuiText>
           </div>
         ),
