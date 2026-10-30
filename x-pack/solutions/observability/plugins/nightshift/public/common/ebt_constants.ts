@@ -8,6 +8,7 @@
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 
 export const NIGHTSHIFT_EBT_ACTIONS = {
+  ADD_RECOMMENDED_SOURCES: 'addRecommendedSources',
   CANCEL_AUTOMATION_EDIT: 'cancelAutomationEdit',
   VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
   CLEAR_AUTOMATION_FILTERS: 'clearAutomationFilters',

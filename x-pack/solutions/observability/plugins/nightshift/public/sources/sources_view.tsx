@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -28,6 +36,7 @@ import { isOnboardingInProgress } from './utils';
 import {
   CREATE_SOURCE_BUTTON_LABEL,
   EMPTY_STATE_BODY,
+  EMPTY_STATE_TITLE,
   READ_ONLY_EMPTY_STATE_TITLE,
   RETRY_LABEL,
   SOURCES_LOAD_ERROR_BODY,
@@ -37,6 +46,7 @@ import {
   SOURCE_NOT_FOUND_TOAST_TITLE,
 } from './translations';
 import { RecommendedSourcesTable } from './recommended_sources/recommended_sources_table';
+import { RECOMMENDED_SOURCES_TITLE } from './recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
   import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
@@ -270,7 +280,35 @@ export function SourcesView() {
         ) : hasNoSources ? (
           <EuiFlexItem>
             {canManage ? (
-              <RecommendedSourcesTable entry="sources_page" />
+              <EuiFlexGroup direction="column" gutterSize="xl">
+                <EuiFlexItem grow={false}>
+                  <EuiEmptyPrompt
+                    data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                    iconType="database"
+                    title={<h2>{EMPTY_STATE_TITLE}</h2>}
+                    body={<p>{EMPTY_STATE_BODY}</p>}
+                    actions={
+                      <EuiButton
+                        data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
+                        fill
+                        iconType="plus"
+                        onClick={openCreateFlyout}
+                      >
+                        {CREATE_SOURCE_BUTTON_LABEL}
+                      </EuiButton>
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2 data-test-subj="nightshiftRecommendedSourcesTitle">
+                      {RECOMMENDED_SOURCES_TITLE}
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <RecommendedSourcesTable entry="sources_page" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : (
               <EuiEmptyPrompt
                 data-test-subj="significantEventsAppSourcesEmptyPrompt"

@@ -217,12 +217,16 @@ describe('SourcesView routes', () => {
     expect(screen.queryByText('0 sources')).not.toBeInTheDocument();
   });
 
-  it('shows recommended sources to a manager with no sources', () => {
+  it('shows the empty prompt and recommended sources to a manager with no sources', () => {
     mockSources = [];
     renderSources('/sources');
 
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('Create your first source')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
+      'Recommended sources'
+    );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
-    expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
   });
 
   it('waits for the source list before resolving a deep link', async () => {
