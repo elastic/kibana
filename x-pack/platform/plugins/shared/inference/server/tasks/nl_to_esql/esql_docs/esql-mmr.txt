@@ -1,6 +1,6 @@
 # MMR
 
-The `MMR` command reduces a result set by applying a diversification strategy to the returned rows. It uses Maximum Marginal Relevance to discard rows that are too similar to each other while preserving the ordering of the input rows.
+The `MMR` command reduces the result set from a set of input rows by applying a diversification strategy to the return rows. It returns a limited, diverse set of row results by using Maximum Marginal Relevance to discard results that are too similar to each other. The ordering of results returned from the input rows is preserved.
 
 ## Syntax
 
@@ -18,20 +18,22 @@ The maximum number of rows to return after diversification.
 
 #### query_vector
 
-Optional. The query vector to use as part of the diversification algorithm for comparison. It must have the same number of dimensions as the vector field you are searching against. It must be one of:
+Optional. The query vector to use as part of the diversification algorithm for comparison. Must have the same number of dimensions as the vector field you are searching against.
+
+Must be one of:
 
 - An array of floats
-- A hex-encoded byte vector, with one byte per dimension, or one byte per 8 dimensions for `bit`
-- A base64-encoded vector string. Base64 supports `float` and `bfloat16` in big-endian format, `byte`, and `bit` encodings depending on the target field type
+- A hex-encoded byte vector, one byte per dimension; for `bit`, one byte per 8 dimensions
+- A base64-encoded vector string. Base64 supports `float` and `bfloat16` big-endian, `byte`, and `bit` encodings depending on the target field type
 - A function or expression that returns a `dense_vector`
 
 #### lambda_value
 
-Required if `WITH` is used. A value between 0.0 and 1.0 that controls how similarity is calculated during diversification. Higher values weight similarity to the `query_vector` more heavily, while lower values weight diversity more heavily.
+Required if `WITH` is used. A value between 0.0 and 1.0 that controls how similarity is calculated during diversification. Higher values weight the similarity to the `query_vector` more heavily, while lower values weight the diversity more heavily.
 
 ## Examples
 
-Diversify ten sorted rows to return three rows using the `text_vector` field.
+Diversify sorted vector search results and return three rows.
 
 ```esql
 FROM mmr_text_vector_keyword
@@ -41,13 +43,12 @@ FROM mmr_text_vector_keyword
 | DROP text_vector, byte_vector, bit_vector
 ```
 
-| keyword_field:keyword | text_body:text |
-| --- | --- |
-| test1 | first text |
-| test3 | third text |
-| test6 | sixth text |
+keyword_field:keyword | text_body:text
+test1 | first text
+test3 | third text
+test6 | sixth text
 
-Diversify ten sorted rows using an explicit query vector and a lambda value.
+Diversify vector results with an explicit query vector and lambda value.
 
 ```esql
 FROM mmr_text_vector_keyword
@@ -57,13 +58,12 @@ FROM mmr_text_vector_keyword
 | DROP text_vector, byte_vector, bit_vector
 ```
 
-| keyword_field:keyword | text_body:text |
-| --- | --- |
-| test3 | third text |
-| test6 | sixth text |
-| test8 | eighth text |
+keyword_field:keyword | text_body:text
+test3 | third text
+test6 | sixth text
+test8 | eighth text
 
-Generate a query vector with `TEXT_EMBEDDING`, run a vector search, and diversify the top results.
+Generate a query vector with text embedding, run KNN, and diversify the top scored rows.
 
 ```esql
 FROM dense_vector_text METADATA _score
@@ -75,14 +75,13 @@ FROM dense_vector_text METADATA _score
 | KEEP text_field, query_embedding
 ```
 
-| text_field:text | query_embedding:dense_vector |
-| --- | --- |
-| be excellent to each other | [45.0, 55.0, 54.0] |
-| live long and prosper | [45.0, 55.0, 54.0] |
-| all we have to decide is what to do with the time that is given to us | [45.0, 55.0, 54.0] |
+text_field:text | query_embedding:dense_vector
+be excellent to each other | [45.0, 55.0, 54.0]
+live long and prosper | [45.0, 55.0, 54.0]
+all we have to decide is what to do with the time that is given to us | [45.0, 55.0, 54.0]
 
 ## Limitations
 
-You must limit the number of input rows before the `MMR` command. For example, use the `LIMIT` command to restrict the input.
+You must limit the number of input rows before the `MMR` command. For example, you can use the `LIMIT` command to restrict the input.
 
 In a cross-cluster query, the inference endpoint used to generate a query vector must exist on the cluster that receives the query.
