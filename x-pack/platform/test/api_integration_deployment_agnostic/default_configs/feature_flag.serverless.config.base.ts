@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { FtrConfigProviderContext, Config } from '@kbn/test';
+import { KBN_SERVERLESS_UIAM_CERTS } from '@kbn/dev-utils';
+import type { KbnServerlessProjectType } from '@kbn/dev-utils';
 import { defineDockerServersConfig, packageRegistryDocker, dockerRegistryPort } from '@kbn/test';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
@@ -22,7 +24,18 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
   testFiles: string[];
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
+  /**
+   * UIAM reads Kibana's project type from its client certificate and refuses to let Kibana assume
+   * the service accounts of a project of another type. The shared Serverless config presents the
+   * certificate of a search project; a suite that uses service accounts names its own type here.
+   */
+  uiamCertProjectType?: KbnServerlessProjectType;
 }
+
+const UIAM_CERT_ARG_PREFIXES = [
+  '--xpack.security.uiam.ssl.certificate=',
+  '--xpack.security.uiam.ssl.key=',
+];
 
 // include settings from elasticsearch controller
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
@@ -63,6 +76,20 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
       kbnServerArgs = await updateKbnServerArguments(options.kbnServerArgs);
     }
 
+    const getSharedKbnServerArgs = (sharedArgs: string[]): string[] => {
+      if (!options.uiamCertProjectType) {
+        return sharedArgs;
+      }
+      const { certPath, keyPath } = KBN_SERVERLESS_UIAM_CERTS[options.uiamCertProjectType];
+      return [
+        ...sharedArgs.filter(
+          (arg) => !UIAM_CERT_ARG_PREFIXES.some((prefix) => arg.startsWith(prefix))
+        ),
+        `--xpack.security.uiam.ssl.certificate=${certPath}`,
+        `--xpack.security.uiam.ssl.key=${keyPath}`,
+      ];
+    };
+
     const svlSharedConfig = await readConfigFile(
       require.resolve('../../serverless/shared/config.base.ts')
     );
@@ -90,7 +117,7 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          ...svlSharedConfig.get('kbnTestServer.serverArgs'),
+          ...getSharedKbnServerArgs(svlSharedConfig.get('kbnTestServer.serverArgs')),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
           ...(options.serverlessProject === 'oblt'
