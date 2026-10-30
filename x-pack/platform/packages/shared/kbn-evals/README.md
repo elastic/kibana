@@ -527,11 +527,15 @@ You can use these as-is or build your own directly in the suite.
 
 #### LLM-as-a-judge
 
-Set `--judge` to select which model judges results. Judge evaluators receive the judge connector automatically.
+Judge evaluators receive the judge connector automatically. Without `--judge`, the [default judge](#default-judge) is used; set `--judge` to pick another model.
 
 ```bash
 node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
 ```
+
+#### Default judge
+
+Without `--judge` / `EVAL_CONNECTOR_ID`, the judge comes from `evaluationConnectorId` in the profile config (`dev-vault`, or a `config.<profile>.json` synced from Vault). Profiles without it, such as `local`, still prompt (or fail without a TTY).
 
 #### Selecting evaluators at runtime
 

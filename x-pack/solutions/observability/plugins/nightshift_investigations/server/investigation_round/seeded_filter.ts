@@ -15,6 +15,11 @@ import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
+import {
+  CONNECTOR_DOCS_ROOT,
+  CONNECTOR_MANIFEST_PATH,
+  ELASTIC_MANIFEST_PATH,
+} from '../tools/sandbox_bash/connector_docs';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
@@ -24,15 +29,21 @@ export const SEEDED_WORKSPACE_KINDS = ['cortex', 'memories', 'decision_trees', '
 
 export type SeededWorkspaceKind = (typeof SEEDED_WORKSPACE_KINDS)[number];
 
-export const SEEDED_ENV_FILES = ['/workspace/elastic.md', '/workspace/connectors.md'] as const;
+export const SEEDED_ENV_FILES = [ELASTIC_MANIFEST_PATH, CONNECTOR_MANIFEST_PATH] as const;
 
-const SEEDED_ROOT_BY_KIND: Record<Exclude<SeededWorkspaceKind, 'env_docs'>, string> = {
+const SEEDED_ROOT_BY_KIND: Record<SeededWorkspaceKind, string> = {
   cortex: CORTEX_WORKSPACE_ROOT,
   memories: MEMORY_WORKSPACE_ROOT,
   decision_trees: DECISION_TREE_WORKSPACE_ROOT,
+  env_docs: CONNECTOR_DOCS_ROOT,
 };
 
-const SEEDED_DIR_NAMES = new Set<string>(['cortex', 'memories', 'decision-trees']);
+const SEEDED_DIR_NAMES = new Set<string>([
+  'cortex',
+  'memories',
+  'decision-trees',
+  '.connector-docs',
+]);
 const CORTEX_BUCKET_NAMES = new Set<string>(
   CORTEX_ENTITY_TYPES.map((entityType) => CORTEX_ENTITY_TYPE_BUCKETS[entityType])
 );
@@ -88,7 +99,7 @@ export const matchesFilePathForKinds = (
   if (kinds.has('env_docs') && (SEEDED_ENV_FILES as readonly string[]).includes(resolved)) {
     return true;
   }
-  for (const kind of ['cortex', 'memories', 'decision_trees'] as const) {
+  for (const kind of SEEDED_WORKSPACE_KINDS) {
     if (!kinds.has(kind)) {
       continue;
     }
@@ -113,7 +124,7 @@ const matchesOrContainsSeededForKinds = (
   if (kinds.has('env_docs') && SEEDED_ENV_FILES.some((envFile) => envFile.startsWith(prefix))) {
     return true;
   }
-  for (const kind of ['cortex', 'memories', 'decision_trees'] as const) {
+  for (const kind of SEEDED_WORKSPACE_KINDS) {
     if (!kinds.has(kind)) {
       continue;
     }

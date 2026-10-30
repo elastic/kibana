@@ -1808,6 +1808,19 @@ describe('executeDashboardUpsert', () => {
         );
         expect(result.dashboardData.panels).toEqual([{ ...vegaPanel, config: { updated: true } }]);
       });
+
+      it('drops applyChartRules when renderer is omitted on a vega panel', async () => {
+        const { result, resolvePanelContent } = await editWith(vegaPanel, {
+          source: 'request',
+          query: 'change the title',
+          applyChartRules: true,
+        });
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ renderer: 'vega', applyChartRules: undefined })
+        );
+        expect(result.failures).toEqual([]);
+      });
     });
 
     it('resolves multiple panel edits in parallel', async () => {
