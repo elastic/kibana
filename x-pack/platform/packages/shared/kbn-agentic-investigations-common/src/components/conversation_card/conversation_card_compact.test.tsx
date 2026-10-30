@@ -37,7 +37,6 @@ const renderRow = (props: Partial<React.ComponentProps<typeof ConversationCardCo
       onClickAction={jest.fn()}
       onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
-      onClickRecommendedAction={jest.fn()}
       {...props}
     />
   );

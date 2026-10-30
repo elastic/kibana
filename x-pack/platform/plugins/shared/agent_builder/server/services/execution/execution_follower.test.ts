@@ -28,6 +28,7 @@ const createMockExecutionClient = () =>
     appendEvents: jest.fn(),
     updateHeartbeat: jest.fn(),
     peek: jest.fn(),
+    delete: jest.fn(),
     readEvents: jest.fn(),
     find: jest.fn().mockResolvedValue([]),
   } as jest.Mocked<AgentExecutionClient>);

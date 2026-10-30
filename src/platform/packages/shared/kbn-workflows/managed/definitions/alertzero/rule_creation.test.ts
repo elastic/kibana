@@ -112,7 +112,23 @@ describe('Detection Rule Creation worker', () => {
       );
       const create = action.steps.find((step) => step.name === 'create_rule');
       expect(create?.type).toBe('security.createRule');
-      expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
+      const rule = create?.with?.rule as Record<string, unknown>;
+      for (const field of Object.keys(props.actionInput.properties ?? {})) {
+        expect(rule[field]).toBe(`\${{ inputs.actionInput.${field} }}`);
+      }
+    });
+
+    // The approval closes the gap only if the rule runs, so the action creates
+    // the rule enabled and the proposal tells the analyst that is what approving
+    // does.
+    it('creates the rule enabled and says so in the proposal', () => {
+      const create = action.steps.find((step) => step.name === 'create_rule');
+      expect((create?.with?.rule as Record<string, unknown>).enabled).toBe(true);
+      expect(action.steps.map((step) => step.type)).not.toContain('security.enableRule');
+
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      expect(comment).toContain('creates and enables the rule');
+      expect(comment).not.toContain('disabled');
     });
 
     // A draft is reviewable only with a query, a name, a description, an interval and an
@@ -242,6 +258,66 @@ describe('Detection Rule Creation worker', () => {
         rule: { ...noDraft.rule, language: '', type: '', severity: '', risk_score: '' },
       };
       expect(schema.safeParse(allEmpty).success).toBe(false);
+    });
+
+    // The preview runs as the worker's service account, which reads only the default
+    // security index patterns. A draft over other indices previews as zero matches
+    // with only a warning, which the preview reports as no_matching_indices; the
+    // comment has to say so rather than present 0 as a result.
+    it('reports a draft whose indices the preview could not see instead of 0 matches', async () => {
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      const render = (preview: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(comment, {
+          inputs: { preview_invocation_count: 3 },
+          steps: {
+            draft_creation: { output: { structured_output: { rule: {} } } },
+            preview_creation: { output: preview },
+          },
+        });
+
+      const skipped = render({ succeeded: false, no_matching_indices: true, error_text: 'w' });
+      expect(skipped).toContain('no index the Rule Coverage worker can read matches');
+      expect(skipped).not.toContain('expected matches');
+      expect(skipped).not.toContain('Backtest errors');
+
+      const unreadable = render({ succeeded: false, unreadable_indices: 'custom-xdr-*' });
+      expect(unreadable).toContain('cannot read these drafted rule indices: `custom-xdr-*`');
+      expect(unreadable).not.toContain('expected matches');
+
+      const counted = render({ succeeded: true, is_aborted: false, alert_count: 4 });
+      expect(counted).toContain('4 expected matches over 3 simulated runs');
+
+      const capped = render({
+        succeeded: true,
+        is_aborted: false,
+        alert_count: 300,
+        alert_limit_reached: true,
+      });
+      expect(capped).toContain('At least 300 expected matches over 3 simulated runs');
+      expect(capped).toContain('maximum alerts per execution');
+    });
+
+    // The draft carries no index list, so the sources the preview checks for `read`
+    // come from the query's FROM clause, whatever its case, spacing or METADATA.
+    it.each([
+      [
+        'FROM logs-acme.repro-*,custom-xdr-* METADATA _id | WHERE x',
+        ['logs-acme.repro-*', 'custom-xdr-*'],
+      ],
+      ['from logs-*, remote1:logs-*\n| where from_port > 1', ['logs-*', 'remote1:logs-*']],
+      ['FROM "logs-*", """custom-xdr-*""" METADATA _id', ['logs-*', 'custom-xdr-*']],
+      ['FROM custom-xdr-*', ['custom-xdr-*']],
+      ['', []],
+    ])('hands the preview the indices of %j', (query, expected) => {
+      const csv = createWorkflowLiquidEngine().parseAndRenderSync(
+        flagOf('probe_indices', 'csv'),
+        draftContext({ rule: { query } })
+      );
+      expect(
+        evaluate(String(inputsOf(stepByName('preview_creation')).indices), {
+          steps: { probe_indices: { output: { csv } } },
+        })
+      ).toEqual(expected);
     });
 
     // The preview informs the analyst; it does not gate the proposal.

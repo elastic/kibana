@@ -217,7 +217,7 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      fp_summary: "{% if inputs.total_alert_count > 0 %}Analysts closed {{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet.{% else %}Analysts closed {{ inputs.fp_count }} alerts as false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
+      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) were judged false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are new since the last tuning review. Some were closed by analysts and some were classified by Alert Triage and may still be open.{% else %}{{ inputs.fp_count }} alerts were judged false positives, closed by analysts or classified by Alert Triage, in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
   # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
   # mode skips this step and goes directly to diagnosis.
@@ -234,19 +234,16 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-            # Raised before any diagnosis, so the comment's own heading is the only
-            # name this proposal has.
+            # Raised before any diagnosis, so there is no diagnosed title to name it by.
             title: Review rule for tuning
             comment: |-
-              **Review rule for tuning?**
-
               {{ steps.compose_evidence.output.rule_line }}
 
               **Why this rule was picked**
               {{ steps.compose_evidence.output.fp_summary }}
 
               **On approval**
-              If you approve, the agent studies these false positives and makes a tuning proposal. You must approve this second proposal before the agent changes the rule. If you dismiss, the alerts are marked as reviewed and the review ends.
+              If you approve, the agent studies these false positives and proposes a change to the rule. The rule changes only if you also approve that proposal. If you dismiss, the review ends. These false positives are not reviewed again. New false positives can start a new review.
             impact: low
             # No action, so no inherited category, and the queue drops an
             # uncategorised proposal. Grouped with the tuning proposal that follows.
@@ -278,7 +275,6 @@ steps:
                   updates:
                     status: closed
                     close_reason: other
-                    verdict: "Analyst declined the tuning review."
                 on-failure:
                   continue: true
 
@@ -374,6 +370,24 @@ steps:
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
     timeout: "10m"
+    on-failure:
+      fallback:
+        - name: post_diagnosis_failed
+          type: ai.conversation.add_user_message
+          on-failure:
+            continue: true
+          with:
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            message: |-
+              **Diagnosis failed**
+              **Rule:** {{ steps.fetch_rule.output.name }}
+
+              The rule could not be diagnosed, so no tuning proposal will follow: {{ steps.diagnose_rule.error.message }}
+
+              Diagnosis runs on the AlertZero model set in **Feature settings**. A connector or connection error usually means that model is missing or can't be reached. 
+              
+              The next sweep will retry to diagnose this rule.
     create-conversation: true
     with:
       author_name: "{{ consts.author_name }}"
@@ -390,15 +404,16 @@ steps:
         Use the [/investigate-rule](skill://investigate-rule) skill to investigate
         rule_id "{{ steps.fetch_rule.output.rule_id }}" ({{ steps.fetch_rule.output.name }}).
 
-        {{ inputs.fp_count }} alerts from this rule were closed as false positives
-        during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
+        {{ inputs.fp_count }} alerts from this rule were judged false positives
+        (closed by analysts, or classified by Alert Triage and possibly still open) during the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. Their document ids
         {%- if inputs.fp_count > inputs.alert_ids.size %} (newest {{ inputs.alert_ids.size }} of {{ inputs.fp_count }}){%- endif %}:
         ["{{ inputs.alert_ids | join: '", "' }}"]
 
         Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
         tool, passing the rule's investigation_fields as additional_fields, and use
-        them as the confirmed false positives grounding the diagnosis; do not
-        re-derive the closed set. Return one structured tuning recommendation.
+        them as the false positives grounding the diagnosis, checking each alert's
+        status and tags before treating it as analyst-confirmed; do not
+        re-derive the set. Return one structured tuning recommendation.
 
         These ids are the whole dataset, so do not run the security.alerts queries:
         they would re-fetch alerts already in hand. Base the volume and entity
@@ -784,6 +799,18 @@ steps:
         field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
         cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: consts.no_items }}"
 
+  # Approving replaces the whole threshold, so an empty proposed cardinality would
+  # write `cardinality: []` to a rule that never had one. Runs only when there is a
+  # cardinality to clear; otherwise the action's cardinality stays undefined and
+  # is left out of the patch.
+  - name: clear_threshold_cardinality
+    type: data.set
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+        and steps.fetch_rule.output.threshold.cardinality.size > 0 }}
+    with:
+      cardinality: "${{ consts.no_items }}"
+
   # A schedule change alters how much history each simulated run covers, so the
   # proposed run count is scaled to keep both previews over the same period:
   # period = runs x current interval; proposed runs = ceil(period / proposed interval),
@@ -803,6 +830,77 @@ steps:
         {%- assign period = cs | times: runs -%}
         {{- period | times: 1.0 | divided_by: ps | ceil | at_least: 1 -}}
 
+  # The rule details page shows a schedule's `from` as "Additional look-back time":
+  # `from` minus the interval, in the largest whole unit (now-65m every 5m is 1h).
+  # Also renders how far back each preview searched: its runs are one interval apart
+  # and each searches its own `from`, so (runs - 1) x interval + from, in seconds.
+  # Renders "<current>,<proposed>,<current seconds>,<proposed seconds>", or nothing
+  # when either `from` is not plain now-<n><unit> or starts after its interval, so
+  # the proposal falls back to `from`.
+  # Every change type is backtested on a schedule, so this runs for all of them;
+  # only a schedule change has a proposed schedule that differs from the current one.
+  - name: compute_schedule_lookbacks
+    type: data.set
+    with:
+      lookbacks: >-
+        {%- capture schedules -%}
+        now-{{ steps.fetch_rule.output.interval }}|{{ steps.fetch_rule.output.from }}|
+        {%- if steps.diagnose_rule.output.structured_output.change_type == 'schedule' -%}
+        now-{{ steps.diagnose_rule.output.structured_output.proposed_interval }}|{{ steps.diagnose_rule.output.structured_output.proposed_from }}
+        {%- else -%}
+        now-{{ steps.fetch_rule.output.interval }}|{{ steps.fetch_rule.output.from }}
+        {%- endif -%}
+        {%- endcapture -%}
+        {%- assign schedules = schedules | split: "|" -%}
+        {%- assign valid = true -%}
+        {%- if schedules.size != 4 %}{% assign valid = false %}{% endif -%}
+        {%- assign lookbacks = "" -%}
+        {%- assign runs = inputs.preview_invocation_count | default: consts.preview_invocation_count -%}
+        {%- assign proposed_runs = steps.compute_schedule_preview_runs.output.proposed_invocation_count | default: runs -%}
+        {%- assign windows = "" -%}
+        {%- for expression in schedules -%}
+        {%- assign unit = expression | slice: -1 -%}
+        {%- assign amount = expression | slice: 4, 64 | remove_last: unit | plus: 0 -%}
+        {%- capture rebuilt %}now-{{ amount }}{{ unit }}{% endcapture -%}
+        {%- case unit -%}
+        {%- when "d" %}{% assign seconds = amount | times: 86400 -%}
+        {%- when "h" %}{% assign seconds = amount | times: 3600 -%}
+        {%- when "m" %}{% assign seconds = amount | times: 60 -%}
+        {%- when "s" %}{% assign seconds = amount -%}
+        {%- else %}{% assign valid = false -%}
+        {%- endcase -%}
+        {%- if rebuilt != expression %}{% assign valid = false %}{% endif -%}
+        {%- assign is_interval = forloop.index0 | modulo: 2 -%}
+        {%- if is_interval == 0 -%}
+        {%- assign interval_seconds = seconds -%}
+        {%- else -%}
+        {%- if forloop.index0 == 1 %}{% assign window_runs = runs %}{% else %}{% assign window_runs = proposed_runs %}{% endif -%}
+        {%- assign window = window_runs | minus: 1 | times: interval_seconds | plus: seconds -%}
+        {%- assign windows = windows | append: "," | append: window -%}
+        {%- assign lookback = seconds | minus: interval_seconds -%}
+        {%- assign days = lookback | modulo: 86400 -%}
+        {%- assign hours = lookback | modulo: 3600 -%}
+        {%- assign minutes = lookback | modulo: 60 -%}
+        {%- if lookback < 0 %}{% assign valid = false %}{% endif -%}
+        {%- if lookback == 0 %}{% assign lookback = "0s" -%}
+        {%- elsif days == 0 %}{% assign lookback = lookback | divided_by: 86400 | append: "d" -%}
+        {%- elsif hours == 0 %}{% assign lookback = lookback | divided_by: 3600 | append: "h" -%}
+        {%- elsif minutes == 0 %}{% assign lookback = lookback | divided_by: 60 | append: "m" -%}
+        {%- else %}{% assign lookback = lookback | append: "s" -%}
+        {%- endif -%}
+        {%- assign lookbacks = lookbacks | append: lookback | append: "," -%}
+        {%- endif -%}
+        {%- endfor -%}
+        {%- if valid %}{{ lookbacks | remove_last: "," }}{{ windows }}{% endif -%}
+
+  # A rule with a data view searches the view's indices and ignores its own `index`,
+  # so only a rule without one has an index list worth checking.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.fetch_rule.output.data_view_id == blank }}"
+    with:
+      index: "${{ steps.fetch_rule.output.index | default: consts.no_items }}"
+
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
   # slot and a lost resume strands this run in waiting_for_child.
@@ -816,6 +914,13 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        # An ES|QL rule names its indices in the query and a data view rule in the
+        # view, so neither has an `index` to check; both rely on the preview's own
+        # missing-indices warning instead. The threat index is searched either way.
+        indices: >-
+          ${{ steps.probe_indices.output.index
+            | default: consts.no_items
+            | concat: steps.fetch_rule.output.threat_index }}
         preview_body:
           type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
@@ -948,6 +1053,12 @@ steps:
       proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
+      unreadable_indices: "{{ steps.run_previews.output.unreadable_indices }}"
+      no_matching_indices: >-
+        ${{ steps.run_previews.output.no_matching_indices == true
+          or steps.run_previews.output.proposed_no_matching_indices == true }}
+      current_limit_reached: "${{ steps.run_previews.output.alert_limit_reached == true }}"
+      proposed_limit_reached: "${{ steps.run_previews.output.proposed_alert_limit_reached == true }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
   # keeps only what the decision needs. `ai.conversation.add_user_message` appends
@@ -1008,41 +1119,14 @@ steps:
     on-failure:
       continue: true
 
-  - name: compose_proposal
+  # The "Proposed change" section is built by one step per change type, so each
+  # type's wording sits on its own. Only the matching step runs; compose_proposal
+  # takes the output of whichever did. `undo` says how to reverse the change.
+  - name: describe_query_change
     type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'query' }}"
     with:
-      # The same expression the comment's heading uses, lifted out so the
-      # proposal carries it as a field the queue can render as plain text.
-      # Truncated because the diagnosis schema does not bound its title and the
-      # proposal step rejects anything longer; the comment below keeps it whole.
-      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
-      comment: |-
-        **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
-
-        {{ steps.compose_evidence.output.rule_line }}
-
-        **Why this rule needs tuning**
-        {{ steps.compose_evidence.output.fp_summary }}
-        {% if inputs.fp_count > inputs.alert_ids.size %}
-        The agent examined the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives. Your decision tags these {{ inputs.alert_ids.size }} alerts. The tag also removes the older alerts from future sweeps.
-        {% endif %}
-
-        **Summary**
-        {{ steps.diagnose_rule.output.structured_output.summary }}
-        {% if steps.post_fp_pattern.error %}
-
-        **False positive pattern**
-        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
-        {% endif %}
-        {% if steps.post_reasoning.error %}
-
-        **Reasoning**
-        {{ steps.diagnose_rule.output.structured_output.reasoning }}
-        {% endif %}
-
-        **Proposed change**
-        {% case steps.diagnose_rule.output.structured_output.change_type %}
-        {% when "query" %}
+      change: |-
         Current query:
         ```
         {{ steps.fetch_rule.output.query }}
@@ -1052,75 +1136,210 @@ steps:
         ```
         {{ steps.diagnose_rule.output.structured_output.proposed_query }}
         ```
-        {% when "exception" %}
-        Proposed exception:
-        {% for entry in steps.bound_exception_entries.output.entries_json | json_parse %}
-        - {{ entry.field }} {{ entry.operator }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
-        {% endfor %}
-        Approve to add the exception to the exception list of the rule. You can remove it in the Detection Rules UI.
-        {% when "risk_score" %}
-        Current risk score: {{ steps.fetch_rule.output.risk_score }} ({{ steps.fetch_rule.output.severity }})
-        Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }} ({{ steps.diagnose_rule.output.structured_output.proposed_severity }})
-        Approve to change the risk score and severity of the rule. You can change them back in the Detection Rules UI.
-        {% when "threshold" %}
-        Current threshold value: {{ steps.fetch_rule.output.threshold.value }}
-        Proposed threshold value: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}
-        {% if steps.diagnose_rule.output.structured_output.proposed_threshold_field != nil %}
-        Current threshold field: {{ steps.fetch_rule.output.threshold.field | json }}
-        Proposed threshold field: {{ steps.diagnose_rule.output.structured_output.proposed_threshold_field | json }}
-        {% endif %}
-        Current threshold cardinality: {% if steps.fetch_rule.output.threshold.cardinality %}{% for entry in steps.fetch_rule.output.threshold.cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
-        Proposed threshold cardinality: {% if steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}{% for entry in steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality %}- {{ entry.field }} >= {{ entry.value }} {% endfor %}{% else %}none{% endif %}
-        Approve to change the threshold settings of the rule. You can change them back in the Detection Rules UI.
-        {% when "schedule" %}
-        Current interval: {{ steps.fetch_rule.output.interval }}
-        Proposed interval: {{ steps.diagnose_rule.output.structured_output.proposed_interval }}
-        Current lookback (from): {{ steps.fetch_rule.output.from }}
-        Proposed lookback (from): {{ steps.diagnose_rule.output.structured_output.proposed_from }}
-        Approve to change the schedule settings of the rule. You can change them back in the Detection Rules UI.
-        {% else %}
+      undo: Approve to change the query of the rule. You can restore the previous version using History on the rule details page.
+
+  # Conditions are ANDed, one per line, as the exceptions UI shows them.
+  - name: describe_exception_change
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'exception' }}"
+    with:
+      change: |-
+        {%- assign entries = steps.bound_exception_entries.output.entries_json | json_parse -%}
+        Add exception:
+        ```
+        {%- for entry in entries %}
+        {% unless forloop.first %}AND {% endunless %}{{ entry.field }} {{ entry.operator | replace: "_", " " }}{% if entry.values %} {{ entry.values | join: ", " }}{% elsif entry.value %} {{ entry.value }}{% endif %}
+        {%- endfor %}
+        ```
+      undo: Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.
+
+  # Settings the proposal leaves as they are are not listed.
+  - name: describe_risk_score_change
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}"
+    with:
+      change: |-
+        {%- assign rule = steps.fetch_rule.output -%}
+        {%- assign proposal = steps.diagnose_rule.output.structured_output -%}
+        {%- if proposal.proposed_risk_score != rule.risk_score %}
+        Risk score: `{{ rule.risk_score }}` → `{{ proposal.proposed_risk_score }}`
+        {%- endif %}
+        {%- if proposal.proposed_severity != rule.severity %}
+        Severity: `{{ rule.severity }}` → `{{ proposal.proposed_severity }}`
+        {%- endif %}
+      undo: Approve to change the risk score and severity of the rule. You can restore the previous version using History on the rule details page.
+
+  - name: describe_threshold_change
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'threshold' }}"
+    with:
+      change: |-
+        {%- assign threshold = steps.fetch_rule.output.threshold -%}
+        {%- assign proposal = steps.diagnose_rule.output.structured_output -%}
+        {%- assign current_fields = threshold.field | join: ", " -%}
+        {%- assign proposed_fields = proposal.proposed_threshold_field | join: ", " -%}
+        {%- capture current_cardinality %}{% for entry in threshold.cardinality %}{% unless forloop.first %}, {% endunless %}{{ entry.field }} >= {{ entry.value }}{% endfor %}{% endcapture -%}
+        {%- capture proposed_cardinality %}{% for entry in proposal.proposed_threshold_cardinality %}{% unless forloop.first %}, {% endunless %}{{ entry.field }} >= {{ entry.value }}{% endfor %}{% endcapture -%}
+        {%- if proposal.proposed_threshold_value != threshold.value %}
+        Threshold: `{{ threshold.value }}` → `{{ proposal.proposed_threshold_value }}`
+        {%- endif %}
+        {%- if proposed_fields != current_fields %}
+        Group by: `{{ current_fields | default: "none" }}` → `{{ proposed_fields | default: "none" }}`
+        {%- endif %}
+        {%- if proposed_cardinality != current_cardinality %}
+        Unique values count: `{{ current_cardinality | default: "none" }}` → `{{ proposed_cardinality | default: "none" }}`
+        {%- endif %}
+      undo: Approve to change the threshold settings of the rule. You can restore the previous version using History on the rule details page.
+
+  # Uses the rule details page's names: "Runs every" and "Additional look-back time".
+  - name: describe_schedule_change
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output.change_type == 'schedule' }}"
+    with:
+      change: |-
+        {%- assign rule = steps.fetch_rule.output -%}
+        {%- assign proposal = steps.diagnose_rule.output.structured_output -%}
+        {%- assign lookbacks = steps.compute_schedule_lookbacks.output.lookbacks | split: "," -%}
+        {%- if proposal.proposed_interval != rule.interval %}
+        Runs every: `{{ rule.interval }}` → `{{ proposal.proposed_interval }}`
+        {%- endif %}
+        {%- if lookbacks.size == 4 %}
+        {%- if lookbacks[0] != lookbacks[1] %}
+        Additional look-back time: `{{ lookbacks[0] }}` → `{{ lookbacks[1] }}`
+        {%- endif %}
+        {%- elsif proposal.proposed_from != rule.from %}
+        Analyzed time range starts at: `{{ rule.from }}` → `{{ proposal.proposed_from }}`
+        {%- endif %}
+      undo: Approve to change the schedule settings of the rule. You can restore the previous version using History on the rule details page.
+
+  # Every change type except risk score is backtested. A schedule change
+  # already shows both schedules above, so its backtest gives only the run counts.
+  - name: describe_backtest
+    type: data.set
+    if: >-
+      ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
+        or steps.diagnose_rule.output.structured_output.change_type == 'exception'
+        or steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+        or steps.diagnose_rule.output.structured_output.change_type == 'schedule' }}
+    with:
+      text: |-
+        {%- assign rule = steps.fetch_rule.output -%}
+        {%- assign proposal = steps.diagnose_rule.output.structured_output -%}
+        {%- assign outcome = steps.record_preview_outcome.output -%}
+        {%- assign lookbacks = steps.compute_schedule_lookbacks.output.lookbacks | split: "," -%}
+        {%- assign end_day = inputs.last_fp_at | date: "%B %-d", "UTC" -%}
+        {%- if steps.can_preview_query_change.output.supported %}
+        **Backtest**
+        {%- if outcome.unreadable_indices != blank %}
+        The backtest did not run: the Rule Tuning worker's service account cannot read these rule indices: `{{ outcome.unreadable_indices }}`.
+        The worker reads only the default security index patterns, so a rule on other indices cannot be backtested.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {%- elsif outcome.no_matching_indices == true %}
+        The backtest did not run: no index the Rule Tuning worker can read matches the rule's index patterns, so there is no data to count alerts in.
+        Either the indices do not exist, or the worker's service account cannot read them: it reads only the default security index patterns, so a rule on other indices cannot be backtested.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {%- else %}
+        {%- if lookbacks.size == 4 %}
+        {%- assign end_seconds = inputs.last_fp_at | date: "%s" | plus: 0 %}
+        {%- assign ranges = "" %}
+        {%- for window in lookbacks offset: 2 %}
+        {%- assign seconds = window | plus: 0 %}
+        {%- assign start = end_seconds | minus: seconds %}
+        {%- assign start_day = start | date: "%B %-d", "UTC" %}
+        {%- if seconds < 120 %}{% assign length = seconds | append: " seconds" %}
+        {%- elsif seconds < 7200 %}{% assign length = seconds | divided_by: 60 | floor | append: " minutes" %}
+        {%- else %}{% assign length = seconds | divided_by: 3600 | floor | append: " hours" %}
+        {%- endif %}
+        {%- capture range %}{% if start_day == end_day %}{{ start | date: "%H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%H:%M", "UTC" }} UTC on {{ end_day }}{% else %}{{ start | date: "%B %-d at %H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%B %-d at %H:%M", "UTC" }} UTC{% endif %} ({{ length }}){% endcapture %}
+        {%- assign ranges = ranges | append: range | append: "|" %}
+        {%- endfor %}
+        {%- assign ranges = ranges | split: "|" %}
+        {%- if proposal.change_type == 'schedule' %}
+        The backtest replayed the current schedule from {{ ranges[0] }}, and the proposed schedule from {{ ranges[1] }}, both ending at the newest false positive.
+        {%- else %}
+        The backtest replayed the rule from {{ ranges[0] }}, ending at the newest false positive.
+        {%- endif %}
+        {%- else %}
+        The backtest ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d at %H:%M UTC", "UTC" }}.
+        {%- endif %}
+
+        Alerts with the current rule: {% if outcome.current_succeeded and outcome.current_is_aborted == false %}{% if outcome.current_limit_reached == true %}at least {% endif %}{{ outcome.current_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the proposed change: {% if outcome.proposed_succeeded and outcome.proposed_is_aborted == false %}{% if outcome.proposed_limit_reached == true %}at least {% endif %}{{ outcome.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        {%- if outcome.current_limit_reached == true or outcome.proposed_limit_reached == true %}
+        A count marked "at least" stopped at the rule's maximum alerts per execution ({{ rule.max_signals }}), so the real number is higher.
+        {%- endif %}
+        {%- if outcome.current_error_text != '' %}
+        Current preview errors: {{ outcome.current_error_text }}
+        {%- endif %}
+        {%- if outcome.proposed_error_text != '' %}
+        Proposed preview errors: {{ outcome.proposed_error_text }}
+        {%- endif %}
+        {%- endif %}
+        {%- else %}
+        No backtest is available for this change.
+        {%- if rule.type == 'saved_query' or rule.type == 'machine_learning' %}
+        The preview does not support saved query rules or machine learning rules.
+        {%- elsif proposal.change_type == 'exception' and rule.type == 'esql' %}
+        The backtest simulates an exception as a query filter, and an ES|QL rule has no place for one, so it cannot simulate this change. The rule itself still honours the exception when it runs.
+        To check the effect yourself, ask the agent in this investigation to preview the rule's query with the exception's conditions excluded.
+        {%- elsif proposal.change_type == 'exception' %}
+        The agent could not convert the proposed exception into a preview filter.
+        {%- else %}
+        The preview does not support this change on a {{ rule.type }} rule.
+        {%- endif %}
+        Approving still applies the proposed change.
+        Judge it on the change and on the false positives above, not on a simulated alert count.
+        {%- endif %}
+
+  - name: compose_proposal
+    type: data.set
+    with:
+      # Truncated because the diagnosis schema does not bound its title and the
+      # proposal step rejects anything longer.
+      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
+      comment: |-
+        {%- assign described = steps.describe_query_change.output
+          | default: steps.describe_exception_change.output
+          | default: steps.describe_risk_score_change.output
+          | default: steps.describe_threshold_change.output
+          | default: steps.describe_schedule_change.output -%}
+        {{ steps.compose_evidence.output.rule_line }}
+
+        **Why this rule was picked**
+        {{ steps.compose_evidence.output.fp_summary }}
+        {%- if inputs.fp_count > inputs.alert_ids.size %}
+        The agent examined the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives. Your decision tags these {{ inputs.alert_ids.size }} alerts. The tag also removes the older alerts from future sweeps.
+        {%- endif %}
+
+        **Summary**
+        {{ steps.diagnose_rule.output.structured_output.summary }}
+        {%- if steps.post_fp_pattern.error %}
+
+        **False positive pattern**
+        {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
+        {%- endif %}
+        {%- if steps.post_reasoning.error %}
+
+        **Reasoning**
+        {{ steps.diagnose_rule.output.structured_output.reasoning }}
+        {%- endif %}
+
+        **Proposed change**
+        {%- if described %}
+        {{ described.change | strip }}
+
+        {{ described.undo }}
+        {%- else %}
         No automated change is safe for this rule.
         Approving records the handoff. The agent makes no change to the rule.
         Apply the recommended change in the Detection Rules UI.
-        {% endcase %}
+        {%- endif %}
+        {%- if steps.describe_backtest.output.text %}
 
-        {% if steps.diagnose_rule.output.structured_output.change_type == "query"
-          or steps.diagnose_rule.output.structured_output.change_type == "exception"
-          or steps.diagnose_rule.output.structured_output.change_type == "threshold"
-          or steps.diagnose_rule.output.structured_output.change_type == "schedule" %}
-        {% if steps.can_preview_query_change.output.supported %}
-        **Backtest**
-
-        The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions with interval {{ steps.fetch_rule.output.interval }}
-        and lookback {{ steps.fetch_rule.output.from }}. It ends at the newest false positive, {{ inputs.last_fp_at }}.
-        This time span is usually much shorter than the span of the false positives.
-        {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}
-        The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
-        {% endif %}
-
-        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
-        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
-        {% if steps.record_preview_outcome.output.current_error_text != '' %}
-        Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
-        {% endif %}
-        {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
-        Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
-        {% endif %}
-        {% else %}
-        No backtest is available for this change.
-        {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
-        The preview does not support saved query rules or machine learning rules.
-        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
-        The preview cannot apply an exception to an ES|QL rule, which has no filters.
-        {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
-        The agent could not convert the proposed exception into a preview filter.
-        {% else %}
-        The preview does not support this change on a {{ steps.fetch_rule.output.type }} rule.
-        {% endif %}
-        Approving still applies the proposed change.
-        Judge it on the change and on the false positives above, not on a simulated alert count.
-        {% endif %}
-        {% endif %}
+        {{ steps.describe_backtest.output.text | strip }}
+        {%- endif %}
 
   # One switch, four exclusive arms, one gate call each. Separate arms because a
   # YAML object cannot be assembled conditionally. The manual arm is the default.
@@ -1247,7 +1466,8 @@ steps:
                   threshold:
                     value: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_value }}"
                     field: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_field }}"
-                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality }}"
+                    # `default` treats [] as empty, so an empty proposal falls back to the clearing value.
+                    cardinality: "${{ steps.diagnose_rule.output.structured_output.proposed_threshold_cardinality | default: steps.clear_threshold_cardinality.output.cardinality }}"
                 impact: medium
                 confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
                 autoApprove: false
@@ -1432,9 +1652,6 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        # No raw change type: the default arm accepts values the arms do not
-        # name, and an unrecognised one would leave a gap in the sentence.
-        verdict: "Analyst approved the tuning proposal."
     on-failure:
       continue: true
 
@@ -1458,7 +1675,6 @@ steps:
       updates:
         status: closed
         close_reason: other
-        verdict: "The tuning proposal was dismissed."
     on-failure:
       continue: true
 
@@ -1518,7 +1734,8 @@ steps:
           and steps.propose_manual.output.decision != 'approved'
           and steps.resolve_applied.output.landed != true }}
       backtest_ran: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true }}"
-      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
+      # A proposed count that stopped at max_signals is a floor, so it cannot show a reduction.
+      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_limit_reached != true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
       rule_unavailable: "${{ steps.fetch_rule.error != null or steps.fetch_rule.output.enabled != true }}"
       # The rule's own type; the step maps it to the event's vocabulary.
       rule_type: "{{ steps.fetch_rule.output.type }}"
