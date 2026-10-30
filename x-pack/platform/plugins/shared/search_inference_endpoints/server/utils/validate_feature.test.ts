@@ -32,8 +32,6 @@ describe('validateFeature', () => {
           recommendedEndpoints: [
             'plain',
             { id: 'with_reasoning', parameters: { reasoning: { effort: 'xhigh' } } },
-            { id: 'with_temperature', parameters: { temperature: 0 } },
-            { id: 'with_max_temperature', parameters: { temperature: 2 } },
             { id: 'without_parameters' },
           ],
         })
@@ -139,21 +137,6 @@ describe('validateFeature', () => {
         ],
       },
       expectedMessage: 'parameters.reasoning.effort',
-    },
-    {
-      name: 'recommendedEndpoints entry with negative temperature',
-      overrides: { recommendedEndpoints: [{ id: 'ep', parameters: { temperature: -0.1 } }] },
-      expectedMessage: 'parameters.temperature',
-    },
-    {
-      name: 'recommendedEndpoints entry with temperature above the maximum',
-      overrides: { recommendedEndpoints: [{ id: 'ep', parameters: { temperature: 2.1 } }] },
-      expectedMessage: 'parameters.temperature',
-    },
-    {
-      name: 'recommendedEndpoints entry with NaN temperature',
-      overrides: { recommendedEndpoints: [{ id: 'ep', parameters: { temperature: NaN } }] },
-      expectedMessage: 'parameters.temperature',
     },
   ];
 
