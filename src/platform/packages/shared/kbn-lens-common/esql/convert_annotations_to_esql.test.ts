@@ -75,7 +75,7 @@ describe('convertQueryAnnotationsToEsql', () => {
             type: 'esql',
             key: { type: 'point_in_time' },
             query: {
-              esql: 'FROM logs-* | WHERE KQL("""event.action: "deploy"""") | KEEP `event.created`, `service.version`, `service.name`',
+              esql: 'FROM logs-* | WHERE KQL("""event.action: "deploy"""") | KEEP `event.created`, `service.version`, `service.name` | SORT `event.created` DESC | LIMIT 1000',
             },
             timeField: 'event.created',
             timeColumn: 'event.created',
