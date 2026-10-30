@@ -968,6 +968,24 @@ describe('runFindingsPass with workspace files', () => {
     }
   });
 
+  it('asks for the same summary and hypothesis style in every pass, and the rest in the final one', () => {
+    const live = buildRecorderSystemPrompt({ final: false });
+    const final = buildRecorderSystemPrompt({ final: true });
+
+    for (const prompt of [live, final]) {
+      expect(prompt).toContain('At most 60 words of Markdown');
+      expect(prompt).toContain('noun phrase of at most eight words');
+      expect(prompt).toContain('**Tested:**');
+      expect(prompt).toContain('**Result:**');
+      expect(prompt).toContain('never "I checked..."');
+    }
+    expect(final).toContain('At most 70 words of Markdown');
+    expect(final).toContain('Cause not confirmed:');
+    expect(final).toContain('at most 45 words in all');
+    expect(live).not.toContain('Cause not confirmed:');
+    expect(live).not.toContain('45 words');
+  });
+
   it('sends the prompt that matches the pass', async () => {
     const files = setupFiles([answerWith(output)]);
     await files.run();

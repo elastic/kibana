@@ -420,12 +420,12 @@ export const FINDINGS_JSON_SCHEMA = {
     summary: {
       type: 'string',
       description:
-        'What happened, as far as the evidence shows: what deviated, when and where, and the current leading explanation. Two to four plain sentences, under 800 characters.',
+        'What we saw and since when, not the cause. At most 60 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets.',
     },
     verdict: {
       type: 'string',
       description:
-        'Only when the agent has given its final answer: the conclusion in one or two sentences, with the root cause and the mechanism. Omit while the investigation is still running. Under 600 characters.',
+        'Only when the agent has given its final answer: the most likely cause. At most 70 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets. Starts with Cause not confirmed: when no hypothesis is confirmed. Omit while the investigation is still running.',
     },
     severity: {
       type: 'string',
@@ -435,7 +435,7 @@ export const FINDINGS_JSON_SCHEMA = {
     impact_summary: {
       type: 'string',
       description:
-        'The business consequence in one or two plain sentences: who or what was affected, how badly, for how long, how broadly, with measured numbers. Omit when the evidence shows no impact yet. Under 500 characters.',
+        'The business consequence: who or what was hurt and how badly, with measured numbers. At most 45 words: a lead sentence of at most 25 words, then at most three short bullets. Omit when the evidence shows no impact yet.',
     },
     impact_evidence: {
       anyOf: [EVIDENCE_JSON_SCHEMA, { type: 'null' }],
@@ -493,13 +493,17 @@ export const FINDINGS_JSON_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          candidate: { type: 'string', description: 'The candidate cause, stated concretely.' },
+          candidate: {
+            type: 'string',
+            description:
+              'The name on the card: a noun phrase of at most eight words, with no counts or ids.',
+          },
           confidence: { type: 'number', description: 'From 0 to 1.' },
           status: { type: 'string', enum: HYPOTHESIS_STATUSES },
           reason: {
             type: 'string',
             description:
-              'Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown, under 300 characters.',
+              'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. Under 600 characters.',
           },
           evidence: {
             type: 'array',
