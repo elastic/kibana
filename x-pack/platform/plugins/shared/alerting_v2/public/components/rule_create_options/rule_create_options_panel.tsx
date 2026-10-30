@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateOptionItem } from '../create_options';
 import { CreateOptionsPanel } from '../create_options';
+import { useRuleBuilderCreateOptions } from '../../hooks/use_rule_builder_create_options';
 import {
   type AgentBuilderSkillsRequirements,
   useAreAgentBuilderSkillsAvailable,
@@ -44,7 +45,7 @@ interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
-  onCreateThresholdRule?: () => void;
+  onCreateBuilderRule?: (type: string) => void;
   onBuildSequence?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -83,17 +84,6 @@ export const getCreateWithAgentTooltipText = ({
 }: AgentBuilderSkillsRequirements): string | undefined =>
   hasAgentBuilderCapability ? undefined : CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
 
-const THRESHOLD_RULE_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
-  { defaultMessage: 'Threshold rule' }
-);
-const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
-  {
-    defaultMessage: 'Use the query builder to monitor metrics against threshold conditions.',
-  }
-);
-
 const SEQUENCE_TITLE = i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.sequenceTitle', {
   defaultMessage: 'Build a sequence',
 });
@@ -125,8 +115,9 @@ const flyoutCardDisabledStyle = css({
 const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdRule,
+  onCreateBuilderRule,
 }) => {
+  const builderOptions = useRuleBuilderCreateOptions();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
@@ -161,17 +152,16 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   );
 
   const secondaryItems = useMemo<CreateOptionItem[]>(
-    () => [
-      {
-        id: 'create-threshold-rule',
-        iconType: 'chartThreshold',
-        title: THRESHOLD_RULE_TITLE,
-        description: THRESHOLD_RULE_DESCRIPTION,
-        onClick: onCreateThresholdRule ?? noop,
-        'data-test-subj': 'createThresholdRuleCard',
-      },
-    ],
-    [onCreateThresholdRule]
+    () =>
+      builderOptions.map((option) => ({
+        id: `create-${option.type}-rule`,
+        iconType: option.iconType,
+        title: option.title,
+        description: option.description,
+        onClick: () => onCreateBuilderRule?.(option.type),
+        'data-test-subj': option.dataTestSubj,
+      })),
+    [builderOptions, onCreateBuilderRule]
   );
 
   return (
@@ -275,10 +265,11 @@ const LegacyRuleTypesSection: React.FC<{ items: LegacyRuleTypeItem[] }> = ({ ite
 const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateWithAgent,
-  onCreateThresholdRule,
+  onCreateBuilderRule,
   onBuildSequence,
   legacyRuleTypes,
 }) => {
+  const builderOptions = useRuleBuilderCreateOptions();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
@@ -345,18 +336,25 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <RuleBuilderSectionDivider />
-      <EuiCard
-        layout="horizontal"
-        display="plain"
-        titleElement="h3"
-        titleSize="xs"
-        hasBorder={true}
-        title={THRESHOLD_RULE_TITLE}
-        description={THRESHOLD_RULE_DESCRIPTION}
-        onClick={onCreateThresholdRule ?? noop}
-        icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
-      />
+      {builderOptions.length > 0 ? <RuleBuilderSectionDivider /> : null}
+      <EuiFlexGroup direction="column" gutterSize="l">
+        {builderOptions.map((option) => (
+          <EuiFlexItem key={option.type}>
+            <EuiCard
+              layout="horizontal"
+              display="plain"
+              titleElement="h3"
+              titleSize="xs"
+              hasBorder={true}
+              title={option.title}
+              description={option.description}
+              onClick={() => onCreateBuilderRule?.(option.type)}
+              icon={<EuiIcon type={option.iconType} color="text" size="l" aria-hidden={true} />}
+              data-test-subj={option.dataTestSubj}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       {legacyRuleTypes && <LegacyRuleTypesSection items={legacyRuleTypes} />}
     </>
   );

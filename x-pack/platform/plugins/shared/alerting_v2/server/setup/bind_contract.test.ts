@@ -15,6 +15,7 @@ import { ActionPolicyClient } from '../lib/action_policy_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
 import type { AlertingServerSetup, AlertingServerStart } from '../types';
@@ -57,6 +58,7 @@ describe('bindContract', () => {
     container
       .bind(AlertStatusChangedOptIns)
       .toConstantValue(new AlertStatusChangedOptIns(createLoggerService().loggerService));
+    container.bind(BuilderTypeRegistry).toSelf().inSingletonScope();
     mockInternalRulesClient = { bulkDisableRules: jest.fn() };
     container
       .bind(InternalRulesClient)
@@ -65,11 +67,12 @@ describe('bindContract', () => {
     container.load(new ContainerModule((options) => bindContract(options)));
   });
 
-  it('exposes registerArtifactType and enableAlertStatusChanged on the setup contract', () => {
+  it('exposes registerArtifactType, enableAlertStatusChanged, and registerBuilderType on the setup contract', () => {
     const setup = container.get(AlertingSetupToken);
     expect(setup).toEqual({
       registerArtifactType: expect.any(Function),
       enableAlertStatusChanged: expect.any(Function),
+      registerBuilderType: expect.any(Function),
     });
   });
 
