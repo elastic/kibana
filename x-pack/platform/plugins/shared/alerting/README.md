@@ -110,7 +110,7 @@ The following table describes the properties of the `options` object.
 |autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
 |getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
 |internallyManaged|(Optional) Indicates that the rule type is managed internally by a Kibana plugin. Internally managed rule types cannot be created or updated through the APIs. API keys of internal rule types can be updated. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.|boolean|
-|alertingV2Migration|(Optional) Opts the rule type in to migration to alerting v2. Its `toV2Draft` function converts a rule of this type into an alerting v2 rule draft. For full details, see the [migrating a rule type to alerting v2](#migrating-a-rule-type-to-alerting-v2) section below.|{ toV2Draft: Function }|
+|alertingV2Migration|(Optional) Opts the rule type in to migration to alerting v2. Its `toV2Draft` function converts the rule type's params into the params-dependent part of an alerting v2 rule draft. For full details, see the [migrating a rule type to alerting v2](#migrating-a-rule-type-to-alerting-v2) section below.|{ toV2Draft: Function }|
 
 ### Executor
 
@@ -226,36 +226,44 @@ This function should take the rule type params (with saved object references) an
 
 ### Migrating a rule type to alerting v2
 
-A rule type can specify how its rules convert to alerting v2 rules by adding `alertingV2Migration` to the options it already passes to `registerType`. The framework stores it with the rule type. It does not call it. A consumer reads it from the registered rule type, for example with `getType(ruleTypeId).alertingV2Migration`.
+A rule type can specify how its rules convert to alerting v2 rules by adding `alertingV2Migration` to the options it already passes to `registerType`. The framework stores it with the rule type. It does not call it. A consumer reads it from the registered rule type, for example with `getType(ruleTypeId).alertingV2Migration`, and passes it to `buildV2Draft`.
 
-**alertingV2Migration.toV2Draft(rule)**
+**alertingV2Migration.toV2Draft(params)**
 
-| Property | Description |
+The rule type converts only its own params. The framework maps the fields every rule has.
+
+| Mapped by | Fields |
 | --- | --- |
-| rule | The classic rule to convert, in the `SanitizedRule` shape returned by the rules client (`name`, `tags`, `schedule`, `params`, `alertDelay`, `artifacts` and so on). |
-| returns | A `RuleV2Draft`, which is the alerting v2 `CreateRuleData` type from `@kbn/alerting-v2-schemas`. |
+| The rule type, from `params` | Everything else in the v2 draft: `query`, `time_field` and `lookback` (becomes `schedule.lookback`), all required, and `grouping` (optional) |
+| The framework, in `buildV2Draft` | `name`, `tags`, `schedule.interval` (becomes `schedule.every`), `alertDelay` (becomes `state_transition.pending`), `artifacts` (the investigation guide becomes a runbook and dashboards become dashboard artifacts), and the defaults `kind: 'alert'`, `recovery: { strategy: 'no_breach' }` and `no_data: { strategy: 'ignore' }` |
 
-`toV2Draft` receives the whole rule, so the rule type maps the name, tags, schedule and params itself. Rule types that do not specify `alertingV2Migration` cannot be migrated. Throw from `toV2Draft` when a rule cannot be converted.
+Rule types that do not specify `alertingV2Migration` cannot be migrated. Throw from `toV2Draft` when the params cannot be converted. `buildV2Draft` rethrows.
 
-A draft is a starting point for the user to review. It is not guaranteed to pass alerting v2 create validation, for example when a query cannot be translated and only part of it can be seeded. Action conversion is not part of `toV2Draft`.
+**buildV2Draft(rule, alertingV2Migration)**
+
+Returns a `RuleV2Draft`, which is the alerting v2 `CreateRuleData` type from `@kbn/alerting-v2-schemas`. `rule` is a classic rule in the `SanitizedRule` shape returned by the rules client.
+
+A draft is a starting point for the user to review. It is not guaranteed to pass alerting v2 create validation, for example when a query cannot be translated and only part of it can be seeded. Action conversion is not part of the draft.
 
 ```ts
 alerting.registerType({
   id: 'my_plugin.myRule',
   // ...the rest of the rule type, unchanged
   alertingV2Migration: {
-    toV2Draft: (rule) => ({
-      kind: 'alert',
-      metadata: { name: rule.name, tags: rule.tags },
-      time_field: '@timestamp',
-      schedule: { every: rule.schedule.interval },
-      query: { base: `FROM ${rule.params.index}` },
+    toV2Draft: (params) => ({
+      query: { base: `FROM ${params.index}` },
+      time_field: params.timeField,
+      lookback: `${params.timeWindowSize}${params.timeWindowUnit}`,
     }),
   },
 });
+
+// a consumer
+const { alertingV2Migration } = alerting.getType(rule.alertTypeId);
+const draft = alertingV2Migration ? buildV2Draft(rule, alertingV2Migration) : undefined;
 ```
 
-The `RuleTypeV2Migration`, `RuleV2Draft` and `ToV2DraftFn` types are exported from the plugin's server entry point.
+`buildV2Draft` and the `RuleParamsV2Draft`, `RuleTypeV2Migration`, `RuleV2Draft` and `ToV2DraftFn` types are exported from the plugin's server entry point.
 
 ## Recovered Alerts
 

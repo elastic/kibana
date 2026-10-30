@@ -6,7 +6,7 @@
  */
 
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
-import type { RuleTypeParams, SanitizedRule } from '../types';
+import type { RuleTypeParams } from '../types';
 
 /**
  * An alerting v2 rule derived from a classic rule. It is a starting point for the user to
@@ -14,16 +14,36 @@ import type { RuleTypeParams, SanitizedRule } from '../types';
  */
 export type RuleV2Draft = CreateRuleData;
 
-/** Converts a classic rule of one rule type into an alerting v2 rule draft. */
+/** The fields of a {@link RuleV2Draft} that `buildV2Draft` fills from the classic rule itself. */
+type FrameworkMappedField =
+  | 'kind'
+  | 'metadata'
+  | 'schedule'
+  | 'recovery'
+  | 'no_data'
+  | 'state_transition'
+  | 'artifacts';
+
+/**
+ * A {@link RuleV2Draft} without the fields the framework maps, so it holds what depends on a rule
+ * type's params. `schedule` is replaced by `lookback`, because `schedule.every` comes from the
+ * classic schedule interval.
+ */
+export interface RuleParamsV2Draft extends Omit<RuleV2Draft, FrameworkMappedField> {
+  /** Becomes `schedule.lookback`, for example `5m`. */
+  lookback: NonNullable<RuleV2Draft['schedule']['lookback']>;
+}
+
+/** Converts the params of one rule type into the params-dependent part of a v2 rule draft. */
 export type ToV2DraftFn<Params extends RuleTypeParams = RuleTypeParams> = (
-  rule: SanitizedRule<Params>
-) => RuleV2Draft;
+  params: Params
+) => RuleParamsV2Draft;
 
 /** Registered by a rule type to make its rules migratable to alerting v2. */
 export interface RuleTypeV2Migration<Params extends RuleTypeParams = RuleTypeParams> {
   /**
-   * Receives the whole classic rule, so the rule type owns the mapping of its name, tags,
-   * schedule and params. Throws when the rule cannot be converted.
+   * Receives only the rule's params. The framework maps the fields every rule has (name, tags,
+   * schedule, alert delay and artifacts). Throws when the params cannot be converted.
    */
   toV2Draft: ToV2DraftFn<Params>;
 }

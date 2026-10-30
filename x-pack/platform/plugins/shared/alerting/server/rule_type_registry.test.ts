@@ -21,8 +21,7 @@ import type { RecoveredActionGroupId } from '../common';
 import type { AlertingConfig } from './config';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { getRule } from './task_runner/action_scheduler/test_fixtures';
-import type { RuleV2Draft } from './rule_type_v2_migration/types';
+import type { RuleParamsV2Draft } from './rule_type_v2_migration/types';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -1155,22 +1154,20 @@ describe('Create Lifecycle', () => {
       solution: 'stack',
       validate: { params: { validate: (params) => params } },
     };
-    const draft: RuleV2Draft = {
-      kind: 'alert',
-      metadata: { name: 'name-of-alert' },
-      time_field: '@timestamp',
-      schedule: { every: '1m' },
+    const draft: RuleParamsV2Draft = {
       query: { base: 'FROM logs-*' },
+      time_field: '@timestamp',
+      lookback: '5m',
     };
 
     test('keeps the migration a rule type registers with', () => {
       const toV2Draft = jest.fn().mockReturnValue(draft);
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register({ ...baseRuleType, alertingV2Migration: { toV2Draft } });
-      const rule = getRule({ alertTypeId: 'foo' });
+      const params = { index: 'logs-*' };
 
-      expect(registry.get('foo').alertingV2Migration?.toV2Draft(rule)).toBe(draft);
-      expect(toV2Draft).toHaveBeenCalledWith(rule);
+      expect(registry.get('foo').alertingV2Migration?.toV2Draft(params)).toBe(draft);
+      expect(toV2Draft).toHaveBeenCalledWith(params);
     });
 
     test('has no migration when the rule type does not register one', () => {
