@@ -18,6 +18,9 @@ import { css } from '@emotion/react';
 import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
 import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 
+/** Width of a typical header split button, so the skeleton matches the loaded header. */
+const SPLIT_BUTTON_SKELETON_WIDTH = '137px';
+
 /**
  * Loading skeleton for an attachment card, shown during streaming before the
  * attachment data is available. Matches the border and header structure of
@@ -31,6 +34,8 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const headerStyles = css`
+    display: flex;
+    align-items: center;
     border-radius: ${ATTACHMENT_INNER_RADIUS}px;
     min-height: ${isCompact ? 'auto' : `${INLINE_HEADER_HEIGHT}px`};
     padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.base};
@@ -49,28 +54,32 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
             style={{ width: '100%' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiSkeletonRectangle width="160px" height={euiTheme.size.l} borderRadius="s" />
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiSkeletonRectangle
+                    width={euiTheme.size.base}
+                    height={euiTheme.size.base}
+                    borderRadius="s"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSkeletonRectangle
+                    width="160px"
+                    height={euiTheme.size.base}
+                    borderRadius="s"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem
               grow={false}
               style={isCompact ? { alignSelf: 'flex-end' } : { flexShrink: 0 }}
             >
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle
-                    width={euiTheme.size.xl}
-                    height={euiTheme.size.xl}
-                    borderRadius="m"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSkeletonRectangle
-                    width={euiTheme.size.xl}
-                    height={euiTheme.size.xl}
-                    borderRadius="m"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiSkeletonRectangle
+                width={SPLIT_BUTTON_SKELETON_WIDTH}
+                height={euiTheme.size.xl}
+                borderRadius="m"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSplitPanel.Inner>
