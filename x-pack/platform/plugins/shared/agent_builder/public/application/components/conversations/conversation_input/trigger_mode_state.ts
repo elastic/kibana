@@ -47,6 +47,17 @@ export const getTriggerMode = (
     ? ChatTriggerMode.Always
     : state.auto ?? state.selected;
 
+/**
+ * How the agent toggle changes:
+ * - Typing: only a mention at the start of the message counts (spaces before it are ignored).
+ *   - `@user` → "Post to team" (`never`)
+ *   - `@agent` → "Ask agent" (`always`)
+ *   - mention removed → back to `selected`
+ *   - a mention later in the message changes nothing
+ * - Manual flip: wins over mentions until the message is sent.
+ * - Send: the mode used stays for the next message, and mentions switch it again.
+ * - Each chat keeps its own choice. Mentions do nothing when `canMention` is off.
+ */
 export const triggerModeReducer = (
   state: TriggerModeState,
   action: TriggerModeAction
