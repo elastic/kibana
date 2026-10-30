@@ -333,6 +333,27 @@ describe('validateAndConvertAggregations', () => {
     );
   });
 
+  it('throws an error when the attribute path is referencing the access control list', () => {
+    const mappingsWithAcl = {
+      properties: {
+        ...mockMappings.properties,
+        acl: { properties: { owner: { properties: { id: { type: 'keyword' } } } } },
+      },
+    } as const;
+    const aggregations: AggsMap = {
+      owners: {
+        terms: {
+          field: 'alert.acl.owner.id',
+        },
+      },
+    };
+    expect(() =>
+      validateAndConvertAggregations(['alert'], aggregations, mappingsWithAcl)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[owners.terms.field] Invalid attribute path: alert.acl.owner.id"`
+    );
+  });
+
   it('rewrites the `field` name even when nested', () => {
     const aggregations: AggsMap = {
       average: {

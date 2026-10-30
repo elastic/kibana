@@ -80,9 +80,9 @@ export class ActionsAuthorization {
       });
 
       let { hasAllRequested } = response;
-      const recovery = response.privileges.kibana.find(
-        ({ privilege }) => privilege === recoveryAction
-      );
+      const recovery = recoveryAction
+        ? response.privileges.kibana.find(({ privilege }) => privilege === recoveryAction)
+        : undefined;
       if (recovery) {
         hasAllRequested = response.privileges.kibana.every(
           ({ privilege, authorized }) => privilege === recoveryAction || authorized

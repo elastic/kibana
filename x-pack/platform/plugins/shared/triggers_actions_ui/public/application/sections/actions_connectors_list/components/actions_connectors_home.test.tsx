@@ -42,6 +42,7 @@ const { loadAllActions, loadActionTypes, loadConnectorAuthStatus } = jest.requir
   '../../../lib/action_connector_api'
 );
 jest.mock('../../../../common/lib/kibana');
+const { useKibana } = jest.requireMock('../../../../common/lib/kibana');
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveActionsCapability: jest.fn(),
 }));
@@ -117,6 +118,8 @@ describe('ActionsConnectorsHome', () => {
     lastActionsConnectorsListProps = undefined;
     loadAllActions.mockResolvedValue([]);
     loadConnectorAuthStatus.mockResolvedValue({});
+    // The create flyout loads the connector access policy; an empty response leaves it off.
+    useKibana().services.http.get.mockResolvedValue({});
   });
 
   it('renders Actions connectors list component', async () => {
