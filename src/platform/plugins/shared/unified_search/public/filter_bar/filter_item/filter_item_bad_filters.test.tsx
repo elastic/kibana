@@ -27,7 +27,8 @@ jest.mock('@kbn/data-plugin/public', () => {
       if (dataView && !dataView.fields.some((field) => field.name === filter.meta.key)) {
         throw new Error(`Field ${filter.meta.key} not found in data view ${dataView.title}`);
       }
-      return String(filter.meta.params?.query ?? '');
+      const params = filter.meta.params as { query?: unknown } | undefined;
+      return String(params?.query ?? '');
     },
   };
 });
