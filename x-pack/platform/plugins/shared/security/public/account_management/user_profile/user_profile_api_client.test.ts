@@ -116,6 +116,35 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
+  it('does not post the stored locale when updating the whole profile', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+
+    await apiClient.update({ userSettings: { locale: 'de-DE', darkMode: 'dark' } });
+
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
+      body: JSON.stringify({ userSettings: { darkMode: 'dark' } }),
+    });
+    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
+      userSettings: { locale: 'de-DE', darkMode: 'dark' },
+    });
+  });
+
+  it('posts a locale that differs from the stored one', async () => {
+    coreStart.http.get.mockResolvedValue({
+      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
+    });
+    await apiClient.getCurrent({ dataPath: 'userSettings' });
+
+    await apiClient.update({ userSettings: { locale: 'fr-FR', darkMode: 'light' } });
+
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
+      body: JSON.stringify({ userSettings: { locale: 'fr-FR', darkMode: 'light' } }),
+    });
+  });
+
   it('should get user profiles in bulk', async () => {
     await apiClient.bulkGet({ uids: new Set(['UID-1', 'UID-2']), dataPath: '*' });
     expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_bulk_get', {

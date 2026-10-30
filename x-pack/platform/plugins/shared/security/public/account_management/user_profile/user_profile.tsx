@@ -995,9 +995,8 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       // Update profile only if it's available for the current user.
       if (values.data) {
-        // Leave an unchanged locale out of the payload. partialUpdate posts this
-        // object as the request body, and the route rejects a locale that is no
-        // longer enabled.
+        // A profile without a stored locale gets a fallback in the form, which the route can
+        // reject when the deployment enables no locales.
         const { locale, ...userSettingsWithoutLocale } = values.data.userSettings;
         const profileData = {
           ...values.data,

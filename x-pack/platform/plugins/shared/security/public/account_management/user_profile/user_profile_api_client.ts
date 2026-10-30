@@ -27,6 +27,22 @@ import type { GetUserProfileResponse, UserProfile } from '../../../common';
  */
 const DEFAULT_PROFILE_CACHE_KEY = '__profile__';
 
+/**
+ * The profile data API validates `userSettings.locale` against the locales the deployment
+ * enables, and that list can shrink after a locale is stored. Re-posting the stored locale
+ * would then reject the whole update.
+ */
+function omitStoredLocale(
+  body: Partial<UserProfileData>,
+  stored: UserProfileData | null
+): Partial<UserProfileData> {
+  if (!body.userSettings?.locale || body.userSettings.locale !== stored?.userSettings?.locale) {
+    return body;
+  }
+  const { locale: _locale, ...userSettings } = body.userSettings;
+  return { ...body, userSettings };
+}
+
 export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly _cache = new Map<string, Promise<GetUserProfileResponse>>();
 
@@ -143,7 +159,8 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   /**
-   * Replaces the in-memory profile with `data` and posts that same object.
+   * Replaces the in-memory profile with `data` and posts it, leaving out a locale that matches
+   * the stored one.
    */
   public update<D extends UserProfileData>(data: D) {
     return this.postProfileData(data, data);
@@ -152,9 +169,8 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   /**
    * Merges `data` into the in-memory profile and posts only `data`.
    *
-   * The profile data API merges the body into the stored document, so a field
-   * left out of `data` stays stored and is not re-validated. Posting the merged
-   * cache would send those untouched fields back through that validation.
+   * The profile data API merges the body into the stored document, so fields left
+   * out of `data` keep their stored values and skip request validation.
    * @param data Fields to merge into the stored profile.
    */
   public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
@@ -167,7 +183,9 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
     this._userProfile$.next(optimistic);
 
     return this.http
-      .post('/internal/security/user_profile/_data', { body: JSON.stringify(body) })
+      .post('/internal/security/user_profile/_data', {
+        body: JSON.stringify(omitStoredLocale(body, previous)),
+      })
       .then(() => {
         this._cache.clear();
         this.internalDataUpdates$.next(optimistic);
