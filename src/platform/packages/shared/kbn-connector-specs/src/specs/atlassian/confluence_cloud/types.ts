@@ -11,6 +11,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_ID_LENGTH = 200;
 // Page and space IDs are int64 in the Confluence v2 spec: at most 19 digits.
+const MAX_NUMERIC_ID_LENGTH = 19;
 const NUMERIC_ID_REGEX = /^\d{1,19}$/;
 const MAX_CURSOR_LENGTH = 2048;
 // Confluence v2 accepts up to 100 `space-id` values on GET /pages, and up to 250 `ids` or `keys` on GET /spaces.
@@ -41,7 +42,7 @@ export const SPACE_TYPES = [
 ] as const;
 export const SPACE_STATUSES = ['current', 'archived', 'trashed'] as const;
 
-const numericId = () => z.string().trim().regex(NUMERIC_ID_REGEX);
+const numericId = () => z.string().trim().max(MAX_NUMERIC_ID_LENGTH).regex(NUMERIC_ID_REGEX);
 
 // =============================================================================
 // Action input schemas & inferred types
