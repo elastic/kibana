@@ -19,6 +19,7 @@ import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import type { RandomSamplerStorage } from './sampling_menu';
@@ -29,7 +30,10 @@ export type EventRate = Array<{
   docCount: number;
 }>;
 
-export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage) {
+export function useCategorizeRequest(
+  randomSamplerStorage: RandomSamplerStorage,
+  requestCancellationManager?: RequestCancellationManager
+) {
   const { data } = useAiopsAppContext();
 
   const abortController = useRef(new AbortController());
@@ -71,7 +75,14 @@ export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage)
               true,
               additionalFilter === undefined // don't include the outer sparkline if there is an additional filter
             ),
-            { abortSignal: abortController.current.signal }
+            {
+              abortSignal: requestCancellationManager
+                ? AbortSignal.any([
+                    abortController.current.signal,
+                    requestCancellationManager.signal,
+                  ])
+                : abortController.current.signal,
+            }
           )
           .subscribe({
             next: (result) => {
@@ -92,7 +103,7 @@ export function useCategorizeRequest(randomSamplerStorage: RandomSamplerStorage)
           });
       });
     },
-    [data.search, randomSampler]
+    [data.search, randomSampler, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {

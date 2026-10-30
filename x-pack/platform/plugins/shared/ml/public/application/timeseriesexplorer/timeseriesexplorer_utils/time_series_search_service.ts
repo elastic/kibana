@@ -142,7 +142,8 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
     entityFields: MlEntityField[],
     earliestMs: number,
     latestMs: number,
-    metricFunctionDescription?: ES_AGGREGATION
+    metricFunctionDescription?: ES_AGGREGATION,
+    signal?: AbortSignal
   ) {
     return new Promise((resolve, reject) => {
       const obj: TimeSeriesExplorerChartDetails = {
@@ -180,6 +181,7 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
             earliestMs,
             latestMs,
             datafeed,
+            signal,
           })
           .then((results: any) => {
             each(blankEntityFields, (field) => {

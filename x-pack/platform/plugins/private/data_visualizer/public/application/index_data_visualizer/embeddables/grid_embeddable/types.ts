@@ -9,6 +9,7 @@ import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
@@ -106,6 +107,10 @@ export interface FieldStatisticTableEmbeddableProps {
    * Reports `undefined` while a (re)load is in progress.
    */
   onFieldsCountChange?: (fieldsCount: number | undefined) => void;
+  /**
+   * Optional manager used by dashboard panels to cancel in-flight and pending requests
+   */
+  requestCancellationManager?: RequestCancellationManager;
 
   isInteractive?: boolean;
 }

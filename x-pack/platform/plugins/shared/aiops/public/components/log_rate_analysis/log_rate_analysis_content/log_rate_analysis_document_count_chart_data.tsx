@@ -9,6 +9,7 @@ import { type FC, useEffect } from 'react';
 import type { Moment } from 'moment';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 
 import {
   useAppDispatch,
@@ -27,11 +28,15 @@ export interface LogRateAnalysisDocumentcountChartDataProps {
   timeRange?: { min: Moment; max: Moment };
   /** Optional Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
+  /** Optional callback reporting whether a document count request is in flight */
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
 export const LogRateAnalysisDocumentCountChartData: FC<
   LogRateAnalysisDocumentcountChartDataProps
-> = ({ timeRange, esSearchQuery }) => {
+> = ({ timeRange, esSearchQuery, requestCancellationManager, onLoadingChange }) => {
   const { dataView } = useDataSource();
 
   const currentSelectedGroup = useCurrentSelectedGroup();
@@ -47,7 +52,10 @@ export const LogRateAnalysisDocumentCountChartData: FC<
     currentSelectedGroup,
     undefined,
     true,
-    timeRange
+    timeRange,
+    requestCancellationManager,
+    undefined,
+    onLoadingChange
   );
 
   // TODO Since `useData` isn't just used within Log Rate Analysis, this is a bit of

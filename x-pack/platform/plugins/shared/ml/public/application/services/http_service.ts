@@ -19,7 +19,7 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
   path: string;
   fetchOptions: HttpFetchOptions;
 } {
-  const { path, method, headers, body, query, version } = options;
+  const { path, method, headers, body, query, version, signal } = options;
   if (!path) {
     throw new Error('URL path is missing');
   }
@@ -39,6 +39,9 @@ function getFetchOptions(options: HttpFetchOptionsWithPath): {
   }
   if (version) {
     fetchOptions.version = version;
+  }
+  if (signal) {
+    fetchOptions.signal = signal;
   }
 
   return {

@@ -13,13 +13,14 @@ import { getTimeFieldRange } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DEFAULT_MINIMUM_TIME_RANGE_OPTION, MINIMUM_TIME_RANGE } from './minimum_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../../types/storage';
 import { AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE } from '../../../types/storage';
 import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
-export function useMinimumTimeRange() {
+export function useMinimumTimeRange(requestCancellationManager?: RequestCancellationManager) {
   const { http } = useAiopsAppContext();
   const abortController = useRef(new AbortController());
 
@@ -51,7 +52,9 @@ export function useMinimumTimeRange() {
         query: queryIn,
         runtimeMappings,
         path: '/internal/file_upload/time_field_range',
-        signal: abortController.current.signal,
+        signal: requestCancellationManager
+          ? AbortSignal.any([abortController.current.signal, requestCancellationManager.signal])
+          : abortController.current.signal,
       });
 
       if (resp.end.epoch === null || resp.start.epoch === null) {
@@ -79,7 +82,7 @@ export function useMinimumTimeRange() {
         useSubAgg: true,
       };
     },
-    [http]
+    [http, requestCancellationManager]
   );
 
   const [minimumTimeRangeOption, setMinimumTimeRangeOption] = useStorage<

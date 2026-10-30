@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { fetch$ } from '@kbn/presentation-publishing';
+import { fetch$, type RequestCancellationManager } from '@kbn/presentation-publishing';
 import {
   BehaviorSubject,
   catchError,
@@ -14,7 +14,6 @@ import {
   debounceTime,
   distinctUntilChanged,
   EMPTY,
-  from,
   map,
   type Observable,
   of,
@@ -27,6 +26,7 @@ import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../../../common/constants/explorer';
 import type { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
+import { fromAbortablePromise } from '../common/from_abortable_promise';
 import { getJobsObservable } from '../common/get_jobs_observable';
 import { processFilters } from '../common/process_filters';
 import type { AnomalySwimlaneServices } from '../types';
@@ -39,7 +39,8 @@ export const initializeSwimLaneDataFetcher = (
   chartWidth$: Observable<number | undefined>,
   dataLoading$: BehaviorSubject<boolean | undefined>,
   blockingError$: BehaviorSubject<Error | undefined>,
-  services: AnomalySwimlaneServices
+  services: AnomalySwimlaneServices,
+  requestCancellationManager: RequestCancellationManager
 ) => {
   const { anomalyTimelineService, anomalyDetectorService } = services;
 
@@ -84,11 +85,19 @@ export const initializeSwimLaneDataFetcher = (
   ])
     .pipe(
       tap(() => {
+        // Starting a new load lifts a previous cancellation. This happens before the debounce so
+        // that cancelling while the fetch is still debouncing prevents the requests from starting.
+        requestCancellationManager.startLoad();
         dataLoading$.next(true);
       }),
       debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
       switchMap(([explorerJobs, input, fetchContext, bucketInterval]) => {
         const { query, filters } = fetchContext;
+        const { signal } = requestCancellationManager;
+        if (signal.aborted) {
+          // Cancelled before the requests started, `cancelRequests` already cleared the loading state.
+          return EMPTY;
+        }
         if (!explorerJobs) {
           // couldn't load the list of jobs
           return of(undefined);
@@ -109,13 +118,16 @@ export const initializeSwimLaneDataFetcher = (
           return EMPTY;
         }
 
-        return from(
-          anomalyTimelineService.loadOverallData(
-            explorerJobs,
-            undefined,
-            bucketInterval,
-            severityThresholds
-          )
+        return fromAbortablePromise(
+          (requestSignal) =>
+            anomalyTimelineService.loadOverallData(
+              explorerJobs,
+              undefined,
+              bucketInterval,
+              severityThresholds,
+              requestSignal
+            ),
+          signal
         ).pipe(
           switchMap((overallSwimlaneData) => {
             const { earliest, latest } = overallSwimlaneData;
@@ -123,20 +135,23 @@ export const initializeSwimLaneDataFetcher = (
             if (overallSwimlaneData && swimlaneType === SWIMLANE_TYPE.VIEW_BY) {
               const swimLaneLimit = ANOMALY_SWIM_LANE_HARD_LIMIT;
 
-              return from(
-                anomalyTimelineService.loadViewBySwimlane(
-                  [],
-                  { earliest, latest },
-                  explorerJobs,
-                  viewBy!,
-                  swimLaneLimit,
-                  perPage!,
-                  fromPage,
-                  undefined,
-                  appliedFilters,
-                  bucketInterval,
-                  severityThresholds
-                )
+              return fromAbortablePromise(
+                (requestSignal) =>
+                  anomalyTimelineService.loadViewBySwimlane(
+                    [],
+                    { earliest, latest },
+                    explorerJobs,
+                    viewBy!,
+                    swimLaneLimit,
+                    perPage!,
+                    fromPage,
+                    undefined,
+                    appliedFilters,
+                    bucketInterval,
+                    severityThresholds,
+                    requestSignal
+                  ),
+                signal
               ).pipe(
                 map((viewBySwimlaneData) => {
                   return {

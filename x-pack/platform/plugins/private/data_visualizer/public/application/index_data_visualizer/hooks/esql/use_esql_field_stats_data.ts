@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -28,12 +29,14 @@ export const useESQLFieldStatsData = <T extends Column>({
   filter,
   limit,
   timeRange,
+  requestCancellationManager,
 }: {
   searchQuery?: AggregateQuery;
   columns?: T[];
   filter?: QueryDslQueryContainer;
   limit: number;
   timeRange?: TimeRange;
+  requestCancellationManager?: RequestCancellationManager;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
@@ -49,7 +52,7 @@ export const useESQLFieldStatsData = <T extends Column>({
     },
   } = useDataVisualizerKibana();
 
-  const { runRequest, cancelRequest } = useCancellableSearch(data);
+  const { runRequest, cancelRequest } = useCancellableSearch(data, requestCancellationManager);
 
   useEffect(
     function updateFieldStats() {
@@ -57,6 +60,12 @@ export const useESQLFieldStatsData = <T extends Column>({
 
       const fetchFieldStats = async () => {
         cancelRequest();
+
+        // The panel was cancelled and no new load has started yet, don't start requests.
+        if (requestCancellationManager?.signal.aborted) {
+          setFetchState({ isRunning: false, cancelled: true });
+          return;
+        }
 
         setFetchState({
           ...getInitialProgress(),
@@ -132,7 +141,9 @@ export const useESQLFieldStatsData = <T extends Column>({
             isRunning: false,
           });
         } catch (e) {
-          if (e.name !== 'AbortError') {
+          if (e.name === 'AbortError') {
+            setFetchState({ isRunning: false, cancelled: true });
+          } else {
             const title = i18n.translate(
               'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
               {

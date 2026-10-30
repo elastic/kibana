@@ -140,13 +140,14 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch(query: ESSearchRequest, jobIds: string[]) {
+  anomalySearch(query: ESSearchRequest, jobIds: string[], signal?: AbortSignal) {
     const body = JSON.stringify({ query, jobIds });
     return httpService.http<ESSearchResponse<MlAnomalyRecordDoc>>({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_search`,
       method: 'POST',
       body,
       version: '1',
+      signal,
     });
   },
 
@@ -256,43 +257,51 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  getScoresByBucket(payload: {
-    jobIds: string[];
-    earliestMs: number;
-    latestMs: number;
-    intervalMs: number;
-    perPage?: number;
-    fromPage?: number;
-    swimLaneSeverity?: Array<{ min: number; max?: number }>;
-  }) {
+  getScoresByBucket(
+    payload: {
+      jobIds: string[];
+      earliestMs: number;
+      latestMs: number;
+      intervalMs: number;
+      perPage?: number;
+      fromPage?: number;
+      swimLaneSeverity?: Array<{ min: number; max?: number }>;
+    },
+    signal?: AbortSignal
+  ) {
     const body = JSON.stringify(payload);
     return httpService.http<ViewByResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
       method: 'POST',
       body,
       version: '1',
+      signal,
     });
   },
 
-  getInfluencerValueMaxScoreByTime(payload: {
-    jobIds: string[];
-    influencerFieldName: string;
-    influencerFieldValues?: string[];
-    earliestMs: number;
-    latestMs: number;
-    intervalMs: number;
-    maxResults?: number;
-    perPage?: number;
-    fromPage?: number;
-    influencersFilterQuery?: unknown;
-    swimLaneSeverity?: Array<{ min: number; max?: number }>;
-  }) {
+  getInfluencerValueMaxScoreByTime(
+    payload: {
+      jobIds: string[];
+      influencerFieldName: string;
+      influencerFieldValues?: string[];
+      earliestMs: number;
+      latestMs: number;
+      intervalMs: number;
+      maxResults?: number;
+      perPage?: number;
+      fromPage?: number;
+      influencersFilterQuery?: unknown;
+      swimLaneSeverity?: Array<{ min: number; max?: number }>;
+    },
+    signal?: AbortSignal
+  ) {
     const body = JSON.stringify(payload);
     return httpService.http<ViewByResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
       method: 'POST',
       body,
       version: '1',
+      signal,
     });
   },
 });

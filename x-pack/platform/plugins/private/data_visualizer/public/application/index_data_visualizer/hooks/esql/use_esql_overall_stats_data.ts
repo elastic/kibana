@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -212,7 +213,8 @@ export const useESQLOverallStatsData = (
         totalCount?: number;
         timeRange?: TimeRange;
       }
-    | undefined
+    | undefined,
+  requestCancellationManager?: RequestCancellationManager
 ) => {
   const {
     services: {
@@ -226,7 +228,7 @@ export const useESQLOverallStatsData = (
   const previousError = useRef<Error | undefined>();
   const fetchGeneration = useRef(0);
 
-  const { runRequest, cancelRequest } = useCancellableSearch(data);
+  const { runRequest, cancelRequest } = useCancellableSearch(data, requestCancellationManager);
 
   // An aborted request resolves with `null` rather than throwing, so a superseded run resumes past its awaits and keeps writing state.
   const cancelOverallStatsRequest = useCallback(() => {
@@ -277,6 +279,12 @@ export const useESQLOverallStatsData = (
         const generation = fetchGeneration.current;
         const isStale = () => fetchGeneration.current !== generation;
 
+        // The panel was cancelled and no new load has started yet, don't start requests.
+        if (requestCancellationManager?.signal.aborted) {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          return;
+        }
+
         setOverallStatsProgress({
           ...getInitialProgress(),
           isRunning: true,
@@ -323,6 +331,13 @@ export const useESQLOverallStatsData = (
         )) as ESQLResponse | undefined;
         if (isStale()) return;
         setQueryHistoryStatus(false);
+
+        // `runRequest` resolves with `null` when the request was cancelled.
+        if (!columnsResp) {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          return;
+        }
+
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
           : [];
@@ -384,6 +399,11 @@ export const useESQLOverallStatsData = (
             onError,
             timeRange
           );
+
+          if (requestCancellationManager?.signal.aborted) {
+            setOverallStatsProgress({ isRunning: false, cancelled: true });
+            return;
+          }
 
           if (isStale()) return;
           totalCount = results.totalCount;
@@ -497,6 +517,11 @@ export const useESQLOverallStatsData = (
           setTableData({ exampleDocs });
         }
       } catch (error) {
+        if (error.name === 'AbortError') {
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
+          setQueryHistoryStatus(false);
+          return;
+        }
         setOverallStatsProgress({
           loaded: 100,
           isRunning: false,

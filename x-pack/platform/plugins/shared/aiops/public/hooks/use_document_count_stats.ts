@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 
@@ -62,7 +63,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
   changePointsByDefault = true,
+  requestCancellationManager?: RequestCancellationManager,
   projectRoutingOverride?: string,
+  onLoadingChange?: (isLoading: boolean) => void,
   esqlQuery?: string
 ): DocumentStats {
   const {
@@ -72,6 +75,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
+  // Only the latest request may report that loading finished, a superseded request
+  // finishing late must not clear the loading state of the one that replaced it.
+  const latestRequestId = useRef(0);
 
   const [documentStats, setDocumentStats] = useState<DocumentStats>({
     sampleProbability: 1,
@@ -85,15 +91,30 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   );
 
   const fetchDocumentCountData = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
+
     if (!searchParams) return;
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
+      onLoadingChange?.(false);
       return;
     }
 
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      onLoadingChange?.(false);
+      return;
+    }
+
+    onLoadingChange?.(true);
+
+    let signal = abortCtrl.current.signal;
     try {
       abortCtrl.current = new AbortController();
+      signal = requestCancellationManager
+        ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+        : abortCtrl.current.signal;
 
       if (
         esqlQuery !== undefined &&
@@ -111,7 +132,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           latest: searchParams.latest,
           intervalMs: searchParams.intervalMs,
           searchQuery: searchParams.searchQuery,
-          signal: abortCtrl.current.signal,
+          signal,
         });
         const esqlStats: DocumentStats = { sampleProbability: 1, documentCountStats, totalCount };
         setDocumentStats(esqlStats);
@@ -140,7 +161,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           {
             params: getDocumentCountStatsRequest(totalHitsParams, undefined, changePointsByDefault),
           },
-          { abortSignal: abortCtrl.current.signal }
+          { abortSignal: signal }
         )
       );
       const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
@@ -161,7 +182,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
               searchParamsCompare === undefined && changePointsByDefault
             ),
           },
-          { abortSignal: abortCtrl.current.signal }
+          { abortSignal: signal }
         )
       );
 
@@ -186,7 +207,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
                 randomSamplerWrapper
               ),
             },
-            { abortSignal: abortCtrl.current.signal }
+            { abortSignal: signal }
           )
         );
 
@@ -207,17 +228,30 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       });
     } catch (error) {
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
-      if (error.name !== 'AbortError') {
-        displayError(toasts, searchParams!.index, extractErrorProperties(error));
-        setDocumentStats((previous) => ({
-          ...previous,
-          errorMessage: extractErrorMessage(error),
-        }));
+      // Aborting with `AbortReason.REPLACED` does not surface as `AbortError`; the composed signal is aborted instead.
+      if (signal.aborted || error.name === 'AbortError') {
+        return;
+      }
+      displayError(toasts, searchParams!.index, extractErrorProperties(error));
+      setDocumentStats((previous) => ({
+        ...previous,
+        errorMessage: extractErrorMessage(error),
+      }));
+    } finally {
+      if (requestId === latestRequestId.current) {
+        onLoadingChange?.(false);
       }
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.search, documentStatsCache, cacheKey]);
+  }, [
+    data?.search,
+    documentStatsCache,
+    cacheKey,
+    requestCancellationManager,
+    projectRoutingOverride,
+    onLoadingChange,
+  ]);
 
   useEffect(
     function getDocumentCountData() {

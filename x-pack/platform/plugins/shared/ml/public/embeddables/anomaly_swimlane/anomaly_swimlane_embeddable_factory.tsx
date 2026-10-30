@@ -17,12 +17,14 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesUnifiedSearch, ViewMode } from '@kbn/presentation-publishing';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import {
   apiHasExecutionContext,
   fetch$,
   getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
+  RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
@@ -108,6 +110,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 
       const interval = new BehaviorSubject<number | undefined>(undefined);
 
+      const requestCancellationManager = new RequestCancellationManager();
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const rendered$ = new BehaviorSubject<boolean>(false);
       subscriptions.add(
@@ -204,13 +207,20 @@ export const getAnomalySwimLaneEmbeddableFactory = (
         ),
         dataLoading$,
         rendered$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
       const { swimLaneData$, onDestroy } = initializeSwimLaneDataFetcher(
         api,
         chartWidth$.asObservable(),
         dataLoading$,
         blockingError$,
-        anomalySwimLaneServices
+        anomalySwimLaneServices,
+        requestCancellationManager
       );
 
       subscriptions.add(

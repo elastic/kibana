@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { Moment } from 'moment';
 
@@ -22,11 +22,13 @@ import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 import { useDocumentCountStats } from './use_document_count_stats';
+import { useReload } from './use_reload';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -40,7 +42,9 @@ export const useData = (
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment },
+  requestCancellationManager?: RequestCancellationManager,
   projectRoutingOverride?: string,
+  onDocumentCountLoadingChange?: (isLoading: boolean) => void,
   /** ES|QL document scope; when set, document counts come from ES|QL instead of DSL. */
   esqlQuery?: string,
   /** Upper limit for the number of histogram buckets, instead of the `histogram:maxBars` setting. */
@@ -56,6 +60,20 @@ export const useData = (
   });
 
   const [lastRefresh, setLastRefresh] = useState(0);
+  const { refreshTimestamp } = useReload();
+  const reloadTimestampOnMount = useRef(refreshTimestamp);
+
+  // Dashboard refresh emits on the timefilter before `fetch$` runs `startLoad`, so a request
+  // started from that tick is aborted. ReloadContext updates only after the new signal exists.
+  useEffect(() => {
+    if (!requestCancellationManager) {
+      return;
+    }
+    if (refreshTimestamp === reloadTimestampOnMount.current) {
+      return;
+    }
+    setLastRefresh(Date.now());
+  }, [refreshTimestamp, requestCancellationManager]);
 
   const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
@@ -117,7 +135,9 @@ export const useData = (
     selectedSignificantItemStatsRequest,
     lastRefresh,
     changePointsByDefault,
+    requestCancellationManager,
     projectRoutingOverride,
+    onDocumentCountLoadingChange,
     esqlQuery
   );
 

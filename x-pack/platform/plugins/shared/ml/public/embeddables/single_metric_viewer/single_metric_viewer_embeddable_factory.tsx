@@ -13,12 +13,14 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
+import type { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
   getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
+  RequestCancellationManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
@@ -62,6 +64,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
         titleManager.api
       );
 
+      const requestCancellationManager = new RequestCancellationManager();
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
@@ -130,11 +133,24 @@ export const getSingleMetricViewerEmbeddableFactory = (
         ...stateApi,
         dataLoading$,
         blockingError$,
+        cancelRequests: (reason?: AbortReason) => {
+          requestCancellationManager.cancel(reason);
+          // Without this the dashboard keeps showing the panel as loading, which keeps the
+          // cancel button visible and blocks `waitForPanelsToLoad$`.
+          dataLoading$.next(false);
+        },
       });
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
         api,
         services[1].data.query.timefilter.timefilter
+      );
+
+      // Starting a new load lifts a previous cancellation. The data fetcher emits whenever the
+      // fetch context or one of the panel's data inputs changes, before the chart (a later
+      // subscriber) starts loading.
+      subscriptions.add(
+        singleMetricViewerData$.subscribe(() => requestCancellationManager.startLoad())
       );
 
       const SingleMetricViewerComponent = getSingleMetricViewerComponent(...services, api);
@@ -201,6 +217,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
               onRenderComplete={() => {
                 dataLoading$.next(false);
               }}
+              requestCancellationManager={requestCancellationManager}
             />
           );
         },

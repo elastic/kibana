@@ -182,6 +182,8 @@ export interface DataStatsFetchProgress {
   isRunning: boolean;
   loaded: number;
   total: number;
+  /** Set when the fetch was cancelled before completing, the progress won't reach 100 */
+  cancelled?: boolean;
 }
 
 export interface Field {

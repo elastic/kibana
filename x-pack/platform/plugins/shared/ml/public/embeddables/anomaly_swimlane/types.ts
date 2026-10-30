@@ -8,6 +8,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   PublishesDataSources,
   PublishesUnifiedSearch,
@@ -45,6 +46,7 @@ export interface AnomalySwimLaneComponentApi {
 }
 
 export type AnomalySwimLaneEmbeddableApi = MlEmbeddableBaseApi<AnomalySwimLaneEmbeddableState> &
+  CanCancelRequests &
   PublishesDataSources<DataView> &
   PublishesUnifiedSearch &
   PublishesWritableTitle &
