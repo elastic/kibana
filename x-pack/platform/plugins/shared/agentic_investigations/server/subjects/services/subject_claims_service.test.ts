@@ -174,6 +174,26 @@ describe('SubjectClaimsService', () => {
     ).resolves.toEqual({ claimed: true });
   });
 
+  it('removes the claims it already wrote when a later claim fails', async () => {
+    const { storage, service, holderOf } = setup();
+    const index = storage.index as jest.Mock;
+    const realIndex = index.getMockImplementation();
+    index.mockImplementationOnce(async (request) => realIndex?.(request));
+    index.mockRejectedValueOnce(new Error('storage unavailable'));
+
+    await expect(
+      service.claim({
+        spaceId: SPACE_ID,
+        conversationId: 'conv-1',
+        subjects: [ALERT, EVENT],
+        isHolderOpen: isOpen(true),
+      })
+    ).rejects.toThrow('storage unavailable');
+
+    expect(holderOf(ALERT)).toBeUndefined();
+    expect(holderOf(EVENT)).toBeUndefined();
+  });
+
   it('re-reads when a concurrent start wins the create', async () => {
     const { storage, service } = setup();
     const id = subjectClaimId(SPACE_ID, ALERT);
