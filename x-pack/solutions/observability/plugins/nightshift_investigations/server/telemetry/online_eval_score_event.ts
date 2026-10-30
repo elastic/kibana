@@ -18,9 +18,11 @@ export type OnlineEvalEntryPoint = 'start_api' | 'automation' | 'slack' | 'alert
 
 /**
  * Why an evaluator produced no score. `evidence_unmet` counts as skipped: the round didn't have
- * what the evaluator grades. Error messages are never sent, because they can quote evidence.
+ * what the evaluator grades. `evaluation_failed` means no evaluator ran, because the evidence
+ * couldn't be read or `evaluate()` threw. Error messages are never sent, because they can quote
+ * evidence.
  */
-export type OnlineEvalErrorCode = 'evidence_unmet' | 'evaluator_error';
+export type OnlineEvalErrorCode = 'evidence_unmet' | 'evaluator_error' | 'evaluation_failed';
 
 export interface OnlineEvalScore {
   evaluator_name: string;
@@ -33,7 +35,8 @@ export interface OnlineEvalScore {
 
 export interface OnlineEvalError {
   evaluator_name: string;
-  evaluator_version: string;
+  /** Absent when the evaluation failed before the evaluator was resolved. */
+  evaluator_version?: string;
   code: OnlineEvalErrorCode;
 }
 
@@ -182,7 +185,9 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   },
   failed_count: {
     type: 'long',
-    _meta: { description: 'Evaluators that failed.' },
+    _meta: {
+      description: 'Evaluators that failed, including every evaluator of a failed evaluation.',
+    },
   },
   skipped_count: {
     type: 'long',
@@ -193,10 +198,16 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
     items: {
       properties: {
         evaluator_name: evaluatorNameSchema,
-        evaluator_version: evaluatorVersionSchema,
+        evaluator_version: {
+          type: 'keyword',
+          _meta: { description: 'Version of the evaluator, when it was resolved.', optional: true },
+        },
         code: {
           type: 'keyword',
-          _meta: { description: 'Error code: evidence_unmet (skipped) or evaluator_error.' },
+          _meta: {
+            description:
+              'Error code: evidence_unmet (skipped), evaluator_error, or evaluation_failed when no evaluator ran.',
+          },
         },
       },
     },
