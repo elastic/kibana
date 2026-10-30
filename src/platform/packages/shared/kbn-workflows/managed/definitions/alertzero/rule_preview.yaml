@@ -30,8 +30,8 @@ triggers:
           description: >-
             Source indices the bodies read. Checked for `read` as the running identity
             before any preview; an unreadable one skips both previews. Exclusion
-            patterns (`-name`) and cross-cluster patterns (`cluster:name`) are ignored;
-            a `::selector` suffix is dropped.
+            patterns (`-name`), cross-cluster patterns (`cluster:name`) and date math
+            names (`<name-{now/d}>`) are ignored; a `::selector` suffix is dropped.
       required:
         - preview_body
         - space_id
@@ -77,6 +77,8 @@ steps:
   # - drops `-name` exclusion patterns (not a name to hold a privilege on)
   # - drops `cluster:name` remote patterns (the API checks local grants only, so a
   #   remote pattern the role holds through `remote_indices` would come back false)
+  # - drops `<name-{now/d}>` date math names (the API matches the literal name, so
+  #   one under a granted pattern would come back false)
   # - strips `::failures` / `::data` selectors (the API rejects a request with one)
   # Rendered as a JSON array body, since Liquid cannot filter an array otherwise.
   - name: checkable_indices
@@ -86,7 +88,7 @@ steps:
         {%- for name in inputs.indices -%}
         {%- assign base = name | split: '::' | first -%}
         {%- assign first = base | slice: 0, 1 -%}
-        {%- if first == '-' or base contains ':' -%}{%- else -%},{{ base | json }}{%- endif -%}
+        {%- if first == '-' or first == '<' or base contains ':' -%}{%- else -%},{{ base | json }}{%- endif -%}
         {%- endfor -%}
 
   - name: probe_privileges
@@ -164,14 +166,16 @@ steps:
         {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
         {%- endfor -%}
         {%- endfor -%}
-      # Non-empty when an invocation stopped at the rule's max_signals: the count is
+      # 'true' when an invocation stopped at the rule's max_signals: the count is
       # then a floor, not the number of alerts the rule would have produced.
-      limit_hits: |-
+      limit_reached: |-
+        {%- assign hit = false -%}
         {%- for log in steps.preview_rule.output.logs -%}
         {%- for warn in log.warnings -%}
-        {%- if warn contains 'reached the maximum alert limit' -%}x{%- endif -%}
+        {%- if warn contains 'reached the maximum alert limit' -%}{%- assign hit = true -%}{%- endif -%}
         {%- endfor -%}
         {%- endfor -%}
+        {{ hit }}
 
   # The second body runs inside this same execution on purpose: two consecutive
   # synchronous child workflows in a caller share one immediate-resume slot, and a
@@ -219,12 +223,14 @@ steps:
         {%- if warn contains 'Unable to find matching' -%}{{ warn }}; {% endif -%}
         {%- endfor -%}
         {%- endfor -%}
-      limit_hits: |-
+      limit_reached: |-
+        {%- assign hit = false -%}
         {%- for log in steps.preview_proposed.output.logs -%}
         {%- for warn in log.warnings -%}
-        {%- if warn contains 'reached the maximum alert limit' -%}x{%- endif -%}
+        {%- if warn contains 'reached the maximum alert limit' -%}{%- assign hit = true -%}{%- endif -%}
         {%- endfor -%}
         {%- endfor -%}
+        {{ hit }}
 
   # A partial or timed-out count could report fewer alerts than the preview produced,
   # so it fails the verdict rather than understating a backtest.
@@ -258,5 +264,5 @@ steps:
       unreadable_indices: "{{ steps.collect_unreadable_indices.output.unreadable_indices | remove_first: ', ' }}"
       no_matching_indices: "${{ steps.collect_errors.output.error_text contains 'Unable to find matching' }}"
       proposed_no_matching_indices: "${{ steps.collect_proposed_errors.output.error_text contains 'Unable to find matching' }}"
-      alert_limit_reached: "${{ steps.collect_errors.output.limit_hits != blank }}"
-      proposed_alert_limit_reached: "${{ steps.collect_proposed_errors.output.limit_hits != blank }}"
+      alert_limit_reached: "${{ steps.collect_errors.output.limit_reached == 'true' }}"
+      proposed_alert_limit_reached: "${{ steps.collect_proposed_errors.output.limit_reached == 'true' }}"

@@ -1515,6 +1515,7 @@ describe('detection rule workflows', () => {
               'remote1:logs-*',
               '*:logs-*',
               'remote1:logs-*::failures',
+              '<logs-acme.{now/d}>',
               'custom-edr-*',
               'custom-edr-*::failures',
             ])
@@ -1522,6 +1523,7 @@ describe('detection rule workflows', () => {
         ).toEqual(['logs-*', 'custom-edr-*', 'custom-edr-*']);
         expect(csvOf(['-*elastic-cloud-logs-*'])).toBe('');
         expect(csvOf(['remote1:logs-*'])).toBe('');
+        expect(csvOf(['<logs-acme.{now/d}>'])).toBe('');
         expect(namesOf(csvOf(['logs-*::data']))).toEqual(['logs-*']);
         expect(csvOf(undefined)).toBe('');
         for (const name of ['preview_rule', 'preview_proposed']) {
@@ -1614,7 +1616,7 @@ describe('detection rule workflows', () => {
         ]) {
           const collect = byName(step).with as Record<string, string>;
           const render = (logs: unknown[]) =>
-            createWorkflowLiquidEngine().parseAndRenderSync(String(collect.limit_hits), {
+            createWorkflowLiquidEngine().parseAndRenderSync(String(collect.limit_reached), {
               steps: { [source]: { output: { logs } } },
             });
 
@@ -1622,18 +1624,22 @@ describe('detection rule workflows', () => {
             { errors: [], warnings: [] },
             { errors: [], warnings: [warning] },
           ]);
-          expect(capped).not.toBe('');
+          expect(capped).toBe('true');
           expect(
-            resolveExpression(emit[flag], { steps: { [step]: { output: { limit_hits: capped } } } })
+            resolveExpression(emit[flag], {
+              steps: { [step]: { output: { limit_reached: capped } } },
+            })
           ).toBe(true);
           expect(
             resolveExpression(emit[flag], {
-              steps: { [step]: { output: { limit_hits: render([{ errors: [], warnings: [] }]) } } },
+              steps: {
+                [step]: { output: { limit_reached: render([{ errors: [], warnings: [] }]) } },
+              },
             })
           ).toBe(false);
         }
-        expect(emit.succeeded).not.toContain('limit_hits');
-        expect(emit.proposed_succeeded).not.toContain('limit_hits');
+        expect(emit.succeeded).not.toContain('limit_reached');
+        expect(emit.proposed_succeeded).not.toContain('limit_reached');
       });
 
       it('marks capped counts as a floor and never claims a reduction from one', async () => {
