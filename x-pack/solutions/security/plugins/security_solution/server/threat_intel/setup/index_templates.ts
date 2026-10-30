@@ -366,6 +366,10 @@ const threatReportsTemplate = {
             hunted_technique_ids: { type: 'keyword' as const },
             pending_technique_ids: { type: 'keyword' as const },
             coverage_pending: { type: 'boolean' as const },
+            // Consecutive hunt runs that ended retryable without settling the report. The
+            // writer retires the report once it reaches its bound, and candidate selection
+            // ranks reports by it so a retry only takes a slot no new report wants.
+            hunt_retry_count: { type: 'integer' as const },
             // rank_score * a boost derived from hunt feedback. Reserved mapping
             // only: no writer or reader exists yet, Hunt Watch's writer owns it.
             corroborated_rank_score: { type: 'float' as const },
@@ -972,8 +976,8 @@ const migrateExistingPublishedAtMapping = async (
 };
 
 /**
- * `evidence.hunted_technique_ids`, `evidence.pending_technique_ids` and
- * `evidence.coverage_pending`, the hunt coverage ledger, for
+ * `evidence.hunted_technique_ids`, `evidence.pending_technique_ids`,
+ * `evidence.coverage_pending` and `evidence.hunt_retry_count`, the hunt coverage ledger, for
  * clusters whose reports index predates them. `evidence` is already `nested`, so the fragment
  * declares it nested: an omitted `type` defaults to `object`, which Elasticsearch refuses to merge
  * into a nested field. An index without `evidence` is left to the stale-index check, since the
@@ -1004,7 +1008,8 @@ const migrateExistingHuntLedgerMapping = async (
         evidenceProps &&
         (!evidenceProps.hunted_technique_ids ||
           !evidenceProps.pending_technique_ids ||
-          !evidenceProps.coverage_pending)
+          !evidenceProps.coverage_pending ||
+          !evidenceProps.hunt_retry_count)
       ) {
         await esClient.indices.putMapping({
           index: indexName,
@@ -1015,6 +1020,7 @@ const migrateExistingHuntLedgerMapping = async (
                 hunted_technique_ids: { type: 'keyword' },
                 pending_technique_ids: { type: 'keyword' },
                 coverage_pending: { type: 'boolean' },
+                hunt_retry_count: { type: 'integer' },
               },
             },
           },
@@ -1739,6 +1745,7 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'evidence.hunted_technique_ids' },
   { path: 'evidence.pending_technique_ids' },
   { path: 'evidence.coverage_pending' },
+  { path: 'evidence.hunt_retry_count' },
   { path: 'extracted.iocs.value', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.defanged', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.iocs.reference', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },

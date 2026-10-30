@@ -169,10 +169,27 @@ export const buildCandidateQuery = async (
     });
   }
 
+  // A report that ended retryable keeps its rank, so ranking alone would hand it the same
+  // top slot every sweep and a handful of stuck reports would crowd out every new one.
+  // Fewer retries sorts first: a retry only takes a slot no unhunted report wants. The
+  // `unmapped_type` keeps an index the mapping migration has not reached yet sortable,
+  // rather than failing the whole sweep.
+  //
   // `corroborated_rank_score` is nested under `evidence` too, so it needs a nested
   // sort bound to this space's element. Sorting it as a top-level field silently
   // does nothing. `rank_score` is genuinely top level and sorts as written.
   const sort: estypes.SortCombinations[] = [
+    {
+      'evidence.hunt_retry_count': {
+        order: 'asc',
+        missing: 0,
+        unmapped_type: 'integer',
+        nested: {
+          path: 'evidence',
+          filter: { term: { 'evidence.space_id': spaceId } },
+        },
+      },
+    },
     {
       'evidence.corroborated_rank_score': {
         order: 'desc',

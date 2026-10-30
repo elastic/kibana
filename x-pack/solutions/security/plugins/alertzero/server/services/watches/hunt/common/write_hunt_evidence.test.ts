@@ -7,7 +7,12 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
-import { deriveLastHuntStatus, shouldStampHunt, writeHuntEvidence } from './write_hunt_evidence';
+import {
+  deriveLastHuntStatus,
+  MAX_HUNT_RETRY_ATTEMPTS,
+  shouldStampHunt,
+  writeHuntEvidence,
+} from './write_hunt_evidence';
 import type { WriteHuntEvidenceParams } from './write_hunt_evidence';
 
 describe('deriveLastHuntStatus', () => {
@@ -58,7 +63,9 @@ describe('shouldStampHunt', () => {
 
 describe('writeHuntEvidence', () => {
   const logger = loggingSystemMock.createLogger();
-  const makeEsClient = (stored?: Array<{ space_id: string; coverage_pending: boolean }>) => ({
+  const makeEsClient = (
+    stored?: Array<{ space_id: string; coverage_pending: boolean; hunt_retry_count?: number }>
+  ) => ({
     update: jest.fn().mockResolvedValue(stored ? { get: { _source: { evidence: stored } } } : {}),
   });
   const write = (esClient: ReturnType<typeof makeEsClient>, params: WriteHuntEvidenceParams) =>
@@ -206,8 +213,8 @@ describe('writeHuntEvidence', () => {
         searched_technique_ids: ['T1001'],
       })
     );
-    // The script applies the stamp keys only under `params.stamp`, or when the cap settled the run.
-    expect(script.source).toMatch(/if \(params\.stamp \|\| settledByCap\)/);
+    // The script applies the stamp keys only under `params.stamp`, or when a bound settled the run.
+    expect(script.source).toMatch(/if \(params\.stamp \|\| settledByCap \|\| settledByRetries\)/);
   });
 
   it('writes nothing for a retryable run with no hit that searched nothing', async () => {
@@ -295,7 +302,10 @@ describe('writeHuntEvidence', () => {
     expect(script.source).toContain(
       "boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';"
     );
-    expect(script.source).toMatch(/if \(!keepHit\) \{[^}]*last_hunt_status[^}]*last_hunt_run_id/s);
+    expect(script.source).toContain('boolean keepResult = keepHit ||');
+    expect(script.source).toMatch(
+      /if \(!keepResult\) \{[^}]*last_hunt_status[^}]*last_hunt_run_id/s
+    );
     expect(script.params.last_hunt_status).toBe('clean');
   });
 
@@ -337,7 +347,44 @@ describe('writeHuntEvidence', () => {
     expect(script.params.stamp).toBe(false);
     expect(script.params.last_hunt_status).toBe('incomplete');
     expect(script.source).toContain('boolean settledByCap = params.coverage_pending && !pending;');
-    expect(script.source).toContain('if (params.stamp || settledByCap) {');
+    expect(script.source).toContain('if (params.stamp || settledByCap || settledByRetries) {');
+  });
+
+  it('sends the retry bound, which the script uses to retire a report that never settles', async () => {
+    const esClient = makeEsClient();
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    const [{ script }] = esClient.update.mock.calls[0];
+    expect(script.params.max_retries).toBe(MAX_HUNT_RETRY_ATTEMPTS);
+    expect(script.source).toContain('boolean settledByRetries = retries >= params.max_retries;');
+  });
+
+  it('warns when the retry bound retired a report that wanted to continue', async () => {
+    const esClient = makeEsClient([
+      { space_id: 'default', coverage_pending: false, hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS },
+    ]);
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('retired as incomplete'));
   });
 
   describe('a manual replay of the whole report', () => {
@@ -473,7 +520,7 @@ describe('writeHuntEvidence', () => {
       searchedTechniqueIds: ['T1001'],
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('report-1'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('coverage was settled'));
   });
 
   it('does not warn when the run is still pending, or when it never wanted to continue', async () => {
