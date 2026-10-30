@@ -96,6 +96,8 @@ type SearchClientMethods =
   | 'findLatestByEventId';
 
 /** Typed `.rule-events` read client mock; override individual methods by passing a partial mock. */
+const noDeactivations = () => ({ deactivations: new Map(), failed: false });
+
 const makeEventSearchClient = (
   overrides: Partial<jest.Mocked<Pick<RuleEventsClient, SearchClientMethods>>> = {},
   emitTrigger?: TriggerEmitter
@@ -107,7 +109,7 @@ const makeEventSearchClient = (
       findLatestByCurrentStatePaginated: jest.fn(),
       findLatestLive: jest.fn().mockResolvedValue({ hits: [] }),
       findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits: [], heads: [] }),
-      findOperatorDeactivations: jest.fn().mockResolvedValue(new Map()),
+      findOperatorDeactivations: jest.fn().mockResolvedValue(noDeactivations()),
       findByEventId,
       findLatestByEventId: jest
         .fn()
@@ -1566,7 +1568,11 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       reason: 'known noise',
       deactivatedAt: '2026-10-28T10:00:00.000Z',
     };
-    const deactivated = () => jest.fn().mockResolvedValue(new Map([['group-1', deactivation]]));
+    const deactivated = () =>
+      jest.fn().mockResolvedValue({
+        deactivations: new Map([['group-1', deactivation]]),
+        failed: false,
+      });
     const clientWith = (
       findOperatorDeactivations: jest.Mock,
       closed: SignificantEvent = closedSeries()
@@ -1612,23 +1618,32 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
     });
 
-    it('falls back to the closing note when the action reason is blank', async () => {
-      const blankReason = jest
-        .fn()
-        .mockResolvedValue(new Map([['group-1', { ...deactivation, reason: '' }]]));
+    it("does not hold a deactivation without a reason, whose closing note is only the agent's copied note", async () => {
+      const blankReason = jest.fn().mockResolvedValue({
+        deactivations: new Map([['group-1', { ...deactivation, reason: '' }]]),
+        failed: false,
+      });
 
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(
           blankReason,
-          closedSeries({ assessment_note: 'closing note' })
+          closedSeries({ assessment_note: 'agent detection narrative' })
         ),
         inputs: [breachFor('rule-a')],
       });
 
-      expect(results[0]).toMatchObject({
-        reason: 'held_by_deactivation',
-        assessment_note: 'closing note',
+      expect(results[0]).toMatchObject({ written: true, event_id: closedEventId });
+    });
+
+    it('does not hold on the closing note when the deactivation lookup failed', async () => {
+      const failedLookup = jest.fn().mockResolvedValue({ deactivations: new Map(), failed: true });
+
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith(failedLookup, closedSeries({ assessment_note: 'a note' })),
+        inputs: [breachFor('rule-a')],
       });
+
+      expect(results[0]).toMatchObject({ written: true, event_id: closedEventId });
     });
 
     it.each([
@@ -1637,7 +1652,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     ])('does not hold a close whose only note is %s', async (_label, note) => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(
-          jest.fn().mockResolvedValue(new Map()),
+          jest.fn().mockResolvedValue(noDeactivations()),
           closedSeries({ assessment_note: note })
         ),
         inputs: [breachFor('rule-a')],
@@ -1649,7 +1664,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     it('truncates a long note and flags it as truncated', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(
-          jest.fn().mockResolvedValue(new Map()),
+          jest.fn().mockResolvedValue(noDeactivations()),
           closedSeries({ assessment_note: 'x'.repeat(5000) })
         ),
         inputs: [breachFor('rule-a')],
@@ -1665,7 +1680,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     it('does not flag a note that fits', async () => {
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWith(
-          jest.fn().mockResolvedValue(new Map()),
+          jest.fn().mockResolvedValue(noDeactivations()),
           closedSeries({ assessment_note: 'x'.repeat(1000) })
         ),
         inputs: [breachFor('rule-a')],
@@ -1730,8 +1745,8 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       });
 
     it('holds the series an operator deactivated, not the newer one', async () => {
-      const findOperatorDeactivations = jest.fn().mockResolvedValue(
-        new Map([
+      const findOperatorDeactivations = jest.fn().mockResolvedValue({
+        deactivations: new Map([
           [
             'group-older',
             {
@@ -1741,8 +1756,9 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
               deactivatedAt: '2026-10-27T02:00:00.000Z',
             },
           ],
-        ])
-      );
+        ]),
+        failed: false,
+      });
 
       const results = await eventsWriteBulkHandler({
         eventSearchClient: clientWithTwo(findOperatorDeactivations),

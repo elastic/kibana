@@ -120,7 +120,12 @@ export async function eventsWriteBulkHandler({
   const deactivatedGroupHashes =
     competing.length === 0
       ? new Set<string>()
-      : new Set((await eventSearchClient.findOperatorDeactivations({ heads: competing })).keys());
+      : new Set(
+          [
+            ...(await eventSearchClient.findOperatorDeactivations({ heads: competing }))
+              .deactivations,
+          ].flatMap(([groupHash, { reason }]) => (reason === '' ? [] : [groupHash]))
+        );
   const toWrite = markDuplicateKeys(
     reopenMatchingInactiveSeries({
       candidates: unskipped,
@@ -285,9 +290,10 @@ const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is R
 /**
  * Sets aside the writes that would reopen a closed series, so the agent can read why it was closed
  * before the series reopens. The reason is the one recorded with an Alerting v2 `deactivate` action
- * when there is one, otherwise the note on the version that closed the series. Closes are not told
- * apart by who made them. A write that carries `reopen_deactivated` has read it and goes through, and
- * so does one whose series has no note to read (blank or the standard no-reason note). Only a
+ * when there is one; a deactivate without a reason is not held, because that close only copies the
+ * agent's last note. With no such action, the note on the closing version is read, but only when
+ * the deactivation lookup succeeded. A write that carries `reopen_deactivated` has read it and goes
+ * through, and so does one with no note to read (blank or the standard no-reason note). Only a
  * new-event batch that a closed series covers can be held: an item that names a closed event itself
  * has no series head to look up.
  */
@@ -309,12 +315,14 @@ const holdDeactivatedReopens = async ({
 
   // Looked up even for an item that carries `reopen_deactivated`: the flag cannot be proven to
   // follow a hold, so a reopen it lets through is logged.
-  const deactivations = await eventSearchClient.findOperatorDeactivations({
-    heads: reopening.map(({ reopensSeries: { groupHash, episodeId } }) => ({
-      groupHash,
-      episodeId,
-    })),
-  });
+  const { deactivations, failed: lookupFailed } = await eventSearchClient.findOperatorDeactivations(
+    {
+      heads: reopening.map(({ reopensSeries: { groupHash, episodeId } }) => ({
+        groupHash,
+        episodeId,
+      })),
+    }
+  );
   candidates.forEach((candidate) => {
     if (!isReopeningCandidate(candidate)) {
       stage.kept.push(candidate);
@@ -322,7 +330,11 @@ const holdDeactivatedReopens = async ({
     }
     const { groupHash, closedAt, closingNote } = candidate.reopensSeries;
     const action = deactivations.get(groupHash);
-    const fullNote = action?.reason.trim() || closingNote?.trim() || '';
+    // A user deactivate decides alone: its reason is the closer's note, and none means nothing to
+    // read, since the closing version only copies the agent's last note. With no user deactivate
+    // and a completed lookup, the closing version's note is the operator's, from the update route.
+    // A failed lookup proves nothing, so it holds nothing.
+    const fullNote = (action ? action.reason : lookupFailed ? '' : closingNote ?? '').trim();
     const note = fullNote.slice(0, MAX_HELD_NOTE_LENGTH);
     const truncated = fullNote.length > MAX_HELD_NOTE_LENGTH;
     // A close that says nothing gives the agent nothing to read.
