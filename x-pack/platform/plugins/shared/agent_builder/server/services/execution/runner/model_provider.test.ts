@@ -10,7 +10,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
@@ -105,6 +106,43 @@ const setupChatAndClient = (inference: ReturnType<typeof inferenceMock.createSta
   return { chatModel, inferenceClient, getConnectorById };
 };
 
+const createInferenceConnectorMock = (
+  overrides: Partial<InferenceConnector> = {}
+): InferenceConnector => ({
+  connectorId: 'default-connector',
+  name: 'Default connector',
+  type: InferenceConnectorType.OpenAI,
+  config: { providerConfig: { provider: 'openai' } },
+  capabilities: {},
+  isInferenceEndpoint: false,
+  isPreconfigured: false,
+  ...overrides,
+});
+
+/**
+ * Builds a feature-mode chat model mock exposing only the members the provider relies on; the
+ * `Pick` keeps the mock checked against the `InferenceChatModel` contract.
+ */
+const createFeatureChatModelMock = (connector: InferenceConnector): InferenceChatModel => {
+  const chatModel: Pick<InferenceChatModel, 'getConnector'> = {
+    getConnector: () => connector,
+  };
+  return chatModel as InferenceChatModel;
+};
+
+/**
+ * Builds a bound client mock exposing only the members the provider relies on; the `Pick` keeps
+ * the mock checked against the `BoundInferenceClient` contract.
+ */
+const createBoundInferenceClientMock = (): BoundInferenceClient => {
+  const client: Pick<BoundInferenceClient, 'chatComplete' | 'bindTo' | 'getConnectorById'> = {
+    chatComplete: jest.fn(),
+    bindTo: jest.fn(),
+    getConnectorById: jest.fn().mockResolvedValue(createInferenceConnectorMock()),
+  };
+  return client as BoundInferenceClient;
+};
+
 /**
  * Mocks the feature path: `getChatModel` resolves to a chat model exposing the feature's resolved
  * connector through `getConnector()`, and `getClient` returns a feature-bound client.
@@ -113,17 +151,10 @@ const setupFeatureChatAndClient = (
   inference: ReturnType<typeof inferenceMock.createStartContract>,
   { connectorId = 'feature-connector' }: { connectorId?: string } = {}
 ) => {
-  const featureConnector = createConnectorMock({ connectorId });
-  const chatModel = {
-    kind: 'feature-chat-model',
-    getConnector: () => featureConnector,
-  } as unknown as InferenceChatModel;
-  const chatCompleteMock = jest.fn().mockResolvedValue(undefined);
-  const inferenceClient = {
-    chatComplete: chatCompleteMock,
-    bindTo: jest.fn(),
-    getConnectorById: jest.fn().mockResolvedValue(createConnectorMock()),
-  } as unknown as BoundInferenceClient;
+  const featureConnector = createInferenceConnectorMock({ connectorId });
+  const chatModel = createFeatureChatModelMock(featureConnector);
+  const inferenceClient = createBoundInferenceClientMock();
+  const chatCompleteMock = jest.mocked(inferenceClient.chatComplete);
 
   inference.getChatModel.mockResolvedValue(chatModel);
   inference.getClient.mockReturnValue(inferenceClient);
@@ -218,6 +249,24 @@ describe('createModelProvider', () => {
       );
     });
 
+    it('logs the connector id in use for both explicit and resolved connector defaults', async () => {
+      const explicitDeps = setupDeps({ defaultModel: { connectorId: 'explicit-connector' } });
+      setupChatAndClient(explicitDeps.inference);
+      await createModelProvider(explicitDeps).getDefaultModel();
+
+      expect(explicitDeps.logger.debug).toHaveBeenCalledWith(
+        '[getDefaultConnectorId] Using connectorId: explicit-connector'
+      );
+
+      const resolvedDeps = setupDeps();
+      setupChatAndClient(resolvedDeps.inference);
+      await createModelProvider(resolvedDeps).getDefaultModel();
+
+      expect(resolvedDeps.logger.debug).toHaveBeenCalledWith(
+        '[getDefaultConnectorId] Using connectorId: default-connector'
+      );
+    });
+
     it('builds the default model from a featureId via getChatModel and a feature-bound client', async () => {
       const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
       const { chatModel, inferenceClient } = setupFeatureChatAndClient(deps.inference);
@@ -282,6 +331,18 @@ describe('createModelProvider', () => {
       expect(deps.logger.warn).toHaveBeenCalledTimes(1);
       expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('my_feature'));
       expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('high'));
+    });
+
+    it('warns only once when the first default-model builds run concurrently', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' } });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, reasoningLevel: 'high' });
+      await Promise.all([provider.getDefaultModel(), provider.getDefaultModel()]);
+      await provider.getDefaultModel();
+
+      expect(deps.logger.warn).toHaveBeenCalledTimes(1);
+      expect(deps.inference.getChatModel).toHaveBeenCalledTimes(1);
     });
 
     it('does not warn on a feature-sourced default when no reasoning level is set', async () => {
@@ -438,6 +499,35 @@ describe('createModelProvider', () => {
       await provider.selectModel({ effortLevel: 'low' });
 
       expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs the fast-model fallback to the default connector once across low-effort calls', async () => {
+      const deps = setupDeps({ fastEndpoints: [] });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.selectModel({ effortLevel: 'low' });
+      await provider.selectModel({ effortLevel: 'low' });
+
+      const fallbackLogs = deps.logger.debug.mock.calls.filter(([message]) =>
+        String(message).includes('No dedicated fast inference endpoint found')
+      );
+      expect(fallbackLogs).toHaveLength(1);
+      expect(fallbackLogs[0][0]).toBe(
+        `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to default connector: default-connector. Fast model and default model are the SAME.`
+      );
+    });
+
+    it('does not log the fast-model fallback when a dedicated fast endpoint exists', async () => {
+      const deps = setupDeps({ fastEndpoints: [{ connectorId: 'fast-connector' }] });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.selectModel({ effortLevel: 'low' });
+
+      expect(deps.logger.debug).not.toHaveBeenCalledWith(
+        expect.stringContaining('No dedicated fast inference endpoint found')
+      );
     });
 
     it('returns the feature-sourced default model for low effort when no fast endpoint exists', async () => {

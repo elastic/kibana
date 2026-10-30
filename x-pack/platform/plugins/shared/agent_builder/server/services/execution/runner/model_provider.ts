@@ -161,19 +161,21 @@ export const createModelProvider = ({
     }
   );
   const getDefaultModelSource = memoizeAsync(async (): Promise<ModelSource> => {
-    if (defaultModel) {
+    if (defaultModel?.featureId !== undefined) {
+      logger.debug(`[getDefaultModelSource] Using featureId: ${defaultModel.featureId}`);
       return defaultModel;
     }
-    const defaultEndpoint = await resolveAgentBuilderDefaultEndpoint({
-      request,
-      searchInferenceEndpoints,
-    });
-    if (!defaultEndpoint) {
+
+    const resolvedConnectorId =
+      defaultModel?.connectorId ??
+      (await resolveAgentBuilderDefaultEndpoint({ request, searchInferenceEndpoints }))
+        ?.connectorId;
+    if (!resolvedConnectorId) {
       throw new Error('No connector available');
     }
 
-    logger.debug(`[getDefaultModelSource] Using connectorId: ${defaultEndpoint.connectorId}`);
-    return { connectorId: defaultEndpoint.connectorId };
+    logger.debug(`[getDefaultConnectorId] Using connectorId: ${resolvedConnectorId}`);
+    return { connectorId: resolvedConnectorId };
   });
 
   /**
@@ -187,6 +189,25 @@ export const createModelProvider = ({
       { onlyReturnConfigured: true }
     );
     return endpoints[0]?.connectorId;
+  });
+
+  // Memoized so the fallback is resolved (and logged) once per provider, as the fast connector
+  // lookup always was.
+  const getFastModelSource = memoizeAsync(async (): Promise<ModelSource> => {
+    const fastConnectorId = await getFastModelConnectorId();
+    if (fastConnectorId !== undefined) {
+      return { connectorId: fastConnectorId };
+    }
+
+    const source = await getDefaultModelSource();
+    const fallbackDescription =
+      source.featureId !== undefined
+        ? `default model from inference feature "${source.featureId}"`
+        : `default connector: ${source.connectorId}`;
+    logger.debug(
+      `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to ${fallbackDescription}. Fast model and default model are the SAME.`
+    );
+    return source;
   });
 
   const completedCalls: ModelCallInfo[] = [];
@@ -358,9 +379,9 @@ export const createModelProvider = ({
     if (fastConnectorId === undefined) {
       return false;
     }
-    // A connector-sourced default is compared by id; a feature-sourced one needs to be resolved
-    // by the inference plugin first. A distinct id means a genuinely dedicated (cheaper/faster)
-    // fast model exists.
+    // A connector-sourced default is compared by id (the resolved connector id equals the source
+    // id by construction); a feature-sourced one needs to be resolved by the inference plugin
+    // first. A distinct id means a genuinely dedicated (cheaper/faster) fast model exists.
     const source = await getDefaultModelSource();
     const defaultConnectorId =
       source.connectorId ?? (await getDefaultModel()).connector.connectorId;
@@ -374,21 +395,13 @@ export const createModelProvider = ({
       return getDefaultModel();
     }
 
-    // Fast path never carries reasoning — cheap models are cheap on purpose.
-    const fastConnectorId = await getFastModelConnectorId();
-    if (fastConnectorId !== undefined) {
-      return getModelById(fastConnectorId, false);
-    }
-
-    const source = await getDefaultModelSource();
-    logger.debug(
-      `[model_provider] No dedicated fast inference endpoint found for feature "${AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID}" — falling back to the default model. Fast model and default model are the SAME.`
-    );
+    const source = await getFastModelSource();
     if (source.featureId !== undefined) {
-      // The feature owns its reasoning settings: there is no reasoning-free variant to build.
+      // A feature-sourced default owns its reasoning settings: there is no reasoning-free variant.
       return getDefaultModel();
     }
-    // When the fast connector falls back to the default, we still return a reasoning-free variant.
+    // Fast path never carries reasoning — cheap models are cheap on purpose. When the fast
+    // connector falls back to the default, we still return a reasoning-free variant here.
     return getModelById(source.connectorId, false);
   };
 
