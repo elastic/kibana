@@ -89,7 +89,7 @@ describe('autonomy level card copy', () => {
 
   it('describes Alert Triage closures by who decides them', () => {
     expect(factTextsOf(TRIAGE_WORKER_ID, 'manual')).toEqual([
-      'Worker classifies new alerts.',
+      'Worker classifies new alerts and proposes closing false positives.',
       'You approve or decline each proposed closure.',
     ]);
     expect(factTextsOf(TRIAGE_WORKER_ID, 'supervised')).toEqual([
