@@ -107,6 +107,10 @@ import { registerIocsFlyoutGroupedAttachment } from './agent_builder/attachment_
 import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachment_types/investigation_timeline/register_timeline_flyout_grouped_attachment';
 import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
+import {
+  createCaseAttachmentProviders,
+  withCaseAttachmentProviders,
+} from './cases/attachments/providers';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
@@ -326,11 +330,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
 
-    cases.attachmentFramework.registerAttachment(getIndicatorAttachment());
-    cases.attachmentFramework.registerAttachment(getEndpointUnifiedAttachment());
-    cases.attachmentFramework.registerAttachment(getEventType());
-    cases.attachmentFramework.registerAttachment(getSecurityAlertType());
-    cases.attachmentFramework.registerAttachment(getTimelineAttachment());
+    const withProviders = withCaseAttachmentProviders(
+      createCaseAttachmentProviders(async () => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        return this.getSecurityCanvasContext(coreStart, startPlugins as StartPluginsDependencies);
+      })
+    );
+    cases.attachmentFramework.registerAttachment(withProviders(getIndicatorAttachment()));
+    cases.attachmentFramework.registerAttachment(withProviders(getEndpointUnifiedAttachment()));
+    cases.attachmentFramework.registerAttachment(withProviders(getEventType()));
+    cases.attachmentFramework.registerAttachment(withProviders(getSecurityAlertType()));
+    cases.attachmentFramework.registerAttachment(withProviders(getTimelineAttachment()));
 
     // Always register the entity attachment renderer so that attachments created
     // while the feature flag was enabled continue to display correctly after the
@@ -339,7 +349,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Lazily imported to keep the entity attachment module out of the page-load bundle.
     import('./cases/attachments/entity')
       .then(({ getEntityAttachment }) => {
-        cases.attachmentFramework.registerAttachment(getEntityAttachment());
+        cases.attachmentFramework.registerAttachment(withProviders(getEntityAttachment()));
       })
       .catch((e) => {
         this.logger.error('Failed to register entity attachment type', e);
@@ -352,7 +362,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Lazily imported to keep the attack attachment module out of the page-load bundle.
     import('./cases/attachments/attack')
       .then(({ getAttackAttachment }) => {
-        cases.attachmentFramework.registerAttachment(getAttackAttachment());
+        cases.attachmentFramework.registerAttachment(withProviders(getAttackAttachment()));
       })
       .catch((e) => {
         this.logger.error('Failed to register attack attachment type', e);

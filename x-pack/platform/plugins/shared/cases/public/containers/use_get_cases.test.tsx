@@ -357,5 +357,28 @@ describe('useGetCases', () => {
         })
       );
     });
+
+    it("does not narrow an embedded list to the host app's owner", async () => {
+      const spyOnGetCases = jest.spyOn(api, 'getCases');
+      const coreStart = coreMock.createStart();
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        casesV4: { read_cases: true },
+      };
+
+      renderHook(() => useGetCases(), {
+        wrapper: (props) => (
+          <TestProviders {...props} owner={['securitySolution']} coreStart={coreStart} />
+        ),
+      });
+
+      await waitFor(() => {
+        expect(spyOnGetCases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filterOptions: expect.objectContaining({ owner: ['observability', 'cases'] }),
+          })
+        );
+      });
+    });
   });
 });

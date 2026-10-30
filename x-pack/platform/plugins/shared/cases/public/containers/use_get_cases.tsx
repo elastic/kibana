@@ -44,7 +44,8 @@ export const useGetCases = (
     isTopLevelAppEnabled() ? ['read'] : getAllPermissionsExceptFrom('delete')
   );
 
-  const hasOwner = !!owner.length;
+  // In the top-level app's world a host app's owner no longer scopes which cases a list shows.
+  const hasOwner = !!owner.length && !isTopLevelAppEnabled();
   const initialOwner = hasOwner ? owner : availableSolutions;
 
   const ownerFilter =

@@ -33,7 +33,10 @@ describe('useCaseActions', () => {
     casesServiceMock.helpers.groupAlertsByRule.mockReturnValue(mockAttachments);
   });
 
-  it('opens the case modal with attachments for the selected case owner', () => {
+  // Before the top-level Cases app a table's modal only listed cases of the table's owner, so the
+  // two never differed; now a case of another solution can be picked and the alerts keep the
+  // table's solution type.
+  it("types the attachments by the table's solution, even for a case of another solution", () => {
     const { result } = renderHook(() =>
       useCaseActions({
         alerts: [mockAlert],
@@ -61,6 +64,23 @@ describe('useCaseActions', () => {
           data: expect.arrayContaining([{ field: 'kibana.alert.rule.name', value: ['Test rule'] }]),
         },
       ],
+      'cases'
+    );
+  });
+
+  it('types the attachments by the selected case owner when the table has none', () => {
+    const { result } = renderHook(() =>
+      useCaseActions({ alerts: [mockAlert], cases: casesServiceMock, owner: [] })
+    );
+
+    act(() => {
+      result.current.handleAddToCaseClick();
+    });
+
+    const { getAttachments } = openAddToExistingCaseModalMock.mock.calls[0][0];
+    getAttachments({ theCase: { id: 'case-id', owner: 'observability' } });
+    expect(casesServiceMock.helpers.groupAlertsByRule).toHaveBeenCalledWith(
+      expect.any(Array),
       'observability'
     );
   });

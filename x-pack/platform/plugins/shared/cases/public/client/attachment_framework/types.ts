@@ -198,6 +198,12 @@ export interface AttachmentType<Props> {
   getDocumentAction?: (props: DocumentActionProps) => AttachmentAction | null;
   /** Enables this registered type to render workflow activity labels. */
   workflow?: AttachmentWorkflow;
+  /**
+   * Context the type's renderers need from their solution (services, flyouts, stores). The
+   * top-level Cases app has no solution around it, so it wraps every renderer of this type in it.
+   * Solution apps that embed Cases already provide that context and do not use it.
+   */
+  providers?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 interface UnifiedAttachmentSchema {

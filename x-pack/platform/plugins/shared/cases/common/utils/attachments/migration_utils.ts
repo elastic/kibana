@@ -163,6 +163,17 @@ export const toUnifiedAttachmentType = (type: string, owner: string): string => 
 };
 
 /**
+ * Every unified type a legacy type can have on one case, whatever its owner: a legacy `alert` or
+ * `event` maps to each solution's prefixed type, since any solution may attach to any case.
+ */
+export const toUnifiedAttachmentTypesForAnyOwner = (type: string): string[] => {
+  if (type === LEGACY_EVENT_TYPE || type === LEGACY_ALERT_TYPE) {
+    return [...new Set(Object.values(OWNER_TO_PREFIX_MAP))].map((prefix) => `${prefix}.${type}`);
+  }
+  return [LEGACY_TO_UNIFIED_MAP[type] ?? type];
+};
+
+/**
  * Returns true when the owner has a registered prefix in `OWNER_TO_PREFIX_MAP`,
  * meaning legacy `alert` / `event` types can be mapped to a valid unified
  * `<prefix>.<type>` (e.g. `security.alert`).

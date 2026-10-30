@@ -16,6 +16,7 @@ import {
   type LegacyTypeMatch,
   toLegacyTypeMatches,
   toUnifiedAttachmentType,
+  toUnifiedAttachmentTypesForAnyOwner,
   UNIFIED_ALERT_TYPES_ARRAY,
   getAttachmentTypeFromAttributes,
 } from '../../../../common/utils/attachments';
@@ -433,7 +434,12 @@ export class AttachmentGetter {
 
       const unifiedDocumentsFilter = buildFilter({
         filters: [
-          ...attachmentTypes.map((type) => toUnifiedAttachmentType(type, owner)),
+          ...new Set(
+            attachmentTypes.flatMap((type) => [
+              toUnifiedAttachmentType(type, owner),
+              ...toUnifiedAttachmentTypesForAnyOwner(type),
+            ])
+          ),
           ...unifiedAttachmentTypes,
         ],
         field: 'type',
@@ -899,7 +905,12 @@ export class AttachmentGetter {
         type: CASE_COMMENT_SAVED_OBJECT,
       });
       const unifiedEventsFilter = buildFilter({
-        filters: [toUnifiedAttachmentType(AttachmentType.event, owner)],
+        filters: [
+          ...new Set([
+            toUnifiedAttachmentType(AttachmentType.event, owner),
+            ...toUnifiedAttachmentTypesForAnyOwner(AttachmentType.event),
+          ]),
+        ],
         field: 'type',
         operator: 'or',
         type: CASE_ATTACHMENT_SAVED_OBJECT,

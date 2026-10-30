@@ -17,6 +17,7 @@ import {
 import { CommentAttachmentPayloadSchema } from '../../../common/types/domain/attachment/comment/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { validateUnifiedAttachments } from './validators';
+import { setTopLevelAppEnabled } from '../../common/top_level_app';
 
 describe('validateUnifiedAttachments', () => {
   const validCommentPayload = {
@@ -244,6 +245,20 @@ describe('validateUnifiedAttachments', () => {
           unifiedAttachmentTypeRegistry: registryWithEvent(),
         })
       ).not.toThrow();
+    });
+
+    it('accepts a solution-scoped type under another owner in the top-level app', () => {
+      setTopLevelAppEnabled(true);
+      try {
+        expect(() =>
+          validateUnifiedAttachments({
+            query: { type: securityEventType, owner: 'observability', attachmentId: 'event-1' },
+            unifiedAttachmentTypeRegistry: registryWithEvent(),
+          })
+        ).not.toThrow();
+      } finally {
+        setTopLevelAppEnabled(false);
+      }
     });
 
     it('rejects before running the schema', () => {

@@ -72,7 +72,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const isLoading = useIsLoadingCases();
     const { euiTheme } = useEuiTheme();
 
-    const hasOwner = !!owner.length;
+    const hasOwner = !!owner.length && !isTopLevelAppEnabled();
 
     const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
       useAllCasesState(isSelectorView);

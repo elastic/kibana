@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('cases top-level app', function () {
     loadTestFile(require.resolve('./cases_v4_rbac'));
+    loadTestFile(require.resolve('./cross_solution_attachments'));
     // Legacy roles that were never re-saved keep their solution scope on the server: a deprecated
     // privilege borrows only the UI actions of its casesV4 replacement.
     loadTestFile(require.resolve('../legacy_characterization/rbac_matrix'));

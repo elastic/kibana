@@ -28,7 +28,9 @@ export const useCaseActions = ({
 
   const getCaseAttachments = useCallback(
     (caseOwner?: string) => {
-      const attachmentOwner = caseOwner ?? defaultOwner;
+      // The alerts' solution decides their attachment type; the case still owns the attachment.
+      // Equal to the case owner whenever the table and case share one.
+      const attachmentOwner = defaultOwner ?? caseOwner;
       if (!cases || !attachmentOwner) {
         return [];
       }
