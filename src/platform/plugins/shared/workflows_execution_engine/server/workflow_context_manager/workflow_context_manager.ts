@@ -19,6 +19,7 @@ import {
   type WorkflowContext,
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { buildWorkflowRenderContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
@@ -222,6 +223,21 @@ export class WorkflowContextManager {
    */
   public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
     return this.renderValueWithContext(obj, this.getRenderingContext(obj), additionalContext);
+  }
+
+  /**
+   * Same as {@link renderValueAccordingToContext}, but renders one top-level key at a time and yields to the event loop between keys.
+   */
+  public async renderObjectAccordingToContextAsync(
+    obj: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
+    const context = this.getRenderingContext(obj);
+    const rendered: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      await yieldToEventLoop();
+      rendered[key] = this.renderValueWithContext(value, context);
+    }
+    return rendered;
   }
 
   public renderValueWithContext<T>(

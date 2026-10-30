@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { yieldToEventLoop } from '@kbn/workflows/server';
 import { createRegex, validateInputLength, validateSourceInput } from './regex_utils';
 import { dataRegexExtractStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -76,6 +77,7 @@ export const dataRegexExtractStepDefinition = createServerStepDefinition({
       let matchCount = 0;
 
       for (const item of sourceArray) {
+        await yieldToEventLoop();
         // Check for cancellation to allow prompt workflow termination
         if (context.abortSignal.aborted) {
           context.logger.debug('Regex extraction cancelled via abort signal');
