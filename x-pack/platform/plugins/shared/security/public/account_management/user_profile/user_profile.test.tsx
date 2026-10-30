@@ -439,6 +439,14 @@ describe('useUserProfileForm', () => {
   });
 
   describe('Display Language Form', () => {
+    const getProfileUpdateBody = () => {
+      const calls = coreStart.http.post.mock.calls as unknown as Array<[string, { body: string }]>;
+      const [, { body }] = calls.find(
+        ([path]) => path === '/internal/security/user_profile/_data'
+      )!;
+      return JSON.parse(body);
+    };
+
     it('should report display_language_changed event when locale is changed on submit', async () => {
       const data: UserProfileData = {
         userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
@@ -472,6 +480,44 @@ describe('useUserProfileForm', () => {
       });
 
       expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not send the locale when it is unchanged on submit', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'de-DE' },
+      };
+
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      const { userSettings } = getProfileUpdateBody();
+      expect(userSettings).toEqual(expect.objectContaining({ darkMode: 'dark' }));
+      expect(userSettings).not.toHaveProperty('locale');
+    });
+
+    it('should send the locale when it is changed on submit', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
+      };
+
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.locale', 'fr-FR');
+      });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(getProfileUpdateBody().userSettings.locale).toBe('fr-FR');
     });
   });
 
