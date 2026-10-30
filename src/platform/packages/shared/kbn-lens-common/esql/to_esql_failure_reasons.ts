@@ -26,6 +26,7 @@ export type EsqlConversionFailureReason =
   | 'terms_accuracy_mode_not_supported'
   | 'terms_include_exclude_not_supported'
   | 'terms_other_bucket_not_supported'
+  | 'terms_other_bucket_same_field_not_supported'
   | 'terms_order_by_not_supported'
   | 'terms_custom_order_by_not_supported'
   | 'terms_rank_metric_not_supported'
@@ -113,6 +114,13 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     {
       defaultMessage:
         'Grouping remaining values as "Other" is only supported for the Top values dimension that is aggregated first. It is not supported with both a date histogram and another Top values dimension after it, or when documents without the selected field are included.',
+    }
+  ),
+  terms_other_bucket_same_field_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketSameFieldTooltip',
+    {
+      defaultMessage:
+        'Grouping remaining values as "Other" is not supported when another Top values dimension uses the same field.',
     }
   ),
   terms_order_by_not_supported: i18n.translate(

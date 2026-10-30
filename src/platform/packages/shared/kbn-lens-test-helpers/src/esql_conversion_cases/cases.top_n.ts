@@ -408,7 +408,8 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     },
     // Other converts only on the first bucket. Below another bucket, DSL builds one Other per
     // parent bucket, which the typed key does not express. A date histogram between an outer Top
-    // values with Other and the inner one is not supported either.
+    // values with Other and the inner one is not supported either, nor an inner Top values on the
+    // same field, since both would share one output column.
     {
       group: 'top_n',
       dataset: logs,
@@ -501,6 +502,30 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       expected: {
         success: false,
         reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms with other bucket above terms on the same field is not convertible',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('machine.os.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_same_field_not_supported',
       },
     },
     {
@@ -1272,6 +1297,39 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           'COUNT(*)': ['col3'],
           'agent.keyword': ['col1'],
           'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'two terms on the same field share one column',
+      columns: {
+        col1: terms('machine.os.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('machine.os.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'machine.os.keyword',
+          score: 'rank_machine_os_keyword = AVG(bytes)',
+          sort: 'rank_machine_os_keyword DESC',
+          size: 2,
+        })} | INLINE STATS rank_machine_os_keyword = AVG(bytes) BY machine.os.keyword | STATS AVG(bytes) BY rank_machine_os_keyword, machine.os.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY machine.os.keyword | SORT rank_machine_os_keyword DESC, \`AVG(bytes)\` DESC | DROP rank_machine_os_keyword`,
+        columnNames: ['AVG(bytes)', 'machine.os.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'machine.os.keyword': ['col1', 'col2'],
         },
       },
     },

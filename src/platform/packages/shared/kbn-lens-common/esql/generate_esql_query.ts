@@ -479,13 +479,18 @@ export function generateEsqlQuery(
   // failures above still take precedence. One reason per terms column; take the first.
   // Other converts only on the first bucket: below another bucket, DSL builds one Other per
   // parent bucket, which the typed key does not express. An outer Top values with Other also
-  // needs the inner Top values directly below it, with no date histogram between them.
+  // needs the inner Top values directly below it, with no date histogram between them, and on
+  // a different field, since Top values on the same field share one output column.
   const termsFailureReason = termsBuckets
     .map(({ col, index }) =>
       getTermsConversionFailure(col, {
         hasUnsupportedDateHistogramNesting,
         termsBucketCount: termsBuckets.length,
         supportsOtherBucket: index === 0 && leadingBucketEntries.length <= 1,
+        sharesFieldWithAnotherTermsBucket: termsBuckets.some(
+          ({ col: otherCol, index: otherIndex }) =>
+            otherIndex !== index && otherCol.sourceField === col.sourceField
+        ),
       })
     )
     .find((reason): reason is EsqlConversionFailureReason => reason !== undefined);

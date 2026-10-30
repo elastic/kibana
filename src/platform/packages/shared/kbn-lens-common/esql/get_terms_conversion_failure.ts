@@ -32,6 +32,12 @@ export interface TermsConversionContext {
    * an inner Top values. Defaults to false.
    */
   supportsOtherBucket?: boolean;
+  /**
+   * Another Top values dimension on the layer uses the same field. The generator merges both
+   * into one ES|QL column, which cannot hold the Other label and the inner values at once.
+   * Defaults to false.
+   */
+  sharesFieldWithAnotherTermsBucket?: boolean;
 }
 
 /**
@@ -43,11 +49,12 @@ export interface TermsConversionContext {
  *    includes documents without the field (missingBucket; the UI only enables it
  *    when Other is on, and toEsAggsFn forces missingBucket = otherBucket &&
  *    missingBucket)
- * 3. More than two Top values dimensions
- * 4. Multiple fields on one Top values dimension
- * 5. Include / exclude filters
- * 6. Accuracy mode
- * 7. Unsupported ranking (custom, then rarity / significance)
+ * 3. Other bucket when another Top values dimension uses the same field
+ * 4. More than two Top values dimensions
+ * 5. Multiple fields on one Top values dimension
+ * 6. Include / exclude filters
+ * 7. Accuracy mode
+ * 8. Unsupported ranking (custom, then rarity / significance)
  *
  * Callers may combine eligible terms with other convertible buckets, including a
  * date histogram, via `WHERE … IN (subquery)` and `LIMIT n BY`.
@@ -61,6 +68,7 @@ export const getTermsConversionFailure = (
     hasUnsupportedDateHistogramNesting,
     termsBucketCount,
     supportsOtherBucket = false,
+    sharesFieldWithAnotherTermsBucket = false,
   }: TermsConversionContext
 ): EsqlConversionFailureReason | undefined => {
   const reasons: EsqlConversionFailureReason[] = [];
@@ -73,6 +81,10 @@ export const getTermsConversionFailure = (
   // documents as their own bucket, while the ES|QL remap would count them in Other.
   if (params.otherBucket === true && (!supportsOtherBucket || params.missingBucket === true)) {
     reasons.push('terms_other_bucket_not_supported');
+  }
+
+  if (params.otherBucket === true && sharesFieldWithAnotherTermsBucket) {
+    reasons.push('terms_other_bucket_same_field_not_supported');
   }
 
   if (termsBucketCount > MAX_SUPPORTED_TERMS_BUCKETS) {
