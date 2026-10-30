@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import pRetry, { AbortError } from 'p-retry';
 import { parse as parseYaml } from 'yaml';
 import type {
   CoreStart,
@@ -13,6 +14,8 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { isAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -27,6 +30,11 @@ import {
   type NightshiftServiceAccountInfo,
   type NightshiftUnboundAutomation,
 } from '../../../common';
+import type { NightshiftInvestigationsStartDeps } from '../../types';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../../agents/decision_tree_reinforcement';
+import { installInvestigationAgent } from '../install_investigation_agent';
+import { installDecisionTreeReinforcementAgent } from '../install_decision_tree_reinforcement_agent';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
@@ -49,12 +57,27 @@ interface Deps {
   /** Reads the template values a bound workflow was installed with. */
   getInstalledWorkflowState?: PluginScopedManagedWorkflows['getInstalledWorkflowState'];
   spaces?: SpacesPluginStart;
+  /** Binds the Nightshift agents to the space's agent account; Agent Builder starts after us. */
+  getAgentBuilder?: () => NightshiftInvestigationsStartDeps['agentBuilder'] | undefined;
+  /** Where the agents are available when setup has to install them. */
+  getAgentAvailability: () => AgentAvailabilityConfig;
+  /** The decision-tree reinforcement agent only exists while decision trees are on. */
+  isDecisionTreesEnabled: () => boolean;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
 }
+
+/** The Nightshift agents setup pins to the agent account, with how to install each. */
+const AGENT_INSTALLERS = [
+  [NIGHTSHIFT_INVESTIGATION_AGENT_ID, installInvestigationAgent],
+  [NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID, installDecisionTreeReinforcementAgent],
+] as const;
+
+/** Matches the wait `nightshift.ensureInvestigationAgent` uses for a just-installed agent. */
+const AGENT_VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as const;
 
 const getStatusCode = (error: unknown): number | undefined => {
   if (Boom.isBoom(error)) return error.output.statusCode;
@@ -88,6 +111,9 @@ export const createInvestigatorServiceAccountService = ({
   workflowsManagement,
   getInstalledWorkflowState,
   spaces,
+  getAgentBuilder,
+  getAgentAvailability,
+  isDecisionTreesEnabled,
   getAutomationsSoClient,
   isServerless,
   logger,
@@ -394,6 +420,43 @@ export const createInvestigatorServiceAccountService = ({
     }
   };
 
+  /**
+   * Pins the Nightshift agents to the space's agent account, so every run of them - a workflow's,
+   * a hook's or a user's chat - executes as that account. Core only binds for an authenticated
+   * caller with `manage_security`, which `runEnable` has already checked.
+   */
+  const bindAgents = async (
+    request: KibanaRequest,
+    spaceId: string,
+    agentServiceAccountId: string
+  ): Promise<void> => {
+    const agentBuilder = getAgentBuilder?.();
+    if (!agentBuilder) {
+      throw Boom.serverUnavailable('Agent Builder is not available; cannot bind the agents.');
+    }
+    const registry = await agentBuilder.agents.getRegistry({ request });
+    const agents = AGENT_INSTALLERS.filter(
+      ([agentId]) =>
+        agentId !== NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID || isDecisionTreesEnabled()
+    );
+    for (const [agentId, install] of agents) {
+      // The agents are installed lazily, by the onboarding and by the workflows that need them, so
+      // a space being set up for the first time may not have them yet.
+      await install({ agentBuilder, spaceId, availability: getAgentAvailability() });
+      // A just-installed agent is found by a search that may not see it until the next refresh.
+      await pRetry(async () => {
+        try {
+          await registry.setServiceAccount(agentId, agentServiceAccountId);
+        } catch (error) {
+          throw isAgentNotFoundError(error) ? error : new AbortError(error);
+        }
+      }, AGENT_VISIBILITY_RETRY_OPTIONS);
+    }
+    logger.info(
+      `Nightshift agents in space [${spaceId}] run as service account [${agentServiceAccountId}]`
+    );
+  };
+
   const runEnable = async (
     request: KibanaRequest,
     spaceId: string,
@@ -412,6 +475,7 @@ export const createInvestigatorServiceAccountService = ({
     await assertSpaceExists(request, spaceId);
 
     await installBoundWorkflows(request, spaceId, serviceAccountIds);
+    await bindAgents(request, spaceId, serviceAccountIds.agent);
     const unboundAutomations = await bindAutomations(
       request,
       spaceId,

@@ -12,6 +12,8 @@ import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/manag
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { createAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { BOUND_WORKFLOW_IDS } from './bound_workflows';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
@@ -21,6 +23,10 @@ const SPACE_ID = 'obs';
 const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
 const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
 const IDS = { agent: AGENT_ACCOUNT, automations: AUTOMATIONS_ACCOUNT };
+const AVAILABILITY: AgentAvailabilityConfig = {
+  handler: async () => ({ status: 'available' }),
+  cacheMode: 'global',
+};
 const ENTRY_POINT_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
 
 const setup = ({
@@ -31,6 +37,7 @@ const setup = ({
   runAs = AGENT_ACCOUNT,
   enabled = true,
   installError,
+  decisionTreesEnabled = true,
   automations,
 }: {
   serviceAccountsEnabled?: boolean;
@@ -40,6 +47,7 @@ const setup = ({
   runAs?: string;
   enabled?: boolean;
   installError?: Error;
+  decisionTreesEnabled?: boolean;
   /** Automation saved objects in the space; omit to run without automations. */
   automations?: Array<{ id: string; attributes: Record<string, unknown> }>;
 } = {}) => {
@@ -106,18 +114,35 @@ const setup = ({
     spacesService: { createSpacesClient: () => ({ get: getSpace }) },
   } as unknown as SpacesPluginStart;
 
+  const setServiceAccount = jest.fn().mockResolvedValue(undefined);
+  const ensureAgent = jest.fn().mockResolvedValue(undefined);
+  const agentBuilder = {
+    agents: {
+      ensure: ensureAgent,
+      getRegistry: jest.fn().mockResolvedValue({ setServiceAccount }),
+    },
+  } as unknown as NonNullable<
+    ReturnType<
+      NonNullable<Parameters<typeof createInvestigatorServiceAccountService>[0]['getAgentBuilder']>
+    >
+  >;
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
     workflowsManagement,
     getInstalledWorkflowState,
     spaces,
+    getAgentBuilder: () => agentBuilder,
+    getAgentAvailability: () => AVAILABILITY,
+    isDecisionTreesEnabled: () => decisionTreesEnabled,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
   return {
     service,
+    setServiceAccount,
+    ensureAgent,
     esClient,
     serviceAccounts,
     managedWorkflows,
@@ -184,6 +209,61 @@ describe('createInvestigatorServiceAccountService', () => {
       '_nightshift_agent',
       '_nightshift_automations',
     ]);
+  });
+
+  it('pins the Nightshift agents to the space agent account', async () => {
+    const { service, setServiceAccount } = setup();
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', AGENT_ACCOUNT],
+      ['significant-events.decision-tree-reinforcement', AGENT_ACCOUNT],
+    ]);
+  });
+
+  it('installs the Nightshift agents in the space before pinning them', async () => {
+    const { service, ensureAgent, setServiceAccount } = setup();
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(ensureAgent.mock.calls.map(([{ spaceId, agent }]) => [spaceId, agent.id])).toEqual([
+      [SPACE_ID, 'nightshift.investigation'],
+      [SPACE_ID, 'significant-events.decision-tree-reinforcement'],
+    ]);
+    expect(ensureAgent.mock.invocationCallOrder[0]).toBeLessThan(
+      setServiceAccount.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('leaves out the decision-tree reinforcement agent while decision trees are off', async () => {
+    const { service, ensureAgent, setServiceAccount } = setup({ decisionTreesEnabled: false });
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(ensureAgent.mock.calls.map(([{ agent }]) => agent.id)).toEqual([
+      'nightshift.investigation',
+    ]);
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', AGENT_ACCOUNT]]);
+  });
+
+  it('waits for a just-installed agent to become visible before pinning it', async () => {
+    const { service, setServiceAccount } = setup();
+    setServiceAccount.mockRejectedValueOnce(
+      createAgentNotFoundError({ agentId: 'nightshift.investigation' })
+    );
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount).toHaveBeenCalledTimes(3);
+  });
+
+  it('fails setup when pinning an agent fails for another reason', async () => {
+    const { service, setServiceAccount } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow('no');
+    expect(setServiceAccount).toHaveBeenCalledTimes(1);
   });
 
   it('turns a disabled entry point back on', async () => {
