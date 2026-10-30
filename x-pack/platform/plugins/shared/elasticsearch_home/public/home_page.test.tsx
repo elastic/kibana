@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -45,8 +46,12 @@ const mockHomePageBanner = jest.mocked(HomePageBanner);
 const DOCS_URL = 'https://elastic.co/docs/vector-database';
 const DOCS_LABEL = 'Learn more about Elasticsearch Vector Database';
 
+const fullAccess = { showPanel: true, showDocuments: true, showTotalSize: true };
+
 const stats = {
+  dataPanelAccess: fullAccess,
   indicesCount: 3,
+  dataStreamsCount: 2,
   documentsCount: 42,
   vectorCount: 120,
   storeSizeBytes: 2048,
@@ -59,7 +64,9 @@ const stats = {
 };
 
 const emptyStats = {
+  dataPanelAccess: fullAccess,
   indicesCount: 0,
+  dataStreamsCount: 0,
   documentsCount: 0,
   vectorCount: 0,
   storeSizeBytes: 0,
@@ -72,36 +79,49 @@ const emptyStats = {
 };
 
 describe('HomePage', () => {
+  const ALL_NAV_LINKS = [
+    'management:index_management',
+    'dashboards',
+    'workflows',
+    'management:api_keys',
+  ];
+
   const renderHomePage = ({
     isInTrial = false,
     isServerlessEnabled = false,
+    isServerless = false,
+    projectType,
     canMonitorAllIndices = true,
-    hasIndexManagement = true,
+    canReadWorkflow = true,
+    navLinks = ALL_NAV_LINKS,
     config = {},
   }: {
     isInTrial?: boolean;
     isServerlessEnabled?: boolean;
+    isServerless?: boolean;
+    projectType?: CloudStart['serverless']['projectType'];
     canMonitorAllIndices?: boolean;
-    hasIndexManagement?: boolean;
+    canReadWorkflow?: boolean;
+    navLinks?: string[];
     config?: object;
   } = {}) => {
     const cloud = cloudMock.createStart();
     cloud.isInTrial.mockReturnValue(isInTrial);
     cloud.isServerlessEnabled = isServerlessEnabled;
+    cloud.serverless = { ...cloud.serverless, projectType };
 
     const application = applicationServiceMock.createStartContract();
     application.capabilities = {
       ...application.capabilities,
       [PLUGIN_ID]: { [CAN_MONITOR_ALL_INDICES_CAPABILITY]: canMonitorAllIndices },
+      workflowsManagement: { readWorkflow: canReadWorkflow },
     };
 
     const chrome = chromeServiceMock.createStartContract();
-    chrome.navLinks.has.mockImplementation(
-      (id: string) => id === 'management:index_management' && hasIndexManagement
-    );
+    chrome.navLinks.has.mockImplementation((id: string) => navLinks.includes(id));
 
     return renderWithHomeContext(<HomePage />, {
-      services: { cloud, application, chrome },
+      services: { cloud, application, chrome, isServerless },
       config: { docsLink: { href: DOCS_URL, label: DOCS_LABEL }, ...config },
     });
   };
@@ -174,7 +194,7 @@ describe('HomePage', () => {
       const link = screen.getByTestId('elasticsearchHomeDocumentationLink');
       expect(link).toHaveAttribute(
         'href',
-        docLinksServiceMock.createStartContract().links.elasticsearch.gettingStarted
+        docLinksServiceMock.createStartContract().links.elasticsearch.docsBase
       );
       expect(link).toHaveTextContent('Learn more about Elasticsearch');
     });
@@ -216,13 +236,201 @@ describe('HomePage', () => {
       expect(screen.getByTestId('homePageDataCardDataManagement')).toBeInTheDocument();
     });
 
-    it('is hidden from a role without Index Management', () => {
-      renderHomePage({ hasIndexManagement: false });
+    it('is hidden from a role without Index Management, which keeps the data card', () => {
+      renderHomePage({
+        navLinks: ALL_NAV_LINKS.filter((id) => id !== 'management:index_management'),
+      });
 
       expect(screen.queryByTestId('homePageDataCardDataManagement')).not.toBeInTheDocument();
-      // the data card itself, and its stats, stay visible
       expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
       expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+    });
+  });
+
+  describe('the data card', () => {
+    const renderWithAccess = (
+      dataPanelAccess: typeof fullAccess,
+      projectType?: CloudStart['serverless']['projectType']
+    ) => {
+      mockUseDeploymentStats.mockReturnValue({
+        stats: { ...stats, dataPanelAccess },
+        isLoading: false,
+      });
+      renderHomePage({ projectType });
+    };
+
+    it('shows an info icon on the title when the host supplies a tooltip', () => {
+      renderHomePage({ config: { dataCardTooltip: 'What these stats count' } });
+
+      expect(screen.getByTestId('homePageDataCardTitleInfo')).toBeInTheDocument();
+    });
+
+    it('shows no info icon on the title when the host supplies no tooltip', () => {
+      renderHomePage();
+
+      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
+      expect(screen.queryByTestId('homePageDataCardTitleInfo')).not.toBeInTheDocument();
+    });
+
+    it('shows every stat to a role that may see them all', () => {
+      renderWithAccess(fullAccess);
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-documents')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalSize')).toBeInTheDocument();
+    });
+
+    it('is dropped for a role Elasticsearch denies the index reads', () => {
+      renderWithAccess({ showPanel: false, showDocuments: false, showTotalSize: false });
+
+      expect(screen.queryByTestId('homePageDataCard')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDashboardsCard')).toBeInTheDocument();
+    });
+
+    it('is kept for a role without Index Management', () => {
+      mockUseDeploymentStats.mockReturnValue({ stats, isLoading: false });
+      renderHomePage({
+        navLinks: ALL_NAV_LINKS.filter((id) => id !== 'management:index_management'),
+      });
+
+      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
+    });
+
+    it('drops the documents stat for a role that cannot read documents', () => {
+      renderWithAccess({ ...fullAccess, showDocuments: false });
+
+      expect(screen.queryByTestId('homePageDataCard-documents')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalSize')).toBeInTheDocument();
+    });
+
+    // a role with only `view_index_metadata` can count indices but read neither documents nor sizes
+    it('is dropped when only one stat would be left', () => {
+      renderWithAccess({ showPanel: true, showDocuments: false, showTotalSize: false }, 'vectordb');
+
+      expect(screen.queryByTestId('homePageDataCard')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDashboardsCard')).toBeInTheDocument();
+    });
+
+    it('is kept with only the index and data stream counts', () => {
+      renderWithAccess({ showPanel: true, showDocuments: false, showTotalSize: false });
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-dataStreams')).toBeInTheDocument();
+    });
+
+    it('is kept with two stats', () => {
+      renderWithAccess({ showPanel: true, showDocuments: true, showTotalSize: false });
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-documents')).toBeInTheDocument();
+    });
+
+    it('counts data streams next to the indices', () => {
+      renderHomePage();
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices-value')).toHaveTextContent('3');
+      expect(screen.getByTestId('homePageDataCard-dataStreams-value')).toHaveTextContent('2');
+    });
+
+    it('leaves out the data streams stat on Vector DB, which has no data streams', () => {
+      renderHomePage({ projectType: 'vectordb' });
+
+      expect(screen.queryByTestId('homePageDataCard-dataStreams')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+    });
+
+    it('drops the total size stat for a role that cannot monitor indices', () => {
+      renderWithAccess({ ...fullAccess, showTotalSize: false });
+
+      expect(screen.queryByTestId('homePageDataCard-totalSize')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-documents')).toBeInTheDocument();
+    });
+  });
+
+  describe('the stat values', () => {
+    it('formats each count the deployment reports', () => {
+      mockUseDeploymentStats.mockReturnValue({
+        stats: {
+          ...stats,
+          indicesCount: 7,
+          documentsCount: 12345,
+          dashboardsCount: 2,
+          apiKeysCount: 4,
+        },
+        isLoading: false,
+      });
+
+      renderHomePage();
+
+      expect(screen.getByTestId('homePageDataCard-totalIndices-value')).toHaveTextContent('7');
+      expect(screen.getByTestId('homePageDataCard-documents-value')).toHaveTextContent('12,345');
+      expect(screen.getByTestId('homePageDashboardsCard-dashboardsTotal-value')).toHaveTextContent(
+        '2'
+      );
+      expect(screen.getByTestId('homePageApiKeysCard-apiKeysTotal-value')).toHaveTextContent('4');
+    });
+  });
+
+  describe('while the stats load', () => {
+    it('shows the header and one loading indicator in place of the rest of the page', () => {
+      mockUseDeploymentStats.mockReturnValue({ stats, isLoading: true });
+
+      renderHomePage();
+
+      expect(screen.getByTestId('elasticsearchHomeHeaderLeftsideGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('connectionDetails')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageLoading')).toBeInTheDocument();
+      expect(mockHomePageBanner).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('homePageDataCard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('homePageDashboardsCard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('homePageWorkflowsCard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('homePageApiKeysCard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('addDataSection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('chatWithDataSection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('elasticsearchHomeDocumentationLink')).not.toBeInTheDocument();
+    });
+
+    it('replaces the loading indicator with the rest of the page once the stats arrive', () => {
+      renderHomePage();
+
+      expect(screen.queryByTestId('homePageLoading')).not.toBeInTheDocument();
+      expect(mockHomePageBanner).toHaveBeenCalled();
+      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDashboardsCard')).toBeInTheDocument();
+      expect(screen.getByTestId('addDataSection')).toBeInTheDocument();
+      expect(screen.getByTestId('chatWithDataSection')).toBeInTheDocument();
+      expect(screen.getByTestId('elasticsearchHomeDocumentationLink')).toBeInTheDocument();
+    });
+  });
+
+  describe('the secondary cards', () => {
+    it('are all shown to a role that can reach every app they link to', () => {
+      renderHomePage();
+
+      expect(screen.getByTestId('homePageDashboardsCard')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageWorkflowsCard')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageApiKeysCard')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['homePageDashboardsCard', 'dashboards'],
+      ['homePageWorkflowsCard', 'workflows'],
+      ['homePageApiKeysCard', 'management:api_keys'],
+    ])('drops %s when its app is not reachable', (cardTestSubj, navLinkId) => {
+      renderHomePage({ navLinks: ALL_NAV_LINKS.filter((id) => id !== navLinkId) });
+
+      expect(screen.queryByTestId(cardTestSubj)).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
+    });
+
+    // the workflows app stays registered for users who cannot read workflows
+    it('drops the workflows card without the read workflow privilege', () => {
+      renderHomePage({ canReadWorkflow: false });
+
+      expect(screen.queryByTestId('homePageWorkflowsCard')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDashboardsCard')).toBeInTheDocument();
     });
   });
 
@@ -251,6 +459,17 @@ describe('HomePage', () => {
       expect(bannerProps()).toEqual(expect.objectContaining({ hasData: true }));
     });
 
+    it('receives hasData=false when there are data streams but no indices', () => {
+      mockUseDeploymentStats.mockReturnValue({
+        stats: { ...emptyStats, dataStreamsCount: 2 },
+        isLoading: false,
+      });
+
+      renderHomePage();
+
+      expect(bannerProps()).toEqual(expect.objectContaining({ hasData: false }));
+    });
+
     it('receives hasData=false when there are no indices and no vectors', () => {
       mockUseDeploymentStats.mockReturnValue({ stats: emptyStats, isLoading: false });
 
@@ -269,14 +488,6 @@ describe('HomePage', () => {
       renderHomePage();
 
       expect(bannerProps()).toEqual(expect.objectContaining({ hasData: true }));
-    });
-
-    it('receives isLoading=true while the stats are in flight', () => {
-      mockUseDeploymentStats.mockReturnValue({ stats: emptyStats, isLoading: true });
-
-      renderHomePage();
-
-      expect(bannerProps()).toEqual(expect.objectContaining({ isLoading: true }));
     });
   });
 });

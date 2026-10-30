@@ -15,7 +15,9 @@ endpoints and the Elasticsearch feature that exposes the index `monitor` privile
 capability. The workflows counts are read from the workflows plugin's own `/api/workflows/stats`.
 
 It does not register an application. Hosting plugins render the page inside their own app and route,
-so the page can be the home of more than one product without any of them changing URL.
+so the page can be the home of more than one product without any of them changing URL. Today those
+are `serverless_vectordb` for VectorDB projects and `search_homepage` for Elasticsearch on
+serverless, Cloud Hosted and self-managed.
 
 The plugin is enabled by default, but `config/serverless.yml` sets
 `xpack.elasticsearchHome.enabled: false`, so serverless project types that render the page have to
@@ -60,19 +62,48 @@ Anything that names a product is injected rather than imported:
 | --- | --- | --- |
 | `telemetryPrefix` | yes | Each host keeps its existing telemetry ids, so dashboards built on them stay valid. |
 | `storageKeyPrefix` | yes | Hosts must not share banner or new-index dismissal state. |
-| `docsLink`, `ideSetup` | no | Product-specific copy. Default to the Elasticsearch getting-started docs and a neutral prompt. |
+| `docsLink`, `ideSetup` | no | Product-specific copy. Default to the Elasticsearch search docs and a neutral prompt. |
 | `banner`, `primaryAddDataLink` | no | Product-specific navigation targets. Omit them to render neither. |
+| `addDataLinks` | no | Replaces the generic "Add data" entries, for hosts whose options differ, e.g. no sample data. |
+| `dataCardTooltip` | no | Product-specific copy for an info icon next to the Data card's title, e.g. explaining that data streams are included. Omit it to show no icon, as Vector DB does since it has no data streams. |
+| `solutionNav` | no | The host's side nav under the classic chrome style, e.g. `searchNavigation.useClassicNavigation(history)`. |
 
 Elements this plugin owns namespace their own telemetry ids under `telemetryPrefix`. A
-`primaryAddDataLink` carries a complete `telemetryId`, because the host already knows its prefix.
+Host-supplied "Add data" links carry a complete `telemetryId`, because the host already knows its prefix.
 
 ### Connection details
 
 The header shows the deployment's Elasticsearch endpoint with a copy button, plus buttons that open
 the cloud connection details flyout — which owns API key creation — so no host has to supply this.
 The endpoint comes from `cloud.fetchElasticsearchConfig()`. Where cloud reports none, as on a
-self-managed deployment, the whole group is hidden rather than left blank. The URL panel itself is
-`EndpointUrl` from `@kbn/shared-components`, shared with the vectordb onboarding wizard.
+self-managed deployment, only the endpoint is hidden, and the connection details and API key buttons
+stay.
+
+### Gating
+
+The Data card and its stats follow the user's index privileges, as Elasticsearch reports them:
+a stat's read is denied (403) only when the user holds the privilege on none of their indices, and
+is otherwise scoped to the indices they hold it on.
+
+- Serverless: the card needs `monitor`, `view_index_metadata`, `manage` or `all`, which metering
+  needs for the index count and size. Documents need `read` or `all` on top.
+- Stateful: the card needs `read`, `view_index_metadata`, `manage` or `all`, which the index count
+  needs. Documents need `read` or `all`. Total size needs `monitor`, `manage` or `all`, which
+  `viewer` and `editor` lack.
+
+The "Data streams" stat is left out on Vector DB projects (`cloud.serverless.projectType` is
+`vectordb`), where users can not create data streams. The card is dropped when fewer than two of its 
+stats are left, as on Vector DB for a role with only `view_index_metadata`. The "Manage data" action 
+is gated separately on reaching Index Management.
+
+The Dashboards, Workflows and API Keys cards render only when the user can reach the app they link
+to: the app's nav link must exist, and for workflows the `workflowsManagement.readWorkflow`
+capability must be granted too, since that app stays registered for unauthorized users. Each card's
+"Create" action additionally needs the matching write capability (`dashboard_v2.createNew`,
+`workflowsManagement.createWorkflow`, `api_keys.save`), so read-only users only get "Manage". The "Chat
+with AI Agent" button needs `capabilities.agentBuilder.show` and the license Agent Builder requires.
+Agent Builder is an optional dependency, so with `xpack.agentBuilder.enabled: false` the page still
+renders, without the button or the search skills.
 
 ## Public API
 
@@ -88,7 +119,17 @@ declare its props in a helper rather than inline.
 
 - `GET /internal/elasticsearch_home/deployment_stats` — index, document, size, dashboard and API key
   counts, plus the newest index created in the last 24 hours. Each stat is read independently and
-  reported as `null` on failure, so "unavailable" stays distinguishable from a genuine `0`.
+  reported as `null` on failure, so "unavailable" stays distinguishable from a genuine `0`, and the
+  response's `dataPanelAccess` says which stats the user's privileges allow. Index count and size
+  come from `_metering/stats` on serverless. Stateful, where metering does not exist, counts with
+  `_resolve/index` and sizes with the caller's `_stats`. Stateful sizes use the full data set of primary shards
+  (`total_data_set_size_in_bytes`), so both report the size of the data, including frozen tier
+  indices, rather than the disk used by replicas. User-created data streams are counted in
+  `dataStreamsCount`, each once however many backing indices it has, and their documents and size 
+  count towards the document and size stats. The onboarding banner only looks at `indicesCount`, so a 
+  deployment holding only data streams still gets it.
+  Data streams flagged `system` or hidden, dot-prefixed, or created for Elastic's own features are
+  left out, and data streams are never reported as the newest index.
 - `POST /internal/elasticsearch_home/starred_dashboards_count` — resolves favorited dashboard ids
   against the dashboards that still exist.
 - An Elasticsearch feature registered under the plugin id, which surfaces index `monitor` as the

@@ -16,49 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHomeConfig, useHomeServices, useTelemetryId } from '../context';
-import type { HomeAddDataLink } from '../types';
+import { useHomeConfig } from '../context';
 import { addDataCard } from './add_data_section_styles';
 
 export const AddDataSection = () => {
-  const { application } = useHomeServices();
-  const { primaryAddDataLink } = useHomeConfig();
-  const getTelemetryId = useTelemetryId();
-
-  const addDataLinks: HomeAddDataLink[] = [
-    ...(primaryAddDataLink ? [primaryAddDataLink] : []),
-    {
-      key: 'devTools',
-      iconType: 'code',
-      label: i18n.translate('xpack.elasticsearchHome.home.addData.devTools', {
-        defaultMessage: 'Query your data in Console',
-      }),
-      onClick: () => application.navigateToApp('dev_tools'),
-      testSubj: 'addDataDevToolsLink',
-      telemetryId: getTelemetryId('addData-devTools'),
-    },
-    {
-      key: 'sampleData',
-      iconType: 'unarchive',
-      label: i18n.translate('xpack.elasticsearchHome.home.addData.sampleData', {
-        defaultMessage: 'Browse sample data sets',
-      }),
-      onClick: () => application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' }),
-      testSubj: 'addDataSampleDataLink',
-      telemetryId: getTelemetryId('addData-sampleData'),
-    },
-    {
-      key: 'uploadFile',
-      iconType: 'upload',
-      label: i18n.translate('xpack.elasticsearchHome.home.addData.uploadFile', {
-        defaultMessage: 'Upload a file',
-      }),
-      onClick: () =>
-        application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' }),
-      testSubj: 'addDataUploadFileLink',
-      telemetryId: getTelemetryId('addData-uploadFile'),
-    },
-  ];
+  const { addDataLinks } = useHomeConfig();
 
   return (
     <>
