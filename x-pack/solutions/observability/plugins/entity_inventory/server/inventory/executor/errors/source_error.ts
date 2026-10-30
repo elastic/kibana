@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { asNumber, asText } from '../utils';
+
 /** A failed query against one source, safe to return to the caller. */
 export interface SourceError {
   indexPattern: string;
@@ -21,11 +23,6 @@ interface ErrorLike {
     body?: { error?: { type?: unknown; reason?: unknown } };
   };
 }
-
-const asNumber = (value: unknown): number | null => (typeof value === 'number' ? value : null);
-
-const asText = (value: unknown): string | null =>
-  typeof value === 'string' && value.length > 0 ? value : null;
 
 /** Flattens any thrown value to a status and reason, never a stack or the raw body. */
 export const toSourceError = (indexPattern: string, error: unknown): SourceError => {

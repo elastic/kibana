@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexMode, QueryPlan, ResolvedIndex } from '../generator';
 import { toSourceError } from './errors/source_error';
+import { asList } from './utils';
 
 /** Why a pattern gives the planner no indices. */
 export type UnusableSourceCause =
@@ -202,8 +203,6 @@ export const resolveSourceIndices = async (
 };
 
 const sortedUnion = (lists: string[][]): string[] => [...new Set(lists.flat())].sort();
-
-const asList = (names: string | string[]): string[] => (Array.isArray(names) ? names : [names]);
 
 // Asks by pattern, not by concrete index: the client puts the index list in the URL, and a pattern
 // that resolves to many indices exceeds the HTTP line limit. The client sends `fields` in the body.

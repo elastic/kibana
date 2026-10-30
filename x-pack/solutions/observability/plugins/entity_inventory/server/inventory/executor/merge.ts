@@ -5,31 +5,10 @@
  * 2.0.
  */
 
-import { ENTITY_ID_COLUMN, LAST_SEEN_COLUMN } from '../generator';
+import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
-import type {
-  ESQLValue,
-  InventoryRow,
-  MergeResult,
-  PlanResult,
-  Provenance,
-  TypedOutputColumn,
-} from './types';
-
-/** The row's `last_seen` as epoch milliseconds, or null when absent or unparseable. */
-export const lastSeenInstant = (row: InventoryRow): number | null => {
-  const value = row[LAST_SEEN_COLUMN];
-  const instant =
-    typeof value === 'number' ? value : typeof value === 'string' ? Date.parse(value) : NaN;
-  return Number.isNaN(instant) ? null : instant;
-};
-
-const hasValue = (value: ESQLValue | undefined): value is ESQLValue =>
-  value !== null && value !== undefined;
-
-// A missing instant is older than any instant; on a tie the value already held is kept.
-const isNewer = (candidate: number | null, current: number | null): boolean =>
-  candidate !== null && (current === null || candidate > current);
+import type { InventoryRow, MergeResult, PlanResult, Provenance, TypedOutputColumn } from './types';
+import { hasValue, isNewer, lastSeenInstant } from './utils';
 
 interface EntityState {
   row: InventoryRow;

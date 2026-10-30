@@ -7,7 +7,7 @@
 
 import { ENTITY_ID_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
-import { lastSeenInstant } from './merge';
+import { lastSeenInstant } from './utils';
 import type { InventoryRow } from './types';
 
 const compareIds = (a: InventoryRow, b: InventoryRow): number => {
