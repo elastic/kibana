@@ -11,18 +11,15 @@ import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { ENABLE_NEW_FLYOUT_SETTING } from '../../../common/constants';
 import { translateLegacyStateToDescriptors } from '../../../common/flyout_v2';
-import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 
-const FLYOUT_PARAM = 'flyout' as const;
 const FLYOUT_V2_PARAM = 'flyoutV2' as const;
 
 export const SECURITY_BUILD_REDIRECT_URL_TOOL_ID = securityTool('build_redirect_url');
 
-// Flyout panel parameters use v1 values, but the tool translates this to v2 descriptors when the new flyout is enabled
+// Flyout panel parameters use v1 values, but the tool translates them to v2 descriptors
 const flyoutPanelSchema = lazySchema(() =>
   z.object({
     id: z.string().describe('The id of the panel to open in this slot.'),
@@ -56,17 +53,17 @@ export const buildRedirectUrlSchema = lazySchema(() =>
 );
 
 /**
- * Serializes an expandable-flyout state object into a `flyout=<rison>` query param value.
+ * Serializes flyout descriptors into a `flyoutV2=<rison>` query param value.
  *
  * Two encodings are applied and they reverse cleanly on read:
- * 1. **Rison** (`encode`) → the compact wire format `@kbn/expandable-flyout` rison-decodes.
+ * 1. **Rison** (`encode`) → the compact wire format the flyout URL state rison-decodes.
  * 2. **Percent-encoding** to make it a valid URL query value. We additionally escape the
  *    characters `encodeURIComponent` leaves raw (`! ' ( ) *`): the returned `url` is meant to be
  *    rendered inside a markdown link `[title](url)`, where literal parentheses/quotes break the
  *    link parser. Rison quotes any value containing `: @ .` with single quotes, so ids routinely
  *    produce `'`, `(`, and `)` here.
  *
- * On read, `new URLSearchParams(search).get('flyout')` percent-decodes, then the flyout code
+ * On read, `new URLSearchParams(search).get('flyoutV2')` percent-decodes, then the flyout code
  * rison-decodes — so both encodings reverse.
  */
 const encodeFlyoutQueryValue = (value: unknown): string =>
@@ -85,8 +82,7 @@ const appendQueryParam = (path: string, key: string, value: unknown): string => 
  * in-app URL, resolving the deployment base path and the active space segment.
  */
 export const buildRedirectUrlTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  experimentalFeatures: ExperimentalFeatures
+  core: SecuritySolutionPluginCoreSetupDependencies
 ): BuiltinToolDefinition<typeof buildRedirectUrlSchema> => ({
   id: SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
   type: ToolType.builtin,
@@ -97,7 +93,7 @@ export const buildRedirectUrlTool = (
 Returns a single \`url\`. Render it in your reply as a markdown link \`[title](url)\`, using the returned \`url\` as-is (do not edit it).
 
 - \`path\`: the app-relative path (starting with "/"), without the base path or space segment — the tool adds those for the current deployment and space.
-- \`flyout\` (optional): expandable \`{ left, right, preview }\` panels from the skill. When the new flyout is enabled, panels are translated to \`flyoutV2\` when a mapping exists.
+- \`flyout\` (optional): expandable \`{ left, right, preview }\` panels from the skill. Panels are translated to a \`flyoutV2\` param; panels with no mapping are dropped and the link opens the page without a flyout.
 
 This tool only builds a link; it performs no action.`,
   schema: buildRedirectUrlSchema,
@@ -109,7 +105,7 @@ This tool only builds a link; it performs no action.`,
     idempotentHint: true,
     openWorldHint: false,
   },
-  handler: async ({ path, flyout }, { spaceId, logger, savedObjectsClient }) => {
+  handler: async ({ path, flyout }, { spaceId, logger }) => {
     if (!path.startsWith('/') || path.startsWith('//')) {
       return {
         results: [
@@ -127,22 +123,13 @@ This tool only builds a link; it performs no action.`,
     let relativePath = path;
 
     if (flyout && Boolean(flyout.left || flyout.right || flyout.preview)) {
-      const useNewFlyout = experimentalFeatures.newFlyoutSystemDisabled
-        ? false
-        : await coreStart.uiSettings
-            .asScopedToClient(savedObjectsClient)
-            .get<boolean>(ENABLE_NEW_FLYOUT_SETTING);
-
-      if (useNewFlyout) {
-        const translated = translateLegacyStateToDescriptors(flyout);
-        if (translated?.length) {
-          relativePath = appendQueryParam(relativePath, FLYOUT_V2_PARAM, translated);
-        } else {
-          // Unmigrated panels - keep the legacy expandable encoding.
-          relativePath = appendQueryParam(relativePath, FLYOUT_PARAM, flyout);
-        }
+      const translated = translateLegacyStateToDescriptors(flyout);
+      if (translated?.length) {
+        relativePath = appendQueryParam(relativePath, FLYOUT_V2_PARAM, translated);
       } else {
-        relativePath = appendQueryParam(relativePath, FLYOUT_PARAM, flyout);
+        logger.debug(
+          `${SECURITY_BUILD_REDIRECT_URL_TOOL_ID} could not translate the flyout panels for path '${path}', linking to the page without a flyout`
+        );
       }
     }
 

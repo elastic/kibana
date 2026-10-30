@@ -62,13 +62,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory and entity store v2 settings.
-      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
-      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
+      // Enable asset inventory and entity store v2 settings
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
-        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -90,7 +87,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
-      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -159,11 +155,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEntityDetails(
         '788e996886e5d4eea273c24f7d591159076bca81e76bde03cf2936802da9c701'
       );
-      // check the preview panel grouped items rendered correctly
+      // check the grouped node panel items rendered correctly
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(4);
       await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleTextNumber(4);
 
-      await expandedFlyoutGraph.closePreviewSection();
+      await expandedFlyoutGraph.goBackToGraph();
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
@@ -224,7 +220,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(1)'
       );
-      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      // An alert is always coupled with an event, so we open the grouped node panel instead of the alert flyout
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
 
@@ -263,7 +259,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(0)oa(0)'
       );
-      // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
+      // An alert is always coupled with an event, so we open the grouped node panel instead of the alert flyout
       await alertsPage.flyout.assertPreviewPanelIsOpen('group');
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
@@ -332,11 +328,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.showEntityDetails(
             'aee6fb9ccf55bf0e3e974083019a0a1ba7786ef99ed3fe59a1504f22ac94ee31'
           );
-          // check the preview panel grouped items rendered correctly
+          // check the grouped node panel items rendered correctly
           await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(3);
           await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(3);
 
-          await expandedFlyoutGraph.closePreviewSection();
+          await expandedFlyoutGraph.goBackToGraph();
 
           // Clear filters to reset state
           await expandedFlyoutGraph.clearAllFilters();

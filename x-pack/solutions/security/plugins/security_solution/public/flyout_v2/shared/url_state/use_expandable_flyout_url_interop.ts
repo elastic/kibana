@@ -15,7 +15,6 @@ import {
   translateLegacyStateToDescriptors,
   type LegacyFlyoutState,
 } from '../../../../common/flyout_v2';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useFlyoutApi } from '../../use_flyout_api';
@@ -48,11 +47,10 @@ const NEEDS_ATTACK_HIT = new Set(['attackCorrelations', 'attackEntities']);
 
 /**
  * Legacy-URL interop hook. On mount, reads the `flyout` (or `timelineFlyout`) rison URL param;
- * if found while the new flyout is enabled, translates it to the equivalent flyoutV2 open calls,
+ * if found, translates it to the equivalent flyoutV2 open calls,
  * removes the legacy param, and lets the URL writer record the current state as flyoutV2.
  *
  * Only fires when:
- *  - `useIsNewFlyoutEnabled()` is true
  *  - the legacy param is present
  *  - the v2 param is NOT already present (to avoid double-open on already-migrated URLs)
  *
@@ -62,14 +60,12 @@ const NEEDS_ATTACK_HIT = new Set(['attackCorrelations', 'attackEntities']);
  * The `eventFlyout` param is intentionally ignored per spec.
  */
 export const useLegacyFlyoutUrlInterop = (legacyParamKey: string, v2ParamKey: string): void => {
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
   const hasOpenedRef = useRef(false);
 
   // Decode the legacy param exactly once (synchronous useState initializer).
   const [legacyState] = useState<LegacyFlyoutState | null>(() => {
-    if (!isNewFlyoutEnabled) return null;
     // If v2 param already present, the URL is already migrated — do nothing.
     const searchParams = new URLSearchParams(history.location.search);
     if (searchParams.get(v2ParamKey)) return null;
@@ -79,7 +75,6 @@ export const useLegacyFlyoutUrlInterop = (legacyParamKey: string, v2ParamKey: st
 
   // Track whether the raw legacy param was present but malformed.
   const [isMalformedLegacy] = useState<boolean>(() => {
-    if (!isNewFlyoutEnabled) return false;
     const searchParams = new URLSearchParams(history.location.search);
     if (searchParams.get(v2ParamKey)) return false;
     const raw = searchParams.get(legacyParamKey);

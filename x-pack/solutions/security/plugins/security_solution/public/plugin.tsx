@@ -412,9 +412,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
-        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
       });
       registerEntityGraphAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -423,8 +421,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         searchSession: plugins.data.search.session,
-        experimentalFeatures: this.experimentalFeatures,
-        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.riskScoreHistoryEnabled) {
         registerEntityRiskScoreHistoryAttachment({
@@ -432,9 +428,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           application: core.application,
           agentBuilder: plugins.agentBuilder,
           chrome: core.chrome,
-          experimentalFeatures: this.experimentalFeatures,
           searchSession: plugins.data.search.session,
-          uiSettings: core.uiSettings,
         });
       }
       registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
@@ -447,7 +441,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
         rendering: core.rendering,
         spaces: plugins.spaces,
         registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
