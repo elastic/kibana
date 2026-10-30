@@ -10,11 +10,8 @@
 import fs from 'fs';
 import { escape } from 'he';
 import Path from 'path';
-import {
-  getScoutFailures,
-  type ScoutInfraFailureReason,
-  type ScoutTestFailureExtended,
-} from './get_scout_failures';
+import { getScoutFailures, type ScoutTestFailureExtended } from './get_scout_failures';
+import type { InfraFailureReason } from './infra_failure_rules';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
@@ -26,7 +23,7 @@ export const SCOUT_GITHUB_ISSUES_FILENAME = 'github-issues.json';
 export interface ScoutGithubIssueDetails {
   githubIssue?: string;
   failureCount?: number;
-  infraReason?: ScoutInfraFailureReason;
+  infraReason?: InfraFailureReason;
 }
 
 const getTrackedBranchesStatus = (failure: ScoutTestFailureExtended): string | undefined => {
