@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  requiresDelegatedIdentity,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
@@ -72,6 +73,7 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
@@ -82,6 +84,7 @@ import {
 } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
+import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import type { WorkflowsManagementClient } from './workflows_management_client';
 import { createWorkflowsManagementClient } from './workflows_management_client';
 import type {
@@ -95,7 +98,11 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
-import { getWorkflowDeleteOperation } from '../services/workflow_access_control';
+import {
+  EPHEMERAL_WORKFLOW_ID,
+  getWorkflowDeleteOperation,
+  INTERNAL_TEST_WORKFLOW_ID,
+} from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
@@ -105,8 +112,6 @@ import type {
 } from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
-
-const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
 
 const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
@@ -720,6 +725,30 @@ export class WorkflowsManagementApi {
     return this.workflowsService.disableAllWorkflows(spaceId, request);
   }
 
+  /**
+   * Rejects a run of a workflow that can only execute as the delegated identity of a parent.
+   * `runWorkflow`, `scheduleWorkflow`, and `testWorkflow` throw; `bulkScheduleWorkflow` records
+   * a per-item error so one doomed workflow does not fail the batch. A parent's
+   * `workflow.execute` step goes straight to the engine with `inheritParentIdentity` and never
+   * passes through here. The engine repeats the check so event-trigger scheduling cannot
+   * persist that run or cancel an in-flight one.
+   */
+  public assertRunnableStandalone(workflow: WorkflowExecutionEngineModel): void {
+    if (requiresDelegatedIdentity(workflow)) {
+      throw new WorkflowRequiresDelegatedIdentityError(
+        this.standaloneDelegatedIdentityMessage(workflow.id)
+      );
+    }
+  }
+
+  private standaloneDelegatedIdentityMessage(workflowId: string): string {
+    return i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
+      defaultMessage:
+        "Workflow ''{workflowId}'' delegates its execution identity to a parent workflow and cannot be run standalone.",
+      values: { workflowId },
+    });
+  }
+
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
@@ -732,6 +761,11 @@ export class WorkflowsManagementApi {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
     }
+    // Direct starts land here from the Run route, Cases, executeWorkflow, and its plugin
+    // callers. Rule actions schedule instead of calling runWorkflow; scheduleWorkflow applies
+    // the same refusal. A parent's `workflow.execute` step goes straight to the engine and
+    // never passes through, so gating here cannot block a valid inherited run.
+    this.assertRunnableStandalone(workflow);
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -772,6 +806,10 @@ export class WorkflowsManagementApi {
     eventOverrides,
     expandSelections = ALL_TRIGGER_SELECTION_KINDS,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    // Refuse before trigger preprocessing: the ES lookups it performs would otherwise
+    // run (and could surface a 400 for a bad selection) for a run this gate rejects.
+    // runWorkflow applies the same check again after preprocessing.
+    this.assertRunnableStandalone(workflow);
     const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
@@ -863,7 +901,7 @@ export class WorkflowsManagementApi {
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
 
     return {
-      id: params.workflowId ?? 'ephemeral-workflow',
+      id: params.workflowId ?? EPHEMERAL_WORKFLOW_ID,
       name: params.name ?? workflowJson.name,
       enabled: workflowJson.enabled,
       definition: workflowJson.definition,
@@ -945,6 +983,9 @@ export class WorkflowsManagementApi {
     triggeredBy: string,
     metadata?: WorkflowExecutionEventDispatchMetadata
   ): Promise<string> {
+    // Rule actions and event-trigger callers that go through this API never inherit a
+    // parent service account. Refuse before the engine persists the run or drains concurrency.
+    this.assertRunnableStandalone(workflow);
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -969,8 +1010,18 @@ export class WorkflowsManagementApi {
     request: KibanaRequest
   ): Promise<BulkScheduleWorkflowResult> {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const results: BulkScheduleWorkflowResult = new Array(items.length);
+    const forwardedIndexes: number[] = [];
 
-    const engineItems = items.map((item) => {
+    const engineItems = items.flatMap((item, index) => {
+      if (requiresDelegatedIdentity(item.workflow)) {
+        results[index] = {
+          status: 'error',
+          error: { message: this.standaloneDelegatedIdentityMessage(item.workflow.id) },
+        };
+        return [];
+      }
+      forwardedIndexes.push(index);
       const { event, ...manualInputs } = item.inputs;
       const context: Record<string, unknown> = {
         event,
@@ -981,10 +1032,25 @@ export class WorkflowsManagementApi {
       if (item.metadata) {
         context.metadata = item.metadata;
       }
-      return { workflow: item.workflow, context };
+      return [{ workflow: item.workflow, context }];
     });
 
-    return workflowsExecutionEngine.bulkScheduleWorkflow(engineItems, request);
+    if (engineItems.length === 0) {
+      return items.length === 0
+        ? workflowsExecutionEngine.bulkScheduleWorkflow([], request)
+        : results;
+    }
+
+    const engineResults = await workflowsExecutionEngine.bulkScheduleWorkflow(engineItems, request);
+    // Keep the engine array identity when every item was forwarded, so callers that
+    // compare the result by reference still see the engine payload.
+    if (forwardedIndexes.length === items.length) {
+      return engineResults;
+    }
+    forwardedIndexes.forEach((itemIndex, resultIndex) => {
+      results[itemIndex] = engineResults[resultIndex];
+    });
+    return results;
   }
 
   public async testWorkflow({
@@ -1039,6 +1105,21 @@ export class WorkflowsManagementApi {
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    // A test run is still a top-level run: it holds the same concurrency slot and would
+    // fail the same way on an inherited step. Unsaved drafts of delegated-identity-only
+    // workflows reach the engine through this path, so gate it too.
+    this.assertRunnableStandalone(
+      toWorkflowExecutionEngineModel(
+        {
+          id: resolvedWorkflowId,
+          name: workflowJson.name,
+          enabled: workflowJson.enabled,
+          definition: workflowJson.definition,
+          yaml: resolvedYaml,
+        },
+        { isTestRun: true, isEphemeral: Boolean(workflowYaml) }
+      )
+    );
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -1145,6 +1226,16 @@ export class WorkflowsManagementApi {
       { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
       spaceId
     );
+  }
+
+  /** Workflow ids the caller can read, or `undefined` when no workflow is hidden from them. */
+  public async getReadableWorkflowIds(
+    spaceId: string,
+    request: KibanaRequest,
+    options: { includeManaged: boolean }
+  ): Promise<string[] | undefined> {
+    const access = await this.workflowsService.getAccessControl();
+    return access.readableWorkflowIds(spaceId, request, options);
   }
 
   public async getWorkflowExecution(
@@ -1399,6 +1490,7 @@ export class WorkflowsManagementApi {
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     await this.assertExecutionAccess(executionId, spaceId, 'execute', request);
     const channel = options?.channel;
+    let claimReleased: boolean | undefined;
     try {
       const stepExecutionId =
         options?.stepExecutionId ??
@@ -1412,14 +1504,16 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const claimed = await this.workflowsService.markStepAsResponded(
+      // Resolved before claiming so a lookup failure cannot strand the claim.
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const claim = await this.workflowsService.markStepAsResponded(
         stepExecutionId,
         executionId,
         request,
         channel,
         spaceId
       );
-      if (!claimed) {
+      if (!claim) {
         throw new WorkflowExecutionInvalidStatusError(
           executionId,
           'already responded to or no longer waiting for input',
@@ -1427,12 +1521,19 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-      const result = await workflowsExecutionEngine.resumeWorkflowExecution(
-        executionId,
-        spaceId,
-        input,
-        request
+      const result = await withHitlClaim(
+        {
+          workflowsService: this.workflowsService,
+          logger: this.logger,
+          executionId,
+          stepExecutionId,
+          claim,
+          spaceId,
+          onRelease: (released) => {
+            claimReleased = released;
+          },
+        },
+        () => workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request)
       );
       this.audit?.logExecutionResumed(request, {
         executionId,
@@ -1441,7 +1542,7 @@ export class WorkflowsManagementApi {
       });
       return result;
     } catch (error) {
-      this.audit?.logExecutionResumed(request, { executionId, channel, error });
+      this.audit?.logExecutionResumed(request, { executionId, channel, error, claimReleased });
       throw error;
     }
   }

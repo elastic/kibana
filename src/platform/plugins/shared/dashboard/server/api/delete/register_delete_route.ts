@@ -79,8 +79,9 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
           const result = await deleteDashboard(
-            ctx,
+            core,
             req.params.id,
             getCachedDashboardStateSchema(),
             spacesService?.getSpaceId(req)
