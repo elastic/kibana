@@ -256,7 +256,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await expect(pageObjects.lens.workspace.convertToEsqlButton).toBeDisabled();
   });
 
-  test('should disable Convert to ES|QL button when the chart has query-based annotations', async ({
+  test('should disable Convert to ES|QL button for query annotations that use global filters', async ({
     pageObjects,
     page,
   }) => {
@@ -268,8 +268,8 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     );
     await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
 
-    // Turn the fixture's manual annotation into a query-based one; query annotations
-    // are not yet supported on ES|QL charts, so this must gate the conversion.
+    // The fixture's annotation layer uses global filters, which ES|QL annotations don't apply,
+    // so converting its query annotation would change what the chart shows.
     await lens.layers.activateLayerTab(2);
     await lens.dimensions.openDimensionEditor('lnsXY_xAnnotationsPanel > lns-dimensionTrigger', 2);
     await page.testSubj.click('lnsXY_annotation_query');
@@ -277,6 +277,70 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await lens.closeDimensionEditor();
 
     await expect(lens.workspace.convertToEsqlButton).toBeDisabled();
+
+    await cancelLensInlineEditorAndWaitClosed({ lens });
+  });
+
+  test('converts query annotations to ES|QL annotations', async ({ pageObjects, page }) => {
+    const { dashboard, lens } = pageObjects;
+    const annotationQuery = 'machine.os.raw : "osx"';
+
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
+    );
+
+    await test.step('turn the manual annotation into a query annotation', async () => {
+      await lens.layers.activateLayerTab(2);
+      await lens.layers.setUseGlobalFilters(false);
+      await lens.dimensions.openDimensionEditor(
+        'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+        2
+      );
+      await page.testSubj.click('lnsXY_annotation_query');
+      await lens.style.configureQueryAnnotation({
+        queryString: annotationQuery,
+        // the data view's time field, which the converted annotation keeps as its time column
+        timeField: '@timestamp',
+      });
+      await lens.closeDimensionEditor();
+    });
+
+    await test.step('convert the chart including the annotation layer', async () => {
+      await lens.workspace.convertToEsqlButton.click();
+      const modal = lens.workspace.convertToEsqlModal;
+      // two data layers and the annotation layer convert; the static reference line stays
+      await expect(modal.getByText('Will be converted', { exact: true })).toHaveCount(3);
+      await expect(modal.getByText('Will remain unchanged', { exact: true })).toHaveCount(1);
+      await lens.workspace.convertToEsqlModalConfirmButton.click();
+      await expect(modal).toBeHidden();
+      await expect.poll(() => lens.layers.getLayerCount()).toBe(4);
+    });
+
+    await test.step('assert the annotation became an ES|QL annotation', async () => {
+      await lens.layers.activateLayerTab(2);
+      await lens.dimensions.openDimensionEditor(
+        'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+        2
+      );
+      await expect(page.testSubj.locator('lnsXY_annotation_esql')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      await expect(
+        page.testSubj.locator('lnsXY-annotation-esql-editor').getByRole('code')
+      ).toContainText(/WHERE\s+KQL/);
+      await expect(page.testSubj.locator('lnsXY-annotation-esql-timeColumn')).toHaveValue(
+        '@timestamp'
+      );
+      await lens.closeDimensionEditor();
+
+      const panel = dashboard.getPanelByEmbeddableId(
+        testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
+      );
+      await expect(panel.getByTestId('embeddableError')).toHaveCount(0);
+      await expect(panel.getByTestId('xyVisChart')).toBeVisible();
+    });
 
     await cancelLensInlineEditorAndWaitClosed({ lens });
   });

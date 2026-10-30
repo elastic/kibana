@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper, type ScoutPage } from '@kbn/scout';
 import { normalizeComputedColor, WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /**
@@ -26,6 +26,7 @@ export class LensStyle {
   private readonly curveStyleSelect;
   private readonly missingValuesSuperSelect;
   readonly missingValuesSelect;
+  private readonly esqlCodeEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.styleSettingsFlyout = this.page.testSubj.locator('lnsStyleSettingsFlyout');
@@ -47,6 +48,7 @@ export class LensStyle {
     this.curveStyleSelect = this.page.components.superSelect('lnsCurveStyleSelect');
     this.missingValuesSuperSelect = this.page.components.superSelect('lnsMissingValuesSelect');
     this.missingValuesSelect = this.page.testSubj.locator('lnsMissingValuesSelect');
+    this.esqlCodeEditor = new KibanaCodeEditorWrapper(this.page);
   }
 
   /**
@@ -402,6 +404,56 @@ export class LensStyle {
         await this.addFieldToTooltip(field);
       }
     }
+  }
+
+  /**
+   * Switches the open annotation dimension editor to ES|QL placement, submits the query, and
+   * binds result columns. Column options only exist once the submitted query has returned.
+   */
+  async configureEsqlAnnotation(opts: {
+    query: string;
+    timeColumn: string;
+    endTimeColumn?: string;
+    textColumn?: string;
+    tooltipColumns?: string[];
+  }) {
+    const placement = this.page.testSubj.locator('lnsXY_annotation_esql');
+    await placement.click();
+    await placement.and(this.page.locator('[aria-pressed="true"]')).waitFor({ state: 'visible' });
+
+    await this.esqlCodeEditor.setCodeEditorValueByTestSubj(
+      'lnsXY-annotation-esql-editor',
+      opts.query
+    );
+    await this.page.testSubj
+      .locator('lnsXY-annotation-esql-query')
+      .getByTestId('ESQLEditor-run-query-button')
+      .click();
+
+    await this.selectEsqlAnnotationColumn('lnsXY-annotation-esql-timeColumn', opts.timeColumn);
+    if (opts.endTimeColumn) {
+      const timeRange = this.page.testSubj.locator('lnsXY-annotation-esql-timeRange');
+      await timeRange.click();
+      await timeRange.and(this.page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' });
+      await this.selectEsqlAnnotationColumn(
+        'lnsXY-annotation-esql-endTimeColumn',
+        opts.endTimeColumn
+      );
+    }
+    if (opts.textColumn) {
+      await this.selectEsqlAnnotationColumn('lnsXY-annotation-esql-textColumn', opts.textColumn);
+    }
+    if (opts.tooltipColumns) {
+      await this.page.components
+        .comboBox('lnsXY-annotation-esql-tooltip-columns')
+        .setSelectedOptions(opts.tooltipColumns);
+    }
+  }
+
+  private async selectEsqlAnnotationColumn(testSubj: string, column: string) {
+    const select = this.page.testSubj.locator(testSubj);
+    await select.getByRole('option', { name: column, exact: true }).waitFor({ state: 'attached' });
+    await select.selectOption(column);
   }
 
   /** Sets the marker icon in the open reference-line dimension editor. */

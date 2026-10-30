@@ -192,6 +192,21 @@ export class LensLayers {
     await tab.hover();
   }
 
+  /** Sets "Use global filters" in the active layer's settings flyout, then closes it. */
+  async setUseGlobalFilters(enabled: boolean) {
+    await this.page.testSubj.click('lnsLayerSettings');
+    const toggle = this.page.testSubj.locator('lns-layerSettings-ignoreGlobalFilters');
+    await toggle.waitFor({ state: 'visible' });
+    if ((await toggle.getAttribute('aria-checked')) !== String(enabled)) {
+      await toggle.click();
+    }
+    await toggle
+      .and(this.page.locator(`[aria-checked="${enabled}"]`))
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('lns-indexPattern-dimensionContainerBack');
+    await this.page.testSubj.locator('lnsLayerSettingsFlyout').waitFor({ state: 'hidden' });
+  }
+
   /** Returns the number of layers in the Lens editor (unified-tabs row is hidden for a single layer). */
   async getLayerCount(): Promise<number> {
     const tabs = await this.layerTabsLocator.count();
