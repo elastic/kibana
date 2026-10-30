@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { AclDocument, CanonicalAcl } from '@kbn/access-control';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectReference, SavedObjectsRawDocSource } from '..';
 
@@ -97,6 +98,8 @@ export interface SavedObjectDoc<T = unknown> {
   originId?: string;
   managed?: boolean;
   accessControl?: SavedObjectAccessControl;
+  /** A new or changed ACL, or a stored ACL that a full-document rewrite preserves. */
+  acl?: AclDocument | CanonicalAcl;
 }
 
 /**

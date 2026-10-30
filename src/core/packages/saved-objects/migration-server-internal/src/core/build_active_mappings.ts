@@ -104,6 +104,26 @@ export function getBaseMappings(): IndexMappingSafe {
           },
         },
       },
+      // Platform object-level access control. Every stored ACL value must be indexed or rejected,
+      // because point reads and read filters must decide on the same values: do not add
+      // `ignore_above` or `ignore_malformed` here.
+      acl: {
+        dynamic: 'false',
+        properties: {
+          version: { type: 'integer', coerce: false },
+          owner: { properties: { type: { type: 'keyword' }, id: { type: 'keyword' } } },
+          general_access: { type: 'keyword' },
+          entries: {
+            type: 'nested',
+            properties: {
+              type: { type: 'keyword' },
+              id: { type: 'keyword' },
+              access: { type: 'keyword' },
+              added_at: { type: 'date' },
+            },
+          },
+        },
+      },
     },
   };
 }

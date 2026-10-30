@@ -122,10 +122,11 @@ export class SavedObjectsExporter implements ISavedObjectsExporter {
     // sort with the provided sort function then with the default export sorting
     const exportedObjects = sortObjects(collectedObjects.sort(sortFunction));
 
-    // redact attributes that should not be exported
-    const redactedObjects = includeNamespaces
-      ? exportedObjects
-      : exportedObjects.map<SavedObject<unknown>>(({ namespaces, ...object }) => object);
+    // redact attributes that should not be exported: access control lists never leave Kibana in a file,
+    // and imports apply the destination's creation rules instead
+    const redactedObjects = exportedObjects.map<SavedObject<unknown>>(
+      ({ acl, namespaces, ...object }) => (includeNamespaces ? { ...object, namespaces } : object)
+    );
 
     const exportDetails: SavedObjectsExportResultDetails = {
       exportedCount: exportedObjects.length,

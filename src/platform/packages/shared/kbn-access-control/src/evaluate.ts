@@ -13,6 +13,7 @@ import {
   type AccessPolicy,
   type AclDecision,
   type AclLevel,
+  type AclObjectDecision,
   type AclState,
   type CanonicalAcl,
   type GeneralAccessLevel,
@@ -164,3 +165,16 @@ const matchesPrincipal = (
   component: { type: readonly string[]; id: readonly string[] },
   principal: Principal
 ) => getPrincipalKind(component.type) === principal.type && component.id.includes(principal.id);
+
+/**
+ * Turns a decision into the outcome of one operation. An object the caller cannot view is reported
+ * as missing, so that a denial never discloses that the object exists.
+ */
+export const toObjectDecision = (decision: AclDecision, operation: string): AclObjectDecision => {
+  if (decision.operations.has(operation)) {
+    return { status: 'allowed' };
+  }
+  return decision.operations.has('view')
+    ? { status: 'forbidden', operation }
+    : { status: 'not_found' };
+};

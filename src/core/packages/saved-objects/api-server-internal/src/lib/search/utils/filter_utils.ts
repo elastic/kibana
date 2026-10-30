@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ACL_FIELD } from '@kbn/access-control';
 import { set } from '@kbn/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';
@@ -198,6 +199,10 @@ export const hasFilterKeyError = (
     const keySplit = key.split('.');
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
+    }
+    // Access control lists are visible to access managers only, through the access control API.
+    if (keySplit[1] === ACL_FIELD) {
+      return `This key '${key}' cannot be used in a filter`;
     }
     if (
       (keySplit.length === 2 && fieldDefined(indexMapping, key)) ||

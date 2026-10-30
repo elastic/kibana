@@ -57,6 +57,7 @@ describe('convertSecurityApi', () => {
         getWorkloadBinding: jest.fn(),
         withScopedRequestForWorkload: jest.fn(),
       },
+      accessControl: { asScoped: jest.fn() },
       fakeRequestEnricher: jest.fn(),
     };
   });

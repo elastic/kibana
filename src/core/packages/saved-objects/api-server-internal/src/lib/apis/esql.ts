@@ -46,6 +46,8 @@ export async function performEsql(
   }
 
   const types = castArray(type).filter((t) => allowedTypes.includes(t));
+  // Raw queries bypass the read filters, so object-level security cannot protect them.
+  helpers.acl.rejectUnsupported(types, 'esql');
   if (types.length === 0) {
     return EMPTY_ESQL_RESPONSE;
   }

@@ -34,6 +34,8 @@ export const incrementCounterInternal = async <T>(
   { registry, helpers, client, serializer }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const { common: commonHelper, preflight: preflightHelper, migration: migrationHelper } = helpers;
+  // shortcut: counters write without a preflight read, so they cannot check object-level access yet.
+  helpers.acl.rejectUnsupported([type], 'incrementCounter');
 
   const {
     migrationVersion,

@@ -18,6 +18,7 @@ import {
   type SavedObjectsRawDocParseOptions,
   type SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';
+import { normalizeAclSource } from '@kbn/access-control';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,
@@ -123,6 +124,8 @@ export function getSavedObjectFromSource<T>(
       : undefined,
   } = doc._source;
 
+  const acl = normalizeAclSource(doc._source);
+
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
     namespaces = doc._source.namespaces ?? [
@@ -147,6 +150,7 @@ export function getSavedObjectFromSource<T>(
     references: doc._source.references || [],
     managed,
     accessControl,
+    ...(acl && { acl }),
   };
 }
 

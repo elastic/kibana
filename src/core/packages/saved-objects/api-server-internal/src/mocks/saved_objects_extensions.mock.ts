@@ -11,6 +11,7 @@ import type {
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
+  ISavedObjectsAclExtension,
 } from '@kbn/core-saved-objects-server';
 import type { Either } from '@kbn/core-saved-objects-api-server';
 import type { Payload } from '@hapi/boom';
@@ -67,10 +68,20 @@ const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => (
   asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
 });
 
+// By default the ACL extension allows everything, as for types without an access policy.
+const createAclExtension = (): jest.Mocked<ISavedObjectsAclExtension> => ({
+  getReadFilters: jest.fn().mockResolvedValue(new Map()),
+  authorizeObjects: jest.fn().mockResolvedValue(new Map()),
+  getInitialAcl: jest.fn().mockResolvedValue(undefined),
+  authorizeAclChange: jest.fn(),
+  runInAuditScope: jest.fn().mockImplementation((operation) => operation()),
+});
+
 const create = () => ({
   encryptionExtension: createEncryptionExtension(),
   securityExtension: createSecurityExtension(),
   spacesExtension: createSpacesExtension(),
+  aclExtension: createAclExtension(),
 });
 
 export const savedObjectsExtensionsMock = {
@@ -78,4 +89,5 @@ export const savedObjectsExtensionsMock = {
   createEncryptionExtension,
   createSecurityExtension,
   createSpacesExtension,
+  createAclExtension,
 };
