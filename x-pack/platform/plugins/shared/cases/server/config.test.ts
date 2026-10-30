@@ -33,6 +33,9 @@ describe('config validation', () => {
           "chat": Object {
             "enabled": true,
           },
+          "customStatuses": Object {
+            "enabled": true,
+          },
           "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
@@ -143,6 +146,9 @@ describe('config validation', () => {
           "templates": Object {
             "enabled": true,
           },
+          "topLevelApp": Object {
+            "enabled": true,
+          },
         }
       `);
     });
@@ -205,6 +211,26 @@ describe('config validation', () => {
     it('allows runWorkflows.enabled to be set to false explicitly', () => {
       const config = ConfigSchema.validate({ runWorkflows: { enabled: false } });
       expect(config.runWorkflows.enabled).toBe(false);
+    });
+
+    it('sets topLevelApp.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.topLevelApp.enabled).toBe(true);
+    });
+
+    it('allows topLevelApp.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ topLevelApp: { enabled: false } });
+      expect(config.topLevelApp.enabled).toBe(false);
+    });
+
+    it('sets customStatuses.enabled default to true', () => {
+      const config = ConfigSchema.validate({});
+      expect(config.customStatuses.enabled).toBe(true);
+    });
+
+    it('allows customStatuses.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ customStatuses: { enabled: false } });
+      expect(config.customStatuses.enabled).toBe(false);
     });
   });
 });

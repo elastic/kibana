@@ -60,6 +60,8 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     runWorkflows: { enabled: true },
     attachments: { enabled: true },
     chat: { enabled: true },
+    topLevelApp: { enabled: true },
+    customStatuses: { enabled: true },
     ...overrides,
   };
 }

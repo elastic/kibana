@@ -174,6 +174,18 @@ export const ConfigSchema = schema.object({
   runWorkflows: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Kill switch for the top-level Cases app at /app/cases and the single `casesV4` feature.
+  // `false` restores the per-solution Cases experience.
+  topLevelApp: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
+  // Kill switch for per-space custom case statuses. `false` rejects `status_key` writes and
+  // shows only the three lifecycle categories.
+  customStatuses: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

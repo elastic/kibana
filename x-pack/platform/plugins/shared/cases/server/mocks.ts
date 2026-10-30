@@ -821,6 +821,12 @@ export const mockCasesContract = (): CasesServerStart => ({
     attachments: {
       enabled: true,
     },
+    topLevelApp: {
+      enabled: true,
+    },
+    customStatuses: {
+      enabled: true,
+    },
   },
 });
 
