@@ -26,7 +26,6 @@ export const executionStatusErrorReason = schema.oneOf([
   schema.literal(RuleExecutionStatusErrorReasons.Read), // change
   schema.literal(RuleExecutionStatusErrorReasons.Decrypt), // change
   schema.literal(RuleExecutionStatusErrorReasons.Execute), // change
-  schema.literal(RuleExecutionStatusErrorReasons.Configuration), // change
   schema.literal(RuleExecutionStatusErrorReasons.Unknown), // change
   schema.literal(RuleExecutionStatusErrorReasons.License), // change
   schema.literal(RuleExecutionStatusErrorReasons.Timeout), // change
@@ -43,8 +42,6 @@ export const rawRuleExecutionStatusSchema = schema.object({
     schema.literal('unknown'),
     schema.literal('warning'),
   ]),
-  // Indexed on the rule saved object. Declared so the model-version schema matches the mapping.
-  numberOfTriggeredActions: schema.maybe(schema.number()),
   lastExecutionDate: schema.string(),
   lastDuration: schema.maybe(schema.number()),
   error: schema.nullable(
