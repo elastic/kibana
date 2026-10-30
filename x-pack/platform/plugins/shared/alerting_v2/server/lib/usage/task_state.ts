@@ -236,7 +236,6 @@ const stateSchemaV8 = stateSchemaV7.extends({
       per_status_interval: countSchema,
       time_interval: countSchema,
       every_time: countSchema,
-      none: countSchema,
     })
   ),
 });

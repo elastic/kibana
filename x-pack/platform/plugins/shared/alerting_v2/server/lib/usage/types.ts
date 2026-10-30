@@ -134,7 +134,6 @@ export interface AlertingV2Usage {
     per_status_interval?: number;
     time_interval?: number;
     every_time?: number;
-    none?: number;
   };
 
   // alert event stats
@@ -194,6 +193,6 @@ export type DispatchedByGroupingModeKeysCheck = AssertCovered<
   >
 >;
 export type ThrottledByStrategyKeysCheck = AssertCovered<
-  ThrottleStrategy | 'none',
+  ThrottleStrategy,
   keyof NonNullable<AlertingV2Usage['dispatcher_action_groups_throttled_count_by_strategy_24hr']>
 >;

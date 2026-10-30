@@ -573,35 +573,28 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       type: 'long',
       _meta: {
         description:
-          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy on_status_change.',
+          'Sum of action groups throttled over the last 24 hours with strategy on_status_change (configured, or the default for per_alert policies without throttle).',
       },
     },
     per_status_interval: {
       type: 'long',
       _meta: {
         description:
-          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy per_status_interval.',
+          'Sum of action groups throttled over the last 24 hours with strategy per_status_interval.',
       },
     },
     time_interval: {
       type: 'long',
       _meta: {
         description:
-          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy time_interval.',
+          'Sum of action groups throttled over the last 24 hours with strategy time_interval (configured, or the default for per_field and all policies without throttle).',
       },
     },
     every_time: {
       type: 'long',
       _meta: {
         description:
-          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy every_time.',
-      },
-    },
-    none: {
-      type: 'long',
-      _meta: {
-        description:
-          'Sum of action groups throttled over the last 24 hours by policies with no throttle strategy (already notified groups).',
+          'Sum of action groups throttled over the last 24 hours with strategy every_time.',
       },
     },
   },

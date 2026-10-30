@@ -7,6 +7,7 @@
 
 import { DEFAULT_GROUPING } from '../constants';
 import type { ActionPolicy, ActionPolicyId } from '../types';
+import { effectiveThrottleStrategyOf, type EffectiveThrottleStrategy } from '../throttle_strategy';
 
 const NO_POLICIES: readonly ActionPolicy[] = [];
 
@@ -51,10 +52,9 @@ export class PolicyCatalog {
     return this.byId.get(id)?.apiKey;
   }
 
-  /** Throttle strategy of the policy; undefined when it has no throttle or is missing from the catalog. */
-  public throttleStrategyOf(
-    id: ActionPolicyId
-  ): NonNullable<ActionPolicy['throttle']>['strategy'] | undefined {
-    return this.byId.get(id)?.throttle?.strategy;
+  /** Strategy the dispatcher throttles the policy with; undefined when it is missing from the catalog. */
+  public throttleStrategyOf(id: ActionPolicyId): EffectiveThrottleStrategy | undefined {
+    const policy = this.byId.get(id);
+    return policy ? effectiveThrottleStrategyOf(policy) : undefined;
   }
 }

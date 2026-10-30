@@ -10,6 +10,7 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { EventLogServiceContract } from '../../../services/event_log_service/event_log_service';
 import { DispatchOutcome, type PolicyCatalog, type RuleCatalog } from '../../state';
+import type { EffectiveThrottleStrategy } from '../../throttle_strategy';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -56,8 +57,8 @@ interface PolicySummaryDispatcherFields {
   workflow_ids: string[];
   workflow_execution_ids: string[];
   grouping_mode: ActionPolicy['grouping']['mode'];
-  /** `none` when the policy has no throttle, so suppressed groups can still be split by it. */
-  throttle_strategy: NonNullable<NonNullable<ActionPolicy['throttle']>['strategy']> | 'none';
+  /** Strategy the dispatcher throttled with, including the default applied to policies without `throttle`. */
+  throttle_strategy?: EffectiveThrottleStrategy;
 }
 
 interface UnmatchedDispatcherFields {
@@ -172,6 +173,7 @@ function emitPolicySummary({
     ruleIds,
     rules
   );
+  const throttleStrategy = policies.throttleStrategyOf(summary.policyId);
 
   eventLogService.logEvent(
     buildEvent({
@@ -190,7 +192,7 @@ function emitPolicySummary({
         workflow_ids: Array.from(summary.workflowIds),
         workflow_execution_ids: Array.from(summary.workflowExecutionIds),
         grouping_mode: policies.groupingModeOf(summary.policyId),
-        throttle_strategy: policies.throttleStrategyOf(summary.policyId) ?? 'none',
+        ...(throttleStrategy ? { throttle_strategy: throttleStrategy } : {}),
       },
     })
   );
