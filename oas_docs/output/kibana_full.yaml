@@ -69836,257 +69836,7 @@ paths:
                         version: 2
                     total: 42
               schema:
-                description: |
-                  A paginated response of SLOs matching the query.
-                properties:
-                  page:
-                    example: 1
-                    type: number
-                  perPage:
-                    example: 25
-                    type: number
-                  results:
-                    items:
-                      properties:
-                        budgetingMethod:
-                          description: The budgeting method to use when computing the rollup data.
-                          enum:
-                            - occurrences
-                            - timeslices
-                          example: occurrences
-                          title: Budgeting method
-                          type: string
-                        createdAt:
-                          description: The creation date
-                          example: '2023-01-12T10:03:19.000Z'
-                          type: string
-                        description:
-                          description: The description of the SLO.
-                          example: My SLO description
-                          type: string
-                        enabled:
-                          description: Indicate if the SLO is enabled
-                          example: true
-                          type: boolean
-                        groupBy:
-                          description: optional group by field or fields to use to generate an SLO per distinct value
-                          example:
-                            - - service.name
-                            - service.name
-                            - - service.name
-                              - service.environment
-                          oneOf:
-                            - type: string
-                            - items:
-                                type: string
-                              type: array
-                          title: Group by
-                        id:
-                          description: The identifier of the SLO.
-                          example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                          type: string
-                        indicator:
-                          description: The SLI indicator. Its `params` depend on `type`; see the `indicator` property of the create SLO request body.
-                          type: object
-                          properties:
-                            params:
-                              additionalProperties: true
-                              type: object
-                            type:
-                              description: The type of indicator.
-                              example: sli.kql.custom
-                              type: string
-                          required:
-                            - type
-                            - params
-                        instanceId:
-                          description: the value derived from the groupBy field, if present, otherwise '*'
-                          example: host-abcde
-                          type: string
-                        name:
-                          description: The name of the SLO.
-                          example: My Service SLO
-                          type: string
-                        objective:
-                          description: Defines properties for the SLO objective
-                          properties:
-                            target:
-                              description: the target objective between 0 and 1 excluded
-                              example: 0.99
-                              exclusiveMaximum: true
-                              exclusiveMinimum: true
-                              maximum: 1
-                              minimum: 0
-                              type: number
-                            timesliceTarget:
-                              description: the target objective for each slice when using a timeslices budgeting method
-                              example: 0.995
-                              maximum: 1
-                              minimum: 0
-                              type: number
-                            timesliceWindow:
-                              description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
-                              example: 5m
-                              type: string
-                          required:
-                            - target
-                          title: Objective
-                          type: object
-                        revision:
-                          description: The SLO revision
-                          example: 2
-                          type: number
-                        settings:
-                          description: Defines properties for SLO settings.
-                          properties:
-                            frequency:
-                              default: 1m
-                              description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
-                              example: 5m
-                              type: string
-                            preventCrossProjectSearch:
-                              default: false
-                              deprecated: true
-                              description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
-                              example: true
-                              type: boolean
-                            preventInitialBackfill:
-                              default: false
-                              description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
-                              example: true
-                              type: boolean
-                            projectRoutings:
-                              description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
-                              example: _alias:_origin
-                              maxLength: 8192
-                              nullable: true
-                              type: string
-                            syncDelay:
-                              default: 1m
-                              description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
-                              example: 5m
-                              type: string
-                            syncField:
-                              description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
-                              example: event.ingested
-                              type: string
-                          title: Settings
-                          type: object
-                        summary:
-                          description: The SLO computed data
-                          properties:
-                            errorBudget:
-                              properties:
-                                consumed:
-                                  description: The error budget consummed, as a percentage of the initial value.
-                                  example: 0.8
-                                  type: number
-                                initial:
-                                  description: The initial error budget, as 1 - objective
-                                  example: 0.02
-                                  type: number
-                                isEstimated:
-                                  description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
-                                  example: true
-                                  type: boolean
-                                remaining:
-                                  description: The error budget remaining, as a percentage of the initial value.
-                                  example: 0.2
-                                  type: number
-                              required:
-                                - initial
-                                - consumed
-                                - remaining
-                                - isEstimated
-                              title: Error budget
-                              type: object
-                            sliValue:
-                              example: 0.9836
-                              type: number
-                            status:
-                              enum:
-                                - NO_DATA
-                                - HEALTHY
-                                - DEGRADING
-                                - VIOLATED
-                              example: HEALTHY
-                              title: summary status
-                              type: string
-                          required:
-                            - status
-                            - sliValue
-                            - errorBudget
-                          title: Summary
-                          type: object
-                        tags:
-                          description: List of tags
-                          items:
-                            type: string
-                          type: array
-                        timeWindow:
-                          description: Defines properties for the SLO time window
-                          properties:
-                            duration:
-                              description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
-                              example: 30d
-                              type: string
-                            type:
-                              description: Indicates whether the time window is a rolling or a calendar aligned time window.
-                              enum:
-                                - rolling
-                                - calendarAligned
-                              example: rolling
-                              type: string
-                          required:
-                            - duration
-                            - type
-                          title: Time window
-                          type: object
-                        updatedAt:
-                          description: The last update date
-                          example: '2023-01-12T10:03:19.000Z'
-                          type: string
-                        version:
-                          description: The internal SLO version
-                          example: 2
-                          type: number
-                      required:
-                        - id
-                        - name
-                        - description
-                        - indicator
-                        - timeWindow
-                        - budgetingMethod
-                        - objective
-                        - settings
-                        - revision
-                        - summary
-                        - enabled
-                        - groupBy
-                        - instanceId
-                        - tags
-                        - createdAt
-                        - updatedAt
-                        - version
-                      title: SLO response
-                      type: object
-                    type: array
-                  searchAfter:
-                    description: The cursor to provide to get the next page of results, when using cursor-based pagination
-                    items:
-                      anyOf:
-                        - type: string
-                        - type: number
-                    type: array
-                  size:
-                    description: Size provided for cursor based pagination
-                    example: 25
-                    type: number
-                  total:
-                    example: 34
-                    type: number
-                title: Find SLO response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOFindResponse'
           description: Successful request
         '400':
           content:
@@ -70339,14 +70089,7 @@ paths:
                   value:
                     id: 8853df00-ae2e-11ed-90af-09bb6422b258
               schema:
-                properties:
-                  id:
-                    example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                    type: string
-                required:
-                  - id
-                title: Create SLO response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOCreateResponse'
           description: Successful request
         '400':
           content:
@@ -70526,15 +70269,7 @@ paths:
                   value:
                     taskId: d08506b7-f0e8-4f8b-a06a-a83940f4db91
               schema:
-                description: |
-                  The bulk delete SLO response returns a taskId that can be used to poll for its status
-                properties:
-                  taskId:
-                    description: The taskId of the bulk delete operation
-                    example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
-                    type: string
-                title: Bulk delete SLO response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkDeleteResponse'
           description: Successful response
         '400':
           content:
@@ -70686,36 +70421,7 @@ paths:
                         id: d077e940-1515-11ee-9c50-9d096392f520
                         success: false
               schema:
-                description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
-                properties:
-                  error:
-                    description: The error message if the bulk deletion operation failed
-                    example: Task not found
-                    type: string
-                  isDone:
-                    description: Indicates if the bulk deletion operation is completed
-                    example: true
-                    type: boolean
-                  results:
-                    description: The results of the bulk deletion operation, including the success status and any errors for each SLO
-                    items:
-                      type: object
-                      properties:
-                        error:
-                          description: The error message if the deletion operation failed for this SLO
-                          example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
-                          type: string
-                        id:
-                          description: The ID of the SLO that was deleted
-                          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
-                          type: string
-                        success:
-                          description: The result of the deletion operation for this SLO
-                          example: true
-                          type: boolean
-                    type: array
-                title: The status of the bulk deletion
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkDeleteStatusResponse'
           description: Successful response
         '400':
           content:
@@ -70894,6 +70600,7 @@ paths:
                           type: string
                         timestamp:
                           description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                          format: date-time
                           maxLength: 128
                           type: string
                       required:
@@ -70912,15 +70619,7 @@ paths:
                   value:
                     taskId: 8853df00-ae2e-11ed-90af-09bb6422b258
               schema:
-                description: |
-                  The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
-                properties:
-                  taskId:
-                    description: The task id of the purge operation
-                    example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                    type: string
-                title: Bulk Purge Rollup data response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse'
           description: Successful request
         '400':
           content:
@@ -71056,6 +70755,7 @@ paths:
               properties:
                 at:
                   description: The point in time at which to compute the SLO instance summaries, for example 2025-01-12T10:00:00.000Z
+                  format: date-time
                   maxLength: 128
                   type: string
                 requests:
@@ -71109,107 +70809,7 @@ paths:
                         id: d077e940-1515-11ee-9c50-9d096392f520
                         instanceId: host.name:web-01
               schema:
-                description: |
-                  The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).
-                properties:
-                  at:
-                    description: The point in time at which the summaries were computed
-                    example: '2025-01-12T10:00:00.000Z'
-                    format: date-time
-                    type: string
-                  results:
-                    description: The per-instance computation results
-                    items:
-                      description: |
-                        The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).
-                      properties:
-                        error:
-                          description: Error information when the computation failed for this SLO instance. Present when the computation failed.
-                          type: object
-                          properties:
-                            message:
-                              description: The error message
-                              example: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
-                              type: string
-                            statusCode:
-                              description: The HTTP status code of the error
-                              example: 404
-                              type: number
-                          required:
-                            - statusCode
-                            - message
-                        id:
-                          description: The SLO definition id
-                          example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                          type: string
-                        instanceId:
-                          description: The SLO instance id. '*' represents the default (ungrouped) instance.
-                          example: '*'
-                          type: string
-                        summary:
-                          description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
-                          type: object
-                          properties:
-                            errorBudget:
-                              type: object
-                              properties:
-                                consumed:
-                                  description: The error budget consumed, or null when no data is available
-                                  example: 0.24
-                                  nullable: true
-                                  type: number
-                                initial:
-                                  description: The initial error budget, derived from the SLO objective
-                                  example: 0.01
-                                  type: number
-                                remaining:
-                                  description: The error budget remaining, or null when no data is available
-                                  example: 0.76
-                                  nullable: true
-                                  type: number
-                              required:
-                                - initial
-                                - consumed
-                                - remaining
-                            good:
-                              description: The number of good events
-                              example: 9976
-                              type: number
-                            sliValue:
-                              description: The SLI value at the requested point in time, or null when no data is available
-                              example: 0.9976
-                              nullable: true
-                              type: number
-                            status:
-                              description: The SLO health status
-                              enum:
-                                - NO_DATA
-                                - HEALTHY
-                                - DEGRADING
-                                - VIOLATED
-                              example: HEALTHY
-                              type: string
-                            total:
-                              description: The total number of events
-                              example: 10000
-                              type: number
-                          required:
-                            - status
-                            - sliValue
-                            - errorBudget
-                            - good
-                            - total
-                      required:
-                        - id
-                        - instanceId
-                      title: Snapshot result
-                      type: object
-                    type: array
-                required:
-                  - at
-                  - results
-                title: Snapshot SLO response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSnapshotResponse'
           description: Successful response
         '400':
           content:
@@ -71419,210 +71019,7 @@ paths:
                         version: 2
                     total: 1
               schema:
-                description: |
-                  A paginated response of SLO definitions matching the query.
-                properties:
-                  page:
-                    example: 1
-                    type: number
-                  perPage:
-                    example: 25
-                    type: number
-                  results:
-                    items:
-                      properties:
-                        artifacts:
-                          description: Links to related assets for the SLO
-                          properties:
-                            dashboards:
-                              description: Array of dashboard references
-                              items:
-                                type: object
-                                properties:
-                                  id:
-                                    description: Dashboard saved-object id
-                                    type: string
-                                required:
-                                  - id
-                              type: array
-                          title: Artifacts
-                          type: object
-                        budgetingMethod:
-                          description: The budgeting method to use when computing the rollup data.
-                          enum:
-                            - occurrences
-                            - timeslices
-                          example: occurrences
-                          title: Budgeting method
-                          type: string
-                        createdAt:
-                          description: The creation date
-                          example: '2023-01-12T10:03:19.000Z'
-                          type: string
-                        description:
-                          description: The description of the SLO.
-                          example: My SLO description
-                          type: string
-                        enabled:
-                          description: Indicate if the SLO is enabled
-                          example: true
-                          type: boolean
-                        groupBy:
-                          description: optional group by field or fields to use to generate an SLO per distinct value
-                          example:
-                            - - service.name
-                            - service.name
-                            - - service.name
-                              - service.environment
-                          oneOf:
-                            - type: string
-                            - items:
-                                type: string
-                              type: array
-                          title: Group by
-                        id:
-                          description: The identifier of the SLO.
-                          example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                          type: string
-                        indicator:
-                          description: The SLI indicator. Its `params` depend on `type`; see the `indicator` property of the create SLO request body.
-                          type: object
-                          properties:
-                            params:
-                              additionalProperties: true
-                              type: object
-                            type:
-                              description: The type of indicator.
-                              example: sli.kql.custom
-                              type: string
-                          required:
-                            - type
-                            - params
-                        name:
-                          description: The name of the SLO.
-                          example: My Service SLO
-                          type: string
-                        objective:
-                          description: Defines properties for the SLO objective
-                          properties:
-                            target:
-                              description: the target objective between 0 and 1 excluded
-                              example: 0.99
-                              exclusiveMaximum: true
-                              exclusiveMinimum: true
-                              maximum: 1
-                              minimum: 0
-                              type: number
-                            timesliceTarget:
-                              description: the target objective for each slice when using a timeslices budgeting method
-                              example: 0.995
-                              maximum: 1
-                              minimum: 0
-                              type: number
-                            timesliceWindow:
-                              description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
-                              example: 5m
-                              type: string
-                          required:
-                            - target
-                          title: Objective
-                          type: object
-                        revision:
-                          description: The SLO revision
-                          example: 2
-                          type: number
-                        settings:
-                          description: Defines properties for SLO settings.
-                          properties:
-                            frequency:
-                              default: 1m
-                              description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
-                              example: 5m
-                              type: string
-                            preventCrossProjectSearch:
-                              default: false
-                              deprecated: true
-                              description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
-                              example: true
-                              type: boolean
-                            preventInitialBackfill:
-                              default: false
-                              description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
-                              example: true
-                              type: boolean
-                            projectRoutings:
-                              description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
-                              example: _alias:_origin
-                              maxLength: 8192
-                              nullable: true
-                              type: string
-                            syncDelay:
-                              default: 1m
-                              description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
-                              example: 5m
-                              type: string
-                            syncField:
-                              description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
-                              example: event.ingested
-                              type: string
-                          title: Settings
-                          type: object
-                        tags:
-                          description: List of tags
-                          items:
-                            type: string
-                          type: array
-                        timeWindow:
-                          description: Defines properties for the SLO time window
-                          properties:
-                            duration:
-                              description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
-                              example: 30d
-                              type: string
-                            type:
-                              description: Indicates whether the time window is a rolling or a calendar aligned time window.
-                              enum:
-                                - rolling
-                                - calendarAligned
-                              example: rolling
-                              type: string
-                          required:
-                            - duration
-                            - type
-                          title: Time window
-                          type: object
-                        updatedAt:
-                          description: The last update date
-                          example: '2023-01-12T10:03:19.000Z'
-                          type: string
-                        version:
-                          description: The internal SLO version
-                          example: 2
-                          type: number
-                      required:
-                        - id
-                        - name
-                        - description
-                        - indicator
-                        - timeWindow
-                        - budgetingMethod
-                        - objective
-                        - settings
-                        - revision
-                        - enabled
-                        - groupBy
-                        - tags
-                        - createdAt
-                        - updatedAt
-                        - version
-                      title: SLO definition response
-                      type: object
-                    type: array
-                  total:
-                    example: 34
-                    type: number
-                title: Find SLO definitions response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOFindDefinitionsResponse'
           description: Successful request
         '400':
           content:
@@ -72136,229 +71533,7 @@ paths:
                     updatedAt: '2025-01-12T10:03:19.000Z'
                     version: 2
               schema:
-                properties:
-                  budgetingMethod:
-                    description: The budgeting method to use when computing the rollup data.
-                    enum:
-                      - occurrences
-                      - timeslices
-                    example: occurrences
-                    title: Budgeting method
-                    type: string
-                  createdAt:
-                    description: The creation date
-                    example: '2023-01-12T10:03:19.000Z'
-                    type: string
-                  description:
-                    description: The description of the SLO.
-                    example: My SLO description
-                    type: string
-                  enabled:
-                    description: Indicate if the SLO is enabled
-                    example: true
-                    type: boolean
-                  groupBy:
-                    description: optional group by field or fields to use to generate an SLO per distinct value
-                    example:
-                      - - service.name
-                      - service.name
-                      - - service.name
-                        - service.environment
-                    oneOf:
-                      - type: string
-                      - items:
-                          type: string
-                        type: array
-                    title: Group by
-                  id:
-                    description: The identifier of the SLO.
-                    example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                    type: string
-                  indicator:
-                    description: The SLI indicator. Its `params` depend on `type`; see the `indicator` property of the create SLO request body.
-                    type: object
-                    properties:
-                      params:
-                        additionalProperties: true
-                        type: object
-                      type:
-                        description: The type of indicator.
-                        example: sli.kql.custom
-                        type: string
-                    required:
-                      - type
-                      - params
-                  instanceId:
-                    description: the value derived from the groupBy field, if present, otherwise '*'
-                    example: host-abcde
-                    type: string
-                  name:
-                    description: The name of the SLO.
-                    example: My Service SLO
-                    type: string
-                  objective:
-                    description: Defines properties for the SLO objective
-                    properties:
-                      target:
-                        description: the target objective between 0 and 1 excluded
-                        example: 0.99
-                        exclusiveMaximum: true
-                        exclusiveMinimum: true
-                        maximum: 1
-                        minimum: 0
-                        type: number
-                      timesliceTarget:
-                        description: the target objective for each slice when using a timeslices budgeting method
-                        example: 0.995
-                        maximum: 1
-                        minimum: 0
-                        type: number
-                      timesliceWindow:
-                        description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
-                        example: 5m
-                        type: string
-                    required:
-                      - target
-                    title: Objective
-                    type: object
-                  revision:
-                    description: The SLO revision
-                    example: 2
-                    type: number
-                  settings:
-                    description: Defines properties for SLO settings.
-                    properties:
-                      frequency:
-                        default: 1m
-                        description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
-                        example: 5m
-                        type: string
-                      preventCrossProjectSearch:
-                        default: false
-                        deprecated: true
-                        description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
-                        example: true
-                        type: boolean
-                      preventInitialBackfill:
-                        default: false
-                        description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
-                        example: true
-                        type: boolean
-                      projectRoutings:
-                        description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
-                        example: _alias:_origin
-                        maxLength: 8192
-                        nullable: true
-                        type: string
-                      syncDelay:
-                        default: 1m
-                        description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
-                        example: 5m
-                        type: string
-                      syncField:
-                        description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
-                        example: event.ingested
-                        type: string
-                    title: Settings
-                    type: object
-                  summary:
-                    description: The SLO computed data
-                    properties:
-                      errorBudget:
-                        properties:
-                          consumed:
-                            description: The error budget consummed, as a percentage of the initial value.
-                            example: 0.8
-                            type: number
-                          initial:
-                            description: The initial error budget, as 1 - objective
-                            example: 0.02
-                            type: number
-                          isEstimated:
-                            description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
-                            example: true
-                            type: boolean
-                          remaining:
-                            description: The error budget remaining, as a percentage of the initial value.
-                            example: 0.2
-                            type: number
-                        required:
-                          - initial
-                          - consumed
-                          - remaining
-                          - isEstimated
-                        title: Error budget
-                        type: object
-                      sliValue:
-                        example: 0.9836
-                        type: number
-                      status:
-                        enum:
-                          - NO_DATA
-                          - HEALTHY
-                          - DEGRADING
-                          - VIOLATED
-                        example: HEALTHY
-                        title: summary status
-                        type: string
-                    required:
-                      - status
-                      - sliValue
-                      - errorBudget
-                    title: Summary
-                    type: object
-                  tags:
-                    description: List of tags
-                    items:
-                      type: string
-                    type: array
-                  timeWindow:
-                    description: Defines properties for the SLO time window
-                    properties:
-                      duration:
-                        description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
-                        example: 30d
-                        type: string
-                      type:
-                        description: Indicates whether the time window is a rolling or a calendar aligned time window.
-                        enum:
-                          - rolling
-                          - calendarAligned
-                        example: rolling
-                        type: string
-                    required:
-                      - duration
-                      - type
-                    title: Time window
-                    type: object
-                  updatedAt:
-                    description: The last update date
-                    example: '2023-01-12T10:03:19.000Z'
-                    type: string
-                  version:
-                    description: The internal SLO version
-                    example: 2
-                    type: number
-                required:
-                  - id
-                  - name
-                  - description
-                  - indicator
-                  - timeWindow
-                  - budgetingMethod
-                  - objective
-                  - settings
-                  - revision
-                  - summary
-                  - enabled
-                  - groupBy
-                  - instanceId
-                  - tags
-                  - createdAt
-                  - updatedAt
-                  - version
-                title: SLO response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOWithSummaryResponse'
           description: Successful request
         '400':
           content:
@@ -72620,193 +71795,7 @@ paths:
                     updatedAt: '2025-03-26T14:30:00.000Z'
                     version: 2
               schema:
-                properties:
-                  artifacts:
-                    description: Links to related assets for the SLO
-                    properties:
-                      dashboards:
-                        description: Array of dashboard references
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              description: Dashboard saved-object id
-                              type: string
-                          required:
-                            - id
-                        type: array
-                    title: Artifacts
-                    type: object
-                  budgetingMethod:
-                    description: The budgeting method to use when computing the rollup data.
-                    enum:
-                      - occurrences
-                      - timeslices
-                    example: occurrences
-                    title: Budgeting method
-                    type: string
-                  createdAt:
-                    description: The creation date
-                    example: '2023-01-12T10:03:19.000Z'
-                    type: string
-                  description:
-                    description: The description of the SLO.
-                    example: My SLO description
-                    type: string
-                  enabled:
-                    description: Indicate if the SLO is enabled
-                    example: true
-                    type: boolean
-                  groupBy:
-                    description: optional group by field or fields to use to generate an SLO per distinct value
-                    example:
-                      - - service.name
-                      - service.name
-                      - - service.name
-                        - service.environment
-                    oneOf:
-                      - type: string
-                      - items:
-                          type: string
-                        type: array
-                    title: Group by
-                  id:
-                    description: The identifier of the SLO.
-                    example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                    type: string
-                  indicator:
-                    description: The SLI indicator. Its `params` depend on `type`; see the `indicator` property of the create SLO request body.
-                    type: object
-                    properties:
-                      params:
-                        additionalProperties: true
-                        type: object
-                      type:
-                        description: The type of indicator.
-                        example: sli.kql.custom
-                        type: string
-                    required:
-                      - type
-                      - params
-                  name:
-                    description: The name of the SLO.
-                    example: My Service SLO
-                    type: string
-                  objective:
-                    description: Defines properties for the SLO objective
-                    properties:
-                      target:
-                        description: the target objective between 0 and 1 excluded
-                        example: 0.99
-                        exclusiveMaximum: true
-                        exclusiveMinimum: true
-                        maximum: 1
-                        minimum: 0
-                        type: number
-                      timesliceTarget:
-                        description: the target objective for each slice when using a timeslices budgeting method
-                        example: 0.995
-                        maximum: 1
-                        minimum: 0
-                        type: number
-                      timesliceWindow:
-                        description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
-                        example: 5m
-                        type: string
-                    required:
-                      - target
-                    title: Objective
-                    type: object
-                  revision:
-                    description: The SLO revision
-                    example: 2
-                    type: number
-                  settings:
-                    description: Defines properties for SLO settings.
-                    properties:
-                      frequency:
-                        default: 1m
-                        description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
-                        example: 5m
-                        type: string
-                      preventCrossProjectSearch:
-                        default: false
-                        deprecated: true
-                        description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
-                        example: true
-                        type: boolean
-                      preventInitialBackfill:
-                        default: false
-                        description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
-                        example: true
-                        type: boolean
-                      projectRoutings:
-                        description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
-                        example: _alias:_origin
-                        maxLength: 8192
-                        nullable: true
-                        type: string
-                      syncDelay:
-                        default: 1m
-                        description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
-                        example: 5m
-                        type: string
-                      syncField:
-                        description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
-                        example: event.ingested
-                        type: string
-                    title: Settings
-                    type: object
-                  tags:
-                    description: List of tags
-                    items:
-                      type: string
-                    type: array
-                  timeWindow:
-                    description: Defines properties for the SLO time window
-                    properties:
-                      duration:
-                        description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
-                        example: 30d
-                        type: string
-                      type:
-                        description: Indicates whether the time window is a rolling or a calendar aligned time window.
-                        enum:
-                          - rolling
-                          - calendarAligned
-                        example: rolling
-                        type: string
-                    required:
-                      - duration
-                      - type
-                    title: Time window
-                    type: object
-                  updatedAt:
-                    description: The last update date
-                    example: '2023-01-12T10:03:19.000Z'
-                    type: string
-                  version:
-                    description: The internal SLO version
-                    example: 2
-                    type: number
-                required:
-                  - id
-                  - name
-                  - description
-                  - indicator
-                  - timeWindow
-                  - budgetingMethod
-                  - objective
-                  - settings
-                  - revision
-                  - enabled
-                  - groupBy
-                  - tags
-                  - createdAt
-                  - updatedAt
-                  - version
-                title: SLO definition response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLODefinition'
           description: Successful request
         '400':
           content:
@@ -73009,193 +71998,7 @@ paths:
                     updatedAt: '2025-03-26T14:30:00.000Z'
                     version: 2
               schema:
-                properties:
-                  artifacts:
-                    description: Links to related assets for the SLO
-                    properties:
-                      dashboards:
-                        description: Array of dashboard references
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              description: Dashboard saved-object id
-                              type: string
-                          required:
-                            - id
-                        type: array
-                    title: Artifacts
-                    type: object
-                  budgetingMethod:
-                    description: The budgeting method to use when computing the rollup data.
-                    enum:
-                      - occurrences
-                      - timeslices
-                    example: occurrences
-                    title: Budgeting method
-                    type: string
-                  createdAt:
-                    description: The creation date
-                    example: '2023-01-12T10:03:19.000Z'
-                    type: string
-                  description:
-                    description: The description of the SLO.
-                    example: My SLO description
-                    type: string
-                  enabled:
-                    description: Indicate if the SLO is enabled
-                    example: true
-                    type: boolean
-                  groupBy:
-                    description: optional group by field or fields to use to generate an SLO per distinct value
-                    example:
-                      - - service.name
-                      - service.name
-                      - - service.name
-                        - service.environment
-                    oneOf:
-                      - type: string
-                      - items:
-                          type: string
-                        type: array
-                    title: Group by
-                  id:
-                    description: The identifier of the SLO.
-                    example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                    type: string
-                  indicator:
-                    description: The SLI indicator. Its `params` depend on `type`; see the `indicator` property of the create SLO request body.
-                    type: object
-                    properties:
-                      params:
-                        additionalProperties: true
-                        type: object
-                      type:
-                        description: The type of indicator.
-                        example: sli.kql.custom
-                        type: string
-                    required:
-                      - type
-                      - params
-                  name:
-                    description: The name of the SLO.
-                    example: My Service SLO
-                    type: string
-                  objective:
-                    description: Defines properties for the SLO objective
-                    properties:
-                      target:
-                        description: the target objective between 0 and 1 excluded
-                        example: 0.99
-                        exclusiveMaximum: true
-                        exclusiveMinimum: true
-                        maximum: 1
-                        minimum: 0
-                        type: number
-                      timesliceTarget:
-                        description: the target objective for each slice when using a timeslices budgeting method
-                        example: 0.995
-                        maximum: 1
-                        minimum: 0
-                        type: number
-                      timesliceWindow:
-                        description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
-                        example: 5m
-                        type: string
-                    required:
-                      - target
-                    title: Objective
-                    type: object
-                  revision:
-                    description: The SLO revision
-                    example: 2
-                    type: number
-                  settings:
-                    description: Defines properties for SLO settings.
-                    properties:
-                      frequency:
-                        default: 1m
-                        description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
-                        example: 5m
-                        type: string
-                      preventCrossProjectSearch:
-                        default: false
-                        deprecated: true
-                        description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
-                        example: true
-                        type: boolean
-                      preventInitialBackfill:
-                        default: false
-                        description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
-                        example: true
-                        type: boolean
-                      projectRoutings:
-                        description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
-                        example: _alias:_origin
-                        maxLength: 8192
-                        nullable: true
-                        type: string
-                      syncDelay:
-                        default: 1m
-                        description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
-                        example: 5m
-                        type: string
-                      syncField:
-                        description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
-                        example: event.ingested
-                        type: string
-                    title: Settings
-                    type: object
-                  tags:
-                    description: List of tags
-                    items:
-                      type: string
-                    type: array
-                  timeWindow:
-                    description: Defines properties for the SLO time window
-                    properties:
-                      duration:
-                        description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
-                        example: 30d
-                        type: string
-                      type:
-                        description: Indicates whether the time window is a rolling or a calendar aligned time window.
-                        enum:
-                          - rolling
-                          - calendarAligned
-                        example: rolling
-                        type: string
-                    required:
-                      - duration
-                      - type
-                    title: Time window
-                    type: object
-                  updatedAt:
-                    description: The last update date
-                    example: '2023-01-12T10:03:19.000Z'
-                    type: string
-                  version:
-                    description: The internal SLO version
-                    example: 2
-                    type: number
-                required:
-                  - id
-                  - name
-                  - description
-                  - indicator
-                  - timeWindow
-                  - budgetingMethod
-                  - objective
-                  - settings
-                  - revision
-                  - enabled
-                  - groupBy
-                  - tags
-                  - createdAt
-                  - updatedAt
-                  - version
-                title: SLO definition response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLODefinition'
           description: Successful request
         '400':
           content:
@@ -73408,107 +72211,7 @@ paths:
                           status: VIOLATED
                           total: 10000
               schema:
-                description: |
-                  The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).
-                properties:
-                  at:
-                    description: The point in time at which the summaries were computed
-                    example: '2025-01-12T10:00:00.000Z'
-                    format: date-time
-                    type: string
-                  results:
-                    description: The per-instance computation results
-                    items:
-                      description: |
-                        The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).
-                      properties:
-                        error:
-                          description: Error information when the computation failed for this SLO instance. Present when the computation failed.
-                          type: object
-                          properties:
-                            message:
-                              description: The error message
-                              example: SLO [8853df00-ae2e-11ed-90af-09bb6422b258] not found
-                              type: string
-                            statusCode:
-                              description: The HTTP status code of the error
-                              example: 404
-                              type: number
-                          required:
-                            - statusCode
-                            - message
-                        id:
-                          description: The SLO definition id
-                          example: 8853df00-ae2e-11ed-90af-09bb6422b258
-                          type: string
-                        instanceId:
-                          description: The SLO instance id. '*' represents the default (ungrouped) instance.
-                          example: '*'
-                          type: string
-                        summary:
-                          description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
-                          type: object
-                          properties:
-                            errorBudget:
-                              type: object
-                              properties:
-                                consumed:
-                                  description: The error budget consumed, or null when no data is available
-                                  example: 0.24
-                                  nullable: true
-                                  type: number
-                                initial:
-                                  description: The initial error budget, derived from the SLO objective
-                                  example: 0.01
-                                  type: number
-                                remaining:
-                                  description: The error budget remaining, or null when no data is available
-                                  example: 0.76
-                                  nullable: true
-                                  type: number
-                              required:
-                                - initial
-                                - consumed
-                                - remaining
-                            good:
-                              description: The number of good events
-                              example: 9976
-                              type: number
-                            sliValue:
-                              description: The SLI value at the requested point in time, or null when no data is available
-                              example: 0.9976
-                              nullable: true
-                              type: number
-                            status:
-                              description: The SLO health status
-                              enum:
-                                - NO_DATA
-                                - HEALTHY
-                                - DEGRADING
-                                - VIOLATED
-                              example: HEALTHY
-                              type: string
-                            total:
-                              description: The total number of events
-                              example: 10000
-                              type: number
-                          required:
-                            - status
-                            - sliValue
-                            - errorBudget
-                            - good
-                            - total
-                      required:
-                        - id
-                        - instanceId
-                      title: Snapshot result
-                      type: object
-                    type: array
-                required:
-                  - at
-                  - results
-                title: Snapshot SLO response
-                type: object
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSnapshotResponse'
           description: Successful response
         '400':
           content:
@@ -187094,6 +185797,355 @@ components:
             - timeslices
           type: string
       description: The budgeting method to use when computing the rollup data.
+    Kibana_HTTP_APIs_SLOBulkDeleteResponse:
+      additionalProperties: true
+      description: The bulk delete SLO response returns a taskId that can be used to poll for its status
+      type: object
+      properties:
+        taskId:
+          description: The taskId of the bulk delete operation
+          type: string
+      required:
+        - taskId
+    Kibana_HTTP_APIs_SLOBulkDeleteResult:
+      additionalProperties: true
+      type: object
+      properties:
+        error:
+          description: The error message if the deletion operation failed for this SLO
+          type: string
+        id:
+          description: The ID of the SLO that was deleted
+          type: string
+        success:
+          description: The result of the deletion operation for this SLO
+          type: boolean
+      required:
+        - id
+        - success
+    Kibana_HTTP_APIs_SLOBulkDeleteStatusResponse:
+      additionalProperties: true
+      description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
+      type: object
+      properties:
+        error:
+          description: The error message if the bulk deletion operation failed
+          type: string
+        isDone:
+          description: Indicates if the bulk deletion operation is completed
+          type: boolean
+        results:
+          description: The results of the bulk deletion operation, including the success status and any errors for each SLO
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkDeleteResult'
+          type: array
+      required:
+        - isDone
+    Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse:
+      additionalProperties: true
+      description: The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
+      type: object
+      properties:
+        taskId:
+          anyOf:
+            - type: string
+            - type: number
+          description: The task id of the purge operation
+    Kibana_HTTP_APIs_SLOCreateResponse:
+      additionalProperties: true
+      type: object
+      properties:
+        id:
+          description: The identifier of the SLO.
+          maxLength: 48
+          minLength: 8
+          pattern: ^[a-z0-9-_]+$
+          type: string
+      required:
+        - id
+    Kibana_HTTP_APIs_SLODefinition:
+      additionalProperties: true
+      description: The SLO definition
+      type: object
+      properties:
+        artifacts:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOArtifacts'
+        budgetingMethod:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBudgetingMethod'
+        createdAt:
+          description: The creation date
+          format: date-time
+          maxLength: 128
+          type: string
+        createdBy:
+          description: The user who created the SLO.
+          type: string
+        description:
+          description: The description of the SLO.
+          type: string
+        enabled:
+          description: Indicate if the SLO is enabled
+          type: boolean
+        groupBy:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGroupBy'
+        id:
+          description: The identifier of the SLO.
+          maxLength: 48
+          minLength: 8
+          pattern: ^[a-z0-9-_]+$
+          type: string
+        indicator:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOIndicator'
+        name:
+          description: The name of the SLO.
+          type: string
+        objective:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOObjective'
+        revision:
+          description: The SLO revision
+          type: number
+        settings:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSettings'
+        tags:
+          description: List of tags
+          items:
+            type: string
+          type: array
+        timeWindow:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindow'
+        updatedAt:
+          description: The last update date
+          format: date-time
+          maxLength: 128
+          type: string
+        updatedBy:
+          description: The user who last updated the SLO.
+          type: string
+        version:
+          description: The internal SLO version
+          type: number
+      required:
+        - id
+        - name
+        - description
+        - indicator
+        - timeWindow
+        - budgetingMethod
+        - objective
+        - settings
+        - revision
+        - enabled
+        - tags
+        - createdAt
+        - updatedAt
+        - groupBy
+        - version
+    Kibana_HTTP_APIs_SLODefinitionResponse:
+      additionalProperties: true
+      description: The SLO definition, with its health when requested
+      type: object
+      properties:
+        artifacts:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOArtifacts'
+        budgetingMethod:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBudgetingMethod'
+        createdAt:
+          description: The creation date
+          format: date-time
+          maxLength: 128
+          type: string
+        createdBy:
+          description: The user who created the SLO.
+          type: string
+        description:
+          description: The description of the SLO.
+          type: string
+        enabled:
+          description: Indicate if the SLO is enabled
+          type: boolean
+        groupBy:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGroupBy'
+        health:
+          additionalProperties: false
+          type: object
+          properties:
+            isProblematic:
+              type: boolean
+            rollup:
+              additionalProperties: false
+              type: object
+              properties:
+                isProblematic:
+                  type: boolean
+                missing:
+                  type: boolean
+                state:
+                  anyOf:
+                    - enum:
+                        - stopped
+                      type: string
+                    - enum:
+                        - started
+                      type: string
+                    - enum:
+                        - stopping
+                      type: string
+                    - enum:
+                        - aborting
+                      type: string
+                    - enum:
+                        - failed
+                      type: string
+                    - enum:
+                        - indexing
+                      type: string
+                    - enum:
+                        - unavailable
+                      type: string
+                stateMatches:
+                  type: boolean
+                status:
+                  anyOf:
+                    - enum:
+                        - healthy
+                      type: string
+                    - enum:
+                        - unhealthy
+                      type: string
+                    - enum:
+                        - unavailable
+                      type: string
+              required:
+                - isProblematic
+                - missing
+                - status
+                - state
+            summary:
+              additionalProperties: false
+              type: object
+              properties:
+                isProblematic:
+                  type: boolean
+                missing:
+                  type: boolean
+                state:
+                  anyOf:
+                    - enum:
+                        - stopped
+                      type: string
+                    - enum:
+                        - started
+                      type: string
+                    - enum:
+                        - stopping
+                      type: string
+                    - enum:
+                        - aborting
+                      type: string
+                    - enum:
+                        - failed
+                      type: string
+                    - enum:
+                        - indexing
+                      type: string
+                    - enum:
+                        - unavailable
+                      type: string
+                stateMatches:
+                  type: boolean
+                status:
+                  anyOf:
+                    - enum:
+                        - healthy
+                      type: string
+                    - enum:
+                        - unhealthy
+                      type: string
+                    - enum:
+                        - unavailable
+                      type: string
+              required:
+                - isProblematic
+                - missing
+                - status
+                - state
+          required:
+            - isProblematic
+            - rollup
+            - summary
+        id:
+          description: The identifier of the SLO.
+          maxLength: 48
+          minLength: 8
+          pattern: ^[a-z0-9-_]+$
+          type: string
+        indicator:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOIndicator'
+        name:
+          description: The name of the SLO.
+          type: string
+        objective:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOObjective'
+        revision:
+          description: The SLO revision
+          type: number
+        settings:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSettings'
+        tags:
+          description: List of tags
+          items:
+            type: string
+          type: array
+        timeWindow:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindow'
+        updatedAt:
+          description: The last update date
+          format: date-time
+          maxLength: 128
+          type: string
+        updatedBy:
+          description: The user who last updated the SLO.
+          type: string
+        version:
+          description: The internal SLO version
+          type: number
+      required:
+        - id
+        - name
+        - description
+        - indicator
+        - timeWindow
+        - budgetingMethod
+        - objective
+        - settings
+        - revision
+        - enabled
+        - tags
+        - createdAt
+        - updatedAt
+        - groupBy
+        - version
+    Kibana_HTTP_APIs_SLOErrorBudget:
+      additionalProperties: true
+      type: object
+      properties:
+        consumed:
+          description: The error budget consummed, as a percentage of the initial value.
+          type: number
+        initial:
+          description: The initial error budget, as 1 - objective
+          type: number
+        isEstimated:
+          description: Only for SLO defined with occurrences budgeting method and calendar aligned time window.
+          type: boolean
+        remaining:
+          description: The error budget remaining, as a percentage of the initial value.
+          type: number
+      required:
+        - initial
+        - consumed
+        - remaining
+        - isEstimated
     Kibana_HTTP_APIs_SLOFilter:
       additionalProperties: false
       description: Defines properties for a filter
@@ -187137,6 +186189,56 @@ components:
           type: string
         value:
           type: string
+    Kibana_HTTP_APIs_SLOFindDefinitionsResponse:
+      additionalProperties: true
+      description: A paginated response of SLO definitions matching the query.
+      type: object
+      properties:
+        page:
+          type: number
+        perPage:
+          type: number
+        results:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_SLODefinitionResponse'
+          type: array
+        total:
+          type: number
+      required:
+        - page
+        - perPage
+        - total
+        - results
+    Kibana_HTTP_APIs_SLOFindResponse:
+      additionalProperties: true
+      description: A paginated response of SLOs matching the query.
+      type: object
+      properties:
+        page:
+          type: number
+        perPage:
+          type: number
+        results:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOWithSummaryResponse'
+          type: array
+        searchAfter:
+          description: The cursor to provide to get the next page of results, when using cursor-based pagination
+          items:
+            anyOf:
+              - type: string
+              - type: number
+          type: array
+        size:
+          description: Size provided for cursor based pagination
+          type: number
+        total:
+          type: number
+      required:
+        - page
+        - perPage
+        - total
+        - results
     Kibana_HTTP_APIs_SLOGroupBy:
       anyOf:
         - anyOf:
@@ -187845,6 +186947,175 @@ components:
           type: string
       required:
         - target
+    Kibana_HTTP_APIs_SLOSettings:
+      additionalProperties: false
+      description: Defines properties for SLO settings.
+      type: object
+      properties:
+        frequency:
+          description: The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.
+          maxLength: 16
+          type: string
+        preventCrossProjectSearch:
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
+          type: boolean
+        preventInitialBackfill:
+          description: Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.
+          type: boolean
+        projectRoutings:
+          description: ES ProjectRouting expression controlling which linked projects the L1 rollup reads. When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; `_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.
+          maxLength: 8192
+          nullable: true
+          type: string
+        syncDelay:
+          description: The time delay in minutes between the current time and the latest source data time. Increasing the value will delay any alerting. The default value is 1 minute. The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.
+          maxLength: 16
+          type: string
+        syncField:
+          description: The date field that is used to identify new documents in the source. It is strongly recommended to use a field that contains the ingest timestamp. If you use a different field, you might need to set the delay such that it accounts for data transmission delays. When unspecified, we use the indicator timestamp field.
+          nullable: true
+          type: string
+      required:
+        - syncDelay
+        - frequency
+        - preventInitialBackfill
+    Kibana_HTTP_APIs_SLOSnapshotResponse:
+      additionalProperties: true
+      description: The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).
+      type: object
+      properties:
+        at:
+          description: The point in time at which the summaries were computed
+          format: date-time
+          type: string
+        results:
+          description: The per-instance computation results
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSnapshotResult'
+          type: array
+      required:
+        - at
+        - results
+    Kibana_HTTP_APIs_SLOSnapshotResult:
+      anyOf:
+        - additionalProperties: true
+          type: object
+          properties:
+            id:
+              description: The SLO definition id
+              type: string
+            instanceId:
+              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              type: string
+            summary:
+              additionalProperties: true
+              description: The SLO instance summary at the requested point in time. Present when the computation succeeded.
+              type: object
+              properties:
+                errorBudget:
+                  additionalProperties: true
+                  type: object
+                  properties:
+                    consumed:
+                      description: The error budget consumed, or null when no data is available
+                      nullable: true
+                      type: number
+                    initial:
+                      description: The initial error budget, derived from the SLO objective
+                      type: number
+                    remaining:
+                      description: The error budget remaining, or null when no data is available
+                      nullable: true
+                      type: number
+                  required:
+                    - initial
+                    - consumed
+                    - remaining
+                good:
+                  description: The number of good events
+                  type: number
+                sliValue:
+                  description: The SLI value at the requested point in time, or null when no data is available
+                  nullable: true
+                  type: number
+                status:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSummaryStatus'
+                total:
+                  description: The total number of events
+                  type: number
+              required:
+                - status
+                - sliValue
+                - errorBudget
+                - good
+                - total
+          required:
+            - id
+            - instanceId
+            - summary
+        - additionalProperties: true
+          type: object
+          properties:
+            error:
+              additionalProperties: true
+              description: Error information when the computation failed for this SLO instance. Present when the computation failed.
+              type: object
+              properties:
+                message:
+                  description: The error message
+                  type: string
+                statusCode:
+                  description: The HTTP status code of the error
+                  type: number
+              required:
+                - statusCode
+                - message
+            id:
+              description: The SLO definition id
+              type: string
+            instanceId:
+              description: The SLO instance id. '*' represents the default (ungrouped) instance.
+              type: string
+          required:
+            - id
+            - instanceId
+            - error
+      description: The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).
+    Kibana_HTTP_APIs_SLOSummary:
+      additionalProperties: true
+      description: The SLO computed data
+      type: object
+      properties:
+        errorBudget:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOErrorBudget'
+        fiveMinuteBurnRate:
+          type: number
+        oneDayBurnRate:
+          type: number
+        oneHourBurnRate:
+          type: number
+        sliValue:
+          type: number
+        status:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSummaryStatus'
+        summaryUpdatedAt:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+        - status
+        - sliValue
+        - errorBudget
+        - fiveMinuteBurnRate
+        - oneHourBurnRate
+        - oneDayBurnRate
+    Kibana_HTTP_APIs_SLOSummaryStatus:
+      enum:
+        - NO_DATA
+        - HEALTHY
+        - DEGRADING
+        - VIOLATED
+      type: string
     Kibana_HTTP_APIs_SLOTimesliceMetricBasicMetricWithField:
       additionalProperties: false
       type: object
@@ -187961,6 +187232,130 @@ components:
           required:
             - duration
             - type
+    Kibana_HTTP_APIs_SLOWithSummaryResponse:
+      additionalProperties: true
+      description: The SLO definition with its computed summary
+      type: object
+      properties:
+        artifacts:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOArtifacts'
+        budgetingMethod:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBudgetingMethod'
+        createdAt:
+          description: The creation date
+          format: date-time
+          maxLength: 128
+          type: string
+        createdBy:
+          description: The user who created the SLO.
+          type: string
+        description:
+          description: The description of the SLO.
+          type: string
+        enabled:
+          description: Indicate if the SLO is enabled
+          type: boolean
+        groupBy:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOGroupBy'
+        groupings:
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+          type: object
+        id:
+          description: The identifier of the SLO.
+          maxLength: 48
+          minLength: 8
+          pattern: ^[a-z0-9-_]+$
+          type: string
+        indicator:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOIndicator'
+        instanceId:
+          anyOf:
+            - enum:
+                - '*'
+              type: string
+            - type: string
+          description: the value derived from the groupBy field, if present, otherwise '*'
+        meta:
+          additionalProperties: true
+          type: object
+          properties:
+            synthetics:
+              additionalProperties: true
+              type: object
+              properties:
+                configId:
+                  type: string
+                locationId:
+                  type: string
+                monitorId:
+                  type: string
+              required:
+                - monitorId
+                - locationId
+                - configId
+        name:
+          description: The name of the SLO.
+          type: string
+        objective:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOObjective'
+        remote:
+          additionalProperties: true
+          type: object
+          properties:
+            kibanaUrl:
+              type: string
+            remoteName:
+              type: string
+          required:
+            - remoteName
+            - kibanaUrl
+        revision:
+          description: The SLO revision
+          type: number
+        settings:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSettings'
+        summary:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOSummary'
+        tags:
+          description: List of tags
+          items:
+            type: string
+          type: array
+        timeWindow:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindow'
+        updatedAt:
+          description: The last update date
+          format: date-time
+          maxLength: 128
+          type: string
+        updatedBy:
+          description: The user who last updated the SLO.
+          type: string
+        version:
+          description: The internal SLO version
+          type: number
+      required:
+        - id
+        - name
+        - description
+        - indicator
+        - timeWindow
+        - budgetingMethod
+        - objective
+        - settings
+        - revision
+        - enabled
+        - tags
+        - createdAt
+        - updatedAt
+        - groupBy
+        - version
+        - summary
+        - groupings
+        - instanceId
     Kibana_HTTP_APIs_StreamlangConditionBlock:
       additionalProperties: false
       type: object

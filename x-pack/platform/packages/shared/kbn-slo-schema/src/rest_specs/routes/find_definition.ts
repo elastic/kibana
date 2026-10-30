@@ -32,16 +32,30 @@ const findSloDefinitionsParamsSchema = lazySchema(() =>
   })
 );
 
-const sloDefinitionResponseSchema = sloDefinitionSchema.extend({
-  health: sloHealthSchema.optional(),
-});
+const sloDefinitionResponseSchema = sloDefinitionSchema
+  .extend({
+    health: sloHealthSchema.optional(),
+  })
+  .meta({
+    id: 'SLODefinitionResponse',
+    description: 'The SLO definition, with its health when requested',
+    additionalProperties: true,
+  });
 
-const findSloDefinitionsResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloDefinitionResponseSchema),
-});
+const findSloDefinitionsResponseSchema = lazySchema(() =>
+  z
+    .object({
+      page: z.number(),
+      perPage: z.number(),
+      total: z.number(),
+      results: z.array(sloDefinitionResponseSchema),
+    })
+    .meta({
+      id: 'SLOFindDefinitionsResponse',
+      description: 'A paginated response of SLO definitions matching the query.',
+      additionalProperties: true,
+    })
+);
 
 type FindSLODefinitionsParams = NonNullable<
   z.output<typeof findSloDefinitionsParamsSchema.shape.query>

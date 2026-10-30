@@ -170,6 +170,39 @@ describe('registerRoutes', () => {
     expect(versionedRouteConfig.options).not.toHaveProperty('operationId');
   });
 
+  it('forwards response schemas to versioned and unversioned routes', () => {
+    const responses = {
+      200: { description: 'OK', body: () => z.object({ id: z.string() }) },
+    };
+
+    callRegisterRoutes({
+      'POST /internal/route': {
+        endpoint: 'POST /internal/route',
+        handler: jest.fn(),
+        security: disabledAuthz,
+        responses,
+      },
+      'POST /api/public_route version': {
+        endpoint: 'POST /api/public_route version',
+        handler: jest.fn(),
+        security: disabledAuthz,
+        responses,
+      },
+    } satisfies ServerRouteRepository);
+
+    const [internalRoute] = post.mock.calls[0];
+    expect(internalRoute.validate).toEqual({
+      request: noParamsValidationObject,
+      response: responses,
+    });
+
+    const [versionedRoute] = postAddVersion.mock.calls[0];
+    expect(versionedRoute.validate).toEqual({
+      request: noParamsValidationObject,
+      response: responses,
+    });
+  });
+
   it('does not allow any params if no schema is provided', () => {
     const pathDoesNotAllowExcessKeys = () => {
       noParamsValidationObject.params.parse({
