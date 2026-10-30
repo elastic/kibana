@@ -23,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useLayoutEffect, useRef, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ExecutionFlyoutTitle } from './execution_flyout_title';
 import { ExecutionResultCard } from './execution_result_card';
