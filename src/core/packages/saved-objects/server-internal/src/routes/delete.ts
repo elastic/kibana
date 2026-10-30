@@ -34,9 +34,8 @@ interface RouteDependencies {
 
 export const registerDeleteRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
+  { coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
-  const { allowHttpApiAccess } = config;
   router.delete(
     {
       path: '/{type}/{id}',
@@ -94,9 +93,7 @@ There is currently no complete replacement for deleting arbitrary saved objects 
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request, types: [type] }).catch(() => {});
-      if (!allowHttpApiAccess) {
-        throwIfTypeNotVisibleByAPI(type, typeRegistry);
-      }
+      throwIfTypeNotVisibleByAPI(type, typeRegistry);
       const client = getClient();
       const result = await client.delete(type, id, { force });
       return response.ok({ body: result });
