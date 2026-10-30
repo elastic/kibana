@@ -18,10 +18,8 @@ import { createActor, createMachine, waitFor, type Actor, type SnapshotFrom } fr
 import { disconnectFromDestination } from '../../../../../services/unit_connections';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import { createDefaultUnit, type Unit } from '../../../../../services/unit_repository';
-import {
-  withUnitDestinations,
-  type UnitDestination,
-} from '../../../../streams_layout/destinations/destination_models';
+import type { UnitDestination } from '@kbn/streams-schema';
+import { withUnitDestinations } from '../../../../streams_layout/destinations/destination_models';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 import type { destinationsStateMachine } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { DestinationApiKeyGenerationDeps } from '../../../../streams_layout/destinations/destination_api_keys';
