@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { compareLevels, MAX_ACL_ENTRIES, type Principal } from '@kbn/access-control';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -97,7 +98,7 @@ export const AccessDraftEditor = ({
       {retainedCount > 0 ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             size="s"
             iconType="info"
