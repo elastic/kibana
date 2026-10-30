@@ -51,6 +51,18 @@ describe('generateCustomContentEsql', () => {
     );
   });
 
+  it('only suggests a query the user supplied, never one the agent writes', async () => {
+    mockGenerate.mockResolvedValue({ query: undefined, error: 'index not found' });
+
+    const message = await generateCustomContentEsql(params).then(
+      () => '',
+      (error: Error) => error.message
+    );
+
+    expect(message).toContain('an ES|QL query the user supplied');
+    expect(message).not.toContain('yourself');
+  });
+
   it('says no query was produced when the generator gives no reason', async () => {
     mockGenerate.mockResolvedValue({ query: undefined });
 

@@ -35,7 +35,7 @@ type GenerateCustomContentEsqlParams = Omit<
 >;
 
 const NO_QUERY_HINT =
-  'Pass an exact "index" and a more specific description, or supply the ES|QL query yourself.';
+  'Pass an exact "index" and a more specific description, or an ES|QL query the user supplied.';
 
 /**
  * Generates the ES|QL query of a custom content panel with the shared visualization generator and
