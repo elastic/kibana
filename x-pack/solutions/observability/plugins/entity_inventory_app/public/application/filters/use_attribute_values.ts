@@ -7,23 +7,36 @@
 
 import { useEffect, useState } from 'react';
 import { getEntityInventoryAttributeValues } from '../../mock_inventory_api/get_attribute_values';
-import type { EntityInventoryAttributeValuesParams } from '../../inventory_api_types';
+import type {
+  EntityInventoryAttributeValuesParams,
+  EntityInventoryAttributeValuesResponse,
+} from '../../inventory_api_types';
 
 export const useAttributeValues = (params: EntityInventoryAttributeValuesParams) => {
+  // TODO: the implementation is temporary. Replace the mock call and the loading state with a `useQuery` that calls the real route in https://github.com/elastic/observability-dev/issues/6355
   const paramsKey = JSON.stringify(params);
-  const [state, setState] = useState<{ values: string[]; isLoading: boolean }>({
+  const [state, setState] = useState<
+    EntityInventoryAttributeValuesResponse & { isLoading: boolean; error?: Error }
+  >({
     values: [],
+    invalidSelections: [],
     isLoading: true,
   });
 
   useEffect(() => {
     let isCurrent = true;
-    setState((current) => ({ ...current, isLoading: true }));
-    getEntityInventoryAttributeValues(JSON.parse(paramsKey)).then((values) => {
-      if (isCurrent) {
-        setState({ values, isLoading: false });
-      }
-    });
+    setState((current) => ({ ...current, isLoading: true, error: undefined }));
+    getEntityInventoryAttributeValues(JSON.parse(paramsKey))
+      .then((response) => {
+        if (isCurrent) {
+          setState({ ...response, isLoading: false });
+        }
+      })
+      .catch((error: Error) => {
+        if (isCurrent) {
+          setState({ values: [], invalidSelections: [], isLoading: false, error });
+        }
+      });
 
     return () => {
       isCurrent = false;
