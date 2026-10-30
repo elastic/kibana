@@ -30,17 +30,20 @@ const DEFAULT_PROFILE_CACHE_KEY = '__profile__';
 /**
  * The profile data API validates `userSettings.locale` against the locales the deployment
  * enables, and that list can shrink after a locale is stored. Re-posting the stored locale
- * would then reject the whole update.
+ * would then reject the whole update. A locale-only body is kept as-is, because the route
+ * rejects an empty update for Elastic Cloud SSO users.
  */
-function omitStoredLocale(
-  body: Partial<UserProfileData>,
-  stored: UserProfileData | null
-): Partial<UserProfileData> {
-  if (!body.userSettings?.locale || body.userSettings.locale !== stored?.userSettings?.locale) {
-    return body;
+function omitStoredLocale(data: UserProfileData, stored: UserProfileData | null): UserProfileData {
+  const userSettings = data.userSettings;
+  if (
+    !userSettings?.locale ||
+    userSettings.locale !== stored?.userSettings?.locale ||
+    Object.keys(userSettings).length === 1
+  ) {
+    return data;
   }
-  const { locale: _locale, ...userSettings } = body.userSettings;
-  return { ...body, userSettings };
+  const { locale: _locale, ...otherSettings } = userSettings;
+  return { ...data, userSettings: otherSettings };
 }
 
 export class UserProfileAPIClient implements UserProfileAPIClientType {
@@ -159,40 +162,35 @@ export class UserProfileAPIClient implements UserProfileAPIClientType {
   }
 
   /**
-   * Replaces the in-memory profile with `data` and posts it, leaving out a locale that matches
-   * the stored one.
+   * Updates user profile data of the current user.
+   * @param data Application data to be written (merged with existing data).
    */
   public update<D extends UserProfileData>(data: D) {
-    return this.postProfileData(data, data);
-  }
-
-  /**
-   * Merges `data` into the in-memory profile and posts only `data`.
-   *
-   * The profile data API merges the body into the stored document, so fields left
-   * out of `data` keep their stored values and skip request validation.
-   * @param data Fields to merge into the stored profile.
-   */
-  public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
-    const updated = merge({}, this._userProfile$.getValue(), data);
-    return this.postProfileData(updated, data);
-  }
-
-  private postProfileData(optimistic: UserProfileData, body: Partial<UserProfileData>) {
+    // Optimistic update the user profile Observable.
     const previous = this._userProfile$.getValue();
-    this._userProfile$.next(optimistic);
+    this._userProfile$.next(data);
 
     return this.http
       .post('/internal/security/user_profile/_data', {
-        body: JSON.stringify(omitStoredLocale(body, previous)),
+        body: JSON.stringify(omitStoredLocale(data, previous)),
       })
       .then(() => {
         this._cache.clear();
-        this.internalDataUpdates$.next(optimistic);
+        this.internalDataUpdates$.next(data);
       })
       .catch((err) => {
+        // Revert the user profile data to the previous state.
         this._userProfile$.next(previous);
         return Promise.reject(err);
       });
+  }
+
+  /**
+   * Updates user profile data of the current user.
+   * @param data Application data to be written (merged with existing data).
+   */
+  public partialUpdate<D extends Partial<UserProfileData>>(data: D) {
+    const updated = merge({}, this._userProfile$.getValue(), data);
+    return this.update(updated);
   }
 }

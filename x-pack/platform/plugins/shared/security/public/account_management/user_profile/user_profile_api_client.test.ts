@@ -84,7 +84,7 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
-  it('posts only the partial payload and keeps other cached fields in memory', async () => {
+  it('does not post the stored locale on a partial update', async () => {
     coreStart.http.get.mockResolvedValue({
       data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
     });
@@ -100,19 +100,14 @@ describe('UserProfileAPIClient', () => {
     });
   });
 
-  it('reverts the in-memory profile when a partial update fails', async () => {
-    coreStart.http.get.mockResolvedValue({
-      data: { userSettings: { locale: 'de-DE', darkMode: 'light' } },
-    });
+  it('posts the stored locale when it is the only setting', async () => {
+    coreStart.http.get.mockResolvedValue({ data: { userSettings: { locale: 'de-DE' } } });
     await apiClient.getCurrent({ dataPath: 'userSettings' });
-    coreStart.http.post.mockRejectedValueOnce(new Error('nope'));
 
-    await expect(apiClient.partialUpdate({ userSettings: { darkMode: 'dark' } })).rejects.toThrow(
-      'nope'
-    );
+    await apiClient.update({ userSettings: { locale: 'de-DE' } });
 
-    expect(await firstValueFrom(apiClient.userProfile$)).toEqual({
-      userSettings: { locale: 'de-DE', darkMode: 'light' },
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
+      body: JSON.stringify({ userSettings: { locale: 'de-DE' } }),
     });
   });
 

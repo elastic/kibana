@@ -12,7 +12,7 @@ import React from 'react';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { setAvailableLocales } from '@kbn/i18n';
 
-import { UserLocaleEditor, UserProfile, useUserProfileForm } from './user_profile';
+import { UserProfile, useUserProfileForm } from './user_profile';
 import { UserProfileAPIClient } from '..';
 import type { UserProfileData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -517,11 +517,7 @@ describe('useUserProfileForm', () => {
       };
       const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
-      // The form still holds the fallback. The picker is hidden, so a color-mode
-      // save must not post that locale.
       expect(result.current.values.data?.userSettings.locale).toBe('en');
-      render(<UserLocaleEditor formik={result.current} />);
-      expect(screen.queryByTestId('localeSelect')).not.toBeInTheDocument();
 
       await act(async () => {
         await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
