@@ -8,6 +8,9 @@
  */
 
 import dedent from 'dedent';
+import { getFailures } from './get_failures';
+import { parseTestReport } from './test_report';
+import { FTR_REPORT, JEST_REPORT } from './__fixtures__';
 
 import {
   createFailureIssue,
@@ -65,6 +68,19 @@ describe('redactSensitiveGithubFailureText()', () => {
 });
 
 describe('createFailureIssue()', () => {
+  it.each([FTR_REPORT, JEST_REPORT])('links new issues from parsed JUnit failures', async (xml) => {
+    const api = new GithubApi();
+    const [failure] = getFailures(await parseTestReport(xml));
+
+    await createFailureIssue('https://build-url', failure, api, '8.19', 'kibana-on-merge');
+
+    const [title, body] = api.createIssue.mock.calls[0];
+    expect(title).toContain(failure.classname);
+    expect(body).toContain('Test history: [passes and failures over time]');
+    expect(body.indexOf('Test history:')).toBeLessThan(body.indexOf('<!-- kibanaCiData'));
+    expect(body).toContain('"test.failCount":1');
+  });
+
   it('creates new github issue with failure text, link to issue, and valid metadata', async () => {
     const api = new GithubApi();
 
@@ -160,6 +176,37 @@ describe('createFailureIssue()', () => {
 });
 
 describe('updateFailureIssue()', () => {
+  it('adds the history link to an existing FTR issue on its next failure', async () => {
+    const api = new GithubApi();
+    const classname = 'FTR Tests.x-pack/platform/test/functional/apps/maps/sample_data·js';
+    const name = 'maps app maps loaded from sample data';
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname,
+        name,
+        github: {
+          htmlUrl: 'https://github.com/elastic/kibana/issues/1234',
+          number: 1234,
+          nodeId: 'abcd',
+          body: 'A test failed\n\n<!-- kibanaCiData = {"failed-test":{"test.failCount":2}} -->',
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      { classname, name, testType: 'ftr', time: '1', failure: 'failure', likelyIrrelevant: false }
+    );
+
+    const [, body] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
+    expect(body).toContain('https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history');
+    expect(body).toContain('"test.failCount":3');
+    expect(api.addIssueComment.mock.calls[0][1]).toContain(
+      'https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history'
+    );
+  });
+
   it('increments failure count and adds new comment to issue', async () => {
     const api = new GithubApi();
 
@@ -262,7 +309,9 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             5678,
-            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)",
+            "New failure for \\"local-serverless-observability_complete\\" target: [kibana-on-merge - main](https://build-url)
+
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))",
           ],
         ],
         "results": Array [
@@ -273,6 +322,44 @@ describe('updateFailureIssue()', () => {
         ],
       }
     `);
+  });
+
+  it('keeps the dashboard link out of non-main failure comments', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/5678',
+          number: 5678,
+          nodeId: 'efgh',
+          body: '# existing issue body',
+        },
+      },
+      api,
+      '9.5',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'test failure',
+        time: '1',
+        likelyIrrelevant: false,
+        id: 'test-id-123',
+        target: 'local',
+        location: 'test.spec.ts',
+        duration: 1000,
+        owners: 'elastic/team',
+      }
+    );
+
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      'New failure for "local" target: [kibana-on-merge - 9.5](https://build-url)'
+    );
+    expect(api.editIssueBodyAndEnsureOpen.mock.calls[0][1]).toContain('Test history:');
   });
 
   it('does not include new error message when error.message is missing', async () => {
@@ -410,10 +497,19 @@ describe('updateFailureIssue()', () => {
       }
     );
 
-    const comment = api.addIssueComment.mock.calls[0][1] as string;
-    expect(comment).toContain('New failure for "local-serverless-observability_complete" target');
-    expect(comment).toContain('New error message');
-    expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
+    // Pin down the order of the build link, history link, and new error message.
+    expect(api.addIssueComment.mock.calls[0][1]).toBe(
+      dedent`
+        New failure for "local-serverless-observability_complete" target: [kibana-on-merge - main](https://build-url)
+
+        Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-1213%22')))
+
+        New error message:
+        \`\`\`
+        TimeoutError: locator.click: Timeout 10000ms exceeded.
+        \`\`\`
+      `
+    );
   });
 });
 
@@ -465,6 +561,8 @@ describe('createFailureIssue() - Scout failures', () => {
       \`\`\`
 
       First failure: [kibana-on-merge - main](https://build-url)
+
+      Test history: [passes and failures over time](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?_g=(time%3A(from%3Anow-30d%2Cto%3Anow))&_a=(query%3A(language%3Akuery%2Cquery%3A'test.id%20%3A%20%22test-id-123%22')))
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"scout.suite\\",\\"test.name\\":\\"scout test name\\",\\"test.failCount\\":1,\\"test.type\\":\\"scout\\"}} -->",
             Array [

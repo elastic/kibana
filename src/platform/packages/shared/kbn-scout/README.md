@@ -571,6 +571,8 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 }
 ```
 
+Custom roles (`custom_role_worker_<n>`) can't be assigned to Cloud users on ECH. If the deployment has a SAML realm that trusts Kibana's mock IdP (QAF adds one named `qaf` with `--add-custom-saml-realm`), set `"customSamlProviderName": "qaf"` and custom roles log in through it. Predefined roles still use the users from `cloudUsersFilePath`.
+
 - **`mki`**: Tests are executed against a Serverless project created in Elastic Cloud (MKI). Configuration is **manually** defined in `KIBANA_REPO_ROOT/.scout/servers/cloud_mki.json`.
 
 ```json

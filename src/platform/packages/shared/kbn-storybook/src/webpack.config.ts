@@ -43,8 +43,11 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
-        core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
-        core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+        core_app_image_assets: resolve(
+          REPO_ROOT,
+          'src/core/packages/core/public/styles/core_app/images'
+        ),
+        core_styles: resolve(REPO_ROOT, 'src/core/packages/core/public/index.scss'),
       },
     },
     stats: 'errors-only',

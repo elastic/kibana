@@ -15,12 +15,10 @@ export class SharePageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
 
-  /**
-   * @description close the share modal if it's open, ending on the modal being gone
-   */
+  /** Close the share modal if it appears, and wait until it is gone. */
   async closeShareModal() {
-    // The modal may still be rendering when this runs, so retry until it is gone and its overlay
-    // mask no longer blocks clicks in the next step
+    if (!(await this.testSubjects.waitForExists('shareContextModal'))) return;
+
     await this.retry.try(async () => {
       if (await this.isShareModalOpen()) {
         await this.find.clickByCssSelector(
