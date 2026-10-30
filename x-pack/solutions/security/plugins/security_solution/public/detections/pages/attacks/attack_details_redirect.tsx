@@ -13,17 +13,15 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ATTACKS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { inputsSelectors } from '../../../common/store';
 import { FLYOUT_V2_URL_PARAM } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { resolveAttackFlyoutParams, resolveAttackFlyoutV2Params } from './utils';
+import { resolveAttackFlyoutV2Params } from './utils';
 
 export const AttackDetailsRedirect = () => {
   const { attackId } = useParams<{ attackId: string }>();
   const { search } = useLocation();
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
   const inputState = useSelector(getInputSelector);
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
 
   if (!attackId) {
     return <Redirect to={ATTACKS_PATH} />;
@@ -59,18 +57,12 @@ export const AttackDetailsRedirect = () => {
 
   const kqlAppQuery = encode({ language: 'kuery', query: `_id: ${attackId}` });
 
-  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
   const currentFlyoutV2Params = searchParams.get(FLYOUT_V2_URL_PARAM);
-
-  const flyoutParamKey = isNewFlyoutEnabled ? FLYOUT_V2_URL_PARAM : URL_PARAM_KEY.flyout;
-  const flyoutParamValue = isNewFlyoutEnabled
-    ? resolveAttackFlyoutV2Params({ index, attackId }, currentFlyoutV2Params)
-    : resolveAttackFlyoutParams({ index, attackId }, currentFlyoutParams);
 
   const urlParams = new URLSearchParams({
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
-    [flyoutParamKey]: flyoutParamValue,
+    [FLYOUT_V2_URL_PARAM]: resolveAttackFlyoutV2Params({ index, attackId }, currentFlyoutV2Params),
   });
 
   const url = `${ATTACKS_PATH}?${urlParams.toString()}`;
