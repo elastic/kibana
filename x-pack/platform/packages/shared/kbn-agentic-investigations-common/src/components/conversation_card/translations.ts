@@ -21,15 +21,6 @@ export const CONVERSATION_CARD_LABELS = Object.freeze({
     }),
 });
 
-export const CONVERSATION_CARD_ACTIONS = Object.freeze({
-  default: i18n.translate('xpack.alertzero.conversationCard.defaultAction', {
-    defaultMessage: 'Review',
-  }),
-  viewDetails: i18n.translate('xpack.alertzero.conversationCard.viewDetails', {
-    defaultMessage: 'View details',
-  }),
-});
-
 export const WATCH_TIER_LABELS = Object.freeze({
   officer: i18n.translate('xpack.alertzero.conversationCard.watchTier.officer', {
     defaultMessage: 'Watch Officer',
