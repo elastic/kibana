@@ -220,7 +220,6 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:bump_agent_policies',
         'fleet:bump_agent_policies_by_id',
         'fleet:check-deleted-files-task',
-        'fleet:debounced_bump_agent_policy',
         'fleet:delete-unenrolled-agents-task',
         'fleet:deploy_agent_policies',
         'fleet:iac_upgrade_check',

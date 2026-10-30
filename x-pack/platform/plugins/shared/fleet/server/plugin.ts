@@ -152,7 +152,6 @@ import { registerDeployAgentPoliciesTask } from './services/agent_policies/deplo
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpMigratedAgentPoliciesTask } from './services/agent_policies/bump_migrated_agent_policies_task';
 import { registerBumpAgentPoliciesByIdTask } from './services/agent_policies/bump_agent_policies_by_id_task';
-import { registerDebouncedBumpAgentPolicyTask } from './services/agent_policies/debounced_bump_agent_policy_task';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/agentless/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
@@ -717,7 +716,6 @@ export class FleetPlugin
     registerDeployAgentPoliciesTask(deps.taskManager);
     registerBumpMigratedAgentPoliciesTask(deps.taskManager);
     registerBumpAgentPoliciesByIdTask(deps.taskManager);
-    registerDebouncedBumpAgentPolicyTask(deps.taskManager);
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);

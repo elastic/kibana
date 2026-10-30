@@ -7,13 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { AuthenticatedUser } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { chunk, sortBy } from 'lodash';
+import { chunk, sortBy, uniqBy } from 'lodash';
 
 import { agentPolicyService, appContextService } from '..';
 import { BUMP_AGENT_POLICIES_BATCH_SIZE } from '../../constants';
@@ -121,4 +123,108 @@ export async function scheduleBumpAgentPoliciesByIdTask(
       })
     )
   );
+}
+
+/** How long a debounced bump waits for more changes to the same agent policy by default. */
+export const DEBOUNCED_BUMP_AGENT_POLICY_DEFAULT_DELAY_MS = 5_000;
+
+const MAX_DEBOUNCED_SCHEDULE_ATTEMPTS = 3;
+
+export const getDebouncedBumpAgentPolicyTaskId = (agentPolicyId: string) =>
+  `${TASK_TYPE}:${agentPolicyId}`;
+
+/**
+ * Schedules one bump task per agent policy under an id derived from the policy
+ * id, so calls for the same agent policy within `delayMs`, from any Kibana
+ * node, share one bump and one redeploy. A bump that cannot be handed to a
+ * pending task runs right away, so no change is left undeployed.
+ */
+export async function scheduleDebouncedBumpAgentPoliciesByIdTask(
+  taskManagerStart: TaskManagerStartContract,
+  agentPolicyIdsWithSpace: Array<{ id: string; spaceId: string }>,
+  { delayMs = DEBOUNCED_BUMP_AGENT_POLICY_DEFAULT_DELAY_MS }: { delayMs?: number } = {}
+) {
+  await Promise.all(
+    uniqBy(agentPolicyIdsWithSpace, 'id').map(async (agentPolicyIdWithSpace) => {
+      const { id, spaceId } = agentPolicyIdWithSpace;
+      try {
+        if (await handOffDebouncedBump(taskManagerStart, agentPolicyIdWithSpace, delayMs)) {
+          return;
+        }
+      } catch (error) {
+        appContextService
+          .getLogger()
+          .warn(
+            `Failed to schedule a revision bump for agent policy [${id}], bumping it now: ${error.message}`
+          );
+      }
+      await agentPolicyService.bumpAgentPoliciesByIds([id], undefined, spaceId);
+    })
+  );
+}
+
+/**
+ * Returns whether a task bump is guaranteed to run after this call. When it
+ * returns false, the caller must bump the agent policy itself.
+ */
+async function handOffDebouncedBump(
+  taskManagerStart: TaskManagerStartContract,
+  agentPolicyIdWithSpace: { id: string; spaceId: string },
+  delayMs: number
+): Promise<boolean> {
+  const taskId = getDebouncedBumpAgentPolicyTaskId(agentPolicyIdWithSpace.id);
+
+  for (let attempt = 0; attempt < MAX_DEBOUNCED_SCHEDULE_ATTEMPTS; attempt += 1) {
+    try {
+      await taskManagerStart.schedule({
+        id: taskId,
+        scope: ['fleet'],
+        params: { agentPolicyIdsWithSpace: [agentPolicyIdWithSpace] },
+        taskType: TASK_TYPE,
+        runAt: new Date(Date.now() + delayMs),
+        state: {},
+      });
+      return true;
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+        throw error;
+      }
+    }
+
+    const pending = await getTask(taskManagerStart, taskId);
+    // Completed between the schedule and the read: schedule a fresh bump.
+    if (!pending) {
+      continue;
+    }
+    // A claimed bump has not read the agent policy yet, so it covers this call.
+    if (pending.status === TaskStatus.Claiming) {
+      return true;
+    }
+    if (pending.status === TaskStatus.Idle) {
+      if (delayMs > 0) {
+        return true;
+      }
+      try {
+        await taskManagerStart.runSoon(taskId);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    // A running bump may already be past the read that would cover this call.
+    return false;
+  }
+
+  return false;
+}
+
+async function getTask(taskManagerStart: TaskManagerStartContract, taskId: string) {
+  try {
+    return await taskManagerStart.get(taskId);
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
 }
