@@ -102,6 +102,7 @@ describe('Transform: Job List Columns', () => {
     rerender(<>{executionColumn.render?.(item)}</>);
     expect(screen.getAllByText('100%')).not.toHaveLength(0);
     expect(screen.getByTestId('transformListProgress')).toBeInTheDocument();
+    expect(screen.getByTestId('transformListProgressGroup')).toHaveStyle({ minWidth: '120px' });
 
     rerender(
       <>

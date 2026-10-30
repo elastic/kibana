@@ -8,14 +8,19 @@
 import React, { type FC, useCallback, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { EuiSearchBarProps } from '@elastic/eui';
+import type { EuiSearchBarProps, EuiTableComputedColumnType } from '@elastic/eui';
 import {
+  Comparators,
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiPopover,
   EuiSearchBar,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { TransformFunction } from '../../../../../../common/constants';
@@ -72,6 +77,7 @@ import {
 } from './transform_search_bar_filters';
 import { TransformStatsBar } from './transforms_stats_bar';
 import { useTableSettings } from './use_table_settings';
+import { StatsBarContainer } from '../stats_bar';
 import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 import { StopActionModal } from '../action_stop/stop_action_modal';
@@ -141,7 +147,7 @@ export const TransformList: FC<TransformListProps> = ({
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
   const transformSelectionRef = useRef<TransformListRow[]>([]);
-  const [selectionResetCounter, setSelectionResetCounter] = useState(0);
+  const selectionCheckboxId = useGeneratedHtmlId({ prefix: 'transformSelection' });
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
@@ -156,7 +162,6 @@ export const TransformList: FC<TransformListProps> = ({
 
     transformSelectionRef.current = [];
     setTransformSelection([]);
-    setSelectionResetCounter((counter) => counter + 1);
   }, []);
   const bulkProjectScopeAction = useProjectScopeAction({
     onUpdateSuccess: clearTransformSelection,
@@ -192,6 +197,107 @@ export const TransformList: FC<TransformListProps> = ({
       : searchableTransforms;
   }, [searchQueryText, searchableTransforms]);
 
+  const currentPageTransforms = useMemo(() => {
+    const sortColumn = columns.find(
+      (column) =>
+        column.name === sorting.sort.field ||
+        ('field' in column && column.field === sorting.sort.field)
+    );
+    const sortable = sortColumn && 'sortable' in sortColumn ? sortColumn.sortable : undefined;
+    const sortField = sortColumn && 'field' in sortColumn ? sortColumn.field : sorting.sort.field;
+    const sortedTransforms = [...filteredTransforms].sort(
+      typeof sortable === 'function'
+        ? Comparators.value(sortable, Comparators.default(sorting.sort.direction))
+        : Comparators.property(sortField, Comparators.default(sorting.sort.direction))
+    );
+    const pageIndex = pagination.pageIndex ?? 0;
+    const pageSize = pagination.pageSize ?? sortedTransforms.length;
+
+    return sortedTransforms.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+  }, [columns, filteredTransforms, pagination.pageIndex, pagination.pageSize, sorting.sort]);
+
+  const selectedTransformIds = useMemo(
+    () => new Set(transformSelection.map(({ id }) => id)),
+    [transformSelection]
+  );
+  const isCurrentPageSelected =
+    currentPageTransforms.length > 0 &&
+    currentPageTransforms.every(({ id }) => selectedTransformIds.has(id));
+  const isCurrentPagePartiallySelected =
+    !isCurrentPageSelected && currentPageTransforms.some(({ id }) => selectedTransformIds.has(id));
+  const areAllFilteredTransformsSelected =
+    filteredTransforms.length > 0 &&
+    filteredTransforms.every(({ id }) => selectedTransformIds.has(id));
+
+  const updateTransformSelection = useCallback((selected: TransformListRow[]) => {
+    transformSelectionRef.current = selected;
+    setTransformSelection(selected);
+  }, []);
+
+  const toggleTransformSelection = useCallback(
+    (item: TransformListRow, checked: boolean) => {
+      const selected = checked
+        ? [...transformSelectionRef.current.filter(({ id }) => id !== item.id), item]
+        : transformSelectionRef.current.filter(({ id }) => id !== item.id);
+      updateTransformSelection(selected);
+    },
+    [updateTransformSelection]
+  );
+
+  const toggleCurrentPageSelection = useCallback(
+    (checked: boolean) => {
+      const currentPageIds = new Set(currentPageTransforms.map(({ id }) => id));
+      const selectedOutsideCurrentPage = transformSelectionRef.current.filter(
+        ({ id }) => !currentPageIds.has(id)
+      );
+      updateTransformSelection(
+        checked
+          ? [...selectedOutsideCurrentPage, ...currentPageTransforms]
+          : selectedOutsideCurrentPage
+      );
+    },
+    [currentPageTransforms, updateTransformSelection]
+  );
+
+  const selectionColumn = useMemo<EuiTableComputedColumnType<TransformListRow>>(
+    () => ({
+      name: (
+        <EuiCheckbox
+          id={`${selectionCheckboxId}-all`}
+          aria-label={i18n.translate('xpack.transform.transformList.selectCurrentPageLabel', {
+            defaultMessage: 'Select all transforms on this page',
+          })}
+          checked={isCurrentPageSelected}
+          indeterminate={isCurrentPagePartiallySelected}
+          onChange={(event) => toggleCurrentPageSelection(event.target.checked)}
+          data-test-subj="checkboxSelectAll"
+        />
+      ),
+      width: '40px',
+      render: (item: TransformListRow) => (
+        <EuiCheckbox
+          id={`${selectionCheckboxId}-${item.id}`}
+          aria-label={i18n.translate('xpack.transform.transformList.selectTransformLabel', {
+            defaultMessage: 'Select transform {transformId}',
+            values: { transformId: item.id },
+          })}
+          checked={selectedTransformIds.has(item.id)}
+          onChange={(event) => toggleTransformSelection(item, event.target.checked)}
+          data-test-subj={`checkboxSelectRow-${item.id}`}
+        />
+      ),
+    }),
+    [
+      isCurrentPagePartiallySelected,
+      isCurrentPageSelected,
+      selectedTransformIds,
+      selectionCheckboxId,
+      toggleCurrentPageSelection,
+      toggleTransformSelection,
+    ]
+  );
+  const tableColumns = useMemo(() => [selectionColumn, ...columns], [columns, selectionColumn]);
+
   if (transforms.length === 0) {
     return (
       <EuiPageTemplate.EmptyPrompt
@@ -225,66 +331,76 @@ export const TransformList: FC<TransformListProps> = ({
   );
 
   const bulkActionMenuItems = [
-    <div key="startAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() => bulkStartAction.openModal(transformSelection)}
-        disabled={isStartActionDisabled(
-          transformSelection,
-          capabilities.canStartStopTransform,
-          transformNodes
-        )}
-      >
-        <StartActionName items={transformSelection} transformNodes={transformNodes} />
-      </EuiButtonEmpty>
-    </div>,
-    <div key="scheduleNowAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() =>
-          bulkScheduleNowAction.scheduleNowTransforms(transformSelection.map((i) => ({ id: i.id })))
-        }
-        disabled={isScheduleNowActionDisabled(
-          transformSelection,
-          capabilities.canScheduleNowTransform,
-          transformNodes
-        )}
-      >
-        <ScheduleNowActionName items={transformSelection} transformNodes={transformNodes} />
-      </EuiButtonEmpty>
-    </div>,
-    <div key="stopAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() => {
-          bulkStopAction.openModal(transformSelection);
-        }}
-        disabled={isStopActionDisabled(
-          transformSelection,
-          capabilities.canStartStopTransform,
-          false
-        )}
-      >
-        <StopActionName items={transformSelection} />
-      </EuiButtonEmpty>
-    </div>,
-    <div key="reauthorizeAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() => {
-          bulkReauthorizeAction.openModal(transformSelection);
-        }}
-        disabled={isReauthorizeActionDisabled(
-          transformSelection,
-          capabilities.canStartStopTransform,
-          transformNodes
-        )}
-      >
-        <ReauthorizeActionName items={transformSelection} transformNodes={transformNodes} />
-      </EuiButtonEmpty>
-    </div>,
-    <div key="projectScopeAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() => {
-          setIsActionsMenuOpen(false);
-          bulkProjectScopeAction.openFlyout(transformSelection);
-        }}
+    <EuiContextMenuItem
+      key="startAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkStartAction.openModal(transformSelection);
+      }}
+      disabled={isStartActionDisabled(
+        transformSelection,
+        capabilities.canStartStopTransform,
+        transformNodes
+      )}
+    >
+      <StartActionName items={transformSelection} transformNodes={transformNodes} />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="scheduleNowAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkScheduleNowAction.scheduleNowTransforms(
+          transformSelection.map((item) => ({ id: item.id }))
+        );
+      }}
+      disabled={isScheduleNowActionDisabled(
+        transformSelection,
+        capabilities.canScheduleNowTransform,
+        transformNodes
+      )}
+    >
+      <ScheduleNowActionName items={transformSelection} transformNodes={transformNodes} />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="stopAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkStopAction.openModal(transformSelection);
+      }}
+      disabled={isStopActionDisabled(transformSelection, capabilities.canStartStopTransform, false)}
+    >
+      <StopActionName items={transformSelection} />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="reauthorizeAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkReauthorizeAction.openModal(transformSelection);
+      }}
+      disabled={isReauthorizeActionDisabled(
+        transformSelection,
+        capabilities.canStartStopTransform,
+        transformNodes
+      )}
+    >
+      <ReauthorizeActionName items={transformSelection} transformNodes={transformNodes} />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="projectScopeAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkProjectScopeAction.openFlyout(transformSelection);
+      }}
+      disabled={isProjectScopeActionDisabled({
+        canCreateTransform: bulkProjectScopeAction.canCreateTransform,
+        hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
+        isCpsEnabled: bulkProjectScopeAction.isCpsEnabled,
+        isLoading: bulkProjectScopeAction.isLoading,
+        items: transformSelection,
+      })}
+    >
+      <ProjectScopeActionName
+        canCreateTransform={bulkProjectScopeAction.canCreateTransform}
         disabled={isProjectScopeActionDisabled({
           canCreateTransform: bulkProjectScopeAction.canCreateTransform,
           hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
@@ -292,53 +408,52 @@ export const TransformList: FC<TransformListProps> = ({
           isLoading: bulkProjectScopeAction.isLoading,
           items: transformSelection,
         })}
-      >
-        <ProjectScopeActionName
-          canCreateTransform={bulkProjectScopeAction.canCreateTransform}
-          disabled={isProjectScopeActionDisabled({
-            canCreateTransform: bulkProjectScopeAction.canCreateTransform,
-            hasLinkedProjects: bulkProjectScopeAction.hasLinkedProjects,
-            isCpsEnabled: bulkProjectScopeAction.isCpsEnabled,
-            isLoading: bulkProjectScopeAction.isLoading,
-            items: transformSelection,
-          })}
-          hasLinkedProjects={bulkProjectScopeAction.hasLinkedProjects}
-          isCpsEnabled={bulkProjectScopeAction.isCpsEnabled}
-          isLoading={bulkProjectScopeAction.isLoading}
-          items={transformSelection}
-        />
-      </EuiButtonEmpty>
-    </div>,
-    <div key="resetAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() => {
-          bulkResetAction.openModal(transformSelection);
-        }}
+        hasLinkedProjects={bulkProjectScopeAction.hasLinkedProjects}
+        isCpsEnabled={bulkProjectScopeAction.isCpsEnabled}
+        isLoading={bulkProjectScopeAction.isLoading}
+        items={transformSelection}
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="resetAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkResetAction.openModal(transformSelection);
+      }}
+      disabled={isResetActionDisabled(transformSelection, false)}
+    >
+      <ResetActionName
+        canResetTransform={capabilities.canResetTransform}
         disabled={isResetActionDisabled(transformSelection, false)}
-      >
-        <ResetActionName
-          canResetTransform={capabilities.canResetTransform}
-          disabled={isResetActionDisabled(transformSelection, false)}
-          isBulkAction={true}
-          items={transformSelection}
-        />
-      </EuiButtonEmpty>
-    </div>,
-    <div key="deleteAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty
-        onClick={() => bulkDeleteAction.openModal(transformSelection)}
+        isBulkAction={true}
+        items={transformSelection}
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="deleteAction"
+      onClick={() => {
+        setIsActionsMenuOpen(false);
+        bulkDeleteAction.openModal(transformSelection);
+      }}
+      disabled={isDeleteActionDisabled(transformSelection, false)}
+    >
+      <DeleteActionName
+        canDeleteTransform={capabilities.canDeleteTransform}
         disabled={isDeleteActionDisabled(transformSelection, false)}
-      >
-        <DeleteActionName
-          canDeleteTransform={capabilities.canDeleteTransform}
-          disabled={isDeleteActionDisabled(transformSelection, false)}
-          isBulkAction={true}
-          items={transformSelection}
-          forceDisable={false}
-        />
-      </EuiButtonEmpty>
-    </div>,
+        isBulkAction={true}
+        items={transformSelection}
+        forceDisable={false}
+      />
+    </EuiContextMenuItem>,
   ];
+
+  const selectAllFilteredTransforms = () => {
+    updateTransformSelection(filteredTransforms);
+  };
+
+  const clearAllTransformSelection = () => {
+    updateTransformSelection([]);
+  };
 
   const renderBulkActions = () => {
     const bulkActionButton = (
@@ -370,14 +485,45 @@ export const TransformList: FC<TransformListProps> = ({
         button={bulkActionButton}
         isOpen={isActionsMenuOpen}
         closePopover={() => setIsActionsMenuOpen(false)}
-        panelPaddingSize="s"
-        anchorPosition="rightUp"
+        panelPaddingSize="none"
       >
-        {bulkActionMenuItems}
+        <EuiContextMenuPanel items={bulkActionMenuItems} />
       </EuiPopover>
     );
 
-    return bulkActionIcon;
+    return (
+      <StatsBarContainer>
+        {bulkActionIcon}
+        {isCurrentPageSelected &&
+          filteredTransforms.length > currentPageTransforms.length &&
+          !areAllFilteredTransformsSelected && (
+            <EuiButtonEmpty
+              size="s"
+              iconType="documentsCheck"
+              onClick={selectAllFilteredTransforms}
+              data-test-subj="transformSelectAllButton"
+            >
+              {i18n.translate('xpack.transform.transformList.selectAllTransformsLabel', {
+                defaultMessage:
+                  'Select all {count} {count, plural, one {transform} other {transforms}}',
+                values: { count: filteredTransforms.length },
+              })}
+            </EuiButtonEmpty>
+          )}
+        {areAllFilteredTransformsSelected && (
+          <EuiButtonEmpty
+            size="s"
+            iconType="cross"
+            onClick={clearAllTransformSelection}
+            data-test-subj="transformClearSelectionButton"
+          >
+            {i18n.translate('xpack.transform.transformList.clearSelectionLabel', {
+              defaultMessage: 'Clear selection',
+            })}
+          </EuiButtonEmpty>
+        )}
+      </StatsBarContainer>
+    );
   };
 
   const toolsRight = (
@@ -406,13 +552,6 @@ export const TransformList: FC<TransformListProps> = ({
     query: searchQueryText,
   };
 
-  const selection = {
-    onSelectionChange: (selected: TransformListRow[]) => {
-      transformSelectionRef.current = selected;
-      setTransformSelection(selected);
-    },
-  };
-
   return (
     <div data-test-subj="transformListTableContainer">
       {/* Bulk Action Modals */}
@@ -434,10 +573,9 @@ export const TransformList: FC<TransformListProps> = ({
       {singleActionModals}
 
       <EuiInMemoryTable
-        key={selectionResetCounter}
         allowNeutralSort={false}
         className="transform__TransformTable"
-        columns={columns}
+        columns={tableColumns}
         childrenBetween={
           transformSelection.length > 0 ? (
             renderBulkActions()
@@ -460,7 +598,6 @@ export const TransformList: FC<TransformListProps> = ({
         rowProps={(item) => ({
           'data-test-subj': `transformListRow row-${item.id}`,
         })}
-        selection={selection}
         sorting={sorting}
         search={search}
         tableCaption={i18n.translate('xpack.transform.list.tableCaption', {

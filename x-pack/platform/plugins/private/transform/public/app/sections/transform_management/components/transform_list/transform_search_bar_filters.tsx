@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  type EuiSelectableOption,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
 import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,10 +28,89 @@ import {
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import type { TransformListRow } from '../../../../common';
-import { TransformTaskStateBadge } from './transform_task_state_badge';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
-type TransformFilterConfig = Extract<SearchFilterConfig, { type: 'field_value_selection' }>;
+const TYPE_FILTER_FIELD = 'type';
+const typeFilterOptions = [
+  {
+    value: TRANSFORM_FUNCTION.PIVOT,
+    label: i18n.translate('xpack.transform.typeFilter.pivotLabel', {
+      defaultMessage: 'Pivot',
+    }),
+  },
+  {
+    value: TRANSFORM_FUNCTION.LATEST,
+    label: i18n.translate('xpack.transform.typeFilter.latestLabel', {
+      defaultMessage: 'Latest',
+    }),
+  },
+];
+
+export const TransformTypeFilter = ({ query, onChange }: CustomComponentProps) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
+  const selectedType = query.getSimpleFieldClause(TYPE_FILTER_FIELD)?.value;
+  const options: EuiSelectableOption[] = typeFilterOptions.map(({ value, label }) => ({
+    label,
+    checked: selectedType === value ? 'on' : undefined,
+    key: value,
+    data: { value },
+  }));
+  const filterName = i18n.translate('xpack.transform.typeFilter', { defaultMessage: 'Type' });
+
+  return (
+    <EuiPopover
+      button={
+        <EuiFilterButton
+          aria-label={i18n.translate('xpack.transform.typeFilter.buttonAriaLabel', {
+            defaultMessage: 'Type Selection',
+          })}
+          grow
+          hasActiveFilters={selectedType !== undefined}
+          iconSide="right"
+          iconType="chevronSingleDown"
+          isSelected={selectedType !== undefined}
+          numActiveFilters={selectedType === undefined ? undefined : 1}
+          onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+        >
+          {filterName}
+        </EuiFilterButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+        {i18n.translate('xpack.transform.typeFilter.popoverTitle', {
+          defaultMessage: 'Select transform type',
+        })}
+      </EuiPopoverTitle>
+      <EuiSelectable
+        aria-label={filterName}
+        options={options}
+        singleSelection
+        listProps={{ paddingSize: 's' }}
+        onChange={(_options, _event, changedOption) => {
+          const value = changedOption.data?.value;
+          if (typeof value !== 'string') {
+            return;
+          }
+
+          let nextQuery = query.removeSimpleFieldClauses(TYPE_FILTER_FIELD);
+          if (changedOption.checked === 'on') {
+            nextQuery = nextQuery.addSimpleFieldValue(TYPE_FILTER_FIELD, value);
+          }
+          onChange?.(nextQuery);
+          setIsPopoverOpen(false);
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
 
 export const getTransformType = (transform: TransformListRow): TransformFunction | undefined => {
   if (isLatestTransform(transform.config)) {
@@ -33,7 +121,7 @@ export const getTransformType = (transform: TransformListRow): TransformFunction
   }
 };
 
-export const transformFilters: TransformFilterConfig[] = [
+export const transformFilters: SearchFilterConfig[] = [
   {
     type: 'field_value_selection',
     field: 'stats.health.status',
@@ -45,26 +133,7 @@ export const transformFilters: TransformFilterConfig[] = [
       view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,
     })),
   },
-  {
-    type: 'field_value_selection',
-    field: 'type',
-    name: i18n.translate('xpack.transform.typeFilter', { defaultMessage: 'Type' }),
-    multiSelect: false,
-    options: [
-      {
-        value: TRANSFORM_FUNCTION.PIVOT,
-        name: i18n.translate('xpack.transform.typeFilter.pivotLabel', {
-          defaultMessage: 'Pivot',
-        }),
-      },
-      {
-        value: TRANSFORM_FUNCTION.LATEST,
-        name: i18n.translate('xpack.transform.typeFilter.latestLabel', {
-          defaultMessage: 'Latest',
-        }),
-      },
-    ],
-  },
+  { type: 'custom_component', component: TransformTypeFilter },
   {
     type: 'field_value_selection',
     field: 'stats.state',
@@ -73,7 +142,6 @@ export const transformFilters: TransformFilterConfig[] = [
     options: Object.values(TRANSFORM_STATE).map((val) => ({
       value: val,
       name: val,
-      view: <TransformTaskStateBadge state={val} />,
     })),
   },
   {

@@ -89,7 +89,12 @@ describe('Transform: Transform List <TransformList />', () => {
     await userEvent.click(checkboxes[1]);
 
     expect(screen.queryByTestId('transformStatsBar')).not.toBeInTheDocument();
-    expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('1 selected');
+    const bulkActionsButton = screen.getByTestId('transformBulkActionsMenuButton');
+    expect(bulkActionsButton).toHaveTextContent('1 selected');
+
+    await userEvent.click(bulkActionsButton);
+
+    expect(screen.getByRole('menuitem', { name: 'Schedule now' })).toBeInTheDocument();
   });
 
   test('filters transforms by type', async () => {
@@ -138,9 +143,51 @@ describe('Transform: Transform List <TransformList />', () => {
     );
 
     await userEvent.click(screen.getByRole('button', { name: 'Type Selection' }));
+    expect(screen.getByText('Select transform type')).toBeInTheDocument();
     await userEvent.click(await screen.findByRole('option', { name: 'Latest' }));
 
     expect(await screen.findByText('latest-transform')).toBeInTheDocument();
     expect(screen.queryByText(pivotTransform.id)).not.toBeInTheDocument();
+  });
+
+  test('offers to select every filtered transform after selecting the current page', async () => {
+    const transforms = Array.from({ length: 11 }, (_, index) => ({
+      ...transformListRow,
+      id: `transform-${index}`,
+      config: {
+        ...transformListRow.config,
+        id: `transform-${index}`,
+      },
+    })) as unknown as TransformListRow[];
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <TransformList
+            isLoading={false}
+            onCreateTransform={jest.fn()}
+            transformNodes={1}
+            transforms={transforms}
+            transformsLoading={false}
+            transformsStatsLoading={false}
+            pageState={{ pageSize: 10, pageIndex: 0, sortField: 'id', sortDirection: 'asc' }}
+            updatePageState={jest.fn()}
+          />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Select all transforms on this page' })
+    );
+
+    expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('10 selected');
+    const selectAllButton = screen.getByTestId('transformSelectAllButton');
+    expect(selectAllButton).toHaveTextContent('Select all 11 transforms');
+
+    await userEvent.click(selectAllButton);
+
+    expect(screen.getByTestId('transformBulkActionsMenuButton')).toHaveTextContent('11 selected');
+    expect(screen.getByTestId('transformClearSelectionButton')).toBeInTheDocument();
   });
 });

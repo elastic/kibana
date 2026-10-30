@@ -37,18 +37,28 @@ describe('transform search bar filters', () => {
   } as unknown as TransformListRow;
 
   test('uses the redesigned filter order', () => {
-    expect(transformFilters.map(({ name }) => name)).toEqual([
-      'Health',
-      'Type',
-      'Status',
-      'Execution',
-    ]);
-    expect(transformFilters[3].options).toEqual(
+    expect(transformFilters[0]).toEqual(expect.objectContaining({ name: 'Health' }));
+    expect(transformFilters[1]).toEqual(expect.objectContaining({ type: 'custom_component' }));
+    expect(transformFilters[2]).toEqual(expect.objectContaining({ name: 'Status' }));
+    expect(transformFilters[3]).toEqual(expect.objectContaining({ name: 'Execution' }));
+
+    const executionFilter = transformFilters[3];
+    expect(executionFilter.type).toBe('field_value_selection');
+    if (executionFilter.type !== 'field_value_selection') {
+      throw new Error('Expected execution to use a field value selection filter');
+    }
+    expect(executionFilter.options).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ value: 'batch', name: 'One-time' }),
         expect.objectContaining({ value: 'continuous', name: 'Continuous' }),
       ])
     );
+
+    const statusFilter = transformFilters[2];
+    if (statusFilter.type !== 'field_value_selection' || !Array.isArray(statusFilter.options)) {
+      throw new Error('Expected status to use static field value selection options');
+    }
+    expect(statusFilter.options.every((option) => option.view === undefined)).toBe(true);
   });
 
   test('filters execution even when transform stats are unavailable', () => {

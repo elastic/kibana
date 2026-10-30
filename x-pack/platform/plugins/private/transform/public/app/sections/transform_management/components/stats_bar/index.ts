@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { StatsBar } from './stats_bar';
+export { StatsBar, StatsBarContainer } from './stats_bar';

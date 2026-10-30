@@ -18,7 +18,7 @@ const useStyles = () => {
       flex-wrap: wrap;
       align-items: center;
       gap: ${euiTheme.size.xs};
-      min-height: ${euiTheme.size.xl};
+      min-height: calc(${euiTheme.size.xl} + ${euiTheme.size.l});
       margin-block-start: -${euiTheme.size.m};
       padding-block-end: ${euiTheme.size.l};
     `,
@@ -30,17 +30,28 @@ interface StatsBarProps {
   dataTestSub: string;
 }
 
-export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
+export const StatsBarContainer: FC<{
+  children: ReactNode;
+  dataTestSub?: string;
+}> = ({ children, dataTestSub }) => {
   const styles = useStyles();
 
   return (
     <div css={styles.statsBar} data-test-subj={dataTestSub}>
+      {children}
+    </div>
+  );
+};
+
+export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
+  return (
+    <StatsBarContainer dataTestSub={dataTestSub}>
       {stats.map(({ key, content }, index) => (
         <React.Fragment key={key}>
           {index > 0 && <span aria-hidden="true">·</span>}
           <span>{content}</span>
         </React.Fragment>
       ))}
-    </div>
+    </StatsBarContainer>
   );
 };

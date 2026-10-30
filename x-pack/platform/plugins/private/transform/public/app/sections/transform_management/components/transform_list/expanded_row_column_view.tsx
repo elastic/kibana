@@ -45,13 +45,14 @@ export const Section: FC<SectionProps> = ({ section }) => {
 
   return (
     <section>
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <span>{section.title}</span>
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiDescriptionList
         compressed
         type="column"
+        columnWidths={[1, 2]}
         listItems={section.items}
         titleProps={{
           css: {
@@ -75,18 +76,32 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
   dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const leftSections = sections.filter(
+    (section) => section.position === 'left' && section.items.length > 0
+  );
+  const rightSections = sections.filter(
+    (section) => section.position === 'right' && section.items.length > 0
+  );
+  const hasTwoColumns = leftSections.length > 0 && rightSections.length > 0;
   const columnStyles = {
     left: css`
+      padding-block: ${euiTheme.base}px;
       padding-inline-end: ${euiTheme.size.l};
     `,
     right: css`
       border-inline-start: ${euiTheme.border.thin};
+      padding-block: ${euiTheme.base}px;
       padding-inline-start: ${euiTheme.size.l};
     `,
   };
-  const contentStyles = css`
-    padding-block-start: ${euiTheme.size.s};
-  `;
+
+  const renderSections = (columnSections: SectionConfig[]) =>
+    columnSections.map((section, index) => (
+      <Fragment key={section.title}>
+        {index > 0 && <EuiSpacer size="s" />}
+        <Section section={section} />
+      </Fragment>
+    ));
 
   return (
     <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
@@ -105,27 +120,18 @@ export const ExpandedRowColumnView: FC<ExpandedRowDetailsPaneProps> = ({
           />
         </>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false} css={contentStyles}>
-        <EuiFlexItem css={columnStyles.left}>
-          {sections
-            .filter((s) => s.position === 'left')
-            .map((s) => (
-              <Fragment key={s.title}>
-                <EuiSpacer size="s" />
-                <Section section={s} />
-              </Fragment>
-            ))}
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem css={columnStyles.left} data-test-subj="transformExpandedRowColumn">
+          {renderSections(leftSections.length > 0 ? leftSections : rightSections)}
         </EuiFlexItem>
-        <EuiFlexItem css={columnStyles.right}>
-          {sections
-            .filter((s) => s.position === 'right')
-            .map((s) => (
-              <Fragment key={s.title}>
-                <EuiSpacer size="s" />
-                <Section section={s} />
-              </Fragment>
-            ))}
-        </EuiFlexItem>
+        {hasTwoColumns && (
+          <EuiFlexItem
+            css={columnStyles.right}
+            data-test-subj="transformExpandedRowColumnWithDivider"
+          >
+            {renderSections(rightSections)}
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

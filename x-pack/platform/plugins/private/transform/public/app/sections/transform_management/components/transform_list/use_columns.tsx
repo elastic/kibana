@@ -24,7 +24,6 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
   EuiLoadingSpinner,
-  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -60,28 +59,14 @@ const StatsUnknown = () => (
 );
 
 const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
+  const { euiTheme } = useEuiTheme();
   const transformId = item.config.id;
   const description = item.config.description;
   const transformIdContent = !isManagedTransform(item) ? (
-    <EuiToolTip content={transformId}>
-      <span tabIndex={0} data-test-subj="transformListColumnIdText">
-        {transformId}
-      </span>
-    </EuiToolTip>
+    <span data-test-subj="transformListColumnIdText">{transformId}</span>
   ) : (
     <>
-      <EuiToolTip
-        content={`${transformId} (${i18n.translate(
-          'xpack.transform.transformList.managedBadgeLabel',
-          {
-            defaultMessage: 'Managed',
-          }
-        )})`}
-      >
-        <span tabIndex={0} data-test-subj="transformListColumnIdText">
-          {transformId}
-        </span>
-      </EuiToolTip>
+      <span data-test-subj="transformListColumnIdText">{transformId}</span>
       &nbsp;
       <EuiToolTip
         content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
@@ -102,14 +87,15 @@ const TransformIdWithDescription = ({ item }: { item: TransformListRow }) => {
     <>
       <div>{transformIdContent}</div>
       {description ? (
-        <>
-          <EuiSpacer size="xs" />
-          <EuiToolTip content={description}>
-            <EuiText tabIndex={0} color="subdued" size="s">
-              <span data-test-subj="transformListColumnDescriptionText">{description}</span>
-            </EuiText>
-          </EuiToolTip>
-        </>
+        <EuiText
+          color="subdued"
+          css={{
+            fontSize: euiTheme.font.scale.xs * euiTheme.base,
+            marginBlockStart: euiTheme.size.xs,
+          }}
+        >
+          <span data-test-subj="transformListColumnDescriptionText">{description}</span>
+        </EuiText>
       ) : null}
     </>
   );
@@ -210,9 +196,13 @@ export const useColumns = (
       truncateText: true,
       render(item: TransformListRow) {
         return item.stats?.health ? (
-          <TransformHealthColoredDot
-            healthStatus={mapEsHealthStatus2TransformHealthStatus(item.stats.health.status)}
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <TransformHealthColoredDot
+                healthStatus={mapEsHealthStatus2TransformHealthStatus(item.stats.health.status)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ) : (
           <NoStatsFallbackComponent />
         );
@@ -267,6 +257,7 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnExecution',
       sortable: (item: TransformListRow) => item.mode,
       truncateText: true,
+      align: RIGHT_ALIGNMENT,
       render(item: TransformListRow) {
         if (item.mode === TRANSFORM_MODE.CONTINUOUS) {
           return i18n.translate('xpack.transform.execution.continuous', {
@@ -276,7 +267,14 @@ export const useColumns = (
 
         const progress = getTransformProgress(item);
         return progress === undefined ? null : (
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            css={{ minWidth: '120px' }}
+            data-test-subj="transformListProgressGroup"
+            gutterSize="s"
+            justifyContent="flexEnd"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiText size="s">{`${progress}%`}</EuiText>
             </EuiFlexItem>
@@ -336,6 +334,7 @@ export const useColumns = (
             <EuiButtonIcon
               onClick={() => toggleDetails(item)}
               aria-label={label}
+              color="text"
               iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
               data-test-subj="transformListRowDetailsToggle"
             />

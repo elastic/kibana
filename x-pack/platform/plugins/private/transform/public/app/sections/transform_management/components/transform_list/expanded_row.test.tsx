@@ -58,7 +58,9 @@ describe('Transform: Transform List <ExpandedRow />', () => {
     await waitFor(() => {
       expect(screen.getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
       const tabContent = screen.getByTestId('transformStatsTabContent');
-      expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
+      expect(within(tabContent).getByText('Statistics')).toBeInTheDocument();
+      expect(within(tabContent).getByText('Pages processed')).toBeInTheDocument();
+      expect(within(tabContent).queryByText('pages_processed')).not.toBeInTheDocument();
     });
   });
 });
