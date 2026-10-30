@@ -18,9 +18,10 @@ export const SOURCES_PATH = 'internal/nightshift/sources';
 
 /**
  * Test data indices are created under this prefix so roles can be scoped to them. It avoids
- * `logs-*` on purpose: that template only allows data streams.
+ * `logs-*` on purpose because that template only allows data streams, while still matching the
+ * recommended `logs*` source.
  */
-export const TEST_INDEX_PREFIX = 'nightshift-sources-test-';
+export const TEST_INDEX_PREFIX = 'logsnightshift-sources-test-';
 
 const VIEW_NAME_PATTERN = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}*`;
 

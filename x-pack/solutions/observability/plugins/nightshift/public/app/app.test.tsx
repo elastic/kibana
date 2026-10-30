@@ -20,6 +20,9 @@ import { useKibana } from '../hooks/use_kibana';
 jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+jest.mock('./use_detection_setup_banner', () => ({
+  useDetectionSetupBanner: () => ({ isVisible: false, dismiss: jest.fn() }),
+}));
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;

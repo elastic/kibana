@@ -51,7 +51,9 @@ import {
   setNightshiftSearchQueryParam,
   setNightshiftSeverityParam,
 } from '../common/url_params';
+import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
+import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 function isSeverity(value: string | undefined): value is Severity {
   return SEVERITY_OPTIONS.some((severity) => severity === value);
@@ -59,7 +61,11 @@ function isSeverity(value: string | undefined): value is Severity {
 
 const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
-export function NightshiftApp(): React.ReactElement {
+export function NightshiftApp({
+  hideDetectionSetupBanner = false,
+}: {
+  hideDetectionSetupBanner?: boolean;
+}): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { analytics, application, nightshiftInvestigations, agenticInvestigations, agentBuilder } =
     useKibana().services;
@@ -123,6 +129,13 @@ export function NightshiftApp(): React.ReactElement {
 
   const showAllEventsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/detections/events',
+  });
+  const navigateToDetections = useCallback(
+    () => application.navigateToUrl(showAllEventsHref),
+    [application, showAllEventsHref]
+  );
+  const detectionSetupBanner = useDetectionSetupBanner({
+    suppressed: hideDetectionSetupBanner,
   });
 
   const handleInvestigationClick = useCallback(
@@ -350,6 +363,17 @@ export function NightshiftApp(): React.ReactElement {
       />
 
       <EuiSpacer size="l" />
+
+      {detectionSetupBanner.isVisible && (
+        <>
+          <DetectionSetupBanner
+            detectionsHref={showAllEventsHref}
+            onConfigure={navigateToDetections}
+            onDismiss={detectionSetupBanner.dismiss}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <EuiFieldSearch
         data-test-subj="nightshiftInvestigationsSearchInput"
