@@ -11421,7 +11421,6 @@
     "xpack.agentBuilder.attachmentActions.moreActionsPopover": "Ações de anexo",
     "xpack.agentBuilder.attachmentGroupPill.removeAriaLabel": "Remover grupo de anexos",
     "xpack.agentBuilder.attachmentHeader.close": "Fechar",
-    "xpack.agentBuilder.attachmentHeader.closePreview": "Fechar prévia",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "Prévia somente leitura",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "Remover anexo",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "Anexos",

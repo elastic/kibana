@@ -8,13 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiCallOut, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HeaderBadge, HeaderColor } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentHeader } from './attachment_header';
-import { AttachmentCard } from './attachment_card';
+import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
 import { AttachmentLoadingSkeleton } from './attachment_loading_skeleton';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 
@@ -30,6 +29,23 @@ interface ShellArgs {
   previewBadgeState?: React.ComponentProps<typeof AttachmentHeader>['previewBadgeState'];
 }
 
+const FlyoutFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        max-width: 820px;
+        overflow: hidden;
+        border: ${euiTheme.border.thin};
+        border-radius: 0 ${euiTheme.border.radius.small} 0 0;
+      `}
+    >
+      {children}
+    </div>
+  );
+};
+
 const Shell: React.FC<ShellArgs> = ({
   icon,
   title,
@@ -40,35 +56,39 @@ const Shell: React.FC<ShellArgs> = ({
   body,
   actionButtons,
   previewBadgeState,
-}) => (
-  <AttachmentCard color={color} maxWidth={820}>
-    <AttachmentHeader
-      icon={icon}
-      title={title}
-      subtitle={subtitle}
-      badges={badges}
-      color={color}
-      isCanvas={isCanvas}
-      actionButtons={actionButtons}
-      previewBadgeState={previewBadgeState}
-      onClosePreview={action('close preview')}
-    />
-    <EuiSplitPanel.Inner
-      grow={false}
-      paddingSize="none"
-      css={css`
-        border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
-        overflow: hidden;
+}) => {
+  const Frame = isCanvas ? FlyoutFrame : AttachmentCard;
+  const frameProps = isCanvas ? {} : { color, maxWidth: 820 };
 
-        > .euiPanel {
-          border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
-        }
-      `}
-    >
-      <TimelineRenderErrorBoundary>{() => body}</TimelineRenderErrorBoundary>
-    </EuiSplitPanel.Inner>
-  </AttachmentCard>
-);
+  return (
+    <Frame {...frameProps}>
+      <AttachmentHeader
+        icon={icon}
+        title={title}
+        subtitle={subtitle}
+        badges={badges}
+        color={color}
+        isCanvas={isCanvas}
+        actionButtons={actionButtons}
+        previewBadgeState={previewBadgeState}
+      />
+      <EuiSplitPanel.Inner
+        grow={false}
+        paddingSize="none"
+        css={css`
+          border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
+          overflow: hidden;
+
+          > .euiPanel {
+            border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
+          }
+        `}
+      >
+        <TimelineRenderErrorBoundary>{() => body}</TimelineRenderErrorBoundary>
+      </EuiSplitPanel.Inner>
+    </Frame>
+  );
+};
 
 const bodyPlaceholder = (
   <div style={{ padding: 16 }}>
@@ -240,12 +260,39 @@ export const MenuOnlyWithoutPrimary: Story = {
     icon: 'document',
     title: 'note.txt',
     actionButtons: [
-      { label: 'Copy', icon: 'copy', type: ActionButtonType.SECONDARY, handler: action('copy') },
+      {
+        label: 'Archive',
+        icon: 'folderClosed',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('archive'),
+      },
       {
         label: 'Delete',
         icon: 'trash',
         type: ActionButtonType.OVERFLOW,
         handler: action('delete'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const SecondaryActionsWithoutPrimary: Story = {
+  args: {
+    icon: 'document',
+    title: 'note.txt',
+    actionButtons: [
+      {
+        label: 'Preview',
+        icon: 'eye',
+        type: ActionButtonType.SECONDARY,
+        handler: action('preview'),
+      },
+      {
+        label: 'Open in editor',
+        icon: 'external',
+        type: ActionButtonType.SECONDARY,
+        handler: action('open in editor'),
       },
     ],
     body: bodyPlaceholder,

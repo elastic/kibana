@@ -12,6 +12,8 @@ import type { HeaderColor } from '@kbn/agent-builder-browser/attachments';
 import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useHeaderColorTokens } from './header_color';
 
+export const ATTACHMENT_INNER_RADIUS = AB_PANEL_RADIUS - 1;
+
 interface AttachmentCardProps {
   color?: HeaderColor;
   maxWidth?: number;

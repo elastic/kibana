@@ -11438,7 +11438,6 @@
     "xpack.agentBuilder.attachmentActions.moreActionsPopover": "添付ファイルの操作",
     "xpack.agentBuilder.attachmentGroupPill.removeAriaLabel": "添付ファイルグループを削除",
     "xpack.agentBuilder.attachmentHeader.close": "閉じる",
-    "xpack.agentBuilder.attachmentHeader.closePreview": "プレビューを閉じる",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "読み取り専用プレビュー",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "添付ファイルを削除",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "添付ファイル",

@@ -15,7 +15,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AttachmentCard } from './attachment_card';
+import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
 import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_header';
 
 /**
@@ -31,6 +31,7 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
 
   const headerStyles = css`
+    border-radius: ${ATTACHMENT_INNER_RADIUS}px;
     min-height: ${isCompact ? 'auto' : `${INLINE_HEADER_HEIGHT}px`};
     padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.base};
   `;

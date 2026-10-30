@@ -19,8 +19,11 @@ jest.mock('@elastic/eui', () => ({
 const useResizeObserverMock = useResizeObserver as jest.Mock;
 
 let colors: ReturnType<typeof useEuiTheme>['euiTheme']['colors'];
+let boldWeight: ReturnType<typeof useEuiTheme>['euiTheme']['font']['weight']['bold'];
 const ThemeProbe: React.FC = () => {
-  colors = useEuiTheme().euiTheme.colors;
+  const { euiTheme } = useEuiTheme();
+  colors = euiTheme.colors;
+  boldWeight = euiTheme.font.weight.bold;
   return null;
 };
 
@@ -77,10 +80,34 @@ describe('AttachmentHeader', () => {
     );
   });
 
+  it('renders a bold title with a 16px line height', () => {
+    renderHeader();
+
+    const title = getComputedStyle(screen.getByText('My attachment'));
+    expect(title.lineHeight).toBe('16px');
+    expect(title.fontWeight).toBe(String(boldWeight));
+  });
+
   it('omits the divider when the header has no body', () => {
     const { container } = renderHeader({ isHeaderOnly: true });
 
     expect(container.querySelector('.euiSplitPanel__inner')).toHaveStyle('border-bottom: none');
+  });
+
+  it('shows a previewing badge instead of the actions while previewing', () => {
+    renderHeader({ previewBadgeState: 'previewing' });
+
+    expect(screen.getByText("You're previewing this")).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Run' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Close preview')).not.toBeInTheDocument();
+  });
+
+  it('uses the heading color for the title', () => {
+    renderHeader();
+
+    expect(getComputedStyle(screen.getByText('My attachment')).color).toBe(
+      normalize(colors.textHeading, 'color')
+    );
   });
 
   it('shows the label on the main button when there is room', () => {

@@ -11440,7 +11440,6 @@
     "xpack.agentBuilder.attachmentActions.moreActionsPopover": "附件操作",
     "xpack.agentBuilder.attachmentGroupPill.removeAriaLabel": "移除附件组",
     "xpack.agentBuilder.attachmentHeader.close": "关闭",
-    "xpack.agentBuilder.attachmentHeader.closePreview": "关闭预览",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "只读预览",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "移除附件",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "附件",

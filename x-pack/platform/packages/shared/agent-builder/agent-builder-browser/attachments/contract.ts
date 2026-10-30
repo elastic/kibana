@@ -15,6 +15,11 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 
+/**
+ * Where an action is shown in the attachment header, which renders a split button.
+ * The first `PRIMARY` action is the main button; without one, the first `SECONDARY` action
+ * is (or a lone action). All other actions go in the menu next to it.
+ */
 export enum ActionButtonType {
   PRIMARY = 'primary',
   SECONDARY = 'secondary',

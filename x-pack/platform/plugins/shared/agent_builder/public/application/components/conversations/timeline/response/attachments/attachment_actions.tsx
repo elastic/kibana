@@ -52,6 +52,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
 
   const mainButton =
     buttons.find(({ type }) => type === ActionButtonType.PRIMARY) ??
+    buttons.find(({ type }) => type === ActionButtonType.SECONDARY) ??
     (buttons.length === 1 ? buttons[0] : undefined);
   const menuButtons = buttons.filter((button) => button !== mainButton);
 
@@ -104,7 +105,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
           <EuiToolTip content={MORE_ACTIONS_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
               color="text"
-              size="s"
+              size="xs"
               iconType="ellipsis"
               aria-label={MORE_ACTIONS_LABEL}
               onClick={togglePopover}

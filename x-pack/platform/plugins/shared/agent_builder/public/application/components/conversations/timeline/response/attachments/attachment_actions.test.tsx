@@ -67,17 +67,32 @@ describe('AttachmentActions', () => {
     expect(save.handler).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a menu-only button when there is no primary action and several actions', async () => {
-    const copy = createButton({ label: 'Copy' });
-    const remove = createButton({ label: 'Delete', type: ActionButtonType.OVERFLOW });
-    render(<AttachmentActions buttons={[copy, remove]} />);
+  it('uses the first secondary action as the main button when there is no primary action', async () => {
+    const preview = createButton({ label: 'Preview' });
+    const openInEditor = createButton({ label: 'Open in editor' });
+    render(<AttachmentActions buttons={[preview, openInEditor]} />);
 
-    expect(screen.queryByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    expect(preview.handler).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Open in editor')).not.toBeInTheDocument();
 
     openMenu();
-    fireEvent.click(await screen.findByText('Copy'));
+    fireEvent.click(await screen.findByText('Open in editor'));
 
-    expect(copy.handler).toHaveBeenCalledTimes(1);
+    expect(openInEditor.handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders a menu-only button when all actions are overflow actions', async () => {
+    const remove = createButton({ label: 'Delete', type: ActionButtonType.OVERFLOW });
+    const archive = createButton({ label: 'Archive', type: ActionButtonType.OVERFLOW });
+    render(<AttachmentActions buttons={[remove, archive]} />);
+
+    expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+
+    openMenu();
+    fireEvent.click(await screen.findByText('Archive'));
+
+    expect(archive.handler).toHaveBeenCalledTimes(1);
   });
 
   it('shows a lone non-primary action as a regular button', () => {
@@ -119,6 +134,36 @@ describe('AttachmentActions', () => {
     expect(main).toHaveAttribute('aria-disabled', 'true');
     expect(main).not.toBeDisabled();
     expect(save.handler).not.toHaveBeenCalled();
+  });
+
+  it('keeps the menu usable when the main button is disabled', async () => {
+    const save = createButton({
+      label: 'Save',
+      type: ActionButtonType.PRIMARY,
+      disabled: true,
+      disabledReason: 'Missing privileges',
+    });
+    const copy = createButton({ label: 'Copy' });
+    render(<AttachmentActions buttons={[save, copy]} />);
+
+    openMenu();
+    fireEvent.click(await screen.findByText('Copy'));
+
+    expect(copy.handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the menu usable when the main button is disabled without a reason', async () => {
+    const save = createButton({ label: 'Save', type: ActionButtonType.PRIMARY, disabled: true });
+    const copy = createButton({ label: 'Copy' });
+    render(<AttachmentActions buttons={[save, copy]} />);
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    expect(screen.getByTestId('agentBuilderAttachmentMoreActions')).toBeEnabled();
+
+    openMenu();
+    fireEvent.click(await screen.findByText('Copy'));
+
+    expect(copy.handler).toHaveBeenCalledTimes(1);
   });
 
   it('renders the main button as a link when it has an href', () => {

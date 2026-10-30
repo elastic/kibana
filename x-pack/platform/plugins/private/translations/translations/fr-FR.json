@@ -11396,7 +11396,6 @@
     "xpack.agentBuilder.attachmentActions.moreActionsPopover": "Actions de liaison",
     "xpack.agentBuilder.attachmentGroupPill.removeAriaLabel": "Supprimer le groupe de pièces jointes",
     "xpack.agentBuilder.attachmentHeader.close": "Fermer",
-    "xpack.agentBuilder.attachmentHeader.closePreview": "Fermer l'aperçu",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "Aperçu en lecture seule",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "Supprimer la pièce jointe",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "Pièces jointes",

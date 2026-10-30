@@ -14,12 +14,11 @@ import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-br
 import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { useAgentId } from '../../../../../hooks/use_conversation';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
-import { AttachmentCard } from './attachment_card';
+import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
@@ -64,7 +63,6 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
 }) => {
   const {
     openCanvas: openCanvasContext,
-    closeCanvas,
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
@@ -160,14 +158,13 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
   return (
     <AttachmentCard color={header?.color} maxWidth={maxWidth}>
       <AttachmentHeader
-        icon={header?.icon}
+        icon={header?.icon ?? uiDefinition?.getIcon?.()}
         title={title}
         subtitle={header?.subtitle}
         badges={header?.badges}
         color={header?.color}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
-        onClosePreview={closeCanvas}
         isHeaderOnly={isHeaderOnly}
       />
       {!isHeaderOnly && (
@@ -175,18 +172,18 @@ const InlineAttachmentWithActionsComponent: React.FC<InlineAttachmentWithActions
           grow={false}
           paddingSize="none"
           css={css`
-            border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+            border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
             overflow: hidden;
 
             /* Nested panels default to EUI medium radius (6px); match the card shell (12px). */
             > .euiPanel {
-              border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
+              border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
             }
 
             /* No header rendered (no action buttons): the content is the top of the card too. */
             &:first-child,
             &:first-child > .euiPanel {
-              border-radius: ${AB_PANEL_RADIUS}px;
+              border-radius: ${ATTACHMENT_INNER_RADIUS}px;
             }
           `}
         >
