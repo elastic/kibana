@@ -25,7 +25,7 @@ import {
 } from '../../telemetry';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
-import { isReportVisibleToSpace } from '../../services/watches/hunt/common/write_hunt_evidence';
+import { isReportVisibleToSpace } from '../../services/watches/hunt/common/report_visibility';
 
 export { FIND_OR_CREATE_INVESTIGATION_URL };
 
