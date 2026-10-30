@@ -9,7 +9,7 @@
 
 import { OtelLog } from '../otel_logs';
 
-/** An EDOT Browser log record; the SDK observes it at the time it is emitted. */
+/** A log record the SDK observes when it is emitted, as EDOT Browser and EDOT React Native do. */
 export class EdotBrowserLog extends OtelLog {
   timestamp(time: number) {
     super.timestamp(time);
