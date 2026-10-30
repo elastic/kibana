@@ -76,6 +76,7 @@ export type {
   ProposalCategory,
   ProposalConfidence,
   ProposalDecision,
+  ProposalDecisionMode,
   ProposalFilters,
   ProposalImpact,
   ProposalOrigin,
