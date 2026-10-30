@@ -8,6 +8,7 @@
 import type { CasesFeaturesAllRequired } from '../ui/types';
 
 export * from './owners';
+export * from './statuses';
 export * from './files';
 export * from './application';
 export * from './observables';
