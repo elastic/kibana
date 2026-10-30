@@ -161,6 +161,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common_legacy_cases.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_legacy_cases.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_top_level_app.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_attachments_legacy.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_attachments_no_attacks.ts

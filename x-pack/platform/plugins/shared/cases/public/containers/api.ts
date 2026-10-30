@@ -68,6 +68,7 @@ import {
 import {
   CASE_REPORTERS_URL,
   CASE_TAGS_URL,
+  INTERNAL_AVAILABLE_OWNERS_URL,
   CASES_URL,
   COMMENT_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
@@ -162,6 +163,18 @@ export const getTags = async ({
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
+};
+
+export const getAvailableOwners = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<string[]> => {
+  const response = await KibanaServices.get().http.fetch<{ owners: string[] }>(
+    INTERNAL_AVAILABLE_OWNERS_URL,
+    { method: 'GET', signal }
+  );
+  return response?.owners ?? [];
 };
 
 export const getCategories = async ({

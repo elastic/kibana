@@ -102,9 +102,16 @@ export class ObservabilityPlugin
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
     if (plugins.cases?.config.enabled) {
-      plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
-      plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
-      plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+      const { withCasesV4Replacement } = plugins.cases;
+      plugins.features.registerKibanaFeature(
+        withCasesV4Replacement(getCasesFeature(casesCapabilities, casesApiTags))
+      );
+      plugins.features.registerKibanaFeature(
+        withCasesV4Replacement(getCasesFeatureV2(casesCapabilities, casesApiTags))
+      );
+      plugins.features.registerKibanaFeature(
+        withCasesV4Replacement(getCasesFeatureV3(casesCapabilities, casesApiTags))
+      );
       plugins.cases.attachmentFramework.registerAttachment(observabilityAlertAttachmentType);
     }
 

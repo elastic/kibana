@@ -74,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         generalCases: 0,
         generalCasesV2: 0,
         generalCasesV3: 0,
+        casesV4: 0,
         manageReporting: 0,
         maps: 2,
         maps_v2: 2,

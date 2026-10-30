@@ -9,6 +9,7 @@ import { ALERTS_UI_READ, RULES_UI_READ } from '@kbn/security-solution-features/c
 import {
   SECURITY_FEATURE_ID,
   CASES_FEATURE_ID,
+  CASES_FEATURE_ID_V4,
   RULES_FEATURE_ID,
   ALERTS_FEATURE_ID,
 } from './constants';
@@ -36,7 +37,9 @@ export function hasAccessToAlerts(capabilities: Capabilities): boolean {
 }
 
 export function hasAccessToCases(capabilities: Capabilities): boolean {
-  return Boolean(capabilities[CASES_FEATURE_ID]?.read_cases);
+  // With the top-level Cases app on, Security's Cases feature is deprecated in favor of casesV4
+  // and only casesV4 capabilities reach the browser.
+  return Boolean((capabilities[CASES_FEATURE_ID_V4] ?? capabilities[CASES_FEATURE_ID])?.read_cases);
 }
 
 export function isSecuritySolutionAccessible(capabilities: Capabilities): boolean {

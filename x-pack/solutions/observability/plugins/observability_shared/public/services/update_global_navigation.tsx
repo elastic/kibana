@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
+import { FEATURE_ID_V4 } from '@kbn/cases-plugin/common';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
@@ -38,7 +39,8 @@ export function hasObservabilityCapabilities(capabilities: Capabilities): boolea
 }
 
 function hasAccessToCases(capabilities: Capabilities): boolean {
-  return Boolean(capabilities[casesFeatureId]?.read_cases);
+  // With the top-level Cases app on, only casesV4 capabilities reach the browser.
+  return Boolean((capabilities[FEATURE_ID_V4] ?? capabilities[casesFeatureId])?.read_cases);
 }
 
 export function updateGlobalNavigation({

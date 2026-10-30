@@ -115,6 +115,11 @@ export class SpacesClient implements ISpacesClient {
    */
   private readonly deprecatedFeaturesReferences: Map<string, Set<string>>;
 
+  /**
+   * For each replacement feature, the deprecated features that map to it, grouped by category.
+   */
+  private readonly deprecatedFeaturesSources: Map<string, Map<string | undefined, Set<string>>>;
+
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly config: ConfigType,
@@ -125,9 +130,9 @@ export class SpacesClient implements ISpacesClient {
     private readonly npreClient: INpreClient | undefined
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
-    this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
-      features.getKibanaFeatures()
-    );
+    const kibanaFeatures = features.getKibanaFeatures();
+    this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(kibanaFeatures);
+    this.deprecatedFeaturesSources = this.collectDeprecatedFeaturesSources(kibanaFeatures);
   }
 
   public async getAll(options: v1.GetAllSpacesOptions = {}): Promise<v1.GetSpaceResult[]> {
@@ -413,9 +418,7 @@ export class SpacesClient implements ISpacesClient {
       imageUrl: savedObject.attributes.imageUrl,
       disabledFeatures: withSpaceSolutionDisabledFeatures(
         this.features.getKibanaFeatures(),
-        savedObject.attributes.disabledFeatures?.flatMap((featureId: string) =>
-          Array.from(this.deprecatedFeaturesReferences.get(featureId) ?? [featureId])
-        ) ?? [],
+        this.replaceDeprecatedDisabledFeatures(savedObject.attributes.disabledFeatures ?? []),
         solution
       ),
       _reserved: savedObject.attributes._reserved,
@@ -434,6 +437,43 @@ export class SpacesClient implements ISpacesClient {
       ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
   };
+
+  /**
+   * Replaces deprecated features in a space's disabled list with the features that replace them.
+   * When several features from different categories are consolidated into one (for example each
+   * solution's Cases feature into a single Cases feature), the replacement is disabled only if every
+   * category disabled at least one of its deprecated features. Otherwise disabling one solution's
+   * feature would disable the consolidated feature for all of them.
+   */
+  private replaceDeprecatedDisabledFeatures(disabledFeatures: string[]) {
+    const disabled = new Set(disabledFeatures);
+    const replaced = disabledFeatures.flatMap((featureId) => {
+      const replacements = this.deprecatedFeaturesReferences.get(featureId);
+      if (!replacements) {
+        return [featureId];
+      }
+
+      return Array.from(replacements).filter((replacementId) =>
+        Array.from(this.deprecatedFeaturesSources.get(replacementId)?.values() ?? []).every(
+          (sources) => Array.from(sources).some((sourceId) => disabled.has(sourceId))
+        )
+      );
+    });
+    return Array.from(new Set(replaced));
+  }
+
+  private collectDeprecatedFeaturesSources(features: KibanaFeature[]) {
+    const sources = new Map<string, Map<string | undefined, Set<string>>>();
+    for (const [deprecatedId, replacementIds] of this.deprecatedFeaturesReferences) {
+      const category = features.find(({ id }) => id === deprecatedId)?.category?.id;
+      for (const replacementId of replacementIds) {
+        const byCategory = sources.get(replacementId) ?? new Map<string | undefined, Set<string>>();
+        byCategory.set(category, (byCategory.get(category) ?? new Set()).add(deprecatedId));
+        sources.set(replacementId, byCategory);
+      }
+    }
+    return sources;
+  }
 
   /**
    * Collects a map of all deprecated feature IDs and the feature IDs that replace them.

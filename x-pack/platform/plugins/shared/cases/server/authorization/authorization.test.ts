@@ -1535,4 +1535,68 @@ describe('authorization', () => {
       ).resolves.not.toThrow();
     });
   });
+  describe('getAvailableOwners', () => {
+    let securityStart: jest.Mocked<SecurityPluginStart>;
+    let featuresStart: jest.Mocked<FeaturesPluginStart>;
+
+    const createAuth = async (disabledFeatures: string[] = []) => {
+      const spacesStart = spacesMock.createStart();
+      (spacesStart.spacesService.getActiveSpace as jest.Mock).mockResolvedValue({
+        disabledFeatures,
+      });
+
+      return Authorization.create({
+        request,
+        securityAuth: securityStart.authz,
+        spaces: spacesStart,
+        features: featuresStart,
+        auditLogger: new AuthorizationAuditLogger(mockLogger),
+        logger: loggingSystemMock.createLogger(),
+      });
+    };
+
+    beforeEach(() => {
+      securityStart = securityMock.createStart();
+      securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+      (
+        securityStart.authz.actions.cases.get as jest.MockedFunction<
+          typeof securityStart.authz.actions.cases.get
+        >
+      ).mockImplementation((owner, opName) => `${owner}:${opName}`);
+      securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        jest.fn(async () => ({
+          hasAllRequested: false,
+          username: 'user',
+          privileges: {
+            kibana: [
+              { authorized: true, privilege: 'securitySolution:getCase' },
+              { authorized: true, privilege: 'cases:getCase' },
+              { authorized: false, privilege: 'observability:getCase' },
+            ],
+          },
+        }))
+      );
+
+      featuresStart = featuresPluginMock.createStart();
+      featuresStart.getKibanaFeatures.mockReturnValue([
+        { id: 'casesV4', cases: ['cases', 'observability', 'securitySolution'] },
+        { id: 'securitySolutionCasesV3', cases: ['securitySolution'] },
+        { id: 'observabilityCasesV3', cases: ['observability'] },
+      ] as unknown as KibanaFeature[]);
+    });
+
+    it('returns only the authorized owners whose solution registered a Cases feature', async () => {
+      const auth = await createAuth();
+
+      await expect(auth.getAvailableOwners(Operations.getCase)).resolves.toEqual([
+        'securitySolution',
+      ]);
+    });
+
+    it('returns no owners when the space disables casesV4', async () => {
+      const auth = await createAuth(['casesV4']);
+
+      await expect(auth.getAvailableOwners(Operations.getCase)).resolves.toEqual([]);
+    });
+  });
 });

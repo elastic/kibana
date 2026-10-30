@@ -16,6 +16,8 @@ import { getOwnersFilter, groupByAuthorization } from './utils';
 import type { OperationDetails } from '.';
 import { AuthorizationAuditLogger } from '.';
 import { createCaseError } from '../common/error';
+import { FEATURE_ID_V4 } from '../../common/constants';
+import { LEGACY_CASES_FEATURE_IDS } from '../features/v4_replacement';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -25,22 +27,26 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseOwners: Set<string>;
+  private readonly registeredCaseOwners: Set<string>;
   private readonly auditLogger: AuthorizationAuditLogger;
 
   private constructor({
     request,
     securityAuth,
     caseOwners,
+    registeredCaseOwners,
     auditLogger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     caseOwners: Set<string>;
+    registeredCaseOwners: Set<string>;
     auditLogger: AuthorizationAuditLogger;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseOwners = caseOwners;
+    this.registeredCaseOwners = registeredCaseOwners;
     this.auditLogger = auditLogger;
   }
 
@@ -68,16 +74,29 @@ export class Authorization {
 
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
+    let registeredCaseOwners: Set<string>;
 
     try {
       const maybeSpace = await getSpace();
       const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
+      // A space's disabled list names `casesV4` in place of the legacy Cases features it
+      // replaces, so disabling it must also disable them.
+      if (disabledFeatures.has(FEATURE_ID_V4)) {
+        LEGACY_CASES_FEATURE_IDS.forEach((id) => disabledFeatures.add(id));
+      }
+      const kibanaFeatures = features.getKibanaFeatures();
 
       caseOwners = new Set(
-        features
-          .getKibanaFeatures()
+        kibanaFeatures
           // get all the features' cases owners that aren't disabled
           .filter(({ id }) => !disabledFeatures.has(id))
+          .flatMap((feature) => feature.cases ?? [])
+      );
+      // `casesV4` lists every owner whether or not its solution runs in this deployment, so the
+      // owners that exist are the ones the solutions' own Cases features list.
+      registeredCaseOwners = new Set(
+        kibanaFeatures
+          .filter(({ id }) => id !== FEATURE_ID_V4)
           .flatMap((feature) => feature.cases ?? [])
       );
     } catch (error) {
@@ -88,7 +107,13 @@ export class Authorization {
       });
     }
 
-    return new Authorization({ request, securityAuth, caseOwners, auditLogger });
+    return new Authorization({
+      request,
+      securityAuth,
+      caseOwners,
+      registeredCaseOwners,
+      auditLogger,
+    });
   }
 
   private shouldCheckAuthorization(): boolean {
@@ -198,6 +223,14 @@ export class Authorization {
       this.auditLogger.log({ error, operation });
       throw error;
     }
+  }
+
+  /**
+   * Returns the owners that exist in this deployment and that the user is authorized for.
+   */
+  public async getAvailableOwners(operation: OperationDetails): Promise<string[]> {
+    const { authorizedOwners } = await this.getAuthorizedOwners([operation]);
+    return authorizedOwners.filter((owner) => this.registeredCaseOwners.has(owner));
   }
 
   private async _ensureAuthorized(owners: string[], operations: OperationDetails[]) {

@@ -52,6 +52,7 @@ import {
   getReporters,
   getTags,
   getCategories,
+  getAvailableOwners,
 } from './get';
 import type { PushParams } from './push';
 import { push } from './push';
@@ -141,6 +142,10 @@ export interface CasesSubClient {
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
   /**
+   * Retrieves the owners that exist in this deployment and whose cases the user can read.
+   */
+  getAvailableOwners(): Promise<string[]>;
+  /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
   getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
@@ -205,6 +210,7 @@ const usageCounterByMethod = {
   getTags: null,
   getCategories: null,
   getReporters: null,
+  getAvailableOwners: null,
   getCasesByAlertID: null,
   getCasesByAttachmentIDs: null,
   replaceCustomField: 'replace_custom_field',
@@ -256,6 +262,7 @@ export const createCasesSubClient = (
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
+    getAvailableOwners: () => getAvailableOwners(clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
     getCasesByAttachmentIDs: (params: CasesByAttachmentIDsRequest) =>
       getCasesByAttachmentIDs(params, clientArgs),

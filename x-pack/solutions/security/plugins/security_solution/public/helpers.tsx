@@ -21,7 +21,6 @@ import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
   APP_UI_ID,
-  CASES_FEATURE_ID,
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
@@ -44,7 +43,11 @@ import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
 import { AllRulesTabs } from './detection_engine/rule_management_ui/components/rules_table/constants';
-import { hasAccessToAttackDiscovery, hasAccessToSecuritySolution } from './helpers_access';
+import {
+  hasAccessToAttackDiscovery,
+  hasAccessToCases,
+  hasAccessToSecuritySolution,
+} from './helpers_access';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -298,7 +301,7 @@ export const getSubPluginRoutesByCapabilities = (
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
   if (CASES_SUB_PLUGIN_KEY === pluginKey) {
-    return capabilities[CASES_FEATURE_ID].read_cases === true;
+    return hasAccessToCases(capabilities);
   }
   if (pluginKey === 'attackDiscovery') {
     return hasAccessToAttackDiscovery(capabilities);

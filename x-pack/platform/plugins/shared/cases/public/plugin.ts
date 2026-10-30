@@ -213,7 +213,10 @@ export class CasesUiPlugin
         useIsAddToCaseOpen,
       },
       helpers: {
-        canUseCases: canUseCases(core.application.capabilities),
+        canUseCases: canUseCases(
+          core.application.capabilities,
+          config.topLevelApp?.enabled === true
+        ),
         getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,

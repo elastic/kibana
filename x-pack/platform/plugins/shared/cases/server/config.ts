@@ -179,6 +179,13 @@ export const ConfigSchema = schema.object({
   // `false` restores the per-solution Cases experience.
   topLevelApp: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
+    // `casesV4` sub-feature privileges a product tier does not include, e.g. `cases_connectors`
+    // in Security essentials. Lives here rather than in `xpack.features.overrides`, which fails
+    // at startup when the feature is not registered (the flag above is off).
+    disabledSubFeaturePrivileges: schema.arrayOf(schema.string({ maxLength: 100 }), {
+      defaultValue: [],
+      maxSize: 20,
+    }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Kill switch for per-space custom case statuses. `false` rejects `status_key` writes and

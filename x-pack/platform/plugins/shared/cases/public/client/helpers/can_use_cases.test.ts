@@ -17,6 +17,7 @@ import {
   writeCasesPermissions,
 } from '../../common/mock';
 import { canUseCases } from './can_use_cases';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 type CasesCapabilities = Pick<
   ApplicationStart['capabilities'],
@@ -123,4 +124,21 @@ describe('canUseCases', () => {
       expect(permissions).toStrictEqual(readCasesPermissions());
     }
   );
+});
+
+describe('canUseCases with the top-level Cases app', () => {
+  it('returns the casesV4 permissions whatever the owners', () => {
+    expect(
+      canUseCases(
+        { ...hasNone, casesV4: allCasesCapabilities() },
+        true
+      )([SECURITY_SOLUTION_OWNER])
+    ).toEqual(allCasesPermissions());
+  });
+
+  it('ignores the legacy per-solution capabilities', () => {
+    expect(canUseCases({ ...hasAll, casesV4: noCasesCapabilities() }, true)()).toEqual(
+      noCasesPermissions()
+    );
+  });
 });

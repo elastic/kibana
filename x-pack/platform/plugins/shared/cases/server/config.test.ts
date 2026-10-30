@@ -147,6 +147,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "topLevelApp": Object {
+            "disabledSubFeaturePrivileges": Array [],
             "enabled": true,
           },
         }

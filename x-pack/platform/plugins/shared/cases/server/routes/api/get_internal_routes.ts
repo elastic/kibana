@@ -18,6 +18,7 @@ import type { CaseRoute } from './types';
 import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
 import { bulkDeleteAttachmentsRoute } from './internal/bulk_delete_attachments';
 import { getCaseUsersRoute } from './internal/get_case_users';
+import { getAvailableOwnersRoute } from './internal/get_available_owners';
 import { bulkDeleteFileAttachments } from './internal/bulk_delete_file_attachments';
 import { getCategoriesRoute } from './cases/categories/get_categories';
 import { getCaseMetricRoute } from './internal/get_case_metrics';
@@ -54,6 +55,7 @@ export const getInternalRoutes = (
     bulkGetAttachmentsRoute,
     bulkDeleteAttachmentsRoute,
     getCaseUsersRoute,
+    getAvailableOwnersRoute,
     bulkDeleteFileAttachments,
     getCategoriesRoute,
     getCaseMetricRoute,

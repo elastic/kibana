@@ -16,6 +16,7 @@ import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
   FEATURE_ID_V3,
+  FEATURE_ID_V4,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
@@ -204,7 +205,8 @@ interface UseApplicationCapabilities {
 
 export const useApplicationCapabilities = (): UseApplicationCapabilities => {
   const capabilities = useKibana().services?.application?.capabilities;
-  const casesCapabilities = capabilities[FEATURE_ID_V3];
+  const casesCapabilities =
+    capabilities[KibanaServices.getConfig()?.topLevelApp?.enabled ? FEATURE_ID_V4 : FEATURE_ID_V3];
   const permissions = getUICapabilities(casesCapabilities);
 
   return useMemo(

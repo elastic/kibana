@@ -53,6 +53,7 @@ import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { OWNERS } from '../../../common/constants';
 import { getOwnersFilter } from '../../authorization/utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -647,5 +648,19 @@ export async function getCategories(
     return decodeOrThrowZod(GetCategoriesResponseSchema)(categories);
   } catch (error) {
     throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
+  }
+}
+
+/**
+ * Retrieves the owners (solutions) that exist in this deployment and whose cases the user can read.
+ */
+export async function getAvailableOwners(clientArgs: CasesClientArgs): Promise<string[]> {
+  const { logger, authorization } = clientArgs;
+
+  try {
+    const owners = await authorization.getAvailableOwners(Operations.getCase);
+    return OWNERS.filter((owner) => owners.includes(owner));
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get available owners: ${error}`, error, logger });
   }
 }

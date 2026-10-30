@@ -114,7 +114,9 @@ export class ProductFeaturesService {
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
   ) {
-    this.productFeaturesRegistry.init(plugins.features);
+    // Cases moves Security's Cases feature onto its single `casesV4` feature (when enabled), after
+    // the tier configuration below has been merged in.
+    this.productFeaturesRegistry.init(plugins.features, plugins.cases?.withCasesV4Replacement);
     registerApiAccessControl(this, core.http);
   }
 

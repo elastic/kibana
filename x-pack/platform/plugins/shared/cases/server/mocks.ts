@@ -823,6 +823,7 @@ export const mockCasesContract = (): CasesServerStart => ({
     },
     topLevelApp: {
       enabled: true,
+      disabledSubFeaturePrivileges: [],
     },
     customStatuses: {
       enabled: true,

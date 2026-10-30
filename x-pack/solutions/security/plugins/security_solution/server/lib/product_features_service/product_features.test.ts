@@ -186,6 +186,22 @@ describe('ProductFeatures', () => {
       });
     });
 
+    it('should register the features as transformed by the init transform', () => {
+      const productFeatures = new ProductFeatures(logger);
+      const transformFeature = jest.fn((feature) => ({ ...feature, deprecated: { notice: 'x' } }));
+
+      productFeatures.create(featureGroup, [testFeatureParams]);
+      productFeatures.init(featuresSetup, transformFeature);
+      productFeatures.register([], {});
+
+      expect(transformFeature).toHaveBeenCalledWith({ ...baseKibanaFeature, subFeatures: [] });
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
+        ...baseKibanaFeature,
+        subFeatures: [],
+        deprecated: { notice: 'x' },
+      });
+    });
+
     it('should register enabled kibana features', () => {
       const productFeatures = new ProductFeatures(logger);
 
