@@ -62,6 +62,13 @@ describe('migrateLegacyAiIndices', () => {
   it('copies entries and removes the legacy index', async () => {
     await migrate();
 
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: legacyAiIndicesIndexName,
+        size: 10_000,
+        allow_partial_search_results: false,
+      })
+    );
     expect(bulk).toHaveBeenCalledWith({
       operations: [
         { create: { _id: 'default:logs', document: { id: 'logs', space: 'default' } } },

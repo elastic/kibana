@@ -35,6 +35,7 @@ export const migrateLegacyAiIndices = async ({
     size: MAX_MIGRATED_AI_INDICES,
     track_total_hits: true,
     ignore_unavailable: true,
+    allow_partial_search_results: false,
     query: { match_all: {} },
   });
   const total =
