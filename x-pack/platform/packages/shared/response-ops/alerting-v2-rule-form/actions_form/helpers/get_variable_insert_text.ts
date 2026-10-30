@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import { parseDocument, visit } from 'yaml';
+import { parseDocument, visit, type Scalar } from 'yaml';
 
-// True when the text between `start` and `end` parses as part of a YAML string scalar.
-const isWithinStringScalar = (source: string, start: number, end: number): boolean => {
-  let isWithin = false;
+// Returns the YAML scalar containing `offset`, if any.
+const getScalarAtOffset = (source: string, offset: number): Scalar | undefined => {
+  let scalarAtOffset: Scalar | undefined;
   visit(parseDocument(source), {
-    Scalar(_, { value, range }) {
-      if (typeof value === 'string' && range && range[0] <= start && end <= range[1]) {
-        isWithin = true;
-        return visit.BREAK;
+    Scalar(_, scalar) {
+      if (scalar.range && scalar.range[0] <= offset && offset <= scalar.range[2]) {
+        scalarAtOffset = scalar;
       }
     },
   });
-  return isWithin;
+  return scalarAtOffset;
 };
 
 /**
  * Returns the `{{ name }}` template to insert between `before` and `after` in a params YAML,
- * quoted only where a bare template would parse as a YAML flow mapping instead of a string.
+ * quoted when it starts an unquoted value so YAML does not parse it as a flow mapping.
  */
 export const getVariableInsertText = (name: string, before: string, after: string): string => {
   const template = `{{ ${name} }}`;
-  const fits = (text: string): boolean =>
-    isWithinStringScalar(`${before}${text}${after}`, before.length, before.length + text.length);
+  const scalar = getScalarAtOffset(`${before}${after}`, before.length);
+  const scalarType = scalar?.type ?? null;
+  const value = typeof scalar?.value === 'string' ? scalar.value : '';
 
-  if (fits(template)) {
-    return template;
-  }
-  const quotedTemplate = `"${template}"`;
-  return fits(quotedTemplate) ? quotedTemplate : template;
+  // Mirrors the `shouldBeQuoted` rule of the workflows YAML editor's variable autocomplete
+  // (workflows_management `get_variable_suggestions.ts`). ToDo: replace with a shared helper
+  // once workflows exposes one, so both editors quote inserted variables the same way.
+  const shouldBeQuoted =
+    (scalarType === null || scalarType === 'PLAIN') &&
+    (value === '' || value.startsWith('{{') || value.startsWith('@'));
+
+  return shouldBeQuoted ? `"${template}"` : template;
 };
