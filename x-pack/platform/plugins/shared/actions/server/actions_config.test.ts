@@ -884,18 +884,24 @@ describe('validateEmailAddresses()', () => {
       expect(acu.validateEmailAddresses(nonTrialEmails)).toBe(undefined);
     });
 
-    test('do not use recipient_allowlist in trial even when recipient_allowlist_in_trial is not set', () => {
+    test('uses recipient_allowlist in trial when recipient_allowlist_in_trial is not set', () => {
       const acu = getActionsConfigurationUtilities(
         { ...defaultActionsConfig, email: { recipient_allowlist: ['dev.*@company.co'] } },
         { isTrial: () => true }
       );
 
-      expect(acu.validateEmailAddresses(nonTrialEmails)).toMatchInlineSnapshot(
-        `"not allowed emails: dev.team@company.co"`
-      );
+      expect(acu.validateEmailAddresses(nonTrialEmails)).toBe(undefined);
       expect(acu.validateEmailAddresses(trialEmails)).toMatchInlineSnapshot(
         `"not allowed emails: trial-user@company.co"`
       );
+    });
+
+    test('does not restrict recipients in trial when neither allowlist is set', () => {
+      const acu = getActionsConfigurationUtilities(defaultActionsConfig, {
+        isTrial: () => true,
+      });
+
+      expect(acu.validateEmailAddresses([...trialEmails, ...nonTrialEmails])).toBe(undefined);
     });
 
     test('re-evaluates trial status on each validation', () => {

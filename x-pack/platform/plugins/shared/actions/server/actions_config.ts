@@ -303,11 +303,11 @@ function getCustomHostSettings(
 }
 
 function getRecipientAllowlist(config: ActionsConfig, isTrial: () => boolean): string[] | null {
-  if (isTrial()) {
-    return config.email?.recipient_allowlist_in_trial || [];
-  } else {
-    return config.email?.recipient_allowlist ?? null;
+  const trialAllowlist = config.email?.recipient_allowlist_in_trial;
+  if (trialAllowlist !== undefined && isTrial()) {
+    return trialAllowlist;
   }
+  return config.email?.recipient_allowlist ?? null;
 }
 
 function validateEmails(
@@ -326,7 +326,7 @@ function validateEmails(
 }
 
 export interface ActionsConfigurationUtilitiesOptions {
-  /** Evaluated on each email validation; when true, `email.recipient_allowlist_in_trial` applies. */
+  /** Evaluated on each email validation; when true, `email.recipient_allowlist_in_trial` applies if set. */
   isTrial?: () => boolean;
 }
 
