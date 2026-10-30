@@ -26,6 +26,7 @@ import {
   WORKFLOW_YAML_ATTACHMENT_TYPE,
 } from '../../../../common/agent_builder_attachments';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
+import { InsufficientPrivilegesError } from '../../../errors';
 
 export interface SaveAutomationParams {
   workflowAttachmentId?: string;
@@ -293,7 +294,7 @@ const assertWorkflowReadAccess = async ({
   const security = await getSecurityStart();
   const canRead = await hasWorkflowReadPrivilege({ security, request, spaceId });
   if (!canRead) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       `Unauthorized to reference workflow '${workflowId}'. The workflowsManagement read privilege is required.`
     );
   }
@@ -316,7 +317,7 @@ const assertWorkflowCreateAccess = async ({
   const security = await getSecurityStart();
   const canCreate = await hasWorkflowCreatePrivilege({ security, request, spaceId });
   if (!canCreate) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       'Unauthorized to create a workflow. The workflowsManagement create privilege is required.'
     );
   }
@@ -336,7 +337,7 @@ const assertWorkflowUpdateAccess = async ({
   const security = await getSecurityStart();
   const canUpdate = await hasWorkflowUpdatePrivilege({ security, request, spaceId });
   if (!canUpdate) {
-    throw new Error(
+    throw new InsufficientPrivilegesError(
       `Unauthorized to update workflow '${workflowId}'. The workflowsManagement update privilege is required.`
     );
   }
@@ -391,7 +392,7 @@ const resolveWorkflowSource = (
  * reverts the workflow without anyone asking for that. None of this can fail a save that has
  * already persisted and attached, so every step only warns.
  */
-const syncAttachmentsToSavedWorkflow = async ({
+export const syncAttachmentsToSavedWorkflow = async ({
   source,
   workflowId,
   attachments,
@@ -704,7 +705,56 @@ export const saveAutomationHandler = async ({
   }
 
   const source = resolveWorkflowSource(params, attachments);
-  const { existingWorkflowId } = source;
+  const result = await saveWorkflowToAiIndex({
+    aiIndexId,
+    workflowYaml: source.yaml,
+    existingWorkflowId: source.existingWorkflowId,
+    request,
+    spaceId,
+    logger,
+    getAiIndexService,
+    getSecurityStart,
+    getWorkflowsManagement,
+  });
+
+  await syncAttachmentsToSavedWorkflow({
+    source,
+    workflowId: result.workflowId,
+    attachments,
+    logger,
+  });
+
+  return result;
+};
+
+/**
+ * Creates or overwrites a workflow and attaches it to an AI index, outside any conversation. A
+ * newly created workflow is deleted again when attaching it fails. Callers check Context Engine
+ * write access first.
+ */
+export const saveWorkflowToAiIndex = async ({
+  aiIndexId,
+  workflowYaml,
+  existingWorkflowId,
+  request,
+  spaceId,
+  logger,
+  getAiIndexService,
+  getSecurityStart,
+  getWorkflowsManagement,
+}: {
+  aiIndexId: string;
+  workflowYaml: string;
+  existingWorkflowId?: string;
+  request: KibanaRequest;
+  spaceId: string;
+  logger: Logger;
+  getAiIndexService: () => Promise<AiIndexService>;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  getWorkflowsManagement: () => WorkflowsManagementApi;
+}): Promise<SaveAutomationResult> => {
+  const workflowsManagement = getWorkflowsManagement();
+  const aiIndexService = await getAiIndexService();
   const isUpdate = existingWorkflowId !== undefined;
 
   // Fail-fast: reject before createWorkflow/updateWorkflow when the index cannot accept this automation.
@@ -715,7 +765,7 @@ export const saveAutomationHandler = async ({
   );
 
   const { workflowId, newlyCreated } = await persistWorkflow({
-    yaml: source.yaml,
+    yaml: workflowYaml,
     existingWorkflowId,
     workflowsManagement,
     spaceId,
@@ -723,16 +773,13 @@ export const saveAutomationHandler = async ({
     getSecurityStart,
   });
 
-  let result: SaveAutomationResult;
   try {
     const attachStatus = await aiIndexService.addAutomation(aiIndexId, spaceId, {
       type: 'workflow',
       value: workflowId,
     });
 
-    await syncAttachmentsToSavedWorkflow({ source, workflowId, attachments, logger });
-
-    result = {
+    return {
       aiIndexId,
       workflowId,
       status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
@@ -750,8 +797,6 @@ export const saveAutomationHandler = async ({
 
     throw error;
   }
-
-  return result;
 };
 
 export const getSaveAutomationErrorMessage = (error: unknown): string => {
