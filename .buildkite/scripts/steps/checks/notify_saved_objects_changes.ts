@@ -31,12 +31,8 @@ export interface SavedObjectsCheckFinding {
   /** Plain-text supplement (e.g. fixture diff) rendered separately in PR comments. */
   details?: string;
   fixHint?: string;
-  /**
-   * Path fragment appended to the Saved Objects docs base URL.
-   * MUST start with `#` (anchor on the same page) or `/` (relative path).
-   * A value without a leading `#` or `/` will produce a malformed URL.
-   */
-  docsAnchor?: string;
+  /** Path appended to the Saved Objects docs base URL, from `RULE_DOCS_ANCHORS`. */
+  docsAnchor: string;
   /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
   baselineUrl?: string;
   /** GCS URL of the serverless baseline snapshot that triggered this finding. */
@@ -80,9 +76,9 @@ export interface SavedObjectsCheckReport {
 }
 
 const COMMENT_CONTEXT = 'saved-objects-check';
-const DOCS_BASE_URL = 'https://www.elastic.co/docs/extend/kibana/saved-objects';
+const DOCS_BASE_URL = 'https://www.elastic.co/docs/extend/kibana/key-concepts/saved-objects';
 const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/troubleshooting`;
-const MODEL_VERSIONS_URL = `${DOCS_BASE_URL}#defining-model-versions`;
+const MODEL_VERSIONS_URL = `${DOCS_BASE_URL}/update`;
 const FIXTURE_MISMATCH_RULE_ID = 'documents/fixture-mismatch';
 
 const stripAnsi = (text: string): string => text.replace(/\u001B\[[0-9;]*m/g, '');
@@ -124,7 +120,7 @@ export const formatFindingForComment = (finding: SavedObjectsCheckFinding): stri
   ]
     .filter(Boolean)
     .join(' ');
-  const links = `([docs](${findingDocsLink(finding)}))${
+  const links = `([docs](${DOCS_BASE_URL}${finding.docsAnchor}))${
     baselineLinks ? ` (${baselineLinks})` : ''
   }`;
   const headline = `- **[${finding.ruleId}]** ${getFindingSummary(finding)}${fix} ${links}`;
@@ -197,11 +193,6 @@ function buildkiteBuildLink(): string {
 function listSection(title: string, items: string[]): string {
   if (items.length === 0) return '';
   return `- **${title}:** ${items.map((t) => `\`${t}\``).join(', ')}`;
-}
-
-function findingDocsLink(finding: SavedObjectsCheckFinding): string {
-  const anchor = finding.docsAnchor ?? '#defining-model-versions';
-  return `${DOCS_BASE_URL}${anchor}`;
 }
 
 function groupFindingsByType(
