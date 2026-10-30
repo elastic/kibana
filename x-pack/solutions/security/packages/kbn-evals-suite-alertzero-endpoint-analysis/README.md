@@ -71,6 +71,11 @@ node scripts/eslint x-pack/solutions/security/packages/kbn-evals-suite-alertzero
 node scripts/evals start --profile local --suite alertzero-endpoint-analysis --judge gemini-3-1-pro --repetitions 1
 ```
 
+AlertZero routes 404 outside a Security solution space. The `evals_alertzero_endpoint_analysis`
+Scout config set creates the default space with the Security solution
+(`xpack.spaces.defaultSolution=security`); against a stack whose default space already exists, the
+suite switches it to Security for the run and restores the previous solution afterwards.
+
 The live run requires local ES/Kibana, AlertZero and context engine enabled,
 installed managed workflows, Agent Builder inference endpoint configuration,
 and trace collection readable by `traceEsClient`. Missing connectors or missing
