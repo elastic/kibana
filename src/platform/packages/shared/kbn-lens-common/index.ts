@@ -505,6 +505,7 @@ export {
 } from './datasources/time_scale_utils';
 export { createEsAggsIdMapEntry } from './esql/create_es_aggs_id_map_entry';
 export type { ColumnRoles, EsqlQueryResult } from './esql/generate_esql_query';
+export { convertQueryAnnotationsToEsql } from './esql/convert_annotations_to_esql';
 export {
   extractAggId,
   generateEsqlQuery,

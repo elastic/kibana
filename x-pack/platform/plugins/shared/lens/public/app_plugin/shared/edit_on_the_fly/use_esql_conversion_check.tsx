@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
+  convertQueryAnnotationsToEsql,
   generateEsqlQuery,
   getFailureTooltipText,
   isEsqlQuerySuccess,
@@ -36,7 +37,6 @@ import { operationDefinitionMap } from '../../../datasources/form_based/operatio
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 import { useLensSelector, selectPersistedDoc } from '../../../state_management';
-import { convertQueryAnnotationsToEsql } from './convert_annotations_to_esql';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 
 interface EsqlConversionSettings {

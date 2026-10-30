@@ -27,6 +27,7 @@
     "@kbn/presentation-publishing",
     "@kbn/coloring",
     "@kbn/esql-types",
+    "@kbn/esql-utils",
     "@kbn/inspector-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/interpreter",
