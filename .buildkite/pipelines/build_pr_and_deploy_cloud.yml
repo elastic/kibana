@@ -64,7 +64,7 @@ steps:
           preemptible: true
         timeout_in_minutes: 60
         key: build_cloud_image
-        # Shared with kibana-pull-request's ci:cloud-deploy steps so both pipelines never build or deploy the same PR at once
+        # Per-PR, so builds triggered by kibana-pull-request's ci:cloud-deploy label and by the checkbox never overlap
         concurrency: 1
         concurrency_group: 'kibana/cloud-image/pr-${GITHUB_PR_NUMBER}'
         retry:

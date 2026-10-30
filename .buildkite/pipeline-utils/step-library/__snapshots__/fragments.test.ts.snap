@@ -659,46 +659,23 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
   "steps": [
     {
       "agents": {
-        "machineType": "n2-standard-16",
-        "preemptible": true,
-      },
-      "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
-      "concurrency": 1,
-      "concurrency_group": "kibana/cloud-image/pr-\${GITHUB_PR_NUMBER}",
-      "key": "build_cloud_image",
-      "label": "Build Cloud Image",
-      "retry": {
-        "automatic": [
-          {
-            "exit_status": -1,
-            "limit": 3,
-          },
-        ],
-      },
-      "timeout_in_minutes": 60,
-    },
-    {
-      "agents": {
+        "image": "family/kibana-minimal-ubuntu-2604",
+        "imageProject": "elastic-images-prod",
         "machineType": "n2-standard-2",
-        "preemptible": true,
+        "provider": "gcp",
       },
-      "command": ".buildkite/scripts/steps/cloud/deploy.sh",
-      "concurrency": 1,
-      "concurrency_group": "kibana/cloud-deploy/pr-\${GITHUB_PR_NUMBER}",
-      "depends_on": [
-        "build_cloud_image",
-      ],
+      "command": ".buildkite/scripts/steps/trigger_from_pr.sh kibana-deploy-cloud-from-pr",
       "key": "deploy_cloud",
-      "label": "Deploy to Cloud",
+      "label": "Trigger Cloud Deployment",
       "retry": {
         "automatic": [
           {
             "exit_status": -1,
-            "limit": 3,
+            "limit": 1,
           },
         ],
       },
-      "timeout_in_minutes": 30,
+      "timeout_in_minutes": 10,
     },
   ],
 }
@@ -709,38 +686,19 @@ exports[`pull_request fragments pull_request/deploy_project 1`] = `
   "steps": [
     {
       "agents": {
-        "machineType": "n2-standard-16",
-        "preemptible": true,
+        "image": "family/kibana-minimal-ubuntu-2604",
+        "imageProject": "elastic-images-prod",
+        "machineType": "n2-standard-2",
+        "provider": "gcp",
       },
-      "command": ".buildkite/scripts/steps/artifacts/docker_image.sh",
-      "key": "build_project_image",
-      "label": "Build Project Image",
-      "retry": {
-        "automatic": [
-          {
-            "exit_status": -1,
-            "limit": 3,
-          },
-        ],
-      },
-      "timeout_in_minutes": 90,
-    },
-    {
-      "agents": {
-        "machineType": "n2-standard-4",
-        "preemptible": true,
-      },
-      "command": ".buildkite/scripts/steps/serverless/deploy.sh",
-      "depends_on": [
-        "build_project_image",
-      ],
+      "command": ".buildkite/scripts/steps/trigger_from_pr.sh kibana-deploy-project-from-pr",
       "key": "deploy_project",
-      "label": "Deploy Project",
+      "label": "Trigger Project Deployment",
       "retry": {
         "automatic": [
           {
             "exit_status": -1,
-            "limit": 3,
+            "limit": 1,
           },
         ],
       },
@@ -2347,7 +2305,7 @@ exports[`pull_request fragments pull_request/trigger_entity_store_performance 1`
         "machineType": "n2-standard-2",
         "provider": "gcp",
       },
-      "command": ".buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh",
+      "command": ".buildkite/scripts/steps/trigger_from_pr.sh kibana-entity-store-performance-from-pr",
       "key": "entity_store_performance",
       "label": "Entity Store Performance Tests",
       "retry": {
