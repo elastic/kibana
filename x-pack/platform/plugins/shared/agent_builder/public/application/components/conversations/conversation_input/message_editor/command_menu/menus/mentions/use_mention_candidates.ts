@@ -62,8 +62,13 @@ const byName = (first: UserMentionCandidate, second: UserMentionCandidate): numb
   first.name.localeCompare(second.name);
 
 /**
- * Who can be mentioned, in menu order: the agent, people in the chat, then (public chats only)
- * the rest of the space.
+ * Who can be mentioned, in menu order:
+ * 1. The chat's agent, when the typed text is empty or matches its name.
+ * 2. People in the chat, sorted by name:
+ *    - private chat: the owner and the people it is shared with
+ *    - public chat: the owner and everyone who sent a message
+ * 3. Public chat only: anyone else the space user search finds.
+ * The current user is never listed. A chat that is not shared lists nobody.
  */
 export const useMentionCandidates = (
   query: string
