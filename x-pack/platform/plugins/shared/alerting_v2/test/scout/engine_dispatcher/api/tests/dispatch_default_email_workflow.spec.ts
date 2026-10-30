@@ -10,13 +10,7 @@
  * layout when the dispatcher runs it. A rule breaches for two hosts, the dispatcher sends
  * both alerts in one group to a workflow built from the default email template, and the
  * spec reads the rendered message and the sent email back from the workflow execution.
- *
- * We exclude `@kbn/eslint/scout_require_api_client_in_api_test` because this spec does not
- * target an HTTP endpoint. It drives the alerting_v2 background tasks via source data and
- * observes the workflow executions.
  */
-
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { expect } from '@kbn/scout/api';
 import {
@@ -45,8 +39,8 @@ interface DispatchedAlert {
   alert_url: string;
 }
 
-// The `__json` email service returns the message instead of sending it, which is only
-// set up for local runs.
+// The email connector's `__json` service builds the email and returns it instead of sending
+// it. The spec only runs locally because this connector setup has not been checked on Cloud.
 apiTest.describe(
   'Dispatcher runs the default email workflow of a simple workflow',
   { tag: ['@local-stateful-classic'] },
