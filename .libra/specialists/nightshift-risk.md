@@ -9,6 +9,8 @@ apply_to:
   - "x-pack/solutions/observability/packages/kbn-nightshift-shared/**"
   - "x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/**"
   - "x-pack/solutions/observability/packages/kbn-investigation-output/**"
+  - "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-*/**"
+  - "x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/**"
   - "x-pack/platform/plugins/shared/sandbox/**"
   - "x-pack/platform/packages/shared/kbn-nightshift-ai/**"
   - "x-pack/platform/packages/shared/kbn-significant-events-schema/**"
