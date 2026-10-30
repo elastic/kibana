@@ -311,6 +311,10 @@ export async function callKibanaApi<T = unknown>(
   const maxResponseBytes =
     params.maxResponseBytes ?? deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
+  // The route handler receives a plain request and cannot renew the service account token it is
+  // handed, so it gets a freshly minted one rather than whatever is left of the current token.
+  await coreStart.security.serviceAccounts.refreshRequestCredential(fakeRequest);
+
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(fakeRequest);
   if (!authorizationHeader) {
     throw new Error('callKibanaApi: missing Authorization header on the workflow fake request');

@@ -134,6 +134,9 @@ export const buildSecurityApi = ({
         requireServiceAccounts().workloads.getBinding(pluginId, params),
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
+      // Without service accounts no request is bound to one, so there is nothing to refresh.
+      refreshRequestCredential: async (request) =>
+        getServiceAccounts()?.backend.refreshFakeRequest(request),
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

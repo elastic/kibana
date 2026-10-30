@@ -761,6 +761,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
+  async refreshFakeRequest(request: KibanaRequest): Promise<void> {
+    await this.fakeRequests.refresh(request);
+  }
+
   releaseFakeRequest(request: KibanaRequest): void {
     this.fakeRequests.release(request);
   }

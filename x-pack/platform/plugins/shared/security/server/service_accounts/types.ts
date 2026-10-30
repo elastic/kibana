@@ -68,9 +68,9 @@ export interface ServiceAccountsBackend {
   /**
    * Mints a fake `KibanaRequest` bound to the given service account, for use with `asScoped(...)`
    * facilities. The credential is transparently replaced after an Elasticsearch token-expiry
-   * failure, within the configured
+   * or Kibana self-client 401, within the configured
    * `xpack.security.serviceAccounts.requestLifetime`. Already-issued tokens keep their upstream
-   * expiration. Kibana self-client calls do not yet trigger renewal (#290877).
+   * expiration.
    * Performs no user authorization: callers must authorize their own users first.
    */
   createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest>;
@@ -93,6 +93,14 @@ export interface ServiceAccountsBackend {
    * Kibana's to re-mint.
    */
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
+
+  /**
+   * Mints a new credential for a fake request minted by this backend before it is handed to a
+   * route handler, which cannot renew it. A no-op for every other request. Keeps the current
+   * credential after a transient failure, and rejects when the request can no longer be refreshed
+   * (its binding is gone or its lease expired).
+   */
+  refreshFakeRequest(request: KibanaRequest): Promise<void>;
 
   /**
    * Drops a fake request from the refresh registry: transparent credential replacement is
