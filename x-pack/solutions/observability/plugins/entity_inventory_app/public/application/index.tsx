@@ -17,7 +17,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { ENTITY_INVENTORY_PAGES, ENTITY_INVENTORY_TITLE } from '../pages';
 import type { EntityInventoryAppStartDependencies, EntityInventoryEntityCategory } from '../types';
-import { EntityInventoryPageShell } from './components/entity_inventory_page_shell';
+import { EntityInventoryPageShell } from './components/page_shell';
 import { ENTITY_LIST_PLACEHOLDER } from './translations';
 
 const DEFAULT_PAGE_PATH = ENTITY_INVENTORY_PAGES[0].path;

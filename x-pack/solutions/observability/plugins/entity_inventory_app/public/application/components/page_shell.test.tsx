@@ -11,8 +11,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../types';
-import { useEntityInventorySearch } from '../context/entity_inventory_search_context';
-import { EntityInventoryPageShell } from './entity_inventory_page_shell';
+import { useEntityInventorySearch } from '../context/search_context';
+import { EntityInventoryPageShell } from './page_shell';
 
 const renderWithServices = (ui: React.ReactElement) => {
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();

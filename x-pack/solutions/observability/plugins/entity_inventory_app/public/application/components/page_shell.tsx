@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EntityInventoryEntityCategory } from '../../types';
-import { EntityInventorySearchProvider } from '../context/entity_inventory_search_context';
-import { EntityInventorySearchBar } from './entity_inventory_search_bar';
+import { EntityInventorySearchProvider } from '../context/search_context';
+import { EntityInventorySearchBar } from './search_bar';
 
 export interface EntityInventoryPageShellProps {
   entityCategory: EntityInventoryEntityCategory;

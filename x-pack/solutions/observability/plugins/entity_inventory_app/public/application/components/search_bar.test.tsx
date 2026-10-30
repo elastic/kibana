@@ -14,9 +14,9 @@ import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { ENTITY_INVENTORY_APP_NAME } from '../constants';
-import { EntityInventorySearchProvider } from '../context/entity_inventory_search_context';
+import { EntityInventorySearchProvider } from '../context/search_context';
 import { MAX_TIME_RANGE_HINT, SEARCH_BAR_PLACEHOLDERS } from '../translations';
-import { EntityInventorySearchBar } from './entity_inventory_search_bar';
+import { EntityInventorySearchBar } from './search_bar';
 
 // Mirrors the real SearchBar: the picker keeps its own state, resynced only when the range props change.
 const MockSearchBar = jest.fn(({ dateRangeFrom, onQuerySubmit }: StatefulSearchBarProps) => {

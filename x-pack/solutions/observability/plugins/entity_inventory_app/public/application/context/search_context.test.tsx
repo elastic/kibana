@@ -15,7 +15,7 @@ import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../tr
 import {
   EntityInventorySearchProvider,
   useEntityInventorySearch,
-} from './entity_inventory_search_context';
+} from './search_context';
 
 const renderSearchHook = () => {
   const core = coreMock.createStart();
