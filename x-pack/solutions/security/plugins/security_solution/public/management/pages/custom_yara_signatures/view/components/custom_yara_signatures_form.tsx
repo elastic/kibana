@@ -21,6 +21,7 @@ import {
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { monaco } from '@kbn/code-editor';
+import type { CreateCommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
@@ -30,8 +31,11 @@ import type { EffectedPolicySelectProps } from '../../../../components/effected_
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
+import { ArtifactFormComments } from '../../../../components/artifact_form_comments';
 import { OS_TITLES } from '../../../../common/translations';
 import {
+  COMMENTS_DESCRIPTION,
+  COMMENTS_TITLE,
   DEFINITION_DESCRIPTION,
   DEFINITION_TITLE,
   DESCRIPTION_LABEL,
@@ -111,6 +115,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     const [hasNameError, setHasNameError] = useState(!item.name?.trim());
     const [hasOsError, setHasOsError] = useState(!(item.os_types?.length ?? 0));
+    const [hasCommentError, setHasCommentError] = useState(false);
     const [signatureEditorInstance, setSignatureEditorInstance] =
       useState<monaco.editor.IStandaloneCodeEditor | null>(null);
     const [signatureEditorHeight, setSignatureEditorHeight] = useState(
@@ -155,10 +160,10 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
         onChange({
           item: nextItem,
-          isValid: isItemValid(nextItem, yaraSyntaxValid),
+          isValid: !hasCommentError && isItemValid(nextItem, yaraSyntaxValid),
         });
       },
-      [isYaraSyntaxValid, item, onChange]
+      [hasCommentError, isYaraSyntaxValid, item, onChange]
     );
 
     const notifyOfChangeRef = useRef(notifyOfChange);
@@ -166,7 +171,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
 
     useEffect(() => {
       notifyOfChangeRef.current(undefined, isYaraSyntaxValid);
-    }, [isYaraSyntaxValid]);
+    }, [isYaraSyntaxValid, hasCommentError]);
 
     useCustomYaraSignatureEditorMarkers({
       editor: signatureEditorInstance,
@@ -239,6 +244,13 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
       (updatedItem) => {
         notifyOfChange(updatedItem);
+      },
+      [notifyOfChange]
+    );
+
+    const handleOnCommentsChange = useCallback(
+      (comments: CreateCommentsArray) => {
+        notifyOfChange({ comments });
       },
       [notifyOfChange]
     );
@@ -447,6 +459,23 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
             disabled={disabled}
           />
         </EuiFormRow>
+        <EuiHorizontalRule />
+
+        <EuiTitle size="xs">
+          <h2>{COMMENTS_TITLE}</h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" data-test-subj={getTestId('commentsAbout')}>
+          <p>{COMMENTS_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <ArtifactFormComments
+          item={item}
+          onChange={handleOnCommentsChange}
+          onErrorChange={setHasCommentError}
+          data-test-subj={getTestId('comments')}
+          isDisabled={disabled}
+        />
       </EuiForm>
     );
   }

@@ -23,7 +23,7 @@ const AGENT_RECURSION_LIMIT = 100;
  * @returns The automatic import agent
  */
 export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) => {
-  const { model, subagents, samples } = params;
+  const { model, subagents, samples, userContext } = params;
 
   const stateSchema = AutomaticImportAgentState;
 
@@ -31,6 +31,7 @@ export const createAutomaticImportAgent = (params: AutomaticImportAgentParams) =
     subagents,
     model,
     samples,
+    userContext,
     recursionLimit: AGENT_RECURSION_LIMIT,
   });
 
