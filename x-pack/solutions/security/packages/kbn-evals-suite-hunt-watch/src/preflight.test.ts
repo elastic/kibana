@@ -162,15 +162,25 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
   }) as unknown as HttpHandler;
 };
 
-const run = (fetch: HttpHandler) =>
+const run = (fetch: HttpHandler, options: { isServerless?: boolean } = {}) =>
   runPreflight({
     fetch,
     log: new ToolingLog(),
     connectorId: CONNECTOR.id,
     evaluationConnector: JUDGE_CONNECTOR,
+    ...options,
   });
 
 describe('runPreflight', () => {
+  const originalCi = process.env.CI;
+  beforeEach(() => {
+    process.env.CI = 'true';
+  });
+  afterEach(() => {
+    if (originalCi === undefined) delete process.env.CI;
+    else process.env.CI = originalCi;
+  });
+
   it('resolves and returns a cleanup function on a healthy stack', async () => {
     const cleanup = await run(buildMockFetch());
     expect(typeof cleanup).toBe('function');
@@ -254,7 +264,65 @@ describe('runPreflight', () => {
       -1
     );
     expect(lastSpaceWrite).toBeGreaterThan(-1);
+    expect(firstAlertZero).toBeGreaterThan(-1);
     expect(lastSpaceWrite).toBeLessThan(firstAlertZero);
+  });
+
+  it('does not read or write spaces on serverless, where spaces have no solution view', async () => {
+    const spaceWrites: MockOverrides['spaceWrites'] = [];
+    const inner = buildMockFetch({
+      existingSpaces: { default: { id: 'default', name: 'Default', solution: 'classic' } },
+      spaceWrites,
+    }) as unknown as jest.Mock;
+    const spaceCalls: string[] = [];
+    const fetch = jest.fn(async (...args: unknown[]) => {
+      const first = args[0];
+      const path = typeof first === 'string' ? first : (first as { path: string }).path;
+      if (path.startsWith('/api/spaces/')) spaceCalls.push(path);
+      return inner(...args);
+    }) as unknown as HttpHandler;
+
+    await run(fetch, { isServerless: true });
+
+    expect(spaceCalls).toEqual([]);
+    expect(spaceWrites).toEqual([]);
+  });
+
+  it('refuses to convert a Classic default space outside CI, before writing anything', async () => {
+    delete process.env.CI;
+    const spaceWrites: MockOverrides['spaceWrites'] = [];
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    await expect(
+      run(
+        buildMockFetch({
+          existingSpaces: { default: { id: 'default', name: 'Default', solution: 'classic' } },
+          spaceWrites,
+          settingsWrites,
+        })
+      )
+    ).rejects.toThrow(/"default" space uses the "classic" solution view/);
+    expect(spaceWrites).toEqual([]);
+    expect(settingsWrites).toEqual([]);
+  });
+
+  it('still converts the non-default eval spaces outside CI', async () => {
+    delete process.env.CI;
+    const spaceWrites: MockOverrides['spaceWrites'] = [];
+    await run(
+      buildMockFetch({
+        existingSpaces: {
+          default: { id: 'default', name: 'Default', solution: 'security' },
+          'hunt-a': { id: 'hunt-a', name: 'hunt-a', solution: 'classic' },
+          'hunt-b': { id: 'hunt-b', name: 'hunt-b', solution: 'security' },
+          'hunt-blocked': { id: 'hunt-blocked', name: 'hunt-blocked' },
+        },
+        spaceWrites,
+      })
+    );
+    expect(spaceWrites.filter(({ method }) => method === 'PUT').map(({ path }) => path)).toEqual([
+      '/api/spaces/space/hunt-a',
+      '/api/spaces/space/hunt-blocked',
+    ]);
   });
 
   it('restores each space to the default connector it had before the bridge, not to null', async () => {

@@ -55,12 +55,6 @@ const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 ];
 
-/**
- * The suite runs on the stateful Scout stack, where the Worker role is an ES reserved role and
- * spaces carry a solution view. Serverless spaces have no `solution` field.
- */
-const IS_SERVERLESS = false;
-
 /** The `solution` view value AlertZero requires; any other value (or none) is a Classic space. */
 const SECURITY_SOLUTION_VIEW = 'security';
 
@@ -79,11 +73,16 @@ const ensureSecuritySpace = async ({
   fetch,
   log,
   spaceId,
+  isServerless,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   spaceId: string;
+  isServerless: boolean;
 }): Promise<void> => {
+  // Serverless spaces have no `solution` field, so there is nothing to create or convert.
+  if (isServerless) return;
+
   const existing = await fetch<SpaceBody>(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
     method: 'GET',
     headers: apiVersion(PUBLIC_API_VERSION),
@@ -102,13 +101,26 @@ const ensureSecuritySpace = async ({
         name: spaceId,
         description: 'Eval-only space created by the hunt-watch suite preflight fixture.',
         disabledFeatures: [],
-        ...(IS_SERVERLESS ? {} : { solution: SECURITY_SOLUTION_VIEW }),
+        solution: SECURITY_SOLUTION_VIEW,
       }),
     });
     return;
   }
 
-  if (IS_SERVERLESS || existing.solution === SECURITY_SOLUTION_VIEW) return;
+  if (existing.solution === SECURITY_SOLUTION_VIEW) return;
+
+  // The conversion is never reverted, so it is only done on a disposable CI stack. On a
+  // developer's long-lived stack it would silently change the `default` space's navigation.
+  if (spaceId === DEFAULT_EVAL_SPACE_ID && !process.env.CI) {
+    throw new Error(
+      `[hunt-watch] the "${spaceId}" space uses the "${
+        existing.solution ?? 'classic'
+      }" solution view, but AlertZero routes 404 outside a Security space. The suite only ` +
+        `converts "${spaceId}" automatically when CI is set because the change is not ` +
+        `reverted. Switch it to the Security solution view in Stack Management > Spaces, ` +
+        `or run the suite on a throwaway stack.`
+    );
+  }
 
   log.info(
     `[hunt-watch] switching space "${spaceId}" from solution "${
@@ -294,8 +306,16 @@ const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountEn
  * Worker roles: stateful ships them as Elasticsearch reserved roles, so an ES snapshot without
  * them refuses to enable the Worker, and the suite should say so by name.
  */
-const findBuiltInWorkerRole = async (fetch: HttpHandler, accountName: string): Promise<string> => {
-  const roleName = getWorkerRoleName(accountName, { isServerless: IS_SERVERLESS });
+const findBuiltInWorkerRole = async ({
+  fetch,
+  accountName,
+  isServerless,
+}: {
+  fetch: HttpHandler;
+  accountName: string;
+  isServerless: boolean;
+}): Promise<string> => {
+  const roleName = getWorkerRoleName(accountName, { isServerless });
   const missing = () =>
     new Error(
       `[hunt-watch] Elasticsearch has no built-in "${roleName}" role for the Worker. ` +
@@ -324,10 +344,12 @@ const ensureWorkerServiceAccount = async ({
   fetch,
   log,
   workerId,
+  isServerless,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   workerId: string;
+  isServerless: boolean;
 }): Promise<string> => {
   const name = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
   if (!name) {
@@ -347,7 +369,7 @@ const ensureWorkerServiceAccount = async ({
     return existing.id;
   }
 
-  const roleName = await findBuiltInWorkerRole(fetch, name);
+  const roleName = await findBuiltInWorkerRole({ fetch, accountName: name, isServerless });
   try {
     const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
       method: 'POST',
@@ -374,13 +396,16 @@ const ensureWorkerServiceAccount = async ({
 const enableWorkerInEvalSpaces = async ({
   fetch,
   log,
+  isServerless,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  isServerless: boolean;
 }): Promise<void> => {
   const serviceAccountId = await ensureWorkerServiceAccount({
     fetch,
     log,
+    isServerless,
     workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   });
 
@@ -470,14 +495,17 @@ export const runPreflight = async ({
   log,
   connectorId,
   evaluationConnector,
+  isServerless = false,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
   evaluationConnector: EvalConnector;
+  /** `config.serverless` from the Scout test config; defaults to the stateful stack. */
+  isServerless?: boolean;
 }): Promise<PreflightCleanup> => {
   for (const spaceId of EVAL_SPACE_IDS) {
-    await ensureSecuritySpace({ fetch, log, spaceId });
+    await ensureSecuritySpace({ fetch, log, spaceId, isServerless });
   }
   await configureIndexScope({ fetch, log });
   const previousConnectors = await bridgeSubjectModel({ fetch, log, connectorId });
@@ -488,7 +516,7 @@ export const runPreflight = async ({
   // does not match" on the next run against a long-lived stack). They are eval-only and
   // `ensureSecuritySpace` is idempotent, so a CI stack discards them and a local one reuses them.
   // The Security solution view is not reverted either, `default` included: the Worker stays
-  // enabled there between runs.
+  // enabled there between runs. That is why `default` is only converted when CI is set.
   const restoreConnectors: PreflightCleanup = async () => {
     for (const spaceId of EVAL_SPACE_IDS) {
       try {
@@ -512,7 +540,7 @@ export const runPreflight = async ({
   // Every gate below can throw, and a worker fixture that throws before `use()` never runs the
   // cleanup it would have returned, so the connectors are put back here before the error leaves.
   try {
-    await enableWorkerInEvalSpaces({ fetch, log });
+    await enableWorkerInEvalSpaces({ fetch, log, isServerless });
     await assertThreatIntelSupplyReady({ fetch, log });
     await ensureEntityStoreRunning({ fetch, log });
     await ensureJudgeConnectorAccessible({ fetch, connector: evaluationConnector, log });
