@@ -138,15 +138,6 @@ _nightshift_agent:
     - 'read_project_routing'
   indices:
     - names:
-        - 'logs-*'
-        - 'metrics-*'
-        - 'traces-*'
-        - 'apm-*'
-      privileges:
-        - 'read'
-        - 'view_index_metadata'
-      allow_restricted_indices: false
-    - names:
         - 'ai-index-idx-nightshift-cortex'
         - 'ai-index-idx-nightshift-semantic-memory'
         - 'ai-index-idx-nightshift-decision-trees'
