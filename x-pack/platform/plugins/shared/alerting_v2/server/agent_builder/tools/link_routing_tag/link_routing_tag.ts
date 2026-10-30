@@ -26,7 +26,7 @@ import {
 const NOTIFY_PREFIX = 'notify-';
 const ATTACHMENT_ID_MAX_LENGTH = 256;
 
-/** How to present a link result; shared by the rule-bound and policy-bound link tools. */
+/** How to present a link result; shared by both skill-bound link tools. */
 export const LINK_ROUTING_TAG_RESULT_GUIDANCE = `After it returns, render both attachments with the ids and versions from the result:
 <render_attachment id="{ruleAttachment.id}" version="{ruleAttachment.version}"/>
 <render_attachment id="{actionPolicyAttachment.id}" version="{actionPolicyAttachment.version}"/>

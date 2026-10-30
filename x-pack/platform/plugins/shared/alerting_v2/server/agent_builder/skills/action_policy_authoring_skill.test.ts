@@ -91,7 +91,6 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(skill.content).toContain('Default Notification Setup');
     expect(skill.content).toContain('action-policy-single-rule.md');
     expect(skill.content).toContain(ALERTING_TOOL_IDS.linkActionPolicyToRule);
-    expect(skill.content).toContain("policy attachment's `link_action_policy_to_rule` tool");
     expect(skill.content).toContain('action-policy-multi-rule.md');
     expect(skill.content).not.toContain('## Multi-rule policies');
     expect(skill.content).not.toContain('Step 2 — Create a Default Action Policy');

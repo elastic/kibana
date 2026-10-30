@@ -142,7 +142,7 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
 
 See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, call \`${
       ALERTING_TOOL_IDS.linkActionPolicyToRule
-    }\` with this policy attachment and the rule attachment, or use the policy attachment's \`link_action_policy_to_rule\` tool. The \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+    }\` with this policy attachment and the rule attachment.
 
 ${generateActionPolicyOperationsDoc()}
 

@@ -7,9 +7,8 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinAttachmentBoundedTool } from '@kbn/agent-builder-server/attachments';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ALERTING_NAMESPACE, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
+import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import {
   actionPolicyAttachmentIdSchema,
   LINK_ROUTING_TAG_RESULT_GUIDANCE,
@@ -31,22 +30,7 @@ const linkActionPolicyToRuleSkillSchema = lazySchema(() =>
   })
 );
 
-const linkActionPolicyToRuleSchema = lazySchema(() =>
-  z.object({
-    ruleAttachmentId: ruleAttachmentIdSchema,
-    tag: routingTagSchema,
-  })
-);
-
-/** Bounded tool id — unique per action policy attachment instance. */
-export const linkActionPolicyToRuleToolId = (actionPolicyAttachmentId: string): string =>
-  `${ALERTING_NAMESPACE}.link_action_policy_to_rule.${actionPolicyAttachmentId}`;
-
-export interface LinkActionPolicyToRuleToolParams extends LinkRoutingTagToolDeps {
-  actionPolicyAttachmentId: string;
-}
-
-/** Skill-bound variant that takes both attachment ids. */
+/** Skill-bound tool that takes both attachment ids. */
 export const linkActionPolicyToRuleSkillTool = ({
   logger,
 }: LinkRoutingTagToolDeps): BuiltinSkillBoundedTool<typeof linkActionPolicyToRuleSkillSchema> => ({
@@ -59,23 +43,4 @@ ${LINK_ACTION_POLICY_TO_RULE_USAGE}`,
   schema: linkActionPolicyToRuleSkillSchema,
   handler: async (input, { attachments, spaceId }) =>
     linkRoutingTag(input, { attachments, logger, spaceId }),
-});
-
-export const linkActionPolicyToRuleTool = ({
-  actionPolicyAttachmentId,
-  logger,
-}: LinkActionPolicyToRuleToolParams): BuiltinAttachmentBoundedTool<
-  typeof linkActionPolicyToRuleSchema
-> => ({
-  id: linkActionPolicyToRuleToolId(actionPolicyAttachmentId),
-  type: ToolType.builtin,
-  description: `Link action policy attachment "${actionPolicyAttachmentId}" to one alerting rule attachment by writing the same routing tag onto this policy's matcher.tags and the rule's metadata.routing_tags.
-
-${LINK_ACTION_POLICY_TO_RULE_USAGE}`,
-  schema: linkActionPolicyToRuleSchema,
-  handler: async ({ ruleAttachmentId, tag }, { attachments, spaceId }) =>
-    linkRoutingTag(
-      { ruleAttachmentId, actionPolicyAttachmentId, tag },
-      { attachments, logger, spaceId }
-    ),
 });

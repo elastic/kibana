@@ -218,7 +218,7 @@ When the user asks what happens if data stops arriving (missing metrics, heartbe
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To link this rule to an action policy already in the conversation, call \`${
       ALERTING_TOOL_IDS.linkRuleToActionPolicy
-    }\` with the rule attachment and the policy attachment, or use the rule attachment's \`link_rule_to_action_policy\` tool.`,
+    }\` with the rule attachment and the policy attachment.`,
     getInlineTools: () => [
       manageRuleTool(deps),
       attachRuleTool(deps),

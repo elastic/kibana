@@ -791,7 +791,6 @@ describe('schema_to_skill_docs', () => {
       const doc = generateSingleRuleActionPolicyDoc();
       expect(doc).toContain('# Single-rule Action Policies');
       expect(doc).toContain('platform.alerting.link_action_policy_to_rule');
-      expect(doc).toContain("policy attachment's `link_action_policy_to_rule` tool");
       expect(doc).toContain('set_metadata');
       expect(doc).toContain('set_destinations');
       expect(doc).toContain('{ operation: "validate" }');
