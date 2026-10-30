@@ -351,7 +351,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.workerValue',
-              '<worker> checks each proposed gap and proposes a next step.'
+              '<worker> checks each coverage gap and proposes a next step.'
             ),
           },
           {
