@@ -175,12 +175,14 @@ describe('Detection Rule Creation worker', () => {
       ).toBe(expected);
     });
 
-    // NO_DATA, INCOHERENT and NOT_SECURITY_RELEVANT come back the same on every run.
-    // INVALID_OUTPUT, a tool error (no code) or a missing code may not.
+    // NO_DATA comes back the same on every run. INVALID_OUTPUT, a tool error (no code)
+    // or a missing code may not. The gap text is built by the workflow, so INCOHERENT and
+    // NOT_SECURITY_RELEVANT are not expected; if the tool ever returns them, the gap is
+    // retried.
     it.each([
       ['NO_DATA', true],
-      ['INCOHERENT', true],
-      ['NOT_SECURITY_RELEVANT', true],
+      ['INCOHERENT', false],
+      ['NOT_SECURITY_RELEVANT', false],
       ['INVALID_OUTPUT', false],
       ['', false],
       [undefined, false],

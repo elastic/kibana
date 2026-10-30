@@ -193,7 +193,8 @@ steps:
             description: >-
               Why the tool returned no rule, in one sentence. Empty when it returned one.
           # Required, so a model that drops it cannot turn a gap with no data into one
-          # that is retried on every sweep.
+          # that is retried on every sweep. Lists every code the tool defines, so a code
+          # this workflow does not act on still validates and is retried.
           rejection_code:
             type: string
             enum: ['', NO_DATA, INCOHERENT, NOT_SECURITY_RELEVANT, INVALID_OUTPUT]
@@ -232,14 +233,9 @@ steps:
           and steps.draft_creation.output.structured_output.attachment_id != null
           and steps.draft_creation.output.structured_output.attachment_id != '' }}
       # The tool rejected the request for a reason another run would not change: no
-      # index fits the gap, or the request makes no sense as a rule. Any other unusable
-      # draft, such as a model mistake or a tool error, can pass on the next sweep.
-      # The tool does not return INCOHERENT or NOT_SECURITY_RELEVANT yet. They are
-      # listed so those requests close the gap once it does.
-      final: >-
-        ${{ steps.draft_creation.output.structured_output.rejection_code == 'NO_DATA'
-          or steps.draft_creation.output.structured_output.rejection_code == 'INCOHERENT'
-          or steps.draft_creation.output.structured_output.rejection_code == 'NOT_SECURITY_RELEVANT' }}
+      # index fits the gap. Any other unusable draft, such as a model mistake or a tool
+      # error, can pass on the next sweep.
+      final: "${{ steps.draft_creation.output.structured_output.rejection_code == 'NO_DATA' }}"
 
   - name: preview_creation
     type: workflow.execute
