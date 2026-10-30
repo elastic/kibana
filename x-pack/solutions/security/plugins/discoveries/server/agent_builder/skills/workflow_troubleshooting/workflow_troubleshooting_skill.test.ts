@@ -240,6 +240,14 @@ describe('createWorkflowTroubleshootingSkill', () => {
       expect(skill.referencedContent).toHaveLength(4);
     });
 
+    it('points generation timeout remediation at the run or schedule size', () => {
+      const content = skill.referencedContent?.find(
+        (r) => r.name === 'expanded-error-categories'
+      )?.content;
+
+      expect(content).toContain('Alert volume is controlled by the `size` of the run or schedule');
+    });
+
     describe('attack_discovery_step_types', () => {
       const getStepTypesContent = () =>
         skill.referencedContent?.find((r) => r.name === 'attack-discovery-step-types');
@@ -262,6 +270,13 @@ describe('createWorkflowTroubleshootingSkill', () => {
         const { content } = getStepTypesContent() ?? {};
 
         expect(content?.toLowerCase()).toContain('failure');
+      });
+
+      it('documents the generate step size as max discoveries, not an alert cap', () => {
+        const { content } = getStepTypesContent() ?? {};
+
+        expect(content).toContain('Maximum number of **discoveries** to generate');
+        expect(content).toContain('does not reduce alert volume');
       });
     });
 

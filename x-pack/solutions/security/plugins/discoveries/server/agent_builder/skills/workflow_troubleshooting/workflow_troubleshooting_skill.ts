@@ -325,6 +325,7 @@ Sends anonymized alerts to an LLM to generate attack discoveries.
 - \`alerts\` — Array of anonymized alert strings
 - \`api_config\` — LLM connector configuration
 - \`replacements\` — Anonymization replacement map
+- \`size\` — Maximum number of **discoveries** to generate (default: 10). This is NOT an alert cap: the alerts are the \`alerts\` input, already retrieved. Passing \`size: \${{ inputs.size }}\` to this step does not reduce alert volume, so do not recommend it for timeouts or context-length errors
 - \`type\` — Discovery type (always \`"attack_discovery"\`)
 
 **Common Failure Modes:**
@@ -598,7 +599,7 @@ determine the category.
 ⚠️ **Not a permission issue:** Timeouts are caused by LLM latency or excessive alert volume — never by missing RBAC privileges. Do NOT suggest RBAC fixes for timeouts.
 
 **Remediation:**
-- For LLM generation timeouts: reduce the number of alerts (try 20–30) or switch to a faster connector/model
+- For LLM generation timeouts: reduce the number of alerts (try 20–30) or switch to a faster connector/model. Alert volume is controlled by the \`size\` of the run or schedule (passed to alert retrieval), not by the generation workflow's \`size\` input, which is read but not acted upon, nor by the generate step's \`size\` (max discoveries)
 - Check if the LLM provider is experiencing latency issues
 - Review step-level timeouts in the workflow YAML — consider increasing the generation step timeout if the model is consistently slow
 - For alert retrieval timeouts, reduce the \`size\` parameter or narrow the time range
