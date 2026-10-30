@@ -14,12 +14,14 @@ import {
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,
 } from '.';
 import {
+  allSteps,
   describeCloseReports,
   describeReportStep,
   evalGuard,
   INVESTIGATION_ID,
   renderReport,
   stepNamed,
+  stepsOf,
   topLevelSteps,
 } from './worker_reports.test_helpers';
 import type { YamlStep } from './worker_reports.test_helpers';
@@ -78,6 +80,28 @@ describe('Rule Tuning and Rule Coverage close reports', () => {
       ALERTZERO_COVERAGE_WORKER_WORKFLOW,
       ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
     ],
+  });
+});
+
+describe('Rule Tuning and Rule Coverage metadata patches', () => {
+  // The flyout shows `metadata.verdict` as a Conclusion section, which the MVP dropped.
+  it('write no verdict', () => {
+    const writers = [
+      ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,
+      ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW,
+      ALERTZERO_COVERAGE_WORKER_WORKFLOW,
+      ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
+    ].flatMap((definition) =>
+      allSteps(stepsOf(definition))
+        .filter(
+          (step) =>
+            step.type === 'ai.conversation.metadata.patch' &&
+            'verdict' in ((step.with?.updates as Record<string, unknown> | undefined) ?? {})
+        )
+        .map(({ name }) => `${definition.id}: ${name}`)
+    );
+
+    expect(writers).toEqual([]);
   });
 });
 
@@ -1046,8 +1070,8 @@ describe('Rule Coverage outcome reports', () => {
 
 describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
-    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 32],
-    [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 34],
+    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 33],
+    [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 35],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
     [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 7],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {

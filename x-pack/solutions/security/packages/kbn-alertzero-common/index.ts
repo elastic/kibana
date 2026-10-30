@@ -158,6 +158,7 @@ export {
   WorkerSettingsWrite,
   WorkflowTriggerType,
   AffectedAsset,
+  HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
   HuntForThreatRequestBody,

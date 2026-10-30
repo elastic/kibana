@@ -4986,7 +4986,7 @@ components:
       nullable: true
       additionalProperties: true
       description: |
-        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       example:
         content: A new comment.
     unified_attachment_metadata:
@@ -4994,7 +4994,7 @@ components:
       nullable: true
       additionalProperties: true
       description: |
-        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
     unified_attachment_type:
       type: string
       description: |

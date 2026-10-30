@@ -22,6 +22,7 @@
     "@kbn/es-query",
     "@kbn/securitysolution-ecs",
     "@kbn/securitysolution-t-grid",
+    "@kbn/securitysolution-timeline-common",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
     "@kbn/data-views-plugin",
@@ -36,7 +37,6 @@
     "@kbn/search-errors",
     "@kbn/search-types",
     "@kbn/react-kibana-mount",
-    "@kbn/field-formats-plugin",
     "@kbn/config-schema",
     "@kbn/zod"
   ],
