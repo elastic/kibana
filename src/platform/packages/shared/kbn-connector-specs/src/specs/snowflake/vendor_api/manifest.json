@@ -12,7 +12,7 @@
         "method": "post",
         "pagination": "none",
         "path": "/api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service_name}:query",
-        "source": "cortexSearch"
+        "source": "cortex_search"
       }
     ],
     "describeTable": [
@@ -48,7 +48,7 @@
         "method": "get",
         "pagination": "none",
         "path": "/api/v2/databases/{database}/schemas/{schema}/cortex-search-services",
-        "source": "cortexSearch"
+        "source": "cortex_search"
       }
     ],
     "listDatabases": [
@@ -92,7 +92,7 @@
     ]
   },
   "sources": {
-    "cortexSearch": {
+    "cortex_search": {
       "apiVersion": "0.1.0",
       "fetchedAt": "2026-10-07T20:21:40.588Z",
       "format": "openapi",

@@ -4,7 +4,7 @@
       {
         "method": "POST",
         "path": "/api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service_name}:query",
-        "source": "cortexSearch"
+        "source": "cortex_search"
       }
     ]
   },

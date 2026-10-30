@@ -4,14 +4,14 @@
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/issues/{issue_number}/assignees",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "addIssueComment": [
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/issues/{issue_number}/comments",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "addLabels": [
@@ -19,7 +19,7 @@
         "method": "post",
         "pagination": "none",
         "path": "/repos/{owner}/{repo}/issues/{issue_number}/labels",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "callTool": [],
@@ -27,28 +27,28 @@
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/git/refs",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "createIssue": [
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/issues",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "createOrUpdateFile": [
       {
         "method": "put",
         "path": "/repos/{owner}/{repo}/contents/{path}",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "createPullRequest": [
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/pulls",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "getCommit": [],
@@ -68,7 +68,7 @@
       {
         "method": "put",
         "path": "/repos/{owner}/{repo}/pulls/{pull_number}/merge",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "pullRequestRead": [],
@@ -76,7 +76,7 @@
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "searchCode": [],
@@ -88,26 +88,26 @@
       {
         "method": "post",
         "path": "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "updateIssue": [
       {
         "method": "patch",
         "path": "/repos/{owner}/{repo}/issues/{issue_number}",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ],
     "updatePullRequest": [
       {
         "method": "patch",
         "path": "/repos/{owner}/{repo}/pulls/{pull_number}",
-        "source": "2022-11-28"
+        "source": "rest_2022_11_28"
       }
     ]
   },
   "sources": {
-    "2022-11-28": {
+    "rest_2022_11_28": {
       "apiVersion": "1.1.4",
       "fetchedAt": "2026-10-07T20:20:34.696Z",
       "format": "openapi",
