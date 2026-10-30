@@ -43,6 +43,33 @@ const tagsOf = (doc: Record<string, unknown>): string[] => {
 
 const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
+/**
+ * The alerts to untag, and of those the ones that need a verdict. Besides the alerts taken out of a
+ * pending proposal, this covers the ones no revision handled (the proposal settled first, a chat
+ * revise took them out, or the caller cannot read proposals) whose tags still contradict the
+ * analyst: `az:false_positive` next to another verdict would stay open as a false positive, and no
+ * verdict at all would be analysed again. The worker's own re-tags always leave one verdict and no
+ * `az:false_positive`, so they still change nothing here.
+ */
+const retagOutput = (
+  tagged: ReadonlyArray<{ id: string; tags: string[] }>,
+  groups: ReadonlyArray<{ alertIds: string[] }>,
+  revised: ReadonlySet<string>
+) => {
+  const grouped = new Set(groups.flatMap(({ alertIds }) => alertIds));
+  const hasOtherVerdict = (tags: string[]) =>
+    tags.includes('az:true_positive') || tags.includes('az:inconclusive');
+  const untag = tagged.filter(
+    ({ id, tags }) =>
+      revised.has(id) ||
+      (grouped.has(id) && tags.includes('az:false_positive') === hasOtherVerdict(tags))
+  );
+  return {
+    excluded_alert_ids: untag.map(({ id }) => id),
+    needs_verdict_alert_ids: untag.filter(({ tags }) => !hasOtherVerdict(tags)).map(({ id }) => id),
+  };
+};
+
 export const getTriageExcludeFromProposalStepDefinition = (
   deps: ExcludeFromProposalStepDependencies
 ) =>
@@ -61,18 +88,19 @@ export const getTriageExcludeFromProposalStepDefinition = (
         const { alerts } = await loadAlertsByIds(contextManager, input.alert_ids);
         const tagged = alerts.map((doc) => ({ doc, id: String(doc._id), tags: tagsOf(doc) }));
         const groups = groupExcludedAlerts(tagged);
-        const empty = { proposals: [], excluded_alert_ids: [], needs_verdict_alert_ids: [] };
-        if (groups.length === 0) return { output: empty };
+        if (groups.length === 0) {
+          return { output: { proposals: [], excluded_alert_ids: [], needs_verdict_alert_ids: [] } };
+        }
 
         const { getProposalsService, getProposalPrivileges } = deps.getProposals();
         const service = getProposalsService();
         // Without the privilege no head is read and nothing is revised, so the alerts stay listed
-        // and only the close re-check protects them.
+        // and only the close re-check protects them. Their tags are still brought in line.
         try {
           await getProposalPrivileges().assertCanRead(request);
         } catch (error) {
           deps.logger?.warn(`alert_triage exclusion: the caller cannot read proposals: ${error}`);
-          return { output: empty };
+          return { output: { proposals: [], ...retagOutput(tagged, groups, new Set()) } };
         }
 
         const result = await excludeFromProposals(groups, {
@@ -98,13 +126,14 @@ export const getTriageExcludeFromProposalStepDefinition = (
               excluded.truePositiveCount > 0
                 ? ` ${excluded.truePositiveCount} of them marked true positive, so the pattern may be too coarse.`
                 : '';
+            const remains =
+              remainingIds.length === 0
+                ? 'No alerts remain, so approving this proposal closes nothing.'
+                : `${plural(remainingIds.length, 'alert')} remain.`;
             const note = `${plural(
               excluded.count,
               'alert'
-            )} excluded by analysts since this proposal was created.${truePositives} ${plural(
-              remainingIds.length,
-              'alert'
-            )} remain.`;
+            )} excluded by analysts since this proposal was created.${truePositives} ${remains}`;
             return service.revise(
               {
                 id: head.proposalId,
@@ -120,16 +149,9 @@ export const getTriageExcludeFromProposalStepDefinition = (
         });
 
         const excluded = new Set(result.flatMap(({ excludedIds }) => excludedIds));
-        const needsVerdict = tagged
-          .filter(
-            ({ id, tags }) =>
-              excluded.has(id) &&
-              !tags.includes('az:true_positive') &&
-              !tags.includes('az:inconclusive')
-          )
-          .map(({ id }) => id);
         return {
           output: {
+            ...retagOutput(tagged, groups, excluded),
             proposals: result.map((entry) => ({
               root_proposal_id: entry.rootProposalId,
               conversation_id: entry.conversationId,
@@ -139,8 +161,6 @@ export const getTriageExcludeFromProposalStepDefinition = (
               remaining_count: entry.remainingCount,
               revised: entry.revised,
             })),
-            excluded_alert_ids: [...excluded],
-            needs_verdict_alert_ids: needsVerdict,
           },
         };
       } catch (error) {

@@ -144,23 +144,84 @@ describe('triage exclude from proposal step', () => {
     expect(service.getLatestRevisions).not.toHaveBeenCalled();
   });
 
-  it('leaves a settled proposal and its alerts alone', async () => {
+  it('says so when the exclusion leaves the proposal empty', async () => {
     const { run, service } = setup({
-      alerts: [alertDoc('b', ['az:inconclusive', `az:proposal:${ROOT}`])],
+      alerts: [alertDoc('b', ['az:true_positive', `az:proposal:${ROOT}`])],
+      heads: [head(['b'])],
+    });
+
+    await run(['b']);
+
+    expect(service.revise.mock.calls[0][0].comment).toContain(
+      'No alerts remain, so approving this proposal closes nothing.'
+    );
+  });
+
+  // The worker's expiry or dismissal re-tag: one verdict, no az:false_positive. It must keep az:model_fp.
+  it('leaves a settled proposal and the worker’s re-tags alone', async () => {
+    const { run, service } = setup({
+      alerts: [alertDoc('b', ['az:inconclusive', 'az:model_fp', `az:proposal:${ROOT}`])],
       heads: [head(['a', 'b'], { status: 'expired' })],
     });
 
-    expect(await run(['b'])).toEqual(expect.objectContaining({ excluded_alert_ids: [] }));
+    expect(await run(['b'])).toEqual(
+      expect.objectContaining({ excluded_alert_ids: [], needs_verdict_alert_ids: [] })
+    );
     expect(service.revise).not.toHaveBeenCalled();
   });
 
-  it('does nothing when the caller cannot read proposals', async () => {
+  // The approval landed first and the close skipped the alert, so it is open with both verdicts.
+  it('still untags an alert that kept az:false_positive next to another verdict after its proposal settled', async () => {
     const { run, service } = setup({
-      alerts: [alertDoc('b', ['az:inconclusive', `az:proposal:${ROOT}`])],
+      alerts: [alertDoc('b', ['az:false_positive', 'az:true_positive', `az:proposal:${ROOT}`])],
+      heads: [head(['a', 'b'], { status: 'succeeded', decision: 'approved' })],
+    });
+
+    expect(await run(['b'])).toEqual({
+      proposals: [],
+      excluded_alert_ids: ['b'],
+      needs_verdict_alert_ids: [],
+    });
+    expect(service.revise).not.toHaveBeenCalled();
+  });
+
+  it('gives a verdict to an alert that lost its only verdict after its proposal settled', async () => {
+    const { run } = setup({
+      alerts: [alertDoc('b', [`az:proposal:${ROOT}`])],
+      heads: [head(['a', 'b'], { status: 'succeeded', decision: 'approved' })],
+    });
+
+    expect(await run(['b'])).toEqual(
+      expect.objectContaining({ excluded_alert_ids: ['b'], needs_verdict_alert_ids: ['b'] })
+    );
+  });
+
+  it('untags an alert a chat revise already took out of the proposal', async () => {
+    const { run, service } = setup({
+      alerts: [alertDoc('b', ['az:false_positive', 'az:inconclusive', `az:proposal:${ROOT}`])],
+      heads: [head(['a', 'c'])],
+    });
+
+    expect(await run(['b'])).toEqual(
+      expect.objectContaining({ proposals: [], excluded_alert_ids: ['b'] })
+    );
+    expect(service.revise).not.toHaveBeenCalled();
+  });
+
+  it('revises nothing when the caller cannot read proposals, but still brings the tags in line', async () => {
+    const { run, service } = setup({
+      alerts: [
+        alertDoc('a', ['az:inconclusive', `az:proposal:${ROOT}`]),
+        alertDoc('b', ['az:false_positive', 'az:true_positive', `az:proposal:${ROOT}`]),
+      ],
       canRead: false,
     });
 
-    expect(await run(['b'])).toEqual(expect.objectContaining({ excluded_alert_ids: [] }));
+    expect(await run(['a', 'b'])).toEqual({
+      proposals: [],
+      excluded_alert_ids: ['b'],
+      needs_verdict_alert_ids: [],
+    });
     expect(service.getLatestRevisions).not.toHaveBeenCalled();
   });
 });

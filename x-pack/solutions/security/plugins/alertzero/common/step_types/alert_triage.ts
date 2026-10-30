@@ -442,7 +442,9 @@ const excludeFromProposalOutputSchema = lazySchema(() =>
       .describe('One entry per pending proposal that held an excluded alert.'),
     excluded_alert_ids: z
       .array(z.string())
-      .describe('Alerts that are in a pending proposal and that an analyst excluded.'),
+      .describe(
+        'Alerts an analyst excluded: the ones taken out of a pending proposal, and the ones whose proposal no longer holds them but whose tags still contradict the analyst (`az:false_positive` next to another verdict, or no verdict at all).'
+      ),
     needs_verdict_alert_ids: z
       .array(z.string())
       .describe('Of those, the alerts with no other verdict tag, which the sweep would re-plan.'),
