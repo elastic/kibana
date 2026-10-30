@@ -455,6 +455,8 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [triggerSuggestions]);
 
+  const showRunButton = Boolean(editorIsInline) && !hideRunQueryButton;
+
   const styles = useMemo(
     () =>
       esqlEditorStyles(theme.euiTheme, editorHeight, Boolean(editorIsInline), Boolean(hasOutline)),
@@ -803,7 +805,7 @@ const ESQLEditorInternal = function ESQLEditor({
           ${editorAiStyle}
         `}
       />
-      {Boolean(editorIsInline) && !hideRunQueryButton ? (
+      {showRunButton ? (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}

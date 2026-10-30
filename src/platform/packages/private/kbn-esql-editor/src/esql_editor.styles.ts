@@ -25,7 +25,7 @@ export const esqlEditorStyles = (
   hasOutline: boolean
 ) => {
   return {
-    // Border wraps the code surface and the footer together. No overflow clip here:
+    // Border wraps the code surface and the footer. No overflow clip here:
     // footer popovers and the history panel must be able to extend outside the shell.
     outlineShell: {
       border: euiTheme.border.thin,

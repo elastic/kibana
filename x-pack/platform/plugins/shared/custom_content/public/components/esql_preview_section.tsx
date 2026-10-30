@@ -191,8 +191,8 @@ export const EsqlPreviewSection = ({
         disabled={!esqlQuery.trim()}
         data-test-subj="customContentPreviewDataButton"
       >
-        {i18n.translate('xpack.customContent.editFlyout.esqlSection.runQueryButton', {
-          defaultMessage: 'Run query',
+        {i18n.translate('xpack.customContent.editFlyout.esqlSection.searchButton', {
+          defaultMessage: 'Search',
         })}
       </EuiButtonEmpty>
 
