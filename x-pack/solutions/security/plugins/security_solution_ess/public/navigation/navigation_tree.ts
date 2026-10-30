@@ -61,8 +61,8 @@ export const createNavigationTree = (
             link: securityLink(SecurityPageName.alerts),
           },
       ...getWorkflowsNavPanel(services),
-      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
-      ...(alertZeroEnabled ? [contextEngineLink] : []),
+      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink] : []),
+      ...(alertZeroEnabled || showAgentBuilder ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',
