@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
 import type { LinksLayoutType } from '../../../../../common/types';
 
 export class LinksPanel {
@@ -16,7 +16,10 @@ export class LinksPanel {
   public readonly linksComponent: Locator;
   public readonly linkDestinationError: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly dashboard: PageObjects['dashboard']
+  ) {
     this.panelEditorFlyout = this.page.testSubj.locator('links--panelEditor--flyout');
     this.linkEditorFlyout = this.page.testSubj.locator('links--linkEditor--flyout');
     this.linksComponent = this.page.testSubj.locator('links--component');
@@ -40,6 +43,12 @@ export class LinksPanel {
   /** Opens the links panel editor from the (already open) dashboard add panel flyout. */
   async openEditorFromAddPanelFlyout() {
     await this.page.testSubj.click('create-action-Links');
+    await this.panelEditorFlyout.waitFor({ state: 'visible' });
+  }
+
+  /** Opens the links panel editor for the panel with the given title on a dashboard in edit mode. */
+  async openPanelEditor(panelTitle: string) {
+    await this.dashboard.clickPanelAction('embeddablePanelAction-editPanel', panelTitle);
     await this.panelEditorFlyout.waitFor({ state: 'visible' });
   }
 

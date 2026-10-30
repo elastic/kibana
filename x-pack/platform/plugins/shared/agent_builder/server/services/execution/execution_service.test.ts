@@ -37,6 +37,7 @@ import {
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
 import {
@@ -214,6 +215,292 @@ describe('AgentExecutionService', () => {
       },
       eventCount: 0,
       events: [],
+    });
+  });
+
+  describe('executeAgent with an agent bound to a service account', () => {
+    const boundAgent = createMockedInternalAgent({ id: 'agent-1', service_account_id: 'sa-1' });
+    const checkPrivileges = jest.fn();
+    const securityPlugin = {
+      authz: {
+        checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
+        actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+      },
+    } as any;
+    const createBoundService = ({
+      serviceAccountsEnabled = true,
+      principalServiceAccountId,
+    }: { serviceAccountsEnabled?: boolean; principalServiceAccountId?: string } = {}) =>
+      createAgentExecutionService({
+        logger,
+        elasticsearch,
+        security: {
+          serviceAccounts: { isEnabled: () => serviceAccountsEnabled },
+          authc: {
+            getPrincipal: () =>
+              principalServiceAccountId
+                ? { type: 'service_account', serviceAccountId: principalServiceAccountId }
+                : undefined,
+          },
+        } as any,
+        taskManager,
+        securityPlugin,
+        inference,
+        conversationService: conversationService as any,
+        agentService,
+        runAgent: jest.fn(),
+        attachmentsService,
+        uiSettings,
+        savedObjects,
+        meteringService,
+        searchInferenceEndpoints,
+        callbackDeliveryService,
+      });
+    const converse = (
+      boundService: ReturnType<typeof createBoundService>,
+      useTaskManager?: boolean,
+      request = httpServerMock.createKibanaRequest()
+    ) =>
+      boundService.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager,
+      });
+
+    beforeEach(() => {
+      agentRegistry.get.mockResolvedValue(boundAgent);
+      checkPrivileges.mockResolvedValue({ hasAllRequested: true });
+      mockExecutionClient.create.mockImplementation(async (params) => ({
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.scheduled,
+        eventCount: 0,
+        events: [],
+        ...params,
+        agentParams: {
+          ...params.agentParams,
+          conversationId: 'conv-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+        },
+      }));
+    });
+
+    it('checks the caller can use the agent before anything else', async () => {
+      await converse(createBoundService(), true);
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(checkPrivileges).toHaveBeenCalledWith({
+        kibana: ['api:agentBuilder:invokeBoundAgents'],
+      });
+    });
+
+    it('refuses a caller without the invoke privilege before creating anything', async () => {
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      await expect(converse(createBoundService(), true)).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+        message: expect.stringContaining('service account "sa-1"'),
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
+    it('checks the privilege for the agent the conversation resolves to, not the requested one', async () => {
+      resolveConversation.mockResolvedValueOnce({
+        conversationId: 'investigation-1',
+        agentId: 'agent-1',
+      });
+      conversationClient.get.mockResolvedValueOnce(
+        createEmptyConversation({
+          id: 'investigation-1',
+          agent_id: 'agent-1',
+          schema_version: CONVERSATION_SCHEMA_VERSION,
+        })
+      );
+      agentRegistry.get.mockImplementation(async (agentId: string) =>
+        agentId === 'agent-1' ? boundAgent : createMockedInternalAgent({ id: agentId })
+      );
+      checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+      await expect(
+        createBoundService().executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'unbound-agent',
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses to run a bound agent while service accounts are disabled', async () => {
+      await expect(
+        converse(createBoundService({ serviceAccountsEnabled: false }), true)
+      ).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+        message: expect.stringContaining('disabled'),
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('records the service account on the execution and schedules the task with runAs', async () => {
+      const result = await converse(createBoundService(), true);
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          owner: { id: 'user-1', username: 'alice' },
+          runAs: { type: 'service_account', serviceAccountId: 'sa-1' },
+        })
+      );
+      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: { executionId: result.executionId },
+          runAs: {
+            workloadType: 'agent',
+            workloadId: 'agent-1',
+            spaceId: 'default',
+            expectedServiceAccountId: 'sa-1',
+          },
+        }),
+        undefined
+      );
+    });
+
+    it('runs through Task Manager even when local execution was requested', async () => {
+      await converse(createBoundService(), false);
+
+      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+        expect.objectContaining({ runAs: expect.objectContaining({ workloadId: 'agent-1' }) }),
+        undefined
+      );
+    });
+
+    it('refuses runtime configuration overrides on a bound agent before creating anything', async () => {
+      await expect(
+        createBoundService().executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            nextInput: { message: 'hello' },
+            configurationOverrides: { tools: [{ tool_ids: ['*'] }] },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({
+        meta: { statusCode: 403 },
+        message: expect.stringContaining('configuration overrides'),
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
+    it('accepts runtime configuration overrides from a request already running as the account', async () => {
+      await createBoundService({ principalServiceAccountId: 'sa-1' }).executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          configurationOverrides: { instructions: 'be brief' },
+        },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ runAs: { type: 'service_account', serviceAccountId: 'sa-1' } })
+      );
+    });
+
+    describe('when the request already runs as the bound service account', () => {
+      const sameAccount = () => createBoundService({ principalServiceAccountId: 'sa-1' });
+
+      it('runs inline instead of nesting a Task Manager task when local execution was requested', async () => {
+        mockHandleAgentExecution.mockResolvedValue(of());
+        mockCollectAndWriteEvents.mockResolvedValue(undefined);
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await converse(sameAccount(), false, request);
+
+        expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+        expect(mockExecutionClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            runAs: { type: 'service_account', serviceAccountId: 'sa-1' },
+          })
+        );
+        expect(mockHandleAgentExecution).toHaveBeenCalledWith(
+          expect.objectContaining({
+            request,
+            execution: expect.objectContaining({ executionId: result.executionId }),
+          })
+        );
+      });
+
+      it('runs inline for a fake request, as an unbound agent would', async () => {
+        mockHandleAgentExecution.mockResolvedValue(of());
+        mockCollectAndWriteEvents.mockResolvedValue(undefined);
+        const fakeRequest = Object.assign(httpServerMock.createKibanaRequest(), {
+          isFakeRequest: true,
+        });
+
+        await converse(sameAccount(), undefined, fakeRequest);
+
+        expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+        expect(mockHandleAgentExecution).toHaveBeenCalled();
+      });
+
+      it('still schedules with runAs and without the request when Task Manager is used', async () => {
+        await converse(sameAccount(), true);
+
+        expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+          expect.objectContaining({ runAs: expect.objectContaining({ workloadId: 'agent-1' }) }),
+          undefined
+        );
+      });
+
+      it('still forces Task Manager for a request of another service account', async () => {
+        await converse(createBoundService({ principalServiceAccountId: 'sa-other' }), false);
+
+        expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+          expect.objectContaining({ runAs: expect.objectContaining({ workloadId: 'agent-1' }) }),
+          undefined
+        );
+        expect(mockHandleAgentExecution).not.toHaveBeenCalled();
+      });
+    });
+
+    it('leaves an unbound agent on the caller credentials', async () => {
+      agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
+      const request = httpServerMock.createKibanaRequest();
+
+      await createBoundService().executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(checkPrivileges).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.not.objectContaining({ runAs: expect.anything() })
+      );
+      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(expect.anything(), {
+        request,
+        cloneApiKey: true,
+      });
     });
   });
 
@@ -1059,7 +1346,7 @@ describe('AgentExecutionService', () => {
     });
 
     it("validates the agent's inference feature model when the agent declares one", async () => {
-      agentRegistry.get.mockResolvedValueOnce(
+      agentRegistry.get.mockResolvedValue(
         createMockedInternalAgent({
           id: 'agent-1',
           configuration: { tools: [], inference_feature_id: 'my_feature' },
@@ -1902,6 +2189,17 @@ describe('AgentExecutionService', () => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
       conversationClient.create.mockResolvedValue(conversation);
       conversationClient.update.mockResolvedValue(conversation);
+      // The dispatch path reads the id back from the created record.
+      mockExecutionClient.create.mockImplementation(
+        async (params) =>
+          ({
+            '@timestamp': new Date().toISOString(),
+            status: ExecutionStatus.scheduled,
+            eventCount: 0,
+            events: [],
+            ...params,
+          } as AgentExecution)
+      );
     });
 
     it('refuses with conversationBusy, deletes its execution record and schedules nothing', async () => {

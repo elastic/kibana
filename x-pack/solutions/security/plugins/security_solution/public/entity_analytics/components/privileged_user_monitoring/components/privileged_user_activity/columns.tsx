@@ -9,7 +9,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize, isArray } from 'lodash/fp';
 import { EuiBadge, EuiButtonIcon, EuiToolTip, type EuiBasicTableColumn } from '@elastic/eui';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
@@ -17,7 +16,6 @@ import { UserName } from '../../../user_name';
 import { getRowItemsWithActions } from '../../../../../common/components/tables/helpers';
 import { NetworkDetails } from '../../../network_details';
 import type { TableItemType } from './types';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { SCOPE_ID } from '../../constants';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
@@ -91,7 +89,10 @@ const getIpColumn = (fieldName = 'source.ip') => ({
     }),
 });
 
-const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => ({
+/** Opens the document flyout for a row's event. */
+export type OpenDocument = (id: string, indexName: string) => void;
+
+const getActionsColumn = (openDocument: OpenDocument) => ({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.actions"
@@ -99,16 +100,7 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
     />
   ),
   render: (record: { _id: string; _index: string }) => {
-    const onClick = () => {
-      openRightPanel({
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: record._id,
-          indexName: record._index,
-          scopeId: SCOPE_ID,
-        },
-      });
-    };
+    const onClick = () => openDocument(record._id, record._index);
 
     return (
       <EuiToolTip
@@ -138,11 +130,10 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
   width: COLUMN_WIDTHS.actions,
 });
 
-type OpenRightPanelType = (props: FlyoutPanelProps) => void;
 export const buildGrantedRightsColumns = (
-  openRightPanel: OpenRightPanelType
+  openDocument: OpenDocument
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel),
+  getActionsColumn(openDocument),
   timestampColumn,
   getPrivilegedUserColumn(),
   getTargetUserColumn(),
@@ -159,9 +150,9 @@ export const buildGrantedRightsColumns = (
 ];
 
 export const buildAccountSwitchesColumns = (
-  openRightPanel: OpenRightPanelType
+  openDocument: OpenDocument
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel),
+  getActionsColumn(openDocument),
   timestampColumn,
   getPrivilegedUserColumn(),
   {
@@ -195,9 +186,9 @@ export const buildAccountSwitchesColumns = (
 ];
 
 export const buildAuthenticationsColumns = (
-  openRightPanel: OpenRightPanelType
+  openDocument: OpenDocument
 ): Array<EuiBasicTableColumn<TableItemType>> => [
-  getActionsColumn(openRightPanel),
+  getActionsColumn(openDocument),
   timestampColumn,
   getPrivilegedUserColumn(),
   {
