@@ -23,7 +23,7 @@ import {
   getStreamPatternFor,
   INTEGRATION_TYPES,
   integrationsSourceIndex,
-  oktaLastFullSyncMarkersIndex,
+  getLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
 import { getWatchlistSavedObjectClient } from '../../../shared/utils';
 import type { IntegrationType } from '../../../entity_sources/infra';
@@ -133,13 +133,6 @@ const createSourceForType = async (
   }
 
   return client.create(source, request);
-};
-
-const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {
-  if (integration === 'entityanalytics_ad') {
-    return getStreamPatternFor(integration, namespace);
-  }
-  return oktaLastFullSyncMarkersIndex(namespace);
 };
 
 const buildIntegrationSourceAttributes = (
