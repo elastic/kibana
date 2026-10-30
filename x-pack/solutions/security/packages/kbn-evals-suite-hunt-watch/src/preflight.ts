@@ -460,10 +460,10 @@ export type PreflightCleanup = () => Promise<void>;
  * misconfigured stack silently score zeros.
  *
  * Ordering is load-bearing: (1) spaces must exist, as Security-solution spaces, before anything
- * is configured in them (AlertZero routes 404 in a Classic space);
- * (2) index scope before the Worker is enabled (resolveHuntScope reads it); (3) the subject-model
- * bridge before Worker enablement (enabling without a model throws `noModel`); (4) TI supply and
- * Entity Store are independent readiness checks that can run after enablement.
+ * is configured in them; (2) index scope before the Worker is enabled (resolveHuntScope reads
+ * it); (3) the subject-model bridge before Worker enablement (enabling without a model throws
+ * `noModel`); (4) TI supply and Entity Store are independent readiness checks that can run after
+ * enablement.
  */
 export const runPreflight = async ({
   fetch,
@@ -487,8 +487,8 @@ export const runPreflight = async ({
   // workflow reconcile (seen as a 404 on the TI supply route and a 403 "service account binding
   // does not match" on the next run against a long-lived stack). They are eval-only and
   // `ensureSecuritySpace` is idempotent, so a CI stack discards them and a local one reuses them.
-  // The Security solution view is likewise not reverted, including on `default`: the Worker stays
-  // enabled there between runs and AlertZero 404s in a Classic space, so reverting would break it.
+  // The Security solution view is not reverted either, `default` included: the Worker stays
+  // enabled there between runs.
   const restoreConnectors: PreflightCleanup = async () => {
     for (const spaceId of EVAL_SPACE_IDS) {
       try {
