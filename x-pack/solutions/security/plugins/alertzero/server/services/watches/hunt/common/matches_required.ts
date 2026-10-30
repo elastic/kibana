@@ -11,6 +11,7 @@ import {
   splitRemoteCluster,
   stripBackingPrefix,
 } from '../../../../../common/remote_cluster';
+import { reachesLinkedProjects } from './cps_scope';
 import { clusterCovers, compileGlob, exclusionReachesCluster, globsOverlap } from './index_glob';
 
 interface CompiledPattern {
@@ -90,6 +91,10 @@ const overlapsExclusion = (rawCandidate: string, exclusion: string): boolean =>
  * exact cluster string. A local pattern never reaches a remote cluster, and a
  * cluster the scope does not reach stays refused. A `::` selector
  * (`logs-*::failures`) is never allowed.
+ *
+ * An unqualified candidate also has to clear its `*:` twin when the allowlist was widened to
+ * linked projects (`reachesLinkedProjects`): the search fans it out to them, so a
+ * project-qualified exclusion applies to it even though it names no project.
  */
 export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string[]): boolean => {
   if (!candidate || allowedPatterns.length === 0) return false;
@@ -110,5 +115,12 @@ export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string
     .map((entry) => entry.index);
   const contained =
     positives.includes(index) || buildMatchesRequired(positives)(index.replace(/\*/g, 'x'));
-  return contained && !exclusions.some((exclusion) => overlapsExclusion(index, exclusion));
+  if (!contained || exclusions.some((exclusion) => overlapsExclusion(index, exclusion))) {
+    return false;
+  }
+  return (
+    cluster !== undefined ||
+    !reachesLinkedProjects(allowedPatterns) ||
+    isIndexPatternAllowed(`*:${candidate}`, allowedPatterns)
+  );
 };

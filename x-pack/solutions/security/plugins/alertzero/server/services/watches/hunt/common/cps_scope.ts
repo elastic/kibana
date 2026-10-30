@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isIndexExclusion, parseIndexScopeEntry } from '../../../../../common/remote_cluster';
+import { parseIndexScopeEntry } from '../../../../../common/remote_cluster';
 
 /**
  * Under cross-project search an unqualified entry reaches every project the space routes to,
@@ -25,11 +25,32 @@ export const withLinkedProjectTwins = (patterns: string[]): string[] => {
   return [...new Set(expanded)];
 };
 
+const isQualifiedExclusion = (entry: string): boolean => {
+  const { exclude, cluster } = parseIndexScopeEntry(entry);
+  return exclude && cluster !== undefined;
+};
+
+/**
+ * Whether an allowlist was widened by `withLinkedProjectTwins`: some unqualified positive entry
+ * also appears with its `*:` twin. Such a list reads an unqualified source as reaching every
+ * linked project, so the source guard must check that reach too.
+ */
+export const reachesLinkedProjects = (allowedPatterns: string[]): boolean => {
+  const entries = allowedPatterns.map(parseIndexScopeEntry).filter(({ exclude }) => !exclude);
+  const local = new Set(
+    entries.filter(({ cluster }) => cluster === undefined).map(({ index }) => index)
+  );
+  return entries.some(({ cluster, index }) => cluster === '*' && local.has(index));
+};
+
 /**
  * What Tier 2 may read: the targets, widened to linked projects under cross-project search,
- * with the universe's exclusions carried along. A widened `*:logs-aws.*` would otherwise
- * reach a project the universe excludes by name (`linked:-logs-aws.*`), since targets hold
- * positive entries only. Without cross-project search the targets stand as they are.
+ * with the universe's project-qualified exclusions carried along. A widened `*:logs-aws.*`
+ * would otherwise reach a project the universe excludes by name (`linked:-logs-aws.*`), since
+ * targets hold positive entries only. Unqualified exclusions are not carried: target selection
+ * already applied them, and they hold for the widened twin too. Carrying one with a leading
+ * wildcard (`-*elastic-cloud-logs-*`) would also veto every wildcard source, because the source
+ * guard judges wildcards by literal prefix. Without cross-project search the targets stand.
  */
 export const tier2AllowedIndices = ({
   targets,
@@ -41,7 +62,7 @@ export const tier2AllowedIndices = ({
   crossProjectSearch: boolean;
 }): string[] =>
   crossProjectSearch
-    ? withLinkedProjectTwins([...targets, ...universe.filter(isIndexExclusion)])
+    ? withLinkedProjectTwins([...targets, ...universe.filter(isQualifiedExclusion)])
     : targets;
 
 /** The patterns the guards compare against: widened when cross-project search is on. */
