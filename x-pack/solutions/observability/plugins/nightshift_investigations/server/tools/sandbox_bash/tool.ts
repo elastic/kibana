@@ -17,6 +17,7 @@ import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
+import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -93,11 +94,13 @@ export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
+  sandboxAllowlistClient,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
@@ -160,6 +163,7 @@ export const createSandboxBashTool = ({
     // Connector credentials are resolved in Kibana and scoped to this one command's environment.
     // The sandbox never holds a credential-retrieval primitive of its own.
     let credentialEnv: Record<string, string> = {};
+    let secretEnvKeys: SecretEnvKey[] = [];
     let secretValues: readonly string[] = [];
     if (connector_id) {
       if (!resolveConnectorCredentials) {
@@ -179,8 +183,14 @@ export const createSandboxBashTool = ({
         };
       }
       credentialEnv = resolved.env;
+      secretEnvKeys =
+        (resolved as { secretEnvKeys?: SecretEnvKey[] }).secretEnvKeys ?? [];
       secretValues = resolved.secretValues;
     }
+
+    const spaceAllowedHosts = sandboxAllowlistClient
+      ? await sandboxAllowlistClient.getHostsForCommand(context.request)
+      : [];
 
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
@@ -197,6 +207,8 @@ export const createSandboxBashTool = ({
         command,
         directory: working_directory,
         env: mergedEnv,
+        ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
+        ...(spaceAllowedHosts.length > 0 ? { allowed_hosts: spaceAllowedHosts } : {}),
         timeout_seconds:
           timeout_seconds && timeout_seconds > 0
             ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)

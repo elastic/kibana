@@ -20,9 +20,11 @@ const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
 
 const setup = ({
   resolveConnectorCredentials,
+  allowedHosts = [],
   stdout = '',
 }: {
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  allowedHosts?: string[];
   stdout?: string;
 } = {}) => {
   const runCommand = jest.fn().mockResolvedValue({
@@ -40,12 +42,16 @@ const setup = ({
   const sandboxWorkspaceManager = {
     ensureWorkspaceReady: jest.fn().mockResolvedValue(undefined),
   } as unknown as SandboxWorkspaceManager;
+  const sandboxAllowlistClient = {
+    getHostsForCommand: jest.fn().mockResolvedValue(allowedHosts),
+  };
   const logger = loggingSystemMock.createLogger();
 
   const tool = createSandboxBashTool({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
+    sandboxAllowlistClient,
     logger,
   });
 
@@ -122,6 +128,20 @@ describe('sandbox bash tool — connector credentials', () => {
     const { env } = runCommand.mock.calls[0][0];
     expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(GITHUB_TOKEN);
     expect(env.FOO).toBe('bar');
+  });
+
+  it('passes space egress firewall rules in allowed_hosts when configured on the space', async () => {
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: resolved(),
+      allowedHosts: ['allow pypi.org GET,HEAD /simple/', 'deny api.github.com POST /gists'],
+    });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].allowed_hosts).toEqual([
+      'allow pypi.org GET,HEAD /simple/',
+      'deny api.github.com POST /gists',
+    ]);
   });
 
   it('passes no credentials without a connector_id', async () => {

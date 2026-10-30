@@ -115,6 +115,7 @@ import {
   createListSandboxConnectorTypes,
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
+import { createSandboxAllowlistClient, sandboxAllowlistUiSetting } from './sandbox_allowlist';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -219,6 +220,11 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
+    core.uiSettings.register(sandboxAllowlistUiSetting);
+
+    const sandboxAllowlistClient = createSandboxAllowlistClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, uiSettings: this.uiSettings }),
+    });
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -343,6 +349,7 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            sandboxAllowlistClient,
             logger: sandboxLogger,
           })
         );
@@ -540,6 +547,7 @@ export class NightshiftInvestigationsPlugin
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
+          sandboxAllowlistClient,
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
