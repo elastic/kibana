@@ -16,10 +16,15 @@ const SCRIPT_PATH = Path.resolve(__dirname, './activate_service_account.sh');
 const TOKEN_SCRIPT_PATH = Path.resolve(__dirname, './gcp_oidc_token.sh');
 const PROVIDER =
   'projects/1003139005402/locations/global/workloadIdentityPools/buildkite/providers/buildkite';
-const PROXY_EMAIL = 'kibana-ci-sa-proxy@elastic-kibana-ci.iam.gserviceaccount.com';
 const TARGET_EMAIL = 'kibana-ci-access-artifacts@elastic-kibana-ci.iam.gserviceaccount.com';
 const OTHER_EMAIL = 'kibana-ci-access-so-snapshots@elastic-kibana-ci.iam.gserviceaccount.com';
-const BUCKET = 'ci-artifacts.kibana.dev';
+const CHROMIUM_EMAIL = 'kibana-ci-access-chromium-blds@elastic-kibana-ci.iam.gserviceaccount.com';
+const PUBLISHED_EMAIL = 'kibana-ci-access-published@elastic-kibana-ci.iam.gserviceaccount.com';
+const PUBLISHED_PR_EMAIL =
+  'kibana-ci-access-published-pr@elastic-kibana-ci.iam.gserviceaccount.com';
+const TYPESCRIPT_EMAIL = 'kibana-ci-access-ts-archives@elastic-kibana-ci.iam.gserviceaccount.com';
+const TYPESCRIPT_PR_EMAIL = 'kibana-ci-ts-archives-pr@elastic-kibana-ci.iam.gserviceaccount.com';
+const BUCKET = 'kibana-ci-artifacts-us-central1';
 const TOKEN_RESPONSE = 'mock-token-response';
 const QUOTA_ERROR = 'Error code quota_exceeded: [Security Token Service] throttled';
 
@@ -137,9 +142,9 @@ describe('GCS service account activation', () => {
     sandbox.cleanup();
   });
 
-  it('mints one impersonated token and points gcloud at it instead of impersonating', () => {
+  it('exchanges directly for the bucket account and points gcloud at the shared token', () => {
     const { credentialsDir, run, tokenFile } = sandbox;
-    const credentialsFile = Path.join(credentialsDir, 'credentials.json');
+    const credentialsFile = Path.join(credentialsDir, `${TARGET_EMAIL}.credentials.json`);
     const result = run();
 
     expect(result.status).toBe(0);
@@ -149,12 +154,12 @@ describe('GCS service account activation', () => {
         'workload-identity-pools',
         'create-cred-config',
         PROVIDER,
-        `--service-account=${PROXY_EMAIL}`,
+        `--service-account=${TARGET_EMAIL}`,
         `--executable-command="${TOKEN_SCRIPT_PATH}"`,
         `--output-file=${credentialsFile}`,
       ],
       ['auth', 'print-access-token', '--verbosity=error'],
-      ['env', `override=${credentialsFile}`, `impersonate=${TARGET_EMAIL}`, 'token_file=[]'],
+      ['env', `override=${credentialsFile}`, 'impersonate=', 'token_file=[]'],
       ['config', 'unset', 'auth/impersonate_service_account'],
       ['config', 'unset', 'auth/access_token_file'],
       ['config', 'set', 'auth/access_token_file', tokenFile(TARGET_EMAIL)],
@@ -166,7 +171,7 @@ describe('GCS service account activation', () => {
     const { run } = sandbox;
     expect(run().status).toBe(0);
 
-    const sameAccount = run([`gs://kibana-ci-artifacts-us-central1`]);
+    const sameAccount = run([`gs://kibana-ci-artifacts-europe-west2`]);
     expect(sameAccount.status).toBe(0);
     expect(sameAccount.stdout).toContain(`Reusing access token for ${TARGET_EMAIL}`);
     expect(mints(sameAccount.calls)).toHaveLength(0);
@@ -174,8 +179,32 @@ describe('GCS service account activation', () => {
     const otherAccount = run(['kibana-so-types-snapshots']);
     expect(otherAccount.status).toBe(0);
     expect(mints(otherAccount.calls)).toEqual([
-      ['env', expect.any(String), `impersonate=${OTHER_EMAIL}`, 'token_file=[]'],
+      ['env', expect.any(String), 'impersonate=', 'token_file=[]'],
     ]);
+    expect(otherAccount.calls[0]).toContain(`--service-account=${OTHER_EMAIL}`);
+  });
+
+  it('uses a separate account for published CI artifacts', () => {
+    const { credentialsDir, run } = sandbox;
+    const result = run(['ci-artifacts.kibana.dev']);
+
+    expect(result.status).toBe(0);
+    expect(result.calls[0]).toContain(`--service-account=${PUBLISHED_EMAIL}`);
+    expect(result.calls[0]).toContain(
+      `--output-file=${Path.join(credentialsDir, `${PUBLISHED_EMAIL}.credentials.json`)}`
+    );
+  });
+
+  it.each([
+    ['ci-artifacts.kibana.dev', 'kibana-pull-request', PUBLISHED_PR_EMAIL],
+    ['ci-artifacts.kibana.dev', 'kibana-storybooks-from-pr', PUBLISHED_PR_EMAIL],
+    ['ci-typescript-archives', 'kibana-pull-request', TYPESCRIPT_PR_EMAIL],
+    ['ci-typescript-archives', 'kibana-on-merge', TYPESCRIPT_EMAIL],
+  ])('selects scoped access to %s for %s', (bucket, pipelineSlug, expectedEmail) => {
+    const result = sandbox.run([bucket], { BUILDKITE_PIPELINE_SLUG: pipelineSlug });
+
+    expect(result.status).toBe(0);
+    expect(result.calls[0]).toContain(`--service-account=${expectedEmail}`);
   });
 
   it('mints a new token once the cached one is 30 minutes old', () => {
@@ -214,28 +243,26 @@ describe('GCS service account activation', () => {
     expect(Fs.existsSync(sandbox.tokenFile(TARGET_EMAIL))).toBe(false);
   });
 
-  it('logs in and impersonates with --auto-refresh so gcloud keeps refreshing credentials', () => {
+  it('logs in directly with --auto-refresh so gcloud keeps refreshing credentials', () => {
     const { credentialsDir, run } = sandbox;
     const result = run(['--auto-refresh', 'kibana-ci-access-chromium-blds']);
+    const credentialsFile = Path.join(credentialsDir, `${CHROMIUM_EMAIL}.credentials.json`);
 
     expect(result.status).toBe(0);
     expect(mints(result.calls)).toHaveLength(0);
-    expect(result.calls.slice(1)).toEqual([
+    expect(result.calls).toEqual([
       [
-        'auth',
-        'login',
-        `--cred-file=${Path.join(credentialsDir, 'credentials.json')}`,
-        '--quiet',
-        '--no-user-output-enabled',
+        'iam',
+        'workload-identity-pools',
+        'create-cred-config',
+        PROVIDER,
+        `--service-account=${CHROMIUM_EMAIL}`,
+        `--executable-command="${TOKEN_SCRIPT_PATH}"`,
+        `--output-file=${credentialsFile}`,
       ],
+      ['auth', 'login', `--cred-file=${credentialsFile}`, '--quiet', '--no-user-output-enabled'],
       ['config', 'unset', 'auth/impersonate_service_account'],
       ['config', 'unset', 'auth/access_token_file'],
-      [
-        'config',
-        'set',
-        'auth/impersonate_service_account',
-        'kibana-ci-access-chromium-blds@elastic-kibana-ci.iam.gserviceaccount.com',
-      ],
     ]);
   });
 
@@ -279,18 +306,17 @@ describe('GCS service account activation', () => {
     expect(result.calls).toEqual([]);
   });
 
-  it('clears the gcloud auth config, revokes the proxy account and removes credentials on logout', () => {
+  it('clears the gcloud auth config, revokes directly logged-in accounts and removes credentials', () => {
     const { credentialsDir, run } = sandbox;
-    expect(run().status).toBe(0);
+    expect(run(['--auto-refresh', 'kibana-ci-access-chromium-blds']).status).toBe(0);
 
-    const result = run(['--logout-gcloud'], { MOCK_ACTIVE_ACCOUNT: PROXY_EMAIL });
+    const result = run(['--logout-gcloud']);
 
     expect(result.status).toBe(0);
     expect(result.calls).toEqual([
       ['config', 'unset', 'auth/impersonate_service_account'],
       ['config', 'unset', 'auth/access_token_file'],
-      ['auth', 'list'],
-      ['auth', 'revoke', PROXY_EMAIL, '--no-user-output-enabled'],
+      ['auth', 'revoke', CHROMIUM_EMAIL, '--no-user-output-enabled'],
     ]);
     expect(Fs.existsSync(credentialsDir)).toBe(false);
   });
