@@ -16758,9 +16758,6 @@ packages:
   gl-matrix@3.3.0:
     resolution: {integrity: sha512-COb7LDz+SXaHtl/h4LeaFcNdJdAQSDeVqjiIihSXNrkWObZLhDI4hIkZC11Aeqp7bcE72clzB0BnDXr2SmslRA==}
 
-  gl-matrix@3.4.3:
-    resolution: {integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==}
-
   gl-matrix@3.4.4:
     resolution: {integrity: sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==}
 
@@ -26542,7 +26539,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.7
       '@math.gl/types': 3.6.3
-      gl-matrix: 3.4.3
+      gl-matrix: 3.4.4
 
   '@math.gl/polygon@3.6.3':
     dependencies:
@@ -33957,8 +33954,6 @@ snapshots:
   gitdiff-parser@0.3.1: {}
 
   gl-matrix@3.3.0: {}
-
-  gl-matrix@3.4.3: {}
 
   gl-matrix@3.4.4: {}
 
