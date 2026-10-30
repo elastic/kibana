@@ -9,19 +9,26 @@
 // shorter; the cap keeps an oversized stored value from being interpolated into a query.
 const MAX_SOURCE_INDEX_LENGTH = 4096;
 
-// Characters allowed in an ES|QL `FROM` index expression: index-name characters, the `*`
-// wildcard, the `,` multi-index separator, `-` exclusions, `.` and `_`, and `:` for
-// remote-cluster references. Everything else — whitespace, quotes, backticks, pipes,
-// parentheses, and the `/` that forms ES|QL comments — is excluded, so a stored value
-// cannot break out of `FROM ${index} ...` into additional ES|QL clauses or comments.
-const SAFE_ESQL_SOURCE_INDEX = /^[a-zA-Z0-9_.\-,:*]+$/;
+// Characters that must not appear in a source expression interpolated unquoted into an ES|QL
+// `FROM` clause. The ES|QL lexer only requires a source to be quoted when it contains
+// `: " = | , [ ] /` or whitespace (see `shouldBeQuotedSource`, built from the lexer's
+// `UNQUOTED_SOURCE_PART` fragment), so any other character — including `@`, `+` and `$`,
+// which appear in legitimate index/data-view names — is a valid unquoted source character
+// and left alone. From that set we keep `,` (multi-index separator) and `:` (remote-cluster
+// reference), since the resolved value is a whole `FROM` source list, and reject the rest
+// plus other quote/clause/comment characters (`'`, backtick, `\`, `()`, `{}`, `<>`, `;`,
+// `?`, `#`, control characters). This blocks breaking out of `FROM ${index} ...` into
+// additional ES|QL clauses or comments without rejecting valid source names.
+const UNSAFE_ESQL_SOURCE_CHARS = /[\u0000-\u001f\u007f\s"'`|\\/()[\]{}<>=;?#]/;
 
 /**
- * Returns true when `index` is a source-index expression that is safe to interpolate into
- * the `FROM` clause of an ES|QL query.
+ * Returns true when `index` is a source expression that is safe to interpolate into the
+ * `FROM` clause of an ES|QL query.
  */
 export const isValidEsqlSourceIndex = (index: string): boolean =>
-  index.length > 0 && index.length <= MAX_SOURCE_INDEX_LENGTH && SAFE_ESQL_SOURCE_INDEX.test(index);
+  index.length > 0 &&
+  index.length <= MAX_SOURCE_INDEX_LENGTH &&
+  !UNSAFE_ESQL_SOURCE_CHARS.test(index);
 
 /**
  * Throws when `index` cannot be safely interpolated into an ES|QL `FROM` clause. The risk

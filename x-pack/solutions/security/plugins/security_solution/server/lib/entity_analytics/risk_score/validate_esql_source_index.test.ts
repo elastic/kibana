@@ -19,6 +19,13 @@ describe('validate_esql_source_index', () => {
       'remote_cluster:logs-*',
       '-excluded,.alerts-security.alerts-default',
       'my_index_name',
+      // Characters that are valid in unquoted ES|QL source names and in index/data-view
+      // titles, and must not be rejected.
+      'alerts@prod',
+      'alerts+prod',
+      'alerts$prod',
+      'alerts@prod,alerts+staging',
+      'remote:alerts@prod',
     ])('%s', (index) => {
       expect(isValidEsqlSourceIndex(index)).toBe(true);
       expect(() => assertValidEsqlSourceIndex(index)).not.toThrow();
