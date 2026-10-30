@@ -36,7 +36,7 @@ const baseParams = {
   spaceId: 'default',
   context: { spaceId: 'default' },
   defaultTriggeredBy: 'manual',
-  executorIdentity: {
+  authenticatedUser: {
     executedBy: 'user-1',
     user: { name: 'User One', username: 'user-1-name', profileUid: 'user-1' },
   },
@@ -172,7 +172,7 @@ describe('buildWorkflowExecutionDocument', () => {
   it('fails the execution immediately when no identity is attached', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
-      executorIdentity: undefined,
+      authenticatedUser: undefined,
     });
 
     expect(workflowExecution).toMatchObject({
@@ -190,7 +190,7 @@ describe('buildWorkflowExecutionDocument', () => {
   it('does not treat a real principal named unknown as a missing identity', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
-      executorIdentity: { executedBy: 'unknown', user: { name: 'unknown', username: 'unknown' } },
+      authenticatedUser: { executedBy: 'unknown', user: { name: 'unknown', username: 'unknown' } },
     });
 
     expect(workflowExecution).toMatchObject({

@@ -997,7 +997,7 @@ export class WorkflowsExecutionEnginePlugin
                   'workflow',
                   'execution'
                 );
-                const executorIdentity = await getAuthenticatedUser(
+                const executedBy = await getAuthenticatedUser(
                   fakeRequest,
                   coreStart.security,
                   coreStart.elasticsearch.client
@@ -1009,7 +1009,7 @@ export class WorkflowsExecutionEnginePlugin
                   spaceId,
                   context: executionContext,
                   defaultTriggeredBy: 'scheduled',
-                  executorIdentity,
+                  authenticatedUser: executedBy,
                   now: workflowCreatedAt,
                   maxEventChainDepth: this.config.eventDriven.maxChainDepth,
                   getConcurrencyGroupKey: (execution) =>
@@ -1297,7 +1297,7 @@ export class WorkflowsExecutionEnginePlugin
       spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
-      executorIdentity: ResolvedExecutionIdentity | undefined;
+      authenticatedUser: ResolvedExecutionIdentity | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
       if (!args.inheritedIdentity) {
@@ -1372,7 +1372,7 @@ export class WorkflowsExecutionEnginePlugin
 
       // `options.authenticatedUser` is a pre-resolved principal (e.g. a cloud service
       // account username from the actions plugin); use it verbatim as the identity snapshot.
-      const executorIdentity: ResolvedExecutionIdentity | undefined =
+      const authenticatedUser: ResolvedExecutionIdentity | undefined =
         options.authenticatedUser != null
           ? {
               executedBy: options.authenticatedUser,
@@ -1386,7 +1386,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         context,
         defaultTriggeredBy,
-        executorIdentity,
+        authenticatedUser,
         now: new Date(),
       });
 
@@ -1634,7 +1634,7 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
       const request = getWorkflowOriginalRequest(originalRequest);
 
-      const executorIdentity = await getAuthenticatedUser(
+      const authenticatedUser = await getAuthenticatedUser(
         request,
         coreStart.security,
         coreStart.elasticsearch.client
@@ -1696,7 +1696,7 @@ export class WorkflowsExecutionEnginePlugin
             spaceId,
             context: item.context,
             defaultTriggeredBy: 'alert',
-            executorIdentity,
+            authenticatedUser,
             now,
           });
           prepared.push({ idx, workflowExecution });
@@ -1869,7 +1869,7 @@ export class WorkflowsExecutionEnginePlugin
         isUserInteractive: true,
       };
 
-      const executorIdentity = await getAuthenticatedUser(
+      const executedBy = await getAuthenticatedUser(
         request,
         coreStart.security,
         coreStart.elasticsearch.client
@@ -1879,7 +1879,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         context,
         defaultTriggeredBy: 'manual',
-        executorIdentity,
+        authenticatedUser: executedBy,
         now: new Date(),
       });
       workflowExecution.stepId = stepId;
