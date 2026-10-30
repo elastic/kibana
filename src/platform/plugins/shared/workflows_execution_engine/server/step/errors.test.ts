@@ -8,8 +8,16 @@
  */
 
 import { Readable } from 'stream';
+import { ExecutionError } from '@kbn/workflows/server';
 import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
-import { formatBytes, parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
+import {
+  formatBytes,
+  parseByteSize,
+  ResponseSizeLimitError,
+  safeOutputSize,
+  toExecutionError,
+} from './errors';
+import { CallKibanaApiResponseTooLargeError } from '../lib/call_kibana_api';
 
 describe('formatBytes', () => {
   it('should format 0 bytes', () => {
@@ -129,6 +137,10 @@ describe('ResponseSizeLimitError', () => {
     expect(error.details?.limitBytes).toBe(1024);
   });
 
+  it('is not retryable', () => {
+    expect(new ResponseSizeLimitError(1024, 'my_step').retryable).toBe(false);
+  });
+
   it('should include limit in message', () => {
     const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'es_step');
     expect(error.message).toContain('10 MB');
@@ -182,7 +194,29 @@ describe('ResponseSizeLimitError', () => {
   });
 });
 
+describe('toExecutionError', () => {
+  it('maps an oversized callKibanaApi response to a non-retryable size error', () => {
+    const error = toExecutionError(new CallKibanaApiResponseTooLargeError(2048));
+
+    expect(error).toBeInstanceOf(ExecutionError);
+    expect(error.toSerializableObject()).toEqual({
+      type: 'StepSizeLimitExceeded',
+      message: expect.stringContaining('2048 bytes'),
+      details: { limitBytes: 2048 },
+      retryable: false,
+    });
+  });
+
+  it('leaves the retryable flag of other errors unset', () => {
+    expect(toExecutionError(new Error('boom')).retryable).toBeUndefined();
+  });
+});
+
 describe('ActionsResponseContentLengthLimitError', () => {
+  it('is not retryable', () => {
+    expect(new ActionsResponseContentLengthLimitError('download_file').retryable).toBe(false);
+  });
+
   it('should identify the actions response content length config as the source', () => {
     const error = new ActionsResponseContentLengthLimitError('download_file', {
       limitBytes: 1024 * 1024,
