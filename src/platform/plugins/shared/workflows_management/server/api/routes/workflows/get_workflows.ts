@@ -17,7 +17,9 @@ import {
   API_VERSION,
   AVAILABILITY,
   MAX_ARRAY_PARAM_SIZE,
+  MAX_FILTER_VALUE_LENGTH,
   MAX_PAGE_SIZE,
+  MAX_SEARCH_QUERY_LENGTH,
   OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -33,7 +35,12 @@ const MAX_VISIBILITY_CONTEXT_LENGTH = 128;
 
 const querySchema = schema.object(
   {
-    query: schema.maybe(schema.string({ meta: { description: 'Free-text search query.' } })),
+    query: schema.maybe(
+      schema.string({
+        maxLength: MAX_SEARCH_QUERY_LENGTH,
+        meta: { description: 'Free-text search query.' },
+      })
+    ),
     size: schema.maybe(
       schema.number({
         min: 1,
@@ -49,13 +56,23 @@ const querySchema = schema.object(
     ),
     createdBy: schema.maybe(
       schema.oneOf(
-        [schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })],
+        [
+          schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }),
+          schema.arrayOf(schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }), {
+            maxSize: MAX_ARRAY_PARAM_SIZE,
+          }),
+        ],
         { meta: { description: 'Filter by creator.' } }
       )
     ),
     tags: schema.maybe(
       schema.oneOf(
-        [schema.string(), schema.arrayOf(schema.string(), { maxSize: MAX_ARRAY_PARAM_SIZE })],
+        [
+          schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }),
+          schema.arrayOf(schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }), {
+            maxSize: MAX_ARRAY_PARAM_SIZE,
+          }),
+        ],
         { meta: { description: 'Filter by tags.' } }
       )
     ),

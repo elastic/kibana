@@ -10,7 +10,14 @@
 import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_EXECUTION_FIELD_NAME_LENGTH,
+  MAX_PAGE_SIZE,
+  MAX_WORKFLOW_ENTITY_ID_LENGTH,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
@@ -46,6 +53,7 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
               {
                 stepExecutionId: schema.maybe(
                   schema.string({
+                    maxLength: MAX_WORKFLOW_ENTITY_ID_LENGTH,
                     meta: { description: 'Filter logs by a specific step execution ID.' },
                   })
                 ),
@@ -61,7 +69,10 @@ export function registerGetExecutionLogsRoute({ router, api, spaces }: RouteDepe
                   meta: { description: 'Page number.' },
                 }),
                 sortField: schema.maybe(
-                  schema.string({ meta: { description: 'Field to sort by.' } })
+                  schema.string({
+                    maxLength: MAX_EXECUTION_FIELD_NAME_LENGTH,
+                    meta: { description: 'Field to sort by.' },
+                  })
                 ),
                 sortOrder: schema.maybe(
                   schema.oneOf([schema.literal('asc'), schema.literal('desc')], {

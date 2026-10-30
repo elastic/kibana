@@ -11,7 +11,14 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { SearchStepExecutionsParams } from '../../workflows_management_api';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_DATEMATH_LENGTH,
+  MAX_FILTER_VALUE_LENGTH,
+  MAX_PAGE_SIZE,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
@@ -47,7 +54,10 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
             query: schema.object(
               {
                 stepId: schema.maybe(
-                  schema.string({ meta: { description: 'Filter by step ID.' } })
+                  schema.string({
+                    maxLength: MAX_FILTER_VALUE_LENGTH,
+                    meta: { description: 'Filter by step ID.' },
+                  })
                 ),
                 includeInput: schema.maybe(
                   schema.boolean({ meta: { description: 'Include step input data.' } })
@@ -67,6 +77,7 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
                 ),
                 startedAfter: schema.maybe(
                   schema.string({
+                    maxLength: MAX_DATEMATH_LENGTH,
                     meta: {
                       description:
                         'Datemath lower bound for filtering step executions by startedAt (inclusive when parsed).',
@@ -75,6 +86,7 @@ export function registerGetWorkflowStepExecutionsRoute({ router, api, spaces }: 
                 ),
                 startedBefore: schema.maybe(
                   schema.string({
+                    maxLength: MAX_DATEMATH_LENGTH,
                     meta: {
                       description:
                         'Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).',

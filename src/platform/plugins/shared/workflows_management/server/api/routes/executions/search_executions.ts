@@ -25,6 +25,8 @@ import type { RouteDependencies } from '../types';
 import {
   API_VERSION,
   AVAILABILITY,
+  MAX_DATEMATH_LENGTH,
+  MAX_FILTER_VALUE_LENGTH,
   MAX_PAGE_SIZE,
   MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
   OAS_TAG,
@@ -74,31 +76,44 @@ const querySchema = schema.object(
       )
     ),
     executedBy: schema.maybe(
-      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-        defaultValue: [],
-        meta: { description: 'Filter by the user who triggered the execution.' },
-      })
+      schema.oneOf(
+        [
+          schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }),
+          schema.arrayOf(schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }), { maxSize: 100 }),
+        ],
+        {
+          defaultValue: [],
+          meta: { description: 'Filter by the user who triggered the execution.' },
+        }
+      )
     ),
     concurrencyGroupKey: schema.maybe(
-      schema.string({ meta: { description: 'Filter by evaluated concurrency group key.' } })
+      schema.string({
+        maxLength: MAX_FILTER_VALUE_LENGTH,
+        meta: { description: 'Filter by evaluated concurrency group key.' },
+      })
     ),
     startedAfter: schema.maybe(
       schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
         meta: { description: 'Datemath lower bound for filtering executions by startedAt.' },
       })
     ),
     startedBefore: schema.maybe(
       schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
         meta: { description: 'Datemath upper bound for filtering executions by startedAt.' },
       })
     ),
     finishedAfter: schema.maybe(
       schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
         meta: { description: 'Datemath lower bound for filtering executions by finishedAt.' },
       })
     ),
     finishedBefore: schema.maybe(
       schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
         meta: { description: 'Datemath upper bound for filtering executions by finishedAt.' },
       })
     ),
