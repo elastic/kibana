@@ -156,7 +156,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async geoipEmptyListPromptExists() {
-      return await testSubjects.exists('geoipEmptyListPrompt');
+      return await testSubjects.waitForExists('geoipEmptyListPrompt');
     },
 
     async openCreateDatabaseModal() {

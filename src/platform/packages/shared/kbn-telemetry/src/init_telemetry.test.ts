@@ -28,7 +28,14 @@ jest.mock('@kbn/apm-config-loader', () => {
 import { REPO_ROOT, PKG_JSON } from '@kbn/repo-info';
 import { ApmConfiguration } from '@kbn/apm-config-loader/src/config';
 import { resources } from '@elastic/opentelemetry-node/sdk';
+import {
+  ATTR_PROCESS_COMMAND_ARGS,
+  ATTR_PROCESS_EXECUTABLE_NAME,
+  ATTR_PROCESS_PID,
+} from '@opentelemetry/semantic-conventions/incubating';
 import { initTelemetry } from '..';
+
+const PROCESS_ARGS_COUNT = 'process.args_count';
 
 describe('initTelemetry', () => {
   beforeEach(() => {
@@ -125,6 +132,93 @@ describe('initTelemetry', () => {
           git_rev: expect.any(String),
         })
       );
+    });
+  });
+
+  describe('process command args', () => {
+    const initAndGetDetectedResource = async () => {
+      const apmConfig = new ApmConfiguration(REPO_ROOT, {}, false);
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
+
+      const detectResourcesSpy = jest.spyOn(resources, 'detectResources');
+      initTelemetry([], REPO_ROOT, false, 'test-service');
+
+      const resource = detectResourcesSpy.mock.results[0].value;
+      await resource.waitForAsyncAttributes?.();
+      return resource;
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('drops process.command_args and records how many arguments were detected', async () => {
+      const commandArgs = ['node', '--dev', 'src/cli/dist'];
+      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+        attributes: {
+          [ATTR_PROCESS_PID]: 123,
+          [ATTR_PROCESS_EXECUTABLE_NAME]: 'node',
+          [ATTR_PROCESS_COMMAND_ARGS]: commandArgs,
+        },
+      });
+
+      const resource = await initAndGetDetectedResource();
+
+      expect(resource.attributes).not.toHaveProperty(ATTR_PROCESS_COMMAND_ARGS);
+      expect(resource.attributes[PROCESS_ARGS_COUNT]).toBe(commandArgs.length);
+      expect(resource.attributes[ATTR_PROCESS_PID]).toBe(123);
+      expect(resource.attributes[ATTR_PROCESS_EXECUTABLE_NAME]).toBe('node');
+    });
+
+    test('records a count of zero when the detected command args are empty', async () => {
+      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+        attributes: {
+          [ATTR_PROCESS_COMMAND_ARGS]: [],
+        },
+      });
+
+      const resource = await initAndGetDetectedResource();
+
+      expect(resource.attributes).not.toHaveProperty(ATTR_PROCESS_COMMAND_ARGS);
+      expect(resource.attributes[PROCESS_ARGS_COUNT]).toBe(0);
+    });
+
+    test('does not set process.args_count when command args are absent', async () => {
+      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+        attributes: {
+          [ATTR_PROCESS_PID]: 123,
+        },
+      });
+
+      const resource = await initAndGetDetectedResource();
+
+      expect(resource.attributes).not.toHaveProperty(ATTR_PROCESS_COMMAND_ARGS);
+      expect(resource.attributes).not.toHaveProperty(PROCESS_ARGS_COUNT);
+      expect(resource.attributes[ATTR_PROCESS_PID]).toBe(123);
+    });
+
+    test('drops non-array command args without recording a count', async () => {
+      jest.spyOn(resources.processDetector, 'detect').mockReturnValue({
+        attributes: {
+          [ATTR_PROCESS_COMMAND_ARGS]: 'node --dev src/cli/dist',
+        },
+      });
+
+      const resource = await initAndGetDetectedResource();
+
+      expect(resource.attributes).not.toHaveProperty(ATTR_PROCESS_COMMAND_ARGS);
+      expect(resource.attributes).not.toHaveProperty(PROCESS_ARGS_COUNT);
+    });
+
+    test('strips command args reported by the real process detector', async () => {
+      const resource = await initAndGetDetectedResource();
+
+      const expectedCount = [process.argv[0], ...process.execArgv, ...process.argv.slice(1)].length;
+
+      expect(resource.attributes).not.toHaveProperty(ATTR_PROCESS_COMMAND_ARGS);
+      expect(resource.attributes[PROCESS_ARGS_COUNT]).toBe(expectedCount);
+      expect(resource.attributes[ATTR_PROCESS_PID]).toBe(process.pid);
     });
   });
 });

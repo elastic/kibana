@@ -335,12 +335,12 @@ export function TrainedModelsTableProvider(
     }
 
     public async deleteModel(modelId: string) {
-      const fromContextMenu = await this.doesModelCollapsedActionsButtonExist(modelId);
-      await mlCommonUI.invokeTableRowAction(
-        this.rowSelector(modelId),
-        'mlModelsTableRowDeleteAction',
-        fromContextMenu
+      const row = this.rowSelector(modelId);
+      await this.waitForModelsToLoad();
+      await retry.waitForWithTimeout(`trained model '${modelId}' row to render`, 10000, () =>
+        testSubjects.exists(row)
       );
+      await mlCommonUI.invokeTableRowAction(row, 'mlModelsTableRowDeleteAction', 'auto');
       await this.assertDeleteModalExists();
       await this.confirmDeleteModel();
       await mlCommonUI.waitForRefreshButtonEnabled();

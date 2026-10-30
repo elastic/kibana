@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -42,6 +43,22 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       schema: schema.boolean(),
       value: false,
       technicalPreview: true,
+      requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.includeFrozenByDefault.description',
+        {
+          defaultMessage:
+            'Makes the built-in Agent Builder tools include frozen tier data by default.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.includeFrozenByDefault.name', {
+        defaultMessage: 'Elastic Agent Builder: Include frozen tier data by default',
+      }),
+      schema: schema.boolean(),
+      value: false,
       requiresPageReload: false,
       readonly: false,
     },

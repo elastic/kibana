@@ -65,5 +65,7 @@ export const createIndexSearchFormValidationSchema = (toolsService: ToolsService
 
     customInstructions: z.string().optional(),
 
+    includeFrozen: z.boolean(),
+
     type: z.literal(ToolType.index_search),
   });

@@ -370,7 +370,7 @@ export class AgentBuilderPageObject extends FtrService {
     // Check whether the dropdown is already open before clicking, so we don't
     // accidentally toggle it closed on retry.
     await this.retry.tryForTime(30000, async () => {
-      const isOpen = await this.testSubjects.exists(optionSelector, { timeout: 0 });
+      const isOpen = await this.testSubjects.exists(optionSelector);
       if (!isOpen) {
         await this.testSubjects.click('agentBuilderMcpToolSelect');
       }

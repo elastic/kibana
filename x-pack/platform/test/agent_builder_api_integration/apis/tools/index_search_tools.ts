@@ -179,6 +179,37 @@ export default function ({ getService }: FtrProviderContext) {
           .send(toolWithInvalidRowLimit)
           .expect(400);
       });
+
+      it('should persist include_frozen', async () => {
+        const testTool = {
+          ...mockTool,
+          id: 'include-frozen-search-test-tool',
+          configuration: { ...mockTool.configuration, include_frozen: true },
+        };
+
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(testTool)
+          .expect(200);
+        createdToolIds.push(testTool.id);
+
+        const response = await supertest.get(`/api/agent_builder/tools/${testTool.id}`).expect(200);
+
+        expect(response.body.configuration).to.have.property('include_frozen', true);
+      });
+
+      it('should validate include_frozen is a boolean', async () => {
+        await supertest
+          .post('/api/agent_builder/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            ...mockTool,
+            id: 'invalid-include-frozen-tool',
+            configuration: { ...mockTool.configuration, include_frozen: 'yes' },
+          })
+          .expect(400);
+      });
     });
 
     describe('GET /api/agent_builder/tools/get-search-test-tool', () => {
@@ -325,6 +356,17 @@ export default function ({ getService }: FtrProviderContext) {
           'custom_instructions',
           updates.configuration.custom_instructions
         );
+      });
+
+      it('should update include_frozen', async () => {
+        const response = await supertest
+          .put(`/api/agent_builder/tools/update-search-test-tool`)
+          .set('kbn-xsrf', 'kibana')
+          .send({ configuration: { include_frozen: true } })
+          .expect(200);
+
+        expect(response.body.configuration).to.have.property('include_frozen', true);
+        expect(response.body.configuration).to.have.property('pattern', testIndex);
       });
 
       it('should return 404 for non-existent tool', async () => {

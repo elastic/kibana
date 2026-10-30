@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export function ObservabilityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const textValue = 'Foobar';
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   return {
     async clickSolutionNavigationEntry(appId: string, navId: string) {

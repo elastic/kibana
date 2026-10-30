@@ -386,6 +386,13 @@ export default function (providerContext: FtrProviderContextWithServices) {
       const staleVariantId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}7.17`;
       const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
+      // Create an agent already assigned to the stale variant (simulates a downlevel enrolled agent).
+      // policy_base_id is set so the deploy path can also find it via getAgentAssignedVersionsForPolicies.
+      // Indexed before the variant document so no sweep can observe the variant with zero agents.
+      await createAgentDoc(providerContext, 'agent-stale', staleVariantId, '7.17.0', true, {
+        policy_base_id: policyId,
+      });
+
       await es.index({
         index: '.fleet-policies',
         id: `${staleVariantId}:1`,
@@ -397,12 +404,6 @@ export default function (providerContext: FtrProviderContextWithServices) {
           data: { id: staleVariantId, revision: 1, inputs: [], agent: { monitoring: {} } },
         },
         refresh: 'wait_for',
-      });
-
-      // Create an agent already assigned to the stale variant (simulates a downlevel enrolled agent).
-      // policy_base_id is set so the deploy path can also find it via getAgentAssignedVersionsForPolicies.
-      await createAgentDoc(providerContext, 'agent-stale', staleVariantId, '7.17.0', true, {
-        policy_base_id: policyId,
       });
 
       await waitForTask();

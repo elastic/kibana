@@ -53,14 +53,14 @@ export class GlobalNavService extends FtrService {
   }
 
   public async openSolutionNavSwitcher(): Promise<void> {
-    if (await this.testSubjects.exists(`~solutionNavSwitcherPanel`, { timeout: 0 })) return;
+    if (await this.testSubjects.exists(`~solutionNavSwitcherPanel`)) return;
 
     await this.testSubjects.click('~solutionNavSwitcher');
     await this.testSubjects.existOrFail('~solutionNavSwitcherPanel');
   }
 
   public async changeSolutionNavigation(id: 'es' | 'oblt' | 'search'): Promise<void> {
-    if (!(await this.testSubjects.exists(`~solutionNavSwitcherPanel`, { timeout: 0 }))) {
+    if (!(await this.testSubjects.exists(`~solutionNavSwitcherPanel`))) {
       await this.openSolutionNavSwitcher();
     }
     await this.testSubjects.click(`~solutionNavSwitcherPanel > ${`~solutionNavSwitcher-${id}`}`);
