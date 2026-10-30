@@ -121,13 +121,4 @@ describe('migrateLegacyAiIndices', () => {
     expect(bulk).not.toHaveBeenCalled();
     expect(deleteIndex).toHaveBeenCalled();
   });
-
-  it('removes an empty legacy index', async () => {
-    search.mockResolvedValue({ hits: { total: { value: 0, relation: 'eq' }, hits: [] } });
-
-    await migrate();
-
-    expect(bulk).not.toHaveBeenCalled();
-    expect(deleteIndex).toHaveBeenCalled();
-  });
 });

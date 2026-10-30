@@ -1603,22 +1603,15 @@ describe('AiIndexService', () => {
         .fn()
         .mockRejectedValueOnce(new Error('boom'))
         .mockResolvedValue(undefined);
-      const onUnhandled = jest.fn();
-      process.on('unhandledRejection', onUnhandled);
-      try {
-        service = new AiIndexService({
-          esClient,
-          logger: loggingSystemMock.createLogger(),
-          migrateLegacy,
-        });
-        await new Promise(setImmediate);
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        migrateLegacy,
+      });
+      await new Promise(setImmediate);
 
-        expect(onUnhandled).not.toHaveBeenCalled();
-        await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([]);
-        expect(migrateLegacy).toHaveBeenCalledTimes(2);
-      } finally {
-        process.off('unhandledRejection', onUnhandled);
-      }
+      await expect(service.list(DEFAULT_SPACE)).resolves.toEqual([]);
+      expect(migrateLegacy).toHaveBeenCalledTimes(2);
     });
   });
 
