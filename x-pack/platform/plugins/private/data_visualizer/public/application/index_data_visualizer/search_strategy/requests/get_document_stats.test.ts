@@ -14,14 +14,23 @@ import { getDocumentCountStats } from './get_document_stats';
 
 const EARLIEST = 1454889600000;
 
-const searchParams = {
+const searchParams: OverallStatsSearchStrategyParams = {
   index: 'farequote-*',
   timeFieldName: '@timestamp',
   earliest: EARLIEST,
   latest: 1455235200000,
   intervalMs: 3600000,
   searchQuery: { match_all: {} },
-} as OverallStatsSearchStrategyParams;
+  aggInterval: {
+    asMilliseconds: () => 3600000,
+    asSeconds: () => 3600,
+    expression: '1h',
+  },
+  aggregatableFields: [],
+  nonAggregatableFields: [],
+  browserSessionSeed: 1,
+  samplingOption: { mode: 'no_sampling', seed: 'seed' },
+};
 
 const searchOptions: ISearchOptions = {};
 
