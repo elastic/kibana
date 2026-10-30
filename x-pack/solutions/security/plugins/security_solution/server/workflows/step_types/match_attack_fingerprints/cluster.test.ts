@@ -646,6 +646,22 @@ describe('disposition', () => {
     expect(decision.investigationId).toBe(investigationIdFromAttackId(canonical.attackId));
   });
 
+  it('waits when the Investigation could not be read and the fingerprint is still young', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const decision = disposition(
+      canonical,
+      stored({ writtenAt: now.toISOString(), investigationId: 'live-inv' }),
+      { unreadable: true },
+      [canonical],
+      now
+    );
+
+    expect(decision.kind).toBe('attach');
+    expect(decision.investigationId).toBe('live-inv');
+    expect(decision.tagCorrelatedAlerts).toBe(false);
+    expect(decision.retargetFingerprint).toBeUndefined();
+  });
+
   it('returns attach and leaves an open in-analysis investigation untagged', () => {
     const decision = disposition(canonical, stored(), { status: 'open', verdict: 'In analysis' });
 

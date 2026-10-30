@@ -28,6 +28,7 @@ import {
   disposition,
   fingerprintId,
   investigationIdFromAttackId,
+  investigationStillPending,
   hostUserPair,
   sharedIds,
   uniqueSorted,
@@ -883,6 +884,14 @@ const RETARGET_FINGERPRINT_SCRIPT = `
   }
 `;
 
+/** A 404, or a failed read of a fingerprint still inside 15 minutes. */
+const fingerprintStillPending = (
+  meta: InvestigationMeta | undefined,
+  stored: StoredFingerprint,
+  now: Date
+): boolean =>
+  meta === undefined || (meta.unreadable === true && investigationStillPending(stored, now));
+
 const fingerprintExpiresAt = (attack: AttackSignals, now: Date): string => {
   const last = attack.lastAlertAt === undefined ? Number.NaN : Date.parse(attack.lastAlertAt);
   return new Date((Number.isNaN(last) ? now.getTime() : last) + FINGERPRINT_TTL_MS).toISOString();
@@ -1041,10 +1050,14 @@ export const matchAttackFingerprints = async ({
     let fingerprintPending = false;
     if (decision.kind === 'attach' && match !== undefined) {
       attachedTo = match;
-      // Missing and still inside the 15-minute window. The attach adds this
-      // attack's alert ids after the Investigation appears, or retargets this
-      // fingerprint if it does not.
-      fingerprintPending = investigations.get(match.investigationId) === undefined;
+      // Missing, or unreadable, and still inside the 15-minute window. The attach
+      // adds this attack's alert ids after the Investigation appears, or retargets
+      // this fingerprint if it does not.
+      fingerprintPending = fingerprintStillPending(
+        investigations.get(match.investigationId),
+        match,
+        now
+      );
       await extendFingerprint(
         esClient,
         match,
@@ -1110,7 +1123,7 @@ export const matchAttackFingerprints = async ({
         if (adopted.kind === 'attach' && conflicting !== undefined) {
           decision = adopted;
           attachedTo = conflicting;
-          fingerprintPending = meta === undefined;
+          fingerprintPending = fingerprintStillPending(meta, conflicting, now);
           await extendFingerprint(
             esClient,
             conflicting,

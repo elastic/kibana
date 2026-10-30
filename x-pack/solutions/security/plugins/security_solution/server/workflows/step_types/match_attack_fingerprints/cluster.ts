@@ -516,8 +516,21 @@ export const disposition = (
   }
 
   // A 5xx, a timeout, or a privilege error is not a missing Investigation.
-  // Retargeting here would rewrite a fingerprint that may still be live.
+  // Inside 15 minutes the review may still be creating it, so this waits, the
+  // same as a 404. Older than that, retargeting would rewrite a fingerprint
+  // that may still be live.
   if (investigation?.unreadable === true) {
+    if (investigationStillPending(stored, now)) {
+      return {
+        kind: 'attach',
+        investigationId: stored.investigationId,
+        relatedInvestigationId: '',
+        relatedLinkReason: '',
+        tagCorrelatedAlerts: false,
+        tagFpChainAlerts: false,
+        journalAlertsRetired: false,
+      };
+    }
     return review;
   }
 
@@ -644,7 +657,8 @@ export const bestStoredForGroup = (
 /**
  * Lower ranks first. `joinable` is a missing Investigation still inside 15 minutes,
  * or an open one that is not finished. `retarget` is missing and already older than
- * that. `finished` is closed, expired, analysis failed, gate failed, or unreadable.
+ * that. `finished` is closed, expired, analysis failed, gate failed, or unreadable
+ * and already older than 15 minutes.
  */
 const JOIN_TIER = {
   joinable: 0,
@@ -663,10 +677,10 @@ const joinTier = (
     return JOIN_TIER.joinable;
   }
   const investigation = investigations.get(stored.investigationId);
-  // An unread Investigation is not a candidate to join or to retarget. A
-  // fingerprint that can still be joined ranks ahead of it.
+  // A failed read inside 15 minutes is still the in-flight review. Older than
+  // that, it is not a candidate to join or to retarget.
   if (investigation?.unreadable === true) {
-    return JOIN_TIER.finished;
+    return investigationStillPending(stored, now) ? JOIN_TIER.joinable : JOIN_TIER.finished;
   }
   if (investigation === undefined) {
     return investigationStillPending(stored, now) ? JOIN_TIER.joinable : JOIN_TIER.retarget;

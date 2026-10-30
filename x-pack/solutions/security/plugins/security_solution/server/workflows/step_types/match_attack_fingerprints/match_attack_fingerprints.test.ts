@@ -1019,6 +1019,101 @@ describe('matchAttackFingerprints', () => {
     );
   });
 
+  it('waits when a young fingerprint cannot be read', async () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const index = jest.fn().mockRejectedValue({ statusCode: 409, message: 'conflict' });
+    const { esClient, contextManager, update } = createHarness({
+      index,
+      get: jest.fn().mockResolvedValue({
+        _id: 'stored-fp',
+        _source: {
+          id: 'stored-fp',
+          '@timestamp': now.toISOString(),
+          attributes: {
+            investigation_id: '11111111-1111-8111-8111-111111111111',
+            alert_ids: ['old-1', 'old-2'],
+            host_entity_ids: ['host-1'],
+            user_entity_ids: ['user-1'],
+            mitre_attack_tactics: ['TA0008'],
+            first_alert_at: '2026-10-21T10:00:00.000Z',
+            last_alert_at: '2026-10-21T10:30:00.000Z',
+          },
+        },
+      }),
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 503, headers: {}, body: {}, message: 'unavailable' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['new-1', 'new-2'])],
+      contextManager,
+      esClient,
+      logger,
+      now,
+      spaceId: 'default',
+    });
+
+    expect(output.reviews).toEqual([]);
+    expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
+    expect(output.attachments[0]?.fingerprint_pending).toBe(true);
+    expect(index).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          attributes: expect.objectContaining({ alert_ids: ['old-1', 'old-2'] }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('does not retarget a fingerprint when the Investigation read fails', async () => {
+    const update = jest.fn().mockResolvedValue({ result: 'updated' });
+    const index = jest.fn().mockResolvedValue({ result: 'created' });
+    const { esClient, contextManager } = createHarness({
+      index,
+      update,
+      hits: [
+        {
+          _id: 'stored-fp',
+          _source: {
+            id: 'stored-fp',
+            type: 'security.attack_fingerprint',
+            '@timestamp': '2026-10-21T10:00:00.000Z',
+            expires_at: '2026-10-22T10:30:00.000Z',
+            attributes: {
+              investigation_id: '11111111-1111-8111-8111-111111111111',
+              alert_ids: ['a1', 'a2'],
+              host_entity_ids: ['host-1'],
+              user_entity_ids: ['user-1'],
+              mitre_attack_tactics: ['TA0008'],
+              first_alert_at: '2026-10-21T10:00:00.000Z',
+              last_alert_at: '2026-10-21T10:30:00.000Z',
+            },
+          },
+        },
+      ],
+    });
+    (contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({ status: 503, headers: {}, body: {}, message: 'unavailable' })
+    );
+
+    const output = await matchAttackFingerprints({
+      attacks: [attackDocument(ATTACK_ID, ['a1', 'a2'])],
+      contextManager,
+      esClient,
+      logger,
+      now: new Date('2026-10-21T12:00:00.000Z'),
+      spaceId: 'default',
+    });
+
+    expect(output.attachments).toEqual([]);
+    expect(output.reviews).toHaveLength(1);
+    expect(output.reviews[0]?.related_investigation_id).toBe('');
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('writes its own fingerprint when the retarget finds the document already claimed', async () => {
     const update = jest.fn().mockResolvedValue({ result: 'noop' });
     const index = jest.fn().mockResolvedValue({ result: 'created' });

@@ -54,21 +54,19 @@ triggers:
         tag_correlated_alerts:
           type: boolean
           description: >
-            When true, tag the detection alerts `az:ad_correlated`. Set only when
-            the Investigation has already escalated or closed for a reason other
-            than false positive.
+            Does not choose the tag. The attach tags `az:ad_correlated` only when
+            the re-read says the Investigation was handed off.
         tag_fp_chain_alerts:
           type: boolean
           description: >
-            When true, tag the detection alerts `az:ad_fp_chain` and acknowledge
-            the ones still open. Set when this attack joins an Investigation
-            already closed as a false positive. Wins when both tag flags are set.
+            Does not tag or acknowledge. It only changes the journal wording for
+            a closed false positive. The review writes `az:ad_fp_chain` at the
+            decision.
         journal_alerts_retired:
           type: boolean
           description: >
-            When true, journal that the correlated alerts were retired. Set only
-            when the Investigation verdict is a handed-off true positive or
-            inconclusive, the same cases the review journals.
+            Does not choose the note. The retirement journal runs when the re-read
+            says the Investigation was handed off.
         parent_run_id:
           type: string
           maxLength: 128
