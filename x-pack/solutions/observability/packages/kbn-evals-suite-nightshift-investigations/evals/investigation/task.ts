@@ -168,6 +168,7 @@ export const runInvestigation = async (
     query: example.input.question,
   };
   let investigation: Investigation | undefined;
+  let conversation: { rounds: ConversationRound[] } | undefined;
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
       '/internal/nightshift/investigations',
@@ -186,7 +187,13 @@ export const runInvestigation = async (
     output.investigation_id = investigationId;
     output.conversation_id = investigationId;
     investigation = await readInvestigation(fetch, investigationId);
-    while (!investigation || investigation.in_progress) {
+    // A pending proposal ends `in_progress` while the agent's round is still running, so the run is
+    // only over once that round has finished too.
+    while (
+      !investigation ||
+      investigation.in_progress ||
+      !isPersisted((conversation = await readConversation(fetch, investigation.id)))
+    ) {
       output.workflow_status = 'running';
       if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
         const minutes = INVESTIGATION_TIMEOUT_MS / 60_000;
@@ -199,6 +206,8 @@ export const runInvestigation = async (
       await setTimeout(POLL_INTERVAL_MS);
       investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
     }
+    // The verdict may have been written after the last read, while the round was finishing.
+    investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
   } catch (error) {
     output.execution_error = error instanceof Error ? error.message : String(error);
   }
@@ -212,11 +221,14 @@ export const runInvestigation = async (
       // There is no failed state: a run that ended without a conclusion recorded none.
       output.execution_error ??= NO_CONCLUSION_ERROR;
     }
-    const conversation = await readFinishedConversation(
-      fetch,
-      investigation.id,
-      !investigation.in_progress
-    );
+    if (!isPersisted(conversation)) {
+      conversation = await readFinishedConversation(
+        fetch,
+        investigation.id,
+        !investigation.in_progress
+      );
+    }
+    if (!conversation) throw new Error('Investigation conversation has no persisted rounds');
     if (!investigation.in_progress && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
     }
