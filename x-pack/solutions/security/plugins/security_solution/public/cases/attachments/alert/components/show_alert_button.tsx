@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useCaseViewNavigation, useCaseViewParams } from '@kbn/cases-plugin/public';
 import { CASE_VIEW_PAGE_TABS } from '@kbn/cases-plugin/common';
-import { EasePanelKey } from '../../../../flyout/ease/constants/panel_keys';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { getAlertHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { SHOW_ALERT_TOOLTIP } from '../translations';
+import { EaseFlyout } from '../../../../detections/components/alert_summary/flyout/ease_flyout';
 
 export interface ShowAlertButtonProps {
   id: string;
@@ -30,15 +27,15 @@ export interface ShowAlertButtonProps {
 }
 
 export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButtonProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const {
     telemetry,
     application: { capabilities },
   } = useKibana().services;
   const { navigateToCaseView } = useCaseViewNavigation();
   const { detailName } = useCaseViewParams();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openDocumentFlyoutFromIndex } = useFlyoutApi();
+  const [isEaseFlyoutOpen, setIsEaseFlyoutOpen] = useState(false);
+  const closeEaseFlyout = useCallback(() => setIsEaseFlyoutOpen(false), []);
 
   // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
   //  https://github.com/elastic/kibana/issues/218741
@@ -48,37 +45,15 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
     const hasValidIndex = index && String(index).trim();
     if (hasValidIndex) {
       if (EASE) {
-        // EASE alert summary flyout has no new-flyout equivalent yet, so it stays on the legacy flyout.
-        openFlyout({
-          right: {
-            id: EasePanelKey,
-            params: {
-              id: alertId,
-              indexName: index,
-            },
-          },
-        });
+        setIsEaseFlyoutOpen(true);
       } else {
-        if (enableNewFlyout) {
-          openDocumentFlyoutFromIndex({
-            documentId: alertId,
-            indexName: index,
-            renderCellActions: casesCellActionRenderer,
-            origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
-            title: getAlertHistoryTitle(ruleName),
-          });
-        } else {
-          openFlyout({
-            right: {
-              id: DocumentDetailsRightPanelKey,
-              params: {
-                id: alertId,
-                indexName: index,
-                scopeId: TimelineId.casePage,
-              },
-            },
-          });
-        }
+        openDocumentFlyoutFromIndex({
+          documentId: alertId,
+          indexName: index,
+          renderCellActions: casesCellActionRenderer,
+          origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+          title: getAlertHistoryTitle(ruleName),
+        });
         telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: TimelineId.casePage,
           panel: 'right',
@@ -91,25 +66,26 @@ export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButto
     EASE,
     alertId,
     index,
-    openFlyout,
     telemetry,
     detailName,
     navigateToCaseView,
-    enableNewFlyout,
     openDocumentFlyoutFromIndex,
     ruleName,
   ]);
 
   return (
-    <EuiToolTip position="top" content={<p>{SHOW_ALERT_TOOLTIP}</p>}>
-      <EuiButtonIcon
-        aria-label={SHOW_ALERT_TOOLTIP}
-        data-test-subj={`comment-action-show-alert-${id}`}
-        onClick={onClick}
-        iconType="chevronSingleRight"
-        id={`${id}-show-alert`}
-      />
-    </EuiToolTip>
+    <>
+      <EuiToolTip position="top" content={<p>{SHOW_ALERT_TOOLTIP}</p>}>
+        <EuiButtonIcon
+          aria-label={SHOW_ALERT_TOOLTIP}
+          data-test-subj={`comment-action-show-alert-${id}`}
+          onClick={onClick}
+          iconType="chevronSingleRight"
+          id={`${id}-show-alert`}
+        />
+      </EuiToolTip>
+      {isEaseFlyoutOpen && <EaseFlyout documentId={alertId} onClose={closeEaseFlyout} />}
+    </>
   );
 };
 
