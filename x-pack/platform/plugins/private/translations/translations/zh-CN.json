@@ -8528,7 +8528,6 @@
     "securitySolutionPackages.ruleManagement.prebuiltRuleCustomization.upsell": "需要 {requiredLicense} {licenseKind} 才能定制预构建规则",
     "securitySolutionPackages.sideNav.betaBadge.label": "公测版",
     "securitySolutionPackages.sideNav.togglePanel": "切换面板导航",
-    "securitySolutionPackages.siemMigration.pageTitle": "转换规则",
     "securitySolutionPackages.upselling.graphVisualization.description": "此功能需要{subscription}。",
     "securitySolutionPackages.upselling.graphVisualization.subscriptionLink": "白金级订阅",
     "securitySolutionPackages.upselling.pages.attackDiscovery.pageTitle.pageTitle": "Attack Discovery",
