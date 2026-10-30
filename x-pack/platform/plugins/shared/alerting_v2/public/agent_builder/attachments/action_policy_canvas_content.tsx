@@ -23,6 +23,7 @@ import { ActionPolicyDefinitionList } from '../../components/action_policy/detai
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
+import { recordAttachmentSync, useRecordedAttachmentSync } from './attachment_save_state';
 
 const EMPTY_VALUE = '-';
 
@@ -46,6 +47,7 @@ export const ActionPolicyCanvasContent = ({
   const data = rawData as ActionPolicyCanvasData;
   // Origin is only set if the action policy has been persisted
   const isPersisted = Boolean(origin);
+  const recordedSyncedAt = useRecordedAttachmentSync(attachment.id);
 
   const [mounted, setMounted] = useState(false);
   const [dependenciesReady, setDependenciesReady] = useState<boolean | null>(null);
@@ -114,7 +116,7 @@ export const ActionPolicyCanvasContent = ({
                 data.id,
                 attachmentDataToActionPolicyPayload(data)
               );
-              await updateOrigin(data.id);
+              recordAttachmentSync(attachment.id, await updateOrigin(data.id));
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
                   defaultMessage: 'Policy "{name}" created',
@@ -155,7 +157,7 @@ export const ActionPolicyCanvasContent = ({
               attachmentDataToActionPolicyPayload(data)
             );
             // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
-            await updateOrigin(data.id);
+            recordAttachmentSync(attachment.id, await updateOrigin(data.id));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
@@ -197,6 +199,10 @@ export const ActionPolicyCanvasContent = ({
     notifications,
     data,
     hasDraftDependencies,
+    attachment.id,
+    // Re-registering the buttons after a recorded sync redraws the canvas header, so getHeader
+    // re-evaluates the unsaved changes badge against the new sync date.
+    recordedSyncedAt,
   ]);
 
   return (

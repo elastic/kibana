@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { hasUnsavedChanges } from './attachment_save_state';
+import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
+import { hasUnsavedChanges, recordAttachmentSync } from './attachment_save_state';
 
 const SYNCED_AT = '2026-04-01T00:00:00.000Z';
 const LATER = '2026-04-02T00:00:00.000Z';
+const LATEST = '2026-04-03T00:00:00.000Z';
 
 const versionData = (
   overrides: Partial<{
@@ -25,10 +27,17 @@ const versionData = (
   ...overrides,
 });
 
+const originResponse = (originSnapshotAt?: string) =>
+  ({
+    success: true,
+    attachment: { origin_snapshot_at: originSnapshotAt },
+  } as unknown as UpdateOriginResponse);
+
 describe('hasUnsavedChanges', () => {
   it('is true when the latest version was created after the last sync', () => {
     expect(
       hasUnsavedChanges({
+        id: 'att-1',
         origin: 'rule-1',
         versionData: versionData({ version: 2, versionCount: 2, createdAt: LATER }),
       })
@@ -65,15 +74,52 @@ describe('hasUnsavedChanges', () => {
       { origin: 'rule-1', versionData: versionData({ createdAt: 'not-a-date' }) },
     ],
   ])('is false when %s', (_name, attachment) => {
-    expect(hasUnsavedChanges(attachment)).toBe(false);
+    expect(hasUnsavedChanges({ id: 'att-1', ...attachment })).toBe(false);
   });
 
   it('compares instants rather than strings', () => {
     expect(
       hasUnsavedChanges({
+        id: 'att-1',
         origin: 'rule-1',
         versionData: versionData({ createdAt: '2026-04-01T01:00:00.000+02:00' }),
       })
     ).toBe(false);
+  });
+});
+
+describe('recordAttachmentSync', () => {
+  const unsavedEdit = (id: string, originSyncedAt = SYNCED_AT) => ({
+    id,
+    origin: 'rule-1',
+    versionData: versionData({ version: 2, versionCount: 2, createdAt: LATER, originSyncedAt }),
+  });
+
+  it('clears unsaved changes once a later sync is recorded', () => {
+    const attachment = unsavedEdit('att-recorded');
+    expect(hasUnsavedChanges(attachment)).toBe(true);
+
+    recordAttachmentSync('att-recorded', originResponse(LATEST));
+
+    expect(hasUnsavedChanges(attachment)).toBe(false);
+  });
+
+  it('only applies to the attachment it was recorded for', () => {
+    recordAttachmentSync('att-other', originResponse(LATEST));
+
+    expect(hasUnsavedChanges(unsavedEdit('att-unrelated'))).toBe(true);
+  });
+
+  it('ignores a response without a sync date', () => {
+    recordAttachmentSync('att-no-date', originResponse(undefined));
+    recordAttachmentSync('att-no-date', undefined);
+
+    expect(hasUnsavedChanges(unsavedEdit('att-no-date'))).toBe(true);
+  });
+
+  it('keeps the later sync date from props over an older recorded one', () => {
+    recordAttachmentSync('att-older-record', originResponse(SYNCED_AT));
+
+    expect(hasUnsavedChanges(unsavedEdit('att-older-record', LATEST))).toBe(false);
   });
 });
