@@ -37,8 +37,8 @@ export class ConsolePage {
     const encoded = compressToEncodedURIComponent(request);
     await this.page.gotoApp('dev_tools', {
       hash: `console?load_from=data:text/plain,${encoded}`,
+      readyWhen: this.inputEditor,
     });
-    await this.inputEditor.waitFor({ state: 'visible' });
     await this.skipTourButton.click();
     await this.focusEditor(this.inputEditor);
     await this.sendRequestButton.waitFor({ state: 'visible' });
