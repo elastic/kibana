@@ -28,6 +28,14 @@ export const DISRUPTIVE_ACTION_IDS: readonly string[] = [
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 ];
 
+const ACTION_ID_PREFIX = 'system-alertzero-action-';
+
+/** Short log label of a recommended action: `system-alertzero-action-isolate-host` -> `isolate-host`. */
+export const actionTypeLabel = (actionWorkflowId: string): string =>
+  actionWorkflowId.startsWith(ACTION_ID_PREFIX)
+    ? actionWorkflowId.slice(ACTION_ID_PREFIX.length)
+    : actionWorkflowId;
+
 /** Actions Endpoint Analysis may recommend: the Elastic Defend response catalog. */
 export const ENDPOINT_RESPONSE_ALLOW_LIST: readonly string[] = DISRUPTIVE_ACTION_IDS;
 

@@ -10,6 +10,7 @@ import type { ListAttachmentsResponse } from '@kbn/agent-builder-plugin/common/h
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { assertActionSafety } from './action_safety';
 import { analysisOutputValidator } from './contracts';
+import { assertContainmentProposed } from './verdict_checks';
 
 export interface AlertZeroExpectedEvidence {
   host: string;
@@ -93,6 +94,15 @@ export const assertAnalysisExecution = (
     });
   } catch (error) {
     errors.push(error instanceof Error ? error.message : String(error));
+  }
+  // A conclusive fixture must end with a containment proposal for the analyst: `ActionSafety`
+  // alone passes vacuously when nothing is proposed.
+  if (expected.conclusive === true) {
+    try {
+      assertContainmentProposed(output?.structured_output, { endpointIds: [expected.endpointId] });
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
   }
   if (errors.length > 0) throw new Error(errors.join(' | '));
   return assertStructuredEvidence(output?.structured_output, expected);

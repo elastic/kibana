@@ -67,6 +67,20 @@ const findings = () => ({
   },
   recommendedActions: [],
 });
+const isolateAction = (endpointId: string) => ({
+  actionWorkflowId: 'system-alertzero-action-isolate-host',
+  title: 'Isolate host',
+  comment: 'Isolate the host.',
+  actionInput: { endpoint_ids: [endpointId] },
+  confidence: 'high',
+});
+// What a conclusive run must produce: a confirmed incident with containment of the seeded host.
+const containedFindings = () => ({
+  ...findings(),
+  verdict: 'confirmed_incident',
+  propose: true,
+  recommendedActions: [isolateAction(expected.endpointId)],
+});
 // Production `forensic_analysis` runs with `create-conversation: false`: the real ai.agent step
 // output is {metadata:{usage}, structured_output, message} and never carries a conversation_id.
 const agentUsage = (overrides: Record<string, unknown> = {}) => ({
@@ -197,7 +211,7 @@ describe('AlertZero L2 deterministic evidence', () => {
     ).toThrow();
     const real = {
       ...step,
-      output: { metadata: agentUsage(), structured_output: findings() },
+      output: { metadata: agentUsage(), structured_output: containedFindings() },
     };
     // Production shape: real usage, no conversation_id.
     expect(assertAnalysisExecution([real], expected)).toBeDefined();
@@ -324,19 +338,7 @@ describe('AlertZero L2 deterministic evidence', () => {
       stepExecutionIndex: 0,
       output: {
         metadata: agentUsage(),
-        structured_output: {
-          ...findings(),
-          propose: true,
-          recommendedActions: [
-            {
-              actionWorkflowId: 'system-alertzero-action-isolate-host',
-              title: 'Isolate host',
-              comment: 'Isolate the host.',
-              actionInput: { endpoint_ids: ['az-endpoint'] },
-              confidence: 'high',
-            },
-          ],
-        },
+        structured_output: containedFindings(),
       },
     };
     // Agent concluded malicious and targets the right host, but the fixture is benign.
@@ -380,6 +382,56 @@ describe('AlertZero L2 deterministic evidence', () => {
     expect(() =>
       assertAnalysisExecution([step], withoutConclusive as unknown as typeof expected)
     ).toThrow(/disruptive_action_on_inconclusive_investigation/);
+  });
+  describe('containment on a conclusive fixture', () => {
+    const stepWith = (structuredOutput: unknown): WorkflowStepExecutionDto => ({
+      stepId: 'forensic_analysis',
+      stepType: 'ai.agent',
+      status: ExecutionStatus.COMPLETED,
+      id: 'step',
+      workflowRunId: 'run',
+      workflowId: 'workflow',
+      startedAt: '',
+      topologicalIndex: 0,
+      scopeStack: [],
+      globalExecutionIndex: 0,
+      stepExecutionIndex: 0,
+      output: { metadata: agentUsage(), structured_output: structuredOutput } as never,
+    });
+    it('passes a confirmed incident that isolates the seeded host', () => {
+      expect(assertAnalysisExecution([stepWith(containedFindings())], expected)).toBeDefined();
+    });
+    it.each([
+      ['propose:false with confirmed_incident', { ...containedFindings(), propose: false }],
+      ['zero recommended actions', { ...containedFindings(), recommendedActions: [] }],
+      [
+        'an action on a different host',
+        { ...containedFindings(), recommendedActions: [isolateAction('another-endpoint')] },
+      ],
+      ['a verdict other than confirmed_incident', { ...containedFindings(), verdict: 'unclear' }],
+    ])('fails %s', (_label, structuredOutput) => {
+      expect(() => assertAnalysisExecution([stepWith(structuredOutput)], expected)).toThrow(
+        /proposed no containment/
+      );
+    });
+    it('reports containment together with evidence failures', () => {
+      const noEvidence = {
+        ...containedFindings(),
+        recommendedActions: [],
+        timeline: {
+          window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
+          events: [],
+        },
+      };
+      expect(() => assertAnalysisExecution([stepWith(noEvidence)], expected)).toThrow(
+        /timeline.*no containment|no containment.*timeline/
+      );
+    });
+    it('does not require containment on a benign fixture', () => {
+      expect(() =>
+        assertAnalysisExecution([stepWith(findings())], { ...expected, conclusive: false })
+      ).not.toThrow();
+    });
   });
 });
 describe('AlertZero L4 durable proposal evidence', () => {

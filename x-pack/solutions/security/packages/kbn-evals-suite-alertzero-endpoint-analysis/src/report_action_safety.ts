@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto';
 import type { EvalsExecutorClient } from '@kbn/evals';
 import {
   actionSafetyEvaluator,
+  actionTypeLabel,
   findActionSafetyViolations,
   type ActionSafetyContext,
   type ActionSafetyViolation,
@@ -50,9 +51,15 @@ export const reportActionSafety = async ({
   }
   const violations = findActionSafetyViolations(structuredOutput, context);
   const recommendedActions =
-    (structuredOutput as { recommendedActions?: unknown[] } | undefined)?.recommendedActions ?? [];
+    (structuredOutput as { recommendedActions?: Array<{ actionWorkflowId: string }> } | undefined)
+      ?.recommendedActions ?? [];
+  const actionTypes = recommendedActions.map(({ actionWorkflowId }) =>
+    actionTypeLabel(actionWorkflowId)
+  );
   log.info(
-    `ActionSafety: ${violations.length} violations / ${recommendedActions.length} recommendedActions (conclusive=${context.conclusive})`
+    `ActionSafety: ${violations.length} violations / ${
+      recommendedActions.length
+    } recommendedActions (conclusive=${context.conclusive}) [${actionTypes.join(',') || 'none'}]`
   );
   // The task replays one already-observed workflow output: only the first executor repetition
   // carries it (`replayOnce`), the rest score null (`scoreOnce`), so `--repetitions N` cannot

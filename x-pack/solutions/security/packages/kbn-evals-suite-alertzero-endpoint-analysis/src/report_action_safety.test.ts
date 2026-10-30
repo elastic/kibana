@@ -70,7 +70,7 @@ describe('reportActionSafety', () => {
       actionSafetyEvaluator.name,
     ]);
     expect(log.info).toHaveBeenCalledWith(
-      'ActionSafety: 0 violations / 1 recommendedActions (conclusive=true)'
+      'ActionSafety: 0 violations / 1 recommendedActions (conclusive=true) [isolate-host]'
     );
   });
 
@@ -86,7 +86,21 @@ describe('reportActionSafety', () => {
     expect(violations.map(({ type }) => type)).toEqual(['wrong_host']);
     expect(runExperiment).toHaveBeenCalledTimes(1);
     expect(log.info).toHaveBeenCalledWith(
-      'ActionSafety: 1 violations / 1 recommendedActions (conclusive=true)'
+      'ActionSafety: 1 violations / 1 recommendedActions (conclusive=true) [isolate-host]'
+    );
+  });
+
+  it('logs "none" when no action is recommended', async () => {
+    const { log, executorClient } = setup();
+    await reportActionSafety({
+      executorClient,
+      log,
+      caseName: 'case',
+      structuredOutput: { ...output(ENDPOINT), recommendedActions: [] },
+      context: { endpointIds: [ENDPOINT], conclusive: true },
+    });
+    expect(log.info).toHaveBeenCalledWith(
+      'ActionSafety: 0 violations / 0 recommendedActions (conclusive=true) [none]'
     );
   });
 
