@@ -10,6 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntModels } from './types';
 import { huntCoordinator } from './hunt_coordinator';
+import type { HuntCoordinatorParams } from './hunt_coordinator';
 import { SUMMARIZE_HIT_SOURCE_FIELDS } from './common/summarize_hit';
 
 /** The universe the routes hand the coordinator: the space's default data view. */
@@ -1460,6 +1461,39 @@ describe('huntCoordinator', () => {
       expect(scheduled.replayed_whole_report).toBe(false);
       expect(callerText.replayed_whole_report).toBe(false);
     });
+
+    it.each<[string, Pick<HuntCoordinatorParams, 'iocs' | 'techniques'>]>([
+      ['iocs', { iocs: [{ type: 'ip', value: '192.0.2.99' }] }],
+      ['techniques', { techniques: ['T1059'] }],
+    ])(
+      'does not call a manual run over caller-supplied %s a replay of the whole report',
+      async (_, callerInput) => {
+        const { loadReportHuntContext: mockLoad } = jest.requireMock(
+          './common/load_report_context'
+        );
+        mockLoad.mockResolvedValueOnce({
+          iocs: [{ type: 'ip', value: '192.0.2.30' }],
+          techniques: ['T1078.004'],
+          text: 'report body text',
+        });
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          allTiers({} as ScopedModel),
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'manual',
+            run_id: 'run-caller-inputs',
+            report_id: 'rpt-1',
+            ...callerInput,
+          }
+        );
+
+        expect(result.replayed_whole_report).toBe(false);
+      }
+    );
 
     it('omits the list when Tier 2 did not run', async () => {
       const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
