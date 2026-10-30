@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
   useMutation,
   useQuery,
@@ -20,6 +21,7 @@ import {
 } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
+import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../onboarding/use_onboarding';
 import { createBrowserServiceAccountsApi } from './browser_service_accounts_api';
 
 const QUERY_KEY = ['nightshift.investigatorServiceAccount'] as const;
@@ -63,6 +65,39 @@ const toError = (error: unknown, { isServerless }: { isServerless: boolean }): E
   return error instanceof Error ? error : new Error(String(error));
 };
 
+/** How many unbound automations the warning names before it counts the rest. */
+const MAX_LISTED_UNBOUND_AUTOMATIONS = 3;
+
+/**
+ * Warns about automations the setup could not bind. They keep running as the user who created
+ * them, so they stop working once that user loses access, and an admin has to save them again.
+ */
+const warnAboutUnboundAutomations = (
+  { unboundAutomations }: InvestigatorServiceAccountStatus,
+  notifications: NotificationsStart
+): void => {
+  if (!unboundAutomations?.length) {
+    return;
+  }
+  const listed = unboundAutomations
+    .slice(0, MAX_LISTED_UNBOUND_AUTOMATIONS)
+    .map(({ name, id }) => name || id)
+    .join(', ');
+  const remaining = unboundAutomations.length - MAX_LISTED_UNBOUND_AUTOMATIONS;
+  notifications.toasts.addWarning({
+    title: i18n.translate('xpack.nightshift.serviceAccount.unboundAutomationsToastTitle', {
+      defaultMessage:
+        '{count, plural, one {# automation still runs as its author} other {# automations still run as their authors}}',
+      values: { count: unboundAutomations.length },
+    }),
+    text: i18n.translate('xpack.nightshift.serviceAccount.unboundAutomationsToastText', {
+      defaultMessage:
+        'Nightshift is set up, but {listed}{remaining, plural, =0 {} one { and # more} other { and # more}} could not be moved to the Nightshift automations account. Open each automation and save it, or enable Nightshift again.',
+      values: { listed, remaining: Math.max(remaining, 0) },
+    }),
+  });
+};
+
 /** Reads whether Nightshift is set up with its service account in the current space. */
 export const useInvestigatorServiceAccount = (): UseQueryResult<
   InvestigatorServiceAccountStatus,
@@ -86,8 +121,10 @@ export const useInvestigatorServiceAccount = (): UseQueryResult<
 };
 
 /**
- * Sets up Nightshift in the current space: finds the deployment's Nightshift service accounts by
- * name, or creates them, as the current user, then binds the space's workflows to them.
+ * Enables Nightshift in the current space, in one step: finds the deployment's Nightshift service
+ * accounts by name, or creates them, as the current user, binds the space's workflows to them,
+ * then installs the investigation agent. Both halves are idempotent, so a retry after a partial
+ * failure completes the setup.
  */
 export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
   InvestigatorServiceAccountStatus,
@@ -113,20 +150,33 @@ export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
         createBrowserServiceAccountsApi({ http, serviceAccounts: security.serviceAccounts }),
         { isServerless }
       );
-      return investigationsClient.fetch(
+      const status = await investigationsClient.fetch(
         'POST /internal/nightshift/investigations/service_account/_enable',
         { signal: null, params: { body: { serviceAccountIds } } }
       );
+      // The space's agent runs as the account the step above bound, so it is installed last.
+      await investigationsClient.fetch('POST /internal/nightshift/onboarding/enable', {
+        signal: null,
+      });
+      return status;
     },
     onSuccess: (status) => {
       queryClient.setQueryData(QUERY_KEY, status);
+      queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.serviceAccount.enabledToastTitle', {
+          defaultMessage: 'Elastic Nightshift enabled',
+        }),
+      });
+      warnAboutUnboundAutomations(status, notifications);
     },
     onError: (error) => {
       // A failed setup may have done part of its work; read the status again.
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_ONBOARDING_QUERY_KEY });
       notifications.toasts.addError(toError(error, { isServerless }), {
         title: i18n.translate('xpack.nightshift.serviceAccount.setupErrorToastTitle', {
-          defaultMessage: 'Failed to set up the Nightshift service account',
+          defaultMessage: 'Could not enable Elastic Nightshift',
         }),
       });
     },
