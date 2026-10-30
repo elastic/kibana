@@ -14,20 +14,17 @@ import {
   timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
 import { isEmpty, isObject } from 'lodash';
-import type { FieldPath } from 'react-hook-form';
+import type { FieldPath, UseFormGetValues } from 'react-hook-form';
 import { useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
-export function useSectionFormValidation() {
-  const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();
-  // Subscribes this component (not the form root) to the values and errors read below.
-  const [indicatorType] = useWatch({
-    control,
-    name: ['indicator.type', 'indicator.params', 'name'],
-  });
-  const formState = useFormState({ control });
-  const isInvalid = (field: FieldPath<CreateSLOForm>) => getFieldState(field, formState).invalid;
+type IsInvalid = (field: FieldPath<CreateSLOForm>) => boolean;
 
+const getIndicatorSectionValid = (
+  indicatorType: CreateSLOForm['indicator']['type'],
+  getValues: UseFormGetValues<CreateSLOForm>,
+  isInvalid: IsInvalid
+): boolean => {
   let isIndicatorSectionValid: boolean = false;
 
   switch (indicatorType) {
@@ -215,6 +212,36 @@ export function useSectionFormValidation() {
       break;
   }
 
+  return isIndicatorSectionValid;
+};
+
+/**
+ * Validity of the indicator section only. Subscribes to the indicator values and errors, so that consumers
+ * (the data preview chart) do not re-render on changes elsewhere in the form.
+ */
+export function useIndicatorSectionValidation(): boolean {
+  const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();
+  const [indicatorType] = useWatch({ control, name: ['indicator.type', 'indicator.params'] });
+  const formState = useFormState({ control, name: 'indicator' });
+
+  return getIndicatorSectionValid(
+    indicatorType,
+    getValues,
+    (field) => getFieldState(field, formState).invalid
+  );
+}
+
+export function useSectionFormValidation() {
+  const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();
+  const [indicatorType] = useWatch({
+    control,
+    name: ['indicator.type', 'indicator.params', 'name'],
+  });
+  const formState = useFormState({ control });
+  const isInvalid: IsInvalid = (field) => getFieldState(field, formState).invalid;
+
+  const isIndicatorSectionValid = getIndicatorSectionValid(indicatorType, getValues, isInvalid);
+
   const isObjectiveSectionValid = (
     [
       'budgetingMethod',
@@ -231,6 +258,7 @@ export function useSectionFormValidation() {
     !isInvalid('name') && getValues('name') !== '' && !isInvalid('description');
 
   return {
+    isValidating: formState.isValidating,
     isIndicatorSectionValid,
     isObjectiveSectionValid,
     isDescriptionSectionValid,

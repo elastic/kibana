@@ -9,10 +9,11 @@ import { EuiComboBox, EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
 import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
+import { useFormValues } from '../../../hooks/use_form_values';
 import type { CreateSLOForm } from '../../../types';
 
 const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
@@ -50,13 +51,10 @@ export function MetricInput({
   indexFields,
 }: MetricInputProps) {
   const { control } = useFormContext<CreateSLOForm>();
-  const [metricName, metricAggregation] = useWatch({
-    control,
-    name: [
-      `indicator.params.metric.metrics.${index}.name`,
-      `indicator.params.metric.metrics.${index}.aggregation`,
-    ],
-  });
+  const [metricName, metricAggregation] = useFormValues([
+    `indicator.params.metric.metrics.${index}.name`,
+    `indicator.params.metric.metrics.${index}.aggregation`,
+  ]);
 
   const [metricFields, setMetricFields] = useState(
     indexFields.filter((field) => NUMERIC_FIELD_TYPES.includes(field.type))

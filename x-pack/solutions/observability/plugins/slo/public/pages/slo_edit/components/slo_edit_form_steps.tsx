@@ -9,10 +9,8 @@ import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { useFormContext, useFormState } from 'react-hook-form';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
-import type { CreateSLOForm } from '../types';
 
 interface Props {
   isEditMode: boolean;
@@ -32,11 +30,12 @@ export function SloEditFormSteps({
   objectiveSection,
   descriptionSection,
 }: Props) {
-  const { control } = useFormContext<CreateSLOForm>();
-  const { isValidating } = useFormState({ control });
-
-  const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
-    useSectionFormValidation();
+  const {
+    isValidating,
+    isIndicatorSectionValid,
+    isObjectiveSectionValid,
+    isDescriptionSectionValid,
+  } = useSectionFormValidation();
 
   const { showDescriptionSection, showObjectiveSection } = useShowSections(
     isEditMode,
