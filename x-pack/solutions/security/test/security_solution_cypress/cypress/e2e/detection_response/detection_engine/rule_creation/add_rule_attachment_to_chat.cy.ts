@@ -14,6 +14,7 @@ import { visit } from '../../../../tasks/navigation';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import { visitRuleEditPage } from '../../../../tasks/edit_rule';
+import { openAppMenuOverflow } from '../../../../tasks/app_menu';
 import { setPreferredChatExperienceToAgent } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import {
   clickNewAgentBuilderAttachmentButton,
@@ -45,13 +46,14 @@ describe(
       assertAgentBuilderConversationInputEditorContains(prompt);
     });
 
-    it('should show the "Add to chat" button on the rule details page', () => {
+    it('should show the "Add to chat" item in the "More" menu on the rule details page', () => {
       createRule(
         getCustomQueryRuleParams({ rule_id: 'test-rule', name: 'Test Rule', enabled: false })
       ).then((response) => {
         visitRuleDetailsPage(response.body.id);
       });
 
+      openAppMenuOverflow();
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
       assertAgentBuilderConversationInputEditorContains(prompt);

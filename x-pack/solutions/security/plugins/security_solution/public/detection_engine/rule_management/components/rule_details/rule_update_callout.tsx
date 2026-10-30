@@ -64,7 +64,7 @@ const RuleUpdateCalloutComponent = ({
         <p>{message}</p>
         {updateCallToActionButton}
       </EuiCallOut>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
       {rulePreviewFlyout}
     </>
   );

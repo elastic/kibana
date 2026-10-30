@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { omit } from 'lodash/fp';
+import type { AppHeaderTab } from '@kbn/app-header';
+import { useLocation } from 'react-router-dom';
+import { useNavigation } from '../../../../common/lib/kibana';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
-import type { NavTab } from '../../../../common/components/navigation/types';
 
 export enum RuleDetailTabs {
   overview = 'overview',
@@ -44,83 +47,51 @@ export const useRuleDetailsTabs = ({
   isExistingRule,
   canReadAlerts,
 }: UseRuleDetailsTabsProps) => {
+  const [{ tabName }] = useRouteSpy();
+  const { search } = useLocation();
+  const { getAppUrl } = useNavigation();
   const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
     'endpointExceptionsMovedUnderManagement'
   );
 
-  const ruleDetailTabs = useMemo(
-    (): Record<RuleDetailTabs, NavTab> => ({
-      [RuleDetailTabs.overview]: {
-        id: RuleDetailTabs.overview,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.overview],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.overview}`,
-      },
-      [RuleDetailTabs.alerts]: {
-        id: RuleDetailTabs.alerts,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts],
-        disabled: false,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.alerts}`,
-      },
-      [RuleDetailTabs.exceptions]: {
-        id: RuleDetailTabs.exceptions,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.exceptions],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.exceptions}`,
-      },
-      [RuleDetailTabs.endpointExceptions]: {
-        id: RuleDetailTabs.endpointExceptions,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.endpointExceptions],
-        disabled: rule == null,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.endpointExceptions}`,
-      },
-      [RuleDetailTabs.executionResults]: {
-        id: RuleDetailTabs.executionResults,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionResults],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
-      },
-    }),
-    [isExistingRule, rule, ruleId]
-  );
-
-  const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
-
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canReadExceptions = useUserPrivileges().rulesPrivileges.exceptions.read;
+  return useMemo<AppHeaderTab[]>(() => {
+    const hasEndpointList = (rule?.exceptions_list ?? []).some(
+      (list) => list.type === ExceptionListTypeEnum.ENDPOINT
+    );
+    const visibleTabs = [
+      RuleDetailTabs.overview,
+      ...(canReadAlerts ? [RuleDetailTabs.alerts] : []),
+      ...(canReadExceptions ? [RuleDetailTabs.exceptions] : []),
+      ...(!isEndpointExceptionsMovedFFEnabled && canReadEndpointExceptions && hasEndpointList
+        ? [RuleDetailTabs.endpointExceptions]
+        : []),
+      RuleDetailTabs.executionResults,
+    ];
 
-  useEffect(() => {
-    const hiddenTabs = [];
-
-    if (!canReadAlerts) {
-      hiddenTabs.push(RuleDetailTabs.alerts);
-    }
-    if (isEndpointExceptionsMovedFFEnabled || !canReadEndpointExceptions) {
-      hiddenTabs.push(RuleDetailTabs.endpointExceptions);
-    }
-    if (!canReadExceptions) {
-      hiddenTabs.push(RuleDetailTabs.exceptions);
-    }
-    if (rule != null) {
-      const hasEndpointList = (rule.exceptions_list ?? []).some(
-        (list) => list.type === ExceptionListTypeEnum.ENDPOINT
-      );
-      if (!hasEndpointList) {
-        hiddenTabs.push(RuleDetailTabs.endpointExceptions);
-      }
-    }
-
-    const tabs = omit<Record<RuleDetailTabs, NavTab>>(hiddenTabs, ruleDetailTabs);
-
-    setTabs(tabs);
+    return visibleTabs.map((id) => ({
+      id,
+      label: RULE_DETAILS_TAB_NAME[id],
+      disabled:
+        id === RuleDetailTabs.executionResults
+          ? !isExistingRule
+          : id !== RuleDetailTabs.alerts && rule == null,
+      href: getAppUrl({ path: `/rules/id/${ruleId}/${id}${search}` }),
+      isSelected: tabName === id,
+      onClick: () => track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`),
+      'data-test-subj': `navigation-${id}`,
+    }));
   }, [
     canReadEndpointExceptions,
     canReadExceptions,
     canReadAlerts,
     isEndpointExceptionsMovedFFEnabled,
     rule,
-    ruleDetailTabs,
+    isExistingRule,
+    getAppUrl,
+    ruleId,
+    search,
+    tabName,
   ]);
-
-  return pageTabs;
 };
