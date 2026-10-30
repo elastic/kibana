@@ -178,6 +178,7 @@ export const SentryGetEventInputSchema = lazySchema(() =>
       .describe('The project slug the event belongs to.'),
     eventId: z
       .string()
+      .max(32)
       .regex(/^[0-9a-f]{32}$/)
       .describe('The 32-character hexadecimal Sentry event ID, returned by listIssueEvents.'),
   })
