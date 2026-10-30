@@ -21,18 +21,18 @@ const ANOMALIES_RECENT_TABLE_TEST_ID = 'entity-anomalies-flyout-section-recent-t
 // Host right panel header — present whenever the host panel is rendered; used as page-ready signal
 const HOST_PANEL_HEADER_TEST_ID = 'host-panel-header' as const;
 
-// Anomalies tab button in entity details left panel
-// (defined in entity_details/shared/components/test_ids.ts via the flyout PREFIX)
-const ANOMALIES_TAB_BUTTON_TEST_ID = 'securitySolutionFlyoutAnomaliesTab' as const;
+// Anomaly insights tool flyout body
+// (mirrors public/flyout_v2/entity/shared/tools/anomaly_insights/test_ids.ts)
+const ANOMALY_INSIGHTS_TOOL_TEST_ID = 'anomalyInsightsTool' as const;
 
-// ExpandablePanel title link — clicking it opens the entity details left panel
+// ExpandablePanel title link — clicking it opens the anomaly insights tool
 // The suffix 'TitleLink' is appended by ExpandablePanel to the data-test-subj prop.
 const ANOMALIES_SECTION_EXPANDABLE_PANEL_OUTER_PANEL_TEST_ID =
   `${ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID}Panel` as const;
 const ANOMALIES_SECTION_EXPANDABLE_PANEL_TITLE_LINK_TEST_ID =
   `${ANOMALIES_SECTION_EXPANDABLE_PANEL_TEST_ID}TitleLink` as const;
 
-// AnomaliesTab — left panel tab content sections
+// AnomaliesTab — content sections rendered inside the anomaly insights tool
 const ANOMALIES_TAB_CONTENT_TEST_ID = 'entity-anomalies-tab' as const;
 const ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID = 'entity-anomalies-tab-attack-chain' as const;
 const ANOMALIES_TAB_TIMELINE_TEST_ID = 'entity-anomalies-tab-timeline' as const;
@@ -40,7 +40,7 @@ const ANOMALIES_TAB_TABLE_TEST_ID = 'entity-anomalies-tab-table' as const;
 const ANOMALIES_TAB_TABLE_GRID_TEST_ID = 'entity-anomalies-tab-table-grid' as const;
 const ANOMALIES_TAB_MANAGE_JOBS_BUTTON_TEST_ID = 'entity-anomalies-tab-manage-jobs-button' as const;
 
-// AnomalyTabTableSection — left panel anomalies table row controls
+// AnomalyTabTableSection — anomalies table row controls
 const ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID =
   'entity-anomalies-table-row-expand-button' as const;
 const ANOMALIES_TABLE_EXPANDED_ROW_DESCRIPTION_TEST_ID =
@@ -58,31 +58,26 @@ export const HOST_FLYOUT_ENTITY_ID = 'test-entity-id';
 export const HOST_FLYOUT_HOST_NAME = 'test-host';
 
 /**
- * Rison-encoded flyout URL parameter that opens the host entity right panel.
- * Entity store v2 is off by default so entityId drives the anomaly lookup.
+ * Rison-encoded legacy flyout URL parameter for the host entity flyout. The permanent legacy URL
+ * interop translates it to the v2 host flyout. Entity store v2 is off by default so entityId
+ * drives the anomaly lookup.
  */
-export const HOST_RIGHT_PANEL_FLYOUT_PARAM = `(preview:!(),right:(id:host-panel,params:(contextID:host-panel,entityId:${HOST_FLYOUT_ENTITY_ID},hostName:${HOST_FLYOUT_HOST_NAME},isPreviewMode:!f,scopeId:alerts-page)))`;
-
-/**
- * Rison-encoded flyout URL parameter that opens both the host entity right panel
- * and the host details left panel (entity details view).
- */
-export const HOST_BOTH_PANELS_FLYOUT_PARAM = `(left:(id:host_details,params:(entityId:${HOST_FLYOUT_ENTITY_ID},entityStoreEntityId:${HOST_FLYOUT_ENTITY_ID},hostName:${HOST_FLYOUT_HOST_NAME},isRiskScoreExist:!f,scopeId:alerts-page)),preview:!(),right:(id:host-panel,params:(contextID:host-panel,entityId:${HOST_FLYOUT_ENTITY_ID},hostName:${HOST_FLYOUT_HOST_NAME},isPreviewMode:!f,scopeId:alerts-page)))`;
+export const HOST_FLYOUT_PARAM = `(preview:!(),right:(id:host-panel,params:(contextID:host-panel,entityId:${HOST_FLYOUT_ENTITY_ID},hostName:${HOST_FLYOUT_HOST_NAME},isPreviewMode:!f,scopeId:alerts-page)))`;
 
 export class EntityFlyoutAnomaliesPage {
-  // Right panel — host panel header (always rendered; used as page-ready signal)
+  // Host flyout — header (always rendered; used as page-ready signal)
   public readonly hostPanelHeader: Locator;
 
-  // Right panel — anomalies section
+  // Host flyout — anomalies section
   public readonly anomaliesSection: Locator;
   public readonly anomaliesSectionButton: Locator;
   public readonly anomaliesExpandablePanel: Locator;
   public readonly anomaliesRecentTable: Locator;
 
-  // Left panel — anomalies tab button
-  public readonly anomaliesTab: Locator;
+  // Anomaly insights tool
+  public readonly anomaliesTool: Locator;
 
-  // Left panel — anomalies tab content sections
+  // Anomaly insights tool — content sections
   public readonly anomaliesTabContent: Locator;
   public readonly anomaliesTabAttackChain: Locator;
   public readonly anomaliesTabTimeline: Locator;
@@ -91,12 +86,12 @@ export class EntityFlyoutAnomaliesPage {
   public readonly anomaliesTabManageJobsButton: Locator;
   public readonly anomaliesExpandablePanelTitleLink: Locator;
 
-  // Left panel — anomalies table row controls
+  // Anomaly insights tool — anomalies table row controls
   public readonly rowExpandButton: Locator;
   public readonly expandedRowDescription: Locator;
   public readonly rowActionsButton: Locator;
 
-  // Left panel — attack chain tactic filter
+  // Anomaly insights tool — attack chain tactic filter
   public readonly mitreTacticClearChip: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -112,7 +107,7 @@ export class EntityFlyoutAnomaliesPage {
       ANOMALIES_SECTION_EXPANDABLE_PANEL_TITLE_LINK_TEST_ID
     );
     this.anomaliesRecentTable = this.page.testSubj.locator(ANOMALIES_RECENT_TABLE_TEST_ID);
-    this.anomaliesTab = this.page.testSubj.locator(ANOMALIES_TAB_BUTTON_TEST_ID);
+    this.anomaliesTool = this.page.testSubj.locator(ANOMALY_INSIGHTS_TOOL_TEST_ID);
     this.anomaliesTabContent = this.page.testSubj.locator(ANOMALIES_TAB_CONTENT_TEST_ID);
     this.anomaliesTabAttackChain = this.page.testSubj.locator(ANOMALIES_TAB_ATTACK_CHAIN_TEST_ID);
     this.anomaliesTabTimeline = this.page.testSubj.locator(ANOMALIES_TAB_TIMELINE_TEST_ID);
@@ -129,24 +124,19 @@ export class EntityFlyoutAnomaliesPage {
     this.mitreTacticClearChip = this.page.testSubj.locator(MITRE_TACTIC_CLEAR_CHIP_TEST_ID);
   }
 
-  async clickAnomaliesTab() {
-    await this.anomaliesTab.click();
-    await this.anomaliesTabContent.waitFor({ state: 'visible' });
-  }
-
+  /**
+   * Click the anomalies section title link in the host flyout, which opens the anomaly insights
+   * tool, and wait for the tool content to render.
+   */
   async clickAnomaliesCountLink() {
     // Attached rather than visible: the section sits below risk contributions and may be
     // off-screen until the click scrolls to it.
     await this.anomaliesExpandablePanel.waitFor({ state: 'attached' });
-    // The flyout sometimes auto-navigates to both panels before this runs, and clicking then
-    // would toggle the tab back off.
-    if (!(await this.anomaliesTab.isVisible())) {
-      // noWaitAfter: the URL update that opens the left panel triggers unmocked API calls that
-      // keep Playwright's navigation tracker pending. The extended timeout covers the tab mount,
-      // which React flushes synchronously before the browser acknowledges mouseup.
-      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true, timeout: 30000 });
-    }
-    await this.anomaliesTab.waitFor({ state: 'visible' });
+    // noWaitAfter: the URL update that opens the tool triggers unmocked API calls that keep
+    // Playwright's navigation tracker pending.
+    await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true, timeout: 30000 });
+    await this.anomaliesTool.waitFor({ state: 'visible' });
+    await this.anomaliesTabContent.waitFor({ state: 'visible' });
   }
 
   /**
@@ -154,9 +144,9 @@ export class EntityFlyoutAnomaliesPage {
    * (e.g. "Credential Access") within the Anomalies tab. Clicking it toggles
    * that tactic as the tab's active filter.
    *
-   * Scoped to anomaliesTabAttackChain: when both panels are open, the right
-   * panel's overview also renders a (non-interactive) MITRE chain with the
-   * same per-tactic test-id, so an unscoped locator would match both.
+   * Scoped to anomaliesTabAttackChain: the host flyout's anomalies section,
+   * still open next to the tool, also renders a (non-interactive) MITRE chain
+   * with the same per-tactic test-id, so an unscoped locator would match both.
    */
   getMitreTacticDot(tactic: string): Locator {
     return this.anomaliesTabAttackChain.locator(
@@ -209,25 +199,22 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   /**
-   * Navigate to entity analytics page with the host entity right panel flyout open.
+   * Navigate to entity analytics page with the host entity flyout open.
    * Waits for the host panel header to confirm the flyout has rendered.
    */
-  async navigateToHostRightPanel() {
+  async navigateToHostFlyout() {
     await this.page.gotoApp('security/entity_analytics_home_page', {
-      params: { flyout: HOST_RIGHT_PANEL_FLYOUT_PARAM },
+      params: { flyout: HOST_FLYOUT_PARAM },
     });
     await this.hostPanelHeader.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   /**
-   * Navigate to entity analytics page with both the host entity right panel and
-   * entity details left panel open.
-   * Waits for the host panel header to confirm the flyout has rendered.
+   * Navigate to entity analytics page with the host entity flyout open, then open the
+   * anomaly insights tool from its anomalies section.
    */
-  async navigateToHostBothPanels() {
-    await this.page.gotoApp('security/entity_analytics_home_page', {
-      params: { flyout: HOST_BOTH_PANELS_FLYOUT_PARAM },
-    });
-    await this.hostPanelHeader.waitFor({ state: 'visible', timeout: 30000 });
+  async navigateToHostAnomaliesTool() {
+    await this.navigateToHostFlyout();
+    await this.clickAnomaliesCountLink();
   }
 }
