@@ -14,8 +14,12 @@
  * Used to manually test trace-sample pagination on the APM transaction details
  * page when several samples share traceId + transactionId.
  *
- * Usage:
- *   node scripts/synthtrace duplicate_trace_samples --live
+ * Usage (run from the repository root; this scenario lives in a plugin
+ * directory and has no short-name alias in `SCENARIO_ALIASES`, so pass its
+ * full repository-relative path):
+ *   node scripts/synthtrace \
+ *     x-pack/solutions/observability/plugins/apm/test/scenarios/duplicate_trace_samples.ts \
+ *     --live
  *   (or with --from/--to for a fixed range)
  *
  * Then open service `duplicate-samples-service` > Transactions >
