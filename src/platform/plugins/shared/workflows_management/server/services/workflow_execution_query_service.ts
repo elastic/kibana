@@ -25,7 +25,11 @@ import type {
 
 import {
   createMarkStepAsRespondedUpdater,
+  createReleaseHitlStepClaimUpdater,
+  getStrippedHitlToken,
+  type HitlStepClaim,
   MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+  type MarkStepAsRespondedCurrent,
 } from './mark_step_as_responded_updater';
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_INDEX } from '../../common';
@@ -906,7 +910,7 @@ export class WorkflowExecutionQueryService {
   /**
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
-   * Returns `true` when this caller won the claim, or `false` when the doc is
+   * Returns the claim when this caller won it, or `null` when the doc is
    * missing, belongs to another space or to an execution other than
    * `executionId`, is not a HITL wait step, has already settled (terminal
    * status or `finishedAt` set), or was already claimed. Unexpected ES
@@ -916,6 +920,68 @@ export class WorkflowExecutionQueryService {
     stepExecutionId: string,
     executionId: string,
     audit: { respondedBy: string; respondedAt: string; channel?: string },
+    spaceId: string
+  ): Promise<HitlStepClaim | null> {
+    const claimUpdater = createMarkStepAsRespondedUpdater(audit, spaceId, executionId);
+    // The bulk helper re-runs the updater after a version conflict and only the last patch can land.
+    let claimedSource: MarkStepAsRespondedCurrent | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.bulk({
+        refresh: 'wait_for',
+        items: [
+          bulkUpdaterItem<
+            EsWorkflowStepExecution,
+            (typeof MARK_STEP_AS_RESPONDED_SOURCE_FIELDS)[number]
+          >({
+            operation: 'update',
+            documentId: stepExecutionId,
+            sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+            retryOnConflict: 3,
+            updater: (current) => {
+              const patch = claimUpdater(current);
+              claimedSource = patch === 'noop' ? undefined : current;
+              return patch;
+            },
+          }),
+        ],
+      });
+
+      const writeResult = getBulkUpdaterWriteResult(items[0]);
+      if (writeResult === 'conflict') {
+        // Retries were exhausted without a write; this is not a lost claim, so surface it.
+        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+      }
+      if (writeResult !== 'updated') {
+        return null;
+      }
+
+      const { respondedBy, respondedAt, channel } = audit;
+      const strippedToken = claimedSource ? getStrippedHitlToken(claimedSource) : undefined;
+      return {
+        respondedBy,
+        respondedAt,
+        ...(channel != null ? { channel } : {}),
+        ...(strippedToken ? { strippedToken } : {}),
+      };
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Releases a claim written by `markStepAsResponded` whose resume was not applied, restoring the
+   * external-resume token it stripped.
+   *
+   * Returns `true` when the claim was released, or `false` when the doc is
+   * missing, belongs to another space, has settled, or no longer holds this
+   * claim. Unexpected ES failures are rethrown.
+   */
+  async releaseHitlStepClaim(
+    stepExecutionId: string,
+    claim: HitlStepClaim,
     spaceId: string
   ): Promise<boolean> {
     try {
@@ -930,20 +996,21 @@ export class WorkflowExecutionQueryService {
             documentId: stepExecutionId,
             sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
             retryOnConflict: 3,
-            updater: createMarkStepAsRespondedUpdater(audit, spaceId, executionId),
+            updater: createReleaseHitlStepClaimUpdater(claim, spaceId),
           }),
         ],
       });
 
       const writeResult = getBulkUpdaterWriteResult(items[0]);
       if (writeResult === 'conflict') {
-        // Retries were exhausted without a write; this is not a lost claim, so surface it.
-        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+        throw new Error(
+          `Version conflict releasing the claim on step execution ${stepExecutionId}`
+        );
       }
       return writeResult === 'updated';
     } catch (error) {
       this.deps.logger.error(
-        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+        `Failed to release the claim on step execution ${stepExecutionId}: ${error}`
       );
       throw error;
     }

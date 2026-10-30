@@ -59,6 +59,7 @@ type ArtifactViewFlyoutRenderProps = {
   labels?: ArtifactViewFlyoutProps['labels'];
   allowCardEditAction?: boolean;
   allowCardDeleteAction?: boolean;
+  showComments?: boolean;
   onTakeAction?: ArtifactViewFlyoutTakeAction;
   policyAssignmentInfoTooltip?: string;
 } & (
@@ -131,6 +132,7 @@ describe('ArtifactViewFlyout', () => {
           : {}),
         ...(props.onTakeAction ? { onTakeAction: props.onTakeAction } : {}),
         policyAssignmentInfoTooltip: props.policyAssignmentInfoTooltip,
+        ...(props.showComments !== undefined ? { showComments: props.showComments } : {}),
         allowCardEditAction: props.allowCardEditAction ?? true,
       };
 
@@ -411,6 +413,54 @@ describe('ArtifactViewFlyout', () => {
     const policy = renderResult.getByTestId('viewFlyout-policyAssignment-policy-policy-1');
     expect(policy).toHaveTextContent('policy-1');
     expect(policy.style.color).toBe('');
+  });
+
+  describe('comments', () => {
+    it('does not show comments by default', () => {
+      render();
+
+      expect(renderResult.queryByTestId('viewFlyout-commentsTitle')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('viewFlyout-comments-list')).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId('viewFlyout-comments-none')).not.toBeInTheDocument();
+    });
+
+    it('shows an empty value when showComments is true and there are no comments', () => {
+      item.comments = [];
+      useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+
+      render({ showComments: true });
+
+      expect(renderResult.getByTestId('viewFlyout-commentsTitle')).toHaveTextContent('Comments');
+      expect(renderResult.getByTestId('viewFlyout-comments-none')).toHaveTextContent(
+        getEmptyValue()
+      );
+    });
+
+    it('lists the comments when showComments is true', () => {
+      item.comments = [
+        {
+          id: 'comment-1',
+          comment: 'First comment',
+          created_at: '2025-12-01T10:00:00.000Z',
+          created_by: 'jane.doe',
+        },
+        {
+          id: 'comment-2',
+          comment: 'Second comment',
+          created_at: '2025-12-02T10:00:00.000Z',
+          created_by: 'john.doe',
+        },
+      ];
+      useGetArtifactMock.mockReturnValue({ data: item, error: null, refetch: refetchArtifact });
+
+      render({ showComments: true });
+
+      const list = renderResult.getByTestId('viewFlyout-comments-list');
+      expect(list).toHaveTextContent('First comment');
+      expect(list).toHaveTextContent('jane.doe');
+      expect(list).toHaveTextContent('Second comment');
+      expect(list).toHaveTextContent('john.doe');
+    });
   });
 
   it('opens edit and delete from the take action menu', () => {

@@ -16,6 +16,7 @@ import {
   EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
@@ -42,6 +43,7 @@ import {
   CLEAR_SEARCH_LABEL,
   CLEAR_SELECTION_LABEL,
   DELETE_SELECTED_LABEL,
+  DETECTION_SCOPE_HELP_TEXT,
   ERROR_MESSAGE,
   ERROR_TITLE,
   NOT_FOUND_TITLE,
@@ -69,8 +71,9 @@ export const RulesTab = ({
 }): React.ReactElement => {
   const history = useHistory();
   const location = useLocation();
-  const { application, notifications } = useKibana().services;
+  const { application, notifications, cps } = useKibana().services;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const rulesQuery = useDetectionRules(timeRange, { entities, unassigned });
   const hasEntityFilter = entities.length > 0 || unassigned;
   const { demoteRules, isPending } = useRulesDemote({});
@@ -173,6 +176,14 @@ export const RulesTab = ({
 
   return (
     <>
+      {isCpsMultiProject ? (
+        <>
+          <EuiText size="xs" color="subdued" data-test-subj="nightshiftDetectionRulesScopeHelpText">
+            <p>{DETECTION_SCOPE_HELP_TEXT}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
