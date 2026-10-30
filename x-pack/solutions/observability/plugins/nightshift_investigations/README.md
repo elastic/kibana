@@ -30,9 +30,9 @@ when the automation limit denies it, and with reason `investigation_limit` when 
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
 back both slots when the attempt loses the subject claim to a concurrent start and continues that
-investigation instead. The global quota check fails closed:
+investigation instead, or when the claim attempt itself fails. The global quota check fails closed:
 a missing callback, a timeout after ten seconds, or an error denies the attempt. An
-attempt that fails while or after claiming its subjects keeps its slot: the claim stays live for two minutes,
+attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
 its own slot, so the investigation counts once. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.

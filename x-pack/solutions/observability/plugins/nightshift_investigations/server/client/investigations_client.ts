@@ -550,6 +550,10 @@ export class NightshiftInvestigationsClient {
       // a follow-up adds a round to an investigation that was already paid for.
       assertCanOpenNew: () =>
         this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget),
+      releaseNewInvestigationCharge: async () => {
+        await this.releaseBudget(globalBudget);
+        await this.releaseBudget(automationBudget);
+      },
     });
     const isFollowUp = investigationId !== newInvestigationId;
     if (isFollowUp) {
@@ -792,6 +796,7 @@ export class NightshiftInvestigationsClient {
     subjects,
     newInvestigationId,
     assertCanOpenNew,
+    releaseNewInvestigationCharge,
   }: {
     conversations: ConversationPublicClient;
     agenticInvestigations: AgenticInvestigationsPluginStart;
@@ -799,6 +804,8 @@ export class NightshiftInvestigationsClient {
     newInvestigationId: string;
     /** Throws when this start may not open a new investigation. Runs before any claim. */
     assertCanOpenNew: () => Promise<void>;
+    /** Gives back what `assertCanOpenNew` charged, for a start that does not open a new investigation. */
+    releaseNewInvestigationCharge: () => Promise<void>;
   }): Promise<{ id: string; recorded: StoredInvestigationSubject[] }> {
     const newInvestigation = { id: newInvestigationId, recorded: [] };
     const keys = toSubjectKeys(subjects, newInvestigationId);
@@ -842,17 +849,22 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up and releases both budgets. A start whose claim
-    // attempt fails keeps its slot, because the claims it wrote before failing stay live.
+    // claim to a concurrent one becomes a follow-up and releases both budgets, and so does a start
+    // whose claim attempt fails. A start that fails after claiming keeps its slot.
     await assertCanOpenNew();
-    const claim = await subjectsClient.claimSubjects({
-      conversationId: newInvestigationId,
-      subjects: keys,
-      isHolderOpen: async (conversationId) => {
-        const [holder] = await findInvestigationConversations(conversations, [conversationId]);
-        return holder?.status === 'open';
-      },
-    });
+    const claim = await subjectsClient
+      .claimSubjects({
+        conversationId: newInvestigationId,
+        subjects: keys,
+        isHolderOpen: async (conversationId) => {
+          const [holder] = await findInvestigationConversations(conversations, [conversationId]);
+          return holder?.status === 'open';
+        },
+      })
+      .catch(async (error) => {
+        await releaseNewInvestigationCharge();
+        throw error;
+      });
     if (claim.claimed) {
       return newInvestigation;
     }
