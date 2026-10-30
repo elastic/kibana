@@ -7,7 +7,10 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import { SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import {
+  operatorFallbackAssessmentNote,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+} from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import {
   assertValidBulkWriteSize,
@@ -20,7 +23,6 @@ import {
   decideLifecycle,
   StatusChange,
 } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
-import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 import { mergeSignalsLatestPerRule } from './episode_context';
 import type { EventsWriteSource } from './severity_lock';
 import {
@@ -44,6 +46,7 @@ import {
 import {
   alignResults,
   type BulkResults,
+  type ClosedSeries,
   type DedupCandidate,
   type EventsWriteBulkResult,
   type EventsWriteInput,
@@ -56,6 +59,7 @@ import {
 export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
 
 const WRITE_CONCURRENCY = 10;
+const MAX_HELD_NOTE_LENGTH = 1000;
 
 /**
  * Versions a batch of significant events in one request while preserving input order in the
@@ -267,7 +271,10 @@ const decideStatuses = ({
   return stage;
 };
 
-type ReopeningCandidate = ResolvedWriteCandidate & { mode: 'snapshot'; reopensSeries: SeriesHead };
+type ReopeningCandidate = ResolvedWriteCandidate & {
+  mode: 'snapshot';
+  reopensSeries: ClosedSeries;
+};
 
 /** A write that would reopen a closed series that the server matched by identity. */
 const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is ReopeningCandidate =>
@@ -276,10 +283,13 @@ const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is R
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === candidate.status);
 
 /**
- * Sets aside the writes that would reopen a series an operator deactivated, so the agent can read the
- * operator's reason before the series reopens. A write that carries `reopen_deactivated` has read it
- * and goes through. Only a new-event batch that a closed series covers can be held: an
- * item that names a closed event itself has no series head to look a deactivation up by.
+ * Sets aside the writes that would reopen a closed series, so the agent can read why it was closed
+ * before the series reopens. The reason is the one recorded with an Alerting v2 `deactivate` action
+ * when there is one, otherwise the note on the version that closed the series. Closes are not told
+ * apart by who made them. A write that carries `reopen_deactivated` has read it and goes through, and
+ * so does one whose series has no note to read (blank or the standard no-reason note). Only a
+ * new-event batch that a closed series covers can be held: an item that names a closed event itself
+ * has no series head to look up.
  */
 const holdDeactivatedReopens = async ({
   candidates,
@@ -300,17 +310,28 @@ const holdDeactivatedReopens = async ({
   // Looked up even for an item that carries `reopen_deactivated`: the flag cannot be proven to
   // follow a hold, so a reopen it lets through is logged.
   const deactivations = await eventSearchClient.findOperatorDeactivations({
-    heads: reopening.map(({ reopensSeries }) => reopensSeries),
+    heads: reopening.map(({ reopensSeries: { groupHash, episodeId } }) => ({
+      groupHash,
+      episodeId,
+    })),
   });
   candidates.forEach((candidate) => {
-    const deactivation = isReopeningCandidate(candidate)
-      ? deactivations.get(candidate.reopensSeries.groupHash)
-      : undefined;
-    if (deactivation === undefined) {
+    if (!isReopeningCandidate(candidate)) {
       stage.kept.push(candidate);
       return;
     }
-    const identity = `event_id=${candidate.eventId} group_hash=${deactivation.groupHash}`;
+    const { groupHash, closedAt, closingNote } = candidate.reopensSeries;
+    const action = deactivations.get(groupHash);
+    const note = (action?.reason.trim() || closingNote?.trim() || '').slice(
+      0,
+      MAX_HELD_NOTE_LENGTH
+    );
+    // A close that says nothing gives the agent nothing to read.
+    if (note === '' || note === operatorFallbackAssessmentNote('inactive')) {
+      stage.kept.push(candidate);
+      return;
+    }
+    const identity = `event_id=${candidate.eventId} group_hash=${groupHash}`;
     if (candidate.input.reopen_deactivated === true) {
       logger?.info(`reopened_after_deactivation ${identity}`);
       stage.kept.push(candidate);
@@ -325,8 +346,8 @@ const holdDeactivatedReopens = async ({
       skipped: true,
       reason: 'held_by_deactivation',
       existing_event_id: candidate.eventId,
-      deactivation_reason: deactivation.reason,
-      deactivated_at: deactivation.deactivatedAt,
+      assessment_note: note,
+      deactivated_at: action?.deactivatedAt ?? closedAt,
     });
   });
   return stage;

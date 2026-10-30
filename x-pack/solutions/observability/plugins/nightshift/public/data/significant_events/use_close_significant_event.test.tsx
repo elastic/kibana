@@ -8,27 +8,20 @@
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
 } from './use_fetch_significant_events';
-import { bulkDeactivateEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useCloseSignificantEvent } from './use_close_significant_event';
 
-jest.mock('./use_kibana');
-jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
-  bulkDeactivateEpisodeActions: jest.fn(),
-}));
+jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
-const http = { post: jest.fn() };
-const mockBulkDeactivate = bulkDeactivateEpisodeActions as jest.Mock;
+const significantEventsFetch = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
-const addInfo = jest.fn();
 
 const event: SignificantEvent = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
@@ -42,195 +35,106 @@ const event: SignificantEvent = {
 };
 
 describe('useCloseSignificantEvent', () => {
-  const createWrapper = (queryClient: QueryClient) => {
-    const Wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    return Wrapper;
-  };
-
-  const newQueryClient = () =>
-    new QueryClient({
-      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
-    });
-
-  const close = (result: { current: ReturnType<typeof useCloseSignificantEvent> }, args = {}) =>
-    act(() =>
-      result.current.closeSignificantEvent({
-        eventId: event.event_id,
-        episodeId: 'episode-1',
-        reason: 'known noise',
-        ...args,
-      })
-    );
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mockBulkDeactivate.mockResolvedValue({ affected_count: 1, errors: [] });
+    significantEventsFetch.mockResolvedValue({
+      updated: 1,
+      ignored: 0,
+      status: 'inactive',
+    });
     mockUseKibana.mockReturnValue({
       services: {
-        http,
         notifications: {
-          toasts: { addError, addSuccess, addInfo },
+          toasts: { addError, addSuccess },
+        },
+        significantEvents: {
+          significantEventsRepositoryClient: { fetch: significantEventsFetch },
         },
       },
     });
   });
 
-  it('deactivates the episode with the reason as given and updates the Nightshift cache', async () => {
-    const queryClient = newQueryClient();
+  it('marks the event inactive and updates the Nightshift cache', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    });
     queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
       NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-      { hits: [event], page: 1, perPage: 1, total: 1 }
+      {
+        hits: [event],
+        page: 1,
+        perPage: 1,
+        total: 1,
+      }
     );
-    const onClosed = jest.fn();
-    const { result } = renderHook(() => useCloseSignificantEvent({ onClosed }), {
-      wrapper: createWrapper(queryClient),
-    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
 
-    close(result);
+    act(() => result.current.closeSignificantEvent(event.event_id, 'known noise'));
 
     await waitFor(() => expect(addSuccess).toHaveBeenCalled());
-    expect(mockBulkDeactivate).toHaveBeenCalledWith(http, [
-      { alert_id: 'episode-1', reason: 'known noise' },
-    ]);
+
+    expect(significantEventsFetch).toHaveBeenCalledWith(
+      'POST /internal/significant_events/events/{id}/update',
+      {
+        params: {
+          path: { id: 'event-1' },
+          body: { status: 'inactive', assessment_note: 'known noise' },
+        },
+        signal: null,
+      }
+    );
     expect(
       queryClient.getQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY
       )?.hits[0]
-    ).toEqual(expect.objectContaining({ status: 'inactive' }));
-    expect(onClosed).toHaveBeenCalledTimes(1);
-    expect(addError).not.toHaveBeenCalled();
-  });
-
-  it.each([[''], ['   '], [undefined]])(
-    'sends the standard operator note when the reason is %p',
-    async (reason) => {
-      const { result } = renderHook(() => useCloseSignificantEvent(), {
-        wrapper: createWrapper(newQueryClient()),
-      });
-
-      close(result, { reason });
-
-      await waitFor(() => expect(addSuccess).toHaveBeenCalled());
-      expect(mockBulkDeactivate).toHaveBeenCalledWith(http, [
-        { alert_id: 'episode-1', reason: operatorFallbackAssessmentNote('inactive') },
-      ]);
-    }
-  );
-
-  it('shows an info toast, not a success, when the episode is already inactive', async () => {
-    mockBulkDeactivate.mockResolvedValue({
-      affected_count: 0,
-      errors: [
-        {
-          id: 'episode-1',
-          error: { code: 'INVALID_ALERT_STATE_TRANSITION', message: 'already inactive' },
-        },
-      ],
-    });
-    const onClosed = jest.fn();
-    const { result } = renderHook(() => useCloseSignificantEvent({ onClosed }), {
-      wrapper: createWrapper(newQueryClient()),
-    });
-
-    close(result);
-
-    await waitFor(() => expect(addInfo).toHaveBeenCalledTimes(1));
-    expect(addInfo).toHaveBeenCalledWith({
-      title: 'No change made: the significant event is already inactive or no longer exists',
-    });
-    expect(addSuccess).not.toHaveBeenCalled();
-    expect(addError).not.toHaveBeenCalled();
-    expect(onClosed).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows an error toast for any other per-item error', async () => {
-    mockBulkDeactivate.mockResolvedValue({
-      affected_count: 0,
-      errors: [{ id: 'episode-1', error: { code: 'ALERT_NOT_FOUND', message: 'not found' } }],
-    });
-    const { result } = renderHook(() => useCloseSignificantEvent(), {
-      wrapper: createWrapper(newQueryClient()),
-    });
-
-    close(result);
-
-    await waitFor(() => expect(addError).toHaveBeenCalled());
-    expect(addError).toHaveBeenCalledWith(expect.objectContaining({ message: 'not found' }), {
-      title: 'Failed to mark significant event inactive',
-    });
-    expect(addSuccess).not.toHaveBeenCalled();
-    expect(addInfo).not.toHaveBeenCalled();
-  });
-
-  it('uses a next-step message when bulk deactivation returns no result', async () => {
-    mockBulkDeactivate.mockResolvedValue({
-      affected_count: 0,
-      errors: [],
-    });
-    const { result } = renderHook(() => useCloseSignificantEvent(), {
-      wrapper: createWrapper(newQueryClient()),
-    });
-
-    close(result);
-
-    await waitFor(() => expect(addError).toHaveBeenCalled());
-    expect(addError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Refresh the list and try again.' }),
-      { title: 'Failed to mark significant event inactive' }
-    );
-  });
-
-  it('shows the generic error toast when the request throws', async () => {
-    mockBulkDeactivate.mockRejectedValueOnce(new Error('inactive update failed'));
-    const { result } = renderHook(() => useCloseSignificantEvent(), {
-      wrapper: createWrapper(newQueryClient()),
-    });
-
-    close(result);
-
-    await waitFor(() => expect(addError).toHaveBeenCalled());
-    expect(addSuccess).not.toHaveBeenCalled();
-    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: 'Failed to mark significant event inactive',
-    });
-  });
-
-  it('explains the missing permission on HTTP 403', async () => {
-    mockBulkDeactivate.mockRejectedValueOnce(
-      Object.assign(new Error('Forbidden'), {
-        response: { status: 403 },
-        body: { statusCode: 403 },
+    ).toEqual(
+      expect.objectContaining({
+        status: 'inactive',
       })
     );
-    const { result } = renderHook(() => useCloseSignificantEvent(), {
-      wrapper: createWrapper(newQueryClient()),
-    });
-
-    close(result);
-
-    await waitFor(() => expect(addError).toHaveBeenCalled());
-    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: 'You do not have permission to mark this significant event inactive',
-    });
+    expect(addError).not.toHaveBeenCalled();
   });
 
-  it('shows an error toast and sends no request when the event has no episode id', () => {
-    const { result } = renderHook(() => useCloseSignificantEvent(), {
-      wrapper: createWrapper(newQueryClient()),
+  it('sends no assessment_note when the note is omitted', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
     });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
 
-    close(result, { episodeId: undefined });
+    act(() => result.current.closeSignificantEvent(event.event_id));
 
-    expect(addError).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: 'Refresh the list and try again.',
-      }),
+    await waitFor(() => expect(addSuccess).toHaveBeenCalled());
+    expect(significantEventsFetch).toHaveBeenCalledWith(
+      'POST /internal/significant_events/events/{id}/update',
       {
-        title: 'Failed to mark significant event inactive',
+        params: { path: { id: 'event-1' }, body: { status: 'inactive' } },
+        signal: null,
       }
     );
-    expect(mockBulkDeactivate).not.toHaveBeenCalled();
+  });
+
+  it('surfaces inactive update failures as toast errors', async () => {
+    significantEventsFetch.mockRejectedValueOnce(new Error('inactive update failed'));
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
+
+    act(() => result.current.closeSignificantEvent(event.event_id, 'known noise'));
+
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Failed to mark significant event inactive',
+    });
   });
 });

@@ -118,12 +118,7 @@ const mockFocusedSignificantEventService = {
 };
 const mockAddSuccess = jest.fn();
 const mockSignificantEventsFetch = jest.fn();
-const mockBulkDeactivateEpisodeActions = jest.fn();
 let mockCanManage = false;
-
-jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
-  bulkDeactivateEpisodeActions: (...args: unknown[]) => mockBulkDeactivateEpisodeActions(...args),
-}));
 
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
@@ -135,7 +130,7 @@ jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: { basePath: { prepend: (path: string) => path }, post: jest.fn() },
+      http: { basePath: { prepend: (path: string) => path } },
       analytics: { reportEvent: mockReportEvent },
       agentBuilder: {
         openChat: mockOpenChat,
@@ -145,9 +140,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
       notifications: {
         toasts: {
           addSuccess: mockAddSuccess,
-          addInfo: jest.fn(),
-          addError: jest.fn(),
-          addDanger: jest.fn(),
         },
       },
       charts: {
@@ -182,7 +174,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
 }));
 
 const mockEvent: SignificantEventResponse = {
-  episode_id: 'episode-001',
   '@timestamp': '2026-07-10T12:00:00Z',
   created_at: '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
@@ -202,8 +193,6 @@ describe('EventFlyout', () => {
     mockFocusedSignificantEventService.setFocusedEvent.mockClear();
     mockFocusedSignificantEventService.clearFocusedEvent.mockClear();
     mockAddSuccess.mockClear();
-    mockBulkDeactivateEpisodeActions.mockReset();
-    mockBulkDeactivateEpisodeActions.mockResolvedValue({ affected_count: 1, errors: [] });
     mockInvestigationRunStatuses = undefined;
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
@@ -331,13 +320,16 @@ describe('EventFlyout', () => {
     fireEvent.click(screen.getByTestId('nightshiftMarkSignificantEventInactiveConfirm'));
 
     await waitFor(() =>
-      expect(mockBulkDeactivateEpisodeActions).toHaveBeenCalledWith(expect.anything(), [
-        { alert_id: 'episode-001', reason: 'Known maintenance' },
-      ])
-    );
-    expect(mockSignificantEventsFetch).not.toHaveBeenCalledWith(
-      'POST /internal/significant_events/events/{id}/update',
-      expect.anything()
+      expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
+        'POST /internal/significant_events/events/{id}/update',
+        {
+          params: {
+            path: { id: mockEvent.event_id },
+            body: { status: 'inactive', assessment_note: 'Known maintenance' },
+          },
+          signal: null,
+        }
+      )
     );
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });

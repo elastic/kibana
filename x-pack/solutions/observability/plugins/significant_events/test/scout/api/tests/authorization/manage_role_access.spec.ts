@@ -46,8 +46,6 @@ import {
   seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
 
-const BULK_DEACTIVATE_ENDPOINT = 'api/alerting/v2/alerts/_bulk_deactivate';
-
 // No Kibana privilege besides Nightshift `all` and Agent Builder `read` (for the tools), and no
 // index privilege besides reading the data the source queries. Anything else Significant Events
 // needs, Alerting v2 included, has to come from the Nightshift feature privilege.
@@ -159,14 +157,12 @@ for (const { name, label, role } of ROLES) {
           }, POLL_OPTIONS)
           .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
 
-        const response = await apiClient.post(BULK_DEACTIVATE_ENDPOINT, {
-          headers: toolHeaders,
-          body: { items: [{ alert_id: eventId, reason: `Closed by ${name}` }] },
+        const response = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
+          headers,
+          body: { status: 'inactive', assessment_note: `Closed by ${name}` },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
-        expect(response.body.affected_count).toBe(1);
-        expect(response.body.errors).toStrictEqual([]);
       });
 
       apiTest('writes and reads detections', async ({ apiClient }) => {

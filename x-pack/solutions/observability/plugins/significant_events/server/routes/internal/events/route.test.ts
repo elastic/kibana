@@ -703,12 +703,12 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
     findLatestByEventId,
     createAlertEvent = jest.fn().mockResolvedValue(undefined),
     emitTrigger,
-    body = { status: 'active' as const },
+    body = { status: 'inactive' as const },
   }: {
     findLatestByEventId: jest.Mock;
     createAlertEvent?: jest.Mock;
     emitTrigger?: jest.Mock;
-    body?: { status: 'active'; assessment_note?: string };
+    body?: { status: 'active' | 'inactive'; assessment_note?: string };
   }) =>
     eventsUpdateRoute.handler({
       params: { path: { id: 'event-1' }, body },
@@ -726,7 +726,7 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
 
   const stored = {
     event_id: 'event-1',
-    status: 'inactive',
+    status: 'active',
     '@timestamp': '2026-01-01T00:00:00.000Z',
   };
 
@@ -738,15 +738,15 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
       findLatestByEventId: jest.fn().mockResolvedValue(stored),
       createAlertEvent,
       emitTrigger,
-      body: { status: 'active', assessment_note: ' recurring again ' },
+      body: { status: 'inactive', assessment_note: ' not an incident ' },
     });
 
-    expect(result).toEqual({ updated: 1, ignored: 0, status: 'active' });
+    expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
     expect(createAlertEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         fingerprint: 'event-1',
-        alert_status: 'active',
-        data: expect.objectContaining({ assessment_note: 'recurring again' }),
+        alert_status: 'inactive',
+        data: expect.objectContaining({ assessment_note: 'not an incident' }),
       })
     );
     expect(emitTrigger).toHaveBeenCalledTimes(1);
@@ -756,26 +756,22 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
 describe('POST /internal/significant_events/events/{id}/update — body schema', () => {
   const bodySchema = eventsUpdateRoute.params.shape.body;
 
-  it('rejects inactive: operator deactivation uses the deactivate action', () => {
-    expect(bodySchema.safeParse({ status: 'inactive' }).success).toBe(false);
-    expect(
-      bodySchema.safeParse({ status: 'inactive', assessment_note: 'Known noise' }).success
-    ).toBe(false);
-  });
-
-  it('tells the caller to use the deactivate action', () => {
+  it('accepts inactive status without assessment_note', () => {
     const result = bodySchema.safeParse({ status: 'inactive' });
-
-    expect(result.success ? '' : JSON.stringify(result.error.issues)).toContain(
-      'use the deactivate action'
-    );
+    expect(result.success).toBe(true);
   });
 
-  it('accepts active status with and without assessment_note', () => {
-    expect(bodySchema.safeParse({ status: 'active' }).success).toBe(true);
-    expect(bodySchema.safeParse({ status: 'active', assessment_note: 'Recurring' }).success).toBe(
-      true
-    );
+  it('accepts inactive status with a non-empty assessment_note', () => {
+    const result = bodySchema.safeParse({
+      status: 'inactive',
+      assessment_note: 'Known noise from nightly batch job',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts active status without assessment_note', () => {
+    const result = bodySchema.safeParse({ status: 'active' });
+    expect(result.success).toBe(true);
   });
 
   it('rejects recovering, which only the lifecycle state machine writes', () => {

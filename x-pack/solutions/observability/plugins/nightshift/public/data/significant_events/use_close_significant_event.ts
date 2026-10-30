@@ -8,12 +8,8 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { bulkDeactivateEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
-import { INVALID_ALERT_STATE_TRANSITION_CODE } from '@kbn/alerting-v2-schemas';
-import { operatorFallbackAssessmentNote } from '@kbn/significant-events-schema';
-import { useKibana } from './use_kibana';
-import { invalidateSignificantEventQueries } from '../data/significant_events/invalidate_significant_event_queries';
+import { useKibana } from '../../hooks/use_kibana';
+import { invalidateSignificantEventQueries } from './invalidate_significant_event_queries';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
@@ -34,44 +30,11 @@ const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.erro
   defaultMessage: 'Failed to mark significant event inactive',
 });
 
-const CLOSE_FORBIDDEN_TOAST_TITLE = i18n.translate(
-  'xpack.nightshift.closeEvent.forbiddenToastTitle',
-  {
-    defaultMessage: 'You do not have permission to mark this significant event inactive',
-  }
-);
-
-const CLOSE_FALLBACK_ERROR_MESSAGE = i18n.translate(
-  'xpack.nightshift.closeEvent.fallbackErrorMessage',
-  {
-    defaultMessage: 'Refresh the list and try again.',
-  }
-);
-
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-const markEventInactive = (
-  current: NightshiftSignificantEventsQueryData | undefined,
-  eventId: string
-): NightshiftSignificantEventsQueryData | undefined =>
-  current && {
-    ...current,
-    hits: current.hits.map((event) =>
-      event.event_id === eventId ? { ...event, status: 'inactive' as const } : event
-    ),
-  };
-
-type CloseOutcome = 'closed' | 'already_inactive';
-
-interface CloseSignificantEventArgs {
-  eventId: string;
-  episodeId?: string;
-  reason?: string;
-}
-
 interface UseCloseSignificantEventResult {
-  closeSignificantEvent: (args: CloseSignificantEventArgs) => void;
+  closeSignificantEvent: (eventId: string, assessmentNote?: string) => void;
   closingEventId?: string;
 }
 
@@ -80,54 +43,62 @@ export const useCloseSignificantEvent = ({
 }: {
   onClosed?: () => void;
 } = {}): UseCloseSignificantEventResult => {
-  const { notifications, http } = useKibana().services;
+  const {
+    notifications,
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
   const queryClient = useQueryClient();
   const [closingEventId, setClosingEventId] = useState<string>();
 
-  const mutation = useMutation<
-    CloseOutcome,
-    Error,
-    CloseSignificantEventArgs & { episodeId: string }
-  >({
-    mutationFn: async ({ episodeId, reason }) => {
-      const { affected_count: affectedCount, errors } = await bulkDeactivateEpisodeActions(http, [
+  const mutation = useMutation({
+    mutationFn: ({ eventId, assessmentNote }: { eventId: string; assessmentNote?: string }) =>
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/events/{id}/update',
         {
-          alert_id: episodeId,
-          reason: reason?.trim() || operatorFallbackAssessmentNote('inactive'),
-        },
-      ]);
-      if (affectedCount > 0) {
-        return 'closed';
-      }
-      const [firstError] = errors;
-      if (firstError?.error.code === INVALID_ALERT_STATE_TRANSITION_CODE) {
-        return 'already_inactive';
-      }
-      throw new Error(firstError?.error.message ?? CLOSE_FALLBACK_ERROR_MESSAGE);
-    },
+          params: {
+            path: { id: eventId },
+            body: {
+              status: 'inactive',
+              ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+            },
+          },
+          // Unmounting the list must not abort an update that is already in flight.
+          signal: null,
+        }
+      ),
     onMutate: ({ eventId }) => {
       setClosingEventId(eventId);
     },
-    onSuccess: (outcome, { eventId }) => {
-      // The invalidation in `onSettled` refetches the list.
-      if (outcome === 'already_inactive') {
+    onSuccess: ({ updated }, { eventId }) => {
+      // Nothing was written when `updated` is 0 (already inactive, or no such event); the
+      // invalidation in `onSettled` refetches the list.
+      if (updated === 0) {
         notifications.toasts.addInfo({ title: CLOSE_NO_CHANGE_TOAST_TITLE });
         onClosed?.();
         return;
       }
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-        (current) => markEventInactive(current, eventId)
+        (current) =>
+          current
+            ? {
+                ...current,
+                hits: current.hits.map((event) =>
+                  event.event_id === eventId
+                    ? {
+                        ...event,
+                        status: 'inactive' as const,
+                      }
+                    : event
+                ),
+              }
+            : current
       );
       notifications.toasts.addSuccess({ title: CLOSE_SUCCESS_TOAST_TITLE });
       onClosed?.();
     },
     onError: (error: unknown) => {
-      const normalized = toError(error);
-      const { response } = normalized as Partial<IHttpFetchError>;
-      const title =
-        response?.status === 403 ? CLOSE_FORBIDDEN_TOAST_TITLE : CLOSE_ERROR_TOAST_TITLE;
-      notifications.toasts.addError(normalized, { title });
+      notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       setClosingEventId(undefined);
@@ -136,15 +107,8 @@ export const useCloseSignificantEvent = ({
   });
 
   return {
-    closeSignificantEvent: ({ eventId, episodeId, reason }) => {
-      if (!episodeId) {
-        notifications.toasts.addError(new Error(CLOSE_FALLBACK_ERROR_MESSAGE), {
-          title: CLOSE_ERROR_TOAST_TITLE,
-        });
-        return;
-      }
-      mutation.mutate({ eventId, episodeId, reason });
-    },
+    closeSignificantEvent: (eventId, assessmentNote) =>
+      mutation.mutate({ eventId, assessmentNote: assessmentNote?.trim() || undefined }),
     closingEventId,
   };
 };
