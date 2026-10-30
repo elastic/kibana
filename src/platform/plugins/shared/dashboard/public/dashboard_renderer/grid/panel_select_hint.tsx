@@ -21,7 +21,7 @@ const hintLabel = i18n.translate('dashboard.panelSelectHint.label', {
   values: { modifierKey: isMac ? 'Cmd' : 'Ctrl' },
 });
 
-/** Short-lived badge explaining the selection gesture, shown at the bottom of the clicked panel */
+/** Short-lived badge explaining the selection gesture, shown at the top of the clicked panel */
 export const PanelSelectHint = ({ rect }: { rect: SelectionRect | undefined }) => {
   const styles = useMemoCss(panelSelectHintStyles);
   const { euiTheme } = useEuiTheme();
@@ -31,7 +31,7 @@ export const PanelSelectHint = ({ rect }: { rect: SelectionRect | undefined }) =
     <div
       css={styles.hint}
       data-test-subj="dashboardPanelSelectHint"
-      style={{ left: (rect.left + rect.right) / 2, top: rect.bottom }}
+      style={{ left: (rect.left + rect.right) / 2, top: rect.top }}
     >
       <EuiBadge color={euiTheme.colors.textParagraph}>{hintLabel}</EuiBadge>
     </div>
@@ -49,8 +49,8 @@ const panelSelectHintStyles = {
       position: 'fixed',
       pointerEvents: 'none',
       zIndex: euiTheme.levels.toast,
-      // anchored at the panel's bottom center, pulled up inside the panel
-      transform: `translate(-50%, calc(-100% - ${euiTheme.size.m}))`,
+      // anchored at the panel's top center, pushed down below the title bar
+      transform: `translate(-50%, ${euiTheme.size.xxl})`,
       animation: `${fadeIn} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
     }),
 };
