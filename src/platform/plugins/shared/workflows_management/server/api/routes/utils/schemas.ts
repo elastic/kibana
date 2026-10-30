@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from './route_constants';
+import { ES_MAX_RESULT_WINDOW } from '../../../lib/workflow_history_pagination_error';
 
 export const idParamSchema = schema.object({
   id: schema.string({
@@ -30,3 +31,12 @@ export const workflowIdParamSchema = schema.object({
     meta: { description: 'Workflow ID' },
   }),
 });
+
+/** Rejects `page * size` past the ES result window; `defaultSize` applies when `size` is omitted. */
+export const validatePaginationWindow =
+  (defaultSize: number) =>
+  ({ page, size }: { page?: number; size?: number }): string | undefined => {
+    if (page !== undefined && page * (size ?? defaultSize) > ES_MAX_RESULT_WINDOW) {
+      return `page * size must not exceed ${ES_MAX_RESULT_WINDOW}`;
+    }
+  };
