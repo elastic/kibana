@@ -26,10 +26,13 @@ import type { AgentsServiceStart } from '../../services/agents/types';
 import { resolveAgentBuilderDefaultEndpoint } from '../../services/execution/utils';
 
 /**
- * Whether `resolveFeatureConnector` failed because the feature has no endpoint (a 400 request
- * error), as opposed to any other failure the caller should see.
+ * Whether `resolveFeatureConnector` failed because the feature currently resolves to no usable
+ * model. The inference side reports every such cause as a 400 request error — no endpoint is
+ * available, the feature is not registered, or it is not a chat completion feature — and this
+ * display-only route deliberately treats them alike rather than telling them apart by message.
+ * Any other error (other statuses, internal errors) is a failure the caller should see.
  */
-const isMissingFeatureEndpointError = (error: unknown): boolean =>
+const isUnresolvableFeatureError = (error: unknown): boolean =>
   isInferenceRequestError(error) && error.meta.status === 400;
 
 const toAgentModelConnector = (
@@ -201,12 +204,15 @@ export function registerInternalAgentRoutes({
       const inferenceFeatureId = agent.configuration.inference_feature_id;
 
       if (inferenceFeatureId !== undefined) {
-        // A run hands the feature to the inference plugin as is, so this mirrors its resolution:
-        // a feature with no endpoint has no model to report, and the run does not fall back.
+        // A run hands the feature to the inference plugin as is, so this mirrors its resolution.
+        // ANY inference request error (400) — missing endpoint, unregistered feature, non-chat
+        // feature — means the feature has no usable model: it is reported as no connector, with
+        // the source still being the agent feature, since the run will not fall back either.
+        // Every other error propagates.
         const connector = await inference
           .resolveFeatureConnector(inferenceFeatureId, request)
           .catch((error) => {
-            if (isMissingFeatureEndpointError(error)) {
+            if (isUnresolvableFeatureError(error)) {
               return undefined;
             }
             throw error;

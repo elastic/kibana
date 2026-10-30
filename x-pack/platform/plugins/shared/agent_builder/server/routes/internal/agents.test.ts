@@ -311,6 +311,34 @@ describe('registerInternalAgentRoutes', () => {
       expect(result.body).toEqual({ inference_feature_id: 'my_feature', source: 'agent_feature' });
     });
 
+    it.each([
+      {
+        cause: 'the feature is not registered',
+        message: 'Feature "my_feature" is not registered',
+      },
+      {
+        cause: 'the feature is not a chat completion feature',
+        message:
+          'Feature "my_feature" is not a chat completion feature (task type "sparse_embedding")',
+      },
+    ])(
+      'reports no connector for the agent feature when $cause (inference 400)',
+      async ({ message }) => {
+        mockAgentFeature('my_feature');
+        mockResolveFeatureConnector.mockRejectedValue(createInferenceRequestError(message, 400));
+        mockEndpointsByFeature({ agent_builder: ['default'] });
+
+        const result = await callModel();
+
+        expect(result.type).toBe('ok');
+        expect(mockGetForFeature).not.toHaveBeenCalled();
+        expect(result.body).toEqual({
+          inference_feature_id: 'my_feature',
+          source: 'agent_feature',
+        });
+      }
+    );
+
     it('surfaces a non-400 inference request error from the feature resolution', async () => {
       mockAgentFeature('my_feature');
       mockResolveFeatureConnector.mockRejectedValue(
