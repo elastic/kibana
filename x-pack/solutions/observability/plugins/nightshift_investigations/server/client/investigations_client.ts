@@ -843,7 +843,8 @@ export class NightshiftInvestigationsClient {
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
     // claim to a concurrent one becomes a follow-up and releases both budgets. A start whose claim
-    // attempt fails keeps its slot, because a concurrent start may already have joined its claims.
+    // attempt fails keeps its slot, because a concurrent start may already have joined its claims
+    // or a failed rollback may have left them live.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,
