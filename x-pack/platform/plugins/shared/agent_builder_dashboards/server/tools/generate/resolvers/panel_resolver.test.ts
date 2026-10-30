@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildLensConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  buildLensConfig,
+  generateCustomContentEsql,
+} from '@kbn/agent-builder-visualizations-server';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -17,6 +21,7 @@ import { createPanelResolver } from './panel_resolver';
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
+  generateCustomContentEsql: jest.fn(),
 }));
 
 jest.mock('@kbn/custom-content-server', () => ({
@@ -24,6 +29,7 @@ jest.mock('@kbn/custom-content-server', () => ({
 }));
 
 const mockedBuildLensConfig = jest.mocked(buildLensConfig);
+const mockedGenerateCustomContentEsql = jest.mocked(generateCustomContentEsql);
 const mockedCreateTemplateResolver = jest.mocked(createCustomContentTemplateResolver);
 
 const grid = { x: 0, y: 0, w: 12, h: 5 };
@@ -64,6 +70,22 @@ describe('createPanelResolver', () => {
     });
     expect(mockedBuildLensConfig).toHaveBeenCalledTimes(1);
     expect(resolveTemplate).not.toHaveBeenCalled();
+  });
+
+  it('gives the query generator the values of the dashboard controls of a custom_content request', async () => {
+    mockedGenerateCustomContentEsql.mockResolvedValue('FROM logs | WHERE host.name == ?host');
+    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+
+    await resolve({
+      renderer: 'custom_content',
+      nlQuery: 'hits for the selected host',
+      hasData: true,
+      resolveEsqlVariables: jest.fn().mockResolvedValue(esqlVariables),
+    });
+
+    expect(mockedGenerateCustomContentEsql).toHaveBeenCalledWith(
+      expect.objectContaining({ nlQuery: 'hits for the selected host', esqlVariables })
+    );
   });
 
   it('routes a custom_content request to the template resolver', async () => {
