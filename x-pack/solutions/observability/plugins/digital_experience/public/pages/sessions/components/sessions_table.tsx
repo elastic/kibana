@@ -29,6 +29,8 @@ import type { SessionSortField, SessionSummary } from '../../../../common/sessio
 import { VITAL_LABELS, WebVitalBadge } from '../../../components/web_vital_badges';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
+import { ANONYMOUS_USER } from '../../../labels';
+import { clientOf, locationOf } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import { SESSIONS_PAGE_SIZES, type SessionsListState } from '../hooks/use_sessions_list_query';
 import { JourneyTrail } from './journey_trail';
@@ -50,25 +52,6 @@ type SortableColumn = keyof typeof SORT_FIELDS;
 const columnOfSortField = (field: SessionSortField): SortableColumn =>
   (Object.keys(SORT_FIELDS) as SortableColumn[]).find((column) => SORT_FIELDS[column] === field) ??
   'startTime';
-
-export const ANONYMOUS_USER = i18n.translate(
-  'xpack.digitalExperience.sessions.table.anonymousUserLabel',
-  { defaultMessage: 'Anonymous' }
-);
-
-/** Browser, OS and device, as far as they're known, e.g. "Chrome 130 · macOS". */
-export const clientOf = ({ userAgent }: Pick<SessionSummary, 'userAgent'>): string =>
-  [
-    [userAgent.browser, userAgent.browserVersion].filter(Boolean).join(' '),
-    userAgent.os,
-    userAgent.device,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-/** City, region and country, as far as they're known, e.g. "Amsterdam, North Holland, NL". */
-export const locationOf = ({ geo }: Pick<SessionSummary, 'geo'>): string | null =>
-  [geo.city, geo.region, geo.countryIso].filter(Boolean).join(', ') || null;
 
 const VITAL_COLUMNS = ['lcp', 'inp', 'cls'] as const satisfies readonly CoreWebVital[];
 

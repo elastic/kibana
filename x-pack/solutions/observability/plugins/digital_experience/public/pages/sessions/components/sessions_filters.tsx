@@ -22,7 +22,7 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../
 import type { Formatters } from '../../../hooks/use_formatters';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
-import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../utils/sessions_list_query';
+import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
 
 export const SEARCH_DEBOUNCE_MS = 300;
 

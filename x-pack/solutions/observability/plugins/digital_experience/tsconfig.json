@@ -13,6 +13,7 @@
     "@kbn/charts-theme",
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/css-utils",
     "@kbn/data-plugin",
     "@kbn/deeplinks-observability",
     "@kbn/ebt-click",

@@ -13,13 +13,13 @@ import { CORE_WEB_VITALS, getVitalRating } from '../../common/core_web_vitals';
 import type { SessionWebVitals } from '../../common/sessions';
 import { formatDurationMs } from '../utils/format_duration';
 
-const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
+export const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
   good: 'success',
   needsImprovement: 'warning',
   poor: 'danger',
 };
 
-const RATING_LABELS: Record<VitalRating, string> = {
+export const RATING_LABELS: Record<VitalRating, string> = {
   good: i18n.translate('xpack.digitalExperience.sessionDetail.vitals.goodLabel', {
     defaultMessage: 'Good',
   }),
