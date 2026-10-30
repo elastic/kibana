@@ -8,8 +8,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -110,11 +112,11 @@ describe('workflow:scheduled task runner', () => {
   let plugin: WorkflowsExecutionEnginePlugin;
   let coreStart: ReturnType<typeof coreMock.createStart>;
 
-  const createTaskInstance = (): ConcreteTaskInstance =>
+  const createTaskInstance = (taskSpaceId: string = spaceId): ConcreteTaskInstance =>
     ({
       id: `workflow:${workflowId}:scheduled`,
       taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
-      params: { workflowId, spaceId, triggerType: 'scheduled' },
+      params: { workflowId, spaceId: taskSpaceId, triggerType: 'scheduled' },
       state: taskState,
       attempts: 1,
       runAt: new Date('2024-01-01T10:00:00Z'),
@@ -126,7 +128,7 @@ describe('workflow:scheduled task runner', () => {
       schedule: { interval: '1h' },
     } as ConcreteTaskInstance);
 
-  const setupPlugin = () => {
+  const setupPlugin = ({ withSpaces = false }: { withSpaces?: boolean } = {}) => {
     taskDefinitions = {};
     initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
@@ -143,6 +145,7 @@ describe('workflow:scheduled task runner', () => {
         actions: {} as never,
         workflowsExtensions: {} as never,
         licensing: licensingMock.createStart(),
+        ...(withSpaces ? { spaces: spacesMock.createStart() } : {}),
       },
       {} as never,
     ]);
@@ -208,6 +211,93 @@ describe('workflow:scheduled task runner', () => {
       workflow_id: workflowId,
       space_id: spaceId,
       outcome: 'queued_deleted',
+    });
+  });
+
+  describe('when the task space was deleted', () => {
+    const deletedSpaceId = 'deleted-space';
+    let spaceRepository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+
+    const runInSpace = async (taskSpaceId: string) => {
+      const setCustomTaskRunEventFields = jest.fn();
+      const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: createTaskInstance(taskSpaceId),
+          fakeRequest: {} as KibanaRequest,
+          setCustomTaskRunEventFields,
+        })
+      );
+      const result = await runner.run();
+      return { result, setCustomTaskRunEventFields };
+    };
+
+    const setupWithSpaceRepository = (options: { withSpaces: boolean }) => {
+      setupPlugin(options);
+      spaceRepository = savedObjectsRepositoryMock.create();
+      spaceRepository.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('space', deletedSpaceId)
+      );
+      coreStart.savedObjects.createInternalRepository.mockReturnValue(spaceRepository);
+    };
+
+    it('requests task deletion without loading the workflow', async () => {
+      setupWithSpaceRepository({ withSpaces: true });
+      const warnSpy = jest.spyOn(initializerContext.logger.get(), 'warn');
+
+      const { result, setCustomTaskRunEventFields } = await runInSpace(deletedSpaceId);
+
+      expect(result).toEqual({ state: taskState, shouldDeleteTask: true });
+      expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith(['space']);
+      expect(spaceRepository.get).toHaveBeenCalledWith('space', deletedSpaceId);
+      expect(mockGetWorkflow).not.toHaveBeenCalled();
+      expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockRunWorkflow).not.toHaveBeenCalled();
+      expect(warnSpy).toHaveBeenCalledWith(
+        `Space ${deletedSpaceId} no longer exists; removing orphaned scheduled task for workflow ${workflowId}`
+      );
+      expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+        workflow_id: workflowId,
+        space_id: deletedSpaceId,
+        outcome: 'queued_deleted',
+      });
+    });
+
+    it('loads the workflow when the space still exists', async () => {
+      setupWithSpaceRepository({ withSpaces: true });
+      spaceRepository.get.mockResolvedValue({
+        id: 'existing-space',
+        type: 'space',
+        references: [],
+        attributes: {},
+      });
+
+      await runInSpace('existing-space');
+
+      expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, 'existing-space', {
+        includeGlobal: true,
+      });
+    });
+
+    it('loads the workflow when the space lookup fails', async () => {
+      setupWithSpaceRepository({ withSpaces: true });
+      spaceRepository.get.mockRejectedValue(new Error('cluster unavailable'));
+
+      await runInSpace(deletedSpaceId);
+
+      expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, deletedSpaceId, {
+        includeGlobal: true,
+      });
+    });
+
+    it('skips the space lookup when the spaces plugin is disabled', async () => {
+      setupWithSpaceRepository({ withSpaces: false });
+
+      await runInSpace(deletedSpaceId);
+
+      expect(coreStart.savedObjects.createInternalRepository).not.toHaveBeenCalledWith(['space']);
+      expect(mockGetWorkflow).toHaveBeenCalledWith(workflowId, deletedSpaceId, {
+        includeGlobal: true,
+      });
     });
   });
 
