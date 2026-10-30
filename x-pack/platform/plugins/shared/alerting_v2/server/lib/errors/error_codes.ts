@@ -350,6 +350,12 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * The action policy client could not read the policies around a bulk write
+   * or a bulk delete. The write already succeeded; its domain events are
+   * published with the policy ids only, so subscribers receive no policy fields.
+   */
+  EVENTS_ACTION_POLICY_READ_FAILED: 'EVENTS_ACTION_POLICY_READ_FAILED',
 
   // ───────────────────── Event-based telemetry (EBT) ─────────────────────
   /**
@@ -379,6 +385,21 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
+   * Writing the `.alert-actions` records of a dispatch commit failed (the
+   * request threw, or Elasticsearch rejected every record), so scheduling
+   * stopped and the tick halts `commit_failed` with the watermark held. The
+   * groups of that commit were dispatched but not recorded, and the next tick
+   * dispatches them again.
+   */
+  DISPATCH_COMMIT_FAILED: 'DISPATCH_COMMIT_FAILED',
+  /**
+   * Elasticsearch rejected some, but not all, records of a dispatch commit;
+   * scheduling continues. Their series are
+   * fetched again on the next tick, and a group whose `notified` record was
+   * rejected can be dispatched again.
+   */
+  DISPATCH_COMMIT_DEGRADED: 'DISPATCH_COMMIT_DEGRADED',
+  /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.
    */
@@ -407,9 +428,10 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
-   * completed. The pipeline was aborted cooperatively; the returned watermark is
-   * safe. This is expected under sustained high load — it is not an error.
+   * The self-imposed tick deadline (15s before
+   * `xpack.alerting_v2.dispatcher.run.timeout`) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark
+   * is safe. This is expected under sustained high load — it is not an error.
    */
   DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
   /**
@@ -455,6 +477,14 @@ export const ALERTING_LOG_CODES = {
    * the dispatcher README for the recovery timeline.
    */
   DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
+  /**
+   * `xpack.alerting_v2.dispatcher.paused` is true: every dispatcher tick is a
+   * no-op and the watermark is held, so no alerting v2 notification is sent.
+   * The backlog is dispatched late once the setting is removed, except events
+   * older than the cold-start seed when no watermark was persisted yet.
+   * Logged once per Kibana start; remove the override after the incident.
+   */
+  DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

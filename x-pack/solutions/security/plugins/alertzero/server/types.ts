@@ -73,6 +73,12 @@ export interface AlertZeroPluginStart {
   registerThreatIntelSupplyWorkflowInstaller: (
     installer: ThreatIntelSupplyWorkflowInstaller
   ) => void;
+  /**
+   * False while the fingerprint template install is in flight, and after it fails. The
+   * matcher reads this on each run and does not auto-create the index from the generic
+   * template until the install has succeeded.
+   */
+  readonly attackFingerprintWritesAllowed: boolean;
 }
 
 export interface AlertZeroSetupDependencies {

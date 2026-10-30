@@ -1337,7 +1337,7 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       originalRequest: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: { refresh: boolean | 'wait_for'; authenticatedUser?: string } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
@@ -1363,11 +1363,9 @@ export class WorkflowsExecutionEnginePlugin
         await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
       }
 
-      const authenticatedUser = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
+      const authenticatedUser =
+        options.authenticatedUser ??
+        (await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client));
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
@@ -1553,7 +1551,12 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, originalRequest) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (
+      workflow,
+      context,
+      originalRequest,
+      options
+    ) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
@@ -1562,7 +1565,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'alert',
         request,
-        { refresh: 'wait_for' }
+        { refresh: 'wait_for', authenticatedUser: options?.authenticatedUser }
       );
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {

@@ -25,7 +25,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { formatTimelineTime } from '../../../common/format_timestamp';
-import { getChangePointLabel } from '../detection/change_point';
+import { getChangePointLabel } from '../../../common/change_point';
 
 interface EventTimelineProps {
   event: SignificantEventResponse;

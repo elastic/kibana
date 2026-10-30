@@ -29,15 +29,6 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('./app/app', () => ({
   NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
 }));
-jest.mock('./investigation/start_investigation_panel', () => ({
-  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
-    <div data-test-subj="startInvestigationPanelStub">
-      <button onClick={onClose} type="button">
-        Close start investigation
-      </button>
-    </div>
-  ),
-}));
 jest.mock('./sandbox_secrets/sandbox_secrets_flyout', () => ({
   SandboxSecretsFlyout: () => <div data-test-subj="sandboxSecretsFlyoutStub" />,
 }));
@@ -103,6 +94,13 @@ jest.mock('./settings/page', () => ({
   },
 }));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('./hooks/use_developer_mode', () => ({
+  useDeveloperMode: () => ({
+    isDeveloperMode: false,
+    isSaving: false,
+    setDeveloperMode: jest.fn(),
+  }),
+}));
 jest.mock('./hooks/use_significant_events_availability');
 
 const mockUseKibana = useKibana as jest.Mock;
@@ -191,75 +189,6 @@ describe('NightshiftPage', () => {
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
-  describe('Investigate action', () => {
-    const withInvestigationsClient = (capabilities: Record<string, boolean>) => {
-      const { services } = mockUseKibana();
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...services,
-          nightshiftInvestigations: { investigationsClient: {} },
-          application: {
-            ...services.application,
-            capabilities: { nightshift: capabilities },
-          },
-        },
-      });
-    };
-
-    it('opens and closes the start investigation modal from the header primary action', async () => {
-      withInvestigationsClient({
-        [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
-        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
-      });
-      renderPage();
-
-      const investigateButton = await screen.findByTestId(
-        'o11yNightshiftAppStartInvestigationButton'
-      );
-      expect(investigateButton).toHaveTextContent('Investigate');
-      expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
-
-      await act(async () => fireEvent.click(investigateButton));
-      expect(screen.getByTestId('startInvestigationPanelStub')).toBeInTheDocument();
-
-      await act(async () =>
-        fireEvent.click(screen.getByRole('button', { name: 'Close start investigation' }))
-      );
-      expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
-    });
-
-    it('hides the action without the Nightshift manage privilege', async () => {
-      withInvestigationsClient({ [NIGHTSHIFT_UI_PRIVILEGES.show]: true });
-      renderPage();
-
-      await screen.findByTestId('nightshiftAppStub');
-      expect(
-        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-      ).not.toBeInTheDocument();
-    });
-
-    it('hides the action when the investigations client is unavailable', async () => {
-      renderPage();
-
-      await screen.findByTestId('nightshiftAppStub');
-      expect(
-        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it('links to Significant Events management', async () => {
-    renderPage();
-    await openAppMenuOverflow();
-
-    const managementLink = await screen.findByTestId('nightshiftManagementLink');
-    expect(managementLink).toHaveAttribute('href', '/app/significant_events/queries');
-
-    await act(async () => fireEvent.click(managementLink));
-
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/queries');
-  });
-
   it('hides the settings link without both Nightshift manage and configure', async () => {
     mockUseKibana.mockReturnValue({
       services: {
@@ -289,8 +218,6 @@ describe('NightshiftPage', () => {
     await openAppMenuOverflow();
 
     expect(screen.queryByTestId('nightshiftSettingsLink')).not.toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftManagementLink')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationsLink')).not.toBeInTheDocument();
   });
 
   it('links to Nightshift settings with EBT tracking', async () => {
@@ -343,42 +270,23 @@ describe('NightshiftPage', () => {
       expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
     });
 
-    it('renders the lazy page without showing a link to itself', async () => {
+    it('renders the lazy page at /knowledge', async () => {
       renderPage('/knowledge/cortex');
 
       expect(await screen.findByTestId('knowledgePageStub')).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Knowledge');
-      await openAppMenuOverflow();
-      expect(screen.queryByTestId('nightshiftKnowledgeLink')).not.toBeInTheDocument();
     });
   });
 
   describe('Sources', () => {
-    it('links to Sources from the overflow menu with EBT tracking', async () => {
-      renderPage();
-      await openAppMenuOverflow();
-
-      const sourcesLink = await screen.findByTestId('nightshiftSourcesLink');
-      expect(sourcesLink).toHaveAttribute('href', '/app/nightshift/sources');
-
-      await act(async () => fireEvent.click(sourcesLink));
-
-      expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/sources');
-      expect(sourcesLink).toHaveAttribute('data-ebt-action', 'viewSources');
-      expect(sourcesLink).toHaveAttribute('data-ebt-element', 'nightshiftPageHeader');
-    });
-
     it.each(['/sources', '/sources/new', '/sources/source-1'])(
-      'renders the lazy Sources page at %s without a link to itself',
+      'renders the lazy Sources page at %s',
       async (path) => {
         renderPage(path);
 
         expect(await screen.findByTestId('sourcesPageStub')).toBeInTheDocument();
         expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Sources');
         expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
-        await openAppMenuOverflow();
-        expect(screen.queryByTestId('nightshiftSourcesLink')).not.toBeInTheDocument();
-        expect(screen.getByTestId('nightshiftKnowledgeLink')).toBeInTheDocument();
       }
     );
   });
@@ -392,6 +300,14 @@ describe('NightshiftPage', () => {
       expect(history.location.pathname).toBe('/detections/events');
     }
   );
+
+  it('redirects Signals to Events with the current params outside developer mode', async () => {
+    const { history } = renderPage('/detections/signals?entity=checkout&signalsSearch=latency');
+
+    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/detections/events');
+    expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
+  });
 
   it('shows Sources and detection Settings in the Detections header', async () => {
     renderPage('/detections/events');
@@ -411,9 +327,6 @@ describe('NightshiftPage', () => {
     expect(settingsLink).toBeVisible();
     expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings/detections');
     expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
-
-    await openAppMenuOverflow();
-    expect(screen.queryByTestId('nightshiftManagementLink')).not.toBeInTheDocument();
   });
 
   describe('sandbox secrets', () => {
@@ -456,23 +369,9 @@ describe('NightshiftPage', () => {
       expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
     });
 
-    it('retains unsaved settings when opening a flyout updates the page shell', () => {
-      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
-      renderPage('/settings/detections');
-
-      fireEvent.change(screen.getByTestId('settingsPageDraftStub'), {
-        target: { value: 'unsaved changes' },
-      });
-      fireEvent.click(screen.getByTestId('settingsPageOpenSandboxSecretsStub'));
-
-      expect(screen.getByTestId('sandboxSecretsFlyoutStub')).toBeInTheDocument();
-      expect(screen.getByTestId('settingsPageDraftStub')).toHaveValue('unsaved changes');
-    });
-
-    it('shows the Automations action when the API and feature flag are available', async () => {
+    it('shows the Automations button when the API and feature flag are available', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
-      await openAppMenuOverflow();
 
       expect(await screen.findByTestId('nightshiftAutomationsPrimaryAction')).toHaveAttribute(
         'href',
@@ -497,37 +396,13 @@ describe('NightshiftPage', () => {
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Automations');
     });
 
-    it('shows Settings instead of Automations inside the automations page', async () => {
-      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
-      mockUseKibana.mockReturnValue({
-        services: {
-          ...mockUseKibana().services,
-          application: {
-            ...mockUseKibana().services.application,
-            capabilities: {
-              nightshift: {
-                [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
-                [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
-                manage: true,
-              },
-            },
-          },
-        },
-      });
-      renderPage('/automations');
-      await openAppMenuOverflow();
-
-      expect(await screen.findByTestId('nightshiftSettingsLink')).toBeInTheDocument();
-      expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
-    });
-
     it('hides the sandbox secrets link when Nightshift is not enabled', async () => {
       featureFlags.useBooleanValue.mockReturnValue(false);
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
       await openAppMenuOverflow();
 
-      await screen.findByTestId('nightshiftManagementLink');
+      await screen.findByTestId('nightshiftSettingsLink');
       expect(screen.queryByTestId('nightshiftSandboxSecretsLink')).not.toBeInTheDocument();
     });
   });

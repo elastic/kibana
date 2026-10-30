@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isEqual } from 'lodash';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   getMaxPackageName,
@@ -19,8 +20,9 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { reconcileInstances } from './instances';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
+import { toSOMetadataUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -34,6 +36,7 @@ import {
   getBareNamePackage,
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { getNamespaceError } from './instance_namespace_field';
 import {
   getDescriptionError,
   getIntegrationNameError,
@@ -57,7 +60,10 @@ export interface ServiceVars {
    * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
    */
   varsByDataStream: Record<string, ServiceDataStreamVars>;
-  /** Data stream namespace for this instance's policy. Empty or absent inherits the agent policy's. */
+  /**
+   * Data stream namespace of a duplicate's policy. Originals have none and take the global
+   * namespace; a duplicate with none takes it too.
+   */
   namespace?: string;
 }
 
@@ -87,6 +93,11 @@ export interface ServiceSettingsPersistedState {
   /** The last name the prefill generated. While the name still equals it, it follows the selection. */
   autoName?: string;
   description?: string;
+  /**
+   * Global data stream namespace. Every original instance deploys into it; a duplicate may pick
+   * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
+   */
+  namespace?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -102,53 +113,6 @@ export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
   serviceVars: {},
 };
-
-/** Derive the canonical base instances (one per serviceId) from the selected ids list. */
-function baseInstances(
-  selectedServiceIds: string[],
-  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
-): ServiceInstance[] {
-  return selectedServiceIds
-    .map((id) => {
-      const service = awsServicesMap?.get(id);
-      if (!service || !service.showInUI) return null;
-      return { instanceId: id, serviceId: id, name: service.name, isDuplicate: false };
-    })
-    .filter((i): i is ServiceInstance => i !== null);
-}
-
-/**
- * Reconcile persisted instances against the current selectedServiceIds.
- * - Keep instances whose serviceId is still selected.
- * - Add a base instance for any newly-selected service with no existing instance.
- * - Drop instances for deselected services.
- */
-function reconcileInstances(
-  selectedServiceIds: string[],
-  persisted: ServiceInstance[] | undefined,
-  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
-): ServiceInstance[] {
-  const selectedSet = new Set(selectedServiceIds);
-
-  if (!persisted || persisted.length === 0) {
-    return baseInstances(selectedServiceIds, awsServicesMap);
-  }
-
-  const kept = persisted.filter((inst) => selectedSet.has(inst.serviceId));
-  const coveredServiceIds = new Set(kept.map((i) => i.serviceId));
-
-  const added: ServiceInstance[] = [];
-  for (const id of selectedServiceIds) {
-    if (!coveredServiceIds.has(id)) {
-      const service = awsServicesMap?.get(id);
-      if (service?.showInUI) {
-        added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
-      }
-    }
-  }
-
-  return [...kept, ...added];
-}
 
 function mergeVarsByDataStream(
   base: Record<string, ServiceDataStreamVars>,
@@ -259,6 +223,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
+  const namespace = persisted?.namespace ?? '';
+
+  const setNamespace = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        namespace: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
   const integrationName = persisted?.integrationName ?? '';
   const description = persisted?.description ?? '';
 
@@ -284,7 +260,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
-    () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
+    () =>
+      reconcileInstances(
+        persisted?.instances ?? [],
+        selectedServiceIds,
+        awsServicesMap ?? new Map()
+      ),
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
 
@@ -380,9 +361,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     });
   }, [persisted, toAutoName, setPersisted]);
 
-  // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
-  // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
-  // breaks the update→re-run loop after one iteration (next run finds zero stale keys).
+  // Keeps the stored copy in step with the reconciled one, so steps that read session storage
+  // without going through this step (jumping ahead, a reload, a resume) see the same instances.
+  // Also prunes serviceVars entries for instances no longer present (deselected in Step 1), in the
+  // same write so the two never overwrite each other. Runs on mount and whenever the instance list
+  // changes. Writing only when something differs breaks the update→re-run loop after one
+  // iteration (the next run finds the stored instances equal and zero stale keys).
   // Guard: skip while awsServicesMap is still loading — instances would be empty, making every
   // stored key look stale and erasing valid configuration before the matrix can reconstruct them.
   useEffect(() => {
@@ -390,12 +374,17 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     const validIds = new Set(instances.map((i) => i.instanceId));
     const storedVars = persisted?.serviceVars ?? {};
     const staleKeys = Object.keys(storedVars).filter((k) => !validIds.has(k));
-    if (staleKeys.length === 0) return;
+    const instancesChanged = !isEqual(persisted?.instances ?? [], instances);
+    if (staleKeys.length === 0 && !instancesChanged) return;
     const pruned: Record<string, ServiceVars> = {};
     for (const [k, v] of Object.entries(storedVars)) {
       if (validIds.has(k)) pruned[k] = v as ServiceVars;
     }
-    setPersisted({ ...(persisted ?? { globalRegion: '', serviceVars: {} }), serviceVars: pruned });
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      instances,
+      serviceVars: pruned,
+    });
   }, [instances, persisted, setPersisted, awsServicesMap]);
 
   const getServiceVars = useCallback(
@@ -421,19 +410,26 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instanceId: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string,
+      /** A new display name for the instance, written in the same update. */
+      newName?: string
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
+      // Only a duplicate has a namespace of its own; an original always follows the global one.
+      const isDuplicate = instances.some((i) => i.instanceId === instanceId && i.isDuplicate);
+      const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        instances,
+        instances: newName
+          ? instances.map((i) => (i.instanceId === instanceId ? { ...i, name: newName } : i))
+          : instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [instanceId]: {
             enabledDataStreams,
             varsByDataStream: merged,
-            namespace: namespace ?? current.namespace,
+            namespace: ownNamespace,
           },
         },
       });
@@ -447,7 +443,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      namespace?: string
+      instanceNamespace?: string
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -479,7 +475,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               ? enabledDataStreams
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
-            namespace: namespace ?? sourceVars.namespace,
+            namespace: instanceNamespace ?? sourceVars.namespace,
           },
         },
       });
@@ -530,38 +526,34 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
+  const namespaceError = getNamespaceError(namespace);
 
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
       incompleteInstances.length === 0 &&
       !integrationNameError &&
-      !descriptionError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
+      !descriptionError &&
+      !namespaceError,
+    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
   const handleNext = useCallback(() => {
-    // Flush instances to session storage so step 4 can read them without going through step 2 again.
-    setPersisted({
-      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-      instances,
-    });
     setServiceSettingsMethod(deploymentMethod);
     // The name and description stay editable after a deploy, and a later deploy may find nothing
     // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
-    // again.
+    // again. Not the namespace: a changed one is detected against the saved one and applied by the
+    // next deploy, which saves it.
     const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
     if (deploymentId) {
-      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
+      updateDeployment(deploymentId, toSOMetadataUpdate(persisted));
     }
     onContinue();
   }, [
     onContinue,
     persisted,
-    setPersisted,
-    instances,
     deploymentMethod,
     setServiceSettingsMethod,
     detectAndReviewStep?.onboardingDeploymentId,
@@ -580,6 +572,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     description,
     setDescription,
     descriptionError,
+    namespace,
+    setNamespace,
+    namespaceError,
     bareNamePackage,
     instances,
     filteredInstances,
