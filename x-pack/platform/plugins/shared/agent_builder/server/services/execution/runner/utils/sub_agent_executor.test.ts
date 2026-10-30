@@ -8,6 +8,7 @@
 import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
+import type { ModelSource } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { createSubAgentExecutor } from './sub_agent_executor';
 
@@ -138,6 +139,71 @@ describe('createSubAgentExecutor', () => {
       const calls = await runAll(createExecutor({ enabled: false }));
 
       calls.forEach((params) => expect(params).not.toHaveProperty('workflowExecutionId'));
+    });
+  });
+
+  describe('model source', () => {
+    const runAll = async (
+      executor: ReturnType<typeof createExecutor>,
+      modelSource: ModelSource | undefined
+    ) => {
+      await executor.executeSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        modelSource,
+      });
+      await executor.createSubAgent({
+        agentId: 'child',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        conversationId: 'conversation-id',
+        parentConversationId: 'parent-conversation-id',
+        subagentName: 'child',
+        modelSource,
+      });
+      await executor.sendToSubAgent({
+        agentId: 'child',
+        conversationId: 'conversation-id',
+        prompt: 'go',
+        parentExecutionId: 'parent-execution-id',
+        modelSource,
+      });
+      return executeAgent.mock.calls.map(([call]) => call.params);
+    };
+
+    it('passes inferenceFeatureId and no connectorId to executeAgent for a feature source', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }), {
+        featureId: 'parent_feature',
+      });
+
+      expect(calls).toHaveLength(3);
+      for (const params of calls) {
+        expect(params.inferenceFeatureId).toBe('parent_feature');
+        expect(params.connectorId).toBeUndefined();
+      }
+    });
+
+    it('passes connectorId and no inferenceFeatureId to executeAgent for a connector source', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }), {
+        connectorId: 'parent-connector',
+      });
+
+      expect(calls).toHaveLength(3);
+      for (const params of calls) {
+        expect(params.connectorId).toBe('parent-connector');
+        expect(params.inferenceFeatureId).toBeUndefined();
+      }
+    });
+
+    it('passes neither when no source is forwarded', async () => {
+      const calls = await runAll(createExecutor({ enabled: false }), undefined);
+
+      expect(calls).toHaveLength(3);
+      for (const params of calls) {
+        expect(params.connectorId).toBeUndefined();
+        expect(params.inferenceFeatureId).toBeUndefined();
+      }
     });
   });
 

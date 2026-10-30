@@ -11,6 +11,7 @@ import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
 import { createSubagentTool } from './run_subagent';
+import { createSendMessageTool } from './send_message';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
 
 jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
@@ -23,7 +24,7 @@ jest.mock('./run_subagent', () => ({
   createSubagentTool: jest.fn(() => ({ id: 'run_subagent' })),
 }));
 jest.mock('./send_message', () => ({
-  createSendMessageTool: () => ({ id: 'send_message_to_agent' }),
+  createSendMessageTool: jest.fn(() => ({ id: 'send_message_to_agent' })),
 }));
 jest.mock('./sleep', () => ({ createSleepTool: () => ({ id: 'sleep' }) }));
 jest.mock('./read_file', () => ({ createReadFileTool: () => ({ id: 'read_file' }) }));
@@ -67,7 +68,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: false },
-    defaultConnectorId: 'connector-1',
+    defaultModel: { connectorId: 'connector-1' },
     subAgentExecutor: {},
     agentRegistry: {},
     filesystemService: {},
@@ -163,6 +164,19 @@ describe('registerInternalTools - subagents', () => {
 
     expect(createSubagentTool).toHaveBeenCalledWith(
       expect.objectContaining({ transientOnly: false })
+    );
+  });
+
+  it("hands the parent's model source to run_subagent and send_message", async () => {
+    const { context } = createContext({ defaultModel: { featureId: 'parent_feature' } });
+
+    await register(context);
+
+    expect(createSubagentTool).toHaveBeenCalledWith(
+      expect.objectContaining({ parentModel: { featureId: 'parent_feature' } })
+    );
+    expect(createSendMessageTool).toHaveBeenCalledWith(
+      expect.objectContaining({ parentModel: { featureId: 'parent_feature' } })
     );
   });
 
