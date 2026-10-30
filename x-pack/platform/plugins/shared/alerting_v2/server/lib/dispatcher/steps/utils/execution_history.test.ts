@@ -131,6 +131,7 @@ describe('emitExecutionHistory', () => {
       workflow_ids: ['wf-a', 'wf-b'],
       workflow_execution_ids: ['exec-a', 'exec-b'],
       grouping_mode: 'per_alert',
+      throttle_strategy: 'none',
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
   });
@@ -166,7 +167,7 @@ describe('emitExecutionHistory', () => {
     });
   });
 
-  it('omits throttle_strategy when the policy has no throttle', () => {
+  it('records throttle_strategy none when the policy has no throttle', () => {
     const rule = createRule({ id: 'rule-1' });
     const policy = createActionPolicy({ id: 'policy-1' });
     const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
@@ -188,7 +189,7 @@ describe('emitExecutionHistory', () => {
     );
 
     const [[event]] = eventLogger.logEvent.mock.calls;
-    expect(event?.kibana?.alerting_v2?.dispatcher).not.toHaveProperty('throttle_strategy');
+    expect(event?.kibana?.alerting_v2?.dispatcher).toMatchObject({ throttle_strategy: 'none' });
   });
 
   it('emits separate summaries per policy when multiple policies dispatched in one run', () => {
@@ -251,6 +252,7 @@ describe('emitExecutionHistory', () => {
       workflow_ids: ['wf-a'],
       workflow_execution_ids: [],
       grouping_mode: 'per_alert',
+      throttle_strategy: 'none',
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
   });

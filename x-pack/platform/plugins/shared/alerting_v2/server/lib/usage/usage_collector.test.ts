@@ -360,6 +360,13 @@ describe('registerAlertingV2UsageCollector', () => {
                   'Sum of action groups throttled over the last 24 hours by policies with throttle strategy every_time.',
               },
             },
+            none: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Sum of action groups throttled over the last 24 hours by policies with no throttle strategy (already notified groups).',
+              },
+            },
           },
           alerts_count: { _meta: { description: 'Total number of alert events.' }, type: 'long' },
           alerts_count_by_kind: {

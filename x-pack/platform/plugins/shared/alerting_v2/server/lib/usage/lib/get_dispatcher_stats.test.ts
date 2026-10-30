@@ -101,6 +101,7 @@ const eventStatsAggregations = {
       buckets: [
         { key: 'time_interval', doc_count: 1, action_groups: { value: 2 } },
         { key: 'every_time', doc_count: 1, action_groups: { value: 1 } },
+        { key: 'none', doc_count: 3, action_groups: { value: 3 } },
       ],
     },
   },
@@ -276,6 +277,7 @@ describe('getDispatcherStats', () => {
       dispatcher_action_groups_throttled_count_by_strategy_24hr: {
         time_interval: 2,
         every_time: 1,
+        none: 3,
       },
     });
   });

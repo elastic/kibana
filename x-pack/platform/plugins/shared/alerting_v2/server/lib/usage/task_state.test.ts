@@ -345,7 +345,7 @@ describe('alerting v2 telemetry task state', () => {
       expect(() =>
         v8.schema.validate({
           ...v7State,
-          dispatcher_action_groups_throttled_count_by_strategy_24hr: { none: 1 },
+          dispatcher_action_groups_throttled_count_by_strategy_24hr: { burst: 1 },
         })
       ).toThrow();
       expect(() =>

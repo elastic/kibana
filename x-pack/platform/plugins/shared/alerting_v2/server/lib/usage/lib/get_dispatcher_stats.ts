@@ -163,7 +163,7 @@ async function searchEventStats(esClient: ElasticsearchClient) {
       aggs?.dispatch_failed.by_reason.buckets
     ),
     dispatcher_action_groups_throttled_count_by_strategy_24hr: sumsToRecord<
-      ThrottleStrategy,
+      ThrottleStrategy | 'none',
       DispatcherStrategyBucket
     >(aggs?.throttled.by_strategy.buckets ?? [], (bucket) => bucket.action_groups),
   };

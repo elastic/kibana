@@ -56,7 +56,8 @@ interface PolicySummaryDispatcherFields {
   workflow_ids: string[];
   workflow_execution_ids: string[];
   grouping_mode: ActionPolicy['grouping']['mode'];
-  throttle_strategy?: NonNullable<ActionPolicy['throttle']>['strategy'];
+  /** `none` when the policy has no throttle, so suppressed groups can still be split by it. */
+  throttle_strategy: NonNullable<NonNullable<ActionPolicy['throttle']>['strategy']> | 'none';
 }
 
 interface UnmatchedDispatcherFields {
@@ -171,7 +172,6 @@ function emitPolicySummary({
     ruleIds,
     rules
   );
-  const throttleStrategy = policies.throttleStrategyOf(summary.policyId);
 
   eventLogService.logEvent(
     buildEvent({
@@ -190,7 +190,7 @@ function emitPolicySummary({
         workflow_ids: Array.from(summary.workflowIds),
         workflow_execution_ids: Array.from(summary.workflowExecutionIds),
         grouping_mode: policies.groupingModeOf(summary.policyId),
-        ...(throttleStrategy ? { throttle_strategy: throttleStrategy } : {}),
+        throttle_strategy: policies.throttleStrategyOf(summary.policyId) ?? 'none',
       },
     })
   );

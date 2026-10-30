@@ -597,6 +597,13 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
           'Sum of action groups throttled over the last 24 hours by policies with throttle strategy every_time.',
       },
     },
+    none: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups throttled over the last 24 hours by policies with no throttle strategy (already notified groups).',
+      },
+    },
   },
 
   alerts_count: {
