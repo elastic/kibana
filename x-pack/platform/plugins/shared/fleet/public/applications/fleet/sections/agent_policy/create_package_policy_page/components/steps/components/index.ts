@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { ColumnarIndexModeSetting } from './columnar_index_mode_setting';
 export {
   COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ,
   ColumnarIndexModeSwitch,

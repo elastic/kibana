@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import semverLt from 'semver/functions/lt';
 import {
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -26,8 +25,6 @@ import {
   getRegistryStreamWithDataStreamForInputType,
   getInputEffectiveName,
   buildInputKey,
-  getLogsdbColumnarNotReadyDataStreams,
-  isLogsdbColumnarDefault,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
@@ -38,13 +35,12 @@ import type {
   RegistryInput,
 } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useGetPackageInfoByKeyQuery } from '../../../../../hooks';
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 import { isInputCompatibleWithVarGroupSelections } from '../../services';
 
-import { ColumnarIndexModeSwitch, PackagePolicyInputPanel } from './components';
+import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -59,10 +55,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
   bottomExtension?: React.ReactNode;
-  /** The columnar index mode picked on this page; `undefined` until the switch is used. */
-  logsdbColumnar?: boolean;
-  /** Shows the columnar index mode switch. The page applies the choice when it saves. */
-  onLogsdbColumnarChange?: (enabled: boolean) => void;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -76,8 +68,6 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected = false,
   varGroupSelections = {},
   bottomExtension,
-  logsdbColumnar,
-  onLogsdbColumnarChange,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
@@ -96,60 +86,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
   const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
 
-  // Columnar index mode: one choice per installed integration, stored on the installation and set
-  // through the package API when the page is saved. It can only be turned on when every logs data
-  // stream of the installed version declares readiness, which is what the API checks. A policy
-  // being edited can still be on an older version than the installed one. A newer version on the
-  // add page is installed when the page is saved, so its own readiness applies.
-  const installationInfo =
-    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
-  const installedVersion = installationInfo?.version;
-  const isPolicyBehindInstallation =
-    !!installedVersion && semverLt(packageInfo.version, installedVersion);
-  const { data: installedPackageData } = useGetPackageInfoByKeyQuery(
-    packageInfo.name,
-    installedVersion,
-    { full: true },
-    { enabled: isPolicyBehindInstallation && !!onLogsdbColumnarChange }
-  );
-  const columnarPackageInfo: PackageInfo =
-    isPolicyBehindInstallation && installedPackageData?.item
-      ? installedPackageData.item
-      : packageInfo;
-  const logsDataStreams = useMemo(
-    () =>
-      columnarPackageInfo.type === 'input'
-        ? []
-        : (columnarPackageInfo.data_streams ?? []).filter(
-            (dataStream) => dataStream.type === 'logs'
-          ),
-    [columnarPackageInfo]
-  );
-  const isColumnarNotReady = useMemo(
-    () => getLogsdbColumnarNotReadyDataStreams(columnarPackageInfo, logsDataStreams).length > 0,
-    [columnarPackageInfo, logsDataStreams]
-  );
-  const isColumnarIndexModeEnabled =
-    logsdbColumnar ??
-    (installationInfo
-      ? installationInfo.logsdb_columnar_enabled === true
-      : isLogsdbColumnarDefault(packageInfo));
-
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>
         {!noTopRule && <EuiHorizontalRule margin="m" />}
-        {logsDataStreams.length > 0 && onLogsdbColumnarChange && (
-          <>
-            <ColumnarIndexModeSwitch
-              checked={isColumnarIndexModeEnabled}
-              notReady={isColumnarNotReady}
-              onChange={() => onLogsdbColumnarChange(!isColumnarIndexModeEnabled)}
-            />
-            <EuiHorizontalRule margin="m" />
-          </>
-        )}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);

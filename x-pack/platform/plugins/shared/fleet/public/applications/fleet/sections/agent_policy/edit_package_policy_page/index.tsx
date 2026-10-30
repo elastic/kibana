@@ -543,6 +543,15 @@ export const EditPackagePolicyForm = memo<{
                 }
               }}
               packagePolicyId={packagePolicyId}
+              logsdbColumnar={logsdbColumnar}
+              onLogsdbColumnarChange={
+                !extensionView
+                  ? (enabled) => {
+                      setLogsdbColumnar(enabled);
+                      setIsEdited(true);
+                    }
+                  : undefined
+              }
             />
           )}
 
@@ -558,11 +567,6 @@ export const EditPackagePolicyForm = memo<{
               isUpgrade={isUpgrade}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               varGroupSelections={varGroupSelections}
-              logsdbColumnar={logsdbColumnar}
-              onLogsdbColumnarChange={(enabled) => {
-                setLogsdbColumnar(enabled);
-                setIsEdited(true);
-              }}
             />
           )}
 

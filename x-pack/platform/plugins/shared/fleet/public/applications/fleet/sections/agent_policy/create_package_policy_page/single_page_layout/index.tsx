@@ -677,6 +677,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
             }
             hideInVarGroupOptions={hiddenVarGroupOptions}
+            logsdbColumnar={logsdbColumnar}
+            onLogsdbColumnarChange={!extensionView ? setLogsdbColumnar : undefined}
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
@@ -690,8 +692,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               submitAttempted={submitAttempted}
               isAgentlessSelected={isAgentlessSelected}
               varGroupSelections={varGroupSelections}
-              logsdbColumnar={logsdbColumnar}
-              onLogsdbColumnarChange={setLogsdbColumnar}
               bottomExtension={
                 createBottomExtensionView && packagePolicy.package?.name ? (
                   <ExtensionWrapper>
