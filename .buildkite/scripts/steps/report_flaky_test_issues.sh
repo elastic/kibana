@@ -55,8 +55,6 @@ else
 fi
 
 echo "--- Bootstrap Kibana"
-# The step only runs Node scripts; skip building the dev-mode shared webpack bundles
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Download flaky test report"

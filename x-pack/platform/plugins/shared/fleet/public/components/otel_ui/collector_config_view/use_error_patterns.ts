@@ -149,7 +149,9 @@ export const useErrorPatterns = ({
 }): UseErrorPatternsResult => {
   const { data: dataService } = useStartServices();
 
-  const { data, isLoading, error } = useQuery(
+  // `isInitialLoading` (not `isLoading`): in react-query v4 a query that has never succeeded
+  // goes back to `loading` on every refetch, and a disabled query stays `loading` forever.
+  const { data, isInitialLoading, error } = useQuery(
     ['errorPatterns', serviceInstanceId, timeRange, enrolledAt],
     async () => {
       const now = Date.now();
@@ -176,7 +178,10 @@ export const useErrorPatterns = ({
     },
     {
       enabled: !!serviceInstanceId,
-      refetchInterval: 30 * 1000, // 30 seconds
+      // Polling every 30 seconds. If the search failed before ever succeeding, stop: each refetch
+      // would put the query back in its initial loading state and re-show the loading bar forever.
+      refetchInterval: (_data, query) =>
+        query.state.status === 'error' && !query.state.dataUpdatedAt ? false : 30 * 1000,
       keepPreviousData: true,
     }
   );
@@ -194,7 +199,7 @@ export const useErrorPatterns = ({
     errorCount: errorPatterns.length,
     warningCount: warningPatterns.length,
     totalLogCount,
-    isLoading,
+    isLoading: isInitialLoading,
     error: error instanceof Error ? error : undefined,
   };
 };

@@ -2045,6 +2045,82 @@ export default function (providerContext: FtrProviderContext) {
         await supertest.get(`/api/fleet/agent_policies/${hostedPolicy.id}`).expect(404);
       });
 
+      it('should remove the policy from a shared package policy whose package is not available', async () => {
+        const createAgentPolicy = async (name: string) => {
+          const {
+            body: { item },
+          } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name, namespace: 'default' })
+            .expect(200);
+          return item.id;
+        };
+        const policyToDeleteId = await createAgentPolicy('Policy to delete');
+        const remainingPolicyId = await createAgentPolicy('Remaining policy');
+        const packagePolicyId = 'shared-package-policy-not-available';
+
+        // Written directly as a saved object: the package is neither installed nor in the
+        // registry, so its package info can't be loaded.
+        await kibanaServer.savedObjects.create({
+          id: packagePolicyId,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          overwrite: true,
+          attributes: {
+            name: 'not-available-1',
+            namespace: 'default',
+            enabled: true,
+            inputs: [],
+            revision: 1,
+            policy_id: policyToDeleteId,
+            policy_ids: [policyToDeleteId, remainingPolicyId],
+            created_at: new Date().toISOString(),
+            created_by: 'system',
+            updated_at: new Date().toISOString(),
+            updated_by: 'system',
+            package: {
+              name: 'not_available_package',
+              title: 'Not available package',
+              version: '1.0.0',
+            },
+            latest_revision: true,
+          },
+        });
+
+        try {
+          await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: policyToDeleteId })
+            .expect(200);
+
+          await supertest.get(`/api/fleet/agent_policies/${policyToDeleteId}`).expect(404);
+
+          const { attributes } = await kibanaServer.savedObjects.get<{
+            policy_id: string;
+            policy_ids: string[];
+            revision: number;
+            updated_by: string;
+          }>({
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: packagePolicyId,
+          });
+          expect(attributes.policy_ids).to.eql([remainingPolicyId]);
+          expect(attributes.policy_id).to.eql(remainingPolicyId);
+          expect(attributes.revision).to.eql(1);
+          expect(attributes.updated_by).to.eql('elastic');
+        } finally {
+          await kibanaServer.savedObjects.bulkDelete({
+            objects: [{ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: packagePolicyId }],
+          });
+          await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: remainingPolicyId })
+            .expect(200);
+        }
+      });
+
       describe('Errors when trying to delete', () => {
         it('should prevent policies having agents from being deleted', async () => {
           const {

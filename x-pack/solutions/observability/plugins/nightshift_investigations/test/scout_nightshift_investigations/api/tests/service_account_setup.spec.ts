@@ -13,8 +13,9 @@ import {
   apiTest,
   COMMON_HEADERS,
   getNightshiftServiceAccountStatus,
-  INVESTIGATIONS_READ_ROLE,
   INVESTIGATIONS_WRITE_ROLE,
+  NIGHTSHIFT_MANAGE_ROLE,
+  NIGHTSHIFT_NO_ACCESS_ROLE,
   SERVICE_ACCOUNT_PATH,
   uniqueId,
 } from '../fixtures';
@@ -124,14 +125,29 @@ apiTest.describe(
     );
 
     apiTest(
-      'tells a user without manage_security that the space is set up but not theirs to change',
+      'tells a Nightshift manager without manage_security that the space is set up but not theirs to change',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
+        // Nightshift `all` alone, without Agent Builder: the automations page gates on this status.
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ROLE);
 
         const status = await readStatus(apiClient, cookieHeader);
 
         expect(status.bound).toBe(true);
         expect(status.canModifyBoundWorkflows).toBe(false);
+      }
+    );
+
+    apiTest(
+      'does not show the setup to a user without Nightshift access',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_NO_ACCESS_ROLE);
+
+        const response = await apiClient.get(SERVICE_ACCOUNT_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(403);
       }
     );
 

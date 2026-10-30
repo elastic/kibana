@@ -100,7 +100,7 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 import { EditIntegrationFlyout } from './components/edit_integration_flyout';
-import { ErrorIconPanel } from './components/icon_panel';
+import { ErrorIconPanel, getIconPanelWidth } from './components/icon_panel';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -992,7 +992,7 @@ export function Detail() {
       topContent={securityCallout}
       tabs={headerTabs}
       tabsCss={`
-        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+        margin-left: calc(${getIconPanelWidth(theme.euiTheme.size.base, theme.euiTheme.size.xl)}px +
           ${theme.euiTheme.size.l});
       `}
     >
