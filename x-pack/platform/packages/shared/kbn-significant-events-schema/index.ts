@@ -35,6 +35,7 @@ export {
 } from './src/queries';
 
 export type {
+  EventDeactivation,
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
@@ -134,6 +135,9 @@ export {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
+  MAX_DEACTIVATION_REASON_LENGTH,
+  INACTIVE_SERIES_LOOKBACK_HOURS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   resolveSignificantEventsTuningConfig,
