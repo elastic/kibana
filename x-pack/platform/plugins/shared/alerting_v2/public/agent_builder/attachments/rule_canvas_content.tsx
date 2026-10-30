@@ -101,6 +101,8 @@ export const RuleCanvasContent = ({
         type: ActionButtonType.PRIMARY,
         handler: async () => {
           await rulesApi.upsertRule(ruleId, buildRulePayload(data));
+          // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
+          await updateOrigin(ruleId);
           notifications.toasts.addSuccess(
             i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
               defaultMessage: 'Rule "{name}" updated',

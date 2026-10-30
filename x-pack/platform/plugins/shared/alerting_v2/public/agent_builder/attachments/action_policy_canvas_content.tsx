@@ -154,6 +154,8 @@ export const ActionPolicyCanvasContent = ({
               data.id,
               attachmentDataToActionPolicyPayload(data)
             );
+            // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
+            await updateOrigin(data.id);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
