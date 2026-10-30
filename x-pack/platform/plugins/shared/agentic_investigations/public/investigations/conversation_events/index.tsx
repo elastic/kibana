@@ -19,6 +19,7 @@ import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   type InvestigationSeverityChangedEventData,
 } from '../../../common/investigations/severity_change';
+import { investigationRunFailedEventUiDefinition } from './run_failed_event';
 
 const UNKNOWN_ACTOR = i18n.translate(
   'xpack.agenticInvestigations.investigations.events.unknownActor',
@@ -67,4 +68,5 @@ export const registerInvestigationConversationEventUiDefinitions = (
   conversationEvents: ConversationEventsServiceStartContract
 ): void => {
   conversationEvents.register(investigationSeverityChangedEventUiDefinition);
+  conversationEvents.register(investigationRunFailedEventUiDefinition);
 };

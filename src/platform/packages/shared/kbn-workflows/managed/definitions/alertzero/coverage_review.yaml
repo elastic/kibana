@@ -286,7 +286,6 @@ steps:
                   updates:
                     status: closed
                     close_reason: other
-                    verdict: "Analyst declined the coverage review."
                 on-failure:
                   continue: true
 
@@ -1006,7 +1005,6 @@ steps:
               updates:
                 status: closed
                 close_reason: "{% if steps.report_unresolved_rule.output.decision == 'approved' or steps.report_unconfirmed_rule.output.decision == 'approved' or steps.report_missing_version.output.decision == 'approved' or steps.report_unknown_verdict.output.decision == 'approved' %}other{% else %}resolved{% endif %}"
-                verdict: "{% if steps.propose_enable.output.status == 'succeeded' %}Analyst approved enabling the existing rule.{% elsif steps.propose_install.output.status == 'succeeded' %}Analyst approved installing the prebuilt rule.{% elsif steps.propose_confirm.output.decision == 'approved' %}Analyst confirmed the enabled rule covers the gap.{% elsif steps.run_rule_creation.output.created == true %}Analyst approved creating a new rule for the gap.{% else %}Analyst acknowledged the coverage check report.{% endif %}"
             on-failure:
               continue: true
 
@@ -1029,7 +1027,6 @@ steps:
               updates:
                 status: closed
                 close_reason: other
-                verdict: "Analyst dismissed the coverage proposal."
             on-failure:
               continue: true
 

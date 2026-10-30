@@ -33,6 +33,11 @@ export {
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
 export { NIGHTSHIFT_MANAGE_ROLE, NIGHTSHIFT_READ_ROLE, NIGHTSHIFT_NO_ACCESS_ROLE } from './roles';
 export { ensureNightshiftServiceAccountRoles } from '../../../../common';
+export {
+  getNightshiftServiceAccountStatus,
+  setUpNightshiftServiceAccount,
+  SERVICE_ACCOUNT_PATH,
+} from './service_account';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,

@@ -115,6 +115,7 @@ export const runValidationStep = async ({
       executionUuid,
       logger,
       generationResult,
+      generationSource: workflowConfig.generation_source,
       maxWaitMs,
       request,
       ruleId: sourceMetadata?.ruleId,
