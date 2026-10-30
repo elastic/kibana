@@ -416,7 +416,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('should render metadata tab, pin and unpin table row', async () => {
           // Add Pin
           await pageObjects.assetDetails.clickAddMetadataPin();
-          expect(await pageObjects.assetDetails.metadataRemovePinExists()).to.be(true);
+          await pageObjects.assetDetails.metadataRemovePinExistsOrFail();
 
           // Persist pin after refresh
           await browser.refresh();
@@ -430,7 +430,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           // Remove Pin
           await pageObjects.assetDetails.clickRemoveMetadataPin();
-          expect(await pageObjects.assetDetails.metadataRemovePinExists()).to.be(false);
+          await pageObjects.assetDetails.metadataRemovePinMissing();
         });
 
         it('preserves search term between page reloads', async () => {
