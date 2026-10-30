@@ -74,8 +74,7 @@ test.describe('Links panel - accessibility', { tag: ['@local-stateful-classic'] 
   }) => {
     const { dashboard, linksPanel } = pageObjects;
     await dashboard.openDashboardWithIdInEditMode(emptyLinksDashboardId);
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel', EMPTY_PANEL_TITLE);
-    await expect(linksPanel.panelEditorFlyout).toBeVisible();
+    await linksPanel.openPanelEditor(EMPTY_PANEL_TITLE);
 
     const { violations } = await page.checkA11y();
     expect(violations).toStrictEqual([]);
@@ -87,8 +86,7 @@ test.describe('Links panel - accessibility', { tag: ['@local-stateful-classic'] 
   }) => {
     const { dashboard, linksPanel } = pageObjects;
     await dashboard.openDashboardWithIdInEditMode(linksDashboardId);
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel', LINKS_PANEL_TITLE);
-    await expect(linksPanel.panelEditorFlyout).toBeVisible();
+    await linksPanel.openPanelEditor(LINKS_PANEL_TITLE);
     await expect(linksPanel.getEditorLinks()).toHaveCount(2);
 
     const { violations } = await page.checkA11y();
@@ -101,7 +99,7 @@ test.describe('Links panel - accessibility', { tag: ['@local-stateful-classic'] 
   }) => {
     const { dashboard, linksPanel } = pageObjects;
     await dashboard.openDashboardWithIdInEditMode(emptyLinksDashboardId);
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel', EMPTY_PANEL_TITLE);
+    await linksPanel.openPanelEditor(EMPTY_PANEL_TITLE);
     await linksPanel.openLinkEditor();
 
     const { violations } = await page.checkA11y();
@@ -114,7 +112,7 @@ test.describe('Links panel - accessibility', { tag: ['@local-stateful-classic'] 
   }) => {
     const { dashboard, linksPanel } = pageObjects;
     await dashboard.openDashboardWithIdInEditMode(emptyLinksDashboardId);
-    await dashboard.clickPanelAction('embeddablePanelAction-editPanel', EMPTY_PANEL_TITLE);
+    await linksPanel.openPanelEditor(EMPTY_PANEL_TITLE);
     await linksPanel.setExternalUrl('https://elastic.co');
 
     const { violations } = await page.checkA11y();
