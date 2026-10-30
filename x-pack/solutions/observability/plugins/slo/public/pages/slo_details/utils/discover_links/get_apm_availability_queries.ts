@@ -11,7 +11,7 @@ import {
   ALL_VALUE,
   type APMTransactionErrorRateIndicator,
   is,
-  kqlWithFiltersSchemaZod,
+  kqlWithFiltersSchema,
 } from '@kbn/slo-schema';
 
 export function getApmAvailabilityQueries(
@@ -44,12 +44,12 @@ export function getApmAvailabilityQueries(
   }
 
   if (indicator.params.filter) {
-    const filterKuery = is(kqlWithFiltersSchemaZod, indicator.params.filter)
+    const filterKuery = is(kqlWithFiltersSchema, indicator.params.filter)
       ? indicator.params.filter.kqlQuery
       : indicator.params.filter;
     const filter = buildEsQuery({
       kuery: filterKuery,
-      filters: is(kqlWithFiltersSchemaZod, indicator.params.filter)
+      filters: is(kqlWithFiltersSchema, indicator.params.filter)
         ? indicator.params.filter.filters
         : [],
       config: esQueryConfig,

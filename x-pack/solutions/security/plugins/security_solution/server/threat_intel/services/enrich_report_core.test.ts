@@ -17,7 +17,7 @@ import {
 import { hashIocSet } from './adjudicate_iocs';
 
 const URL = 'https://evil.example/PAYLOAD/Stage2.exe';
-const HASH = 'A'.repeat(64);
+const HASH = 'a'.repeat(64);
 const iocs: ExtractedIoc[] = [
   {
     type: 'url',
@@ -32,7 +32,9 @@ const iocs: ExtractedIoc[] = [
     value: HASH,
     tier: 'discriminating',
     tier_heuristic: 'discriminating',
-    tier_basis: 'test',
+    // Only prose hashes are reviewed; section and defanged hashes stay deterministic.
+    tier_basis: 'hash_high_entropy',
+    context: `Payload hash ${HASH}.`,
   },
 ];
 
@@ -92,7 +94,10 @@ describe('enrichReportCore', () => {
   const logger = loggingSystemMock.createLogger();
 
   it('returns exact deterministic IOC values selected by candidate id', async () => {
-    const invoke = jest.fn().mockResolvedValue({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    const invoke = jest.fn().mockResolvedValue({
+      raw: { response_metadata: {} },
+      parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0, 1] },
+    });
     const result = await enrichReportCore(buildModel(invoke), logger, {
       text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
       iocs,
@@ -112,6 +117,23 @@ describe('enrichReportCore', () => {
       })
     );
     expect(result.context.mode).toBe('full');
+  });
+
+  it('downgrades an unapproved hash candidate to reference', async () => {
+    const invoke = jest.fn().mockResolvedValue({ raw: { response_metadata: {} }, parsed: OUTPUT });
+    const result = await enrichReportCore(buildModel(invoke), logger, {
+      text: `The attacker downloaded ${URL}. Payload hash ${HASH}.`,
+      iocs,
+    });
+
+    expect(result.anchor_iocs.map(({ value }) => value)).toEqual([URL]);
+    expect(result.iocs[1]).toEqual(
+      expect.objectContaining({
+        value: HASH,
+        tier: 'reference',
+        tier_basis: 'semantic_reference',
+      })
+    );
   });
 
   it('retries with evenly distributed degraded context only after overflow', async () => {

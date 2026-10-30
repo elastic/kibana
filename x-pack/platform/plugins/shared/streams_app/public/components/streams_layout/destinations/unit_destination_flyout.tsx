@@ -16,6 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DeleteDestinationConfirmation } from './delete_destination_confirmation';
 import { DestinationIndicesList } from './destination_indices_list';
+import { S3DestinationDetails } from './s3_destination_details';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
 import type { DestinationViewModel } from './types';
 
@@ -87,15 +88,23 @@ export const UnitDestinationFlyout = ({
       data-test-subj="streamsUnitDestinationFlyout"
     >
       <EuiFlyoutBody>
-        <DestinationIndicesList
-          destination={destination}
-          indices={indices}
-          status={indicesStatus}
-          error={indicesError}
-          showHeader={true}
-          titleId={flyoutTitleId}
-          onIndexClick={onIndexClick}
-        />
+        {destination.type === 's3' ? (
+          <S3DestinationDetails
+            destination={destination}
+            showHeader={true}
+            titleId={flyoutTitleId}
+          />
+        ) : (
+          <DestinationIndicesList
+            destination={destination}
+            indices={indices}
+            status={indicesStatus}
+            error={indicesError}
+            showHeader={true}
+            titleId={flyoutTitleId}
+            onIndexClick={onIndexClick}
+          />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <DestinationDeleteFooter

@@ -6,6 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { getEffectiveNamespace } from '../../common/effective_namespace';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
@@ -120,13 +121,6 @@ export function getSourcePolicyName(
   ).slice(0, MAX_POLICY_NAME_LENGTH);
 }
 
-function instanceNamespace(
-  instance: ServiceInstance,
-  storedServiceVars: Record<string, ServiceVars>
-): string {
-  return storedServiceVars[instance.instanceId]?.namespace ?? '';
-}
-
 /**
  * Group originals by packageName and namespace, and make each duplicate its own group.
  *
@@ -146,12 +140,14 @@ export function groupByPackage(
    * otherwise they stay apart, as for agent-based, where an empty namespace means the namespace
    * of the agent policy.
    */
-  defaultNamespace?: string
+  defaultNamespace?: string,
+  /** The global namespace, which every instance without a namespace of its own deploys into. */
+  globalNamespace?: string
 ): DeployGroup[] {
-  const resolveNamespace = (instance: ServiceInstance) => {
-    const namespace = instanceNamespace(instance, storedServiceVars);
-    return namespace || defaultNamespace || '';
-  };
+  const resolveNamespace = (instance: ServiceInstance) =>
+    getEffectiveNamespace(instance.instanceId, storedServiceVars, globalNamespace) ||
+    defaultNamespace ||
+    '';
   const bundled = new Map<
     string,
     {

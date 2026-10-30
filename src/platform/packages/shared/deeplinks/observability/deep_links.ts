@@ -9,6 +9,7 @@
 
 import type {
   APM_APP_ID,
+  ENTITY_INVENTORY_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
@@ -24,7 +25,6 @@ import type {
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
-  SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
   NIGHTSHIFT_APP_ID,
@@ -47,7 +47,7 @@ type ObltDigitalExperienceApp = typeof OBLT_DIGITAL_EXPERIENCE_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
-type SignificantEventsApp = typeof SIGNIFICANT_EVENTS_APP_ID;
+type EntityInventoryApp = typeof ENTITY_INVENTORY_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
 type OnboardingApp = typeof ONBOARDING_APP_ID;
 type NightshiftApp = typeof NIGHTSHIFT_APP_ID;
@@ -70,11 +70,11 @@ export type AppId =
   | ObltProfilingApp
   | InventoryApp
   | StreamsApp
-  | SignificantEventsApp
   | IngestHubApp
   | OnboardingApp
   | NightshiftApp
-  | ObservabilityAlertingApp;
+  | ObservabilityAlertingApp
+  | EntityInventoryApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -94,6 +94,8 @@ export type MetricsLinkId =
   | 'settings'
   | 'assetDetails';
 
+export type EntityInventoryAppLinkId = 'allResources' | 'hosts' | 'kubernetes';
+
 export type ApmLinkId =
   | 'services'
   | 'traces'
@@ -111,9 +113,7 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
 
-export type SignificantEventsLinkId = 'events' | 'rules';
-
-export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'sources';
+export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'rules' | 'sources';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'
@@ -144,6 +144,6 @@ export type DeepLinkId =
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`
-  | `${SignificantEventsApp}:${SignificantEventsLinkId}`
   | `${NightshiftApp}:${NightshiftLinkId}`
-  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`;
+  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`
+  | `${EntityInventoryApp}:${EntityInventoryAppLinkId}`;
