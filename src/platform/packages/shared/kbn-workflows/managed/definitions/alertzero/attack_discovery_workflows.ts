@@ -247,13 +247,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  *
  * Version 17 retargets only when the matcher confirmed the Investigation was
  * missing. A privilege error or a 5xx starts a review and leaves the fingerprint.
+ *
+ * Version 18 writes that review's own fingerprint when the failed read's wait
+ * still fails. A confirmed 404 still retargets and does not create a second one.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 17,
+  version: 18,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

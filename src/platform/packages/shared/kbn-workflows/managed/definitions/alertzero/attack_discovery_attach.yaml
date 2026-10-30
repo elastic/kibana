@@ -251,11 +251,53 @@ steps:
           alerts:
             values: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
 
+  # A failed read does not retarget, because the Investigation may still be
+  # live. This review still needs a fingerprint, or the next continuation
+  # matches the earlier one and opens another Investigation. A confirmed 404
+  # takes the retarget above and does not write a second document.
+  - name: write_own_fingerprint_when_unreadable
+    type: elasticsearch.index
+    if: "${{ steps.wait_for_investigation.error != blank and inputs.fingerprint_pending == true and inputs.retarget_if_missing == false and inputs.own_fingerprint_id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank }}"
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      id: "{{ inputs.own_fingerprint_id }}"
+      op_type: create
+      refresh: wait_for
+      document:
+        "@timestamp": "${{ now }}"
+        id: "{{ inputs.own_fingerprint_id }}"
+        type: security.attack_fingerprint
+        title: "{{ inputs.title | truncate: 512, '' }}"
+        tags:
+          - consumer:attack-discovery
+        expires_at: "{{ inputs.expires_at }}"
+        permissions:
+          kibana:
+            privileges:
+              - space: "{{ workflow.spaceId }}"
+        attributes:
+          space_id: "{{ workflow.spaceId }}"
+          investigation_id: "{{ steps.resolve_own_investigation_id.output.investigation_id }}"
+          attack_discovery_id: "{{ inputs.attack_discovery_id }}"
+          alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+          analyzed_alert_ids: "${{ inputs.alert_ids | default: consts.no_alert_ids }}"
+          alert_count: "${{ inputs.alert_ids | default: consts.no_alert_ids | size }}"
+          host_entity_ids: "${{ inputs.host_entity_ids | default: consts.no_alert_ids }}"
+          user_entity_ids: "${{ inputs.user_entity_ids | default: consts.no_alert_ids }}"
+          entity_pairs: "${{ inputs.entity_pairs | default: consts.no_alert_ids }}"
+          mitre_attack_tactics: "${{ inputs.tactics | default: consts.no_alert_ids }}"
+          first_alert_at: "{{ inputs.first_alert_at }}"
+          last_alert_at: "{{ inputs.last_alert_at }}"
+          status: open
+          parent_run_id: "{{ inputs.parent_run_id }}"
+
   # The id this attack was going to join is recorded as a related Investigation.
   # `investigation_missing` is what makes the review's note say the wait failed,
   # rather than that the earlier Investigation was a closed false positive.
-  # Runs after the retarget, so the review reads the fingerprint that now
-  # points at this attack.
+  # Runs after the fingerprint write, so the review reads the document that
+  # now points at this attack: the retargeted one, or the one just created.
   - name: review_when_investigation_missing
     type: workflow.executeAsync
     if: "${{ steps.wait_for_investigation.error != blank }}"

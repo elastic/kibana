@@ -3973,6 +3973,31 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
+      it('writes this attack its own fingerprint when a failed read never clears', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        const write = stepIn(attachSteps, 'write_own_fingerprint_when_unreadable');
+
+        expect(names.indexOf('write_own_fingerprint_when_unreadable')).toBeGreaterThan(
+          names.indexOf('retarget_pending_fingerprint')
+        );
+        expect(names.indexOf('write_own_fingerprint_when_unreadable')).toBeLessThan(
+          names.indexOf('review_when_investigation_missing')
+        );
+        expect(write?.type).toBe('elasticsearch.index');
+        expect(write?.with?.op_type).toBe('create');
+        expect(write?.if).toContain('inputs.retarget_if_missing == false');
+        expect(write?.if).toContain('inputs.fingerprint_pending == true');
+        expect(write?.if).toContain('steps.wait_for_investigation.error != blank');
+        expect(write?.with?.document).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              investigation_id: '{{ steps.resolve_own_investigation_id.output.investigation_id }}',
+              attack_discovery_id: '{{ inputs.attack_discovery_id }}',
+            }),
+          })
+        );
+      });
+
       it('adds the continuation alert ids only after the investigation appears', () => {
         const extend = stepIn(attachSteps, 'extend_pending_fingerprint');
         const script = extend?.with?.script as { source?: string } | undefined;
@@ -4041,6 +4066,7 @@ describe('Attack Discovery worker chain', () => {
           'resolve_own_investigation_id',
           'find_pending_fingerprint',
           'retarget_pending_fingerprint',
+          'write_own_fingerprint_when_unreadable',
           'review_when_investigation_missing',
           'reread_investigation',
           'resolve_attach_row',
@@ -4190,8 +4216,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 17 so only a confirmed miss retargets', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(17);
+      it('bumps the attach workflow to version 18 so a failed read still has a fingerprint', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(18);
       });
 
       it('keeps its alert tags in sync with the review', () => {
