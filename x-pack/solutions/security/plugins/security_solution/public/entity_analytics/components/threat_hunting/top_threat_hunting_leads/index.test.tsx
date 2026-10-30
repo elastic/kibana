@@ -12,6 +12,7 @@ import type { AIConnector } from '@kbn/inference-connectors';
 
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
@@ -32,20 +33,10 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useTimeZone: jest.fn(() => 'UTC'),
 }));
 
-const mockOpenFlyout = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({
-    openFlyout: mockOpenFlyout,
-  }),
-}));
-
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => false,
-}));
-
+const mockOpenEntityFlyout = jest.fn();
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
-    openEntityFlyout: jest.fn(),
+    openEntityFlyout: mockOpenEntityFlyout,
   }),
 }));
 
@@ -427,17 +418,14 @@ describe('TopThreatHuntingLeads', () => {
 
     fireEvent.click(screen.getByTestId('leadEntityBadge-admin@example.com'));
 
-    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'user-panel',
-        params: {
-          userName: 'admin@example.com',
-          entityId: 'user:admin@example.com',
-          contextID: 'entity-analytics-threat-hunting-leads',
-          scopeId: 'entity-analytics-threat-hunting-leads',
-        },
-      },
+    expect(mockOpenEntityFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenEntityFlyout).toHaveBeenCalledWith({
+      engineType: 'user',
+      entityName: 'admin@example.com',
+      origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
+      entityId: 'user:admin@example.com',
+      contextID: 'entity-analytics-threat-hunting-leads',
+      scopeId: 'entity-analytics-threat-hunting-leads',
     });
     expect(onLeadClick).not.toHaveBeenCalled();
   });
@@ -463,7 +451,7 @@ describe('TopThreatHuntingLeads', () => {
 
     fireEvent.click(screen.getByText('payment-api'));
 
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(mockOpenEntityFlyout).not.toHaveBeenCalled();
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
   });

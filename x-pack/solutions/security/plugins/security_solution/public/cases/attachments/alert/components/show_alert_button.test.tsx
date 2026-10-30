@@ -38,6 +38,13 @@ jest.mock('@kbn/cases-plugin/public', () => ({
 }));
 
 jest.mock('../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../../detections/components/alert_summary/flyout/ease_flyout', () => ({
+  EaseFlyout: ({ documentId, onClose }: { documentId: string; onClose: () => void }) => (
+    <button type="button" data-test-subj="mockEaseFlyout" onClick={onClose}>
+      {documentId}
+    </button>
+  ),
+}));
 jest.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
@@ -124,27 +131,29 @@ describe('ShowAlertButton', () => {
     );
   });
 
-  it('opens the legacy EASE flyout when the EASE capability is on, regardless of the new flyout flag', () => {
-    setKibanaServices(true);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+  it.each([true, false])(
+    'opens the EASE flyout when the EASE capability is on (new flyout enabled: %s)',
+    (newFlyoutEnabled) => {
+      setKibanaServices(true);
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(newFlyoutEnabled);
 
-    render(<ShowAlertButton {...props} />);
-    fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+      render(<ShowAlertButton {...props} />);
+      expect(screen.queryByTestId('mockEaseFlyout')).not.toBeInTheDocument();
 
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: 'ease-details',
-        params: {
-          id: 'alert-id',
-          indexName: 'alert-index',
-        },
-      },
-    });
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
-    // EASE path does not report the document flyout telemetry event
-    expect(mockReportEvent).not.toHaveBeenCalled();
-    expect(navigateToCaseView).not.toHaveBeenCalled();
-  });
+      fireEvent.click(screen.getByTestId('comment-action-show-alert-action-id'));
+
+      expect(screen.getByTestId('mockEaseFlyout')).toHaveTextContent('alert-id');
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+      // EASE path does not report the document flyout telemetry event
+      expect(mockReportEvent).not.toHaveBeenCalled();
+      expect(navigateToCaseView).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('mockEaseFlyout'));
+
+      expect(screen.queryByTestId('mockEaseFlyout')).not.toBeInTheDocument();
+    }
+  );
 
   it('navigates to the case view when there is no valid index', () => {
     render(<ShowAlertButton {...props} index="" />);
