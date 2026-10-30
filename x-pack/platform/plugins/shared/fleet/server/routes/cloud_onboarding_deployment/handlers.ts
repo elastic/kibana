@@ -189,6 +189,14 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
         body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
       });
     }
+    if (SavedObjectsErrorHelpers.isConflictError(error)) {
+      return response.customError({
+        statusCode: 409,
+        body: {
+          message: `Cloud onboarding deployment ${request.params.id} was modified concurrently, retry the request`,
+        },
+      });
+    }
     throw error;
   }
 };
