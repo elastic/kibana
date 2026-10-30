@@ -266,7 +266,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
   /** Sources the caller resolved from slugs. Omitted when the search covers the whole space. */
   sources?: readonly NightshiftSource[];
   kiClient: KnowledgeIndicatorClient;
-  topologySnapshotClient?: Pick<TopologySnapshotClient, 'neighborhood'>;
+  topologySnapshotClient: Pick<TopologySnapshotClient, 'neighborhood'>;
   logger: Logger;
   params: SearchKnowledgeIndicatorsInput;
   view: KISearchView;
@@ -282,22 +282,20 @@ export async function searchKnowledgeIndicatorsToolHandler({
     },
     getSourceIds: async () => [...catalog.byId.keys()],
     getSourceSlug: (sourceId) => catalog.byId.get(sourceId)?.slug,
-    resolveTopologySeeds: topologySnapshotClient
-      ? async (seedIds, sourceIds) => {
-          try {
-            const neighborhood = await topologySnapshotClient.neighborhood(seedIds, sourceIds);
-            topologyExpansion = { truncated: neighborhood.truncated };
-            return neighborhood.featureIds;
-          } catch (error) {
-            logger.warn(
-              `ki_search: topology unavailable, expanding in memory: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
-            return undefined;
-          }
-        }
-      : undefined,
+    resolveTopologySeeds: async (seedIds, sourceIds) => {
+      try {
+        const neighborhood = await topologySnapshotClient.neighborhood(seedIds, sourceIds);
+        topologyExpansion = { truncated: neighborhood.truncated };
+        return neighborhood.featureIds;
+      } catch (error) {
+        logger.warn(
+          `ki_search: topology unavailable, expanding in memory: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      }
+    },
     getFeatures: async (sourceId, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
         return (await kiClient.findFeatures(sourceId, searchText, { featureTypes, featureIds }))

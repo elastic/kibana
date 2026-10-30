@@ -88,9 +88,15 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     getQueryLinks: jest.fn(),
   } as unknown as KnowledgeIndicatorClient;
 
+  const topologySnapshotClient = { neighborhood: jest.fn() };
+
   beforeEach(() => {
     jest.clearAllMocks();
     catalog = catalogFor(['logs.test']);
+    topologySnapshotClient.neighborhood.mockImplementation(async (seedIds: string[]) => ({
+      featureIds: seedIds,
+      truncated: false,
+    }));
   });
 
   it('returns both features and queries when kind is omitted', async () => {
@@ -113,6 +119,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     const result = await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: {},
       view: 'compact',
@@ -139,6 +146,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     const result = await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { kind: ['query'] },
       view: 'compact',
@@ -170,6 +178,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: {
         kind: ['query'],
@@ -196,6 +205,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: {
         kind: ['feature'],
@@ -213,7 +223,8 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     expect(kiClient.getFeatures).not.toHaveBeenCalled();
   });
 
-  it('loads topology candidates in one feature search', async () => {
+  it('expands seeds in memory from one unfiltered feature search when the topology is unavailable', async () => {
+    topologySnapshotClient.neighborhood.mockRejectedValueOnce(new Error('topology unavailable'));
     kiClient.getFeatures = jest
       .fn()
       .mockImplementation(
@@ -241,6 +252,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     const result = await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: {
         kind: ['feature'],
@@ -258,78 +270,51 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     ]);
     expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['dependency'],
+      featureIds: undefined,
     });
+    expect(result.topology_expansion).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('topology unavailable'));
   });
 
-  describe('topology expansion', () => {
-    const neighborhood = {
+  it('expands seeds through the topology and fetches the expanded ids', async () => {
+    topologySnapshotClient.neighborhood.mockResolvedValueOnce({
       featureIds: ['orders-api', 'orders-api-storage', 'storage'],
       truncated: true,
-    };
-
-    it('expands seeds through the snapshot and pushes the ids to the feature fetch', async () => {
-      const topologySnapshotClient = { neighborhood: jest.fn().mockResolvedValue(neighborhood) };
-      kiClient.getFeatures = jest.fn().mockResolvedValue({
-        hits: [
-          makeFeature({
-            id: 'orders-api-storage',
-            type: 'dependency',
-            properties: { source: 'orders-api', target: 'storage' },
-          }),
-          makeFeature({ id: 'storage', type: 'entity', properties: { name: 'storage' } }),
-        ],
-        total: 2,
-      });
-
-      const result = await searchKnowledgeIndicatorsToolHandler({
-        catalog,
-        kiClient,
-        topologySnapshotClient,
-        logger,
-        params: {
-          kind: ['feature'],
-          feature_types: ['dependency', 'entity'],
-          feature_ids: ['orders-api'],
-        },
-        view: 'compact',
-      });
-
-      expect(topologySnapshotClient.neighborhood).toHaveBeenCalledWith(
-        ['orders-api'],
-        ['logs.test']
-      );
-      expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
-        type: ['dependency', 'entity'],
-        featureIds: ['orders-api', 'orders-api-storage', 'storage'],
-      });
-      expect(result.topology_expansion).toEqual({ truncated: true });
-      expect(
-        result.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : null))
-      ).toEqual(['orders-api-storage', 'storage']);
+    });
+    kiClient.getFeatures = jest.fn().mockResolvedValue({
+      hits: [
+        makeFeature({
+          id: 'orders-api-storage',
+          type: 'dependency',
+          properties: { source: 'orders-api', target: 'storage' },
+        }),
+        makeFeature({ id: 'storage', type: 'entity', properties: { name: 'storage' } }),
+      ],
+      total: 2,
     });
 
-    it('falls back to in-memory expansion with a warning when the topology cannot be computed', async () => {
-      const topologySnapshotClient = {
-        neighborhood: jest.fn().mockRejectedValue(new Error('topology failed')),
-      };
-      kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
-
-      const result = await searchKnowledgeIndicatorsToolHandler({
-        catalog,
-        kiClient,
-        topologySnapshotClient,
-        logger,
-        params: { kind: ['feature'], feature_types: ['dependency'], feature_ids: ['orders-api'] },
-        view: 'compact',
-      });
-
-      expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
-        type: ['dependency'],
-        featureIds: undefined,
-      });
-      expect(result.topology_expansion).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('topology failed'));
+    const result = await searchKnowledgeIndicatorsToolHandler({
+      catalog,
+      kiClient,
+      topologySnapshotClient,
+      logger,
+      params: {
+        kind: ['feature'],
+        feature_types: ['dependency', 'entity'],
+        feature_ids: ['orders-api'],
+      },
+      view: 'compact',
     });
+
+    expect(topologySnapshotClient.neighborhood).toHaveBeenCalledWith(['orders-api'], ['logs.test']);
+    expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
+      type: ['dependency', 'entity'],
+      featureIds: ['orders-api', 'orders-api-storage', 'storage'],
+    });
+    expect(result.topology_expansion).toEqual({ truncated: true });
+    expect(
+      result.knowledge_indicators.map((ki) => (ki.kind === 'feature' ? ki.feature.id : null))
+    ).toEqual(['orders-api-storage', 'storage']);
   });
 
   it('presents a stored source id as its slug and includes view_name on the envelope', async () => {
@@ -361,6 +346,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       catalog,
       sources: [source],
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { source_ids: [source.id], kind: ['feature'] },
       view: 'full',
@@ -408,6 +394,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     const result = await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { kind: ['query'] },
       view: 'compact',
@@ -430,6 +417,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { kind: ['feature'] },
       view: 'compact',
@@ -448,6 +436,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { source_ids: ['logs.allowed', 'logs.not_allowed'] },
       view: 'compact',
@@ -468,6 +457,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     const result = await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: {
         feature_types: ['dependency', 'entity'],
@@ -482,8 +472,10 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       view: 'compact',
     });
 
+    expect(topologySnapshotClient.neighborhood).toHaveBeenCalledWith(['service-a'], ['logs.test']);
     expect(kiClient.getFeatures).toHaveBeenCalledWith('logs.test', {
       type: ['dependency', 'entity'],
+      featureIds: ['service-a'],
     });
     expect(kiClient.getQueryLinks).toHaveBeenCalledWith(['logs.test'], {
       ruleUnbacked: 'exclude',
@@ -509,6 +501,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { kind: ['feature'] },
       view: 'compact',
@@ -528,6 +521,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       const result = await searchKnowledgeIndicatorsToolHandler({
         catalog,
         kiClient,
+        topologySnapshotClient,
         logger,
         params: { kind: ['feature'] },
         view: 'compact',
@@ -724,6 +718,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       const result = await searchKnowledgeIndicatorsToolHandler({
         catalog,
         kiClient,
+        topologySnapshotClient,
         logger,
         params: { kind: ['feature'] },
         view: 'full',
@@ -759,6 +754,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       const result = await searchKnowledgeIndicatorsToolHandler({
         catalog,
         kiClient,
+        topologySnapshotClient,
         logger,
         params: { kind: ['query'] },
         view: 'full',

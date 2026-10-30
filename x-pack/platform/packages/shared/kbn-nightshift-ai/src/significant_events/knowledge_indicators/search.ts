@@ -289,7 +289,8 @@ export async function searchKnowledgeIndicators({
   getSourceIds(): Promise<string[]>;
   /** Slug of a source id, used to order results. Ids sort as is when it is omitted. */
   getSourceSlug?(sourceId: string): string | undefined;
-  resolveTopologySeeds?(seedIds: string[], sourceIds: string[]): Promise<string[] | undefined>;
+  /** Topology neighborhood of the seeds; `undefined` when unavailable, which falls back to in-memory expansion. */
+  resolveTopologySeeds(seedIds: string[], sourceIds: string[]): Promise<string[] | undefined>;
   getFeatures(
     sourceId: string,
     options: {
@@ -332,7 +333,7 @@ export async function searchKnowledgeIndicators({
 
   const seedIds = params.feature_ids?.length ? uniq(params.feature_ids) : undefined;
   const expandedFeatureIds =
-    normalized.includeFeatures && seedIds && resolveTopologySeeds
+    normalized.includeFeatures && seedIds
       ? await resolveTopologySeeds(seedIds, sourceIds)
       : undefined;
 
