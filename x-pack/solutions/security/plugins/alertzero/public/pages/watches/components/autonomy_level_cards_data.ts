@@ -309,7 +309,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
           {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.workerValue',
-              '<worker> analyzes each qualifying rule.'
+              '<worker> analyzes each qualifying rule and proposes a tuning change.'
             ),
           },
           {
