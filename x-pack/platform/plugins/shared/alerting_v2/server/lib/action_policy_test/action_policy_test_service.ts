@@ -79,7 +79,7 @@ export class ActionPolicyTestService {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('actionPolicyClient');
+    this.logger = loggerService.forSubsystem('actionPolicyTest');
   }
 
   public async preview({

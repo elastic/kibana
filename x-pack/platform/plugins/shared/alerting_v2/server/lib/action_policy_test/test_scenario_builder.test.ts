@@ -10,7 +10,6 @@ import {
   KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
   buildFieldsZodValidator,
 } from '@kbn/workflows';
-import objectHash from 'object-hash';
 import { buildAlertDetailsUrl } from '../dispatcher/alert_details_url';
 import {
   MOCK_KIBANA_BASE_URL,
@@ -101,13 +100,20 @@ describe('buildTestScenario', () => {
 
       expect(groups).toHaveLength(1);
       expect(groups[0]).toEqual({
-        id: dispatcherGroups[0].id,
+        id: `${TEST_ID_PREFIX}${dispatcherGroups[0].id}`,
         policyId: dispatcherGroups[0].policyId,
         groupKey: dispatcherGroups[0].groupKey,
         alerts: dispatcherGroups[0].alerts,
         rules: dispatcherGroups[0].rules,
       });
-      expect(groups[0].id).toBe(objectHash({ policyId: policy.id, groupKey: groups[0].groupKey }));
+    });
+
+    it('never reuses the id of a production group', async () => {
+      const [{ id }] = buildGroups(policy);
+      const { groups: dispatcherGroups } = await groupWithDispatcher(policy);
+
+      expect(id.startsWith(TEST_ID_PREFIX)).toBe(true);
+      expect(id).not.toBe(dispatcherGroups[0].id);
     });
 
     it('builds a payload valid against the alertingV2NotificationGroup input definition', () => {
