@@ -93,7 +93,7 @@ Present findings as a numbered list: file + line range, the operation(s) involve
 
 Non-negotiable when implementing:
 - Always call \`_describe\` (or the \`describe_ai_index\` tool) before writing an ES|QL query against this index. It gives the real field names and working example queries, not assumed ones.
-- \`PUT /api/context_engine/ai_index/${aiIndexId}\` replaces the whole record. GET the current record first, merge your change into its \`sources\` (or \`automations\`, \`description\`), and send the full object back, or you will wipe out everything you left out.
+- \`PUT /api/context_engine/ai_index/${aiIndexId}\` replaces the whole record. GET the current record first, merge your change into \`sources\` (or \`automations\`, \`description\`), then send back only: \`description\`, \`memory_enabled\`, \`feedback_analysis\`, \`dest\`, \`automations\`, \`sources\`, \`traces\` (each trace as \`{ type, value }\`). Strip \`id\`, \`managed\`, \`date_created\`, \`date_modified\`, and any derived \`query\` field on traces first. The GET response includes those; the PUT schema does not accept them and will 400 if you send them back.
 - Don't fight the lifecycle filters (\`governance.lifecycle.status\`, \`expires_at\`) that \`_query\` injects automatically; they're what keeps deleted and expired KIs out of results.
 - \`remember\`/\`forget\` only work when this AI index has \`memory_enabled: true\`. Don't try to write memory content through any other route.
 - \`/internal/context_engine/...\` routes are an internal implementation detail, not a stable public contract. Build new integrations on sources plus the three public routes/tools above.
