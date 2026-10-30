@@ -189,6 +189,7 @@ describe('Significant Events run quota workflow contracts', () => {
           processedCount: 0,
           hasWork: false,
           skippedCount: 0,
+          heldBackCount: 0,
           needsAgentCount: 0,
           classifierReasonCounts: '{}',
           classifierProbeStatusCounts: '{}',

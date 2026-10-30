@@ -611,6 +611,46 @@ describe('useTimelineEventsHandler', () => {
         expect(result.current[0]).toBe(DataLoadingState.loaded);
       });
     });
+
+    test('passes a failed search to the search handler error callback', async () => {
+      const { result } = renderHook(
+        (args) => useTimelineEventsModule.useTimelineEventsHandler(args),
+        { initialProps: { ...props, id: 'selection-query', timerangeKind: 'absolute' as const } }
+      );
+      const onResponse = jest.fn();
+      const onSearchError = jest.fn();
+
+      act(() => {
+        result.current[2](onResponse, onSearchError);
+      });
+
+      await waitFor(() => expect(onSearchError).toHaveBeenCalledWith(uniqueError));
+      expect(onResponse).not.toHaveBeenCalled();
+    });
+
+    test('reports a search that cannot start to the search handler error callback', async () => {
+      const { result } = renderHook(
+        (args) => useTimelineEventsModule.useTimelineEventsHandler(args),
+        {
+          initialProps: {
+            ...props,
+            id: 'selection-query',
+            indexNames: [],
+            timerangeKind: 'absolute' as const,
+          },
+        }
+      );
+      const onResponse = jest.fn();
+      const onSearchError = jest.fn();
+
+      act(() => {
+        result.current[2](onResponse, onSearchError);
+      });
+
+      await waitFor(() => expect(onSearchError).toHaveBeenCalledTimes(1));
+      expect(onResponse).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+    });
   });
 
   describe('fields', () => {

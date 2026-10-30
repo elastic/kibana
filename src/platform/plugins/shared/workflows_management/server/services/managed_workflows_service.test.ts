@@ -32,6 +32,7 @@ import type {
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import { INITIAL_WORKFLOW_VERSION } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -2422,6 +2423,41 @@ describe('ManagedWorkflowsService', () => {
         },
         request
       );
+    });
+
+    it('refuses a workflow whose identity can only come from a parent', async () => {
+      // This method starts the engine directly, bypassing the runWorkflow standalone
+      // gate, so it must apply the delegated-identity check itself.
+      const definition = createDefinition();
+      const request = {} as KibanaRequest;
+      const { crudService, workflowsExecutionEngine, service } = createService();
+      mockManagedWorkflowDefinitions = [definition];
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          spaceId: '*',
+          definition: {
+            name: 'Managed Workflow',
+            enabled: true,
+            steps: [
+              {
+                id: 'child',
+                type: 'workflow.execute',
+                with: { 'run-as-mode': 'inherit' },
+              },
+            ],
+          } as unknown as WorkflowYaml,
+        })
+      );
+
+      await expect(
+        service.executeManagedWorkflow(
+          WORKFLOW_ID,
+          request,
+          { spaceId: SPACE_ID, inputs: {} },
+          definition.pluginId
+        )
+      ).rejects.toThrow(WorkflowRequiresDelegatedIdentityError);
+      expect(workflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
   });
 });

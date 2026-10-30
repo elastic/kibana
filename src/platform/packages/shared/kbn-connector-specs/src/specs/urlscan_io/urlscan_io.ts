@@ -481,7 +481,7 @@ export const UrlscanIo: ConnectorSpec = {
   metadata: {
     id: '.urlscan_io',
     displayName: 'URLScan.io',
-    description: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.metadata.description', {
+    description: i18n.translate('connectorSpecs.urlscanIo.metadata.description', {
       defaultMessage:
         'Submit URLs for scanning, read maliciousness verdicts, and search historical scans on URLScan.io',
     }),
@@ -517,7 +517,7 @@ export const UrlscanIo: ConnectorSpec = {
         isRecommended: true,
         defaults: { headerField: 'api-key' },
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.auth.apiKeyHeader.label', {
+          label: i18n.translate('connectorSpecs.urlscanIo.auth.apiKeyHeader.label', {
             defaultMessage: 'API key (required for scanning, results, and DOM)',
           }),
           meta: {
@@ -532,7 +532,7 @@ export const UrlscanIo: ConnectorSpec = {
         type: 'none',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.auth.none.label', {
+          label: i18n.translate('connectorSpecs.urlscanIo.auth.none.label', {
             defaultMessage: 'No authentication (search, screenshots, and quota only)',
           }),
         },
@@ -947,7 +947,7 @@ Gotchas that matter:
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.urlscanIo.test.description', {
+    description: i18n.translate('connectorSpecs.urlscanIo.test.description', {
       defaultMessage:
         'Verifies connectivity, and the API key when one is configured, by reading the account quotas. Consumes no scan quota.',
     }),

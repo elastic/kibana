@@ -1,5 +1,5 @@
 {
-  "sha1": "8bb08a58a916dd1c6934db102c255eced4b24aa3",
+  "sha1": "551dfe571535c0dec78312b3f771eff2718cd53f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -332,8 +332,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 61,
-        "column": 15
+        "line": 62,
+        "column": 9
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/dependencies/dependency_operation_detail.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 72,
+        "column": 11
       }
     },
     {
@@ -1569,8 +1569,8 @@
       }
     },
     {
-      "id": "6a80f754a8758b3-c5a4af62fc020af",
-      "title": "Service map - nodes, edges and popovers shows popover when clicking on an edge",
+      "id": "6a80f754a8758b3-84f5007b89a3502",
+      "title": "Service map - nodes, edges and popovers opens the request flyout when clicking on an edge",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1596,8 +1596,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 95,
-        "column": 56
+        "line": 108,
+        "column": 7
       }
     },
     {
@@ -1612,8 +1612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 106,
-        "column": 74
+        "line": 121,
+        "column": 54
       }
     },
     {
@@ -1628,8 +1628,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 114,
-        "column": 25
+        "line": 130,
+        "column": 26
       }
     },
     {
@@ -1644,8 +1644,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 123,
-        "column": 13
+        "line": 139,
+        "column": 11
       }
     },
     {
@@ -1660,8 +1660,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 134,
-        "column": 20
+        "line": 149,
+        "column": 7
       }
     },
     {
@@ -1676,8 +1676,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 138,
-        "column": 13
+        "line": 154,
+        "column": 11
       }
     },
     {
@@ -1692,8 +1692,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_detailed.spec.ts",
-        "line": 150,
-        "column": 11
+        "line": 165,
+        "column": 14
       }
     },
     {
@@ -1724,7 +1724,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 226,
+        "line": 220,
         "column": 16
       }
     },

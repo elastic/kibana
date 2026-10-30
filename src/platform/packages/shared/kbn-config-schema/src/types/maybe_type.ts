@@ -15,7 +15,7 @@ export class MaybeType<V> extends Type<V | undefined> {
   private readonly maybeType: Type<V>;
 
   constructor(type: Type<V>) {
-    super(
+    super(() =>
       type
         .getSchema()
         .optional()

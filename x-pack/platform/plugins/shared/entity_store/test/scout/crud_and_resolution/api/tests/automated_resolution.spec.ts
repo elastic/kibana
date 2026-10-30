@@ -39,7 +39,8 @@ import {
   teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
-apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/296892
+apiTest.describe.skip('Automated resolution integration tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 

@@ -1,0 +1,67 @@
+{
+  "version": "1.0",
+  "sources": [
+    "model"
+  ],
+  "maven": {
+    "dependencies": [
+      "software.amazon.smithy:smithy-aws-protocol-tests:1.74.1"
+    ]
+  },
+  "projections": {
+    "restxml": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = aws.protocoltests.restxml#RestXml], service[id = aws.protocoltests.restxml#RestXml] ~> *)"
+          }
+        },
+        {
+          "name": "excludeTraits",
+          "args": {
+            "traits": [
+              "smithy.api#documentation"
+            ]
+          }
+        }
+      ]
+    },
+    "restxml-xmlns": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = aws.protocoltests.restxml.xmlns#RestXmlWithNamespace], service[id = aws.protocoltests.restxml.xmlns#RestXmlWithNamespace] ~> *)"
+          }
+        },
+        {
+          "name": "excludeTraits",
+          "args": {
+            "traits": [
+              "smithy.api#documentation"
+            ]
+          }
+        }
+      ]
+    },
+    "s3": {
+      "transforms": [
+        {
+          "name": "includeShapesBySelector",
+          "args": {
+            "selector": ":is([trait|trait], [trait|trait] ~> *, service[id = com.amazonaws.s3#AmazonS3], service[id = com.amazonaws.s3#AmazonS3] ~> *, [id|namespace = aws.protocoltests.config], [id|namespace = aws.protocoltests.config] ~> *)"
+          }
+        },
+        {
+          "name": "excludeTraits",
+          "args": {
+            "traits": [
+              "smithy.api#documentation"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -13,7 +13,9 @@ import { tags } from '@kbn/scout';
 import {
   buildEpisodeActionsHistoryQuery,
   buildEpisodeQuery,
+  buildSeriesSnoozeQuery,
 } from '@kbn/alerting-v2-common-queries';
+import { buildGroupActionsQuery } from '@kbn/alerting-v2-episodes-ui/queries/group_actions_query';
 import type { AlertingApiServicesFixture } from '../fixtures';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
@@ -246,19 +248,45 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(204);
 
-        // Episodes query: the snooze state is aggregated per series, not per group_hash.
+        // Episode query: each episode resolves to its own series, not just the group_hash.
         const [episodeA] = await runEsql(
           esClient,
-          buildEpisodeQuery(SPACE_ID, episodeIdA, SHARED_GROUP_HASH).print('basic')
+          buildEpisodeQuery(SPACE_ID, episodeIdA).print('basic')
         );
         const [episodeB] = await runEsql(
           esClient,
-          buildEpisodeQuery(SPACE_ID, episodeIdB, SHARED_GROUP_HASH).print('basic')
+          buildEpisodeQuery(SPACE_ID, episodeIdB).print('basic')
         );
         expect(episodeA).toMatchObject({ 'episode.id': episodeIdA, series_id: seriesIdA });
-        expect(episodeA.last_snooze_action).toBe('snooze');
         expect(episodeB).toMatchObject({ 'episode.id': episodeIdB, series_id: seriesIdB });
-        expect(episodeB.last_snooze_action ?? null).toBeNull();
+
+        // Group actions query (alert flyout and details page): the snooze rows are kept apart by
+        // rule, so each alert reads its own rule's row.
+        const groupActions = await runEsql(
+          esClient,
+          buildGroupActionsQuery(SPACE_ID, [SHARED_GROUP_HASH]).print('basic')
+        );
+        const snoozedGroupActions = groupActions.filter(
+          (row) => row.last_snooze_action === 'snooze'
+        );
+        expect(snoozedGroupActions).toHaveLength(1);
+        expect(snoozedGroupActions[0]).toMatchObject({
+          rule_id: RULE_A_ID,
+          group_hash: SHARED_GROUP_HASH,
+        });
+
+        // Series snooze query (Agent Builder alert tools): the snooze state is matched per
+        // series, not per group_hash.
+        const [snoozeA] = await runEsql(
+          esClient,
+          buildSeriesSnoozeQuery(SPACE_ID, SHARED_GROUP_HASH, seriesIdA).print('basic')
+        );
+        const [snoozeB] = await runEsql(
+          esClient,
+          buildSeriesSnoozeQuery(SPACE_ID, SHARED_GROUP_HASH, seriesIdB).print('basic')
+        );
+        expect(snoozeA.last_snooze_action).toBe('snooze');
+        expect(snoozeB?.last_snooze_action ?? null).toBeNull();
 
         // Action history: series-level actions are matched by series, so rule A's snooze is in
         // rule A's history and absent from rule B's.

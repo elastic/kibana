@@ -16,19 +16,19 @@ import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting
 export const ENRICH_MODES = [
   {
     name: 'any',
-    description: i18n.translate('kbn-esql-language.esql.definitions.ccqAnyDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.ccqAnyDoc', {
       defaultMessage: 'Enrich takes place on any cluster',
     }),
   },
   {
     name: 'coordinator',
-    description: i18n.translate('kbn-esql-language.esql.definitions.ccqCoordinatorDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.ccqCoordinatorDoc', {
       defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
     }),
   },
   {
     name: 'remote',
-    description: i18n.translate('kbn-esql-language.esql.definitions.ccqRemoteDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.ccqRemoteDoc', {
       defaultMessage: 'Enrich takes place on the cluster hosting the target index.',
     }),
   },
@@ -42,7 +42,7 @@ export const buildPoliciesDefinitions = (
       label,
       text: getSafeInsertText(label, { dashSupported: true }) + ' ',
       kind: 'Class',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.policyDefinition', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.policyDefinition', {
         defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
         values: {
           count: sourceIndices.length,
@@ -114,24 +114,24 @@ export const getPosition = (
 };
 
 export const noPoliciesAvailableSuggestion: ISuggestionItem = {
-  label: i18n.translate('kbn-esql-language.esql.autocomplete.noPoliciesLabel', {
+  label: i18n.translate('esqlLanguage.esql.autocomplete.noPoliciesLabel', {
     defaultMessage: 'No available policy',
   }),
   text: '',
   kind: 'Issue',
-  detail: i18n.translate('kbn-esql-language.esql.autocomplete.noPoliciesLabelsFound', {
+  detail: i18n.translate('esqlLanguage.esql.autocomplete.noPoliciesLabelsFound', {
     defaultMessage: 'Click to create',
   }),
   category: SuggestionCategory.CUSTOM_ACTION,
   command: {
     id: 'esql.policies.create',
-    title: i18n.translate('kbn-esql-language.esql.autocomplete.createNewPolicy', {
+    title: i18n.translate('esqlLanguage.esql.autocomplete.createNewPolicy', {
       defaultMessage: 'Click to create',
     }),
   },
 };
 
-export const modeDescription = i18n.translate('kbn-esql-language.esql.definitions.ccqMode', {
+export const modeDescription = i18n.translate('esqlLanguage.esql.definitions.ccqMode', {
   defaultMessage: 'Cross-cluster query mode',
 });
 
@@ -141,7 +141,7 @@ export const modeSuggestions: ISuggestionItem[] = ENRICH_MODES?.map(({ name, des
     text: `_${name}:$0`,
     asSnippet: true,
     kind: 'Reference',
-    detail: i18n.translate('kbn-esql-language.esql.definitions.ccqModeDoc', {
+    detail: i18n.translate('esqlLanguage.esql.definitions.ccqModeDoc', {
       defaultMessage: 'Cross-cluster query mode - ${description}',
       values: {
         description,
@@ -154,7 +154,7 @@ export const onSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'ON',
   text: 'ON ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.onDoc', {
+  detail: i18n.translate('esqlLanguage.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
 });
@@ -163,7 +163,7 @@ export const withSuggestion: ISuggestionItem = withAutoSuggest({
   label: 'WITH',
   text: 'WITH ',
   kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.withDoc', {
+  detail: i18n.translate('esqlLanguage.esql.definitions.withDoc', {
     defaultMessage: 'With',
   }),
 });
@@ -177,7 +177,7 @@ export const buildMatchingFieldsDefinition = (
       label,
       text: getSafeInsertText(label) + ' ',
       kind: 'Variable',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.matchingFieldDefinition', {
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.matchingFieldDefinition', {
         defaultMessage: `Use to match on {matchingField} on the policy`,
         values: {
           matchingField,

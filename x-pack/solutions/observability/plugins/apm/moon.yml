@@ -183,12 +183,14 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/genai-common'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*

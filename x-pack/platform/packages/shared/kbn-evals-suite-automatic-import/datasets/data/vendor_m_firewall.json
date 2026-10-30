@@ -1,0 +1,3177 @@
+{
+  "id": "vendor_m_firewall",
+  "title": "Vendor M firewall",
+  "description": "Check Point firewall logs from Log Exporter, as RFC 5424 syslog with key:\"value\" pairs in brackets. Includes connection, VPN, and threat prevention events.",
+  "cohort": "control",
+  "format": "text",
+  "samples": [
+    {
+      "line": "<134>1 2024-01-04T04:26:20Z THENEWAUDITTEST CheckPoint 13885 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x6596336e,0x0,0x1f67238a,0x1b3f363d}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"1\"; time:\"1704342380\"; version:\"5\"; administrator:\"testUser\"; advanced_changes:\" \"; client_ip:\"192.168.1.153\"; domain_name:\"'auditTest_domain'\"; fieldschanges:\"Name: was not modified Source: was not modified Destination: Added 'bm_core_switches' VPN: was not modified Action: was not modified Track: was not modified  Layer Name: 'bnkb01-Bermuda_Prod Security' Policy Names: ''\"; logic_changes:\"Dsts.dsts: Added '54bbefc0-48c4-4525-8120-2f94f9ac7b8e' \"; objectname:\"ospf rule\"; objecttype:\"Access Control Rule\"; operation:\"Modify Rule\"; product:\"SmartConsole\"; sendtotrackerasadvancedauditlog:\"0\"; session_description:\"CHG0887797\"; session_name:\"testUser@1/4/2024\"; session_uid:\"565dc65a-1c9f-43b2-8d71-4b4c7c311c71\"; subject:\"Object Manipulation\"; uid:\"9cd56553-3079-4873-8f19-46bee168b44a\"]",
+      "expected": {
+        "@timestamp": "2024-01-04T04:26:20.000Z",
+        "dns": {
+          "question": {
+            "name": "'auditTest_domain'"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Object Manipulation",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153"
+          ],
+          "user": [
+            "9cd56553-3079-4873-8f19-46bee168b44a",
+            "testuser"
+          ]
+        },
+        "rule": {
+          "name": "ospf rule"
+        },
+        "source": {
+          "ip": "192.168.1.153",
+          "user": {
+            "id": "9cd56553-3079-4873-8f19-46bee168b44a",
+            "name": "testuser"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "id": "9cd56553-3079-4873-8f19-46bee168b44a",
+          "name": "testuser"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x6596336e,0x0,0x1f67238a,0x1b3f363d}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-04T05:03:52Z THENEWAUDITTEST CheckPoint 26412 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65963c39,0x0,0x1f67238a,0x33ac672c}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CASCC1DMBNTB1002..7f4rte\"; sequencenum:\"1\"; time:\"1704344632\"; version:\"5\"; administrator:\"testUser\"; advanced_changes:\" \"; client_ip:\"192.168.1.153\"; domain_name:\"'testUser_domain'\"; fieldschanges:\"Name: name is empty Source: Added 'Alice', 'Bob', 'Cat';  Destination: Added 'Alice.2', 'Alice.3', 'Alice.4', 'Alice.5';  VPN: Any Action: Changed from 'Drop' to 'Accept' Track: Changed from 'None' to 'Log' Comments: 'CHG0887890 TS 040124' Services & Applications: Added 'tcp_5601', 'tcp_3001', 'TCP_1002', 'TCP_5600';  UseLogPerConnection: Changed from 'Disable' to 'Enable'  Layer Name: 'CAMCCCVBNTB009_prod Security' Policy Names: ''\"; logic_changes:\"ActionSettings.action: Changed from 'rtheyht-8eec-4103-ad21-cd461ac2c473' to 'rtheyht-8eec-4103-ad21-cd461ac2c472' TrackSettings.useLogPerConnection: Changed from 'Disable' to 'Enable' \"; objecttype:\"Access Control Rule\"; operation:\"Create Rule\"; product:\"SmartConsole\"; sendtotrackerasadvancedauditlog:\"0\"; session_name:\"testUser@1/4/2024\"; session_uid:\"59383b5a-947b-415b-a5fa-6049514dc150\"; subject:\"Object Manipulation\"; uid:\"9a53d1d3-273a-4106-bc7d-9edb225d927e\"]",
+      "expected": {
+        "@timestamp": "2024-01-04T05:03:52.000Z",
+        "dns": {
+          "question": {
+            "name": "'testUser_domain'"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Object Manipulation",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153"
+          ],
+          "user": [
+            "9a53d1d3-273a-4106-bc7d-9edb225d927e",
+            "testuser"
+          ]
+        },
+        "source": {
+          "ip": "192.168.1.153",
+          "user": {
+            "id": "9a53d1d3-273a-4106-bc7d-9edb225d927e",
+            "name": "testuser"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "id": "9a53d1d3-273a-4106-bc7d-9edb225d927e",
+          "name": "testuser"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x65963c39,0x0,0x1f67238a,0x33ac672c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-04T04:51:17Z THENEWAUDITTEST CheckPoint 26412 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65963946,0x5,0x1f67238a,0x33ac672c}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CASCC1DMBNTB1002..7f4rte\"; sequencenum:\"6\"; time:\"1704343877\"; version:\"5\"; administrator:\"testUser\"; advanced_changes:\" \"; client_ip:\"192.168.1.153\"; domain_name:\"'testUser_domain'\"; fieldschanges:\"Name: name is empty Source: Added 'Alice.2', 'Alice.3', 'Alice.4', 'Alice.5';  Destination: Added 'BNTB_10.255.109.83', 'BNTB_10.255.109.76', 'HP_155.61.9.27';  VPN: Any Action: Changed from 'Drop' to 'Accept' Track: Changed from 'None' to 'Log' Comments: 'CHG0887889 TS 040124' Services & Applications: Added 'tcp_3001', 'TCP_1002', 'TCP_5600', 'tcp_5601';  UseLogPerConnection: Changed from 'Disable' to 'Enable'  Layer Name: 'CAMCCCVBNTB005_prod_Clone Security' Policy Names: ''\"; logic_changes:\"ActionSettings.action: Changed from 'rtheyht-8eec-4103-ad21-cd461ac2c473' to 'rtheyht-8eec-4103-ad21-cd461ac2c472' Applications.applications: Added 'c8dea3f3-9dc5-4015-9a53-28d7ff74269c', '964309ed-bf93-43ab-829c-e0c932e1036d', '8f4a01b6-d247-48e8-828d-da78c3bd705c', '92cd90d2-e1e8-45c8-a27a-7df33bc35cd4'; Removed '97aeb369-9aea-11d5-bd16-0090272ccb30' Comments: 'CHG0887889 TS 040124' Dsts.dsts: Added '0ab016cd-442f-4d70-9dab-49302b909f1a', 'fd0040e8-b195-4d84-a7a5-145c2ed47b48', '9ab91246-8916-470f-0a31-73bc06b9458a'; Removed '97aeb369-9aea-11d5-bd16-0090272ccb30' Srcs.srcs: Added '384f949d-3eb2-49f8-872d-759c6a47dea5', '43f8deeb-4d91-498c-be12-bf856a8e455a', 'b2ff1fb1-280f-499c-bae0-32b31016721d', '28dc7aad-dc42-4696-a263-1994aff44699'; Removed '97aeb369-9aea-11d5-bd16-0090272ccb30' TrackSettings.track: Changed from '29e53e3d-23bf-48fe-b6b1-d59bd88036f9' to '598ead32-aa42-4615-90ed-f51a5928d41d' TrackSettings.useLogPerConnection: Changed from 'Disable' to 'Enable' \"; objecttype:\"Access Control Rule\"; operation:\"Create Rule\"; product:\"SmartConsole\"; sendtotrackerasadvancedauditlog:\"0\"; session_name:\"testUser@1/4/2024\"; session_uid:\"1c6dee37-a6aa-4998-ba2b-7a568b7bba4c\"; subject:\"Object Manipulation\"; uid:\"169949b7-51ee-4195-b7c8-a586fefc3b7c\"]",
+      "expected": {
+        "@timestamp": "2024-01-04T04:51:17.000Z",
+        "dns": {
+          "question": {
+            "name": "'testUser_domain'"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Object Manipulation",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153"
+          ],
+          "user": [
+            "169949b7-51ee-4195-b7c8-a586fefc3b7c",
+            "testuser"
+          ]
+        },
+        "source": {
+          "ip": "192.168.1.153",
+          "user": {
+            "id": "169949b7-51ee-4195-b7c8-a586fefc3b7c",
+            "name": "testuser"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "id": "169949b7-51ee-4195-b7c8-a586fefc3b7c",
+          "name": "testuser"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x65963946,0x5,0x1f67238a,0x33ac672c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 6,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T14:18:04Z THENEWAUDITTEST CheckPoint 13885 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65941b1e,0x2,0x1f67238a,0x1b3f363d}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"3\"; time:\"1704205084\"; version:\"5\"; administrator:\"System\"; advanced_changes:\" \"; client_ip:\"172.16.1.190\"; domain_name:\"'auditTest_domain'\"; fieldschanges:\"Name: '2c90c96e-2c99-47a4-a3c3-993a14c018f4_765e58b0-ccbb-4947-bb97-44fe0f6d0b29' Profile: 'g_Recommended_Protection' Protection: 'Exponent CMS SQL Injection (CVE-2017-7991)' ProtectionId: '7732550153' StagingMode: 'Enable' \"; logic_changes:\"Name: '2c90c96e-2c99-47a4-a3c3-993a14c018f4_765e58b0-ccbb-4947-bb97-44fe0f6d0b29' Profile: '2c90c96e-2c99-47a4-a3c3-993a14c018f4' Protection: '765e58b0-ccbb-4947-bb97-44fe0f6d0b29' ProtectionId: '6854867' StagingMode: 'Enable' \"; objectname:\"2c90c96e-2c99-47a4-a3c3-993a14c018f4_765e58b0-ccbb-4947-bb97-44fe0f6d0b29\"; objecttype:\"ThreatIpsProtectionOverride\"; operation:\"Create Object\"; sendtotrackerasadvancedauditlog:\"0\"; session_description:\"Global Domain Assignment\"; session_name:\"Global Domain Assignment\"; session_uid:\"d5c7cc4f-01ea-4ac7-8de1-72ae05d28bc6\"; subject:\"Object Manipulation\"; uid:\"efa04289-5905-4583-82a5-a576c33a72c4\"]",
+      "expected": {
+        "@timestamp": "2024-01-02T14:18:04.000Z",
+        "dns": {
+          "question": {
+            "name": "'auditTest_domain'"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Object Manipulation",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190"
+          ],
+          "user": [
+            "efa04289-5905-4583-82a5-a576c33a72c4",
+            "system"
+          ]
+        },
+        "rule": {
+          "name": "2c90c96e-2c99-47a4-a3c3-993a14c018f4_765e58b0-ccbb-4947-bb97-44fe0f6d0b29"
+        },
+        "source": {
+          "ip": "172.16.1.190",
+          "user": {
+            "id": "efa04289-5905-4583-82a5-a576c33a72c4",
+            "name": "system"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "id": "efa04289-5905-4583-82a5-a576c33a72c4",
+          "name": "system"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x65941b1e,0x2,0x1f67238a,0x1b3f363d}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 3,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T20:57:52Z THENEWAUDITTEST CheckPoint 14706 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x659478d1,0x0,0x1f67238a,0x1cc7b972}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"1\"; time:\"1704229072\"; version:\"5\"; administrator:\"test_admin\"; client_ip:\"192.168.1.153\"; machine:\"machine.checkpoint.net\"; operation:\"Log Out\"; operation_number:\"12\"; product:\"WEB_API\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2024-01-02T20:57:52.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153",
+            "172.16.1.190"
+          ],
+          "user": [
+            "test_admin"
+          ]
+        },
+        "source": {
+          "domain": "machine.checkpoint.net",
+          "ip": "192.168.1.153",
+          "user": {
+            "name": "test_admin"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "test_admin"
+        },
+        "event": {
+          "action": "logged-out",
+          "category": [
+            "authentication"
+          ],
+          "code": "12",
+          "id": "{0x659478d1,0x0,0x1f67238a,0x1cc7b972}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T20:57:47Z THENEWAUDITTEST CheckPoint 14706 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x659478cd,0x0,0x1f67238a,0x1cc73972}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"1\"; time:\"1704229067\"; version:\"5\"; additional_info:\"Authentication method: radius\"; administrator:\"test_admin\"; client_ip:\"192.168.1.153\"; machine:\"machine.checkpoint.net\"; operation:\"Log In\"; operation_number:\"10\"; product:\"WEB_API\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2024-01-02T20:57:47.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153",
+            "172.16.1.190"
+          ],
+          "user": [
+            "test_admin"
+          ]
+        },
+        "source": {
+          "domain": "machine.checkpoint.net",
+          "ip": "192.168.1.153",
+          "user": {
+            "name": "test_admin"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "test_admin"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "code": "10",
+          "id": "{0x659478cd,0x0,0x1f67238a,0x1cc73972}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T14:18:04Z THENEWAUDITTEST CheckPoint 13885 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65941b1e,0x3,0x1f67238a,0x1b3f363d}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"4\"; time:\"1704205084\"; version:\"5\"; administrator:\"System\"; client_ip:\"172.16.1.190\"; fieldschanges:\"2 Objects were changed\"; operation:\"Publish\"; product:\"SmartConsole\"; sendtotrackerasadvancedauditlog:\"0\"; session_description:\"Global Domain Assignment\"; session_name:\"Global Domain Assignment\"; session_uid:\"d5c7cc4f-01ea-4ac7-8de1-72ae05d28bc6\"; subject:\"Revision Control\"]\t",
+      "expected": {
+        "@timestamp": "2024-01-02T14:18:04.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Revision Control",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190"
+          ],
+          "user": [
+            "system"
+          ]
+        },
+        "source": {
+          "ip": "172.16.1.190",
+          "user": {
+            "name": "system"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "system"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x65941b1e,0x3,0x1f67238a,0x1b3f363d}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 4,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T14:18:04Z THENEWAUDITTEST CheckPoint 13885 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65941b1e,0x1,0x1f67238a,0x1b3f363d}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"2\"; time:\"1704205084\"; version:\"5\"; administrator:\"System\"; advanced_changes:\" \"; client_ip:\"172.16.1.190\"; domain_name:\"'auditTest_domain'\"; fieldschanges:\"Name: '2c90c96e-2c99-47a4-a3c3-993a14c018f4_8e063574-e017-3745-96ed-80a573d73488' Profile: 'g_Recommended_Protection' Protection: 'Microsoft Exchange Server Remote Code Execution (CVE-2022-41082)' ProtectionId: '8589640366' StagingMode: 'Enable' \"; logic_changes:\"Name: '2c90c96e-2c99-47a4-a3c3-993a14c018f4_8e063574-e017-3745-96ed-80a573d73488' Profile: '2c90c96e-2c99-47a4-a3c3-993a14c018f4' Protection: '8e063574-e017-3745-96ed-80a573d73488' ProtectionId: '8589640366' StagingMode: 'Enable' \"; objectname:\"2c90c96e-2c99-47a4-a3c3-993a14c018f4_8e063574-e017-3745-96ed-80a573d73488\"; objecttype:\"ThreatIpsProtectionOverride\"; operation:\"Create Object\"; sendtotrackerasadvancedauditlog:\"0\"; session_description:\"Global Domain Assignment\"; session_name:\"Global Domain Assignment\"; session_uid:\"d5c7cc4f-01ea-4ac7-8de1-72ae05d28bc6\"; subject:\"Object Manipulation\"; uid:\"30d36d30-6a20-4336-98ee-37c25d52d4db\"]",
+      "expected": {
+        "@timestamp": "2024-01-02T14:18:04.000Z",
+        "dns": {
+          "question": {
+            "name": "'auditTest_domain'"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Object Manipulation",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190"
+          ],
+          "user": [
+            "30d36d30-6a20-4336-98ee-37c25d52d4db",
+            "system"
+          ]
+        },
+        "rule": {
+          "name": "2c90c96e-2c99-47a4-a3c3-993a14c018f4_8e063574-e017-3745-96ed-80a573d73488"
+        },
+        "source": {
+          "ip": "172.16.1.190",
+          "user": {
+            "id": "30d36d30-6a20-4336-98ee-37c25d52d4db",
+            "name": "system"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "id": "30d36d30-6a20-4336-98ee-37c25d52d4db",
+          "name": "system"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x65941b1e,0x1,0x1f67238a,0x1b3f363d}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 2,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T14:18:04Z THENEWAUDITTEST CheckPoint 14706 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65941b1d,0x0,0x1f67238a,0x1cc73972}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=auditTest..aw4c8s\"; sequencenum:\"1\"; time:\"1704205084\"; version:\"5\"; administrator:\"System\"; client_ip:\"172.16.1.190\"; domain_name:\"auditTest_domain\"; fieldschanges:\"IPS version was updated from 635240010 to 635240034\"; operation:\"IPS Update\"; product:\"cpmidu_update_tool\"; sendtotrackerasadvancedauditlog:\"0\"; session_description:\"IPS\"; session_name:\"IPS\"; session_uid:\"d5c7cc4f-01ea-4ac7-8de1-72ae05d28bc6\"; subject:\"IPS Update\"]",
+      "expected": {
+        "@timestamp": "2024-01-02T14:18:04.000Z",
+        "dns": {
+          "question": {
+            "name": "auditTest_domain"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "IPS Update",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "product": "cpmidu_update_tool",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190"
+          ],
+          "user": [
+            "system"
+          ]
+        },
+        "source": {
+          "ip": "172.16.1.190",
+          "user": {
+            "name": "system"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "system"
+        },
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x65941b1d,0x0,0x1f67238a,0x1cc73972}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2024-01-02T00:21:21Z THENEWAUDITTEST CheckPoint 25603 - [action:\"Forgot Passcode\"; flags:\"49184\"; ifdir:\"outbound\"; loguid:\"{0xc8fcfded,0xb6eb29b0,0xcca171be,0xdaa091e6}\"; origin:\"172.16.1.190\"; originsicname:\"cn=cp_mgmt,o=CASCC1DMBNTB1002..7f4rte\"; sequencenum:\"1\"; time:\"1704154881\"; version:\"5\"; administrator:\"test_admin\"; audit_status:\"Success\"; client_ip:\"172.16.1.190\"; machine:\"172.16.1.190\"; operation:\"Run One Time Script\"; operation_result_description:\"Cluster Mode: Virtual System Load Sharing (Primary Up)\"; operation_results:\" Cluster Mode:   Virtual System Load Sharing (Primary Up) Down! - ClusterXL Inactive or Virtual System is Down \"; product:\"Management Blade\"; script_value_for_one_time_scripts:\"cphaprob stat\"; subject:\"Management CDM Object Manipulation\"; task:\"cphaprob stat\"; task_percent:\"100%\"; task_progress:\"Completed\"; taskid:\"ed37f94c-4302-4fc1-a57c-ee4ee8aa469d\"; tasktargetid:\"e62ce0ce-d7ec-45c7-6bd6-0cdfa6687f3b\"]",
+      "expected": {
+        "@timestamp": "2024-01-02T00:21:21.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Management CDM Object Manipulation",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "172.16.1.190"
+          ],
+          "name": "172.16.1.190",
+          "product": "Management Blade",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190"
+          ],
+          "user": [
+            "test_admin"
+          ]
+        },
+        "source": {
+          "ip": "172.16.1.190",
+          "user": {
+            "name": "test_admin"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "test_admin"
+        },
+        "event": {
+          "action": "Forgot Passcode",
+          "category": [
+            "network"
+          ],
+          "id": "{0xc8fcfded,0xb6eb29b0,0xcca171be,0xdaa091e6}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC"
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-29T14:20:02Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x658ed593,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1703859602\"; version:\"5\"; additional_info:\"login by localhost\"; administrator:\"WEB_API\"; client_ip:\"192.168.1.153\"; operation:\"Log In\"; product:\"WEB_API\"; sendtotrackerasadvancedauditlog:\"0\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-29T14:20:02.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153"
+          ],
+          "user": [
+            "web_api"
+          ]
+        },
+        "source": {
+          "ip": "192.168.1.153",
+          "user": {
+            "name": "web_api"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "web_api"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0x658ed593,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-29T14:03:03Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x658ed198,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1703858583\"; version:\"5\"; additional_info:\"Authentication method: Active Directory\"; administrator:\"User (Example)\"; client_ip:\"127.0.0.1\"; machine:\"localhost\"; operation:\"Log In\"; operation_number:\"10\"; product:\"WEB_API\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-29T14:03:03.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "127.0.0.1",
+            "192.168.1.153"
+          ],
+          "user": [
+            "example",
+            "User"
+          ]
+        },
+        "source": {
+          "ip": "127.0.0.1",
+          "user": {
+            "full_name": "User",
+            "name": "example"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "full_name": "User",
+          "name": "example"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "code": "10",
+          "id": "{0x658ed198,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-29T08:42:55Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x658e8690,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1703839375\"; version:\"5\"; additional_info:\"Authentication method: radius\"; administrator:\"mario.rossi@example.org\"; client_ip:\"10.16.10.27\"; machine:\"desktop0001.example.local\"; operation:\"Log In\"; operation_number:\"10\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-29T08:42:55.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "10.16.10.27",
+            "192.168.1.153"
+          ],
+          "user": [
+            "mario.rossi",
+            "mario.rossi@example.org"
+          ]
+        },
+        "source": {
+          "domain": "desktop0001.example.local",
+          "ip": "10.16.10.27",
+          "user": {
+            "domain": "example.org",
+            "email": "mario.rossi@example.org",
+            "name": "mario.rossi"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.org",
+          "email": "mario.rossi@example.org",
+          "name": "mario.rossi"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "code": "10",
+          "id": "{0x658e8690,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-15T11:52:02Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x657c3de4,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1702641122\"; version:\"5\"; additional_info:\"Authentication method: radius\"; administrator:\"i.biachi@customer.com\"; client_ip:\"172.28.11.213\"; machine:\"relay599.rdnssender.com\"; operation:\"Log In\"; operation_number:\"10\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-15T11:52:02.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.28.11.213",
+            "192.168.1.153"
+          ],
+          "user": [
+            "i.biachi",
+            "i.biachi@customer.com"
+          ]
+        },
+        "source": {
+          "domain": "relay599.rdnssender.com",
+          "ip": "172.28.11.213",
+          "user": {
+            "domain": "customer.com",
+            "email": "i.biachi@customer.com",
+            "name": "i.biachi"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "customer.com",
+          "email": "i.biachi@customer.com",
+          "name": "i.biachi"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "code": "10",
+          "id": "{0x657c3de4,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-27T09:39:55Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x658bf0ed,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1703669995\"; version:\"5\"; additional_info:\"Administrator failed to log in: Wrong Password\"; administrator:\"i.biachi@customer.com\"; audit_status:\"Failure\"; client_ip:\"172.28.11.213\"; machine:\"relay599.rdnssender.com\"; operation:\"Log In\"; operation_number:\"11\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-27T09:39:55.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.28.11.213",
+            "192.168.1.153"
+          ],
+          "user": [
+            "i.biachi",
+            "i.biachi@customer.com"
+          ]
+        },
+        "source": {
+          "domain": "relay599.rdnssender.com",
+          "ip": "172.28.11.213",
+          "user": {
+            "domain": "customer.com",
+            "email": "i.biachi@customer.com",
+            "name": "i.biachi"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "customer.com",
+          "email": "i.biachi@customer.com",
+          "name": "i.biachi"
+        },
+        "event": {
+          "action": "logon-failed",
+          "category": [
+            "authentication"
+          ],
+          "code": "11",
+          "id": "{0x658bf0ed,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "failure",
+          "reason": "Wrong Password",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-28T08:03:28Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x658d2bd2,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1703750608\"; version:\"5\"; additional_info:\"Administrator failed to log in: SIC Error for gettopo: Server could not find authentication method for service gettopo. Peer is: \"; audit_status:\"Failure\"; client_ip:\"172.28.11.213\"; operation:\"Log In\"; operation_number:\"11\"; product:\"Unknown\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-28T08:03:28.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "Unknown",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.28.11.213",
+            "192.168.1.153"
+          ]
+        },
+        "source": {
+          "ip": "172.28.11.213"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "logon-failed",
+          "category": [
+            "authentication"
+          ],
+          "code": "11",
+          "id": "{0x658d2bd2,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "failure",
+          "reason": "SIC Error for gettopo: Server could not find authentication method for service gettopo. Peer is:",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-21T10:41:20Z CP-Manager CheckPoint 10547 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x65841652,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.153\"; originsicname:\"cn=cp_mgmt,o=CP-Manager.example.local\"; sequencenum:\"1\"; time:\"1703155280\"; version:\"5\"; additional_info:\"Administrator failed to log in: Wrong Password\"; administrator:\"mario.rossi@example.org\"; audit_status:\"Failure\"; client_ip:\"172.16.1.190\"; machine:\"cp_console.example.local\"; operation:\"Log In\"; operation_number:\"11\"; product:\"SmartConsole\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-12-21T10:41:20.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.153"
+          ],
+          "name": "192.168.1.153",
+          "product": "SmartConsole",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190",
+            "192.168.1.153"
+          ],
+          "user": [
+            "mario.rossi",
+            "mario.rossi@example.org"
+          ]
+        },
+        "source": {
+          "domain": "cp_console.example.local",
+          "ip": "172.16.1.190",
+          "user": {
+            "domain": "example.org",
+            "email": "mario.rossi@example.org",
+            "name": "mario.rossi"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.org",
+          "email": "mario.rossi@example.org",
+          "name": "mario.rossi"
+        },
+        "event": {
+          "action": "logon-failed",
+          "category": [
+            "authentication"
+          ],
+          "code": "11",
+          "id": "{0x65841652,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "failure",
+          "reason": "Wrong Password",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-22T08:38:43Z CP-Manager CheckPoint 10547 - [alert:\"Expert_Alert\"; flags:\"139296\"; ifdir:\"inbound\"; loguid:\"{0x65854b15,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"10.16.109.248\"; sequencenum:\"71\"; time:\"1703234323\"; version:\"5\"; additional_info:\"SSH connection by admin_org user to Expert Shell\"; administrator:\"admin_org\"; client_ip:\"10.16.109.244\"; device_name:\"CPFW-0001\"; device_type:\"GW\"; operation:\"Log In\"; product:\"Expert Shell\"; subject:\"Administrator Expert Shell login\"]",
+      "expected": {
+        "@timestamp": "2023-12-22T08:38:43.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "CPFW-0001",
+          "type": "GW"
+        },
+        "message": "Administrator Expert Shell login",
+        "network": {
+          "direction": "inbound",
+          "protocol": "ssh"
+        },
+        "observer": {
+          "ip": [
+            "10.16.109.248"
+          ],
+          "name": "10.16.109.248",
+          "product": "Expert Shell",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "10.16.109.244",
+            "10.16.109.248"
+          ],
+          "user": [
+            "admin_org"
+          ]
+        },
+        "source": {
+          "ip": "10.16.109.244",
+          "user": {
+            "name": "admin_org"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "admin_org"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0x65854b15,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 71,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-12-01T08:49:00Z CP-Manager CheckPoint 21491 - [alert:\"Expert_Alert\"; flags:\"139296\"; ifdir:\"inbound\"; loguid:\"{0x65699dfe,0x0,0x6401a8c0,0x29fed3f3}\"; origin:\"10.16.109.248\"; sequencenum:\"165\"; time:\"1701420540\"; version:\"5\"; additional_info:\"SSH connection by mario.rossi@example.org user to Expert Shell\"; administrator:\"mario.rossi@example.org\"; client_ip:\"172.16.1.190\"; device_name:\"CPFW-0001\"; device_type:\"GW\"; operation:\"Log In\"; product:\"Expert Shell\"; subject:\"Administrator Expert Shell login\"]",
+      "expected": {
+        "@timestamp": "2023-12-01T08:49:00.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "name": "CPFW-0001",
+          "type": "GW"
+        },
+        "message": "Administrator Expert Shell login",
+        "network": {
+          "direction": "inbound",
+          "protocol": "ssh"
+        },
+        "observer": {
+          "ip": [
+            "10.16.109.248"
+          ],
+          "name": "10.16.109.248",
+          "product": "Expert Shell",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "172.16.1.190",
+            "10.16.109.248"
+          ],
+          "user": [
+            "mario.rossi",
+            "mario.rossi@example.org"
+          ]
+        },
+        "source": {
+          "ip": "172.16.1.190",
+          "user": {
+            "domain": "example.org",
+            "email": "mario.rossi@example.org",
+            "name": "mario.rossi"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "example.org",
+          "email": "mario.rossi@example.org",
+          "name": "mario.rossi"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0x65699dfe,0x0,0x6401a8c0,0x29fed3f3}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 165,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-30T07:20:35Z gw-da58d3 CheckPoint 7776 - [action:\"Accept\"; flags:\"444676\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x5e819dc3,0x0,0x353707c7,0xee78a1dc}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"1\"; time:\"1594646954\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={880771B0-FD92-2C4F-82FC-B96FC3DE5A07};mgmt=gw-da58d3;date=1585502566;policy_name=Standard\\]\"; dst:\"192.168.1.153\"; inzone:\"Local\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; outzone:\"External\"; product:\"VPN-1 & FireWall-1\"; proto:\"17\"; s_port:\"43103\"; service:\"514\"; service_id:\"syslog\"; src:\"192.168.1.100\"]",
+      "expected": {
+        "@timestamp": "2020-07-13T13:29:14.000Z",
+        "destination": {
+          "ip": "192.168.1.153",
+          "port": 514
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "syslog",
+          "direction": "outbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "External"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "zone": "Local"
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100",
+            "192.168.1.153"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.1.100",
+          "port": 43103
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e819dc3,0x0,0x353707c7,0xee78a1dc}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2021-05-05T12:27:09Z cp-m CheckPoint 1231 - [action:\"Drop\"; flags:\"278528\"; ifdir:\"inbound\"; ifname:\"bond1.3999\"; loguid:\"{0x60928f1d,0x8,0x40de101f,0xfcdbb197}\"; origin:\"127.0.0.1\"; originsicname:\"CN=CP,O=cp.com.9jjkfo\"; sequencenum:\"62\"; time:\"1620217629\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={F6212FB3-54CE-6344-9164-B224119E2B92};mgmt=cp-m;date=1620031791;policy_name=CP-Cluster]\"; action_reason:\"Dropped by multiportal infrastructure\"; dst:\"81.2.69.144\"; product:\"VPN & FireWall\"; proto:\"6\"; s_port:\"52780\"; service:\"80\"; src:\"81.2.69.144\"]",
+      "expected": {
+        "@timestamp": "2021-05-05T12:27:09.000Z",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "iana_number": "6",
+          "transport": "tcp"
+        },
+        "observer": {
+          "hostname": "CP",
+          "ingress": {
+            "interface": {
+              "name": "bond1.3999"
+            }
+          },
+          "ip": [
+            "127.0.0.1"
+          ],
+          "name": "127.0.0.1",
+          "product": "VPN & FireWall",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.144",
+            "127.0.0.1"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 52780
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Drop",
+          "category": [
+            "network"
+          ],
+          "id": "{0x60928f1d,0x8,0x40de101f,0xfcdbb197}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 62,
+          "timezone": "UTC",
+          "type": [
+            "connection",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2022-12-02T16:39:12.000Z fwmgr CheckPoint 45470 - [action:\"Decrypt\"; flags:\"417028\"; ifdir:\"inbound\"; ifname:\"bond2.204\"; logid:\"0\"; loguid:\"{0xdca02360,0x9c491391,0xb5348f,0x1c07d10c}\"; origin:\"172.16.2.9\"; originsicname:\"CN=cp_mgmt,O=fwmgr.sdasdqdqd.com.ds2wd2\"; sequencenum:\"178\"; time:\"1669999152000\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 \\u0026 FireWall-1[db_tag={F6212FB3-54CE-6344-9164-B224119E2B92};mgmt=fwmgr;date=1669986326;policy_name=Standard\\\\]\"; community:\"RemoteAccess\"; dst:\"192.168.1.153\"; fw_subproduct:\"VPN-1\"; inzone:\"External\"; lastupdatetime:\"1669999152\"; layer_name:\"Network\"; layer_uuid:\"e2117254-df10-4a5d-8d42-cacc362e077b\"; match_id:\"5\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_name:\"SysAdmn\"; rule_uid:\"9294591a-bc96-4916-bb63-926c31f8c943\"; methods::\"ESP: AES-128 + SHA1\"; outzone:\"Internal\"; peer_gateway:\"172.28.11.213\"; product:\"VPN-1 \\u0026 FireWall-1\"; proto:\"17\"; s_port:\"49129\"; scheme::\"IKE\"; service:\"53\"; service_id:\"domain-udp_\"; session_uid:\"{6389E8E3-0000-0000-AC10-0209F7730000}\"; src:\"192.168.1.153\"; src_user_dn:\" \"; src_user_name:\"srcuser \"; user:\"srcuser \"; vpn_feature_name:\"VPN\"]",
+      "expected": {
+        "@timestamp": "2022-12-02T16:39:12.000Z",
+        "destination": {
+          "ip": "192.168.1.153",
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "domain-udp_",
+          "direction": "inbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "interface": {
+              "name": "bond2.204"
+            },
+            "zone": "External"
+          },
+          "ip": [
+            "172.16.2.9"
+          ],
+          "name": "172.16.2.9",
+          "product": "VPN-1 \\u0026 FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153",
+            "172.16.2.9"
+          ],
+          "user": [
+            "srcuser"
+          ]
+        },
+        "rule": {
+          "name": "SysAdmn",
+          "uuid": "9294591a-bc96-4916-bb63-926c31f8c943"
+        },
+        "source": {
+          "ip": "192.168.1.153",
+          "port": 49129,
+          "user": {
+            "name": "srcuser"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "srcuser"
+        },
+        "event": {
+          "action": "Decrypt",
+          "category": [
+            "network"
+          ],
+          "end": "2022-12-02T16:39:12.000Z",
+          "id": "{0xdca02360,0x9c491391,0xb5348f,0x1c07d10c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 178,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2022-12-02T16:39:12.000Z fwmgr CheckPoint 45470 - [action:\"Decrypt\"; flags:\"417028\"; ifdir:\"inbound\"; ifname:\"bond2.204\"; logid:\"0\"; loguid:\"{0xdca02360,0x9c491391,0xb5348f,0x1c07d10c}\"; origin:\"172.16.2.9\"; originsicname:\"CN=cp_mgmt,O=fwmgr.sdasdqdqd.com.ds2wd2\"; sequencenum:\"178\"; time:\"2021-05-05T12:27:09Z\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 \\u0026 FireWall-1[db_tag={F6212FB3-54CE-6344-9164-B224119E2B92};mgmt=fwmgr;date=1669986326;policy_name=Standard\\\\]\"; community:\"RemoteAccess\"; dst:\"192.168.1.153\"; fw_subproduct:\"VPN-1\"; inzone:\"External\"; lastupdatetime:\"1669999152\"; layer_name:\"Network\"; layer_uuid:\"e2117254-df10-4a5d-8d42-cacc362e077b\"; match_id:\"5\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_name:\"SysAdmn\"; rule_uid:\"9294591a-bc96-4916-bb63-926c31f8c943\"; methods::\"ESP: AES-128 + SHA1\"; outzone:\"Internal\"; peer_gateway:\"172.28.11.213\"; product:\"VPN-1 \\u0026 FireWall-1\"; proto:\"17\"; s_port:\"49129\"; scheme::\"IKE\"; service:\"53\"; service_id:\"domain-udp_\"; session_uid:\"{6389E8E3-0000-0000-AC10-0209F7730000}\"; src:\"192.168.1.153\"; src_user_dn:\" \"; src_user_name:\"srcuser \"; user:\"srcuser \"; vpn_feature_name:\"VPN\"]",
+      "expected": {
+        "@timestamp": "2021-05-05T12:27:09.000Z",
+        "destination": {
+          "ip": "192.168.1.153",
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "domain-udp_",
+          "direction": "inbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "interface": {
+              "name": "bond2.204"
+            },
+            "zone": "External"
+          },
+          "ip": [
+            "172.16.2.9"
+          ],
+          "name": "172.16.2.9",
+          "product": "VPN-1 \\u0026 FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.153",
+            "172.16.2.9"
+          ],
+          "user": [
+            "srcuser"
+          ]
+        },
+        "rule": {
+          "name": "SysAdmn",
+          "uuid": "9294591a-bc96-4916-bb63-926c31f8c943"
+        },
+        "source": {
+          "ip": "192.168.1.153",
+          "port": 49129,
+          "user": {
+            "name": "srcuser"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "srcuser"
+        },
+        "event": {
+          "action": "Decrypt",
+          "category": [
+            "network"
+          ],
+          "end": "2022-12-02T16:39:12.000Z",
+          "id": "{0xdca02360,0x9c491391,0xb5348f,0x1c07d10c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 178,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T13:19:20Z gw-da58d3 CheckPoint 1930 - [flags:\"133440\"; ifdir:\"inbound\"; ifname:\"daemon\"; loguid:\"{0x5e80a059,0x0,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.100\"; sequencenum:\"1\"; version:\"5\"; product:\"System Monitor\"; sys_message::\"The eth0 interface is not protected by the anti-spoofing feature. Your network may be at risk\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T13:19:20.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "ingress": {
+            "interface": {
+              "name": "daemon"
+            }
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "System Monitor",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e80a059,0x0,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "sequence": 1,
+          "timezone": "UTC"
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T13:19:21Z gw-da58d3 CheckPoint 1930 - [flags:\"133440\"; ifdir:\"inbound\"; ifname:\"daemon\"; loguid:\"{0x5e80a059,0x2,0x6401a8c0,0x3c7878a}\"; origin:\"192.168.1.100\"; sequencenum:\"2\"; version:\"5\"; product:\"System Monitor\"; sys_message::\"installed Standard\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T13:19:21.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "ingress": {
+            "interface": {
+              "name": "daemon"
+            }
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "System Monitor",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e80a059,0x2,0x6401a8c0,0x3c7878a}",
+          "kind": "event",
+          "sequence": 2,
+          "timezone": "UTC"
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T13:19:22Z gw-da58d3 CheckPoint 1930 - [action:\"Accept\"; flags:\"444676\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x5e80a05a,0x0,0x60e0fe3b,0xda019994}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"1\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={DF903A6D-B97D-1A4D-A054-2BF3A330CB5A};mgmt=gw-da58d3;date=1585487925;policy_name=Standard\\]\"; dst:\"192.168.1.1\"; inzone:\"Local\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; outzone:\"Internal\"; product:\"VPN-1 & FireWall-1\"; proto:\"17\"; s_port:\"46915\"; service:\"53\"; service_id:\"domain-udp\"; src:\"192.168.1.100\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T13:19:22.000Z",
+        "destination": {
+          "ip": "192.168.1.1",
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "domain-udp",
+          "direction": "outbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "zone": "Local"
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100",
+            "192.168.1.1"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.1.100",
+          "port": 46915
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e80a05a,0x0,0x60e0fe3b,0xda019994}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T13:19:22Z gw-da58d3 CheckPoint 1930 - [action:\"Accept\"; flags:\"444676\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x5e80a05a,0x0,0xbba3afa,0xd2c10858}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"2\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={DF903A6D-B97D-1A4D-A054-2BF3A330CB5A};mgmt=gw-da58d3;date=1585487925;policy_name=Standard\\]\"; dst:\"81.2.69.144\"; inzone:\"Local\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; nat_addtnl_rulenum:\"0\"; nat_rulenum:\"0\"; outzone:\"Internal\"; product:\"VPN-1 & FireWall-1\"; proto:\"6\"; s_port:\"61794\"; service:\"443\"; service_id:\"https\"; src:\"192.168.1.100\"; xlatedport:\"0\"; xlatedst:\"0.0.0.0\"; xlatesport:\"26680\"; xlatesrc:\"0.0.0.0\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T13:19:22.000Z",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "https",
+          "direction": "outbound",
+          "iana_number": "6",
+          "name": "Network",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "zone": "Local"
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.1.100",
+          "nat": {
+            "port": 26680
+          },
+          "port": 61794
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e80a05a,0x0,0xbba3afa,0xd2c10858}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 2,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T13:19:22Z gw-da58d3 CheckPoint 1930 - [action:\"Accept\"; flags:\"444676\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x5e80a05a,0x0,0x1cae0484,0xf99c33e9}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"3\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={DF903A6D-B97D-1A4D-A054-2BF3A330CB5A};mgmt=gw-da58d3;date=1585487925;policy_name=Standard\\]\"; dst:\"192.168.1.1\"; inzone:\"Local\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; outzone:\"Internal\"; product:\"VPN-1 & FireWall-1\"; proto:\"17\"; s_port:\"36749\"; service:\"53\"; service_id:\"domain-udp\"; src:\"192.168.1.100\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T13:19:22.000Z",
+        "destination": {
+          "ip": "192.168.1.1",
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "domain-udp",
+          "direction": "outbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "zone": "Local"
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100",
+            "192.168.1.1"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.1.100",
+          "port": 36749
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e80a05a,0x0,0x1cae0484,0xf99c33e9}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 3,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T23:18:44Z gw-da58d3 CheckPoint 8363 - [flags:\"133440\"; ifdir:\"inbound\"; loguid:\"{0x5e812cd4,0x1,0x6401a8c0,0x108620ab}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"1\"; version:\"5\"; comment:\"No update was found\"; description:\"Contracts\"; product:\"Security Gateway/Management\"; status:\"Finished\"; update_service:\"1\"; version:\"1.0\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T23:18:44.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "Security Gateway/Management",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e812cd4,0x1,0x6401a8c0,0x108620ab}",
+          "kind": "event",
+          "sequence": 1,
+          "timezone": "UTC"
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T23:18:43Z gw-da58d3 CheckPoint 8363 - [action:\"Accept\"; flags:\"444676\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x5e812cd3,0x6,0x353707c7,0xee78a1dc}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"8\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={880771B0-FD92-2C4F-82FC-B96FC3DE5A07};mgmt=gw-da58d3;date=1585502566;policy_name=Standard\\]\"; dst:\"81.2.69.144\"; inzone:\"Local\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; nat_addtnl_rulenum:\"0\"; nat_rulenum:\"0\"; outzone:\"External\"; product:\"VPN-1 & FireWall-1\"; proto:\"6\"; s_port:\"61180\"; service:\"80\"; service_id:\"http\"; src:\"192.168.1.100\"; xlatedport:\"0\"; xlatedst:\"0.0.0.0\"; xlatesport:\"10860\"; xlatesrc:\"0.0.0.0\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T23:18:43.000Z",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "http",
+          "direction": "outbound",
+          "iana_number": "6",
+          "name": "Network",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "External"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "zone": "Local"
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.1.100",
+          "nat": {
+            "port": 10860
+          },
+          "port": 61180
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e812cd3,0x6,0x353707c7,0xee78a1dc}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 8,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T23:18:53Z gw-da58d3 CheckPoint 8363 - [action:\"Accept\"; conn_direction:\"Outgoing\"; flags:\"6703366\"; ifdir:\"inbound\"; ifname:\"eth1\"; logid:\"0\"; loguid:\"{0x5e812cdd,0x0,0x353707c7,0xee78a1dc}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"1\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={880771B0-FD92-2C4F-82FC-B96FC3DE5A07};mgmt=gw-da58d3;date=1585502566;policy_name=Standard\\]\"; dst:\"81.2.69.144\"; log_delay:\"1585523933\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; product:\"VPN-1 & FireWall-1\"; proto:\"17\"; s_port:\"55039\"; service:\"53\"; service_id:\"domain-udp\"; src:\"192.168.2.2\"]",
+      "expected": {
+        "@timestamp": "2020-03-29T23:18:53.000Z",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "domain-udp",
+          "direction": "inbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "interface": {
+              "name": "eth1"
+            }
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.2.2",
+            "81.2.69.144",
+            "192.168.1.100"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.2.2",
+          "port": 55039
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e812cdd,0x0,0x353707c7,0xee78a1dc}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-30T01:18:44Z gw-da58d3 CheckPoint 8363 - [flags:\"133440\"; ifdir:\"inbound\"; loguid:\"{0x5e8148f5,0x0,0x6401a8c0,0x108620ab}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"1\"; version:\"5\"; description:\"Contracts\"; product:\"Security Gateway/Management\"; status:\"Started\"; update_service:\"1\"; version:\"1.0\"]",
+      "expected": {
+        "@timestamp": "2020-03-30T01:18:44.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "Security Gateway/Management",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e8148f5,0x0,0x6401a8c0,0x108620ab}",
+          "kind": "event",
+          "sequence": 1,
+          "timezone": "UTC"
+        }
+      }
+    },
+    {
+      "line": "<134>1 2025-01-21T09:36:10Z TEST_HOSTNAME CheckPoint 16953 - [action:\"Drop\"; flags:\"409600\"; ifdir:\"inbound\"; logid:\"0\"; loguid:\"{0x5e818e17,0x0,0x6401a8c0,0x108620ab}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"1\"; time:\"1737452170\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={880771B0-FD92-2C4F-82FC-B96FC3DE5A07};mgmt=gw-da58d3;date=1585502566;policy_name=Standard\\]\"; drop_reason:\"matched optimized drop\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Drop\"; rule_name:\"Cleanup rule\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; packet_amount:\"5\"; packets:\" <81.2.69.142,59912,81.2.69.144,1990,6;eth0> <81.2.69.142,40252,81.2.69.144,999,6;eth0> <81.2.69.142,60636,89.160.20.128,999,6;eth0> <81.2.69.142,43010,89.160.20.128,1898,6;eth0> <81.2.69.142,59440,81.2.69.144,1898,6;eth0>\"]",
+      "expected": {
+        "@timestamp": "2025-01-21T09:36:10.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "name": "Network",
+          "packets": 5
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "rule": {
+          "name": "Cleanup rule",
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Drop",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e818e17,0x0,0x6401a8c0,0x108620ab}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "connection",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2025-01-21T09:37:10Z TEST_HOSTNAME CheckPoint 16953 - [action:\"Drop\"; flags:\"409600\"; ifdir:\"inbound\"; logid:\"0\"; loguid:\"{0x5e818e17,0x1,0x6401a8c0,0x108620ab}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"2\"; time:\"1737452230\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={880771B0-FD92-2C4F-82FC-B96FC3DE5A07};mgmt=gw-da58d3;date=1585502566;policy_name=Standard\\]\"; drop_reason:\"matched optimized drop\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Drop\"; rule_name:\"Cleanup rule\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; packet_amount:\"3\"; packets:\" <81.2.69.142,45000,81.2.69.144,443,6> <81.2.69.142,45001,89.160.20.128,80,17> <81.2.69.142,45002,81.2.69.144,8080,6>\"]",
+      "expected": {
+        "@timestamp": "2025-01-21T09:37:10.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "name": "Network",
+          "packets": 3
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "rule": {
+          "name": "Cleanup rule",
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Drop",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e818e17,0x1,0x6401a8c0,0x108620ab}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 2,
+          "timezone": "UTC",
+          "type": [
+            "connection",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2025-11-19T01:36:02Z TEST_HOSTNAME CheckPoint 16953 - [action:\"Drop\"; flags:\"409600\"; ifdir:\"inbound\"; logid:\"0\"; loguid:\"{0x1816caef, 0x1,0x6401a8c0,0x108620ab}\"; origin:\"192.168.1.100\"; originsicname:\"CN=fw,O=fmmt.domain.com.tmn8s8\"; sequencenum:\"3\"; time:\"1763516162\"; version:\"5\"; packet_amount:\"5\"; packets:\"(sample only) <81.2.69.142,59912,81.2.69.144,1990,6;bond12> <81.2.69.142,40252,81.2.69.144,999,6;bond12> <81.2.69.142,60636,89.160.20.128,999,6;bond12> <81.2.69.142,43010,89.160.20.128,1898,6;bond12> <81.2.69.142,59440,81.2.69.144,1898,6;bond12>\";]",
+      "expected": {
+        "@timestamp": "2025-11-19T01:36:02.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "packets": 5
+        },
+        "observer": {
+          "hostname": "fw",
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Drop",
+          "category": [
+            "network"
+          ],
+          "id": "{0x1816caef, 0x1,0x6401a8c0,0x108620ab}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 3,
+          "timezone": "UTC",
+          "type": [
+            "connection",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2025-03-31T09:45:12Z FW-RANDOM CheckPoint 98765 - [action:\"Drop\"; flags:\"409600\"; ifdir:\"inbound\"; logid:\"0\"; loguid:\"{0xa1b2c3d4,0xe5f67890,0x12345678,0xabcdef12}\"; origin:\"192.168.45.23\"; originsicname:\"CN=FWSC-RANDOM,O=TMUK_SDMZ_RANDOM.oam.example.com.abcd12\"; sequencenum:\"112\"; time:\"1743414312\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={F1234567-89AB-CDEF-0123-456789ABCDEF};mgmt=TMUK_SDMZ_RANDOM;date=1742477474;policy_name=Standard\\\\]\"; drop_reason:\"matched optimized drop\"; layer_name:\"Network\"; layer_uuid:\"123e4567-e89b-12d3-a456-426614174000\"; match_id:\"8\"; parent_rule:\"0\"; rule_action:\"Drop\"; rule_uid:\"abcdef12-3456-7890-abcd-ef1234567890\"; packet_amount:\"5\"; packets:\" <203.0.113.45,54321,198.51.100.23,12345,6;bond1.3> <203.0.113.46,23456,198.51.100.24,34567,6;bond1.3> <203.0.113.47,45678,198.51.100.25,56789,6;bond1.3> <203.0.113.48,67890,198.51.100.26,78901,6;bond1.3> <203.0.113.49,89012,198.51.100.27,90123,6;bond1.3>\"; product:\"VPN-1 & FireWall-1\"; proto:\"6\"]",
+      "expected": {
+        "@timestamp": "2025-03-31T09:45:12.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "iana_number": "6",
+          "name": "Network",
+          "packets": 5,
+          "transport": "tcp"
+        },
+        "observer": {
+          "hostname": "FWSC-RANDOM",
+          "ip": [
+            "192.168.45.23"
+          ],
+          "name": "192.168.45.23",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.45.23"
+          ]
+        },
+        "rule": {
+          "uuid": "abcdef12-3456-7890-abcd-ef1234567890"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Drop",
+          "category": [
+            "network"
+          ],
+          "id": "{0xa1b2c3d4,0xe5f67890,0x12345678,0xabcdef12}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 112,
+          "timezone": "UTC",
+          "type": [
+            "connection",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2026-03-31T06:49:33.170Z TEST_HOSTNAME CheckPoint 31085 - [action:\"Drop\"; flags:\"393216\"; ifdir:\"inbound\"; ifname:\"bond1.992\"; logid:\"1\"; loguid:\"{0xd82800ab,0xca,0xb384aa9a,0x3331928d}\"; origin:\"192.168.8.200\"; originsicname:\"CN=fw,O=example..sdf7da\"; sequencenum:\"1342\"; time:\"1743414973170\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={8383ADC5llll0-744C-80D1-6915514EFAD5};mgmt=example;date=1743403451;policy_name=example8\\]\"; dst:\"81.2.69.144\"; product:\"VPN-1 & FireWall-1\"; proto:\"6\"; s_port:\"5223\"; service:\"49689\"; src:\"81.2.69.142\"; tcp_flags:\"ACK\"; tcp_packet_out_of_state:\"First packet isn't SYN\"]",
+      "expected": {
+        "@timestamp": "2025-03-31T09:56:13.170Z",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 49689
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "iana_number": "6",
+          "transport": "tcp"
+        },
+        "observer": {
+          "hostname": "fw",
+          "ingress": {
+            "interface": {
+              "name": "bond1.992"
+            }
+          },
+          "ip": [
+            "192.168.8.200"
+          ],
+          "name": "192.168.8.200",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.142",
+            "81.2.69.144",
+            "192.168.8.200"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142",
+          "port": 5223
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Drop",
+          "category": [
+            "network"
+          ],
+          "id": "{0xd82800ab,0xca,0xb384aa9a,0x3331928d}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1342,
+          "timezone": "UTC",
+          "type": [
+            "connection",
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2025-11-19T02:10:00Z TEST_HOSTNAME CheckPoint 16953 - [action:\"Accept\"; flags:\"393216\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x1816caef,0x2,0x6401a8c0,0x108620ab}\"; origin:\"192.168.1.100\"; originsicname:\"CN=fw,O=fmmt.domain.com.tmn8s8\"; sequencenum:\"4\"; time:\"1763518200\"; version:\"5\"; dst:\"81.2.69.144\"; product:\"VPN-1 & FireWall-1\"; proto:\"6\"; s_port:\"43210\"; service:\"443\"; src:\"81.2.69.142\"]",
+      "expected": {
+        "@timestamp": "2025-11-19T02:10:00.000Z",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "outbound",
+          "iana_number": "6",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            }
+          },
+          "hostname": "fw",
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.142",
+            "81.2.69.144",
+            "192.168.1.100"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142",
+          "port": 43210
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x1816caef,0x2,0x6401a8c0,0x108620ab}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 4,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2022-07-06T15:53:08Z checkpoint-logs CheckPoint 2700 - [action:\"Failed Log In\"; flags:\"18688\"; ifdir:\"inbound\"; loguid:\"{0xf17d1a9b,0x453b1e67,0xf27bccbf,0x233793e1}\"; origin:\"216.160.83.56\"; originsicname:\"CN=xxx-dc-gw-1_gw-vp-ext-7,O=7checkpoint-mng..tstst7\"; sequencenum:\"3\"; time:\"1657122788\"; version:\"5\"; mac_address:\"aa:aa:aa:aa:aa:aa\"; product:\"Connectra\"]",
+      "expected": {
+        "@timestamp": "2022-07-06T15:53:08.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "hostname": "xxx-dc-gw-1_gw-vp-ext-7",
+          "ip": [
+            "216.160.83.56"
+          ],
+          "mac": [
+            "AA-AA-AA-AA-AA-AA"
+          ],
+          "name": "216.160.83.56",
+          "product": "Connectra",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "216.160.83.56"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "logon-failed",
+          "category": [
+            "network",
+            "authentication"
+          ],
+          "id": "{0xf17d1a9b,0x453b1e67,0xf27bccbf,0x233793e1}",
+          "kind": "event",
+          "outcome": "failure",
+          "sequence": 3,
+          "timezone": "UTC",
+          "type": [
+            "denied"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2022-07-06T16:08:25Z checkpoint-logs CheckPoint 2700 - [action:\"Log In\"; flags:\"150784\"; ifdir:\"inbound\"; logid:\"131073\"; loguid:\"{0xf40caad8,0x2dccf344,0xbf0fb0c8,0x6e943a48}\"; origin:\"216.160.83.56\"; originsicname:\"CN=xx-dc-gw-1_gw-vp-ext-5,O=7checkpoint-mng..tstst7\"; sequencenum:\"1\"; time:\"1657123705\"; version:\"5\"; auth_method:\"User Authentication (Active Directory)\"; auth_status:\"Successful Login\"; client_name:\"Active Directory Query\"; client_version:\"R80.30\"; domain_name:\"xxx.com\"; endpoint_ip:\"81.2.69.142\"; identity_src:\"AD Query\"; identity_type:\"user\"; product:\"Identity Awareness\"; roles:\"Remote_Access_AR\"; snid:\"ccaaffdd\"; src:\"81.2.69.192\"; src_user_group:\"Remote_Access_Users; Remote_Admins; All Users; AD_Users\"; src_user_name:\"usrTest (usrTest)\"; user:\"usrTest (usrTest)\"]",
+      "expected": {
+        "@timestamp": "2022-07-06T16:08:25.000Z",
+        "dns": {
+          "question": {
+            "name": "xxx.com"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "hostname": "xx-dc-gw-1_gw-vp-ext-5",
+          "ip": [
+            "216.160.83.56"
+          ],
+          "name": "216.160.83.56",
+          "product": "Identity Awareness",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.192",
+            "216.160.83.56",
+            "81.2.69.142"
+          ],
+          "user": [
+            "usrtest",
+            "usrTest"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.192",
+          "user": {
+            "full_name": "usrTest",
+            "group": {
+              "name": "Remote_Access_Users; Remote_Admins; All Users; AD_Users"
+            },
+            "name": "usrtest"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "full_name": "usrTest",
+          "group": {
+            "name": "remote_access_users; remote_admins; all users; ad_users"
+          },
+          "name": "usrtest"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0xf40caad8,0x2dccf344,0xbf0fb0c8,0x6e943a48}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2022-07-16T18:51:20Z fw1 CheckPoint 15190 - [action:\"Accept\"; contextnum:\"1\"; flags:\"802832\"; ifdir:\"inbound\"; ifname:\"eth0.11\"; logid:\"6\"; loguid:\"{0x8f6ff124,0xbeef4db4,0xbad40b,0xa9525929}\"; origin:\"81.2.69.144\"; originsicname:\"CN=fwcp1,O=Client_Server_1.company.com.bg7ujf\"; sequencenum:\"8\"; time:\"1657997480\"; version:\"5\"; __nsons:\"0\"; __p_dport:\"0\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={2A2FD8C0-A383-3DE4-A515-13D2CB28A798};mgmt=Client_Server_1;date=1657919347;policy_name=Standard\\]\"; __pos:\"7\"; bytes:\"11930\"; client_inbound_bytes:\"7475\"; client_inbound_interface:\"eth0.11\"; client_inbound_packets:\"15\"; client_outbound_bytes:\"6345\"; client_outbound_packets:\"22\"; context_num:\"1\"; elapsed:\"0\"; hll_key:\"12347634786232348735\"; packets:\"37\"; product:\"Log Update\"; segment_time:\"1657997472\"; server_inbound_bytes:\"6345\"; server_inbound_packets:\"11\"; server_outbound_bytes:\"7475\"; server_outbound_interface:\"eth0.10\"; server_outbound_packets:\"30\"; start_time:\"1657997472\"]",
+      "expected": {
+        "@timestamp": "2022-07-16T18:51:20.000Z",
+        "destination": {
+          "bytes": 7475,
+          "packets": 30
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "bytes": 11930,
+          "direction": "inbound",
+          "packets": 37
+        },
+        "observer": {
+          "hostname": "fwcp1",
+          "ingress": {
+            "interface": {
+              "name": "eth0.11"
+            }
+          },
+          "ip": [
+            "81.2.69.144"
+          ],
+          "name": "81.2.69.144",
+          "product": "Log Update",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.144"
+          ]
+        },
+        "source": {
+          "bytes": 6345,
+          "packets": 22
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x8f6ff124,0xbeef4db4,0xbad40b,0xa9525929}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 8,
+          "start": "1657997472",
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<85>1 2023-01-13T10:10:16--5:00 172.16.2.9 CP-GW - Log [Fields@1.3.6.1.4.1.2620 inzone=\"DMZ\" outzone=\"External\" service_id=\"https\" src=\"81.2.69.192\" dst=\"81.2.69.142\" proto=\"6\" xlatesrc=\"81.2.69.144\" xlatedst=\"\" NAT_rulenum=\"1195\" NAT_addtnl_rulenum=\"0\" user=\"\" src_user_name=\"\" src_machine_name=\"\" src_user_dn=\"\" snid=\"\" dst_user_name=\"\" dst_machine_name=\"\" dst_user_dn=\"\" UP_match_table=\"TABLE_START\" ROW_START=\"0\" match_id=\"762\" layer_uuid=\"e2117254-df10-4a5d-8d42-cacc362e077b\" layer_name=\"DETOMPERMFW_2021 Security\" rule_uid=\"82434e2a-a72c-4a59-8422-a0269fc32e93\" rule_name=\"\" ROW_END=\"0\" UP_match_table=\"TABLE_END\" ProductName=\"VPN-1 & FireWall-1\" svc=\"443\" sport_svc=\"56530\" xlatedport_svc=\"\" xlatesport_svc=\"28493\" ProductFamily=\"Network\" ]",
+      "expected": {
+        "@timestamp": "2023-01-13T10:10:16.000-05:00",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142"
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "https",
+          "iana_number": "6",
+          "name": "DETOMPERMFW_2021 Security",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "zone": "External"
+          },
+          "ingress": {
+            "zone": "DMZ"
+          },
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.192",
+            "81.2.69.144",
+            "81.2.69.142"
+          ]
+        },
+        "rule": {
+          "uuid": "82434e2a-a72c-4a59-8422-a0269fc32e93"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.192",
+          "nat": {
+            "ip": "81.2.69.144"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "timezone": "-05:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "<85>1 2023-01-13T12:10:16--5:00 172.16.2.9 CP-GW - Log [Fields@1.3.6.1.4.1.2620 inzone=\"DMZ\" outzone=\"External\" service_id=\"https\" src=\"81.2.69.192\" dst=\"172.28.11.213\" proto=\"6\" xlatesrc=\"81.2.69.144\" xlatedst=\"81.2.69.142\" NAT_rulenum=\"1195\" NAT_addtnl_rulenum=\"0\" user=\"alice\" src_user_name=\"bob\" src_machine_name=\"zen\" src_user_dn=\"blake\" snid=\"4748F525-85B7-448A-82DF-D4E4E8D55172\" dst_user_name=\"dave\" dst_machine_name=\"orac\" dst_user_dn=\"blake\" UP_match_table=\"TABLE_START\" ROW_START=\"0\" match_id=\"762\" layer_uuid=\"e2117254-df10-4a5d-8d42-cacc362e077b\" layer_name=\"DETOMPERMFW_2021 Security\" rule_uid=\"82434e2a-a72c-4a59-8422-a0269fc32e93\" rule_name=\"internal\" ROW_END=\"0\" UP_match_table=\"TABLE_END\" ProductName=\"VPN-1 & FireWall-1\" svc=\"443\" sport_svc=\"56530\" xlatedport_svc=\"34536\" xlatesport_svc=\"28493\" ProductFamily=\"Network\" ]",
+      "expected": {
+        "@timestamp": "2023-01-13T12:10:16.000-05:00",
+        "destination": {
+          "domain": "orac",
+          "ip": "172.28.11.213",
+          "nat": {
+            "ip": "81.2.69.142"
+          },
+          "user": {
+            "domain": "blake",
+            "name": "dave"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "https",
+          "iana_number": "6",
+          "name": "DETOMPERMFW_2021 Security",
+          "transport": "tcp"
+        },
+        "observer": {
+          "egress": {
+            "zone": "External"
+          },
+          "ingress": {
+            "zone": "DMZ"
+          },
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.192",
+            "81.2.69.144",
+            "172.28.11.213",
+            "81.2.69.142"
+          ],
+          "user": [
+            "alice",
+            "bob",
+            "dave"
+          ]
+        },
+        "rule": {
+          "name": "internal",
+          "uuid": "82434e2a-a72c-4a59-8422-a0269fc32e93"
+        },
+        "source": {
+          "domain": "zen",
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.192",
+          "nat": {
+            "ip": "81.2.69.144"
+          },
+          "user": {
+            "name": "bob"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "alice"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "timezone": "-05:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "<134>1 2023-03-01T07:57:07Z gw-0b8ccd CheckPoint 16700 - [action:\"Accept\"; flags:\"411908\"; ifdir:\"inbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x341d6d49,0xc1db9b1,0x8781cca,0x60557f55}\"; origin:\"192.168.178.40\"; originsicname:\"cn=cp_mgmt,o=gw-0b8ccd..zx8qy7\"; sequencenum:\"1\"; time:\"1677657427\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={129CA1F9-6B7D-0F45-8AC1-693F4B58DC18};mgmt=gw-0b8ccd;date=1677651757;policy_name=Standard\\]\"; dst:\"192.168.178.40\"; inzone:\"Internal\"; layer_name:\"Network\"; layer_uuid:\"38271c2f-ab44-4e25-9aa4-e219cb6e12cf\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_name:\"Allow Mac\"; rule_uid:\"0d0462b6-4d22-4fff-902b-c433ea539ce0\"; outzone:\"Internal\"; product:\"VPN-1 & FireWall-1\"]",
+      "expected": {
+        "@timestamp": "2023-03-01T07:57:07.000Z",
+        "destination": {
+          "ip": "192.168.178.40"
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "direction": "inbound",
+          "name": "Network"
+        },
+        "observer": {
+          "egress": {
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "Internal"
+          },
+          "ip": [
+            "192.168.178.40"
+          ],
+          "name": "192.168.178.40",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.178.40"
+          ]
+        },
+        "rule": {
+          "name": "Allow Mac",
+          "uuid": "0d0462b6-4d22-4fff-902b-c433ea539ce0"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x341d6d49,0xc1db9b1,0x8781cca,0x60557f55}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-03-01T05:02:37Z gw-0b8ccd CheckPoint 16700 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x63ff0952,0x10c,0x28b2a8c0,0x20a1413c}\"; origin:\"192.168.178.40\"; sequencenum:\"1\"; time:\"1677646957\"; version:\"5\"; additional_info:\"logout localhost\"; administrator:\"WEB_API\"; client_ip:\"192.168.178.40\"; domain_name:\"SMC User\"; operation:\"Log Out\"; product:\"WEB_API\"; sendtotrackerasadvancedauditlog:\"0\"; session_uid:\"baed1377-9d26-44b8-bc91-6d223f0807a7\"; subject:\"Administrator Logout\"]",
+      "expected": {
+        "@timestamp": "2023-03-01T05:02:37.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Logout",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "name": "192.168.178.40",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "user": [
+            "web_api"
+          ]
+        },
+        "source": {
+          "ip": "192.168.178.40",
+          "user": {
+            "domain": "SMC User",
+            "name": "web_api"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "smc user",
+          "name": "web_api"
+        },
+        "event": {
+          "action": "logged-out",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0x63ff0952,0x10c,0x28b2a8c0,0x20a1413c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-03-01T07:58:40Z gw-0b8ccd CheckPoint 16700 - [action:\"Accept\"; flags:\"409600\"; ifdir:\"inbound\"; ifname:\"eth1\"; logid:\"0\"; loguid:\"{0xed4a5d02,0xb33e9b9d,0x7eb0709c,0x92e2793b}\"; origin:\"192.168.178.40\"; originsicname:\"cn=cp_mgmt,o=gw-0b8ccd..zx8qy7\"; sequencenum:\"1\"; time:\"1677657520\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={129CA1F9-6B7D-0F45-8AC1-693F4B58DC18};mgmt=gw-0b8ccd;date=1677651757;policy_name=Standard\\]\"; dst:\"10.0.0.1\"; icmp:\"Echo Request\"; icmp_code:\"0\"; icmp_type:\"8\"; layer_name:\"Network\"; layer_uuid:\"38271c2f-ab44-4e25-9aa4-e219cb6e12cf\"; match_id:\"2\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_name:\"Log all\"; rule_uid:\"b769a8ca-3ce1-4293-9099-f1c08980c1b1\"; product:\"VPN-1 & FireWall-1\"; proto:\"1\"; service_id:\"echo-request\"; src:\"10.0.0.2\"]",
+      "expected": {
+        "@timestamp": "2023-03-01T07:58:40.000Z",
+        "destination": {
+          "ip": "10.0.0.1"
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "echo-request",
+          "direction": "inbound",
+          "iana_number": "1",
+          "name": "Network",
+          "transport": "icmp"
+        },
+        "observer": {
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "interface": {
+              "name": "eth1"
+            }
+          },
+          "ip": [
+            "192.168.178.40"
+          ],
+          "name": "192.168.178.40",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "10.0.0.2",
+            "10.0.0.1",
+            "192.168.178.40"
+          ]
+        },
+        "rule": {
+          "name": "Log all",
+          "uuid": "b769a8ca-3ce1-4293-9099-f1c08980c1b1"
+        },
+        "source": {
+          "ip": "10.0.0.2"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0xed4a5d02,0xb33e9b9d,0x7eb0709c,0x92e2793b}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-03-01T02:15:54Z gw-0b8ccd CheckPoint 16700 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x63ff0952,0x41,0x28b2a8c0,0x20a1413c}\"; origin:\"192.168.178.40\"; sequencenum:\"1\"; time:\"1677636954\"; version:\"5\"; additional_info:\"login by localhost\"; administrator:\"WEB_API\"; client_ip:\"192.168.178.40\"; operation:\"Log In\"; product:\"WEB_API\"; sendtotrackerasadvancedauditlog:\"0\"; subject:\"Administrator Login\"]",
+      "expected": {
+        "@timestamp": "2023-03-01T02:15:54.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Login",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "name": "192.168.178.40",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "user": [
+            "web_api"
+          ]
+        },
+        "source": {
+          "ip": "192.168.178.40",
+          "user": {
+            "name": "web_api"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "web_api"
+        },
+        "event": {
+          "action": "logged-in",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0x63ff0952,0x41,0x28b2a8c0,0x20a1413c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "start"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-03-01T02:16:17Z gw-0b8ccd CheckPoint 16700 - [action:\"Accept\"; flags:\"163872\"; ifdir:\"outbound\"; loguid:\"{0x63ff0952,0x42,0x28b2a8c0,0x20a1413c}\"; origin:\"192.168.178.40\"; sequencenum:\"1\"; time:\"1677636977\"; version:\"5\"; additional_info:\"logout localhost\"; administrator:\"WEB_API\"; client_ip:\"192.168.178.40\"; domain_name:\"SMC User\"; operation:\"Log Out\"; product:\"WEB_API\"; sendtotrackerasadvancedauditlog:\"0\"; session_uid:\"02e77b40-e0d5-400c-bea0-5a7bd8fc9648\"; subject:\"Administrator Logout\"]",
+      "expected": {
+        "@timestamp": "2023-03-01T02:16:17.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Administrator Logout",
+        "network": {
+          "direction": "outbound"
+        },
+        "observer": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "name": "192.168.178.40",
+          "product": "WEB_API",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "user": [
+            "web_api"
+          ]
+        },
+        "source": {
+          "ip": "192.168.178.40",
+          "user": {
+            "domain": "SMC User",
+            "name": "web_api"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "smc user",
+          "name": "web_api"
+        },
+        "event": {
+          "action": "logged-out",
+          "category": [
+            "authentication"
+          ],
+          "id": "{0x63ff0952,0x42,0x28b2a8c0,0x20a1413c}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 1,
+          "timezone": "UTC",
+          "type": [
+            "end"
+          ]
+        }
+      }
+    },
+    {
+      "line": "<134>1 2023-03-01T02:16:55Z gw-0b8ccd CheckPoint 16700 - [flags:\"131104\"; ifdir:\"inbound\"; loguid:\"{0x63ff0952,0x43,0x28b2a8c0,0x20a1413c}\"; origin:\"192.168.178.40\"; sequencenum:\"1\"; time:\"1677637015\"; version:\"5\"; administrator:\"admin\"; fieldschanges:\"NTP version of server ntp.checkpoint.com is set to 4 \"; machine:\"gw-0b8ccd\"; objectname:\"NTP\"; operation:\"Set Object\"; product:\"Web-UI\"; subject:\"Object Manipulation\"]",
+      "expected": {
+        "@timestamp": "2023-03-01T02:16:55.000Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "message": "Object Manipulation",
+        "network": {
+          "direction": "inbound"
+        },
+        "observer": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "name": "192.168.178.40",
+          "product": "Web-UI",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.178.40"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "rule": {
+          "name": "NTP"
+        },
+        "source": {
+          "user": {
+            "name": "admin"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "admin"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "id": "{0x63ff0952,0x43,0x28b2a8c0,0x20a1413c}",
+          "kind": "event",
+          "sequence": 1,
+          "timezone": "UTC"
+        }
+      }
+    },
+    {
+      "line": "<134>1 2020-03-29T13:20:47Z gw-da58d3 CheckPoint 1930 - [action:\"Accept\"; flags:\"444676\"; ifdir:\"outbound\"; ifname:\"eth0\"; logid:\"0\"; loguid:\"{0x5e80a0af,0x3,0xbba3afa,0xd2c10858}\"; origin:\"192.168.1.100\"; originsicname:\"cn=cp_mgmt,o=gw-da58d3..tmn8s8\"; sequencenum:\"5\"; version:\"5\"; __policy_id_tag:\"product=VPN-1 & FireWall-1[db_tag={AFDE1595-0AEA-6E48-B48E-A69F8263607D};mgmt=gw-da58d3;date=1585488025;policy_name=Standard\\]\"; dst:\"192.168.1.1\"; inzone:\"Local\"; layer_name:\"Network\"; layer_uuid:\"63b7fe60-76d2-4287-bca5-21af87337b0a\"; match_id:\"1\"; parent_rule:\"0\"; rule_action:\"Accept\"; rule_uid:\"1fde807b-6300-4b1a-914f-f1c1f3e2e7d2\"; outzone:\"Internal\"; product:\"VPN-1 & FireWall-1\"; proto:\"17\"; s_port:\"37029\"; service:\"53\"; service_id:\"domain-udp\"; src:\"192.168.1.100\"]  ",
+      "expected": {
+        "@timestamp": "2020-03-29T13:20:47.000Z",
+        "destination": {
+          "ip": "192.168.1.1",
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "domain-udp",
+          "direction": "outbound",
+          "iana_number": "17",
+          "name": "Network",
+          "transport": "udp"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "eth0"
+            },
+            "zone": "Internal"
+          },
+          "hostname": "cp_mgmt",
+          "ingress": {
+            "zone": "Local"
+          },
+          "ip": [
+            "192.168.1.100"
+          ],
+          "name": "192.168.1.100",
+          "product": "VPN-1 & FireWall-1",
+          "type": "firewall",
+          "vendor": "Checkpoint"
+        },
+        "related": {
+          "ip": [
+            "192.168.1.100",
+            "192.168.1.1"
+          ]
+        },
+        "rule": {
+          "uuid": "1fde807b-6300-4b1a-914f-f1c1f3e2e7d2"
+        },
+        "source": {
+          "ip": "192.168.1.100",
+          "port": 37029
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "Accept",
+          "category": [
+            "network"
+          ],
+          "id": "{0x5e80a0af,0x3,0xbba3afa,0xd2c10858}",
+          "kind": "event",
+          "outcome": "success",
+          "sequence": 5,
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "connection"
+          ]
+        }
+      }
+    }
+  ]
+}

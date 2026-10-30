@@ -11,16 +11,20 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { walkHuntTierConnectors } from '../../../services/watches/hunt/common/hunt_tier_connectors';
 
+type ChatModelOptions = Parameters<InferenceServerStart['getChatModel']>[0]['chatModelOptions'];
+
 const buildScopedModel = async ({
   inference,
   request,
   connectorId,
+  chatModelOptions,
 }: {
   inference: InferenceServerStart;
   request: KibanaRequest;
   connectorId: string;
+  chatModelOptions: ChatModelOptions;
 }): Promise<ScopedModel> => {
-  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
+  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions });
   const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
   const connector = await inference.getConnectorById(connectorId, request);
   return { connector, chatModel, inferenceClient };
@@ -31,10 +35,11 @@ const tryBuildScoped = async (
   request: KibanaRequest,
   connectorId: string,
   label: string,
-  logger: Logger
+  logger: Logger,
+  chatModelOptions: ChatModelOptions
 ): Promise<ScopedModel | null> => {
   try {
-    return await buildScopedModel({ inference, request, connectorId });
+    return await buildScopedModel({ inference, request, connectorId, chatModelOptions });
   } catch (err) {
     logger.warn(
       `[hunt:connector] ${label} connector='${connectorId}' unavailable — falling through. ` +
@@ -55,6 +60,7 @@ export const resolveScopedModel = async ({
   request,
   uiSettingsClient,
   logger,
+  chatModelOptions = {},
 }: {
   inference: InferenceServerStart | undefined;
   /** Optional plugin: absent deployments fall back to the connector chain below. */
@@ -64,6 +70,8 @@ export const resolveScopedModel = async ({
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
+  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
+  chatModelOptions?: ChatModelOptions;
 }): Promise<ResolveScopedModelOutcome> => {
   if (!inference) {
     return {
@@ -83,7 +91,7 @@ export const resolveScopedModel = async ({
     request,
     logger,
     accept: ({ connectorId, label }) =>
-      tryBuildScoped(inference, request, connectorId, label, logger),
+      tryBuildScoped(inference, request, connectorId, label, logger, chatModelOptions),
   });
   if (accepted) return { ok: true, model: accepted.value };
 
@@ -94,4 +102,48 @@ export const resolveScopedModel = async ({
       'No GenAI connector is configured or available. Set `genAi:defaultAIConnector` in ' +
       'advanced settings, or configure a GenAI connector for the current user.',
   };
+};
+
+/**
+ * Builds the connector an operator saved for `featureId`. An empty row, an
+ * unregistered feature, and a failed build all return undefined. There is no
+ * fallthrough to the deployment default: this read is for a row that must stay
+ * unused until someone saves a model on it.
+ */
+export const resolveConfiguredScopedModel = async ({
+  inference,
+  searchInferenceEndpoints,
+  featureId,
+  request,
+  logger,
+  chatModelOptions = {},
+}: {
+  inference: InferenceServerStart | undefined;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  featureId: string;
+  request: KibanaRequest;
+  logger: Logger;
+  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
+  chatModelOptions?: ChatModelOptions;
+}): Promise<ScopedModel | undefined> => {
+  if (!inference || !searchInferenceEndpoints) return undefined;
+  if (searchInferenceEndpoints.features.get(featureId) == null) return undefined;
+
+  try {
+    const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+      featureId,
+      request,
+      { onlyReturnConfigured: true }
+    );
+    const connectorId = endpoints[0]?.connectorId;
+    if (!connectorId) return undefined;
+    return await buildScopedModel({ inference, request, connectorId, chatModelOptions });
+  } catch (err) {
+    logger.warn(
+      `[hunt:connector] configured feature '${featureId}' could not be built. ${
+        (err as Error).message
+      }`
+    );
+    return undefined;
+  }
 };

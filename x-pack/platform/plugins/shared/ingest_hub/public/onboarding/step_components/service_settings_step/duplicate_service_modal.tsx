@@ -30,6 +30,7 @@ import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings'
 import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
+import { MAX_POLICY_NAME_LENGTH } from './integration_settings';
 import {
   InstanceNamespaceField,
   getNamespaceError,
@@ -41,9 +42,13 @@ interface DuplicateServiceModalProps {
   sourceConfig: ServiceVars;
   /** Pre-filled name suggestion (e.g. "AWS CloudTrail [Duplicate]"). */
   suggestedName: string;
+  /** The suggestion for a namespace; the name follows it until the user types one. */
+  suggestName?: (namespace: string) => string;
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
   globalRegion: string;
+  /** The namespace the duplicate starts with. */
+  globalNamespace?: string;
   onAdd: (
     name: string,
     varsByDataStream: Record<string, ServiceDataStreamVars>,
@@ -57,25 +62,31 @@ export function DuplicateServiceModal({
   service,
   sourceConfig,
   suggestedName,
+  suggestName,
   existingNames,
   globalRegion,
+  globalNamespace = '',
   onAdd,
   onCancel,
 }: DuplicateServiceModalProps) {
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
+  // Whether the user typed a name; until then it follows the namespace.
+  const [nameEdited, setNameEdited] = useState(false);
 
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...sourceConfig.varsByDataStream,
   }));
-  const [namespace, setNamespace] = useState(sourceConfig.namespace ?? '');
+  const [namespace, setNamespace] = useState(globalNamespace);
   const showNamespace = supportsNamespace(service);
   const isNamespaceInvalid = showNamespace && !!getNamespaceError(namespace);
 
   const trimmedName = name.trim();
   const nameEmpty = trimmedName === '';
   const nameTaken = !nameEmpty && isDuplicateNameTaken(trimmedName, existingNames);
-  const nameInvalid = nameEmpty || nameTaken;
+  // The service name is the duplicate's policy name, which Fleet limits.
+  const nameTooLong = trimmedName.length > MAX_POLICY_NAME_LENGTH;
+  const nameInvalid = nameEmpty || nameTaken || nameTooLong;
 
   const singleDs = service.dataStreams.length === 1;
   const enabledDsFromInputs = service.dataStreams.filter((dsId) => {
@@ -118,6 +129,11 @@ export function DuplicateServiceModal({
     : nameTaken
     ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTaken', {
         defaultMessage: 'This name is already in use. Choose a different name.',
+      })
+    : nameTooLong
+    ? i18n.translate('xpack.ingestHub.serviceSettingsStep.duplicateModal.name.errorTooLong', {
+        defaultMessage: 'The name must be {max} characters or less.',
+        values: { max: MAX_POLICY_NAME_LENGTH },
       })
     : undefined;
 
@@ -176,6 +192,7 @@ export function DuplicateServiceModal({
             onChange={(e) => {
               setName(e.target.value);
               setNameTouched(true);
+              setNameEdited(true);
             }}
             onBlur={() => setNameTouched(true)}
             isInvalid={nameTouched && nameInvalid}
@@ -187,7 +204,14 @@ export function DuplicateServiceModal({
 
         {showNamespace && (
           <>
-            <InstanceNamespaceField namespace={namespace} onChange={setNamespace} />
+            <InstanceNamespaceField
+              emptyUsesGlobal
+              namespace={namespace}
+              onChange={(value) => {
+                setNamespace(value);
+                if (!nameEdited && suggestName) setName(suggestName(value));
+              }}
+            />
             <EuiSpacer size="m" />
           </>
         )}
