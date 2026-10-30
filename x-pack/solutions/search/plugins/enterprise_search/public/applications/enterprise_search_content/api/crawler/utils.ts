@@ -297,8 +297,6 @@ export const crawlerCustomSchedulingClientToServer = (
       ...crawlerSchedule.customEntryPointUrls,
     ];
 
-    // An empty array fails crawler-side validation and the crawl is never requested. Omitting
-    // the key instead falls back to the domain's configured URLs, as the one-time crawl does.
     const configurationOverrides: CrawlerCustomScheduleConfigOverridesClient = {
       maxCrawlDepth: crawlerSchedule.maxCrawlDepth,
       sitemapDiscoveryDisabled: !crawlerSchedule.includeSitemapsInRobotsTxt,

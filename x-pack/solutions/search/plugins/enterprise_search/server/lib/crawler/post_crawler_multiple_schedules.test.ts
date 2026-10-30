@@ -172,8 +172,6 @@ describe('postCrawlerCustomScheduling lib function', () => {
     expect(mockClient.asCurrentUser.update).toHaveBeenCalledTimes(1);
   });
 
-  // The crawler writes `last_synced` under each schedule, so the update has to rely on the partial
-  // `doc` deep-merge and remove only the override keys it names.
   it('does not touch schedule fields outside configuration_overrides', async () => {
     await postCrawlerCustomScheduling(
       client,

@@ -30,10 +30,8 @@ const CONFIGURATION_OVERRIDE_KEYS: ReadonlyArray<keyof CrawlerCustomScheduleConf
     'seed_urls',
   ];
 
-// Removes schedules the client dropped, plus any override a schedule no longer sets. The partial
-// `doc` update below deep-merges, so a cleared override would otherwise keep its stored value.
-// `last_synced` is written by the crawler under each schedule and must survive this, hence the
-// targeted removals rather than replacing `custom_scheduling` wholesale.
+// Removes deleted schedules and cleared overrides. Never assigns `custom_scheduling` wholesale:
+// the crawler writes `last_synced` under each schedule and it has to survive.
 const REMOVE_STALE_ENTRIES_SCRIPT = `
   if (ctx._source.custom_scheduling == null) {
     return;
