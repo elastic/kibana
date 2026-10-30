@@ -27,6 +27,7 @@ export class DigitalExperiencePage {
   public readonly summary: Locator;
   public readonly pageLoadsChart: Locator;
   public readonly otelOverviewKpis: Locator;
+  public readonly otelOverviewVitals: Locator;
   public readonly otelOverviewPageLoads: Locator;
   public readonly overviewEmpty: Locator;
   public readonly overviewTab: Locator;
@@ -52,6 +53,7 @@ export class DigitalExperiencePage {
     this.summary = page.getByTestId('digitalExperienceApplicationsSummary');
     this.pageLoadsChart = page.getByTestId('digitalExperiencePageLoadsChart');
     this.otelOverviewKpis = page.getByTestId('digitalExperienceOverviewKpis');
+    this.otelOverviewVitals = page.getByTestId('digitalExperienceOverviewVitals');
     this.otelOverviewPageLoads = page.getByTestId('digitalExperienceOverviewPageLoads');
     this.overviewEmpty = page.getByTestId('digitalExperienceOverviewEmpty');
     this.overviewTab = page.getByTestId('digitalExperienceTab-overview');
@@ -73,9 +75,13 @@ export class DigitalExperiencePage {
     await this.page.goto(this.kbnUrl.get(`${APP_PATH}?${new URLSearchParams(query)}`));
   }
 
-  async gotoApplication(serviceName: string, timeRange = TIME_RANGE): Promise<void> {
+  /** Opens the Overview with the given URL query, by default only the time range. */
+  async gotoApplication(
+    serviceName: string,
+    query: Record<string, string> = TIME_RANGE
+  ): Promise<void> {
     await this.page.goto(
-      this.kbnUrl.get(`${APP_PATH}/${serviceName}?${new URLSearchParams(timeRange)}`)
+      this.kbnUrl.get(`${APP_PATH}/${serviceName}?${new URLSearchParams(query)}`)
     );
   }
 
