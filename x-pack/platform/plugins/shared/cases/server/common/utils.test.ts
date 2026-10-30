@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
-import { setTopLevelAppEnabled } from './cases_app_path';
+import { setTopLevelAppEnabled } from './top_level_app';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import {
   GENERAL_CASES_OWNER,

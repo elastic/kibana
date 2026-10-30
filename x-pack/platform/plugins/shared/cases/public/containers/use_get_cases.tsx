@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { casesQueriesKeys, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
 import { useToasts } from '../common/lib/kibana';
+import { isTopLevelAppEnabled } from '../common/top_level_app';
 import * as i18n from './translations';
 import { getCases } from './api';
 import type { ServerError } from '../types';
@@ -37,7 +38,11 @@ export const useGetCases = (
 ): UseQueryResult<CasesFindResponseUI> => {
   const toasts = useToasts();
   const { owner } = useCasesContext();
-  const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
+  // The top-level app lists every case the user can read; ownerless embeds keep listing only the
+  // owners the user can fully work with.
+  const availableSolutions = useAvailableCasesOwners(
+    isTopLevelAppEnabled() ? ['read'] : getAllPermissionsExceptFrom('delete')
+  );
 
   const hasOwner = !!owner.length;
   const initialOwner = hasOwner ? owner : availableSolutions;
@@ -81,7 +86,8 @@ export const useGetCases = (
   })();
 
   return useQuery(
-    casesQueriesKeys.cases(params),
+    // The owners come from the server in the top-level app, so they belong in the key.
+    casesQueriesKeys.cases({ ...params, owner: ownerFilter.owner }),
     ({ signal }) => {
       return getCases({
         filterOptions: {
@@ -100,6 +106,7 @@ export const useGetCases = (
     },
     {
       keepPreviousData: true,
+      enabled: ownerFilter.owner.length > 0 || !isTopLevelAppEnabled(),
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

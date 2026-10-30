@@ -52,7 +52,7 @@ import {
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
-import { getCasesAppBasePath } from './cases_app_path';
+import { getCasesAppBasePath } from './top_level_app';
 
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {

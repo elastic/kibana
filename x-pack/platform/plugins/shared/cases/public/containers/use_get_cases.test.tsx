@@ -10,6 +10,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import { useGetCases } from './use_get_cases';
 import * as api from './api';
+import * as topLevelApp from '../common/top_level_app';
 import { TestProviders, allCasesCapabilities } from '../common/mock';
 import { useToasts } from '../common/lib/kibana/hooks';
 import { OWNERS } from '../../common/constants';
@@ -321,6 +322,40 @@ describe('useGetCases', () => {
       },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
+    });
+  });
+
+  describe('with the top-level Cases app', () => {
+    beforeEach(() => {
+      jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('lists the readable owners the server reports once they load', async () => {
+      const spyOnGetCases = jest.spyOn(api, 'getCases');
+      const coreStart = coreMock.createStart();
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        casesV4: { read_cases: true },
+      };
+
+      renderHook(() => useGetCases(), {
+        wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
+      });
+
+      await waitFor(() => {
+        expect(spyOnGetCases).toHaveBeenCalled();
+      });
+
+      expect(spyOnGetCases).toHaveBeenCalledTimes(1);
+      expect(spyOnGetCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filterOptions: expect.objectContaining({ owner: ['observability', 'cases'] }),
+        })
+      );
     });
   });
 });

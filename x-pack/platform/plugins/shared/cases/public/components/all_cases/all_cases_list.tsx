@@ -36,6 +36,7 @@ import { useCasesConfig } from '../../common/lib/kibana';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 import { useIsLoadingCases } from './hooks/use_is_loading_cases';
 import { useAllCasesState } from './hooks/use_all_cases_state';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './hooks/use_cases_columns_selection';
 import { useListFieldsSelection } from './hooks/use_list_fields_selection';
@@ -65,7 +66,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, getAttachments }) => {
     const { owner, permissions } = useCasesContext();
 
-    const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
+    const availableSolutions = useAvailableCasesOwners(
+      isTopLevelAppEnabled() ? ['read'] : getAllPermissionsExceptFrom('delete')
+    );
     const isLoading = useIsLoadingCases();
     const { euiTheme } = useEuiTheme();
 

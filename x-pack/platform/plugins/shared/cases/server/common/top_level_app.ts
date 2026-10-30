@@ -12,11 +12,15 @@ let topLevelAppEnabled = false;
 
 /**
  * Set once at plugin setup from `xpack.cases.topLevelApp.enabled`. Links built on the server
- * (push, notifications, Agent Builder) are generated far from the plugin config, so they read it here.
+ * (push, notifications, Agent Builder) and attachment validation run far from the plugin config,
+ * so they read it here.
  */
 export const setTopLevelAppEnabled = (enabled: boolean): void => {
   topLevelAppEnabled = enabled;
 };
+
+/** Whether Cases runs as the single top-level app with the `casesV4` feature. */
+export const isTopLevelAppEnabled = (): boolean => topLevelAppEnabled;
 
 /** The path cases live under: `/app/cases`, or the owner's solution app when the top-level app is off. */
 export const getCasesAppBasePath = (owner: string): string => {

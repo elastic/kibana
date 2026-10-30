@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Case, RelatedCase } from '../../../common/types/domain';
 import { getCaseViewPath } from '../../common/utils';
-import { getCasesAppBasePath } from '../../common/cases_app_path';
+import { getCasesAppBasePath } from '../../common/top_level_app';
 
 export interface CoreServices {
   coreStart: CoreStart;

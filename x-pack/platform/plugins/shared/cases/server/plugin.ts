@@ -48,7 +48,7 @@ import {
   getTopLevelAppCasesKibanaFeatures,
   withCasesV4Replacement,
 } from './features';
-import { setTopLevelAppEnabled } from './common/cases_app_path';
+import { setTopLevelAppEnabled } from './common/top_level_app';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';

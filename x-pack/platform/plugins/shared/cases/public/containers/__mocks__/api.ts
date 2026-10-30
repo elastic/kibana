@@ -69,6 +69,9 @@ export const getSingleCaseMetrics = async (
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
+export const getAvailableOwners = async (): Promise<string[]> =>
+  Promise.resolve(['observability', 'cases']);
+
 export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
 
 export const findCaseUserActions = async (
