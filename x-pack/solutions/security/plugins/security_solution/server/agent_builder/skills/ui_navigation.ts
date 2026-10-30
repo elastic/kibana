@@ -162,17 +162,13 @@ function asIndentedJson(value: unknown) {
  */
 export const ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT = `## UI-guided navigation — when to redirect instead of acting
 
-Some Entity Analytics operations are intentionally **not performed in chat**: destructive lifecycle changes, bulk / CSV uploads, and configuration that lives in dedicated UI flows. For these intents, **decline the action** and point the user to the right place in the UI with a link.
+Some Entity Analytics operations have no dedicated, purpose-built tool: destructive lifecycle changes, bulk / CSV uploads, and configuration that lives in dedicated UI flows. For these intents, one option is to point the user to the right place in the UI with a link.
 
 **How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` for the destination (and, for the flyout destinations below, the \`flyout\` object). It returns a single \`url\` with the deployment base path and current space already applied. Render that \`url\` in your reply as a markdown link \`[title](url)\`. **Never** hand-write, guess, or edit the URL — always use the \`url\` the tool returns. Pass the \`path\` exactly as written below (app-relative, starting with \`/\`); do **not** prepend a base path or \`/s/<space>\` segment yourself.
 
-**Output shape.** Three things, in one short reply:
+**When you redirect**, reply with a short message containing the markdown link built from the \`security.build_redirect_url\` result — do not prompt for confirmation yourself, and do not claim the operation succeeded.
 
-1. What you can't do in chat (one sentence).
-2. Why (one short clause — "lives in the management UI", "needs a CSV upload", "the editing flyout exposes the full configuration").
-3. **Where to go** — the markdown link built from the \`security.build_redirect_url\` result.
-
-Do **not** call any *mutating* tool, do **not** prompt for confirmation, and do **not** claim the operation succeeded. The user clicks the link and performs the action themselves. (\`security.build_redirect_url\` is not a mutation — it only builds a link.)
+**Only describe the destination as covering what's explicitly listed below for that intent.** If the user's request also includes something not listed in that section and not handled by another tool in this skill, don't assume the linked page covers it too — say you're not sure it's available, rather than folding it into the redirect.
 
 ### Entity Analytics — enable / disable & clear all data
 
@@ -185,7 +181,7 @@ These are the global controls at the **top of the Entity Analytics management pa
 
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.settings}'\` and render the returned \`url\`.
 
-Example reply: "I can't enable or disable Entity Analytics from chat — that's the switch at the top of the [Entity Analytics management page](<url from build_redirect_url>), where you can also clear all entity data."
+Example reply: "You can enable or disable Entity Analytics from the switch at the top of the [Entity Analytics management page](<url from build_redirect_url>), where you can also clear all entity data."
 
 ### Risk engine — scoring configuration
 
@@ -194,7 +190,9 @@ Redirect when the user asks to:
 - **configure** / **change settings** for risk scoring (alert filters, retainment, schedule, closed-alert handling, etc.)
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.riskScore}'\` and render the returned \`url\`.
 
-Example reply: "I can't change the risk scoring settings from chat — that's managed on the Risk Score page. Open the [Risk Score settings](<url from build_redirect_url>) to reconfigure scoring."
+Example reply: "You can change the risk scoring settings from the [Risk Score settings](<url from build_redirect_url>) page."
+
+There is **no "re-run risk scoring now" / manual trigger action** on this page. Do not say or imply that the linked page lets the user trigger a re-score. If asked to trigger one, say that's not something you're able to do here.
 
 ### Asset criticality — bulk / CSV operations
 
@@ -205,7 +203,7 @@ Redirect when the user asks to:
 
 Call \`security.build_redirect_url\` with \`path: '${ENTITY_ANALYTICS_UI_PATHS.assetCriticality}'\` and render the returned \`url\`.
 
-Example reply: "I can't import a criticality CSV from chat — that runs through the Asset Criticality page. Open the [Asset Criticality upload](<url from build_redirect_url>) to upload your file."
+Example reply: "I can't import a criticality CSV from chat, but you can do that through the Asset Criticality page. Open the [Asset Criticality upload](<url from build_redirect_url>) to upload your file."
 
 ### Entity store / engine status
 
