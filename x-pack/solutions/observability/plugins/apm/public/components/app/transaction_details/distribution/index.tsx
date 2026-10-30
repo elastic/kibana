@@ -68,14 +68,29 @@ export function TransactionDistribution({
   // documents) can be navigated individually. Resolving selection by identifier
   // alone collapses such pairs onto the first match, breaking forward
   // pagination.
-  const selectedSampleIndex = sampleIndex;
+  //
+  // Only trust the index when the sample at that position still matches the
+  // URL's traceId/transactionId. A reload after paging refetches samples with
+  // the selected ids boosted by `_score`, which can move them to the front
+  // while the URL keeps the old index; using a stale index would then point the
+  // pager at an unrelated sample. On a mismatch we fall back to identifier
+  // matching and drop the stale index entirely (see `selectedSampleIndex`).
+  const selectedSampleIndex = useMemo(() => {
+    if (!isValidSampleIndex(sampleIndex, traceSamples)) {
+      return undefined;
+    }
+    const sampleAtIndex = traceSamples[sampleIndex];
+    const matchesUrlIds =
+      sampleAtIndex.traceId === traceId && sampleAtIndex.transactionId === transactionId;
+    return matchesUrlIds ? sampleIndex : undefined;
+  }, [sampleIndex, traceSamples, traceId, transactionId]);
 
   // Derive the selected sample from the URL so the pagination index stays in
   // sync with browser back/forward navigation. Passing `selectedSample` (even
   // as `null`) puts `WaterfallWithSummary` into its controlled mode, where the
   // index is derived from the URL instead of from local click-only state.
-  // Prefer the explicit index when present so paired samples are kept distinct;
-  // fall back to matching by identifier for URLs without a `sampleIndex`.
+  // Prefer the validated index when present so paired samples are kept distinct;
+  // fall back to matching by identifier for URLs without a usable `sampleIndex`.
   const selectedSample = useMemo(() => {
     if (isValidSampleIndex(selectedSampleIndex, traceSamples)) {
       return traceSamples[selectedSampleIndex];

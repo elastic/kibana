@@ -435,6 +435,48 @@ describe('transaction_details/distribution', () => {
           expect(afterBack?.selectedSample).toBe(afterBack?.traceSamples?.[0]);
         });
       });
+
+      // Regression for a stale `sampleIndex`: reloading after paging refetches
+      // samples with the URL's ids boosted by `_score`, so the sample that used
+      // to live at the old index may now be a different, unrelated one. The
+      // index must only be trusted when the sample at that position still
+      // matches the URL's traceId/transactionId; otherwise fall back to
+      // identifier matching and drop the stale index.
+      it('ignores sampleIndex when the sample at that position no longer matches the URL ids', async () => {
+        // The URL points at trace-b, but sampleIndex=0 now resolves to trace-a
+        // (e.g. trace-b was boosted to the front on a refetch).
+        render(
+          <TransactionDistribution
+            onChartSelection={jest.fn()}
+            onClearSelection={jest.fn()}
+            traceSamplesFetchResult={{
+              data: { traceSamples },
+              status: useFetcherModule.FETCH_STATUS.SUCCESS,
+              error: undefined,
+            }}
+          />,
+          {
+            wrapper: ({ children }: { children?: ReactNode }) => (
+              <Wrapper
+                urlParams={{ traceId: 'trace-b', transactionId: 'tx-b' }}
+                search={fromQuery({ sampleIndex: 0 })}
+              >
+                {children}
+              </Wrapper>
+            ),
+          }
+        );
+
+        await waitFor(() => {
+          expect(mockWaterfallWithSummarySpy).toHaveBeenCalled();
+        });
+
+        const lastProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+        // The stale index is dropped rather than forwarded to the pager...
+        expect(lastProps?.selectedSampleIndex).toBeUndefined();
+        // ...and selection falls back to matching the URL ids (trace-b, index 1).
+        expect(lastProps?.selectedSample).toBe(lastProps?.traceSamples?.[1]);
+      });
     });
   });
 });
