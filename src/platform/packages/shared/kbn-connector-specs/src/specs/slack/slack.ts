@@ -528,7 +528,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
+        'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages. Without oldest, only recent messages may be returned, so an empty page does not mean the channel has no history; pass oldest and latest to read a specific time range, such as around an incident.',
       input: SlackGetConversationHistoryInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackGetConversationHistoryInput =
