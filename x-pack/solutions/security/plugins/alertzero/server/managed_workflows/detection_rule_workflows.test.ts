@@ -372,7 +372,7 @@ describe('detection rule workflows', () => {
       expect(post?.with?.conversation_id).toBe(
         '{{ steps.create_investigation.output.conversation_id }}'
       );
-      expect(String(post?.with?.message)).toContain('{{ error.message }}');
+      expect(String(post?.with?.message)).toContain('{{ steps.diagnose_rule.error.message }}');
     });
 
     // Every change type decides at the proposal gate, which runs the action as

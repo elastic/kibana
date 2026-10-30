@@ -383,7 +383,7 @@ steps:
               **Diagnosis failed**
               **Rule:** {{ steps.fetch_rule.output.name }}
 
-              The rule could not be diagnosed, so no tuning proposal will follow: {{ error.message }}
+              The rule could not be diagnosed, so no tuning proposal will follow: {{ steps.diagnose_rule.error.message }}
 
               Diagnosis runs on the AlertZero model set in **Feature settings**. A connector or connection error usually means that model is missing or can't be reached. 
               
