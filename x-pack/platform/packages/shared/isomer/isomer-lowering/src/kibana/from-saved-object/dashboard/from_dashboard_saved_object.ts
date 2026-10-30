@@ -24,6 +24,7 @@ import type { SavedObjectEnvelope } from '../ndjson';
 import { SavedObjectEnvelopeSchema } from '../schema';
 
 import { lowerLongTailPanel } from './from_panel';
+import { findPanelReference } from './panel_reference';
 import { isLensPanelType } from './panel_types';
 import type { DashboardAttributes, DashboardPanel, DashboardSearchSource } from './types';
 
@@ -290,19 +291,7 @@ export const fromKibanaDashboardSavedObject = (
     : options;
 
   const adaptivePanels: AdaptivePanel[] = panels.map((panel, panelIndex) => {
-    // Kibana 8.x dashboards namespace every panel-level reference with the
-    // panel's index/uuid (e.g. `4:panel_4`) before storing them on the
-    // dashboard envelope. When a panel itself uses the bare ref name we
-    // accept either form so byReference panels still resolve.
-    const lookupName = panel.panelRefName;
-    const ref = lookupName
-      ? envelope.references?.find(
-          (r) =>
-            r.name === lookupName ||
-            r.name === `${panel.panelIndex ?? ''}:${lookupName}` ||
-            r.name.endsWith(`:${lookupName}`)
-        )
-      : undefined;
+    const ref = findPanelReference(panel, envelope.references);
     if (!ref) {
       // Inline Lens panels carry their attributes at `embeddableConfig.attributes`.
       // Kibana 9.4 stores the same blob under panel type `vis`.

@@ -43,9 +43,8 @@ export interface DashboardPanel {
     i?: string;
   };
   /**
-   * When set, the actual saved-object id is in the dashboard's `references`
-   * array under this name; otherwise the panel's embeddable config carries
-   * an inline `savedVis` / `attributes` blob.
+   * Before Kibana 9.4, the name of the dashboard reference holding the saved object; since 9.4 that reference is
+   * `<panelIndex>:savedObjectRef` and this is unset. By-value panels carry their state in `embeddableConfig`.
    */
   panelRefName?: string;
   /** Display title override (e.g. dashboard-level rename of a panel). */

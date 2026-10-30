@@ -23,6 +23,8 @@ import {
 } from './dashboard_context';
 import { type GridData, planDashboard, type TimeRange } from './dashboard';
 import type { ExecuteEsql, ExecuteSearch } from './esql_response';
+import { findPanelReference } from './kibana/from-saved-object/dashboard/panel_reference';
+import { isVisualizationPanelType } from './kibana/from-saved-object/dashboard/panel_types';
 import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
 import { bindMapPanels, type MapServices, type PanelSize } from './map_panels';
 import { bindVegaPanels } from './vega_panels';
@@ -85,7 +87,7 @@ interface PanelJson {
   type?: string;
   title?: string;
   panelRefName?: string;
-  gridData: GridData;
+  gridData: GridData & { i?: string };
   embeddableConfig?: {
     title?: string;
     hidePanelTitles?: boolean;
@@ -103,13 +105,11 @@ const markdownAppearance = (
   references: ReadonlyArray<{ name: string; id: string }>,
   objects: ReadonlyArray<{ type?: unknown; id?: unknown; attributes?: { visState?: string } }>
 ): { appearance: 'kibanaLegacy'; fontSize: number } | Record<string, never> => {
-  if (panel.type !== 'visualization') {
+  if (!isVisualizationPanelType(panel.type)) {
     return {};
   }
   const byValue = panel.embeddableConfig?.savedVis;
-  const reference = references.find(({ name }) =>
-    panel.panelRefName ? name === panel.panelRefName : name.startsWith(`${panel.panelIndex}:`)
-  );
+  const reference = findPanelReference(panel, references);
   const saved = objects.find(({ type, id }) => type === 'visualization' && id === reference?.id);
   const visState = byValue ?? (saved ? JSON.parse(saved.attributes?.visState ?? '{}') : undefined);
   if (visState?.type !== 'markdown') {
