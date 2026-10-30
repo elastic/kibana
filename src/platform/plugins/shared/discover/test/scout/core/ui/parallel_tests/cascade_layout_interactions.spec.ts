@@ -15,6 +15,7 @@
  * expected layout.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 import { runCascadeQuery } from '../../../common/ui/fixtures/helpers';
@@ -128,6 +129,35 @@ spaceTest.describe(
           await expect(page.testSubj.locator('unifiedDataTableComparisonDisplay')).toHaveText(
             'Comparing 2 results'
           );
+          // The comparison grid is rendered through the cascade's connected custom body, so it has no
+          // inner virtualized (scrolling) container of its own: only the cascade scrolls.
+          await expect(
+            comparisonGrid.locator('[data-test-subj="discoverCascadeComparisonGridBody"]')
+          ).toBeVisible();
+          await expect(comparisonGrid.locator('.euiDataGrid__virtualized')).toHaveCount(0);
+
+          // The field rows render through that body, and every one of them is reachable by
+          // scrolling the cascade itself: scrolling the cascade to the bottom edge of the
+          // comparison grid brings its last field row into view.
+          const comparisonRowAt = (index: number) =>
+            comparisonGrid.locator(`${euiSelectors.dataGrid.ROW_SELECTOR}[data-index="${index}"]`);
+          await expect(comparisonRowAt(0)).toBeVisible();
+          const comparisonFieldCount = await dataGrid.getComparisonFieldCount();
+          expect(comparisonFieldCount).toBeGreaterThan(1);
+          await expect(async () => {
+            await comparisonGrid.evaluate((grid) => {
+              const cascadeScrollContainer = document.querySelector<HTMLElement>(
+                '[data-test-subj="dataCascadeScrollContainer"]'
+              );
+              if (!cascadeScrollContainer) {
+                throw new Error('cascade scroll container not found');
+              }
+              cascadeScrollContainer.scrollTop +=
+                grid.getBoundingClientRect().bottom -
+                cascadeScrollContainer.getBoundingClientRect().bottom;
+            });
+            await expect(comparisonRowAt(comparisonFieldCount - 1)).toBeVisible();
+          }).toPass();
 
           await dataGrid.exitComparisonMode();
           await expect(expandedRowGrid.rows).not.toHaveCount(0);

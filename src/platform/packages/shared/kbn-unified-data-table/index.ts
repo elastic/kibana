@@ -37,6 +37,10 @@ export type {
   UnifiedDataTableRenderCustomToolbar,
   UnifiedDataTableRenderCustomToolbarProps,
 } from './src/components/custom_toolbar/render_custom_toolbar';
+export type {
+  UnifiedDataTableRenderCustomComparisonToolbar,
+  UnifiedDataTableRenderCustomComparisonToolbarProps,
+} from './src/components/compare_documents/types';
 export {
   getRenderCustomToolbarWithElements,
   renderCustomToolbar,

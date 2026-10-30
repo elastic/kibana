@@ -47,6 +47,8 @@ Props description:
 | **externalAdditionalControls** | (optional)React.ReactNode | Optional value for providing the additional controls available in the UnifiedDataTable toolbar to manage it's records or state. UnifiedDataTable includes Columns, Sorting and Bulk Actions. |
 | **rowsPerPageOptions** | (optional)number[] | Optional list of number type values to set custom UnifiedDataTable paging options to display the records per page. |
 | **renderCustomGridBody** | (optional)(args: EuiDataGridCustomBodyProps) => React.ReactNode; | An optional function called to completely customize and control the rendering of EuiDataGrid's body and cell placement. |
+| **renderCustomComparisonGridBody** | (optional)(args: EuiDataGridCustomBodyProps) => React.ReactNode; | Like `renderCustomGridBody`, but for the comparison grid shown when comparing selected documents; its rows are the compared fields rather than documents. |
+| **renderCustomComparisonToolbar** | (optional)UnifiedDataTableRenderCustomComparisonToolbar | Optional decorator for the toolbar of the comparison grid shown when comparing selected documents, e.g. to relocate it; render the given `toolbar` to keep its controls. |
 | **visibleCellActions** | (optional)number | An optional value for a custom number of the visible cell actions in the table. By default is up to 3. |
 | **externalCustomRenderers** | (optional)Record<string,(props: EuiDataGridCellValueElementProps) => React.ReactNode>; | An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering. |
 | **consumer** | (optional)string | Name of the UnifiedDataTable consumer component or application. |

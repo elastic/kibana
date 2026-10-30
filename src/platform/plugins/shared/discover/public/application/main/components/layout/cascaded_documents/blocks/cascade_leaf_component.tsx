@@ -49,14 +49,29 @@ interface ESQLDataCascadeLeafCellProps
 
 interface CustomCascadeGridBodyProps
   extends EuiDataGridCustomBodyProps,
-    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
-  data: DataTableRecord[];
+    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'>,
+    Pick<
+      Parameters<typeof useConnectedChildVirtualizer>[0],
+      'cellId' | 'rowIndex' | 'estimatedRowHeight'
+    > {
   isFullScreenMode?: boolean;
-  cellId: string;
-  rowIndex: number;
+  /**
+   * Whether the body renders the comparison of the selected documents rather than the documents.
+   */
+  isComparisonView?: boolean;
+  /**
+   * Whether a comparison body brings its row into view when it mounts: set when it replaces the
+   * documents, not when an already active comparison is mounted again (e.g. the row scrolled back
+   * into the cascade's range or the layout was restored).
+   */
+  scrollIntoViewOnMount?: boolean;
+  onMount?: () => void;
+  'data-test-subj': string;
 }
 
 const EMPTY_SORT: SortOrder[] = [];
+const DOCUMENT_ROW_ESTIMATED_HEIGHT = 65;
+const COMPARISON_ROW_ESTIMATED_HEIGHT = 40;
 
 /**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
@@ -64,19 +79,25 @@ const EMPTY_SORT: SortOrder[] = [];
  */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
   isFullScreenMode,
-  data,
   virtualizerController,
   cellId,
   rowIndex,
+  estimatedRowHeight,
+  isComparisonView = false,
+  scrollIntoViewOnMount = false,
+  onMount,
+  'data-test-subj': dataTestSubj,
   Cell,
   visibleColumns,
   visibleRowData,
   headerRow,
   footerRow,
 }: CustomCascadeGridBodyProps) {
-  const visibleRows = useMemo(
-    () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
-    [data, visibleRowData.startRow, visibleRowData.endRow]
+  // the connected virtualizer only needs to know how many rows the grid renders
+  const rowCount = visibleRowData.endRow - visibleRowData.startRow;
+  const rows = useMemo(
+    () => Array.from({ length: rowCount }, (_, index) => ({ id: String(index) })),
+    [rowCount]
   );
 
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -92,9 +113,8 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     controller: virtualizerController,
     cellId,
     rowIndex,
-    // @ts-expect-error - required to allow the use of the visibleRows array
-    rows: visibleRows,
-    estimatedRowHeight: 65,
+    rows,
+    estimatedRowHeight,
     overscan: 10,
     privateScrollElement: customGridBodyScrollContainerRef,
   });
@@ -107,17 +127,54 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     }
   }, [isFullScreenMode, isDetached, handle]);
 
+  const hasReportedMountRef = useRef(false);
+  useLayoutEffect(() => {
+    if (hasReportedMountRef.current) return;
+    hasReportedMountRef.current = true;
+    onMount?.();
+  }, [onMount]);
+
+  // The comparison replaces the document grid while the cascade may be scrolled deep into the
+  // documents, where the much shorter comparison has no content, so its row is brought into view
+  // when it mounts: the group header, the comparison toolbar and the first compared fields.
+  const hasScrolledComparisonIntoViewRef = useRef(false);
+  useLayoutEffect(() => {
+    if (
+      !isComparisonView ||
+      !scrollIntoViewOnMount ||
+      isDetached ||
+      hasScrolledComparisonIntoViewRef.current
+    ) {
+      return;
+    }
+    const bodyElement = customGridBodyScrollContainerRef.current;
+    const { scrollElement } = virtualizer;
+    if (!bodyElement || !(scrollElement instanceof HTMLElement)) return;
+    hasScrolledComparisonIntoViewRef.current = true;
+    const rowElement = bodyElement.closest<HTMLElement>('[role="row"]') ?? bodyElement;
+    // scrolled through the virtualizer, so that its size compensations start from this position
+    virtualizer.scrollToVirtualizedIndex(
+      scrollElement.scrollTop +
+        rowElement.getBoundingClientRect().top -
+        scrollElement.getBoundingClientRect().top
+    );
+  }, [isComparisonView, scrollIntoViewOnMount, isDetached, virtualizer]);
+
+  // A comparison does not resume where a previous one was scrolled to, so its anchor is dropped when
+  // it goes away. Effects clean up in declaration order, so this runs after the connected
+  // virtualizer has persisted the anchor on disconnect.
+  useEffect(() => {
+    if (!isComparisonView) return;
+    return () => virtualizerController.clearPersistedAnchor(cellId);
+  }, [isComparisonView, virtualizerController, cellId]);
+
   const items = virtualizer.getVirtualItems();
 
   const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
   const translateY = items.length > 0 ? items[0].start - scrollMargin : 0;
 
   return (
-    <div
-      data-test-subj="discoverCascadeCustomDataGridBody"
-      role="rowgroup"
-      css={customCascadeGridBodyStyle.wrapper}
-    >
+    <div data-test-subj={dataTestSubj} role="rowgroup" css={customCascadeGridBodyStyle.wrapper}>
       <>{headerRow}</>
       <div
         ref={customGridBodyScrollContainerRef}
@@ -220,6 +277,13 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
 
+    // Whether the documents have been shown by this leaf: a comparison mounted afterwards replaces
+    // them (the user entered the comparison), whereas a comparison mounted first is being restored.
+    const hasRenderedDocumentsRef = useRef(false);
+    const markDocumentsRendered = useCallback(() => {
+      hasRenderedDocumentsRef.current = true;
+    }, []);
+
     const renderCustomToolbarWithElements = useMemo(
       () =>
         getRenderCustomToolbarWithElements({
@@ -241,32 +305,42 @@ export const ESQLDataCascadeLeafCell = React.memo(
     const renderCustomCascadeGridBodyCallback = useCallback<
       NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
     >(
-      ({
-        Cell,
-        visibleColumns,
-        visibleRowData,
-        setCustomGridBodyProps,
-        gridWidth,
-        headerRow,
-        footerRow,
-      }) => (
+      (gridBodyProps) => (
         <CustomCascadeGridBodyMemoized
+          {...gridBodyProps}
           key={cellId}
-          Cell={Cell}
-          data={cellData}
-          visibleColumns={visibleColumns}
-          visibleRowData={visibleRowData}
-          headerRow={headerRow}
-          footerRow={footerRow}
-          gridWidth={gridWidth}
-          setCustomGridBodyProps={setCustomGridBodyProps}
+          data-test-subj="discoverCascadeCustomDataGridBody"
           virtualizerController={virtualizerController}
           cellId={cellId}
           rowIndex={rowIndex}
+          estimatedRowHeight={DOCUMENT_ROW_ESTIMATED_HEIGHT}
+          isFullScreenMode={isCellInFullScreenMode}
+          onMount={markDocumentsRendered}
+        />
+      ),
+      [virtualizerController, isCellInFullScreenMode, cellId, rowIndex, markDocumentsRendered]
+    );
+
+    // The comparison grid's rows are the compared fields rather than documents, so it connects to the
+    // cascade under its own id and keeps its scroll position apart from the document grid's
+    const renderCustomComparisonGridBodyCallback = useCallback<
+      NonNullable<UnifiedDataTableProps['renderCustomComparisonGridBody']>
+    >(
+      (gridBodyProps) => (
+        <CustomCascadeGridBodyMemoized
+          {...gridBodyProps}
+          key={`${cellId}/comparison`}
+          data-test-subj="discoverCascadeComparisonGridBody"
+          virtualizerController={virtualizerController}
+          cellId={`${cellId}/comparison`}
+          isComparisonView
+          scrollIntoViewOnMount={hasRenderedDocumentsRef.current}
+          rowIndex={rowIndex}
+          estimatedRowHeight={COMPARISON_ROW_ESTIMATED_HEIGHT}
           isFullScreenMode={isCellInFullScreenMode}
         />
       ),
-      [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
+      [virtualizerController, isCellInFullScreenMode, cellId, rowIndex]
     );
     return (
       <UnifiedDataTable
@@ -292,6 +366,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         renderDocumentView="external"
         setRenderDocumentViewMeta={setRenderDocumentViewMeta}
         renderCustomGridBody={renderCustomCascadeGridBodyCallback}
+        renderCustomComparisonGridBody={renderCustomComparisonGridBodyCallback}
         onFullScreenChange={setIsCellInFullScreenMode}
         externalCustomRenderers={externalCustomRenderers}
         paginationMode="infinite"

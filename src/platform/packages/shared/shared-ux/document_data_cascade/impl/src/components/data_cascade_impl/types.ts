@@ -63,6 +63,10 @@ export interface CascadeRowCellRendererProps<G extends GroupNode, L extends Leaf
   nodePath: string[];
   nodePathMap: Record<string, string>;
   virtualizerController: ChildVirtualizerController;
+  /**
+   * Index of the row in the cascade's root virtualizer (its position in the flattened, expanded
+   * row model). Pass it as `rowIndex` to `useConnectedChildVirtualizer`.
+   */
   rowIndex: number;
 }
 
@@ -81,6 +85,12 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    */
   onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
   getVirtualizer: () => CascadeRootVirtualizerReturnValue;
+  /**
+   * Index of the cell's row in the cascade's root virtualizer (its position in the flattened, expanded
+   * row model), which the child virtualizer controller keys its per-row state by. It differs from the
+   * within-parent `row.index` for nested rows.
+   */
+  virtualRowIndex: number;
   /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
