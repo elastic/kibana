@@ -83,14 +83,14 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('fleet_agent_policies_read_only user (no settings-read)', () => {
+    describe('fleet_agent_policies_read_int_read user (no settings-read)', () => {
       it('should NOT expose proxy_headers or ssl.key in the full policy response', async () => {
         const { body } = await supertestWithoutAuth
           .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            testUsers.fleet_agent_policies_read_only.username,
-            testUsers.fleet_agent_policies_read_only.password
+            testUsers.fleet_agent_policies_read_int_read.username,
+            testUsers.fleet_agent_policies_read_int_read.password
           )
           .expect(200);
 
@@ -112,8 +112,8 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agent_policies/${agentPolicyId}/download`)
           .set('kbn-xsrf', 'xxxx')
           .auth(
-            testUsers.fleet_agent_policies_read_only.username,
-            testUsers.fleet_agent_policies_read_only.password
+            testUsers.fleet_agent_policies_read_int_read.username,
+            testUsers.fleet_agent_policies_read_int_read.password
           )
           .expect(200);
 
@@ -124,12 +124,12 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('fleet_all_only user (has settings-read)', () => {
+    describe('fleet_all_int_read user (has settings-read)', () => {
       it('should expose proxy_headers and ssl.key in the full policy response', async () => {
         const { body } = await supertestWithoutAuth
           .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
           .set('kbn-xsrf', 'xxxx')
-          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
           .expect(200);
 
         const outputs = body.item.outputs as Record<string, any>;
@@ -145,7 +145,7 @@ export default function (providerContext: FtrProviderContext) {
         const { text } = await supertestWithoutAuth
           .get(`/api/fleet/agent_policies/${agentPolicyId}/download`)
           .set('kbn-xsrf', 'xxxx')
-          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
           .expect(200);
 
         expect(text).to.contain('SUPER_SECRET_TOKEN');
