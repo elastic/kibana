@@ -73,7 +73,6 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/security-solution-distribution-bar'
   - '@kbn/test-jest-helpers'
-  - '@kbn/user-profile-components'
   - '@kbn/proposals-common'
   - '@kbn/proposals-plugin'
   - '@kbn/security-mitre-attack-common'
