@@ -2773,10 +2773,18 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
       expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
     });
 
+    // The Slack thread workflow only continues an existing investigation and omits round_kind.
+    it('reads a follow-up when a later run on the investigation omits round_kind', async () => {
+      withRun(ExecutionStatus.RUNNING, {});
+
+      await expect(makeClient().getActiveRoundKind('inv-1')).resolves.toBe('follow_up');
+    });
+
     it.each([
-      ['declares no kind', {}],
-      ['declares an unknown kind', { round_kind: 'recovery' }],
-    ])('fails when the run in progress %s', async (_case, inputs) => {
+      ['the first run declares no kind', ['exec-2'], {}],
+      ['a run declares an unknown kind', ['exec-1', 'exec-2'], { round_kind: 'recovery' }],
+    ])('fails when %s', async (_case, workflowExecutionIds, inputs) => {
+      withConversations(makeConversation({ id: 'inv-1', workflowExecutionIds }));
       withRun(ExecutionStatus.RUNNING, inputs);
 
       await expect(makeClient().getActiveRoundKind('inv-1')).rejects.toThrow(
