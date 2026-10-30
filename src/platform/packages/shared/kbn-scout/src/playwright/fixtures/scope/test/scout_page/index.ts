@@ -8,8 +8,10 @@
  */
 
 import { Page } from '@playwright/test';
-import { PathOptions } from '../../../../../common/services/kibana_url';
 import type { RunA11yScanOptions } from '../../../../utils';
+import type { GotoAppOptions } from './goto_app';
+
+export type { GotoAppOptions } from './goto_app';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
@@ -23,10 +25,12 @@ export type ScoutPage = Page & {
   /**
    * Navigates to the specified Kibana application.
    * @param appName - The name of the Kibana app (e.g., 'discover', 'dashboard').
-   * @param options - Additional navigation options, passed directly to Playwright's `goto` method.
+   * @param options - URL `params` and `hash`, Playwright `goto` options, and `readyWhen` / `readyTimeout`.
+   * With `readyWhen`, navigation resolves on `commit` and waits for that locator to be visible.
    * @returns A Promise resolving to a Playwright `Response` or `null`.
    */
-  gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
+  gotoApp: (appName: string, options?: GotoAppOptions) => ReturnType<Page['goto']>;
+
   /**
    * Performs an accessibility (a11y) scan of the current page using axe-core.
    * Use this in tests to collect formatted violation summaries (one string per violation).

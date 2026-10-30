@@ -61,7 +61,9 @@ import type { ScoutTestFixtures, ScoutWorkerFixtures, ScoutPage } from '@kbn/sco
 
 class MyPluginPage {
   constructor(private readonly page: ScoutPage) {}
-  async goto() { await this.page.gotoApp('myPlugin'); }
+  async goto() {
+    await this.page.gotoApp('myPlugin', { readyWhen: this.page.testSubj.locator('myPluginPage') });
+  }
 }
 
 interface ExtendedFixtures extends ScoutTestFixtures {
@@ -95,6 +97,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Waiting + flake control
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
+- **Gate navigation on the app's ready element:** in page object `goto()`, use `gotoApp(app, { readyWhen: <app's ready locator> })`. It resolves on `commit` and makes that locator the single readiness gate (30s by default; raise `readyTimeout` with a comment only for slow apps). Keep the default `gotoApp()` (waits for `load`) when the test asserts a redirect or URL. Don't hand-wire `waitUntil: 'commit'` / `'domcontentloaded'` plus a separate wait, and never use `'networkidle'`.
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
 - Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
 
