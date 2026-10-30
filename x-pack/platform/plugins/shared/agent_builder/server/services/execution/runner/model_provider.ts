@@ -375,17 +375,20 @@ export const createModelProvider = ({
   };
 
   const hasFastModel = memoizeAsync(async (): Promise<boolean> => {
-    const fastConnectorId = await getFastModelConnectorId();
-    if (fastConnectorId === undefined) {
+    // Shares the memoized fast lookup with `selectModel`, so the lookup (and its fallback log)
+    // happens once whichever runs first. A feature source here means the fast path fell back to a
+    // feature-sourced default: no dedicated fast model.
+    const fastSource = await getFastModelSource();
+    if (fastSource.featureId !== undefined) {
       return false;
     }
     // A connector-sourced default is compared by id (the resolved connector id equals the source
     // id by construction); a feature-sourced one needs to be resolved by the inference plugin
     // first. A distinct id means a genuinely dedicated (cheaper/faster) fast model exists.
-    const source = await getDefaultModelSource();
+    const defaultSource = await getDefaultModelSource();
     const defaultConnectorId =
-      source.connectorId ?? (await getDefaultModel()).connector.connectorId;
-    return fastConnectorId !== defaultConnectorId;
+      defaultSource.connectorId ?? (await getDefaultModel()).connector.connectorId;
+    return fastSource.connectorId !== defaultConnectorId;
   });
 
   const selectModel: ModelProvider['selectModel'] = async ({

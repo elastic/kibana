@@ -589,6 +589,45 @@ describe('createModelProvider', () => {
       await expect(provider.hasFastModel()).resolves.toBe(false);
     });
 
+    it('emits the fast-model fallback debug log once when called before selectModel', async () => {
+      const deps = setupDeps({ fastEndpoints: [] });
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await expect(provider.hasFastModel()).resolves.toBe(false);
+
+      const countFallbackLogs = () =>
+        deps.logger.debug.mock.calls.filter(([message]) =>
+          String(message).includes('No dedicated fast inference endpoint found')
+        ).length;
+      expect(countFallbackLogs()).toBe(1);
+
+      await provider.selectModel({ effortLevel: 'low' });
+      await provider.hasFastModel();
+
+      expect(countFallbackLogs()).toBe(1);
+      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+        deps.request,
+        { onlyReturnConfigured: true }
+      );
+      expect(
+        jest
+          .mocked(deps.searchInferenceEndpoints.endpoints.getForFeature)
+          .mock.calls.filter(([featureId]) => featureId === AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID)
+      ).toHaveLength(1);
+    });
+
+    it('is false without building a model when the fast path falls back to a feature-sourced default', async () => {
+      const deps = setupDeps({ defaultModel: { featureId: 'my_feature' }, fastEndpoints: [] });
+      setupFeatureChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+
+      await expect(provider.hasFastModel()).resolves.toBe(false);
+      expect(deps.inference.getChatModel).not.toHaveBeenCalled();
+    });
+
     it('is true when a distinct fast endpoint exists next to a connector-sourced default', async () => {
       const deps = setupDeps({ fastEndpoints: [{ connectorId: 'fast-connector' }] });
       setupChatAndClient(deps.inference);
