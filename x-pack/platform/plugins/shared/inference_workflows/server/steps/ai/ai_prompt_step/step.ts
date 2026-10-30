@@ -19,6 +19,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   normalizeConnectorFeatureIds,
   resolveFeatureIdFromFeatures,
+  type SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
@@ -163,6 +164,27 @@ const completePromptWithTemplate = async ({
   };
 };
 
+/**
+ * The connector of the endpoint configured for a feature that `resolveFeatureIdFromFeatures`
+ * picked. The same `onlyReturnConfigured` lookup selected the feature, so the step keeps running
+ * on that endpoint (a recommended one when no override is saved) rather than on the inference
+ * plugin's standard resolution, which puts a global default connector first.
+ */
+const resolveConfiguredFeatureConnectorId = async (
+  featureId: string,
+  request: KibanaRequest,
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart
+): Promise<string> => {
+  const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(featureId, request, {
+    onlyReturnConfigured: true,
+  });
+  const connectorId = endpoints[0]?.connectorId;
+  if (!connectorId) {
+    throw new Error(`No endpoint is configured for feature "${featureId}".`);
+  }
+  return connectorId;
+};
+
 export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsStartDeps>) =>
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
@@ -187,9 +209,12 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         conflictMessage:
           'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.',
       });
-      // The winning feature's connector is resolved by the inference plugin, like any feature.
       const resolvedConnectorId = featureIdFromFeatures
-        ? (await inference.resolveFeatureConnector(featureIdFromFeatures, request)).connectorId
+        ? await resolveConfiguredFeatureConnectorId(
+            featureIdFromFeatures,
+            request,
+            searchInferenceEndpoints
+          )
         : await resolveConnectorId(connectorId, inference, request, {
             featureId: AI_PROMPT_FEATURE_ID,
             searchInferenceEndpoints,

@@ -75,7 +75,6 @@ describe('aiPromptStepDefinition', () => {
 
     mockInference = {
       getChatModel: jest.fn().mockResolvedValue(mockChatModel),
-      resolveFeatureConnector: jest.fn(),
     } as any;
 
     mockSearchInferenceEndpoints = {
@@ -849,9 +848,6 @@ describe('aiPromptStepDefinition', () => {
             return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
           }
         );
-        mockInference.resolveFeatureConnector.mockResolvedValue({
-          connectorId: 'template-connector',
-        } as InferenceConnector);
         mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
         const contextWithFeature = {
           ...mockContext,
@@ -862,10 +858,6 @@ describe('aiPromptStepDefinition', () => {
 
         await handler(contextWithFeature);
 
-        expect(mockInference.resolveFeatureConnector).toHaveBeenCalledWith(
-          'alertzero_template_models',
-          expect.anything()
-        );
         expect(mockInference.getChatModel).toHaveBeenCalledWith(
           expect.objectContaining({ connectorId: 'template-connector' })
         );
@@ -894,9 +886,6 @@ describe('aiPromptStepDefinition', () => {
         mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
           endpoints: [{ connectorId: 'gemini-flash-connector' }],
         });
-        mockInference.resolveFeatureConnector.mockResolvedValue({
-          connectorId: 'gemini-flash-connector',
-        } as InferenceConnector);
         mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
 
         await handler(contextWithFeature);
@@ -906,14 +895,41 @@ describe('aiPromptStepDefinition', () => {
           expect.any(Object),
           { onlyReturnConfigured: true }
         );
-        expect(mockInference.resolveFeatureConnector).toHaveBeenCalledWith(
-          'context_engine_prompt',
-          expect.any(Object)
-        );
         expect(mockResolveConnectorId).not.toHaveBeenCalled();
         expect(mockInference.getChatModel).toHaveBeenCalledWith(
           expect.objectContaining({ connectorId: 'gemini-flash-connector' })
         );
+      });
+
+      it('runs on the recommended endpoint configured for the feature, not on the global default connector', async () => {
+        const contextWithFeature = {
+          ...mockContext,
+          config: { 'connector-id-by-feature': 'context_engine_prompt' },
+        };
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
+        // No saved-object override: the configured endpoint is the feature's recommended one.
+        mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'recommended-connector' }],
+          warnings: [],
+          soEntryFound: false,
+        });
+        // The inference plugin's standard feature resolution would put the global default first.
+        const globalDefault = { connectorId: 'global-default-connector' } as InferenceConnector;
+        mockInference.resolveFeatureConnector = jest.fn().mockResolvedValue(globalDefault);
+        mockInference.getDefaultConnector = jest.fn().mockResolvedValue(globalDefault);
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+        await handler(contextWithFeature);
+
+        expect(mockInference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId: 'recommended-connector' })
+        );
+        expect(mockInference.getChatModel).not.toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId: 'global-default-connector' })
+        );
+        expect(mockInference.resolveFeatureConnector).not.toHaveBeenCalled();
+        expect(mockInference.getDefaultConnector).not.toHaveBeenCalled();
+        expect(mockResolveConnectorId).not.toHaveBeenCalled();
       });
 
       it('throws when both connector-id and connector-id-by-feature are specified', async () => {
@@ -948,9 +964,6 @@ describe('aiPromptStepDefinition', () => {
           mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
             endpoints: [{ connectorId: 'gemini-flash-connector' }],
           });
-          mockInference.resolveFeatureConnector.mockResolvedValue({
-            connectorId: 'gemini-flash-connector',
-          } as InferenceConnector);
           mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
 
           await handler(contextWithBlankConnector);
