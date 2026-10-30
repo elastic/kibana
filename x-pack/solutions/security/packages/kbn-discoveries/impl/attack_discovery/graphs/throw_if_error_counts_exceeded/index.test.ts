@@ -231,6 +231,23 @@ describe('throwIfErrorCountsExceeded', () => {
       expect(message).toContain('prompt tokens: 128390');
     });
 
+    it('keeps the existing remedy when the attempt limit is hit with no recorded errors', () => {
+      let message = '';
+      try {
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: [],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        });
+      } catch (error) {
+        message = (error as Error).message;
+      }
+
+      expect(message).toContain('Try sending fewer alerts');
+      expect(message).not.toContain('will not help');
+    });
+
     it('keeps the existing remedy when only some of the errors are empty model responses', () => {
       let message = '';
       try {

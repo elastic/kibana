@@ -475,6 +475,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors[0]).toContain(error.message);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.errors[0]).toContain('completion tokens');
+    expect(state.errors[0]).not.toContain('raw response length'); // nothing was returned to measure
   });
 
   it('keeps model output out of state.errors, and persists only its length, when the response cannot be parsed', async () => {
@@ -543,5 +544,37 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors).toHaveLength(1);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.generationAttempts).toBe(3);
+  });
+
+  it('does not record a whitespace-only completion as a generation', async () => {
+    const rawResponse = ' \n\t ';
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const node = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node({
+      ...initialGraphState,
+      combinedGenerations: 'gen0',
+      generationAttempts: 1,
+      generations: ['gen0'],
+    });
+
+    expect(state.generations).toEqual(['gen0']);
+    expect(state.errors).toHaveLength(1);
   });
 });

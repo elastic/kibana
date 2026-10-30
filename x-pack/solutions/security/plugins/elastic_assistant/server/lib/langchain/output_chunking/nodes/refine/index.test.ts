@@ -473,6 +473,7 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state.errors[0]).toContain(error.message);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.errors[0]).toContain('completion tokens');
+    expect(state.errors[0]).not.toContain('raw response length'); // nothing was returned to measure
   });
 
   it('keeps model output out of state.errors, and persists only its length, when the response cannot be parsed', async () => {
@@ -539,5 +540,36 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state.errors).toHaveLength(1);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.generationAttempts).toBe(3);
+  });
+
+  it('does not record a whitespace-only completion as a refinement', async () => {
+    const rawResponse = ' \n\t ';
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const node = getRefineNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node({
+      ...initialGraphState,
+      combinedRefinements: 'ref0',
+      generationAttempts: 1,
+      refinements: ['ref0'],
+    });
+
+    expect(state.refinements).toEqual(['ref0']);
+    expect(state.errors).toHaveLength(1);
   });
 });

@@ -196,7 +196,8 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        refinements: partialResponse.length > 0 ? [...refinements, partialResponse] : refinements,
+        refinements:
+          partialResponse.trim().length > 0 ? [...refinements, partialResponse] : refinements,
       };
     }
   };

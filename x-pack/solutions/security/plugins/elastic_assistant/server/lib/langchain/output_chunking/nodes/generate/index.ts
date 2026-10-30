@@ -183,7 +183,8 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         }),
         errors: [...state.errors, parsingError],
         generationAttempts: generationAttempts + 1,
-        generations: partialResponse.length > 0 ? [...generations, partialResponse] : generations,
+        generations:
+          partialResponse.trim().length > 0 ? [...generations, partialResponse] : generations,
       };
     }
   };
