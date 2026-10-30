@@ -63,7 +63,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   description: `Update the custom content panel from a natural-language prompt and/or a new ES|QL query.
 
 - Provide \`prompt\` to describe what to create or change. The server generates the HTML template.
-- When the edit changes what the panel shows, also set \`regenerateEsql: true\` (and \`index\` when known): the server regenerates the ES|QL query from \`prompt\`, keeping the parts the request does not change, and samples the new schema before generating so the template matches the data. Do not write the query yourself.
+- When the edit needs different data, such as a new measure ("also show the average bytes"), a new grouping or filter, or another time window, also set \`regenerateEsql: true\` (and \`index\` when known). Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from \`prompt\`, keeping the parts the request does not change, and samples the new schema before generating so the template matches the data. Do not write the query yourself.
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query generation or sampling, preserving layout and design.
 - Pass \`esqlQuery\` only when the user supplied a query verbatim; pass \`esqlQuery: null\` to remove the query entirely.
 
@@ -124,6 +124,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
             events,
             logger,
             esClient,
+            esqlVariables: currentData?.esql_variables,
             noQueryHint:
               'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
           }),
@@ -153,6 +154,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
+          esqlVariables: currentData?.esql_variables,
         }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);
