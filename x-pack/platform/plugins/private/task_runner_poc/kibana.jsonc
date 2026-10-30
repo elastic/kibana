@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-runner-poc-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "description": "POC: submit and view jobs on the multi-tenant task runner service",
+  "plugin": {
+    "id": "taskRunnerPoc",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "share"
+    ]
+  }
+}

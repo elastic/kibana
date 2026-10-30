@@ -3841,6 +3841,9 @@ importers:
       '@kbn/task-manager-service-accounts-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/task_manager/plugins/service_accounts
+      '@kbn/task-runner-poc-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/task_runner_poc
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -9380,6 +9383,8 @@ importers:
   x-pack/platform/plugins/private/subscription_status: {}
 
   x-pack/platform/plugins/private/task_manager_dependencies: {}
+
+  x-pack/platform/plugins/private/task_runner_poc: {}
 
   x-pack/platform/plugins/private/telemetry_collection_xpack: {}
 
@@ -19340,6 +19345,7 @@ packages:
   http-call@5.3.0:
     resolution: {integrity: sha512-ahwimsC23ICE4kPl9xTBjKB4inbRaeLyZeRunC/1Jy/Z6X8tv22MEAjK+KBOMSVLaqXPTTmd8638waVIKLGx2w==}
     engines: {node: '>=8.0.0'}
+    deprecated: Renamed to @heroku/http-call — please install @heroku/http-call instead.
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
