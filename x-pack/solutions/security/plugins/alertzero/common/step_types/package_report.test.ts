@@ -113,3 +113,55 @@ describe('packageReportInputSchema coordinator results', () => {
     ).toBe(false);
   });
 });
+
+describe('packageReportInputSchema retired runs', () => {
+  const gap = { reason: 'unknown_technique_id', detail: 'T9999 is not in the catalog' };
+
+  it('accepts retired_incomplete as a hunt status', () => {
+    expect(
+      packageReportInputSchema.safeParse({ ...defaultInput, huntStatus: 'retired_incomplete' })
+        .success
+    ).toBe(true);
+  });
+
+  it('rejects an unknown hunt status', () => {
+    expect(
+      packageReportInputSchema.safeParse({ ...defaultInput, huntStatus: 'retired' }).success
+    ).toBe(false);
+  });
+
+  it('accepts an input that omits the coverage gaps', () => {
+    expect(
+      packageReportInputSchema.safeParse({ ...defaultInput, huntStatus: 'retired_incomplete' })
+        .success
+    ).toBe(true);
+  });
+
+  it('accepts gaps with and without a technique id', () => {
+    expect(
+      packageReportInputSchema.safeParse({
+        ...defaultInput,
+        coverageGaps: [gap, { ...gap, technique_id: 'T9999' }],
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts exactly the technique cap and rejects one more', () => {
+    const gaps = (count: number) => Array.from({ length: count }, () => gap);
+    expect(
+      packageReportInputSchema.safeParse({ ...defaultInput, coverageGaps: gaps(100) }).success
+    ).toBe(true);
+    expect(
+      packageReportInputSchema.safeParse({ ...defaultInput, coverageGaps: gaps(101) }).success
+    ).toBe(false);
+  });
+
+  it('does not reject a long detail or technique id, which would strand the Investigation open', () => {
+    expect(
+      packageReportInputSchema.safeParse({
+        ...defaultInput,
+        coverageGaps: [{ ...gap, detail: 'x'.repeat(5000), technique_id: 'y'.repeat(5000) }],
+      }).success
+    ).toBe(true);
+  });
+});
