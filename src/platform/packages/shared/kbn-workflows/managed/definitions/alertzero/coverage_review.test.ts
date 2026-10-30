@@ -567,6 +567,20 @@ describe('Detection Coverage review', () => {
       ).toBe(expected);
     });
 
+    // `ai.conversation.metadata.patch` rejects a verdict over 10,000 characters, and a
+    // rejected close leaves the investigation open.
+    it.each(['close_investigation_no_rule', 'close_investigation_retry'])(
+      'keeps the %s verdict within the metadata limit',
+      (name) => {
+        const updates = stepByName(name)?.with?.updates as Record<string, string>;
+        const verdict = createWorkflowLiquidEngine().parseAndRenderSync(updates.verdict, {
+          steps: { run_rule_creation: { output: { skip_reason: 'x'.repeat(10000) } } },
+        });
+        expect(verdict).toContain(`${'x'.repeat(1997)}...`);
+        expect(verdict.length).toBeLessThanOrEqual(10000);
+      }
+    );
+
     // Nothing was proposed, so the note is the only message in the chat saying why.
     it('notes why no rule was drafted, within the journal limit', () => {
       const note = stepByName('note_no_rule');
