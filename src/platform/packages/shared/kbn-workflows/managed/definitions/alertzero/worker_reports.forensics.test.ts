@@ -304,6 +304,7 @@ describe('Endpoint Analysis outcome reports', () => {
         resolve_finding_presence: { output: { iocs: attached, timeline: attached } },
         resolve_host: { output: { host_name: host } },
         resolve_prior_assessment: { output: { count: priorCount } },
+        resolve_proposal_counts: { output: { new_count: dispatched + dispatchFailed } },
         resolve_proposal_dispatch: { output: { failed: dispatchFailed } },
         resolve_proposals: { output: { proposals_lost: dispatchFailed > 0 } },
         resolve_request: { output: { has_request: request } },
@@ -444,7 +445,7 @@ describe('Endpoint Analysis managed versions', () => {
     [
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id,
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      16,
+      17,
     ],
     [
       ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { Capabilities } from '@kbn/core/public';
 import { TestProviders, kibanaMock } from '../../common/mock';
 import type { StartServices } from '../../types';
@@ -69,7 +69,30 @@ describe('EntityStoreDisabledEmptyPromptBody', () => {
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
     expect(screen.getByTestId(ADD_INTEGRATIONS_TEST_ID)).toHaveAttribute(
       'href',
-      expect.stringContaining('/app/integrations/browse/advanced_analytics_ueba')
+      expect.stringContaining('/app/integrations/browse/security/advanced_analytics_ueba')
+    );
+  });
+
+  it('opens Integrations in the same tab', () => {
+    renderWithCapabilities({
+      ...kibanaMock.application.capabilities,
+      fleet: { read: true },
+    });
+
+    const addIntegrations = screen.getByTestId(ADD_INTEGRATIONS_TEST_ID);
+    expect(addIntegrations).not.toHaveAttribute('target');
+
+    fireEvent.click(addIntegrations);
+    expect(kibanaMock.application.navigateToUrl).toHaveBeenCalledWith(
+      '/app/integrations/browse/security/advanced_analytics_ueba'
+    );
+  });
+
+  it('opens Entity Analytics management in the same tab', () => {
+    renderWithCapabilities(kibanaMock.application.capabilities);
+
+    expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).not.toHaveAttribute(
+      'target'
     );
   });
 
