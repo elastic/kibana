@@ -533,6 +533,8 @@ export class SyntheticsPrivateLocation {
       const result = await this.packagePolicyService.bulkCreate({
         newPolicies,
         spaceId,
+        // An agent should pick up a test run right away, not after the batching window.
+        immediate: Boolean(testRunId),
       });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
@@ -614,9 +616,9 @@ export class SyntheticsPrivateLocation {
   }
 
   /**
-   * When `deferredBumps` is passed, scalable-location agent policy revision
-   * bumps are collected there instead of awaited per call — so a caller editing
-   * many batches in sequence can bump each agent policy once, not once per batch.
+   * When `deferredBumps` is passed, agent policy revision bumps are collected
+   * there instead of scheduled per call — so a caller editing many batches in
+   * sequence can bump each agent policy once, not once per batch.
    */
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,

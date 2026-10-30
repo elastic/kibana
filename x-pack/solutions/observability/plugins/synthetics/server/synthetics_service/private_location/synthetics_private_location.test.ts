@@ -98,7 +98,10 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn().mockReturnValue([{ policy_ids: ['policyId'] }]),
       },
-      agentPolicyService: { getByIds: jest.fn().mockReturnValue([]) },
+      agentPolicyService: {
+        getByIds: jest.fn().mockReturnValue([]),
+        scheduleRevisionBump: jest.fn().mockResolvedValue(undefined),
+      },
       runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
@@ -400,7 +403,7 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('deleteMonitors only deletes legacy package policy ids that exist', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = jest.fn().mockResolvedValue([]);
     const getByIDsMock = jest.fn().mockResolvedValue([{ id: 'testId-policyId' }]);
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
       ...serverMock,
@@ -424,7 +427,7 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('deleteMonitors deletes legacy package policy ids when they exist', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = jest.fn().mockResolvedValue([]);
     const getByIDsMock = jest
       .fn()
       .mockResolvedValue([{ id: 'testId-policyId' }, { id: 'testId-policyId-test-space' }]);
@@ -448,7 +451,7 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('deleteMonitors only deletes new-format id when that policy exists', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = jest.fn().mockResolvedValue([]);
     const getByIDsMock = jest.fn().mockResolvedValue([{ id: 'testId-policyId-test-space' }]);
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
       ...serverMock,
@@ -470,7 +473,7 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it('deleteMonitors does not call delete when no matching policies exist', async () => {
-    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const deleteMock = jest.fn().mockResolvedValue([]);
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
       ...serverMock,
       fleet: {

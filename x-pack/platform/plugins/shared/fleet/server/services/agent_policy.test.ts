@@ -13,6 +13,7 @@ import { of } from 'rxjs';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
@@ -52,9 +53,12 @@ import * as outputsHelpers from './agent_policies/outputs_helpers';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
-import { isSpaceAwarenessEnabled } from './spaces/helpers';
+import { getSpaceForAgentPolicy, isSpaceAwarenessEnabled } from './spaces/helpers';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
-import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
+import {
+  scheduleBumpAgentPoliciesByIdTask,
+  scheduleDebouncedBumpAgentPoliciesByIdTask,
+} from './agent_policies/bump_agent_policies_by_id_task';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
 import { agentlessAgentService } from './agents/agentless_agent';
@@ -1465,6 +1469,54 @@ describe('Agent policy', () => {
       );
       expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('scheduleRevisionBump', () => {
+    // getByIds is spied on the shared service instance; later suites need the real one.
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('schedules a debounced bump through a space each agent policy lives in', async () => {
+      const unscopedSoClient = createSavedObjectClientMock();
+      const taskManagerStart = taskManagerMock.createStart();
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        unscopedSoClient
+      );
+      mockedAppContextService.getTaskManagerStart.mockReturnValue(taskManagerStart);
+      // Missing policies are not returned (ignoreMissing), so they are not scheduled.
+      const getByIdsSpy = jest
+        .spyOn(agentPolicyService, 'getByIds')
+        .mockResolvedValue([{ id: 'policy-1', space_ids: ['space-a'] } as AgentPolicy]);
+      jest.mocked(getSpaceForAgentPolicy).mockReturnValue('space-a');
+
+      await agentPolicyService.scheduleRevisionBump(['policy-1', 'policy-1', 'missing'], {
+        delayMs: 0,
+      });
+
+      expect(getByIdsSpy).toHaveBeenCalledWith(
+        unscopedSoClient,
+        [
+          { id: 'policy-1', spaceId: '*' },
+          { id: 'missing', spaceId: '*' },
+        ],
+        expect.objectContaining({ ignoreMissing: true })
+      );
+      expect(scheduleDebouncedBumpAgentPoliciesByIdTask).toHaveBeenCalledWith(
+        taskManagerStart,
+        [{ id: 'policy-1', spaceId: 'space-a' }],
+        { delayMs: 0 }
+      );
+    });
+
+    it('does nothing for an empty list', async () => {
+      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
+
+      await agentPolicyService.scheduleRevisionBump([]);
+
+      expect(getByIdsSpy).not.toHaveBeenCalled();
+      expect(scheduleDebouncedBumpAgentPoliciesByIdTask).not.toHaveBeenCalled();
     });
   });
 

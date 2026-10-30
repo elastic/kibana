@@ -12,7 +12,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SyntheticsServerSetup } from '../../types';
-import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
 import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 
@@ -30,7 +29,6 @@ interface GetByIdsOptions {
 interface PackagePolicyWithAgentPolicyIds {
   id?: string;
   policy_ids?: string[];
-  condition?: string | null;
 }
 
 const getSpaceSoClientFor = (server: SyntheticsServerSetup, spaceId: string) =>
@@ -40,29 +38,20 @@ const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
   server.coreStart.elasticsearch.client.asInternalUser;
 
 /**
- * Bumps one agent policy's revision, scoping the write to a space the agent
- * policy actually lives in.
+ * Bumps one agent policy's revision right away, scoping the write to a space
+ * the agent policy actually lives in. Monitor writes go through Fleet's
+ * debounced `scheduleRevisionBump` instead; this is for the maintenance tasks
+ * that bump once per run.
  *
- * A batch coalesces writes for the same agent policy across spaces, so no
- * requesting client is the right one to bump with: whichever scheduled first
- * would pick the namespace for every coalesced write. That client is not
- * guaranteed to resolve the agent policy — {@link PackagePolicyService.bulkUpdateInSpace}
- * scopes to each package policy's own recorded space, which can diverge from
- * its agent policy's spaces — and a namespace miss throws a non-conflict (404)
- * error, which is not retried and rejects every waiter in the batch, failing
- * monitor writes whose package policies already persisted. So resolve the space
- * from the agent policy itself: `spaceId: ALL_SPACES_ID` on an unscoped client
- * finds it wherever it lives (agent policies are `namespaceType: 'multiple'`,
- * so the write itself still needs a single concrete namespace).
+ * Resolves the space from the agent policy itself: `spaceId: ALL_SPACES_ID` on
+ * an unscoped client finds it wherever it lives (agent policies are
+ * `namespaceType: 'multiple'`, so the write itself still needs a single
+ * concrete namespace).
  *
  * Uses `createInternalRepository()`, not `getUnsafeInternalClient()`: the
  * latter always attaches a spaces extension backed by a synthetic, headerless
- * request (core has no real request to attach here — this runs off a
- * `setTimeout`, not an HTTP handler), and resolving the `*` namespace made
- * that extension issue an ES `_has_privileges` check with no credentials,
- * failing every scalable-location write outright. `createInternalRepository()`
- * attaches no extensions, matching {@link listByAgentPolicy}'s existing
- * cross-space Fleet lookup in this same file.
+ * request, and resolving the `*` namespace made that extension issue an ES
+ * `_has_privileges` check with no credentials, failing the write outright.
  */
 export const bumpAgentPolicyRevision = async (
   server: SyntheticsServerSetup,
@@ -91,51 +80,11 @@ export const bumpAgentPolicyRevision = async (
   );
 };
 
-/**
- * One batcher per server, not per {@link PackagePolicyService}.
- *
- * Coalescing only works among writes that share a batcher, and instances are
- * constructed ad hoc (e.g. the monitor-create rollback in `add_monitor_api`),
- * so a per-instance batcher would let those writes race the main CRUD path on
- * the same agent policy — the version-conflict storm this batching exists to
- * prevent. Keyed on the server object rather than a module singleton so tests
- * (and any future multi-server setup) stay isolated, and weakly so a discarded
- * server does not pin its batcher.
- */
-const revisionBatchersByServer = new WeakMap<SyntheticsServerSetup, AgentPolicyRevisionBatcher>();
-
-const getRevisionBatcher = (server: SyntheticsServerSetup): AgentPolicyRevisionBatcher => {
-  const existing = revisionBatchersByServer.get(server);
-  if (existing) {
-    return existing;
-  }
-
-  const batcher = new AgentPolicyRevisionBatcher({
-    logger: server.logger,
-    bumpRevision: (policyId) => bumpAgentPolicyRevision(server, policyId),
-  });
-  revisionBatchersByServer.set(server, batcher);
-  return batcher;
-};
-
-/**
- * Runs any batched agent-policy revision bumps still waiting out their debounce
- * window. Call from the plugin's `stop()`: package policies are written with
- * `bumpRevision: false`, so a batch dropped at shutdown leaves them undeployed.
- */
-export const flushPendingAgentPolicyRevisionBumps = async (
-  server: SyntheticsServerSetup
-): Promise<void> => {
-  await revisionBatchersByServer.get(server)?.flushPending();
-};
-
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
-  private readonly revisionBatcher: AgentPolicyRevisionBatcher;
 
   constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
-    this.revisionBatcher = getRevisionBatcher(_server);
   }
 
   private getSpaceSoClient(spaceId: string) {
@@ -151,18 +100,32 @@ export class PackagePolicyService {
   async scheduleRevisionBumps(deferredBumps: Set<string>): Promise<void> {
     const policyIds = [...deferredBumps];
     deferredBumps.clear();
-    await this.revisionBatcher.schedule(policyIds);
+    await this.scheduleAgentPolicyRevisionBumps(policyIds);
+  }
+
+  /**
+   * Fleet shares one bump per agent policy across all writes made to it within
+   * a short window, from any Kibana node, so it redeploys once per window.
+   */
+  private async scheduleAgentPolicyRevisionBumps(
+    policyIds: string[],
+    { immediate = false }: { immediate?: boolean } = {}
+  ): Promise<void> {
+    await this.server.fleet.agentPolicyService.scheduleRevisionBump(
+      policyIds,
+      immediate ? { delayMs: 0 } : undefined
+    );
   }
 
   private async scheduleOrDeferRevisionBumps(
     policyIds: string[],
-    deferredBumps?: Set<string>
+    { deferredBumps, immediate }: { deferredBumps?: Set<string>; immediate?: boolean }
   ): Promise<void> {
     if (deferredBumps) {
       policyIds.forEach((policyId) => deferredBumps.add(policyId));
       return;
     }
-    await this.revisionBatcher.schedule(policyIds);
+    await this.scheduleAgentPolicyRevisionBumps(policyIds, { immediate });
   }
 
   private getInternalEsClient() {
@@ -264,43 +227,45 @@ export class PackagePolicyService {
     return items;
   }
 
+  /**
+   * Every write below goes out with `bumpRevision: false` and hands its agent
+   * policies to Fleet's debounced `scheduleRevisionBump`, so a burst of monitor
+   * writes redeploys each agent policy once instead of once per write.
+   */
   async bulkCreate({
     newPolicies,
     spaceId,
     deferredBumps,
+    immediate,
   }: {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
     /** Collects the agent policy ids to bump instead of bumping them now. */
     deferredBumps?: Set<string>;
+    /** Skips the batching window, for writes an agent should pick up right away (Test Now). */
+    immediate?: boolean;
   }) {
     if (newPolicies.length === 0) {
       return { created: [], failed: [] };
     }
 
-    const promises = (
-      await this.getDefaultAndSpacePackagePolicies({ policies: newPolicies, spaceId })
-    ).flatMap(({ client, policies }) => {
-      const { batched, immediate } = this.partitionByRevisionStrategy(policies);
-
-      return [
-        ...(immediate.length > 0
-          ? [
-              this.server.fleet.packagePolicyService.bulkCreate(
-                client,
-                this.getInternalEsClient(),
-                immediate,
-                { asyncDeploy: true }
-              ),
-            ]
-          : []),
-        ...(batched.length > 0
-          ? [this.bulkCreateWithBatchedRevision(client, batched, deferredBumps)]
-          : []),
-      ];
-    });
-
-    const res = await Promise.all(promises);
+    const res = await Promise.all(
+      (
+        await this.getDefaultAndSpacePackagePolicies({ policies: newPolicies, spaceId })
+      ).map(async ({ client, policies }) => {
+        const result = await this.server.fleet.packagePolicyService.bulkCreate(
+          client,
+          this.getInternalEsClient(),
+          policies,
+          { asyncDeploy: true, bumpRevision: false }
+        );
+        await this.scheduleOrDeferRevisionBumps(
+          result.created.flatMap(({ policy_ids: policyIds }) => policyIds),
+          { deferredBumps, immediate }
+        );
+        return result;
+      })
+    );
 
     return {
       created: res.flatMap((r) => r.created),
@@ -322,29 +287,23 @@ export class PackagePolicyService {
       return [];
     }
 
-    const promises = (
-      await this.getDefaultAndSpacePackagePolicies({ policies: policiesToUpdate, spaceId })
-    ).flatMap(({ client, policies }) => {
-      const { batched, immediate } = this.partitionByRevisionStrategy(policies);
-
-      return [
-        ...(immediate.length > 0
-          ? [
-              this.server.fleet.packagePolicyService.bulkUpdate(
-                client,
-                this.getInternalEsClient(),
-                immediate,
-                { force: true, asyncDeploy: true }
-              ),
-            ]
-          : []),
-        ...(batched.length > 0
-          ? [this.bulkUpdateWithBatchedRevision(client, batched, deferredBumps)]
-          : []),
-      ];
-    });
-
-    const res = await Promise.all(promises);
+    const res = await Promise.all(
+      (
+        await this.getDefaultAndSpacePackagePolicies({ policies: policiesToUpdate, spaceId })
+      ).map(async ({ client, policies }) => {
+        const result = await this.server.fleet.packagePolicyService.bulkUpdate(
+          client,
+          this.getInternalEsClient(),
+          policies,
+          { force: true, asyncDeploy: true, bumpRevision: false }
+        );
+        await this.scheduleOrDeferRevisionBumps(
+          result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? [],
+          { deferredBumps }
+        );
+        return result;
+      })
+    );
     return res.flatMap((r) => r.failedPolicies);
   }
 
@@ -358,18 +317,13 @@ export class PackagePolicyService {
    * from its agent policy's spaces — silently dropping the write.
    *
    * Only called by the shard-rebalance task, and only ever with monitors from
-   * a condition-sharded (scalable) location, so every write here always goes
-   * through the batched revision bump — unlike {@link bulkUpdate}, there's no
-   * classic/immediate split to make. Without this, a rebalance cycle's bump
-   * races the same agent policy as concurrent monitor CRUD with no retry,
-   * so a single version conflict fails the whole cycle's moves outright.
+   * a condition-sharded (scalable) location.
    *
    * Writes through Fleet's `bulkUpdatePartial` rather than `bulkUpdate`: only
    * `condition` (plus the revision metadata) changes, so the package lookup,
    * validation, secret handling, input compilation and callbacks that
    * `bulkUpdate` runs have nothing to act on here. `bulkUpdatePartial` also
-   * skips agent-policy deployment, which this path already owns via
-   * {@link AgentPolicyRevisionBatcher}.
+   * skips agent-policy deployment, which the scheduled revision bump owns.
    */
   async bulkUpdateInSpace({
     policiesToUpdate,
@@ -397,7 +351,7 @@ export class PackagePolicyService {
       policiesToUpdate.map(({ update, agentPolicyIds }) => [update.id, agentPolicyIds])
     );
 
-    await this.revisionBatcher.schedule(
+    await this.scheduleAgentPolicyRevisionBumps(
       updatedPolicies.flatMap(({ id }) => agentPolicyIdsByPackagePolicyId.get(id) ?? [])
     );
 
@@ -418,111 +372,31 @@ export class PackagePolicyService {
       return;
     }
 
-    const promises = (
-      await this.getDefaultAndSpacePackagePolicies({
-        policies: await this.getByIds({
+    const res = await Promise.all(
+      (
+        await this.getDefaultAndSpacePackagePolicies({
+          policies: await this.getByIds({
+            spaceId,
+            packagePolicyIds: policyIdsToDelete,
+            fields: ['name', 'policy_ids'],
+          }),
           spaceId,
-          packagePolicyIds: policyIdsToDelete,
-          fields: ['name', 'policy_ids', 'condition'],
-        }),
-        spaceId,
+        })
+      ).map(async ({ client, policies }) => {
+        const result = await this.server.fleet.packagePolicyService.delete(
+          client,
+          this.getInternalEsClient(),
+          policies.flatMap(({ id }) => (id ? [id] : [])),
+          { force: true, asyncDeploy: true, bumpRevision: false }
+        );
+        await this.scheduleOrDeferRevisionBumps(
+          result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : [])),
+          { deferredBumps }
+        );
+        return result;
       })
-    ).flatMap(({ client, policies }) => {
-      const { batched, immediate } = this.partitionByRevisionStrategy(policies);
-
-      return [
-        ...(immediate.length > 0
-          ? [
-              this.server.fleet.packagePolicyService.delete(
-                client,
-                this.getInternalEsClient(),
-                immediate.flatMap(({ id }) => (id ? [id] : [])),
-                { force: true, asyncDeploy: true }
-              ),
-            ]
-          : []),
-        ...(batched.length > 0
-          ? [this.bulkDeleteWithBatchedRevision(client, batched, deferredBumps)]
-          : []),
-      ];
-    });
-
-    const res = await Promise.all(promises);
+    );
     return res.flat();
-  }
-
-  private partitionByRevisionStrategy<T extends PackagePolicyWithAgentPolicyIds>(policies: T[]) {
-    const batched: T[] = [];
-    const immediate: T[] = [];
-
-    policies.forEach((policy) => {
-      // Only scalable private-location policies carry an agent condition. Keep
-      // classic private-location revision bumps immediate and unchanged.
-      if (typeof policy.condition === 'string') {
-        batched.push(policy);
-      } else {
-        immediate.push(policy);
-      }
-    });
-
-    return { batched, immediate };
-  }
-
-  private async bulkCreateWithBatchedRevision(
-    client: SavedObjectsClientContract,
-    policies: NewPackagePolicyWithId[],
-    deferredBumps?: Set<string>
-  ) {
-    const result = await this.server.fleet.packagePolicyService.bulkCreate(
-      client,
-      this.getInternalEsClient(),
-      policies,
-      { asyncDeploy: true, bumpRevision: false }
-    );
-
-    await this.scheduleOrDeferRevisionBumps(
-      result.created.flatMap(({ policy_ids: policyIds }) => policyIds),
-      deferredBumps
-    );
-    return result;
-  }
-
-  private async bulkUpdateWithBatchedRevision(
-    client: SavedObjectsClientContract,
-    policies: UpdatePackagePolicyWithId[],
-    deferredBumps?: Set<string>
-  ) {
-    const result = await this.server.fleet.packagePolicyService.bulkUpdate(
-      client,
-      this.getInternalEsClient(),
-      policies,
-      { force: true, asyncDeploy: true, bumpRevision: false }
-    );
-
-    await this.scheduleOrDeferRevisionBumps(
-      result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? [],
-      deferredBumps
-    );
-    return result;
-  }
-
-  private async bulkDeleteWithBatchedRevision(
-    client: SavedObjectsClientContract,
-    policies: PackagePolicyWithAgentPolicyIds[],
-    deferredBumps?: Set<string>
-  ) {
-    const result = await this.server.fleet.packagePolicyService.delete(
-      client,
-      this.getInternalEsClient(),
-      policies.flatMap(({ id }) => (id ? [id] : [])),
-      { force: true, asyncDeploy: true, bumpRevision: false }
-    );
-
-    await this.scheduleOrDeferRevisionBumps(
-      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : [])),
-      deferredBumps
-    );
-    return result;
   }
 
   // The agent policies can be in the default space or the spaceId
