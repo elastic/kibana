@@ -63,26 +63,15 @@ describe('continuous_onboarding.yaml stays in sync with constants', () => {
     assertYamlContains(`every: '${COORDINATOR_INTERVAL_MINUTES}m'`);
   });
 
-  it('uses the correct maxScheduledStreams input', () => {
-    assertYamlContains(
-      `name: maxScheduledStreams\n        type: number\n        default: ${MAX_SCHEDULED_STREAMS}`
-    );
-  });
-
-  it('uses the correct lookbackHours input', () => {
-    assertYamlContains(`name: lookbackHours\n        type: number\n        default: 24`);
-  });
-
-  it('declares consts that match the input defaults', () => {
+  it('declares consts that match the defaults of the constants', () => {
     assertYamlContains(`maxScheduledStreams: ${MAX_SCHEDULED_STREAMS}`);
     assertYamlContains('lookbackHours: 24');
   });
 
-  it('declares extractionIntervalHours as an optional input without default', () => {
-    assertYamlContains('name: extractionIntervalHours\n        type: number\n        description:');
-    expect(WORKFLOW_YAML).not.toMatch(
-      /- name: extractionIntervalHours\n\s+type: number\n\s+default:/m
-    );
+  // Anyone allowed to run workflows could otherwise run it as the service account, with any inputs.
+  it('only runs on its schedule, so it declares no inputs', () => {
+    expect(WORKFLOW_YAML).not.toContain('type: manual');
+    expect(WORKFLOW_YAML).not.toContain('name: extractionIntervalHours');
   });
 
   it('does not declare the removed excludedStreamPatterns input', () => {
