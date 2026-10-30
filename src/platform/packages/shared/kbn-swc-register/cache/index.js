@@ -79,7 +79,7 @@ function logLmdbDisabledOnce(reason) {
 
   lmdbDisabledLogged = true;
   const detail = reason ? ` (${reason})` : '';
-  console.warn(`LMDB cache disabled for @kbn/swc-register${detail}`);
+  console.warn(`LMDB cache disabled for @kbn/swc-register${detail}, using filesystem cache`);
 }
 
 /**
@@ -96,18 +96,22 @@ function getCache() {
     return undefined;
   }
 
+  const dir = Path.resolve(REPO_ROOT, 'data/swc_register_cache', UPSTREAM_BRANCH);
+
   if (lmdbAvailable()) {
     log?.write('lmdb is available, using lmdb cache\n');
-    return new (require('./lmdb_cache').LmdbCache)({
-      dir: Path.resolve(REPO_ROOT, 'data/swc_register_cache', UPSTREAM_BRANCH),
-      prefix,
-      log,
-    });
+    return new (require('./lmdb_cache').LmdbCache)({ dir, prefix, log });
   }
 
-  log?.end('lmdb is unavailable, disabling cache\n');
+  // Without any cache the swc transform falls back to inline source maps with
+  // inlined sources content, which bloats the dev server heap by hundreds of
+  // MB and re-transpiles everything on each boot, so fall back to a plain
+  // filesystem cache. This is the normal path for the dev server child, which
+  // runs with --disallow-code-generation-from-strings: lmdb's ordered-binary
+  // dependency throws under that flag at require time.
+  log?.write('lmdb is unavailable, using filesystem cache\n');
   logLmdbDisabledOnce(lmdbDisabledReason);
-  return undefined;
+  return new (require('./fs_cache').FsCache)({ dir, prefix, log });
 }
 
 module.exports = {
