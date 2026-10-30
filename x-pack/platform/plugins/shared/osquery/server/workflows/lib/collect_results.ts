@@ -53,8 +53,15 @@ export const countIndexedResults = async ({
   return body.data?.total ?? 0;
 };
 
-/** Smallest page tried after a failed read of a wide page. */
-const MIN_PAGE_SIZE = 25;
+/**
+ * Page sizes tried after a failed read of a wide page (rows of ~400KB push 25 of them over the
+ * response cap). Each divides the one before it, so `offset % pageSize === 0` holds after a step
+ * down and the page index stays a whole number.
+ */
+const FALLBACK_PAGE_SIZES = [25, 5, 1];
+
+const nextSmallerPageSize = (pageSize: number): number | undefined =>
+  FALLBACK_PAGE_SIZES.find((size) => size < pageSize);
 
 export interface CollectedResults {
   rows: ResultRow[];
@@ -67,8 +74,8 @@ const isForbidden = (error: unknown): boolean =>
 
 /**
  * Reads up to `maxRows` rows page by page. Stops at `rowCount`, at the route's 10k window and
- * when the shared output budget is spent. A failed read halves the page size (a page of wide rows
- * can exceed the response cap) and retries; once it cannot shrink further the rows read so far
+ * when the shared output budget is spent. A failed read steps the page size down (a page of wide
+ * rows can exceed the response cap) and retries; once it cannot shrink further the rows read so far
  * are returned with `readFailed`, so the caller decides whether they are enough. A 401/403 is
  * thrown: the identity lost read access.
  */
@@ -93,8 +100,10 @@ export const collectResults = async ({
   if (budget.exhausted) return { rows, readFailed: false };
 
   const path = resultsPath(actionId, queryActionId);
-  let pageSize = RESULTS_PAGE_SIZE;
-  // Always a multiple of `pageSize`: it only grows by whole pages, and the size only halves.
+  // The first page is no wider than what is asked for, so `max_rows: 1` does not read 200 rows.
+  let pageSize = Math.min(RESULTS_PAGE_SIZE, maxRows);
+  // Always a multiple of `pageSize`: it only grows by whole pages, and the size only steps down
+  // to a divisor of itself (the capped first page is the only page when it is not 200).
   let offset = 0;
 
   while (
@@ -112,9 +121,8 @@ export const collectResults = async ({
           pageSize,
           // A document still arriving during the read (after the deadline) sorts after the pages
           // already read, instead of shifting them. The route breaks ties on `_doc`.
-          // Known limit: pages are offset-based, so rows sharing an `event.ingested` value can be
-          // repeated or skipped if the pages are served by replicas with a different `_doc` order.
-          // A PIT with `search_after` would remove it, but the results route does not offer one.
+          // Pages are offset-based and the route pins the search to the action's `preference`, so
+          // every page is served by the same shard copies and the `_doc` tie-break is stable.
           sort: 'event.ingested',
           sortOrder: 'asc',
         },
@@ -124,8 +132,9 @@ export const collectResults = async ({
     } catch (error) {
       if (isForbidden(error)) throw error;
 
-      if (pageSize > MIN_PAGE_SIZE) {
-        pageSize = Math.max(MIN_PAGE_SIZE, Math.floor(pageSize / 2));
+      const smaller = nextSmallerPageSize(pageSize);
+      if (smaller !== undefined) {
+        pageSize = smaller;
         continue;
       }
 

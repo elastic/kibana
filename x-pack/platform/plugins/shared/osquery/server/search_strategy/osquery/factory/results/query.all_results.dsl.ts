@@ -87,6 +87,9 @@ export const buildResultsQuery = ({
     allow_no_indices: true,
     index,
     ignore_unavailable: true,
+    // Offset pages of one action are served by the same shard copies, so the `_doc` tie-break
+    // below keeps them disjoint (its order differs between copies).
+    ...(scheduleId != null && executionCount != null ? {} : { preference: actionId }),
     aggs: {
       count_by_agent_id: {
         terms: {

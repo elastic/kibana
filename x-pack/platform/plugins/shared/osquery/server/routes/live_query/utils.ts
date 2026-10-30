@@ -42,6 +42,7 @@ export const getActionResponses = (
               responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
                 rows_count: estypes.AggregationsSumAggregate;
                 responding_agents?: estypes.AggregationsCardinalityAggregate;
+                responding_agent_ids?: { buckets: Array<{ key: string }> };
                 responses: {
                   buckets: Array<{
                     key: string;
@@ -56,6 +57,7 @@ export const getActionResponses = (
     >(
       {
         actionId,
+        agentsCount,
         factoryQueryType: OsqueryQueries.actionResults,
         kuery: '',
         pagination: generateTablePaginationOptions(0, 1000),
@@ -72,19 +74,20 @@ export const getActionResponses = (
     )
     .pipe(
       mergeMap((val) => {
-        const responded =
-          val.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-        const docs =
-          val.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
-        const aggsBuckets =
-          val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
+        const responsesByAction = val.rawResponse?.aggregations?.aggs.responses_by_action_id;
+        const docs = responsesByAction?.rows_count?.value ?? 0;
+        const aggsBuckets = responsesByAction?.responses.buckets;
         const successful = aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
         const failed = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
-        // A duplicate response must not stand in for an agent that has not answered: `pending`
-        // counts distinct agents, falling back to documents when the aggregation is absent.
-        const respondingAgents =
-          val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responding_agents?.value;
-        const pending = agentsCount - (respondingAgents ?? responded);
+        // Responses are delivered at least once: a duplicate must not stand in for an agent that
+        // has not answered. `responded` and `pending` count distinct agents (exact when the
+        // targeted count is known), falling back to documents when no agg is present.
+        const responded =
+          responsesByAction?.responding_agent_ids?.buckets.length ??
+          responsesByAction?.responding_agents?.value ??
+          responsesByAction?.doc_count ??
+          0;
+        const pending = agentsCount - responded;
 
         return of({
           action_id: actionId,

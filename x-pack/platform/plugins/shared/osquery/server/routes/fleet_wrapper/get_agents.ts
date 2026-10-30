@@ -67,25 +67,19 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-        // Page through every osquery package policy: with only the first 1000, agents of the
-        // remaining policies were missing from the picker and from the counts the workflow
-        // step's preflight reads, while `parseAgentSelection` still dispatches to them.
+        // Every osquery package policy, not just the first 1000: agents of the remaining
+        // policies were missing from the picker and from the counts the workflow step's preflight
+        // reads, while `parseAgentSelection` still dispatches to them. Fleet pages with a PIT, so
+        // this also works past the 10k saved-objects window.
         const packagePolicies: PackagePolicy[] = [];
         const packagePolicyKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`;
-        let packagePolicyPage = 1;
-        let packagePolicyTotal = Number.POSITIVE_INFINITY;
-        while (packagePolicies.length < packagePolicyTotal) {
-          const listed = await packagePolicyService?.list(spaceScopedClient, {
+        if (packagePolicyService) {
+          const pages = await packagePolicyService.fetchAllItems(spaceScopedClient, {
             kuery: packagePolicyKuery,
             perPage: 1000,
-            page: packagePolicyPage,
           });
-          const items = listed?.items ?? [];
-          packagePolicyTotal = listed?.total ?? packagePolicies.length + items.length;
-          packagePolicies.push(...items);
-          packagePolicyPage += 1;
-          if (items.length === 0) {
-            break;
+          for await (const page of pages) {
+            packagePolicies.push(...page);
           }
         }
 

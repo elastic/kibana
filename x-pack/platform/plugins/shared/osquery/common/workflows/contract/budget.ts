@@ -32,6 +32,14 @@ export const MAX_ROWS = 10000;
 
 export const MAX_AGENT_IDS = 250;
 export const MAX_AGENT_POLICY_IDS = 10;
+/**
+ * Policy ids go into the agents route's `kuery`, which is capped at 4096 characters. Each id is
+ * written twice (exact and `#*` variant) and escaping can lengthen it, so ten ids of this length
+ * stay under the cap and an over-long id is an `INVALID_INPUT`, not a rejected request.
+ */
+export const MAX_AGENT_POLICY_ID_LENGTH = 64;
+/** Longest `wait_timeout` string (`1800s`, `30m`); the digits of the regex are unbounded. */
+export const MAX_WAIT_LENGTH = 8;
 /** Post-expansion ceiling: the live-query route has no bound of its own. */
 export const TARGET_AGENT_LIMIT = 1000;
 

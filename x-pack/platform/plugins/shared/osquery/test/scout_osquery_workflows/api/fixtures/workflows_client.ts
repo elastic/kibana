@@ -32,6 +32,17 @@ export interface WorkflowExecution {
 /** Workflows created and not yet deleted, so a failed test still gets them removed. */
 const pendingDeletions = new Map<string, () => Promise<unknown>>();
 
+/** Action ids (parent and per-query) the steps dispatched, for removing their documents. */
+const dispatchedActionIds = new Set<string>();
+
+/** The action ids dispatched since the last call. */
+export const takeDispatchedActionIds = (): string[] => {
+  const ids = [...dispatchedActionIds];
+  dispatchedActionIds.clear();
+
+  return ids;
+};
+
 /** Deletes every workflow a test created and did not delete, e.g. because an assertion threw. */
 export const deleteLeftoverWorkflows = async (): Promise<void> => {
   const deletions = [...pendingDeletions.values()];
@@ -42,8 +53,16 @@ export const deleteLeftoverWorkflows = async (): Promise<void> => {
 /** Creates and runs workflows as the identity behind `headers` (an API key or a cookie). */
 export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<string, string>) => {
   const allHeaders = { 'kbn-xsrf': 'true', ...headers };
-  const remove = (workflowId: string) =>
-    apiClient.delete(`api/workflows/workflow/${workflowId}`, { headers: allHeaders });
+  // Without `force` the delete is soft: the workflow stays and its id is not reusable.
+  const remove = async (workflowId: string) => {
+    const response = await apiClient.delete(
+      `api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+      { headers: allHeaders }
+    );
+    if (response.statusCode >= 300 && response.statusCode !== 404) {
+      throw new Error(`Deleting workflow ${workflowId} failed with ${response.statusCode}`);
+    }
+  };
 
   const getExecution = async (executionId: string): Promise<WorkflowExecution> => {
     const response = await apiClient.get(
@@ -93,8 +112,9 @@ export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<str
     },
 
     delete: async (workflowId: string) => {
-      pendingDeletions.delete(workflowId);
+      // Forgotten only once the delete worked, so a failed one is retried by the cleanup hook.
       await remove(workflowId);
+      pendingDeletions.delete(workflowId);
     },
 
     run: async (workflowId: string): Promise<string> => {
@@ -125,6 +145,9 @@ export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<str
           `Step ${stepId} did not dispatch: ${execution.status} ${JSON.stringify(execution.error)}`
         );
       }
+
+      dispatchedActionIds.add(state.action_id);
+      state.queries.forEach((query) => dispatchedActionIds.add(query.action_id));
 
       return state;
     },

@@ -7,7 +7,14 @@
 
 import { z } from '@kbn/zod/v4';
 import { PLATFORM_IDS } from '../../constants';
-import { isWithinMaxWait, MAX_AGENT_IDS, MAX_AGENT_POLICY_IDS, MAX_ROWS } from './budget';
+import {
+  isWithinMaxWait,
+  MAX_AGENT_IDS,
+  MAX_AGENT_POLICY_ID_LENGTH,
+  MAX_AGENT_POLICY_IDS,
+  MAX_ROWS,
+  MAX_WAIT_LENGTH,
+} from './budget';
 
 export const STEP_STATUSES = ['success', 'partial', 'failed', 'timed_out'] as const;
 export type StepStatus = (typeof STEP_STATUSES)[number];
@@ -15,12 +22,17 @@ export type StepStatus = (typeof STEP_STATUSES)[number];
 /** Raw input fields shared by both steps, to be spread into `z.object`. */
 export const commonInputShape = () => ({
   agent_ids: z.array(z.string().min(1)).min(1).max(MAX_AGENT_IDS).optional(),
-  agent_policy_ids: z.array(z.string().min(1)).min(1).max(MAX_AGENT_POLICY_IDS).optional(),
+  agent_policy_ids: z
+    .array(z.string().min(1).max(MAX_AGENT_POLICY_ID_LENGTH))
+    .min(1)
+    .max(MAX_AGENT_POLICY_IDS)
+    .optional(),
   // osquery platform ids, as on saved queries and packs. The step expands `linux` to the Fleet
   // platform values (`ubuntu`, `centos`, ...) of the agents in scope before dispatch.
   agent_platforms: z.array(z.enum(PLATFORM_IDS)).min(1).max(PLATFORM_IDS.length).optional(),
   wait_timeout: z
     .string()
+    .max(MAX_WAIT_LENGTH)
     .regex(/^[1-9][0-9]*(s|m|h)$/, 'Use a duration such as 30s, 5m or 30m')
     .refine(isWithinMaxWait, 'wait_timeout cannot exceed 30m')
     .optional(),

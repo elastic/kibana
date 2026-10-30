@@ -216,6 +216,16 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             liveDispatchSource = { kind: 'caller' };
           }
 
+          // Only the workflow steps send the header; it does nothing while they are off.
+          const maxAgents = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
+            ? maxAgentsFromHeader(request.headers[OSQUERY_MAX_AGENTS_HEADER])
+            : undefined;
+          if (maxAgents === null) {
+            return response.badRequest({
+              body: `${OSQUERY_MAX_AGENTS_HEADER} must be a positive integer`,
+            });
+          }
+
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
@@ -224,10 +234,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               alertData,
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
-              // Only the workflow steps send the header; it does nothing while they are off.
-              maxAgents: osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
-                ? maxAgentsFromHeader(request.headers[OSQUERY_MAX_AGENTS_HEADER])
-                : undefined,
+              maxAgents,
             }
           );
 
@@ -257,12 +264,22 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     );
 };
 
-/** A positive integer from the workflow step. Anything else means the caller did not opt in. */
-export const maxAgentsFromHeader = (header: string | string[] | undefined): number | undefined => {
-  const raw = Array.isArray(header) ? header[0] : header;
-  if (!raw || !/^[1-9][0-9]{0,6}$/.test(raw)) {
-    return undefined;
+/**
+ * The ceiling the workflow step sends: a positive integer, `undefined` when the header is absent
+ * and `null` when it is present but invalid. Node joins a repeated header into `"5, 9"`; the
+ * smallest value wins so a duplicate can only tighten the ceiling.
+ */
+export const maxAgentsFromHeader = (
+  header: string | string[] | undefined
+): number | undefined | null => {
+  if (header === undefined) return undefined;
+
+  const values = (Array.isArray(header) ? header : [header])
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim());
+  if (values.length === 0 || !values.every((value) => /^[1-9][0-9]{0,6}$/.test(value))) {
+    return null;
   }
 
-  return Number(raw);
+  return Math.min(...values.map(Number));
 };

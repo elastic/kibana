@@ -619,6 +619,46 @@ describe('osquery.runQuery step', () => {
       expect(output).toMatchObject({ status: 'timed_out' });
     });
 
+    describe('a results read that fails part way through', () => {
+      /** Counts everything as searchable, serves the first page, then fails every later read. */
+      const partialResults = () => {
+        let servedFirstPage = false;
+
+        return jest.fn(({ query }: { query?: Record<string, unknown> }) => {
+          if (servedFirstPage) return apiError(502);
+          // The poll's searchable-count read, before any page is asked for.
+          if (Number(query?.pageSize) === 1) return { data: { edges: resultEdges(1), total: 400 } };
+          servedFirstPage = true;
+
+          return { data: { edges: resultEdges(200) } };
+        });
+      };
+
+      it('keeps polling before the deadline instead of reporting the prefix', async () => {
+        const { result } = poll({
+          [DETAILS]: () => ({ data: { queries: [counters({ docs: 400 })] } }),
+          [RESULTS]: partialResults(),
+        });
+
+        expect(await result).toEqual({ state: expect.any(Object) });
+      });
+
+      it('reports the rows read so far as truncated once the deadline passed', async () => {
+        const { result } = poll(
+          {
+            [DETAILS]: () => ({ data: { queries: [counters({ docs: 400 })] } }),
+            [RESULTS]: partialResults(),
+          },
+          { deadline: new Date(Date.now() - 1000).toISOString() }
+        );
+
+        const { output } = (await result) as { output: { rows: unknown[]; truncated: boolean } };
+
+        expect(output.rows).toHaveLength(200);
+        expect(output).toMatchObject({ status: 'success', row_count: 400, truncated: true });
+      });
+    });
+
     it('returns STATUS_UNREADABLE_FORBIDDEN when the results read is forbidden', async () => {
       const { result } = poll({
         [DETAILS]: () => ({ data: { queries: [counters({ docs: 1 })] } }),

@@ -16,12 +16,14 @@ import {
   createSystemIndicesClient,
   deleteAgentPolicy,
   deleteAnsweredQueries,
+  deleteDispatchedActions,
   deleteFakeAgents,
   deleteLeftoverWorkflows,
   deleteSavedQuery,
   deleteSystemIndicesUser,
   indexFakeAgents,
   stepOf,
+  takeDispatchedActionIds,
   workflowsClient,
   type FakeAgent,
 } from '../fixtures';
@@ -103,6 +105,7 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
 
   apiTest.afterAll(async ({ esClient, kbnClient }) => {
     await deleteAnsweredQueries(esClient);
+    await deleteDispatchedActions(systemEs, takeDispatchedActionIds());
     for (const { id, space } of savedQueryIds) {
       await deleteSavedQuery(kbnClient, id, space);
     }

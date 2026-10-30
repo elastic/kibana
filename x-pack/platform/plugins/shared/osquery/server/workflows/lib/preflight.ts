@@ -24,6 +24,9 @@ const ONLINE_KUERY = '(status:online OR status:degraded)';
  */
 const SAFE_FLEET_PLATFORM = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 
+/** KQL keywords: unquoted, they turn `(not or ubuntu)` into a negation that targets other agents. */
+const KQL_KEYWORDS = new Set(['and', 'or', 'not']);
+
 export interface ResolvedTarget {
   target: TargetInput;
   agentCount: number;
@@ -103,6 +106,7 @@ export const resolveTarget = async (
   const buckets = (groups?.platforms ?? []).filter(
     (bucket) =>
       SAFE_FLEET_PLATFORM.test(bucket.id) &&
+      !KQL_KEYWORDS.has(bucket.id) &&
       platformIds.some((platformId) => matchesPlatformId(bucket.id, platformId))
   );
 

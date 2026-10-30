@@ -22,6 +22,8 @@ const SYSTEM_USER = 'osquery_workflows_fake_agents';
 const SYSTEM_PASSWORD = 'osquery-workflows-fake-agents';
 
 export const FLEET_AGENTS_INDEX = '.fleet-agents';
+export const FLEET_ACTIONS_INDEX = '.fleet-actions';
+export const OSQUERY_ACTIONS_INDEX = '.logs-osquery_manager.actions-default';
 export const RESPONSES_DATA_STREAM = 'logs-osquery_manager.action.responses-default';
 export const RESULTS_DATA_STREAM = 'logs-osquery_manager.result-default';
 const API_VERSION = { 'elastic-api-version': '2023-10-31' };
@@ -44,7 +46,7 @@ export const createSystemIndicesClient = async (
     indices: [
       {
         // `.fleet-agents` is an alias: delete-by-query writes to the backing `.fleet-agents-7`.
-        names: [`${FLEET_AGENTS_INDEX}*`],
+        names: [`${FLEET_AGENTS_INDEX}*`, `${FLEET_ACTIONS_INDEX}*`, `${OSQUERY_ACTIONS_INDEX}*`],
         privileges: ['all'],
         allow_restricted_indices: true,
       },
@@ -141,6 +143,35 @@ export const deleteFakeAgents = async (systemEs: Client, agentIds: string[]): Pr
     refresh: true,
     ignore_unavailable: true,
     query: { ids: { values: agentIds } },
+  });
+};
+
+/** Removes the action documents the dispatched queries left in Fleet and in the osquery index. */
+export const deleteDispatchedActions = async (
+  systemEs: Client,
+  actionIds: string[]
+): Promise<void> => {
+  if (!actionIds.length) return;
+
+  await systemEs.deleteByQuery({
+    index: FLEET_ACTIONS_INDEX,
+    refresh: true,
+    ignore_unavailable: true,
+    query: { terms: { action_id: actionIds } },
+  });
+  await systemEs.deleteByQuery({
+    index: OSQUERY_ACTIONS_INDEX,
+    refresh: true,
+    ignore_unavailable: true,
+    query: {
+      bool: {
+        should: [
+          { terms: { action_id: actionIds } },
+          { terms: { 'queries.action_id': actionIds } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
   });
 };
 

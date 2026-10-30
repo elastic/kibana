@@ -440,16 +440,40 @@ describe('createLiveQueryRoute', () => {
       expect(passedMaxAgents()).toBeUndefined();
     });
 
+    it('returns 400 for a present but invalid header rather than dispatching unbounded', async () => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: true,
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: 'all' },
+      });
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: `${OSQUERY_MAX_AGENTS_HEADER} must be a positive integer`,
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('accepts the request when the invalid header is ignored with the steps off', async () => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: false,
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: 'all' },
+      });
+
+      expect(response.badRequest).not.toHaveBeenCalled();
+      expect(passedMaxAgents()).toBeUndefined();
+    });
+
     it.each([
       ['a positive integer', '250', 250],
-      ['the first value of a repeated header', ['5', '9'], 5],
+      ['the smallest of a repeated header', ['9', '5'], 5],
+      ['the smallest of a comma-joined header', '5, 9', 5],
       ['a missing header', undefined, undefined],
-      ['zero', '0', undefined],
-      ['a negative number', '-1', undefined],
-      ['a decimal', '1.5', undefined],
-      ['a leading zero', '010', undefined],
-      ['more than seven digits', '12345678', undefined],
-      ['text', 'all', undefined],
+      ['zero', '0', null],
+      ['a negative number', '-1', null],
+      ['a decimal', '1.5', null],
+      ['a leading zero', '010', null],
+      ['more than seven digits', '12345678', null],
+      ['text', 'all', null],
+      ['a valid value next to an invalid one', '5, all', null],
     ])('maxAgentsFromHeader reads %s', (_name, header, expected) => {
       expect(maxAgentsFromHeader(header)).toBe(expected);
     });

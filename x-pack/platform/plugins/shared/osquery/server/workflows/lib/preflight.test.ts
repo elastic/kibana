@@ -119,6 +119,23 @@ describe('preflight', () => {
       });
     });
 
+    it('never forwards a Fleet platform value that reads as a KQL keyword', async () => {
+      const contextManager = createContextManager({
+        [AGENTS]: () =>
+          fleet([
+            ['and', 2],
+            ['or', 3],
+            ['not', 4],
+            ['ubuntu', 1],
+          ]),
+      });
+
+      expect(await resolveTarget(contextManager, { agent_platforms: ['linux'] })).toEqual({
+        target: { agent_platforms: ['ubuntu'] },
+        agentCount: 1,
+      });
+    });
+
     it('fails with AGENTS_NOT_IN_SPACE when no online agent runs on the platforms', async () => {
       const contextManager = createContextManager({ [AGENTS]: () => fleet([['ubuntu', 2]]) });
 

@@ -83,3 +83,9 @@ export const MAX_TAG_LENGTH = 256;
  * sketch memory at max precision could trip the circuit breaker.
  */
 export const AGENT_CARDINALITY_PRECISION = 40000;
+
+/**
+ * Largest targeted-agent count whose responders are counted with an exact `terms` aggregation
+ * instead of `cardinality`. Stays under Elasticsearch's default `search.max_buckets` (65,536).
+ */
+export const EXACT_RESPONDING_AGENTS_LIMIT = 50000;

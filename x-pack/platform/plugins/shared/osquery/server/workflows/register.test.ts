@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { allowedExperimentalValues } from '../../common/experimental_features';
 import { registerOsqueryWorkflowSteps } from './register';
 
 describe('registerOsqueryWorkflowSteps (server)', () => {
@@ -49,9 +50,6 @@ describe('registerOsqueryWorkflowSteps (server)', () => {
   });
 
   it('defaults the flag to off', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { allowedExperimentalValues } = require('../../common/experimental_features');
-
     expect(allowedExperimentalValues.workflowsExtensionsEnabled).toBe(false);
   });
 });

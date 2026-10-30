@@ -30,8 +30,14 @@ describe('getAgentsRoute', () => {
   const mockAgentService = {
     asInternalScopedUser: jest.fn().mockReturnValue({ listAgents: mockListAgents }),
   };
-  const mockPackagePolicyService = { list: jest.fn() };
+  const mockPackagePolicyService = { fetchAllItems: jest.fn() };
   const mockAgentPolicyService = { getByIds: jest.fn() };
+
+  /** `fetchAllItems` resolves to an async iterable of pages, as Fleet's PIT-backed one does. */
+  const packagePolicyPages = (pages: Array<Array<Record<string, unknown>>>) =>
+    (async function* () {
+      yield* pages;
+    })();
 
   const createMockRequest = (kuery = '') =>
     httpServerMock.createKibanaRequest({
@@ -47,9 +53,9 @@ describe('getAgentsRoute', () => {
     jest.clearAllMocks();
 
     mockAgentService.asInternalScopedUser.mockReturnValue({ listAgents: mockListAgents });
-    mockPackagePolicyService.list.mockResolvedValue({
-      items: [{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }],
-    });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(
+      packagePolicyPages([[{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }]])
+    );
     mockAgentPolicyService.getByIds.mockResolvedValue([
       { id: 'policy-1', name: 'Production Policy' },
     ]);
@@ -133,7 +139,7 @@ describe('getAgentsRoute', () => {
   });
 
   it('returns empty result when no osquery policies exist', async () => {
-    mockPackagePolicyService.list.mockResolvedValue({ items: [] });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(packagePolicyPages([[]]));
     const mockResponse = httpServerMock.createResponseFactory();
     await routeHandler({} as never, createMockRequest('') as never, mockResponse);
 
@@ -144,15 +150,12 @@ describe('getAgentsRoute', () => {
   });
 
   it('includes osquery package policies past the first page', async () => {
-    mockPackagePolicyService.list
-      .mockResolvedValueOnce({
-        items: [{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }],
-        total: 2,
-      })
-      .mockResolvedValueOnce({
-        items: [{ package: { version: '1.0.0' }, policy_ids: ['policy-2'] }],
-        total: 2,
-      });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(
+      packagePolicyPages([
+        [{ package: { version: '1.0.0' }, policy_ids: ['policy-1'] }],
+        [{ package: { version: '1.0.0' }, policy_ids: ['policy-2'] }],
+      ])
+    );
     mockAgentPolicyService.getByIds.mockResolvedValue([
       { id: 'policy-1', name: 'One' },
       { id: 'policy-2', name: 'Two' },
@@ -161,18 +164,25 @@ describe('getAgentsRoute', () => {
     await routeHandler({} as never, createMockRequest('') as never, mockResponse);
 
     const esQuery = receivedEsQuery();
-    expect(mockPackagePolicyService.list).toHaveBeenCalledTimes(2);
+    // One PIT-backed iteration covers every page, however many there are.
+    expect(mockPackagePolicyService.fetchAllItems).toHaveBeenCalledTimes(1);
+    expect(mockPackagePolicyService.fetchAllItems).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ kuery: expect.stringContaining('osquery_manager') })
+    );
     expect(esQuery).toContain('policy-1');
     expect(esQuery).toContain('policy-2');
   });
 
   it('excludes pre-0.6.0 package versions from the policy scope', async () => {
-    mockPackagePolicyService.list.mockResolvedValue({
-      items: [
-        { package: { version: '0.5.0' }, policy_ids: ['old-policy'] },
-        { package: { version: '1.0.0' }, policy_ids: ['new-policy'] },
-      ],
-    });
+    mockPackagePolicyService.fetchAllItems.mockResolvedValue(
+      packagePolicyPages([
+        [
+          { package: { version: '0.5.0' }, policy_ids: ['old-policy'] },
+          { package: { version: '1.0.0' }, policy_ids: ['new-policy'] },
+        ],
+      ])
+    );
     mockAgentPolicyService.getByIds.mockResolvedValue([{ id: 'new-policy', name: 'New' }]);
     const mockResponse = httpServerMock.createResponseFactory();
     await routeHandler({} as never, createMockRequest('') as never, mockResponse);

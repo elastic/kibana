@@ -111,6 +111,22 @@ describe('osquery workflow step pickers', () => {
       expect(details.message).not.toMatch(/install/i);
     });
 
+    it('reports a failed lookup only for the value it failed on', async () => {
+      const selection = createSavedQuerySelection(http);
+      http.get.mockRejectedValueOnce({ body: { message: 'Forbidden' } });
+
+      expect(await selection.resolve('denied', context('saved_query'))).toBeNull();
+      http.get.mockResolvedValueOnce({ data: [] });
+      expect(await selection.resolve('other', context('saved_query'))).toBeNull();
+
+      const denied = await selection.getDetails('denied', context('saved_query'), null);
+      const other = await selection.getDetails('other', context('saved_query'), null);
+
+      expect(denied.message).toMatch(/Forbidden/);
+      expect(other.message).not.toMatch(/Forbidden/);
+      expect(other.message).toMatch(/install/i);
+    });
+
     it('explains how to fix a missing saved query', async () => {
       const details = await createSavedQuerySelection(http).getDetails(
         'missing',
@@ -120,6 +136,18 @@ describe('osquery workflow step pickers', () => {
 
       expect(details.message).toMatch(/install/i);
       expect(details.links?.[0].path).toBe('/app/osquery/saved_queries');
+    });
+
+    it('prefixes the manage link with the current space', async () => {
+      const spacedHttp = httpServiceMock.createSetupContract({ basePath: '/s/my-space' });
+
+      const details = await createSavedQuerySelection(spacedHttp).getDetails(
+        'missing',
+        context('saved_query'),
+        null
+      );
+
+      expect(details.links?.[0].path).toBe('/s/my-space/app/osquery/saved_queries');
     });
   });
 });
