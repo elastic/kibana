@@ -49,6 +49,41 @@ test('tests, stories, evals and docs in Nightshift paths are Low', () => {
   assert.deepEqual(result, { scope: 'nightshift', tier: 'low', reasons: [] });
 });
 
+test('Nightshift-owned tests outside the plugins are Low', () => {
+  const result = classify(
+    [
+      file(
+        'x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts'
+      ),
+      file(
+        'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/maintenance.ts'
+      ),
+    ],
+    member
+  );
+  assert.equal(result.tier, 'low');
+});
+
+test('Nightshift-owned code outside the plugins is in scope but not Low', () => {
+  for (const path of [
+    'x-pack/platform/plugins/shared/actions/server/lib/relay/relay_client.ts',
+    'src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/agent_optimize/agent_optimize_workflow.yaml',
+    'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-source/10.1.0.json',
+  ]) {
+    const result = classify([file(path)], member);
+    assert.equal(result.scope, 'nightshift', path);
+    assert.equal(result.tier, 'not_low', path);
+  }
+});
+
+test('co-owned code such as agentic_investigations is out of scope', () => {
+  const result = classify(
+    [file('x-pack/platform/plugins/shared/agentic_investigations/server/a.test.ts')],
+    member
+  );
+  assert.equal(result.scope, 'none');
+});
+
 test('production code, prompts and config are not Low', () => {
   for (const path of [
     `${NI}/server/lib/service_account/install.ts`,
