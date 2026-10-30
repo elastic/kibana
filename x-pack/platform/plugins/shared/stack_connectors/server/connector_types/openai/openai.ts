@@ -475,6 +475,16 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       connectorUsageCollector
     );
 
+    // A content-filtered completion may carry no content at all. Return it as such, instead of the
+    // "unrecognized format" text below, so the caller can see the provider's stop reason.
+    if (res.choices?.[0]?.finish_reason === 'content_filter') {
+      return {
+        message: (res.choices[0].message?.content ?? '').trim(),
+        usage: res.usage ?? { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+        finish_reason: 'content_filter',
+      };
+    }
+
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
       return { message: result, usage: res.usage };

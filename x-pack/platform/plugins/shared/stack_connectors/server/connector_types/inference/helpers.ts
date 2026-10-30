@@ -80,6 +80,9 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
               if (chunk.choices[0].message.refusal) {
                 prev.choices[0].message.refusal = chunk.choices[0].message.refusal;
               }
+              if (chunk.choices[0].finish_reason) {
+                prev.choices[0].finish_reason = chunk.choices[0].finish_reason;
+              }
 
               chunk.choices[0].message.tool_calls?.forEach((toolCall) => {
                 if (toolCall.index !== undefined) {
