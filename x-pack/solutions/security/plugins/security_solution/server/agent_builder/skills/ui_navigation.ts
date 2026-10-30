@@ -36,15 +36,16 @@ export const ENTITY_ANALYTICS_UI_PATHS = {
   entityResolutionBulk: `${ENTITY_ANALYTICS_MANAGEMENT_BASE}/entity_resolution`,
   /** Entity Store / engine Status tab. */
   status: `${ENTITY_ANALYTICS_MANAGEMENT_BASE}/status`,
-  /** Watchlists management tab (also hosts the per-watchlist edit flyout). */
+  /** Watchlists management tab (also hosts the per-watchlist edit flyout, see `buildWatchlistEditPath`). */
   watchlists: `${ENTITY_ANALYTICS_MANAGEMENT_BASE}/watchlists`,
   /** Entity Analytics home page — surface the single-entity Resolution flyout opens on. */
   entityResolutionHomePage: ENTITY_ANALYTICS_HOME_PAGE_BASE,
 } as const;
 
+// Query param that opens a watchlist's edit flyout on the Watchlists tab
+export const EDIT_WATCHLIST_URL_PARAM = 'editWatchlistId';
 // Legacy expandable-flyout panel keys
 export const ENTITY_RESOLUTION_GROUP_TAB = 'resolution_group';
-export const WATCHLISTS_FLYOUT_KEY = 'watchlists-flyout';
 // Flyout `scopeId` / `contextID`. We use the id the Entity Analytics home page's own entities table
 // passes (`ENTITY_ANALYTICS_TABLE_ID`), since the deep-link opens the flyout on that page.
 export const ENTITY_ANALYTICS_HOME_TABLE_SCOPE = 'entity-analytics-home-table';
@@ -143,14 +144,9 @@ export function buildResolutionFlyoutTemplate(entityType: EntityResolutionType) 
   }
 }
 
-/** Builds the `flyout` template that opens a specific watchlist's edit flyout. */
-export function buildWatchlistEditFlyoutTemplate() {
-  return {
-    right: {
-      id: WATCHLISTS_FLYOUT_KEY,
-      params: { mode: 'edit', watchlistId: WATCHLIST_ID },
-    },
-  };
+/** Builds the `path` that opens a specific watchlist's edit flyout on the Watchlists tab. */
+export function buildWatchlistEditPath(watchlistId: string = WATCHLIST_ID) {
+  return `${ENTITY_ANALYTICS_UI_PATHS.watchlists}?${EDIT_WATCHLIST_URL_PARAM}=${watchlistId}`;
 }
 
 /** Renders an object as a 4-space-indented block for embedding in skill markdown. */
@@ -228,7 +224,7 @@ Exactly one watchlist operation is intentionally **not** performed in chat: **up
 
 For this intent, **decline the action** and point the user to the right place in the UI. Three things in one short reply: what you can't do in chat, why ("the CSV upload lives in the editor"), and where to go — a clickable markdown link.
 
-**How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` below and the \`flyout\` object, and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`security.build_redirect_url\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
+**How to produce the link.** Call \`security.build_redirect_url\` with the \`path\` below (no \`flyout\`), and render the \`url\` it returns as \`[title](url)\`. The tool applies the deployment base path and current space for you — pass the \`path\` exactly as written (app-relative, starting with \`/\`) and **never** hand-write, guess, or edit the URL. \`security.build_redirect_url\` is **not** a mutation, so calling it for a redirect is expected; do **not** call the mutating tools (\`create\` / \`update\` / \`delete\` / \`add_entities\` / \`remove_entities\`). Do **not** prompt for confirmation, and do **not** claim the operation succeeded.
 
 ### Redirect intent
 
@@ -238,12 +234,7 @@ For this intent, **decline the action** and point the user to the right place in
 
 - **The user named a specific watchlist** (by name or id) → open that watchlist's edit flyout.
   1. Resolve the watchlist **id**. If you already have the id, use it. Otherwise call \`security.get_watchlist_id\` with \`{ identifier: <the name the user gave> }\`. 
-  2. Call \`security.build_redirect_url\` with \`path: '${
-    ENTITY_ANALYTICS_UI_PATHS.watchlists
-  }'\` and this \`flyout\` (substitute \`${WATCHLIST_ID}\` with the resolved id):
-
-${asIndentedJson(buildWatchlistEditFlyoutTemplate())}
-
+  2. Call \`security.build_redirect_url\` with \`path: '${buildWatchlistEditPath()}'\` (substitute \`${WATCHLIST_ID}\` with the resolved id) and no \`flyout\`.
   3. Render the returned \`url\`.
 - **No specific watchlist** ("open the watchlists page") → call \`security.build_redirect_url\` with \`path: '${
   ENTITY_ANALYTICS_UI_PATHS.watchlists
@@ -254,9 +245,9 @@ ${asIndentedJson(buildWatchlistEditFlyoutTemplate())}
 User: "Upload a CSV of members to the Privileged Users watchlist."
 
 1. Call \`security.get_watchlist_id\` with \`{ identifier: 'Privileged Users' }\` to resolve the id.
-2. Call \`security.build_redirect_url\` with \`path: '${
-  ENTITY_ANALYTICS_UI_PATHS.watchlists
-}'\` and \`flyout: { right: { id: '${WATCHLISTS_FLYOUT_KEY}', params: { mode: 'edit', watchlistId: '<id from step 1>' } } }\`.
+2. Call \`security.build_redirect_url\` with \`path: '${buildWatchlistEditPath(
+  '<id from step 1>'
+)}'\` (no \`flyout\`).
 3. Render the returned \`url\` in a decline-and-redirect reply:
    > "I can't upload a CSV to a watchlist from chat — that runs through the watchlist editor. Open the editor: [Edit Privileged Users](<url from build_redirect_url>)."
 

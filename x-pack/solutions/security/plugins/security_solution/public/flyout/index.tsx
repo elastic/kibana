@@ -65,7 +65,6 @@ import {
   GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  WatchlistsFlyoutKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
 import { buildEntityPreviewPanel } from './entity_details/shared/utils/build_entity_preview_panel';
@@ -103,10 +102,7 @@ import {
   USER_PREVIEW_PANEL_ARIA_LABEL,
   VULNERABILITY_FINDINGS_PANEL_ARIA_LABEL,
   VULNERABILITY_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
-  WATCHLISTS_PANEL_ARIA_LABEL,
 } from './panel_aria_labels';
-import type { WatchlistsFlyoutExpandableFlyoutProps } from './entity_details/watchlists_right';
-import { WatchlistsFlyoutPanel } from './entity_details/watchlists_right';
 import {
   MisconfigurationFindingsPanelKey,
   MisconfigurationFindingsPreviewPanelKey,
@@ -415,13 +411,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       </IOCDetailsProvider>
     ),
     'aria-label': IOC_RIGHT_PANEL_ARIA_LABEL,
-  },
-  {
-    key: WatchlistsFlyoutKey,
-    component: (props) => (
-      <WatchlistsFlyoutPanel {...(props as WatchlistsFlyoutExpandableFlyoutProps).params} />
-    ),
-    'aria-label': WATCHLISTS_PANEL_ARIA_LABEL,
   },
 ];
 

@@ -106,9 +106,9 @@ describe('buildRedirectUrlTool', () => {
   });
 
   describe('flyout serialization', () => {
-    it('appends a rison-encoded flyout query param for unmigrated panels (watchlists)', async () => {
+    it('appends a rison-encoded flyout query param for unmigrated panels', async () => {
       const flyout = {
-        right: { id: 'watchlists-flyout', params: { mode: 'edit', watchlistId: 'wl-123' } },
+        right: { id: 'unmigrated-panel', params: { someId: 'id-123' } },
       };
       const { results } = (await buildRedirectUrlTool(coreSetup, experimentalFeatures).handler(
         { path: '/app/security/entity_analytics_management/watchlists', flyout },
@@ -231,10 +231,10 @@ describe('buildRedirectUrlTool', () => {
       expect(decodeFlyout(url)).toEqual(expandable);
     });
 
-    it('keeps legacy flyout encoding for unmigrated panels (watchlists) when new flyout is on', async () => {
+    it('keeps legacy flyout encoding for unmigrated panels when new flyout is on', async () => {
       mockUiSettingsGet.mockResolvedValue(true);
       const flyout = {
-        right: { id: 'watchlists-flyout', params: { mode: 'edit', watchlistId: 'wl-123' } },
+        right: { id: 'unmigrated-panel', params: { someId: 'id-123' } },
       };
       const { results } = (await buildRedirectUrlTool(coreSetup, experimentalFeatures).handler(
         { path: '/app/security/entity_analytics_management/watchlists', flyout },
@@ -261,7 +261,7 @@ describe('buildRedirectUrlSchema', () => {
     expect(
       buildRedirectUrlSchema.safeParse({
         path: '/app/security',
-        flyout: { right: { id: 'watchlists-flyout', params: { watchlistId: 'wl-1' } } },
+        flyout: { right: { id: 'some-panel', params: { someId: 'id-1' } } },
       }).success
     ).toBe(true);
   });
