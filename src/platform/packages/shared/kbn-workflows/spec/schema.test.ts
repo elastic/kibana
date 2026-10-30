@@ -46,9 +46,37 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
-import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import { IF_CONDITION_MAX_LENGTH, WORKFLOW_RUN_NAME_MAX_LENGTH } from '../common/constants';
 import { MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 import { getShape } from '../common/utils/zod';
+
+describe('run-name', () => {
+  const workflow = {
+    name: 'Deploy',
+    triggers: [{ type: 'manual' }],
+    steps: [{ name: 'log', type: 'console', with: { message: 'done' } }],
+  };
+
+  it.each(['Deploy staging', 'Deploy {{ inputs.target }}', '', '   '])(
+    'preserves the optional template %j',
+    (runName) => {
+      const definition = { ...workflow, 'run-name': runName };
+      expect(WorkflowSchema.parse(definition)['run-name']).toBe(runName);
+      expect(WorkflowSchemaForAutocomplete.parse(definition)['run-name']).toBe(runName);
+    }
+  );
+
+  it('allows workflows without a run name', () => {
+    expect(WorkflowSchema.parse(workflow)['run-name']).toBeUndefined();
+  });
+
+  it.each([123, {}, 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1)])(
+    'rejects an invalid run name',
+    (runName) => {
+      expect(WorkflowSchema.safeParse({ ...workflow, 'run-name': runName }).success).toBe(false);
+    }
+  );
+});
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {

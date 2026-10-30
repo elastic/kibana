@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import { useWorkflowUrlState } from './use_workflow_url_state';
 import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
@@ -143,6 +144,34 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.urlState.lastViewedExecutionId).toBeUndefined();
     expect(result.current.history.location.search).not.toContain('executionStatuses');
     expect(result.current.history.location.search).not.toContain('lastViewedExecutionId');
+  });
+
+  it('preserves execution name characters in the URL and removes the cleared filter', () => {
+    const { result } = renderHook(
+      () => ({ urlState: useWorkflowUrlState(), history: useHistory() }),
+      { wrapper: createWrapper() }
+    );
+    const runName = 'Deploy A & B + #1 ';
+
+    act(() => result.current.urlState.updateUrlState({ runName }));
+
+    expect(result.current.urlState.executionListFilters.runName).toBe(runName);
+    expect(new URLSearchParams(result.current.history.location.search).get('runName')).toBe(
+      runName
+    );
+
+    act(() => result.current.urlState.updateUrlState({ runName: undefined }));
+
+    expect(result.current.urlState.executionListFilters.runName).toBeUndefined();
+    expect(result.current.history.location.search).not.toContain('runName');
+  });
+
+  it('ignores execution name filters over the length limit', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper([`/?runName=${'a'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1)}`]),
+    });
+
+    expect(result.current.executionListFilters.runName).toBeUndefined();
   });
 
   it('keeps the last viewed execution when the selected execution is cleared', () => {

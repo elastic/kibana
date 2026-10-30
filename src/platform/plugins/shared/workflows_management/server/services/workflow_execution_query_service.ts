@@ -127,6 +127,33 @@ export interface WorkflowExecutionStatusItem {
   status: ExecutionStatus;
 }
 
+const getExecutionNameFilters = (runName: string): estypes.QueryDslQueryContainer[] => {
+  // Bound the wildcard automaton; verify longer substrings against doc values.
+  const wildcardPrefix = runName.slice(0, 128).replace(/[\uD800-\uDBFF]$/, '');
+  const filters: estypes.QueryDslQueryContainer[] = [
+    {
+      wildcard: {
+        runName: {
+          value: `*${wildcardPrefix.replace(/[\\*?]/g, '\\$&')}*`,
+          case_insensitive: true,
+        },
+      },
+    },
+  ];
+  if (wildcardPrefix !== runName) {
+    filters.push({
+      script: {
+        script: {
+          source:
+            "doc['runName'].size() != 0 && doc['runName'].value.toLowerCase(Locale.ROOT).contains(params.runName)",
+          params: { runName: runName.toLowerCase() },
+        },
+      },
+    });
+  }
+  return filters;
+};
+
 export class WorkflowExecutionQueryService {
   constructor(private readonly deps: WorkflowExecutionQueryDeps) {}
 
@@ -224,6 +251,11 @@ export class WorkflowExecutionQueryService {
     }
     if (params.executedBy && params.executedBy.length > 0) {
       must.push({ terms: { executedBy: params.executedBy } });
+    }
+
+    const runName = params.runName?.trim();
+    if (runName) {
+      must.push(...getExecutionNameFilters(runName));
     }
 
     if (params.concurrencyGroupKey !== undefined) {

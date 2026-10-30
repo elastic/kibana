@@ -54,6 +54,7 @@ import {
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { getWorkflowExecutionName } from './lib/get_workflow_execution_name';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
@@ -953,6 +954,8 @@ export class WorkflowsExecutionEnginePlugin
                   logger,
                   {
                     createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
+                    getRunName: (execution) =>
+                      getWorkflowExecutionName(execution, logger, coreStart, dependencies),
                     hasActiveTaskForExecution: (executionId) =>
                       workflowTaskManager.hasActiveTaskForExecution(executionId),
                   }
@@ -1011,6 +1014,8 @@ export class WorkflowsExecutionEnginePlugin
                   authenticatedUser: executedBy,
                   now: workflowCreatedAt,
                   maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+                  getRunName: (execution) =>
+                    getWorkflowExecutionName(execution, logger, coreStart, dependencies),
                   getConcurrencyGroupKey: (execution) =>
                     this.getConcurrencyGroupKey(
                       execution,
@@ -1305,6 +1310,8 @@ export class WorkflowsExecutionEnginePlugin
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+        getRunName: (execution) =>
+          getWorkflowExecutionName(execution, this.logger, coreStart, dependencies),
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(
             execution,

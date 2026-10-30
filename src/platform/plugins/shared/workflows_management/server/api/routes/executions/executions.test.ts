@@ -560,6 +560,7 @@ describe('Execution Routes', () => {
           sortField: 'finishedAt',
           sortOrder: 'desc',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
+          runName: 'production',
         },
       };
 
@@ -571,6 +572,7 @@ describe('Execution Routes', () => {
           statuses: ['running'],
           executionTypes: undefined,
           executedBy: undefined,
+          runName: 'production',
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
           page: 2,
           size: 5,

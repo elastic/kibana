@@ -17,6 +17,7 @@ import {
   ExecutionTypeValues,
   type LayoutDirection,
 } from '@kbn/workflows';
+import { WORKFLOW_RUN_NAME_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import {
   getStoredEditorView,
   getStoredGraphDirection,
@@ -41,6 +42,7 @@ export interface WorkflowUrlState {
   executionStatuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   /** Row to highlight after the detail flyout closes. */
   lastViewedExecutionId?: string;
 }
@@ -146,10 +148,12 @@ export function useWorkflowUrlState() {
       statuses: ExecutionStatus[];
       executionTypes: ExecutionType[];
       executedBy: string[];
+      runName?: string;
     };
     lastViewedExecutionId: string | undefined;
   } => {
     const params = queryString.parse(location.search);
+    const runName = firstString(params.runName);
     return {
       tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
       view:
@@ -178,6 +182,7 @@ export function useWorkflowUrlState() {
           ExecutionTypeValues
         ),
         executedBy: stringList(params.executedBy),
+        runName: runName && runName.length <= WORKFLOW_RUN_NAME_MAX_LENGTH ? runName : undefined,
       },
       lastViewedExecutionId: boundedToken(firstString(params.lastViewedExecutionId)),
     };

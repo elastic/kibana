@@ -35,6 +35,7 @@ import { getRunMode } from '../../workflow_execution_detail/lib/get_run_mode';
 
 /** Fixed column widths for the execution-history table (panel must not scroll horizontally). */
 export const EXECUTION_HISTORY_COLUMN_WIDTHS = {
+  runName: '200px',
   /** Fits the HITL 'Action is required' badge (wider than Success / Waiting). */
   status: '160px',
   /** Fits `Yesterday 22:04` / `Aug 17 14:03` without clipping. */
@@ -183,6 +184,19 @@ export const getExecutionHistoryColumns = (
   );
 
   return [
+    {
+      field: 'runName',
+      name: i18n.translate('workflows.workflowExecutionList.column.executionNameLabel', {
+        defaultMessage: 'Execution name',
+      }),
+      width: EXECUTION_HISTORY_COLUMN_WIDTHS.runName,
+      truncateText: true,
+      render: (runName: string | undefined) => (
+        <EuiText size="xs" data-test-subj="workflowExecutionListRunNameCell">
+          <EuiTextTruncate text={runName ?? EM_DASH} />
+        </EuiText>
+      ),
+    },
     {
       field: 'status',
       name: i18n.translate('workflows.workflowExecutionList.column.status', {
