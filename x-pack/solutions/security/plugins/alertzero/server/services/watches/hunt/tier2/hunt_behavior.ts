@@ -263,6 +263,7 @@ const executeValidatedEsql = async ({
   window,
   row_limit,
   allowedIndices,
+  crossProjectSearch,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -271,6 +272,7 @@ const executeValidatedEsql = async ({
   window: { from: string; to: string };
   row_limit: number;
   allowedIndices: string[];
+  crossProjectSearch: boolean;
 }): Promise<{
   execution: BehaviorExecution;
   affected_hosts?: string[];
@@ -284,7 +286,9 @@ const executeValidatedEsql = async ({
 
   try {
     const prepared = prepareEsqlForExecute(esql);
-    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices);
+    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices, {
+      crossProjectSearch,
+    });
     if (!sourcesAllowed.ok) {
       logger.warn(
         `[hunt:esql] execute for ${techniqueId} refused — ${sourcesAllowed.reason}. ` +
@@ -530,6 +534,7 @@ const generateGroundedEsql = async ({
   excludedIocs,
   articleContext,
   allowedIndices,
+  crossProjectSearch,
   rowLimit,
 }: {
   esqlModel: ScopedModel;
@@ -541,6 +546,7 @@ const generateGroundedEsql = async ({
   excludedIocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
   allowedIndices: string[];
+  crossProjectSearch: boolean;
   rowLimit: number;
 }): Promise<{ generated: Map<string, string>; ungrounded: Map<string, string> }> => {
   const index = resolveGenerationIndex(allowedIndices);
@@ -548,7 +554,7 @@ const generateGroundedEsql = async ({
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
-  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
+  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices, { crossProjectSearch });
   const iocValues = (iocs ?? []).map((ioc) => ioc.value);
   const excludedIocValues = (excludedIocs ?? []).map((ioc) => ioc.value);
 
@@ -593,7 +599,8 @@ const generateGroundedEsql = async ({
         // `query_out_of_scope` exactly as today.
         const sourcesAllowed = assertEsqlSourcesAllowed(
           prepareEsqlForExecute(esql),
-          allowedIndices
+          allowedIndices,
+          { crossProjectSearch }
         );
         if (!sourcesAllowed.ok) {
           return { outcome: 'generated', techniqueId: behavior.technique_id, esql };
@@ -757,6 +764,7 @@ export const huntBehavior = async (
     size,
     row_limit: rowLimitFromParams,
     allowed_indices: allowedIndices = [],
+    cross_project_search: crossProjectSearch = false,
     already_searched_technique_ids: alreadySearchedIds = [],
     pending_technique_ids: pendingIds = [],
   } = params;
@@ -1081,7 +1089,9 @@ export const huntBehavior = async (
       // as one — it keeps the non-executable placeholder instead. The allowlist is
       // the one generation was steered by; an empty one allows nothing, so a caller
       // that passed no scope cannot reach `.kibana-*` or `*`.
-      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), allowedIndices);
+      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), allowedIndices, {
+        crossProjectSearch,
+      });
       if (!sourcesAllowed.ok) {
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
@@ -1130,6 +1140,7 @@ export const huntBehavior = async (
         window: window!,
         row_limit: rowLimit!,
         allowedIndices,
+        crossProjectSearch,
       });
       behavior.execution = executed.execution;
       const executeReason = executed.execution.inconclusive_reason;
@@ -1165,6 +1176,7 @@ export const huntBehavior = async (
       excludedIocs,
       articleContext,
       allowedIndices,
+      crossProjectSearch,
       rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
     });
     const published = new Map<string, string>();
@@ -1245,6 +1257,7 @@ export const huntBehavior = async (
         excludedIocs,
         articleContext,
         allowedIndices,
+        crossProjectSearch,
         rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
       });
       for (const behavior of validated) {

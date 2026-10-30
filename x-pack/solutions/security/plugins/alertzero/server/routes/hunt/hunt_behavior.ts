@@ -118,6 +118,7 @@ export const registerHuntBehaviorRoute = ({
           const esClient = huntEsClient({ getClusterClient, request });
           // What the generated query may read: the same default data view Tier 1 searches.
           const indexPatterns = await resolveHuntUniverse(context, logger);
+          const crossProjectSearch = isCpsEnabled();
 
           const body: HuntBehaviorResponse = await huntBehavior(
             { extraction, esql },
@@ -129,7 +130,8 @@ export const registerHuntBehaviorRoute = ({
               iocs,
               ...(excluded_iocs !== undefined ? { excluded_iocs } : {}),
               article_context,
-              allowed_indices: scopeGuardPatterns(indexPatterns, isCpsEnabled()),
+              allowed_indices: scopeGuardPatterns(indexPatterns, crossProjectSearch),
+              cross_project_search: crossProjectSearch,
             },
             esClient,
             mitreDataClient

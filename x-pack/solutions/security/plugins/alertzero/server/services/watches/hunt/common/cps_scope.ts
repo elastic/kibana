@@ -31,19 +31,6 @@ const isQualifiedExclusion = (entry: string): boolean => {
 };
 
 /**
- * Whether an allowlist was widened by `withLinkedProjectTwins`: some unqualified positive entry
- * also appears with its `*:` twin. Such a list reads an unqualified source as reaching every
- * linked project, so the source guard must check that reach too.
- */
-export const reachesLinkedProjects = (allowedPatterns: string[]): boolean => {
-  const entries = allowedPatterns.map(parseIndexScopeEntry).filter(({ exclude }) => !exclude);
-  const local = new Set(
-    entries.filter(({ cluster }) => cluster === undefined).map(({ index }) => index)
-  );
-  return entries.some(({ cluster, index }) => cluster === '*' && local.has(index));
-};
-
-/**
  * What Tier 2 may read: the targets, widened to linked projects under cross-project search,
  * with the universe's project-qualified exclusions carried along. A widened `*:logs-aws.*`
  * would otherwise reach a project the universe excludes by name (`linked:-logs-aws.*`), since

@@ -29,7 +29,8 @@ export type AssertEsqlSourcesAllowedResult = { ok: true } | { ok: false; reason:
  */
 export const assertEsqlSourcesAllowed = (
   query: string,
-  allowedPatterns: string[]
+  allowedPatterns: string[],
+  options: { crossProjectSearch?: boolean } = {}
 ): AssertEsqlSourcesAllowedResult => {
   if (allowedPatterns.length === 0) {
     return { ok: false, reason: 'no allowed index patterns' };
@@ -66,7 +67,7 @@ export const assertEsqlSourcesAllowed = (
 
   for (const command of root.commands) {
     for (const source of sourcesOf(command)) {
-      if (!isIndexPatternAllowed(source, allowedPatterns)) {
+      if (!isIndexPatternAllowed(source, allowedPatterns, options)) {
         return {
           ok: false,
           reason: `${command.name.toUpperCase()} source "${source}" is outside the hunt index scope`,

@@ -27,12 +27,13 @@ import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
  */
 export const scopedEsqlProbeClient = (
   esClient: ElasticsearchClient,
-  allowedPatterns: string[]
+  allowedPatterns: string[],
+  options: { crossProjectSearch?: boolean } = {}
 ): ElasticsearchClient => {
   const gatedQuery = ((...args: Parameters<ElasticsearchClient['esql']['query']>) => {
     const params = args[0] as { query?: unknown } | undefined;
     const query = typeof params?.query === 'string' ? params.query : '';
-    const check = assertEsqlSourcesAllowed(query, allowedPatterns);
+    const check = assertEsqlSourcesAllowed(query, allowedPatterns, options);
     if (!check.ok) {
       return Promise.reject(
         new Error(`refused to probe an out-of-scope generated query: ${check.reason}`)

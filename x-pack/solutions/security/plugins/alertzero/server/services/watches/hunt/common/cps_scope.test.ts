@@ -6,12 +6,7 @@
  */
 
 import { assertEsqlSourcesAllowed } from '../tier2/assert_esql_sources_allowed';
-import {
-  reachesLinkedProjects,
-  scopeGuardPatterns,
-  tier2AllowedIndices,
-  withLinkedProjectTwins,
-} from './cps_scope';
+import { scopeGuardPatterns, tier2AllowedIndices, withLinkedProjectTwins } from './cps_scope';
 import { buildMatchesRequired } from './matches_required';
 
 describe('withLinkedProjectTwins', () => {
@@ -73,18 +68,13 @@ describe('guards over widened patterns', () => {
       ok: false,
       reason: expect.stringContaining('outside the hunt index scope'),
     });
-    expect(assertEsqlSourcesAllowed(query, widened)).toEqual({ ok: true });
+    expect(assertEsqlSourcesAllowed(query, widened, { crossProjectSearch: true })).toEqual({
+      ok: true,
+    });
   });
 });
 
-describe('reachesLinkedProjects', () => {
-  it('is true for a widened list and false for a plain or cross-cluster one', () => {
-    expect(reachesLinkedProjects(withLinkedProjectTwins(['logs-*']))).toBe(true);
-    expect(reachesLinkedProjects(['logs-*'])).toBe(false);
-    expect(reachesLinkedProjects(['logs-*', 'remote:logs-*'])).toBe(false);
-    expect(reachesLinkedProjects(['*:logs-*'])).toBe(false);
-  });
-});
+const CPS = { crossProjectSearch: true };
 
 describe('tier2AllowedIndices', () => {
   const universe = ['logs-*', 'linked:-logs-aws.cloudtrail-*', '-*elastic-cloud-logs-*'];
@@ -112,15 +102,15 @@ describe('tier2AllowedIndices', () => {
   });
 
   it('refuses an unqualified source too, since it fans out to the excluded project', () => {
-    expect(assertEsqlSourcesAllowed('FROM logs-aws.cloudtrail-* | LIMIT 1', allowed).ok).toBe(
+    expect(assertEsqlSourcesAllowed('FROM logs-aws.cloudtrail-* | LIMIT 1', allowed, CPS).ok).toBe(
       false
     );
     expect(
-      assertEsqlSourcesAllowed('FROM linked:logs-aws.cloudtrail-* | LIMIT 1', allowed).ok
+      assertEsqlSourcesAllowed('FROM linked:logs-aws.cloudtrail-* | LIMIT 1', allowed, CPS).ok
     ).toBe(false);
-    expect(assertEsqlSourcesAllowed('FROM other:logs-aws.cloudtrail-* | LIMIT 1', allowed).ok).toBe(
-      true
-    );
+    expect(
+      assertEsqlSourcesAllowed('FROM other:logs-aws.cloudtrail-* | LIMIT 1', allowed, CPS).ok
+    ).toBe(true);
   });
 
   it('still allows an unqualified wildcard source the excluded project does not touch', () => {
@@ -130,8 +120,24 @@ describe('tier2AllowedIndices', () => {
       crossProjectSearch: true,
     });
 
-    expect(assertEsqlSourcesAllowed('FROM logs-okta.system-* | LIMIT 1', widened)).toEqual({
+    expect(assertEsqlSourcesAllowed('FROM logs-okta.system-* | LIMIT 1', widened, CPS)).toEqual({
       ok: true,
     });
+  });
+});
+
+describe('the source guard without cross-project search', () => {
+  // A cross-cluster universe often lists `*:logs-*` next to local patterns. The flag, not the
+  // shape of the list, decides whether an unqualified source also has to clear its `*:` twin.
+  const ccsAllowed = ['logs-*', '*:logs-*', 'filebeat-*', 'remote:-logs-x*'];
+
+  it('keeps an unqualified source local, as cross-cluster search does', () => {
+    expect(assertEsqlSourcesAllowed('FROM filebeat-* | LIMIT 1', ccsAllowed)).toEqual({ ok: true });
+    expect(assertEsqlSourcesAllowed('FROM logs-x-* | LIMIT 1', ccsAllowed)).toEqual({ ok: true });
+  });
+
+  it('applies the twin check once the flag is on', () => {
+    expect(assertEsqlSourcesAllowed('FROM filebeat-* | LIMIT 1', ccsAllowed, CPS).ok).toBe(false);
+    expect(assertEsqlSourcesAllowed('FROM logs-x-* | LIMIT 1', ccsAllowed, CPS).ok).toBe(false);
   });
 });

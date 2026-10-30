@@ -174,6 +174,7 @@ describe('registerHuntBehaviorRoute', () => {
     expect(local?.length).toBeGreaterThan(0);
     expect(widened).toEqual(withLinkedProjectTwins(local ?? []));
     expect(widened).not.toEqual(local);
+    expect(huntBehaviorMock.mock.calls[0][2].cross_project_search).toBe(true);
   });
 
   it('scopes the client to the request with the space project routing', async () => {

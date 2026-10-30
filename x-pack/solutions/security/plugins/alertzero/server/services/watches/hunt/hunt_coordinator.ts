@@ -1036,6 +1036,7 @@ const huntCoordinatorCore = async (
           universe: scope.index_patterns,
           crossProjectSearch,
         }),
+        cross_project_search: crossProjectSearch,
         ...(continuation
           ? {
               already_searched_technique_ids: continuation.already_searched_technique_ids,

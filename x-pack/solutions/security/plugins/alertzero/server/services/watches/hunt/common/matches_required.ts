@@ -11,7 +11,6 @@ import {
   splitRemoteCluster,
   stripBackingPrefix,
 } from '../../../../../common/remote_cluster';
-import { reachesLinkedProjects } from './cps_scope';
 import { clusterCovers, compileGlob, exclusionReachesCluster, globsOverlap } from './index_glob';
 
 interface CompiledPattern {
@@ -92,11 +91,16 @@ const overlapsExclusion = (rawCandidate: string, exclusion: string): boolean =>
  * cluster the scope does not reach stays refused. A `::` selector
  * (`logs-*::failures`) is never allowed.
  *
- * An unqualified candidate also has to clear its `*:` twin when the allowlist was widened to
- * linked projects (`reachesLinkedProjects`): the search fans it out to them, so a
- * project-qualified exclusion applies to it even though it names no project.
+ * With `crossProjectSearch` an unqualified candidate also has to clear its `*:` twin: the
+ * search fans it out to every routed project, so a project-qualified exclusion applies to it
+ * even though it names no project. Without it an unqualified candidate stays local, as
+ * cross-cluster search keeps it.
  */
-export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string[]): boolean => {
+export const isIndexPatternAllowed = (
+  candidate: string,
+  allowedPatterns: string[],
+  { crossProjectSearch = false }: { crossProjectSearch?: boolean } = {}
+): boolean => {
   if (!candidate || allowedPatterns.length === 0) return false;
   // A generated exclusion is not a source; only positive entries can be named outright.
   const { exclude, cluster, index } = parseIndexScopeEntry(candidate);
@@ -120,7 +124,7 @@ export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string
   }
   return (
     cluster !== undefined ||
-    !reachesLinkedProjects(allowedPatterns) ||
+    !crossProjectSearch ||
     isIndexPatternAllowed(`*:${candidate}`, allowedPatterns)
   );
 };
