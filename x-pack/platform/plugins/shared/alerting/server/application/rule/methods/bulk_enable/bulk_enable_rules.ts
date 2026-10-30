@@ -20,9 +20,9 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import type { RawRule } from '../../../../types';
+import type { RawRule, RuleTypeParams } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { convertRuleIdsToKueryNode, authorizeRuleTypeParams } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
@@ -212,8 +212,17 @@ const bulkEnableRulesWithOCC = async (
         rulesFinderRules,
         async (rule) => {
           const ruleName = rule.attributes.name;
+          const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
           try {
+            // Re-authorize persisted params before activating them: they may have
+            // bypassed the authorizer entirely (e.g. via Saved Objects import).
+            await authorizeRuleTypeParams(
+              rule.attributes.params as RuleTypeParams,
+              ruleType.authorize?.params,
+              { request: context.request, spaceId: context.spaceId }
+            );
+
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
             }
