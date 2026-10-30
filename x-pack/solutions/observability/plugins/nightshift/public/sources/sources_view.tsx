@@ -28,7 +28,6 @@ import { isOnboardingInProgress } from './utils';
 import {
   CREATE_SOURCE_BUTTON_LABEL,
   EMPTY_STATE_BODY,
-  EMPTY_STATE_TITLE,
   READ_ONLY_EMPTY_STATE_TITLE,
   RETRY_LABEL,
   SOURCES_LOAD_ERROR_BODY,
@@ -37,6 +36,7 @@ import {
   SOURCES_TABLE_SEARCH_PLACEHOLDER,
   SOURCE_NOT_FOUND_TOAST_TITLE,
 } from './translations';
+import { RecommendedSourcesTable } from './recommended_sources/recommended_sources_table';
 
 const SourceFlyout = React.lazy(() =>
   import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
@@ -269,24 +269,16 @@ export function SourcesView() {
           </EuiFlexItem>
         ) : hasNoSources ? (
           <EuiFlexItem>
-            <EuiEmptyPrompt
-              data-test-subj="significantEventsAppSourcesEmptyPrompt"
-              iconType="database"
-              title={<h2>{canManage ? EMPTY_STATE_TITLE : READ_ONLY_EMPTY_STATE_TITLE}</h2>}
-              body={<p>{EMPTY_STATE_BODY}</p>}
-              actions={
-                canManage && (
-                  <EuiButton
-                    data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
-                    fill
-                    iconType="plus"
-                    onClick={openCreateFlyout}
-                  >
-                    {CREATE_SOURCE_BUTTON_LABEL}
-                  </EuiButton>
-                )
-              }
-            />
+            {canManage ? (
+              <RecommendedSourcesTable entry="sources_page" />
+            ) : (
+              <EuiEmptyPrompt
+                data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                iconType="database"
+                title={<h2>{READ_ONLY_EMPTY_STATE_TITLE}</h2>}
+                body={<p>{EMPTY_STATE_BODY}</p>}
+              />
+            )}
           </EuiFlexItem>
         ) : (
           <>
