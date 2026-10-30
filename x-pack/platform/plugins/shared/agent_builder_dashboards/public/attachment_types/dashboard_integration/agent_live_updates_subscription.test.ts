@@ -77,6 +77,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
     ['the linked saved dashboard', 'dashboard-1', 'dashboard-1', 1],
     ['an empty unsaved dashboard', undefined, undefined, 1],
     ['a different saved dashboard', 'dashboard-1', 'other-dashboard', 0],
+    ['an empty unsaved dashboard, for another saved dashboard', undefined, 'other-dashboard', 0],
   ])(
     'upserts the attachment and applies the state only for its own dashboard: %s',
     (_, savedObjectId, origin, calls) => {

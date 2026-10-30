@@ -103,6 +103,9 @@ export const registerDashboardAttachmentUiDefinition = ({
       switchMap(([api, appId]) => {
         // maintains a dashboardApi reference for access in getActionButtons
         dashboardApi = api;
+        if (api) {
+          appliedAttachments.claimNextDashboardLink(api);
+        }
         // integrates dashboard app with agent only when both dashboard and chat are active
         const isAgentOpen = appId === 'agentBuilder';
         return api && isAgentOpen

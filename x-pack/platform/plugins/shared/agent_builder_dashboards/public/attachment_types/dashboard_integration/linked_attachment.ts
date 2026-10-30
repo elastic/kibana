@@ -59,9 +59,18 @@ export const getLinkedAttachment = ({
   return unsavedAttachments.length === 1 ? unsavedAttachments[0] : undefined;
 };
 
+/** Whether the open dashboard is a new one without panels, so applying an attachment loses nothing. */
+export const isNewEmptyDashboard = (api: DashboardApi): boolean => {
+  if (api.savedObjectId$.getValue()) {
+    return false;
+  }
+  const { panels, pinnedPanels } = api.layout$.getValue();
+  return Object.keys(panels).length === 0 && Object.keys(pinnedPanels).length === 0;
+};
+
 /**
  * Whether the attachment belongs on the open dashboard: it is the attachment the dashboard is
- * linked to, or the dashboard is a new, empty one with nothing to lose.
+ * linked to, or an attachment without a saved dashboard and the dashboard is new and empty.
  */
 export const canShowAttachmentInDashboard = ({
   api,
@@ -79,6 +88,6 @@ export const canShowAttachmentInDashboard = ({
   if (dashboardId) {
     return attachment.origin === dashboardId;
   }
-  const { panels, pinnedPanels } = api.layout$.getValue();
-  return Object.keys(panels).length === 0 && Object.keys(pinnedPanels).length === 0;
+  // linking an unsaved copy of another saved dashboard would move the attachment's origin on save
+  return !attachment.origin && isNewEmptyDashboard(api);
 };

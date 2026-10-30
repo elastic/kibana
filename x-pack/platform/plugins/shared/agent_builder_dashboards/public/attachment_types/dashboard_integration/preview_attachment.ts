@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { applyAttachmentToDashboard } from './apply_attachment';
 import type { AppliedAttachmentsStore } from './applied_attachments_store';
-import { canShowAttachmentInDashboard } from './linked_attachment';
+import { canShowAttachmentInDashboard, isNewEmptyDashboard } from './linked_attachment';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
@@ -36,17 +38,27 @@ export const previewAttachmentInDashboard = async ({
   const linkedDashboardExists = attachment.origin
     ? await checkSavedDashboardExist(attachment.origin)
     : false;
-  const dashboardState = attachmentDataToDashboardState(attachment.data);
+
+  // the attachment's saved dashboard was deleted, so a new, empty dashboard can stand for it
+  if (!linkedDashboardExists && isNewEmptyDashboard(dashboardApi)) {
+    await applyAttachmentToDashboard({ store: appliedAttachments, api: dashboardApi, attachment });
+    return;
+  }
 
   // otherwise navigate to the attachment's saved dashboard, or a new unsaved dashboard with its state,
-  // so the open dashboard is not overwritten
+  // so the open dashboard is not overwritten; a new dashboard stays linked to the attachment
+  if (!linkedDashboardExists) {
+    appliedAttachments.linkNextDashboard(dashboardApi, attachment.id);
+  }
+  const { filters, query, ...dashboardState } = attachmentDataToDashboardState(attachment.data);
   // A host app's own `dashboardApi.locator` (e.g. Security's) may keep only `dashboardId` and drop
   // the attachment's panels, so navigate through the Dashboard app locator instead.
   await dashboardLocator?.navigate({
-    title: dashboardState.title,
-    description: dashboardState.description,
-    panels: dashboardState.panels,
-    time_range: dashboardState.time_range,
+    ...dashboardState,
+    filters: toStoredFilters(filters),
+    query: toStoredQuery(query),
+    // the attachment holds the dashboard's filters, so they replace the saved ones
+    preserveSavedFilters: false,
     dashboardId: linkedDashboardExists ? attachment.origin : undefined,
     viewMode: 'edit',
     changedBy: ['agent'],

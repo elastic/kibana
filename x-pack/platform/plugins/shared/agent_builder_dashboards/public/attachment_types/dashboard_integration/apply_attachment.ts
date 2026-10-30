@@ -69,7 +69,16 @@ export const isAttachmentShownInDashboard = (
   api: DashboardApi,
   { comparableState }: DashboardSnapshot,
   data: DashboardAttachmentData
-): boolean => isEmpty(api.diffStates(getComparableAttachmentState(data), comparableState));
+): boolean => {
+  const attachmentState = getComparableAttachmentState(data);
+  const { refresh_interval: refreshInterval } = comparableState;
+  // applying an attachment without a refresh interval keeps the dashboard's own
+  const baseline =
+    attachmentState.refresh_interval || !refreshInterval
+      ? attachmentState
+      : { ...attachmentState, refresh_interval: refreshInterval };
+  return isEmpty(api.diffStates(baseline, comparableState));
+};
 
 /**
  * Applies the attachment to the dashboard and waits for its panels to settle, so the state
