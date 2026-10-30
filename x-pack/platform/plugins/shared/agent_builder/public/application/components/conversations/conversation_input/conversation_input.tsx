@@ -58,7 +58,7 @@ const containerAriaLabel = i18n.translate('xpack.agentBuilder.conversationInput.
 });
 
 const postToTeamLabel = i18n.translate('xpack.agentBuilder.conversationInput.postToTeam.label', {
-  defaultMessage: "Posting to the team · Agent won't respond.",
+  defaultMessage: "Agent won't respond to this message.",
 });
 
 const getMessageTooLongLabel = (characterCount: number): string =>

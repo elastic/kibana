@@ -48,11 +48,11 @@ describe('trigger mode state', () => {
   });
 
   describe('a mention at the start', () => {
-    it('switches to Post to team for a user', () => {
+    it('switches to Skip agent for a user', () => {
       expect(modeOf(run(typed(userMention)))).toBe(Never);
     });
 
-    it('switches to Ask agent for the agent, also when the user had picked Post to team', () => {
+    it('switches to Ask agent for the agent, also when the user had picked Skip agent', () => {
       expect(modeOf(run(flip(Never), sent(Never), typed(agentMention)))).toBe(Always);
     });
 

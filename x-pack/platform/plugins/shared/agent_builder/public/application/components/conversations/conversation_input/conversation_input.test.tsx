@@ -117,7 +117,7 @@ jest.mock('./input_actions', () => ({
           onChange={(event) => onTriggerModeChange(event.target.value)}
         >
           <option value="always">Ask agent</option>
-          <option value="never">Post to team</option>
+          <option value="never">Skip agent</option>
         </select>
       )}
     </>
@@ -390,7 +390,7 @@ describe('ConversationInput', () => {
       selectTalkToUsers();
 
       expect(header).toHaveAttribute('aria-hidden', 'false');
-      expect(header).toHaveTextContent("Posting to the team · Agent won't respond.");
+      expect(header).toHaveTextContent("Agent won't respond to this message.");
     });
 
     it('falls back to running the agent once the conversation is no longer shared', () => {
@@ -532,7 +532,7 @@ describe('ConversationInput', () => {
         );
       });
 
-      it('asks the agent when the message starts with the agent, also after posting to the team', async () => {
+      it('asks the agent when the message starts with the agent, also after skipping the agent', async () => {
         renderInput(<ConversationInput />);
         fireEvent.change(modeValue(), { target: { value: 'never' } });
         fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
@@ -905,7 +905,7 @@ describe('InputActions', () => {
       renderActions({ onMentionClick: jest.fn() });
 
       expect(screen.getByTestId('agentBuilderConversationInputMentionButton')).toHaveAccessibleName(
-        'Mention a teammate or the agent'
+        'Mention a user or the agent'
       );
     });
 

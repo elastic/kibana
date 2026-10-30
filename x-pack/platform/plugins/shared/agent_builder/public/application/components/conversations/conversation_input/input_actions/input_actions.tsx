@@ -16,7 +16,7 @@ import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
 
 const mentionButtonLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.inputActions.mentionButtonLabel',
-  { defaultMessage: 'Mention a teammate or the agent' }
+  { defaultMessage: 'Mention a user or the agent' }
 );
 
 const connectorFlexItemStyles = css`

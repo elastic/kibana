@@ -50,7 +50,7 @@ export const getTriggerMode = (
 /**
  * How the agent toggle changes:
  * - Typing: only a mention at the start of the message counts (spaces before it are ignored).
- *   - `@user` → "Post to team" (`never`)
+ *   - `@user` → "Skip agent" (`never`)
  *   - `@agent` → "Ask agent" (`always`)
  *   - mention removed → back to `selected`
  *   - a mention later in the message changes nothing

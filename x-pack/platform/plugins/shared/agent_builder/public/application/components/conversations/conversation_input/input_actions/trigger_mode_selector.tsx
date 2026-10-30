@@ -18,18 +18,18 @@ const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
   ),
   [ChatTriggerMode.Never]: i18n.translate(
     'xpack.agentBuilder.conversationInput.triggerModeSelector.skipAgent',
-    { defaultMessage: 'Post to team' }
+    { defaultMessage: 'Skip agent' }
   ),
 };
 
 const selectorAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.triggerModeSelector.ariaLabel',
-  { defaultMessage: 'Ask the agent or post to the team' }
+  { defaultMessage: 'Ask or skip the agent' }
 );
 
 const getButtonAriaLabel = (mode: string) =>
   i18n.translate('xpack.agentBuilder.conversationInput.triggerModeSelector.buttonAriaLabel', {
-    defaultMessage: 'Ask the agent or post to the team, {mode}',
+    defaultMessage: 'Ask or skip the agent, {mode}',
     values: { mode },
   });
 

@@ -16,7 +16,7 @@ import {
   triggerModeReducer,
 } from './trigger_mode_state';
 
-/** State of the "Ask agent / Post to team" toggle. A leading mention can switch it. */
+/** State of the "Ask agent / Skip agent" toggle. A leading mention can switch it. */
 export const useTriggerMode = ({ canMention }: { canMention: boolean }) => {
   const conversationId = useConversationId();
   const isSelectable = useIsSharedConversation();
