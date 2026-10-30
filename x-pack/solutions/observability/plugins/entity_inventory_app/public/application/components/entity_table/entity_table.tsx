@@ -10,6 +10,7 @@ import type {
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
+  EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import {
@@ -19,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiScreenReaderOnly,
   EuiText,
 } from '@elastic/eui';
@@ -56,6 +58,15 @@ import {
 
 export const DEFAULT_PAGE_SIZE = 10;
 const NO_BADGE_COLUMNS: readonly string[] = [];
+
+/** Row rules only and a shaded header, as in the design's list tables. */
+const GRID_STYLE: EuiDataGridStyle = {
+  border: 'horizontal',
+  header: 'shade',
+  stripes: false,
+  fontSize: 'm',
+  cellPadding: 'm',
+};
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 type SortingColumns = EuiDataGridSorting['columns'];
@@ -194,7 +205,6 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       showSortSelector: true,
       showDisplaySelector: false,
       showFullScreenSelector: false,
-      showKeyboardShortcuts: false,
       additionalControls: {
         left: (
           <EuiText size="xs" data-test-subj="entityInventoryTableSummary">
@@ -204,6 +214,7 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
         right: (
           <EuiButtonEmpty
             size="xs"
+            color="text"
             iconType="undo"
             onClick={onReset}
             data-test-subj="entityInventoryTableReset"
@@ -222,11 +233,18 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
   );
 
   return (
-    <div data-test-subj="entityInventoryTable" data-entity-type={type}>
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="s"
+      data-test-subj="entityInventoryTable"
+      data-entity-type={type}
+    >
       <EuiDataGrid
         aria-label={getTableAriaLabel(typeName)}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
+        gridStyle={GRID_STYLE}
         rowCount={sortedRows.length}
         renderCellValue={renderCellValue}
         sorting={{ columns: sortingColumns, onSort }}
@@ -239,6 +257,6 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
         }}
         toolbarVisibility={toolbarVisibility}
       />
-    </div>
+    </EuiPanel>
   );
 };

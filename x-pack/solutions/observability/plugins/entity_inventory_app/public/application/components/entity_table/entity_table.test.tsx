@@ -162,6 +162,22 @@ describe('EntityTable', () => {
     );
   });
 
+  it('styles the grid like the design: horizontal row borders, a shaded header and no stripes', () => {
+    renderTable(getFixture('normal'));
+
+    const grid = document.querySelector('.euiDataGrid');
+    expect(grid).toHaveClass('euiDataGrid--bordersHorizontal');
+    expect(grid).toHaveClass('euiDataGrid--headerShade');
+    expect(grid).not.toHaveClass('euiDataGrid--stripes');
+  });
+
+  it('frames the table in a panel and keeps the keyboard shortcuts control', () => {
+    renderTable(getFixture('normal'));
+
+    expect(screen.getByTestId('entityInventoryTable')).toHaveClass('euiPanel');
+    expect(screen.getByTestId('dataGridKeyboardShortcutsButton')).toBeInTheDocument();
+  });
+
   it('shows 10 rows per page by default', () => {
     renderTable(getFixture('normal'));
 
