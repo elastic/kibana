@@ -61,6 +61,8 @@ import {
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
   readEsqlQuery,
   toEsqlQueryState,
 } from '@kbn/custom-content-common';
@@ -85,14 +87,12 @@ import {
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import type { CustomContentEmbeddableState } from '../server';
 
-const UPDATE_PANEL_TOOL_ID = 'custom_content_update_panel';
-const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
-
 const isToolCallForPanel = (event: BrowserChatEvent, panelId: string): boolean => {
   if (!isToolCallEvent(event)) return false;
   const { tool_id: toolId, params } = event.data;
-  if (toolId === UPDATE_PANEL_TOOL_ID) return params.embeddable_id === panelId;
-  if (toolId !== GENERATE_DASHBOARD_TOOL_ID || !Array.isArray(params.panels)) return false;
+  if (toolId === CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID) return params.embeddable_id === panelId;
+  if (toolId !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID || !Array.isArray(params.panels))
+    return false;
   return params.panels.some(
     (panel: unknown) =>
       typeof panel === 'object' && panel !== null && 'id' in panel && panel.id === panelId
