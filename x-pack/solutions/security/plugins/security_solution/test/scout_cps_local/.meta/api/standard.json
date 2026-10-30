@@ -1,5 +1,5 @@
 {
-  "sha1": "ebfcddd7fd9273f98cf0f9cedabe37fa6f23c97f",
+  "sha1": "9268346bf4cdb7a0ac8488f352f6496de99aa93a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,6 +58,76 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/cps/missing_npre_routing.spec.ts",
         "line": 151,
         "column": 5
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-45adf789df21325",
+      "title": "Hunt Watch - index scope and worker coverage across projects resolves a linked project pattern through index_scope when the space routes to it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 132,
+        "column": 9
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-100b06c2a31330c",
+      "title": "Hunt Watch - index scope and worker coverage across projects cannot resolve a linked project pattern in a space routed to the origin only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 174,
+        "column": 5
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-687412fd0a9b7d5",
+      "title": "Hunt Watch - index scope and worker coverage across projects finds a Tier 1 IOC hit on the linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 197,
+        "column": 6
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-8a2b27ce2f16523",
+      "title": "Hunt Watch - index scope and worker coverage across projects answers worker coverage from the role for the built-in Serverless role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 235,
+        "column": 32
+      }
+    },
+    {
+      "id": "752be1b1bae5fc6-336624e5d868c5c",
+      "title": "Hunt Watch - index scope and worker coverage across projects lists a custom pattern with data that the built-in role cannot read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/tests/hunt/hunt_index_scope_cps.spec.ts",
+        "line": 253,
+        "column": 36
       }
     },
     {
