@@ -25,7 +25,8 @@ const kibanaApis = (...apiIds: string[]): ApiReference[] =>
 
 const listRefreshes: readonly ListRefresh[] = [
   {
-    queryKey: queryKeys.agentProfiles.all,
+    queryKey: queryKeys.agentProfiles.allLists,
+    exact: false,
     apis: kibanaApis(
       'agent-builder.post-agent-builder-agents',
       'agent-builder.put-agent-builder-agents-id',

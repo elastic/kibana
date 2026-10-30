@@ -32,6 +32,15 @@ triggers:
           type: string
           default: '{{ execution.id }}'
           description: Investigation to run. Defaults to one named after this execution.
+        # How long the investigation may run. It caps the step below rather than this run's
+        # `settings.timeout`, because a workflow bound to a service account only runs its saved
+        # definition: a run that rewrote its own timeout would be refused. Capped at the shared
+        # investigation's own 60m timeout, so the step timeout always fires before this run's.
+        timeout_seconds:
+          type: number
+          default: 3600
+          maximum: 3600
+          description: Upper bound for the investigation in seconds, at most an hour. Defaults to an hour.
       # The shared investigation validates the rest of the inputs.
       additionalProperties: true
 
@@ -53,6 +62,9 @@ steps:
 
   - name: investigate
     type: workflow.execute
+    # Rendered per run from the input above, so a caller's timeout applies without changing the
+    # stored definition. Shorter than this workflow's own timeout, which has to outlast it.
+    timeout: '{{ inputs.timeout_seconds }}s'
     with:
       workflow-id: system-nightshift-investigation
       run-as-mode: inherit
