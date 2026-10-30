@@ -1,0 +1,130 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "transform-indicator-raw-1",
+    "index": "logs-ti_transform_test.indicator",
+    "source": {
+      "@timestamp": "2022-06-01T10:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_transform_test.indicator",
+        "id": "transform-indicator",
+        "type": "indicator"
+      },
+      "labels": {
+        "is_ioc_transform_source": "true"
+      },
+      "threat": {
+        "feed": {
+          "name": "Transform Test Feed"
+        },
+        "indicator": {
+          "file": {
+            "hash": {
+              "sha256": "5d1b6a2c0f3e4b7a9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b"
+            }
+          },
+          "first_seen": "2022-06-01T09:00:00.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "transform-indicator-raw-2",
+    "index": "logs-ti_transform_test.indicator",
+    "source": {
+      "@timestamp": "2022-06-02T10:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_transform_test.indicator",
+        "id": "transform-indicator",
+        "type": "indicator"
+      },
+      "labels": {
+        "is_ioc_transform_source": "true"
+      },
+      "threat": {
+        "feed": {
+          "name": "Transform Test Feed"
+        },
+        "indicator": {
+          "file": {
+            "hash": {
+              "sha256": "5d1b6a2c0f3e4b7a9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b"
+            }
+          },
+          "first_seen": "2022-06-01T09:00:00.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "transform-indicator-latest",
+    "index": "logs-ti_transform_test_latest.indicator",
+    "source": {
+      "@timestamp": "2022-06-02T10:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_transform_test.indicator",
+        "id": "transform-indicator",
+        "type": "indicator"
+      },
+      "labels": {
+        "is_ioc_transform_source": "false"
+      },
+      "threat": {
+        "feed": {
+          "name": "Transform Test Feed"
+        },
+        "indicator": {
+          "file": {
+            "hash": {
+              "sha256": "5d1b6a2c0f3e4b7a9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b"
+            }
+          },
+          "first_seen": "2022-06-01T09:00:00.000Z",
+          "type": "file"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "custom-indicator",
+    "index": "logs-ti_custom_test.indicator",
+    "source": {
+      "@timestamp": "2022-06-02T11:00:00.000Z",
+      "event": {
+        "category": "threat",
+        "dataset": "ti_custom_test.indicator",
+        "id": "custom-indicator",
+        "type": "indicator"
+      },
+      "threat": {
+        "feed": {
+          "name": "Custom Test Feed"
+        },
+        "indicator": {
+          "first_seen": "2022-06-02T10:30:00.000Z",
+          "type": "url",
+          "url": {
+            "full": "https://malicious.example.com/payload"
+          }
+        }
+      }
+    }
+  }
+}

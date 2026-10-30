@@ -36,6 +36,11 @@ export class SecurityOverviewPage {
     this.threatIntelEnableModuleButton = this.page.testSubj.locator('cti-enable-module-button');
   }
 
+  /** Threat intelligence panel row for a feed, holding its name and indicator count. */
+  threatIntelFeedRow(feedName: string): Locator {
+    return this.threatIntelPanel.getByRole('row').filter({ hasText: feedName });
+  }
+
   /** Opens Overview, optionally with an absolute global time range instead of the default. */
   async navigate(timeRange?: AbsoluteTimeRange): Promise<void> {
     await this.page.gotoApp(

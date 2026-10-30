@@ -305,6 +305,35 @@ describe('Multiple indicators', { tags: ['@ess'] }, () => {
   });
 });
 
+describe('Indicators from integration transforms', { tags: ['@ess'] }, () => {
+  before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_transform' }));
+
+  after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_transform' }));
+
+  beforeEach(() => {
+    login();
+    visitWithTimeRange(URL);
+    waitForViewToBeLoaded();
+  });
+
+  it('should show each transform indicator once alongside indicators without the transform label', () => {
+    // ti_indicators_data_transform holds two raw versions and the latest copy of one indicator,
+    // plus one indicator from a feed without the transform label
+    const indicatorsNumber = 2;
+
+    cy.get(TABLE_CONTROLS).should(
+      'contain.text',
+      `Showing 1-${indicatorsNumber} of ${indicatorsNumber}`
+    );
+
+    // indicators plus the header
+    cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL).should('have.length', indicatorsNumber + 1);
+    cy.get(INDICATORS_TABLE_INDICATOR_NAME_CELL)
+      .should('contain.text', '5d1b6a2c0f3e4b7a9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b')
+      .and('contain.text', 'https://malicious.example.com/payload');
+  });
+});
+
 describe('Invalid Indicators', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
 
