@@ -39,8 +39,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     .map(({ id }) => id);
   const payload = preview?.groups[0];
   const hasKqlMatcher = Boolean(normalizeMatcher(policy.matcher)?.expression);
-  // Once sent, the form stays locked so the same workflows are not started again by accident.
-  const isSent = sendResponse !== undefined;
   const resultsByWorkflowId = new Map(
     (sendResponse?.results ?? []).map((result) => [result.workflow_id, result])
   );
@@ -131,7 +129,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
                 <DestinationTestCard
                   destination={destination}
                   checked={destination.executable && !deselectedIds.has(destination.id)}
-                  disabled={!destination.executable || isSending || isSent}
+                  disabled={!destination.executable || isSending}
                   onChange={() => toggleDestination(destination.id)}
                   result={resultsByWorkflowId.get(destination.id)}
                 />
@@ -151,7 +149,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           iconType="send"
           onClick={send}
           isLoading={isSending}
-          isDisabled={!payload || selectedIds.length === 0 || isSent}
+          isDisabled={!payload || selectedIds.length === 0}
           data-test-subj="sendTestNotificationSendButton"
         />
       </Footer>
