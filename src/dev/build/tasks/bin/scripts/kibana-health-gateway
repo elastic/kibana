@@ -15,7 +15,6 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 . "$DIR/bin/kibana_env"
-NODE="${DIR}/node/default/bin/node"
 if [ -n "$KBN_NODE_HOME" ]; then
   NODE="${KBN_NODE_HOME}/bin/node" 
 else  
