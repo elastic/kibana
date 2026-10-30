@@ -18,6 +18,17 @@ export {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './string_helpers';
-export type { SchemaHelper, StringWarnOptions, UnboundedStringOptions } from './string_helpers';
+export type {
+  SchemaHelper,
+  StringWarnOptions,
+  UnboundedStringOptions,
+  BoundedStringHelper,
+  BoundedStringOptions,
+  BoundedStringWarnOptions,
+} from './string_helpers';

@@ -19,6 +19,10 @@ import {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './src/helpers';
 
@@ -92,9 +96,20 @@ export {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from './src/helpers';
-export type { SchemaHelper, StringWarnOptions, UnboundedStringOptions } from './src/helpers';
+export type {
+  SchemaHelper,
+  StringWarnOptions,
+  UnboundedStringOptions,
+  BoundedStringHelper,
+  BoundedStringOptions,
+  BoundedStringWarnOptions,
+} from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -804,6 +819,10 @@ export const schema = {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
   string,
   uri,

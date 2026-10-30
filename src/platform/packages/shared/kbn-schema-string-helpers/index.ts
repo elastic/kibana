@@ -12,6 +12,10 @@ export {
   getStringHelperLimits,
   assertUnboundedStringReason,
   assertValidMinLength,
+  BOUNDED_STRING_HELPER,
+  BOUNDED_STRING_MAX_LENGTH,
+  getBoundedStringLimits,
+  assertBoundedStringLabel,
 } from './limits';
-export type { StringHelperName, StringHelperLimits } from './limits';
+export type { StringHelperName, StringHelperLimits, ReportedStringHelperName } from './limits';
 export { reportStringLengthViolation } from './report_string_length_violation';

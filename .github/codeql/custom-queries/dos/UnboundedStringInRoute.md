@@ -40,10 +40,14 @@ Prefer the built-in semantic string helpers in `@kbn/config-schema` and `@kbn/zo
 | `searchFilter` | 0 | 10,000 |
 | `aggregation` | 0 | 100,000 |
 | `querySortField` | 0 | 256 |
+| `urlString` | 1 | 2,048 |
+| `pemCertificate` | 1 | 262,144 |
+| `version` | 1 | 256 |
 
 For example, use `schema.savedObjectId()` or Zod's `savedObjectId()`.
 Helpers accept explicit overrides when an existing route requires a different
-bound. Use a raw bounded string for fields without a matching semantic helper.
+bound. For fields without a matching semantic helper, use `boundedString({ maxLength })`,
+which requires an explicit limit.
 
 ### Route as a simple proxy to Elasticsearch API
 
@@ -161,8 +165,8 @@ unboundedString({ reason: 'Size is enforced upstream' });
 ```
 
 The query treats these library exports as intentional data-flow barriers, including
-aliased imports. Reporting helpers (`schema.savedObjectId.warn()` or
-`savedObjectId.warn()`) are also intentional barriers: they report maximum
+aliased imports. Reporting helpers (`schema.savedObjectId.warn()`,
+`savedObjectId.warn()` or `boundedString.warn({ maxLength, label })`) are also intentional barriers: they report maximum
 length violations without rejecting them during adoption. Unrelated functions
 with the same names do not suppress alerts.
 

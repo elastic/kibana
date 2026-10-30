@@ -74,3 +74,47 @@ export const registerStringHelperRoutes = (router: TestRouter, handler: () => vo
     handler
   );
 };
+
+export const registerBoundedStringHelperRoutes = (
+  router: TestRouter,
+  handler: () => void
+): void => {
+  // The URL, PEM certificate, version and generic bounded helpers, strict or reporting,
+  // must not produce alerts.
+
+  router.post(
+    {
+      path: '/api/helpers/config/bounded',
+      validate: {
+        body: schema.object({
+          url: schema.urlString(),
+          urlWarn: schema.urlString.warn({ label: 'test.url' }),
+          certificate: schema.pemCertificate(),
+          certificateWarn: schema.pemCertificate.warn({ label: 'test.certificate' }),
+          version: schema.version(),
+          versionWarn: schema.version.warn({ label: 'test.version' }),
+          bounded: schema.boundedString({ maxLength: 4096 }),
+          boundedWarn: schema.boundedString.warn({ maxLength: 4096, label: 'test.bounded' }),
+        }),
+      },
+    },
+    handler
+  );
+
+  router.post(
+    {
+      path: '/api/helpers/zod/bounded',
+      validate: {
+        body: z.object({
+          url: zNs.urlString(),
+          urlWarn: zNs.urlString.warn({ label: 'test.url' }),
+          certificateWarn: zNs.pemCertificate.warn({ label: 'test.certificate' }),
+          versionWarn: zNs.version.warn({ label: 'test.version' }),
+          bounded: zNs.boundedString({ maxLength: 4096 }),
+          boundedWarn: zNs.boundedString.warn({ maxLength: 4096, label: 'test.bounded' }),
+        }),
+      },
+    },
+    handler
+  );
+};
