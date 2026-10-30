@@ -58,6 +58,7 @@ export {
   asSavedObjectExecutionSource,
   asHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  asAgentBuilderExecutionSource,
   isNotificationExecutionSource,
   getBasicAuthHeader,
   NOTIFICATIONS_REQUESTER_ID,
