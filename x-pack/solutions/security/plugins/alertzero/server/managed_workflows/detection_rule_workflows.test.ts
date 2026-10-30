@@ -1435,7 +1435,7 @@ describe('detection rule workflows', () => {
           'query',
           'does not support saved query rules or machine learning rules',
         ],
-        ['esql', 'exception', 'cannot apply an exception to an ES|QL rule'],
+        ['esql', 'exception', 'an ES|QL rule has no place for one'],
         ['query', 'exception', 'could not convert the proposed exception into a preview filter'],
         ['query', 'threshold', 'does not support this change on a query rule'],
       ])(
@@ -1619,6 +1619,277 @@ describe('detection rule workflows', () => {
           ]);
           expect(query.bool.must_not).toEqual([{ exists: { field: 'kibana.alert.group.index' } }]);
         }
+      });
+
+      // The preview runs as the worker's service account, which reads a fixed set of
+      // index patterns. An index outside them is invisible to the preview, which then
+      // reports zero alerts, so the worker asks first and names what it cannot read.
+      it('skips both previews when the running identity cannot read a rule index', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const byName = (name: string) => previewSteps.find((step) => step.name === name)!;
+        const probe = byName('probe_privileges');
+        const emit = byName('emit_result').with as Record<string, string>;
+
+        expect(probe.type).toBe('elasticsearch.request');
+        expect(probe.with?.path).toBe('/_security/user/_has_privileges');
+        expect(String(probe.if)).toContain('steps.checkable_indices.output.csv != blank');
+
+        // `-name` entries exclude indices from the search and are not index names the
+        // identity could hold a privilege on, so they stay out of the probe. So do
+        // `cluster:name` entries: `_has_privileges` checks local grants only and
+        // answers false for a remote pattern the role holds through `remote_indices`.
+        // A `::failures` selector is stripped, as the API rejects any name carrying one.
+        const csvOf = (indices: unknown) =>
+          createWorkflowLiquidEngine().parseAndRenderSync(
+            String((byName('checkable_indices').with as Record<string, string>).csv),
+            { inputs: { indices } }
+          );
+        const namesOf = (csv: string) =>
+          resolveExpression(
+            (probe.with?.body as { index: Array<{ names: string }> }).index[0].names,
+            { steps: { checkable_indices: { output: { csv } } } }
+          );
+        expect(
+          namesOf(
+            csvOf([
+              'logs-*',
+              '-*elastic-cloud-logs-*',
+              'remote1:logs-*',
+              '*:logs-*',
+              'remote1:logs-*::failures',
+              '<logs-acme.{now/d}>',
+              'custom-edr-*',
+              'custom-edr-*::failures',
+            ])
+          )
+        ).toEqual(['logs-*', 'custom-edr-*', 'custom-edr-*']);
+        expect(csvOf(['-*elastic-cloud-logs-*'])).toBe('');
+        expect(csvOf(['remote1:logs-*'])).toBe('');
+        expect(csvOf(['<logs-acme.{now/d}>'])).toBe('');
+        expect(namesOf(csvOf(['logs-*::data']))).toEqual(['logs-*']);
+        expect(csvOf(undefined)).toBe('');
+        for (const name of ['preview_rule', 'preview_proposed']) {
+          expect(String(byName(name).if)).toContain(
+            'steps.collect_unreadable_indices.output.unreadable_indices == blank'
+          );
+        }
+        for (const verdict of ['succeeded', 'proposed_succeeded']) {
+          expect(emit[verdict]).toContain('unreadable_indices == blank');
+        }
+
+        const steps = {
+          probe_privileges: {
+            output: { index: { 'logs-*': { read: true }, 'custom-edr-*': { read: false } } },
+          },
+        };
+        const unreadable = createWorkflowLiquidEngine().parseAndRenderSync(
+          String(
+            (byName('collect_unreadable_indices').with as Record<string, string>).unreadable_indices
+          ),
+          { steps }
+        );
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(emit.unreadable_indices, {
+            steps: { collect_unreadable_indices: { output: { unreadable_indices: unreadable } } },
+          })
+        ).toBe('custom-edr-*');
+        expect(
+          createWorkflowLiquidEngine().parseAndRenderSync(
+            String(
+              (byName('collect_unreadable_indices').with as Record<string, string>)
+                .unreadable_indices
+            ),
+            { steps: {} }
+          )
+        ).toBe('');
+      });
+
+      // A rule whose patterns match no index the identity can see is only a warning
+      // to the preview API, which still answers 200 with zero alerts. That has to
+      // fail the verdict like an error, or "0 → 0" reads as a real result.
+      it('fails a preview whose index patterns matched nothing', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const byName = (name: string) => previewSteps.find((step) => step.name === name)!;
+        const emit = byName('emit_result').with as Record<string, string>;
+        const warning =
+          'Unable to find matching indices for rule r. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.';
+        const errorsOf = (step: string, source: string, logs: unknown[]) =>
+          createWorkflowLiquidEngine().parseAndRenderSync(
+            String((byName(step).with as Record<string, string>).error_text),
+            { steps: { [source]: { output: { logs } } } }
+          );
+
+        for (const [step, source, flag] of [
+          ['collect_errors', 'preview_rule', 'no_matching_indices'],
+          ['collect_proposed_errors', 'preview_proposed', 'proposed_no_matching_indices'],
+        ]) {
+          const skipped = errorsOf(step, source, [{ errors: [], warnings: [warning] }]);
+          expect(skipped).toContain('Unable to find matching indices');
+          expect(
+            resolveExpression(emit[flag], {
+              steps: { [step]: { output: { error_text: skipped } } },
+            })
+          ).toBe(true);
+
+          const benign = errorsOf(step, source, [
+            { errors: [], warnings: ['Disabled actions: a'] },
+          ]);
+          expect(benign).toBe('');
+          expect(
+            resolveExpression(emit[flag], { steps: { [step]: { output: { error_text: benign } } } })
+          ).toBe(false);
+        }
+      });
+
+      // An invocation that stops at max_signals still counts, but the count is a floor.
+      // The verdict stays valid; the flag lets the proposal say "at least".
+      it('flags a preview that stopped at the alert limit without failing it', () => {
+        const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
+        const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
+        const byName = (name: string) => previewSteps.find((step) => step.name === name)!;
+        const emit = byName('emit_result').with as Record<string, string>;
+        const warning =
+          'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.';
+
+        for (const [step, source, flag] of [
+          ['collect_errors', 'preview_rule', 'alert_limit_reached'],
+          ['collect_proposed_errors', 'preview_proposed', 'proposed_alert_limit_reached'],
+        ]) {
+          const collect = byName(step).with as Record<string, string>;
+          const render = (logs: unknown[]) =>
+            createWorkflowLiquidEngine().parseAndRenderSync(String(collect.limit_reached), {
+              steps: { [source]: { output: { logs } } },
+            });
+
+          const capped = render([
+            { errors: [], warnings: [] },
+            { errors: [], warnings: [warning] },
+          ]);
+          expect(capped).toBe('true');
+          expect(
+            resolveExpression(emit[flag], {
+              steps: { [step]: { output: { limit_reached: capped } } },
+            })
+          ).toBe(true);
+          expect(
+            resolveExpression(emit[flag], {
+              steps: {
+                [step]: { output: { limit_reached: render([{ errors: [], warnings: [] }]) } },
+              },
+            })
+          ).toBe(false);
+        }
+        expect(emit.succeeded).not.toContain('limit_reached');
+        expect(emit.proposed_succeeded).not.toContain('limit_reached');
+      });
+
+      it('marks capped counts as a floor and never claims a reduction from one', async () => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const comment = String((compose.with as Record<string, string>).comment);
+        const report = reviewSteps.find(({ name }) => name === 'report_review_completed')!
+          .with as Record<string, string>;
+        const outcome = (limits: Record<string, boolean>) => ({
+          current_succeeded: true,
+          current_is_aborted: false,
+          current_alert_count: 200,
+          proposed_succeeded: true,
+          proposed_is_aborted: false,
+          proposed_alert_count: 120,
+          ...limits,
+        });
+
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
+          inputs: {},
+          consts: {},
+          steps: {
+            fetch_rule: { output: { type: 'query', name: 'r', id: 'id', max_signals: 100 } },
+            diagnose_rule: { output: { structured_output: { change_type: 'query' } } },
+            can_preview_query_change: { output: { supported: true } },
+            record_preview_outcome: {
+              output: outcome({ current_limit_reached: true, proposed_limit_reached: true }),
+            },
+          },
+        });
+        expect(rendered).toContain('Alerts with the current rule: at least 200');
+        expect(rendered).toContain('Alerts with the proposed change: at least 120');
+        expect(rendered).toContain('maximum alerts per execution (100)');
+
+        const reduced = (limits: Record<string, boolean>) =>
+          resolveExpression(report.backtest_reduced_alerts, {
+            steps: { record_preview_outcome: { output: outcome(limits) } },
+          });
+        expect(reduced({})).toBe(true);
+        expect(reduced({ current_limit_reached: true })).toBe(true);
+        expect(reduced({ proposed_limit_reached: true })).toBe(false);
+      });
+
+      // The rule's `index`, plus `threat_index` for indicator match. An ES|QL rule
+      // names its indices in the query, so it has none to check. A rule with a data
+      // view searches the view and ignores its own `index`, so that is left out too;
+      // the threat index is searched either way.
+      it('hands the preview worker the indices the rule reads', () => {
+        const probe = reviewSteps.find(({ name }) => name === 'probe_indices')!;
+        const previews = reviewSteps.find(({ name }) => name === 'run_previews')!;
+        const indices = (previews.with?.inputs as Record<string, unknown>).indices;
+        const resolve = (rule: Record<string, unknown>) => {
+          const context = { consts: { no_items: [] }, steps: { fetch_rule: { output: rule } } };
+          const probed = resolveExpression(probe.if, context)
+            ? { output: { index: resolveExpression(probe.with?.index, context) } }
+            : {};
+          return resolveExpression(indices, {
+            ...context,
+            steps: { ...context.steps, probe_indices: probed },
+          });
+        };
+
+        expect(resolve({ index: ['logs-*', 'custom-edr-*'], threat_index: ['ti-*'] })).toEqual([
+          'logs-*',
+          'custom-edr-*',
+          'ti-*',
+        ]);
+        expect(resolve({ index: ['custom-edr-*'] })).toEqual(['custom-edr-*']);
+        expect(resolve({ type: 'esql', query: 'FROM custom-edr-*' })).toEqual([]);
+        expect(resolve({ data_view_id: 'dv', index: ['legacy-*'] })).toEqual([]);
+        expect(
+          resolve({ data_view_id: 'dv', index: ['legacy-*'], threat_index: ['ti-*'] })
+        ).toEqual(['ti-*']);
+      });
+
+      it.each([
+        [
+          'the worker cannot read a rule index',
+          { unreadable_indices: 'custom-edr-*', no_matching_indices: false },
+          'cannot read these rule indices: `custom-edr-*`',
+        ],
+        [
+          'no index the worker can read matches the rule',
+          { unreadable_indices: '', no_matching_indices: true },
+          'no index the Rule Tuning worker can read matches the rule',
+        ],
+      ])('says why the backtest did not run when %s', async (_scenario, outcome, reason) => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const comment = String((compose.with as Record<string, string>).comment);
+
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
+          inputs: {},
+          consts: {},
+          steps: {
+            fetch_rule: { output: { type: 'query', name: 'r', id: 'id' } },
+            diagnose_rule: { output: { structured_output: { change_type: 'query' } } },
+            can_preview_query_change: { output: { supported: true } },
+            record_preview_outcome: {
+              output: { ...outcome, current_succeeded: false, proposed_succeeded: false },
+            },
+          },
+        });
+
+        expect(rendered).toContain('The backtest did not run');
+        expect(rendered).toContain(reason);
+        expect(rendered).not.toContain('The backtest ran');
+        expect(rendered).not.toContain('Alerts with the current rule');
+        expect(rendered).toContain('Approving still applies the proposed change');
       });
 
       // Data view, timestamp override and alert suppression are passed through to
