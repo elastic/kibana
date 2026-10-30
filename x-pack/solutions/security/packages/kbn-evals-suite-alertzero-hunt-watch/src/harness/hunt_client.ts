@@ -34,7 +34,7 @@ export interface HuntWatchClientOptions {
    * ingest route is a plain `op_type: create` index op and never refreshes,
    * so a fresh id can otherwise come back `not_found`.
    */
-  esClient: ReportsIndexRefresher;
+  esClient: ReportsIndexClient;
   /** Sweep poll bounds; one sweep runs up to 14 hunts with model calls. */
   maxWaitMs?: number;
   pollIntervalMs?: number;
@@ -106,9 +106,16 @@ export const readHuntResultOutput = (steps: readonly unknown[]): unknown => {
   return undefined;
 };
 
-/** The one ES call the client makes: an explicit refresh of the reports index. */
-export interface ReportsIndexRefresher {
+/** The ES calls the client makes: refresh the reports index, delete the reports it ingested. */
+export interface ReportsIndexClient {
   indices: { refresh: (params: { index: string }) => Promise<unknown> };
+  deleteByQuery: (params: {
+    index: string;
+    query: { ids: { values: string[] } };
+    refresh: boolean;
+    conflicts: 'proceed';
+    ignore_unavailable: boolean;
+  }) => Promise<unknown>;
 }
 
 /**
@@ -141,6 +148,22 @@ export class HuntWatchClient {
       body: { document: nestDottedKeys(document) },
     });
     return { reportId: response.data.reportId };
+  }
+
+  /**
+   * Deletes reports this run ingested. The ingest route has no delete
+   * counterpart, so cleanup goes to the reports index directly, by the
+   * ES-minted ids only (other suites' reports on a shared stack survive).
+   */
+  async deleteReports(reportIds: readonly string[]): Promise<void> {
+    if (reportIds.length === 0) return;
+    await this.options.esClient.deleteByQuery({
+      index: THREAT_REPORTS_INDEX,
+      query: { ids: { values: [...reportIds] } },
+      refresh: true,
+      conflicts: 'proceed',
+      ignore_unavailable: true,
+    });
   }
 
   /**
@@ -184,8 +207,15 @@ export class HuntWatchClient {
   ): Promise<{
     runs: Map<string, CoordinatorRun>;
     invalidBatches: Array<{ batch: string[]; response: CandidatesResponse }>;
+    /**
+     * Terminal status of the sweep that covered each report. A report without a
+     * run whose sweep did not end `completed` (skipped by the concurrency gate,
+     * failed, cancelled, timed out) was never hunted — not a parse problem.
+     */
+    sweepStatusByReport: Map<string, string>;
   }> {
     const runs = new Map<string, CoordinatorRun>();
+    const sweepStatusByReport = new Map<string, string>();
     const invalidBatches: Array<{ batch: string[]; response: CandidatesResponse }> = [];
 
     // Serialized: the Worker's concurrency is `strategy: drop, max: 1`, so a
@@ -197,14 +227,17 @@ export class HuntWatchClient {
       const perBatchOk = candidatesMatchBatch(batch, candidates);
       if (perBatchOk) {
         const sweep = await this.triggerSweep(batch);
-        const sweepRuns = await this.readSweepCoordinatorOutputs(sweep.executionId);
+        const { runs: sweepRuns, status } = await this.readSweepCoordinatorOutputs(
+          sweep.executionId
+        );
         for (const [reportId, run] of sweepRuns) runs.set(reportId, run);
+        for (const reportId of batch) sweepStatusByReport.set(reportId, status);
       } else {
         invalidBatches.push({ batch, response: candidates });
       }
     }
 
-    return { runs, invalidBatches };
+    return { runs, invalidBatches, sweepStatusByReport };
   }
 
   /** Manual Worker trigger with reportIds: the bypass path (design v1 §4). */
@@ -275,8 +308,9 @@ export class HuntWatchClient {
    */
   private async readSweepCoordinatorOutputs(
     sweepExecutionId: string
-  ): Promise<Map<string, CoordinatorRun>> {
-    await this.waitForSweep(sweepExecutionId);
+  ): Promise<{ runs: Map<string, CoordinatorRun>; status: string }> {
+    const sweep = await this.waitForSweep(sweepExecutionId);
+    const status = typeof sweep.status === 'string' ? sweep.status : 'unknown';
     const runs = new Map<string, CoordinatorRun>();
 
     const childrenResponse = await this.kbnClient.request<Array<Record<string, unknown>>>({
@@ -303,6 +337,6 @@ export class HuntWatchClient {
         runs.set(reportId, wireToCoordinatorRun(output));
       }
     }
-    return runs;
+    return { runs, status };
   }
 }

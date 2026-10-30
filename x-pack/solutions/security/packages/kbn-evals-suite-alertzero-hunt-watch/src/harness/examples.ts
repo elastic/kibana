@@ -202,3 +202,13 @@ export const buildExamples = ({
     };
   });
 };
+
+/**
+ * INVALID reason for a report with no coordinator output. A sweep that ended
+ * in anything but `completed` never hunted the report, which must stay
+ * distinguishable from a completed sweep whose output did not parse.
+ */
+export const missingOutputReason = (reportId: string, sweepStatus: string | undefined): string =>
+  sweepStatus !== undefined && sweepStatus !== 'completed'
+    ? `sweep-not-completed: sweep ended ${sweepStatus}, report ${reportId} was not hunted`
+    : `missing-coordinator-output: no run_hunt_coordinator step output for report ${reportId}`;

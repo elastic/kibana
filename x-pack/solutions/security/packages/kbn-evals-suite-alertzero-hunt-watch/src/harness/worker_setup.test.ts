@@ -7,13 +7,18 @@
 
 import { KbnClientRequesterError, type KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { HUNT_WORKER_ACCOUNT_NAME, HUNT_WORKER_ID, ensureHuntWorkerEnabled } from './worker_setup';
+import {
+  HUNT_WORKER_ACCOUNT_NAME,
+  HUNT_WORKER_ID,
+  ensureHuntWorkerEnabled,
+  restoreHuntWorker,
+} from './worker_setup';
 
 interface Req {
   path: string;
   method?: string;
   query?: Record<string, unknown>;
-  body?: { settings: { serviceAccountId: string } };
+  body?: { enabled?: boolean; settings: { serviceAccountId: string | null } };
 }
 
 const log = {
@@ -67,14 +72,17 @@ const makeServer = ({
     }
     if (req.method === 'PATCH') {
       if (enableWorks) {
-        state.enabled = true;
-        state.serviceAccountId = req.body?.settings.serviceAccountId;
+        state.enabled = req.body?.enabled ?? state.enabled;
+        state.serviceAccountId = req.body?.settings.serviceAccountId ?? undefined;
       }
+      return { data: {} };
+    }
+    if (req.method === 'DELETE' && req.path.startsWith('/internal/security/service_account/')) {
       return { data: {} };
     }
     throw new Error(`unexpected request ${req.method} ${req.path}`);
   });
-  return { kbnClient: { request } as unknown as KbnClient, requests };
+  return { kbnClient: { request } as unknown as KbnClient, requests, state };
 };
 
 const roleRequests = (requests: Req[]) =>
@@ -189,5 +197,65 @@ describe('ensureHuntWorkerEnabled (B4)', () => {
     await expect(ensureHuntWorkerEnabled(kbnClient, log)).rejects.toThrow(
       /not enabled after setup.*no_service_account/
     );
+  });
+});
+
+describe('restoreHuntWorker', () => {
+  it('disables the Worker, clears the account and deletes the account this run created', async () => {
+    const { kbnClient, requests, state } = makeServer({});
+    const { prior } = await ensureHuntWorkerEnabled(kbnClient, log);
+    expect(state.enabled).toBe(true);
+
+    await restoreHuntWorker(kbnClient, log, prior);
+
+    expect(state).toMatchObject({ enabled: false, serviceAccountId: undefined });
+    const patches = requests.filter((r) => r.method === 'PATCH');
+    expect(patches[patches.length - 1].body).toEqual({
+      enabled: false,
+      settingsRevision: 7,
+      settings: { serviceAccountId: null },
+    });
+    expect(requests.filter((r) => r.method === 'DELETE').map((r) => r.path)).toEqual([
+      '/internal/security/service_account/sa-new',
+    ]);
+  });
+
+  it('restores a previously enabled Worker on its own account and deletes nothing', async () => {
+    const { kbnClient, requests, state } = makeServer({
+      accounts: [
+        { id: 'sa-other', name: HUNT_WORKER_ACCOUNT_NAME, enabled: true, assumable: true },
+      ],
+      worker: { enabled: true, serviceAccountId: 'sa-other' },
+    });
+    const { prior } = await ensureHuntWorkerEnabled(kbnClient, log);
+    await restoreHuntWorker(kbnClient, log, prior);
+    expect(state).toMatchObject({ enabled: true, serviceAccountId: 'sa-other' });
+    expect(requests.some((r) => r.method === 'DELETE')).toBe(false);
+  });
+
+  it('does not delete a pre-existing usable account when it disables the Worker', async () => {
+    const { kbnClient, requests, state } = makeServer({
+      accounts: [{ id: 'sa-pre', name: HUNT_WORKER_ACCOUNT_NAME, enabled: true, assumable: true }],
+    });
+    const { prior } = await ensureHuntWorkerEnabled(kbnClient, log);
+    await restoreHuntWorker(kbnClient, log, prior);
+    expect(state.enabled).toBe(false);
+    expect(requests.some((r) => r.method === 'DELETE')).toBe(false);
+  });
+
+  it('never throws when the restore itself fails', async () => {
+    const warning = jest.fn();
+    const failing = {
+      request: jest.fn(async () => {
+        throw new Error('boom');
+      }),
+    } as unknown as KbnClient;
+    await expect(
+      restoreHuntWorker(failing, { ...log, warning } as unknown as ToolingLog, {
+        enabled: false,
+        createdServiceAccountId: 'sa-new',
+      })
+    ).resolves.toBeUndefined();
+    expect(warning).toHaveBeenCalled();
   });
 });

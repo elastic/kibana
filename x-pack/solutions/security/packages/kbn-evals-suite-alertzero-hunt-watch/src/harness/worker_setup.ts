@@ -91,10 +91,18 @@ const findBuiltInRole = async (kbnClient: KbnClient): Promise<string> => {
   return roleName;
 };
 
+/** What the stack looked like before setup touched it; `restoreHuntWorker` puts it back. */
+export interface HuntWorkerPriorState {
+  enabled: boolean;
+  serviceAccountId?: string;
+  /** Set when this run created the service account (and so must delete it). */
+  createdServiceAccountId?: string;
+}
+
 export const ensureHuntWorkerEnabled = async (
   kbnClient: KbnClient,
   log: ToolingLog
-): Promise<{ serviceAccountId: string }> => {
+): Promise<{ serviceAccountId: string; prior: HuntWorkerPriorState }> => {
   // 1. service account, found by name first
   const accounts: ServiceAccountEntry[] = [];
   let after: string | undefined;
@@ -115,6 +123,7 @@ export const ensureHuntWorkerEnabled = async (
     (a) => a.name === HUNT_WORKER_ACCOUNT_NAME && a.enabled && a.assumable
   );
   let serviceAccountId = usable?.id;
+  let createdServiceAccountId: string | undefined;
   if (!serviceAccountId) {
     const roleName = await findBuiltInRole(kbnClient);
     const created = await kbnClient.request<{ id: string }>({
@@ -128,10 +137,16 @@ export const ensureHuntWorkerEnabled = async (
       },
     });
     serviceAccountId = created.data.id;
+    createdServiceAccountId = serviceAccountId;
   }
 
   // 2. enable, with the current settings revision (optimistic concurrency)
   const worker = await readWorker(kbnClient);
+  const prior: HuntWorkerPriorState = {
+    enabled: worker.enabled,
+    serviceAccountId: worker.settings?.serviceAccountId,
+    createdServiceAccountId,
+  };
   if (!(worker.enabled && worker.settings?.serviceAccountId === serviceAccountId)) {
     await kbnClient.request({
       path: `${WORKERS_URL}/${encodeURIComponent(HUNT_WORKER_ID)}`,
@@ -155,7 +170,56 @@ export const ensureHuntWorkerEnabled = async (
     );
   }
   log.info(`[hunt-watch] hunt Worker enabled with service account ${serviceAccountId}`);
-  return { serviceAccountId };
+  return { serviceAccountId, prior };
+};
+
+/**
+ * Undoes `ensureHuntWorkerEnabled`: puts the Worker back to its prior enabled
+ * state and service account, then deletes the account only if this run created
+ * it. Without it the Worker keeps hunting on its own schedule on a reused stack
+ * and can drop a later manual sweep (its concurrency is `drop, max: 1`).
+ * Every step is attempted; failures are logged, never thrown, so teardown
+ * cannot mask the sweep's own error.
+ */
+export const restoreHuntWorker = async (
+  kbnClient: KbnClient,
+  log: ToolingLog,
+  prior: HuntWorkerPriorState
+): Promise<void> => {
+  try {
+    const worker = await readWorker(kbnClient);
+    if (
+      worker.enabled !== prior.enabled ||
+      worker.settings?.serviceAccountId !== prior.serviceAccountId
+    ) {
+      await kbnClient.request({
+        path: `${WORKERS_URL}/${encodeURIComponent(HUNT_WORKER_ID)}`,
+        method: 'PATCH',
+        headers: INTERNAL_HEADERS,
+        body: {
+          enabled: prior.enabled,
+          settingsRevision: worker.settingsRevision,
+          settings: { serviceAccountId: prior.serviceAccountId ?? null },
+        },
+      });
+    }
+  } catch (e) {
+    log.warning(`[hunt-watch] could not restore the hunt Worker's prior state: ${String(e)}`);
+    return; // the account may still be bound; deleting it would only fail
+  }
+  if (prior.createdServiceAccountId) {
+    try {
+      await kbnClient.request({
+        path: `${SERVICE_ACCOUNT_URL}/${encodeURIComponent(prior.createdServiceAccountId)}`,
+        method: 'DELETE',
+        headers: { 'x-elastic-internal-origin': 'Kibana', 'kbn-xsrf': 'true' },
+      });
+    } catch (e) {
+      log.warning(
+        `[hunt-watch] could not delete service account ${prior.createdServiceAccountId}: ${String(e)}`
+      );
+    }
+  }
 };
 
 const readWorker = async (kbnClient: KbnClient): Promise<WorkerEntry> => {

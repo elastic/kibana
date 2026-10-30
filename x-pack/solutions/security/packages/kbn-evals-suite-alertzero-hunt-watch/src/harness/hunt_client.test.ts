@@ -103,13 +103,14 @@ const makeServer = ({
     throw new Error(`unexpected request ${req.method} ${req.path}`);
   });
   const refresh = jest.fn(async (_p: { index: string }) => ({}));
+  const deleteByQuery = jest.fn(async (_p: unknown) => ({}));
   const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
     huntWorkerWorkflowId: 'worker-1',
-    esClient: { indices: { refresh } },
+    esClient: { indices: { refresh }, deleteByQuery },
     pollIntervalMs: 1,
     maxWaitMs: 50,
   });
-  return { client, requests, refresh };
+  return { client, requests, refresh, deleteByQuery };
 };
 
 describe('HuntWatchClient.ingestThreatReport', () => {
@@ -131,6 +132,26 @@ describe('HuntWatchClient.ingestThreatReport', () => {
         extracted: { iocs: [{ type: 'domain', value: 'a.example' }] },
       },
     });
+  });
+});
+
+describe('HuntWatchClient.deleteReports', () => {
+  it('deletes exactly the ingested ids from the reports index', async () => {
+    const { client, deleteByQuery } = makeServer({ children: [] });
+    await client.deleteReports(['rep-1', 'rep-2']);
+    expect(deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.kibana-threat-reports',
+        query: { ids: { values: ['rep-1', 'rep-2'] } },
+        refresh: true,
+      })
+    );
+  });
+
+  it('does nothing when nothing was ingested', async () => {
+    const { client, deleteByQuery } = makeServer({ children: [] });
+    await client.deleteReports([]);
+    expect(deleteByQuery).not.toHaveBeenCalled();
   });
 });
 
@@ -173,6 +194,24 @@ describe('HuntWatchClient.runHunts', () => {
     const { runs } = await client.runHunts(['rep-1']);
     expect(runs.size).toBe(1);
     expect(Date.now() - started).toBeLessThan(40);
+  });
+
+  it('returns the sweep terminal status per report so a dropped sweep is not read as a parse problem', async () => {
+    const { client } = makeServer({ sweepStatuses: ['skipped'], children: [] });
+    const { runs, sweepStatusByReport } = await client.runHunts(['rep-1', 'rep-2']);
+    expect(runs.size).toBe(0);
+    expect([...sweepStatusByReport]).toEqual([
+      ['rep-1', 'skipped'],
+      ['rep-2', 'skipped'],
+    ]);
+  });
+
+  it('reports `completed` for a sweep that finished', async () => {
+    const { client } = makeServer({
+      children: [{ executionId: 'c1', reportId: 'rep-1', output: coordinatorOutput('d1') }],
+    });
+    const { sweepStatusByReport } = await client.runHunts(['rep-1']);
+    expect(sweepStatusByReport.get('rep-1')).toBe('completed');
   });
 
   it('B8: throws at the deadline when the sweep never terminates', async () => {

@@ -6,16 +6,19 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { HUNT_WATCH_TIMEOUT_MS, pinSingleRepetition } from './src/playwright_settings';
+
+// createPlaywrightEvalsConfig reads EVAL_REPETITIONS before the `repetitions`
+// option, so the env must be pinned first or the option is dead.
+pinSingleRepetition(process.env);
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  // 3 phases x 14 reports x PER_HUNT_MS (60s per hunt, incl. Tier 2 model
-  // calls) plus ingest/refresh/poll overhead; pinned by
-  // src/harness/playwright_budget.test.ts.
-  timeout: 60 * 60_000,
+  // Sized by src/playwright_settings.test.ts.
+  timeout: HUNT_WATCH_TIMEOUT_MS,
   // The sweep runs inside the Playwright task, not inside the experiment
   // task: runExperiment's task merely replays the recorded run records, so
   // repetitions > 1 would publish repeated "independent" measurements of one
-  // sweep. Pinned to 1 here and asserted in the spec.
+  // sweep. The spec asserts it as a backstop.
   repetitions: 1,
 });

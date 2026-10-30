@@ -23,6 +23,7 @@ import {
   cellKey,
   foreignHitIds,
   leakAuditFailures,
+  missingOutputReason,
   toInvalidRecord,
   toRunRecord,
   type ControlFailure,
@@ -267,5 +268,20 @@ describe('foreignHitIds', () => {
       ],
     };
     expect(foreignHitIds(run, 'E+', labels)).toEqual(['alien', 'alien2']);
+  });
+});
+
+describe('missingOutputReason', () => {
+  it('names the sweep status when the sweep did not complete', () => {
+    for (const status of ['skipped', 'failed', 'cancelled', 'timed_out']) {
+      expect(missingOutputReason('rep-1', status)).toMatch(
+        new RegExp(`^sweep-not-completed: sweep ended ${status}`)
+      );
+    }
+  });
+
+  it('keeps the parse-problem reason for a completed (or unknown) sweep', () => {
+    expect(missingOutputReason('rep-1', 'completed')).toMatch(/^missing-coordinator-output/);
+    expect(missingOutputReason('rep-1', undefined)).toMatch(/^missing-coordinator-output/);
   });
 });

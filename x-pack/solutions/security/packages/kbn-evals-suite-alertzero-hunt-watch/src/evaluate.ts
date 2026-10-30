@@ -11,7 +11,7 @@ import {
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import { HuntWatchClient } from './harness/hunt_client';
-import { ensureHuntWorkerEnabled } from './harness/worker_setup';
+import { ensureHuntWorkerEnabled, restoreHuntWorker } from './harness/worker_setup';
 import { huntWatchSpaceId } from './harness/space';
 
 // Paths are inlined like the template suite (threat-intel-enrichment): packages
@@ -97,7 +97,9 @@ export const assertTierPinned = ({
  *   then falls back to the stack defaults, so without this the run measures
  *   whatever the stack default is.
  * - `huntWorker` (worker-scoped): installs and enables the hunt Worker with a
- *   service account, and asserts it is enabled before any phase runs.
+ *   service account, asserts it is enabled before any phase runs, and on
+ *   teardown restores the Worker's prior state and deletes a service account
+ *   it created.
  * - `huntWatchClient` (worker-scoped): drives the SUT over real HTTP — the
  *   production threat-report ingest route, the candidates route, and the Worker
  *   manual trigger with `reportIds`, reading each hunt's coordinator output
@@ -181,7 +183,12 @@ export const evaluate = base.extend<
   huntWorker: [
     async ({ kbnClient, log, modelSettingsForHuntWatch }, use) => {
       void modelSettingsForHuntWatch;
-      await use(await ensureHuntWorkerEnabled(kbnClient, log));
+      const { serviceAccountId, prior } = await ensureHuntWorkerEnabled(kbnClient, log);
+      try {
+        await use({ serviceAccountId });
+      } finally {
+        await restoreHuntWorker(kbnClient, log, prior);
+      }
     },
     { scope: 'worker', auto: true },
   ],
