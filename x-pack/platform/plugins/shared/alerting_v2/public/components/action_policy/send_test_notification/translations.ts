@@ -17,19 +17,6 @@ export const FLYOUT_TITLE = i18n.translate(
   { defaultMessage: 'Send test notification' }
 );
 
-export const SYNTHETIC_DATA_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.syntheticData.title',
-  { defaultMessage: 'The test notification uses synthetic data' }
-);
-
-export const SYNTHETIC_DATA_TEXT = i18n.translate(
-  'xpack.alertingV2.actionPolicy.sendTestNotification.syntheticData.text',
-  {
-    defaultMessage:
-      'Alerts and rules are placeholders built from the policy configuration, and their ids start with "test-". Alert links point to alerts that do not exist. Alert data only holds placeholder values for the fields the policy groups by, and rule names are placeholders.',
-  }
-);
-
 export const REAL_CHANNELS_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicy.sendTestNotification.realChannels.title',
   { defaultMessage: 'Notifications are sent to real channels' }
@@ -63,7 +50,7 @@ export const PREVIEW_ERROR_TITLE = i18n.translate(
 
 export const DESTINATIONS_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicy.sendTestNotification.destinations.title',
-  { defaultMessage: 'Destinations' }
+  { defaultMessage: 'Send to' }
 );
 
 export const NOT_EXECUTABLE = i18n.translate(

@@ -79,13 +79,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
       <Header title={labels.FLYOUT_TITLE} description={policy.name} />
       <Body>
         <Body.Callout
-          id="syntheticData"
-          level="info"
-          title={labels.SYNTHETIC_DATA_TITLE}
-          text={labels.SYNTHETIC_DATA_TEXT}
-          data-test-subj="sendTestNotificationSyntheticDataCallout"
-        />
-        <Body.Callout
           id="realChannels"
           level="warning"
           title={labels.REAL_CHANNELS_TITLE}
@@ -111,6 +104,28 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
           />
         )}
         {isLoading && <EuiLoadingSpinner size="l" />}
+        <Body.Section
+          id="payload"
+          title={labels.PAYLOAD_TITLE}
+          data-test-subj="sendTestNotificationPayload"
+        >
+          {payload ? (
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              paddingSize="m"
+              overflowHeight={480}
+              isCopyable
+              data-test-subj="sendTestNotificationPayloadCode"
+            >
+              {JSON.stringify(payload, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            <EuiText size="s" color="subdued">
+              <p>{labels.NO_PAYLOAD}</p>
+            </EuiText>
+          )}
+        </Body.Section>
         <Body.Section
           id="destinations"
           title={labels.DESTINATIONS_TITLE}
@@ -143,28 +158,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
               );
             })}
           </EuiFlexGroup>
-        </Body.Section>
-        <Body.Section
-          id="payload"
-          title={labels.PAYLOAD_TITLE}
-          data-test-subj="sendTestNotificationPayload"
-        >
-          {payload ? (
-            <EuiCodeBlock
-              language="json"
-              fontSize="s"
-              paddingSize="m"
-              overflowHeight={480}
-              isCopyable
-              data-test-subj="sendTestNotificationPayloadCode"
-            >
-              {JSON.stringify(payload, null, 2)}
-            </EuiCodeBlock>
-          ) : (
-            <EuiText size="s" color="subdued">
-              <p>{labels.NO_PAYLOAD}</p>
-            </EuiText>
-          )}
         </Body.Section>
       </Body>
       <Footer>
