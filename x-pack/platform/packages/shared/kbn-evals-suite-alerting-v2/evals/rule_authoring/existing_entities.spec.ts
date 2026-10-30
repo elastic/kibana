@@ -110,6 +110,7 @@ evaluate.describe(
                       attachments,
                       ACTION_POLICY_ATTACHMENT_TYPE
                     );
+                    expect(policy?.id).toBe(existingActionPolicy.id);
                     expect(policy?.name).toBe(existingActionPolicy.name);
                     expect(policy?.matcher?.tags).toEqual(['production']);
                   },
