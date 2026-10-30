@@ -84,6 +84,25 @@ describe('DEFEND_ACTION_KINDS', () => {
 });
 
 describe('selectProcessActions', () => {
+  describe('exited process', () => {
+    it('proposes nothing, ahead of every other rule, with a held-back line', () => {
+      const decision = selectProcessActions({
+        selector: selector({
+          processName: 'lsass.exe',
+          observedAt: '2026-09-24T23:59:59.000Z',
+          exitedAt: '2026-09-25T00:01:00.000Z',
+        }),
+        host: host(['memdump_process']),
+        state: state(),
+      });
+      expect(decision.rule).toBe('exited');
+      expect(decision.actions).toEqual([]);
+      expect(decision.heldBack).toBe(
+        'No action was proposed for `lsass.exe` (PID 4212) on WIN-ANALYST01: it exited at 2026-09-25T00:01:00.000Z'
+      );
+    });
+  });
+
   describe('rule 1: protected system process', () => {
     it('proposes memory dump only when the endpoint can dump, with a held-back line', () => {
       const decision = selectProcessActions({
