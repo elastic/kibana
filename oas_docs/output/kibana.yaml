@@ -140923,6 +140923,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 4096
             type: string
         - description: Number of results per page.
           in: query
@@ -140954,6 +140955,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -140963,6 +140965,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -141591,6 +141594,7 @@ paths:
           name: stepExecutionId
           required: false
           schema:
+            maxLength: 255
             type: string
         - description: Number of log entries per page.
           in: query
@@ -141614,6 +141618,7 @@ paths:
           name: sortField
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Sort order.
           in: query
@@ -143445,6 +143450,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -143453,6 +143459,7 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
@@ -143466,6 +143473,7 @@ paths:
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
@@ -143473,6 +143481,7 @@ paths:
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
@@ -143535,6 +143544,7 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
@@ -143542,6 +143552,7 @@ paths:
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
       responses:
@@ -143666,6 +143677,7 @@ paths:
           name: stepId
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Include step input data.
           in: query
@@ -143699,12 +143711,14 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
       responses:
         '200':
@@ -143833,6 +143847,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -143841,30 +143856,35 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Datemath lower bound for filtering executions by startedAt.
           in: query
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by startedAt.
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath lower bound for filtering executions by finishedAt.
           in: query
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by finishedAt.
           in: query
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Field to collapse execution results by.
           in: query
