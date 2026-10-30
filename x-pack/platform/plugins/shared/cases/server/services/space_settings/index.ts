@@ -17,11 +17,25 @@ import type {
 } from '../../../common/types/domain/space_settings/v1';
 import { getEffectiveStatuses } from '../../../common/utils/statuses';
 
+/**
+ * The settings document id of a space. Ids of `multiple-isolated` types are not prefixed with the
+ * space, so each space needs its own id.
+ */
+export const getSpaceSettingsId = (spaceId: string): string =>
+  `${CASES_SPACE_SETTINGS_ID}-${spaceId}`;
+
 /** Reads and writes the single Cases settings document of the request's space. */
 export class SpaceSettingsService {
+  private readonly id: string;
+
   constructor(
-    private readonly dependencies: { unsecuredSavedObjectsClient: SavedObjectsClientContract }
-  ) {}
+    private readonly dependencies: {
+      unsecuredSavedObjectsClient: SavedObjectsClientContract;
+      spaceId: string;
+    }
+  ) {
+    this.id = getSpaceSettingsId(dependencies.spaceId);
+  }
 
   /** The saved settings, or `null` when the space never saved any. */
   async get(): Promise<CasesSpaceSettings | null> {
@@ -29,7 +43,7 @@ export class SpaceSettingsService {
       const { attributes } =
         await this.dependencies.unsecuredSavedObjectsClient.get<CasesSpaceSettings>(
           CASES_SPACE_SETTINGS_SAVED_OBJECT,
-          CASES_SPACE_SETTINGS_ID
+          this.id
         );
       return attributes;
     } catch (error) {
@@ -50,7 +64,7 @@ export class SpaceSettingsService {
       await this.dependencies.unsecuredSavedObjectsClient.create<CasesSpaceSettings>(
         CASES_SPACE_SETTINGS_SAVED_OBJECT,
         settings,
-        { id: CASES_SPACE_SETTINGS_ID, overwrite: true, refresh: false }
+        { id: this.id, overwrite: true, refresh: false }
       );
     return attributes;
   }

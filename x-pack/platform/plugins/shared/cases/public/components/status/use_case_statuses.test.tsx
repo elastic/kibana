@@ -172,11 +172,11 @@ describe('useCaseStatuses', () => {
       expect(result.current.getPickableStatuses(triage)).toEqual(result.current.enabledStatuses);
     });
 
-    it('finds the first enabled status of a category', async () => {
+    it('finds the default status of a category, not the first in order', async () => {
       const { result } = await renderStatuses();
 
-      expect(result.current.getFirstStatusOfCategory('active')).toBe(waiting);
-      expect(result.current.getFirstStatusOfCategory('done').key).toBe('closed');
+      expect(result.current.getCategoryDefaultStatus('active').key).toBe('in-progress');
+      expect(result.current.getCategoryDefaultStatus('done').key).toBe('closed');
     });
 
     it('renders the badge with the label and color of the status', async () => {

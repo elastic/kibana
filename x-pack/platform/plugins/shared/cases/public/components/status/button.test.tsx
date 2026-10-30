@@ -129,7 +129,7 @@ describe('StatusActionButton', () => {
 
     beforeEach(() => {
       jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
-      // The disabled status comes first, so the button skips it.
+      // A non-default status and a disabled one come first; the button targets the default.
       jest
         .spyOn(api, 'getCaseStatuses')
         .mockResolvedValue([
@@ -145,18 +145,20 @@ describe('StatusActionButton', () => {
       jest.restoreAllMocks();
     });
 
-    it('moves the case to the first enabled status of the next stage', async () => {
+    it('moves the case to the default status of the next stage', async () => {
       render(
         <TestProviders>
           <StatusActionButton {...defaultProps} />
         </TestProviders>
       );
 
-      expect(await screen.findByRole('button', { name: 'Mark as Waiting' })).toBeInTheDocument();
+      expect(
+        await screen.findByRole('button', { name: 'Mark as In progress' })
+      ).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('case-view-status-action-button'));
 
-      expect(onStatusChanged).toHaveBeenCalledWith(waiting);
+      expect(onStatusChanged).toHaveBeenCalledWith(expect.objectContaining({ key: 'in-progress' }));
     });
   });
 });

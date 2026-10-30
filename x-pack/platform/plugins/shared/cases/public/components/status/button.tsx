@@ -35,7 +35,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   onStatusChanged,
   isLoading,
 }) => {
-  const { isCustomStatusesEnabled, getFirstStatusOfCategory } = useCaseStatuses();
+  const { isCustomStatusesEnabled, getCategoryDefaultStatus } = useCaseStatuses();
   const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
     totalAlerts,
     syncAlertsEnabled,
@@ -48,7 +48,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   const nextStatusIndex = useMemo(() => getNextItem(indexOfCurrentStatus), [indexOfCurrentStatus]);
   const nextStatus = caseStatuses[nextStatusIndex];
   // The button moves the case to the next lifecycle stage, landing on its first status.
-  const target = getFirstStatusOfCategory(STATUS_TO_CATEGORY[nextStatus]);
+  const target = getCategoryDefaultStatus(STATUS_TO_CATEGORY[nextStatus]);
 
   const onCloseCase = useCallback(
     (closeReason?: string) => {

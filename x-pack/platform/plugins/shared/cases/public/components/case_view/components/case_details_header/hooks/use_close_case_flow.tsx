@@ -59,7 +59,8 @@ export const useCloseCaseFlow = ({ caseData, onUpdateField }: UseCloseCaseFlowAr
 
   const onStatusChanged = useCallback(
     (status: CaseStatusDefinition) => {
-      if (status.category === 'done') {
+      // A close reason applies when the case closes, not when it moves between done statuses.
+      if (status.category === 'done' && caseData.status !== CaseStatuses.closed) {
         setClosingStatus(status);
         openCloseCaseModal();
       } else if (isCustomStatusesEnabled) {

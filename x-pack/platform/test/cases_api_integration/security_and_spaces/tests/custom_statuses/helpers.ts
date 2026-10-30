@@ -44,15 +44,19 @@ export const SETTINGS_WITH_CUSTOM_STATUSES: CasesSpaceSettings = {
   statuses: [...DEFAULT_CASE_STATUSES, TRIAGE, DUPLICATE],
 };
 
+const spacePrefix = (space?: string) => (space ? `/s/${space}` : '');
+
 export const getSpaceSettings = async ({
   supertest,
   expectedHttpCode = 200,
+  space,
 }: {
   supertest: SuperTest.Agent;
   expectedHttpCode?: number;
+  space?: string;
 }): Promise<CasesSpaceSettings> => {
   const { body } = await supertest
-    .get(INTERNAL_CASES_SPACE_SETTINGS_URL)
+    .get(`${spacePrefix(space)}${INTERNAL_CASES_SPACE_SETTINGS_URL}`)
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'kibana')
     .expect(expectedHttpCode);
@@ -64,13 +68,15 @@ export const putSpaceSettings = async ({
   supertest,
   settings,
   expectedHttpCode = 200,
+  space,
 }: {
   supertest: SuperTest.Agent;
   settings: object;
   expectedHttpCode?: number;
+  space?: string;
 }) => {
   const { body } = await supertest
-    .put(INTERNAL_CASES_SPACE_SETTINGS_URL)
+    .put(`${spacePrefix(space)}${INTERNAL_CASES_SPACE_SETTINGS_URL}`)
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'kibana')
     .send(settings)

@@ -152,7 +152,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
           <Route path={getCasesConfigurePath(basePath)}>
             {permissions.settings ? (
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <SolutionProfileScope>
+                <SolutionProfileScope pickerAtTop={false}>
                   <ConfigureCasesLazy />
                 </SolutionProfileScope>
               </Suspense>

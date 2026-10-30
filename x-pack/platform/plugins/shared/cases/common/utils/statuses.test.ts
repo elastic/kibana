@@ -68,6 +68,12 @@ describe('statuses', () => {
       );
     });
 
+    it("ignores a stored key whose category does not match the case's status", () => {
+      expect(
+        getCaseStatus(statuses, { status: CaseStatuses.closed, statusKey: 'triage' }).key
+      ).toBe('closed');
+    });
+
     it('reads the stored status_key', () => {
       expect(getCaseStatus(statuses, { status: CaseStatuses.open, statusKey: 'triage' }).key).toBe(
         'triage'

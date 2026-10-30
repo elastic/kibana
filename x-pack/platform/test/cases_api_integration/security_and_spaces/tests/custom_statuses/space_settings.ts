@@ -21,6 +21,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const spacesService = getService('spaces');
 
   describe('space settings', () => {
     afterEach(async () => {
@@ -44,6 +45,24 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const settings = await getSpaceSettings({ supertest });
       expect(settings).to.eql(SETTINGS_WITH_CUSTOM_STATUSES);
+    });
+
+    it("keeps each space's statuses separate", async () => {
+      await spacesService.create({ id: 'other_status_space', name: 'other_status_space' });
+      try {
+        const otherSettings = {
+          statuses: SETTINGS_WITH_CUSTOM_STATUSES.statuses.filter(({ key }) => key !== 'triage'),
+        };
+        await putSpaceSettings({ supertest, settings: SETTINGS_WITH_CUSTOM_STATUSES });
+        await putSpaceSettings({ supertest, settings: otherSettings, space: 'other_status_space' });
+
+        expect(await getSpaceSettings({ supertest })).to.eql(SETTINGS_WITH_CUSTOM_STATUSES);
+        expect(await getSpaceSettings({ supertest, space: 'other_status_space' })).to.eql(
+          otherSettings
+        );
+      } finally {
+        await spacesService.delete('other_status_space');
+      }
     });
 
     it('lets a custom status become the default of its category', async () => {

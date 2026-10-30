@@ -36,9 +36,7 @@ export const useAvailableCasesOwners = (
     if (capabilities.includes('settings')) {
       return serverOwners.settingsOwners;
     }
-    return capabilities.some((capability) => capability !== 'read')
-      ? serverOwners.createOwners
-      : serverOwners.owners;
+    return capabilities.includes('create') ? serverOwners.createOwners : serverOwners.owners;
   }
 
   return Object.entries(kibanaCapabilities).reduce(

@@ -34,7 +34,7 @@ export const DEFAULT_CASE_STATUSES: readonly CaseStatusDefinition[] = [
   {
     key: CaseStatuses.open,
     label: i18n.translate('xpack.cases.statuses.default.open', { defaultMessage: 'Open' }),
-    color: 'primary',
+    color: 'success',
     category: 'not_started',
     order: 0,
     isDefault: true,
@@ -45,7 +45,7 @@ export const DEFAULT_CASE_STATUSES: readonly CaseStatusDefinition[] = [
     label: i18n.translate('xpack.cases.statuses.default.inProgress', {
       defaultMessage: 'In progress',
     }),
-    color: 'warning',
+    color: 'primary',
     category: 'active',
     order: 1,
     isDefault: true,
@@ -92,8 +92,14 @@ export const getDefaultStatus = (
 export const getCaseStatus = (
   statuses: readonly CaseStatusDefinition[],
   { status, statusKey }: { status: CaseStatuses; statusKey?: string | null }
-): CaseStatusDefinition =>
-  findStatus(statuses, statusKey) ?? getDefaultStatus(statuses, STATUS_TO_CATEGORY[status]);
+): CaseStatusDefinition => {
+  const found = findStatus(statuses, statusKey);
+  // A key from elsewhere (e.g. a case imported from another space) may name a status of another
+  // category here; the persisted category wins.
+  return found && CATEGORY_TO_STATUS[found.category] === status
+    ? found
+    : getDefaultStatus(statuses, STATUS_TO_CATEGORY[status]);
+};
 
 export class StatusWriteError extends Error {}
 

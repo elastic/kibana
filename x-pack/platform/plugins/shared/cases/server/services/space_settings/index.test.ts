@@ -7,13 +7,10 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import {
-  CASES_SPACE_SETTINGS_ID,
-  CASES_SPACE_SETTINGS_SAVED_OBJECT,
-} from '../../../common/constants';
+import { CASES_SPACE_SETTINGS_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesSpaceSettings } from '../../../common/types/domain/space_settings/v1';
 import { DEFAULT_CASE_STATUSES } from '../../../common/utils/statuses';
-import { SpaceSettingsService } from '.';
+import { SpaceSettingsService, getSpaceSettingsId } from '.';
 
 const settings: CasesSpaceSettings = {
   statuses: [
@@ -31,7 +28,7 @@ const settings: CasesSpaceSettings = {
 };
 
 const savedObject = (attributes: CasesSpaceSettings) => ({
-  id: CASES_SPACE_SETTINGS_ID,
+  id: 'cases-space-settings-default',
   type: CASES_SPACE_SETTINGS_SAVED_OBJECT,
   attributes,
   references: [],
@@ -39,7 +36,7 @@ const savedObject = (attributes: CasesSpaceSettings) => ({
 
 describe('SpaceSettingsService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const service = new SpaceSettingsService({ unsecuredSavedObjectsClient });
+  const service = new SpaceSettingsService({ unsecuredSavedObjectsClient, spaceId: 'default' });
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -49,14 +46,14 @@ describe('SpaceSettingsService', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError(
         CASES_SPACE_SETTINGS_SAVED_OBJECT,
-        CASES_SPACE_SETTINGS_ID
+        'cases-space-settings-default'
       )
     );
 
     await expect(service.get()).resolves.toBeNull();
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith(
       CASES_SPACE_SETTINGS_SAVED_OBJECT,
-      CASES_SPACE_SETTINGS_ID
+      'cases-space-settings-default'
     );
   });
 
@@ -64,7 +61,7 @@ describe('SpaceSettingsService', () => {
     unsecuredSavedObjectsClient.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError(
         CASES_SPACE_SETTINGS_SAVED_OBJECT,
-        CASES_SPACE_SETTINGS_ID
+        'cases-space-settings-default'
       )
     );
 
@@ -90,7 +87,13 @@ describe('SpaceSettingsService', () => {
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       CASES_SPACE_SETTINGS_SAVED_OBJECT,
       settings,
-      { id: CASES_SPACE_SETTINGS_ID, overwrite: true, refresh: false }
+      { id: 'cases-space-settings-default', overwrite: true, refresh: false }
     );
+  });
+});
+
+describe('getSpaceSettingsId', () => {
+  it('gives every space its own settings document', () => {
+    expect(getSpaceSettingsId('default')).not.toBe(getSpaceSettingsId('security-view'));
   });
 });

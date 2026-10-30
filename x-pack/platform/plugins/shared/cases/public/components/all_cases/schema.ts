@@ -6,10 +6,13 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { CaseSeveritySchema, CaseStatusSchema } from '../../../common/types/domain';
+import {
+  CaseSeveritySchema,
+  CaseStatusKeySchema,
+  CaseStatusSchema,
+} from '../../../common/types/domain';
 import {
   MAX_CASE_STATUSES,
-  MAX_CASE_STATUS_KEY_LENGTH,
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
   MAX_TEMPLATE_DEFINITION_LENGTH,
@@ -22,7 +25,7 @@ export const AllCasesURLQueryParamsSchema = lazySchema(() =>
       search: z.string(),
       severity: z.array(CaseSeveritySchema),
       status: z.array(CaseStatusSchema),
-      statusKey: z.array(z.string().max(MAX_CASE_STATUS_KEY_LENGTH)).max(MAX_CASE_STATUSES),
+      statusKey: z.array(CaseStatusKeySchema).max(MAX_CASE_STATUSES),
       tags: z.array(z.string()),
       category: z.array(z.string()),
       assignees: z.array(z.union([z.string(), z.null()])),

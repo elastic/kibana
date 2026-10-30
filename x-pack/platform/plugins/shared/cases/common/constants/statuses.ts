@@ -23,6 +23,6 @@ export const MAX_CASE_STATUS_KEY_LENGTH = 50;
 export const MAX_CASE_STATUS_LABEL_LENGTH = 50;
 
 export const CASES_SPACE_SETTINGS_SAVED_OBJECT = 'cases-space-settings' as const;
-/** One settings document per space, so the id is fixed and the namespace scopes it. */
+/** Prefix of each space's settings document id; the space id follows. */
 export const CASES_SPACE_SETTINGS_ID = 'cases-space-settings' as const;
 export const INTERNAL_CASES_SPACE_SETTINGS_URL = '/internal/cases/space_settings' as const;

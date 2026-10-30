@@ -6,7 +6,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { useCallback } from 'react';
+import React, { createContext, useCallback, useContext } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiEmptyPrompt,
@@ -41,7 +41,15 @@ const SOLUTION_HELP = i18n.translate('xpack.cases.configure.solutionProfile.help
  * lets the user pick whose settings to show and scopes the page to that solution. In a solution's
  * own app it renders the page unchanged.
  */
-export const SolutionProfileScope: FC<{ children: ReactNode }> = ({ children }) => {
+const SolutionProfilePickerContext = createContext<ReactNode>(null);
+
+/** The solution picker, for pages that place it themselves (see `pickerAtTop`). */
+export const useSolutionProfilePicker = (): ReactNode => useContext(SolutionProfilePickerContext);
+
+export const SolutionProfileScope: FC<{ children: ReactNode; pickerAtTop?: boolean }> = ({
+  children,
+  pickerAtTop = true,
+}) => {
   const { owner } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(['settings']);
   const { isLoading } = useGetAvailableOwners({ enabled: owner.length === 0 });
@@ -73,27 +81,30 @@ export const SolutionProfileScope: FC<{ children: ReactNode }> = ({ children }) 
   const selected =
     requested != null && availableOwners.includes(requested) ? requested : availableOwners[0];
 
+  const picker =
+    availableOwners.length > 1 ? (
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+        <EuiFormRow label={SOLUTION_LABEL} helpText={SOLUTION_HELP}>
+          <EuiSuperSelect
+            data-test-subj="cases-settings-solution-select"
+            options={availableOwners.map((value) => ({
+              value,
+              inputDisplay: getOwnerLabel(value),
+            }))}
+            valueOfSelected={selected}
+            onChange={onChange}
+          />
+        </EuiFormRow>
+      </EuiPanel>
+    ) : null;
+
   return (
-    <>
-      {availableOwners.length > 1 && (
-        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-          <EuiFormRow label={SOLUTION_LABEL} helpText={SOLUTION_HELP}>
-            <EuiSuperSelect
-              data-test-subj="cases-settings-solution-select"
-              options={availableOwners.map((value) => ({
-                value,
-                inputDisplay: getOwnerLabel(value),
-              }))}
-              valueOfSelected={selected}
-              onChange={onChange}
-            />
-          </EuiFormRow>
-        </EuiPanel>
-      )}
+    <SolutionProfilePickerContext.Provider value={pickerAtTop ? null : picker}>
+      {pickerAtTop && picker}
       <CaseOwnerScope key={selected} caseOwner={selected}>
         {children}
       </CaseOwnerScope>
-    </>
+    </SolutionProfilePickerContext.Provider>
   );
 };
 

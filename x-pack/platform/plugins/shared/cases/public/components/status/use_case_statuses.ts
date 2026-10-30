@@ -82,12 +82,10 @@ export const useCaseStatuses = () => {
     [enabledStatuses, statuses]
   );
 
-  /** The first enabled status of a category, in admin order. */
-  const getFirstStatusOfCategory = useCallback(
-    (category: CaseStatusCategory): CaseStatusDefinition =>
-      enabledStatuses.find((status) => status.category === category) ??
-      getDefaultStatus(statuses, category),
-    [enabledStatuses, statuses]
+  /** The default status of a category, where status-only moves land on the server too. */
+  const getCategoryDefaultStatus = useCallback(
+    (category: CaseStatusCategory): CaseStatusDefinition => getDefaultStatus(statuses, category),
+    [statuses]
   );
 
   return {
@@ -97,7 +95,7 @@ export const useCaseStatuses = () => {
     isLoading,
     getStatus,
     getPickableStatuses,
-    getFirstStatusOfCategory,
+    getCategoryDefaultStatus,
   };
 };
 

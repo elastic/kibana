@@ -381,7 +381,7 @@ export class CasesClientFactory {
     return {
       templatesService,
       fieldDefinitionsService,
-      spaceSettingsService: new SpaceSettingsService({ unsecuredSavedObjectsClient }),
+      spaceSettingsService: new SpaceSettingsService({ unsecuredSavedObjectsClient, spaceId }),
       alertsService: new AlertService(
         esClient,
         this.logger,
