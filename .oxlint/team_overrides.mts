@@ -294,7 +294,10 @@ export const teamOverrides: OxlintOverride[] = [
     // ESLint matched `public/**/!(*.test).{js,mjs,ts,tsx}`; oxlint globs have no extglobs.
     files: ['x-pack/solutions/security/plugins/lists/public/**/*.{js,mjs,ts,tsx}'],
     excludeFiles: ['x-pack/solutions/security/plugins/lists/public/**/*.test.{js,mjs,ts,tsx}'],
-    rules: { 'react-perf/jsx-no-new-function-as-prop': 'error' },
+    rules: {
+      'react-perf/jsx-no-new-function-as-prop': 'error',
+      '@kbn/compat/react-jsx-no-bind': 'error',
+    },
   },
   {
     files: ['x-pack/solutions/security/plugins/lists/**/*.{js,mjs,ts,tsx}'],
@@ -613,7 +616,10 @@ export const teamOverrides: OxlintOverride[] = [
     // ESLint matched `public/**/!(*.test).{js,mjs,ts,tsx}`; oxlint globs have no extglobs.
     files: ['x-pack/platform/plugins/shared/osquery/public/**/*.{js,mjs,ts,tsx}'],
     excludeFiles: ['x-pack/platform/plugins/shared/osquery/public/**/*.test.{js,mjs,ts,tsx}'],
-    rules: { 'react-perf/jsx-no-new-function-as-prop': 'error' },
+    rules: {
+      'react-perf/jsx-no-new-function-as-prop': 'error',
+      '@kbn/compat/react-jsx-no-bind': 'error',
+    },
   },
   /**
    * Platform Security Team overrides
