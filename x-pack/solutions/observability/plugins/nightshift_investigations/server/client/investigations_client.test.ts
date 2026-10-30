@@ -1542,13 +1542,13 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         expect(release).not.toHaveBeenCalled();
       });
 
-      it('releases both slots when the claim attempt fails', async () => {
+      it('keeps both slots when the claim attempt fails', async () => {
         subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
 
         await expect(startWithBudget(1)).rejects.toThrow('claim conflict');
 
-        expect(release).toHaveBeenCalledTimes(1);
-        expect(await usage()).toBe(0);
+        expect(release).not.toHaveBeenCalled();
+        expect(await usage()).toBe(1);
       });
 
       it('keeps the global slot when the start fails after claiming', async () => {
