@@ -6,7 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import { isAgentNotFoundError } from '@kbn/agent-builder-common';
+import type {
+  AgentBaseConfiguration,
+  AgentConfigContext,
+  AgentTypeDefinition,
+} from '@kbn/agent-builder-server/agents';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID } from '../../../common';
@@ -108,27 +113,80 @@ Replies are read in chat, including Slack, so make them scannable.
   one long paragraph.
 `;
 
+export type AssistantAgentTypeOptions = NightshiftAgentTypeOptions & {
+  /**
+   * Reads the connectors users assigned to the investigation agent in the request's space. The
+   * assistant is hidden from the agent picker, so it inherits them instead of keeping its own.
+   */
+  getInvestigatorConnectorIds?: (ctx: AgentConfigContext) => Promise<readonly string[]>;
+};
+
+const readInvestigatorConnectorIds = async ({
+  ctx,
+  getInvestigatorConnectorIds,
+  logger,
+}: {
+  ctx: AgentConfigContext;
+  getInvestigatorConnectorIds: (ctx: AgentConfigContext) => Promise<readonly string[]>;
+  logger: NightshiftAgentTypeOptions['logger'];
+}): Promise<readonly string[]> => {
+  try {
+    return await getInvestigatorConnectorIds(ctx);
+  } catch (error) {
+    // Inherited connectors only widen the assistant's reach; failing to read them must not block
+    // a run. A space without the investigation agent simply has nothing to inherit.
+    if (!isAgentNotFoundError(error)) {
+      logger?.warn(
+        `Failed to read the investigation agent's connectors in space "${ctx.spaceId}": ${error.message}`
+      );
+    }
+    return [];
+  }
+};
+
 /**
  * Builds the Nightshift assistant agent type: the investigator's tools, connectors, Cortex and
  * Memory hooks and custom context, behind a short direct-answer prompt. Decision trees are
  * skipped for it by the agent policy.
  */
-export const getAssistantAgentType = (
-  options: NightshiftAgentTypeOptions
-): AgentTypeDefinition => ({
-  id: NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,
-  name: ASSISTANT_AGENT_NAME,
-  description: ASSISTANT_AGENT_DESCRIPTION,
-  avatar_icon: 'logoElastic',
-  baseConfiguration: buildNightshiftAgentConfiguration({
+export const getAssistantAgentType = ({
+  getInvestigatorConnectorIds,
+  ...options
+}: AssistantAgentTypeOptions): AgentTypeDefinition => {
+  const baseConfiguration = buildNightshiftAgentConfiguration({
     ...options,
     instructions: ASSISTANT_INSTRUCTIONS,
-  }),
-});
+  });
+  const resolveBase = async (ctx: AgentConfigContext): Promise<AgentBaseConfiguration> =>
+    typeof baseConfiguration === 'function' ? baseConfiguration(ctx) : baseConfiguration;
+
+  return {
+    id: NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,
+    name: ASSISTANT_AGENT_NAME,
+    description: ASSISTANT_AGENT_DESCRIPTION,
+    avatar_icon: 'logoElastic',
+    baseConfiguration: async (ctx) => {
+      const [base, investigatorConnectorIds] = await Promise.all([
+        resolveBase(ctx),
+        getInvestigatorConnectorIds
+          ? readInvestigatorConnectorIds({
+              ctx,
+              getInvestigatorConnectorIds,
+              logger: options.logger,
+            })
+          : [],
+      ]);
+      return {
+        ...base,
+        connector_ids: [...new Set([...(base.connector_ids ?? []), ...investigatorConnectorIds])],
+      };
+    },
+  };
+};
 
 export const registerAssistantAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
-  options: NightshiftAgentTypeOptions
+  options: AssistantAgentTypeOptions
 ): void => {
   agentBuilder.agents.registerType(getAssistantAgentType(options));
 };

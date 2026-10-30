@@ -280,20 +280,32 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
+        // Both agent types allow every configured telemetry connector; the investigator narrows
+        // the list per conversation in the sandbox workspace manager.
+        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
-        telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
       if (plugins.sandbox?.isAvailable) {
-        registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
+        registerAssistantAgentType(plugins.agentBuilder, {
+          ...nightshiftAgentOptions,
+          // Users assign connectors to the investigator in Agent Builder; the hidden assistant
+          // inherits them. The sandbox still checks each one against the caller's actions client.
+          getInvestigatorConnectorIds: async ({ request }) => {
+            if (!this.agentBuilder) return [];
+            const registry = await this.agentBuilder.agents.getRegistry({ request });
+            const { configuration } = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+            return configuration.connector_ids ?? [];
+          },
+        });
         this.assistantEnabled = true;
       }
 
