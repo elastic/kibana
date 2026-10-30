@@ -9,6 +9,12 @@
 
 export { buildTrendlineQueryCases, type TrendlineQueryCase } from './src/trendline_query_cases';
 export {
+  ANNOTATION_CONVERSION_TIME_FIELD,
+  buildAnnotationConversionCases,
+  type AnnotationConversionCase,
+  type AnnotationConversionInput,
+} from './src/annotation_conversion_cases';
+export {
   buildEsqlConversionCasesByGroup,
   createEsqlConversionIndexPattern,
   createEsqlConversionInput,

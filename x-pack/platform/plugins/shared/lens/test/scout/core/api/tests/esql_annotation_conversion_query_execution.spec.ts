@@ -20,6 +20,11 @@ import {
   type IndexPattern,
   type IndexPatternMap,
 } from '@kbn/lens-common';
+import {
+  ANNOTATION_CONVERSION_TIME_FIELD,
+  buildAnnotationConversionCases,
+  type AnnotationConversionInput,
+} from '@kbn/lens-test-helpers';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ES_ARCHIVE_PATHS } from '../../../common/fixtures/constants';
@@ -32,17 +37,28 @@ const INTERNAL_HEADERS = {
 } as const;
 
 // Only the fields the converter reads; the full IndexPattern carries runtime field state.
+const INDEX = 'logstash-*';
 const INDEX_PATTERNS = {
-  logstash: { id: 'logstash', title: 'logstash-*', timeFieldName: '@timestamp' } as IndexPattern,
+  logstash: {
+    id: 'logstash',
+    title: INDEX,
+    timeFieldName: ANNOTATION_CONVERSION_TIME_FIELD,
+  } as IndexPattern,
 } as IndexPatternMap;
 
-const baseAnnotation: QueryPointEventAnnotationConfig = {
+const toQueryAnnotation = ({
+  filter,
+  extraFields,
+  ...rest
+}: AnnotationConversionInput): QueryPointEventAnnotationConfig => ({
   id: 'annotation',
   type: 'query',
   key: { type: 'point_in_time' },
   label: 'Annotation',
-  filter: { type: 'kibana_query', query: '', language: 'kuery' },
-};
+  ...rest,
+  filter: { type: 'kibana_query', ...(filter ?? { query: '', language: 'kuery' }) },
+  ...(extraFields ? { extraFields: [...extraFields] } : {}),
+});
 
 const convertAnnotation = (annotation: QueryPointEventAnnotationConfig) => {
   const state = convertQueryAnnotationsToEsql(
@@ -65,52 +81,6 @@ const convertAnnotation = (annotation: QueryPointEventAnnotationConfig) => {
   return state.layers[0].annotations[0];
 };
 
-const CASES: Array<{
-  description: string;
-  annotation: Partial<QueryPointEventAnnotationConfig>;
-  expectedColumns: string[];
-}> = [
-  {
-    description: 'KQL with text and tooltip fields',
-    annotation: {
-      filter: { type: 'kibana_query', query: 'machine.os.raw : "osx"', language: 'kuery' },
-      textVisibility: true,
-      textField: 'geo.src',
-      extraFields: ['geo.dest'],
-    },
-    expectedColumns: ['@timestamp', 'geo.src', 'geo.dest'],
-  },
-  {
-    description: 'KQL ending in a quoted value',
-    annotation: {
-      filter: { type: 'kibana_query', query: 'geo.src : "CN"', language: 'kuery' },
-    },
-    expectedColumns: ['@timestamp'],
-  },
-  {
-    description: 'Lucene',
-    annotation: {
-      filter: { type: 'kibana_query', query: 'machine.os.raw:osx', language: 'lucene' },
-    },
-    expectedColumns: ['@timestamp'],
-  },
-  {
-    description: 'an empty query without a WHERE clause',
-    annotation: {},
-    expectedColumns: ['@timestamp'],
-  },
-  {
-    description: 'a non-default time field and a text field that is also a tooltip field',
-    annotation: {
-      timeField: 'utc_time',
-      textVisibility: true,
-      textField: 'geo.src',
-      extraFields: ['geo.src', 'machine.os.raw'],
-    },
-    expectedColumns: ['utc_time', 'geo.src', 'machine.os.raw'],
-  },
-];
-
 apiTest.describe(
   'Lens query annotation → ES|QL annotation query execution',
   { tag: [...tags.stateful.classic] },
@@ -122,24 +92,30 @@ apiTest.describe(
       cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     });
 
-    for (const { description, annotation, expectedColumns } of CASES) {
-      apiTest(`executes the converted query for ${description}`, async ({ apiClient }) => {
-        const converted = convertAnnotation({ ...baseAnnotation, ...annotation });
+    for (const conversionCase of buildAnnotationConversionCases({ index: INDEX })) {
+      apiTest(
+        `executes the converted query for ${conversionCase.description}`,
+        async ({ apiClient }) => {
+          const converted = convertAnnotation(toQueryAnnotation(conversionCase.annotation));
+          // Keep the exact query assertion close to execution so this layer verifies
+          // the converter output that it sends to Elasticsearch.
+          expect(converted.query.esql).toBe(conversionCase.expectedEsql);
 
-        const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
-          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-          body: { params: { query: converted.query.esql } },
-        });
+          const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
+            headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+            body: { params: { query: converted.query.esql } },
+          });
 
-        expect(response).toHaveStatusCode(200);
-        const columnNames = response.body.rawResponse.columns.map(
-          ({ name }: { name: string }) => name
-        );
-        // Result names must match the bindings the annotation renders from
-        expect(columnNames).toStrictEqual(expectedColumns);
-        expect(columnNames).toContain(converted.timeColumn);
-        expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
-      });
+          expect(response).toHaveStatusCode(200);
+          const columnNames = response.body.rawResponse.columns.map(
+            ({ name }: { name: string }) => name
+          );
+          // Result names must match the bindings the annotation renders from
+          expect(columnNames).toStrictEqual([...conversionCase.expectedResultColumns]);
+          expect(columnNames).toContain(converted.timeColumn);
+          expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
+        }
+      );
     }
   }
 );
