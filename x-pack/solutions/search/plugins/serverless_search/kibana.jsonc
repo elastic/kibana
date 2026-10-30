@@ -35,6 +35,7 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "fleet",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
