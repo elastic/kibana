@@ -117,6 +117,8 @@ export async function createSAMLResponse(options: {
         uiamEnabled: true;
         accessTokenLifetimeSec?: number;
         refreshTokenLifetimeSec?: number;
+        /** Built-in UIAM organization roles the user holds, such as `billing-admin`. */
+        organizationRoleIds?: string[];
       };
 }) {
   const acsUrl = options.acsUrl ?? `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`;
@@ -130,6 +132,7 @@ export async function createSAMLResponse(options: {
         organizationId: options.serverless.organizationId,
         projectType: options.serverless.projectType,
         roles: options.roles,
+        organizationRoleIds: options.serverless.organizationRoleIds,
         fullName: options.full_name,
         email: options.email,
         accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
@@ -335,6 +338,7 @@ export async function createUiamSessionTokens({
   organizationId,
   projectType: rawProjectType,
   roles,
+  organizationRoleIds,
   fullName,
   email,
   // 1H
@@ -346,6 +350,8 @@ export async function createUiamSessionTokens({
   organizationId: string;
   projectType: string;
   roles: string[];
+  /** Built-in UIAM organization roles the user holds, such as `billing-admin`. */
+  organizationRoleIds?: string[];
   fullName?: string;
   email?: string;
   accessTokenLifetimeSec?: number;
@@ -362,6 +368,7 @@ export async function createUiamSessionTokens({
     organizationId,
     projectType,
     applicationRoles: roles,
+    organizationRoleIds,
     email,
     firstName: givenName,
     lastName: familyName,
@@ -395,6 +402,7 @@ export async function createUiamSessionTokens({
           organizationId,
           projectType,
           applicationRoles: roles,
+          organizationRoleIds,
         }),
       },
 

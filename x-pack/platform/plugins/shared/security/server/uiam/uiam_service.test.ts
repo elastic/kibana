@@ -2919,6 +2919,109 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#checkAuthorization', () => {
+    const checks = [
+      { action: 'get', resource: { type: 'billing-details', organization_id: 'org' } },
+    ];
+
+    it('forwards the checks with the request credentials and normalizes the decisions', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          decision: 'deny',
+          checks: [
+            { check: checks[0], decision: 'permit' },
+            {
+              check: { action: 'update', resource: { type: 'billing-details' } },
+              decision: 'deny',
+            },
+          ],
+        }),
+      });
+
+      await expect(uiamService.checkAuthorization(createUiamRequest(), checks)).resolves.toEqual({
+        permitted: false,
+        checks: [
+          { ...checks[0], permitted: true },
+          { action: 'update', resource: { type: 'billing-details' }, permitted: false },
+        ],
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authorization/_check',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Kibana/9.0.0',
+            Authorization: 'Bearer essu_access-token',
+          },
+          body: JSON.stringify({ checks }),
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('permits when every check is permitted', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          decision: 'permit',
+          checks: [{ check: checks[0], decision: 'permit' }],
+        }),
+      });
+
+      await expect(uiamService.checkAuthorization(createUiamRequest(), checks)).resolves.toEqual({
+        permitted: true,
+        checks: [{ ...checks[0], permitted: true }],
+      });
+    });
+
+    it('relays the inbound client authentication that rode in with the token', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ decision: 'permit', checks: [] }),
+      });
+
+      await uiamService.checkAuthorization(createUiamRequest('inbound-secret'), checks);
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/authorization/_check',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'inbound-secret',
+            Authorization: 'Bearer essu_access-token',
+          }),
+        })
+      );
+    });
+
+    it('fails without calling UIAM when the request does not carry a UIAM credential', async () => {
+      await expect(
+        uiamService.checkAuthorization(
+          httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer es-token' } }),
+          checks
+        )
+      ).rejects.toThrow('Provided credential is not compatible with UIAM');
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('fails if UIAM responds with an error', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 403,
+        headers: new Map(),
+        json: async () => ({ error: { code: 'AUTHZ_DENY', message: 'Forbidden' } }),
+      });
+
+      await expect(uiamService.checkAuthorization(createUiamRequest(), checks)).rejects.toThrow(
+        '[AUTHZ_DENY] Forbidden'
+      );
+    });
+  });
+
   describe('#resolveUsers', () => {
     it('returns an empty map without calling UIAM when there are no user ids', async () => {
       await expect(uiamService.resolveUsers(createUiamRequest(), [])).resolves.toEqual({

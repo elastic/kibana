@@ -23,6 +23,7 @@ import { securityMock } from './mocks';
 import { serviceAccountsServiceMock } from './service_accounts/service_accounts_service.mock';
 import { getPrintableSessionId } from './session_management';
 import { sessionMock } from './session_management/session.mock';
+import { uiamServiceMock } from './uiam/uiam_service.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('buildSecurityApi', () => {
@@ -30,6 +31,7 @@ describe('buildSecurityApi', () => {
   let auditService: ReturnType<typeof auditServiceMock.create>;
   let session: ReturnType<typeof sessionMock.create>;
   let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart> | null;
+  let uiam: ReturnType<typeof uiamServiceMock.create>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let api: CoreSecurityDelegateContract;
 
@@ -38,11 +40,13 @@ describe('buildSecurityApi', () => {
     auditService = auditServiceMock.create();
     session = sessionMock.create();
     serviceAccounts = serviceAccountsServiceMock.createStart();
+    uiam = uiamServiceMock.create();
     logger = loggingSystemMock.createLogger();
     api = buildSecurityApi({
       getAuthc: () => authc,
       getSession: () => session,
       getServiceAccounts: () => serviceAccounts,
+      getUiam: () => uiam,
       audit: auditService,
       config: { uiam: { enabled: false } },
       logger,
@@ -243,6 +247,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts: () => serviceAccounts,
+        getUiam: () => uiam,
         audit: auditService,
         config,
         logger,
@@ -275,6 +280,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts,
+        getUiam: () => uiam,
         audit: auditService,
         config: {},
         logger,
@@ -472,6 +478,8 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
+          organizationId: 'org-1',
           audit: auditService,
           config: { uiam: { enabled: true } },
           logger,
@@ -481,6 +489,68 @@ describe('buildSecurityApi', () => {
       it('should expose the uiam API', () => {
         expect(api.authc.apiKeys.uiam).not.toBeNull();
         expect(api.authc.apiKeys.uiam).toBeDefined();
+      });
+
+      it('should ask UIAM whether the user may read the organization billing details', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const check = {
+          action: 'get',
+          resource: { type: 'billing-details', organization_id: 'org-1' },
+        };
+        uiam.checkAuthorization.mockResolvedValue({
+          permitted: true,
+          checks: [{ ...check, permitted: true }],
+        });
+
+        await expect(api.authz.uiam!.hasBillingAccess(request)).resolves.toBe(true);
+
+        expect(uiam.checkAuthorization).toHaveBeenCalledTimes(1);
+        expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [check]);
+      });
+
+      it('should report no billing access when UIAM denies the check', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        uiam.checkAuthorization.mockResolvedValue({ permitted: false, checks: [] });
+
+        await expect(api.authz.uiam!.hasBillingAccess(request)).resolves.toBe(false);
+      });
+
+      it('should omit the organization from the check when none is configured', async () => {
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
+          audit: auditService,
+          config: { uiam: { enabled: true } },
+          logger,
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        await api.authz.uiam!.hasBillingAccess(request);
+
+        expect(uiam.checkAuthorization).toHaveBeenCalledWith(request, [
+          { action: 'get', resource: { type: 'billing-details' } },
+        ]);
+      });
+
+      it('should fail the billing access check until the UIAM service is available', async () => {
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          getSession: () => session,
+          getServiceAccounts: () => serviceAccounts,
+          getUiam: () => {
+            throw new Error('UIAM service is not available.');
+          },
+          organizationId: 'org-1',
+          audit: auditService,
+          config: { uiam: { enabled: true } },
+          logger,
+        });
+
+        await expect(
+          api.authz.uiam!.hasBillingAccess(httpServerMock.createKibanaRequest())
+        ).rejects.toThrow('UIAM service is not available.');
       });
 
       it('should properly delegate grant to the service', async () => {
@@ -555,6 +625,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
           audit: auditService,
           config: { uiam: { enabled: false } },
           logger,
@@ -563,6 +634,7 @@ describe('buildSecurityApi', () => {
 
       it('should set uiam to null', () => {
         expect(api.authc.apiKeys.uiam).toBeNull();
+        expect(api.authz.uiam).toBeNull();
       });
     });
 
@@ -575,6 +647,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
+          getUiam: () => uiam,
           audit: auditService,
           config: {},
           logger,
@@ -583,6 +656,7 @@ describe('buildSecurityApi', () => {
 
       it('should set uiam to null', () => {
         expect(api.authc.apiKeys.uiam).toBeNull();
+        expect(api.authz.uiam).toBeNull();
       });
     });
   });
