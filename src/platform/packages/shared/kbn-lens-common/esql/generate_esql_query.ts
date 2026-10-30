@@ -630,28 +630,33 @@ export function generateEsqlQuery(
     });
     const toStatsGroup = (outputName: string, expression: string): string =>
       outputName !== expression ? `${esql.col(outputName)} = ${expression}` : expression;
-    const aliasedBuckets = Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
-      toStatsGroup(outputName, expression)
-    );
-    const buildStatsClause = (leadingGroups: string[] = []): string | undefined =>
-      validMetrics.length > 0
-        ? `STATS ${validMetrics.join(', ')} BY ${[...leadingGroups, ...aliasedBuckets].join(', ')}`
-        : undefined;
-    // Other groups by its typed key in place of the field, which the label EVAL restores.
-    const buildOtherBucketStatsClause = (
+    // With a key override, Other groups by its typed key in place of the field; the label EVAL
+    // restores the field afterwards.
+    const buildStatsGroups = (
       leadingGroups: string[],
-      { groupExpr, keyAlias }: { groupExpr: string; keyAlias: string }
-    ): string => {
-      const groups = [
+      keyOverride?: { groupExpr: string; keyAlias: string }
+    ): string =>
+      [
         ...leadingGroups,
         ...Array.from(uniqueBucketsByOutputName, ([outputName, expression]) =>
-          outputName === groupExpr ? keyAlias : toStatsGroup(outputName, expression)
+          outputName === keyOverride?.groupExpr
+            ? keyOverride.keyAlias
+            : toStatsGroup(outputName, expression)
         ),
       ].join(', ');
-      return validMetrics.length > 0
-        ? `STATS ${validMetrics.join(', ')} BY ${groups}`
-        : `STATS BY ${groups}`;
-    };
+    const buildStatsClause = (leadingGroups: string[] = []): string | undefined =>
+      validMetrics.length > 0
+        ? `STATS ${validMetrics.join(', ')} BY ${buildStatsGroups(leadingGroups)}`
+        : undefined;
+    // Unlike the plain clause, Other always needs the STATS so the key collapses into one group.
+    const buildOtherBucketStatsClause = (
+      leadingGroups: string[],
+      keyOverride: { groupExpr: string; keyAlias: string }
+    ): string =>
+      `STATS ${validMetrics.length > 0 ? `${validMetrics.join(', ')} ` : ''}BY ${buildStatsGroups(
+        leadingGroups,
+        keyOverride
+      )}`;
 
     if (innerTermsBucket) {
       // "Rank by" resolves either to the bucket's own field (alphabetical) or to the
