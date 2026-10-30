@@ -11778,8 +11778,8 @@ packages:
   '@hapi/catbox@12.1.1':
     resolution: {integrity: sha512-hDqYB1J+R0HtZg4iPH3LEnldoaBsar6bYp0EonBmNQ9t5CO+1CqgCul2ZtFveW1ReA5SQuze9GPSU7/aecERhw==}
 
-  '@hapi/content@6.0.2':
-    resolution: {integrity: sha512-OKyCOTjNR1hftwSjk9ueyAQTw8AwapvzBrPIWMGn39vhR5PmqLdYFmLc35bsSBye7gSMnlkXfc679bUdMIcRyQ==}
+  '@hapi/content@6.0.3':
+    resolution: {integrity: sha512-ksXemMNZAwPq/mu1a9TZ7LDUSgMR9sexBgpalF3nrP6SM42ARlnBZs58IS5Ay+o4o7y6tFNXL+rMJkQ5ghvCSw==}
 
   '@hapi/cookie@12.0.1':
     resolution: {integrity: sha512-TpykARUIgTBvgbsgtYe5CrM/7XBGms2/22JD3N6dzct6bG1vcOC6pH1JWIos1O5zvQnyDSJ2pnaFk+DToHkAng==}
@@ -19340,6 +19340,7 @@ packages:
   http-call@5.3.0:
     resolution: {integrity: sha512-ahwimsC23ICE4kPl9xTBjKB4inbRaeLyZeRunC/1Jy/Z6X8tv22MEAjK+KBOMSVLaqXPTTmd8638waVIKLGx2w==}
     engines: {node: '>=8.0.0'}
+    deprecated: Renamed to @heroku/http-call — please install @heroku/http-call instead.
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
@@ -28099,7 +28100,7 @@ snapshots:
       '@hapi/podium': 5.0.2
       '@hapi/validate': 2.0.1
 
-  '@hapi/content@6.0.2':
+  '@hapi/content@6.0.3':
     dependencies:
       '@hapi/boom': 10.0.1
 
@@ -28187,7 +28188,7 @@ snapshots:
     dependencies:
       '@hapi/b64': 6.0.1
       '@hapi/boom': 10.0.1
-      '@hapi/content': 6.0.2
+      '@hapi/content': 6.0.3
       '@hapi/hoek': 11.0.7
       '@hapi/nigel': 5.0.1
 
@@ -28223,7 +28224,7 @@ snapshots:
     dependencies:
       '@hapi/boom': 10.0.1
       '@hapi/bourne': 3.0.0
-      '@hapi/content': 6.0.2
+      '@hapi/content': 6.0.3
       '@hapi/file': 3.0.0
       '@hapi/hoek': 11.0.7
       '@hapi/pez': 6.1.1
