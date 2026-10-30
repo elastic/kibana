@@ -1,0 +1,31 @@
+{
+  "index_patterns": ["perf-dex-prebuilt-rules-runs"],
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "run_id": { "type": "keyword" },
+        "environment_id": { "type": "keyword" },
+        "environment_role": { "type": "keyword" },
+        "scenario": { "type": "keyword" },
+        "boot_type": { "type": "keyword" },
+        "stack_version": { "type": "keyword" },
+        "kibana_memory_mb": { "type": "integer" },
+        "es_heap_mb": { "type": "integer" },
+        "total_rules": { "type": "integer" },
+        "iterations": { "type": "integer" },
+        "median_duration_ms": { "type": "long" },
+        "p95_duration_ms": { "type": "long" },
+        "p99_duration_ms": { "type": "long" },
+        "min_duration_ms": { "type": "long" },
+        "max_duration_ms": { "type": "long" },
+        "mean_duration_ms": { "type": "long" },
+        "std_dev_ms": { "type": "double" },
+        "peak_rss_mb": { "type": "double" },
+        "peak_heap_mb": { "type": "double" },
+        "oom_events": { "type": "integer" },
+        "errors": { "type": "integer" }
+      }
+    }
+  }
+}
