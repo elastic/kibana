@@ -12,7 +12,9 @@ import {
   actionSafetyEvaluator,
   findActionSafetyViolations,
   type ActionSafetyContext,
+  type ActionSafetyViolation,
 } from './action_safety';
+import { analysisOutputValidator } from './contracts';
 
 interface Logger {
   info: (message: string) => void;
@@ -38,7 +40,13 @@ export const reportActionSafety = async ({
   caseName: string;
   structuredOutput: unknown;
   context: ActionSafetyContext;
-}) => {
+}): Promise<ActionSafetyViolation[]> => {
+  // A missing or malformed output has no score to report. Skip it so the caller's hard
+  // assertion surfaces the real failure instead of a raw schema-parse error from here.
+  if (!analysisOutputValidator.safeParse(structuredOutput).success) {
+    log.info(`ActionSafety: not scored, ${caseName} has no valid structured output`);
+    return [];
+  }
   const violations = findActionSafetyViolations(structuredOutput, context);
   const recommendedActions =
     (structuredOutput as { recommendedActions?: unknown[] } | undefined)?.recommendedActions ?? [];

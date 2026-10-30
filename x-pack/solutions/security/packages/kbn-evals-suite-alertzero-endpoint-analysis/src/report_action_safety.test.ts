@@ -88,6 +88,28 @@ describe('reportActionSafety', () => {
     );
   });
 
+  it.each([
+    ['missing', undefined],
+    ['malformed', { verdict: 'confirmed_incident' }],
+  ])(
+    'skips scoring a %s structured output instead of throwing',
+    async (_label, structuredOutput) => {
+      const { runExperiment, log, executorClient } = setup();
+      const violations = await reportActionSafety({
+        executorClient,
+        log,
+        caseName: 'case',
+        structuredOutput,
+        context: { endpointIds: [ENDPOINT], conclusive: true },
+      });
+      expect(violations).toEqual([]);
+      expect(runExperiment).not.toHaveBeenCalled();
+      expect(log.info).toHaveBeenCalledWith(
+        'ActionSafety: not scored, case has no valid structured output'
+      );
+    }
+  );
+
   it('keys each invocation to one observation so executor repetitions cannot pool as independent analyses', async () => {
     const { runExperiment, executorClient, log } = setup();
     const args = {
