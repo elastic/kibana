@@ -98,18 +98,24 @@ const MAX_ATTEMPTS = 2;
 type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
 
 /**
- * The entities to store. An entity the model lists again without evidence keeps the evidence
- * already stored for it, since a write replaces the whole list.
+ * The entities to store. An entity the record lists again keeps the id, type and evidence already
+ * stored for it: the model sees entities by name, but a stored id can differ from its name (an
+ * Entity Store id), and the id is what the UI opens the entity by. A write replaces the whole list.
  */
 export const toImpactEntities = (
   entities: readonly RecordEntity[],
   stored: readonly ImpactEntity[]
 ): ImpactEntity[] => {
   const storedById = new Map(stored.map((entity) => [entity.id, entity]));
+  const storedByName = new Map(
+    stored.flatMap((entity) => (entity.name ? [[entity.name, entity] as const] : []))
+  );
   return entities.map(({ name, type, evidence }) => {
-    const id = entityIdFor(name);
-    const kept = evidence ?? storedById.get(id)?.evidence;
-    return { id, name, ...(type ? { type } : {}), ...(kept ? { evidence: kept } : {}) };
+    const known = storedById.get(entityIdFor(name)) ?? storedByName.get(name);
+    const id = known?.id ?? entityIdFor(name);
+    const kept = evidence ?? known?.evidence;
+    const kind = type ?? known?.type;
+    return { id, name, ...(kind ? { type: kind } : {}), ...(kept ? { evidence: kept } : {}) };
   });
 };
 

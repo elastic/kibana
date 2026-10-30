@@ -1039,6 +1039,16 @@ describe('toImpactEntities', () => {
     ).toEqual([{ id: 'checkout', name: 'checkout', evidence: sent }]);
   });
 
+  it('keeps the stored id, type and evidence of an entity listed again by its name', () => {
+    const evidence = { description: 'Errors rose.' };
+    expect(
+      toImpactEntities(
+        [{ name: 'checkout' }],
+        [{ id: 'service:checkout', name: 'checkout', type: 'service', evidence }]
+      )
+    ).toEqual([{ id: 'service:checkout', name: 'checkout', type: 'service', evidence }]);
+  });
+
   it('does not carry evidence over to an entity that was not stored', () => {
     expect(
       toImpactEntities([{ name: 'new' }], [{ id: 'other', evidence: { description: 'x' } }])
