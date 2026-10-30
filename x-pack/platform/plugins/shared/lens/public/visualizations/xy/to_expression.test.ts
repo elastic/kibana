@@ -12,7 +12,10 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { XYVisualizationState } from './xy_visualization';
 import { getXyVisualization } from './xy_visualization';
 import type { OperationDescriptor } from '@kbn/lens-common';
-import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type {
+  EsqlEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -1083,6 +1086,46 @@ describe('#toExpression', () => {
     ) as Ast;
 
     expect(expression.chain[0].arguments.layers).toHaveLength(1);
+  });
+
+  it('should ignore query annotations without a filter', () => {
+    // Simulates a freshly switched query annotation whose filter has not been set yet
+    const annotationWithoutFilter = {
+      id: 'query-annotation',
+      type: 'query',
+      key: { type: 'point_in_time' },
+      timeField: 'timestamp',
+      label: 'Query annotation',
+    } as QueryPointEventAnnotationConfig;
+
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: LayerTypes.DATA,
+            seriesType: 'area',
+            xAccessor: 'a',
+            accessors: ['b'],
+          },
+          {
+            layerId: 'annotations',
+            layerType: LayerTypes.ANNOTATIONS,
+            annotations: [annotationWithoutFilter],
+            indexPatternId: 'my-indexPattern',
+            ignoreGlobalFilters: true,
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(expression.chain[0].arguments.annotations).toEqual([]);
   });
 
   it('should correctly set the current time marker visibility settings', () => {
