@@ -35,6 +35,7 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
+import type { BuilderTypeDefinition } from './lib/builder_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
@@ -63,6 +64,11 @@ export interface AlertingServerSetup {
    * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
+  /**
+   * Registers a builder type id. Create and update reject any other
+   * `metadata.builder.type`.
+   */
+  registerBuilderType(definition: BuilderTypeDefinition): void;
 }
 
 export interface AlertingServerStart {

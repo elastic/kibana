@@ -22,7 +22,7 @@ jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdRule = jest.fn();
+const onCreateBuilderRule = jest.fn();
 const onBuildSequence = jest.fn();
 
 const renderPanel = () =>
@@ -31,7 +31,7 @@ const renderPanel = () =>
       <RuleCreateOptionsPanel
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdRule={onCreateThresholdRule}
+        onCreateBuilderRule={onCreateBuilderRule}
       />
     </I18nProvider>
   );
@@ -92,12 +92,12 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {
+  it('calls onCreateBuilderRule when the "Threshold rule" card is clicked', () => {
     renderPanel();
 
     fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
 
-    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+    expect(onCreateBuilderRule).toHaveBeenCalledWith('threshold');
   });
 
   it('renders the agent card disabled and does not fire onCreateWithAgent when agent builder is unavailable', () => {
@@ -138,7 +138,7 @@ describe('RuleCreateOptionsPanel', () => {
           layout="vertical"
           onCreateEsqlRule={onCreateEsqlRule}
           onCreateWithAgent={onCreateWithAgent}
-          onCreateThresholdRule={onCreateThresholdRule}
+          onCreateBuilderRule={onCreateBuilderRule}
         />
       </I18nProvider>
     );
@@ -161,7 +161,7 @@ describe('RuleCreateOptionsPanel', () => {
             layout="vertical"
             onCreateEsqlRule={onCreateEsqlRule}
             onCreateWithAgent={onCreateWithAgent}
-            onCreateThresholdRule={onCreateThresholdRule}
+            onCreateBuilderRule={onCreateBuilderRule}
             onBuildSequence={withSequence ? onBuildSequence : undefined}
           />
         </I18nProvider>

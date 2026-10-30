@@ -122,6 +122,7 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { SpaceUiSettingsClientToken } from '../settings/tokens';
@@ -136,6 +137,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EventOriginActorToken).toConstantValue('user');
   bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+  bind(BuilderTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);

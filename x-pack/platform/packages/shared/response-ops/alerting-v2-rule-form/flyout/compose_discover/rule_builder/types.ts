@@ -21,11 +21,19 @@ export interface RuleBuilderStepProps {
   services: RuleFormServices;
 }
 
+export interface RuleBuilderCreateOption {
+  title: string;
+  description: string;
+  iconType: string;
+  order: number;
+  flyoutTitle: string;
+  dataTestSubj: string;
+}
+
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
   stepTitle: string;
-  /** Flyout header when creating a rule with this builder (e.g. "Create Threshold rule"). */
-  createFlyoutTitle: string;
+  createOption?: RuleBuilderCreateOption;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
   renderRecoveryStep?: (props: CustomRecoveryRenderProps) => React.ReactNode;
