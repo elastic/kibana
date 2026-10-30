@@ -1089,8 +1089,11 @@ export class NightshiftInvestigationsClient {
    * The kind of round the investigation's current run adds, as the caller that started the run
    * declared it. Read as the round starts, while that run waits on it. A round with no run in
    * progress was written straight into the conversation, by a person following up in Agent
-   * Builder, so it is a follow-up. Throws when the investigation or its run cannot be read, or the
-   * run declares no kind, rather than guess.
+   * Builder, so it is a follow-up. The Slack thread workflow only continues existing
+   * investigations (`find_investigation` runs with `create: false`) and omits `round_kind`, so a
+   * run without `round_kind` on an investigation that already has an earlier run is a follow-up.
+   * Throws when the investigation or its run cannot be read, or when the first run declares no
+   * kind, rather than guess.
    */
   async getActiveRoundKind(investigationId: string): Promise<InvestigationRoundKind> {
     const { agentBuilder } = this.requireWriteDeps();
@@ -1114,6 +1117,9 @@ export class NightshiftInvestigationsClient {
       return 'follow_up';
     }
     const roundKind = inputs?.round_kind;
+    if (roundKind === undefined && investigation.workflowExecutionIds.length > 1) {
+      return 'follow_up';
+    }
     if (!isInvestigationRoundKind(roundKind)) {
       throw new Error(
         `Investigation run "${latestExecutionId}" of "${investigationId}" declares no round_kind`
