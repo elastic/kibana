@@ -32,7 +32,7 @@ export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleD
   metadata: data.metadata!,
   schedule: data.schedule!,
   query: data.query!,
-  state_transition: data.state_transition ?? null,
+  state_transition: data.state_transition,
   time_field: data.time_field ?? DEFAULT_TIME_FIELD,
   ...buildLifecycle(data),
   ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),

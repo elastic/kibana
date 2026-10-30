@@ -16,11 +16,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  monaco,
-  CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
-} from '@kbn/monaco';
+import { monaco, CODE_EDITOR_DEFAULT_THEME_ID } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Interpolation, Theme } from '@emotion/react';
@@ -28,6 +24,10 @@ import { css, Global } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
+  type CodeEditorScope,
+  type KbnCodeEditorChromeOverrides,
+  getCodeEditorScope,
+  getEditorInputSurface,
 } from './react_monaco_editor';
 import { remeasureFonts } from './utils/remeasure_fonts';
 import {
@@ -38,8 +38,11 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
+  usePersistHoverContentWidget,
 } from './mods';
 import { styles } from './editor.styles';
+
+export type { CodeEditorScope };
 
 export interface CodeEditorProps
   extends Pick<ReactMonacoEditorProps, 'overflowWidgetsContainerZIndexOverride'> {
@@ -63,7 +66,18 @@ export interface CodeEditorProps
    * Documentation of options can be found here:
    * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
-  options?: monaco.editor.IStandaloneEditorConstructionOptions;
+  options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext' | 'theme'>;
+
+  /**
+   * Chrome colors for this editor instance: background, gutter, selection, suggest and hover widgets,
+   * diff decorations. Keyed by Monaco color id (`'editor.background'`,
+   * `'editorSuggestWidget.selectedBackground'`, …) and derived from the EUI theme so they follow
+   * light/dark switches. Applied as CSS custom properties on this editor's own DOM nodes, so no
+   * other editor on the page is affected.
+   * Syntax colors are not chrome: they come from the language's registered theme and cannot be changed here.
+   * Declare the function once at module scope, not inline in render.
+   */
+  chromeOverrides?: KbnCodeEditorChromeOverrides;
 
   /**
    * Suggestion provider for autocompletion
@@ -132,7 +146,8 @@ export interface CodeEditorProps
   editorWillUnmount?: () => void;
 
   /**
-   * Should the editor use a transparent background
+   * Should the editor use a transparent background. Shorthand for a
+   * {@link chromeOverrides} of `{ 'editor.background': 'transparent' }`; explicit overrides win.
    */
   transparentBackground?: boolean;
 
@@ -181,9 +196,20 @@ export interface CodeEditorProps
   dataTestSubj?: string;
 
   /**
-   * Custom CSS class to apply to the container
+   * @deprecated Global styles injected while this editor is mounted.
+   * Any unscoped `.monaco-editor` rule here reaches every editor on the page.
+   * Prefer `chromeOverrides` to set custom colors for this editor instance and `scopedCss` for
+   * anything that needs a selector.
    */
   classNameCss?: Interpolation<Theme>;
+
+  /**
+   * Styles for this editor alone. Receives selectors that match only this instance's nodes —
+   * `scope.editor` for the inline editor's container, `scope.overflowWidgets` for the suggest and
+   * hover widgets portaled to `body` — so rules written against them cannot leak to other editors.
+   * For colors use `chromeOverrides` instead; this is for structure (z-index, padding, hiding).
+   */
+  scopedCss?: (scope: CodeEditorScope) => Interpolation<Theme>;
 
   /**
    * Enables a custom context menu with Cut, Copy, Paste actions. Disabled by default.
@@ -248,6 +274,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   enableFindAction,
   dataTestSubj = 'kibanaCodeEditor',
   classNameCss,
+  scopedCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
   htmlId,
@@ -255,7 +282,20 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onFocus,
   onBlur,
   overflowWidgetsContainerZIndexOverride,
+  chromeOverrides,
 }) => {
+  let resolvedOptions = options ?? {};
+
+  // runtime check to guard against the theme option being provided
+  if (options && 'theme' in resolvedOptions) {
+    const { theme, ...rest } = resolvedOptions;
+    resolvedOptions = rest;
+    // eslint-disable-next-line no-console
+    console.error(
+      'Providing the `theme` option is not supported in the @kbn/code-editor component, see the README for details on how theming is approached.'
+    );
+  }
+
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
@@ -274,12 +314,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       allowFullScreen,
     });
 
+  const persistHoverContentWidget = usePersistHoverContentWidget();
+  const wireHoverContentPersistence = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      return persistHoverContentWidget(editor);
+    },
+    [persistHoverContentWidget]
+  );
+
   const isReadOnly = options?.readOnly ?? false;
 
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
+  const hoverContentPersistenceSubscription = useRef<monaco.IDisposable | undefined>(undefined);
 
   const [isHintActive, setIsHintActive] = useState(true);
 
@@ -308,7 +357,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       if (ev.keyCode === monaco.KeyCode.Escape) {
         const inspectTokensWidget = editor?.getContribution(
           'editor.contrib.inspectTokens'
-          // @ts-expect-errors -- "_widget" is not part of the TS interface but does exist
         )?._widget;
         // If the inspect tokens widget is open then we want to let monaco handle ESCAPE for it,
         // otherwise widget will not close.
@@ -503,19 +551,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       remeasureFonts();
 
-      const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
-      if (textbox) {
-        // Make sure the textarea is not directly accessible with TAB
-        textbox.tabIndex = -1;
+      const inputSurface = getEditorInputSurface(editor.getDomNode());
+      if (inputSurface) {
+        // Make sure the real input surface is not directly accessible with TAB
+        inputSurface.tabIndex = -1;
 
         // The Monaco editor seems to override the tabindex and set it back to "0"
         // so we make sure that whenever the attributes change the tabindex stays at -1
         textboxMutationObserver.current = new MutationObserver(function onTextboxAttributeChange() {
-          if (textbox.tabIndex >= 0) {
-            textbox.tabIndex = -1;
+          if (inputSurface.tabIndex >= 0) {
+            inputSurface.tabIndex = -1;
           }
         });
-        textboxMutationObserver.current.observe(textbox, { attributes: true });
+        textboxMutationObserver.current.observe(inputSurface, { attributes: true });
       }
 
       editor.onKeyDown((ev: monaco.IKeyboardEvent) => {
@@ -524,19 +572,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       editor.onDidBlurEditorText(onBlurMonaco);
 
       const messageContribution = editor.getContribution('editor.contrib.messageController');
+
       editor.onDidAttemptReadOnlyEdit(() => {
-        // @ts-expect-error the show message API does exist and is documented here
-        // https://github.com/microsoft/vscode/commit/052f02175f4752c36024c18cfbca4e13403e10c3
-        messageContribution?.showMessage(readOnlyMessage, editor.getPosition());
+        messageContribution?.showMessage?.(readOnlyMessage, editor.getPosition());
       });
 
-      // "widget" is not part of the TS interface but does exist
-      // @ts-expect-errors
-      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
-        ?.value;
+      const suggestionController = editor.getContribution('editor.contrib.suggestController');
+      const suggestionWidget = suggestionController?.widget?.value;
 
-      // As I haven't found official documentation for "onDidShow" and "onDidHide"
-      // we guard from possible changes in the underlying lib
       if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
         suggestionWidget.onDidShow(() => {
           isSuggestionMenuOpen.current = true;
@@ -545,6 +588,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           isSuggestionMenuOpen.current = false;
         });
       }
+
+      hoverContentPersistenceSubscription.current?.dispose();
+      hoverContentPersistenceSubscription.current = wireHoverContentPersistence(editor);
 
       if (enableCustomContextMenu) {
         registerContextMenuActions({
@@ -566,6 +612,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       registerContextMenuActions,
       isReadOnly,
       customContextMenuActions,
+      wireHoverContentPersistence,
     ]
   );
 
@@ -580,6 +627,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       // Clear the stored editor reference before it gets disposed, to avoid downstream
       // effects/hooks attempting to call into a disposed editor instance.
       setEditor(null);
+
+      hoverContentPersistenceSubscription.current?.dispose();
+      hoverContentPersistenceSubscription.current = undefined;
 
       const model = editor.getModel();
       model?.dispose();
@@ -596,10 +646,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     // apply aria described by on editor element
     if (_editor && ariaDescribedBy) {
-      _editor
-        .getDomNode()
-        ?.querySelector('textarea[aria-roledescription="editor"]')
-        ?.setAttribute('aria-describedby', ariaDescribedBy);
+      getEditorInputSurface(_editor.getDomNode())?.setAttribute(
+        'aria-describedby',
+        ariaDescribedBy
+      );
     }
   }, [_editor, ariaDescribedBy]);
 
@@ -608,9 +658,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
-  const theme =
-    options?.theme ??
-    (transparentBackground ? CODE_EDITOR_TRANSPARENT_THEME_ID : CODE_EDITOR_DEFAULT_THEME_ID);
+  const resolvedChromeOverrides = useMemo<KbnCodeEditorChromeOverrides | undefined>(() => {
+    if (!transparentBackground) {
+      return chromeOverrides;
+    }
+
+    return ((theme) => ({
+      ...chromeOverrides?.(theme),
+      'editor.background': 'transparent',
+      'editorGutter.background': 'transparent',
+    })) satisfies KbnCodeEditorChromeOverrides;
+  }, [transparentBackground, chromeOverrides]);
+
+  const editorInstanceId = useMemo(() => htmlIdGenerator('kbnCodeEditor')(), []);
+
+  const scopedStyles = useMemo(
+    () => scopedCss?.(getCodeEditorScope(editorInstanceId)),
+    [scopedCss, editorInstanceId]
+  );
 
   return (
     <div
@@ -620,6 +685,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       className="kibanaCodeEditor"
     >
       <Global styles={classNameCss} />
+      {scopedStyles !== undefined && <Global styles={scopedStyles} />}
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
@@ -643,7 +709,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <ReBroadcastMouseDownEvents>
           {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
           <MonacoEditor
-            theme={theme}
+            theme={CODE_EDITOR_DEFAULT_THEME_ID}
+            chromeOverrides={resolvedChromeOverrides}
             language={languageId}
             value={value}
             onChange={onChange}
@@ -653,12 +720,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             editorDidMount={_editorDidMount}
             editorWillUnmount={_editorWillUnmount}
             overflowWidgetsContainerZIndexOverride={overflowWidgetsContainerZIndexOverride}
+            editorInstanceId={editorInstanceId}
             options={{
               padding: allowFullScreen || isCopyable ? { top: 24 } : {},
+              // Opt-out of the new EditContext API for now.
+              editContext: false,
               renderLineHighlight: 'none',
               scrollBeyondLastLine: false,
+              stickyScroll: { enabled: false },
               minimap: {
                 enabled: false,
+              },
+              quickSuggestions: {
+                other: 'on',
               },
               scrollbar: {
                 useShadows: false,
@@ -667,7 +741,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 // outer scrollbars.
                 alwaysConsumeMouseWheel: false,
               },
-              wordBasedSuggestions: false,
+              wordBasedSuggestions: 'off',
               wordWrap: 'on',
               wrappingIndent: 'indent',
               matchBrackets: 'never',
@@ -675,9 +749,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               fontSize: isFullScreen ? 16 : 12,
               lineHeight: isFullScreen ? 24 : 21,
               contextmenu: enableCustomContextMenu,
+              defaultColorDecorators: 'never',
+              lightbulb: {
+                enabled: monaco.editor.ShowLightbulbIconMode.On,
+              },
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
-              ...options,
+              ...resolvedOptions,
+              hover: {
+                sticky: true,
+                ...resolvedOptions?.hover,
+              },
               // Explicit links prop always takes precedence over any value passed in options
               links,
               // Explicit not possible to override because of the way the suggestion widget is rendered in a separate container

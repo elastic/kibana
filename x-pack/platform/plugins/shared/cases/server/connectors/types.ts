@@ -46,11 +46,24 @@ export interface ExternalIncidentSnapshot {
 
 export type ParseIncident = (incident: Record<string, unknown>) => ExternalIncidentSnapshot;
 
+/** The incident a change notification from the external system is about. */
+export interface ExternalIncidentNotification {
+  /** The incident id, as recorded on the case by a push. */
+  externalId: string;
+  /** When the incident changed, as the external system reports it. */
+  updatedAt?: string;
+}
+
+/** Reads a change notification sent by the external system; `null` when the body is not one. */
+export type ParseNotification = (body: unknown) => ExternalIncidentNotification | null;
+
 export interface ICasesConnector<TExternalServiceParams = {}> {
   format: (theCase: Case, alerts: CasesClientGetAlertsResponse) => TExternalServiceParams;
   getMapping: () => ConnectorMappings;
   /** Maps a `getIncident` response to case fields. Absent when the type cannot be synced from. */
   parseIncident?: ParseIncident;
+  /** Reads change notifications the external system sends to Kibana. Absent when it cannot send them. */
+  parseNotification?: ParseNotification;
   /**
    * Push payload key that accepts arbitrary external fields as a JSON string. Mapped case
    * fields are written through it; absent when the connector has no such channel.

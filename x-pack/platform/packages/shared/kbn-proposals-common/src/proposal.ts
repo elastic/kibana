@@ -7,8 +7,8 @@
 
 import type { ActionMetadata } from '@kbn/workflows';
 import { actionCategorySchema, actionImpactSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
-import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_CHARTS_SUMMARY_BUCKETS, PROPOSAL_CATEGORY_TODO } from './constants';
 
 /**
  * What a human concluded. Absent until someone decides, which is what makes
@@ -17,6 +17,15 @@ import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
  */
 export const proposalDecisionSchema = z.enum(['approved', 'dismissed']);
 export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
+
+/**
+ * How the decision was reached: `manual` when someone answered the gate, `auto`
+ * when nobody did. The gate decides on its own only by auto-approving, so in
+ * practice `auto` comes with `approved`. Written with the decision. It does not
+ * change after that. Absent only while undecided.
+ */
+export const proposalDecisionModeSchema = lazySchema(() => z.enum(['manual', 'auto']));
+export type ProposalDecisionMode = z.infer<typeof proposalDecisionModeSchema>;
 
 /**
  * Where the proposal got to, independent of what was decided. `no_action`
@@ -112,7 +121,7 @@ export const MAX_TITLE_LENGTH = 256;
 export const DEFAULT_PROPOSAL_TITLE = 'Proposed action';
 /** Markdown shown to a human, so it needs room without being unbounded. */
 export const MAX_COMMENT_LENGTH = 8192;
-const MAX_RATIONALE_LENGTH = 4096;
+export const MAX_RATIONALE_LENGTH = 4096;
 const MAX_ERROR_LENGTH = 4096;
 /** ISO 8601 timestamps; generous enough for any offset notation. */
 const MAX_TIMESTAMP_LENGTH = 64;
@@ -144,90 +153,101 @@ export const proposalUserSchema = z.object({
 });
 export type ProposalUser = z.infer<typeof proposalUserSchema>;
 
-export const proposalSchema = z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  spaceId: z.string().max(MAX_ID_LENGTH),
-  /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  /**
-   * Short label naming what is proposed. Plain text, not markdown: `comment` is
-   * already the body. Required like `comment`, and resolved on write — the
-   * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
-   * so every reader renders this field instead of re-deriving a fallback chain.
-   */
-  title: z.string().max(MAX_TITLE_LENGTH),
-  /** Markdown explaining what is being proposed. Every proposal carries one. */
-  comment: z.string().max(MAX_COMMENT_LENGTH),
+export const proposalSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    spaceId: z.string().max(MAX_ID_LENGTH),
+    /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    /**
+     * Short label naming what is proposed. Plain text, not markdown: `comment` is
+     * already the body. Required like `comment`, and resolved on write — the
+     * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
+     * so every reader renders this field instead of re-deriving a fallback chain.
+     */
+    title: z.string().max(MAX_TITLE_LENGTH),
+    /** Markdown explaining what is being proposed. Every proposal carries one. */
+    comment: z.string().max(MAX_COMMENT_LENGTH),
 
-  /**
-   * Managed action workflow this proposal would execute. Absent for
-   * non-action proposals. Immutable: a different action is a different
-   * proposal.
-   */
-  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Inputs for the action workflow. Frozen once the proposal is decided. */
-  actionInput: boundedActionInput.optional(),
+    /**
+     * Managed action workflow this proposal would execute. Absent for
+     * non-action proposals. Immutable: a different action is a different
+     * proposal.
+     */
+    actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Inputs for the action workflow. Frozen once the proposal is decided. */
+    actionInput: boundedActionInput.optional(),
 
-  status: proposalStatusSchema,
-  /** Absent while the proposal is still awaiting a human. */
-  decision: proposalDecisionSchema.optional(),
-  /**
-   * Set when this proposal was replaced — by a retry after a failed action, or
-   * by an analyst-requested revision. Points at the successor so the queue can
-   * show one live proposal per subject rather than every attempt.
-   */
-  supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
-  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
-  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
-  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
-  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
-  revision: z.number().int().min(1).optional(),
-  /** Snapshotted from the triggering context at creation; never re-scored. */
-  impact: proposalImpactSchema,
-  confidence: proposalConfidenceSchema,
-  /**
-   * Resolved from the action workflow's metadata at creation, so it is absent
-   * on a proposal that carries no action.
-   */
-  category: proposalCategorySchema.optional(),
-  origin: proposalOriginSchema,
-  /** Decision deadline, evaluated on read rather than swept into a status. */
-  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    status: proposalStatusSchema,
+    /** Absent while the proposal is still awaiting a human. */
+    decision: proposalDecisionSchema.optional(),
+    /**
+     * Set when this proposal was replaced — by a retry after a failed action, or
+     * by an analyst-requested revision. Points at the successor so the queue can
+     * show one live proposal per subject rather than every attempt.
+     */
+    supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+    /** First proposal in the chain; equal to `id` on the root and never rewritten. */
+    rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
+    supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+    /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
+    revision: z.number().int().min(1).optional(),
+    /** Snapshotted from the triggering context at creation; never re-scored. */
+    impact: proposalImpactSchema,
+    confidence: proposalConfidenceSchema,
+    /**
+     * Resolved from the action workflow's metadata at creation, so it is absent
+     * on a proposal that carries no action.
+     */
+    category: proposalCategorySchema.optional(),
+    origin: proposalOriginSchema,
+    /** Decision deadline, evaluated on read rather than swept into a status. */
+    expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  decidedBy: proposalUserSchema.optional(),
-  decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-  dismissReason: dismissReasonSchema.optional(),
-  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-  executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
-  /**
-   * The `executionError` of the attempt this proposal re-offers: copied from
-   * the predecessor when a failed proposal is cloned, then carried through
-   * revisions untouched, since revising runs nothing. It therefore names the
-   * last attempt that actually ran and failed, which sits further back than
-   * `supersedes` once a clone has been revised. Absent while nothing in the
-   * chain has run and failed — a consumer must not read absence as "the
-   * previous attempt succeeded".
-   *
-   * A deliberate denormalisation of something the chain can already derive.
-   * The queue answers "did the last attempt fail, and how" on every row it
-   * renders, and deriving it would cost one extra fetch per row. It holds one
-   * failure only: "failed three times" is `revision` plus a chain query.
-   */
-  previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+    decidedBy: proposalUserSchema.optional(),
+    decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    decisionMode: proposalDecisionModeSchema.optional(),
+    dismissReason: dismissReasonSchema.optional(),
+    rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+    executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+    /**
+     * The `executionError` of the attempt this proposal re-offers: copied from
+     * the predecessor when a failed proposal is cloned, then carried through
+     * revisions untouched, since revising runs nothing. It therefore names the
+     * last attempt that actually ran and failed, which sits further back than
+     * `supersedes` once a clone has been revised. Absent while nothing in the
+     * chain has run and failed — a consumer must not read absence as "the
+     * previous attempt succeeded".
+     *
+     * A deliberate denormalisation of something the chain can already derive.
+     * The queue answers "did the last attempt fail, and how" on every row it
+     * renders, and deriving it would cost one extra fetch per row. It holds one
+     * failure only: "failed three times" is `revision` plus a chain query.
+     */
+    previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
-  /** Gating execution to resume. Absent when no workflow is waiting. */
-  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Gating execution to resume. Absent when no workflow is waiting. */
+    workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * Stamped by `releaseGate` — the approve and dismiss routes — before it
+     * resumes the gate, and refused by `revise()` from then on: the gate adopts
+     * the chain head before it writes the decision, so a revision landing in
+     * between would be what the approval executes. Absent on a gate resumed
+     * through any other surface and on every auto-approval, so it says nothing
+     * about who decided or how.
+     */
+    gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
-  createdBy: proposalUserSchema.optional(),
-});
+    createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
+    createdBy: proposalUserSchema.optional(),
+  })
+);
 export type Proposal = z.infer<typeof proposalSchema>;
 
-/** Catalog metadata resolved on read, plus the expiry evaluated at request time. */
+/** Catalog metadata resolved on read. */
 export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
-  expired: boolean;
 }
 
 export const createProposalRequestSchema = z.object({
@@ -263,6 +283,22 @@ export const createProposalRequestSchema = z.object({
   origin: proposalOriginSchema,
   expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
   workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+  /**
+   * The id to create the proposal under, instead of a random one. For a caller
+   * that derives the id from what it is proposing, so that two calls for the same
+   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+   * check-then-create in application code — decides which one creates it.
+   *
+   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+   * service reads and returns nothing. What a duplicate means, and whether a
+   * settled proposal should be followed by a new one under another id, is the
+   * caller's to decide.
+   *
+   * The index is shared across spaces and the service does not scope the id, so
+   * the caller must put the space (and its own producer) into whatever the id is
+   * derived from. Omitting `id` mints a random one, exactly as before.
+   */
+  id: z.uuid().optional(),
 });
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
@@ -329,6 +365,12 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+  /**
+   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+   * an undecided one first, so paging stays consistent with the order shown.
+   */
+  order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -396,6 +438,16 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
+ * A to-do for a human: something the analyst carries out themselves, so approving it records that
+ * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
+ * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
+ * producer states it explicitly, and a proposal without an action that still asks for permission
+ * (to run an analysis, say) keeps Approve/Decline.
+ */
+export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
+  proposal.category === PROPOSAL_CATEGORY_TODO;
+
+/**
  * Approved, but the action it triggers has not finished running yet — `executing`, or briefly
  * still `pending` while the gate workflow's post-gate write is catching up with an approve call
  * that already returned. Declining has no action to run, so a decline never reads this; it
@@ -409,10 +461,54 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
   proposal.decision === 'approved' &&
   (proposal.status === 'pending' || proposal.status === 'executing');
 
-export const isExpired = (proposal: Pick<Proposal, 'expiresAt'>, now = Date.now()): boolean => {
-  if (!proposal.expiresAt) {
-    return false;
-  }
-  const deadline = Date.parse(proposal.expiresAt);
-  return Number.isFinite(deadline) && deadline <= now;
-};
+/**
+ * The action failed and its retry does not exist yet. Poll until the original is superseded.
+ */
+export const isAwaitingRetry = (
+  proposal: Pick<Proposal, 'decision' | 'status' | 'supersededBy'>
+): boolean =>
+  proposal.decision === 'approved' &&
+  proposal.status === 'failed' &&
+  proposal.supersededBy === undefined;
+
+/** Settled by a deadline rather than a person.
+ * `pending` reads as live even past `expiresAt` until the gate workflow sweeps it,
+ * so this is not a substitute for comparing `expiresAt` to `now`. */
+export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
+  proposal.status === 'expired';
+
+/**
+ * Gives the phase of each status. It is a `Record` over every `ProposalStatus`. If you add a
+ * status and do not place it here, the compiler reports an error. The groups below come from this
+ * map, so they cannot drift from it.
+ *
+ * - `open`: can still change. `pending` waits for a decision. `executing` is approved and running.
+ * - `settled`: the result is known. Nothing runs again.
+ * - `replaced`: not decided, but it cannot change. A superseded proposal is not the live
+ *   revision. A caller can still hold its id (a stale workflow variable or a retried step).
+ *   That caller must not revive it through `update()`.
+ */
+const PROPOSAL_STATUS_PHASE = {
+  pending: 'open',
+  executing: 'open',
+  succeeded: 'settled',
+  failed: 'settled',
+  expired: 'settled',
+  no_action: 'settled',
+  superseded: 'replaced',
+} as const satisfies Record<ProposalStatus, 'open' | 'settled' | 'replaced'>;
+
+type ProposalStatusPhase = (typeof PROPOSAL_STATUS_PHASE)[ProposalStatus];
+
+const statusesInPhase = (phase: ProposalStatusPhase): ProposalStatus[] =>
+  proposalStatusSchema.options.filter((status) => PROPOSAL_STATUS_PHASE[status] === phase);
+
+/** Statuses that can still change: waiting for a decision, or approved and running. */
+export const OPEN_PROPOSAL_STATUSES = statusesInPhase('open');
+
+/** Statuses with a known result. `superseded` is not here: its successor represents it. */
+export const SETTLED_PROPOSAL_STATUSES = statusesInPhase('settled');
+
+/** Returns true for a settled or replaced status. Only `pending` and `executing` return false. */
+export const isTerminal = (status: ProposalStatus): boolean =>
+  PROPOSAL_STATUS_PHASE[status] !== 'open';

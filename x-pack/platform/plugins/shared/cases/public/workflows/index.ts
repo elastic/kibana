@@ -136,6 +136,10 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.bulkDeleteObservablesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.getCasesStepDefinition)
   );
 
@@ -145,6 +149,10 @@ export function registerCasesSteps(
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./simple_steps').then((m) => m.syncCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./simple_steps').then((m) => m.deleteAttachmentsStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_BULK_DELETE_ATTACHMENTS } from '../../constants';
 import { AddAlertsStepTypeId, addAlertsStepCommonDefinition } from './add_alerts';
 import { AddEventsStepTypeId, addEventsStepCommonDefinition } from './add_events';
 import { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
@@ -13,6 +14,10 @@ import { RemoveTagsStepTypeId, removeTagsStepCommonDefinition } from './remove_t
 import { AssignCaseStepTypeId, assignCaseStepCommonDefinition } from './assign_case';
 import { CloseCaseStepTypeId, closeCaseStepCommonDefinition } from './close_case';
 import { DeleteCasesStepTypeId, deleteCasesStepCommonDefinition } from './delete_cases';
+import {
+  DeleteAttachmentsStepTypeId,
+  deleteAttachmentsStepCommonDefinition,
+} from './delete_attachments';
 import {
   FindSimilarCasesStepTypeId,
   findSimilarCasesStepCommonDefinition,
@@ -39,6 +44,10 @@ import {
   DeleteObservableStepTypeId,
   deleteObservableStepCommonDefinition,
 } from './delete_observable';
+import {
+  BulkDeleteObservablesStepTypeId,
+  bulkDeleteObservablesStepCommonDefinition,
+} from './bulk_delete_observables';
 import { GetCasesStepTypeId, getCasesStepCommonDefinition } from './get_cases';
 import { PushCasesStepTypeId, pushCasesStepCommonDefinition } from './push_cases';
 import { SyncCaseStepTypeId, syncCaseStepCommonDefinition } from './sync_case';
@@ -67,6 +76,10 @@ import {
   updateObservableInputFixture,
   deleteObservableInputFixture,
   deleteObservableOutputFixture,
+  deleteAttachmentsInputFixture,
+  deleteAttachmentsOutputFixture,
+  bulkDeleteObservablesInputFixture,
+  bulkDeleteObservablesOutputFixture,
   getCasesInputFixture,
   getCasesOutputFixture,
   pushCasesInputFixture,
@@ -193,6 +206,12 @@ const stepDefinitions = [
     output: deleteObservableOutputFixture,
   },
   {
+    typeId: BulkDeleteObservablesStepTypeId,
+    definition: bulkDeleteObservablesStepCommonDefinition,
+    input: bulkDeleteObservablesInputFixture,
+    output: bulkDeleteObservablesOutputFixture,
+  },
+  {
     typeId: GetCasesStepTypeId,
     definition: getCasesStepCommonDefinition,
     input: getCasesInputFixture,
@@ -209,6 +228,12 @@ const stepDefinitions = [
     definition: syncCaseStepCommonDefinition,
     input: syncCaseInputFixture,
     output: syncCaseOutputFixture,
+  },
+  {
+    typeId: DeleteAttachmentsStepTypeId,
+    definition: deleteAttachmentsStepCommonDefinition,
+    input: deleteAttachmentsInputFixture,
+    output: deleteAttachmentsOutputFixture,
   },
 ] as const;
 
@@ -230,6 +255,18 @@ describe('cases common step definitions', () => {
     expect(syncCaseStepCommonDefinition.inputSchema.safeParse({ case_id: 'case-1' }).success).toBe(
       true
     );
+  });
+
+  it('bounds ids for deleteAttachments', () => {
+    const { inputSchema } = deleteAttachmentsStepCommonDefinition;
+
+    expect(inputSchema.safeParse({ case_id: 'case-1', ids: [] }).success).toBe(false);
+    expect(
+      inputSchema.safeParse({
+        case_id: 'case-1',
+        ids: Array.from({ length: MAX_BULK_DELETE_ATTACHMENTS + 1 }, (_, i) => `id-${i}`),
+      }).success
+    ).toBe(false);
   });
 
   it('rejects non built-in observable type keys for addObservables', () => {

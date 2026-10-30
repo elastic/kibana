@@ -13,6 +13,7 @@ import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DataViewSource, type EsqlSource } from '@kbn/data-source';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -31,6 +32,7 @@ import type {
   DataMsg,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
+import type { RecordsFetchResponse } from '../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
@@ -49,6 +51,7 @@ export interface CommonFetchParams {
   scopedProfilesManager: ScopedProfilesManager;
   scopedEbtManager: ScopedDiscoverEBTManager;
   getCurrentTab: () => TabState;
+  esqlSource?: EsqlSource;
 }
 
 /**
@@ -76,8 +79,9 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    esqlSource,
   } = params;
-  const { data, expressions } = services;
+  const { data } = services;
 
   try {
     const searchSource = originalSearchSource.createChild();
@@ -100,22 +104,29 @@ export function fetchAll(
       });
     }
 
+    const loadingDataSource = isEsqlQuery
+      ? esqlSource
+      : dataView.id
+      ? new DataViewSource(dataView)
+      : undefined;
+
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$);
-    sendLoadingMsg(dataSubjects.documents$, { query });
+    sendLoadingMsg(dataSubjects.documents$, {
+      query,
+      ...(loadingDataSource ? { dataSource: loadingDataSource } : {}),
+    });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
 
-    // Start fetching all required requests
-    const response = isEsqlQuery
+    const response: Promise<RecordsFetchResponse> = isEsqlQuery
       ? fetchEsql({
           query,
-          dataView,
+          esqlSource,
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
-          expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
@@ -135,12 +146,15 @@ export function fetchAll(
       .then(
         ({
           records,
-          esqlQueryColumns,
           interceptedWarnings = [],
           esqlHeaderWarning,
+          dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
-          fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+          fetchAllRequestsOnlyTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximationApplied,
+          });
 
           if (isEsqlQuery) {
             const fetchStatus =
@@ -181,7 +195,11 @@ export function fetchAll(
           dataSubjects.documents$.next({
             fetchStatus,
             result: records,
-            esqlQueryColumns,
+            dataSource: isEsqlQuery
+              ? fetchedDataSource
+              : dataView.id
+              ? new DataViewSource(dataView)
+              : undefined,
             esqlHeaderWarning,
             interceptedWarnings,
             approximationApplied,

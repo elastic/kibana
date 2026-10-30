@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SyncUserActionPayloadRt, SyncUserActionRt } from './v1';
+import { SyncUserActionPayloadSchema, SyncUserActionSchema } from './v1';
 
 describe('Sync', () => {
   const defaultRequest = {
@@ -20,27 +20,26 @@ describe('Sync', () => {
     },
   };
 
-  it('decodes the payload and strips unknown attributes', () => {
-    const query = SyncUserActionPayloadRt.decode({
+  it('parses the payload and strips unknown attributes', () => {
+    const result = SyncUserActionPayloadSchema.safeParse({
       sync: { ...defaultRequest.sync, foo: 'bar' },
     });
 
-    expect(query).toStrictEqual({ _tag: 'Right', right: defaultRequest });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(defaultRequest);
   });
 
-  it('decodes the user action with its type', () => {
-    const query = SyncUserActionRt.decode({ type: 'sync', payload: defaultRequest });
+  it('parses the user action with its type', () => {
+    const result = SyncUserActionSchema.safeParse({ type: 'sync', payload: defaultRequest });
 
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: { type: 'sync', payload: defaultRequest },
-    });
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual({ type: 'sync', payload: defaultRequest });
   });
 
   it('rejects a payload without updated_fields', () => {
     const { updated_fields: _omit, ...rest } = defaultRequest.sync;
-    const query = SyncUserActionPayloadRt.decode({ sync: rest });
+    const result = SyncUserActionPayloadSchema.safeParse({ sync: rest });
 
-    expect(query._tag).toBe('Left');
+    expect(result.success).toBe(false);
   });
 });

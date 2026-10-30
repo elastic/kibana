@@ -90,6 +90,24 @@ describe('regex patterns', () => {
     });
   });
 
+  describe('liquid tag pattern complexity', () => {
+    // An earlier form padded a lazy `[^%]*?` with `\s*` on both sides. Because that class also
+    // matches whitespace, an unclosed `{%` followed by a whitespace run was cubic: ~1.5k spaces
+    // blocked the event loop for seconds.
+    const SPACES = ' '.repeat(1_000_000);
+
+    it.each([`{%${SPACES}`, `{%-${SPACES}-`])(
+      'scans a long unclosed tag in linear time',
+      (input) => {
+        const start = Date.now();
+
+        expect(isLiquidTagValue(input)).toBe(false);
+
+        expect(Date.now() - start).toBeLessThan(1_000);
+      }
+    );
+  });
+
   describe('ALLOWED_KEY_REGEX', () => {
     it('should match valid property paths', () => {
       const validPaths = [
@@ -103,6 +121,8 @@ describe('regex patterns', () => {
         'response.data["user-info"].name',
         'user[abc]',
         'inputs.payload.rules[ep.rule_id].name',
+        'foreach.item.2',
+        'steps.search.output.hits.0._source',
       ];
 
       validPaths.forEach((path) => {
@@ -150,6 +170,8 @@ describe('regex patterns', () => {
         'response.data["user-info"].name',
         'user[abc]',
         'inputs.payload.rules[ep.rule_id].name',
+        'foreach.item.2',
+        'steps.search.output.hits.0._source',
       ];
 
       validPaths.forEach((path) => {

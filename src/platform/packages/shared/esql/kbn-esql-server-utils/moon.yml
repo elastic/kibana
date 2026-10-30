@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/esql-types'
+  - '@kbn/esql-language'
+  - '@kbn/logging-mocks'
 tags:
   - shared-server
   - package
@@ -30,6 +32,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

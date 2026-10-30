@@ -5,78 +5,53 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  ExternalSyncFieldMapping as GeneratedExternalSyncFieldMapping,
+  ExternalSyncFieldRule as GeneratedExternalSyncFieldRule,
+  ExternalSyncSettings as GeneratedExternalSyncSettings,
+} from '../../../bundled-types.gen';
 
 /**
  * External sync (technical preview). Leaf module so cases, configuration and
  * connector mappings can all reference it without import cycles.
  */
 
-export const ExternalSyncConflictStrategyRt = rt.union([
-  rt.literal('external'),
-  rt.literal('kibana'),
-]);
+const EXTERNAL_SYNC_FIELDS = ['title', 'description', 'status', 'tags', 'comments'] as const;
 
-export const ExternalSyncSettingsRt = rt.strict({
-  autoPush: rt.boolean,
-  conflictStrategy: ExternalSyncConflictStrategyRt,
-});
+/** Request-size ceiling only; the configure validators enforce the per-connector product limit. */
+const MAX_EXTERNAL_SYNC_FIELD_MAPPINGS_SCHEMA = 100;
 
-export const ExternalSyncFieldRt = rt.union([
-  rt.literal('title'),
-  rt.literal('description'),
-  rt.literal('status'),
-  rt.literal('tags'),
-  rt.literal('comments'),
-]);
+export const ExternalSyncConflictStrategySchema = lazySchema(() => z.enum(['external', 'kibana']));
 
-export const ExternalSyncDirectionRt = rt.union([
-  rt.literal('both'),
-  rt.literal('push'),
-  rt.literal('pull'),
-  rt.literal('off'),
-]);
+export const ExternalSyncSettingsSchema = GeneratedExternalSyncSettings;
 
-export const ExternalSyncFieldRuleRt = rt.intersection([
-  rt.strict({
-    field: ExternalSyncFieldRt,
-    direction: ExternalSyncDirectionRt,
-  }),
-  rt.exact(
-    rt.partial({
-      /**
-       * Overrides the case's conflict strategy for this field
-       */
-      conflictStrategy: ExternalSyncConflictStrategyRt,
-    })
-  ),
-]);
+export const ExternalSyncFieldSchema = lazySchema(() => z.enum(EXTERNAL_SYNC_FIELDS));
 
-export const ExternalSyncFieldRulesRt = rt.array(ExternalSyncFieldRuleRt);
+export const ExternalSyncDirectionSchema = lazySchema(() =>
+  z.enum(['both', 'push', 'pull', 'off'])
+);
+
+export const ExternalSyncFieldRuleSchema = GeneratedExternalSyncFieldRule;
+
+export const ExternalSyncFieldRulesSchema = lazySchema(() =>
+  z.array(ExternalSyncFieldRuleSchema).max(EXTERNAL_SYNC_FIELDS.length * 2)
+);
 
 /**
  * Carries one external field onto a global case field (stored under `extended_fields`).
  */
-export const ExternalSyncFieldMappingRt = rt.intersection([
-  rt.strict({
-    externalField: rt.string,
-    caseField: rt.string,
-    direction: ExternalSyncDirectionRt,
-  }),
-  rt.exact(
-    rt.partial({
-      conflictStrategy: ExternalSyncConflictStrategyRt,
-    })
-  ),
-]);
+export const ExternalSyncFieldMappingSchema = GeneratedExternalSyncFieldMapping;
 
-export const ExternalSyncFieldMappingsRt = rt.array(ExternalSyncFieldMappingRt);
+export const ExternalSyncFieldMappingsSchema = lazySchema(() =>
+  z.array(ExternalSyncFieldMappingSchema).max(MAX_EXTERNAL_SYNC_FIELD_MAPPINGS_SCHEMA)
+);
 
-export type ExternalSyncConflictStrategy = rt.TypeOf<typeof ExternalSyncConflictStrategyRt>;
-export type ExternalSyncSettings = rt.TypeOf<typeof ExternalSyncSettingsRt>;
-export type ExternalSyncField = rt.TypeOf<typeof ExternalSyncFieldRt>;
-export type ExternalSyncDirection = rt.TypeOf<typeof ExternalSyncDirectionRt>;
-export type ExternalSyncFieldRule = rt.TypeOf<typeof ExternalSyncFieldRuleRt>;
-export type ExternalSyncFieldRules = rt.TypeOf<typeof ExternalSyncFieldRulesRt>;
-export type ExternalSyncFieldMapping = rt.TypeOf<typeof ExternalSyncFieldMappingRt>;
-export type ExternalSyncFieldMappings = rt.TypeOf<typeof ExternalSyncFieldMappingsRt>;
+export type ExternalSyncConflictStrategy = z.infer<typeof ExternalSyncConflictStrategySchema>;
+export type ExternalSyncSettings = z.infer<typeof ExternalSyncSettingsSchema>;
+export type ExternalSyncField = z.infer<typeof ExternalSyncFieldSchema>;
+export type ExternalSyncDirection = z.infer<typeof ExternalSyncDirectionSchema>;
+export type ExternalSyncFieldRule = z.infer<typeof ExternalSyncFieldRuleSchema>;
+export type ExternalSyncFieldRules = z.infer<typeof ExternalSyncFieldRulesSchema>;
+export type ExternalSyncFieldMapping = z.infer<typeof ExternalSyncFieldMappingSchema>;
+export type ExternalSyncFieldMappings = z.infer<typeof ExternalSyncFieldMappingsSchema>;

@@ -15,8 +15,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import {
   discoverAriaText,
   openInDiscoverText,
@@ -79,6 +80,11 @@ export default function DocumentTrends({
     [breakdown, trackDatasetDetailsBreakdownFieldChanged]
   );
 
+  const dataSource = useMemo(
+    () => (dataView ? new DataViewSource(dataView) : undefined),
+    [dataView]
+  );
+
   const {
     openModal: openFailureStoreModal,
     canUserManageFailureStore,
@@ -90,16 +96,18 @@ export default function DocumentTrends({
       <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
-            <UnifiedBreakdownFieldSelector
-              dataView={dataView!}
-              breakdown={{
-                field:
-                  breakdown.dataViewField && breakdown.fieldSupportsBreakdown
-                    ? breakdown.dataViewField
-                    : undefined,
-              }}
-              onBreakdownFieldChange={onBreakdownFieldChange}
-            />
+            {dataSource ? (
+              <UnifiedBreakdownFieldSelector
+                dataSource={dataSource}
+                breakdown={{
+                  field:
+                    breakdown.dataViewField && breakdown.fieldSupportsBreakdown
+                      ? breakdown.dataViewField
+                      : undefined,
+                }}
+                onBreakdownFieldChange={onBreakdownFieldChange}
+              />
+            ) : null}
           </EuiSkeletonRectangle>
         </EuiFlexItem>
         <EuiFlexItem>

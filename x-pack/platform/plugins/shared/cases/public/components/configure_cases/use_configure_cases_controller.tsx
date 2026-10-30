@@ -67,6 +67,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     data: currentConfiguration,
     isLoading: loadingCaseConfigure,
     isFetching: isFetchingCaseConfigure,
+    isFetched: isFetchedCaseConfigure,
     isError: isErrorCaseConfigure,
     refetch: refetchCaseConfigure,
   } = useGetCaseConfiguration();
@@ -84,6 +85,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     externalSync,
     externalSyncFields,
     externalSyncFieldMappings,
+    workflowTags,
   } = currentConfiguration;
 
   const {
@@ -125,6 +127,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         closureType,
         customFields,
         templates,
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
       });
@@ -136,6 +140,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       closureType,
       customFields,
       templates,
+      observableTypes,
+      workflowTags,
       configurationId,
       configurationVersion,
       onConnectorUpdated,
@@ -181,6 +187,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         closureType,
         customFields,
         templates,
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
       });
@@ -191,6 +199,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       closureType,
       customFields,
       templates,
+      observableTypes,
+      workflowTags,
       configurationId,
       configurationVersion,
     ]
@@ -202,6 +212,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         connector,
         customFields,
         templates,
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType: type,
@@ -213,6 +225,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       connector,
       customFields,
       templates,
+      observableTypes,
+      workflowTags,
       persistCaseConfigure,
     ]
   );
@@ -223,6 +237,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         connector,
         customFields,
         templates,
+        observableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -236,6 +252,8 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       connector,
       customFields,
       templates,
+      observableTypes,
+      workflowTags,
       persistCaseConfigure,
     ]
   );
@@ -377,6 +395,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       persistCaseConfigure({
         connector,
         observableTypes: remainingObservableTypes,
+        workflowTags,
         id: configurationId,
         version: configurationVersion,
         closureType,
@@ -390,6 +409,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       configurationVersion,
       connector,
       observableTypes,
+      workflowTags,
       persistCaseConfigure,
       customFields,
       templates,
@@ -420,6 +440,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
         version: configurationVersion,
         closureType,
         observableTypes: updatedObservableTypes,
+        workflowTags,
         customFields,
         templates,
       });
@@ -435,7 +456,33 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
       closureType,
       customFields,
       templates,
+      workflowTags,
       onCloseObservableTypesFlyout,
+    ]
+  );
+
+  const onChangeWorkflowTags = useCallback(
+    (updatedWorkflowTags: string[]) => {
+      persistCaseConfigure({
+        connector,
+        closureType,
+        customFields,
+        templates,
+        observableTypes,
+        workflowTags: updatedWorkflowTags,
+        id: configurationId,
+        version: configurationVersion,
+      });
+    },
+    [
+      connector,
+      closureType,
+      customFields,
+      templates,
+      observableTypes,
+      persistCaseConfigure,
+      configurationId,
+      configurationVersion,
     ]
   );
 
@@ -474,9 +521,11 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     externalSync,
     externalSyncFields,
     externalSyncFieldMappings,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration: isFetchingCaseConfigure,
+    isCaseConfigurationFetched: isFetchedCaseConfigure,
     isConfigurationFetchError: isErrorCaseConfigure,
     isLoadingConnectors,
     connectors,
@@ -499,6 +548,7 @@ export const useConfigureCasesController = <ExtraFlyoutType extends string = nev
     ConnectorEditFlyout,
     onEditObservableType,
     onDeleteObservableType,
+    onChangeWorkflowTags,
     AddOrEditObservableTypeFlyout,
   };
 };

@@ -29,6 +29,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     template: i18n.APPLIED_TEMPLATE,
     workflow: i18n.WORKFLOW_RAN,
     sync: i18n.SYNCED_FROM_EXTERNAL,
+    bulkAttachments: i18n.ATTACHMENTS_REMOVED,
   };
 
   switch (type) {
@@ -37,6 +38,7 @@ export const getUserActionAriaLabel = (type: keyof typeof UserActionTypes) => {
     case 'pushed':
     case 'workflow':
     case 'sync':
+    case 'bulkAttachments':
       return actionsMap[type];
     default:
       return i18n.USER_ACTION_EDITED(actionsMap[type]);

@@ -191,12 +191,13 @@ export default function ({ getService }: FtrProviderContext) {
               interval: number;
               tzid: string;
             };
-          }
+          },
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule })
+        .send({ taskIds, schedule, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -212,12 +213,13 @@ export default function ({ getService }: FtrProviderContext) {
               tzid: string;
             };
           },
-      regenerateApiKey: boolean = false
+      regenerateApiKey: boolean = false,
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule, regenerateApiKey })
+        .send({ taskIds, schedule, regenerateApiKey, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -656,19 +658,21 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(result.apiKey).not.empty();
 
-      queryResult = await supertest
-        .post('/internal/security/api_key/_query')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
-      expect(
-        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-          return apiKey.id === result.userScope?.apiKeyId;
-        }).length
-      ).eql(1);
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
 
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      });
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
@@ -748,14 +752,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(scheduled.apiKey).not.empty();
       expect(grantedApiKeyId).not.to.be(undefined);
-      expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+      await retry.try(async () => {
+        expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+      });
 
       // API keys are granted before the task document is written, so an ensureScheduled call for
       // an existing task used to mint a key and then discard it on the version conflict.
       await ensureTaskScheduledWithApiKey(task);
       await ensureTaskScheduledWithApiKey(task);
 
-      expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+      await retry.try(async () => {
+        expect((await queryApiKeys()).length).to.eql(apiKeysBefore.length + 1);
+      });
 
       // The stored task keeps running on the key it was scheduled with.
       const unchanged = await currentTask(task.id);
@@ -789,18 +797,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(result.userScope?.userName).not.empty();
 
       // cross-check the captured user name against the owner of the API key that was created for the task
-      const queryResult = await supertest
-        .post('/internal/security/api_key/_query')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await retry.try(async () => {
+        const queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
-      const createdApiKey = queryResult.body.apiKeys.find(
-        (apiKey: { id: string }) => apiKey.id === result.userScope?.apiKeyId
-      );
+        const createdApiKey = queryResult.body.apiKeys.find(
+          (apiKey: { id: string }) => apiKey.id === result.userScope?.apiKeyId
+        );
 
-      expect(createdApiKey).not.to.be(undefined);
-      expect(result.userScope?.userName).to.eql(createdApiKey.username);
+        expect(createdApiKey).not.to.be(undefined);
+        expect(result.userScope?.userName).to.eql(createdApiKey.username);
+      });
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
@@ -849,20 +859,22 @@ export default function ({ getService }: FtrProviderContext) {
       expect(result.apiKey).not.empty();
       expect(result.userScope?.apiKeyCreatedByUser).to.be(false);
 
-      queryResult = await supertest
-        .post('/internal/security/api_key/_query')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
-      // route creates one key for the fake request; task manager clones another for the task
-      expect(
-        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-          return apiKey.id === result.userScope?.apiKeyId;
-        }).length
-      ).eql(1);
+        // route creates one key for the fake request; task manager clones another for the task
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
 
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 2);
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 2);
+      });
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
@@ -1524,18 +1536,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // test that a new api key was created and matches the api key id for this task
-      queryResult = await supertest
-        .post('/internal/security/api_key/_query')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
-      expect(
-        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-          return apiKey.id === result.userScope?.apiKeyId;
-        }).length
-      ).eql(1);
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      });
 
       // update the schedule for this task with a request
       const updates = await bulkUpdateSchedulesWithApiKey([scheduledTask.id], { interval: '5s' });
@@ -1589,18 +1603,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // test that a new api key was created and matches the api key id for this task
-      queryResult = await supertest
-        .post('/internal/security/api_key/_query')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
-      expect(
-        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-          return apiKey.id === result.userScope?.apiKeyId;
-        }).length
-      ).eql(1);
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      });
 
       // update the schedule for this task with a request
       const updates = await bulkUpdateSchedulesWithApiKey(
@@ -1643,19 +1659,21 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // test that a new api key was created on update and matches the api key id for this task
-      const updatedQueryResult = await supertest
-        .post('/internal/security/api_key/_query')
-        .send({})
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+      await retry.try(async () => {
+        const updatedQueryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
-      // test that the api key for the task is updated
-      expect(
-        updatedQueryResult.body.apiKeys.filter((apiKey: { id: string }) => {
-          return apiKey.id === updatedApiKey;
-        }).length
-      ).eql(1);
-      expect(updatedQueryResult.body.apiKeys.length).eql(apiKeysLength + 2);
+        // test that the api key for the task is updated
+        expect(
+          updatedQueryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === updatedApiKey;
+          }).length
+        ).eql(1);
+        expect(updatedQueryResult.body.apiKeys.length).eql(apiKeysLength + 2);
+      });
     });
 
     it('should bulk update schedules tasks with fake request if request is provided', async () => {
@@ -1922,6 +1940,57 @@ export default function ({ getService }: FtrProviderContext) {
 
         // scheduledRunAt shouldn't be changed
         expect(task.runAt).to.eql(scheduledRunAt);
+      });
+    });
+
+    it('should bulk update schedules for a running task and have the update survive completion when includeRunningTasks is true', async () => {
+      const releaseEvent = 'releaseRunningTaskWithUpdatedSchedule';
+      const runningTask = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { waitForEvent: releaseEvent },
+      });
+
+      await runTaskSoon({ id: runningTask.id });
+
+      // ensure task is running and capture when this execution was due
+      let dueRunAt: string;
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('running');
+        dueRunAt = task.runAt;
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([runningTask.id], { interval: '3h' }, true);
+
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // the running task's schedule is updated in place while it is still running, runAt is untouched
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('running');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expect(task.runAt).to.be(dueRunAt);
+      });
+
+      // the task writes its history doc right before it starts waiting for the release event
+      await retry.try(async () => {
+        expect((await historyDocs(runningTask.id)).length).to.eql(1);
+      });
+      await releaseTasksWaitingForEventToComplete(releaseEvent);
+
+      // once the run finishes, the next runAt is one 3h interval from this run's due time
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('idle');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expectReschedule(Date.parse(dueRunAt), task, 3 * 60 * 60 * 1000);
       });
     });
 

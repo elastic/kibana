@@ -6,12 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isToolAction, isSelectedActionEnabled } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
@@ -19,6 +20,7 @@ import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_to
 jest.mock('@kbn/connector-specs', () => ({
   getConnectorSpec: jest.fn(),
   isToolAction: jest.fn(),
+  isSelectedActionEnabled: jest.fn().mockReturnValue(true),
 }));
 
 jest.mock('@kbn/agent-builder-server', () => {
@@ -37,6 +39,7 @@ jest.mock('@kbn/agent-builder-server', () => {
 
 const mockGetConnectorSpec = getConnectorSpec as jest.Mock;
 const mockIsToolAction = isToolAction as jest.Mock;
+const mockIsSelectedActionEnabled = isSelectedActionEnabled as jest.Mock;
 
 const makeConnector = (
   overrides: Partial<{ id: string; name: string; actionTypeId: string }> = {}
@@ -75,11 +78,15 @@ const makeContext = (connectorIds?: string[]) =>
     agentConfiguration: connectorIds !== undefined ? { connector_ids: connectorIds } : undefined,
   } as unknown as ToolHandlerContext);
 
+const makeContextWithConfiguration = (agentConfiguration: { connector_ids?: string[] }) =>
+  ({ request: {}, agentConfiguration } as unknown as ToolHandlerContext);
+
 describe('connector-discovery inline tools', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetConnectorSpec.mockReturnValue(undefined);
     mockIsToolAction.mockReturnValue(false);
+    mockIsSelectedActionEnabled.mockReturnValue(true);
   });
 
   describe('list_connectors', () => {
@@ -182,7 +189,7 @@ describe('connector-discovery inline tools', () => {
       expect(data.total).toBe(0);
     });
 
-    it('returns all spec-eligible connectors when connector_ids is not set', async () => {
+    it('returns all spec-eligible connectors when there is no agent configuration', async () => {
       const { actionsStart } = makeActionsStart([
         makeConnector({ id: 'c1', actionTypeId: '.github' }),
         makeConnector({ id: 'c2', actionTypeId: '.github' }),
@@ -194,6 +201,82 @@ describe('connector-discovery inline tools', () => {
 
       const data = result.results[0].data as { connectors: Array<{ id: string }> };
       expect(data.connectors).toHaveLength(2);
+    });
+
+    it('returns no connectors when the agent configuration has no connector_ids', async () => {
+      const { actionsStart } = makeActionsStart([
+        makeConnector({ id: 'c1', actionTypeId: '.github' }),
+      ]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        {},
+        makeContextWithConfiguration({})
+      )) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as { connectors: unknown[]; total: number };
+      expect(data.connectors).toEqual([]);
+      expect(data.total).toBe(0);
+    });
+  });
+
+  describe('list_connectors include_unassigned', () => {
+    interface Listed {
+      connectors: Array<{ id: string; assigned: boolean }>;
+      assigned_total: number;
+    }
+
+    const listWithFlag = async (context: ToolHandlerContext) => {
+      const { actionsStart } = makeActionsStart([
+        makeConnector({ id: 'c1', actionTypeId: '.github' }),
+        makeConnector({ id: 'c2', actionTypeId: '.github' }),
+      ]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
+      const result = (await tool.handler(
+        { include_unassigned: true },
+        context
+      )) as ToolHandlerStandardReturn;
+      return result.results[0].data as Listed;
+    };
+
+    it('returns every connector in the space, marking which are assigned', async () => {
+      const data = await listWithFlag(makeContext(['c1']));
+
+      expect(data.connectors).toEqual([
+        expect.objectContaining({ id: 'c1', assigned: true }),
+        expect.objectContaining({ id: 'c2', assigned: false }),
+      ]);
+      expect(data.assigned_total).toBe(1);
+    });
+
+    it('marks everything unassigned when the agent configuration has no connector_ids', async () => {
+      const data = await listWithFlag(makeContextWithConfiguration({}));
+
+      expect(data.connectors.map((c) => c.assigned)).toEqual([false, false]);
+      expect(data.assigned_total).toBe(0);
+    });
+
+    it('marks everything assigned when there is no agent configuration', async () => {
+      const data = await listWithFlag(makeContext());
+
+      expect(data.connectors.map((c) => c.assigned)).toEqual([true, true]);
+    });
+
+    it('does not include the assigned flag on the default call', async () => {
+      const { actionsStart } = makeActionsStart([
+        makeConnector({ id: 'c1', actionTypeId: '.github' }),
+        makeConnector({ id: 'c2', actionTypeId: '.github' }),
+      ]);
+      mockGetConnectorSpec.mockReturnValue(makeSpec());
+      const tool = createListConnectorsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler({}, makeContext(['c1']))) as ToolHandlerStandardReturn;
+
+      const data = result.results[0].data as { connectors: Array<Record<string, unknown>> };
+      expect(data.connectors).toHaveLength(1);
+      expect(data.connectors[0]).not.toHaveProperty('assigned');
     });
   });
 
@@ -209,6 +292,9 @@ describe('connector-discovery inline tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(result.results[0].data).toEqual({
+        message: expect.stringContaining("Connector 'conn-1' does not have a spec"),
+      });
     });
 
     it('returns only isTool:true sub-actions with formatted parameter schemas', async () => {
@@ -299,11 +385,43 @@ describe('connector-discovery inline tools', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(result.results[0].data).toEqual({
+        message: 'Failed to get connector sub-actions: not found',
+      });
     });
 
-    it('returns an error when connector_id is not in agentConfiguration.connector_ids', async () => {
+    // Denied connectors are spec-eligible with a tool action, so the denial must come from the
+    // allowedIds guard, and the result must not expose their sub-actions.
+    it.each([
+      ['connector_id is not in agentConfiguration.connector_ids', makeContext(['other-id'])],
+      ['connector_ids is an empty array', makeContext([])],
+      ['the agent configuration has no connector_ids', makeContextWithConfiguration({})],
+    ])('says the connector is not assigned when %s', async (_, context) => {
       const { actionsStart, mockGet } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
-      mockGetConnectorSpec.mockReturnValue(makeSpec()); // connector is spec-eligible; denial must come from allowedIds guard
+      mockGetConnectorSpec.mockReturnValue(
+        makeSpec('GitHub connector', { createIssue: { isTool: true, input: {} } })
+      );
+      mockIsToolAction.mockReturnValue(true);
+      const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
+
+      const result = (await tool.handler(
+        { connector_id: 'conn-1' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(result.results[0].data).toEqual({
+        message: expect.stringContaining("Connector 'conn-1' isn't assigned to this agent"),
+      });
+      expect(JSON.stringify(result)).not.toContain('createIssue');
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet).toHaveBeenCalledWith({ id: 'conn-1' });
+    });
+
+    it('says an unassigned connector without a spec has no spec', async () => {
+      const { actionsStart } = makeActionsStart([makeConnector({ actionTypeId: '.email' })]);
+      mockGetConnectorSpec.mockReturnValue(undefined);
       const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
 
       const result = (await tool.handler(
@@ -311,22 +429,35 @@ describe('connector-discovery inline tools', () => {
         makeContext(['other-id'])
       )) as ToolHandlerStandardReturn;
 
-      expect(result.results[0].type).toBe(ToolResultType.error);
-      expect(mockGet).not.toHaveBeenCalled(); // guard must fire before any network call
+      expect(result.results[0].data).toEqual({
+        message: expect.stringContaining("Connector 'conn-1' does not have a spec"),
+      });
     });
 
-    it('blocks access when connector_ids is an empty array', async () => {
-      const { actionsStart, mockGet } = makeActionsStart([makeConnector({ id: 'conn-1' })]);
-      mockGetConnectorSpec.mockReturnValue(makeSpec()); // connector is spec-eligible; denial must come from allowedIds guard
+    it.each([
+      ['assigned', makeContext(['missing'])],
+      ['not assigned', makeContext(['other-id'])],
+      ['unscoped', makeContext()],
+    ])('says there is no connector with the id when it does not exist (%s)', async (_, context) => {
+      const getActionsClientWithRequest = jest.fn().mockResolvedValue({
+        get: jest
+          .fn()
+          .mockRejectedValue(
+            SavedObjectsErrorHelpers.createGenericNotFoundError('action', 'missing')
+          ),
+      });
+      const actionsStart = { getActionsClientWithRequest } as unknown as ActionsPluginStart;
       const tool = createGetConnectorSubActionsTool({ getActionsStart: async () => actionsStart });
 
       const result = (await tool.handler(
-        { connector_id: 'conn-1' },
-        makeContext([])
+        { connector_id: 'missing' },
+        context
       )) as ToolHandlerStandardReturn;
 
       expect(result.results[0].type).toBe(ToolResultType.error);
-      expect(mockGet).not.toHaveBeenCalled(); // guard must fire before any network call
+      expect(result.results[0].data).toEqual({
+        message: expect.stringContaining("No connector with id 'missing'"),
+      });
     });
 
     it('allows access when connector_id is in agentConfiguration.connector_ids', async () => {

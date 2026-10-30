@@ -14,7 +14,7 @@ export const configSchema = schema.object({
   }),
   /**
    * Outbound client for streams-config-distributor (`PUT /v1/units/<unit-id>`
-   * and `POST /v1/validate`). A unit write requires `url`. When it is unset,
+   * and `POST /v1/units/validate`). A unit write requires `url`. When it is unset,
    * validation and publish log an error and do not run, and the unit is not stored.
    */
   distributor: schema.object(
@@ -30,6 +30,13 @@ export const configSchema = schema.object({
       ),
     },
     { defaultValue: { ssl: {} } }
+  ),
+  /** Mount directory of the project-controller `streams-encryption-key` Secret. */
+  encryptionKey: schema.object(
+    {
+      path: schema.maybe(schema.string({ maxLength: 4096 })),
+    },
+    { defaultValue: {} }
   ),
   preconfigured: schema.object({
     enabled: schema.boolean({ defaultValue: true }),

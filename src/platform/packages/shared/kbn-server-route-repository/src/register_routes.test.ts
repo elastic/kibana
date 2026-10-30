@@ -144,6 +144,32 @@ describe('registerRoutes', () => {
     });
   });
 
+  it('forwards the OAS operation metadata to versioned routes', () => {
+    callRegisterRoutes({
+      'POST /api/public_route version': {
+        endpoint: 'POST /api/public_route version',
+        options: {
+          access: 'public',
+          summary: 'Create a resource',
+          description: 'Creates a resource.',
+          operationId: 'createResourceOp',
+        },
+        handler: jest.fn(),
+        security: disabledAuthz,
+      },
+    } satisfies ServerRouteRepository);
+
+    const [versionedRouteConfig] = postWithVersion.mock.calls[0];
+    expect(versionedRouteConfig).toEqual(
+      expect.objectContaining({
+        summary: 'Create a resource',
+        description: 'Creates a resource.',
+        operationId: 'createResourceOp',
+      })
+    );
+    expect(versionedRouteConfig.options).not.toHaveProperty('operationId');
+  });
+
   it('does not allow any params if no schema is provided', () => {
     const pathDoesNotAllowExcessKeys = () => {
       noParamsValidationObject.params.parse({
@@ -188,37 +214,12 @@ describe('registerRoutes', () => {
     expect(bodyDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_union\\",
-          \\"errors\\": [
-            [
-              {
-                \\"code\\": \\"unrecognized_keys\\",
-                \\"keys\\": [
-                  \\"unexpectedKey\\"
-                ],
-                \\"path\\": [],
-                \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
-              }
-            ],
-            [
-              {
-                \\"expected\\": \\"null\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected null, received object\\"
-              }
-            ],
-            [
-              {
-                \\"expected\\": \\"undefined\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected undefined, received object\\"
-              }
-            ]
+          \\"code\\": \\"unrecognized_keys\\",
+          \\"keys\\": [
+            \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Invalid input\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);

@@ -34,12 +34,12 @@ const PrivilegesAccessDenied = () => {
 
   return (
     <AccessDenied
-      title={i18n.translate('platform.plugins.shared.workflows_management.ui.noReadAccess.title', {
+      title={i18n.translate('workflows.ui.noReadAccess.title', {
         defaultMessage: 'Contact your administrator for access',
       })}
       description={
         <FormattedMessage
-          id="platform.plugins.shared.workflows_management.ui.noReadAccess.description"
+          id="workflows.ui.noReadAccess.description"
           defaultMessage="To view workflows in this space, you need additional privileges."
         />
       }
@@ -47,7 +47,7 @@ const PrivilegesAccessDenied = () => {
         <PrivilegesFooter
           permissions={[
             {
-              id: 'platform.plugins.shared.workflows_management.readWorkflowPermissionText',
+              id: 'workflows.readWorkflowPermissionText',
               default: 'Workflows: Read',
             },
           ]}

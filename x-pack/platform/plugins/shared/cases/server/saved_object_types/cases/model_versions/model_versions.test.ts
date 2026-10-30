@@ -16,6 +16,7 @@ import {
   modelVersion8,
   modelVersion9,
   modelVersion11,
+  modelVersion12,
 } from '.';
 
 describe('Model versions', () => {
@@ -261,6 +262,24 @@ describe('Model versions', () => {
   describe('version 11', () => {
     it('returns version 11 changes correctly', () => {
       expect(modelVersion11.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "extract_observables_source": Object {
+                "ignore_above": 1024,
+                "type": "keyword",
+              },
+            },
+            "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 12', () => {
+    it('returns version 12 changes correctly', () => {
+      expect(modelVersion12.changes).toMatchInlineSnapshot(`
         Array [
           Object {
             "addedMappings": Object {

@@ -45,6 +45,10 @@ paths:
     $ref: 'paths/api@cases@{caseid}@fields.yaml'
   '/api/cases/{caseId}/alerts':
     $ref: 'paths/api@cases@{caseid}@alerts.yaml'
+  '/api/cases/{caseId}/attachments':
+    $ref: 'paths/api@cases@{caseid}@attachments.yaml'
+  '/api/cases/{caseId}/attachments/{attachmentId}':
+    $ref: 'paths/api@cases@{caseid}@attachments@{attachmentid}.yaml'
   '/api/cases/{caseId}/comments':
     $ref: 'paths/api@cases@{caseid}@comments.yaml'
   '/api/cases/{caseId}/comments/_find':
@@ -55,6 +59,8 @@ paths:
     $ref: 'paths/api@cases@{caseid}@connector@{connectorid}@_push.yaml'
   '/api/cases/{caseId}/_sync':
     $ref: 'paths/api@cases@{caseid}@_sync.yaml'
+  '/api/cases/external_sync/{connectorId}/_notify':
+    $ref: 'paths/api@cases@external_sync@{connectorid}@_notify.yaml'
   '/api/cases/{caseId}/user_actions/_find':
     $ref: 'paths/api@cases@{caseid}@user_actions@_find.yaml'
   '/api/cases/configure/connectors/_find':

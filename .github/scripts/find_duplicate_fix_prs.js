@@ -15,14 +15,15 @@
  * every open fixer PR (hundreds), we shortlist those whose `failed-test` issue shares the
  * target's owning team, then let the agent confirm real duplicates against the diffs.
  *
- * Team is the signal: fixer PRs carry no ownership label, but the `failed-test` issues they
- * close do (labeled from CODEOWNERS), and same-root-cause fixes touch one team's files. We read
+ * Team is the signal: `failed-test` issues carry ownership labels derived from CODEOWNERS.
+ * Using issue ownership also covers older fix PRs without ownership labels. We read
  * the target's team from its issue, list that team's recent `failed-test` issues in one search,
  * and intersect with the linked issues we already parse from each PR — no per-issue fetch.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { getTeamLabels } = require('./team_labels.ts');
 
 const OWNER = 'elastic';
 const REPO = 'kibana';
@@ -68,15 +69,6 @@ const fetchFixerPrs = async (github) => {
   return [...open, ...merged];
 };
 
-// A team surfaces as either a `Team:*` label (allowing stray spaces, e.g. `Team: SecuritySolution`)
-// or a legacy colon-prefixed area label (e.g. ML's `:ml`, used instead of `Team:ML`). Match both.
-const isTeamLabel = (name) => /^team\s*:/i.test(name) || name.startsWith(':');
-
-const teamLabelsOf = (labels) =>
-  (labels ?? [])
-    .map((label) => (typeof label === 'string' ? label : label.name))
-    .filter((name) => name && isTeamLabel(name));
-
 // `failed-test` issue numbers owned by any of `teamLabels`, created since `sinceDate`.
 const fetchTeamIssueNumbers = async (github, teamLabels, sinceDate) => {
   const numbers = new Set();
@@ -117,7 +109,7 @@ const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
     throw new Error('findDuplicateCandidates requires either prNumber or issueNumber');
   }
 
-  // Owning team lives on the failed-test issue, not the PR.
+  // Resolve ownership from the source issue for both older and newly labeled fix PRs.
   let teamLabels = [];
   const targetIssue = issueNumber ?? targetIssues[0];
   if (targetIssue != null) {
@@ -126,7 +118,7 @@ const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
       repo: REPO,
       issue_number: targetIssue,
     });
-    teamLabels = teamLabelsOf(data.labels);
+    teamLabels = getTeamLabels(data.labels ?? []);
   }
 
   let teamIssues = new Set();

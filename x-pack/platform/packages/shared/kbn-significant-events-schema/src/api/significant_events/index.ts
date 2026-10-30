@@ -6,11 +6,12 @@
  */
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   esqlQuerySchema,
   queryFeatureSchema,
   queryTypeSchema,
+  significantEventTypeSchema,
   type StreamQuery,
 } from '../../queries';
 import {
@@ -18,7 +19,7 @@ import {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
-import type { ChangePointType } from '../../significant_events/detections';
+import type { ChangePointType, DetectionSkip } from '../../significant_events/detections';
 import type { SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
@@ -36,12 +37,14 @@ interface SignificantEventOccurrence {
 type QueryWithOccurrences = StreamQuery & {
   /** Alerting rule UUID (`QueryLink.rule_id`); optional during rolling upgrades. */
   rule_uuid?: string;
-  stream_name: string;
+  source_id: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
+  /** Enabled state of the backing alerting rule, omitted when lookup fails. */
+  rule_enabled?: boolean;
 };
 
 interface QueryOccurrencesResponse {
@@ -49,16 +52,19 @@ interface QueryOccurrencesResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
-export const generatedSignificantEventQuerySchema = z.object({
-  type: queryTypeSchema,
-  title: z.string().max(MAX_TITLE_LENGTH),
-  esql: esqlQuerySchema,
-  severity_score: z.number().min(0).max(100),
-  description: z.string().max(MAX_TEXT_LENGTH),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  replaces: z.string().max(MAX_ID_LENGTH).optional(),
-  features: z.array(queryFeatureSchema),
-});
+export const generatedSignificantEventQuerySchema = lazySchema(() =>
+  z.object({
+    type: queryTypeSchema,
+    title: z.string().max(MAX_TITLE_LENGTH),
+    esql: esqlQuerySchema,
+    category: significantEventTypeSchema.optional(),
+    severity_score: z.number().min(0).max(100),
+    description: z.string().max(MAX_TEXT_LENGTH),
+    evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
+    replaces: z.string().max(MAX_ID_LENGTH).optional(),
+    features: z.array(queryFeatureSchema),
+  })
+);
 
 type GeneratedSignificantEventQuery = z.infer<typeof generatedSignificantEventQuerySchema>;
 
@@ -72,14 +78,33 @@ interface LifecycleDetection {
   rule_name: string;
   /** Alerting rule that produced the detection; used to match event evidence. */
   rule_uuid?: string;
-  stream_name: string;
+  /** Absent when the stored signal or detection carries no source. */
+  source_id?: string;
   change_point_type: ChangePointType;
   '@timestamp': string;
+  /** Set when the classifier closed this detection of the event's rule without the agent. */
+  skip?: DetectionSkip;
+}
+
+/** An operator's deactivation of one episode of an event, from Alerting v2's action log. */
+interface EventDeactivation {
+  /** When the operator deactivated the episode. */
+  '@timestamp': string;
+  /** The episode that was deactivated: the `episode_id` of the version it produced. */
+  episode_id: string;
+  /** The operator's reason, trimmed; empty when none was given. */
+  reason: string;
 }
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
+  /**
+   * Event versions, oldest first. The version an operator deactivation produced carries the
+   * operator's reason as its `assessment_note` when one was given.
+   */
   events: SignificantEventResponse[];
+  /** Set when the event has more skipped detections than the response carries. */
+  skipped_truncated?: boolean;
 }
 
 export type {
@@ -89,4 +114,5 @@ export type {
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,
   EventLifecycleResponse,
+  EventDeactivation,
 };

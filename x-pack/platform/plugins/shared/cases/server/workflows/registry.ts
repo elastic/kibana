@@ -27,6 +27,8 @@ import { getCasesByAlertIdStepDefinition } from './steps/get_cases_by_alert_id';
 import { getAllAttachmentsStepDefinition } from './steps/get_all_attachments';
 import { updateObservableStepDefinition } from './steps/update_observable';
 import { deleteObservableStepDefinition } from './steps/delete_observable';
+import { deleteAttachmentsStepDefinition } from './steps/delete_attachments';
+import { bulkDeleteObservablesStepDefinition } from './steps/bulk_delete_observables';
 import { getCasesStepDefinition } from './steps/get_cases';
 import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import { removeTagsStepDefinition } from './steps/remove_tags';
@@ -75,9 +77,11 @@ export const casesStepRegistry: CasesStepFactory[] = [
   getAllAttachmentsStepDefinition,
   updateObservableStepDefinition,
   deleteObservableStepDefinition,
+  bulkDeleteObservablesStepDefinition,
   getCasesStepDefinition,
   setCustomFieldStepDefinition,
   removeTagsStepDefinition,
   pushCasesStepDefinition,
   syncCaseStepDefinition,
+  deleteAttachmentsStepDefinition,
 ];

@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
+import { escapeEsqlColumnName } from '../../../definitions/utils/columns';
 import { METADATA_FIELDS } from '../metadata';
 import { prettifyQueryTemplate, prettifyQuery } from './utils';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
@@ -18,24 +19,29 @@ export interface EditorExtensions {
   recommendedFields: RecommendedField[];
 }
 
-interface QueryTemplate {
+export interface QueryTemplate {
   label: string;
   description: string;
   queryString: string;
   category?: SuggestionCategory;
 }
 
-// Order starts with the simple ones and goes to more complex ones
+// Ordered by relevance: the first ones are the most useful and are the ones Discover shows in its empty state
 
 export const getRecommendedQueriesTemplates = ({
   fromCommand,
-  timeField,
-  categorizationField,
+  timeField: timeFieldName,
+  categorizationField: categorizationFieldName,
 }: {
   fromCommand: string;
   timeField?: string;
   categorizationField?: string;
 }): QueryTemplate[] => {
+  const timeField = timeFieldName ? escapeEsqlColumnName(timeFieldName) : undefined;
+  const categorizationField = categorizationFieldName
+    ? escapeEsqlColumnName(categorizationFieldName)
+    : undefined;
+
   // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
   const bucketExpression =
     timeField === '@timestamp' ? 'TBUCKET(50)' : `BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
@@ -47,52 +53,85 @@ export const getRecommendedQueriesTemplates = ({
 
   const queries: QueryTemplate[] = [
     {
-      label: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.label', {
+      label: i18n.translate('esqlLanguage.recommendedQueries.searchExample.label', {
         defaultMessage: 'Search all fields',
       }),
-      description: i18n.translate(
-        'kbn-esql-language.recommendedQueries.searchExample.description',
-        {
-          defaultMessage: 'Use WHERE to filter/search data',
-        }
-      ),
+      description: i18n.translate('esqlLanguage.recommendedQueries.searchExample.description', {
+        defaultMessage: 'Filter documents with a KQL expression',
+      }),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
       category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     },
     {
-      label: i18n.translate('kbn-esql-language.recommendedQueries.aggregateExample.label', {
+      label: i18n.translate('esqlLanguage.recommendedQueries.aggregateExample.label', {
         defaultMessage: 'Aggregate with STATS',
       }),
-      description: i18n.translate(
-        'kbn-esql-language.recommendedQueries.aggregateExample.description',
-        {
-          defaultMessage: 'Count aggregation',
-        }
-      ),
+      description: i18n.translate('esqlLanguage.recommendedQueries.aggregateExample.description', {
+        defaultMessage: 'Count documents, optionally grouped by a field',
+      }),
       queryString: `${fromCommand}  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
     },
     ...(timeField
       ? [
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.sortByTime.label', {
-              defaultMessage: 'Sort by time',
+            label: i18n.translate('esqlLanguage.recommendedQueries.dateHistogram.label', {
+              defaultMessage: 'Create a date histogram',
             }),
             description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.sortByTime.description',
+              'esqlLanguage.recommendedQueries.dateHistogram.description',
               {
-                defaultMessage: 'Sort by time',
+                defaultMessage: 'Count documents per time bucket, ready to chart',
               }
             ),
-            queryString: `${fromCommand}| SORT ${timeField} /* Data is not sorted by default */`,
+            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
           },
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.dateIntervals.label', {
+            label: i18n.translate('esqlLanguage.recommendedQueries.sortByTime.label', {
+              defaultMessage: 'Sort by time',
+            }),
+            description: i18n.translate('esqlLanguage.recommendedQueries.sortByTime.description', {
+              defaultMessage: 'Order documents from oldest to newest',
+            }),
+            queryString: `${fromCommand}| SORT ${timeField} /* Data is not sorted by default */`,
+          },
+        ]
+      : []),
+    ...(fromCommand
+      ? [
+          {
+            label: i18n.translate('esqlLanguage.recommendedQueries.loadUnmappedFields.label', {
+              defaultMessage: 'Load unmapped fields',
+            }),
+            description: i18n.translate(
+              'esqlLanguage.recommendedQueries.loadUnmappedFields.description',
+              {
+                defaultMessage:
+                  'Allows querying unmapped fields, loading their values from the _source if present.',
+              }
+            ),
+            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
+          },
+        ]
+      : []),
+    ...(timeField
+      ? [
+          {
+            label: i18n.translate('esqlLanguage.recommendedQueries.lastHour.label', {
+              defaultMessage: 'Total count vs count last hour',
+            }),
+            description: i18n.translate('esqlLanguage.recommendedQueries.lastHour.description', {
+              defaultMessage: 'Compare the last hour with the rest of the data',
+            }),
+            queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+          },
+          {
+            label: i18n.translate('esqlLanguage.recommendedQueries.dateIntervals.label', {
               defaultMessage: 'Create 5 minute time buckets with EVAL',
             }),
             description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.dateIntervals.description',
+              'esqlLanguage.recommendedQueries.dateIntervals.description',
               {
-                defaultMessage: 'Count aggregation over time',
+                defaultMessage: 'Group documents into 5-minute buckets',
               }
             ),
             queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 m, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
@@ -100,65 +139,35 @@ export const getRecommendedQueriesTemplates = ({
         ]
       : []),
     {
-      label: i18n.translate('kbn-esql-language.recommendedQueries.caseExample.label', {
+      label: i18n.translate('esqlLanguage.recommendedQueries.caseExample.label', {
         defaultMessage: 'Create a conditional with CASE',
       }),
-      description: i18n.translate('kbn-esql-language.recommendedQueries.caseExample.description', {
-        defaultMessage: 'Conditional',
+      description: i18n.translate('esqlLanguage.recommendedQueries.caseExample.description', {
+        defaultMessage: 'Label results with conditional logic',
       }),
       queryString: `${fromCommand}| STATS count = COUNT(*)| EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other")| KEEP newField`,
     },
     ...(timeField
       ? [
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.dateHistogram.label', {
-              defaultMessage: 'Create a date histogram',
-            }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.dateHistogram.description',
-              {
-                defaultMessage: 'Count aggregation over time',
-              }
-            ),
-            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
-          },
-          {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.label', {
+            label: i18n.translate('esqlLanguage.recommendedQueries.eventRate.label', {
               defaultMessage: 'Calculate the event rate',
             }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.eventRate.description',
-              {
-                defaultMessage: 'Event rate over time',
-              }
-            ),
+            description: i18n.translate('esqlLanguage.recommendedQueries.eventRate.description', {
+              defaultMessage: 'Average events per second since the earliest document',
+            }),
             queryString: `${fromCommand}| STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */ | KEEP event_rate`,
           },
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.categorize.label', {
+            label: i18n.translate('esqlLanguage.recommendedQueries.categorize.label', {
               // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
               // the capability aiops.enabled can be used to check both of these conditions
               defaultMessage: 'Detect change points',
             }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.categorize.description',
-              {
-                defaultMessage: 'Change point on count aggregation',
-              }
-            ),
-            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} /* To use CHANGE_POINT BY, set grouping field(s) - e.g. BY host, buckets = ... */ | CHANGE_POINT count ON buckets /* Use the BY operator to group by the field - e.g. ON buckets BY host */ | WHERE type IS NOT NULL /* Filter to only include change points. */`,
-          },
-          {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
-              defaultMessage: 'Total count vs count last hour',
+            description: i18n.translate('esqlLanguage.recommendedQueries.categorize.description', {
+              defaultMessage: 'Spot spikes and dips in event volume over time',
             }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.lastHour.description',
-              {
-                defaultMessage: 'A more complicated example',
-              }
-            ),
-            queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} /* To use CHANGE_POINT BY, set grouping field(s) - e.g. BY host, buckets = ... */ | CHANGE_POINT count ON buckets /* Use the BY operator to group by the field - e.g. ON buckets BY host */ | WHERE type IS NOT NULL /* Filter to only include change points. */`,
           },
         ]
       : []),
@@ -167,11 +176,11 @@ export const getRecommendedQueriesTemplates = ({
         // the capability aiops.enabled can be used to check both of these conditions
         [
           {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.patternAnalysis.label', {
+            label: i18n.translate('esqlLanguage.recommendedQueries.patternAnalysis.label', {
               defaultMessage: 'Identify patterns',
             }),
             description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.patternAnalysis.description',
+              'esqlLanguage.recommendedQueries.patternAnalysis.description',
               {
                 defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
@@ -179,23 +188,6 @@ export const getRecommendedQueriesTemplates = ({
             queryString: timeField
               ? `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`
               : `${fromCommand} | SAMPLE .001 | STATS Count=COUNT(*)/.001, Sparkline=SPARKLINE(COUNT(*), ${timeField}, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(${categorizationField})| SORT Count DESC`,
-          },
-        ]
-      : []),
-    ...(fromCommand
-      ? [
-          {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
-              defaultMessage: 'Load unmapped fields',
-            }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
-              {
-                defaultMessage:
-                  'Allows querying unmapped fields, loading their values from the _source if present.',
-              }
-            ),
-            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
           },
         ]
       : []),

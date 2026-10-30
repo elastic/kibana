@@ -10,24 +10,16 @@ import { casesSchemaV11 } from '../schemas';
 import { createSchemaOverrides } from './create_schema_overrides';
 
 /**
- * Adds `settings.externalSync` (auto-push and conflict strategy for the case
- * connector). Only `autoPush` is mapped, for filtering and telemetry.
+ * Adds the server-owned `extract_observables_source` keyword mapping
  */
 export const modelVersion11: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        settings: {
-          properties: {
-            externalSync: {
-              properties: {
-                autoPush: {
-                  type: 'boolean',
-                },
-              },
-            },
-          },
+        extract_observables_source: {
+          type: 'keyword',
+          ignore_above: 1024,
         },
       },
     },

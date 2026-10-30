@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { ExternalSyncSettingsRt } from '../../external_sync/v1';
+import { z } from '@kbn/zod/v4';
+import { ExternalSyncSettingsSchema } from '../../external_sync/v1';
 import { UserActionTypes } from '../action/v1';
 
-// Settings payload accepts one or both settings
-export const SettingsUserActionPayloadRt = rt.strict({
-  settings: rt.partial({
-    syncAlerts: rt.boolean,
-    extractObservables: rt.boolean,
-    externalSync: ExternalSyncSettingsRt,
+export const SettingsUserActionPayloadSchema = z.object({
+  settings: z.object({
+    syncAlerts: z.boolean().optional(),
+    extractObservables: z.boolean().optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
   }),
 });
 
-export const SettingsUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.settings),
-  payload: SettingsUserActionPayloadRt,
+export const SettingsUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.settings),
+  payload: SettingsUserActionPayloadSchema,
 });

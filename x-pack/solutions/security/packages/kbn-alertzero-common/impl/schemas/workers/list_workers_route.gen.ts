@@ -21,6 +21,13 @@ import { Worker } from '../components/watch_settings.gen';
 export const ListWorkersResponse = lazySchema(() =>
   z.object({
     workers: z.array(Worker),
+    /**
+     * True when the caller has the Elasticsearch cluster privilege manage_security.
+     */
+    canModifyWorkers: z
+      .boolean()
+      .optional()
+      .describe('True when the caller has the Elasticsearch cluster privilege manage_security.'),
   })
 );
 export type ListWorkersResponse = z.infer<typeof ListWorkersResponse>;

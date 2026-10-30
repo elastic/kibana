@@ -26,6 +26,7 @@ import { ExtendedFieldsUserActionBuilder } from './builders/extended_fields';
 import { TemplateUserActionBuilder } from './builders/template';
 import { WorkflowUserActionBuilder } from './builders/workflow';
 import { SyncUserActionBuilder } from './builders/sync';
+import { BulkAttachmentsUserActionBuilder } from './builders/bulk_attachments';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -47,6 +48,7 @@ const builderMap = {
   template: TemplateUserActionBuilder,
   workflow: WorkflowUserActionBuilder,
   sync: SyncUserActionBuilder,
+  bulkAttachments: BulkAttachmentsUserActionBuilder,
 };
 
 export class BuilderFactory {

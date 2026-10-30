@@ -6,30 +6,45 @@
  */
 
 import type { EuiEmptyPromptProps, IconType } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React, { type ReactNode } from 'react';
 
-interface AiIndexDetailPanelEmptyPromptProps {
+interface AiIndexDetailPanelEmptyStateProps {
   iconType: IconType;
   dataTestSubj: string;
-  title: ReactNode;
+  message: ReactNode;
+  action?: ReactNode;
   paddingSize?: EuiEmptyPromptProps['paddingSize'];
 }
 
-export const AiIndexDetailPanelEmptyPrompt = ({
+export const AiIndexDetailPanelEmptyState = ({
   iconType,
   dataTestSubj,
-  title,
+  message,
+  action,
   paddingSize,
-}: AiIndexDetailPanelEmptyPromptProps) => (
-  <EuiEmptyPrompt
-    paddingSize={paddingSize}
-    icon={<EuiIcon type={iconType} size="xl" aria-hidden={true} color="subdued" />}
-    data-test-subj={dataTestSubj}
-    body={
-      <EuiText size="xs" color="subdued">
-        {title}
-      </EuiText>
-    }
-  />
-);
+}: AiIndexDetailPanelEmptyStateProps) => {
+  return (
+    <EuiEmptyPrompt
+      paddingSize={paddingSize ?? 'none'}
+      data-test-subj={dataTestSubj}
+      icon={<EuiIcon type={iconType} size="l" aria-hidden={true} color="subdued" />}
+      body={
+        action != null ? (
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued" textAlign="center">
+                {message}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{action}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="xs" color="subdued">
+            {message}
+          </EuiText>
+        )
+      }
+    />
+  );
+};

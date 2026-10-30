@@ -129,6 +129,7 @@ const convertConfigureResponseToCasesConfigure = (
     externalSync,
     externalSyncFields,
     externalSyncFieldMappings,
+    workflowTags,
   } = configuration;
 
   return {
@@ -145,5 +146,6 @@ const convertConfigureResponseToCasesConfigure = (
     externalSync,
     externalSyncFields,
     externalSyncFieldMappings,
+    workflowTags,
   };
 };

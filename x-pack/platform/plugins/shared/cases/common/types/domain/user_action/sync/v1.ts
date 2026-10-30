@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
 /**
@@ -13,26 +13,24 @@ import { UserActionTypes } from '../action/v1';
  * `updated_fields` were applied; `conflicted_fields` were kept because the
  * case's conflict strategy favoured the Kibana value.
  */
-export const SyncUserActionPayloadRt = rt.strict({
-  sync: rt.intersection([
-    rt.strict({
-      connector_name: rt.string,
-      external_id: rt.string,
-      external_title: rt.string,
-      external_url: rt.string,
-      updated_fields: rt.array(rt.string),
-      conflicted_fields: rt.array(rt.string),
+export const SyncUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    sync: z.object({
+      connector_name: z.string(),
+      external_id: z.string(),
+      external_title: z.string(),
+      external_url: z.string(),
+      updated_fields: z.array(z.string()),
+      conflicted_fields: z.array(z.string()),
+      external_updated_at: z.string().optional(),
+      external_updated_by: z.string().optional(),
     }),
-    rt.exact(
-      rt.partial({
-        external_updated_at: rt.string,
-        external_updated_by: rt.string,
-      })
-    ),
-  ]),
-});
+  })
+);
 
-export const SyncUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.sync),
-  payload: SyncUserActionPayloadRt,
-});
+export const SyncUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.sync),
+    payload: SyncUserActionPayloadSchema,
+  })
+);

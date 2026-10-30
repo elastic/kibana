@@ -462,6 +462,87 @@ describe('validateMonitor', () => {
     });
   });
 
+  describe('Vault references', () => {
+    const privateLocation = { id: 'private-1', label: 'Private', isServiceManaged: false };
+
+    it.each([
+      [ConfigKey.PASSWORD, 'vault://prod@app/creds#password'],
+      [ConfigKey.REQUEST_HEADERS_CHECK, { Authorization: 'Bearer vault://prod@app/creds#token' }],
+      [ConfigKey.PASSWORD, 'vault://prod@app%2Fcreds#password'],
+    ])('rejects a reference in %s on an Elastic managed location', (key, value) => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.USERNAME]: 'user', [key]: value } as MonitorFields,
+        'default'
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references cannot be used on Elastic managed locations',
+      });
+    });
+
+    it('rejects a reference when a managed location is mixed with a private one', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [...testHTTPFields[ConfigKey.LOCATIONS], privateLocation],
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(false);
+    });
+
+    it('allows a reference on private locations only', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects a reference when secret connections are disabled', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references are not available in this deployment',
+      });
+    });
+
+    it('allows a monitor without references when secret connections are disabled', () => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.LOCATIONS]: [privateLocation] } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result.valid).toBe(true);
+    });
+
+    it('ignores vault:// text in a browser script on a managed location', () => {
+      const result = validateMonitor(
+        {
+          ...testBrowserFields,
+          [ConfigKey.SOURCE_INLINE]: "step('x', () => page.goto('vault://prod@a#b'));",
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(true);
+    });
+  });
+
   describe('HTTP authentication mutual exclusivity', () => {
     it('validates an HTTP monitor using only Kerberos auth', () => {
       const testMonitor = {
@@ -1306,6 +1387,73 @@ describe('normalizeAPIConfig', () => {
       formattedConfig: {
         type: 'browser',
         params: '{"username":"test","pass":"test"}',
+      },
+    });
+  });
+
+  it.each(['[]', '["secret"]', '"secret"', '42', 'true', 'null'])(
+    'rejects params that are not a JSON object: %s',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+        errorMessage: 'Invalid params: Params must be a JSON object.',
+        formattedConfig: {
+          type: 'browser',
+          params,
+        },
+      });
+    }
+  );
+
+  it.each([[['secret']], [new Date()], [new Set()], ['secret'], [/regex/]])(
+    'rejects non-string params that are not a plain record of strings: %p',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any).errorMessage).toMatch(
+        /^Invalid params: /
+      );
+    }
+  );
+
+  it.each([[false], [0], [null]])(
+    'rejects falsy params that would silently clear stored params: %p',
+    (params) => {
+      expect(
+        normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: '{"a":"b"}' })
+          .errorMessage
+      ).toMatch(/^Invalid params: /);
+    }
+  );
+
+  it('still treats empty string params as clearing them', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: '' } as any, { previousParams: '{"a":"b"}' })
+        .errorMessage
+    ).toBeUndefined();
+  });
+
+  it('tolerates null params when there is no stored value to lose', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: null } as any).errorMessage
+    ).toBeUndefined();
+  });
+
+  it('accepts params objects with nested values', () => {
+    const params = '{"retries":3,"options":{"mode":"fast"}}';
+    expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
+  it('keeps unchanged stored params that are not a JSON object', () => {
+    const params = '["secret"]';
+    expect(
+      normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: params })
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
       },
     });
   });

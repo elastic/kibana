@@ -165,7 +165,8 @@ export function getPluginPrivileges() {
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
-        all: savedObjects,
+        // ml-module objects are only installed by Fleet, so they must not be writable by ML users
+        all: savedObjects.filter((type) => type !== ML_MODULE_SAVED_OBJECT_TYPE),
         read: savedObjects,
       },
       alerting: {

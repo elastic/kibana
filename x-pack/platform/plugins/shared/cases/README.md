@@ -25,15 +25,68 @@ This plugin provides cases management in Kibana
 
 ## Sync with an external system (technical preview)
 
-Cases can keep a pushed case and its external incident in step in both directions. Outbound changes are pushed automatically when a case has "Push changes automatically" on. Inbound changes are applied when the case is synced from its incident: manually with **Sync from <connector>** on the case, through `POST /api/cases/{caseId}/_sync`, or from a workflow with the `cases.syncCase` step.
+Cases can keep a pushed case and its external incident in step in both directions. Outbound changes are pushed automatically when a case has "Push changes automatically" on. Inbound changes are applied when the case is synced from its incident: manually with **Sync from <connector>** on the case, through `POST /api/cases/{caseId}/_sync`, from a workflow with the `cases.syncCase` step, or when Jira or ServiceNow notifies Kibana that the incident changed.
 
 Per-connector defaults and field rules live on **Stack Management → Cases → Settings**, under the selected incident management system. They apply to new cases that use that connector; each case can override them in its Connectors panel.
 
 For Jira and ServiceNow, the **External fields** table in the same block carries additional external fields onto global case fields from the Field Library, in the direction you choose. Values travel through the connector's free-form fields (`otherFields` for Jira, `additional_fields` for ServiceNow) on push and are read from the incident on sync.
 
-### Apply changes from Jira automatically
+### Apply changes from Jira and ServiceNow automatically
 
-Kibana does not poll Jira. To apply Jira edits without pressing **Sync from Jira**, let Jira call Kibana and run the sync step from a workflow. No change is needed on the Jira side beyond a webhook.
+Kibana does not poll Jira or ServiceNow. Instead, the external system tells Kibana that an incident changed, and Kibana syncs every case pushed to that incident through the connector:
+
+```text
+POST /s/<space-id>/api/cases/external_sync/<connector-id>/_notify
+```
+
+The endpoint only queues the sync and answers `202` with `{ id, accepted_at, cases }`. It answers `400` when the body is not an incident change for the connector type, `404` when no case was pushed to the incident through the connector, and `409` when no service account is bound to the connector. The notification only names the incident; Kibana reads the incident itself through the connector, so the caller cannot choose what gets written to the case.
+
+The sync runs as a service account bound to the connector, not as the caller. Set it up once per connector and space:
+
+1. In **Stack Management → Service accounts**, create a service account with a role that grants Cases **All** and Actions and Connectors **Read** in the space. Service accounts require `xpack.security.serviceAccounts.enabled` (on by default).
+2. Bind it to the connector. Binding requires the `manage_security` cluster privilege:
+
+   ```sh
+   curl -X PUT "https://<kibana>/s/<space-id>/internal/cases/external_sync/<connector-id>/service_account" \
+     -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' -H 'Content-Type: application/json' \
+     -u <admin> -d '{ "service_account_id": "<service-account-id>" }'
+   ```
+
+   `GET` on the same path returns the current binding and `DELETE` removes it. Bound connectors are listed under the service account's workloads as **Case connector sync**.
+
+3. Create an API key for the caller. It only needs Cases **Read** and Actions and Connectors **Read** in the space, because it never writes to a case.
+
+Then configure the external system to call the endpoint with the headers `Authorization: ApiKey <encoded-api-key>`, `kbn-xsrf: true`, and `Content-Type: application/json`:
+
+- **ServiceNow** (ITSM or SecOps): an async business rule on `incident` (or `sn_si_incident`) that runs after update and posts the record's `sys_id` and `sys_updated_on`. A Flow Designer REST step with the same body works too.
+
+  ```js
+  (function executeRule(current, previous) {
+    var request = new sn_ws.RESTMessageV2();
+    request.setEndpoint('https://<kibana>/s/<space-id>/api/cases/external_sync/<connector-id>/_notify');
+    request.setHttpMethod('POST');
+    request.setRequestHeader('Authorization', 'ApiKey <encoded-api-key>');
+    request.setRequestHeader('kbn-xsrf', 'true');
+    request.setRequestHeader('Content-Type', 'application/json');
+    request.setRequestBody(JSON.stringify({
+      sys_id: current.getUniqueValue(),
+      sys_updated_on: current.getValue('sys_updated_on'),
+    }));
+    request.executeAsync();
+  })(current, previous);
+  ```
+
+- **Jira**: an Automation rule triggered by **Issue updated** (and **Issue commented**), scoped to the project you push cases to, with a **Send web request** action that posts the issue id and update time. A Jira system webhook body also works as-is, but system webhooks cannot send the `Authorization` header.
+
+  ```json
+  { "issue": { "id": "{{issue.id}}", "fields": { "updated": "{{issue.updated}}" } } }
+  ```
+
+Each case is synced as described for `POST /api/cases/{caseId}/_sync` and records a `sync` entry in its activity, attributed to the service account. Delivery is best effort: a Kibana restart can drop a queued notification, and the next change, or **Sync from <connector>**, catches the case up.
+
+### Apply Jira changes from a workflow
+
+Instead of the endpoint above, Jira can call an Inbound Webhook connector that runs the sync step from a workflow. No change is needed on the Jira side beyond a webhook.
 
 1. In **Stack Management → Connectors**, create an **Inbound Webhook** connector and copy its ingest URL and token (the token is shown once; rotate it to get a new one).
 2. In Jira, create a system webhook (**Settings → System → Webhooks**) for the `Issue updated` event, scoped with a JQL filter to the project you push cases to. Jira system webhooks cannot send headers, so put the token in the URL:

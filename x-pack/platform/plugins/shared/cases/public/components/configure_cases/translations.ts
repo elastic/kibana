@@ -559,3 +559,38 @@ export const EXTERNAL_FIELDS_CASE_FIELD_ARIA = (fieldLabel: string): string =>
   });
 
 export { CONFLICT_KEEP_EXTERNAL, CONFLICT_KEEP_KIBANA } from '../edit_connector/translations';
+
+export const WORKFLOW_TAGS_TITLE = i18n.translate('xpack.cases.configureCases.workflowTags.title', {
+  defaultMessage: 'Available workflow tags',
+});
+
+export const WORKFLOW_TAGS_DESCRIPTION = i18n.translate(
+  'xpack.cases.configureCases.workflowTags.description',
+  {
+    defaultMessage:
+      'Select one or more tags to limit which workflows appear in Cases workflow selectors. When no tags are configured, all workflows are shown. Tags only filter the list. They do not restrict which workflows users can run.',
+  }
+);
+
+export const WORKFLOW_TAGS_LABEL = i18n.translate('xpack.cases.configureCases.workflowTags.label', {
+  defaultMessage: 'Workflow tags',
+});
+
+const ADD_WORKFLOW_TAG_LABEL = (searchValue: string) =>
+  i18n.translate('xpack.cases.configureCases.workflowTags.addWorkflowTag', {
+    defaultMessage: 'Add {searchValue} as a workflow tag',
+    values: { searchValue },
+  });
+
+/**
+ * Static variant of the workflow-tag custom-option label. Passes the literal
+ * string `'{searchValue}'` so that EUI can substitute it at runtime, while the
+ * i18n tooling sees a correctly-bound message (values: { searchValue }).
+ */
+export const ADD_WORKFLOW_TAG_COMBO_BOX = ADD_WORKFLOW_TAG_LABEL('{searchValue}');
+
+export const WORKFLOW_TAG_TOO_LONG = (maxLength: number) =>
+  i18n.translate('xpack.cases.configureCases.workflowTags.tagTooLong', {
+    values: { maxLength },
+    defaultMessage: 'Tag must be {maxLength} characters or fewer.',
+  });

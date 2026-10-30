@@ -6,13 +6,13 @@
  */
 
 import type { Case } from '../../../common/types/domain';
-import { CasesRt } from '../../../common/types/domain';
+import { CasesSchema } from '../../../common/types/domain';
 import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 
 export interface FindByExternalIdParams {
@@ -71,7 +71,7 @@ export const findByExternalId = async (
       found.saved_objects.map((theCase) => ({ id: theCase.id, owner: theCase.attributes.owner }))
     );
 
-    return decodeOrThrow(CasesRt)(
+    return decodeOrThrowZod(CasesSchema)(
       found.saved_objects.map((savedObject) => flattenCaseSavedObject({ savedObject }))
     );
   } catch (error) {

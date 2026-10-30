@@ -18,6 +18,8 @@ import { FieldType } from '../types/domain/template/fields';
 /** Lower of the Jira `otherFields` and ServiceNow `additional_fields` limits. */
 export const MAX_EXTERNAL_SYNC_FIELD_MAPPINGS = 20;
 
+export const MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH = 256;
+
 /** Connector types with a free-form outbound channel for mapped fields. */
 export const EXTERNAL_SYNC_FREE_FORM_CONNECTOR_TYPES: ReadonlySet<string> = new Set([
   ConnectorTypes.jira,

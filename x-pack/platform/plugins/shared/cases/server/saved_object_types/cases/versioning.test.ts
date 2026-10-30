@@ -213,4 +213,23 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).toEqual(expect.objectContaining({ assignees: [{ uid: '123' }] }));
     });
   });
+
+  describe('Model version 10 to 11', () => {
+    it('does not add extract_observables_source to existing cases', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 10,
+        toVersion: 11,
+      });
+      expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
+    });
+  });
+
+  describe('Model version 11 to 12', () => {
+    it('does not add externalSync to the settings of existing cases', () => {
+      const document = createCaseSavedObjectResponse();
+      const migrated = migrator.migrate({ document, fromVersion: 11, toVersion: 12 });
+      expect(migrated.attributes).toHaveProperty('settings', document.attributes.settings);
+    });
+  });
 });

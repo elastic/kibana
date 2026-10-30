@@ -53,7 +53,7 @@ describe('projectUserActionForSearch', () => {
           flag: true,
         },
       },
-    } as Partial<UserActionTransformedAttributes>);
+    } as unknown as Partial<UserActionTransformedAttributes>);
 
     expect(projectUserActionForSearch(attributes, 'xyzaua')).toBeNull();
   });

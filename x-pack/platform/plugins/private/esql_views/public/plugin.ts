@@ -5,37 +5,35 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
-
-interface EsqlViewsPublicConfig {
-  managementUi: {
-    enabled: boolean;
-  };
-}
+import type { EsqlViewsTelemetryClient } from './telemetry';
 
 interface SetupDependencies {
   management: ManagementSetup;
 }
 
 export interface StartDependencies {
+  data: DataPublicPluginStart;
   share: SharePluginStart;
 }
 
 export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, StartDependencies> {
-  private readonly isManagementUiEnabled: boolean;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    const { managementUi } = initializerContext.config.get<EsqlViewsPublicConfig>();
-    this.isManagementUiEnabled = managementUi.enabled;
-  }
+  private telemetryClient?: Promise<EsqlViewsTelemetryClient | undefined>;
 
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
-    if (!this.isManagementUiEnabled) {
-      return;
-    }
+    // Loaded once, on first mount; resolves to no client if the telemetry module fails to load.
+    const getTelemetryClient = () =>
+      (this.telemetryClient ??= import('./telemetry')
+        .then(({ TelemetryService }) => {
+          const telemetry = new TelemetryService();
+          telemetry.setup(core.analytics);
+          return telemetry.start();
+        })
+        .catch(() => undefined));
 
     management.sections.section.data.registerApp({
       id: MANAGEMENT_APP_ID,
@@ -43,12 +41,14 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
       order: 2.1,
       keywords: ['esql', 'views'],
       async mount(params) {
-        const [{ mountManagementSection }, [coreStart, { share }]] = await Promise.all([
-          import('./application'),
-          core.getStartServices(),
-        ]);
+        const [{ mountManagementSection }, [coreStart, startDependencies], telemetryClient] =
+          await Promise.all([
+            import('./application'),
+            core.getStartServices(),
+            getTelemetryClient(),
+          ]);
 
-        return mountManagementSection(coreStart, { share }, params);
+        return mountManagementSection(coreStart, startDependencies, params, telemetryClient);
       },
     });
   }

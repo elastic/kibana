@@ -79,6 +79,10 @@ import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
 import { registerAutoPushListener } from './external_sync/auto_push_listener';
+import { externalIncidentUpdatedTopic } from './external_sync/external_incident_topic';
+import { registerExternalIncidentConsumer } from './external_sync/external_incident_consumer';
+import { registerExternalSyncWorkloadType } from './external_sync/service_account';
+import { getExternalSyncRoutes } from './routes/api/external_sync';
 import { LicensingService } from './services/licensing';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
@@ -174,6 +178,24 @@ export class CasePlugin
 
     this.casesEventBus = new CasesEventBus(this.logger);
 
+    // Registered even when the sync is off, so existing bindings can still be listed and removed.
+    registerExternalSyncWorkloadType(core.security.serviceAccounts);
+
+    if (this.caseConfig.bidirectionalSync.enabled) {
+      core.pubsub.registerTopic(externalIncidentUpdatedTopic);
+      registerExternalIncidentConsumer({
+        pubsub: core.pubsub,
+        logger: this.logger,
+        getServices: async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            serviceAccounts: coreStart.security.serviceAccounts,
+            getCasesClient: this.getCasesClientWithRequest(coreStart, 'external_sync'),
+          };
+        },
+      });
+    }
+
     registerSavedObjects({
       core,
       logger: this.logger,
@@ -259,6 +281,11 @@ export class CasePlugin
         }
       : undefined;
 
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
+    };
+
     registerRoutes({
       router,
       routes: [
@@ -274,6 +301,19 @@ export class CasePlugin
             ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
             : undefined
         ),
+        ...(this.caseConfig.bidirectionalSync.enabled
+          ? getExternalSyncRoutes({
+              getStartServices: async () => {
+                const [coreStart] = await core.getStartServices();
+                return {
+                  pubsub: coreStart.pubsub,
+                  serviceAccounts: coreStart.security.serviceAccounts,
+                };
+              },
+              getActionsClient,
+              getSpaceId,
+            })
+          : []),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -290,11 +330,6 @@ export class CasePlugin
         const [coreStart] = await core.getStartServices();
         return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
       };
-    };
-
-    const getActionsClient = async (request: KibanaRequest) => {
-      const [, pluginsStart] = await core.getStartServices();
-      return pluginsStart.actions.getActionsClientWithRequest(request);
     };
 
     const serverlessProjectType = this.isServerless
@@ -439,6 +474,10 @@ export class CasePlugin
         //    so deleting a data view in space `analytics-1` from a `/reset`
         //    request that arrived in `default` 404s on the existence check
         //    (even with `force: true`).
+        //  - The reconciliation task lists the hidden `space` SOs to delete
+        //    analytics documents of deleted spaces. Only opted in when Spaces
+        //    is enabled: it registers the type, and opting in an unregistered
+        //    type throws.
         // The cases SO types are hidden, so they must be opted in
         // explicitly. `index-pattern` is a globally-registered SO type
         // (data-views plugin); opting it in here grants the internal client
@@ -448,6 +487,7 @@ export class CasePlugin
         // unified `cases-attachments` type is registered unconditionally
         // since #275225), so both are opted in here and the attachments
         // reconciliation runner always walks both source types.
+        const spacesEnabled = plugins.spaces != null;
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
@@ -456,6 +496,7 @@ export class CasePlugin
           CASE_TEMPLATE_SAVED_OBJECT,
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
+          ...(spacesEnabled ? ['space'] : []),
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
         void this.casesAnalyticsV2Service.start({
@@ -463,6 +504,7 @@ export class CasePlugin
           taskManager: plugins.taskManager,
           internalSavedObjectsClient: v2InternalSavedObjectsClient,
           dataViewsService: plugins.dataViews,
+          spacesEnabled,
         });
       }
     }

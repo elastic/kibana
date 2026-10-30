@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-server'
   - '@kbn/share-plugin'
-  - '@kbn/actions-plugin'
   - '@kbn/logging'
   - '@kbn/react-kibana-context-render'
   - '@kbn/doc-links'
@@ -45,7 +44,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-router-server-mocks'
-  - '@kbn/logging-mocks'
   - '@kbn/cloud-connect-plugin'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-security-server'
@@ -65,12 +63,15 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/ui-callout'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -79,6 +80,4 @@ fileGroups:
     - server/**/*
     - test/scout_inference_test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

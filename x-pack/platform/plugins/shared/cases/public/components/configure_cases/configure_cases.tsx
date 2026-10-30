@@ -44,6 +44,8 @@ import { AutomaticClosureSwitch } from './automatic_closure_switch';
 import { SettingsSection } from './settings_section';
 import { ConfigureCasesAppHeader } from './configure_cases_app_header';
 import { OldCustomFieldsAndTemplatesSection } from './old_custom_fields_and_templates_section';
+import { WorkflowTags } from './workflow_tags';
+import { useAreWorkflowsAvailableForCases } from '../workflows/use_run_case_workflow';
 import * as observableTypesI18n from '../observable_types/translations';
 
 const contentWrapperCss = css`
@@ -62,11 +64,13 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed) => css`
 
 type LegacyFlyoutType = 'customField' | 'template';
 
-export const ConfigureCasesRedesign: React.FC = React.memo(() => {
+export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();
   const { permissions, owner } = useCasesContext();
   const { docLinks } = useKibana().services;
+
+  const workflowsAvailableForCases = useAreWorkflowsAvailableForCases();
 
   const {
     hasMinimumLicensePermissions,
@@ -86,9 +90,11 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     externalSync,
     externalSyncFields,
     externalSyncFieldMappings,
+    workflowTags,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
     isFetchingCaseConfiguration,
+    isCaseConfigurationFetched,
     isConfigurationFetchError,
     isLoadingConnectors,
     connectors,
@@ -107,6 +113,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     onChangeExternalSync,
     onChangeExternalSyncFields,
     onChangeExternalSyncFieldMappings,
+    onChangeWorkflowTags,
     ConnectorAddFlyout,
     ConnectorEditFlyout,
     onEditObservableType,
@@ -157,10 +164,10 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
               </>
             )}
             <div css={contentWrapperCss}>
-              <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-redesign-settings-panel">
+              <EuiPanel hasBorder paddingSize="m" data-test-subj="cases-settings-panel">
                 {hasMinimumLicensePermissions && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-external-incident-management-section"
+                    data-test-subj="cases-external-incident-management-section"
                     title={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_TITLE}
                     description={configureCasesI18n.INCIDENT_MANAGEMENT_SYSTEM_DESC}
                   >
@@ -181,7 +188,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       onAddNewConnector={onAddNewConnector}
                     />
                     {isExternalSyncEnabled && (
-                      <div data-test-subj="cases-redesign-external-sync-section">
+                      <div data-test-subj="cases-external-sync-section">
                         <EuiSpacer size="l" />
                         {connector.type !== ConnectorTypes.none ? (
                           <>
@@ -245,7 +252,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {hasMinimumLicensePermissions && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-case-closures-section"
+                    data-test-subj="cases-case-closures-section"
                     title={configureCasesI18n.CASE_CLOSURE_OPTIONS_TITLE}
                     description={configureCasesI18n.CASE_CLOSURE_OPTIONS_DESC}
                   >
@@ -265,7 +272,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {showExtractObservablesSection && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-extract-observables-section"
+                    data-test-subj="cases-extract-observables-section"
                     title={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_TITLE}
                     description={configureCasesI18n.EXTRACT_OBSERVABLES_DEFAULT_DESC}
                   >
@@ -289,7 +296,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
 
                 {showObservableTypesSection && (
                   <SettingsSection
-                    data-test-subj="cases-redesign-observable-types-section"
+                    data-test-subj="cases-observable-types-section"
                     title={observableTypesI18n.TITLE}
                     description={observableTypesI18n.DESCRIPTION}
                   >
@@ -308,6 +315,28 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   </SettingsSection>
                 )}
 
+                {workflowsAvailableForCases && <EuiHorizontalRule margin="l" />}
+
+                {workflowsAvailableForCases && (
+                  <SettingsSection
+                    data-test-subj="cases-workflow-tags-section"
+                    title={configureCasesI18n.WORKFLOW_TAGS_TITLE}
+                    description={configureCasesI18n.WORKFLOW_TAGS_DESCRIPTION}
+                  >
+                    <WorkflowTags
+                      isLoading={isLoadingCaseConfiguration}
+                      disabled={
+                        isLoadingCaseConfiguration ||
+                        !isCaseConfigurationFetched ||
+                        isConfigurationFetchError ||
+                        !permissions.settings
+                      }
+                      workflowTags={workflowTags}
+                      onChange={onChangeWorkflowTags}
+                    />
+                  </SettingsSection>
+                )}
+
                 {/* Rendered for both templates-flag states: with templates v2 ON it is the
                     read-mostly "legacy" section behind a local-storage switch; with templates
                     v2 OFF it is the only custom-fields / templates management UI (the v2
@@ -321,6 +350,8 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                   connector={connector}
                   customFields={customFields}
                   templates={templates}
+                  observableTypes={observableTypes}
+                  workflowTags={workflowTags}
                   connectors={connectors ?? []}
                   isLoadingCaseConfiguration={isLoadingCaseConfiguration}
                   persistCaseConfigure={persistCaseConfigure}
@@ -342,7 +373,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   );
 });
 
-ConfigureCasesRedesign.displayName = 'ConfigureCasesRedesign';
+ConfigureCases.displayName = 'ConfigureCases';
 
 // eslint-disable-next-line import/no-default-export
-export { ConfigureCasesRedesign as default };
+export { ConfigureCases as default };

@@ -143,5 +143,12 @@ describe('getIndices', () => {
       const result = await getIndices({ http, pattern: 'kibana', isRollupIndex });
       expect(result.length).toBe(0);
     });
+
+    it('should rethrow errors when throwOnError is set', async () => {
+      http.get.mockRejectedValueOnce(new Error('Test error'));
+      await expect(
+        getIndices({ http, pattern: 'kibana', isRollupIndex, throwOnError: true })
+      ).rejects.toThrow('Test error');
+    });
   });
 });

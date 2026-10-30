@@ -12,10 +12,7 @@ import type {
   ExternalSyncFieldRule,
   ExternalSyncSettings,
 } from '../../../common/types/domain';
-import {
-  ConnectorMappingsAttributesPartialRt,
-  ConnectorMappingsAttributesRt,
-} from '../../../common/types/domain';
+import { ConnectorMappingsAttributesSchema } from '../../../common/types/domain';
 
 export interface ConnectorMappingsPersistedAttributes {
   mappings: Array<{
@@ -29,10 +26,10 @@ export interface ConnectorMappingsPersistedAttributes {
   externalSyncFieldMappings?: ExternalSyncFieldMapping[];
 }
 
-export const ConnectorMappingsAttributesTransformedRt = ConnectorMappingsAttributesRt;
+export const ConnectorMappingsAttributesTransformedSchema = ConnectorMappingsAttributesSchema;
 
 export type ConnectorMappingsAttributesTransformed = ConnectorMappingsAttributes;
 export type ConnectorMappingsSavedObjectTransformed =
   SavedObject<ConnectorMappingsAttributesTransformed>;
 
-export { ConnectorMappingsAttributesPartialRt };
+export const ConnectorMappingsAttributesPartialSchema = ConnectorMappingsAttributesSchema.partial();

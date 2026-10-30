@@ -81,7 +81,7 @@ describe('registerAutoPushListener', () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: theCase.id,
       owner: 'securitySolution',
-      attachmentIds: ['c-1'],
+      ids: ['c-1'],
       attachmentType: 'user',
     });
     await flush();
@@ -101,7 +101,7 @@ describe('registerAutoPushListener', () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: theCase.id,
       owner: 'securitySolution',
-      attachmentIds: ['c-1'],
+      ids: ['c-1'],
       attachmentType: 'comment',
       origin: 'external_sync',
     });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export interface RelayInstallRequest {
-  kibana_api_key: string;
+interface RelayInstallRequestBase {
   kibana_url: string;
   kibana_version: string;
   license_info: string;
@@ -15,6 +14,30 @@ export interface RelayInstallRequest {
   agent_id?: string;
 }
 
+/**
+ * ECH and Serverless with `xpack.actions.relay.uiam.enabled` off. The API key is
+ * the only install credential.
+ */
+export interface RelayApiKeyInstallRequest extends RelayInstallRequestBase {
+  kibana_api_key: string;
+  uiam_service_account_id?: never;
+}
+
+/**
+ * Serverless with `xpack.actions.relay.uiam.enabled` on. The service-account id
+ * is the only install credential; the raw token is never sent.
+ */
+export interface RelayServiceAccountInstallRequest extends RelayInstallRequestBase {
+  uiam_service_account_id: string;
+  kibana_api_key?: never;
+}
+
+/**
+ * Install body. Exactly one credential is set: `kibana_api_key` (M1) or
+ * `uiam_service_account_id` (M2).
+ */
+export type RelayInstallRequest = RelayApiKeyInstallRequest | RelayServiceAccountInstallRequest;
+
 export interface RelayInstallResponse {
   authorize_url: string;
   claim_id: string;
@@ -22,7 +45,14 @@ export interface RelayInstallResponse {
 
 export type RelayClaimResponse =
   | { status: 'pending' }
-  | { status: 'complete'; tenant_key: string | undefined };
+  | {
+      status: 'complete';
+      tenant_key: string | undefined;
+      /** Slack workspace name. Chosen by the workspace owner, so a display label only. */
+      tenant_name?: string;
+      /** Slack workspace URL from `auth.test` (https://api.slack.com/methods/auth.test); the field to trust when identifying the workspace. */
+      tenant_url?: string;
+    };
 
 export interface RelayCallbackResponse {
   status: number;
@@ -72,19 +102,32 @@ export interface RelayTriggerInput {
   tenantKey: string;
   channel: string;
   message: string;
+  /** Slack Block Kit blocks. `message` stays the notification and fallback text. */
+  blocks?: Array<Record<string, unknown>>;
   /** Timestamp of the message to reply to, when posting into an existing thread. */
   threadTs?: string;
+  /**
+   * Timestamp of a message this app posted earlier; the Relay edits it instead of posting.
+   * Takes precedence over `threadTs`, which is not sent when this is set.
+   */
+  messageTs?: string;
 }
 
 export interface RelayTriggerResponse {
   /** The posted message's Slack `ts`. */
   ref: string;
-  tenantKey: string;
   /** Slack conversation id after Relay resolved a name, or the id that was sent. */
   channel: string;
+  /** The Relay's key for the thread posted to. Opaque: store and compare it, never build or parse it. */
+  externalConversationId?: string;
 }
 
 export interface RelayClientContract {
+  /**
+   * `xpack.actions.relay.uiam.enabled`. When true, install sends a service-account
+   * id and every request carries Kibana's system-identity bearer token.
+   */
+  readonly uiamEnabled: boolean;
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
   /** Unbind a single workspace binding identified by its tenant key. */

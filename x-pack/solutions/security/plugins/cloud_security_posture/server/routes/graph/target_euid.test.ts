@@ -47,6 +47,22 @@ describe('getTargetEuidEsqlEvaluation', () => {
       expect(withoutTargetRefs).not.toContain('user.name');
       expect(withoutTargetRefs).not.toContain('user.domain');
     });
+
+    it('rewrites user.entity.id to the target field and keeps the cloud.provider routing', () => {
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user, '_target_user_euid');
+
+      expect(esql).toContain('user.target.entity.id');
+      expect(esql).not.toContain('cloud.target.provider');
+
+      const awsBranchCondition = esql
+        .split('\n')
+        .find((line) => line.includes('_euid_branch_1_cond ='));
+      expect(awsBranchCondition).toContain('cloud.provider');
+      expect(awsBranchCondition).toContain('"aws"');
+
+      const withoutTargetRefs = esql.replace(/user\.target\./g, 'USER_TARGET_REPLACED.');
+      expect(withoutTargetRefs).not.toContain('user.entity.id');
+    });
   });
 
   describe('host type', () => {
@@ -117,6 +133,10 @@ describe('getTargetEuidSourceFields', () => {
     expect(fields).not.toContain('user.email');
     expect(fields).not.toContain('user.id');
     expect(fields).not.toContain('user.name');
+  });
+
+  it('includes user.target.entity.id for user', () => {
+    expect(getTargetEuidSourceFields(EntityType.enum.user)).toContain('user.target.entity.id');
   });
 
   it('returns target-namespace singleField for service', () => {

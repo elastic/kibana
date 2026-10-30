@@ -9,14 +9,5 @@ import { schema } from '@kbn/config-schema';
 import { casesSchema as casesSchemaV10 } from './v10';
 
 export const casesSchema = casesSchemaV10.extends({
-  settings: schema.object({
-    syncAlerts: schema.maybe(schema.boolean()),
-    extractObservables: schema.maybe(schema.boolean()),
-    externalSync: schema.maybe(
-      schema.object({
-        autoPush: schema.boolean(),
-        conflictStrategy: schema.oneOf([schema.literal('external'), schema.literal('kibana')]),
-      })
-    ),
-  }),
+  extract_observables_source: schema.maybe(schema.string()),
 });

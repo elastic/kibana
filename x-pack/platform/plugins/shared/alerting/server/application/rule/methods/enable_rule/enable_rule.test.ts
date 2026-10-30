@@ -148,6 +148,33 @@ describe('enable()', () => {
         ruleTypeId: 'myType',
       });
     });
+
+    test('rejects enabling the rule when the rule type params authorizer denies the persisted params', async () => {
+      // Simulates params persisted through a path that skips the authorizer (e.g. import).
+      const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRule,
+        attributes: { ...existingRule.attributes, params: persistedParams },
+      });
+      const authorizeParams = jest
+        .fn()
+        .mockRejectedValue(new Error('Unauthorized to enable a privileged param'));
+      (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+        authorize: { params: { authorize: authorizeParams } },
+      });
+
+      await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to enable a privileged param"`
+      );
+
+      expect(authorizeParams).toHaveBeenCalledWith(
+        persistedParams,
+        expect.objectContaining({ request: rulesClientParams.request })
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+    });
   });
 
   describe('auditLogger', () => {
@@ -330,6 +357,55 @@ describe('enable()', () => {
     const writtenAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
     expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
     expect(writtenAttributes).not.toHaveProperty('uiamApiKeyExternal');
+  });
+
+  test('invalidates the UIAM key a UIAM-only rule held once it gets a new key set', async () => {
+    const uiamApiKey = Buffer.from('uiam-id:essu_key').toString('base64');
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingRuleWithoutApiKey,
+      attributes: {
+        ...existingRuleWithoutApiKey.attributes,
+        apiKeyOwner: 'service-account-id',
+        apiKeyCreatedByUser: false,
+        uiamApiKey,
+      },
+    });
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toHaveProperty(
+      'apiKey',
+      'MTIzOmFiYw=='
+    );
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [uiamApiKey] },
+      expect.any(Object),
+      expect.any(Object)
+    );
+  });
+
+  test('does not invalidate a user-created UIAM key when the rule gets a new key set', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingRuleWithoutApiKey,
+      attributes: {
+        ...existingRuleWithoutApiKey.attributes,
+        apiKeyCreatedByUser: true,
+        uiamApiKey: 'essu_user_key',
+      },
+    });
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
   test(`doesn't update already enabled alerts but ensures task is enabled`, async () => {

@@ -8,11 +8,13 @@
 import { getMapping } from './mapping';
 import { format } from './format';
 import { parseIncident } from './parse_incident';
+import { parseNotification } from './parse_notification';
 import type { JiraCaseConnector } from './types';
 
 export const getCaseConnector = (): JiraCaseConnector => ({
   getMapping,
   format,
   parseIncident,
+  parseNotification,
   freeFormFieldsKey: 'otherFields',
 });

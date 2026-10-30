@@ -60,7 +60,7 @@ export interface TestMetadataRow {
 }
 
 /** What the Jest reporter writes as the suite title of a test outside any describe block. */
-const UNKNOWN_SUITE_TITLE = 'unknown';
+export const UNKNOWN_SUITE_TITLE = 'unknown';
 
 const asArray = (value: string | string[] | null | undefined): string[] => {
   if (value === null || value === undefined) return [];
@@ -68,7 +68,7 @@ const asArray = (value: string | string[] | null | undefined): string[] => {
 };
 
 /** Tests split by execution model, so each group can be queried the way its framework requires. */
-const groupByExecutionModel = (
+export const groupByExecutionModel = (
   tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
 ): Array<{ frameworks: readonly TestFramework[]; testIds: string[] }> =>
   buildExecutionModels([...new Set(tests.map((test) => test.framework))]).map((model) => ({
@@ -156,6 +156,10 @@ export const buildTestStatsQuery = (
  * filter keeps it affordable; `LAST` is the expensive part, which is why Playwright attempts are
  * left out and only its per-run `test-outcome` documents are scanned.
  */
+// Skipped Playwright runs may carry no status at all
+const RUN_STATUS =
+  'CASE(test.outcome == "flaky", "flaky", test.outcome == "skipped", "skipped", test.status)';
+
 export const buildBranchStatsQuery = (
   scope: FlakyTestQueryScope,
   frameworks: readonly TestFramework[],
@@ -170,8 +174,7 @@ export const buildBranchStatsQuery = (
     )}`,
     `EVAL is_execution = CASE(${model.executionFilter}, 1, 0),` +
       ` failed = CASE(is_execution == 1 AND ${model.failedExpression} == 1, 1, 0),` +
-      // skipped Playwright runs may carry no status at all
-      ' status = CASE(test.outcome == "flaky", "flaky", test.outcome == "skipped", "skipped", test.status)',
+      ` status = ${RUN_STATUS}`,
     'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
       ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
@@ -182,6 +185,34 @@ export const buildBranchStatsQuery = (
       ' latest_at = MAX(@timestamp),' +
       ' latest_build_url = LAST(buildkite.build.url, @timestamp),' +
       ' latest_job_id = LAST(buildkite.job_id, @timestamp)' +
+      ' BY test.id, buildkite.branch',
+    'RENAME test.id AS test_id, buildkite.branch AS branch',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+};
+
+/** Per test and branch, how many setups (pipeline, config, target) ran it and skipped it last. */
+export const buildBranchSetupsQuery = (
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string => {
+  const [model] = buildExecutionModels(frameworks);
+  const setupParts = [
+    'buildkite.pipeline.slug',
+    'test_run.config.file.path',
+    'test_run.target.mode',
+    'test_run.target.type',
+  ].map((field) => `COALESCE(${field}, "-")`);
+
+  return [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[...scopeClauses(scope), model.runFilter, `test.id IN (${inList(testIds)})`].join(
+      ' AND '
+    )}`,
+    `EVAL status = ${RUN_STATUS}, setup = CONCAT(${setupParts.join(', " ", ')})`,
+    'STATS latest_status = LAST(status, @timestamp) BY test.id, buildkite.branch, setup',
+    'STATS setups = COUNT(*), skipped_setups = SUM(CASE(latest_status == "skipped", 1, 0))' +
       ' BY test.id, buildkite.branch',
     'RENAME test.id AS test_id, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
@@ -239,7 +270,8 @@ export const buildTestMetadataQuery = (
   [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
-    'STATS title = MAX(test.title.keyword),' +
+    // The text field: not every index has the `.keyword` sub-field
+    'STATS title = MAX(test.title),' +
       ' suite_title = MAX(suite.title.keyword),' +
       ' file_path = MAX(test.file.path),' +
       ' config_path = MAX(test_run.config.file.path),' +
@@ -251,7 +283,7 @@ export const buildTestMetadataQuery = (
     `LIMIT ${ESQL_ROW_LIMIT}`,
   ].join(' | ');
 
-const runEsql = async <T extends Record<string, unknown>>(
+export const runEsql = async <T extends Record<string, unknown>>(
   es: ESClient,
   query: string
 ): Promise<T[]> => {
@@ -348,8 +380,9 @@ export const fetchTestMetadata = async (
 };
 
 /**
- * Per-branch build counts and latest run for the given tests, most failed builds first. Tests are
- * grouped by execution model so that each one is counted the way its framework requires.
+ * Per-branch build counts, latest run and whether every setup skipped it, for the given tests,
+ * most failed builds first. Tests are grouped by execution model so that each one is counted the
+ * way its framework requires.
  */
 export const fetchBranchStats = async (
   es: ESClient,
@@ -375,6 +408,34 @@ export const fetchBranchStats = async (
     )
   );
 
+  // Setup: pipeline + config + Scout target. Only tests whose latest run is a skip are checked
+  const candidates = new Set(
+    results
+      .flat()
+      .filter((record) => record.branch !== null && record.latest_status === 'skipped')
+      .map((record) => record.test_id)
+  );
+  const setupResults = await Promise.all(
+    groupByExecutionModel(tests.filter(({ testId }) => candidates.has(testId))).map(
+      ({ frameworks, testIds }) =>
+        runEsql<{ test_id: string; branch: string | null; setups: number; skipped_setups: number }>(
+          es,
+          buildBranchSetupsQuery(scope, frameworks, testIds)
+        )
+    )
+  );
+
+  const branchKey = (testId: string, branch: string): string => `${testId}\n${branch}`;
+  const skipped = new Map<string, boolean>();
+  for (const record of setupResults.flat()) {
+    if (record.branch !== null) {
+      skipped.set(
+        branchKey(record.test_id, record.branch),
+        record.setups > 0 && record.skipped_setups === record.setups
+      );
+    }
+  }
+
   const byTest = new Map<string, FlakyTestBranchStats[]>();
   for (const record of results.flat()) {
     if (record.branch === null) continue;
@@ -399,6 +460,9 @@ export const fetchBranchStats = async (
               jobId: record.latest_job_id || undefined,
             }
           : undefined,
+      skipped:
+        record.latest_status === 'skipped' &&
+        skipped.get(branchKey(record.test_id, record.branch)) === true,
     });
     byTest.set(record.test_id, stats);
   }
@@ -576,11 +640,12 @@ const errorHeadExpression = (): string => {
 /**
  * The distinct errors of the given tests, per pipeline, across every pipeline and branch in the
  * window. Failures are attempt-level `test-end` documents with a message, for every framework
- * (Playwright attempts carry the error, its per-run outcome documents do not), so a Playwright
- * run that failed twice before passing counts two failures. Grouped by pipeline in the query and
+ * (Playwright attempts carry the error, its per-run outcome documents do not), counted as distinct
+ * builds so that a retry that failed again counts once. Grouped by pipeline in the query and
  * folded per error afterwards; a build belongs to one pipeline, so the distinct build counts add
- * up. The representative message is the newest failure's, cut to a bounded length as text cannot
- * be aggregated whole.
+ * up. The build ids let a consumer count the builds of an error shared by several tests. The
+ * representative message is the newest failure's, cut to a bounded length as text cannot be
+ * aggregated whole.
  */
 export const buildTestErrorsQuery = (
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -601,8 +666,8 @@ export const buildTestErrorsQuery = (
     'EVAL lines = SPLIT(event.error.message, "\\n"),' +
       ` head = ${errorHeadExpression()},` +
       ` message = LEFT(event.error.message, ${ERROR_MESSAGE_CHARACTERS})`,
-    'STATS failures = COUNT(*),' +
-      ' builds = COUNT_DISTINCT(buildkite.build.id),' +
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' build_ids = VALUES(buildkite.build.id),' +
       ' branches = VALUES(buildkite.branch),' +
       ' targets = VALUES(test_run.target.mode),' +
       ' first_failed_at = MIN(@timestamp),' +
@@ -619,8 +684,8 @@ interface TestErrorRow extends Record<string, unknown> {
   test_id: string;
   head: string | null;
   pipeline: string | null;
-  failures: number;
   builds: number;
+  build_ids: string | string[] | null;
   branches: string | string[] | null;
   targets: string | string[] | null;
   first_failed_at: string;
@@ -635,13 +700,20 @@ const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestErr
   const newest = [...rows].sort((a, b) => b.last_failed_at.localeCompare(a.last_failed_at))[0];
   const byPipeline = rows
     .flatMap((row) =>
-      row.pipeline ? [{ pipeline: row.pipeline, failuresCount: row.failures }] : []
+      row.pipeline
+        ? [
+            {
+              pipeline: row.pipeline,
+              buildsCount: row.builds,
+              buildIds: [...asArray(row.build_ids)].sort(),
+            },
+          ]
+        : []
     )
-    .sort((a, b) => b.failuresCount - a.failuresCount || a.pipeline.localeCompare(b.pipeline));
+    .sort((a, b) => b.buildsCount - a.buildsCount || a.pipeline.localeCompare(b.pipeline));
   return {
     key,
     message: newest.message ?? '',
-    failuresCount: rows.reduce((sum, row) => sum + row.failures, 0),
     buildsCount: rows.reduce((sum, row) => sum + row.builds, 0),
     byPipeline,
     branches: [...new Set(rows.flatMap((row) => asArray(row.branches)))].sort(),
@@ -655,7 +727,7 @@ const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestErr
   };
 };
 
-/** Distinct errors keyed by test id, most failures first. */
+/** Distinct errors keyed by test id, most builds first. */
 export const fetchTestErrors = async (
   es: ESClient,
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -694,7 +766,7 @@ export const fetchTestErrors = async (
       testId,
       [...byKey.entries()]
         .map(([key, rows]) => foldErrorRows(key, rows))
-        .sort((a, b) => b.failuresCount - a.failuresCount || b.buildsCount - a.buildsCount)
+        .sort((a, b) => b.buildsCount - a.buildsCount || a.key.localeCompare(b.key))
     );
   }
   return byTest;

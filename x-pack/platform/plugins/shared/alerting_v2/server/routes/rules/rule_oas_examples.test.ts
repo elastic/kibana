@@ -15,13 +15,17 @@ import {
   createRuleDataSchema,
   dryRunResponseSchema,
   findRulesResponseSchema,
+  matchRulesBodySchema,
   ruleResponseSchema,
+  ruleRoutingTagsResponseSchema,
   ruleTagsResponseSchema,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import { BULK_GET_RULES_RESPONSE } from './bulk_get_rules_oas_example';
 import { RULE_TAGS_RESPONSE } from './get_rule_tags_oas_example';
+import { RULE_ROUTING_TAGS_RESPONSE } from './get_rule_routing_tags_oas_example';
 import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
+import { MATCH_RULES_REQUEST } from './match_rules_oas_example';
 import {
   BULK_BY_QUERY_REQUEST,
   BULK_CREATE_RULES_REQUEST,
@@ -81,5 +85,13 @@ describe('rule OAS example payloads', () => {
 
   it('keeps rule tags response example valid against ruleTagsResponseSchema', () => {
     expect(ruleTagsResponseSchema.safeParse(RULE_TAGS_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps rule routing tags response example valid against ruleRoutingTagsResponseSchema', () => {
+    expect(ruleRoutingTagsResponseSchema.safeParse(RULE_ROUTING_TAGS_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps match rules request example valid against matchRulesBodySchema', () => {
+    expect(matchRulesBodySchema.safeParse(MATCH_RULES_REQUEST).success).toBe(true);
   });
 });

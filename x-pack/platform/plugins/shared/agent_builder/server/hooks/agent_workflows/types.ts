@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WorkflowContext } from '@kbn/agent-builder-common';
+import type { ToolResult, WorkflowContext } from '@kbn/agent-builder-common';
 
 /**
  * Contract between a workflows and the before workflow hook:
@@ -47,5 +47,14 @@ export interface AfterExecutionWorkflowParams {
     tool_id: string;
     tool_call_id: string;
     params: Record<string, unknown>;
+  }>;
+  /**
+   * Results of the round's tool calls, keyed by `tool_call_id`. Sent only to workflows that
+   * declare this input, since results can be large.
+   */
+  tool_results?: Array<{
+    tool_id: string;
+    tool_call_id: string;
+    results: ToolResult[];
   }>;
 }

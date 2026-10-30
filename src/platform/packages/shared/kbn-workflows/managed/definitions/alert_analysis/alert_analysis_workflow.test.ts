@@ -132,6 +132,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(manualInputs.properties).toHaveProperty('alerts');
     expect(manualInputs.properties).toHaveProperty('calledByWorker');
     expect(manualInputs.properties).toHaveProperty('connectorIdByFeature');
+    // The agent and the prompt option come from the space's settings, not from the caller.
+    expect(manualInputs.properties).not.toHaveProperty('agentId');
+    expect(manualInputs.properties).not.toHaveProperty('useDirectPrompt');
 
     expect(result.data.outputs).toBeDefined();
     if (
@@ -306,45 +309,45 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(workflow.consts.batch_size).toBeGreaterThan(1);
   });
 
-  it('asks the agent for one verdict per alert id, on a 0-1 confidence scale', () => {
-    const agentStep = findStepByType(workflow.steps, 'ai.agent') as {
-      with: {
-        schema: {
+  it('asks the model for one verdict per alert id, on a 0-1 confidence scale', () => {
+    const agentStep = findStepByType(workflow.steps, 'ai.agent') as { with: { schema: string } };
+    const schema = evaluateExpression(createWorkflowLiquidEngine(), agentStep.with.schema, {
+      consts: workflow.consts,
+    }) as {
+      type: string;
+      required: string[];
+      properties: {
+        verdicts: {
           type: string;
-          required: string[];
-          properties: {
-            verdicts: {
-              type: string;
-              maxItems: number;
-              items: {
-                required: string[];
-                properties: {
-                  id: { type: string; maxLength: number };
-                  classification: { enum: string[] };
-                  confidence_score: { minimum: number; maximum: number };
-                  rationale: { type: string; maxLength: number };
-                  contributing_factors: {
-                    maxItems: number;
-                    items: { type: string; maxLength: number };
-                  };
-                };
+          items: {
+            required: string[];
+            properties: {
+              id: { type: string; maxLength: number };
+              classification: { enum: string[] };
+              confidence_score: { minimum: number; maximum: number };
+              rationale: { type: string; maxLength: number };
+              contributing_factors: {
+                maxItems: number;
+                items: { type: string; maxLength: number };
               };
             };
-            batch_summary?: { type: string; maxLength: number };
           };
         };
+        batch_summary?: { type: string; maxLength: number };
       };
     };
 
     // The root of an ai.agent schema must stay an object, so the per-alert verdicts are carried in
     // an array property.
-    expect(agentStep.with.schema.type).toBe('object');
-    expect(agentStep.with.schema.required).toEqual(['verdicts']);
+    expect(schema.type).toBe('object');
+    expect(schema.required).toEqual(['verdicts']);
 
-    const verdicts = agentStep.with.schema.properties.verdicts;
+    const verdicts = schema.properties.verdicts;
     expect(verdicts.type).toBe('array');
-    // Cap at consts.batch_size — more than 50 verdicts cannot pair to real alerts in a batch.
-    expect(verdicts.maxItems).toBe(50);
+    // No maxItems on the array: Gemini answers 400 "Provider returned error" to this schema when
+    // the array cap sits next to the per-verdict bounds. The cap is applied after parsing instead
+    // (see 'caps the verdicts taken from one batch at consts.batch_size').
+    expect(verdicts).not.toHaveProperty('maxItems');
     // The echoed id is what pairs a verdict with its alert, so it is required.
     expect(verdicts.items.required).toEqual(
       expect.arrayContaining(['id', 'classification', 'confidence_score', 'rationale'])
@@ -367,7 +370,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(verdicts.items.properties.contributing_factors.maxItems).toBe(3);
     expect(verdicts.items.properties.contributing_factors.items.maxLength).toBe(100);
     // Bound at the producer so accumulated batch_summaries cannot inflate execution state.
-    expect(agentStep.with.schema.properties.batch_summary?.maxLength).toBe(500);
+    expect(schema.properties.batch_summary?.maxLength).toBe(1000);
   });
 
   it('tells the model how to behave in a batch: one verdict per id, judged independently', () => {
@@ -387,15 +390,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
-      'connector-id-by-feature': string;
+      'connector-id-by-feature': string[];
       'create-conversation': string;
     };
 
     expect(agentStep).toBeDefined();
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
-    // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
-    // "" for the unused variable so exactly one is non-empty at execution time.
-    expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
+    // The template row leads. Liquid renders "" for the unused tier variable, and a blank
+    // entry is ignored, so exactly one of connector-id and the tier is set at execution time.
+    expect(agentStep['connector-id-by-feature']).toEqual([
+      'alertzero_template_models',
+      '{{ variables.connector_id_by_feature }}',
+    ]);
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
@@ -413,20 +419,31 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const batchCheck = findStepByName(workflow.steps, 'check_batch_output_exists') as {
       condition: string;
     };
-    expect(batchCheck.condition).toBe(
-      'not steps.runAgent_step.output.structured_output.verdicts:*'
-    );
+    expect(batchCheck.condition).toBe('${{ variables.batch_result_verdict_count == 0 }}');
+
+    // The direct prompt is the same batch with the same failure handling.
+    const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
+      'on-failure': {
+        retry: { 'max-attempts': number; delay: string; strategy: string };
+        continue: boolean;
+      };
+    };
+    expect(promptStep['on-failure'].retry['max-attempts']).toBe(3);
+    expect(promptStep['on-failure'].continue).toBe(true);
+    // The prompt's usual failure goes away on the next try, so it retries sooner than the agent.
+    expect(promptStep['on-failure'].retry.delay).toBe('5s');
+    expect(promptStep['on-failure'].retry.strategy).toBe('exponential');
   });
 
   it('posts batch progress counts reconciled to this batch alert ids, not raw agent verdicts', () => {
     const progress = findStepByName(workflow.steps, 'post_batch_progress_comment') as {
-      with: { body: { input: string } };
+      with: { message: string };
     };
     // Fabricated agent ids must not inflate the Investigation summary.
-    expect(progress.with.body.input).toContain('variables.batch_tp_count');
-    expect(progress.with.body.input).toContain('variables.batch_fp_count');
-    expect(progress.with.body.input).toContain('variables.batch_inc_count');
-    expect(progress.with.body.input).not.toContain(
+    expect(progress.with.message).toContain('variables.batch_tp_count');
+    expect(progress.with.message).toContain('variables.batch_fp_count');
+    expect(progress.with.message).toContain('variables.batch_inc_count');
+    expect(progress.with.message).not.toContain(
       "structured_output.verdicts | where: 'classification'"
     );
 
@@ -584,11 +601,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(collectStep.with.all_verdicts).toBe(
       '${{ variables.all_verdicts | concat: variables.batch_verdicts }}'
     );
-    expect(collectStep.with.batch_input_tokens).toContain(
+    expect(collectStep.with.batch_input_tokens).toContain('variables.batch_result_input_tokens');
+    expect(collectStep.with.batch_output_tokens).toContain('variables.batch_result_output_tokens');
+
+    // Whichever step ran, its usage is read from the same place.
+    const normalizeStep = findStepByName(workflow.steps, 'normalize_batch_result') as {
+      with: Record<string, string>;
+    };
+    expect(normalizeStep.with.batch_result_input_tokens).toContain(
       'steps.runAgent_step.output.metadata.usage.inputTokens'
     );
-    expect(collectStep.with.batch_output_tokens).toContain(
-      'steps.runAgent_step.output.metadata.usage.outputTokens'
+    expect(normalizeStep.with.batch_result_input_tokens).toContain(
+      'steps.runPrompt_step.output.metadata.usage.inputTokens'
     );
   });
 
@@ -885,7 +909,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(autoCloseGate.steps[0].with.auto_close_enabled).toBe('${{ inputs.autoCloseEnabled }}');
     // String fields use Liquid | default: (safe because empty string is the only falsy edge case
     // and neither field would be intentionally set to "")
-    expect(setStep.with.agent_id).toBe('{{ inputs.agentId | default: variables.agent_id }}');
+    // The Worker has no agent input and ignores the space's agent: it always classifies with a prompt.
+    expect(setStep.with).not.toHaveProperty('agent_id');
+    expect(setStep.with.use_prompt).toBe(true);
     expect(setStep.with.tag_prefix).toBe('{{ inputs.tagPrefix | default: variables.tag_prefix }}');
     // Worker path: suppress Agent Builder chats (output goes to the Investigation via comments)
     // and stash investigationConversationId for the gated kibana.request comment steps.
@@ -936,7 +962,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // related-alert graph search uses the executing-space alias, not this field.
     expect(alertsInput?.items?.properties?._index?.maxLength).toBe(512);
     expect(alertsInput?.items?.properties?._index?.pattern).toBe(
-      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+      '^(\\.ds-)?\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
     );
     // Used as an ES date-math enrichment anchor — reject non-dates at the input boundary.
     expect(alertsInput?.items?.properties?.['@timestamp']?.format).toBe('date-time');
@@ -1490,6 +1516,7 @@ const createMockOutputVerdict = (
     rationale: string;
     contributing_factors: string[];
     host_name: string;
+    host_entity_key: string;
     user_name: string;
   }> = {}
 ) => ({
@@ -1499,6 +1526,7 @@ const createMockOutputVerdict = (
   rationale: 'suspicious',
   contributing_factors: ['c2 url'],
   host_name: 'host-a',
+  host_entity_key: 'host-a',
   user_name: 'user-a',
   ...overrides,
 });
@@ -1651,8 +1679,26 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       rationale: 'signed installer',
       contributing_factors: ['vendor signature'],
       host_name: '__missing__',
+      host_entity_key: '__missing__',
       user_name: '__missing__',
     });
+  });
+
+  it('keys the host entity on host.id when the alert has one, else host.name, like the Entity Store', () => {
+    const buildStep = findStepByName(workflow.steps, 'build_output_verdict') as {
+      with: { output_verdict: Record<string, unknown> };
+    };
+    const keyFor = (host: Record<string, unknown>) =>
+      (
+        renderValueRecursively(engine, buildStep.with.output_verdict, {
+          foreach: { item: { _id: 'a', host, user: {} } },
+          variables: { batch_alert_verdict: { contributing_factors: [] } },
+        }) as Record<string, unknown>
+      ).host_entity_key;
+
+    expect(keyFor({ id: 'HW-UUID-ABC', name: 'prod-web-01' })).toBe('HW-UUID-ABC');
+    expect(keyFor({ name: 'prod-web-01' })).toBe('prod-web-01');
+    expect(keyFor({})).toBe('__missing__');
   });
 
   it('truncates host_name and user_name to the workflow.output 512-char limit', () => {
@@ -1781,6 +1827,126 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     ).toEqual([]);
   });
 
+  describe('apply_verdicts source', () => {
+    const verdictsLoop = findStepByName(workflow.steps, 'apply_verdicts') as { foreach: string };
+    const alerts = [{ _id: 'a1' }, { _id: 'a2' }, { _id: 'a3' }];
+    const eventAlerts = [{ _id: 't1' }, { _id: 't2' }];
+
+    const renderIds = (context: object): string[] =>
+      (
+        JSON.parse(engine.parseAndRenderSync(verdictsLoop.foreach, context)) as Array<{
+          _id: string;
+        }>
+      ).map(({ _id }) => _id);
+
+    it('derives the missing ids before the loop that reads them', () => {
+      const names = (findStepAncestors(workflow.steps, 'apply_verdicts') ?? []).at(-1)?.steps as
+        | Array<{ name: string }>
+        | undefined;
+      const order = (names ?? []).map(({ name }) => name);
+      expect(order.indexOf('collect_verdict_ids')).toBeLessThan(order.indexOf('apply_verdicts'));
+      expect(order.indexOf('set_missing_alert_ids')).toBeLessThan(order.indexOf('apply_verdicts'));
+    });
+
+    it('visits only the alerts without a verdict on a Worker run with auto-close off', () => {
+      expect(
+        renderIds({
+          inputs: { calledByWorker: true, alerts },
+          variables: {
+            pending_filter_expr: 'false',
+            auto_close_enabled: false,
+            all_verdict_ids: ['a1'],
+          },
+        })
+      ).toEqual(['a2', 'a3']);
+    });
+
+    it('visits nothing when every alert of a Worker run got a verdict', () => {
+      expect(
+        renderIds({
+          inputs: { calledByWorker: true, alerts },
+          variables: {
+            pending_filter_expr: 'false',
+            auto_close_enabled: false,
+            all_verdict_ids: ['a1', 'a2', 'a3'],
+          },
+        })
+      ).toEqual([]);
+    });
+
+    it('matches the alerts reported in missing_alert_ids', () => {
+      const missingStep = findStepByName(workflow.steps, 'set_missing_alert_ids') as {
+        with: { missing_alert_ids: string };
+      };
+      const context = {
+        inputs: { calledByWorker: true, alerts },
+        variables: {
+          pending_filter_expr: 'false',
+          auto_close_enabled: false,
+          all_verdict_ids: ['a2'],
+        },
+      };
+      expect(evaluateExpression(engine, missingStep.with.missing_alert_ids, context)).toEqual(
+        renderIds(context)
+      );
+    });
+
+    it('drops the pending alerts too, so it still matches missing_alert_ids with a pending filter', () => {
+      const missingStep = findStepByName(workflow.steps, 'set_missing_alert_ids') as {
+        with: { missing_alert_ids: string };
+      };
+      const context = {
+        inputs: { calledByWorker: true, alerts },
+        variables: {
+          pending_filter_expr: 'a._id == "a3"',
+          auto_close_enabled: false,
+          all_verdict_ids: ['a1'],
+        },
+      };
+
+      expect(renderIds(context)).toEqual(['a2']);
+      expect(evaluateExpression(engine, missingStep.with.missing_alert_ids, context)).toEqual(
+        renderIds(context)
+      );
+    });
+
+    it('drops the pending alerts on a Worker run with auto-close on as well', () => {
+      expect(
+        renderIds({
+          inputs: { calledByWorker: true, alerts },
+          variables: {
+            pending_filter_expr: 'a._id == "a3"',
+            auto_close_enabled: true,
+            all_verdict_ids: ['a1'],
+          },
+        })
+      ).toEqual(['a1', 'a2']);
+    });
+
+    it('keeps every alert when a Worker turns auto-close on, since auto_close_ids is built here', () => {
+      expect(
+        renderIds({
+          inputs: { calledByWorker: true, alerts },
+          variables: {
+            pending_filter_expr: 'false',
+            auto_close_enabled: true,
+            all_verdict_ids: ['a1', 'a2', 'a3'],
+          },
+        })
+      ).toEqual(['a1', 'a2', 'a3']);
+    });
+
+    it('keeps visiting every pending alert on the standalone path', () => {
+      expect(
+        renderIds({
+          event: { alerts: eventAlerts },
+          inputs: { alerts: [] },
+          variables: { pending_filter_expr: 'false', auto_close_enabled: false },
+        })
+      ).toEqual(['t1', 't2']);
+    });
+  });
+
   it('fails a caller that supplies alerts without the Worker flag instead of analysing nothing', () => {
     const gate = findStepByName(workflow.steps, 'require_worker_flag_for_caller_alerts') as {
       condition: string;
@@ -1804,31 +1970,57 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(false);
   });
 
-  it('links the Investigation from both alert notes, and omits it on the standalone path', () => {
-    const verdictNote = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
-      with: { body: { note: { note: string } } };
-    };
+  it('links the Investigation from the no-verdict note, and omits it on the standalone path', () => {
     const errorNote = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
       with: { body: { note: { note: string } } };
     };
+    const note = errorNote.with.body.note.note;
 
-    for (const note of [verdictNote.with.body.note.note, errorNote.with.body.note.note]) {
-      const withInvestigation = engine.parseAndRenderSync(note, {
-        workflow: { spaceId: 'default' },
-        variables: { investigation_conversation_id: 'conv-1' },
-      });
-      expect(withInvestigation).toContain(
-        '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
-      );
+    const withInvestigation = engine.parseAndRenderSync(note, {
+      workflow: { spaceId: 'default' },
+      variables: { investigation_conversation_id: 'conv-1' },
+    });
+    expect(withInvestigation).toContain(
+      '- Investigation: [conv-1](/s/default/app/agent_builder/conversations/conv-1)'
+    );
 
-      // Standalone runs have no Investigation, so the line must not render as a dead link.
-      const standalone = engine.parseAndRenderSync(note, {
-        workflow: { spaceId: 'default' },
-        variables: { investigation_conversation_id: '' },
-      });
-      expect(standalone).not.toContain('Investigation:');
-      expect(standalone).not.toContain('agent_builder/conversations');
-    }
+    // Standalone runs have no Investigation, so the line must not render as a dead link.
+    const standalone = engine.parseAndRenderSync(note, {
+      workflow: { spaceId: 'default' },
+      variables: { investigation_conversation_id: '' },
+    });
+    expect(standalone).not.toContain('Investigation:');
+    expect(standalone).not.toContain('agent_builder/conversations');
+  });
+
+  // A Worker caller applies only its own static AlertZero tags.
+  it('writes the alert-analysis tags only on the standalone path', () => {
+    const gate = findStepByName(workflow.steps, 'write_standalone_tags') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(gate.steps.map(({ name }) => name)).toEqual([
+      'set_tags',
+      'has_tags_to_remove',
+      'add_result_tags',
+    ]);
+    expect(evaluateExpression(engine, gate.condition, { inputs: { calledByWorker: true } })).toBe(
+      false
+    );
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(true);
+  });
+
+  // The Worker writes its own verdict note; writing this one too would give each alert two.
+  it('writes the verdict note only on the standalone path', () => {
+    const gate = findStepByName(workflow.steps, 'write_standalone_verdict_note') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(gate.steps.map(({ name }) => name)).toEqual(['add_verdict_note_to_alert']);
+    expect(evaluateExpression(engine, gate.condition, { inputs: { calledByWorker: true } })).toBe(
+      false
+    );
+    expect(evaluateExpression(engine, gate.condition, { inputs: {} })).toBe(true);
   });
 
   it('drops verdicts whose id belongs to another batch', () => {
@@ -1838,25 +2030,87 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
       with: { batch_verdicts: string };
     };
-    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
 
     const batchAlertIds = evaluateExpression(engine, idsStep.with.batch_alert_ids, {
       foreach: { item: [{ _id: 'a1' }, { _id: 'a2' }] },
     });
     const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
-      variables: { batch_alert_ids: batchAlertIds },
-      steps: {
-        [agentStepName]: {
-          output: {
-            structured_output: {
-              verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
-            },
-          },
-        },
+      consts: { batch_size: workflow.consts.batch_size },
+      variables: {
+        batch_alert_ids: batchAlertIds,
+        batch_result_verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
       },
     });
 
     expect(batchVerdicts).toEqual([{ id: 'a1' }, { id: 'a2' }]);
+  });
+
+  it('caps the verdicts taken from one batch at consts.batch_size', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const batchSize = workflow.consts.batch_size as number;
+    const ids = Array.from({ length: batchSize + 10 }, (_, i) => `a${i}`);
+
+    // A response with more verdicts than the batch has alerts, all echoing real ids.
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: {
+        batch_alert_ids: ids,
+        batch_result_verdicts: ids.map((id) => ({ id })),
+      },
+    });
+
+    expect(batchVerdicts).toEqual(ids.slice(0, batchSize).map((id) => ({ id })));
+  });
+
+  it('applies the batch_size cap after dropping foreign ids, not before', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const batchSize = workflow.consts.batch_size as number;
+    const realIds = Array.from({ length: batchSize }, (_, i) => `a${i}`);
+    const foreign = Array.from({ length: 10 }, (_, i) => ({ id: `foreign${i}` }));
+
+    // Foreign ids come first: slicing before the where_exp would evict real verdicts.
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: {
+        batch_alert_ids: realIds,
+        batch_result_verdicts: [...foreign, ...realIds.map((id) => ({ id }))],
+      },
+    });
+
+    expect(batchVerdicts).toEqual(realIds.map((id) => ({ id })));
+  });
+
+  it('keeps only the first verdict per id so duplicates cannot evict real verdicts', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const batchSize = workflow.consts.batch_size as number;
+    const realIds = Array.from({ length: batchSize }, (_, i) => `a${i}`);
+    const duplicates = Array.from({ length: batchSize }, (_, i) => ({
+      id: 'a0',
+      rationale: `dup${i}`,
+    }));
+
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: {
+        batch_alert_ids: realIds,
+        batch_result_verdicts: [
+          { id: 'a0', rationale: 'first' },
+          ...duplicates,
+          ...realIds.slice(1).map((id) => ({ id })),
+        ],
+      },
+    });
+
+    expect(batchVerdicts).toEqual([
+      { id: 'a0', rationale: 'first' },
+      ...realIds.slice(1).map((id) => ({ id })),
+    ]);
   });
 
   it('reports every pending alert as missing when analysis is skipped', () => {
@@ -1908,7 +2162,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       event: { alerts: triggerAlerts },
       inputs: { alerts: callerAlerts },
     };
-    const worker = { ...shared, inputs: { calledByWorker: true, alerts: callerAlerts } };
+    // A Worker run has already derived the ids that got a verdict by the time apply_verdicts runs;
+    // none did here, so the whole batch is still outstanding.
+    const worker = {
+      ...shared,
+      variables: { ...shared.variables, all_verdict_ids: [], auto_close_enabled: false },
+      inputs: { calledByWorker: true, alerts: callerAlerts },
+    };
     interface LoopAlert {
       _id: string;
     }
@@ -1970,8 +2230,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         generated_summary: 'Hosts look compromised.',
         resolved_connector_id: 'connector-1',
         agent_id: 'elastic-ai-agent',
-        impacted_entities: [{ entity_type: 'host', name: 'host-a' }],
-        impacted_entities_truncated: 'false',
+        impacted_entities: [{ id: 'host:host-a', name: 'host-a', type: 'host' }],
         missing_alert_ids: ['a-missing'],
       },
     }) as Record<string, unknown>;
@@ -1985,8 +2244,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(rendered.generated_summary).toBe('Hosts look compromised.');
     expect(rendered.connector_id).toBe('connector-1');
     expect(rendered.agent_id).toBe('elastic-ai-agent');
-    expect(rendered.impacted_entities).toEqual([{ entity_type: 'host', name: 'host-a' }]);
-    expect(rendered.impacted_entities_truncated).toBe('false');
+    expect(rendered.impacted_entities).toEqual([
+      { id: 'host:host-a', name: 'host-a', type: 'host' },
+    ]);
     expect(rendered.missing_alert_ids).toEqual(['a-missing']);
   });
 
@@ -2016,8 +2276,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('2 alert(s) with host ws-1 classified as true positive.');
-    expect(summary).toContain('1 alert(s) with host dc-1 classified as false positive.');
+    expect(summary).toContain('2 alerts with host ws-1 classified as true positive.');
+    expect(summary).toContain('1 alert with host dc-1 classified as false positive.');
   });
 
   it('describes alerts with no host field in plain language instead of the __missing__ sentinel', () => {
@@ -2036,7 +2296,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       variables: { output_verdicts: verdicts },
     });
 
-    expect(summary).toContain('1 alert(s) with no host field classified as false positive.');
+    expect(summary).toContain('1 alert with no host field classified as false positive.');
     expect(summary).not.toContain('__missing__');
   });
 
@@ -2060,7 +2320,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary.endsWith(' ')).toBe(false);
   });
 
-  it('builds host and user impact entity rows with per-verdict counts', () => {
+  it('builds type-prefixed host and user impact entities, skipping alerts without the field', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string; user_names_for_entities: string };
+    };
     const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
       with: { current_entity: Record<string, unknown> };
     };
@@ -2070,113 +2333,118 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     const verdicts = [
       createMockOutputVerdict({
         alert_id: 'a1',
-        classification: 'true_positive',
         host_name: 'ws-1',
+        host_entity_key: 'HW-1',
         user_name: 'alice',
       }),
       createMockOutputVerdict({
         alert_id: 'a2',
-        classification: 'false_positive',
         host_name: 'ws-1',
+        host_entity_key: 'HW-1',
+        user_name: '__missing__',
+      }),
+      createMockOutputVerdict({
+        alert_id: 'a3',
+        host_name: '__missing__',
+        host_entity_key: '__missing__',
         user_name: 'alice',
       }),
     ];
 
-    const hostEntity = renderValueRecursively(engine, hostStep.with.current_entity, {
-      foreach: { item: 'ws-1' },
+    const hostKeys = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
       variables: { output_verdicts: verdicts },
-    });
-    const userEntity = renderValueRecursively(engine, userStep.with.current_entity, {
-      foreach: { item: 'alice' },
-      variables: { output_verdicts: verdicts },
-    });
+    }) as string[];
+    // Two alerts for one host.id are one entity, and the alert without a host is skipped.
+    expect(hostKeys).toEqual(['HW-1']);
+    expect(
+      evaluateExpression(engine, collectStep.with.user_names_for_entities, {
+        variables: { output_verdicts: verdicts },
+      })
+    ).toEqual(['alice']);
 
-    expect(hostEntity).toEqual({
-      entity_type: 'host',
-      name: 'ws-1',
-      alert_count: 2,
-      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
-    });
-    expect(userEntity).toEqual({
-      entity_type: 'user',
-      name: 'alice',
-      alert_count: 2,
-      verdicts: { true_positive: 1, false_positive: 1, inconclusive: 0 },
-    });
+    // The id uses the Entity Store key (host.id) while the name stays readable.
+    expect(
+      renderValueRecursively(engine, hostStep.with.current_entity, {
+        foreach: { item: hostKeys[0] },
+        variables: { output_verdicts: verdicts },
+      })
+    ).toEqual({ id: 'host:HW-1', name: 'ws-1', type: 'host' });
+    // A host with an id but no name is labelled by its key, since the shared impact needs a name.
+    expect(
+      renderValueRecursively(engine, hostStep.with.current_entity, {
+        foreach: { item: 'HW-2' },
+        variables: {
+          output_verdicts: [
+            createMockOutputVerdict({ host_name: '__missing__', host_entity_key: 'HW-2' }),
+          ],
+        },
+      })
+    ).toEqual({ id: 'host:HW-2', name: 'HW-2', type: 'host' });
+    // The type prefix keeps a host and a user that share a name distinct in the shared impact.
+    expect(
+      renderValueRecursively(engine, userStep.with.current_entity, { foreach: { item: 'dup' } })
+    ).toEqual({ id: 'user:dup', name: 'dup', type: 'user' });
   });
 
-  it('pre-caps unique host/user lists before entity loops and flags truncation from uncapped counts', () => {
-    const hostPlan = findStepByName(workflow.steps, 'plan_host_entity_iteration') as {
-      with: { host_names_for_entities: string; entity_name_count: string };
+  it('keeps hosts that report a different identity field as separate entities, as the Entity Store does', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string };
     };
-    const userPlan = findStepByName(workflow.steps, 'plan_user_entity_iteration') as {
-      with: {
-        impacted_entities_truncated: string;
-        user_entity_budget: string;
-      };
-    };
-    const userSlice = findStepByName(workflow.steps, 'slice_user_names_for_entities') as {
-      with: { user_names_for_entities: string };
-    };
-    const hostLoop = findStepByName(workflow.steps, 'build_host_entities') as {
-      foreach: string;
-    };
-    const userLoop = findStepByName(workflow.steps, 'build_user_entities') as {
-      foreach: string;
-    };
-    const capStep = findStepByName(workflow.steps, 'cap_impacted_entities') as {
-      with: { impacted_entities: string };
-    };
+    const verdicts = [
+      createMockOutputVerdict({ alert_id: 'a1', host_name: 'ws-1', host_entity_key: 'HW-1' }),
+      createMockOutputVerdict({ alert_id: 'a2', host_name: 'ws-1', host_entity_key: 'ws-1' }),
+    ];
 
-    expect(hostLoop.foreach).toContain('host_names_for_entities');
-    expect(userLoop.foreach).toContain('user_names_for_entities');
-
-    const hostNamesAll = Array.from({ length: 40 }, (_, i) => `host-${i}`);
-    const userNamesAll = Array.from({ length: 30 }, (_, i) => `user-${i}`);
-
-    const entityNameCount = evaluateExpression(engine, hostPlan.with.entity_name_count, {
-      variables: { host_names_all: hostNamesAll, user_names_all: userNamesAll },
+    const hostKeys = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
+      variables: { output_verdicts: verdicts },
     });
-    expect(entityNameCount).toBe(70);
 
-    const hostNamesForEntities = evaluateExpression(engine, hostPlan.with.host_names_for_entities, {
-      variables: { host_names_all: hostNamesAll },
+    expect(hostKeys).toEqual(['HW-1', 'ws-1']);
+  });
+
+  it('keeps the prefixed entity id within the shared 256-character limit for long names', () => {
+    const hostStep = findStepByName(workflow.steps, 'build_host_entity') as {
+      with: { current_entity: Record<string, unknown> };
+    };
+    const longName = 'h'.repeat(512);
+
+    const entity = renderValueRecursively(engine, hostStep.with.current_entity, {
+      foreach: { item: longName },
+      variables: {
+        output_verdicts: [
+          createMockOutputVerdict({ host_name: longName, host_entity_key: longName }),
+        ],
+      },
+    }) as { id: string; name: string };
+
+    expect(entity.id.length).toBeLessThanOrEqual(256);
+    expect(entity.id.startsWith('host:')).toBe(true);
+    expect(entity.name).toBe(longName);
+  });
+
+  it('caps hosts and users at 50 each so impact stays within the shared 100-entity limit', () => {
+    const collectStep = findStepByName(workflow.steps, 'collect_unique_entity_names') as {
+      with: { host_keys_for_entities: string; user_names_for_entities: string };
+    };
+    const verdicts = Array.from({ length: 70 }, (_, i) =>
+      createMockOutputVerdict({
+        alert_id: `a${i}`,
+        host_name: `host-${i}`,
+        host_entity_key: `host-${i}`,
+        user_name: `user-${i}`,
+      })
+    );
+
+    const hosts = evaluateExpression(engine, collectStep.with.host_keys_for_entities, {
+      variables: { output_verdicts: verdicts },
     }) as string[];
-    expect(hostNamesForEntities).toHaveLength(40);
+    const users = evaluateExpression(engine, collectStep.with.user_names_for_entities, {
+      variables: { output_verdicts: verdicts },
+    }) as string[];
 
-    const truncatedFlag = engine.parseAndRenderSync(userPlan.with.impacted_entities_truncated, {
-      variables: { entity_name_count: 70 },
-    });
-    expect(truncatedFlag.trim()).toBe('true');
-
-    const userBudget = evaluateExpression(engine, userPlan.with.user_entity_budget, {
-      variables: { host_names_for_entities: hostNamesForEntities },
-    });
-    expect(userBudget).toBe(10);
-
-    const userNamesForEntities = evaluateExpression(
-      engine,
-      userSlice.with.user_names_for_entities,
-      {
-        variables: {
-          user_names_all: userNamesAll,
-          user_entity_budget: userBudget,
-        },
-      }
-    ) as string[];
-    expect(userNamesForEntities).toHaveLength(10);
-    expect(userNamesForEntities[0]).toBe('user-0');
-    expect(userNamesForEntities[9]).toBe('user-9');
-
-    // Safety net still slices any materialized list to 50.
-    const entities = Array.from({ length: 55 }, (_, i) => ({
-      entity_type: 'host',
-      name: `host-${i}`,
-    }));
-    const capped = evaluateExpression(engine, capStep.with.impacted_entities, {
-      variables: { impacted_entities: entities },
-    }) as unknown[];
-    expect(capped).toHaveLength(50);
+    expect(hosts).toHaveLength(50);
+    expect(hosts[0]).toBe('host-0');
+    expect(users).toHaveLength(50);
   });
 
   it('applies autoCloseEnabled only when the caller explicitly provides it', () => {
@@ -2245,9 +2513,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
   });
 
   describe('batch_summary reconciliation', () => {
-    const { name: agentStepName } = findStepByType(workflow.steps, 'ai.agent') as { name: string };
-    const agentOutput = (batchSummary: string | null) => ({
-      [agentStepName]: { output: { structured_output: { batch_summary: batchSummary } } },
+    // The summary reaches these steps through normalize_batch_result.
+    const summaryVariables = (batchSummary: string | null) => ({
+      batch_result_summary: batchSummary ?? '',
     });
 
     it('counts distinct matched verdict ids so a repeated id cannot hide a dropped alert', () => {
@@ -2269,8 +2537,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       const evaluate = (matched: number, batchSummary: string | null, calledByWorker = true) =>
         evaluateExpression(engine, gate.condition, {
           inputs: { calledByWorker },
-          variables: { batch_matched_id_count: matched },
-          steps: agentOutput(batchSummary),
+          variables: { batch_matched_id_count: matched, ...summaryVariables(batchSummary) },
         });
 
       expect(evaluate(2, 'Hosts look benign.')).toBe(true);
@@ -2286,8 +2553,11 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       };
       const render = (matched: number) =>
         engine.parseAndRenderSync(entryStep.with.batch_summary_entry, {
-          variables: { batch_matched_id_count: matched, batch_alert_ids: ['a1', 'a2', 'a3'] },
-          steps: agentOutput('Hosts look benign.'),
+          variables: {
+            batch_matched_id_count: matched,
+            batch_alert_ids: ['a1', 'a2', 'a3'],
+            ...summaryVariables('Hosts look benign.'),
+          },
         });
 
       expect(render(3)).toBe('Hosts look benign.');
@@ -2336,7 +2606,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     expect(summary).toContain('host-49');
     expect(summary).not.toContain('host-50');
     // 80 verdicts, 80 unique hosts → 30 omitted; overflow note must appear
-    expect(summary).toContain('30 additional host(s) omitted from summary');
+    expect(summary).toContain('30 additional hosts omitted from summary');
     expect(summary.length).toBeLessThanOrEqual(10000);
 
     const longHost = 'h'.repeat(200);
@@ -2354,5 +2624,269 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     // caller knows the summary is partial (not silently cut mid-sentence).
     expect(longSummary.length).toBeLessThanOrEqual(10000);
     expect(longSummary).toContain('[truncated]');
+  });
+
+  describe('direct prompt', () => {
+    const AGENT_STEP = 'runAgent_step';
+    const PROMPT_STEP = 'runPrompt_step';
+    const normalizeStep = findStepByName(workflow.steps, 'normalize_batch_result') as {
+      with: Record<string, string>;
+    };
+    const normalize = (steps: Record<string, unknown>) => ({
+      verdicts: evaluateExpression(engine, normalizeStep.with.batch_result_verdicts, {
+        steps,
+        consts: workflow.consts,
+      }),
+      summary: engine.parseAndRenderSync(normalizeStep.with.batch_result_summary, { steps }),
+      inputTokens: evaluateExpression(engine, normalizeStep.with.batch_result_input_tokens, {
+        steps,
+      }),
+      connectorId: engine.parseAndRenderSync(normalizeStep.with.batch_result_connector_id, {
+        steps,
+      }),
+    });
+
+    it.each([
+      { usePrompt: false, expected: { agent: true, prompt: false } },
+      { usePrompt: true, expected: { agent: false, prompt: true } },
+      // A runtime config without the field must still run one of the two steps.
+      { usePrompt: undefined, expected: { agent: true, prompt: false } },
+    ])('runs exactly one of the agent and the prompt when use_prompt is $usePrompt', (testCase) => {
+      const agentStep = findStepByName(workflow.steps, 'runAgent_step') as { if: string };
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as { if: string };
+      const variables = { use_prompt: testCase.usePrompt };
+
+      expect({
+        agent: evaluateExpression(engine, agentStep.if, { variables }),
+        prompt: evaluateExpression(engine, promptStep.if, { variables }),
+      }).toEqual(testCase.expected);
+    });
+
+    it('takes use_prompt from the space settings, starting with the agent so the standalone path is unchanged', () => {
+      const init = findStepByName(workflow.steps, 'set_workflow_variables') as {
+        with: Record<string, unknown>;
+      };
+      const runtime = findStepByName(workflow.steps, 'set_runtime_config_variables') as {
+        with: Record<string, string>;
+      };
+
+      expect(init.with.use_prompt).toBe(false);
+      expect(runtime.with.use_prompt).toBe('${{ steps.fetch_runtime_config.output.usePrompt }}');
+    });
+
+    it('keeps shared context in the template input and drops the static preamble', () => {
+      const templateStep = findStepByName(workflow.steps, 'template_alerts_text') as {
+        with: { alerts_text: string };
+      };
+      const message = [
+        '<role>static instructions</role>',
+        '<batch_protocol>one verdict per id</batch_protocol>',
+        '## Shared Context',
+        '### Rule: Suspicious process',
+        '- Severity: high',
+        '## Alerts to classify (1)',
+        '<alert id="alert-1">',
+        '- event.code: behavior',
+        '</alert>',
+      ].join('\n');
+
+      const rendered = engine.parseAndRenderSync(templateStep.with.alerts_text, {
+        inputs: { calledByWorker: false },
+        steps: { build_agent_message: { output: { message } } },
+      });
+
+      expect(rendered).toContain('## Shared Context');
+      expect(rendered).toContain('### Rule: Suspicious process');
+      expect(rendered).toContain('- Severity: high');
+      expect(rendered).toContain('## Alerts to classify (1)');
+      expect(rendered).toContain('<alert id="alert-1">');
+      expect(rendered).not.toContain('<role>');
+      expect(rendered).not.toContain('<batch_protocol>');
+      expect(rendered).not.toContain('batch_summary');
+    });
+
+    it('appends the worker batch summary after the shared context', () => {
+      const templateStep = findStepByName(workflow.steps, 'template_alerts_text') as {
+        with: { alerts_text: string };
+      };
+      const rendered = engine.parseAndRenderSync(templateStep.with.alerts_text, {
+        inputs: { calledByWorker: true },
+        steps: {
+          build_agent_message: {
+            output: { message: '<role>preamble</role>\n## Shared Context\n### Rule: R' },
+          },
+        },
+      });
+
+      expect(rendered.trim().startsWith('## Shared Context')).toBe(true);
+      expect(rendered).toContain('batch_summary');
+      expect(rendered).not.toContain('<role>');
+    });
+
+    it('lists both connector fields on the prompt, like the agent, so either path can set one', () => {
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<
+        string,
+        unknown
+      >;
+
+      expect(promptStep['connector-id']).toBe('{{ variables.connector_id }}');
+      expect(promptStep['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        '{{ variables.connector_id_by_feature }}',
+      ]);
+      expect(promptStep.with).toEqual(
+        expect.objectContaining({
+          template_id: '.alert-triage',
+          template_version: 1,
+          template_variables: {
+            alerts_text: '{{ steps.template_alerts_text.output.alerts_text }}',
+          },
+        })
+      );
+    });
+
+    describe('token usage attribution', () => {
+      const promptStep = findStepByName(workflow.steps, PROMPT_STEP) as Record<string, string>;
+      const init = findStepByName(workflow.steps, 'set_workflow_variables') as {
+        with: Record<string, unknown>;
+      };
+      const callerOverrides = findStepByName(workflow.steps, 'set_caller_overrides') as {
+        with: Record<string, unknown>;
+      };
+      const attributionFor = (variables: Record<string, unknown>) => ({
+        pluginId: engine.parseAndRenderSync(promptStep['plugin-id'], { variables }),
+        aggregateBy: engine.parseAndRenderSync(promptStep['aggregate-by'], { variables }),
+      });
+
+      it('attributes standalone prompt calls to Alert Analysis, with no parent', () => {
+        expect(attributionFor(init.with)).toEqual({
+          pluginId: 'security_alert_analysis',
+          aggregateBy: '',
+        });
+      });
+
+      it('attributes Worker prompt calls to the Alert Triage Worker under the Alertzero parent', () => {
+        expect(attributionFor({ ...init.with, ...callerOverrides.with })).toEqual({
+          pluginId: 'alertzero_alert_triage',
+          aggregateBy: 'alertzero_parent',
+        });
+      });
+
+      it("leaves the agent's attribution alone, so ai.agent calls keep counting as Agent Builder", () => {
+        const agentStep = findStepByName(workflow.steps, AGENT_STEP) as Record<string, unknown>;
+
+        expect(agentStep).not.toHaveProperty('plugin-id');
+        expect(agentStep).not.toHaveProperty('aggregate-by');
+      });
+    });
+
+    it('accepts the same large reply as the agent', () => {
+      const agentStep = findStepByName(workflow.steps, 'runAgent_step') as Record<string, unknown>;
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<
+        string,
+        unknown
+      >;
+
+      expect(promptStep['max-step-size']).toBe('10mb');
+      expect(promptStep['max-step-size']).toBe(agentStep['max-step-size']);
+    });
+
+    it('reports no agent in the output when the prompt classified the batches', () => {
+      const outputStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+        with: { agent_id: string };
+      };
+      const agentIdFor = (use_prompt: boolean) =>
+        engine.parseAndRenderSync(outputStep.with.agent_id, {
+          variables: { use_prompt, agent_id: 'elastic-ai-agent' },
+        });
+
+      expect(agentIdFor(true)).toBe('');
+      expect(agentIdFor(false)).toBe('elastic-ai-agent');
+    });
+
+    it('sends the same message and expects the same structured reply as the agent', () => {
+      const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
+        with: { message: string; schema: string };
+      };
+      const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as {
+        with: { prompt: string; schema: string };
+      };
+      const render = (expression: string) =>
+        evaluateExpression(engine, expression, { consts: workflow.consts });
+
+      expect(promptStep.with.prompt).toBe(agentStep.with.message);
+      // Both read one shared schema, so the two ways of calling the model cannot drift apart.
+      expect(promptStep.with.schema).toBe(agentStep.with.schema);
+      expect(render(promptStep.with.schema)).toEqual(workflow.consts.batch_reply_schema);
+    });
+
+    it('allows a summary longer than the prompt asks for and cuts a runaway one', () => {
+      const { batch_reply_schema: schema } = workflow.consts as {
+        batch_reply_schema: { properties: { batch_summary: { maxLength?: number } } };
+      };
+      // Models write about 500 characters and a reply over the limit is rejected whole. Measured
+      // replies reached 655 characters.
+      expect(schema.properties.batch_summary.maxLength).toBe(1000);
+
+      const summary = 'word '.repeat(400);
+      const result = normalize({
+        [PROMPT_STEP]: {
+          output: { content: { verdicts: [{ id: 'a1' }], batch_summary: summary } },
+        },
+      });
+
+      expect(result.summary.length).toBe(1000);
+      expect(result.verdicts).toEqual([{ id: 'a1' }]);
+    });
+
+    it('keeps a summary within the limit as it is', () => {
+      const result = normalize({
+        [PROMPT_STEP]: {
+          output: { content: { verdicts: [{ id: 'a1' }], batch_summary: 'Looks benign.' } },
+        },
+      });
+
+      expect(result.summary).toBe('Looks benign.');
+    });
+
+    it('reads the verdicts, summary, tokens and connector from the agent when it ran', () => {
+      const result = normalize({
+        [AGENT_STEP]: {
+          output: {
+            structured_output: { verdicts: [{ id: 'a1' }], batch_summary: 'Looks benign.' },
+            metadata: { usage: { inputTokens: 120, outputTokens: 30, connectorId: 'connector-1' } },
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        verdicts: [{ id: 'a1' }],
+        summary: 'Looks benign.',
+        inputTokens: 120,
+        connectorId: 'connector-1',
+      });
+    });
+
+    it('reads them from the prompt when it ran', () => {
+      const result = normalize({
+        [PROMPT_STEP]: {
+          output: {
+            content: { verdicts: [{ id: 'a1' }, { id: 'a2' }], batch_summary: 'Two hosts.' },
+            metadata: { usage: { inputTokens: 80, outputTokens: 25, connectorId: 'connector-2' } },
+          },
+        },
+      });
+
+      expect(result).toEqual({
+        verdicts: [{ id: 'a1' }, { id: 'a2' }],
+        summary: 'Two hosts.',
+        inputTokens: 80,
+        connectorId: 'connector-2',
+      });
+    });
+
+    it('reads a batch whose call failed as no verdicts', () => {
+      expect(normalize({})).toEqual({ verdicts: [], summary: '', inputTokens: 0, connectorId: '' });
+    });
   });
 });

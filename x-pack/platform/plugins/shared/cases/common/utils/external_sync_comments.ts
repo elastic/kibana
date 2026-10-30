@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExternalSyncCommentMetadata } from '../types/domain_zod/attachment/comment/v2';
-import { ExternalSyncCommentMetadataSchema } from '../types/domain_zod/attachment/comment/v2';
+import type { ExternalSyncCommentMetadata } from '../types/domain/attachment/comment/v2';
+import { ExternalSyncCommentMetadataSchema } from '../types/domain/attachment/comment/v2';
 
 /**
  * Attribution of a comment that was imported from an external incident. Lives under

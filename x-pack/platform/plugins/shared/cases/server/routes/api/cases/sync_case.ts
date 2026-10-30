@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../../common/runtime_types';
 import { CASE_SYNC_URL } from '../../../../common/constants';
 import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';
@@ -31,7 +31,9 @@ export const syncCaseRoute: CaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const params = decodeWithExcessOrThrow(caseApiV1.CaseSyncRequestParamsRt)(request.params);
+      const params = decodeWithExcessOrThrowZod(caseApiV1.CaseSyncRequestParamsSchema)(
+        request.params
+      );
       const res: caseDomainV1.Case = toLegacyCaseResponse(
         await casesClient.cases.sync({ caseId: params.case_id })
       );

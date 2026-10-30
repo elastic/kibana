@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
+import { STACK_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import type { Services } from '../common/services';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { alertZeroLink } from '@kbn/security-solution-navigation/links';
 import { createNavigationTree } from './navigation_tree';
 
 const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): boolean =>
@@ -20,28 +21,36 @@ const containsLink = (nodes: NavigationTreeDefinition['body'], link: string): bo
   );
 
 describe('createNavigationTree', () => {
-  const createServices = (options?: { agentBuilderNavAtTop?: boolean }): Services => ({
+  const createServices = (): Services => ({
     ...mockServices,
-    featureFlags: {
-      ...mockServices.featureFlags,
-      getBooleanValue$: jest.fn((flag: string, defaultValue?: boolean) => {
-        if (flag === AGENT_BUILDER_NAV_AT_TOP_FLAG) {
-          return of(options?.agentBuilderNavAtTop ?? defaultValue ?? false);
-        }
-
-        return of(defaultValue ?? false);
-      }),
-    },
     uiSettings: {
       ...mockServices.uiSettings,
       get: jest.fn(<T>(_key: string, defaultValue?: T) => defaultValue as T),
     },
   });
 
-  it('always includes context engine first in classic chat experience', async () => {
+  it('places Escalations right under AlertZero, with Watches after them', async () => {
     const { body } = (await createNavigationTree(
       createServices(),
-      AIChatExperience.Classic
+      AIChatExperience.Agent,
+      true
+    )) as NavigationTreeDefinition;
+
+    const links = body.map((item) => item.link);
+    const alertZeroIndex = links.indexOf(alertZeroLink());
+    const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
+    const watchesIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroWatches));
+
+    expect(alertZeroIndex).toBe(0);
+    expect(escalationsIndex).toBe(alertZeroIndex + 1);
+    expect(watchesIndex).toBeGreaterThan(escalationsIndex);
+  });
+
+  it('keeps context engine after Workflows when AlertZero is on in classic chat experience, with no agent builder link', async () => {
+    const { body } = (await createNavigationTree(
+      createServices(),
+      AIChatExperience.Classic,
+      true
     )) as NavigationTreeDefinition;
 
     const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
@@ -51,39 +60,80 @@ describe('createNavigationTree', () => {
       icon: 'tableSparkles',
       link: 'context_engine',
     });
-    expect(contextEngineIndex).toBe(0);
+    expect(body[0].link).toBe(alertZeroLink());
+    expect(contextEngineIndex).toBeGreaterThan(
+      body.findIndex((item) => item.link === alertZeroLink(SecurityPageName.alertZeroWatches))
+    );
+    expect(body[contextEngineIndex + 1].id).toBe(SecurityPageName.attackDiscovery);
     expect(agentBuilderNode).toBeUndefined();
   });
 
-  it('keeps context engine first when agent builder nav is in the middle', async () => {
+  it('places agent builder between Escalations and Watches and context engine after Workflows when the chat experience is Agent', async () => {
     const { body } = (await createNavigationTree(
-      createServices({ agentBuilderNavAtTop: false }),
-      AIChatExperience.Agent
+      createServices(),
+      AIChatExperience.Agent,
+      true
     )) as NavigationTreeDefinition;
 
-    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
-    const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
+    const links = body.map((item) => item.link);
+    const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
 
-    expect(contextEngineIndex).toBe(0);
-    expect(agentBuilderIndex).toBeGreaterThan(contextEngineIndex);
+    expect(links[escalationsIndex + 1]).toBe('agent_builder');
+    expect(links[escalationsIndex + 2]).toBe(alertZeroLink(SecurityPageName.alertZeroWatches));
+    expect(links.indexOf('context_engine')).toBeGreaterThan(links.indexOf('discover'));
+    expect(body[links.indexOf('context_engine') + 1].id).toBe(SecurityPageName.attackDiscovery);
   });
 
-  it('keeps context engine below agent builder when agent builder nav is at the top', async () => {
-    const { body } = (await createNavigationTree(
-      createServices({ agentBuilderNavAtTop: true }),
-      AIChatExperience.Agent
+  describe('when AlertZero is disabled', () => {
+    it('keeps the original order with Agents and Context Engine after Workflows in Agent chat experience', async () => {
+      const { body } = (await createNavigationTree(
+        createServices(),
+        AIChatExperience.Agent,
+        false
+      )) as NavigationTreeDefinition;
+
+      const links = body.map((item) => item.link);
+      const agentBuilderIndex = links.indexOf('agent_builder');
+
+      expect(links.indexOf('discover')).toBeLessThan(agentBuilderIndex);
+      expect(links[agentBuilderIndex + 1]).toBe('context_engine');
+      expect(links).not.toContain(alertZeroLink());
+    });
+
+    it('keeps Context Engine at the top in classic chat experience', async () => {
+      const { body } = (await createNavigationTree(
+        createServices(),
+        AIChatExperience.Classic,
+        false
+      )) as NavigationTreeDefinition;
+
+      expect(body[0].link).toBe('context_engine');
+      expect(body.some((item) => item.link === 'agent_builder')).toBe(false);
+    });
+  });
+
+  it('includes Stack Rules in project settings > Alerts and Insights', async () => {
+    const { footer } = (await createNavigationTree(
+      createServices(),
+      AIChatExperience.Classic
     )) as NavigationTreeDefinition;
+    const managementCategory = footer?.find((item) => item.id === 'category-management');
+    const stackManagement = managementCategory?.children?.find(
+      (item) => item.id === STACK_MANAGEMENT_NAV_ID
+    );
+    const alertsSection = stackManagement?.children?.find((item) =>
+      item.children?.some((child) => child.link === 'management:triggersActions')
+    );
 
-    const agentBuilderIndex = body.findIndex((item) => item.link === 'agent_builder');
-    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
-
-    expect(agentBuilderIndex).toBe(0);
-    expect(contextEngineIndex).toBe(1);
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ id: 'stackRules', link: 'management:triggersActions' })
+    );
   });
 
   it('includes service accounts in Admin and Settings', async () => {
     const { footer = [] } = (await createNavigationTree(
-      createServices()
+      createServices(),
+      AIChatExperience.Classic
     )) as NavigationTreeDefinition;
 
     expect(containsLink(footer, 'management:service_accounts')).toBe(true);

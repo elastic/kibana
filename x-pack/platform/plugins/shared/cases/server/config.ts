@@ -172,7 +172,7 @@ export const ConfigSchema = schema.object({
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Temporary feature flag for running workflows from Cases.
   runWorkflows: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   // NOTE: exposed to the Browser via `exposeToBrowser` setting in cases/server/index.ts
   // Technical preview: automatic push and pull-based sync with Jira and ServiceNow.
