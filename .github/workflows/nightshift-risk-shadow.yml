@@ -1,0 +1,59 @@
+name: nightshift-risk-shadow
+
+# Shadow mode for low-risk auto-approval of Nightshift PRs. Labels Low PRs with
+# nightshift:risk-low and explains why; it never approves. See
+# .github/scripts/nightshift_risk_shadow.js for the rules.
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    # The script re-checks the whole PR on every run. A PR that drops all of these paths
+    # stops triggering, so its label can go stale; acceptable while this only observes.
+    paths:
+      - 'x-pack/solutions/observability/plugins/nightshift/**'
+      - 'x-pack/solutions/observability/plugins/nightshift_sources/**'
+      - 'x-pack/solutions/observability/plugins/nightshift_investigations/**'
+      - 'x-pack/solutions/observability/plugins/significant_events/**'
+      - 'x-pack/solutions/observability/packages/kbn-nightshift-shared/**'
+      - 'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/**'
+      - 'x-pack/solutions/observability/packages/kbn-investigation-output/**'
+      - 'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-*/**'
+      - 'x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/**'
+      - 'x-pack/platform/plugins/shared/sandbox/**'
+      - 'x-pack/platform/packages/shared/kbn-nightshift-ai/**'
+      - 'x-pack/platform/packages/shared/kbn-significant-events-schema/**'
+
+concurrency:
+  group: nightshift-risk-shadow-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # pull_request_target checks out the base branch, so a PR can't change the rules it's
+      # judged by. PR code is never checked out or run; its diff is read through the API.
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Classify Nightshift risk
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = require('./.github/scripts/nightshift_risk_shadow');
+            await run({ github, context, core });
