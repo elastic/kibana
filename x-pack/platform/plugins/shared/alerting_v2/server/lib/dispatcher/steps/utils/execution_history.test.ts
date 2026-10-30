@@ -25,7 +25,7 @@ import type {
   Rule,
   RuleId,
 } from '../../types';
-import { DispatchOutcome, DispatchPlan, RuleCatalog } from '../../state';
+import { DispatchOutcome, DispatchPlan, PolicyCatalog, RuleCatalog } from '../../state';
 import { emitExecutionHistory } from './execution_history';
 import { DISPATCH_FAILURE_REASONS } from '../constants';
 
@@ -40,6 +40,7 @@ describe('emitExecutionHistory', () => {
       plan = DispatchPlan.empty(),
       outcome = DispatchOutcome.empty(),
       rules = RuleCatalog.empty(),
+      policies = PolicyCatalog.empty(),
       input,
     }) =>
       emitExecutionHistory({
@@ -49,6 +50,7 @@ describe('emitExecutionHistory', () => {
         unmatched: plan.unmatched,
         outcome,
         rules,
+        policies,
         timestamp: input.startedAt.toISOString(),
         executionUuid: input.executionUuid,
       });
@@ -128,7 +130,67 @@ describe('emitExecutionHistory', () => {
       action_group_ids: ['group-1', 'group-2'],
       workflow_ids: ['wf-a', 'wf-b'],
       workflow_execution_ids: ['exec-a', 'exec-b'],
+      grouping_mode: 'per_alert',
+      throttle_strategy: 'on_status_change',
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
+    });
+  });
+
+  it('records the policy grouping mode and throttle strategy on policy summaries', () => {
+    const rule = createRule({ id: 'rule-1' });
+    const policy = createActionPolicy({
+      id: 'policy-1',
+      grouping: { mode: 'per_field', fields: ['host.name'] },
+      throttle: { strategy: 'time_interval', interval: '1h' },
+    });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const group = createActionGroup({
+      id: 'group-1',
+      policyId: 'policy-1',
+      alerts: [alert],
+      destinations: [{ type: 'workflow', id: 'wf-a' }],
+    });
+
+    emitFromState(
+      createDispatcherPipelineState({
+        throttled: [group],
+        dispatchable: [alert],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+      })
+    );
+
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+      grouping_mode: 'per_field',
+      throttle_strategy: 'time_interval',
+    });
+  });
+
+  it('records the default on_status_change strategy when a per_alert policy has no throttle', () => {
+    const rule = createRule({ id: 'rule-1' });
+    const policy = createActionPolicy({ id: 'policy-1' });
+    const alert = createAlert({ rule_id: 'rule-1', alert_id: 'ep-1' });
+    const group = createActionGroup({
+      id: 'group-1',
+      policyId: 'policy-1',
+      alerts: [alert],
+      destinations: [{ type: 'workflow', id: 'wf-a' }],
+    });
+
+    emitFromState(
+      createDispatcherPipelineState({
+        dispatch: [group],
+        dispatchable: [alert],
+        rules: new Map<RuleId, Rule>([[rule.id, rule]]),
+        policies: new Map<ActionPolicyId, ActionPolicy>([[policy.id, policy]]),
+        dispatchedExecutions: new Map([['group-1', ['exec-a']]]),
+      })
+    );
+
+    const [[event]] = eventLogger.logEvent.mock.calls;
+    expect(event?.kibana?.alerting_v2?.dispatcher).toMatchObject({
+      throttle_strategy: 'on_status_change',
     });
   });
 
@@ -191,6 +253,8 @@ describe('emitExecutionHistory', () => {
       action_group_ids: ['group-1'],
       workflow_ids: ['wf-a'],
       workflow_execution_ids: [],
+      grouping_mode: 'per_alert',
+      throttle_strategy: 'on_status_change',
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
   });

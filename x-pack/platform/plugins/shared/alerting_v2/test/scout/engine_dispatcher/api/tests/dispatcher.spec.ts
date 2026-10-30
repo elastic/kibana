@@ -1971,4 +1971,61 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       });
     }
   );
+
+  apiTest(
+    'reports the dispatch activity of the window in the snapshot telemetry',
+    async ({ apiServices }) => {
+      // `test-workflow` does not exist in this environment, so np-1 fails every dispatch with
+      // `workflow_not_found`: the only outcome this spec can rely on. The event log is not
+      // reset between tests, so counters are lower bounds.
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-series-telemetry',
+          episodeId: 'rule-1-series-telemetry-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: relativeTime(10),
+        }),
+      ]);
+      await expectStableCount(apiServices, 1, { ruleId: 'rule-1', actionTypes: ['fire'] });
+      // A later event for the same episode makes the next tick re-evaluate the group. It is still
+      // breached, so np-1 (no throttle, per_alert) suppresses it with the default on_status_change
+      // strategy and records a `throttled` event.
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-series-telemetry',
+          episodeId: 'rule-1-series-telemetry-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: relativeTime(2),
+        }),
+      ]);
+      await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
+
+      const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
+
+      expect(state.has_errors).toBe(false);
+      expect(
+        state.dispatcher_dispatch_failures_count_by_reason_24hr?.workflow_not_found
+      ).toBeGreaterThanOrEqual(1);
+      expect(state.dispatcher_policies_count_by_activity_24hr?.failing).toBeGreaterThanOrEqual(1);
+      expect(state.dispatcher_policies_count_by_activity_24hr?.broken).toBeGreaterThanOrEqual(1);
+      expect(
+        state.dispatcher_action_groups_throttled_count_by_strategy_24hr?.on_status_change
+      ).toBeGreaterThanOrEqual(1);
+      // A failed dispatch is not a notification.
+      expect(state.dispatcher_unique_alerts_dispatched_count_24hr).toBe(0);
+      expect(state.dispatcher_workflow_executions_count_24hr).toBe(0);
+      expect(state.dispatcher_action_groups_dispatched_per_policy_24hr).toStrictEqual({
+        p50: null,
+        p99: null,
+        avg: null,
+      });
+      expect(
+        state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr
+      ).toStrictEqual({});
+    }
+  );
 });

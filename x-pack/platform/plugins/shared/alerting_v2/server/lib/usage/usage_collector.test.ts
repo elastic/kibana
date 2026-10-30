@@ -28,6 +28,339 @@ describe('registerAlertingV2UsageCollector', () => {
         isReady: expect.any(Function),
         fetch: expect.any(Function),
         schema: {
+          dispatcher_alerts_count_by_outcome_24hr: {
+            dispatched: {
+              type: 'long',
+              _meta: { description: 'Sum of alerts in dispatched events over the last 24 hours.' },
+            },
+            throttled: {
+              type: 'long',
+              _meta: { description: 'Sum of alerts in throttled events over the last 24 hours.' },
+            },
+            unmatched: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Sum of alerts that matched no action policy (unmatched events) over the last 24 hours.',
+              },
+            },
+          },
+          dispatcher_action_groups_count_by_outcome_24hr: {
+            dispatched: {
+              type: 'long',
+              _meta: {
+                description: 'Sum of action groups in dispatched events over the last 24 hours.',
+              },
+            },
+            throttled: {
+              type: 'long',
+              _meta: {
+                description: 'Sum of action groups in throttled events over the last 24 hours.',
+              },
+            },
+          },
+          dispatcher_unique_alerts_dispatched_count_24hr: {
+            type: 'long',
+            _meta: {
+              description:
+                'Approximate number of distinct alerts dispatched over the last 24 hours (cardinality, precision threshold 10000).',
+            },
+          },
+          dispatcher_workflow_executions_count_24hr: {
+            type: 'long',
+            _meta: {
+              description:
+                'Approximate number of distinct workflow executions scheduled by the dispatcher over the last 24 hours.',
+            },
+          },
+          dispatcher_unique_workflows_triggered_count_24hr: {
+            type: 'long',
+            _meta: {
+              description:
+                'Approximate number of distinct workflows triggered by the dispatcher over the last 24 hours.',
+            },
+          },
+          dispatcher_notifying_executions_count_24hr: {
+            type: 'long',
+            _meta: {
+              description:
+                'Approximate number of dispatcher executions that dispatched at least one action group over the last 24 hours.',
+            },
+          },
+          dispatcher_notifying_spaces_count_24hr: {
+            type: 'long',
+            _meta: {
+              description:
+                'Approximate number of spaces with at least one dispatched event over the last 24 hours.',
+            },
+          },
+          dispatcher_policies_count_by_activity_24hr: {
+            dispatched: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of action policies with at least one dispatched event over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            throttled: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of action policies with at least one throttled event over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            failing: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of action policies with at least one dispatch_failed event over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            broken: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of action policies with at least one dispatch_failed event and no dispatched event over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+          },
+          dispatcher_action_groups_dispatched_per_policy_24hr: {
+            p50: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P50 of action groups dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            p99: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P99 of action groups dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description:
+                  'Average action groups dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+          },
+          dispatcher_alerts_dispatched_per_policy_24hr: {
+            p50: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P50 of alerts dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            p99: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P99 of alerts dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description:
+                  'Average alerts dispatched per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+          },
+          dispatcher_workflow_executions_per_policy_24hr: {
+            p50: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P50 of distinct workflow executions per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            p99: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P99 of distinct workflow executions per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description:
+                  'Average distinct workflow executions per action policy over the last 24 hours (top 100 policies by event count).',
+              },
+            },
+          },
+          dispatcher_throttle_ratio_per_policy_24hr: {
+            p50: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P50 of throttled / (dispatched + throttled) action groups per action policy over the last 24 hours, range 0-1 (top 100 policies by event count).',
+              },
+            },
+            p99: {
+              type: 'float',
+              _meta: {
+                description:
+                  'P99 of throttled / (dispatched + throttled) action groups per action policy over the last 24 hours, range 0-1 (top 100 policies by event count).',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description:
+                  'Average throttled / (dispatched + throttled) action groups per action policy over the last 24 hours, range 0-1 (top 100 policies by event count).',
+              },
+            },
+          },
+          dispatcher_uncovered_rules_count_24hr: {
+            type: 'long',
+            _meta: {
+              description:
+                'Approximate number of distinct rules whose alerts matched no action policy over the last 24 hours.',
+            },
+          },
+          dispatcher_dispatch_failures_count_by_reason_24hr: {
+            missing_api_key: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of failed dispatches over the last 24 hours because the policy had no API key.',
+              },
+            },
+            workflow_not_found: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of failed dispatches over the last 24 hours because the workflow was not found.',
+              },
+            },
+            workflow_disabled: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of failed dispatches over the last 24 hours because the workflow was disabled.',
+              },
+            },
+            schedule_error: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of failed dispatches over the last 24 hours because scheduling the workflow failed.',
+              },
+            },
+            license_not_supported: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of failed dispatches over the last 24 hours because the license does not support action policies.',
+              },
+            },
+          },
+          dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: {
+            per_alert: {
+              p50: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'P50 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+              p99: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'P99 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+              avg: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'Average action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+            },
+            per_field: {
+              p50: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'P50 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+              p99: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'P99 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+              avg: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'Average action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+            },
+            all: {
+              p50: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'P50 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+              p99: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'P99 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+              avg: {
+                type: 'float',
+                _meta: {
+                  description:
+                    'Average action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+                },
+              },
+            },
+          },
+          dispatcher_action_groups_throttled_count_by_strategy_24hr: {
+            on_status_change: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Sum of action groups throttled over the last 24 hours with strategy on_status_change (configured, or the default for per_alert policies without throttle).',
+              },
+            },
+            per_status_interval: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Sum of action groups throttled over the last 24 hours with strategy per_status_interval.',
+              },
+            },
+            time_interval: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Sum of action groups throttled over the last 24 hours with strategy time_interval (configured, or the default for per_field and all policies without throttle).',
+              },
+            },
+            every_time: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Sum of action groups throttled over the last 24 hours with strategy every_time.',
+              },
+            },
+          },
           alerts_count: { _meta: { description: 'Total number of alert events.' }, type: 'long' },
           alerts_count_by_kind: {
             breached: {
