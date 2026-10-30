@@ -26,7 +26,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
 import { PAGE_TITLE } from '../screens/common/page';
-import { DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE } from '../screens/expandable_flyout/alert_details_right_panel';
+import { DOCUMENT_FLYOUT_HEADER_ASSIGNEES } from '../screens/document_flyout';
 import { expandFirstAlertActions } from './alerts';
 import { login } from './login';
 import { visitWithTimeRange } from './navigation';
@@ -84,7 +84,7 @@ export const checkEmptyAssigneesStateInAlertsTable = () => {
 };
 
 export const checkEmptyAssigneesStateInAlertDetailsFlyout = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
+  cy.get(DOCUMENT_FLYOUT_HEADER_ASSIGNEES).within(() => {
     cy.get(ALERT_AVATARS_PANEL).children().should('have.length', 0);
   });
 };
@@ -121,7 +121,7 @@ export const alertsTableShowsAssigneesForAllAlerts = (users: string[]) => {
 
 export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
   users.forEach((user) => {
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE)
+    cy.get(DOCUMENT_FLYOUT_HEADER_ASSIGNEES)
       .find(`.euiAvatar${ALERT_USER_AVATAR(user)}`)
       .should('be.visible');
   });
