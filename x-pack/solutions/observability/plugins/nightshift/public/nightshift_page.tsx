@@ -27,15 +27,19 @@ import {
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
-} from './app/app_header';
+} from './components/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useDeveloperMode } from './hooks/use_developer_mode';
-import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
+import {
+  isNightshiftSetUp,
+  useInvestigatorServiceAccount,
+} from './service_account/use_investigator_service_account';
 import { DETECTION_TAB_IDS, isDetectionTabId } from './pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from './knowledge/knowledge_tabs';
 
@@ -186,6 +190,13 @@ export function NightshiftPage(): React.ReactElement | null {
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
 
+  // Nightshift only works as its service account, so a space that is not set up shows the setup
+  // step instead of the app. A failed status read (e.g. missing privileges) does not block it.
+  const requiresSetup = nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
+  const serviceAccount = useInvestigatorServiceAccount();
+  const isSetupPending = requiresSetup && serviceAccount.isLoading;
+  const needsSetup =
+    requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
   useBreadcrumbs(
     [
       {
@@ -246,6 +257,30 @@ export function NightshiftPage(): React.ReactElement | null {
 
   if (isSettingsPage && !canManageAndConfigure) {
     return null;
+  }
+
+  // Until the space is set up, every page shows the regular onboarding, which starts at its
+  // "Enable Elastic Nightshift" step, for everyone: only admins can complete it.
+  if (isSetupPending || needsSetup) {
+    return (
+      <ObservabilityPageTemplate
+        data-test-subj="nightshiftPage"
+        restrictWidth={false}
+        pageSectionProps={{ paddingSize: 'none' }}
+      >
+        {/* Nothing behind the header actions works before setup, so the header carries none. */}
+        <NightshiftAppHeader page="landing" />
+        <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
+          {isSetupPending ? (
+            <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexGroup>
+          ) : (
+            <NightshiftOnboarding onFinish={finishOnboarding} />
+          )}
+        </EuiPageTemplate.Section>
+      </ObservabilityPageTemplate>
+    );
   }
 
   const isHomePage =
@@ -394,7 +429,7 @@ export function NightshiftPage(): React.ReactElement | null {
                 ? false
                 : isOnboarding || onboarding.isLoading
                 ? ONBOARDING_MAX_WIDTH
-                : '900px'
+                : '1000px'
             }
           >
             {canUseAutomationsPage ? (

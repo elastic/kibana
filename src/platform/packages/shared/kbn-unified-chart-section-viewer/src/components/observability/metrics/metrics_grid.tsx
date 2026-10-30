@@ -375,6 +375,7 @@ const ChartItem = React.memo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
     );
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
 
     const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
       (event) => {
@@ -418,6 +419,8 @@ const ChartItem = React.memo(
         originalSource: userSource,
         histogramVisualization: gridSettings.histogramVisualization,
         description,
+        seriesColor: color,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
     const esqlQuery = useMemo(() => {
@@ -450,7 +453,6 @@ const ChartItem = React.memo(
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,

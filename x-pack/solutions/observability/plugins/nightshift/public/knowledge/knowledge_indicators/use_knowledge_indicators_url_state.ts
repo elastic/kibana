@@ -12,7 +12,7 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKnowledgeIndicatorsQueryParams } from './use_knowledge_indicators_query_params';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
-import { getKnowledgeIndicatorSourceId } from './utils/get_knowledge_indicator_source_id';
+import { getKnowledgeIndicatorSourceIds } from './utils/get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorSubtype } from './utils/get_knowledge_indicator_subtype';
 import { matchesKnowledgeIndicatorFilters } from './utils/matches_knowledge_indicator_filters';
 import { getKnowledgeIndicatorType } from './utils/get_knowledge_indicator_type';
@@ -124,7 +124,7 @@ export function useKnowledgeIndicatorsUrlState({
           hideComputedTypes,
         })
       ) {
-        availableStreams.add(getKnowledgeIndicatorSourceId(ki));
+        getKnowledgeIndicatorSourceIds(ki).forEach((id) => availableStreams.add(id));
       }
     }
 

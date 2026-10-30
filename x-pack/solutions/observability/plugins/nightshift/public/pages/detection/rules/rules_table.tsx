@@ -27,7 +27,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { buildDiscoverParams } from '../../../common/discover_helpers';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { getRuleStatusPresentation } from '../../../components/entities/rule/rule_status';
 import { SeverityBadge } from '../../../components/ui/severity_badge';
 import type { DetectionRule } from '../../../data/rules/use_detection_rules';
