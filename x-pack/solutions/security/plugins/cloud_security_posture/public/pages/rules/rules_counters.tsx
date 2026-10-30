@@ -121,7 +121,10 @@ export const RulesCounters = ({
         icon={
           <EuiIllustration
             type={cloudServicesSecurityPosture}
-            alt=""
+            alt={i18n.translate(
+              'xpack.csp.rulesPage.rulesCounterEmptyState.noDataIllustrationAlt',
+              { defaultMessage: 'No data illustration' }
+            )}
             css={css`
               max-inline-size: 200px !important;
             `}
