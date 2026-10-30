@@ -20,6 +20,7 @@ import { useAlertingLocators } from '../../../../application/locator_context';
 import { useRuleAuditMetadata } from '../../../../hooks/use_rule_audit_metadata';
 import { useRuleLastExecution } from '../../../../hooks/use_rule_last_execution';
 import {
+  getRuleDetailsLink,
   RULE_MENU_ARIA_LABEL,
   useRuleMenuPanels,
 } from '../../../../pages/rules_list_page/use_rule_menu_panels';
@@ -73,11 +74,10 @@ export const RuleSummaryFlyout = ({
   useRuleAutoAttach(rule, { chrome, agentBuilder });
   const { createdByDisplay, updatedByDisplay, updatedAtFormatted } = useRuleAuditMetadata(rule);
   const lastExecution = useRuleLastExecution(rule.id);
-  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id }, undefined, [rule.id]);
   const takeActionPanels = useRuleMenuPanels({
     rule,
     canWrite,
-    detailsHref,
+    detailsLink: getRuleDetailsLink(rulesLocators, rule.id),
     onEdit,
     onClone,
     onDelete,

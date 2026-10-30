@@ -43,10 +43,7 @@ const mockUseKnowledgeTabsAvailability = useKnowledgeTabsAvailability as jest.Mo
 
 const settledOff = { isEnabled: false, isLoading: false };
 const knowledgeIndicatorsEnabled = { isEnabled: true, isLoading: false };
-const headerProps: KnowledgePageHeaderProps = {
-  onManagementClick: jest.fn(),
-  managementHref: '/app/significant_events',
-};
+const headerProps: KnowledgePageHeaderProps = {};
 
 const renderPage = (path: string, initialAvailability: KnowledgeTabsAvailability) => {
   let availability = initialAvailability;

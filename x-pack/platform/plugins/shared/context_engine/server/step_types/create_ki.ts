@@ -50,9 +50,7 @@ export const getCreateKiStepDefinition = ({
           const verification = verifiers
             ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
-          if (verification && !verification.passed) {
-            return { output: { verification } };
-          }
+          const verificationFailed = verification?.passed === false;
 
           const { dest, managed } = await resolveOrCreateAiIndex(
             getAiIndexService,
@@ -76,7 +74,10 @@ export const getCreateKiStepDefinition = ({
               ...ki,
               id,
               updated_at: now,
-              governance: { provenance: { created_by: writer, updated_by: writer } },
+              governance: {
+                provenance: { created_by: writer, updated_by: writer },
+                ...(verificationFailed && { lifecycle: { status: 'verification_failed' } }),
+              },
             },
             refresh,
             abortSignal: context.abortSignal,

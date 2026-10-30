@@ -150,6 +150,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*
@@ -158,6 +159,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/agent_image/**/*
     - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'

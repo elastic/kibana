@@ -10,12 +10,35 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FlyoutFooterMenuItem, FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import type { AlertingV2Locators } from '../../application/locator_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 export const RULE_MENU_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.rulesList.action.actionsMenu',
   { defaultMessage: 'Rule actions' }
 );
+
+export interface RuleDetailsLink {
+  href: string;
+  onClick: (event: React.MouseEvent) => void;
+}
+
+/**
+ * Builds the "View details" link synchronously, so the item is a link on first paint. Plain left
+ * clicks navigate in-app; modified clicks use the href.
+ */
+export const getRuleDetailsLink = (
+  rulesLocators: AlertingV2Locators['rulesLocators'],
+  ruleId: string
+): RuleDetailsLink => {
+  const href = rulesLocators.getRedirectUrl({ ruleId });
+  const { onClick } = getRouterLinkProps({
+    href,
+    onClick: () => rulesLocators.navigateSync({ ruleId }),
+  });
+  return { href, onClick };
+};
 
 export interface UseRuleMenuPanelsParams {
   rule: RuleApiResponse;
@@ -30,7 +53,7 @@ export interface UseRuleMenuPanelsParams {
   /** When provided, adds a menu entry that opens change history for the rule. */
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
   /** When provided, adds a leading "View details" read action linking to the rule details page. */
-  detailsHref?: string;
+  detailsLink?: RuleDetailsLink;
   /** Called before an item's action runs. Omit it when the menu closes itself on item click. */
   closeMenu?: () => void;
 }
@@ -46,21 +69,24 @@ export const useRuleMenuPanels = ({
   onUpdateApiKey,
   onRun,
   onViewChangeHistory,
-  detailsHref,
+  detailsLink,
   closeMenu,
 }: UseRuleMenuPanelsParams): FlyoutFooterMenuPanel[] => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const viewDetailsItem: FlyoutFooterMenuItem | null = detailsHref
+    const viewDetailsItem: FlyoutFooterMenuItem | null = detailsLink
       ? {
           key: 'viewDetails',
           name: i18n.translate('xpack.alertingV2.rulesList.action.viewDetails', {
             defaultMessage: 'View details',
           }),
           icon: 'eye',
-          href: detailsHref,
-          onClick: () => closeMenu?.(),
+          href: detailsLink.href,
+          onClick: (event: React.MouseEvent) => {
+            closeMenu?.();
+            detailsLink.onClick(event);
+          },
           'data-test-subj': `viewRuleDetails-${rule.id}`,
         }
       : null;
@@ -193,7 +219,8 @@ export const useRuleMenuPanels = ({
       : null;
 
     // Order: Run / Edit / Clone | View change history / Update API key | Delete.
-    // View details (flyout) leads the first group; Enable/Disable sits with API key.
+    // View details links to the rule details page and leads the first group.
+    // Enable/Disable sits with API key.
     const candidateGroups: Array<Array<FlyoutFooterMenuItem | null>> = [
       [viewDetailsItem, runItem, editItem, cloneItem],
       [viewChangeHistoryItem, toggleEnabledItem, updateApiKeyItem],
@@ -222,7 +249,7 @@ export const useRuleMenuPanels = ({
     onUpdateApiKey,
     onRun,
     onViewChangeHistory,
-    detailsHref,
+    detailsLink,
     closeMenu,
     euiTheme.colors.textDanger,
   ]);

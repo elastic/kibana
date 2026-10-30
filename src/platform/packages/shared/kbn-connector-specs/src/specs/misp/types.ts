@@ -12,7 +12,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const MAX_SEARCH_LIMIT = 100;
 const DEFAULT_SEARCH_LIMIT = 10;
 const MAX_ID_LENGTH = 200;
-const MAX_IOC_VALUE_LENGTH = 2048;
 // MISP stores attribute values in TEXT columns and types in varchar(100); tags and categories in varchar(255).
 const MAX_ATTRIBUTE_VALUE_LENGTH = 65_535;
 const MAX_TYPE_LENGTH = 100;
@@ -20,13 +19,15 @@ const MAX_CATEGORY_LENGTH = 255;
 const MAX_TAG_LENGTH = 255;
 const MAX_INFO_LENGTH = 1024;
 const MAX_DATE_LENGTH = 64;
+// MISP documents no limit on the number of values per warninglists/checkValue request.
+const MAX_WARNINGLIST_VALUES = 1000;
 
 export const SearchAttributesInputSchema = lazySchema(() =>
   z.object({
     value: z
       .string()
       .min(1)
-      .max(MAX_IOC_VALUE_LENGTH)
+      .max(MAX_ATTRIBUTE_VALUE_LENGTH)
       .optional()
       .describe('IOC value to search for.'),
     type: z
@@ -71,7 +72,7 @@ export const SearchEventsInputSchema = lazySchema(() =>
     value: z
       .string()
       .min(1)
-      .max(MAX_IOC_VALUE_LENGTH)
+      .max(MAX_ATTRIBUTE_VALUE_LENGTH)
       .optional()
       .describe('IOC value that must appear in the event.'),
     tags: z
@@ -113,7 +114,7 @@ export type SearchEventsInput = z.infer<typeof SearchEventsInputSchema>;
 
 export const CheckIndicatorInputSchema = lazySchema(() =>
   z.object({
-    value: z.string().min(1).max(MAX_IOC_VALUE_LENGTH).describe('IOC value to look up.'),
+    value: z.string().min(1).max(MAX_ATTRIBUTE_VALUE_LENGTH).describe('IOC value to look up.'),
     type: z
       .string()
       .min(1)
@@ -136,7 +137,7 @@ export const AddSightingInputSchema = lazySchema(() =>
       value: z
         .string()
         .min(1)
-        .max(MAX_IOC_VALUE_LENGTH)
+        .max(MAX_ATTRIBUTE_VALUE_LENGTH)
         .optional()
         .describe('Attribute value when id/UUID is unknown.'),
       type: z.coerce
@@ -164,9 +165,9 @@ export type GetEventInput = z.infer<typeof GetEventInputSchema>;
 export const CheckWarninglistInputSchema = lazySchema(() =>
   z.object({
     values: z
-      .array(z.string().min(1).max(MAX_IOC_VALUE_LENGTH))
+      .array(z.string().min(1).max(MAX_ATTRIBUTE_VALUE_LENGTH))
       .min(1)
-      .max(100)
+      .max(MAX_WARNINGLIST_VALUES)
       .describe('Indicator values to check against enabled warninglists.'),
   })
 );
