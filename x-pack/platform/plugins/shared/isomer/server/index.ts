@@ -18,5 +18,7 @@ export type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
 export type { DrawOptions, IsomerDrawing } from './charts_drawing';
 export type { HostDrawOptions } from './render_host/protocol';
 export type { RenderHost } from './render_host/client';
+export { RenderServiceError, type RenderServiceFailure } from './render_host/remote';
+export { describeVocabulary, type RuntimeVocabulary } from './vocabulary';
 export type { IsomerEms, MapBasemap, MapView } from './ems';
 export type { KibanaIsomerRuntime } from '@kbn/isomer';
