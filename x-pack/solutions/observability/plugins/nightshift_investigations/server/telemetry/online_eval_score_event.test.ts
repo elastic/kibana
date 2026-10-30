@@ -56,6 +56,18 @@ describe('onlineEvalScoreEvent schema', () => {
     expect(() => analytics.reportEvent(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event)).not.toThrow();
   });
 
+  it('accepts the event of a failed evaluation, whose errors carry no evaluator version', () => {
+    const analytics = createRegisteredAnalytics();
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [],
+      failedEvaluators: [{ name: 'rca_quality' }],
+      includeExplanations: false,
+    });
+
+    expect(() => analytics.reportEvent(NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT, event)).not.toThrow();
+  });
+
   it('rejects an event without its required metadata', () => {
     const analytics = createRegisteredAnalytics();
     const { round_id: _roundId, ...event } = buildOnlineEvalScoreEvent({

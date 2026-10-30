@@ -1,0 +1,89 @@
+version: '1'
+name: Nightshift Online Evals
+description: >
+  Scores one investigation round with judges and sends the scores to Elastic as telemetry.
+  The investigation workflow starts it after a run that has something to score; customers
+  don't see or store the scores.
+enabled: true
+settings:
+  timeout: '15m'
+  # One run per investigation at a time, in arrival order, so rounds are scored in order. The
+  # queue keeps the engine defaults: at most 100 waiting runs, each skipped after 24h, and a
+  # skipped run sends no score or failure event.
+  concurrency:
+    key: 'online-evals:{{ inputs.investigation_id }}'
+    strategy: queue
+    max: 1
+tags:
+  - observability
+  - nightshift
+  - investigation
+  - online-evals
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        investigation_id:
+          type: string
+          maxLength: 1024
+          description: The investigation the round belongs to.
+        round_id:
+          type: string
+          maxLength: 1024
+          description: The round to score, from classifyRound.
+        round_kind:
+          type: string
+          enum:
+            - initial
+            - follow_up
+            - alert_recovery
+          description: What kind of round it is, from classifyRound.
+        recovery_verdict:
+          type: string
+          maxLength: 100
+          description: Alert recoveries only, the recovery round's verdict on the root cause.
+        investigation_started_at:
+          type: string
+          maxLength: 100
+          description: When the scored investigation run started.
+        investigation_ended_at:
+          type: string
+          maxLength: 100
+          description: When the scored investigation run ended.
+        investigation_execution_id:
+          type: string
+          maxLength: 1024
+          description: The investigation workflow run that was scored.
+        judge_connector_id:
+          type: string
+          maxLength: 256
+          description: The connector every judge calls.
+      required:
+        - investigation_id
+        - round_id
+        - round_kind
+        - investigation_started_at
+        - judge_connector_id
+      additionalProperties: false
+
+steps:
+  # First rounds are graded reference-free: the judges read the round itself, with no ground truth.
+  - name: score_reference_free
+    type: nightshift.onlineEvals.score
+    if: "${{ inputs.round_kind == 'initial' }}"
+    with:
+      investigation_id: '{{ inputs.investigation_id }}'
+      round_id: '{{ inputs.round_id }}'
+      round_kind: '{{ inputs.round_kind }}'
+      graded_report: first_round
+      evaluator_set: reference_free
+      evaluators:
+        - name: nightshift_rca_reward
+        - name: nightshift_investigation_process
+        - name: nightshift_conclusion_quality
+      judge_connector_id: '{{ inputs.judge_connector_id }}'
+      investigation_started_at: '{{ inputs.investigation_started_at }}'
+      # `${{ }}` passes a missing optional input as undefined; `{{ }}` would pass an empty string.
+      investigation_ended_at: '${{ inputs.investigation_ended_at }}'
+      investigation_execution_id: '${{ inputs.investigation_execution_id }}'

@@ -36,6 +36,7 @@ import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
+import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_online_evals_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
@@ -62,7 +63,9 @@ import { renderSlackMessageStepDefinition } from './step_definitions/render_slac
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
+import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
+import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -402,11 +405,21 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
+        const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
         plugins.workflowsExtensions.registerStepDefinition(
           classifyOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             isEvalsAvailable: () => this.evals !== undefined,
-            isPaused: createIsOnlineEvalsPaused(core.getStartServices),
+            isPaused: isOnlineEvalsPaused,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          scoreOnlineEvalsRoundStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getEvaluate: () => this.evals?.evaluate,
+            isPaused: isOnlineEvalsPaused,
+            shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
+            telemetry,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -883,6 +896,7 @@ export class NightshiftInvestigationsPlugin
     // up (see lib/service_account). Not installing the Slack thread's global copy here lets
     // ready() remove any left from earlier versions.
     await installInvestigationWorkflow({ client });
+    await installOnlineEvalsWorkflow({ client });
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
