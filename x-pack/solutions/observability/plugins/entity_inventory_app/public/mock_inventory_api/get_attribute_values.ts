@@ -5,19 +5,70 @@
  * 2.0.
  */
 
-import type { EntityInventoryAttributeValuesParams } from '../inventory_api_types';
+import type {
+  EntityInventoryAttributeValuesParams,
+  EntityInventoryAttributeValuesResponse,
+} from '../inventory_api_types';
 
-const MOCK_ATTRIBUTE_VALUES: Record<string, string[]> = {
-  'os.type': ['darwin', 'linux', 'windows'],
-  'host.arch': ['amd64', 'arm64'],
-  'cloud.provider': ['aws', 'azure', 'gcp'],
-  'cloud.region': ['eu-west-1', 'us-central1', 'us-east-1'],
-  'k8s.cluster.name': ['prod-eu', 'prod-us', 'staging'],
-  'k8s.namespace.name': ['checkout', 'default', 'payments'],
-  'k8s.pod.phase': ['failed', 'pending', 'running'],
-};
+// TODO: fake entities that stand in for the data the values route would aggregate. Replace with the real route in https://github.com/elastic/observability-dev/issues/6355
+const MOCK_ENTITIES: Array<Record<string, string>> = [
+  { 'os.type': 'linux', 'cloud.provider': 'aws', 'service.name': 'cartservice' },
+  { 'os.type': 'linux', 'cloud.provider': 'aws', 'service.name': 'checkoutservice' },
+  { 'os.type': 'linux', 'cloud.provider': 'gcp', 'service.name': 'frontend' },
+  { 'os.type': 'windows', 'cloud.provider': 'azure', 'service.name': 'paymentservice' },
+  { 'os.type': 'windows', 'cloud.provider': 'azure', 'service.name': 'frontend' },
+  { 'os.type': 'darwin', 'cloud.provider': 'gcp', 'service.name': 'frontend' },
+  {
+    'k8s.cluster.name': 'prod-eu',
+    'k8s.node.name': 'node-1',
+    'k8s.namespace.name': 'checkout',
+    'k8s.deployment.name': 'checkoutservice',
+  },
+  {
+    'k8s.cluster.name': 'prod-eu',
+    'k8s.node.name': 'node-2',
+    'k8s.namespace.name': 'checkout',
+    'k8s.deployment.name': 'cartservice',
+  },
+  {
+    'k8s.cluster.name': 'prod-eu',
+    'k8s.node.name': 'node-2',
+    'k8s.namespace.name': 'default',
+    'k8s.deployment.name': 'frontend',
+  },
+  {
+    'k8s.cluster.name': 'prod-us',
+    'k8s.node.name': 'node-3',
+    'k8s.namespace.name': 'payments',
+    'k8s.deployment.name': 'paymentservice',
+  },
+  {
+    'k8s.cluster.name': 'prod-us',
+    'k8s.node.name': 'node-3',
+    'k8s.namespace.name': 'default',
+    'k8s.deployment.name': 'frontend',
+  },
+  {
+    'k8s.cluster.name': 'staging',
+    'k8s.node.name': 'node-1',
+    'k8s.namespace.name': 'default',
+    'k8s.deployment.name': 'cartservice',
+  },
+];
 
 export const getEntityInventoryAttributeValues = async ({
   attribute,
-}: EntityInventoryAttributeValuesParams): Promise<string[]> =>
-  MOCK_ATTRIBUTE_VALUES[attribute] ?? [];
+  filters,
+  selected,
+}: EntityInventoryAttributeValuesParams): Promise<EntityInventoryAttributeValuesResponse> => {
+  const matchingEntities = MOCK_ENTITIES.filter((entity) =>
+    Object.entries(filters).every(
+      ([name, values]) => values.length === 0 || values.includes(entity[name])
+    )
+  );
+  const values = [
+    ...new Set(matchingEntities.map((entity) => entity[attribute]).filter(Boolean)),
+  ].sort();
+
+  return { values, invalidSelections: selected.filter((value) => !values.includes(value)) };
+};
