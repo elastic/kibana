@@ -217,7 +217,7 @@ steps:
     type: data.set
     with:
       rule_line: "**Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)"
-      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) were judged false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are not reviewed yet. Some were closed by analysts and some were classified by Alert Triage and may still be open.{% else %}{{ inputs.fp_count }} alerts were judged false positives, closed by analysts or classified by Alert Triage, in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
+      fp_summary: "{% if inputs.total_alert_count > 0 %}{{ inputs.total_fp_count }} of {{ inputs.total_alert_count }} alerts ({{ inputs.total_fp_count | times: 100 | divided_by: inputs.total_alert_count | round }}%) were judged false positives in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days. {{ inputs.fp_count }} of them are new since the last tuning review. Some were closed by analysts and some were classified by Alert Triage and may still be open.{% else %}{{ inputs.fp_count }} alerts were judged false positives, closed by analysts or classified by Alert Triage, in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.{% endif %}"
 
   # Manual mode only: ask the analyst before the agent diagnoses this rule. Assisted
   # mode skips this step and goes directly to diagnosis.
@@ -234,19 +234,16 @@ steps:
           run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
-            # Raised before any diagnosis, so the comment's own heading is the only
-            # name this proposal has.
+            # Raised before any diagnosis, so there is no diagnosed title to name it by.
             title: Review rule for tuning
             comment: |-
-              **Review rule for tuning?**
-
               {{ steps.compose_evidence.output.rule_line }}
 
               **Why this rule was picked**
               {{ steps.compose_evidence.output.fp_summary }}
 
               **On approval**
-              If you approve, the agent studies these false positives and makes a tuning proposal. You must approve this second proposal before the agent changes the rule. If you dismiss, the alerts are marked as reviewed and the review ends.
+              If you approve, the agent studies these false positives and proposes a change to the rule. The rule changes only if you also approve that proposal. If you dismiss, the review ends. These false positives are not reviewed again. New false positives can start a new review.
             impact: low
             # No action, so no inherited category, and the queue drops an
             # uncategorised proposal. Grouped with the tuning proposal that follows.
@@ -278,7 +275,6 @@ steps:
                   updates:
                     status: closed
                     close_reason: other
-                    verdict: "Analyst declined the tuning review."
                 on-failure:
                   continue: true
 
@@ -1012,17 +1008,13 @@ steps:
   - name: compose_proposal
     type: data.set
     with:
-      # The same expression the comment's heading uses, lifted out so the
-      # proposal carries it as a field the queue can render as plain text.
       # Truncated because the diagnosis schema does not bound its title and the
-      # proposal step rejects anything longer; the comment below keeps it whole.
+      # proposal step rejects anything longer.
       title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" | truncate: 256, "" }}'
       comment: |-
-        **{{ steps.diagnose_rule.output.structured_output.title | default: "Rule tuning review" }}**
-
         {{ steps.compose_evidence.output.rule_line }}
 
-        **Why this rule needs tuning**
+        **Why this rule was picked**
         {{ steps.compose_evidence.output.fp_summary }}
         {% if inputs.fp_count > inputs.alert_ids.size %}
         The agent examined the newest {{ inputs.alert_ids.size }} of the {{ inputs.fp_count }} false positives. Your decision tags these {{ inputs.alert_ids.size }} alerts. The tag also removes the older alerts from future sweeps.
@@ -1433,9 +1425,6 @@ steps:
       updates:
         status: closed
         close_reason: resolved
-        # No raw change type: the default arm accepts values the arms do not
-        # name, and an unrecognised one would leave a gap in the sentence.
-        verdict: "Analyst approved the tuning proposal."
     on-failure:
       continue: true
 
@@ -1459,7 +1448,6 @@ steps:
       updates:
         status: closed
         close_reason: other
-        verdict: "The tuning proposal was dismissed."
     on-failure:
       continue: true
 
