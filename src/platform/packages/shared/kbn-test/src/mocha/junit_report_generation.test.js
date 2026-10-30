@@ -174,7 +174,7 @@ describe('dev/mocha/junit report generation', () => {
       },
     });
 
-    mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
+    mocha.addFile(resolve(PROJECT_DIR, 'target.js'));
     await new Promise((resolve) => mocha.run(resolve));
     const report = await parseStringAsync(await readFile(xmlPath));
 
