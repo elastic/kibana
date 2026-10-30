@@ -397,10 +397,12 @@ components:
           type: string
         tier2_skip_detail:
           type: string
+          maxLength: 200
           description: >-
             Why Tier 2 was skipped, when the reason alone is ambiguous.
             Set when no_inference means the dataset-match model call
-            failed rather than that no model was configured.
+            failed rather than that no model was configured. Capped to
+            match the producer clamp on the failure message.
         unavailable_model_tiers:
           type: array
           description: >-

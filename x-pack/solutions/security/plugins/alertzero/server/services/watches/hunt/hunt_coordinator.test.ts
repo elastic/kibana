@@ -490,6 +490,26 @@ describe('huntCoordinator', () => {
         expect(result.completed_successfully).toBe(false);
       });
 
+      it('still hunts other targets and completes when the match call failed but process telemetry is in scope', async () => {
+        mockScope.mockResolvedValueOnce({
+          ...okScope,
+          report_matches: [],
+          actionable_indices: ['logs-endpoint.events.process-default*'],
+          discovered: [oktaDataset],
+        });
+        mockT1.mockResolvedValueOnce(tier1(false));
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'connector down' });
+
+        const result = await run('run-match-failed-has-actionable');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(mockT2).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBeUndefined();
+        expect(result.tier2_skip_detail).toBeUndefined();
+        expect(result.completeness).toBe('complete');
+        expect(result.completed_successfully).toBe(true);
+      });
+
       it.each([
         [
           'the report matched a dataset',
