@@ -78,6 +78,70 @@ consts:
   # This constant is the empty-list fallback.
   no_rows: []
 steps:
+  # Pre-checks: the sweep checks its dependencies before anything else, so a missing one
+  # starts no review, opens no investigation and calls no model.
+  #
+  # Context Engine must be on in this space. Reviews record each decision on a gap
+  # through Context Engine. With it off, a decided gap stays pending and every sweep
+  # reviews it again. The AI index route returns 404 when Context Engine is off or the
+  # AI index is not registered.
+  - name: check_context_engine
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/context_engine/ai_index/{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+      headers:
+        elastic-api-version: "2023-10-31"
+
+  # AlertZero and its dependencies must be available. Reviews open investigations and
+  # proposals. A scheduled Worker keeps running when AlertZero becomes unavailable later,
+  # for example when Agentic Investigations is turned off in kibana.yml. The watch route
+  # runs the same checks as the AlertZero UI and API: 404 when AlertZero is off or the
+  # space is not supported, 403 without the subscription, 503 when a required plugin
+  # (Agentic Investigations, proposals, Agent Builder) is missing.
+  - name: check_alertzero
+    type: kibana.request
+    on-failure:
+      continue: true
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/watches/system-security-watch-detection"
+      headers:
+        elastic-api-version: "1"
+
+  # Telemetry: a failed check ends the run before `report_worker_run_completed`, so the
+  # blocked run is reported here.
+  - name: report_worker_blocked
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.check_context_engine.error != null or steps.check_alertzero.error != null }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      run_outcome: blocked_precondition
+      degraded_reason: dependency_unavailable
+
+  - name: fail_context_engine_unavailable
+    type: workflow.fail
+    if: "${{ steps.check_context_engine.error != null }}"
+    with:
+      message: >-
+        Context Engine is disabled in this space or the AI index
+        `{{ inputs.ai_index_id | default: consts.ai_index_id }}` is not registered.
+        Rule Coverage can't record decisions on gaps. Enable `contextEngine:enabled`.
+        No reviews were started. {{ steps.check_context_engine.error.message }}
+
+  - name: fail_alertzero_unavailable
+    type: workflow.fail
+    if: "${{ steps.check_alertzero.error != null }}"
+    with:
+      message: >-
+        AlertZero or one of its dependencies (Agentic Investigations, proposals) is
+        unavailable in this space. Rule Coverage can't open investigations or proposals.
+        No reviews were started. {{ steps.check_alertzero.error.message }}
+
   # Step 1 of 8: list the reviews that are active in this space. A review is active from
   # its start until it ends. Each review has the concurrency key
   # `coverage-<indicator id>`. The key gives the indicator id.
@@ -151,13 +215,18 @@ steps:
   # takes the ones closest to leaving it. `_source` is not read. Only `_id` reaches the
   # review, and indicator content can be 64 kB.
   #
-  # If this search fails, the sweep starts no review. The next sweep tries again.
+  # When the search fails, the sweep starts no review and `emit_search_failure` ends the
+  # run as failed. `on-failure: continue` lets `report_worker_run_completed` run first.
   - name: search_pending_indicators
     type: elasticsearch.search
     on-failure:
       continue: true
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id | default: consts.ai_index_id }}"
+      # The index does not exist until a hunt report writes the first gap. These two
+      # options make a missing index return no hits instead of an error.
+      ignore_unavailable: true
+      allow_no_indices: true
       # A plain number. The step rejects a template in a number field. Set to the
       # maximum allowed batch_size input so the search always returns enough candidates.
       # consts.batch_size and the batch_size input maximum (50) must not exceed this.
@@ -251,6 +320,26 @@ steps:
         produced
         {%- endif -%}
 
+  # Runs only when the search failed: ends the run as failed and keeps the same outputs as
+  # `emit_result`. `status` must be a literal, so failure and success are two steps.
+  # A failed `list_active_reviews` does not fail the run, because the review's own
+  # concurrency key already stops a second review for the same gap.
+  - name: emit_search_failure
+    type: workflow.output
+    status: failed
+    if: "${{ steps.search_pending_indicators.error != null }}"
+    with:
+      message: >-
+        Can't read coverage gaps from
+        `ai-index-idx-{{ inputs.ai_index_id | default: consts.ai_index_id }}`.
+        No reviews were started. The next sweep retries.
+        {{ steps.search_pending_indicators.error.message }}
+      pending: 0
+      started: 0
+      in_flight: "${{ steps.collect_active_indicators.output.count }}"
+      search_failed: true
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+
   - name: emit_result
     type: workflow.output
     status: completed
@@ -261,7 +350,7 @@ steps:
       # Reviews this sweep tried to start.
       started: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size }}"
       in_flight: "${{ steps.collect_active_indicators.output.count }}"
-      # Both reads can fail without stopping the sweep. These flags show a failed read.
-      # Zero pending after a failed search does not mean an empty queue.
+      # A failed search never reaches this step, so `search_failed` is false here and
+      # zero pending means an empty queue. A failed lookup is reported as a flag only.
       search_failed: "${{ steps.search_pending_indicators.error != null }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"

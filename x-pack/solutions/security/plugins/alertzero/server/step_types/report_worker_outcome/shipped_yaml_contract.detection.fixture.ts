@@ -137,6 +137,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         consts: { no_rows: [] },
         steps: { search_pending_indicators: { error: { message: 'search failed' } } },
       },
+      { steps: { check_context_engine: { error: { message: 'HTTP 404: Not Found' } } } },
     ],
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
     workflowId: ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
