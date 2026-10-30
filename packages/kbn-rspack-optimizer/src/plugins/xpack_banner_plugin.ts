@@ -65,10 +65,10 @@ export class XPackBannerPlugin {
           // because SWC minification strips legal comments with our minimizer
           // options — in Rspack v1 and v2 alike — so a pre-minify banner never
           // survived into dist bundles. Injecting post-minify makes the banner
-          // independent of minimizer comment settings. Still before
-          // BundleMetricsPlugin (PROCESS_ASSETS_STAGE_ANALYSE = 4000) so
-          // measured sizes include it.
-          stage: rspack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+          // independent of minimizer comment settings. Still before source maps
+          // (PROCESS_ASSETS_STAGE_DEV_TOOLING = 500) and BundleMetricsPlugin
+          // (PROCESS_ASSETS_STAGE_ANALYSE = 4000) so both account for it.
+          stage: rspack.Compilation.PROCESS_ASSETS_STAGE_DEV_TOOLING - 1,
         },
         () => {
           for (const chunk of compilation.chunks) {

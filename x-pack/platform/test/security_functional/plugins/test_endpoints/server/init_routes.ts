@@ -23,6 +23,7 @@ import {
   type UiamAPIKeysType,
 } from '@kbn/core-security-server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
+import { PKIAuthenticationProvider } from '@kbn/security-plugin/server/authentication/providers/pki';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import {
   type BulkUpdateTaskResult,
@@ -123,50 +124,16 @@ export function initRoutes(
   // so PKI never sees the destroyed-stream socket and the Scout test false-greens.
   // Wrapping the already-loaded provider keeps us inside the in-flight Auth cycle function after
   // session lookup, which is the window that invalidates the shared ES token (kibana#258232).
-  const findPkiAuthenticationProvider = () => {
-    for (const [moduleId, cached] of Object.entries(require.cache)) {
-      const normalizedId = moduleId.replaceAll('\\', '/');
-      if (normalizedId.includes('.test.')) {
-        continue;
-      }
-      if (
-        !normalizedId.endsWith('/authentication/providers/pki.ts') &&
-        !normalizedId.endsWith('/authentication/providers/pki.js')
-      ) {
-        continue;
-      }
-      const providerClass = (
-        cached?.exports as
-          | {
-              PKIAuthenticationProvider?: {
-                prototype: {
-                  authenticate: (request: KibanaRequest, session?: unknown) => Promise<unknown>;
-                };
-              };
-            }
-          | undefined
-      )?.PKIAuthenticationProvider;
-      if (typeof providerClass?.prototype.authenticate === 'function') {
-        return providerClass;
-      }
-    }
-    const pkiModules = Object.keys(require.cache)
-      .filter((moduleId) => moduleId.includes('pki'))
-      .join(', ');
-    throw new Error(
-      `security-test-endpoints could not locate PKIAuthenticationProvider to install the HTTP/2 preauth hold. pki modules in require.cache: ${
-        pkiModules || '(none)'
-      }`
-    );
-  };
-
   let pkiAuthenticateHoldInstalled = false;
   const installPkiAuthenticateHold = () => {
     if (pkiAuthenticateHoldInstalled) {
       return;
     }
 
-    const pkiProviderClass = findPkiAuthenticationProvider();
+    // Deep import, so distributables bundle it as an entry sharing the security plugin's instance.
+    const pkiProviderClass: {
+      prototype: { authenticate(request: KibanaRequest, session?: unknown): Promise<unknown> };
+    } = PKIAuthenticationProvider;
     const originalPkiAuthenticate = pkiProviderClass.prototype.authenticate;
     pkiProviderClass.prototype.authenticate = async function wrappedPkiAuthenticate(
       this: unknown,

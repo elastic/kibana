@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * This file is adapted from: https://github.com/microsoft/monaco-languages/blob/master/src/handlebars/handlebars.ts
+/* @notice
+ * This product includes code adapted from: https://github.com/microsoft/monaco-languages/blob/master/src/handlebars/handlebars.ts
  * License: https://github.com/microsoft/monaco-languages/blob/master/LICENSE.md
  */
 

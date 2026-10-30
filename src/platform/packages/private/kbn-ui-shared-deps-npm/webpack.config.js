@@ -19,6 +19,9 @@ const WEBPACK_SRC = require.resolve('webpack');
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 
+// Distributables ship source maps the bundles don't reference, with repo paths like Kibana's bundles.
+const dist = process.env.NODE_ENV === 'production';
+
 /** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
@@ -109,14 +112,17 @@ module.exports = (_, argv) => {
       ],
     },
     context: __dirname,
-    devtool: 'cheap-source-map',
+    devtool: dist ? 'hidden-nosources-source-map' : 'cheap-source-map',
     target: 'web',
     output: {
       path: outputPath,
       filename: '[name].dll.js',
       chunkFilename: 'kbn-ui-shared-deps-npm.chunk.[id].js',
-      devtoolModuleFilenameTemplate: (info) =>
-        `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+      devtoolModuleFilenameTemplate: (info) => {
+        // Also strips the root from identifiers that aren't paths, like those of ignored modules.
+        const path = info.absoluteResourcePath.replaceAll(`${REPO_ROOT}${Path.sep}`, '');
+        return dist ? path : `kbn-ui-shared-deps-npm/${path}`;
+      },
       library: '__kbnSharedDeps_npm__',
     },
 

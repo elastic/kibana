@@ -20,12 +20,14 @@ export function registerRouteForBundle(
     bundlesPath,
     fileHashCache,
     isDist,
+    sourceMaps,
   }: {
     publicPath: string;
     routePath: string;
     bundlesPath: string;
     fileHashCache: FileHashCache;
     isDist: boolean;
+    sourceMaps?: 'hidden' | 'linked';
   }
 ) {
   router.get(
@@ -57,6 +59,7 @@ export function registerRouteForBundle(
       bundlesPath,
       isDist,
       fileHashCache,
+      sourceMaps,
     })
   );
 }

@@ -113,7 +113,7 @@ export interface PluginMetricsInfo {
  * 6. HOOK STAGE
  *
  *    `PROCESS_ASSETS_STAGE_ANALYSE` (stage 4000) runs AFTER `XPackBannerPlugin`
- *    (stage `PROCESS_ASSETS_STAGE_SUMMARIZE` = 1000, post-minify), so sizes
+ *    (stage `PROCESS_ASSETS_STAGE_DEV_TOOLING - 1` = 499, post-minify), so sizes
  *    include license banners.
  *
  * 7. MODULE COUNT

@@ -90,6 +90,7 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
+      sourceMaps: 'hidden',
       bundlesPath: 'uiSharedDepsNpmDistDir',
       publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-npm/',
       routePath: '/sha/bundles/kbn-ui-shared-deps-npm/',
@@ -98,6 +99,7 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
+      sourceMaps: 'hidden',
       bundlesPath: 'uiSharedDepsSrcDistDir',
       publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-src/',
       routePath: '/sha/bundles/kbn-ui-shared-deps-src/',
@@ -106,6 +108,7 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
+      sourceMaps: 'hidden',
       bundlesPath: 'kbnMonacoBundleDir',
       publicPath: '/server-base-path/sha/bundles/kbn-monaco/',
       routePath: '/sha/bundles/kbn-monaco/',
@@ -114,6 +117,7 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
+      sourceMaps: 'hidden',
       bundlesPath: 'kbnVegaSandboxBundleDir',
       publicPath: '/server-base-path/sha/bundles/kbn-vega-sandbox/',
       routePath: '/sha/bundles/kbn-vega-sandbox/',
@@ -122,6 +126,7 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
+      sourceMaps: 'hidden',
       bundlesPath: fromRoot('target/public/bundles'),
       publicPath: '/server-base-path/sha/bundles/',
       routePath: '/sha/bundles/',

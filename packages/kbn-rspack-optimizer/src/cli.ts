@@ -293,7 +293,7 @@ export function runRspackCli(options: CliOptions = {}): void {
         help: `
           Build Options:
             --watch, -w               Enable watch mode for development
-            --dist                    Build for distribution (minified, no source maps)
+            --dist                    Build for distribution (minified, hidden source maps)
             --examples                Include example plugins
             --test-plugins            Include test plugins
             --no-dev-only             Exclude devOnly plugins (included by default, even with --dist;

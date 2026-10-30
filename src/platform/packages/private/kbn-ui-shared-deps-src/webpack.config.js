@@ -23,6 +23,9 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const DOMPURIFY_SRC = require.resolve('dompurify/purify.js');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
+// Distributables ship source maps the bundles don't reference, with repo paths like Kibana's bundles.
+const dist = process.env.NODE_ENV === 'production';
+
 /** @returns {import('webpack').Configuration} */
 module.exports = {
   externals: {
@@ -33,15 +36,18 @@ module.exports = {
     'kbn-ui-shared-deps-src': './src/entry.js',
   },
   context: __dirname,
-  devtool: 'cheap-source-map',
+  devtool: dist ? 'hidden-nosources-source-map' : 'cheap-source-map',
   target: 'web',
   output: {
     path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
     chunkFilename: 'kbn-ui-shared-deps-src.chunk.[id].js',
     sourceMapFilename: '[file].map',
-    devtoolModuleFilenameTemplate: (info) =>
-      `kbn-ui-shared-deps-src/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
+    devtoolModuleFilenameTemplate: (info) => {
+      // Also strips the root from identifiers that aren't paths, like those of ignored modules.
+      const path = info.absoluteResourcePath.replaceAll(`${REPO_ROOT}${Path.sep}`, '');
+      return dist ? path : `kbn-ui-shared-deps-src/${path}`;
+    },
     library: '__kbnSharedDeps__',
   },
 

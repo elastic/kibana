@@ -9,6 +9,7 @@
 
 // development env setup includes a require hook after the env is initialized
 require('./setup_env');
+require('source-map-support').install();
 
 // restore < Node 16 default DNS lookup behavior
 require('./dns_ipv4_first');

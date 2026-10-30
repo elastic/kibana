@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Algorithms from
+/* @notice
+ * This product includes regression algorithms from
  * copyright(c) 2013 Tom Alexander
  * Licensed under the MIT license.
  */

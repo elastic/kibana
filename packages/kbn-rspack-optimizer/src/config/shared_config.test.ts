@@ -190,9 +190,9 @@ describe('shared_config', () => {
         expect(options.jsc.transform.react.development).toBe(true);
       });
 
-      it('should enable source maps in development', () => {
+      it('should leave source maps to devtool in development', () => {
         const options = tsRule.options as any;
-        expect(options.sourceMaps).toBe(true);
+        expect(options).not.toHaveProperty('sourceMaps');
       });
     });
 
@@ -205,9 +205,9 @@ describe('shared_config', () => {
         expect(options.jsc.transform.react.development).toBe(false);
       });
 
-      it('should disable source maps in production', () => {
+      it('should leave source maps to devtool in production', () => {
         const options = tsRule.options as any;
-        expect(options.sourceMaps).toBe(false);
+        expect(options).not.toHaveProperty('sourceMaps');
       });
     });
   });
