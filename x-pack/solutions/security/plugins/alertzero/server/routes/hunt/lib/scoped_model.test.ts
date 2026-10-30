@@ -83,6 +83,13 @@ describe('resolveScopedModel', () => {
       connectorId: 'tier-connector',
       chatModelOptions,
     });
+    expect(mockInference.getClient).toHaveBeenCalledWith({
+      request: mockRequest,
+      bindTo: {
+        connectorId: 'tier-connector',
+        metadata: { connectorTelemetry: { pluginId: 'test_plugin' } },
+      },
+    });
   });
 
   it('resolves via tier connector when available', async () => {
@@ -209,6 +216,10 @@ describe('resolveScopedModel', () => {
         connectorId: 'daybreak',
         chatModelOptions: {},
       });
+      expect(mockInference.getClient).toHaveBeenCalledWith({
+        request: mockRequest,
+        bindTo: { connectorId: 'daybreak' },
+      });
       expect(mockInference.getDefaultConnector).not.toHaveBeenCalled();
     });
 
@@ -232,6 +243,13 @@ describe('resolveScopedModel', () => {
         request: mockRequest,
         connectorId: 'daybreak',
         chatModelOptions,
+      });
+      expect(mockInference.getClient).toHaveBeenCalledWith({
+        request: mockRequest,
+        bindTo: {
+          connectorId: 'daybreak',
+          metadata: { connectorTelemetry: { pluginId: 'test_plugin' } },
+        },
       });
     });
   });
