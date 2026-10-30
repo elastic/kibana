@@ -180,6 +180,20 @@ Error: ResponseError: search_phase_execution_exception
       expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
     });
 
+    it('should mark a wildcard query on a keyed flattened field as user error', () => {
+      const errorMessage = `Error while performing ES|QL search: query_shard_exception
+	Caused by:
+		illegal_argument_exception: [wildcard] queries are not currently supported on keyed [flattened] fields.
+	Root causes:
+		query_shard_exception: failed to create query: [wildcard] queries are not currently supported on keyed [flattened] fields.`;
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark a wildcard query on a keyed flattened field as user error when the error is a string', () => {
+      const errorMessage = `index: "logs-custom-default" reason: "failed to create query: [wildcard] queries are not currently supported on keyed [flattened] fields." type: "query_shard_exception" caused by reason: "[wildcard] queries are not currently supported on keyed [flattened] fields." caused by type: "illegal_argument_exception"`;
+      expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
+    });
+
     // Fielddata errors can also come from framework-generated aggregations and sorts, so they
     // still require the illegal_argument_exception wrapper to be classified as user errors.
     it('should not mark Fielddata error without illegal_argument_exception as user error', () => {

@@ -32,6 +32,9 @@ const USER_ERROR_REASON_SUBSTRINGS = [
   'Can only use prefix queries on keyword, text and wildcard fields',
   // number_format_exception reason, which can arrive without the exception type.
   'is neither a decimal digit number, decimal point, nor "e" notation exponential mark',
+  // Elasticsearch before 9.7 rejects wildcard queries on a key of a flattened field. Remove this
+  // entry once 9.7 is the minimum Elasticsearch version supported for rule searches.
+  'queries are not currently supported on keyed [flattened] fields',
 ];
 
 // Fielddata errors can also be emitted for framework-generated aggregations and sorts, so they
