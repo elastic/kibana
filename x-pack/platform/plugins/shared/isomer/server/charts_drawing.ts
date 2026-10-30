@@ -15,6 +15,7 @@ import { componentsPack } from '@kbn/isomer-components';
 import {
   defineChartsPack,
   prepareCharts,
+  readArtifact,
   type ChartEngine,
   type PrepareChartsOptions,
 } from '@kbn/isomer-primitives-charts';
@@ -25,6 +26,7 @@ import { vegaPack } from '@kbn/isomer-primitives-vega';
 import { fromRoot } from '@kbn/repo-info';
 
 import { hoistStyles, withoutMasks } from './hoist_styles';
+import { createMemoryProbe, type MemoryProbe } from './memory_probe';
 
 const FONTS = fromRoot('src/core/packages/apps/server-internal/assets/fonts');
 
@@ -108,6 +110,8 @@ export const createChartsDrawing = async ({
   packs = [],
   inline = false,
   pdf = true,
+  pixelRatio,
+  pdfThread,
 }: {
   hints?: ChartHints;
   /** Boundary files for the maps pack, which ships none. */
@@ -121,15 +125,23 @@ export const createChartsDrawing = async ({
   inline?: boolean;
   /** Whether `drawPdf` may write; off, it rejects and the PDF thread never starts. */
   pdf?: boolean;
+  /** Device pixels per CSS pixel in drawn charts; the engine's default is 2. */
+  pixelRatio?: number;
+  /** Where takumi writes PDFs: its own worker thread (the default), or this thread, for a process that only draws. */
+  pdfThread?: 'worker' | 'inline';
 } = {}): Promise<ChartsDrawing> => {
   const { defineElasticChartsInlineEngine, defineElasticChartsNodeEngine } = await import(
     '@kbn/isomer-charts-elastic-node'
   );
   const engineOptions = {
     ...(hints ? { hints } : {}),
+    ...(pixelRatio === undefined ? {} : { pixelRatio }),
     fonts: FACES.map(([family, file]) => ({ family, path: join(FONTS, file) })),
   };
-  const engine: ChartEngine & { close?: () => Promise<void> } = inline
+  const engine: ChartEngine & {
+    close?: () => Promise<void>;
+    memory?: () => NodeJS.MemoryUsage | undefined;
+  } = inline
     ? await defineElasticChartsInlineEngine(engineOptions)
     : await defineElasticChartsNodeEngine(engineOptions);
   // The snapshot surface draws in the runtime's default card frame; charts size themselves for it at DEFAULT_CHART_SIZE.
@@ -149,13 +161,34 @@ export const createChartsDrawing = async ({
   const walk = createChildNodeWalker(runtime.primitives);
   const takumi = createTakumiImageBackend({
     fonts: FACES.map(([, file]) => readFileSync(join(FONTS, file))),
+    ...(pdfThread ? { pdfThread } : {}),
   });
+  const charts = (composition: Composition, mode: 'light' | 'dark') => {
+    const nodes: Composition['body'][number][] = [...composition.body];
+    let count = 0;
+    let artifactBytes = 0;
+    for (let index = 0; index < nodes.length; index += 1) {
+      const node = nodes[index];
+      nodes.push(...walk(node).map(({ node: child }) => child as Composition['body'][number]));
+      if (Object.hasOwn(engine.supports, (node as { type: string }).type)) {
+        count += 1;
+        const plot = readArtifact(engine, node as never, mode)?.plot;
+        artifactBytes += plot?.kind === 'markup' ? plot.html.length + plot.stylesheet.length : 0;
+      }
+    }
+    return { charts: count, artifactBytes };
+  };
   // Draws every chart the composition holds, runs `render`, then lets the drawings go.
   const withCharts = async <T>(
+    label: string,
     composition: Composition,
     { chartSize = DEFAULT_CHART_SIZE, sizeFor, hintFor, theme = 'light' }: DrawOptions,
-    render: () => T | Promise<T>
+    render: (probe: MemoryProbe) => T | Promise<T>
   ): Promise<T> => {
+    const probe = createMemoryProbe(label);
+    if (probe.enabled) {
+      probe.stage('start', { compositionBytes: JSON.stringify(composition).length });
+    }
     const { release } = await prepareCharts(engine, composition, {
       walk,
       mode: theme,
@@ -163,12 +196,23 @@ export const createChartsDrawing = async ({
       ...(sizeFor ? { sizeFor } : {}),
       ...(hintFor ? { hintFor } : {}),
     });
+    if (probe.enabled) {
+      probe.stage('charts', charts(composition, theme), engine.memory?.());
+    }
     try {
-      return await render();
+      return await render(probe);
     } finally {
       release();
+      if (probe.enabled) {
+        probe.stage('released', undefined, engine.memory?.());
+        probe.done();
+      }
     }
   };
+  const pageNotes = ({ html, css }: { html: string; css: string }) => ({
+    htmlBytes: html.length,
+    cssBytes: css.length,
+  });
   const snapshot = (composition: Composition, { frame, width, height, theme }: DrawOptions) =>
     hoistStyles(
       runtime.surfaces.snapshot.render(composition, {
@@ -181,20 +225,32 @@ export const createChartsDrawing = async ({
   return {
     runtime,
     drawHtml: (composition, options = {}) =>
-      withCharts(composition, options, () => runtime.surfaces.html.render(composition).html),
+      withCharts('html', composition, options, (probe) => {
+        const { html } = runtime.surfaces.html.render(composition);
+        probe.stage('markup', { htmlBytes: html.length });
+        return html;
+      }),
     drawPng: (composition, { scale, ...options } = {}) =>
-      withCharts(composition, options, () =>
-        takumi.png(snapshot(composition, options), scale ? { scale } : {})
-      ),
+      withCharts('png', composition, options, async (probe) => {
+        const page = snapshot(composition, options);
+        probe.stage('markup', pageNotes(page));
+        const png = await takumi.png(page, scale ? { scale } : {});
+        probe.stage('raster', { outputBytes: png.byteLength });
+        return png;
+      }),
     drawPdf: (composition, { metadata, ...options } = {}) =>
       pdf
-        ? withCharts(composition, options, () => {
+        ? withCharts('pdf', composition, options, async (probe) => {
             // The PDF writer drops content under a mask (request 15).
-            const { html, css, width, height } = withoutMasks(snapshot(composition, options));
-            return takumi.pdf(
+            const page = withoutMasks(snapshot(composition, options));
+            probe.stage('markup', pageNotes(page));
+            const { html, css, width, height } = page;
+            const written = await takumi.pdf(
               { pages: [{ html }], css, width, height },
               { uncoveredText: 'placeholder', ...(metadata ? { metadata } : {}) }
             );
+            probe.stage('raster', { outputBytes: written.byteLength });
+            return written;
           })
         : Promise.reject(new Error('PDF drawing is off for this drawing')),
     renderNode: async (node, { width, height }) => {
