@@ -21,10 +21,14 @@ export interface TimeGrid {
 }
 
 export function getTimeGrid(from: string, to: string, targetBins: number): TimeGrid {
-  const fromMs = Date.parse(from);
-  const rangeMs = Math.max(1, Date.parse(to) - fromMs);
-  const binMs = Math.max(1, Math.ceil(rangeMs / Math.max(1, targetBins)));
-  return { fromMs, binMs, bins: Math.ceil(rangeMs / binMs), endMs: fromMs + rangeMs };
+  const rawFromMs = Date.parse(from);
+  const endMs = Math.max(rawFromMs + 1, Date.parse(to));
+  const binMs = Math.max(1, Math.ceil((endMs - rawFromMs) / Math.max(1, targetBins)));
+  // Columns sit on multiples of the column width: the chart rasters its time scale onto
+  // epoch-aligned buckets of that width (in UTC, see `LatencyHeatmap`), and a column off
+  // that raster would match no bucket and draw no cells.
+  const fromMs = Math.floor(rawFromMs / binMs) * binMs;
+  return { fromMs, binMs, bins: Math.ceil((endMs - fromMs) / binMs), endMs };
 }
 
 /**

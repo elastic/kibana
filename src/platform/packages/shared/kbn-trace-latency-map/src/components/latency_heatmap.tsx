@@ -28,7 +28,7 @@ import { brushToRange, rangeToHighlight } from '../chart/brush';
 import { buildColorBands, buildHeatmapData } from '../chart/encoding';
 import type { Cell as GridPosition, CellRange } from '../geometry/cell_range';
 import { LAYOUT } from '../geometry/layout';
-import { formatColumnTime, resolveTimeZone } from '../geometry/ticks';
+import { formatColumnTime } from '../geometry/ticks';
 import { calibratePlot } from '../geometry/plot_calibration';
 import type { ChartCell } from '../geometry/plot_calibration';
 import type { PlotArea } from '../geometry/map_geometry';
@@ -254,7 +254,10 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
           }}
           xSortPredicate="numAsc"
           ySortPredicate="numDesc"
-          timeZone={resolveTimeZone(timeZone)}
+          // In UTC the chart's raster lands exactly on the grid's epoch-aligned columns
+          // (any real zone would shift it by the UTC offset); the labels and the tooltip
+          // format times in the user's zone themselves.
+          timeZone="UTC"
           xAxisLabelFormatter={(value) =>
             formatColumnTime(
               Number(value),

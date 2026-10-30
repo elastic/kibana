@@ -34,6 +34,19 @@ describe('getTimeGrid', () => {
     expect(getTimeGrid(from, to, 70).endMs).toBe(Date.parse(to));
   });
 
+  it('aligns the columns to multiples of their width, as the chart rasters time', () => {
+    // A live range: "last 15 minutes" resolves to arbitrary milliseconds.
+    const grid = getTimeGrid('2026-10-30T15:53:12.552Z', '2026-10-30T16:08:12.552Z', 120);
+    expect(grid.fromMs % grid.binMs).toBe(0);
+    // The first column starts at or before the range, never after it.
+    const rawFromMs = Date.parse('2026-10-30T15:53:12.552Z');
+    expect(grid.fromMs).toBeLessThanOrEqual(rawFromMs);
+    expect(rawFromMs - grid.fromMs).toBeLessThan(grid.binMs);
+    // The columns still cover the whole range, and the end stays the real end.
+    expect(grid.fromMs + grid.bins * grid.binMs).toBeGreaterThanOrEqual(grid.endMs);
+    expect(grid.endMs).toBe(Date.parse('2026-10-30T16:08:12.552Z'));
+  });
+
   it('survives a range of nothing', () => {
     const grid = getTimeGrid(from, from, 60);
     expect(grid.bins).toBe(1);
