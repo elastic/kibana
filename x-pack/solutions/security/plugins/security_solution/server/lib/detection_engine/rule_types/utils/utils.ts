@@ -966,6 +966,13 @@ export const getMetadataIdInjectionFailedWarning = (reason: string): string => {
   return `Failed to automatically inject METADATA _id into ES|QL query: ${reason}. This may result in duplicate alerts. Try manually adding "METADATA _id" to the FROM command and ensure _id is returned in the query results.`;
 };
 
+export const getReservedMetadataColumnsWarning = (columns: string[]): string => {
+  const columnNames = columns.join(', ');
+  return columns.length === 1
+    ? `ES|QL query returns the metadata column ${columnNames}, which cannot be stored in alerts. Alerts were created without it. Remove it from the "METADATA" clause or the query to stop this warning.`
+    : `ES|QL query returns the metadata columns ${columnNames}, which cannot be stored in alerts. Alerts were created without them. Remove them from the "METADATA" clause or the query to stop this warning.`;
+};
+
 export const getDisabledActionsWarningText = ({
   alertsCreated,
   disabledActions,

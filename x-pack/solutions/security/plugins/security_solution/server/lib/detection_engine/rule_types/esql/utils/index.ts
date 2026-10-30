@@ -15,3 +15,4 @@ export * from './update_excluded_documents';
 export * from './get_transformed_query';
 export * from './validate_esql_query';
 export * from './check_missing_id_field_warning';
+export * from './reserved_metadata_columns';
