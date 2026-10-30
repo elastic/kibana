@@ -7,28 +7,35 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { EuiEmptyPrompt } from '@elastic/eui';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PLUGIN_NAME } from '../common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { createApi } from './api';
+import { App } from './components/app';
 
-export const renderApp = (coreStart: CoreStart, { element }: AppMountParameters) => {
+export interface RenderAppDependencies {
+  coreStart: CoreStart;
+  share: SharePluginStart;
+  projectId: string;
+}
+
+export const renderApp = (
+  { coreStart, share, projectId }: RenderAppDependencies,
+  { element }: AppMountParameters
+) => {
   coreStart.chrome.docTitle.change(PLUGIN_NAME);
   coreStart.chrome.setBreadcrumbs([{ text: PLUGIN_NAME }]);
 
   const root = createRoot(element);
   root.render(
     coreStart.rendering.addContext(
-      <KibanaPageTemplate>
-        <KibanaPageTemplate.Header pageTitle={PLUGIN_NAME} />
-        <KibanaPageTemplate.Section>
-          <EuiEmptyPrompt
-            iconType="clock"
-            title={<h2>Waiting for the updated contract</h2>}
-            body={<p>The jobs, tasks, and output sections land once the service API is final.</p>}
-          />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      <App
+        api={createApi(coreStart.http)}
+        share={share}
+        toasts={coreStart.notifications.toasts}
+        projectId={projectId}
+        canWrite={coreStart.application.capabilities[PLUGIN_ID]?.write === true}
+      />
     )
   );
 

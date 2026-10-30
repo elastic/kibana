@@ -1,36 +1,105 @@
 # WS3 status: Kibana plugin (`taskRunnerPoc`)
 
-Branch `task-runner-poc-plugin` in the Kibana worktree `/Users/cbanta/Developer/kibana/task-runner-poc-plugin`, off `upstream/main`. Local commits only.
+Branch `task-runner-poc-plugin` in the Kibana worktree `/Users/cbanta/Developer/kibana/multi-tenant-task-manager/worktrees/ws3-kibana-plugin`, off `upstream/main`. Local commits only.
 
-**Paused on October 30** while the contract is renamed (run → task, schedule → job with an optional `every`, canvas → flow, new `/jobs` and `/tasks` paths). Only the parts that don't depend on the API shape are built. Route handlers and the page wait for the updated contract.
+**October 30: stages A (server routes) and B (the page) are done**, built against the contract at task-runner `f1c2ac5`. They're tested with unit tests, the Prism mock, and tenant A's real Elasticsearch for the output. Stage C (scheduled jobs in the UI) isn't started; the server side already accepts `everySeconds` and `runAt`.
 
 ## Done
 
-- Worktree created with `kw -f task-runner-poc-plugin` and bootstrapped. Upstream `main` now uses **pnpm**, not yarn.
-- Plugin skeleton at `x-pack/platform/plugins/private/task_runner_poc`: `kibana.jsonc` (plugin ID `taskRunnerPoc`, private, platform group, requires `share`), `package.json`, `tsconfig.json`, generated `moon.yml`. Linked by re-running bootstrap (root `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `tsconfig.base.json`).
-- Config schema (`server/config.ts`), prefix **`task_runner_poc`** (Kibana's default: the snake_case plugin ID):
-  - `serviceUrl`: http(s) URI, default `http://localhost:8800`
-  - `sharedSecret`: optional string; the plugin logs a warning at startup when it's missing
-  - `projectId`: matches the contract's project ID pattern, default `tenant-a`
-- API key grant helper (`server/api_keys.ts`): `grantTaskApiKey()` calls core's `security.authc.apiKeys.grantAsInternalUser` for the request's user, with the same role descriptors as `task-runner/scripts/api-key.sh` (read and `view_index_metadata` on `logs-*`; read, write, and `view_index_metadata` on `tr-*`), optional expiration, and metadata `application: task_runner_poc`. Returns the key ID and `base64(id:api_key)`.
-- Browser side: an app registered as **Task runner (POC)** (`/app/taskRunnerPoc`, Management category in the classic nav, also findable in the global search bar). For now it shows a placeholder page.
-- Type check and lint pass for the plugin project.
+### Setup
 
-Verified on October 30, with Kibana running against tenant A:
+- Plugin at `x-pack/platform/plugins/private/task_runner_poc`: plugin ID `taskRunnerPoc`, private, platform group, requires `features` and `share`. Upstream `main` uses **pnpm**; the plugin is linked through bootstrap and `moon.yml` is generated.
+- Config prefix `task_runner_poc`: `serviceUrl` (default `http://localhost:8800`), `sharedSecret` (no default; a warning is logged when it's missing), `projectId` (default `tenant-a`, exposed to the browser).
+- Kibana feature **Task runner (POC)** (Management category). `All` grants the `read_task_runner_poc` and `manage_task_runner_poc` API privileges; `Read` grants only `read_task_runner_poc`.
 
-- Kibana starts with the plugin; the server logs `[plugins.taskRunnerPoc] Task runner service http://localhost:8803, project tenant-a`.
-- The browser side is in the page's plugin list, and its `plugin-taskRunnerPoc` chunk builds and is served. I couldn't open a browser, so the console itself is unchecked.
-- `grantTaskApiKey`, called through a temporary dev route (not committed) as `elastic`: the key authenticates as `elastic`, reads `logs-demo-default` (200 docs), gets 403 on `.kibana`, expires 1 hour after creation, and carries the expected role descriptors and metadata. The test key was then invalidated.
+### Stage A: server routes
 
-## How to test it
+Internal versioned routes (version `1`) under `/internal/task_runner_poc`:
 
-1. Tenant A Elasticsearch must be running on `localhost:9201` (`make up` in `task-runner/`).
-2. Dev config: `config/kibana.dev.yml` in the worktree (gitignored). It's a real file, not the symlink to the shared `kibana.dev.yml` that `kw` creates. Contents:
+| Route | Privilege | Does |
+|---|---|---|
+| `POST /jobs` | manage | Grants an API key for the current user, then calls the service's `POST /jobs` |
+| `GET /jobs?limit` | read | Lists the project's jobs |
+| `GET /jobs/{jobId}` | read | Gets one job |
+| `DELETE /jobs/{jobId}` | manage | Deletes a job (204) |
+| `GET /tasks?limit` | read | Lists recent tasks |
+| `GET /tasks/{taskId}` | read | Gets one task; the `:` in the ID is URL-encoded on the way to the service |
+| `GET /tasks/{taskId}/output` | read | Reads the task's result document from `tr-results` (`_id` = taskId) with the **current user's** Elasticsearch client |
+
+- **Create body:** `{ query, everySeconds?, runAt?, idempotencyKey? }`. The plugin fills in `taskType: esql_summary`, `params.resultIndex: tr-results`, `timeout: 60s`, and `maxExecutions: 3`. `everySeconds` becomes `every: "{n}s"`, and `runAt` is normalized to ISO 8601. A missing `idempotencyKey` becomes `kbn-{uuid}`.
+- **API key lifetime:**
+  - One-shot job: 1 hour. With a future `runAt`, 1 hour past `runAt`, which covers the timeout and retries.
+  - Scheduled job: never expires (see security shortcuts).
+  - Role descriptors match `task-runner/scripts/api-key.sh`.
+- **Error mapping:** the service's `{error: {code, message}}` becomes a Kibana error with `attributes.code`.
+  - 400, 404, 501, and 503 pass through.
+  - 401 and 403 from the service become **502** with "check task_runner_poc.sharedSecret". The browser never sees a 401 that would log the user out, and the secret is never in a response or log.
+  - `project_not_found` becomes 502 with "check task_runner_poc.projectId".
+  - Unreachable service: 502. Timeout after 10 seconds: 504. Missing secret: 500, with no call made.
+  - An Elasticsearch error on the output route keeps its status, so a user who can't read `tr-results` gets 403.
+- **Logging:** create and delete log with ECS identity meta (`task_runner.project.id`, `task_runner.job.id`, `task_runner.task.id`, `event.action`, `event.outcome`).
+- **Contract follow-up (`cd9e875`, `f1c2ac5`):**
+  - Types include `workerType` and `runAt`. `Task.flowId` is non-null; `Job.flowId` is null for a standalone job.
+  - A repeated idempotency key's first response is passed through unchanged.
+  - The output route reads right after the task's status is `succeeded`.
+  - The plugin doesn't call flows or queue metrics.
+
+### Stage B: the page (`/app/taskRunnerPoc`)
+
+- **New job:**
+  - An ES|QL text area with the default query `FROM logs-* | STATS errors = COUNT(*) WHERE log.level == "error" BY service.name`.
+  - **Run now** creates a one-shot `esql_summary` job writing to `tr-results`. Each click sends a fresh idempotency key, and the button is disabled while the request is in flight, so a double click creates one job.
+  - Without the `All` privilege the button is disabled, with a tooltip.
+  - **Open query in Discover** opens the query over the last 30 days.
+- **Tasks:**
+  - A table polling `GET /tasks` every 2 seconds. Polls never overlap, and the last good data stays when a poll fails.
+  - Columns: status badge, query, "execution N of maxExecutions" (plus the next execution's time while retrying), started, duration, rows, error, and a Discover link to the result document (`FROM tr-results | WHERE taskId == "…"`, 15 minutes either side of `finishedAt`).
+- **Expanded row:**
+  - The last execution's error, in a callout.
+  - Task, job, and flow IDs, created time, and timeout.
+  - Every execution with its worker, start, duration, and error.
+  - For a succeeded task, the output table built from the result document's `columns` and `values`, with "N rows" or "Showing X of rowCount rows", plus a note when the output was truncated.
+
+## Verified (October 30)
+
+- **Checks:**
+  - Type check: exit 0.
+  - Jest: 26 route tests pass (`server/routes/routes.test.ts`).
+  - ESLint and oxlint: clean.
+- **curl through Kibana against Prism (`f1c2ac5`):**
+  - Create one-shot, and scheduled with `runAt`: 200. Prism accepted both request bodies.
+  - Bad `everySeconds`: 400. Bad job ID: 400. Missing `elastic-api-version`: 400.
+  - List and get jobs: 200, with `workerType` and `runAt` present. Delete: 204.
+  - List and get tasks: 200, with the task ID's `%3A` encoding.
+  - Prism stopped: `GET /tasks` returns 502 `unreachable`.
+- **Output route against tenant A's Elasticsearch:**
+  - I indexed a test document with a unique `taskId`, read it through Kibana (200), checked a missing one returns 404, and deleted the document.
+  - The Discover query (`FROM tr-results | WHERE taskId == …`) finds it.
+- **The page, in headless Chromium (Playwright) against the mock:**
+  - The tasks table renders and refreshes.
+  - The failed task's row shows its error and executions.
+  - The succeeded task's row shows the output table (18 web, 15 api, 9 db) from the contract's fixture result document, which I indexed into `tr-results` under the mock's task ID and deleted afterward.
+  - **Run now** shows a success toast.
+  - The result-document Discover link opens Discover with one hit.
+  - No plugin console errors. Kibana's own CSP notice about an inline script appears on every page.
+- **Cleanup:**
+  - Invalidated the 5 API keys Kibana granted during mock testing, one of them a never-expiring scheduled-job key.
+  - Kibana and Prism are stopped.
+
+Not verified: the real control plane, a real worker writing a result, and a user with only the `Read` privilege in the browser (covered by unit tests on the route privileges).
+
+## How to try it
+
+1. Tenant A Elasticsearch on `localhost:9201` (`make up` in `task-runner/`).
+2. `config/kibana.dev.yml` in the worktree (gitignored, a real file):
 
    ```yaml
    elasticsearch.hosts: ["http://localhost:9201"]
    elasticsearch.username: kibana_system
    elasticsearch.password: changeme
+
+   # Kibana main redirects every app to a first-launch solution picker in dev mode; skip it.
+   xpack.spaces.initialSolutionSetup.enabled: false
 
    task_runner_poc:
      serviceUrl: http://localhost:8803   # Prism mock; use 8800 for the real control plane
@@ -38,43 +107,70 @@ Verified on October 30, with Kibana running against tenant A:
      projectId: tenant-a
    ```
 
-3. Start Kibana:
+3. Start the mock (it serves the `openapi.yaml` examples and enforces the bearer token):
 
    ```bash
-   cd /Users/cbanta/Developer/kibana/task-runner-poc-plugin
-   nvm use
-   pnpm start --no-base-path        # same as: node scripts/kibana --dev --no-base-path
+   cd /Users/cbanta/Developer/kibana/multi-tenant-task-manager/task-runner/contract
+   npx prism mock -p 8803 openapi.yaml
    ```
 
-   Look for `[plugins.taskRunnerPoc] Task runner service http://localhost:8803, project tenant-a` in the log.
-4. Open <http://localhost:5601/app/taskRunnerPoc>, log in as `elastic` / `changeme`, and check the placeholder page renders. It's also under **Management** in the side nav.
-5. Type check: `node scripts/type_check --project x-pack/platform/plugins/private/task_runner_poc/tsconfig.json` (about 30 seconds).
+4. Start Kibana in another terminal:
 
-Mock control plane, once routes exist (serves the examples in `contract/openapi.yaml`, enforces the bearer token):
+   ```bash
+   cd /Users/cbanta/Developer/kibana/multi-tenant-task-manager/worktrees/ws3-kibana-plugin
+   source ~/.nvm/nvm.sh && nvm use     # Node 24.22.1 from .nvmrc
+   node scripts/kibana --dev --no-base-path
+   ```
 
-```bash
-cd /Users/cbanta/Developer/kibana/multi-tenant-task-manager/task-runner/contract
-npx prism mock -p 8803 openapi.yaml
-```
+   Wait for `Kibana is now available` and look for `[plugins.taskRunnerPoc] Task runner service http://localhost:8803, project tenant-a`.
+
+5. Open <http://localhost:5601/app/taskRunnerPoc> and log in as `elastic` / `changeme`.
+6. Or use curl. Internal versioned routes need all four headers:
+
+   ```bash
+   H=(-u elastic:changeme -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' -H 'elastic-api-version: 1' -H 'Content-Type: application/json')
+   B=http://localhost:5601/internal/task_runner_poc
+   curl -s "${H[@]}" -X POST $B/jobs -d '{"query":"FROM logs-* | STATS errors = COUNT(*) WHERE log.level == \"error\" BY service.name"}'
+   curl -s "${H[@]}" -X POST $B/jobs -d '{"query":"FROM logs-* | LIMIT 5","everySeconds":10}'
+   curl -s "${H[@]}" "$B/jobs?limit=10"
+   curl -s "${H[@]}" "$B/tasks?limit=10"
+   curl -s "${H[@]}" "$B/tasks/job_01JBX4Q7M2ZK8V3N5R6T9W0YAB%3A1793631815000"
+   curl -s "${H[@]}" "$B/tasks/job_01JBX4Q7M2ZK8V3N5R6T9W0YAB%3A1793631815000/output"   # 404 unless tr-results has that document
+   curl -s "${H[@]}" -X DELETE "$B/jobs/job_01JBX3K1ZP7Q2W4E6R8T0Y1U3I" -w '%{http_code}\n'
+   ```
+
+   Each create against the mock grants a real Elasticsearch API key that the mock never stores. Invalidate them afterward (`GET /_security/api_key?name=task_runner_poc*` and `DELETE /_security/api_key`).
+
+7. Checks (from the worktree; under the agent sandbox they need network permission because Node's `os.networkInterfaces()` is blocked):
+
+   ```bash
+   node scripts/type_check --project x-pack/platform/plugins/private/task_runner_poc/tsconfig.json
+   node scripts/jest x-pack/platform/plugins/private/task_runner_poc
+   node scripts/eslint x-pack/platform/plugins/private/task_runner_poc
+   ```
 
 ## Assumptions
 
-- Internal routes will follow the pattern in current `main` (for example the `feedback` plugin): unversioned `router.get/post/delete` with `options: { access: 'internal' }` and `security.authz: { enabled: false, reason }`, so any authenticated user can call them and Elasticsearch enforces privileges. Paths under `/internal/task_runner_poc/`. `server.restrictInternalApis` defaults to true, so curl calls need `x-elastic-internal-origin: kibana` as well as `kbn-xsrf`.
-- `sharedSecret` has no default in code, so no secret lives in source; the dev value is only in the gitignored `kibana.dev.yml`.
-- The app sits in the Management category of the classic nav. A space using a solution nav won't list it in the side nav; use the global search bar or the URL.
-- UI strings are plain English, not i18n. Fine for a POC; `node scripts/i18n_check` would need the `xpack.taskRunnerPoc` prefix registered if it's ever kept.
-- No `CODEOWNERS` or plugin-list doc entries; those matter only for CI, which this branch never runs.
+- Routes are versioned internal routes (`router.versioned`, `access: 'internal'`, version `1`) with feature API privileges. Elasticsearch still enforces data access: the output route uses the user's own client, and the task's key is the user's.
+- The plugin picks the job's `timeout` (60s) and `maxExecutions` (3); the page doesn't expose them.
+- A one-shot key lasts 1 hour past when the job fires. A task that keeps retrying past that would fail on credentials.
+- The tasks list shows whatever `GET /tasks` returns, newest first, up to 50. The Prism example list includes a `tenant-b` task, which is a mock artifact; the real service scopes by project.
+- The Discover link for the query uses the last 30 days; the seed data is about 13 hours of `logs-demo-default`.
+- UI strings are plain English, not i18n. The app is in the Management category of the classic nav; spaces with a solution nav find it through the global search bar or the URL.
+- No `CODEOWNERS` or plugin-list doc entries; those matter only for CI, which this branch never sees.
 
 ## Security shortcuts (for the roadmap)
 
-- Routes will require only an authenticated user, with no Kibana feature privilege.
-- Keys granted for scheduled work never expire, and nothing invalidates the Elasticsearch API key when a job is deleted: the service deletes its stored copy in Redis, but the key stays valid in Elasticsearch. See the contract change request below.
-- Ad-hoc keys expire after 1 hour but aren't invalidated early when the task finishes.
+- Scheduled-job keys never expire, and nothing invalidates a key in Elasticsearch when its job is deleted. The service deletes its copy in Redis, but the key stays valid. See the `apiKeyId` item below.
+- One-shot keys expire on their own but aren't invalidated when the task finishes.
+- A repeated idempotency key (a retried request) still grants a new key before calling the service. The service discards it and returns the first response, so the extra key is never used or invalidated, and for a scheduled job it never expires.
+- The shared secret is a static bearer token in `kibana.yml`.
+- Feature privileges are per Kibana, not per space; any user with the privilege sees every job and task in the configured project.
 
 ## Open questions
 
-- None blocking. Waiting for the renamed contract (tasks, jobs with optional `every`, flows) before writing routes and the page.
+- None blocking.
 
 ## Contract change requests
 
-- **Let Kibana invalidate a job's API key on delete.** Today Kibana can't tell which Elasticsearch key belongs to which job. Proposal: an optional `apiKeyId` string on the create-job request, stored by the service and returned on the job. On delete, the plugin invalidates that key with `invalidateAsInternalUser`. Not needed for the demo.
+- **Let Kibana invalidate a job's API key on delete** (on the roadmap, not in the contract this week). Proposal: an optional `apiKeyId` string on the create-job request, stored by the service and returned on the job. On delete, the plugin invalidates that key with `invalidateAsInternalUser`.

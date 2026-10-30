@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+
+/** The part of `task_runner_poc` config the server exposes to the browser. */
+export interface TaskRunnerPocPublicConfig {
+  projectId: string;
+}
 
 export interface TaskRunnerPocStartDependencies {
   share: SharePluginStart;
@@ -17,7 +27,14 @@ export interface TaskRunnerPocStartDependencies {
 export class TaskRunnerPocPublicPlugin
   implements Plugin<void, void, object, TaskRunnerPocStartDependencies>
 {
+  private readonly projectId: string;
+
+  constructor(initializerContext: PluginInitializerContext<TaskRunnerPocPublicConfig>) {
+    this.projectId = initializerContext.config.get().projectId;
+  }
+
   public setup(core: CoreSetup<TaskRunnerPocStartDependencies>) {
+    const projectId = this.projectId;
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -25,9 +42,9 @@ export class TaskRunnerPocPublicPlugin
       euiIconType: 'clock',
       order: 9030,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { share }] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(coreStart, params);
+        return renderApp({ coreStart, share, projectId }, params);
       },
     });
   }

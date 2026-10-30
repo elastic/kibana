@@ -17,6 +17,7 @@
     "@kbn/features-plugin",
     "@kbn/share-plugin",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/ui-callout",
     "@kbn/utility-types"
   ],
   "exclude": [

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { TaskRunnerPocPublicConfig } from './plugin';
 import { TaskRunnerPocPublicPlugin } from './plugin';
 
-export function plugin() {
-  return new TaskRunnerPocPublicPlugin();
+export function plugin(initializerContext: PluginInitializerContext<TaskRunnerPocPublicConfig>) {
+  return new TaskRunnerPocPublicPlugin(initializerContext);
 }

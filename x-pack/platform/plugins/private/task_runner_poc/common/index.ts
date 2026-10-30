@@ -28,6 +28,7 @@ export const TASK_ID_PATTERN = /^job_[A-Za-z0-9]+:[0-9]+$/;
 export type {
   CreateJobBody,
   CreateJobResponse,
+  EsqlValue,
   Execution,
   ExecutionStatus,
   Job,
