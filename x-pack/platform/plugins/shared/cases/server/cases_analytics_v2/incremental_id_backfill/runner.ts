@@ -65,12 +65,16 @@ export async function runIncrementalIdBackfill({
   let repaired = 0;
   let searchAfter: SortResults | undefined;
 
-  while (true) {
+  const throwIfAborted = () => {
     if (signal?.aborted) {
       throw new Error(
         `cases-analyticsV2: incremental id backfill aborted after repaired=${repaired}`
       );
     }
+  };
+
+  while (true) {
+    throwIfAborted();
 
     if (deadline != null && Date.now() >= deadline) {
       logger.info(
@@ -79,15 +83,33 @@ export async function runIncrementalIdBackfill({
       return { repaired, completed: false };
     }
 
-    const { hits } = await esClient.search<{ space_id?: string }>({
-      index: CASE_INDEX_NAME,
-      ignore_unavailable: true,
-      size: PAGE_SIZE,
-      _source: ['space_id'],
-      query: { bool: { must_not: [{ exists: { field: 'case.incremental_id' } }] } },
-      sort: [{ 'case.id': 'asc' }],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-    });
+    const {
+      hits,
+      timed_out: timedOut,
+      _shards: shards,
+    } = await esClient.search<{ space_id?: string }>(
+      {
+        index: CASE_INDEX_NAME,
+        ignore_unavailable: true,
+        size: PAGE_SIZE,
+        _source: ['space_id'],
+        query: { bool: { must_not: [{ exists: { field: 'case.incremental_id' } }] } },
+        sort: [{ 'case.id': 'asc' }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      },
+      { signal }
+    );
+
+    // A partial page would otherwise read as the end of the index and mark
+    // the one-time pass complete with cases left unrepaired.
+    if (timedOut || shards?.failed) {
+      throw new Error(
+        `cases-analyticsV2: incremental id backfill got an incomplete search response after repaired=${repaired}`
+      );
+    }
+
+    throwIfAborted();
+
     const page = hits.hits;
 
     if (page.length === 0) {

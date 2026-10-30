@@ -64,7 +64,8 @@ describe('runIncrementalIdBackfill', () => {
         index: CASE_INDEX_NAME,
         ignore_unavailable: true,
         query: { bool: { must_not: [{ exists: { field: 'case.incremental_id' } }] } },
-      })
+      }),
+      { signal: undefined }
     );
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
     expect(writer.bulkUpsertCasesAwait).not.toHaveBeenCalled();
@@ -127,6 +128,34 @@ describe('runIncrementalIdBackfill', () => {
 
     await expect(run(controller.signal)).rejects.toThrow('aborted');
     expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('passes the signal to the search and skips the page when aborted mid-search', async () => {
+    const controller = new AbortController();
+    esClient.search.mockImplementationOnce(async () => {
+      controller.abort();
+      return searchResponse([hit('numbered')]);
+    });
+
+    await expect(run(controller.signal)).rejects.toThrow('aborted');
+    expect(esClient.search).toHaveBeenCalledWith(expect.anything(), {
+      signal: controller.signal,
+    });
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    expect(writer.bulkUpsertCasesAwait).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['timed out', { timed_out: true }],
+    ['had shard failures', { _shards: { total: 1, successful: 0, failed: 1 } }],
+  ])('rejects a search response that %s instead of completing the pass', async (_, extra) => {
+    esClient.search.mockResolvedValueOnce({
+      ...searchResponse([hit('numbered')]),
+      ...extra,
+    } as never);
+
+    await expect(run()).rejects.toThrow('incomplete search response');
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
   it('stops before the next page once the deadline passes and reports the pass incomplete', async () => {
