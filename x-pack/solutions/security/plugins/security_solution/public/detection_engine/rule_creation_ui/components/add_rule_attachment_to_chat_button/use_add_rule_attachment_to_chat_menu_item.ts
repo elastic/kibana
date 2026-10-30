@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { AppMenuItemType } from '@kbn/app-menu';
+import type { AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
@@ -40,7 +40,7 @@ interface UseAddRuleAttachmentToChatMenuItemParams {
   pathway: AgentBuilderAddToChatTelemetry['pathway'];
 }
 
-/** Builds the "Add to chat" app menu item that attaches the rule form state to an Agent Builder conversation. */
+/** Builds the "Add to chat" app menu primary action that attaches the rule form state to an Agent Builder conversation. */
 export const useAddRuleAttachmentToChatMenuItem = ({
   defineStepData,
   aboutStepData,
@@ -49,7 +49,7 @@ export const useAddRuleAttachmentToChatMenuItem = ({
   actionTypeRegistry,
   existingRuleId,
   pathway,
-}: UseAddRuleAttachmentToChatMenuItemParams): AppMenuItemType | undefined => {
+}: UseAddRuleAttachmentToChatMenuItemParams): AppMenuPrimaryActionItem | undefined => {
   const { aiRuleCreation } = useKibana().services;
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
     useAgentBuilderAvailability();
@@ -88,7 +88,7 @@ export const useAddRuleAttachmentToChatMenuItem = ({
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(ruleAttachment);
 
-  return useMemo<AppMenuItemType | undefined>(() => {
+  return useMemo<AppMenuPrimaryActionItem | undefined>(() => {
     if (!hasAgentBuilderPrivilege || !isAgentChatExperienceEnabled) {
       return undefined;
     }
@@ -97,7 +97,6 @@ export const useAddRuleAttachmentToChatMenuItem = ({
       id: 'addRuleToChat',
       label: agentBuilderI18n.ADD_TO_CHAT,
       iconType: 'productAgent',
-      overflow: true,
       disableButton: !hasValidAgentBuilderLicense,
       tooltipContent: !hasValidAgentBuilderLicense
         ? agentBuilderI18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT

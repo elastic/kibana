@@ -530,7 +530,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     ),
   });
 
-  const addToChatMenuItem = useAddRuleAttachmentToChatMenuItem({
+  const addToChatAction = useAddRuleAttachmentToChatMenuItem({
     defineStepData,
     aboutStepData,
     scheduleStepData,
@@ -592,7 +592,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           back={back}
           isRulePreviewVisible={isRulePreviewVisible}
           onToggleRulePreview={toggleRulePreview}
-          addToChatMenuItem={addToChatMenuItem}
+          addToChatAction={addToChatAction}
         />
         <EuiSpacer size="l" />
         <EuiResizableContainer>

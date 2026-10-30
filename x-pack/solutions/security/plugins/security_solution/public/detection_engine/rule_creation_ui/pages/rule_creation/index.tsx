@@ -853,7 +853,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     [actionsStepForm.isValid, activeStep, editStep]
   );
 
-  const addToChatMenuItem = useAddRuleAttachmentToChatMenuItem({
+  const addToChatAction = useAddRuleAttachmentToChatMenuItem({
     defineStepData,
     aboutStepData,
     scheduleStepData,
@@ -906,7 +906,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
           back={back}
           isRulePreviewVisible={isRulePreviewVisible}
           onToggleRulePreview={toggleRulePreview}
-          addToChatMenuItem={addToChatMenuItem}
+          addToChatAction={addToChatAction}
         />
         <EuiSpacer size="l" />
         <EuiResizableContainer>

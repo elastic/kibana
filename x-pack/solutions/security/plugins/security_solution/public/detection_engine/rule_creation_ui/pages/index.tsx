@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import type { AppHeaderBack, AppHeaderMenu } from '@kbn/app-header';
-import type { AppMenuItemType } from '@kbn/app-menu';
+import type { AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import { SecurityAppHeader } from '../../../common/components/app_header';
 import * as i18n from './translations';
 
@@ -16,7 +16,7 @@ interface RuleFormAppHeaderProps {
   back: AppHeaderBack;
   isRulePreviewVisible: boolean;
   onToggleRulePreview: () => void;
-  addToChatMenuItem?: AppMenuItemType;
+  addToChatAction?: AppMenuPrimaryActionItem;
 }
 
 /** App header shared by the rule creation and rule editing pages. */
@@ -25,7 +25,7 @@ const RuleFormAppHeaderComponent: React.FC<RuleFormAppHeaderProps> = ({
   back,
   isRulePreviewVisible,
   onToggleRulePreview,
-  addToChatMenuItem,
+  addToChatAction,
 }) => {
   const menu = useMemo<AppHeaderMenu>(
     () => ({
@@ -38,10 +38,10 @@ const RuleFormAppHeaderComponent: React.FC<RuleFormAppHeaderProps> = ({
           run: onToggleRulePreview,
           testId: 'preview-container',
         },
-        ...(addToChatMenuItem ? [addToChatMenuItem] : []),
       ],
+      primaryActionItem: addToChatAction,
     }),
-    [addToChatMenuItem, isRulePreviewVisible, onToggleRulePreview]
+    [addToChatAction, isRulePreviewVisible, onToggleRulePreview]
   );
 
   return <SecurityAppHeader title={title} back={back} menu={menu} spacing="largeBleed" />;

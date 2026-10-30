@@ -13,7 +13,7 @@ import { EuiProvider } from '@elastic/eui';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
-import type { AppMenuItemType } from '@kbn/app-menu';
+import type { AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import { RuleFormAppHeader } from '.';
 
 jest.mock('../../../common/components/app_header/use_add_integrations_menu_item', () => ({
@@ -62,23 +62,24 @@ describe('RuleFormAppHeader', () => {
     expect(onToggleRulePreview).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Add to chat" item when provided', async () => {
-    const addToChatMenuItem: AppMenuItemType = {
+  it('renders "Add to chat" as the primary action when provided', async () => {
+    const run = jest.fn();
+    const addToChatAction: AppMenuPrimaryActionItem = {
       id: 'addRuleToChat',
       label: 'Add to chat',
       iconType: 'productAgent',
-      overflow: true,
-      run: jest.fn(),
+      run,
       testId: 'newAgentBuilderAttachment',
     };
-    renderHeader({ addToChatMenuItem });
+    renderHeader({ addToChatAction });
 
-    await openAppMenuOverflow();
+    // The primary action stays visible outside the "More" menu.
+    await userEvent.click(screen.getByTestId('newAgentBuilderAttachment'));
 
-    expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+    expect(run).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render the "Add to chat" item when not provided', () => {
+  it('does not render "Add to chat" when not provided', () => {
     renderHeader();
 
     expect(screen.queryByTestId('newAgentBuilderAttachment')).not.toBeInTheDocument();
