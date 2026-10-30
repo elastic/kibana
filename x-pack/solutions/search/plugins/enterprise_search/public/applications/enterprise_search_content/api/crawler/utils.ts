@@ -288,15 +288,21 @@ export const crawlerCustomSchedulingClientToServer = (
   const mapToServerFormat = (
     crawlerSchedule: CrawlerCustomSchedule
   ): CrawlerCustomScheduleClient => {
+    const sitemapUrls = [
+      ...crawlerSchedule.selectedSitemapUrls,
+      ...crawlerSchedule.customSitemapUrls,
+    ];
+    const seedUrls = [
+      ...crawlerSchedule.selectedEntryPointUrls,
+      ...crawlerSchedule.customEntryPointUrls,
+    ];
+
     const configurationOverrides: CrawlerCustomScheduleConfigOverridesClient = {
       maxCrawlDepth: crawlerSchedule.maxCrawlDepth,
       sitemapDiscoveryDisabled: !crawlerSchedule.includeSitemapsInRobotsTxt,
       domainAllowlist: crawlerSchedule.selectedDomainUrls,
-      sitemapUrls: [...crawlerSchedule.selectedSitemapUrls, ...crawlerSchedule.customSitemapUrls],
-      seedUrls: [
-        ...crawlerSchedule.selectedEntryPointUrls,
-        ...crawlerSchedule.customEntryPointUrls,
-      ],
+      ...(sitemapUrls.length > 0 && { sitemapUrls }),
+      ...(seedUrls.length > 0 && { seedUrls }),
     };
 
     return {
