@@ -355,3 +355,81 @@ export const sortedByRowColumnESQLDatatable: DatatableConfig = {
     },
   },
 } satisfies DatatableConfigESQL;
+
+/**
+ * ESQL datatable with progress bars on metrics and rows:
+ * - a metric with a single fill and the default color, range and alignment
+ * - a metric with a solid fill, a dynamic color with closed outer bounds and a negative custom range
+ * - a metric with a gradient fill and a percentage dynamic color
+ * - a row with a single fill, a static color and a left alignment
+ * - a row with a gradient fill and a distributed palette
+ */
+export const progressBarESQLDatatable: DatatableConfig = {
+  title: 'Progress bars',
+  type: 'data_table',
+  data_source: {
+    type: 'esql',
+    query: 'FROM kibana_sample_data_logs | LIMIT 10',
+  },
+  sampling: 1,
+  ignore_global_filters: false,
+  metrics: [
+    {
+      column: 'bytes',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'single',
+      color: { type: 'auto' },
+      value_range: { type: 'auto' },
+      alignment: 'right',
+    },
+    {
+      column: 'bytes_counter',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'solid',
+      color: {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { gte: 0, lt: 30, color: '#54B399' },
+          { gte: 30, lt: 60, color: '#D6BF57' },
+          { gte: 60, lte: 100, color: '#E7664C' },
+        ],
+      },
+      value_range: { type: 'custom', min: -20, max: 0 },
+      alignment: 'right',
+    },
+    {
+      column: 'memory',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'gradient',
+      color: {
+        type: 'dynamic',
+        range: 'percentage',
+        steps: [
+          { gte: 0, lt: 50, color: '#54B399' },
+          { gte: 50, lte: 100, color: '#E7664C' },
+        ],
+      },
+      value_range: { type: 'auto' },
+      alignment: 'right',
+    },
+  ],
+  rows: [
+    {
+      column: 'machine.ram',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'single',
+      color: { type: 'static', color: '#abcdef' },
+      value_range: { type: 'auto' },
+      alignment: 'left',
+    },
+    {
+      column: 'phpmemory',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'gradient',
+      color: { type: 'distributed_palette', palette: 'status' },
+      value_range: { type: 'auto' },
+      alignment: 'right',
+    },
+  ],
+} satisfies DatatableConfigESQL;

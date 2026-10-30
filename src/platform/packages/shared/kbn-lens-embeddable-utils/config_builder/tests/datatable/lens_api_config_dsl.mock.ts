@@ -443,6 +443,70 @@ export const fullConfigDatatableWithDataView: DatatableConfig = {
 } satisfies DatatableConfigNoESQL;
 
 /**
+ * Datatable with a progress bar per fill mode:
+ * - a single fill with a static color, a custom range and a left alignment
+ * - a solid fill with a distributed palette
+ * - a gradient fill with a dynamic color with open outer bounds
+ * - a gradient fill with the default color, range and alignment
+ */
+export const progressBarDatatable: DatatableConfig = {
+  title: 'Progress bars',
+  type: 'data_table',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+  },
+  sampling: 1,
+  ignore_global_filters: false,
+  metrics: [
+    {
+      operation: 'count',
+      empty_as_null: true,
+      apply_color_to: 'progress_bar',
+      fill_mode: 'single',
+      color: { type: 'static', color: '#abcdef' },
+      value_range: { type: 'custom', min: 0, max: 100 },
+      alignment: 'left',
+    },
+    {
+      operation: 'average',
+      field: 'bytes',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'solid',
+      color: { type: 'distributed_palette', palette: 'status' },
+      value_range: { type: 'auto' },
+      alignment: 'right',
+    },
+    {
+      operation: 'median',
+      field: 'bytes',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'gradient',
+      color: {
+        type: 'dynamic',
+        range: 'absolute',
+        steps: [
+          { lt: 30, color: '#54B399' },
+          { gte: 30, lt: 60, color: '#D6BF57' },
+          { gte: 60, color: '#E7664C' },
+        ],
+      },
+      value_range: { type: 'auto' },
+      alignment: 'right',
+    },
+    {
+      operation: 'max',
+      field: 'bytes',
+      apply_color_to: 'progress_bar',
+      fill_mode: 'gradient',
+      color: { type: 'auto' },
+      value_range: { type: 'auto' },
+      alignment: 'right',
+    },
+  ],
+} satisfies DatatableConfigNoESQL;
+
+/**
  * Datatable sorted by a pivoted metric column (split_metrics_by)
  */
 export const sortedByPivotedMetricColumnDatatable: DatatableConfig = {

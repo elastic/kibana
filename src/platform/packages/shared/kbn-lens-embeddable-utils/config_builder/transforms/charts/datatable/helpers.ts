@@ -15,7 +15,8 @@ import type {
 } from '@kbn/lens-common';
 
 import { ACCESSOR } from './constants';
-import type { AutoColorType, ColorByValueType, ColorMappingType } from '../../../schema/color';
+import type { DatatableConfig } from '../../../schema';
+import type { AllColoringTypes } from '../../../schema/color';
 import { isColorByValueColor, isColorMappingColor } from '../../coloring';
 import { getReversibleMappings } from '../utils';
 
@@ -23,13 +24,34 @@ const colorModeCompat = getReversibleMappings([
   ['value', 'text'],
   ['badge', 'badge'],
   ['background', 'cell'],
+  ['progress_bar', 'progress'],
 ]);
 
-type ApiColorTarget = 'value' | 'badge' | 'background';
+type ApiColorTarget = 'value' | 'badge' | 'background' | 'progress_bar';
 
-// 'progress' is a numeric-only cell decoration and is rejected at the as-code export boundary
-// until the datatable API grows an explicit representation for it.
-type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none' | 'progress'>;
+type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none'>;
+
+type DistributivePick<T, K extends PropertyKey> = T extends unknown
+  ? Pick<T, Extract<keyof T, K>>
+  : never;
+
+type ProgressBarColumn = Extract<
+  NonNullable<DatatableConfig['metrics']>[number],
+  { apply_color_to: 'progress_bar' }
+>;
+
+/** The progress bar fields of an API metric or ES|QL row, one variant per fill mode. */
+export type ProgressBarProps = DistributivePick<
+  ProgressBarColumn,
+  'apply_color_to' | 'value_range' | 'alignment' | 'fill_mode' | 'color'
+>;
+
+export type ProgressBarFillProps = DistributivePick<ProgressBarProps, 'fill_mode' | 'color'>;
+
+export type PaletteFillColor = Extract<
+  ProgressBarProps,
+  { fill_mode: 'solid' | 'gradient' }
+>['color'];
 
 export const colorModeToApplyColorTo = (mode: ApiColorMode): ApiColorTarget =>
   colorModeCompat.toAPI(mode);
@@ -80,15 +102,22 @@ export function getAccessorName(
 }
 
 /**
- * Infers the datatype from the color configuration.
+ * Infers the datatype of an API metric or row column from its color configuration.
+ * - progress bar → 'number', whatever its color
  * - colorMapping → 'string'
  * - colorByValue → 'number'
  * - No color → uses the provided default
  */
-export function inferDatatypeFromColor(
-  color: ColorByValueType | ColorMappingType | AutoColorType | undefined,
+export function inferColumnDatatype(
+  {
+    apply_color_to: applyColorTo,
+    color,
+  }: { apply_color_to?: ApiColorTarget; color?: AllColoringTypes },
   defaultType: Extract<DataType, 'number' | 'string'>
 ): Extract<DataType, 'number' | 'string'> {
+  if (applyColorTo === 'progress_bar') {
+    return 'number';
+  }
   if (isColorByValueColor(color)) {
     return 'number';
   }
