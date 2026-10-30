@@ -44,6 +44,18 @@ const noMatchesLabel = i18n.translate(
   { defaultMessage: 'No matching results' }
 );
 
+// Long labels end with "…" instead of pushing the Enter icon out of the row
+const labelStyles = css`
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const enterIconStyles = css`
+  flex-shrink: 0;
+`;
+
 export interface CommandMenuListOption {
   readonly key: string;
   /**
@@ -160,22 +172,15 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       options.length > MAX_VISIBLE_ROWS ? MAX_VISIBLE_ROWS * MENU_ROW_HEIGHT : undefined;
     const activeKey = options[activeIndex]?.key;
 
-    const rowStyles = css`
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: ${euiTheme.size.s};
-    `;
-    // Long labels end with "…" instead of pushing the Enter icon out of the row
-    const labelStyles = css`
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    `;
-    const enterIconStyles = css`
-      flex-shrink: 0;
-    `;
+    const rowStyles = useMemo(
+      () => css`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: ${euiTheme.size.s};
+      `,
+      [euiTheme]
+    );
 
     const activeHighlightStyles = css`
       ${getRowSelector(activeIndex)} {
