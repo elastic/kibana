@@ -124,6 +124,17 @@ export interface AlertingV2Usage {
     schedule_error?: number;
     license_not_supported?: number;
   };
+  dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr?: {
+    per_alert?: Distribution;
+    per_field?: Distribution;
+    all?: Distribution;
+  };
+  dispatcher_action_groups_throttled_count_by_strategy_24hr?: {
+    on_status_change?: number;
+    per_status_interval?: number;
+    time_interval?: number;
+    every_time?: number;
+  };
 
   // alert event stats
   alerts_count?: number;
@@ -174,4 +185,14 @@ export type PolicyActivityKeysCheck = AssertCovered<
 export type DispatchFailureReasonKeysCheck = AssertCovered<
   DispatchFailureReason,
   keyof NonNullable<AlertingV2Usage['dispatcher_dispatch_failures_count_by_reason_24hr']>
+>;
+export type DispatchedByGroupingModeKeysCheck = AssertCovered<
+  GroupingMode,
+  keyof NonNullable<
+    AlertingV2Usage['dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr']
+  >
+>;
+export type ThrottledByStrategyKeysCheck = AssertCovered<
+  ThrottleStrategy,
+  keyof NonNullable<AlertingV2Usage['dispatcher_action_groups_throttled_count_by_strategy_24hr']>
 >;

@@ -497,6 +497,107 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       },
     },
   },
+  dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: {
+    per_alert: {
+      p50: {
+        type: 'float',
+        _meta: {
+          description:
+            'P50 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+      p99: {
+        type: 'float',
+        _meta: {
+          description:
+            'P99 of action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+      avg: {
+        type: 'float',
+        _meta: {
+          description:
+            'Average action groups dispatched per action policy with grouping mode per_alert over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+    },
+    per_field: {
+      p50: {
+        type: 'float',
+        _meta: {
+          description:
+            'P50 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+      p99: {
+        type: 'float',
+        _meta: {
+          description:
+            'P99 of action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+      avg: {
+        type: 'float',
+        _meta: {
+          description:
+            'Average action groups dispatched per action policy with grouping mode per_field over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+    },
+    all: {
+      p50: {
+        type: 'float',
+        _meta: {
+          description:
+            'P50 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+      p99: {
+        type: 'float',
+        _meta: {
+          description:
+            'P99 of action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+      avg: {
+        type: 'float',
+        _meta: {
+          description:
+            'Average action groups dispatched per action policy with grouping mode all over the last 24 hours (top 100 policies by event count; events without grouping_mode are excluded).',
+        },
+      },
+    },
+  },
+  dispatcher_action_groups_throttled_count_by_strategy_24hr: {
+    on_status_change: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy on_status_change.',
+      },
+    },
+    per_status_interval: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy per_status_interval.',
+      },
+    },
+    time_interval: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy time_interval.',
+      },
+    },
+    every_time: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum of action groups throttled over the last 24 hours by policies with throttle strategy every_time.',
+      },
+    },
+  },
 
   alerts_count: {
     type: 'long',
