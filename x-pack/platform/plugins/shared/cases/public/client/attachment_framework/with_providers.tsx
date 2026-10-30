@@ -6,9 +6,9 @@
  */
 
 import type { ComponentType, FC, ReactNode } from 'react';
-import React, { lazy } from 'react';
+import React, { isValidElement, lazy } from 'react';
 import { isTopLevelAppEnabled } from '../../common/top_level_app';
-import type { RegisteredUnifiedAttachmentType } from './types';
+import type { AttachmentAction, RegisteredUnifiedAttachmentType } from './types';
 
 type Providers = ComponentType<{ children: ReactNode }>;
 
@@ -48,30 +48,35 @@ export const withAttachmentProviders = <T extends RegisteredUnifiedAttachmentTyp
     return result;
   };
 
+  const wrapNode = <N,>(node: N): N =>
+    isValidElement(node)
+      ? ((<ProvidersInTopLevelApp providers={providers}>{node}</ProvidersInTopLevelApp>) as N)
+      : node;
+  const wrapAction = <A extends AttachmentAction | null>(action: A): A =>
+    action && 'render' in action ? { ...action, render: () => wrapNode(action.render()) } : action;
+
   return {
     ...type,
     getCreationActivity: (props: Parameters<T['getCreationActivity']>[0]) => {
       const activity = type.getCreationActivity(props as never);
       return {
         ...activity,
+        event: wrapNode(activity.event),
         children: activity.children ? wrap(activity.children, true) : undefined,
         getActions: activity.getActions
-          ? (actionProps: never) =>
-              activity.getActions?.(actionProps).map((action) =>
-                'render' in action
-                  ? {
-                      ...action,
-                      render: () => (
-                        <ProvidersInTopLevelApp providers={providers}>
-                          {action.render()}
-                        </ProvidersInTopLevelApp>
-                      ),
-                    }
-                  : action
-              ) ?? []
+          ? (actionProps: never) => activity.getActions?.(actionProps).map(wrapAction) ?? []
           : undefined,
       };
     },
+    getRemovalActivity: type.getRemovalActivity
+      ? (props: never) => {
+          const activity = type.getRemovalActivity?.(props);
+          return activity ? { ...activity, event: wrapNode(activity.event) } : activity;
+        }
+      : undefined,
+    getDocumentAction: type.getDocumentAction
+      ? (props: never) => wrapAction(type.getDocumentAction?.(props) ?? null)
+      : undefined,
     getAttachmentList: type.getAttachmentList
       ? (props?: never) => {
           const list = type.getAttachmentList?.(props);

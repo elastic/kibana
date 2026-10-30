@@ -27,7 +27,7 @@ const attachmentType: UnifiedReferenceAttachmentType = {
   schema: z.object({}),
   getIcon: () => 'bell',
   getLabel: () => 'Alert',
-  getCreationActivity: () => ({ children: LazyRenderer }),
+  getCreationActivity: () => ({ children: LazyRenderer, event: <Renderer /> }),
   getAttachmentList: () => ({ children: Renderer }),
   providers: Providers,
 };
@@ -61,6 +61,16 @@ describe('withAttachmentProviders', () => {
     renderActivity(withAttachmentProviders(attachmentType));
 
     expect(await screen.findByTestId('context')).toHaveTextContent('solution');
+  });
+
+  it('wraps the activity event element too', () => {
+    jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(true);
+    const { event } = withAttachmentProviders(attachmentType).getCreationActivity(
+      {} as UnifiedReferenceAttachmentViewProps
+    );
+    render(<>{event}</>);
+
+    expect(screen.getByTestId('context')).toHaveTextContent('solution');
   });
 
   it('leaves renderers to the host app context when the top-level app is off', async () => {
