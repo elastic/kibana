@@ -13,6 +13,7 @@ PASSED_INDICES=""
 PASSED=()
 FAILED=()
 FAILED_COUNT_AT_SERVER_START=0
+SCOUT_SERVER_STOP_TIMEOUT_SECONDS=60
 SKIPPED=()
 RETRY_SPEC_FILES=()
 TOTAL_FLAKY=0
@@ -174,7 +175,8 @@ start_server() {
 
   echo "--- Starting test server (timeout: ${timeout_seconds}s)"
 
-  node scripts/scout start-server \
+  # Own process group, so stop_server can stop ES and Kibana too: they outlive start-server on SIGTERM
+  setsid node scripts/scout start-server \
     --location "$SCOUT_TEST_TARGET_LOCATION" \
     --arch "$SCOUT_TEST_TARGET_ARCH" \
     --domain "$SCOUT_TEST_TARGET_DOMAIN" \
@@ -212,10 +214,20 @@ stop_server() {
     return
   fi
 
-  if kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
+  if kill -0 -- "-$SCOUT_SERVER_PID" 2>/dev/null; then
     echo "--- Stopping test server (PID: $SCOUT_SERVER_PID)"
-    kill "$SCOUT_SERVER_PID" 2>/dev/null || true
+    kill -- "-$SCOUT_SERVER_PID" 2>/dev/null || true
     wait "$SCOUT_SERVER_PID" 2>/dev/null || true
+
+    for _ in $(seq 1 "$SCOUT_SERVER_STOP_TIMEOUT_SECONDS"); do
+      kill -0 -- "-$SCOUT_SERVER_PID" 2>/dev/null || break
+      sleep 1
+    done
+    if kill -0 -- "-$SCOUT_SERVER_PID" 2>/dev/null; then
+      echo "Test server processes still running after ${SCOUT_SERVER_STOP_TIMEOUT_SECONDS}s, killing them"
+      kill -KILL -- "-$SCOUT_SERVER_PID" 2>/dev/null || true
+      sleep 1
+    fi
   fi
   SCOUT_SERVER_PID=""
 
