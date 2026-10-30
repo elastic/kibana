@@ -1036,6 +1036,182 @@ describe('Hunt Watch worker chain', () => {
       });
     });
 
+    describe('a Proposal the gate could not create', () => {
+      // A create that fails with no Proposal under the id is neither a lost race nor a failure
+      // after creation. It used to end the gate COMPLETED while the hunt-once stamp was already
+      // written, so the finding was in no queue and nothing said so.
+      const ownStep = stepIn(proposalGateSteps, 'resolve_own_proposal');
+      const outcomeStep = stepIn(proposalGateSteps, 'resolve_create_outcome');
+      const journalStep = stepIn(proposalGateSteps, 'journal_create_failure');
+      const failStep = stepIn(proposalGateSteps, 'fail_on_create_failure');
+      const ownWith = ownStep?.with as Record<string, string>;
+      const outcomeWith = outcomeStep?.with as Record<string, string>;
+      const liquid = createWorkflowLiquidEngine();
+
+      const withCreateError = (message: string | undefined) => ({
+        inputs: { conversationId: 'conv-1', title: 'Isolate host A', reportId: 'report-1' },
+        steps: {
+          create_and_gate_proposal:
+            message === undefined ? { output: { status: 'approved' } } : { error: { message } },
+        },
+      });
+
+      it('knows a Proposal under the id belongs to this conversation', () => {
+        const own = (fetched: Record<string, unknown> | undefined) =>
+          evaluateExpression(ownWith.own_proposal_exists, {
+            ...withCreateError('boom'),
+            steps: {
+              ...withCreateError('boom').steps,
+              ...(fetched === undefined ? {} : { fetch_existing_proposal: { output: fetched } }),
+            },
+          });
+
+        expect(own({ conversationId: 'conv-1' })).toBe(true);
+        expect(own({ conversationId: 'conv-other' })).toBe(false);
+        expect(own(undefined)).toBe(false);
+      });
+
+      it('reads an already-exists refusal as a conflict, and nothing else', () => {
+        const conflict = (message: string | undefined) =>
+          evaluateExpression(ownWith.create_conflict, withCreateError(message));
+
+        expect(conflict('Proposal [x] already exists')).toBe(true);
+        expect(conflict('boom')).toBe(false);
+        expect(conflict(undefined)).toBe(false);
+      });
+
+      describe('create_failed', () => {
+        const failed = (
+          message: string | undefined,
+          variables: Record<string, boolean> | undefined
+        ) =>
+          evaluateExpression(outcomeWith.create_failed, {
+            ...withCreateError(message),
+            variables: variables ?? {},
+          });
+        const none = { lost_race: false, own_proposal_exists: false, create_conflict: false };
+
+        it('is true for a create that failed with no Proposal under the id', () => {
+          expect(failed('boom', none)).toBe(true);
+        });
+
+        it('is false for a lost race', () => {
+          expect(failed('boom', { ...none, lost_race: true })).toBe(false);
+        });
+
+        it('is false when this conversation already has its Proposal, so a later failure stays as it was', () => {
+          expect(failed('boom', { ...none, own_proposal_exists: true })).toBe(false);
+        });
+
+        it('is false for a conflict even when the lookup could not see the winner yet', () => {
+          expect(failed('Proposal [x] already exists', { ...none, create_conflict: true })).toBe(
+            false
+          );
+        });
+
+        it('is false when the create did not fail', () => {
+          expect(failed(undefined, none)).toBe(false);
+        });
+
+        it('reports when the flags are unset, which is the safe default', () => {
+          expect(failed('boom', undefined)).toBe(true);
+        });
+      });
+
+      describe('the journal note', () => {
+        const render = (context: Record<string, unknown>) =>
+          liquid.parseAndRenderSync(outcomeWith.create_failure_note, context).trim();
+
+        it('names the action, the error and the report a manual run must target', () => {
+          const note = render(withCreateError('boom'));
+
+          expect(note).toContain('"Isolate host A"');
+          expect(note).toContain('boom');
+          expect(note).toContain('not in the Proposal queue');
+          expect(note).toContain('`report-1`');
+          expect(note).toContain('stays open');
+        });
+
+        it('names the action when the gate was given no title', () => {
+          const context = withCreateError('boom');
+
+          expect(
+            render({ ...context, inputs: { conversationId: 'conv-1', reportId: 'report-1' } })
+          ).toContain('"the proposed action"');
+        });
+
+        it("points at this Investigation's report when packaging sent no reportId", () => {
+          const context = withCreateError('boom');
+          const note = render({
+            ...context,
+            inputs: { conversationId: 'conv-1', title: 'Isolate host A' },
+          });
+
+          expect(note).toContain("this Investigation's report");
+          expect(note).not.toContain('`');
+        });
+      });
+
+      it('writes the note on this Investigation through the journal workflow, and never fails the gate over it', () => {
+        expect(journalStep?.if).toContain('variables.create_failed == true');
+        expect(journalStep?.with?.['workflow-id']).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW.id);
+        expect(journalStep?.with?.['run-as-mode']).toBe('inherit');
+        expect(String(journalStep?.with?.inputs?.author_name)).toContain('consts.author_name');
+        expect(String(journalStep?.with?.inputs?.conversation_id)).toContain(
+          'inputs.investigationConversationId'
+        );
+        expect(String(journalStep?.with?.inputs?.message)).toContain(
+          'variables.create_failure_note'
+        );
+        expect(journalStep?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('ends the run failed with the create error, and only when the create failed', () => {
+        expect(failStep?.type).toBe('workflow.fail');
+        expect(failStep?.if).toContain('variables.create_failed == true');
+        expect(String((failStep?.with as { message?: string } | undefined)?.message)).toContain(
+          'steps.create_and_gate_proposal.error.message'
+        );
+      });
+
+      it('journals before the settlement requery, and fails after the cleanup, just before emit_result', () => {
+        const order = proposalGate.steps.map((step) => step.name);
+
+        expect(order.indexOf('resolve_own_proposal')).toBeGreaterThan(
+          order.indexOf('journal_lost_race')
+        );
+        expect(order.indexOf('resolve_create_outcome')).toBeGreaterThan(
+          order.indexOf('resolve_own_proposal')
+        );
+        expect(order.indexOf('journal_create_failure')).toBeGreaterThan(
+          order.indexOf('resolve_create_outcome')
+        );
+        expect(order.indexOf('journal_create_failure')).toBeLessThan(
+          order.indexOf('resolve_gate_wrapper_output')
+        );
+        expect(order.indexOf('fail_on_create_failure')).toBeGreaterThan(
+          order.indexOf('report_investigation_closed_settled')
+        );
+        expect(order.indexOf('fail_on_create_failure')).toBe(order.indexOf('emit_result') - 1);
+        expect(order[order.length - 1]).toBe('emit_result');
+        expect((stepIn(proposalGateSteps, 'emit_result') as { status?: string }).status).toBe(
+          'completed'
+        );
+      });
+
+      it('takes a reportId from packaging without requiring it', () => {
+        expect(Object.keys(gateTrigger?.properties ?? {})).toContain('reportId');
+        expect(gateTrigger?.required).not.toContain('reportId');
+
+        const dispatch = stepIn(
+          flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+          'dispatch_gate'
+        );
+
+        expect(String(dispatch?.with?.inputs?.reportId)).toContain('inputs.reportId');
+      });
+    });
+
     describe('the convergence notes', () => {
       const notes = stepIn(packageReportSteps, 'write_convergence_notes') as
         | (YamlStep & { foreach?: string; mode?: string; if?: string })

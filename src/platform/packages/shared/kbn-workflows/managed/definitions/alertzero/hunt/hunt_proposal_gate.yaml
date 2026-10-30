@@ -5,7 +5,9 @@ description: >
   every Proposal on the Investigation has been decided, closes the
   Investigation. Continues rather than failing if it can't confirm the
   Investigation's state afterward, since leaving the Investigation open for
-  someone to check is safer than closing it incorrectly.
+  someone to check is safer than closing it incorrectly. Ends failed, after a
+  journal note on the Investigation, when no Proposal could be created (not a
+  lost race, and not a failure after the Proposal exists).
 enabled: true
 tags:
   - security
@@ -77,6 +79,12 @@ triggers:
         expectedProposalCount:
           type: number
           description: The creation barrier this gate checks (created >= this) before closing the Investigation.
+        reportId:
+          type: string
+          description: >-
+            Threat report id this Investigation is bound to, named in the journal note when the
+            Proposal could not be created so a manual run can target it. Optional: an installed
+            packaging child sends it only once its own YAML has reconciled.
       required:
         - conversationId
         - proposalId
@@ -121,6 +129,12 @@ steps:
   # `proposalId` or refuses with a conflict, so the loser's create fails before any gate is
   # parked or any Proposal id is held, and `continue` carries it on to the requery below.
   #
+  # A create that fails with no Proposal under the id (not a lost race, and not a later failure
+  # of a Proposal that exists, which is left to read as it always has) is journaled and ends this
+  # run failed. Packaging and the Worker cannot see an async child's failure, the hunt-once stamp
+  # is already written so no sweep retries the report, and a failed execution is what the
+  # Workflows list and the Watches failure callout surface. See `resolve_create_outcome`.
+  #
   # The loser is not left silent: `journal_lost_race` below says where its finding went. What it
   # cannot do is close the Investigation. `expectedProposalCount` was fixed when this gate was
   # dispatched and counts the Proposal that was lost, and a sibling gate's `created_count` never
@@ -161,9 +175,10 @@ steps:
         delay: 1s
       continue: true
 
-  # A lost race is a Proposal under this id that belongs to a different conversation. Any other
-  # failure (the gate itself ending in an error, a refused create) is left to read as it always
-  # has, so a note is only written when it can say something true.
+  # A lost race is a Proposal under this id that belongs to a different conversation. A failure
+  # that is neither a lost race nor a conflict is handled by `resolve_create_outcome` below, so a
+  # note is only written when it can say something true. A conflict whose lookup missed the
+  # winner's not-yet-searchable document stays silent as before (`create_conflict`).
   - name: resolve_lost_race
     type: data.set
     with:
@@ -181,6 +196,43 @@ steps:
         author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: "{{ variables.lost_race_note }}"
+    on-failure:
+      continue: true
+
+  # Two flags that read no sibling key (the engine renders every key of a data.set against the
+  # context before the step runs, so a key cannot read another key of the same step).
+  # `own_proposal_exists`: the Proposal under this id belongs to this conversation, so the create
+  # worked and any bridge failure came after it (gate timeout, cancel, failed action).
+  # `create_conflict`: the service refused the id as already taken, so a Proposal exists even when
+  # the lookup above could not see it yet.
+  - name: resolve_own_proposal
+    type: data.set
+    with:
+      own_proposal_exists: "${{ steps.fetch_existing_proposal.output.conversationId == inputs.conversationId }}"
+      create_conflict: "${{ steps.create_and_gate_proposal.error.message != nil and steps.create_and_gate_proposal.error.message contains 'already exists' }}"
+
+  # A create failure is only reported when nothing says a Proposal exists under the id: not a lost
+  # race, not this conversation's own Proposal, not a conflict. A five-term `and` chain with no
+  # `or`, which avoids the mixed and/or precedence hazard create_proposal.yaml warns about. An
+  # unset variable reads as not-true, so reporting is the safe default. The wording does not claim
+  # absolute absence: the gate cannot tell a missing Proposal from a failed read.
+  - name: resolve_create_outcome
+    type: data.set
+    with:
+      create_failed: "${{ steps.create_and_gate_proposal.error.message != nil and steps.create_and_gate_proposal.error.message != empty and variables.lost_race != true and variables.own_proposal_exists != true and variables.create_conflict != true }}"
+      create_failure_note: |-
+        The Proposal for "{{ inputs.title | default: 'the proposed action' }}" could not be created: {{ steps.create_and_gate_proposal.error.message }}. No Proposal was found under its id when this run looked, so it is not in the Proposal queue as far as this run could tell, and it will not be retried automatically because this run already marked the report hunted. {% if inputs.reportId != nil and inputs.reportId != empty %}A manual run targeting report `{{ inputs.reportId }}` retries it.{% else %}A manual run targeting this Investigation's report retries it.{% endif %} This Investigation stays open until an analyst closes it.
+
+  - name: journal_create_failure
+    type: workflow.execute
+    if: "${{ variables.create_failed == true }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        author_name: "{{ consts.author_name }}"
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: "{{ variables.create_failure_note }}"
     on-failure:
       continue: true
 
@@ -367,6 +419,16 @@ steps:
       event: worker_investigation_closed
       investigation_id: "{{ inputs.investigationConversationId }}"
       close_reason: resolved
+
+  # Last, so the requeries and the idempotent close above still run as best-effort cleanup, and
+  # `emit_result` is simply never reached on this path. Ending the run failed is the one signal the
+  # Workflows executions list and the Watches failure callout surface. A lost race does not take
+  # this path: its finding is covered by the other Proposal and it keeps its own note.
+  - name: fail_on_create_failure
+    type: workflow.fail
+    if: "${{ variables.create_failed == true }}"
+    with:
+      message: "Proposal creation failed: {{ steps.create_and_gate_proposal.error.message }}"
 
   - name: emit_result
     type: workflow.output
