@@ -30,25 +30,37 @@ export interface ResolveSelfManagedStatusParams {
 const formatDate = (millis: number): string =>
   new Intl.DateTimeFormat(i18n.getLocale(), { dateStyle: 'medium' }).format(millis);
 
-const getCompareFeaturesAction = (href: string): SubscriptionStatusAction => ({
-  id: 'compare_features',
-  label: i18n.translate('xpack.subscriptionStatus.selfManaged.compareFeaturesLabel', {
-    defaultMessage: 'Compare license features',
-  }),
-  href,
-  external: true,
-});
-
-/** License admins manage the license in Kibana; everyone else can only compare licenses. */
-const getTrialActions = ({
+/** License admins manage the license in Kibana; everyone else is pointed to a cloud trial. */
+const getActions = ({
   canManageLicense,
   urls,
 }: ResolveSelfManagedStatusParams): Pick<
   PopoverStatus,
   'primaryAction' | 'primaryActionStyle' | 'secondaryAction'
 > => {
-  const compareFeatures = getCompareFeaturesAction(urls.compareFeatures);
-  if (!canManageLicense) return { primaryAction: compareFeatures, primaryActionStyle: 'tinted' };
+  const compareFeatures: SubscriptionStatusAction = {
+    id: 'compare_features',
+    label: i18n.translate('xpack.subscriptionStatus.selfManaged.compareFeaturesLabel', {
+      defaultMessage: 'Compare license features',
+    }),
+    href: urls.compareFeatures,
+    external: true,
+  };
+
+  if (!canManageLicense) {
+    return {
+      primaryAction: {
+        id: 'start_cloud_trial',
+        label: i18n.translate('xpack.subscriptionStatus.selfManaged.startCloudTrialLabel', {
+          defaultMessage: 'Start a cloud trial',
+        }),
+        href: START_CLOUD_TRIAL_URL,
+        external: true,
+      },
+      primaryActionStyle: 'tinted',
+      secondaryAction: compareFeatures,
+    };
+  }
 
   return {
     primaryAction: {
@@ -91,7 +103,7 @@ const resolveActiveTrial = (
       percent: Math.max(0, ((TRIAL_LENGTH_IN_DAYS - daysLeft) / TRIAL_LENGTH_IN_DAYS) * 100),
       urgent,
     },
-    ...getTrialActions(params),
+    ...getActions(params),
     licenseType: 'trial',
   };
 };
@@ -120,12 +132,12 @@ const resolveExpiredTrial = (
           defaultMessage:
             'Paid features are no longer available. Contact your admin to update the license.',
         }),
-    ...getTrialActions(params),
+    ...getActions(params),
     licenseType: 'trial',
   };
 };
 
-const resolveBasic = ({ urls }: ResolveSelfManagedStatusParams): SubscriptionStatus => ({
+const resolveBasic = (params: ResolveSelfManagedStatusParams): SubscriptionStatus => ({
   kind: 'popover',
   label: i18n.translate('xpack.subscriptionStatus.selfManaged.basicLabel', {
     defaultMessage: 'Basic',
@@ -134,16 +146,7 @@ const resolveBasic = ({ urls }: ResolveSelfManagedStatusParams): SubscriptionSta
   description: i18n.translate('xpack.subscriptionStatus.selfManaged.basicDescription', {
     defaultMessage: "You're on the free Basic license.",
   }),
-  primaryAction: getCompareFeaturesAction(urls.compareFeatures),
-  primaryActionStyle: 'tinted',
-  secondaryAction: {
-    id: 'start_cloud_trial',
-    label: i18n.translate('xpack.subscriptionStatus.selfManaged.startCloudTrialLabel', {
-      defaultMessage: 'Start a cloud trial',
-    }),
-    href: START_CLOUD_TRIAL_URL,
-    external: true,
-  },
+  ...getActions(params),
   licenseType: 'basic',
 });
 

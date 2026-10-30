@@ -20,6 +20,20 @@ const COMPARE_ACTION = {
   external: true,
 };
 
+const MANAGE_ACTION = {
+  id: 'manage_license',
+  label: 'Manage license',
+  href: MANAGE_URL,
+  external: false,
+};
+
+const CLOUD_TRIAL_ACTION = {
+  id: 'start_cloud_trial',
+  label: 'Start a cloud trial',
+  href: 'https://cloud.elastic.co/registration',
+  external: true,
+};
+
 const resolve = (
   license: Partial<ResolveSelfManagedStatusParams['license']>,
   canManageLicense = true
@@ -51,12 +65,7 @@ describe('resolveSelfManagedStatus', () => {
         percent: 40,
         urgent: false,
       },
-      primaryAction: {
-        id: 'manage_license',
-        label: 'Manage license',
-        href: MANAGE_URL,
-        external: false,
-      },
+      primaryAction: MANAGE_ACTION,
       secondaryAction: COMPARE_ACTION,
       licenseType: 'trial',
     });
@@ -85,27 +94,30 @@ describe('resolveSelfManagedStatus', () => {
       title: 'Your trial ended on Oct 25, 2026',
       description:
         'Paid features are no longer available. Contact your admin to update the license.',
-      primaryAction: COMPARE_ACTION,
+      primaryAction: CLOUD_TRIAL_ACTION,
       primaryActionStyle: 'tinted',
+      secondaryAction: COMPARE_ACTION,
       licenseType: 'trial',
     });
   });
 
-  it('offers a cloud trial on the Basic license', () => {
+  it('lets admins on the Basic license manage the license', () => {
     expect(resolve({ type: 'basic' })).toEqual({
       kind: 'popover',
       label: 'Basic',
       badgeColor: 'hollow',
       description: "You're on the free Basic license.",
-      primaryAction: COMPARE_ACTION,
-      primaryActionStyle: 'tinted',
-      secondaryAction: {
-        id: 'start_cloud_trial',
-        label: 'Start a cloud trial',
-        href: 'https://cloud.elastic.co/registration',
-        external: true,
-      },
+      primaryAction: MANAGE_ACTION,
+      secondaryAction: COMPARE_ACTION,
       licenseType: 'basic',
+    });
+  });
+
+  it('offers non-admins on the Basic license a cloud trial', () => {
+    expect(resolve({ type: 'basic' }, false)).toMatchObject({
+      primaryAction: CLOUD_TRIAL_ACTION,
+      primaryActionStyle: 'tinted',
+      secondaryAction: COMPARE_ACTION,
     });
   });
 

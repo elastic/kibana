@@ -111,6 +111,10 @@ export const Basic: Story = {
   args: { type: 'basic' },
 };
 
+export const BasicNonAdmin: Story = {
+  args: { type: 'basic', canManageLicense: false },
+};
+
 export const BasicInClassicHeader: Story = {
   args: { type: 'basic', inClassicHeader: true },
 };
@@ -125,7 +129,8 @@ const ALL_STATES: ReadonlyArray<[title: string, story: Story]> = [
   ['Trial ending, admin', TrialEnding],
   ['Trial expired, admin', TrialExpiredAdmin],
   ['Trial expired, non-admin', TrialExpiredNonAdmin],
-  ['Basic', Basic],
+  ['Basic, admin', Basic],
+  ['Basic, non-admin', BasicNonAdmin],
 ];
 
 const AllStatesGrid = (props: ScenarioProps) => {
