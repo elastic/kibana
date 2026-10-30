@@ -11,7 +11,6 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import { asyncExitHook } from 'exit-hook';
 import { once } from 'lodash';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
@@ -21,8 +20,7 @@ import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_index
 import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-
-const SHUTDOWN_TIMEOUT_MS = 2 * 60 * 1000;
+import { registerServerShutdown } from './server_shutdown';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -50,20 +48,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       })
     );
 
-    // Hold the exit on SIGTERM/SIGINT until Kibana and ES have stopped, so the caller can start
-    // the next server on the same ports. The persistent signal listener is required: exit-hook
-    // listens with `once`, so execa's signal-exit would otherwise see itself as the last listener
-    // and re-raise the signal, killing this process before the async hook runs.
-    const removeShutdownHook = asyncExitHook(
-      async () => {
-        await procs.teardown();
-        await shutdownEs();
-      },
-      { wait: SHUTDOWN_TIMEOUT_MS }
-    );
-    const keepSignalListener = () => {};
-    process.on('SIGTERM', keepSignalListener);
-    process.on('SIGINT', keepSignalListener);
+    const removeShutdownHook = registerServerShutdown(procs, shutdownEs);
 
     await ensureDefaultSpaceNPRE(config, log);
 
@@ -102,7 +87,5 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     await procs.waitForAllToStop();
     await shutdownEs();
     removeShutdownHook();
-    process.off('SIGTERM', keepSignalListener);
-    process.off('SIGINT', keepSignalListener);
   });
 }
