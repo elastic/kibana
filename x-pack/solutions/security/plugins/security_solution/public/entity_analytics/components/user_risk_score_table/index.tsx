@@ -8,11 +8,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
-import { UserPanelKey } from '../../../flyout/entity_details/shared/constants';
 import type {
   Columns,
   Criteria,
@@ -86,8 +83,6 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openUserFlyout } = useFlyoutApi();
 
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
@@ -149,24 +144,14 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
 
   const openUserDetails = useCallback(
     (userName: string) => {
-      if (enableNewFlyout) {
-        openUserFlyout({
-          userName,
-          contextID: tableType,
-          scopeId: tableType,
-          origin: FLYOUT_ORIGIN.USER_RISK_TABLE,
-        });
-        return;
-      }
-
-      openFlyout({
-        right: {
-          id: UserPanelKey,
-          params: { userName, contextID: tableType, scopeId: tableType },
-        },
+      openUserFlyout({
+        userName,
+        contextID: tableType,
+        scopeId: tableType,
+        origin: FLYOUT_ORIGIN.USER_RISK_TABLE,
       });
     },
-    [enableNewFlyout, openFlyout, openUserFlyout]
+    [openUserFlyout]
   );
 
   const columns = useMemo(
