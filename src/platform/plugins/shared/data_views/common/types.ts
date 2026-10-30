@@ -156,7 +156,7 @@ export interface PersistenceAPI {
    * Delete a saved object by id
    * @param type - type of saved object
    * @param id - id of saved object
-   * @param namespaces - namespaces the saved object lives in, the first one is used to resolve it
+   * @param namespaces - candidate namespaces the saved object lives in, tried in order until one is writable
    */
   delete: (id: string, namespaces?: string[]) => Promise<void>;
 }

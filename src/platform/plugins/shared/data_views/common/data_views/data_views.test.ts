@@ -599,6 +599,23 @@ describe('IndexPatterns', () => {
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', ['b']);
   });
 
+  test('createSavedObject with overwrite and the all-spaces wildcard deletes from the duplicate namespaces', async () => {
+    const dataView = await indexPatterns.create(
+      { title: 'kibana-*', name: 'test', namespaces: ['*'] },
+      true
+    );
+
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([{ ...savedObject, id: 'dupe-id', namespaces: ['b', UNKNOWN_SPACE] }]);
+    savedObjectsClient.delete = jest.fn().mockResolvedValue(undefined);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({ ...savedObject, id: dataView.id });
+
+    await indexPatterns.createSavedObject(dataView, true);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', ['b']);
+  });
+
   test('createSavedObject with overwrite deletes from the current space when no namespaces are requested', async () => {
     const dataView = await indexPatterns.create({ title: 'kibana-*', name: 'test' }, true);
 

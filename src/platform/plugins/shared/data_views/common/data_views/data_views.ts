@@ -44,6 +44,8 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
+const ALL_NAMESPACES_STRING = '*';
+
 const createFetchFieldErrorTitle = ({ id, title }: { id?: string; title?: string }) =>
   i18n.translate('dataViews.fetchFieldErrorTitle', {
     defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
@@ -1281,11 +1283,15 @@ export class DataViewsService {
     if (dupe) {
       if (overwrite) {
         // Only delete from a space the caller is creating the data view in, since that is the
-        // one they are known to be able to write to. Empty means the current space.
+        // one they are known to be able to write to. Empty means the current space and the
+        // all-spaces wildcard covers every concrete namespace.
         const { namespaces: requestedNamespaces } = dataView;
+        const coversAllSpaces = requestedNamespaces.includes(ALL_NAMESPACES_STRING);
         const deleteNamespaces = requestedNamespaces.length
           ? dupe.namespaces?.filter(
-              (namespace) => namespace !== UNKNOWN_SPACE && requestedNamespaces.includes(namespace)
+              (namespace) =>
+                namespace !== UNKNOWN_SPACE &&
+                (coversAllSpaces || requestedNamespaces.includes(namespace))
             )
           : undefined;
         await this.delete(dupe.id, deleteNamespaces);
