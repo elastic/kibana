@@ -61,7 +61,7 @@ A custom content panel with live data does not need a query from you. Always set
 
 To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
 
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateESQL: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
+To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current query. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`regenerateESQL: true\`: without it the stored query is kept and the new data can never appear. The server then regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
 
 Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
