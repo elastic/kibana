@@ -31,8 +31,7 @@ export const KubernetesGkeAuth: AuthTypeSpec<KubernetesGkeAuthSchema> = {
     const { accessToken } = await getGcpAccessToken(
       serviceAccount.client_email,
       serviceAccount.private_key,
-      GKE_TOKEN_SCOPE,
-      ctx.fetchTestOnly
+      GKE_TOKEN_SCOPE
     );
 
     axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
