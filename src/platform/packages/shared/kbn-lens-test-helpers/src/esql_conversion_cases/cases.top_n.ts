@@ -362,7 +362,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'nested terms with other bucket on the outer dimension is not convertible yet',
+      description: 'nested terms with other bucket on the outer dimension ranked by metric DESC',
       columns: {
         col1: terms('geo.src', {
           size: 2,
@@ -374,6 +374,96 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           size: 3,
           orderBy: { type: 'column', columnId: 'col3' },
           orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | EVAL key_geo_src = CASE(geo.src IN (${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | STATS rank_geo_src = AVG(bytes) BY geo.src | SORT rank_geo_src DESC, geo.src ASC | LIMIT 2 | KEEP geo.src), geo.src, NULL) | INLINE STATS rank_geo_src = AVG(bytes) BY key_geo_src | STATS AVG(bytes) BY rank_geo_src, key_geo_src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_geo_src | EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG) | SORT named_geo_src DESC, rank_geo_src DESC, key_geo_src ASC, \`AVG(bytes)\` DESC | EVAL geo.src = COALESCE(TO_STRING(key_geo_src), "Other"::KEYWORD) | DROP named_geo_src, key_geo_src, rank_geo_src`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the outer dimension ranked by metric ASC',
+      columns: {
+        col1: terms('geo.src', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | EVAL key_geo_src = CASE(geo.src IN (${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | STATS rank_geo_src = AVG(bytes) BY geo.src | SORT rank_geo_src ASC, geo.src ASC | LIMIT 2 | KEEP geo.src), geo.src, NULL) | INLINE STATS rank_geo_src = AVG(bytes) BY key_geo_src | STATS AVG(bytes) BY rank_geo_src, key_geo_src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_geo_src | EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG) | SORT named_geo_src DESC, rank_geo_src ASC, key_geo_src ASC, \`AVG(bytes)\` DESC | EVAL geo.src = COALESCE(TO_STRING(key_geo_src), "Other"::KEYWORD) | DROP named_geo_src, key_geo_src, rank_geo_src`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the outer dimension ranked alphabetically',
+      columns: {
+        col1: terms('geo.src', {
+          size: 2,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | EVAL key_geo_src = CASE(geo.src IN (${logsFrom} | ${logsWhere} | WHERE geo.src IS NOT NULL | STATS COUNT(*) BY geo.src | SORT geo.src ASC | LIMIT 2 | KEEP geo.src), geo.src, NULL) | STATS AVG(bytes) BY key_geo_src, host.keyword | SORT \`AVG(bytes)\` DESC | LIMIT 3 BY key_geo_src | EVAL named_geo_src = CASE(key_geo_src IS NULL, 0::LONG, 1::LONG) | SORT named_geo_src DESC, key_geo_src ASC, \`AVG(bytes)\` DESC | EVAL geo.src = COALESCE(TO_STRING(key_geo_src), "Other"::KEYWORD) | DROP named_geo_src, key_geo_src`,
+        columnNames: ['AVG(bytes)', 'geo.src', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'geo.src': ['col1'],
+          'host.keyword': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the inner dimension is not convertible',
+      columns: {
+        col1: terms('geo.src', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
         }),
         col3: metric('average', 'bytes'),
       },
