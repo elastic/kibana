@@ -589,6 +589,89 @@ describe('makeRehydrateProcessSelectors', () => {
       );
     });
 
+    it('leaves a candidate without @timestamp out of the lookup, so it cannot widen the search window', async () => {
+      const esClient = esClientWith([
+        found('logs-endpoint.events-default', 'ev-undated', {
+          host: { name: 'h1' },
+          process: { entity_id: 'ent-undated', name: 'undated.bin' },
+          event: { type: ['start'] },
+        }),
+        startDoc('ev-dated', 'ent-dated', '2026-09-26T10:00:00.000Z'),
+      ]);
+      const selectors = await makeRehydrateProcessSelectors(esClient)({
+        alerts: [],
+        events: [
+          eventRef('logs-endpoint.events-default', 'ev-undated'),
+          eventRef('logs-endpoint.events-default', 'ev-dated'),
+        ],
+      });
+
+      expect(selectors).toHaveLength(2);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: expect.arrayContaining([
+                { terms: { 'process.entity_id': ['ent-dated'] } },
+                { range: { '@timestamp': { gte: '2026-09-19T10:00:00.000Z' } } },
+              ]),
+            },
+          },
+        })
+      );
+    });
+
+    it('leaves a candidate with an unparsable @timestamp out of the lookup instead of failing it for the rest', async () => {
+      const esClient = esClientWith(
+        [
+          found('logs-endpoint.events-default', 'ev-epoch-millis', {
+            '@timestamp': 1761648064974,
+            host: { name: 'h1' },
+            process: { entity_id: 'ent-epoch-millis', name: 'millis.bin' },
+            event: { type: ['start'] },
+          }),
+          startDoc('ev-exited', 'ent-exited', '2026-09-26T10:00:00.000Z'),
+        ],
+        { 'ent-exited': '2026-09-26T10:02:00.000Z' }
+      );
+      const logger = { warn: jest.fn() } as unknown as Logger;
+      const selectors = await makeRehydrateProcessSelectors(
+        esClient,
+        logger
+      )({
+        alerts: [],
+        events: [
+          eventRef('logs-endpoint.events-default', 'ev-epoch-millis'),
+          eventRef('logs-endpoint.events-default', 'ev-exited'),
+        ],
+      });
+
+      expect(selectors.find((s) => s.entityId === 'ent-exited')?.exitedAt).toBe(
+        '2026-09-26T10:02:00.000Z'
+      );
+      expect(selectors.find((s) => s.entityId === 'ent-epoch-millis')).not.toHaveProperty(
+        'exitedAt'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('makes no exit lookup when no candidate has a usable timestamp', async () => {
+      const esClient = esClientWith([
+        found('logs-endpoint.events-default', 'ev-undated', {
+          host: { name: 'h1' },
+          process: { entity_id: 'ent-undated', name: 'undated.bin' },
+          event: { type: ['start'] },
+        }),
+      ]);
+      const selectors = await makeRehydrateProcessSelectors(esClient)({
+        alerts: [],
+        events: [eventRef('logs-endpoint.events-default', 'ev-undated')],
+      });
+
+      expect(selectors).toHaveLength(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
     it('keeps a live process inside the per-host cap ahead of newer exited ones', async () => {
       const docs = [
         startDoc('ev-live', 'ent-live', '2026-09-26T01:00:00.000Z'),

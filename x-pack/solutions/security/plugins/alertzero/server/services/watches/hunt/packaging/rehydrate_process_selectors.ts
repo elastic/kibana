@@ -33,6 +33,8 @@ const MAX_PROCESS_SELECTORS_PER_HOST = 5;
 const DEFEND_PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-*';
 /** Defend data loaded outside a data stream, e.g. `logs-endpoint.events.00e5ea78.2026.10.08`. */
 const DEFEND_PLAIN_EVENTS_INDEX_PREFIX = 'logs-endpoint.events.';
+/** Stands in for a document without `@timestamp`: sorts oldest and is never used to bound a search. */
+const MISSING_TIMESTAMP = new Date(0).toISOString();
 
 const REHYDRATE_SOURCE_FIELDS = [
   '@timestamp',
@@ -112,10 +114,10 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     entityId,
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
     processExecutable: source.process?.executable,
-    timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
+    timestamp: source['@timestamp'] ?? MISSING_TIMESTAMP,
     techniqueId: ref.matched?.technique_id,
     techniqueIds: ref.matched?.technique_id ? [ref.matched.technique_id] : [],
-    rankTimestamp: source['@timestamp'] ?? new Date(0).toISOString(),
+    rankTimestamp: source['@timestamp'] ?? MISSING_TIMESTAMP,
     iocMatched: ref.matched?.ioc === true,
   };
 };
@@ -134,15 +136,20 @@ const findExitedAt = async (
   refIndices: string[],
   logger?: Logger
 ): Promise<Map<string, string>> => {
-  const entityIds = candidates.flatMap(({ entityId }) => (entityId ? [entityId] : []));
-  if (entityIds.length === 0) {
+  // A candidate without an entity_id or a usable timestamp cannot be looked up and stays live.
+  const lookups = candidates.flatMap(({ entityId, timestamp }) => {
+    const observedAt = Date.parse(timestamp);
+    return entityId && timestamp !== MISSING_TIMESTAMP && !Number.isNaN(observedAt)
+      ? [{ entityId, observedAt }]
+      : [];
+  });
+  if (lookups.length === 0) {
     return new Map();
   }
+  const entityIds = lookups.map(({ entityId }) => entityId);
   try {
     // An alert can be created after its process ended, so search from well before it.
-    const earliestObservedAt = Math.min(
-      ...candidates.map(({ timestamp }) => Date.parse(timestamp))
-    );
+    const earliestObservedAt = Math.min(...lookups.map(({ observedAt }) => observedAt));
     const response = await esClient.search<unknown, ExitedAggregations>({
       index: [
         DEFEND_PROCESS_EVENTS_INDEX,
