@@ -460,7 +460,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
     it('routes a graph failure through throwContentFilteredErrorWithGuidance with the provider and model', async () => {
       const graphError = new Error('content filtered');
       mockGraphInvoke.mockRejectedValue(graphError);
-      (throwContentFilteredErrorWithGuidance as jest.Mock).mockImplementationOnce(() => {
+      jest.mocked(throwContentFilteredErrorWithGuidance).mockImplementationOnce(() => {
         throw new Error('guidance');
       });
 

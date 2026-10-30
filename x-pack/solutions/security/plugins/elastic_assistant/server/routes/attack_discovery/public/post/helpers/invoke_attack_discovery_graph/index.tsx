@@ -188,7 +188,12 @@ export const invokeAttackDiscoveryGraph = async ({
       }
     );
   } catch (error) {
-    return throwContentFilteredErrorWithGuidance({ error, logger, model, provider: llmType });
+    return throwContentFilteredErrorWithGuidance({
+      error,
+      logger,
+      model,
+      provider: llmType ?? 'unknown',
+    });
   }
 
   const {
