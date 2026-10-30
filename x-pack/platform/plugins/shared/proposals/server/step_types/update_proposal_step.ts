@@ -44,7 +44,10 @@ export const getUpdateProposalStepDefinition = ({
         // fallback rather than the other way round: any workflow can pass a
         // `decidedBy`, so it must never outrank the request. A blank
         // `decidedBy` means nobody answered the gate, so the Worker running it
-        // auto-approved; only then is the Worker the decider.
+        // auto-approved; only then is the Worker the decider, and only then is
+        // the decision recorded as automatic.
+        const decisionMode =
+          input.decision === undefined ? undefined : input.decidedBy ? 'manual' : 'auto';
         const decidedBy =
           input.decision === undefined
             ? undefined
@@ -68,6 +71,7 @@ export const getUpdateProposalStepDefinition = ({
             status: input.status,
             decision: input.decision,
             decidedBy,
+            decisionMode,
             dismissReason: input.dismissReason,
             rationale: input.rationale,
             executionError: input.executionError,
