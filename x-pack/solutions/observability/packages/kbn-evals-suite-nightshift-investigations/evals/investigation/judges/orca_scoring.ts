@@ -45,9 +45,7 @@ export const scoreOrcaRcaAccuracy = ({
   plausibleFlags: readonly string[];
   namedFlags: readonly string[];
 }): 0 | 1 =>
-  plausibleFlags.length > 0 && plausibleFlags.every((flag) => namesFlag(namedFlags, flag))
-    ? 1
-    : 0;
+  plausibleFlags.length > 0 && plausibleFlags.every((flag) => namesFlag(namedFlags, flag)) ? 1 : 0;
 
 /**
  * 1 when the report names at least one cause and none of those causes is a plausible flag.
