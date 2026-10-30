@@ -112,10 +112,12 @@ export const createActionPolicySmlType = ({
 
     try {
       const client = getScopedActionPolicyClient(context.request);
-      const policy = await client.getActionPolicy({ id: getSmlOriginId(item) });
+      const policyId = getSmlOriginId(item);
+      const policy = await client.getActionPolicy({ id: policyId });
       return {
         type: ACTION_POLICY_ATTACHMENT_TYPE,
         data: actionPolicyAttachmentDataSchema.parse(policy),
+        origin: policyId,
       };
     } catch {
       return undefined;

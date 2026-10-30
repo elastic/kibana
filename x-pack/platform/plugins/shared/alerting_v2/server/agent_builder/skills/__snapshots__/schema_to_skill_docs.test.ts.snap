@@ -442,7 +442,7 @@ rule's \`metadata.routing_tags\`) and an optional KQL \`expression\` over
   \`alert.data.*\` — because query columns often differ across rules. If two rules need
   different message shapes, use two policies (or two workflows) rather than one
   brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).
-- **Search first**: run \`platform.core.sml_search\` for existing policies before adding
+- **Search first**: run \`platform.alerting.find_action_policies\` for existing policies before adding
   another catch-all or overlapping tag matcher.
 - **Grouping**: \`per_alert\` is still a safe default. \`all\` batches mixed-rule
   alerts into a single notification; only use it when the user wants one combined
