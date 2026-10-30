@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import {
+  getContentListSelectionBarSubjects,
+  getContentListToolbarSubjects,
+} from '@kbn/content-list-common';
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { v4 as uuidv4 } from 'uuid';
+
+const toolbarSubjects = getContentListToolbarSubjects();
+const selectionBarSubjects = getContentListSelectionBarSubjects(toolbarSubjects.selectionBar);
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights_many_fields'],
@@ -21,17 +28,21 @@ export const journey = new Journey({
     await kibanaPage.waitForListViewTable();
   })
   .step('Search dashboards', async ({ page, inputDelays, kibanaPage }) => {
-    await page.type(subj('tableListSearchBox'), 'Web', {
+    const searchBox = page.locator(subj(toolbarSubjects.searchBox));
+    await searchBox.pressSequentially('Web', {
       delay: inputDelays.TYPING,
     });
     await kibanaPage.waitForListViewTable();
   })
   .step('Delete dashboard', async ({ page, kibanaPage }) => {
-    const deletedDashboard = page.locator(
-      subj('checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b')
-    );
-    await deletedDashboard.click();
-    await page.click(subj('deleteSelectedItems'));
+    const deletedDashboard = page
+      .getByRole('link', {
+        name: '[Logs] Web Traffic',
+        exact: true,
+      })
+      .locator('xpath=ancestor::tr');
+    await deletedDashboard.getByRole('checkbox').click();
+    await page.click(subj(selectionBarSubjects.deleteButton));
     await page.click(subj('confirmModalConfirmButton'));
     await kibanaPage.waitForListViewTable();
     await deletedDashboard.waitFor({ state: 'detached' });

@@ -71,9 +71,7 @@ spaceTest.describe(
         });
         await pageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
         await page.goBack();
-        await expect(
-          page.testSubj.locator(`dashboardListingTitleLink-${DASHBOARD_NAME.split(' ').join('-')}`)
-        ).toBeVisible();
+        await expect(pageObjects.dashboard.getDashboardListingLink(DASHBOARD_NAME)).toBeVisible();
       }
     );
   }

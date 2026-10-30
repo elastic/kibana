@@ -19,8 +19,7 @@ export const journey = setupDashboardJourney({
     esArchives: ['x-pack/performance/es_archives/million_integers'],
     kbnArchives: ['x-pack/performance/kbn_archives/million_points_dashboard.json'],
   }),
-  dashboardName: 'Million points',
-  dashboardLinkSubj: 'dashboardListingTitleLink-Million-points',
+  dashboardTitle: 'Million points',
   loadCompleteAwaiter: async (_page, kibanaPage) => {
     await kibanaPage.waitForVisualizations({ count: 1, timeout: 120_000 });
   },

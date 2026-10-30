@@ -26,9 +26,12 @@ const PREFIX_MAP = {
 // truth so this service can't drift from what the components render — see the
 // class JSDoc.
 const TOOLBAR_SUBJECTS = getContentListToolbarSubjects();
+const PAGINATION_NEXT_BUTTON = 'pagination-button-next';
 const CONTENT_LIST_TABLE = CONTENT_LIST_TEST_SUBJECTS.table;
 const CONTENT_LIST_TABLE_SKELETON = CONTENT_LIST_TEST_SUBJECTS.tableSkeleton;
 const CONTENT_LIST_ITEM_LINK = CONTENT_LIST_TEST_SUBJECTS.itemLink;
+const CONTENT_LIST_INSPECT_ACTION = CONTENT_LIST_TEST_SUBJECTS.actionInspect;
+const CONTENT_LIST_EDIT_ACTION = CONTENT_LIST_TEST_SUBJECTS.actionEdit;
 const TABLE_LOADING_SELECTOR = [
   '[data-test-subj~="listingTable-isLoading"]',
   `[data-test-subj~="${CONTENT_LIST_TABLE_SKELETON}"]`,
@@ -36,6 +39,7 @@ const TABLE_LOADING_SELECTOR = [
 ].join(', ');
 const CONTENT_LIST_SEARCH_BOX = TOOLBAR_SUBJECTS.searchBox;
 const CONTENT_LIST_TAGS_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.tagsFilter;
+const CONTENT_LIST_CREATED_BY_FILTER_BUTTON = CONTENT_LIST_TEST_SUBJECTS.createdByFilter;
 const CONTENT_LIST_SELECTION_BAR_DELETE = getContentListSelectionBarSubjects(
   TOOLBAR_SUBJECTS.selectionBar
 ).deleteButton;
@@ -166,10 +170,10 @@ export class ListingTableService extends FtrService {
 
   public async loadNextPageIfAvailable() {
     const morePages = !(
-      (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+      (await this.testSubjects.getAttribute(PAGINATION_NEXT_BUTTON, 'disabled')) === 'true'
     );
     if (morePages) {
-      await this.testSubjects.click('pagerNextButton');
+      await this.testSubjects.click(PAGINATION_NEXT_BUTTON);
       await this.waitUntilTableIsLoaded();
     }
 
@@ -226,26 +230,42 @@ export class ListingTableService extends FtrService {
   }
 
   /**
-   * Select users in the searchbar's user filter.
+   * Toggles users in either the legacy or Content List Created by filter.
    */
   public async selectUsers(...userNames: string[]): Promise<void> {
-    await this.openUsersPopover();
-    // select users
-    for (const userName of userNames) {
-      await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+    const isLegacy = await this.isLegacyVariant(
+      'userFilterPopoverButton',
+      CONTENT_LIST_CREATED_BY_FILTER_BUTTON
+    );
+
+    if (isLegacy) {
+      await this.userPopoverToggle.open();
+      for (const userName of userNames) {
+        await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+      }
+      await this.userPopoverToggle.close();
+    } else {
+      for (const userName of userNames) {
+        await this.testSubjects.click(CONTENT_LIST_CREATED_BY_FILTER_BUTTON);
+        await this.retry.try(async () => {
+          const list = await this.testSubjects.find(
+            `${CONTENT_LIST_CREATED_BY_FILTER_BUTTON}-list`
+          );
+          const options = await list.findAllByCssSelector('li[role="option"]', 0);
+          for (const option of options) {
+            if ((await option.getVisibleText()).includes(userName)) {
+              await option.click();
+              return;
+            }
+          }
+          throw new Error(`Created by option "${userName}" was not found.`);
+        });
+        await this.testSubjects.click(CONTENT_LIST_CREATED_BY_FILTER_BUTTON);
+        await this.waitUntilTableIsLoaded();
+      }
     }
-    await this.closeUsersPopover();
+
     await this.waitUntilTableIsLoaded();
-  }
-
-  public async openUsersPopover(): Promise<void> {
-    this.log.debug('ListingTable.openUsersPopover');
-    await this.userPopoverToggle.open();
-  }
-
-  public async closeUsersPopover(): Promise<void> {
-    this.log.debug('ListingTable.closeUsersPopover');
-    await this.userPopoverToggle.close();
   }
 
   /**
@@ -300,11 +320,17 @@ export class ListingTableService extends FtrService {
     });
   }
 
+  public async clickEditAction(name: string) {
+    const isLegacy = await this.isLegacyVariant('edit-action', CONTENT_LIST_EDIT_ACTION);
+    await this.clickRowActionButton(isLegacy ? 'edit-action' : CONTENT_LIST_EDIT_ACTION, name);
+  }
+
   /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {
-    await this.clickActionButton('inspect-action', index);
+    const isLegacy = await this.isLegacyVariant('inspect-action', CONTENT_LIST_INSPECT_ACTION);
+    await this.clickActionButton(isLegacy ? 'inspect-action' : CONTENT_LIST_INSPECT_ACTION, index);
   }
 
   public async inspectorFieldsReadonly() {
