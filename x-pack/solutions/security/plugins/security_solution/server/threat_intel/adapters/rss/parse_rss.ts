@@ -29,6 +29,12 @@ export interface RssEntry {
   link?: string;
   /** ISO-8601 string when the feed exposes a publish/update timestamp. */
   publishedAt?: string;
+  /**
+   * Atom only: the date `content_fingerprint` has always folded in (`<updated>` first). Kept
+   * apart from `publishedAt` so preferring `<published>` for display does not change the
+   * fingerprint of entries already ingested, which would re-ingest and re-enrich them.
+   */
+  fingerprintDate?: string;
   /** Undefined when the feed provides no description/content/summary at all. */
   body?: EntryBody;
 }
@@ -359,12 +365,14 @@ const parseAtom = (feed: XmlNode): ParsedFeed => {
     const content = ((entry.content as XmlChildNode[] | undefined) ?? [])[0];
     const summary = ((entry.summary as XmlChildNode[] | undefined) ?? [])[0];
     const body = resolveTextConstruct(content) ?? resolveTextConstruct(summary);
-    const publishedAt = toIsoDate(text(entry.updated)) ?? toIsoDate(text(entry.published));
+    const published = toIsoDate(text(entry.published));
+    const updated = toIsoDate(text(entry.updated));
     return {
       id: id || linkHref,
       title,
       link: linkHref || undefined,
-      publishedAt,
+      publishedAt: published ?? updated,
+      fingerprintDate: updated ?? published,
       body,
     };
   });

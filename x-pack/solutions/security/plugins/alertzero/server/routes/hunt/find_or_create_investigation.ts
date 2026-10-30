@@ -25,6 +25,7 @@ import {
 } from '../../telemetry';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
+import { isReportVisibleToSpace } from '../../services/watches/hunt/common/report_visibility';
 
 export { FIND_OR_CREATE_INVESTIGATION_URL };
 
@@ -66,10 +67,16 @@ export const registerFindOrCreateInvestigationRoute = ({
           const core = await context.core;
           const spaceId = getSpaceId(request);
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
-          const conversations = getAgentBuilderConversations();
-          const conversationClient = await conversations.getScopedClient({ request });
 
           const { reportId } = request.body;
+
+          const visible = await isReportVisibleToSpace(reportsEsClient, { spaceId, reportId });
+          if (!visible) {
+            return response.notFound({ body: { message: `Report ${reportId} not found` } });
+          }
+
+          const conversations = getAgentBuilderConversations();
+          const conversationClient = await conversations.getScopedClient({ request });
 
           const output = await runFindOrCreateInvestigation(
             { spaceId, reportId },

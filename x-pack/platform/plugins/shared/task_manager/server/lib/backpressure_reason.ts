@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 import { getBulkUpdateStatusCode, getMsearchStatusCode, isClusterBlockException } from './errors';
@@ -19,19 +20,33 @@ export type BackpressureReason =
   | 'bulk_5xx'
   | 'general_error';
 
+const getEsResponseStatusCode = (error: Error): number | undefined =>
+  error instanceof EsErrors.ResponseError ? error.statusCode : undefined;
+
+const isEsTransportUnavailableError = (error: Error): boolean =>
+  error instanceof EsErrors.TimeoutError ||
+  error instanceof EsErrors.ConnectionError ||
+  error instanceof EsErrors.NoLivingConnectionsError;
+
 /** Classifies an error into the backpressure reason it triggers, or `null` if Task Manager would not back off (checked most- to least-specific). */
 export function getBackpressureReason(error: Error): BackpressureReason | null {
   if (isClusterBlockException(error)) {
     return 'cluster_block';
   }
+  const esResponseStatusCode = getEsResponseStatusCode(error);
   if (
     SavedObjectsErrorHelpers.isTooManyRequestsError(error) ||
     getMsearchStatusCode(error) === 429 ||
-    getBulkUpdateStatusCode(error) === 429
+    getBulkUpdateStatusCode(error) === 429 ||
+    esResponseStatusCode === 429
   ) {
     return 'too_many_requests';
   }
-  if (SavedObjectsErrorHelpers.isEsUnavailableError(error)) {
+  if (
+    SavedObjectsErrorHelpers.isEsUnavailableError(error) ||
+    esResponseStatusCode === 503 ||
+    isEsTransportUnavailableError(error)
+  ) {
     return 'es_unavailable';
   }
   if (isEsCannotExecuteScriptError(error)) {
@@ -45,7 +60,10 @@ export function getBackpressureReason(error: Error): BackpressureReason | null {
   if (bulkUpdateStatusCode !== undefined && bulkUpdateStatusCode >= 500) {
     return 'bulk_5xx';
   }
-  if (SavedObjectsErrorHelpers.isGeneralError(error)) {
+  if (
+    SavedObjectsErrorHelpers.isGeneralError(error) ||
+    (esResponseStatusCode !== undefined && esResponseStatusCode >= 500)
+  ) {
     return 'general_error';
   }
   return null;

@@ -108,7 +108,7 @@ jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_contai
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
-jest.mock('./components/episodes_kpis', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_kpis', () => ({
   EpisodesKpis: () => null,
 }));
 
@@ -132,7 +132,7 @@ jest.mock('./components/episodes_filter_bar', () => ({
   ),
 }));
 
-jest.mock('./components/episodes_histogram', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_histogram', () => ({
   EpisodesHistogram: () => null,
 }));
 
@@ -597,6 +597,34 @@ describe('episode count + reset filters toolbar', () => {
     const node = await screen.findByTestId('alertEpisodesItemCount');
     expect(node.textContent).toMatch(/^Showing first\s+1,?000\s+alerts$/);
     expect(node).toHaveAttribute('tabindex', '0');
+  });
+
+  it('passes the loaded episode count as totalHits when under the page size cap', async () => {
+    renderPage();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBe(mockEpisodes.length);
+      expect(lastCall?.totalHits).toBe(mockEpisodes.length);
+    });
+  });
+
+  it('passes totalHits above the page size cap when the limit is reached', async () => {
+    const cappedEpisodes = Array.from({ length: ALERT_EPISODES_LIST_PAGE_SIZE }, (_, index) => ({
+      'episode.id': `ep${index}`,
+      'rule.id': `rule${index}`,
+      group_hash: `gh${index}`,
+      '@timestamp': '2026-01-01T00:00:00Z',
+    }));
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(cappedEpisodes as any);
+
+    renderPage();
+
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBe(ALERT_EPISODES_LIST_PAGE_SIZE);
+      expect(lastCall?.totalHits).toBe(ALERT_EPISODES_LIST_PAGE_SIZE + 1);
+    });
   });
 
   it('disables the reset filters button when filter state equals the default', async () => {

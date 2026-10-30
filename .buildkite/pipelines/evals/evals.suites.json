@@ -34,7 +34,7 @@
       "id": "ml",
       "name": "ML Agent Builder Skills",
       "slackChannel": "#agent-builder-alerts",
-      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/private/ml/kbn-evals-suite-ml/playwright.config.ts",
       "serverConfigSet": "evals_agent_builder",
       "tags": [
         "platform",
@@ -119,66 +119,6 @@
             "evals/ki_feature_exclusion/ki_feature_exclusion.spec.ts"
           ]
         }
-      ],
-      "weeklyEisModelGroups": [
-        "eis/anthropic-claude-4.6-sonnet",
-        "eis/anthropic-claude-4.6-opus",
-        "eis/anthropic-claude-4.8-opus",
-        "eis/openai-gpt-5.2",
-        "eis/openai-gpt-5.4",
-        "eis/openai-gpt-5.4-mini",
-        "eis/openai-gpt-5.4-nano",
-        "eis/openai-gpt-5.6-luna",
-        "eis/openai-gpt-5.6-terra",
-        "eis/openai-gpt-oss-120b"
-      ],
-      "specModelGroups": [
-        {
-          "files": ["evals/discovery/discovery.spec.ts"],
-          "models": [
-            "eis/anthropic-claude-4.6-sonnet",
-            "eis/openai-gpt-5.4",
-            "eis/openai-gpt-5.6-terra",
-            "eis/openai-gpt-5.2",
-            "eis/anthropic-claude-4.6-opus",
-            "eis/anthropic-claude-4.8-opus"
-          ]
-        },
-        {
-          "files": ["evals/ki_query_generation/ki_query_generation.spec.ts"],
-          "models": [
-            "eis/anthropic-claude-4.6-sonnet",
-            "eis/openai-gpt-5.4",
-            "eis/openai-gpt-oss-120b",
-            "eis/anthropic-claude-4.8-opus"
-          ]
-        },
-        {
-          "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"],
-          "models": [
-            "eis/openai-gpt-5.6-luna",
-            "eis/openai-gpt-oss-120b",
-            "eis/openai-gpt-5.4",
-            "eis/openai-gpt-5.4-nano",
-            "eis/anthropic-claude-4.6-sonnet"
-          ]
-        },
-        {
-          "files": ["evals/ki_feature_deduplication/ki_feature_deduplication.spec.ts"],
-          "models": [
-            "eis/anthropic-claude-4.6-sonnet",
-            "eis/openai-gpt-5.4",
-            "eis/openai-gpt-5.4-mini"
-          ]
-        },
-        {
-          "files": ["evals/ki_feature_exclusion/ki_feature_exclusion.spec.ts"],
-          "models": [
-            "eis/anthropic-claude-4.6-sonnet",
-            "eis/openai-gpt-5.4",
-            "eis/openai-gpt-5.4-mini"
-          ]
-        }
       ]
     },
     {
@@ -198,7 +138,25 @@
       "ciLabels": [
         "evals:nightshift-investigations"
       ],
-      "stepTimeoutInMinutes": 60
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-5.5-sonnet",
+        "eis/openai-gpt-5.6-sol",
+        "eis/openai-gpt-5.6-terra"
+      ],
+      "stepTimeoutInMinutes": 240,
+      "shards": [
+        {
+          "id": "customer0",
+          "specFiles": [
+            "evals/smoke/smoke.spec.ts",
+            "evals/investigation/investigation.spec.ts"
+          ]
+        },
+        {
+          "id": "orcabench",
+          "specFiles": ["evals/investigation/orcabench.spec.ts"]
+        }
+      ]
     },
     {
       "id": "llm-tasks",
@@ -575,6 +533,20 @@
         "evals:siem-readiness"
       ],
       "serverConfigSet": "evals_tracing"
+    },
+    {
+      "id": "automatic-import",
+      "name": "Automatic Import",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-automatic-import/playwright.config.ts",
+      "tags": [
+        "platform",
+        "automatic-import"
+      ],
+      "ciLabels": [
+        "evals:automatic-import"
+      ],
+      "stepTimeoutInMinutes": 240,
+      "serverConfigSet": "evals_automatic_import"
     }
   ]
 }

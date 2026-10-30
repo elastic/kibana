@@ -208,7 +208,7 @@ export const GcpIam: ConnectorSpec = {
   metadata: {
     id: '.gcp_iam',
     displayName: 'Google Cloud IAM',
-    description: i18n.translate('core.kibanaConnectorSpecs.gcpIam.metadata.description', {
+    description: i18n.translate('connectorSpecs.gcpIam.metadata.description', {
       defaultMessage:
         'Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings in Google Cloud IAM',
     }),
@@ -229,10 +229,10 @@ export const GcpIam: ConnectorSpec = {
         .optional()
         .describe('Optional default Google Cloud project id used when an action omits one')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.gcpIam.config.defaultProjectId', {
+          label: i18n.translate('connectorSpecs.gcpIam.config.defaultProjectId', {
             defaultMessage: 'Default project ID',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.gcpIam.config.defaultProjectIdHelp', {
+          helpText: i18n.translate('connectorSpecs.gcpIam.config.defaultProjectIdHelp', {
             defaultMessage:
               'Optional. The project used when an action does not specify one, for example my-project-123. Actions that take an explicit project id always win.',
           }),
@@ -805,7 +805,7 @@ Gotchas:
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.gcpIam.test.description', {
+    description: i18n.translate('connectorSpecs.gcpIam.test.description', {
       defaultMessage:
         'Verifies the Google Cloud IAM connection by reading a predefined role definition',
     }),

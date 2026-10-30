@@ -8,7 +8,7 @@
  */
 
 import { applyConfigOverrides } from './serve';
-import { KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { KBN_SERVERLESS_UIAM_CERTS, kibanaDevServiceAccount } from '@kbn/dev-utils';
 
 describe('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
@@ -121,8 +121,8 @@ describe('applyConfigOverrides', () => {
             sharedSecret: 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=',
             url: 'https://localhost:8443',
             ssl: {
-              certificate: KBN_CERT_PATH,
-              key: KBN_KEY_PATH,
+              certificate: KBN_SERVERLESS_UIAM_CERTS.search.certPath,
+              key: KBN_SERVERLESS_UIAM_CERTS.search.keyPath,
               verificationMode: 'none',
             },
           },
@@ -130,6 +130,24 @@ describe('applyConfigOverrides', () => {
       },
     });
   });
+
+  it.each(['search', 'observability', 'security', 'vectordb'])(
+    'presents the UIAM certificate of the %s Serverless project type',
+    (projectType) => {
+      const { xpack } = applyConfigOverrides(
+        { xpack: { cloud: { serverless: { project_type: projectType } } } },
+        { dev: true, serverless: true, uiam: true },
+        {},
+        {}
+      );
+
+      expect(xpack.security.uiam.ssl).toEqual({
+        certificate: KBN_SERVERLESS_UIAM_CERTS[projectType].certPath,
+        key: KBN_SERVERLESS_UIAM_CERTS[projectType].keyPath,
+        verificationMode: 'none',
+      });
+    }
+  );
 
   it('alters config to enable SAML Mock IdP in stateful dev mode', () => {
     expect(applyConfigOverrides({}, { dev: true }, {}, {})).toEqual({

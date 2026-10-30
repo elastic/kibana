@@ -68,6 +68,21 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import { EpisodesKpis } from '@kbn/alerting-v2-episodes-ui/components/episodes_kpis';
+import { EpisodesHistogram } from '@kbn/alerting-v2-episodes-ui/components/episodes_histogram';
+import { ClassicAlertDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/classic_alert_details_flyout';
+import { useEpisodesBulkActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_bulk_actions';
+import { alertEpisodeToDataTableRecord } from '@kbn/alerting-v2-episodes-ui/utils/alert_episode_to_data_table_record';
+import { dataTableRecordToEpisode } from '@kbn/alerting-v2-episodes-ui/utils/data_table_record_to_episode';
+import {
+  canOpenDiscover,
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
+import {
+  filterAlertActionsByPrivilege,
+  ALERT_ACTIONS_PRIVILEGE,
+} from '@kbn/alerting-v2-episodes-ui/utils/filter_alert_actions_by_privilege';
 import {
   DEFAULT_EPISODES_TABLE_SORT,
   DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
@@ -81,25 +96,10 @@ import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
-import { EpisodesKpis } from './components/episodes_kpis';
-import { EpisodesHistogram } from './components/episodes_histogram';
-import { alertEpisodeToDataTableRecord } from './utils';
-import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
-import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { getQueryFilterState } from './utils/episodes_query_filter';
-import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
-import {
-  canOpenDiscover,
-  getDiscoverHrefForAlertEventsHistory,
-  getDiscoverHrefForRuleAndAlertTimestamp,
-} from '../../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_alert_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
@@ -157,10 +157,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object
   ])
 );
 
-// The table fills the space left below the KPIs and the histogram. On short viewports that space
-// only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
-// scroll instead.
-const MIN_TABLE_HEIGHT = 400;
+/*
+ * The table has a fixed height, independent of the KPIs and the histogram above it, so the grid
+ * always measures a definite height and virtualizes rows.
+ */
+const TABLE_HEIGHT = 400;
 
 /**
  * Two reasons this is a whole pixel value rather than the `1.6em` default:
@@ -687,6 +688,7 @@ const AlertsListPageContent = () => {
           flex: 1;
           min-width: 0;
           ${logicalCSS('min-height')}: 0;
+          overflow-y: auto;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -717,10 +719,11 @@ const AlertsListPageContent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem
-          grow
+          grow={false}
           css={css`
             min-width: 0;
-            ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
+            flex-shrink: 0;
+            ${logicalCSS('height', `${TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup
@@ -728,6 +731,7 @@ const AlertsListPageContent = () => {
             gutterSize="xs"
             responsive={false}
             css={css`
+              flex-grow: 1;
               ${logicalCSS('min-height')}: 0;
             `}
           >
@@ -767,7 +771,11 @@ const AlertsListPageContent = () => {
                     customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
                     externalCustomRenderers={externalCustomRenderers}
                     rows={rows}
-                    totalHits={!episodesData?.length ? 0 : ALERT_EPISODES_LIST_PAGE_SIZE + 1}
+                    // Report one more hit than the cap only when the list is capped, so the
+                    // grid footer shows the max limit callout and nothing else
+                    totalHits={
+                      isEpisodeListCapped ? ALERT_EPISODES_LIST_PAGE_SIZE + 1 : loadedEpisodesCount
+                    }
                     loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                     isPaginationEnabled
                     paginationMode="singlePage"

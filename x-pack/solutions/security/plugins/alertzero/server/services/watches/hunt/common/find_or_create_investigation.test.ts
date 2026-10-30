@@ -17,7 +17,7 @@ import type { FindOrCreateConversationClient } from './find_or_create_investigat
 
 const spaceId = 'default';
 const reportId = 'rpt-find-or-create-1';
-const conversationId = buildHuntInvestigationConversationId(reportId);
+const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
 const triggerAttachmentId = buildHuntTriggerAttachmentId({ spaceId, reportId });
 
 const buildClient = (
@@ -74,6 +74,23 @@ describe('runFindOrCreateInvestigation', () => {
         title: reportId,
         templateId: TEMPLATE_ID_INVESTIGATION,
       })
+    );
+    expect(conversationClient.get).not.toHaveBeenCalled();
+  });
+
+  it('mints a separate Investigation for the same report in another space', async () => {
+    const otherSpaceId = 'hunt-b';
+    const conversationClient = buildClient();
+
+    const output = await runFindOrCreateInvestigation(
+      { spaceId: otherSpaceId, reportId },
+      { conversationClient }
+    );
+
+    expect(output.created).toBe(true);
+    expect(output.investigationConversationId).not.toBe(conversationId);
+    expect(output.investigationConversationId).toBe(
+      buildHuntInvestigationConversationId({ spaceId: otherSpaceId, reportId })
     );
     expect(conversationClient.get).not.toHaveBeenCalled();
   });

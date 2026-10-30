@@ -16,6 +16,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
@@ -24,10 +25,12 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
+  MANAGE_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
+  ONBOARDING_PATH,
 } from '../common/constants';
 import type {
   FactoryQueryTypes,
@@ -184,6 +187,13 @@ export const isDashboardViewPath = (pathname: string): boolean =>
     strict: false,
   }) != null;
 
+export const isOnboardingPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: ONBOARDING_PATH,
+    exact: false,
+    strict: false,
+  }) != null;
+
 /**
  * Matches the Add Elastic rules page, whose app header owns the page actions.
  */
@@ -211,12 +221,28 @@ export const isRulesManagementPath = (pathname: string): boolean =>
     strict: false,
   });
 
+export const isCloudSecurityPosturePath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+    strict: false,
+  });
+
 /**
- * Matches the Shared Exception Lists page, whose app header owns the page actions.
+ * Matches the Shared Exception Lists and Exception list details pages, whose app headers own the page actions.
  */
-export const isSharedExceptionListsPath = (pathname: string): boolean =>
+export const isExceptionsPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: EXCEPTIONS_PATH,
+    exact: false,
+    strict: false,
+  });
+
+/**
+ * Matches the Manage landing page, whose app header owns the page actions.
+ */
+export const isManageLandingPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: MANAGE_PATH,
     exact: true,
     strict: false,
   });

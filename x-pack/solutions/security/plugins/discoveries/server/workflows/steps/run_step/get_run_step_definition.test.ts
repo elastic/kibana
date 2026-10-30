@@ -317,6 +317,29 @@ describe('getRunStepDefinition', () => {
       );
     });
 
+    it('forwards a feature_id list in order', async () => {
+      const contextWithFeatureList = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          feature_id: ['alertzero_template_models', 'alertzero_frontier'],
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithFeatureList as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureId: ['alertzero_template_models', 'alertzero_frontier'],
+        })
+      );
+    });
+
     // `connector_id` stays the top of the resolution order, so a caller that names
     // an endpoint outright is never overridden by a tier.
     it('does not resolve a tier when connector_id and feature_id are both provided', async () => {
@@ -781,6 +804,33 @@ describe('getRunStepDefinition', () => {
             skill_enabled: false,
           }),
         })
+      );
+    });
+  });
+
+  describe('generation_source', () => {
+    it('forwards the input to the workflow config', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: { ...syncMockContext.input, generation_source: 'watch_floor_ad_worker' },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({ generation_source: 'watch_floor_ad_worker' }),
+        })
+      );
+    });
+
+    it('leaves it out of the workflow config when omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0].workflowConfig).not.toHaveProperty(
+        'generation_source'
       );
     });
   });
