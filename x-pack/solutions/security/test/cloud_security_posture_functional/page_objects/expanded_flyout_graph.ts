@@ -32,7 +32,6 @@ const {
   GRAPH_IPS_POPOVER_CONTENT_ID,
   GRAPH_IPS_POPOVER_IP_ID,
   GRAPH_IPS_POPOVER_IP_LINK_ID,
-  PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
   GRAPH_NODE_ENTITY_TAG_TEXT_ID,
@@ -42,8 +41,9 @@ const {
   GROUPED_ITEM_TEST_ID,
   GROUPED_ITEM_ACTOR_TEST_ID,
   GROUPED_ITEM_TARGET_TEST_ID,
-  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
-  PREVIEW_SECTION_TEST_ID,
+  GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID,
+  NETWORK_FLYOUT_HEADER_TEXT_TEST_ID,
+  FLYOUT_MENU_BACK_BUTTON_TEST_ID,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
@@ -337,8 +337,11 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await firstIpElement.click();
   }
 
-  async assertPreviewPopoverIsOpen(): Promise<void> {
-    await this.testSubjects.existOrFail(PREVIEW_SECTION_BANNER_PANEL);
+  /**
+   * Asserts the network (IP) flyout opened as a child flyout of the graph's main flyout.
+   */
+  async assertNetworkFlyoutIsOpen(): Promise<void> {
+    await this.testSubjects.existOrFail(NETWORK_FLYOUT_HEADER_TEXT_TEST_ID, { timeout: 10000 });
   }
 
   async assertIpsPopoverContainsIps(expectedIps: string[]): Promise<void> {
@@ -381,7 +384,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async assertPreviewPanelGroupedItemTitleTextNumber(expected: number): Promise<void> {
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      await this.assertGroupedNodePanelIsOpen();
       const titleTextElements = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_TEXT);
       expect(titleTextElements.length).to.be(expected);
     });
@@ -389,14 +392,31 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
 
   async assertPreviewPanelGroupedItemTitleLinkNumber(expected: number): Promise<void> {
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      await this.assertGroupedNodePanelIsOpen();
       const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TITLE_TEST_ID_LINK);
       expect(groupedItems.length).to.be(expected);
     });
   }
 
-  async closePreviewSection(): Promise<void> {
-    await this.testSubjects.click(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID);
+  /**
+   * Asserts the grouped node panel (opened from a grouped graph node) is rendered. It opens as a
+   * child flyout that replaces the graph tool flyout in the flyout system's child slot.
+   */
+  async assertGroupedNodePanelIsOpen(): Promise<void> {
+    await this.testSubjects.existOrFail(GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID, {
+      timeout: 10000,
+    });
+  }
+
+  /**
+   * Navigates back from a child flyout opened from the graph (grouped node panel, entity, network
+   * or document flyout) to the graph tool flyout, using the flyout system's Back button. Closing
+   * the child flyout instead would also close the graph, as both share the child slot.
+   */
+  async goBackToGraph(): Promise<void> {
+    await this.testSubjects.click(FLYOUT_MENU_BACK_BUTTON_TEST_ID);
+    await this.testSubjects.missingOrFail(GROUPED_NODE_PREVIEW_PANEL_CONTENT_BODY_TEST_ID);
+    await this.waitGraphIsLoaded();
   }
 
   async assertGroupedItemActorAndTargetValues(
@@ -405,7 +425,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     target: string
   ): Promise<void> {
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      await this.assertGroupedNodePanelIsOpen();
       const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
       expect(groupedItems.length).to.be.greaterThan(0);
 

@@ -17,17 +17,14 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { createTelemetryServiceMock } from '../../../lib/telemetry/telemetry_service.mock';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../mock/expandable_flyout';
 import { useUserPrivileges } from '../../user_privileges';
 import { initialUserPrivilegesState } from '../../user_privileges/user_privileges_context';
-import { useIsNewFlyoutEnabled } from '../../../hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
-jest.mock('../../../hooks/use_is_new_flyout_enabled');
 jest.mock('../../../../flyout_v2/use_flyout_api');
 jest.mock('../../../hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
@@ -124,7 +121,6 @@ describe('RowAction', () => {
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
     (useRouteSpy as jest.Mock).mockReturnValue([mockRouteSpy]);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   test('displays expand events button', () => {
@@ -136,44 +132,7 @@ describe('RowAction', () => {
     expect(wrapper.getAllByTestId('expand-event')).not.toBeNull();
   });
 
-  test('should always show expandable flyout if the page is attackDiscovery', () => {
-    (useRouteSpy as jest.Mock).mockReturnValue([
-      { ...mockRouteSpy, pageName: SecurityPageName.attackDiscovery },
-    ]);
-    const wrapper = render(
-      <TestProviders>
-        <RowAction {...defaultProps} />
-      </TestProviders>
-    );
-    fireEvent.click(wrapper.getByTestId('expand-event'));
-    expect(mockDispatch).not.toHaveBeenCalled();
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: '1',
-          indexName: undefined,
-          scopeId: 'table-test',
-        },
-      },
-    });
-  });
-
-  test('should open the legacy expandable flyout when enableNewFlyout setting is disabled', () => {
-    const wrapper = render(
-      <TestProviders>
-        <RowAction {...defaultProps} />
-      </TestProviders>
-    );
-
-    fireEvent.click(wrapper.getByTestId('expand-event'));
-
-    expect(mockOpenFlyout).toHaveBeenCalled();
-    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
-  });
-
-  test('should open the new document flyout when enableNewFlyout setting is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+  test('should open the new document flyout', () => {
     const refetch = jest.fn();
 
     const wrapper = render(
@@ -216,8 +175,6 @@ describe('RowAction', () => {
   });
 
   test('binds the new document flyout cell actions to the table scope and details-flyout trigger', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
     const wrapper = render(
       <TestProviders>
         <RowAction {...defaultProps} tableId={TableId.hostsPageEvents} />
@@ -247,7 +204,6 @@ describe('RowAction', () => {
   });
 
   test('should open the pattern-based flyout for rule preview alerts, converting the backing index to its alias', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
     const backingIndex = '.internal.preview.alerts-security.alerts-default';
     const aliasIndex = '.preview.alerts-security.alerts-default';
 
@@ -297,22 +253,7 @@ describe('RowAction', () => {
       });
     });
 
-    test('should open the legacy expandable flyout when enableNewFlyout setting is disabled', () => {
-      const wrapper = render(
-        <TestProviders>
-          <RowAction {...defaultProps} />
-        </TestProviders>
-      );
-
-      fireEvent.click(wrapper.getByTestId('timeline-notes-button-small'));
-
-      expect(mockOpenFlyout).toHaveBeenCalled();
-      expect(flyoutApi.openNotes).not.toHaveBeenCalled();
-    });
-
-    test('should open the new notes flyout when enableNewFlyout setting is enabled', () => {
-      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
+    test('should open the new notes flyout', () => {
       const wrapper = render(
         <TestProviders>
           <RowAction {...defaultProps} />

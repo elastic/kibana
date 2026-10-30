@@ -9,13 +9,9 @@ import React, { memo, useCallback } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../data_view_manager/constants';
 import { OPEN_FLYOUT_BUTTON_TEST_ID } from './test_ids';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
-import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
@@ -53,43 +49,20 @@ export const OpenFlyoutButtonIcon = memo(
     const selectedPatterns = useSelectedPatterns(dataView);
 
     const { telemetry } = useKibana().services;
-    const { openFlyout } = useExpandableFlyoutApi();
-    const enableNewFlyout = useIsNewFlyoutEnabled();
     const { openDocumentFlyoutFromPattern } = useFlyoutApi();
 
     const handleClick = useCallback(() => {
       const indexName = selectedPatterns.join(',');
-      if (enableNewFlyout) {
-        openDocumentFlyoutFromPattern({
-          documentId: eventId,
-          indexName,
-          origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
-        });
-      } else {
-        openFlyout({
-          right: {
-            id: DocumentDetailsRightPanelKey,
-            params: {
-              id: eventId,
-              indexName,
-              scopeId: TableId.alertsOnAlertsPage, // TODO we should update the flyout's code to separate scopeId and preview
-            },
-          },
-        });
-      }
+      openDocumentFlyoutFromPattern({
+        documentId: eventId,
+        indexName,
+        origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+      });
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
         location: timelineId,
         panel: 'right',
       });
-    }, [
-      eventId,
-      openFlyout,
-      selectedPatterns,
-      telemetry,
-      timelineId,
-      enableNewFlyout,
-      openDocumentFlyoutFromPattern,
-    ]);
+    }, [eventId, selectedPatterns, telemetry, timelineId, openDocumentFlyoutFromPattern]);
 
     return (
       <EuiToolTip content={OPEN_FLYOUT_BUTTON} disableScreenReaderOutput>
