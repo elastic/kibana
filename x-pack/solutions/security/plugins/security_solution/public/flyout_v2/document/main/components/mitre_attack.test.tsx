@@ -89,8 +89,8 @@ describe('<MitreAttack />', () => {
     const { getAllByTestId } = renderMitreAttack(hit);
 
     expect(getAllByTestId('threatFrameworkGroupTitle').map((title) => title.textContent)).toEqual([
-      'MITRE ATT&CK',
-      'MITRE ATLAS',
+      'MITRE ATT&CK®',
+      'MITRE ATLAS™',
     ]);
   });
 
