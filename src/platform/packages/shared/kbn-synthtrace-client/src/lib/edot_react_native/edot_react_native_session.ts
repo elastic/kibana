@@ -9,8 +9,8 @@
 
 import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
-import { sample, type Distribution } from '../edot_browser/health_profiles';
-import { between, pick, randomHex } from '../edot_browser/random';
+import { sample, type Distribution } from '../edot_shared/health_profiles';
+import { between, pick, randomHex } from '../edot_shared/random';
 import type { MobilePlatform } from './device_profiles';
 import type { EdotReactNativeClient } from './edot_react_native_client';
 import type { EdotReactNativeSpanDocument } from './edot_react_native_span';

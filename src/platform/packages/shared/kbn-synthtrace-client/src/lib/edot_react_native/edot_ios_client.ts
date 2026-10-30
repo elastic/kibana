@@ -8,14 +8,14 @@
  */
 
 import type { OtelScope } from '../otel_logs';
+import { SEVERITY_FATAL } from '../edot_shared/constants';
+import type { EdotLog } from '../edot_shared/edot_log';
 import {
   EdotReactNativeClientBase,
-  SEVERITY_FATAL,
   type CrashOptions,
   type HttpExceptionEventOptions,
   type HttpRequestOptions,
 } from './edot_react_native_client';
-import type { EdotReactNativeLog } from './edot_react_native_log';
 import type { EdotReactNativeSpan } from './edot_react_native_span';
 
 const HTTP_SCOPE: OtelScope = { name: 'NSURLSession', version: '1.0.0' };
@@ -110,7 +110,7 @@ export class EdotIosClient extends EdotReactNativeClientBase {
     statusCode,
     errorType,
     errorMessage = '',
-  }: HttpExceptionEventOptions): EdotReactNativeLog | undefined {
+  }: HttpExceptionEventOptions): EdotLog | undefined {
     const ids = { traceId, spanId };
     if (errorType !== undefined) {
       return this.exceptionEvent(
@@ -133,7 +133,7 @@ export class EdotIosClient extends EdotReactNativeClientBase {
    * A crash as PLCrashReporter records it, which EDOT iOS reports on the next launch, so set
    * `observedAt` to the crash time.
    */
-  crash({ type, message, stacktrace }: CrashOptions): EdotReactNativeLog {
+  crash({ type, message, stacktrace }: CrashOptions): EdotLog {
     // The crash reporter skips the log processors, so only the session and connection are set
     return this.log(
       CRASH_SCOPE,
@@ -169,7 +169,7 @@ export class EdotIosClient extends EdotReactNativeClientBase {
   }
 
   /** A UIApplication lifecycle notification. */
-  lifecycle(state: IosAppState): EdotReactNativeLog {
+  lifecycle(state: IosAppState): EdotLog {
     return this.log(
       LIFECYCLE_SCOPE,
       { 'ios.app.state': state, ...this.logAttributes },

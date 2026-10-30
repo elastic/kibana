@@ -9,20 +9,16 @@
 
 import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
+import { LOGS_INDEX, SEVERITY_ERROR, SEVERITY_FATAL, TRACES_INDEX } from '../edot_shared/constants';
+import { EdotLog } from '../edot_shared/edot_log';
+import { EdotSpan } from '../edot_shared/edot_span';
 import type { MobilePlatform } from './device_profiles';
 import type { EdotAndroidClient } from './edot_android_client';
 import type { EdotIosClient } from './edot_ios_client';
-import { EdotReactNativeLog } from './edot_react_native_log';
-import { EdotReactNativeSpan } from './edot_react_native_span';
-
-const LOGS_INDEX = 'logs-generic.otel-default';
-const TRACES_INDEX = 'traces-generic.otel-default';
+import type { EdotReactNativeSpan, EdotReactNativeSpanDocument } from './edot_react_native_span';
 
 const BRIDGE_SCOPE: OtelScope = { name: '@elastic/otel-react-native' };
 const INTERACTIONS_SCOPE: OtelScope = { name: '@elastic/otel-react-native.interactions' };
-
-const SEVERITY_ERROR = 17;
-export const SEVERITY_FATAL = 21;
 
 export type NetworkConnectionType = 'wifi' | 'cell' | 'unavailable' | 'unknown';
 
@@ -108,10 +104,10 @@ export abstract class EdotReactNativeClientBase {
   abstract httpRequest(options: HttpRequestOptions): EdotReactNativeSpan;
 
   /** The `exception` span event of a failed HTTP request, or undefined when the SDK adds none. */
-  abstract httpExceptionEvent(options: HttpExceptionEventOptions): EdotReactNativeLog | undefined;
+  abstract httpExceptionEvent(options: HttpExceptionEventOptions): EdotLog | undefined;
 
   /** A crash as the platform's crash reporter records it. */
-  abstract crash(options: CrashOptions): EdotReactNativeLog;
+  abstract crash(options: CrashOptions): EdotLog;
 
   /** The device resource attributes the SDK adds itself. */
   protected deviceAttributes(): Record<string, string> {
@@ -182,8 +178,8 @@ export abstract class EdotReactNativeClientBase {
     scope: OtelScope,
     attributes: Record<string, unknown>,
     { eventName, severityNumber }: { eventName?: string; severityNumber?: number } = {}
-  ): EdotReactNativeLog {
-    const log = new EdotReactNativeLog({ _index: LOGS_INDEX })
+  ): EdotLog {
+    const log = new EdotLog({ _index: LOGS_INDEX })
       .scope(scope)
       .addResourceAttributes(this.resourceAttributes)
       .addAttributes(attributes);
@@ -201,7 +197,7 @@ export abstract class EdotReactNativeClientBase {
     scope: OtelScope,
     exception: Record<string, string>,
     { traceId, spanId }: { traceId: string; spanId: string }
-  ): EdotReactNativeLog {
+  ): EdotLog {
     return this.log(scope, exception, { eventName: 'exception' }).traceContext({ traceId, spanId });
   }
 
@@ -215,7 +211,7 @@ export abstract class EdotReactNativeClientBase {
     spanId = generateShortId(),
     parentSpanId,
   }: SpanOptions): EdotReactNativeSpan {
-    return new EdotReactNativeSpan({
+    return new EdotSpan<EdotReactNativeSpanDocument>({
       _index: TRACES_INDEX,
       trace_id: traceId,
       span_id: spanId,
@@ -250,14 +246,14 @@ export abstract class EdotReactNativeClientBase {
   }
 
   /** A log the app emits with `emitLog(message, 'error')` of `@elastic/otel-react-native`. */
-  errorLog(message: string): EdotReactNativeLog {
+  errorLog(message: string): EdotLog {
     return this.log(BRIDGE_SCOPE, this.logAttributes, { severityNumber: SEVERITY_ERROR }).message(
       message
     );
   }
 
   /** A tap recorded by the Babel plugin of `@elastic/otel-react-native`, or `recordWidgetClick()`. */
-  widgetClick({ id, name }: { id: string; name?: string }): EdotReactNativeLog {
+  widgetClick({ id, name }: { id: string; name?: string }): EdotLog {
     return this.log(
       INTERACTIONS_SCOPE,
       {

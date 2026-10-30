@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Distribution, HealthProfileName } from '../edot_browser/health_profiles';
+import type { Distribution, HealthProfileName } from '../edot_shared/health_profiles';
 
 export interface MobileHealthProfile {
   name: HealthProfileName;

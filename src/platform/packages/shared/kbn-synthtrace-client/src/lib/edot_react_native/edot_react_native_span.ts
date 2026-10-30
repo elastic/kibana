@@ -7,18 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EdotBrowserSpanDocument } from '../edot_browser/edot_browser_span';
-import { Serializable } from '../serializable';
+import type { EdotSpan, EdotSpanDocument } from '../edot_shared/edot_span';
 
-export type EdotReactNativeSpanDocument = Omit<EdotBrowserSpanDocument, 'kind' | 'status'> & {
-  kind: 'Client' | 'Internal';
-  status: { code: 'Unset' | 'Ok' | 'Error' };
-};
+export type EdotReactNativeSpanDocument = EdotSpanDocument<
+  'Client' | 'Internal',
+  'Unset' | 'Ok' | 'Error'
+>;
 
-/** OTel-native span of EDOT Android or EDOT iOS, as stored by the Elasticsearch exporter. */
-export class EdotReactNativeSpan extends Serializable<EdotReactNativeSpanDocument> {
-  duration(durationMs: number) {
-    this.fields.duration = Math.round(durationMs * 1_000_000);
-    return this;
-  }
-}
+/** OTel-native span of EDOT Android or EDOT iOS. */
+export type EdotReactNativeSpan = EdotSpan<EdotReactNativeSpanDocument>;

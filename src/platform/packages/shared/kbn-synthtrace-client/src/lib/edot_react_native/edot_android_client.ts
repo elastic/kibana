@@ -8,13 +8,13 @@
  */
 
 import type { OtelScope } from '../otel_logs';
+import type { EdotLog } from '../edot_shared/edot_log';
 import {
   EdotReactNativeClientBase,
   type CrashOptions,
   type HttpExceptionEventOptions,
   type HttpRequestOptions,
 } from './edot_react_native_client';
-import type { EdotReactNativeLog } from './edot_react_native_log';
 import type { EdotReactNativeSpan } from './edot_react_native_span';
 
 // The OkHttp instrumentation version EDOT Android 1.10.0 ships with
@@ -115,7 +115,7 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     spanId,
     errorType,
     errorMessage = '',
-  }: HttpExceptionEventOptions): EdotReactNativeLog | undefined {
+  }: HttpExceptionEventOptions): EdotLog | undefined {
     if (errorType === undefined) {
       return undefined;
     }
@@ -130,7 +130,7 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     );
   }
 
-  crash({ type, message, stacktrace }: CrashOptions): EdotReactNativeLog {
+  crash({ type, message, stacktrace }: CrashOptions): EdotLog {
     return this.log(
       CRASH_SCOPE,
       {
