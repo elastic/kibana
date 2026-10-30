@@ -9,7 +9,8 @@ import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zo
 
 import {
   StopAutoImportDataStreamRequestParams,
-  UpdateDataStreamPipelineRequestBody,
+  ApplyDataStreamEditsRequestBody,
+  ApplyDataStreamEditsResponse,
   UploadSamplesToDataStreamRequestParams,
   UploadSamplesToDataStreamRequestBody,
   UploadSamplesToDataStreamResponse,
@@ -528,7 +529,7 @@ describe('data stream schemas', () => {
     });
   });
 
-  describe('UpdateDataStreamPipelineRequestBody', () => {
+  describe('ApplyDataStreamEditsRequestBody', () => {
     it('rejects object ingest_pipeline with more than 10000 processors', () => {
       const payload = {
         ingest_pipeline: {
@@ -536,7 +537,7 @@ describe('data stream schemas', () => {
         },
       };
 
-      const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);
+      const result = ApplyDataStreamEditsRequestBody.safeParse(payload);
       expectParseError(result);
     });
 
@@ -545,9 +546,10 @@ describe('data stream schemas', () => {
         ingest_pipeline: {
           processors: Array.from({ length: 10000 }, () => ({})),
         },
+        version: 'WzEsMV0=',
       };
 
-      const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);
+      const result = ApplyDataStreamEditsRequestBody.safeParse(payload);
       expectParseSuccess(result);
     });
 
@@ -557,10 +559,67 @@ describe('data stream schemas', () => {
         extra: true,
       };
 
-      const result = UpdateDataStreamPipelineRequestBody.safeParse(payload);
+      const result = ApplyDataStreamEditsRequestBody.safeParse(payload);
       expectParseError(result);
 
       expect(stringifyZodError(result.error)).toMatch(/unrecognized|Unrecognized/i);
+    });
+
+    it('accepts field type changes and dry_run', () => {
+      const result = ApplyDataStreamEditsRequestBody.safeParse({
+        ingest_pipeline: '{"processors":[]}',
+        changes: [{ name: 'source.bytes', type: 'long' }],
+        version: 'WzEsMV0=',
+        dry_run: true,
+      });
+      expectParseSuccess(result);
+    });
+
+    it('rejects more than 1000 field type changes', () => {
+      const result = ApplyDataStreamEditsRequestBody.safeParse({
+        ingest_pipeline: '{"processors":[]}',
+        changes: Array.from({ length: 1001 }, (_, index) => ({ name: `f${index}`, type: 'long' })),
+        version: 'WzEsMV0=',
+      });
+      expectParseError(result);
+    });
+
+    it('accepts acknowledge_breaking_changes', () => {
+      const result = ApplyDataStreamEditsRequestBody.safeParse({
+        ingest_pipeline: '{"processors":[]}',
+        version: 'WzEsMV0=',
+        acknowledge_breaking_changes: true,
+      });
+      expectParseSuccess(result);
+    });
+
+    it('rejects a non-boolean acknowledge_breaking_changes', () => {
+      const result = ApplyDataStreamEditsRequestBody.safeParse({
+        ingest_pipeline: '{"processors":[]}',
+        version: 'WzEsMV0=',
+        acknowledge_breaking_changes: 'yes',
+      });
+      expectParseError(result);
+    });
+  });
+
+  describe('ApplyDataStreamEditsResponse', () => {
+    const failure = { status: 'failure', field_errors: [] };
+
+    it('accepts a failure that lists removed approved fields', () => {
+      const result = ApplyDataStreamEditsResponse.safeParse({
+        ...failure,
+        removed_approved_fields: ['user.name'],
+      });
+      expectParseSuccess(result);
+    });
+
+    it('rejects more than 10000 removed approved fields', () => {
+      const result = ApplyDataStreamEditsResponse.safeParse({
+        ...failure,
+        removed_approved_fields: Array.from({ length: 10001 }, (_, index) => `f${index}`),
+      });
+      expectParseError(result);
     });
   });
 });
