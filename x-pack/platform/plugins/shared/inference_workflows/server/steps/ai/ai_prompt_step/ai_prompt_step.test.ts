@@ -75,6 +75,7 @@ describe('aiPromptStepDefinition', () => {
 
     mockInference = {
       getChatModel: jest.fn().mockResolvedValue(mockChatModel),
+      resolveFeatureConnector: jest.fn(),
     } as any;
 
     mockSearchInferenceEndpoints = {
@@ -848,6 +849,9 @@ describe('aiPromptStepDefinition', () => {
             return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
           }
         );
+        mockInference.resolveFeatureConnector.mockResolvedValue({
+          connectorId: 'template-connector',
+        } as InferenceConnector);
         mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
         const contextWithFeature = {
           ...mockContext,
@@ -858,6 +862,10 @@ describe('aiPromptStepDefinition', () => {
 
         await handler(contextWithFeature);
 
+        expect(mockInference.resolveFeatureConnector).toHaveBeenCalledWith(
+          'alertzero_template_models',
+          expect.anything()
+        );
         expect(mockInference.getChatModel).toHaveBeenCalledWith(
           expect.objectContaining({ connectorId: 'template-connector' })
         );
@@ -886,6 +894,9 @@ describe('aiPromptStepDefinition', () => {
         mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
           endpoints: [{ connectorId: 'gemini-flash-connector' }],
         });
+        mockInference.resolveFeatureConnector.mockResolvedValue({
+          connectorId: 'gemini-flash-connector',
+        } as InferenceConnector);
         mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
 
         await handler(contextWithFeature);
@@ -894,6 +905,10 @@ describe('aiPromptStepDefinition', () => {
           'context_engine_prompt',
           expect.any(Object),
           { onlyReturnConfigured: true }
+        );
+        expect(mockInference.resolveFeatureConnector).toHaveBeenCalledWith(
+          'context_engine_prompt',
+          expect.any(Object)
         );
         expect(mockResolveConnectorId).not.toHaveBeenCalled();
         expect(mockInference.getChatModel).toHaveBeenCalledWith(
@@ -933,6 +948,9 @@ describe('aiPromptStepDefinition', () => {
           mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
             endpoints: [{ connectorId: 'gemini-flash-connector' }],
           });
+          mockInference.resolveFeatureConnector.mockResolvedValue({
+            connectorId: 'gemini-flash-connector',
+          } as InferenceConnector);
           mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
 
           await handler(contextWithBlankConnector);

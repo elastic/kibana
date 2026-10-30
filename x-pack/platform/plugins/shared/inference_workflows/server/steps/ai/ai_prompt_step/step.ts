@@ -18,7 +18,7 @@ import {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   normalizeConnectorFeatureIds,
-  resolveConnectorIdFromFeatures,
+  resolveFeatureIdFromFeatures,
 } from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
@@ -179,7 +179,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       }
       const request = context.contextManager.getFakeRequest();
 
-      const connectorIdFromFeatures = await resolveConnectorIdFromFeatures({
+      const featureIdFromFeatures = await resolveFeatureIdFromFeatures({
         featureIds,
         request,
         searchInferenceEndpoints,
@@ -187,12 +187,13 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         conflictMessage:
           'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.',
       });
-      const resolvedConnectorId =
-        connectorIdFromFeatures ??
-        (await resolveConnectorId(connectorId, inference, request, {
-          featureId: AI_PROMPT_FEATURE_ID,
-          searchInferenceEndpoints,
-        }));
+      // The winning feature's connector is resolved by the inference plugin, like any feature.
+      const resolvedConnectorId = featureIdFromFeatures
+        ? (await inference.resolveFeatureConnector(featureIdFromFeatures, request)).connectorId
+        : await resolveConnectorId(connectorId, inference, request, {
+            featureId: AI_PROMPT_FEATURE_ID,
+            searchInferenceEndpoints,
+          });
 
       const reasoningLevel = context.config['reasoning-level'];
       const maxContentLength = parseMaxStepSize(context.config['max-step-size']);
