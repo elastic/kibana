@@ -2033,6 +2033,7 @@ describe('Connector metrics', () => {
     jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
     jest.spyOn(connectorExecuteDuration, 'record').mockImplementation(() => {});
     jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+    connectorTypeRegistry.isSpecActionType.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -2057,12 +2058,33 @@ describe('Connector metrics', () => {
     expect(connectorExecuteCounter.add).toHaveBeenCalledTimes(1);
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
     expect(connectorExecuteDuration.record).toHaveBeenCalledWith(expect.any(Number), {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
+  });
+
+  test('flags a spec-based connector type', async () => {
+    mockConnector();
+    connectorTypeRegistry.isSpecActionType.mockReturnValueOnce(true);
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({ actionId: CONNECTOR_ID, status: 'ok' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ 'connector.spec_based': true })
+    );
   });
 
   test('records a failed execution with its error source', async () => {
@@ -2075,6 +2097,9 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'other',
       'error.source': 'user',
@@ -2096,6 +2121,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'disabled',
       'error.source': 'framework',
@@ -2111,6 +2138,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'rate_limited',
       'error.source': 'user',
@@ -2125,6 +2154,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'invalid',
       'error.source': 'user',
@@ -2155,6 +2186,9 @@ describe('Connector metrics', () => {
     });
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'auth_failed',
       'error.source': 'user',
