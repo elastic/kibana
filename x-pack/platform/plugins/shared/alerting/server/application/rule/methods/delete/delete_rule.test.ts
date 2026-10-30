@@ -6,6 +6,7 @@
  */
 
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { deleteLegacyActionsForRules } from '../../../../rules_client/lib';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -20,6 +21,13 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
 }));
 
 jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 const softDeleteGapsMock = softDeleteGaps as jest.Mock;
 
@@ -136,6 +144,42 @@ describe('delete()', () => {
       }
     );
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  test('deletes the legacy actions of a SIEM rule after the rule is deleted', async () => {
+    (deleteLegacyActionsForRules as jest.Mock).mockClear();
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: { ...existingDecryptedAlert.attributes, consumer: 'siem' },
+    });
+
+    await rulesClient.delete({ id: '1' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.delete as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('keeps the legacy actions of a SIEM rule when deleting the rule fails', async () => {
+    (deleteLegacyActionsForRules as jest.Mock).mockClear();
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: { ...existingDecryptedAlert.attributes, consumer: 'siem' },
+    });
+    unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
+
+    await expect(rulesClient.delete({ id: '1' })).rejects.toThrow('Fail');
+
+    expect(deleteLegacyActionsForRules).not.toHaveBeenCalled();
+  });
+
+  test('does not look for legacy actions of rules that are not SIEM rules', async () => {
+    (deleteLegacyActionsForRules as jest.Mock).mockClear();
+
+    await rulesClient.delete({ id: '1' });
+
+    expect(deleteLegacyActionsForRules).not.toHaveBeenCalled();
   });
 
   test('invalidate UIAM API keys as well', async () => {
