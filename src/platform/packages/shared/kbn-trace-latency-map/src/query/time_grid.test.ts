@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQL_MAX_ROWS, LATENCY_MAP_ROWS, MAX_TIME_BINS } from './duration_rows';
 import { getTimeGrid, timeToEdge } from './time_grid';
 
 describe('getTimeGrid', () => {
@@ -19,6 +20,7 @@ describe('getTimeGrid', () => {
       binMs: 60_000,
       bins: 60,
       endMs: Date.parse(to),
+      startMs: Date.parse(from),
     });
     expect(Number.isInteger(getTimeGrid(from, to, 70).binMs)).toBe(true);
   });
@@ -47,6 +49,15 @@ describe('getTimeGrid', () => {
     expect(grid.endMs).toBe(Date.parse('2026-10-30T16:08:12.552Z'));
   });
 
+  it('fits one grid row per cell under the ES|QL row limit, even when alignment adds a column', () => {
+    // A misaligned range at the top tier: one second a column, the range starting mid-column.
+    const misalignedFrom = '2026-10-26T10:00:00.500Z';
+    const misalignedTo = new Date(Date.parse(misalignedFrom) + MAX_TIME_BINS * 1000).toISOString();
+    const grid = getTimeGrid(misalignedFrom, misalignedTo, MAX_TIME_BINS);
+    expect(grid.bins).toBe(MAX_TIME_BINS + 1);
+    expect(grid.bins * LATENCY_MAP_ROWS).toBeLessThanOrEqual(ESQL_MAX_ROWS);
+  });
+
   it('survives a range of nothing', () => {
     const grid = getTimeGrid(from, from, 60);
     expect(grid.bins).toBe(1);
@@ -59,6 +70,19 @@ describe('getTimeGrid', () => {
       expect(timeToEdge(grid, grid.fromMs)).toBe(0);
       expect(timeToEdge(grid, grid.fromMs + 90_000)).toBe(1.5);
       expect(timeToEdge(grid, grid.endMs)).toBe(60);
+    });
+
+    it('takes the start of the range as the first edge when the first column starts before it', () => {
+      // A live range: aligning the columns puts the first one 5,052 ms before the range.
+      const grid = getTimeGrid('2026-10-30T15:53:12.552Z', '2026-10-30T16:08:12.552Z', 120);
+      expect(grid.fromMs).toBeLessThan(grid.startMs);
+      expect(timeToEdge(grid, grid.startMs)).toBe(0);
+      // A time before the range never falls before the first edge.
+      expect(timeToEdge(grid, grid.fromMs)).toBe(0);
+      // The middle of what the first column has, and the edge where the second column begins.
+      const firstEnd = grid.fromMs + grid.binMs;
+      expect(timeToEdge(grid, (grid.startMs + firstEnd) / 2)).toBeCloseTo(0.5);
+      expect(timeToEdge(grid, firstEnd)).toBe(1);
     });
 
     it('takes the end of the range as the final edge when the last column reaches past it', () => {

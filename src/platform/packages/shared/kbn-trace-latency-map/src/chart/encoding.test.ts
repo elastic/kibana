@@ -87,7 +87,13 @@ describe('buildHeatmapData', () => {
   });
 
   it('adds each filler once when the grid has a single column', () => {
-    const single = { fromMs: timeGrid.fromMs, binMs: 1000, bins: 1, endMs: timeGrid.fromMs + 1000 };
+    const single = {
+      fromMs: timeGrid.fromMs,
+      binMs: 1000,
+      bins: 1,
+      endMs: timeGrid.fromMs + 1000,
+      startMs: timeGrid.fromMs,
+    };
     const data = buildHeatmapData({ ...gridOf([]), bins: 1 }, single, false);
     // One filler per row: the first and last column are the same one.
     expect(data).toHaveLength(LATENCY_MAP_ROWS);

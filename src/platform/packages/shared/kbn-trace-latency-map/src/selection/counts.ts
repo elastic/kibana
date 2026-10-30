@@ -47,8 +47,8 @@ export function getSelectionCounts({
   stats: DurationStats;
   selection: LatencyMapSelection;
 }): SelectionCounts {
-  // Edges are measured so that the last column, which may reach past the range, is as wide as the
-  // data it has: a selection over all of it covers all of it.
+  // Edges are measured so that the first and the last column, which may reach past the range, are
+  // as wide as the data they have: a selection over all of such a column covers all of it.
   const fromEdge = timeToEdge(timeGrid, Date.parse(selection.from));
   const toEdge = timeToEdge(timeGrid, Date.parse(selection.to));
   const rowOf = (duration: number) =>

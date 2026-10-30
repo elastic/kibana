@@ -17,8 +17,11 @@ export const LATENCY_MAP_ROWS = LATENCY_MAP_INNER_ROWS + 1;
 
 /** ES|QL returns at most this many rows, and drops the rest without an error. */
 export const ESQL_MAX_ROWS = 10_000;
-/** Time columns the grid query can return in full: one row per cell. */
-export const MAX_TIME_BINS = Math.floor(ESQL_MAX_ROWS / LATENCY_MAP_ROWS);
+/**
+ * Time columns the grid query can return in full: one row per cell, with one column held back
+ * because aligning the grid onto multiples of the column width can add a column over the target.
+ */
+export const MAX_TIME_BINS = Math.floor(ESQL_MAX_ROWS / LATENCY_MAP_ROWS) - 1;
 
 /** The shortest duration the rows tell apart, in nanoseconds: one, the unit of OTel durations. */
 export const MIN_DURATION = 1;

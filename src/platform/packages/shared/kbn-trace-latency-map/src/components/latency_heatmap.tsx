@@ -166,8 +166,9 @@ export const LatencyHeatmap = React.memo(function LatencyHeatmap({
         return (
           <EuiPanel paddingSize="s" hasShadow>
             <CellDetails
-              fromMs={datum.x}
-              // The last column can be clipped by the range: its cell ends there, not a bin on.
+              // The first and last column can be clipped by the range: their cells start and
+              // end there, not on the raster edges beyond it.
+              fromMs={Math.max(datum.x, timeGrid.startMs)}
               toMs={Math.min(datum.x + timeGrid.binMs, timeGrid.endMs)}
               minDuration={rowToDuration(datum.y, stats)}
               maxDuration={rowToDuration(datum.y + 1, stats)}

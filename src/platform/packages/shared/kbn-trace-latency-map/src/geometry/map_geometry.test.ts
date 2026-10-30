@@ -153,6 +153,21 @@ describe('createMapGeometry', () => {
     expect(Date.parse(first.to) - Date.parse(first.from)).toBe(padded.binMs);
   });
 
+  it('starts a selection at the start of the range, not at the aligned start of the first column', () => {
+    // A live range: aligning the columns puts the first one 5,052 ms before the range.
+    const aligned = getTimeGrid('2026-10-30T15:53:12.552Z', '2026-10-30T16:08:12.552Z', 120);
+    expect(aligned.fromMs).toBeLessThan(aligned.startMs);
+    const alignedGeometry = createMapGeometry({
+      plot: { left: 0, top: 0, colWidth: 8, rowHeight: 8 },
+      timeGrid: aligned,
+      stats,
+    });
+    const first = alignedGeometry.rangeToSelection({ x0: 0, x1: 2, y0: 0, y1: 24 });
+    expect(first.from).toBe('2026-10-30T15:53:12.552Z');
+    // And the selection comes back as the same columns.
+    expect(alignedGeometry.selectionToRange(first)).toEqual({ x0: 0, x1: 2, y0: 0, y1: 24 });
+  });
+
   it('restores a full-width selection whole when the last column is under half a bin wide', () => {
     // One second in 85 columns of 12 ms is 84 columns, and the last has 4 ms of range.
     const clipped = getTimeGrid('2026-10-26T10:00:00.000Z', '2026-10-26T10:00:01.000Z', 85);

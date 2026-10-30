@@ -219,12 +219,13 @@ export function LatencyMap({
   const describeCell = useCallback(
     (cell: Cell) => {
       const counts = grid?.cells.get(getCellKey(cell.xi, cell.yi, grid.bins));
-      const fromMs = timeGrid!.fromMs + cell.xi * timeGrid!.binMs;
+      const cellStartMs = timeGrid!.fromMs + cell.xi * timeGrid!.binMs;
       const failed = counts?.failed ?? 0;
       return {
-        fromMs,
-        // The last column can be clipped by the range: its cell ends there, not a bin on.
-        toMs: Math.min(fromMs + timeGrid!.binMs, timeGrid!.endMs),
+        // The first and last column can be clipped by the range: their cells start and end
+        // there, not on the raster edges beyond it.
+        fromMs: Math.max(cellStartMs, timeGrid!.startMs),
+        toMs: Math.min(cellStartMs + timeGrid!.binMs, timeGrid!.endMs),
         minDuration: rowToDuration(cell.yi, stats!),
         maxDuration: rowToDuration(cell.yi + 1, stats!),
         // With "failed only" the map shows the failed spans alone, and so does the cell.
