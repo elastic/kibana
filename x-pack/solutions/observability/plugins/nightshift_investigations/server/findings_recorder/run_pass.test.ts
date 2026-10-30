@@ -11,12 +11,7 @@ import { MessageRole } from '@kbn/inference-common';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import type { RecorderMemory } from './coordinator';
 import { FINAL_INSTRUCTION, LIVE_INSTRUCTION, buildRecorderSystemPrompt } from './prompt';
-import {
-  limitToOneConfirmed,
-  runFindingsPass,
-  toImpactEntities,
-  type FindingsPassDeps,
-} from './run_pass';
+import { runFindingsPass, toImpactEntities, type FindingsPassDeps } from './run_pass';
 
 jest.mock('../lib/create_optimize_model', () => ({ createOptimizeModel: jest.fn() }));
 
@@ -40,18 +35,6 @@ const output = {
 const answerWith = (args: unknown) => ({
   content: '',
   toolCalls: [{ toolCallId: 'x', function: { name: 'structuredOutput', arguments: args } }],
-});
-
-describe('limitToOneConfirmed', () => {
-  it('keeps the first confirmed hypothesis and reopens the rest', () => {
-    const result = limitToOneConfirmed([
-      { candidate: 'a', confidence: 0.9, status: 'confirmed' },
-      { candidate: 'b', confidence: 0.8, status: 'confirmed' },
-      { candidate: 'c', confidence: 0.1, status: 'dismissed' },
-    ]);
-
-    expect(result.map(({ status }) => status)).toEqual(['confirmed', 'investigating', 'dismissed']);
-  });
 });
 
 describe('runFindingsPass', () => {

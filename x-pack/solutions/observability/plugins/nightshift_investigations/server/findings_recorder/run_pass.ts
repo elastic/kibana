@@ -148,19 +148,6 @@ export const withStoredEvidence = (
   });
 };
 
-/** Keeps the first confirmed hypothesis: at most one may be the root cause. */
-export const limitToOneConfirmed = (hypotheses: FindingsRecord['hypotheses']): Hypothesis[] => {
-  let confirmedSeen = false;
-  return hypotheses.map((hypothesis) => {
-    if (hypothesis.status !== 'confirmed') return hypothesis;
-    if (!confirmedSeen) {
-      confirmedSeen = true;
-      return hypothesis;
-    }
-    return { ...hypothesis, status: 'investigating' as const };
-  });
-};
-
 interface ConversationEventLike {
   type: string;
   data?: { severity?: string; previous_severity?: string };
@@ -589,9 +576,7 @@ export const runFindingsPass = async (
       () =>
         writer.setHypotheses({
           conversationId,
-          hypotheses: limitToOneConfirmed(
-            withStoredEvidence(record.hypotheses, stored?.hypotheses ?? [])
-          ),
+          hypotheses: withStoredEvidence(record.hypotheses, stored?.hypotheses ?? []),
         }),
     ]);
     // Any impact field is a write: a pass may retract the evidence (`null`) or change the
