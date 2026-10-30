@@ -9,7 +9,8 @@ import { k8sDeploymentFixture } from '../__fixtures__/definitions';
 import { buildColumns, resolveIdentityPlan } from '../generator';
 import type { OutputColumn, QueryPlan } from '../generator';
 import { mergeRows } from './merge';
-import type { EsqlColumn, InventoryRow, PlanResult } from './types';
+import type { ESQLColumn } from '@kbn/es-types';
+import type { InventoryRow, PlanResult } from './types';
 
 const columns: OutputColumn[] = [
   { name: 'entity.id', kind: 'id' },
@@ -31,7 +32,7 @@ const plan = (index: number, indexPattern = `pattern-${index}`): QueryPlan => ({
 const result = (
   index: number,
   rows: InventoryRow[],
-  esqlColumns: EsqlColumn[] = [],
+  esqlColumns: ESQLColumn[] = [],
   indexPattern?: string
 ): PlanResult => ({ plan: plan(index, indexPattern), columns: esqlColumns, rows });
 

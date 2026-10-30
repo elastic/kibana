@@ -5,15 +5,13 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLColumn } from '@kbn/es-types';
 import type { GeneratedQuery } from '../generator';
-import type { EsqlColumn, EsqlValue, InventoryRow } from './types';
+import { esqlResultsToRows } from './esql_results_to_rows';
+import type { InventoryRow } from './types';
 
-/** `ESQLSearchResponse` lacks `values_loaded`, which `include_execution_metadata` adds. */
-type EsqlResponseWithMetadata = ESQLSearchResponse & { values_loaded?: number };
-
-/** What one query cost; metadata the response lacks is null. */
 export interface EsqlStats {
   /** Cluster time in milliseconds, not wall time. */
   took: number | null;
@@ -26,9 +24,15 @@ export interface EsqlStats {
 
 /** The columns, rows and cost of one ES|QL query. */
 export interface EsqlQueryResult {
-  columns: EsqlColumn[];
+  columns: ESQLColumn[];
   rows: InventoryRow[];
   stats: EsqlStats;
+}
+
+/** `EsqlQueryResponse` lacks the stats Elasticsearch writes on every ES|QL response. */
+interface EsqlQueryResponseWithStats extends estypes.EsqlQueryResponse {
+  documents_found?: number;
+  values_loaded?: number;
 }
 
 /** Options for {@link executeEsql}. */
@@ -46,27 +50,21 @@ export const executeEsql = async (
   { signal }: ExecuteEsqlOptions = {}
 ): Promise<EsqlQueryResult> => {
   // `drop_null_columns` stays off so every plan returns the same column list.
-  const response = (await client.esql.query(
+  const rawResponse: EsqlQueryResponseWithStats = await client.esql.query(
     { query: esql, params, include_execution_metadata: true },
     { signal }
-  )) as EsqlResponseWithMetadata;
+  );
 
-  const columns = response.columns.map(({ name, type }) => ({ name, type }));
-  const rows = response.values.map((values) => {
-    const row: InventoryRow = {};
-    columns.forEach(({ name }, index) => {
-      row[name] = values[index] as EsqlValue;
-    });
-    return row;
-  });
+  const { columns, values } = rawResponse;
+  const rows = esqlResultsToRows(columns, values);
 
   return {
     columns,
     rows,
     stats: {
-      took: response.took ?? null,
-      documentsFound: response.documents_found ?? null,
-      valuesLoaded: response.values_loaded ?? null,
+      took: rawResponse.took ?? null,
+      documentsFound: rawResponse.documents_found ?? null,
+      valuesLoaded: rawResponse.values_loaded ?? null,
       rowCount: rows.length,
     },
   };

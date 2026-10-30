@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { QueryPlan } from '../generator';
-import type { EsqlScalar, EsqlValue, InventoryRow } from './types';
+import type { ESQLValue, InventoryRow } from './types';
 
-const labelScalar = (value: EsqlScalar, labels: Record<string, string>): EsqlScalar => {
+const labelScalar = (
+  value: estypes.FieldValue,
+  labels: Record<string, string>
+): estypes.FieldValue => {
   if (value === null) {
     return null;
   }
@@ -16,7 +20,7 @@ const labelScalar = (value: EsqlScalar, labels: Record<string, string>): EsqlSca
   return Object.hasOwn(labels, raw) ? labels[raw] : raw;
 };
 
-const labelValue = (value: EsqlValue, labels: Record<string, string>): EsqlValue =>
+const labelValue = (value: ESQLValue, labels: Record<string, string>): ESQLValue =>
   Array.isArray(value)
     ? value.map((element) => labelScalar(element, labels))
     : labelScalar(value, labels);

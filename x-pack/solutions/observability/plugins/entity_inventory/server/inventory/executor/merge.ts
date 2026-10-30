@@ -8,7 +8,7 @@
 import { ENTITY_ID_COLUMN, LAST_SEEN_COLUMN } from '../generator';
 import type { OutputColumn } from '../generator';
 import type {
-  EsqlValue,
+  ESQLValue,
   InventoryRow,
   MergeResult,
   PlanResult,
@@ -24,7 +24,7 @@ export const lastSeenInstant = (row: InventoryRow): number | null => {
   return Number.isNaN(instant) ? null : instant;
 };
 
-const hasValue = (value: EsqlValue | undefined): value is EsqlValue =>
+const hasValue = (value: ESQLValue | undefined): value is ESQLValue =>
   value !== null && value !== undefined;
 
 // A missing instant is older than any instant; on a tie the value already held is kept.

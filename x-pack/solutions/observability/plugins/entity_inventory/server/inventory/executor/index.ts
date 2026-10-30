@@ -9,9 +9,7 @@ export { applyValueLabels } from './value_labels';
 export { mergeRows } from './merge';
 export { orderRows, applyLimit, isTruncated, fillColumns } from './output';
 export type {
-  EsqlColumn,
-  EsqlScalar,
-  EsqlValue,
+  ESQLValue,
   InventoryRow,
   MergeResult,
   PlanResult,
