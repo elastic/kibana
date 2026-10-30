@@ -82,7 +82,7 @@ evaluate.describe(
           dataset: {
             name: 'alerting-v2: edit an existing action policy',
             description:
-              'A saved action policy exists. The agent must discover it with find_action_policies, ' +
+              'A saved action policy exists. The agent must discover it by name with the Kibana API tools, ' +
               'attach it with attach_action_policy, and modify it through manage_action_policy.',
             examples: [
               {
@@ -93,14 +93,15 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'The assistant finds the saved policy by name with find_action_policies, not by guessing or asking the user for its id.',
+                    'The assistant finds the saved policy by name using the Kibana API tools (describe_api / execute_api), not by guessing or asking the user for its id.',
                     'The assistant attaches the saved policy and edits that attachment with manage_action_policy, rather than composing a new policy from scratch.',
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds.',
                     'The assistant directs the user to the attachment action buttons instead of claiming the change was persisted via API.',
                   ],
                   expectedSkills: [ACTION_POLICY_AUTHORING_SKILL_ID],
                   expectedToolIds: [
-                    ALERTING_TOOL_IDS.findActionPolicies,
+                    internalTools.describeApi,
+                    internalTools.executeApi,
                     ALERTING_TOOL_IDS.attachActionPolicy,
                     ALERTING_TOOL_IDS.manageActionPolicy,
                   ],
