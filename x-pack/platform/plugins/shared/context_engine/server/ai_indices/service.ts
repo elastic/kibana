@@ -138,7 +138,7 @@ export class AiIndexService {
     this.managedBootstrap = managedBootstrap;
     this.logger = logger;
     this.migrateLegacy = migrateLegacy;
-    this.ensureLegacyMigrated();
+    this.ensureLegacyMigrated().catch(() => {});
   }
 
   // Registry access waits on this; a failed attempt is retried on the next call.
