@@ -271,6 +271,43 @@ describe('rspack compile integration', () => {
       expect(bundleContent).toMatch(/SomeComponent/);
     }, 120_000);
 
+    it('emits the RTL plugin as a module that MapLibre can load under Kibana CSP', () => {
+      const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
+      const outputDir = Path.join(tmpDir, 'output');
+
+      Fs.writeFileSync(
+        Path.join(pluginDir, 'public', 'index.ts'),
+        [
+          "import rtlPluginUrl from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';",
+          'export const plugin = () => ({ setup: () => {}, start: () => {} });',
+          'export { rtlPluginUrl };',
+        ].join('\n')
+      );
+
+      const result = compileInWorker({
+        pluginDir,
+        pluginId,
+        outputDir,
+        dist: false,
+        dllManifestPath,
+      });
+
+      expect(result.errors).toEqual([]);
+      expect(result.success).toBe(true);
+
+      const assetDir = Path.join(outputDir, 'maplibre-gl');
+      const rtlAssets = Fs.readdirSync(assetDir).filter((name) =>
+        /^mapbox-gl-rtl-text\.min\.[a-f0-9]+\.mjs$/.test(name)
+      );
+      expect(rtlAssets).toHaveLength(1);
+      expect(Fs.readFileSync(Path.join(assetDir, rtlAssets[0]))).toEqual(
+        Fs.readFileSync(require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'))
+      );
+      expect(Fs.readFileSync(Path.join(outputDir, pluginId + '.plugin.js'), 'utf-8')).toContain(
+        rtlAssets[0]
+      );
+    }, 120_000);
+
     it.each([
       { dist: false, mode: 'development' },
       { dist: true, mode: 'production' },
