@@ -176,7 +176,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       ...initialGraphState,
       combinedGenerations: '{"key": "value"}',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): the response does not match the expected schema (invalid_type at insights (expected array))',
+        'generate node is unable to parse (fake) response from attempt 0; (this may be an incomplete response from the model): the response does not match the expected schema (invalid_type at insights (expected array)); raw response length: 92 characters',
       ],
       generationAttempts: 1,
       generations: ['{"key": "value"}'],
@@ -295,7 +295,7 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
       ...withPreviousGenerations,
       combinedGenerations: 'gen0gen1',
       errors: [
-        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token',
+        'generate node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): SyntaxError: Unexpected token; raw response length: 4 characters',
       ],
       generationAttempts: 2,
       generations: ['gen0', 'gen1'],
@@ -475,5 +475,37 @@ ${getAnonymizedDocsFromState(initialGraphState).join('\n\n')}
     expect(state.errors[0]).toContain(error.message);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.errors[0]).toContain('completion tokens');
+  });
+
+  it('keeps model output out of state.errors, and persists only its length, when the response cannot be parsed', async () => {
+    const rawResponse = `<html>ALERT-DERIVED-TEXT 502 Bad Gateway${'x'.repeat(500)}</html>`;
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const node = getGenerateNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(
+      `SyntaxError: Unexpected token; raw response length: ${rawResponse.length} characters`
+    );
+    expect(JSON.stringify(state.errors)).not.toContain('ALERT-DERIVED-TEXT');
+    expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
+    expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
 });

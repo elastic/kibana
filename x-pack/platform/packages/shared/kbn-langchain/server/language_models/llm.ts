@@ -279,7 +279,7 @@ export class ActionsClientLlm extends LLM {
   /**
    * Throws (and logs at `error`, i.e. persisted) when a model returns a successful completion with
    * no content. Returning the empty string instead would surface later as an unrelated JSON parse
-   * error. The error message carries diagnostics only; the response preview stays on the error object.
+   * error. The error message carries diagnostics only; the response itself is logged at debug level only.
    */
   #throwIfResponseIsEmpty({
     completionTokens,

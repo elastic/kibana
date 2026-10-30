@@ -20,7 +20,7 @@ const JSON_POSITION_MARKER = ' in JSON at position';
 
 // Connector errors can carry the upstream error body in `name` (`error.name = serviceMessage`), and
 // that body can quote model output, so only a conventional class name is kept.
-const ERROR_CLASS_NAME = /^[A-Za-z]*(Error|Exception)$/;
+const ERROR_CLASS_NAME = /^[A-Za-z][A-Za-z0-9_]*(Error|Exception)$/;
 
 /**
  * V8 `JSON.parse` messages either quote the input (`Unexpected token 'g', "gen0gen1" is not valid

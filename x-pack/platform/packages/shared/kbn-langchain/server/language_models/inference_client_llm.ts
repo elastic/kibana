@@ -139,7 +139,7 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
    * content. Returning the empty string instead would surface much later as an unrelated failure in
    * whatever parses the completion (for the Attack Discovery evaluation that means a JSON parse
    * error), which hides both the real cause and the connector that produced it. The error message
-   * carries diagnostics only; the response preview stays on the error object.
+   * carries diagnostics only; the response itself is logged at debug level only.
    */
   #throwIfResponseIsEmpty({
     completionTokens,

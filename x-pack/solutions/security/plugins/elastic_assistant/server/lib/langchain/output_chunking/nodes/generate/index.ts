@@ -20,6 +20,10 @@ import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
 
+// the length only: the response can contain alert-derived text, so it never reaches `errors`
+const getRawResponseLength = (rawResponse: string): string =>
+  rawResponse === '' ? '' : `; raw response length: ${rawResponse.length} characters`;
+
 export const getGenerateNode = <T extends GraphInsightTypes>({
   llm,
   logger,
@@ -58,6 +62,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
 
     let combinedResponse = ''; // mutable, because it must be accessed in the catch block
     let partialResponse = ''; // mutable, because it must be accessed in the catch block
+    let rawResponse = ''; // mutable, because it must be accessed in the catch block
 
     try {
       const query = getCombinedPromptFn({
@@ -76,7 +81,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const rawResponse = completeWithTemplate
+      rawResponse = completeWithTemplate
         ? await completeWithTemplate({
             alerts: anonymizedDocs,
             phase: combinedGenerations ? 'continue' : 'generate',
@@ -164,7 +169,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
     } catch (error) {
       const parsingError = `generate node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${getParseErrorSummary(
         error
-      )}`;
+      )}${getRawResponseLength(rawResponse)}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
 
       return {

@@ -7,7 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { EmptyModelResponseError } from '@kbn/langchain/server';
+import {
+  EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX,
+  EmptyModelResponseError,
+} from '@kbn/langchain/server';
 
 import { getParseErrorSummary } from '.';
 
@@ -142,6 +145,44 @@ describe('getParseErrorSummary', () => {
       expect(summary).toContain('trace-abc');
       expect(summary).toContain('completion tokens');
     });
+
+    it('sanitizes a message that has the empty-response prefix but no empty-response code', () => {
+      const error = new Error(
+        `${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX} "data: MODEL-OUTPUT-MARKER"`
+      );
+
+      const summary = getParseErrorSummary(error);
+
+      expect(summary).toBe(`Error: ${EMPTY_MODEL_RESPONSE_ERROR_MESSAGE_PREFIX}`);
+      expect(summary).not.toContain('MODEL-OUTPUT-MARKER');
+    });
+
+    it.each([
+      ['TypeError: "secret"'],
+      ['Error secret'],
+      [`Error'secret`],
+      ['secret Error'],
+      ['Error: secret'],
+      ['1Error'],
+    ])('replaces the error name %j, which is not a class name, with a generic one', (name) => {
+      const error = new Error('boom');
+      error.name = name;
+
+      const summary = getParseErrorSummary(error);
+
+      expect(summary).toBe('Error: boom');
+      expect(summary).not.toContain('secret');
+    });
+
+    it.each([['AI_APICallError'], ['ServerSentEventError'], ['HttpException'], ['Error']])(
+      'keeps the class name %s',
+      (name) => {
+        const error = new Error('boom');
+        error.name = name;
+
+        expect(getParseErrorSummary(error)).toBe(`${name}: boom`);
+      }
+    );
 
     it('does not trust the code alone: a message that is not an empty-response one is sanitized', () => {
       const error = new Error('Failed to parse line "MODEL-OUTPUT-MARKER"');

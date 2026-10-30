@@ -187,7 +187,7 @@ ${ATTACK_DISCOVERY_REFINE}
       ...initialGraphState,
       combinedRefinements: '{"key": "value"}',
       errors: [
-        'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): the response does not match the expected schema (invalid_type at insights (expected array))',
+        'refine node is unable to parse (fake) response from attempt 1; (this may be an incomplete response from the model): the response does not match the expected schema (invalid_type at insights (expected array)); raw response length: 92 characters',
       ],
       generationAttempts: 2,
       refinements: ['{"key": "value"}'],
@@ -302,7 +302,7 @@ ${ATTACK_DISCOVERY_REFINE}
       ...withPreviousGenerations,
       combinedRefinements: 'refine0refine1',
       errors: [
-        'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token',
+        'refine node is unable to parse (fake) response from attempt 2; (this may be an incomplete response from the model): SyntaxError: Unexpected token; raw response length: 7 characters',
       ],
       generationAttempts: 3,
       refinements: ['refine0', 'refine1'],
@@ -384,7 +384,7 @@ ${ATTACK_DISCOVERY_REFINE}
       insights: state.unrefinedResults, // <-- the unrefined results are returned
       combinedRefinements: 'refine1this will not pass JSON parsing',
       errors: [
-        'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token',
+        'refine node is unable to parse (fake) response from attempt 9; (this may be an incomplete response from the model): SyntaxError: Unexpected token; raw response length: 31 characters',
       ],
       generationAttempts: 10,
       refinements: ['refine1', response],
@@ -473,5 +473,36 @@ ${ATTACK_DISCOVERY_REFINE}
     expect(state.errors[0]).toContain(error.message);
     expect(state.errors[0]).toContain('trace-abc');
     expect(state.errors[0]).toContain('completion tokens');
+  });
+
+  it('keeps model output out of state.errors, and persists only its length, when the response cannot be parsed', async () => {
+    const rawResponse = `<html>ALERT-DERIVED-TEXT 502 Bad Gateway${'x'.repeat(500)}</html>`;
+
+    const mockLlmWithResponse = new FakeLLM({
+      response: rawResponse,
+    }) as unknown as ActionsClientLlm;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithResponse,
+      generationSchema,
+    }).chain.invoke as jest.Mock;
+
+    mockInvoke.mockResolvedValue(rawResponse);
+
+    const node = getRefineNode({
+      llm: mockLlmWithResponse,
+      logger: mockLogger,
+      responseIsHallucinated: mockResponseIsHallucinated,
+      generationSchema,
+    });
+
+    const state = await node(initialGraphState);
+
+    expect(state.errors).toHaveLength(1);
+    expect(state.errors[0]).toContain(
+      `SyntaxError: Unexpected token; raw response length: ${rawResponse.length} characters`
+    );
+    expect(JSON.stringify(state.errors)).not.toContain('ALERT-DERIVED-TEXT');
+    expect(JSON.stringify(state.errors)).not.toContain('xxxxx');
+    expect(JSON.stringify(state.errors)).not.toContain('Bad Gateway');
   });
 });
