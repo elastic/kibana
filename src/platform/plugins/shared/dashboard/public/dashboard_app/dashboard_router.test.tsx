@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
