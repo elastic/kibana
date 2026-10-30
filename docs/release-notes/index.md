@@ -937,6 +937,78 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix slow workflow template rendering for workflows with large step outputs [#265027]({{kib-pull}}265027).
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
 
+## 9.4.9 [kibana-9.4.9-release-notes]
+
+### Features and enhancements [kibana-9.4.9-features-enhancements]
+
+**Elastic Agent Builder**:
+* Add options to include frozen tier data in Agent Builder tools: an `include_frozen` parameter for built-in tools, an **Include frozen tier data** option for custom {{esql}} and index search tools, and the `agentBuilder:includeFrozenByDefault` advanced setting to include it by default in a space. Frozen tier data stays excluded unless you opt in [#297481]({{kib-pull}}297481), [#299437]({{kib-pull}}299437).
+
+**Data ingestion and {{fleet}}**:
+* Sort agent policies alphabetically in the **Assign new agent policy** modal [#296067]({{kib-pull}}296067).
+
+**{{es}} solution**:
+* Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record [#297728]({{kib-pull}}297728).
+
+### Fixes [kibana-9.4.9-fixes]
+
+**Elastic Agent Builder**:
+* Fix bulk import not letting you select MCP tools that have no description [#300886]({{kib-pull}}300886).
+
+**Alerting and cases**:
+* Fix rules creating duplicate alerts, and leaving the original alerts active, when a rule run stops before it saves its state [#293521]({{kib-pull}}293521).
+* Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents their completed run from being recorded [#295415]({{kib-pull}}295415).
+* Fix recurring tasks with rrule schedules running the same occurrence twice, or getting stuck after a timeout [#297486]({{kib-pull}}297486).
+
+**Dashboards and Visualizations**:
+* Fix the dashboard top menu and **Edit** button not appearing in embedded dashboards when `show-top-menu=true` is set [#299599]({{kib-pull}}299599).
+* Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension [#297429]({{kib-pull}}297429).
+
+**Data ingestion and {{fleet}}**:
+* Fix the minimum {{agent}} version advertised by an agent policy being wrong after you upgrade several integration policies at once [#294439]({{kib-pull}}294439).
+* Fix integration policy edits not reaching {{agent}} for packages that declare their {{agent}} version requirement in the package manifest [#296354]({{kib-pull}}296354).
+* Fix agents enrolled by an older {{fleet}} Server being left on a deleted version-specific agent policy [#295107]({{kib-pull}}295107).
+* Fix managed integration policy upgrades redeploying the agent policy once per integration policy, which slowed upgrades and could stall them when the Elastic Package Registry is unreachable [#294411]({{kib-pull}}294411).
+* Fix integrations that default to agentless deployment saving an agent-based policy when the integration also has a cloud connector option [#299039]({{kib-pull}}299039).
+* Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause [#300189]({{kib-pull}}300189).
+* Validate the `agents` input consistently in {{fleet}} bulk agent action APIs. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters [#299837]({{kib-pull}}299837).
+
+**Data management**:
+* Fix the runtime field editor ignoring **Save** when you edit a field's script while the preview is still updating [#294753]({{kib-pull}}294753).
+* Fix the runtime field editor discarding the script when you change the field type to or from `composite` [#299025]({{kib-pull}}299025).
+* Fix saved object labels showing "index patterns" instead of "data views" when you copy a dashboard that references data views in another space [#297621]({{kib-pull}}297621).
+% !!DEFERRED!! Data management. Not in the latest BC (9.4.9-a3d257d5, built from 29f3bc23); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix creating and fetching {{data-sources}} with `allowNoIndex: true` that target a nonexistent remote cluster failing with a `400` error [#299790]({{kib-pull}}299790).
+
+**Discover**:
+* Fix Discover showing an invalid time range from the URL instead of falling back to the default time range [#290358]({{kib-pull}}290358).
+* Fix field type icons staying stale in the field list when you recreate an index with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
+* Fix the histogram **Breakdown by** button showing a breakdown field that can't be used for the chart [#298832]({{kib-pull}}298832).
+* Fix renaming a background search, or extending a search session's expiration, being reverted when the session status updates at the same time [#296401]({{kib-pull}}296401).
+* Fix the **Url** field formatter adding an extra `/app` segment to relative URLs that start with a slash when {{kib}} runs behind a base path or in a custom space [#299116]({{kib-pull}}299116).
+
+**{{es}} solution**:
+* Fix content connector indexes created from {{kib}} failing to ingest documents with large numeric IDs by mapping the document `id` field as `keyword` [#297711]({{kib-pull}}297711).
+* Fix the **Rule ID**, **Metadata field**, and **Values** tooltips on the query rules **Create rule** page not being announced by screen readers in Chrome with VoiceOver [#295021]({{kib-pull}}295021).
+
+**{{product.observability}} solution**:
+For the {{product.observability}} 9.4.9 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**{{elastic-sec}} solution**:
+For the {{elastic-sec}} 9.4.9 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**{{kib}} platform**:
+* Fix tag filters in listing pages, such as the dashboards list, returning no results when a tag name contains an ampersand (`&`) [#297231]({{kib-pull}}297231).
+* Fix the Analytics overview page showing the **Ingest your data** section to users who can't add data or upload files [#297717]({{kib-pull}}297717).
+* Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out [#296117]({{kib-pull}}296117).
+* Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it [#299786]({{kib-pull}}299786).
+* Fix {{kib}}'s OpenTelemetry process resource exposing command-line arguments. {{kib}} now records the number of arguments instead [#299043]({{kib-pull}}299043).
+% !!DEFERRED!! Not in the latest BC (9.4.9-a3d257d5, built from 29f3bc23); the backport merged after the BC was cut. Re-verify against the next BC.
+% * Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
+
+**Machine learning and {{infer}}**:
+* Fix the data frame analytics audit messages API returning messages for jobs that don't exist in the current {{kib}} space [#297821]({{kib-pull}}297821).
+* Fix the {{esql}} field statistics table being left empty when you change the query or time range while statistics are still loading [#298642]({{kib-pull}}298642).
 
 ## 9.4.8 [kibana-9.4.8-release-notes]
 
