@@ -268,24 +268,23 @@ describe('runPreflight', () => {
     expect(lastSpaceWrite).toBeLessThan(firstAlertZero);
   });
 
-  it('does not read or write spaces on serverless, where spaces have no solution view', async () => {
+  it('creates missing non-default eval spaces on serverless without a solution view', async () => {
     const spaceWrites: MockOverrides['spaceWrites'] = [];
-    const inner = buildMockFetch({
-      existingSpaces: { default: { id: 'default', name: 'Default', solution: 'classic' } },
-      spaceWrites,
-    }) as unknown as jest.Mock;
-    const spaceCalls: string[] = [];
-    const fetch = jest.fn(async (...args: unknown[]) => {
-      const first = args[0];
-      const path = typeof first === 'string' ? first : (first as { path: string }).path;
-      if (path.startsWith('/api/spaces/')) spaceCalls.push(path);
-      return inner(...args);
-    }) as unknown as HttpHandler;
+    await run(
+      buildMockFetch({
+        existingSpaces: { default: { id: 'default', name: 'Default' } },
+        spaceWrites,
+      }),
+      { isServerless: true }
+    );
 
-    await run(fetch, { isServerless: true });
-
-    expect(spaceCalls).toEqual([]);
-    expect(spaceWrites).toEqual([]);
+    const created = spaceWrites.filter(({ method }) => method === 'POST');
+    expect(created.map(({ body }) => body.id).sort()).toEqual(['hunt-a', 'hunt-b', 'hunt-blocked']);
+    for (const { body } of created) {
+      expect(body).not.toHaveProperty('solution');
+    }
+    // Existing serverless spaces (`default`) are never converted.
+    expect(spaceWrites.filter(({ method }) => method === 'PUT')).toEqual([]);
   });
 
   it('refuses to convert a Classic default space outside CI, before writing anything', async () => {

@@ -67,7 +67,8 @@ interface SpaceBody {
 
 /**
  * AlertZero routes 404 in a Classic space (`isSpaceSupported`), `default` included. The spaces
- * PUT replaces the whole object, so an existing space is written back as read.
+ * PUT replaces the whole object, so an existing space is written back as read. On serverless
+ * the space is still created when missing, but without a `solution` and never converted.
  */
 const ensureSecuritySpace = async ({
   fetch,
@@ -80,9 +81,6 @@ const ensureSecuritySpace = async ({
   spaceId: string;
   isServerless: boolean;
 }): Promise<void> => {
-  // Serverless spaces have no `solution` field, so there is nothing to create or convert.
-  if (isServerless) return;
-
   const existing = await fetch<SpaceBody>(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
     method: 'GET',
     headers: apiVersion(PUBLIC_API_VERSION),
@@ -101,13 +99,15 @@ const ensureSecuritySpace = async ({
         name: spaceId,
         description: 'Eval-only space created by the hunt-watch suite preflight fixture.',
         disabledFeatures: [],
-        solution: SECURITY_SOLUTION_VIEW,
+        // Serverless spaces have no solution view, so the field is omitted there.
+        ...(isServerless ? {} : { solution: SECURITY_SOLUTION_VIEW }),
       }),
     });
     return;
   }
 
-  if (existing.solution === SECURITY_SOLUTION_VIEW) return;
+  // Serverless spaces have no `solution` field, so an existing one has nothing to convert.
+  if (isServerless || existing.solution === SECURITY_SOLUTION_VIEW) return;
 
   // The conversion is never reverted, so it is only done on a disposable CI stack. On a
   // developer's long-lived stack it would silently change the `default` space's navigation.
