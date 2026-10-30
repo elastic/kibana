@@ -59,9 +59,8 @@ async function removeAlertActionsCleanupTask({
       error,
       code: ALERTING_LOG_CODES.TASKS_REMOVE_FAILED,
       labels: { task_id: ALERT_ACTIONS_CLEANUP_TASK_ID },
-      message:
-        'Failed to remove the disabled alert actions cleanup task; if it was scheduled by an ' +
-        'earlier start it keeps running until the next restart',
+      message: `Failed to remove the disabled alert actions cleanup task. If it was scheduled by an
+        earlier start it keeps running until the next restart`,
     });
   }
 }
