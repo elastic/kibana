@@ -8,8 +8,10 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature, Feature } from '@kbn/significant-events-schema';
+import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import type { PromoteResult } from '../../data/rules/use_queries_api';
+import { BULK_EXCLUDE_PARTIAL_TOAST_TITLE } from './translations';
 import type { KnowledgeIndicatorsQuery } from './use_knowledge_indicators_query_params';
 import {
   useKnowledgeIndicatorsTable,
@@ -102,7 +104,7 @@ let mockIsMutatingValue = 0;
 const mockMutate = jest.fn();
 let mockMutationCallbacks: {
   onSuccess?: (result: PromoteResult) => Promise<void>;
-  onError?: (e: Error) => void;
+  onError?: (e: Error) => Promise<void>;
 } = {};
 
 jest.mock('@kbn/react-query', () => ({
@@ -110,7 +112,7 @@ jest.mock('@kbn/react-query', () => ({
   useMutation: (config: {
     mutationFn: (ids: string[]) => Promise<unknown>;
     onSuccess?: (result: PromoteResult) => Promise<void>;
-    onError?: (e: Error) => void;
+    onError?: (e: Error) => Promise<void>;
   }) => {
     mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
     return {
@@ -122,14 +124,16 @@ jest.mock('@kbn/react-query', () => ({
 
 function makeFeature(
   overrides: Partial<Feature> & { id: string; source_id: string } & Record<string, unknown>
-): Feature {
+): AggregatedFeature {
   return {
     type: 'entity',
     title: overrides.title ?? overrides.id,
     subtype: undefined,
     excluded: undefined,
+    sources: [overrides.source_id],
+    instances: [{ source_id: overrides.source_id, uuid: overrides.id, confidence: 0 }],
     ...overrides,
-  } as unknown as Feature;
+  } as unknown as AggregatedFeature;
 }
 
 function makeFeatureKI(
@@ -269,7 +273,11 @@ describe('useKnowledgeIndicatorsTable', () => {
       const feature = makeFeature({ id: 'f1', source_id: 's1' });
       const ki = { kind: 'feature' as const, feature };
       mockKnowledgeIndicators = [ki];
-      mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 0 });
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 0,
+        conflictCount: 0,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
@@ -289,7 +297,11 @@ describe('useKnowledgeIndicatorsTable', () => {
     it('shows warning when some features fail', async () => {
       const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
       mockKnowledgeIndicators = [ki];
-      mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 1 });
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 0,
+        failedCount: 1,
+        conflictCount: 0,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
@@ -300,7 +312,35 @@ describe('useKnowledgeIndicatorsTable', () => {
         await result.current.handleBulkExclude();
       });
 
-      expect(mockToasts.addWarning).toHaveBeenCalled();
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        text: undefined,
+      });
+    });
+
+    it('adds that the source was busy to the partial warning when changes hit a conflict', async () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 0,
+        failedCount: 0,
+        conflictCount: 1,
+      });
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        text: BULK_WRITE_CONFLICT_MESSAGE,
+      });
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
     });
 
     it('shows error toast when operation throws', async () => {
@@ -366,7 +406,11 @@ describe('useKnowledgeIndicatorsTable', () => {
         excluded: true,
       });
       mockKnowledgeIndicators = [ki];
-      mockRestoreFeaturesInBulk.mockResolvedValue({ failedCount: 0 });
+      mockRestoreFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 0,
+        conflictCount: 0,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
@@ -469,14 +513,15 @@ describe('useKnowledgeIndicatorsTable', () => {
       });
     });
 
-    it('promote onError shows error toast', () => {
+    it('promote onError shows error toast and refreshes queries other sources may have promoted', async () => {
       renderHook(() => useKnowledgeIndicatorsTable());
 
-      act(() => {
-        mockMutationCallbacks.onError?.(new Error('promote failed'));
+      await act(async () => {
+        await mockMutationCallbacks.onError?.(new Error('promote failed'));
       });
 
       expect(mockToasts.addError).toHaveBeenCalled();
+      expect(mockInvalidatePromoteRelatedQueries).toHaveBeenCalled();
     });
   });
 

@@ -11,6 +11,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getSeriesGate, getTileTrend, useTileSeriesQuery } from './use_tile_series_query';
+import { retryUnlessTimedOut } from './tile_query_timeout';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -97,7 +98,8 @@ describe('useTileSeriesQuery', () => {
         cacheTime: 60 * 60_000,
         refetchOnWindowFocus: false,
         keepPreviousData: true,
-        retry: 1,
+        // One retry, but none after a timeout.
+        retry: retryUnlessTimedOut,
       })
     );
   });
@@ -151,6 +153,15 @@ describe('getTileTrend', () => {
 
   it('ends the dots on the live count', () => {
     expect(getTileTrend(base)).toEqual({ trend: [1, 2, 9], isTrendLoading: false });
+  });
+
+  it('starts the line on the delta baseline when there is one', () => {
+    expect(getTileTrend({ ...base, deltaBaseline: 7 })).toEqual({
+      trend: [7, 1, 2, 9],
+      isTrendLoading: false,
+    });
+    // 0 is a real baseline. A truthy check would drop it and start the line on the first dot.
+    expect(getTileTrend({ ...base, deltaBaseline: 0 }).trend).toEqual([0, 1, 2, 9]);
   });
 
   it('shows a spinner and no line while loading, also for a stale range', () => {

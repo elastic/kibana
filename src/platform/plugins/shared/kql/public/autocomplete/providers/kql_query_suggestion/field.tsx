@@ -52,7 +52,8 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
       } else {
         return (
           (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
-          field.name.toLowerCase().includes(search)
+          (field.name.toLowerCase().includes(search) ||
+            Boolean(field.customLabel?.toLowerCase().includes(search)))
         );
       }
     });
@@ -97,6 +98,8 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
         end,
         cursorIndex,
         field,
+        // The custom label is only shown next to the suggestion, `text` has to stay the real field name
+        ...(field.customLabel ? { description: field.customLabel } : {}),
       };
     });
 

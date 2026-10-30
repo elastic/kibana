@@ -32,10 +32,11 @@ import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/s
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import type { RulesClient } from './lib/rules_client';
+import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
+import type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
@@ -63,13 +64,24 @@ export interface AlertingServerSetup {
    * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
+
+  /**
+   * Opts in to the `alerting.alertStatusChanged` workflow trigger. Until a plugin opts in,
+   * nothing is published for it. The caller owns its own enablement signal and
+   * answers per rule run or alert write through `isEnabled`.
+   */
+  enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
 }
 
 export interface AlertingServerStart {
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(
+    request: KibanaRequest,
+    options?: CreateRulesClientOptions
+  ): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: SpaceId
+    spaceId: SpaceId,
+    options?: CreateRulesClientOptions
   ): Promise<RulesClientApi>;
 
   /**

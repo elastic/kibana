@@ -23,7 +23,7 @@ jest.mock('@elastic/charts', () => ({
   },
   Position: { Left: 'left' },
   ScaleType: { Linear: 'linear' },
-  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+  CurveType: { CURVE_STEP: 'curveStep' },
 }));
 
 const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
@@ -31,6 +31,7 @@ const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
   title: 'New entity',
   description: 'First seen in the last 7 days',
   value: 12345,
+  hasCount: true,
   filterLabel: 'New entity (7d)',
   ...overrides,
 });
@@ -62,11 +63,32 @@ describe('SignalCard', () => {
   });
 
   it('shows the title, the description and the formatted count', () => {
-    renderCard();
+    renderCard({ value: 5678 });
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
     expect(tile).toHaveTextContent('New entity');
     expect(tile).toHaveTextContent('First seen in the last 7 days');
-    expect(tile).toHaveTextContent((12345).toLocaleString());
+    expect(tile).toHaveTextContent('5,678');
+  });
+
+  it.each([
+    [9999, '9,999'],
+    [10000, '10K'],
+    [10500, '10.5K'],
+    [12345, '12.3K'],
+    [1234567, '1.2M'],
+  ])('shortens the count from 10,000 on: %d shows as %s', (value, shown) => {
+    renderCard({ value });
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent(shown);
+  });
+
+  it.each([
+    [9999, '+9,999↑'],
+    [10000, '+10K↑'],
+    [10500, '+10.5K↑'],
+    [-12345, '-12.3K↓'],
+  ])('shortens the change from 10,000 on: %d shows as %s', (delta, shown) => {
+    renderCard({ value: 50000, delta });
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent(shown);
   });
 
   it('shows an increase as +n with an up arrow, and a decrease as -n with a down arrow', () => {
@@ -156,6 +178,15 @@ describe('SignalCard', () => {
       );
     });
 
+    it('says the exact change where the badge shortens it', () => {
+      renderCard({ value: 50000, delta: 10512 });
+      expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('+10.5K↑');
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. Up 10,512 compared with the previous period'
+      );
+    });
+
     it('adds that the history is too short when the tile says so', () => {
       renderCard({ isDeltaUnavailable: true });
       expect(tile()).toHaveAttribute('aria-label', 'New entity. Not enough history to compare');
@@ -210,18 +241,23 @@ describe('SignalCard', () => {
     expect(onToggle).toHaveBeenCalledTimes(3);
   });
 
-  it('shows a clear button on the selected tile that toggles the filter off', () => {
+  it('keeps one control per tile: no button nested in the selected tile, which clears the filter itself', () => {
     const onToggle = jest.fn();
     renderCard({}, { selected: true, onToggle });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
     expect(screen.getByTestId('eaFaceliftSignalCardSelectedDot')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('eaFaceliftSignalCardClearFilter'));
+    expect(screen.queryByTestId('eaFaceliftSignalCardClearFilter')).not.toBeInTheDocument();
+    // The tile is the only interactive element, and the only tab stop, inside it.
+    expect(
+      tile.querySelectorAll('button, a, input, select, textarea, [role], [tabindex]')
+    ).toHaveLength(0);
+    expect(tile).toHaveAttribute('tabindex', '0');
+    expect(tile).toHaveAttribute('aria-pressed', 'true');
 
-    expect(onToggle).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    fireEvent.keyDown(tile, { key: 'Enter' });
+    fireEvent.click(tile);
+    expect(onToggle).toHaveBeenCalledTimes(2);
   });
 
   it('shows a dash and a spinner while the count loads, and is not clickable', () => {
@@ -236,10 +272,28 @@ describe('SignalCard', () => {
     expect(tile).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('shows a dash at 0 without a no-data message', () => {
-    renderCard({ value: 0 });
+  it('shows 0, not a dash, for a count that genuinely came back 0, and is not clickable', () => {
+    const onToggle = jest.fn();
+    renderCard({ value: 0, hasCount: true }, { onToggle });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
-    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent('—');
+    expect(tile).toHaveTextContent('0');
+    expect(tile).not.toHaveTextContent('—');
+    fireEvent.click(tile);
+    fireEvent.keyDown(tile, { key: 'Enter' });
+    expect(onToggle).not.toHaveBeenCalled();
+    expect(tile).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('shows a dash, not 0, when there is no count (failed, skipped, timed out or no access)', () => {
+    const onToggle = jest.fn();
+    renderCard({ value: 0, hasCount: false }, { onToggle });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
+
+    expect(tile).toHaveTextContent('—');
+    expect(tile).not.toHaveTextContent('0');
+    fireEvent.click(tile);
+    expect(onToggle).not.toHaveBeenCalled();
   });
 
   it('shows the no-data message instead of the dash at 0, with no delta, no sparkline and no click', () => {

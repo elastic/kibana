@@ -1,5 +1,5 @@
 {
-  "sha1": "5970e8e457d262b426d3bea30e1523060e9f39de",
+  "sha1": "fc9974608e93080efe481691bbbcfdf93c3294be",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -960,7 +960,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
-        "line": 79,
+        "line": 81,
         "column": 9
       }
     },
@@ -973,8 +973,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
-        "line": 105,
-        "column": 40
+        "line": 108,
+        "column": 26
       }
     },
     {
@@ -986,7 +986,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_annotations.spec.ts",
-        "line": 146,
+        "line": 155,
         "column": 22
       }
     },
@@ -1040,6 +1040,110 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_multi_layer_query_validation.spec.ts",
         "line": 34,
         "column": 11
+      }
+    },
+    {
+      "id": "f9c07a6c5d79f10-a3ba715106b895e",
+      "title": "Lens ES|QL reference line persistence reloads mixed sources, axis placement, styles and independent layer queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_line_persistence.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-9363f8bf6e68b79",
+      "title": "Lens ES|QL reference lines combines query and static references in separate layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 34,
+        "column": 11
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-9ea8c40d53392cd",
+      "title": "Lens ES|QL reference lines offers both reference sources on multi-data-layer ES|QL charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 98,
+        "column": 15
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-569d263c77205d5",
+      "title": "Lens ES|QL reference lines preserves the column and style when moving and duplicating a line",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 127,
+        "column": 97
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-b361a785d664901",
+      "title": "Lens ES|QL reference lines renders a single line from a query returning multiple rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 167,
+        "column": 15
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-54c9daeee5ac31f",
+      "title": "Lens ES|QL reference lines does not render a misleading line for empty results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 202,
+        "column": 25
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-821332891eaa3d4",
+      "title": "Lens ES|QL reference lines does not render a misleading line for null results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 202,
+        "column": 25
+      }
+    },
+    {
+      "id": "a7f2285a0c24845-90a3ba89ec1b1c4",
+      "title": "Lens ES|QL reference lines does not render a misleading line for nonnumeric results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_reference_lines.spec.ts",
+        "line": 202,
+        "column": 25
       }
     },
     {

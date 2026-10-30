@@ -98,8 +98,21 @@ const getTrendReversedBadgeColors = (
         icon: TREND_UPWARD,
       };
 
-/** Delta text with a thousands separator like the main number, e.g. `+3` or `+1,627`. */
-const formatDelta = (delta: number): string => `${delta > 0 ? '+' : ''}${delta.toLocaleString()}`;
+/** From this size on, a tile number is shortened: precision at that scale does not help triage. */
+const COMPACT_NUMBER_FROM = 10_000;
+
+/** A tile number: exact below 10,000 (`5,678`), shortened from there (`10K`, `10.5K`, `1.2M`). */
+const formatTileNumber = (value: number): string =>
+  Math.abs(value) >= COMPACT_NUMBER_FROM
+    ? // Kibana's locale rather than the browser's, so the suffix matches the UI language (`K`, not en-GB `k`).
+      new Intl.NumberFormat(i18n.getLocale(), {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+      }).format(value)
+    : value.toLocaleString();
+
+/** Delta text formatted like the main number, e.g. `+3`, `+1,627` or `+10.5K`. */
+const formatDelta = (delta: number): string => `${delta > 0 ? '+' : ''}${formatTileNumber(delta)}`;
 
 /** What the delta row says, for a screen reader: the signed change, or that the history is too short. */
 const getDeltaDescription = (
@@ -107,6 +120,7 @@ const getDeltaDescription = (
   showNoHistory: boolean
 ): string | undefined => {
   if (shownDelta === undefined) return showNoHistory ? notEnoughHistory : undefined;
+  // Exact, even where the badge shortens it.
   const amount = Math.abs(shownDelta).toLocaleString();
   return shownDelta > 0
     ? i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.ariaLabelUp', {
@@ -197,17 +211,20 @@ const MetricTrendBadge: React.FC<{ delta: number }> = ({ delta }) => {
   );
 };
 
+/**
+ * The filter icon in the tile's corner. It is decorative: the tile itself is the one control that
+ * turns the filter on and off, so the icon is not a second, nested button.
+ */
 const CornerControl: React.FC<{
   selected: boolean;
   emphasized: boolean;
-  onClear?: () => void;
-}> = ({ selected, emphasized, onClear }) => {
+}> = ({ selected, emphasized }) => {
   const { euiTheme } = useEuiTheme();
 
   // Match default filter chrome; selection is signaled by the accent dot only.
   const iconColor = emphasized ? 'primary' : euiTheme.colors.textSubdued;
 
-  const icon = (
+  return (
     <span
       css={css`
         position: relative;
@@ -241,46 +258,13 @@ const CornerControl: React.FC<{
       ) : null}
     </span>
   );
-
-  if (selected && onClear) {
-    return (
-      <button
-        type="button"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.facelift.signalCard.clearFilter',
-          { defaultMessage: 'Clear table filter' }
-        )}
-        data-test-subj="eaFaceliftSignalCardClearFilter"
-        onMouseDown={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onClear();
-        }}
-        css={css`
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          border: 0;
-          background: transparent;
-          cursor: pointer;
-        `}
-      >
-        {icon}
-      </button>
-    );
-  }
-
-  return icon;
 };
 
 /**
  * Decorative area sparkline behind the value: highlighted fill with a 1px peak line on top.
- * The series is a headcount, so it is drawn as steps over a y-axis anchored at zero.
+ * The series is a headcount, so it is drawn as steps over a y-axis anchored at zero. The steps are
+ * centred on each point, so the first and last points (the delta's baseline and the live count)
+ * keep half a step of width instead of the last one vanishing at the edge.
  */
 const Sparkline: React.FC<{ values: number[]; title: string }> = ({ values, title }) => {
   const { euiTheme } = useEuiTheme();
@@ -338,7 +322,7 @@ const Sparkline: React.FC<{ values: number[]; title: string }> = ({ values, titl
         xAccessor="x"
         yAccessors={['y']}
         data={data}
-        curve={CurveType.CURVE_STEP_AFTER}
+        curve={CurveType.CURVE_STEP}
         color={stroke}
         areaSeriesStyle={{
           area: { opacity: 1, visible: true, fill },
@@ -366,12 +350,17 @@ const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolea
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
   }
-  return isZero ? '—' : card.value.toLocaleString();
+  // A 0 without a result (failed, skipped, timed out, no access) is not a count: keep the dash.
+  if (isZero && !card.hasCount) {
+    return '—';
+  }
+  return formatTileNumber(card.value);
 };
 
 /**
  * A Needs-attention KPI tile (EUI layout + area sparkline), ported from the designer's v6
- * prototype. The whole card is the filter toggle, with hover and selected states.
+ * prototype. The whole card is the one control that toggles the filter (select and clear), with
+ * hover and selected states.
  */
 export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle }) => {
   const { euiTheme } = useEuiTheme();
@@ -457,18 +446,21 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         min-block-size: calc(${euiTheme.size.xxxxl} * ${MIN_HEIGHT_FACTOR});
         padding: ${euiTheme.size.base};
         border: 1px solid ${borderColor};
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.panel};
         background: ${tileBackground};
         cursor: ${interactive ? 'pointer' : 'default'};
-        outline: none;
         overflow: hidden;
         position: relative;
         z-index: ${selected || emphasized ? 2 : 1};
         transition: border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
           background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 
+        /* A ring on the tile's own outline: painted above its children (the sparkline), so it
+           goes all the way round the tile; the raised z-index keeps a neighbour from covering it. */
         &:focus-visible {
           border-color: ${selected ? activeBorder : hoverBorder};
+          outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+          z-index: 3;
         }
       `}
     >
@@ -535,11 +527,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
           </EuiFlexItem>
           {interactive ? (
             <EuiFlexItem grow={false}>
-              <CornerControl
-                selected={selected}
-                emphasized={emphasized}
-                onClear={selected ? onToggle : undefined}
-              />
+              <CornerControl selected={selected} emphasized={emphasized} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

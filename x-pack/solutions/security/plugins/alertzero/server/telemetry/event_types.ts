@@ -35,6 +35,8 @@ import {
   AD_WORKER_HANDOFF_OUTCOMES,
   AD_WORKER_RUN_OUTCOMES,
   ALERT_TRIAGE_CLOSURE_OUTCOMES,
+  ALERT_TRIAGE_GROUPING_STATES,
+  type AlertTriageGroupingState,
   DETECTION_RULE_SOURCES,
   DETECTION_RULE_TYPES,
   ENDPOINT_ANALYSIS_OUTCOMES,
@@ -103,6 +105,13 @@ export interface AlertZeroWorkerInvestigationClosedPayload extends AlertZeroEnve
   investigation_id: string;
 }
 
+export interface AlertZeroWorkerInvestigationReopenedPayload {
+  investigation_id: string;
+  is_default_space: boolean;
+  watch_tag: AlertZeroWatchTag;
+  worker_id: AlertZeroWorkerId;
+}
+
 export interface AlertZeroWorkerRunCompletedPayload extends AlertZeroEnvelope {
   candidates_found: number;
   degraded: boolean;
@@ -120,15 +129,30 @@ export interface AlertZeroAlertTriageBatchClassifiedPayload extends AlertZeroEnv
   alerts_without_verdict: number;
   fp_below_floor: number;
   fp_candidates: number;
-  investigation_id: string;
+  investigation_id?: string;
   verdicts_false_positive: number;
   verdicts_inconclusive: number;
   verdicts_true_positive: number;
 }
 
+export interface AlertZeroAlertTriageBatchGroupedPayload extends AlertZeroEnvelope {
+  alerts_joined: number;
+  alerts_pooled: number;
+  alerts_with_strict_key: number;
+  conversation_created: boolean;
+  fp_candidates_on_fallback: number;
+  grouping: AlertTriageGroupingState;
+  proposals_created: number;
+  strict_keys: number;
+  strict_keys_single_alert: number;
+  wide_keys: number;
+  wide_keys_single_alert: number;
+}
+
 export interface AlertZeroAlertTriageClosureResolvedPayload extends AlertZeroEnvelope {
   alerts_proposed: number;
   alerts_retag_failed: number;
+  revisions: number;
   auto_approve_requested: boolean;
   investigation_id: string;
   outcome: AlertTriageClosureOutcome;
@@ -202,8 +226,10 @@ export interface AlertZeroTelemetryEventPayloads {
   [ALERTZERO_TELEMETRY_EVENTS.AdWorkerAnalysisCompleted]: AlertZeroAdWorkerAnalysisCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved]: AlertZeroAdWorkerHandoffResolvedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationClosed]: AlertZeroWorkerInvestigationClosedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationReopened]: AlertZeroWorkerInvestigationReopenedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted]: AlertZeroWorkerRunCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified]: AlertZeroAlertTriageBatchClassifiedPayload;
+  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped]: AlertZeroAlertTriageBatchGroupedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved]: AlertZeroAlertTriageClosureResolvedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted]: AlertZeroRuleTuningReviewCompletedPayload;
   [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted]: AlertZeroRuleCoverageReviewCompletedPayload;
@@ -419,6 +445,35 @@ export const ALERTZERO_WORKER_INVESTIGATION_CLOSED_EVENT: EventTypeOpts<AlertZer
     },
   };
 
+export const ALERTZERO_WORKER_INVESTIGATION_REOPENED_EVENT: EventTypeOpts<AlertZeroWorkerInvestigationReopenedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.WorkerInvestigationReopened,
+    schema: {
+      investigation_id: {
+        type: 'keyword',
+        _meta: {
+          description: `The Investigation the Worker reopened, so a new run records into active work. ${INVESTIGATION_ID_DESCRIPTION}`,
+          optional: false,
+        },
+      },
+      is_default_space: {
+        type: 'boolean',
+        _meta: { description: IS_DEFAULT_SPACE_DESCRIPTION, optional: false },
+      },
+      watch_tag: {
+        type: 'keyword',
+        _meta: { description: WATCH_TAG_DESCRIPTION, optional: false },
+      },
+      worker_id: {
+        type: 'keyword',
+        _meta: {
+          description: `${WORKER_ID_DESCRIPTION}. Only the Hunt Worker reopens its own Investigations today`,
+          optional: false,
+        },
+      },
+    },
+  };
+
 /** A required count field. */
 const countField = (description: string) =>
   ({ type: 'long', _meta: { description, optional: false } } as const);
@@ -500,12 +555,48 @@ export const ALERTZERO_ALERT_TRIAGE_BATCH_CLASSIFIED_EVENT: EventTypeOpts<AlertZ
       fp_candidates: countField(
         'False positives at or above the confidence floor, which the closure proposal covers'
       ),
-      investigation_id: investigationIdField(
-        'The Investigation the Worker opened for the batch; joins to its close'
+      investigation_id: optionalInvestigationIdField(
+        'The Investigation of the batch, absent because a batch has none: only a new proposal or a failure creates one'
       ),
       verdicts_false_positive: countField('Alerts classified as false positives'),
       verdicts_inconclusive: countField('Alerts classified as inconclusive'),
       verdicts_true_positive: countField('Alerts classified as true positives'),
+    },
+  };
+
+export const ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT: EventTypeOpts<AlertZeroAlertTriageBatchGroupedPayload> =
+  {
+    eventType: ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
+    schema: {
+      ...ENVELOPE_SCHEMA,
+      alerts_joined: countField(
+        'Alerts that joined a proposal an earlier batch had opened; 0 when grouping is off'
+      ),
+      alerts_pooled: countField(
+        'Alerts whose key had no other alert in the batch and no open proposal, so they went into one shared proposal; 0 when grouping is off'
+      ),
+      alerts_with_strict_key: countField(
+        'Classified alerts with a strict pattern key, whatever their verdict'
+      ),
+      conversation_created: flagField(
+        'Whether the batch created a conversation: one for each new proposal, and one for a failure that does not end the run (no verdicts, or some alerts without one). A batch that only joins proposals, or has no false positive to propose, creates none'
+      ),
+      fp_candidates_on_fallback: countField(
+        'False positives at or above the confidence floor that have no strict key, so they group by rule and detection only'
+      ),
+      grouping: vocabularyField(
+        'Whether the batch was grouped, or why not: supervised autonomy, the kill switch, a proposal lookup that returned fewer proposals than it matched, or nothing to propose',
+        ALERT_TRIAGE_GROUPING_STATES
+      ),
+      proposals_created: countField(
+        'New closure proposals the batch raised; 0 when grouping is off'
+      ),
+      strict_keys: countField('Distinct strict pattern keys among the classified alerts'),
+      strict_keys_single_alert: countField(
+        'Strict pattern keys that only one alert of the batch has'
+      ),
+      wide_keys: countField('Distinct wide pattern keys among the classified alerts'),
+      wide_keys_single_alert: countField('Wide pattern keys that only one alert of the batch has'),
     },
   };
 
@@ -518,11 +609,14 @@ export const ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT: EventTypeOpts<AlertZ
       alerts_retag_failed: countField(
         'Alerts a dismissal could not re-tag from `az:false_positive`, 0 on any other outcome'
       ),
+      revisions: countField(
+        'Revisions the proposal reached when it settled, counting the first as 1; more than 1 means alerts joined it'
+      ),
       auto_approve_requested: flagField(
         'Whether the review asked the gate to auto-approve (supervised autonomy)'
       ),
       investigation_id: investigationIdField(
-        'The Investigation of the batch the review settles; joins to the batch and its close'
+        'The Investigation of the proposal the review settles; joins to its close'
       ),
       outcome: vocabularyField(
         'How the closure proposal settled (`unknown` is any other gate state)',
@@ -695,8 +789,10 @@ export const ALERTZERO_TELEMETRY_EVENT_TYPES = [
   ALERTZERO_AD_WORKER_ANALYSIS_COMPLETED_EVENT,
   ALERTZERO_AD_WORKER_HANDOFF_RESOLVED_EVENT,
   ALERTZERO_WORKER_INVESTIGATION_CLOSED_EVENT,
+  ALERTZERO_WORKER_INVESTIGATION_REOPENED_EVENT,
   ALERTZERO_WORKER_RUN_COMPLETED_EVENT,
   ALERTZERO_ALERT_TRIAGE_BATCH_CLASSIFIED_EVENT,
+  ALERTZERO_ALERT_TRIAGE_BATCH_GROUPED_EVENT,
   ALERTZERO_ALERT_TRIAGE_CLOSURE_RESOLVED_EVENT,
   ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT,
   ALERTZERO_RULE_COVERAGE_REVIEW_COMPLETED_EVENT,

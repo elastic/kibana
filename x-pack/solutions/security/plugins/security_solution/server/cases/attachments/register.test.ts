@@ -12,7 +12,9 @@ import {
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 import { registerCaseAttachments } from './register';
@@ -36,8 +38,10 @@ const formatZodIssues = (issues: Array<{ path: PropertyKey[]; message: string }>
 describe('registerCaseAttachments', () => {
   const experimentalFeatures: ExperimentalFeatures = {
     entityAttachmentsEnabled: false,
-    attackAttachmentsEnabled: false,
+    attackAttachments: false,
   } as ExperimentalFeatures;
+
+  const deps = { getStartServices: jest.fn(), logger: loggerMock.create() };
 
   const buildFramework = () => ({
     registerAttachment: jest.fn(),
@@ -46,7 +50,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.endpoint attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -57,7 +61,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.event attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -69,7 +73,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -82,7 +86,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.timeline attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
@@ -93,10 +97,14 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.entity attachment with the zod payload schema when enabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, {
-      ...experimentalFeatures,
-      entityAttachmentsEnabled: true,
-    } as ExperimentalFeatures);
+    registerCaseAttachments(
+      framework,
+      {
+        ...experimentalFeatures,
+        entityAttachmentsEnabled: true,
+      } as ExperimentalFeatures,
+      deps
+    );
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ENTITY_ATTACHMENT_TYPE,
@@ -107,7 +115,7 @@ describe('registerCaseAttachments', () => {
   it('does not register the unified security.entity attachment when disabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
     expect(framework.registerAttachment).not.toHaveBeenCalledWith(
       expect.objectContaining({
@@ -119,28 +127,59 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.attack attachment with the zod payload schema when enabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, {
-      ...experimentalFeatures,
-      attackAttachmentsEnabled: true,
-    } as ExperimentalFeatures);
+    registerCaseAttachments(
+      framework,
+      {
+        ...experimentalFeatures,
+        attackAttachments: true,
+      } as ExperimentalFeatures,
+      deps
+    );
 
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       schema: AttackAttachmentPayloadSchema,
+      relatedAttachments: {
+        readTypes: [SECURITY_ATTACK_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE],
+        get: expect.any(Function),
+      },
       workflow: { validateTargets: expect.any(Function) },
     });
   });
 
-  it('does not register the unified security.attack attachment when disabled', () => {
+  it('registers the unified security.attack attachment but refuses new attachments when disabled', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework, experimentalFeatures);
+    registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    expect(framework.registerAttachment).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: SECURITY_ATTACK_ATTACHMENT_TYPE,
-      })
-    );
+    const registered = framework.registerAttachment.mock.calls
+      .map(([attachmentType]) => attachmentType)
+      .find(({ id }) => id === SECURITY_ATTACK_ATTACHMENT_TYPE);
+
+    expect(registered).toBeDefined();
+    expect(registered!.relatedAttachments?.get).toEqual(expect.any(Function));
+    expect(registered!.schema).not.toBe(AttackAttachmentPayloadSchema);
+
+    const result = registered!.schema.safeParse({
+      type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+      owner: 'securitySolution',
+      attachmentId: 'attack-1',
+      metadata: {
+        title: 'Credential access on host-1',
+        alertCount: 3,
+        index: '.alerts-security.attack.discovery.alerts-default',
+      },
+    });
+
+    expect(result.success).toBe(false);
+
+    if (!result.success) {
+      // The FTR flag-off suite asserts this reaches the API response, so the message has to
+      // name the flag rather than read as a generic type mismatch.
+      expect(
+        result.error.issues.map((issue: { message: string }) => issue.message).join('; ')
+      ).toContain('attackAttachments');
+    }
   });
 
   describe('invalid payload surfacing', () => {

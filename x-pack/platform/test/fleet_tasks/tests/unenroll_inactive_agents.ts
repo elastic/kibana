@@ -120,6 +120,46 @@ export default function (providerContext: FtrProviderContextWithServices) {
       });
     });
 
+    it('should unenroll inactive agents that are active with a stale unenrolled_at', async () => {
+      await supertest
+        .put(`/api/fleet/agent_policies/${policyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy for unenroll inactive',
+          namespace: 'default',
+          unenroll_timeout: UNENROLL_TIMEOUT_SECONDS,
+        })
+        .expect(200);
+
+      // legacy doc written by Fleet Server 8.16.0-8.17.0 audit/unenroll: active but unenrolled_at set
+      const staleUnenrolledAt = '2025-01-01T00:00:00.000Z';
+      await createAgentDoc(providerContext, 'inactive-agent-stale', policyId, '8.17.0', true, {
+        last_checkin: new Date(Date.now() - INACTIVITY_TIMEOUT_MS).toISOString(),
+        unenrolled_at: staleUnenrolledAt,
+        audit_unenrolled_reason: 'orphaned',
+        audit_unenrolled_time: staleUnenrolledAt,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
+
+      await retry.tryForTime(60000, async () => {
+        const agentRes = await es.search({
+          index: '.fleet-agents',
+          ignore_unavailable: true,
+          query: {
+            term: {
+              policy_id: policyId,
+            },
+          },
+        });
+
+        const agentDoc = agentRes.hits.hits[0]._source as any;
+        if (agentDoc?.active) {
+          throw new Error('Agent is still active');
+        }
+      });
+    });
+
     it('should unenroll inactive agents when policy has unenroll_timeout set in non-default space', async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await spaces.createTestSpace(TEST_SPACE_1);

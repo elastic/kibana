@@ -183,6 +183,7 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { setFingerprintCreateAllowed } from './workflows/step_types/match_attack_fingerprints/match_attack_fingerprints';
 import {
   registerSecurityManagedWorkflowOwner,
   initSecurityManagedWorkflowsClient,
@@ -331,9 +332,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
+      {
+        profile: this.config.entityAnalytics.riskEngine.esqlProfiling,
+        profileInterval: this.config.entityAnalytics.riskEngine.esqlProfilingInterval,
+      },
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
-    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerAttachments(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      this.pluginContext.env.packageInfo.version,
+      plugins.ml
+    ).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
 
@@ -574,7 +586,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures, {
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+    });
     plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
@@ -919,6 +934,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
+    if (plugins.alertzero) {
+      const alertzero = plugins.alertzero;
+      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
+    }
+
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
