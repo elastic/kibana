@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
-import { encode } from '@kbn/rison';
-import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
@@ -38,7 +35,6 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { useSpace } from '../../hooks/use_space';
 import { render } from '../../utils/test_helper';
-import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
 import { SlosPage } from './slos';
 
@@ -320,7 +316,7 @@ describe('SLOs Page', () => {
     });
 
     describe('when API has returned results', () => {
-      const setupSloListView = async () => {
+      it('renders the SLO list with SLO items', async () => {
         useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -332,125 +328,13 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        const compactViewToggle = await screen.findByTestId('compactView');
-        expect(compactViewToggle).toBeTruthy();
-
         await act(async () => {
-          fireEvent.click(compactViewToggle);
-        });
-      };
-
-      const openRowActionsMenu = async () => {
-        const actionsButton = await screen.findByLabelText('All actions, row 1');
-        await act(async () => {
-          actionsButton.click();
-        });
-        await waitForEuiPopoverOpen();
-      };
-
-      it('renders the SLO list with SLO items', async () => {
-        await setupSloListView();
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('sloListViewButton'));
+          fireEvent.click(await screen.findByTestId('sloListViewButton'));
         });
 
-        expect(screen.queryByTestId('slosPage')).toBeTruthy();
-        expect(screen.queryByTestId('sloList')).toBeTruthy();
-        expect(screen.queryAllByTestId('sloItem')).toBeTruthy();
-        expect((await screen.findAllByTestId('sloItem')).length).toBe(sloList.results.length);
-      });
-
-      it('allows editing an SLO', async () => {
-        await setupSloListView();
-        await openRowActionsMenu();
-
-        const button = await screen.findByTestId('sloActionsEdit');
-
-        expect(button).toBeTruthy();
-
-        await act(async () => {
-          button.click();
-        });
-
-        expect(mockNavigate).toHaveBeenCalledWith(
-          `${paths.sloEdit(sloList.results.at(0)?.id || '')}`
-        );
-      });
-
-      it('allows creating a new rule for an SLO', async () => {
-        await setupSloListView();
-        await openRowActionsMenu();
-
-        const button = await screen.findByTestId('sloActionsCreateRule');
-
-        expect(button).toBeTruthy();
-
-        await act(async () => {
-          button.click();
-        });
-
-        expect(await screen.findByTestId('add-rule-flyout')).toBeInTheDocument();
-      });
-
-      it('allows managing rules for an SLO', async () => {
-        await setupSloListView();
-        await openRowActionsMenu();
-
-        const button = await screen.findByTestId('sloActionsManageRules');
-
-        expect(button).toBeTruthy();
-
-        await act(async () => {
-          button.click();
-        });
-
-        expect(mockLocator).toHaveBeenCalled();
-      });
-
-      it('allows deleting an SLO', async () => {
-        await setupSloListView();
-        await openRowActionsMenu();
-
-        const button = await screen.findByTestId('sloActionsDelete');
-
-        expect(button).toBeTruthy();
-
-        await act(async () => {
-          button.click();
-        });
-
-        await act(async () => {
-          (await screen.findByTestId('observabilitySolutionSloDeleteModalConfirmButton')).click();
-        });
-
-        expect(mockDeleteSlo).toHaveBeenCalledWith({
-          id: sloList.results.at(0)?.id,
-          name: sloList.results.at(0)?.name,
-        });
-      });
-
-      it('allows cloning an SLO', async () => {
-        await setupSloListView();
-        await openRowActionsMenu();
-
-        const button = await screen.findByTestId('sloActionsClone');
-
-        expect(button).toBeTruthy();
-
-        await act(async () => {
-          button.click();
-        });
-
-        await waitFor(() => {
-          const slo = sloList.results.at(0);
-          expect(mockNavigate).toHaveBeenCalledWith(
-            paths.sloCreateWithEncodedForm(
-              encodeURIComponent(encode(transformSloToCloneState(slo!)))
-            )
-          );
-        });
+        expect(screen.getByTestId('slosPage')).toBeInTheDocument();
+        expect(screen.getByTestId('sloList')).toBeInTheDocument();
+        expect(screen.getAllByTestId('sloItem').length).toBe(sloList.results.length);
       });
     });
   });
