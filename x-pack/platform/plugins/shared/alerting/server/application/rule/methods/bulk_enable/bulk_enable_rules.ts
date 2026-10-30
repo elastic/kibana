@@ -23,9 +23,9 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import type { RawRule } from '../../../../types';
+import type { RawRule, RuleTypeParams } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
-import { convertRuleIdsToKueryNode } from '../../../../lib';
+import { convertRuleIdsToKueryNode, authorizeRuleTypeParams } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
@@ -221,6 +221,14 @@ const bulkEnableRulesWithOCC = async (
           const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
           const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
           try {
+            // Re-authorize persisted params before activating them: they may have
+            // bypassed the authorizer entirely (e.g. via Saved Objects import).
+            await authorizeRuleTypeParams(
+              rule.attributes.params as RuleTypeParams,
+              ruleType.authorize?.params,
+              { request: context.request }
+            );
+
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
             }
