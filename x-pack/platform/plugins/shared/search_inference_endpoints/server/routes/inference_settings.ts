@@ -18,11 +18,15 @@ import {
 } from '../../common/constants';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
-import { inferenceSettingsSchemaV1 } from '../saved_objects/schema/v1';
+import { inferenceSettingsSchemaV2 } from '../saved_objects/schema/v2';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { resolveFeatureEndpoints } from '../inference_endpoints';
 import { errorHandler } from '../utils/error_handler';
-import { parseInferenceSettingsSO, validateInferenceSettings } from '../utils/inference_settings';
+import {
+  parseInferenceSettingsSO,
+  validateEndpointParameters,
+  validateInferenceSettings,
+} from '../utils/inference_settings';
 
 const EMPTY_SETTINGS: InferenceSettingsResponse = {
   _meta: { id: INFERENCE_SETTINGS_ID },
@@ -157,7 +161,7 @@ export const defineInferenceSettingsRoutes = ({
         },
         validate: {
           request: {
-            body: inferenceSettingsSchemaV1,
+            body: inferenceSettingsSchemaV2,
           },
         },
         version: ROUTE_VERSIONS.v1,
@@ -165,7 +169,14 @@ export const defineInferenceSettingsRoutes = ({
       errorHandler(logger)(async (context, request, response) => {
         const attrs = request.body;
 
-        const validationErrors = validateInferenceSettings(attrs);
+        let validationErrors = validateInferenceSettings(attrs);
+        if (validationErrors.length === 0) {
+          validationErrors = await validateEndpointParameters(
+            attrs,
+            (id) => getConnectorById(id, request),
+            logger
+          );
+        }
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {
