@@ -291,6 +291,9 @@ export const loadScoutHookConfig = (
   return loadVaultConfig(repoRoot, datasetsProfile) ?? {};
 };
 
+/** Read by the managed stack (EDOT host, Scout env and its staleness hash), so seeded from `process.env`. */
+const STACK_ENV_KEYS = ['TRACING_ES_URL', 'TRACING_EXPORTERS', 'GCS_CREDENTIALS'] as const;
+
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
   log,
@@ -303,7 +306,9 @@ export const resolveProfileEnvOverrides = async ({
     flagsReader.string('export-profile') ?? profile ?? defaultExportProfile(repoRoot);
 
   // Profile values are defaults: a variable the caller already exported wins over them. The
-  // exported value stays in the map because the managed stack reads its config only from here.
+  // managed stack (`ensureEvalStack`, the Scout staleness hash) reads its config only from this map,
+  // never from `process.env`, so the variables it consumes are seeded even when the profile lacks
+  // them. The child process inherits `process.env` anyway, so this changes nothing it sees.
   const profileEnvOverrides: Record<string, string> = Object.fromEntries(
     Object.entries({
       ...envFromDatasetsProfile(repoRoot, datasetsProfile),
@@ -312,8 +317,21 @@ export const resolveProfileEnvOverrides = async ({
       }),
     }).map(([key, profileValue]) => [key, process.env[key] || profileValue])
   );
+  for (const key of STACK_ENV_KEYS) {
+    const exported = process.env[key];
+    if (exported) {
+      profileEnvOverrides[key] = exported;
+    }
+  }
 
-  if (!profile && isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+  // Only a URL taken from the auto-selected `local` profile is probed. An exported TRACING_ES_URL is a
+  // deliberate choice: it is neither probed nor dropped, so the map and the child's inherited
+  // `process.env` can't disagree about it.
+  if (
+    !profile &&
+    !process.env.TRACING_ES_URL &&
+    isExportProfileImplicitLocal(flagsReader, exportProfile)
+  ) {
     const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
     const tracingReachable = tracingEsUrl
@@ -604,9 +622,17 @@ export const resolveEvalScoutTarget = (
 
 /**
  * Reads `--skip-server`: bare `--skip-server` is true, `--skip-server=<true|false|1|0>` and
- * `--no-skip-server` are honoured, and an unset flag is false.
+ * `--no-skip-server` are honoured, and an unset flag is false. `--skip-server=` (empty) is rejected:
+ * getopts reports it exactly like the bare flag, so it is detected in `argv`. It is usually an unset
+ * shell variable (`--skip-server=$SKIP`), where silently skipping the server would be the wrong guess.
  */
-export const readSkipServerFlag = (flagsReader: FlagsReader): boolean => {
+export const readSkipServerFlag = (
+  flagsReader: FlagsReader,
+  argv: readonly string[] = process.argv.slice(2)
+): boolean => {
+  if (argv.includes('--skip-server=')) {
+    throw createFlagError('invalid --skip-server value "", expected true or false');
+  }
   let raw: string | undefined;
   try {
     raw = flagsReader.string('skip-server');

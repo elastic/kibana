@@ -69,7 +69,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--profile` value               | Behavior                                                                                      |
 | ------------------------------- | --------------------------------------------------------------------------------------------- |
 | `dev-vault` or `golden-cluster` | Read config from Vault at runtime (no file needed). Requires `vault login --method oidc`.     |
-| `local`                         | Use `config.local.json` (written automatically with localhost defaults if missing).           |
+| `local`                         | Use `config.local.json` (written automatically with hardcoded localhost defaults if missing). |
 | `<name>`                        | Use `config.<name>.json`. If missing + TTY, runs the custom config wizard for that profile.   |
 | _(omitted)_                     | Interactive prompt: local / golden-cluster / custom. Required in non-interactive mode.        |
 

@@ -20,6 +20,7 @@ import {
 } from './run_helpers';
 import type { EvalSuiteDefinition } from './suites';
 import {
+  defaultExportProfile,
   envFromDatasetsProfile,
   envFromExportProfile,
   loadVaultConfig,
@@ -32,6 +33,7 @@ import { readCachedEisConnectors } from './eis_connectors_cache';
 jest.mock('./profiles', () => ({
   ...jest.requireActual('./profiles'),
   loadVaultConfig: jest.fn(),
+  defaultExportProfile: jest.fn(),
   envFromDatasetsProfile: jest.fn(),
   envFromExportProfile: jest.fn(),
   readSuiteSecretFromDevVault: jest.fn(),
@@ -372,7 +374,9 @@ describe('ensureEvalInit connector guard', () => {
 describe('resolveProfileEnvOverrides', () => {
   const log = new ToolingLog();
   const envKeys = ['EVAL_KBN_URL', 'EVAL_KBN_API_KEY', 'TRACING_ES_URL', 'TRACING_ES_API_KEY'];
-  const saved = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
+  const stackKeys = ['TRACING_EXPORTERS', 'GCS_CREDENTIALS'];
+  const allKeys = [...envKeys, ...stackKeys];
+  const saved = Object.fromEntries(allKeys.map((key) => [key, process.env[key]]));
   const datasetsEnv = {
     EVAL_KBN_URL: 'http://elastic:changeme@localhost:5601/dev',
     EVAL_KBN_API_KEY: 'profile-kbn-key',
@@ -391,13 +395,14 @@ describe('resolveProfileEnvOverrides', () => {
     });
 
   beforeEach(() => {
-    envKeys.forEach((key) => delete process.env[key]);
+    allKeys.forEach((key) => delete process.env[key]);
     jest.mocked(envFromDatasetsProfile).mockReset().mockReturnValue(datasetsEnv);
     jest.mocked(envFromExportProfile).mockReset().mockReturnValue(exportEnv);
+    jest.mocked(defaultExportProfile).mockReset();
   });
 
   afterEach(() => {
-    envKeys.forEach((key) => {
+    allKeys.forEach((key) => {
       if (saved[key] === undefined) {
         delete process.env[key];
       } else {
@@ -439,6 +444,51 @@ describe('resolveProfileEnvOverrides', () => {
     expect(profileEnvOverrides.EVAL_KBN_URL).toBe('http://elastic:changeme@localhost:5601/dev');
   });
 
+  it('seeds exported variables the profile does not define', async () => {
+    process.env.GCS_CREDENTIALS = '{"type":"service_account"}';
+    process.env.TRACING_EXPORTERS = '[{"http":{"url":"http://collector:4318/v1/traces"}}]';
+
+    const { profileEnvOverrides } = await resolve();
+
+    expect(profileEnvOverrides).toMatchObject({
+      GCS_CREDENTIALS: '{"type":"service_account"}',
+      TRACING_EXPORTERS: '[{"http":{"url":"http://collector:4318/v1/traces"}}]',
+    });
+  });
+
+  it('does not probe or drop an exported TRACING_ES_URL on the auto-selected local profile', async () => {
+    process.env.TRACING_ES_URL = 'http://127.0.0.1:1';
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => true);
+    jest.mocked(defaultExportProfile).mockReturnValue('local');
+    jest.mocked(envFromExportProfile).mockReturnValue({ TRACING_ES_URL: 'http://127.0.0.1:2' });
+
+    const { profileEnvOverrides } = await resolveProfileEnvOverrides({
+      repoRoot: '/repo',
+      log,
+      flagsReader: readFlags([]),
+    });
+
+    expect(profileEnvOverrides.TRACING_ES_URL).toBe('http://127.0.0.1:1');
+    expect(warning).not.toHaveBeenCalled();
+    warning.mockRestore();
+  });
+
+  it('drops an unreachable TRACING_ES_URL that came from the auto-selected local profile', async () => {
+    jest.mocked(envFromExportProfile).mockReturnValue({ TRACING_ES_URL: 'http://127.0.0.1:1' });
+    const warning = jest.spyOn(log, 'warning').mockImplementation(() => true);
+    jest.mocked(defaultExportProfile).mockReturnValue('local');
+
+    const { profileEnvOverrides } = await resolveProfileEnvOverrides({
+      repoRoot: '/repo',
+      log,
+      flagsReader: readFlags([]),
+    });
+
+    expect(profileEnvOverrides).not.toHaveProperty('TRACING_ES_URL');
+    expect(warning).toHaveBeenCalledTimes(1);
+    warning.mockRestore();
+  });
+
   it('keeps an explicit --evaluations-kbn-url ahead of the profile', () => {
     const env = buildEvalRunEnv({
       evaluationConnectorId: 'judge',
@@ -474,6 +524,26 @@ describe('readSkipServerFlag', () => {
     expect(() => readSkipServerFlag(readFlags(['--skip-server=maybe']))).toThrow(
       'invalid --skip-server value "maybe"'
     );
+  });
+
+  it('rejects an empty value instead of reading it as the bare flag', () => {
+    const argv = ['--skip-server='];
+    expect(() => readSkipServerFlag(readFlags(argv), argv)).toThrow(
+      'invalid --skip-server value ""'
+    );
+  });
+
+  it('reads the red-team flag set, which extends evalRunFlags with string flags', () => {
+    const redTeamFlags = {
+      ...evalRunFlags,
+      string: [...(evalRunFlags.string ?? []), 'modules', 'count'],
+    };
+    const read = (argv: string[]) =>
+      readSkipServerFlag(new FlagsReader(getFlags(argv, redTeamFlags)), argv);
+
+    expect(read(['--skip-server', '--modules', 'jailbreaking'])).toBe(true);
+    expect(read(['--skip-server=true'])).toBe(true);
+    expect(read(['--skip-server=false'])).toBe(false);
   });
 
   it('forwards a skipped server to the re-run args as a bare flag', () => {
