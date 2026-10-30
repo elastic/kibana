@@ -1,6 +1,7 @@
 ---
 name: nightshift-review
 description: Review guidance for Nightshift changes. Defines risk tiers by what a change touches and the checks each tier needs, with calibration examples from past reviews.
+disable-model-invocation: true
 ---
 
 # Nightshift review
