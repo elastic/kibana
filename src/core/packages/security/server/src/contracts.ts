@@ -9,7 +9,7 @@
 
 import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
-import type { CoreAuthorizationService } from './authorization';
+import type { CoreAuthorizationService } from './authz';
 import type { CoreSecurityDelegateContract, CoreSecurityDelegateHandle } from './api_provider';
 import type { CoreAuditService } from './audit';
 import type { CoreServiceAccountsService } from './service_accounts';

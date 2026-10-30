@@ -79,7 +79,7 @@ const createStartMock = (): SecurityStartMock => {
     }),
     authz: lazyObject({
       uiam: lazyObject({
-        checkAuthorization: jest.fn().mockResolvedValue({ permitted: false, checks: [] }),
+        hasBillingAccess: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: auditServiceMock.create(),
@@ -124,7 +124,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     }),
     authz: lazyObject({
       uiam: lazyObject({
-        checkAuthorization: jest.fn().mockResolvedValue({ permitted: false, checks: [] }),
+        hasBillingAccess: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: auditServiceMock.create(),

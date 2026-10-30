@@ -163,7 +163,9 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
   };
 
   private getSessionByRole = async (options: GetSessionByRole): Promise<Session> => {
-    const { role, forceNewSession, spaceId, uiamOrganizationRoles = [] } = options;
+    const { role, forceNewSession, spaceId } = options;
+    // The same set of organization roles must map to the same user regardless of order.
+    const uiamOrganizationRoles = [...new Set(options.uiamOrganizationRoles ?? [])].sort();
 
     // Validate role before creating SAML session
     this.validateRole(role);

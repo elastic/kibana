@@ -45,7 +45,7 @@ describe('convertSecurityApi', () => {
         },
       },
       authz: {
-        uiam: { checkAuthorization: jest.fn() },
+        uiam: { hasBillingAccess: jest.fn() },
       },
       audit: {
         asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),

@@ -429,6 +429,7 @@ export class SecurityPlugin
         getSession: this.getSession,
         getServiceAccounts: this.getServiceAccountsService,
         getUiam: this.getUiam,
+        organizationId,
         audit: this.auditSetup,
         config,
         logger: this.logger,

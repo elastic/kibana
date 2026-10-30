@@ -100,14 +100,10 @@ export {
   groupSecurityPrivileges,
   flattenSecurityPrivileges,
 } from './src/authz';
+export type { CoreAuthorizationService } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
 export type {
   UiamProjectType,
   UiamClientAuthenticationParams,
-  UiamAuthorizationCheck,
-  UiamAuthorizationCheckResult,
-  UiamAuthorizationResource,
-  UiamAuthorizationResult,
-  UiamAuthorizationType,
+  CoreUiamAuthorizationService,
 } from './src/uiam';
-export type { CoreAuthorizationService } from './src/authorization';

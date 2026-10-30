@@ -204,6 +204,29 @@ describe('SamlSessionManager', () => {
       });
     });
 
+    test(`should treat the same organization roles in any order as one UIAM user`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        serverless: { organizationId: 'org123', projectType: 'oblt', uiam: true },
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        uiamOrganizationRoles: ['organization-admin', 'billing-admin'],
+      });
+      await samlSessionManager.getApiCredentialsForRole(roleViewer, {
+        uiamOrganizationRoles: ['billing-admin', 'organization-admin', 'billing-admin'],
+      });
+
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledTimes(1);
+      expect(createLocalSAMLSessionMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'elastic_viewer_billing-admin_organization-admin@elastic.co',
+          serverless: expect.objectContaining({
+            organizationRoleIds: ['billing-admin', 'organization-admin'],
+          }),
+        })
+      );
+    });
+
     test(`'getUserData' should request the session of the UIAM user holding the organization roles`, async () => {
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,

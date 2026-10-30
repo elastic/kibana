@@ -21,8 +21,6 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
-  UiamAuthorizationCheck,
-  UiamAuthorizationResult,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -37,6 +35,7 @@ import type {
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
+import type { UiamAuthorizationCheck, UiamAuthorizationResult } from './authorization_types';
 import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
@@ -1480,19 +1479,19 @@ export class UiamService implements UiamServicePublic {
   ): Promise<UiamAuthorizationResult> {
     this.#logger.debug(`Attempting to check authorization for ${checks.length} check(s).`);
 
-    try {
-      const body: UiamCheckAuthorizationRequestBody = { checks };
-      const requestOptions: RequestInit & { dispatcher?: Agent } = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': this.#userAgentHeader,
-          ...this.#getRequestAuthenticationHeaders(request),
-        },
-        body: JSON.stringify(body),
-        dispatcher: this.#dispatcher,
-      };
+    const body: UiamCheckAuthorizationRequestBody = { checks };
+    const requestOptions: RequestInit & { dispatcher?: Agent } = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': this.#userAgentHeader,
+        ...this.#getRequestAuthenticationHeaders(request),
+      },
+      body: JSON.stringify(body),
+      dispatcher: this.#dispatcher,
+    };
 
+    try {
       const response: UiamCheckAuthorizationResponse = await UiamService.#parseUiamResponse(
         await fetch(`${this.#config.url}/uiam/api/v1/authorization/_check`, requestOptions)
       );

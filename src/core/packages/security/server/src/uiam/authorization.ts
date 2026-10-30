@@ -10,50 +10,14 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
- * The resource an authorization check is evaluated against. UIAM identifies resources by type and
- * any attributes that type needs, such as `organization_id`.
+ * Cloud privileges evaluated by UIAM for the principal behind a request.
  */
-export interface UiamAuthorizationResource {
-  type: string;
-  [attribute: string]: string;
-}
-
-/**
- * A single authorization check: whether the principal may perform `action` on `resource`.
- */
-export interface UiamAuthorizationCheck {
-  action: string;
-  resource: UiamAuthorizationResource;
-}
-
-/**
- * The outcome of one {@link UiamAuthorizationCheck}.
- */
-export interface UiamAuthorizationCheckResult extends UiamAuthorizationCheck {
-  permitted: boolean;
-}
-
-/**
- * The outcome of an authorization check request. `permitted` is `true` only when every check
- * was permitted.
- */
-export interface UiamAuthorizationResult {
-  permitted: boolean;
-  checks: UiamAuthorizationCheckResult[];
-}
-
-/**
- * Authorization checks evaluated by UIAM for the principal behind a request.
- */
-export interface UiamAuthorizationType {
+export interface CoreUiamAuthorizationService {
   /**
-   * Asks UIAM whether the principal behind the request may perform each action on each resource.
+   * Whether the user behind the request may view the organization's billing details
+   * (UIAM `billing-details:get`, granted by `billing-admin` and `organization-admin`).
    * The request must carry UIAM credentials; the call fails for any other credential.
-   * @param request The request whose credentials the checks are evaluated for.
-   * @param checks The checks to evaluate.
+   * @param request The request whose credentials the check is evaluated for.
    */
-  checkAuthorization(
-    request: KibanaRequest,
-    checks: UiamAuthorizationCheck[]
-  ): Promise<UiamAuthorizationResult>;
+  hasBillingAccess(request: KibanaRequest): Promise<boolean>;
 }

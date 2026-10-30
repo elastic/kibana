@@ -23,6 +23,7 @@ import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
 import type { UiamServicePublic } from './uiam';
+import { UIAM_BILLING_DETAILS_READ_ACTION, UIAM_BILLING_DETAILS_RESOURCE_TYPE } from './uiam';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
@@ -30,6 +31,7 @@ export const buildSecurityApi = ({
   getSession,
   getServiceAccounts,
   getUiam,
+  organizationId,
   audit,
   config,
   logger,
@@ -38,6 +40,8 @@ export const buildSecurityApi = ({
   getSession: () => Pick<Session, 'getSID'>;
   getServiceAccounts: () => ServiceAccountsServiceStart | null;
   getUiam: () => Pick<UiamServicePublic, 'checkAuthorization'>;
+  /** The Cloud organization this Kibana belongs to, which scopes UIAM's billing resources. */
+  organizationId?: string;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
   logger: Logger;
@@ -117,8 +121,18 @@ export const buildSecurityApi = ({
         ? {
             // `async` so that a missing service surfaces as a rejected promise rather than a
             // synchronous throw, which callers of a promise-returning API would not expect.
-            checkAuthorization: async (request, checks) =>
-              getUiam().checkAuthorization(request, checks),
+            hasBillingAccess: async (request) => {
+              const { permitted } = await getUiam().checkAuthorization(request, [
+                {
+                  action: UIAM_BILLING_DETAILS_READ_ACTION,
+                  resource: {
+                    type: UIAM_BILLING_DETAILS_RESOURCE_TYPE,
+                    ...(organizationId ? { organization_id: organizationId } : {}),
+                  },
+                },
+              ]);
+              return permitted;
+            },
           }
         : null,
     },
