@@ -52,17 +52,21 @@ export interface ScoutElasticCloudTarget {
   readonly project?: { readonly id: string };
   readonly deployment?: { readonly id: string };
   readonly region?: string;
+  /** The Elastic Cloud environment, e.g. `qa`: a region name alone exists in several. */
+  readonly environment?: string;
 }
 
 /**
  * The Elastic Cloud project or deployment declared via SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID,
- * SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID and SCOUT_TARGET_ELASTIC_CLOUD_REGION by the pipeline
- * that created it; undefined when neither ID is set. Read per call, like the target attributes.
+ * SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID, SCOUT_TARGET_ELASTIC_CLOUD_REGION and
+ * SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT by the pipeline that created it; undefined when neither
+ * ID is set. Read per call, like the target attributes.
  */
 export const elasticCloudTargetFromEnv = (): ScoutElasticCloudTarget | undefined => {
   const projectId = process.env.SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID?.trim();
   const deploymentId = process.env.SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID?.trim();
   const region = process.env.SCOUT_TARGET_ELASTIC_CLOUD_REGION?.trim();
+  const environment = process.env.SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT?.trim();
   if (!projectId && !deploymentId) {
     return undefined;
   }
@@ -70,5 +74,6 @@ export const elasticCloudTargetFromEnv = (): ScoutElasticCloudTarget | undefined
     ...(projectId ? { project: { id: projectId } } : {}),
     ...(deploymentId ? { deployment: { id: deploymentId } } : {}),
     ...(region ? { region } : {}),
+    ...(environment ? { environment } : {}),
   };
 };

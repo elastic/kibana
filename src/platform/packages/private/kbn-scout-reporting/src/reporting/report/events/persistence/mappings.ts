@@ -168,6 +168,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
           region: {
             type: 'keyword',
           },
+          environment: {
+            type: 'keyword',
+          },
         },
       },
     },

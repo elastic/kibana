@@ -444,7 +444,7 @@ Every Scout test event records why its run was started as `test_run.scope`, read
 
 #### Elastic Cloud target in test events
 
-Test events from a run against Elastic Cloud record which serverless project or hosted deployment it used under `test_run.target.elastic_cloud`: `project.id`, `deployment.id` and `region`, read from `SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID`, `SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID` and `SCOUT_TARGET_ELASTIC_CLOUD_REGION`. The pipeline that creates the project or deployment sets them, so that a failure can be traced to the project's own logs. The field is absent when neither ID is set.
+Test events from a run against Elastic Cloud record which serverless project or hosted deployment it used under `test_run.target.elastic_cloud`: `project.id`, `deployment.id`, `region` and `environment`, read from `SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID`, `SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID`, `SCOUT_TARGET_ELASTIC_CLOUD_REGION` and `SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT`. The pipeline that creates the project or deployment sets them, so that a failure can be traced to the project's own logs. The field is absent when neither ID is set.
 
 ### Test Types and Directory Structure
 

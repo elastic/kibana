@@ -47,6 +47,7 @@ describe('elasticCloudTargetFromEnv', () => {
     'SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID',
     'SCOUT_TARGET_ELASTIC_CLOUD_DEPLOYMENT_ID',
     'SCOUT_TARGET_ELASTIC_CLOUD_REGION',
+    'SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT',
   ] as const;
   const original = Object.fromEntries(VARS.map((name) => [name, process.env[name]]));
 
@@ -65,15 +66,17 @@ describe('elasticCloudTargetFromEnv', () => {
     setEnv(original);
   });
 
-  it('records the serverless project and its region', () => {
+  it('records the serverless project, its region and its environment', () => {
     setEnv({
       SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID: ' 3f1c9a ',
       SCOUT_TARGET_ELASTIC_CLOUD_REGION: 'azure-eastus2',
+      SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT: 'qa',
     });
 
     expect(elasticCloudTargetFromEnv()).toEqual({
       project: { id: '3f1c9a' },
       region: 'azure-eastus2',
+      environment: 'qa',
     });
   });
 
@@ -83,10 +86,11 @@ describe('elasticCloudTargetFromEnv', () => {
     expect(elasticCloudTargetFromEnv()).toEqual({ deployment: { id: 'b72e04' } });
   });
 
-  it('is undefined without a project or deployment ID, even with a region', () => {
+  it('is undefined without a project or deployment ID, even with a region and environment', () => {
     setEnv({
       SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID: ' ',
       SCOUT_TARGET_ELASTIC_CLOUD_REGION: 'azure-eastus2',
+      SCOUT_TARGET_ELASTIC_CLOUD_ENVIRONMENT: 'qa',
     });
 
     expect(elasticCloudTargetFromEnv()).toBeUndefined();
