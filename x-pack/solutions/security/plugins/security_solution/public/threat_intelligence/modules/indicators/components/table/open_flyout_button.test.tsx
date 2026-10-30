@@ -11,20 +11,11 @@ import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { BUTTON_TEST_ID } from './test_ids';
-import { IOCRightPanelKey } from '../../../../../flyout/ioc_details/constants/panel_keys';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
-const mockOpenFlyout = jest.fn();
-
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-}));
-
 jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 const mockIndicator = generateMockIndicator();
 
@@ -35,7 +26,6 @@ describe('<OpenIndicatorFlyoutButton />', () => {
     jest.clearAllMocks();
     flyoutApi = createFlyoutApiMock();
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
   it('should render expand button', () => {
@@ -48,29 +38,7 @@ describe('<OpenIndicatorFlyoutButton />', () => {
     expect(getByTestId(BUTTON_TEST_ID).innerHTML).toContain('maximize');
   });
 
-  it('should open the legacy expandable flyout when the new flyout is disabled', () => {
-    const { getByTestId } = render(
-      <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={mockIndicator} />
-      </TestProvidersComponent>
-    );
-
-    fireEvent.click(getByTestId(BUTTON_TEST_ID));
-
-    expect(mockOpenFlyout).toHaveBeenCalledWith({
-      right: {
-        id: IOCRightPanelKey,
-        params: {
-          id: mockIndicator._id,
-        },
-      },
-    });
-    expect(flyoutApi.openIocFlyout).not.toHaveBeenCalled();
-  });
-
-  it('should open the new IOC flyout when the new flyout is enabled', () => {
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
+  it('should open the new IOC flyout', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
         <OpenIndicatorFlyoutButton indicator={mockIndicator} />
@@ -83,6 +51,5 @@ describe('<OpenIndicatorFlyoutButton />', () => {
       indicator: mockIndicator,
       origin: FLYOUT_ORIGIN.THREAT_INTEL_TABLE,
     });
-    expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 });
