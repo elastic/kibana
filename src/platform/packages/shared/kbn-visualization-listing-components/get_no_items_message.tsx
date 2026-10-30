@@ -8,35 +8,55 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiIllustration, useEuiTheme } from '@elastic/eui';
+import { searchAnalyticsDataviz } from '@elastic/eui-illustrations';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+const NoItemsMessage = ({ createItem }: { createItem: () => void }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiEmptyPrompt
+      icon={
+        <EuiIllustration
+          type={searchAnalyticsDataviz}
+          alt=""
+          fullWidth={false}
+          css={{ inlineSize: euiTheme.base * 8 }}
+        />
+      }
+      title={
+        <h1 id="visualizeListingHeading" data-test-subj="emptyListPrompt">
+          <FormattedMessage
+            id="visualizations.listing.createNew.title"
+            defaultMessage="Create your first visualization"
+          />
+        </h1>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="visualizations.listing.createNew.description"
+            defaultMessage="You can create different visualizations based on your data."
+          />
+        </p>
+      }
+      actions={
+        <EuiButton
+          onClick={createItem}
+          color="text"
+          iconType="plusCircle"
+          data-test-subj="newItemButton"
+        >
+          <FormattedMessage
+            id="visualizations.listing.createNew.createButtonLabel"
+            defaultMessage="Create visualization"
+          />
+        </EuiButton>
+      }
+    />
+  );
+};
+
 export const getNoItemsMessage = (createItem: () => void) => (
-  <EuiEmptyPrompt
-    iconType="visualizeApp"
-    title={
-      <h1 id="visualizeListingHeading" data-test-subj="emptyListPrompt">
-        <FormattedMessage
-          id="visualizations.listing.createNew.title"
-          defaultMessage="Create your first visualization"
-        />
-      </h1>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="visualizations.listing.createNew.description"
-          defaultMessage="You can create different visualizations based on your data."
-        />
-      </p>
-    }
-    actions={
-      <EuiButton onClick={createItem} fill iconType="plusCircle" data-test-subj="newItemButton">
-        <FormattedMessage
-          id="visualizations.listing.createNew.createButtonLabel"
-          defaultMessage="Create new visualization"
-        />
-      </EuiButton>
-    }
-  />
+  <NoItemsMessage createItem={createItem} />
 );

@@ -26,7 +26,8 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 // DNS limits fully qualified domain names to 253 characters.
 const DOMAIN_MAX_LENGTH = 253;
-const URL_MAX_LENGTH = 2048;
+// Only the hostname is sent to URLVoid, so the URL cap need only admit long legal URLs.
+const URL_MAX_LENGTH = 8192;
 
 export const URLVoidConnector: ConnectorSpec = {
   metadata: {

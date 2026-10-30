@@ -58,6 +58,13 @@ describe('NewRelic', () => {
     expect(types).toContain('api_key_header');
   });
 
+  it('marks the api_key_header auth type as sandbox capable', () => {
+    const types = NewRelic.auth?.types ?? [];
+    expect(types).toEqual([
+      expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
+    ]);
+  });
+
   describe('config schema', () => {
     // accountId is stored as a regex-validated string (not z.number()) because the
     // connector config form-generator has no widget for numeric Zod schemas.

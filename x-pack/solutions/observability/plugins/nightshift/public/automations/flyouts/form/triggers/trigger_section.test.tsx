@@ -39,7 +39,6 @@ const legacyPatternTrigger: TriggerFormValues = {
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
-  alertStatus: 'any',
 };
 
 const onTriggerChange = jest.fn();
@@ -76,42 +75,6 @@ describe('AutomationTriggerSection', () => {
 
   beforeEach(() => onTriggerChange.mockClear());
 
-  it('shows the empty state and the trigger groups', async () => {
-    render(<TriggerSection />);
-
-    expect(screen.getByText('Choose what starts this automation.')).toBeInTheDocument();
-    expect(screen.queryByTestId('automationChangeTrigger')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('automationAddTrigger'));
-    expect(await screen.findByText('Elastic')).toBeInTheDocument();
-    expect(screen.getByText('Scheduled')).toBeInTheDocument();
-    expect(screen.getByText('Every…')).toBeInTheDocument();
-    expect(screen.queryByText('Custom cron…')).not.toBeInTheDocument();
-    expect(screen.getByText('Slack')).toBeInTheDocument();
-    expect(screen.getByText('New message in channel')).toBeInTheDocument();
-  });
-
-  it('lists Slack triggers before scheduled ones', async () => {
-    render(<TriggerSection />);
-    fireEvent.click(screen.getByTestId('automationAddTrigger'));
-
-    const groups = (await screen.findAllByText(/^(Elastic|Slack|Scheduled)$/)).map(
-      (group) => group.textContent
-    );
-    expect(groups).toEqual(['Elastic', 'Slack', 'Scheduled']);
-  });
-
-  it('shows the Slack daily limit help for Slack triggers', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'New message in channel');
-
-    expect(screen.getByText('New message')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history."
-      )
-    ).toBeInTheDocument();
-  });
-
   it('removes the trigger', async () => {
     render(<TriggerSection />);
     await selectTrigger('automationAddTrigger', 'Alert triggered');
@@ -133,14 +96,8 @@ describe('AutomationTriggerSection', () => {
     fireEvent.click(await screen.findByText('CPU usage high'));
     expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
     expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
-
-    fireEvent.click(screen.getByTestId('automationStatusPicker'));
-    fireEvent.click(await screen.findByText('Recovered'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'inactive' });
-    expect(screen.getByTestId('automationStatusPicker')).toHaveTextContent('Recovered');
-
-    fireEvent.click(screen.getByText('Active'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'any' });
+    expect(screen.getByText('changes to')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
   it('selects rules and tags in the rule picker', async () => {

@@ -28,7 +28,7 @@ export function registerEndpointsRoute({
       },
       validate: {
         query: schema.object({
-          taskType: schema.maybe(schema.string()),
+          taskType: schema.maybe(schema.string({ maxLength: 256 })),
         }),
       },
     },

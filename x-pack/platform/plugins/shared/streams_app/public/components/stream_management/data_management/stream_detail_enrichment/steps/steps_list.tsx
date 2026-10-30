@@ -9,12 +9,13 @@ import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { isConditionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
 import React from 'react';
+import { DraggableStepWrapper, useDescendantIdsGetter } from '../../../../draggable_steps';
 import type { StepsProcessingSummaryMap } from '../hooks/use_steps_processing_summary';
 import type { InteractiveModeContext } from '../state_management/interactive_mode_machine';
 import type { RootLevelMap } from '../state_management/stream_enrichment_state_machine/utils';
+import { collectDescendantStepIds } from '../state_management/utils';
 import { ActionBlock } from './blocks/action';
 import { WhereBlock } from './blocks/where';
-import { DraggableStepWrapper } from './draggable_step_wrapper';
 import { useInteractiveModeSelector } from '../state_management/stream_enrichment_state_machine';
 
 export interface StepConfigurationProps {
@@ -36,6 +37,9 @@ export const StepsListItem = (props: StepConfigurationProps) => {
   // Find the index of this step in the flat stepRefs array
   const stepIndex = stepRefs.findIndex((ref) => ref.id === props.stepRef.id);
 
+  const stepId = step.customIdentifier;
+  const getDescendantIds = useDescendantIdsGetter(stepRefs, stepId, collectDescendantStepIds);
+
   // Don't wrap with drag-drop if read-only or under edit
   if (props.readOnly || props.stepUnderEdit) {
     return <>{isCondition ? <WhereBlock {...props} /> : <ActionBlock {...props} />}</>;
@@ -49,10 +53,10 @@ export const StepsListItem = (props: StepConfigurationProps) => {
 
   return (
     <DraggableStepWrapper
-      stepId={step.customIdentifier}
+      stepId={stepId}
       index={stepIndex}
       level={props.level}
-      stepRefs={stepRefs}
+      getDescendantIds={getDescendantIds}
       // Only allow nesting (combine) inside WHERE blocks, not regular action blocks
       isBlocked={!isCondition}
       hasChildren={hasChildren}

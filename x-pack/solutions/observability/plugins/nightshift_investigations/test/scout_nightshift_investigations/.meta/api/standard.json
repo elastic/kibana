@@ -1,9 +1,25 @@
 {
-  "sha1": "a33cf4ec5a9d0d514e1f0dce777978254b9f7697",
+  "sha1": "89c49bce16ada8f82ec695427b244da36527d2d7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "b90fa6f806c5b45-b3e54a6ce1163f9",
+      "title": "Set the default space up with the Nightshift service accounts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "9094409a4361f3f-43b3061a5b88a7d",
       "title": "/internal/nightshift/custom_context adds, keeps, edits and removes snippets",
@@ -307,40 +323,36 @@
       }
     },
     {
-      "id": "5634887a4dd65b3-15179325f34e902",
-      "title": "/internal/nightshift/sandbox_secrets stores secrets and only ever returns their keys",
+      "id": "63a66063df79f9e-4086e916e3d62e9",
+      "title": "Scheduled Nightshift automations an edited schedule starts a scoped investigation and stops it at the configured timeout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
-        "line": 66,
-        "column": 27
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
+        "line": 70,
+        "column": 5
       }
     },
     {
-      "id": "5634887a4dd65b3-63eb4e1841adf74",
-      "title": "/internal/nightshift/sandbox_secrets rejects new keys without a value, too short or multi-line values and reserved keys",
+      "id": "63a66063df79f9e-0bcda865dc9df24",
+      "title": "Scheduled Nightshift automations rejects unsupported schedules and missing instructions without creating an automation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
-        "line": 131,
-        "column": 18
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
+        "line": 217,
+        "column": 11
       }
     },
     {
-      "id": "5634887a4dd65b3-ed89ab4d3a81891",
-      "title": "/internal/nightshift/sandbox_secrets keeps secrets isolated per space",
+      "id": "4f4f5d44815329f-824afc0970700c6",
+      "title": "Nightshift service account setup runs investigations in this space as the Nightshift agent account",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -349,14 +361,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
-        "line": 160,
-        "column": 19
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 45,
+        "column": 50
       }
     },
     {
-      "id": "5634887a4dd65b3-e70ee20f53d6a87",
-      "title": "/internal/nightshift/sandbox_secrets lets read-only users list keys but not change secrets",
+      "id": "4f4f5d44815329f-227ef59fafc152f",
+      "title": "Nightshift service account setup binds every workflow of the space to that one account",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -365,14 +377,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
-        "line": 173,
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 53,
         "column": 16
       }
     },
     {
-      "id": "5634887a4dd65b3-64dda8fa872ad46",
-      "title": "/internal/nightshift/sandbox_secrets rejects users without any Nightshift privilege in the space",
+      "id": "4f4f5d44815329f-259e0f74a466d11",
+      "title": "Nightshift service account setup names both accounts with the roles of this deployment",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -381,14 +393,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
-        "line": 197,
-        "column": 30
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 66,
+        "column": 33
       }
     },
     {
-      "id": "5634887a4dd65b3-7bb1a377ae1bfdf",
-      "title": "/internal/nightshift/sandbox_secrets returns 404 while Nightshift is disabled",
+      "id": "4f4f5d44815329f-d40fef37616a115",
+      "title": "Nightshift service account setup refuses to set a space up for a caller without manage_security",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -397,9 +409,41 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
-        "line": 207,
-        "column": 24
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-5278951377b2ae9",
+      "title": "Nightshift service account setup tells a user without manage_security that the space is set up but not theirs to change",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 94,
+        "column": 75
+      }
+    },
+    {
+      "id": "4f4f5d44815329f-4a341d3ea109230",
+      "title": "Nightshift service account setup refuses investigations in a space that was never set up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/service_account_setup.spec.ts",
+        "line": 102,
+        "column": 9
       }
     },
     {
@@ -451,8 +495,8 @@
       }
     },
     {
-      "id": "2bd6d8da5d00a5a-19f05d1b7f407a6",
-      "title": "POST /internal/nightshift/investigations returns 400 when subject.id exceeds 500 characters",
+      "id": "2bd6d8da5d00a5a-e6ea4c64c57ead7",
+      "title": "POST /internal/nightshift/investigations returns 400 when an entry of subject.ids exceeds 500 characters",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -467,6 +511,22 @@
       }
     },
     {
+      "id": "2bd6d8da5d00a5a-28ea4cc4fe80260",
+      "title": "POST /internal/nightshift/investigations returns 400 when subject.ids is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
+        "line": 65,
+        "column": 44
+      }
+    },
+    {
       "id": "2bd6d8da5d00a5a-33c57d77cff5e33",
       "title": "POST /internal/nightshift/investigations returns 404 for a well-formed alert body whose alert does not exist",
       "expectedStatus": "passed",
@@ -478,8 +538,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 65,
-        "column": 58
+        "line": 76,
+        "column": 18
       }
     },
     {
@@ -494,8 +554,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 78,
-        "column": 27
+        "line": 88,
+        "column": 25
       }
     }
   ]

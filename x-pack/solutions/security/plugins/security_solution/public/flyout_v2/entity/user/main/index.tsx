@@ -158,7 +158,7 @@ export const User: FC<UserProps> = memo(function User({
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -271,6 +271,7 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -337,6 +338,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: EntityType.user,
             entityName: userName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onOpenUser,
             title: userName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -351,6 +353,7 @@ export const User: FC<UserProps> = memo(function User({
             value: userName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onOpenUser,
             title: userName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -399,6 +402,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: 'user',
             entityName: userName,
             scopeId,
+            mode,
             onShowEntity: onOpenUser,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,
@@ -462,6 +466,7 @@ export const User: FC<UserProps> = memo(function User({
           lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
           aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
           mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}

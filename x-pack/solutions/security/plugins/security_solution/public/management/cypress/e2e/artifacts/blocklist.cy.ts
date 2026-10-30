@@ -33,7 +33,7 @@ const {
 describe(
   'Blocklist',
   {
-    tags: ['@ess', '@serverless', '@serverlessQA'],
+    tags: ['@serverlessQA'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;

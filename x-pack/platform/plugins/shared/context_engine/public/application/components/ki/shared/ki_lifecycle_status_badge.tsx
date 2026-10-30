@@ -7,7 +7,12 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { KI_STATUS_BADGE_COLOR, resolveKiStatus } from '../../../utils/ki_expiry';
+import {
+  KI_STATUS_BADGE_COLOR,
+  KI_STATUS_LABEL,
+  KI_VERIFICATION_FAILED_TITLE,
+  resolveKiStatus,
+} from '../../../utils/ki_expiry';
 import type { KiLifecycleStatus } from '../../../../../common/step_types/ki';
 import { kiLabelCapitalizeCss } from './ki_type_display';
 
@@ -29,8 +34,9 @@ export const KiLifecycleStatusBadge = ({
       color={KI_STATUS_BADGE_COLOR[status]}
       data-test-subj={dataTestSubj}
       css={kiLabelCapitalizeCss}
+      title={status === 'verification_failed' ? KI_VERIFICATION_FAILED_TITLE : undefined}
     >
-      {status}
+      {KI_STATUS_LABEL[status]}
     </EuiBadge>
   );
 };

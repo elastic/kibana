@@ -77,12 +77,18 @@ evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete 
 
       // Space B is never triggered here: its own copy must have no Investigation, and space A's
       // Investigation must not resolve from space B even though the report ids share a source.
-      const conversationId = buildHuntInvestigationConversationId(reportId);
+      const conversationId = buildHuntInvestigationConversationId({
+        spaceId: HUNT_A_SPACE_ID,
+        reportId,
+      });
       const [bOwn, bSeesA] = await Promise.all([
         getConversation({
           fetch,
           spaceId: HUNT_B_SPACE_ID,
-          conversationId: buildHuntInvestigationConversationId(SPACE_REPORT_IDS.spaceB),
+          conversationId: buildHuntInvestigationConversationId({
+            spaceId: HUNT_B_SPACE_ID,
+            reportId: SPACE_REPORT_IDS.spaceB,
+          }),
         }),
         getConversation({ fetch, spaceId: HUNT_B_SPACE_ID, conversationId }),
       ]);

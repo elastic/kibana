@@ -11,6 +11,19 @@ import { css } from '@emotion/react';
 
 import type { SignalCardData, SignalCardId } from './data';
 import { SignalCard } from './signal_card';
+import { SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID } from '../product_tour/constants';
+
+// Zero-size product tour anchor at the middle of the first card's right edge. The tour
+// popover moves the anchor into its own wrapper, so it must be out of flow.
+const tourAnchorCss = css`
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0;
+  inline-size: 0;
+  block-size: 0;
+  line-height: 0;
+  pointer-events: none;
+`;
 
 export interface SignalCardsProps {
   activeTile: SignalCardId | null;
@@ -89,7 +102,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onF
           gap: euiTheme.size.s,
         })}
       >
-        {cards.map((card) => {
+        {cards.map((card, index) => {
           const selected = activeTile === card.id;
 
           return (
@@ -111,6 +124,11 @@ export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onF
                 selected={selected}
                 onToggle={() => onFilterForCard(card.id)}
               />
+              {index === 0 && (
+                <div aria-hidden="true" css={tourAnchorCss}>
+                  <span data-test-subj={SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID} />
+                </div>
+              )}
             </div>
           );
         })}
