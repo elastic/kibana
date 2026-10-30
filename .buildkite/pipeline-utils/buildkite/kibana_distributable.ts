@@ -11,7 +11,8 @@ import { BuildkiteClient } from './client.ts';
 import type { Build } from './types/build.ts';
 
 export const KIBANA_DISTRIBUTABLE_ARTIFACT = 'kibana-<version>-SNAPSHOT-linux-<arch>.tar.zst';
-const KIBANA_DISTRIBUTABLE_PATTERN = /(^|\/)kibana-[^/]+-SNAPSHOT-linux-(x86_64|aarch64)\.tar\.zst$/;
+const KIBANA_DISTRIBUTABLE_PATTERN =
+  /(^|\/)kibana-[^/]+-SNAPSHOT-linux-(x86_64|aarch64)\.tar\.zst$/;
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
