@@ -36,17 +36,14 @@ import type { UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
-import {
-  type RuntimeStateManager,
-  selectTabRuntimeInternalState,
-  selectTabRuntimeState,
-} from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
   PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabsBarVisibility,
   type ProfileAppStateDefaultField,
   type DiscoverInternalState,
+  type ExpandedDocCascadePath,
   type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
@@ -60,7 +57,12 @@ import {
   type RawAppStatePayload,
 } from './actions';
 import { DEFAULT_EXPANDED_DOC_OWNER } from './constants';
-import { type HasUnsavedChangesResult, selectTab } from './selectors';
+import {
+  type HasUnsavedChangesResult,
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+} from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -71,10 +73,11 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+  initializationState: { hasESData: false, hasDataView: false },
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  saveSessionModal: { isOpen: false, initialTitle: undefined, initialCopyOnSave: false },
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
@@ -190,6 +193,25 @@ const internalStateSliceDef = createSlice({
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
     },
 
+    setPersistedDiscoverSession: (state, action: PayloadAction<DiscoverSession>) => {
+      state.persistedDiscoverSession = action.payload;
+    },
+
+    openSaveSessionModal: (
+      state,
+      action: PayloadAction<{ initialTitle?: string; initialCopyOnSave?: boolean }>
+    ) => {
+      state.saveSessionModal = {
+        isOpen: true,
+        initialTitle: action.payload.initialTitle,
+        initialCopyOnSave: action.payload.initialCopyOnSave ?? false,
+      };
+    },
+
+    closeSaveSessionModal: (state) => {
+      state.saveSessionModal = { isOpen: false, initialTitle: undefined, initialCopyOnSave: false };
+    },
+
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
       state.hasUnsavedChanges = action.payload.hasUnsavedChanges;
       state.tabs.unsavedIds = action.payload.unsavedTabIds;
@@ -205,9 +227,22 @@ const internalStateSliceDef = createSlice({
         tab.forceFetchOnSelect = action.payload.forceFetchOnSelect;
       }),
 
+    setSkipInitialFetch: (state, action: TabAction<Pick<TabState, 'skipInitialFetch'>>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.skipInitialFetch = action.payload.skipInitialFetch;
+      }),
+
     setIsDataViewLoading: (state, action: TabAction<Pick<TabState, 'isDataViewLoading'>>) =>
       withTab(state, action.payload, (tab) => {
         tab.isDataViewLoading = action.payload.isDataViewLoading;
+      }),
+
+    setIsWarningCalloutDismissed: (
+      state,
+      action: TabAction<Pick<TabState, 'isWarningCalloutDismissed'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.isWarningCalloutDismissed = action.payload.isWarningCalloutDismissed;
       }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
@@ -241,6 +276,7 @@ const internalStateSliceDef = createSlice({
       action: TabAction<{
         expandedDoc: DataTableRecord | undefined;
         expandedDocOwner?: string;
+        expandedDocCascadePath?: ExpandedDocCascadePath;
         initialDocViewerTabId?: string;
         initialDocViewerTabState?: object;
       }>
@@ -262,6 +298,9 @@ const internalStateSliceDef = createSlice({
 
         tab.expandedDoc = action.payload.expandedDoc;
         tab.expandedDocOwner = nextExpandedDocOwner;
+        tab.expandedDocCascadePath = action.payload.expandedDoc
+          ? action.payload.expandedDocCascadePath
+          : undefined;
         tab.initialDocViewerTabId = action.payload.initialDocViewerTabId;
 
         if (action.payload.initialDocViewerTabId && action.payload.initialDocViewerTabState) {
@@ -437,6 +476,7 @@ const internalStateSliceDef = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         tab.expandedDoc = undefined;
         tab.expandedDocOwner = undefined;
+        tab.expandedDocCascadePath = undefined;
         tab.renderDocumentViewMeta = undefined;
         tab.initialDocViewerTabId = undefined;
         tab.uiState.docViewer = {};
@@ -448,6 +488,11 @@ const internalStateSliceDef = createSlice({
     ) =>
       withTab(state, action.payload, (tab) => {
         tab.uiState.esqlEditor = action.payload.esqlEditorUiState;
+      }),
+
+    setVisorUiState: (state, action: TabAction<{ visorUiState: TabState['uiState']['visor'] }>) =>
+      withTab(state, action.payload, (tab) => {
+        tab.uiState.visor = action.payload.visorUiState;
       }),
 
     setDataGridUiState: (
@@ -631,23 +676,42 @@ const createMiddleware = (options: InternalStateDependencies) => {
     InternalStateDependencies
   >;
 
+  const shouldPersistTabsLocally = isAnyOf(
+    internalStateSlice.actions.setTabs,
+    internalStateSlice.actions.setPersistedDiscoverSession
+  );
+
   startListening({
-    actionCreator: internalStateSlice.actions.setTabs,
-    effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
-      (action, listenerApi) => {
-        const discoverSession =
-          action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
+    // Unsaved changes are recomputed on every tab change, so persist only when the unsaved tabs differ
+    predicate: (action, currentState, previousState) =>
+      shouldPersistTabsLocally(action) ||
+      (internalStateSlice.actions.setUnsavedChanges.match(action) &&
+        !isEqual(currentState.tabs.unsavedIds, previousState.tabs.unsavedIds)),
+    effect: throttle<
+      ListenerEffect<
+        UnknownAction,
+        DiscoverInternalState,
+        InternalStateDispatch,
+        InternalStateDependencies
+      >
+    >(
+      (_action, listenerApi) => {
+        const state = listenerApi.getState();
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
           selectTabRuntimeInternalState({
             runtimeStateManager,
-            tabState: selectTab(listenerApi.getState(), tabId),
+            tabState: selectTab(state, tabId),
             services,
           });
         void tabsStorageManager.persistLocally(
-          action.payload,
+          {
+            allTabs: selectAllTabs(state),
+            recentlyClosedTabs: selectRecentlyClosedTabs(state),
+            unsavedTabIds: state.tabs.unsavedIds,
+          },
           getTabInternalState,
-          discoverSession?.id
+          state.persistedDiscoverSession
         );
       },
       MIDDLEWARE_THROTTLE_MS,
@@ -660,18 +724,24 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
-        withTab(listenerApi.getState(), action.payload, (tab) => {
-          tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState({
-              runtimeStateManager,
-              tabState: tab,
-              services,
-            }),
-            attributes: tab.attributes,
-            appState: tab.appState,
-            globalState: tab.globalState,
-            profileState: tab.profileState,
-          });
+        const state = listenerApi.getState();
+        withTab(state, action.payload, (tab) => {
+          tabsStorageManager.updateTabStateLocally(
+            action.payload.tabId,
+            {
+              internalState: selectTabRuntimeInternalState({
+                runtimeStateManager,
+                tabState: tab,
+                services,
+              }),
+              attributes: tab.attributes,
+              appState: tab.appState,
+              globalState: tab.globalState,
+              profileState: tab.profileState,
+              visorMode: tab.uiState.visor?.visorMode,
+            },
+            state.persistedDiscoverSession
+          );
         });
       },
       MIDDLEWARE_THROTTLE_MS,
@@ -683,19 +753,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
       dismissFlyouts([DiscoverFlyouts.lensEdit]);
-    },
-  });
-
-  startListening({
-    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
-    effect: (action, listenerApi) => {
-      const { runtimeStateManager } = listenerApi.extra;
-      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
-      const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
-
-      if (dataStateContainer?.cleanupEsql) {
-        dataStateContainer.cleanupEsql();
-      }
     },
   });
 

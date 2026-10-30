@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type {
   Logger,
   SavedObject,
@@ -18,7 +17,6 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
-  AttachmentMode,
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
@@ -27,6 +25,7 @@ import type { AttachmentPersistedAttributes } from '../../common/types/attachmen
 import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
+import type { AttachmentSavedObjectType } from '../user_actions/types';
 import type { ConfigType } from '../../config';
 
 export type MixSavedObjectResponse =
@@ -61,7 +60,21 @@ export interface AttachedToCaseArgs {
 
 export interface GetAttachmentArgs {
   savedObjectId: string;
-  mode: AttachmentMode;
+}
+
+/**
+ * A stored attachment read for deletion; `attributes` is absent when the row fails to decode and
+ * `owner` when the stored owner is not a non-empty string.
+ */
+export interface AttachmentForDeletion {
+  id: string;
+  type: AttachmentSavedObjectType;
+  owner?: string;
+  references: SavedObjectReference[];
+  /** The file of a file attachment, read from the stored fields whether or not they decode. */
+  fileId?: string;
+  attributes?: AttachmentAttributesV2;
+  version?: string;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
@@ -104,6 +117,14 @@ export interface AlertIdsAggsResult {
   };
 }
 
+export interface AttackIdsAggsResult {
+  attackIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
 export interface EventIdsAggsResult {
   legacyEventIds: {
     buckets: Array<{
@@ -125,11 +146,6 @@ export type AlertsAttachedToCaseArgs = AttachedToCaseArgs & {
    */
   originOnly?: boolean;
 };
-
-export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
-  attachmentType: AttachmentType;
-  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
-}
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
   savedObjectIds: string[];
@@ -155,9 +171,52 @@ export interface UpdateArgs {
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
 }
 
-export type UpdateAttachmentArgs = UpdateArgs;
+export interface UpdateAttachmentArgs extends UpdateArgs {
+  /**
+   * The saved object type the attachment is stored as. Skips the type lookup when the caller already read it.
+   */
+  savedObjectType?: AttachmentSavedObjectType;
+}
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
   requestWithoutType?: boolean;
+}
+
+export interface GetCaseIdsByAttachmentIdsArgs {
+  type: string;
+  attachmentIds: string[];
+  /**
+   * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
+   */
+  unifiedFilter?: KueryNode;
+  /**
+   * The same filter, scoped to the legacy `cases-comments` saved object type.
+   */
+  legacyFilter?: KueryNode;
+}
+
+/** The cases one attachment id is attached to, with their owners for authorization. */
+export interface CasesWithOwnerOfAttachment {
+  attachmentId: string;
+  cases: Array<{ id: string; owner: string }>;
+}
+
+export interface GetCaseIdsByAttachmentIdsAggs {
+  attachmentIds: {
+    buckets: Array<{
+      key: string;
+      references: {
+        cases: {
+          caseIds: {
+            sum_other_doc_count: number;
+            buckets: Array<{
+              key: string;
+              attachment: { owner: { buckets: Array<{ key: string }> } };
+            }>;
+          };
+        };
+      };
+    }>;
+  };
 }

@@ -15,6 +15,7 @@ description: >-
 network:
   allowed:
     - agent-observability-ce9858.ingest.us-east4.gcp.elastic.cloud
+    - api.anthropic.com
 env:
   CLAUDE_CODE_ENABLE_TELEMETRY: "1"
   OTEL_METRICS_EXPORTER: otlp

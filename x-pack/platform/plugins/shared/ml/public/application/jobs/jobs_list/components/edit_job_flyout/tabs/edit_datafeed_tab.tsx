@@ -16,7 +16,7 @@ import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../common/util/job_utils';
-import { getNewJobDefaults } from '../../../../../services/ml_server_info';
+import { getIsMlCpsEnabled, getNewJobDefaults } from '../../../../../services/ml_server_info';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../ml_job_editor';
 
 interface EditDatafeedTabProps {
@@ -43,6 +43,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   const {
     services: { cps },
   } = useMlKibana();
+  const isMlCpsEnabled = getIsMlCpsEnabled();
   const defaults = useMemo(() => {
     const jobDefaults = getNewJobDefaults();
     const bucketSpanSeconds =
@@ -104,7 +105,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
         </>
       )}
       <EuiForm>
-        {totalProjectCount > 1 ? (
+        {isMlCpsEnabled && totalProjectCount > 1 ? (
           <EuiFormRow
             label={
               <FormattedMessage

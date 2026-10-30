@@ -6,17 +6,18 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
+import { omitNullKiAttributes } from '../../common/step_types/ki';
+import { updateKi } from '../ai_indices/ki_write';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiBackingIndex,
-  kiNotFoundError,
+  kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
+import { toStepError } from './to_step_error';
 
 export const getUpdateKiStepDefinition = ({
   getAiIndexService,
@@ -28,55 +29,49 @@ export const getUpdateKiStepDefinition = ({
   createServerStepDefinition({
     ...updateKiStepCommonDefinition,
     handler: async (context) => {
-      const request = context.contextManager.getFakeRequest();
-      await assertContextEngineEnabled(isContextEngineEnabled, request);
+      try {
+        const request = context.contextManager.getFakeRequest();
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
-      return withKiWriteTelemetry({
-        action: 'update',
-        aiIndexId,
-        analyticsService,
-        logger,
-        run: async (setManaged) => {
-          await assertKiWritePrivilege(checkWritePrivilege, request);
+        const {
+          ai_index_id: aiIndexId,
+          ki_id: kiId,
+          lifecycle,
+          force = false,
+          refresh = false,
+        } = context.input;
+        const ki = omitNullKiAttributes(context.input.ki);
+        return await withKiWriteTelemetry({
+          action: 'update',
+          aiIndexId,
+          analyticsService,
+          logger,
+          run: async (setManaged) => {
+            await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
-          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId);
-          setManaged(managed);
-          const esClient = context.contextManager.getScopedEsClient();
+            const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
+            setManaged(managed);
+            const esClient = context.contextManager.getScopedEsClient();
+            const writer = kiWriterFromContext(context.contextManager.getContext());
 
-          const backingIndex = await findKiBackingIndex({
-            esClient,
-            aiIndexId,
-            destValue: dest.value,
-            kiId,
-            abortSignal: context.abortSignal,
-          });
-
-          const response = await esClient
-            .update(
-              {
-                index: backingIndex,
-                id: kiId,
-                doc: ki,
-                refresh: 'wait_for',
-              },
-              { signal: context.abortSignal }
-            )
-            .catch((error) => {
-              // The KI may have been removed concurrently.
-              if (isResponseError(error) && error.statusCode === 404) {
-                throw kiNotFoundError(aiIndexId, kiId);
-              }
-              throw error;
+            const result = await updateKi(esClient, {
+              aiIndexId,
+              dest,
+              kiId,
+              ki,
+              writer,
+              force,
+              lifecycle,
+              refresh,
+              abortSignal: context.abortSignal,
             });
 
-          return {
-            output: {
-              id: kiId,
-              result: response.result === 'noop' ? ('noop' as const) : ('updated' as const),
-            },
-          };
-        },
-      });
+            return { output: result };
+          },
+        });
+      } catch (error) {
+        throw toStepError(error, 'Failed to update knowledge indicator');
+      }
     },
   });

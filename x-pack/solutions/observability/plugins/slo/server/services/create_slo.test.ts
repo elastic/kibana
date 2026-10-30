@@ -15,7 +15,15 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
+import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
+import type { SLODefinition } from '../domain/models';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -34,6 +42,7 @@ describe('CreateSLO', () => {
   let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
+  let mockTelemetry: jest.Mocked<SloTelemetryReporter>;
   let createSLO: CreateSLO;
 
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
@@ -44,6 +53,7 @@ describe('CreateSLO', () => {
     mockLogger = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
+    mockTelemetry = createSloTelemetryReporterMock();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     createSLO = new CreateSLO(
       mockScopedClusterClient,
@@ -54,7 +64,8 @@ describe('CreateSLO', () => {
       mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath,
-      'some-user-id'
+      'some-user-id',
+      mockTelemetry
     );
   });
 
@@ -69,6 +80,35 @@ describe('CreateSLO', () => {
         page: 0,
         total: 0,
       });
+    });
+
+    it('reports the slo_created telemetry event', async () => {
+      const sloParams = createSLOParams({
+        id: 'unique-id',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+
+      await createSLO.execute(sloParams);
+
+      expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_created',
+          expect.objectContaining({
+            slo_id: hashSloId('unique-id'),
+            indicator_type: 'sli.apm.transactionErrorRate',
+            budgeting_method: sloParams.budgetingMethod,
+          }),
+        ],
+      ]);
+    });
+
+    it('does not report telemetry when inspecting', async () => {
+      await createSLO.inspect(
+        createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() })
+      );
+
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
     });
 
     it('calls the expected services', async () => {
@@ -204,6 +244,10 @@ describe('CreateSLO', () => {
   });
 
   describe('unhappy path', () => {
+    afterEach(() => {
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
+    });
+
     beforeEach(() => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
@@ -223,7 +267,7 @@ describe('CreateSLO', () => {
 
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+      await expect(createSLO.execute(sloParams)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
     });
@@ -232,9 +276,7 @@ describe('CreateSLO', () => {
       mockTransformManager.install.mockRejectedValue(new Error('Rollup transform install error'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
-        'Rollup transform install error'
-      );
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('Rollup transform install error');
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(
@@ -243,6 +285,10 @@ describe('CreateSLO', () => {
 
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
       expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ index: SUMMARY_TEMP_INDEX_NAME }),
+        { ignore: [404] }
+      );
     });
 
     it('rollbacks completed operations when summary transform install fails', async () => {
@@ -251,9 +297,7 @@ describe('CreateSLO', () => {
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
-        'Summary transform install error'
-      );
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('Summary transform install error');
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
@@ -269,9 +313,7 @@ describe('CreateSLO', () => {
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
-        'temporary document index failed'
-      );
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('temporary document index failed');
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
@@ -279,6 +321,51 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight install operations to settle before rolling back', async () => {
+      const pendingCreate = Promise.withResolvers<SLODefinition>();
+      mockRepository.create.mockReturnValueOnce(pendingCreate.promise);
+      mockTransformManager.install.mockRejectedValueOnce(
+        new Error('Rollup transform install error')
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform install error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+
+      pendingCreate.resolve(mockRepository.create.mock.calls[0][0]);
+      await assertion;
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight start operations to settle before rolling back', async () => {
+      const pendingSummaryStart = Promise.withResolvers<void>();
+      mockTransformManager.start.mockRejectedValueOnce(new Error('Rollup transform start error'));
+      mockSummaryTransformManager.start.mockReturnValueOnce(pendingSummaryStart.promise);
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const assertion = expect(createSLO.execute(sloParams)).rejects.toThrow(
+        'Rollup transform start error'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(mockSummaryTransformManager.start).toHaveBeenCalledTimes(1);
+      expect(mockScopedClusterClient.asCurrentUser.delete).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+
+      pendingSummaryStart.resolve();
+      await assertion;
+
+      expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepository.deleteById).toHaveBeenCalled();
     });
   });
 });

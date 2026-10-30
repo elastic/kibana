@@ -30,16 +30,23 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type {
+  FilesSetup as FilesPublicSetup,
+  FilesStart as FilesPublicStart,
+} from '@kbn/files-plugin/public';
 
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   ConversationSidebarRef,
-  ConversationTemplateTabRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
   OpenConversationSidebarReturn,
+  OpenConversationDetailsOptions,
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
@@ -51,6 +58,7 @@ export interface ConfigSchema {}
 
 export interface AgentBuilderSetupDependencies {
   actions: ActionsPublicPluginSetup;
+  files: FilesPublicSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -63,6 +71,7 @@ export interface AgentBuilderSetupDependencies {
 
 export interface AgentBuilderStartDependencies {
   aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
+  files: FilesPublicStart;
   evals?: EvalsPublicStart;
   inference: InferencePublicStart;
   lens: LensPublicStart;

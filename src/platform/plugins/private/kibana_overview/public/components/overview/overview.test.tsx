@@ -16,7 +16,7 @@ import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-import { hasESData, hasUserDataView } from './overview.test.mocks';
+import { hasESData, hasDataView } from './overview.test.mocks';
 import { Overview } from './overview';
 
 jest.mock('@kbn/shared-ux-page-kibana-template', () => {
@@ -201,7 +201,7 @@ const renderOverview = (
 describe('Overview', () => {
   beforeEach(() => {
     hasESData.mockResolvedValue(true);
-    hasUserDataView.mockResolvedValue(true);
+    hasDataView.mockResolvedValue(true);
   });
 
   afterAll(() => jest.clearAllMocks());
@@ -260,7 +260,7 @@ describe('Overview', () => {
 
   test('renders correctly when there is no user data view', async () => {
     hasESData.mockResolvedValue(true);
-    hasUserDataView.mockResolvedValue(false);
+    hasDataView.mockResolvedValue(false);
 
     const { getByText, queryByTestId, queryByLabelText } = renderOverview();
 
@@ -274,7 +274,7 @@ describe('Overview', () => {
 
   test('show loading spinner during loading', async () => {
     hasESData.mockImplementation(() => new Promise(() => {}));
-    hasUserDataView.mockImplementation(() => new Promise(() => {}));
+    hasDataView.mockImplementation(() => new Promise(() => {}));
 
     const { getByLabelText, queryByText, queryByTestId } = renderOverview();
 

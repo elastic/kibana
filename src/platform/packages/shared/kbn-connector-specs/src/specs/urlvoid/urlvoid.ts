@@ -24,6 +24,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { ConnectorSpec } from '../../connector_spec';
 
+// DNS limits fully qualified domain names to 253 characters.
+const DOMAIN_MAX_LENGTH = 253;
+// Only the hostname is sent to URLVoid, so the URL cap need only admit long legal URLs.
+const URL_MAX_LENGTH = 8192;
+
 export const URLVoidConnector: ConnectorSpec = {
   metadata: {
     id: '.urlvoid',
@@ -42,9 +47,12 @@ export const URLVoidConnector: ConnectorSpec = {
   actions: {
     scanDomain: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Scan a domain against URLVoid blocklist engines and return its reputation, detection count, and the engines that flagged it. Use this for a quick verdict on a bare domain; use getDomainInfo when you also need IP, country, registrar, and domain age.',
       input: lazySchema(() =>
         z.object({
-          domain: z.string().describe('Domain name to scan'),
+          domain: z.string().max(DOMAIN_MAX_LENGTH).describe('Domain name to scan'),
         })
       ),
       handler: async (ctx, input) => {
@@ -64,9 +72,12 @@ export const URLVoidConnector: ConnectorSpec = {
 
     checkUrl: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Check the reputation of a full URL by extracting its hostname and scanning it with URLVoid. Returns the URL, extracted domain, reputation, detection count, and flagging engines. Use this when you have a URL rather than a bare domain.',
       input: lazySchema(() =>
         z.object({
-          url: z.url().describe('URL to check'),
+          url: z.url().max(URL_MAX_LENGTH).describe('URL to check'),
         })
       ),
       handler: async (ctx, input) => {
@@ -88,9 +99,12 @@ export const URLVoidConnector: ConnectorSpec = {
 
     getDomainInfo: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Get reputation and registration details for a domain from URLVoid, including resolved IP, country, registrar, domain age, and detection count. Use this when investigating who owns or hosts a domain; use scanDomain for just the per-engine verdict.',
       input: lazySchema(() =>
         z.object({
-          domain: z.string().describe('Domain name'),
+          domain: z.string().max(DOMAIN_MAX_LENGTH).describe('Domain name'),
         })
       ),
       handler: async (ctx, input) => {
@@ -113,6 +127,9 @@ export const URLVoidConnector: ConnectorSpec = {
 
     scanDomainStats: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Get URLVoid API usage for the configured key: queries remaining, queries used, and plan. Use this to check quota before running many scans; it does not scan any domain.',
       input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';

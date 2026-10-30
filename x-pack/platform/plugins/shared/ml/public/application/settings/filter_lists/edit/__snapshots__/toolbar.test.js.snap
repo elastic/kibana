@@ -53,6 +53,8 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
@@ -64,7 +66,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
             id="add_item_popover"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+              class="euiButton emotion-euiButtonDisplay-s-base-primary"
               data-test-subj="mlFilterListOpenNewItemsPopoverButton"
               type="button"
             >
@@ -85,7 +87,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
+          class="euiButton emotion-euiButtonDisplay-s-isDisabled-base-disabled"
           data-test-subj="mlFilterListDeleteItemButton"
           disabled=""
           type="button"
@@ -155,6 +157,8 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
@@ -166,7 +170,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
             id="add_item_popover"
           >
             <button
-              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+              class="euiButton emotion-euiButtonDisplay-s-base-primary"
               data-test-subj="mlFilterListOpenNewItemsPopoverButton"
               type="button"
             >
@@ -187,7 +191,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+          class="euiButton emotion-euiButtonDisplay-s-base-danger"
           data-test-subj="mlFilterListDeleteItemButton"
           type="button"
         >

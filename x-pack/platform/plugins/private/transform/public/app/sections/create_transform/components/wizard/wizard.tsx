@@ -47,6 +47,7 @@ import type { TransformConfigUnion } from '../../../../../../common/types/transf
 import { isLatestTransform } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
+import { useGetTransformCpsEnabled } from '../../../../hooks';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { useAppDependencies } from '../../../../app_dependencies';
 import { useTransformHasLinkedProjects } from '../../../../hooks/use_transform_has_linked_projects';
@@ -71,9 +72,6 @@ const styles = {
     .euiStep__content {
       padding-right: 0;
     }
-  `,
-  projectScopeSelector: css`
-    min-inline-size: 180px;
   `,
 };
 
@@ -120,8 +118,14 @@ export const Wizard: FC<WizardProps> = React.memo(
     const appDependencies = useAppDependencies();
     const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
     const cpsManager = cps?.cpsManager;
-    const linkedProjectsState = useTransformHasLinkedProjects(cpsManager);
-    const canUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const canCheckProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const { data: isTransformCpsEnabled } = useGetTransformCpsEnabled({
+      enabled: canCheckProjectScope,
+    });
+    const canUseProjectScope = canCheckProjectScope && isTransformCpsEnabled === true;
+    const linkedProjectsState = useTransformHasLinkedProjects(
+      canUseProjectScope ? cpsManager : undefined
+    );
     const shouldUseProjectScope = Boolean(
       canUseProjectScope && linkedProjectsState.hasLinkedProjects !== false
     );
@@ -283,18 +287,18 @@ export const Wizard: FC<WizardProps> = React.memo(
     const isDataViewPickerDisabled = setSavedObjectId === undefined;
     const projectScopeSelector =
       shouldUseProjectScope && cpsManager ? (
-        <EuiFlexItem grow={false} css={styles.projectScopeSelector}>
-          <ProjectScopeSelector
-            cpsManager={cpsManager}
-            onProjectRoutingChange={handleProjectRoutingChange}
-            projectRouting={projectRouting}
-          />
-        </EuiFlexItem>
+        <ProjectScopeSelector
+          cpsManager={cpsManager}
+          onProjectRoutingChange={handleProjectRoutingChange}
+          projectRouting={projectRouting}
+        />
       ) : null;
     const dataViewPickerComponent = (
       <DataViewPicker
         compressed={false}
         currentDataViewId={dataView?.id}
+        showDataViewLabel={false}
+        showDropdownIcon={false}
         savedDataViews={savedDataViews}
         isDisabled={isDataViewPickerDisabled}
         onChangeDataView={requestDataViewChange}
@@ -309,6 +313,8 @@ export const Wizard: FC<WizardProps> = React.memo(
             : undefined
         }
         trigger={{
+          iconSide: 'right',
+          iconType: 'chevronSingleDown',
           label:
             dataView?.getName() ??
             i18n.translate('xpack.transform.stepDefineForm.selectDataViewLabel', {
@@ -348,8 +354,10 @@ export const Wizard: FC<WizardProps> = React.memo(
       </EuiFormRow>
     );
     const dataViewPicker = (
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
-        {projectScopeSelector}
+      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+        {projectScopeSelector ? (
+          <EuiFlexItem grow={false}>{projectScopeSelector}</EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow>{dataViewPickerRow}</EuiFlexItem>
       </EuiFlexGroup>
     );

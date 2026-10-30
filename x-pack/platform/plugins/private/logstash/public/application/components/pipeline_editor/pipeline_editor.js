@@ -26,7 +26,6 @@ import {
   EuiPageSection,
   EuiSelect,
   EuiSpacer,
-  EuiPageHeader,
 } from '@elastic/eui';
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
 import { FlexItemSetting } from './flex_item_setting';
@@ -232,37 +231,6 @@ class PipelineEditorUi extends React.Component {
       .catch(this.notifyOnError);
   };
 
-  getPipelineHeadingText = () => {
-    const { clone, id, isNewPipeline, intl } = this.props;
-
-    if (!!clone && id) {
-      return intl.formatMessage(
-        {
-          id: 'xpack.logstash.pipelineEditor.clonePipelineTitle',
-          defaultMessage: 'Clone Pipeline "{id}"',
-        },
-        {
-          id,
-        }
-      );
-    }
-    if (!isNewPipeline) {
-      return intl.formatMessage(
-        {
-          id: 'xpack.logstash.pipelineEditor.editPipelineTitle',
-          defaultMessage: 'Edit Pipeline "{id}"',
-        },
-        {
-          id: this.state.pipeline.id,
-        }
-      );
-    }
-    return intl.formatMessage({
-      id: 'xpack.logstash.pipelineEditor.createPipelineTitle',
-      defaultMessage: 'Create Pipeline',
-    });
-  };
-
   render() {
     const { intl } = this.props;
 
@@ -272,8 +240,6 @@ class PipelineEditorUi extends React.Component {
         restrictWidth
         data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
       >
-        <EuiPageHeader pageTitle={this.getPipelineHeadingText()} bottomBorder />
-        <EuiSpacer size="l" />
         <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
           {this.props.isNewPipeline && (
             <EuiFormRow

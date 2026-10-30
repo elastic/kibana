@@ -420,7 +420,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                     }
                   )}
                   color={setupMode.data.totalUniqueInstanceCount > 0 ? 'danger' : 'warning'}
-                  iconType="flag"
+                  iconType="pencil"
                 >
                   <p>
                     {i18n.translate(
@@ -455,7 +455,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                     }
                   )}
                   color="warning"
-                  iconType="flag"
+                  iconType="pencil"
                 >
                   <p>
                     {i18n.translate(

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 import { useSelector } from 'react-redux-v7';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -20,6 +20,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from './use_run_document_workflow_panel';
+import { toDocumentSelections } from './to_document_selections';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -46,21 +47,21 @@ import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { Status } from '../../../../../common/api/detection_engine';
-import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
-import type { AlertTableContextMenuItem } from '../types';
+import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 import { useAddToChatAction } from './use_add_to_chat_action';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { AlertRowActionMenu, getAlertRowActionGroups } from './action_menu/alert_row_action_menu';
+
 interface AlertContextMenuProps {
   ariaLabel?: string;
-  ariaRowindex: number;
-  columnValues: string;
   isRemoteDocument: boolean;
   ecsRowData: Ecs;
+  onRemoveFromCase?: (eventId: string) => void;
   onRuleChange?: () => void;
   scopeId: string;
   refetch: (() => void) | undefined;
@@ -68,10 +69,9 @@ interface AlertContextMenuProps {
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
-  ariaRowindex,
-  columnValues,
   isRemoteDocument,
   ecsRowData,
+  onRemoveFromCase,
   onRuleChange,
   scopeId,
   refetch,
@@ -108,7 +108,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsData: ecsRowData,
     nonEcsData: flattenedEcsData,
     onMenuItemClick,
-    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
     refetch,
   });
 
@@ -240,20 +239,18 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsRowData,
   });
 
-  const documentForWorkflow = useMemo(() => {
-    const fields: Record<string, unknown> = {};
-    for (const { field, value } of flattenedEcsData) {
-      fields[field] = value;
-    }
-    return [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '', ...fields }];
-  }, [ecsRowData._id, ecsRowData._index, flattenedEcsData]);
+  const documentIdsForWorkflow = useMemo(
+    () => toDocumentSelections([{ _id: ecsRowData._id, _index: ecsRowData._index }]),
+    [ecsRowData._id, ecsRowData._index]
+  );
 
   const {
     runWorkflowMenuItem: runDocumentWorkflowMenuItem,
     runDocumentWorkflowPanel: runDocumentWorkflowPanels,
   } = useRunDocumentWorkflowPanel({
     closePopover,
-    documents: documentForWorkflow,
+    documentIds: documentIdsForWorkflow,
+    originEventId: ecsRowData._id,
   });
 
   const { addToChatActionItems } = useAddToChatAction({
@@ -262,49 +259,64 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     alertId: ecsRowData._id,
   });
 
-  const items: AlertTableContextMenuItem[] = useMemo(
+  const removeFromCaseItems = useMemo(
     () =>
-      !isEvent && ruleId
+      onRemoveFromCase
         ? [
-            ...addToCaseActionItems,
-            ...statusActionItems,
-            ...runWorkflowMenuItem,
-            ...alertTagsItems,
-            ...alertAssigneesItems,
-            ...exceptionActionItems,
-            ...(agentId ? osqueryActionItems : []),
-            ...addToChatActionItems,
+            {
+              key: REMOVE_FROM_CASE_ACTION_ID,
+              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
+              name: i18n.REMOVE_FROM_CASE,
+              onClick: () => {
+                closePopover();
+                onRemoveFromCase(ecsRowData._id);
+              },
+            },
           ]
-        : [
-            ...addToCaseActionItems,
-            ...runDocumentWorkflowMenuItem,
-            ...(canCreateEndpointEventFilters ? eventFilterActionItems : []),
-            ...(agentId ? osqueryActionItems : []),
-          ],
+        : [],
+    [closePopover, onRemoveFromCase, ecsRowData._id]
+  );
+
+  const isAlertActionMenu = !isEvent && Boolean(ruleId);
+  const hasAgent = Boolean(agentId);
+  const hasItems = useMemo(
+    () =>
+      getAlertRowActionGroups({
+        addToCaseItems: addToCaseActionItems,
+        addToChatItems: addToChatActionItems,
+        alertAssigneeItems: alertAssigneesItems,
+        alertTagItems: alertTagsItems,
+        canCreateEndpointEventFilters,
+        eventFilterItems: eventFilterActionItems,
+        exceptionItems: exceptionActionItems,
+        hasAgent,
+        isAlert: isAlertActionMenu,
+        osqueryItems: osqueryActionItems,
+        removeFromCaseItems,
+        runAlertWorkflowItems: runWorkflowMenuItem,
+        runDocumentWorkflowItems: runDocumentWorkflowMenuItem,
+        statusItems: statusActionItems,
+      }).some((group) => group.length > 0),
     [
+      addToCaseActionItems,
+      addToChatActionItems,
+      alertAssigneesItems,
+      alertTagsItems,
+      canCreateEndpointEventFilters,
+      eventFilterActionItems,
+      exceptionActionItems,
+      hasAgent,
+      isAlertActionMenu,
+      osqueryActionItems,
+      removeFromCaseItems,
       runWorkflowMenuItem,
       runDocumentWorkflowMenuItem,
-      isEvent,
-      ruleId,
-      addToCaseActionItems,
       statusActionItems,
-      exceptionActionItems,
-      agentId,
-      osqueryActionItems,
-      eventFilterActionItems,
-      canCreateEndpointEventFilters,
-      alertTagsItems,
-      alertAssigneesItems,
-      addToChatActionItems,
     ]
   );
 
   const panels = useMemo(
     () => [
-      {
-        id: 0,
-        items,
-      },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
@@ -312,7 +324,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...runDocumentWorkflowPanels,
     ],
     [
-      items,
       alertTagsPanels,
       alertAssigneesPanels,
       statusActionPanels,
@@ -322,7 +333,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const button = useMemo(() => {
-    const hasItems = !!items.length;
     const tooltipContent = isRemoteDocument
       ? i18n.REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE
       : hasItems
@@ -343,7 +353,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         />
       </EuiToolTip>
     );
-  }, [ariaLabel, isPopoverOpen, onButtonClick, isRemoteDocument, items.length]);
+  }, [ariaLabel, hasItems, isPopoverOpen, onButtonClick, isRemoteDocument]);
 
   const osqueryFlyout = useMemo(() => {
     return (
@@ -370,10 +380,22 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             anchorPosition="downLeft"
             repositionOnScroll
           >
-            <EuiContextMenu
-              initialPanelId={0}
+            <AlertRowActionMenu
+              addToCaseItems={addToCaseActionItems}
+              addToChatItems={addToChatActionItems}
+              alertAssigneeItems={alertAssigneesItems}
+              alertTagItems={alertTagsItems}
+              canCreateEndpointEventFilters={canCreateEndpointEventFilters}
+              eventFilterItems={eventFilterActionItems}
+              exceptionItems={exceptionActionItems}
+              hasAgent={hasAgent}
+              isAlert={isAlertActionMenu}
+              osqueryItems={osqueryActionItems}
               panels={panels}
-              data-test-subj="actions-context-menu"
+              removeFromCaseItems={removeFromCaseItems}
+              runAlertWorkflowItems={runWorkflowMenuItem}
+              runDocumentWorkflowItems={runDocumentWorkflowMenuItem}
+              statusItems={statusActionItems}
             />
           </EuiPopover>
         </EventsTdContent>

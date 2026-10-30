@@ -11,7 +11,6 @@ import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -76,8 +75,11 @@ export const CreateEditField = withRouter(
             indexPattern={indexPattern}
             defaultIndex={uiSettings.get('defaultIndex')}
             canSave={dataViews.getCanSaveSync()}
+            back={{
+              href: history.createHref({ pathname: `/dataView/${indexPattern.id}` }),
+              label: indexPattern.getName(),
+            }}
           />
-          <EuiSpacer size={'l'} />
           <FieldEditor
             indexPattern={indexPattern}
             spec={spec}

@@ -24,7 +24,7 @@
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
@@ -177,8 +177,8 @@ describe('WorkflowsService (facade)', () => {
     executionQuerySpies = spyPrototype(WorkflowExecutionQueryService, [
       'getWorkflowExecution',
       'getChildWorkflowExecutions',
+      'getExecutionStepExecutions',
       'getWorkflowExecutions',
-      'getWorkflowExecutionHistory',
       'getStepExecutions',
       'searchStepExecutions',
       'getExecutionLogs',
@@ -232,6 +232,7 @@ describe('WorkflowsService (facade)', () => {
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
+        userProfileService: coreStart.userProfile,
       });
     });
 
@@ -268,7 +269,7 @@ describe('WorkflowsService (facade)', () => {
     it('returns managed template values to their owning plugin', async () => {
       const source = {
         managed: true,
-        managedBy: 'pnd',
+        managedBy: 'alertzero',
         managedTemplateValues: { autonomyLevel: 'assisted' },
         originManagedWorkflowId: 'system-security-watch-floor',
         spaceId: 'space-a',
@@ -281,7 +282,7 @@ describe('WorkflowsService (facade)', () => {
         service.getInstalledManagedWorkflowState(
           'system-security-watch-floor-space-a',
           'space-a',
-          'pnd'
+          'alertzero'
         )
       ).resolves.toEqual({
         workflowId: 'system-security-watch-floor-space-a',
@@ -306,7 +307,7 @@ describe('WorkflowsService (facade)', () => {
         overwrite: true,
       });
       await service.updateWorkflow('wf-1', { name: 'new' } as any, 'default', request);
-      await service.deleteWorkflows(['wf-1'], 'default', { force: true });
+      await service.deleteWorkflows(['wf-1'], 'default', { force: true }, request);
       await service.disableAllWorkflows('my-space', request);
 
       expect(crudSpies.getWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
@@ -333,7 +334,12 @@ describe('WorkflowsService (facade)', () => {
         'default',
         request
       );
-      expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default', { force: true });
+      expect(crudSpies.deleteWorkflows).toHaveBeenCalledWith(
+        ['wf-1'],
+        'default',
+        { force: true },
+        request
+      );
       expect(crudSpies.disableAllWorkflows).toHaveBeenCalledWith('my-space', request);
     });
 
@@ -392,8 +398,11 @@ describe('WorkflowsService (facade)', () => {
 
       await service.getWorkflowExecution('exec-1', 'default', { includeInput: true });
       await service.getChildWorkflowExecutions('parent-1', 'default');
+      await service.getExecutionStepExecutions(
+        { executionId: 'exec-1', page: 1, size: 100 },
+        'default'
+      );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
-      await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.searchStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.getExecutionLogs({ executionId: 'exec-1' } as any);
@@ -407,8 +416,11 @@ describe('WorkflowsService (facade)', () => {
         'parent-1',
         'default'
       );
+      expect(executionQuerySpies.getExecutionStepExecutions).toHaveBeenCalledWith(
+        { executionId: 'exec-1', page: 1, size: 100 },
+        'default'
+      );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();
-      expect(executionQuerySpies.getWorkflowExecutionHistory).toHaveBeenCalled();
       expect(executionQuerySpies.getStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.searchStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.getExecutionLogs).toHaveBeenCalled();
@@ -421,11 +433,19 @@ describe('WorkflowsService (facade)', () => {
       const request = {} as any;
 
       await service.getAvailableConnectors('default', request);
-      await service.validateWorkflow('name: wf', 'default', request);
+      await service.validateWorkflow('name: wf', 'default', request, {
+        includeVariableRules: false,
+        includeEsqlRules: false,
+      });
       await service.getWorkflowZodSchema({ loose: false }, 'default', request);
 
       expect(validationSpies.getAvailableConnectors).toHaveBeenCalledWith('default', request);
-      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith('name: wf', 'default', request);
+      expect(validationSpies.validateWorkflow).toHaveBeenCalledWith(
+        'name: wf',
+        'default',
+        request,
+        { includeVariableRules: false, includeEsqlRules: false }
+      );
       expect(validationSpies.getWorkflowZodSchema).toHaveBeenCalledWith(
         { loose: false },
         'default',
@@ -488,11 +508,33 @@ describe('WorkflowsService (facade)', () => {
       expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
         'wf.managed',
         { spaceId: 'default' },
-        'owner'
+        'owner',
+        undefined
       );
       expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
       expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
       expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledWith(['owner']);
+    });
+  });
+
+  describe('managed install request forwarding', () => {
+    it('forwards the caller request to the managed workflow service', async () => {
+      const service = await buildService();
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.installManagedWorkflow(
+        'system-example-greeting',
+        { spaceId: 'default' },
+        'owner',
+        request
+      );
+
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledWith(
+        'system-example-greeting',
+        { spaceId: 'default' },
+        'owner',
+        request
+      );
     });
   });
 
@@ -514,22 +556,32 @@ describe('WorkflowsService (facade)', () => {
     });
   });
 
+  const claim = {
+    respondedBy: 'alice',
+    respondedAt: '2026-04-29T10:00:00.000Z',
+    channel: 'inbox',
+    strippedToken: { hash: 'hash', expiresAt: '2099-01-01T00:00:00.000Z' },
+  };
+
   describe('markStepAsResponded', () => {
     it('resolves the responder via the security service and delegates with full audit metadata', async () => {
       // The service owns username resolution so callers cannot spoof audit identity.
       // Behavioral coverage of the ES update lives in the query-service tests.
       const markSpy = jest
         .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
-        .mockResolvedValue(true as never);
+        .mockResolvedValue(claim);
       try {
         const service = await buildService();
         const request = { headers: {} } as unknown as Parameters<
           typeof service.markStepAsResponded
-        >[1];
-        await service.markStepAsResponded('step-exec-1', request, 'inbox', 'default');
+        >[2];
+        await expect(
+          service.markStepAsResponded('step-exec-1', 'run-1', request, 'inbox', 'default')
+        ).resolves.toBe(claim);
 
         expect(markSpy).toHaveBeenCalledWith(
           'step-exec-1',
+          'run-1',
           expect.objectContaining({
             channel: 'inbox',
             // The mock security service returns `system` for fake
@@ -541,6 +593,58 @@ describe('WorkflowsService (facade)', () => {
         );
       } finally {
         markSpy.mockRestore();
+      }
+    });
+  });
+
+  describe('claimHitlStepForExternalResume', () => {
+    it('scopes the claim to the execution the link resolved, stamps the external channel and returns the claim', async () => {
+      const markSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'markStepAsResponded')
+        .mockResolvedValue(claim);
+      try {
+        const service = await buildService();
+
+        await expect(
+          service.claimHitlStepForExternalResume(
+            'step-exec-1',
+            'run-1',
+            'external_resume:step-exec-1',
+            'default'
+          )
+        ).resolves.toBe(claim);
+
+        expect(markSpy).toHaveBeenCalledWith(
+          'step-exec-1',
+          'run-1',
+          {
+            respondedBy: 'external_resume:step-exec-1',
+            respondedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            channel: 'external',
+          },
+          'default'
+        );
+      } finally {
+        markSpy.mockRestore();
+      }
+    });
+  });
+
+  describe('releaseHitlStepClaim', () => {
+    it('delegates to WorkflowExecutionQueryService.releaseHitlStepClaim after init', async () => {
+      const releaseSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'releaseHitlStepClaim')
+        .mockResolvedValue(true);
+      try {
+        const service = await buildService();
+
+        await expect(service.releaseHitlStepClaim('step-exec-1', claim, 'default')).resolves.toBe(
+          true
+        );
+
+        expect(releaseSpy).toHaveBeenCalledWith('step-exec-1', claim, 'default');
+      } finally {
+        releaseSpy.mockRestore();
       }
     });
   });

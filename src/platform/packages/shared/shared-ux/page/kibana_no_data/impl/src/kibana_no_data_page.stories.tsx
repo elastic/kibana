@@ -49,7 +49,6 @@ export const LoadingState = {
     const services = {
       ...mock.getServices(params),
       hasESData: dataCheck,
-      hasUserDataView: dataCheck,
       hasDataView: dataCheck,
     };
 

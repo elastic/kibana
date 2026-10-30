@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MANAGED_CONFIG_FILES, MANAGED_CONFIG_KEYS } from './src/managed_config_keys';
+export {
+  MANAGED_CONFIG_FILES,
+  MANAGED_CONFIG_KEYS,
+  MANAGED_EXTENSIONS_KEYS,
+} from './src/managed_config_keys';
+export type { ManagedConfigKey } from './src/managed_config_keys';
 export { updateVscodeConfig } from './src/update_vscode_config';

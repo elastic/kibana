@@ -16,13 +16,20 @@ const ENV_DOCS = [
   },
   {
     name: 'EVAL_CONNECTOR_ID',
-    description: 'Connector used for LLM-as-a-judge evaluators (required).',
+    description:
+      'Connector used for LLM-as-a-judge evaluators. Defaults to the profile\'s evaluationConnectorId (see the kbn-evals README, "Default judge").',
     example: 'EVAL_CONNECTOR_ID=bedrock-claude',
   },
   {
     name: 'EVAL_REPETITIONS',
     description: 'Overrides configured repetition count for evals.',
     example: 'EVAL_REPETITIONS=3',
+  },
+  {
+    name: 'EVAL_CONCURRENCY',
+    description:
+      'Overrides how many examples an experiment runs at once (default 5). A concurrency passed to runExperiment in the spec still wins.',
+    example: 'EVAL_CONCURRENCY=8',
   },
   {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
@@ -60,19 +67,20 @@ const ENV_DOCS = [
   {
     name: 'SELECTED_EVALUATORS',
     description:
-      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',
-    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality"',
+      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K, HitRate@K, MRR@K, NDCG@K, MAP@K match all K-specific evaluators.',
+    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,NDCG@K,Factuality"',
   },
   {
-    name: 'RAG_EVAL_K',
+    name: 'IR_EVAL_K',
     description:
-      'Overrides default k used by RAG evaluators. Supports comma-separated values for multi-K evaluation.',
-    example: 'RAG_EVAL_K=5,10,20',
+      'Overrides default k used by IR (information retrieval) evaluators. Supports comma-separated values for multi-K evaluation. The deprecated RAG_EVAL_K is still read as a fallback.',
+    example: 'IR_EVAL_K=5,10,20',
   },
   {
-    name: 'INDEX_FOCUSED_RAG_EVAL',
-    description: 'Restrict RAG evaluators to ground-truth indices.',
-    example: 'INDEX_FOCUSED_RAG_EVAL=true',
+    name: 'INDEX_FOCUSED_IR_EVAL',
+    description:
+      'Restrict IR evaluators to ground-truth indices. The deprecated INDEX_FOCUSED_RAG_EVAL is still read as a fallback.',
+    example: 'INDEX_FOCUSED_IR_EVAL=true',
   },
 ];
 

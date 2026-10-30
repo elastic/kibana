@@ -39,10 +39,15 @@ export const useData = (
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
-  timeRange?: { min: Moment; max: Moment }
+  timeRange?: { min: Moment; max: Moment },
+  projectRoutingOverride?: string,
+  /** ES|QL document scope; when set, document counts come from ES|QL instead of DSL. */
+  esqlQuery?: string,
+  /** Upper limit for the number of histogram buckets, instead of the `histogram:maxBars` setting. */
+  maxBars?: number
 ) => {
   const { executionContext, uiSettings, cps } = useAiopsAppContext();
-  const { projectRouting } = useProjectRouting(cps);
+  const { projectRouting } = useProjectRouting(cps, projectRoutingOverride);
 
   useExecutionContext(executionContext, {
     name: AIOPS_PLUGIN_ID,
@@ -69,6 +74,9 @@ export const useData = (
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
       _timeBuckets.setBarTarget(barTarget);
+      if (maxBars !== undefined) {
+        _timeBuckets.setMaxBars(maxBars);
+      }
       return {
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
@@ -108,7 +116,9 @@ export const useData = (
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
     lastRefresh,
-    changePointsByDefault
+    changePointsByDefault,
+    projectRoutingOverride,
+    esqlQuery
   );
 
   useEffect(() => {
@@ -161,18 +171,24 @@ export const useData = (
   };
 };
 
-function useProjectRouting(cps?: CPSPluginStart): { projectRouting: ProjectRouting | undefined } {
+function useProjectRouting(
+  cps?: CPSPluginStart,
+  projectRoutingOverride?: string
+): { projectRouting: ProjectRouting | undefined } {
   const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
-    cps?.cpsManager?.getProjectRouting()
+    projectRoutingOverride ?? cps?.cpsManager?.getProjectRouting()
   );
 
   useEffect(() => {
     const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe((newRouting) => {
+      if (projectRoutingOverride) {
+        return;
+      }
       setProjectRouting(newRouting);
     });
 
     return () => subscription?.unsubscribe();
-  }, [cps?.cpsManager]);
+  }, [cps?.cpsManager, projectRoutingOverride]);
 
   return { projectRouting };
 }

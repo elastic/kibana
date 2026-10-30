@@ -12,11 +12,11 @@ import type { ExecutionContract } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import moment from 'moment';
 import { of } from 'rxjs';
-import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
 import type { TimeRange } from '@kbn/es-query';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('fetchEsql', () => {
   beforeEach(() => {
@@ -27,9 +27,10 @@ describe('fetchEsql', () => {
     scopedEbtManager: discoverServiceMock.ebtManager.createScopedEBTManager(),
     toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
+  const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
   const fetchEsqlMockProps = {
     query: { esql: 'from *' },
-    dataView: dataViewWithTimefieldMock,
+    esqlSource: mockEsqlSource,
     inspectorAdapters: { requests: new RequestAdapter() },
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
@@ -60,12 +61,12 @@ describe('fetchEsql', () => {
       ),
     } as unknown as ExecutionContract);
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
-    expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
-      records,
-      esqlQueryColumns: ['_id', 'foo'],
-      esqlHeaderWarning: undefined,
-      interceptedWarnings: [],
-    });
+    const result = await fetchEsql(fetchEsqlMockProps);
+    expect(result.records).toEqual(records);
+    expect(result.dataSource?.resultColumns).toEqual(['_id', 'foo']);
+    expect(result.esqlHeaderWarning).toBeUndefined();
+    expect(result.interceptedWarnings).toEqual([]);
+    expect(result.approximationApplied).toBeUndefined();
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[1] });
@@ -94,23 +95,23 @@ describe('fetchEsql', () => {
         ),
       } as unknown as ExecutionContract);
 
-      await expect(fetchEsql(fetchEsqlMockProps)).resolves.toEqual({
-        records: [
-          {
-            id: `1@${responseTime}`,
-            raw: hits[0],
-            flattened: hits[0],
-          },
-          {
-            id: `2@${responseTime}`,
-            raw: hits[1],
-            flattened: hits[1],
-          },
-        ],
-        esqlQueryColumns: ['_id', 'foo'],
-        esqlHeaderWarning: undefined,
-        interceptedWarnings: [],
-      });
+      const result = await fetchEsql(fetchEsqlMockProps);
+      expect(result.records).toEqual([
+        {
+          id: `1@${responseTime}`,
+          raw: hits[0],
+          flattened: hits[0],
+        },
+        {
+          id: `2@${responseTime}`,
+          raw: hits[1],
+          flattened: hits[1],
+        },
+      ]);
+      expect(result.dataSource?.resultColumns).toEqual(['_id', 'foo']);
+      expect(result.esqlHeaderWarning).toBeUndefined();
+      expect(result.interceptedWarnings).toEqual([]);
+      expect(result.approximationApplied).toBeUndefined();
     } finally {
       jest.useRealTimers();
     }
@@ -194,7 +195,11 @@ describe('fetchEsql', () => {
 
   it('should use inputTimeRange if provided', () => {
     const timeRange: TimeRange = { from: 'now-15m', to: 'now' };
-    const result = getTextBasedQueryStateToAstProps({ ...fetchEsqlMockProps, timeRange });
+    const result = getTextBasedQueryStateToAstProps({
+      query: fetchEsqlMockProps.query,
+      timeRange,
+      data: fetchEsqlMockProps.data,
+    });
     expect(result.time).toEqual(timeRange);
   });
 
@@ -207,7 +212,10 @@ describe('fetchEsql', () => {
       .spyOn(discoverServiceMock.data.query.timefilter.timefilter, 'getAbsoluteTime')
       .mockReturnValue(absoluteTimeRange);
 
-    const result = getTextBasedQueryStateToAstProps(fetchEsqlMockProps);
+    const result = getTextBasedQueryStateToAstProps({
+      query: fetchEsqlMockProps.query,
+      data: fetchEsqlMockProps.data,
+    });
 
     expect(result.time).toEqual(absoluteTimeRange);
   });
@@ -258,6 +266,37 @@ describe('fetchEsql', () => {
     });
     expect(result.records[1].raw.inline_highlights).toEqual({
       snippets: { preTag: '<em>', postTag: '</em>' },
+    });
+  });
+
+  it('should add inline_highlights for HIGHLIGHT command columns', async () => {
+    const hits = [
+      { _index: 'i', _id: '1', highlight_title: '<em>bar</em>' },
+      { _index: 'i', _id: '2', highlight_title: '<em>baz</em>' },
+    ] as unknown as EsHitRecord[];
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: ['_id', 'highlight_title'],
+            rows: hits,
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+
+    const result = await fetchEsql({
+      ...fetchEsqlMockProps,
+      query: { esql: 'from * | HIGHLIGHT "bar" ON title' },
+    });
+
+    expect(result.records[0].raw.inline_highlights).toEqual({
+      highlight_title: { preTag: '<em>', postTag: '</em>' },
+    });
+    expect(result.records[1].raw.inline_highlights).toEqual({
+      highlight_title: { preTag: '<em>', postTag: '</em>' },
     });
   });
 });

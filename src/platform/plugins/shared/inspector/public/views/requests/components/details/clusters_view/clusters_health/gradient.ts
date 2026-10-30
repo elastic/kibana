@@ -8,8 +8,11 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import type { estypes } from '@elastic/elasticsearch';
 
-export function useHealthHexCodes() {
+export type ClusterHealthStatus = Exclude<estypes.ClusterSearchStatus, 'running'>;
+
+export function useHealthHexCodes(): Record<ClusterHealthStatus, string> {
   const { euiTheme } = useEuiTheme();
   return {
     successful: euiTheme.colors.backgroundFilledSuccess,

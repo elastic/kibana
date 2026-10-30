@@ -46,7 +46,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
         ],
         { project: { value: [] } }
@@ -64,7 +63,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
           {
             text: workflowTitle,
@@ -77,26 +75,6 @@ describe('useWorkflowsBreadcrumbs', () => {
         workflowTitle,
         'Workflows',
       ]);
-    });
-
-    it('should handle breadcrumb click event correctly', () => {
-      renderHook(useWorkflowsBreadcrumbs);
-
-      const [[breadcrumbs]] = mockServices.chrome.setBreadcrumbs.mock.calls;
-      const mainBreadcrumb = breadcrumbs[0];
-
-      // Test with preventDefault
-      const mockEvent = { preventDefault: jest.fn() };
-      mainBreadcrumb.onClick?.(mockEvent as any);
-
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
-
-      // Test without event object
-      mockServices.application.navigateToApp.mockClear();
-      mainBreadcrumb.onClick?.(null as any);
-
-      expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
     });
 
     it('should get URL for app correctly', () => {
@@ -114,7 +92,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
         ],
         { project: { value: [] } }
@@ -130,7 +107,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
           {
             text: newWorkflowTitle,
@@ -154,7 +130,6 @@ describe('useWorkflowsBreadcrumbs', () => {
             {
               text: 'Workflows',
               href: '/app/workflows',
-              onClick: expect.any(Function),
             },
           ],
           { project: { value: [] } }
@@ -172,7 +147,6 @@ describe('useWorkflowsBreadcrumbs', () => {
             {
               text: 'Workflows',
               href: '/app/workflows',
-              onClick: expect.any(Function),
             },
           ],
           { project: { value: [] } }
@@ -250,7 +224,6 @@ describe('useSetWorkflowsBreadcrumbs', () => {
         {
           text: 'Workflows',
           href: '/app/workflows',
-          onClick: expect.any(Function),
         },
         ...trailing,
       ],

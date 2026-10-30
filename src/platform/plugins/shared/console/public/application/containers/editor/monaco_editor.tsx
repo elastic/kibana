@@ -98,6 +98,7 @@ export const MonacoEditor = ({
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
   const [selectedRequestsCount, setSelectedRequestsCount] = useState(0);
+  const [hasAutocompleteEntities, setHasAutocompleteEntities] = useState(false);
 
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
@@ -184,7 +185,13 @@ export const MonacoEditor = ({
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const esqlCallbacks = useConsoleEsqlCallbacks({ application, http, licensing, data });
+  const esqlCallbacks = useConsoleEsqlCallbacks({
+    application,
+    http,
+    licensing,
+    data,
+    getEntitiesRefreshGeneration: autocompleteInfo.getEntitiesRefreshGeneration,
+  });
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -194,6 +201,16 @@ export const MonacoEditor = ({
   useSetInitialValue({ localStorageValue, setValue, toasts, defaultEditorContent });
 
   useSetupAutocompletePolling({ autocompleteInfo, settingsService });
+
+  // Cluster-derived suggestions (indices, aliases, templates) only exist once the first
+  // autocomplete_entities response has been merged, so surface that in the DOM.
+  useEffect(() => {
+    const subscription = autocompleteInfo.entitiesRefreshGeneration$.subscribe((generation) =>
+      setHasAutocompleteEntities(generation > 0)
+    );
+
+    return () => subscription.unsubscribe();
+  }, [autocompleteInfo]);
 
   useSetupAutosave({ value });
 
@@ -216,8 +233,12 @@ export const MonacoEditor = ({
   }, [fileToImport, requestToRestoreFromHistory, dispatch, context, editorDispatch]);
 
   useEffect(() => {
-    updateEditor();
-  }, [updateEditor]);
+    // `editorInstance` is set right after the actions provider, so gating on it keeps a
+    // request that arrived before the editor mounted pending instead of clearing it unapplied.
+    if (editorInstance) {
+      updateEditor();
+    }
+  }, [updateEditor, editorInstance]);
 
   return (
     <div
@@ -228,6 +249,7 @@ export const MonacoEditor = ({
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"
       data-currently-selected-requests={selectedRequestsCount}
+      data-autocomplete-entities-loaded={hasAutocompleteEntities}
     >
       <EuiFlexGroup
         css={styles.editorActions}

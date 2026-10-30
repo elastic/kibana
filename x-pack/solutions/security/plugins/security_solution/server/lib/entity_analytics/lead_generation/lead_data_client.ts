@@ -32,6 +32,7 @@ import type { Lead as SynthesizedLead, RelatedEntity } from './types';
 
 export interface LeadDataClientDeps {
   readonly esClient: ElasticsearchClient;
+  readonly internalEsClient: ElasticsearchClient;
   readonly logger: Logger;
   readonly spaceId: string;
 }
@@ -188,6 +189,7 @@ interface EsLeadDoc {
   related_entity_counts: EsRelatedEntityCountDoc[];
   execution_uuid: string;
   source_type: string;
+  origin: string;
   version: number;
   content_hash: string;
 }
@@ -265,6 +267,7 @@ const leadToEsDoc = (
     related_entity_counts: toEsRelatedEntityCounts(lead.relatedEntityCounts),
     execution_uuid: executionId,
     source_type: sourceType,
+    origin: lead.origin,
     version: 1,
     content_hash: computeContentHash({ observations: lead.observations }),
   };
@@ -304,6 +307,7 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     ),
     executionUuid: (doc.execution_uuid as string) ?? '',
     sourceType: (doc.source_type as Lead['sourceType']) ?? 'adhoc',
+    origin: (doc.origin as Lead['origin']) ?? 'observations',
     createdAt: (doc.created_at as string) ?? timestamp,
     changedAt: (doc.changed_at as string) ?? timestamp,
     version: (doc.version as number) ?? 1,
@@ -321,7 +325,9 @@ const PAINLESS_NOW_ISO = 'Instant.ofEpochMilli(System.currentTimeMillis()).toStr
  * - Same content_hash: refresh timestamp to indicate leads was seen again
  * - Different content_hash: replace evidence + narrative, bump version and changed_at;
  *   status only flips when `params.allow_reopen` is true (a dismissal landing between
- *   classify and persist must not be clobbered)
+ *   classify and persist must not be clobbered). `origin` always reflects the latest
+ *   run (a lead can graduate or reclassify between observations and exploratory),
+ *   unlike status which is guarded.
  * - Never touches created_at on updates
  */
 const LEAD_UPDATE_SCRIPT_SOURCE = `
@@ -342,6 +348,7 @@ if (ctx.op == 'create') {
   ctx._source.content_hash = params.content_hash;
   ctx._source.execution_uuid = params.execution_uuid;
   ctx._source.source_type = params.source_type;
+  ctx._source.origin = params.origin;
   ctx._source.status = params.status;
   ctx._source.version = 1;
   ctx._source.timestamp = params.timestamp;
@@ -373,6 +380,7 @@ if (ctx.op == 'create') {
   ctx._source.content_hash = params.content_hash;
   ctx._source.execution_uuid = params.execution_uuid;
   ctx._source.source_type = params.source_type;
+  ctx._source.origin = params.origin;
   ctx._source.status = params.allow_reopen ? params.status : ctx._source.status;
   ctx._source.version = (ctx._source.containsKey('version') ? (int) ctx._source.version : 0) + 1;
   ctx._source.changed_at = now;
@@ -405,6 +413,7 @@ const LEAD_UPDATE_RETRY_ON_CONFLICT = 3;
 
 export const createLeadDataClient = ({
   esClient,
+  internalEsClient,
   logger,
   spaceId,
 }: LeadDataClientDeps): LeadDataClient => {
@@ -531,12 +540,15 @@ export const createLeadDataClient = ({
     }
 
     try {
-      // Adhoc generate does not go through enable, so the first write must create
-      // the index with plugin mappings. Otherwise ES auto-creates without the correct mappings.
-      const indexService = createLeadIndexService({ esClient, logger, spaceId });
-      if (!(await indexService.doesIndexExist())) {
-        await indexService.createIndex();
-      }
+      // Adhoc generate does not go through enable, so persist must reconcile the
+      // index mapping on every write. createIndex is idempotent (exists -> putMapping)
+      // and picks up new fields such as origin on pre-existing strict indices.
+      const indexService = createLeadIndexService({
+        esClient: internalEsClient,
+        logger,
+        spaceId,
+      });
+      await indexService.createIndex();
 
       const bulkBody: object[] = [];
 

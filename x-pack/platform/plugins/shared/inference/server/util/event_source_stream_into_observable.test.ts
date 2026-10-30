@@ -92,6 +92,63 @@ describe('eventSourceStreamIntoObservable', () => {
     }
   });
 
+  it('enforces the deadline in-band when the timers phase is starved', async () => {
+    const start = Date.now();
+    const nowSpy = jest.spyOn(Date, 'now');
+    try {
+      const stream = new Readable({ read: () => {} });
+
+      const error$ = new Promise<unknown>((resolve) => {
+        eventSourceStreamIntoObservable(stream, { maxDurationMs: 60_000 }).subscribe({
+          error: resolve,
+        });
+      });
+
+      // advance time without letting any timer fire
+      nowSpy.mockReturnValue(start + 61_000);
+      stream.push('data: too late\n\n');
+
+      const error = await error$;
+      expect(stream.destroyed).toBe(true);
+      expect(isInferenceRequestError(error)).toBe(true);
+      expect(error).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining('maximum allowed duration'),
+          meta: expect.objectContaining({ status: 408 }),
+        })
+      );
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('yields to the macrotask queue between chunks', async () => {
+    const chunkCount = 20;
+    // objectMode keeps each buffered push a distinct chunk
+    const stream = new Readable({ objectMode: true, read: () => {} });
+    for (let i = 1; i <= chunkCount; i++) {
+      stream.push(`data: ${i}\n\n`);
+    }
+    stream.push(null);
+
+    const emitted: string[] = [];
+    const completion = new Promise<void>((resolve, reject) => {
+      eventSourceStreamIntoObservable(stream).subscribe({
+        next: (value) => emitted.push(value),
+        error: reject,
+        complete: resolve,
+      });
+    });
+
+    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(emitted.length).toBeGreaterThan(0);
+    expect(emitted.length).toBeLessThan(chunkCount);
+
+    await completion;
+    expect(emitted).toHaveLength(chunkCount);
+  });
+
   it('completes normally when the stream ends before maxDurationMs', async () => {
     const messages = [JSON.stringify({ foo: 'bar' }), '42'];
     const stream = Readable.from(messages.map((message) => `data: ${message}\n\n`));

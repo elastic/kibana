@@ -10,7 +10,7 @@
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { BooleanRelation } from '@kbn/es-query';
-import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
+import { extractTimeFilter, convertRangeFilterToTimeRangeString } from '@kbn/es-query';
 import type { QueryStart } from '../query';
 
 export type MultiValueClickActionContext = MultiValueClickContext;
@@ -59,7 +59,7 @@ export function createMultiValueClickActionDefinition(
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(data.timeFieldName, filters);
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          timefilter.setTime(convertRangeFilterToTimeRange(timeRangeFilter));
+          timefilter.setTime(convertRangeFilterToTimeRangeString(timeRangeFilter));
         }
       } else {
         filterManager.addFilters(filters);

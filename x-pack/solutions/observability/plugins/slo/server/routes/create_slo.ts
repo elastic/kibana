@@ -19,8 +19,18 @@ export const createSLORoute = createSloServerRoute({
     },
   },
   params: createSLOParamsSchema,
-  handler: async ({ context, params, logger, request, plugins, corePlugins, getScopedClients }) => {
+  handler: async ({
+    context,
+    params,
+    logger,
+    request,
+    plugins,
+    corePlugins,
+    getScopedClients,
+    commonResourcesInstalled,
+  }) => {
     await assertPlatinumLicense(plugins);
+    await commonResourcesInstalled;
 
     const {
       scopedClusterClient,
@@ -29,6 +39,7 @@ export const createSLORoute = createSloServerRoute({
       repository,
       transformManager,
       summaryTransformManager,
+      telemetry,
     } = await getScopedClients({ request, logger });
 
     const core = await context.core;
@@ -44,7 +55,8 @@ export const createSLORoute = createSloServerRoute({
       logger,
       spaceId,
       basePath,
-      userId
+      userId,
+      telemetry
     );
 
     return await createSLO.execute(params.body);

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/links-plugin",
-  "owner": ["@elastic/kibana-presentation"],
+  "owner": ["@elastic/kibana-dashboards"],
   "group": "platform",
   "visibility": "private",
   "description": "A dashboard panel for creating links to dashboards or external links.",

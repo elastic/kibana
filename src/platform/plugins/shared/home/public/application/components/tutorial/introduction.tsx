@@ -22,6 +22,7 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { Content } from './content';
 import { TutorialsCategory } from '../../../../common/constants';
+import { getTutorialIntroductionBackLink } from '../tutorial_directory_return_crumb';
 
 export interface IntroductionProps {
   description: string;
@@ -35,6 +36,8 @@ export interface IntroductionProps {
   notices?: React.ReactNode;
   exportedFieldsUrl?: string;
   category?: TutorialsCategory;
+  hash?: string;
+  getUrlForApp?: (appId: string, options: { path: string }) => string;
 }
 
 function IntroductionUI({
@@ -48,6 +51,8 @@ function IntroductionUI({
   notices,
   basePath,
   category,
+  hash,
+  getUrlForApp,
 }: IntroductionProps) {
   let rightSideItems;
   if (previewUrl) {
@@ -89,19 +94,23 @@ function IntroductionUI({
       />
     );
   }
+  const backLink = getTutorialIntroductionBackLink({
+    // Without a getUrlForApp, return params can't be resolved to a real href,
+    // so treat the tutorial as if it has none and fall back to the Integrations link.
+    hash: getUrlForApp ? hash ?? '' : '',
+    addBasePath: (path) => basePath.prepend(path),
+    getUrlForApp: getUrlForApp ?? (() => ''),
+  });
   return (
     <>
       <div>
-        <EuiButtonEmpty
-          iconType="chevronSingleLeft"
-          size="xs"
-          flush="left"
-          href={basePath.prepend(`/app/integrations`)}
-        >
-          <FormattedMessage
-            id="home.tutorial.introduction.browseAllIntegrationsButton"
-            defaultMessage="Browse all integrations"
-          />
+        <EuiButtonEmpty iconType="chevronSingleLeft" size="xs" flush="left" href={backLink.href}>
+          {backLink.text ?? (
+            <FormattedMessage
+              id="home.tutorial.introduction.browseAllIntegrationsButton"
+              defaultMessage="Browse all integrations"
+            />
+          )}
         </EuiButtonEmpty>
       </div>
       <EuiSpacer />

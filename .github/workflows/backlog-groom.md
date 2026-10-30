@@ -13,9 +13,17 @@ steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
     with:
       node-version-file: '.nvmrc'
-      cache: yarn
+  - name: Enable corepack-managed pnpm
+    # Kibana pins pnpm via package.json "engines.pnpm" (no "packageManager" field) and
+    # `kbn bootstrap` refuses to run without it.
+    run: |
+      export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+      PNPM_VERSION="$(node -p "require('./package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+      corepack enable
+      corepack prepare "pnpm@${PNPM_VERSION}" --activate
+      pnpm --version
   - name: Bootstrap Kibana
-    run: yarn kbn bootstrap
+    run: pnpm kbn bootstrap
 permissions:
   contents: read
   issues: read

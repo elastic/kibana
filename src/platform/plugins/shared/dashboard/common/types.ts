@@ -9,9 +9,8 @@
 
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
-
-export type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel };
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardChangeSource } from './change_sources';
 
 /**
  * Capabilities object for the Dashboard application.
@@ -62,5 +61,11 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
+
+    /**
+     * Labels for the integrations that supplied this state, e.g. `agent`. They are reported with
+     * the next save of the opened dashboard.
+     */
+    changedBy?: DashboardChangeSource[];
   }
 >;

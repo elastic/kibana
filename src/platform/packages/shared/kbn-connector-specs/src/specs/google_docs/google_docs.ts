@@ -47,7 +47,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
   metadata: {
     id: '.google_docs',
     displayName: 'Google Docs',
-    description: i18n.translate('core.kibanaConnectorSpecs.googleDocs.metadata.description', {
+    description: i18n.translate('connectorSpecs.googleDocs.metadata.description', {
       defaultMessage: 'Read and update documents in Google Docs',
     }),
     minimumLicense: 'enterprise',
@@ -99,6 +99,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
   actions: {
     readDoc: {
       isTool: true,
+      scope: 'read',
       description:
         'Read the full content of a Google Doc as Markdown. ' +
         'Returns the document title, Markdown content, total character count, and a web link. ' +
@@ -205,7 +206,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.googleDocs.test.description', {
+    description: i18n.translate('connectorSpecs.googleDocs.test.description', {
       defaultMessage: 'Verifies connection to the Google Docs API',
     }),
     handler: async (ctx) => {

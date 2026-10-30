@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // This suite installs its package fixtures by upload, and their names
         // (kibana, logstash, ...) exist in the package registry. Fleet rejects
         // such uploads by default.
-        '--xpack.fleet.internal.allowRegistryPackageUploads=true',
+        '--xpack.fleet.internal.skipUploadPackageValidation=true',
       ],
     },
   };

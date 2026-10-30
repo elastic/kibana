@@ -72,14 +72,18 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
     .fn()
     .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
+jest.mock('react-router-dom', () => {
+  const history = {
     push: jest.fn(),
-  }),
-  useLocation: () => ({
-    pathname: '/triggersActions/rules/',
-  }),
-}));
+    createHref: jest.fn(({ pathname }: { pathname: string }) => pathname),
+  };
+  return {
+    useHistory: () => history,
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+});
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),

@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
   - '@kbn/actions-plugin'
+  - '@kbn/app-header'
   - '@kbn/inference-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/security-plugin'
@@ -34,6 +35,7 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/inference-langchain'
+  - '@kbn/inference-tracing'
   - '@kbn/kibana-react-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/shared-ux-page-kibana-template'
@@ -71,6 +73,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -79,6 +83,4 @@ fileGroups:
     - common/**/*.ts
     - test/scout_automatic_import/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

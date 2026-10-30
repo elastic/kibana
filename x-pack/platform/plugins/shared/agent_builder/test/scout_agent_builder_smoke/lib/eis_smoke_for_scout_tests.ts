@@ -28,6 +28,8 @@ export interface DiscoveredEisModel {
   };
 }
 
+const EXCLUDED_EIS_PROPERTIES = new Set(['efficient', 'ocr-only']);
+
 export const getPreDiscoveredEisModelsForScout = (): DiscoveredEisModel[] => {
   if (!existsSync(EIS_MODELS_PATH)) {
     return [];
@@ -37,7 +39,10 @@ export const getPreDiscoveredEisModelsForScout = (): DiscoveredEisModel[] => {
       models?: DiscoveredEisModel[];
     };
     const models = data.models ?? [];
-    return models.filter((model) => !model.metadata?.heuristics?.properties?.includes('efficient'));
+    return models.filter(
+      (model) =>
+        !model.metadata?.heuristics?.properties?.some((p) => EXCLUDED_EIS_PROPERTIES.has(p))
+    );
   } catch {
     return [];
   }

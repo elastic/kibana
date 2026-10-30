@@ -20,6 +20,7 @@ export * from './custom_field/latest';
 export * from './observable/latest';
 export * from './template/latest';
 export * from './field_definition/latest';
+export type * from './workflow/latest';
 
 // V1
 export * as configureApiV1 from './configure/v1';
@@ -39,3 +40,4 @@ export * as fieldDefinitionApiV1 from './field_definition/v1';
 
 // V2
 export * as attachmentApiV2 from './attachment/v2';
+export * as attachmentApiV2Union from './attachment/v2_union';

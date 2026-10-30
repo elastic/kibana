@@ -16,13 +16,13 @@ import {
   FIPS_140_3_IMAGE,
   FIPS_140_2_IMAGE,
   USE_QA_IMAGE_GH_LABEL,
-} from './agent_images';
-import { FIPS_GH_LABELS, FIPS_VERSION } from './pr_labels';
+} from './agent_images.ts';
+import { FIPS_GH_LABELS, FIPS_VERSION } from './pr_labels.ts';
 
 const mockSetAnnotation = jest.fn();
 
-jest.mock('./buildkite', () => {
-  const actual = jest.requireActual('./buildkite');
+jest.mock('./buildkite/index.ts', () => {
+  const actual = jest.requireActual('./buildkite/index.ts');
   return {
     ...actual,
     BuildkiteClient: jest.fn().mockImplementation(() => ({
@@ -156,6 +156,12 @@ describe('agent_images', () => {
       const config = expandAgentQueue('n2-4-spot', 200);
 
       expect(config.diskSizeGb).toBe(200);
+    });
+
+    it('falls back to the default disk size when not provided', () => {
+      expect(expandAgentQueue('n2-4-spot', undefined).diskSizeGb).toBe(
+        DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb
+      );
     });
 
     it('returns base config for queue without spot or virt suffix', () => {

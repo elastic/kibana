@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -19,6 +20,7 @@ import type {
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
+import { transformAlertToRuleResponseAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -46,11 +48,11 @@ import {
   validateBulkDuplicateRule,
 } from '../../../logic/bulk_actions/validations';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
-import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
-import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
+import { fetchRulesByQueryOrIds, BulkActionRuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
@@ -286,11 +288,17 @@ export const performBulkActionRoute = (
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
-          const errors: BulkActionError[] = [...fetchRulesOutcome.errors];
+          const fetchErrors = fetchRulesOutcome.errors;
+          const errors: BulkActionError[] = [];
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
           let skipped: BulkActionSkipResult[] = [];
+
+          // Delete handles fetch errors itself, rules that were not found are reported as skipped
+          if (body.action !== BulkActionTypeEnum.delete) {
+            errors.push(...fetchErrors);
+          }
 
           switch (body.action) {
             case BulkActionTypeEnum.enable: {
@@ -320,6 +328,17 @@ export const performBulkActionRoute = (
               break;
             }
             case BulkActionTypeEnum.delete: {
+              // Rules not found at fetch time are skipped for delete (idempotent semantics)
+              const [notFoundErrors, otherFetchErrors] = partition(
+                fetchErrors,
+                ({ error }) => error instanceof BulkActionRuleNotFoundError
+              );
+              errors.push(...otherFetchErrors);
+              skipped = notFoundErrors.map(({ item }) => ({
+                id: item,
+                skip_reason: 'RULE_NOT_FOUND',
+              }));
+
               // during dry run return early for delete, as no validations needed for this action
               if (isDryRun) {
                 // Populate `deleted` so the summary reflects the correct count of affected rules
@@ -327,11 +346,11 @@ export const performBulkActionRoute = (
                 break;
               }
 
-              const ruleIds = rules.map((rule) => rule.id);
-              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
+              const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ rules });
 
               errors.push(...bulkDeleteResult.errors);
               deleted = bulkDeleteResult.rules;
+              skipped = [...skipped, ...bulkDeleteResult.skipped];
               break;
             }
             case BulkActionTypeEnum.duplicate: {
@@ -342,13 +361,26 @@ export const performBulkActionRoute = (
                   await validateBulkDuplicateRule({ mlAuthz, rule });
 
                   await validateRuleResponseActions({
+                    // A duplicate persists the source rule's response actions on a brand-new
+                    // rule, so it is validated exactly like a create: the actions are the
+                    // payload and there is no `existingRule`. Passing `{}` with `existingRule`
+                    // instead makes every action look like it is being *removed*, which trips
+                    // the removal carve-outs and skips validation entirely - the dry run would
+                    // then report success for a duplicate that `rulesClient.create` denies.
+                    // Skip Defend runscript *payload* revalidation (script library) so dry-run
+                    // does not newly fail copies whose scripts have changed since the source
+                    // rule was saved. Osquery authz and Endpoint authz still run.
+                    rulePayload: {
+                      response_actions: rule.params.responseActions?.map(
+                        transformAlertToRuleResponseAction
+                      ),
+                    },
                     endpointAuthz,
                     endpointService,
-                    rulePayload: {},
                     spaceId,
-                    existingRule: rule,
                     checkOsqueryResponseActionAuthz:
                       ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
+                    skipRunscriptPayloadValidation: true,
                   });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early

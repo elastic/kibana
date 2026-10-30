@@ -207,6 +207,68 @@ describe('CloudConnectorService', () => {
       expect(result.accountType).toEqual(SINGLE_ACCOUNT);
     });
 
+    it('persists iac_key and blueprint on confirm', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        },
+      });
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        iac_key: 'sha256:661cb7def1c7101f',
+        iac_blueprint_id: 'federated-identity',
+        iac_blueprint_version: '1.0.0',
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          iac_key: 'sha256:661cb7def1c7101f',
+          iac_blueprint_id: 'federated-identity',
+          iac_blueprint_version: '1.0.0',
+        })
+      );
+    });
+
+    it('stores no iac_key when confirm clears the digest', async () => {
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          iac_key: null,
+        },
+      });
+
+      await service.create(mockSoClient, {
+        ...mockCreateRequest,
+        iac_key: null,
+      });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          iac_key: null,
+        })
+      );
+    });
+
     it('should create a cloud connector with organization accountType', async () => {
       jest
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
@@ -1063,6 +1125,63 @@ describe('CloudConnectorService', () => {
 
       expect(result.name).toEqual('updated-name');
       expect(result.id).toEqual('cloud-connector-123');
+
+      const awsVarsFromNameUpdate = result.vars as AwsCloudConnectorVars;
+      expect(awsVarsFromNameUpdate.role_arn?.value).toEqual(
+        'arn:aws:iam::123456789012:role/OriginalRole'
+      );
+    });
+
+    it('clears iac_key when confirm sends a null digest', async () => {
+      mockSoClient.get.mockResolvedValue({
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          iac_key: 'sha256:old',
+        },
+      });
+      mockSoClient.update.mockResolvedValue({
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          iac_key: null,
+        },
+      });
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
+
+      await service.update(mockSoClient, 'cloud-connector-123', {
+        iac_key: null,
+      });
+
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cloud-connector-123',
+        expect.objectContaining({
+          iac_key: null,
+        })
+      );
+    });
+
+    it('should keep original vars after a name-only update', async () => {
+      const mockUpdatedSavedObject = {
+        ...mockExistingSavedObject,
+        attributes: {
+          ...mockExistingSavedObject.attributes,
+          name: 'updated-name',
+          updated_at: '2023-01-01T02:00:00.000Z',
+        },
+      };
+
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+      mockSoClient.update.mockResolvedValue(mockUpdatedSavedObject);
+      mockSoClient.find.mockResolvedValue(mockPackagePoliciesForUpdate);
+
+      const result = await service.update(mockSoClient, 'cloud-connector-123', {
+        name: 'updated-name',
+      });
+
+      expect(result.name).toEqual('updated-name');
+      expect(result.id).toEqual('cloud-connector-123');
       const awsVars = result.vars as AwsCloudConnectorVars;
       expect(awsVars.role_arn?.value).toEqual('arn:aws:iam::123456789012:role/OriginalRole');
       const externalId1 = awsVars.external_id?.value as CloudConnectorSecretReference;
@@ -1197,6 +1316,18 @@ describe('CloudConnectorService', () => {
       ).resolves.toBeDefined();
 
       expect(mockSoClient.update).toHaveBeenCalled();
+    });
+
+    it('should reject updating vars with a role_arn that is not an IAM role ARN', async () => {
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+
+      await expect(
+        service.update(mockSoClient, 'cloud-connector-123', {
+          vars: { role_arn: { value: '123456', type: 'text' as const } },
+        })
+      ).rejects.toThrow('role_arn must be an IAM role ARN');
+
+      expect(mockSoClient.update).not.toHaveBeenCalled();
     });
 
     it('should throw error when cloud connector not found', async () => {
@@ -1792,6 +1923,26 @@ describe('CloudConnectorService', () => {
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Package policy must contain role_arn variable'
+        );
+      });
+
+      it.each([
+        ['123456', 'not an ARN'],
+        ['arn:aws:iam::123:role/TestRole', 'a short account id'],
+        ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u', 'a stack ARN'],
+        [' arn:aws:iam::123456789012:role/TestRole', 'surrounding whitespace'],
+        ['   ', 'whitespace only'],
+      ])('should throw error when role_arn is %p (%s)', (roleArn) => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'test-connector',
+          cloudProvider: 'aws',
+          vars: {
+            role_arn: { value: roleArn, type: 'text' },
+          },
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
+          'role_arn must be an IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
         );
       });
 
@@ -2744,6 +2895,65 @@ describe('CloudConnectorService', () => {
           'gcp_credentials_cloud_connector_id must be a valid string'
         );
       });
+    });
+  });
+
+  describe('iac fields', () => {
+    const baseCreate: CreateCloudConnectorRequest = {
+      name: 'iac-connector',
+      cloudProvider: 'aws',
+      vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
+    };
+
+    it('create leaves iac fields unset when not provided (static template)', async () => {
+      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 1 });
+      mockSoClient.create.mockImplementation(async (_type, attributes) => ({
+        id: 'cc-1',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      }));
+
+      await service.create(mockSoClient, baseCreate);
+
+      const [, attributes] = mockSoClient.create.mock.calls[0];
+      expect(attributes).not.toHaveProperty('iac_key');
+      expect(attributes).not.toHaveProperty('iac_deployment_id');
+    });
+
+    it('update writes iac_key and iac_deployment_id only when present in the request', async () => {
+      const existing = {
+        id: 'cc-1',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'iac-connector',
+          namespace: '*',
+          cloudProvider: 'aws',
+          vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      mockSoClient.get.mockResolvedValue(existing);
+      mockSoClient.update.mockImplementation(async (_type, _id, attributes) => ({
+        ...existing,
+        attributes: { ...existing.attributes, ...attributes },
+      }));
+      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await service.update(mockSoClient, 'cc-1', { iac_key: 'sha256:new' });
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cc-1',
+        expect.objectContaining({ iac_key: 'sha256:new' })
+      );
+      const [, , firstUpdate] = mockSoClient.update.mock.calls[0];
+      expect(firstUpdate).not.toHaveProperty('iac_deployment_id');
+
+      await service.update(mockSoClient, 'cc-1', { name: 'renamed' });
+      const [, , secondUpdate] = mockSoClient.update.mock.calls[1];
+      expect(secondUpdate).not.toHaveProperty('iac_key');
     });
   });
 });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -13,21 +14,20 @@ export const ThrottlingDisabledCallout = () => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.title"
             defaultMessage="Automatic cap"
           />
         }
-        color="warning"
-        iconType="warning"
-      >
-        <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.message"
-          defaultMessage="When disabling throttling, your monitor will still have its bandwidth capped by the configurations of the Synthetics Nodes in which it's running."
-        />
-      </EuiCallOut>
+        text={
+          <FormattedMessage
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.message"
+            defaultMessage="When disabling throttling, your monitor will still have its bandwidth capped by the configurations of the Synthetics Nodes in which it's running."
+          />
+        }
+      />
     </>
   );
 };

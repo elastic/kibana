@@ -9,15 +9,26 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { SourceDocumentJsonMode } from './source_document_json_mode';
+import { UnifiedDataTableContext } from '../table_context';
+import { dataTableContextMock } from '../../__mocks__/table_context';
+import { getNodeId } from './json_tree_viewer/tree_model';
 import type { JsonModeSettings } from '../types';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
+import type { DataSource } from '@kbn/data-source';
+
+const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
+const filterForTestId = (path: string) => `jsonTreeViewerFilterFor-${path}`;
+const filterOutTestId = (path: string) => `jsonTreeViewerFilterOut-${path}`;
 
 const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
@@ -34,18 +45,24 @@ const renderCell = (
     inTableSearch,
     jsonModeSettings,
     selectedColumns,
+    onFilter,
+    hideFilteringOnComputedColumns,
+    dataSource,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
     inTableSearch?: { term: string; isCounting: boolean };
     jsonModeSettings?: JsonModeSettings;
     selectedColumns?: string[];
+    onFilter?: DocViewFilterFn;
+    hideFilteringOnComputedColumns?: boolean;
+    dataSource?: DataSource;
   } = {}
 ) => {
-  const cell = (
+  let cell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
-      columnsMeta={undefined}
+      dataSource={dataSource}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
       jsonModeSettings={jsonModeSettings}
@@ -53,17 +70,33 @@ const renderCell = (
     />
   );
 
-  return renderWithI18n(
-    inTableSearch ? (
+  if (inTableSearch) {
+    cell = (
       <InTableSearchCellContext.Provider
         value={{ inTableSearchTerm: inTableSearch.term, isCounting: inTableSearch.isCounting }}
       >
         {cell}
       </InTableSearchCellContext.Provider>
-    ) : (
-      cell
-    )
-  );
+    );
+  }
+
+  if (onFilter) {
+    cell = (
+      <UnifiedDataTableContext.Provider
+        value={{
+          ...dataTableContextMock,
+          dataView: dataViewMock,
+          onFilter,
+          hideFilteringOnComputedColumns,
+          dataSource,
+        }}
+      >
+        {cell}
+      </UnifiedDataTableContext.Provider>
+    );
+  }
+
+  return renderWithI18n(cell);
 };
 
 describe('SourceDocumentJsonMode', () => {
@@ -110,6 +143,136 @@ describe('SourceDocumentJsonMode', () => {
 
     expect(container.textContent).toContain('present');
     expect(container.textContent).not.toContain('empty');
+  });
+
+  describe('filter for / filter out leaf actions', () => {
+    it('renders filter buttons on a filterable leaf and calls onFilter with the field, value and mode', async () => {
+      const onFilter = jest.fn();
+      renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } }, { onFilter });
+
+      // `bytes` has a custom label in the mock data view, which the action label should use.
+      expect(screen.getByTestId(filterForTestId('bytes'))).toHaveAccessibleName(
+        'Filter for this bytesDisplayName'
+      );
+
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 100, '+');
+
+      await userEvent.click(screen.getByTestId(filterOutTestId('bytes')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 100, '-');
+    });
+
+    it('does not render filter buttons for a non-filterable field', () => {
+      // `message` is not searchable in the mock data view, so it is not filterable.
+      renderCell(
+        { _id: '1', _index: 'test', _source: { message: 'hello' } },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(screen.queryByTestId(filterForTestId('message'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(filterOutTestId('message'))).not.toBeInTheDocument();
+    });
+
+    it('does not render filter buttons for a field that is absent from the data view', () => {
+      renderCell(
+        { _id: '1', _index: 'test', _source: { unknownField: 'x' } },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.queryByTestId(filterForTestId('unknownField'))).not.toBeInTheDocument();
+    });
+
+    it('does not render filter buttons when no onFilter is provided', () => {
+      renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } });
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(screen.queryByTestId(filterForTestId('bytes'))).not.toBeInTheDocument();
+    });
+
+    it('filters on the exact clicked element of a multi-value field', async () => {
+      const onFilter = jest.fn();
+      renderCell(
+        { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
+        { onFilter, jsonModeSettings: { defaultRenderedNodes: 0 } }
+      );
+
+      await userEvent.click(screen.getByTestId(rowTestId('bytes')));
+
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 200, '+');
+    });
+
+    it('wraps a multi-value element as an array in ES|QL so the query builder can use MV_CONTAINS', async () => {
+      const onFilter = jest.fn();
+      renderCell(
+        { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
+        {
+          onFilter,
+          dataSource: createMockEsqlSource(),
+          jsonModeSettings: { defaultRenderedNodes: 0 },
+        }
+      );
+
+      await userEvent.click(screen.getByTestId(rowTestId('bytes')));
+
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
+      await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
+      expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');
+    });
+
+    it('renders filter buttons for an ES|QL computed column resolved from the ES|QL columns', async () => {
+      const onFilter: jest.MockedFunction<DocViewFilterFn> = jest.fn();
+      renderCell(
+        { _id: '1', _index: 'test', _source: { computedField: 42 } },
+        {
+          onFilter,
+          dataSource: createMockEsqlSource([
+            { name: 'computedField', type: 'number', source: 'esql-result' },
+          ]),
+        }
+      );
+
+      expect(screen.getByTestId(filterForTestId('computedField'))).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId(filterForTestId('computedField')));
+      const [, value, mode] = onFilter.mock.calls[0];
+      expect(value).toBe(42);
+      expect(mode).toBe('+');
+    });
+
+    it('suppresses filter buttons on a computed column when hideFilteringOnComputedColumns is set', () => {
+      renderCell(
+        { _id: '1', _index: 'test', _source: { computedField: 42 } },
+        {
+          onFilter: jest.fn(),
+          dataSource: createMockEsqlSource([
+            { name: 'computedField', type: 'number', source: 'esql-result' },
+          ]),
+          hideFilteringOnComputedColumns: true,
+        }
+      );
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(screen.queryByTestId(filterForTestId('computedField'))).not.toBeInTheDocument();
+    });
+
+    it('does not render filter buttons when Elasticsearch ignored the field value', () => {
+      renderCell(
+        {
+          _id: '1',
+          _index: 'test',
+          _source: { extension: 'a-very-long-extension', bytes: 100 },
+          _ignored: ['extension'],
+        },
+        { onFilter: jest.fn() }
+      );
+
+      expect(screen.queryByTestId(filterForTestId('extension'))).not.toBeInTheDocument();
+      expect(screen.queryByTestId(filterOutTestId('extension'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(filterForTestId('bytes'))).toBeInTheDocument();
+    });
   });
 
   describe('in-table search counting pass', () => {

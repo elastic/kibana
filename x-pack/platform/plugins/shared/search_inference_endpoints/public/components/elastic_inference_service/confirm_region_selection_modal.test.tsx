@@ -65,17 +65,16 @@ describe('ConfirmRegionSelectionModal', () => {
       );
 
       expect(screen.getByTestId('confirmRegionSelectionModal')).toHaveTextContent(
-        'Confirm region selection'
+        'Review region preferences'
       );
       expect(screen.getByTestId('confirmRegionSelectionSelectedTab')).toHaveTextContent(
-        'Selected region'
+        'Locations'
       );
-      expect(screen.getByTestId('confirmRegionSelectionSelectedBadge')).toHaveTextContent('2');
+      expect(screen.queryByTestId('confirmRegionSelectionSelectedBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('confirmRegionSelectionIssuesTab')).toBeDisabled();
+      expect(screen.getByTestId('confirmRegionSelectionIssuesBadge')).toHaveTextContent('0');
       expect(screen.getByTestId('confirmRegionSelectionReviewChangesTitle')).toHaveTextContent(
-        'Review changes'
-      );
-      expect(screen.getByTestId('confirmRegionSelectionModal')).toHaveTextContent(
-        'selected region'
+        'Pending changes'
       );
       const list = screen.getByTestId('confirmRegionSelectionRegionList');
       expect(list.querySelectorAll('li')).toHaveLength(selectedRegions.length);
@@ -98,12 +97,11 @@ describe('ConfirmRegionSelectionModal', () => {
       );
 
       expect(screen.getByTestId('confirmRegionSelectionSelectedTab')).toHaveTextContent(
-        'Selected geography'
+        'Locations'
       );
-      expect(screen.getByTestId('confirmRegionSelectionSelectedBadge')).toHaveTextContent('2');
-      expect(screen.getByTestId('confirmRegionSelectionModal')).toHaveTextContent(
-        'selected geography'
-      );
+      expect(screen.queryByTestId('confirmRegionSelectionSelectedBadge')).not.toBeInTheDocument();
+      expect(screen.getByTestId('confirmRegionSelectionIssuesTab')).toBeDisabled();
+      expect(screen.getByTestId('confirmRegionSelectionIssuesBadge')).toHaveTextContent('0');
       expect(screen.getByTestId('confirmRegionSelectionGeoList')).toBeInTheDocument();
       expect(screen.queryByTestId('confirmRegionSelectionRegionList')).not.toBeInTheDocument();
     });
@@ -144,7 +142,7 @@ describe('ConfirmRegionSelectionModal', () => {
       expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
-    it('disables the ignore-errors checkbox when there is no conflict', () => {
+    it('enables the ignore-errors checkbox before save so issues can be ignored ahead of time', () => {
       render(
         <Wrapper>
           <ConfirmRegionSelectionModal
@@ -158,10 +156,14 @@ describe('ConfirmRegionSelectionModal', () => {
         </Wrapper>
       );
 
-      expect(screen.getByTestId('confirmRegionSelectionIgnoreCheckbox')).toBeDisabled();
+      expect(screen.getByTestId('confirmRegionSelectionIgnoreCheckbox')).not.toBeDisabled();
+
+      fireEvent.click(screen.getByTestId('confirmRegionSelectionIgnoreCheckbox'));
+      fireEvent.click(screen.getByTestId('confirmRegionSelectionSaveButton'));
+      expect(onConfirm).toHaveBeenCalledWith(true);
     });
 
-    it('disables the Issues tab when there is no conflict', () => {
+    it('disables the Issues tab with a subdued zero badge when there is no conflict', () => {
       render(
         <Wrapper>
           <ConfirmRegionSelectionModal
@@ -176,6 +178,7 @@ describe('ConfirmRegionSelectionModal', () => {
       );
 
       expect(screen.getByTestId('confirmRegionSelectionIssuesTab')).toBeDisabled();
+      expect(screen.getByTestId('confirmRegionSelectionIssuesBadge')).toHaveTextContent('0');
     });
   });
 
@@ -206,7 +209,11 @@ describe('ConfirmRegionSelectionModal', () => {
         expect(screen.getByTestId('confirmRegionSelectionIssue-0')).toBeInTheDocument();
       });
 
+      expect(screen.getByTestId('confirmRegionSelectionIssuesTab')).not.toBeDisabled();
       expect(screen.getByTestId('confirmRegionSelectionIssuesBadge')).toHaveTextContent('3');
+      expect(screen.getByTestId('confirmRegionSelectionSelectedTab')).toHaveTextContent(
+        'Locations'
+      );
       expect(screen.getByTestId('confirmRegionSelectionIssue-0')).toHaveTextContent(
         'region-policy-force-test-index'
       );
@@ -236,6 +243,7 @@ describe('ConfirmRegionSelectionModal', () => {
       );
 
       expect(screen.getByTestId('confirmRegionSelectionSaveButton')).toBeDisabled();
+      expect(screen.getByTestId('confirmRegionSelectionIgnoreCheckbox')).not.toBeDisabled();
 
       fireEvent.click(screen.getByTestId('confirmRegionSelectionIgnoreCheckbox'));
 
@@ -281,7 +289,7 @@ describe('ConfirmRegionSelectionModal', () => {
       );
     });
 
-    it('still lists selected geos after switching back to the Selected geography tab', async () => {
+    it('still lists selected geos after switching back to the Locations tab', async () => {
       render(
         <Wrapper>
           <ConfirmRegionSelectionModal
@@ -320,5 +328,6 @@ describe('ConfirmRegionSelectionModal', () => {
 
     expect(screen.getByTestId('confirmRegionSelectionSaveButton')).toBeDisabled();
     expect(screen.getByTestId('confirmRegionSelectionCancelButton')).toBeDisabled();
+    expect(screen.getByTestId('confirmRegionSelectionIgnoreCheckbox')).toBeDisabled();
   });
 });

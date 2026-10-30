@@ -35,4 +35,7 @@ export const getLegacyLeadsIndexNames = (spaceId: string): string[] =>
 /** Max leads produced by a single generation run (engine cap; see `DEFAULT_ENGINE_CONFIG.maxLeads`). */
 export const MAX_LEADS_PER_RUN = 10;
 
+/** Max exploratory leads the promotion LLM call may add on top of `MAX_LEADS_PER_RUN`. */
+export const MAX_PROMOTED_LEADS = 5;
+
 export const MAX_RECENT_LEADS = 20;

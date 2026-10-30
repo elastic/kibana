@@ -7,6 +7,7 @@
 
 import type {
   DefaultEvaluators,
+  Direction,
   EvalsExecutorClient,
   Evaluator,
   Example,
@@ -14,7 +15,7 @@ import type {
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { extractSearchRetrievedDocs } from './rag_extractor';
+import { extractSearchRetrievedDocs } from './ir_extractor';
 import { createEvaluateDataset, createEvaluateExternalDataset } from './evaluate_dataset';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
@@ -113,10 +114,14 @@ describe('extractSearchRetrievedDocs', () => {
   });
 });
 
-function createTraceEvaluator(name: string): Evaluator<Example, unknown> {
+function createTraceEvaluator(
+  name: string,
+  direction: Direction = 'maximize'
+): Evaluator<Example, unknown> {
   return {
     name,
     kind: 'CODE',
+    direction,
     evaluate: async () => ({ score: 1 }),
   };
 }
@@ -126,24 +131,27 @@ function createDefaultEvaluators(): DefaultEvaluators {
     criteria: () => ({
       name: 'Criteria',
       kind: 'LLM',
+      direction: 'maximize',
       evaluate: async () => ({ score: 1 }),
     }),
     correctnessAnalysis: () => ({
       name: 'CorrectnessAnalysis',
       kind: 'LLM',
+      direction: 'maximize',
       evaluate: async () => ({ score: 1 }),
     }),
     groundednessAnalysis: () => ({
       name: 'GroundednessAnalysis',
       kind: 'LLM',
+      direction: 'maximize',
       evaluate: async () => ({ score: 1 }),
     }),
     traceBasedEvaluators: {
-      inputTokens: createTraceEvaluator('InputTokens'),
-      outputTokens: createTraceEvaluator('OutputTokens'),
-      latency: createTraceEvaluator('Latency'),
-      toolCalls: createTraceEvaluator('ToolCalls'),
-      cachedTokens: createTraceEvaluator('CachedTokens'),
+      inputTokens: createTraceEvaluator('InputTokens', 'minimize'),
+      outputTokens: createTraceEvaluator('OutputTokens', 'minimize'),
+      latency: createTraceEvaluator('Latency', 'minimize'),
+      toolCalls: createTraceEvaluator('ToolCalls', 'minimize'),
+      cachedTokens: createTraceEvaluator('CachedTokens', 'minimize'),
     },
   };
 }

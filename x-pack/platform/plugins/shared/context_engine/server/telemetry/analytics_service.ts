@@ -7,21 +7,27 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { ContextEngineWriteOutcome, ReportKiWriteEventParams } from './events';
+import type {
+  ContextEngineOutcome,
+  ReportKiVerificationEventParams,
+  ReportKiWriteEventParams,
+} from './events';
 import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './events';
 
-export type KiWriteAction = 'create' | 'update' | 'delete';
+export type KiWriteAction = 'create' | 'update' | 'delete' | 'restore';
 
 const KI_EVENT_TYPE_BY_ACTION: Record<KiWriteAction, string> = {
   create: CONTEXT_ENGINE_EVENT_TYPES.KiCreate,
   update: CONTEXT_ENGINE_EVENT_TYPES.KiUpdate,
   delete: CONTEXT_ENGINE_EVENT_TYPES.KiDelete,
+  restore: CONTEXT_ENGINE_EVENT_TYPES.KiRestore,
 };
 
 /**
  * Server-side analytics wrapper for Context Engine telemetry.
  *
- * Owns EBT event type registration and reporting for KI writes.
+ * Owns EBT event type registration and reporting for KI writes
+ * and KI verification outcomes.
  * Payloads never contain KI free text. A reporting failure never
  * propagates to the caller.
  */
@@ -44,7 +50,7 @@ export class ContextEngineAnalyticsService {
     action: KiWriteAction;
     aiIndexId: string;
     managed?: boolean;
-    outcome: ContextEngineWriteOutcome;
+    outcome: ContextEngineOutcome;
     errorType?: string;
   }): void {
     try {
@@ -57,6 +63,48 @@ export class ContextEngineAnalyticsService {
     } catch (error) {
       // Do not fail the write if telemetry fails
       this.logger.debug(`Failed to report KI ${action} telemetry event`, { error });
+    }
+  }
+
+  reportKiVerification({
+    outcome,
+    passed,
+    verifiersRun,
+    failedVerifierIds,
+    failedWorkflowVerifierCount,
+    workflowId,
+    aiIndexId,
+    errorType,
+  }: {
+    outcome: ContextEngineOutcome;
+    passed?: boolean;
+    verifiersRun?: number;
+    failedVerifierIds?: string[];
+    failedWorkflowVerifierCount?: number;
+    workflowId?: string;
+    aiIndexId?: string;
+    errorType?: string;
+  }): void {
+    try {
+      this.analytics.reportEvent<ReportKiVerificationEventParams>(
+        CONTEXT_ENGINE_EVENT_TYPES.KiVerification,
+        {
+          outcome,
+          ...(passed !== undefined && { passed }),
+          ...(verifiersRun !== undefined && { verifiers_run: verifiersRun }),
+          ...(failedVerifierIds !== undefined &&
+            failedVerifierIds.length > 0 && { failed_verifier_ids: failedVerifierIds }),
+          ...(failedWorkflowVerifierCount !== undefined &&
+            failedWorkflowVerifierCount > 0 && {
+              failed_workflow_verifier_count: failedWorkflowVerifierCount,
+            }),
+          ...(workflowId !== undefined && { workflow_id: workflowId }),
+          ...(aiIndexId !== undefined && { ai_index_id: aiIndexId }),
+          ...(errorType !== undefined && { error_type: errorType }),
+        }
+      );
+    } catch (error) {
+      this.logger.debug('Failed to report KI verification telemetry event', { error });
     }
   }
 }

@@ -94,10 +94,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   useEffect(() => {
     const fetchIsNewKibanaInstance = async () => {
       const checkData = async () => {
-        const hasUserDataViewValue = await dataViews.hasData.hasUserDataView();
+        const hasDataViewValue = await dataViews.hasData.hasDataView();
         const hasESDataValue = await dataViews.hasData.hasESData();
-        setNewKibanaInstance((!hasUserDataViewValue && hasESDataValue) || !hasESDataValue);
-        setHasDataView(hasUserDataViewValue);
+        setNewKibanaInstance((!hasDataViewValue && hasESDataValue) || !hasESDataValue);
+        setHasDataView(hasDataViewValue);
         setHasESData(hasESDataValue);
       };
 
@@ -155,6 +155,12 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
     return applications;
   }, [application.capabilities]);
+
+  // `fileUpload.show` is resolved from the user's privileges to create data views, which file upload
+  // and sample data both need.
+  const canIngestData =
+    application.capabilities.navLinks.integrations === true ||
+    application.capabilities.fileUpload?.show === true;
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
@@ -221,7 +227,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
           hasESData: () => Promise.resolve(hasESData),
-          hasUserDataView: () => Promise.resolve(hasDataView),
+          hasDataView: () => Promise.resolve(hasDataView),
         },
       },
       dataViewEditor,
@@ -355,9 +361,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     : {}),
                 })}
               >
-                <EuiFlexItem>
-                  <AddData addBasePath={addBasePath} features={addDataFeatures} />
-                </EuiFlexItem>
+                {canIngestData ? (
+                  <EuiFlexItem>
+                    <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                  </EuiFlexItem>
+                ) : null}
 
                 <EuiFlexItem>
                   <ManageData addBasePath={addBasePath} features={manageDataFeatures} />

@@ -68,7 +68,7 @@ export const Grafana: ConnectorSpec = {
   metadata: {
     id: '.grafana',
     displayName: 'Grafana',
-    description: i18n.translate('core.kibanaConnectorSpecs.grafana.metadata.description', {
+    description: i18n.translate('connectorSpecs.grafana.metadata.description', {
       defaultMessage:
         'Read Grafana-managed alerts and rules, manage silences, post dashboard annotations, and search dashboards and notification configuration.',
     }),
@@ -86,16 +86,13 @@ export const Grafana: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.grafana.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.grafana.auth.bearer.token.label', {
                 defaultMessage: 'Service Account Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.grafana.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Grafana service account token (Administration > Users and access > Service accounts). Grafana Cloud tokens are typically prefixed glsa_.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.grafana.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Grafana service account token (Administration > Users and access > Service accounts). Grafana Cloud tokens are typically prefixed glsa_.',
+              }),
             },
           },
         },
@@ -108,10 +105,10 @@ export const Grafana: ConnectorSpec = {
       baseUrl: UISchemas.url('https://your-stack.grafana.net')
         .describe('Grafana instance URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.grafana.config.baseUrl.label', {
+          label: i18n.translate('connectorSpecs.grafana.config.baseUrl.label', {
             defaultMessage: 'Grafana instance URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.grafana.config.baseUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.grafana.config.baseUrl.helpText', {
             defaultMessage:
               'The base URL of your Grafana instance, e.g. https://your-stack.grafana.net (Grafana Cloud) or https://grafana.example.com (self-hosted).',
           }),
@@ -123,10 +120,10 @@ export const Grafana: ConnectorSpec = {
         .describe('Organization ID to scope requests to, for multi-org Grafana instances')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.grafana.config.orgId.label', {
+          label: i18n.translate('connectorSpecs.grafana.config.orgId.label', {
             defaultMessage: 'Organization ID',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.grafana.config.orgId.helpText', {
+          helpText: i18n.translate('connectorSpecs.grafana.config.orgId.helpText', {
             defaultMessage:
               "Optional. Sent as the X-Grafana-Org-Id header on every request. Leave empty to use the token's default organization.",
           }),
@@ -141,6 +138,7 @@ export const Grafana: ConnectorSpec = {
   actions: {
     getAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch currently firing, pending, silenced, and inhibited alerts from Grafana-managed Alertmanager. The primary read path into Grafana alerting.',
       input: GrafanaGetAlertsInputSchema,
@@ -163,6 +161,7 @@ export const Grafana: ConnectorSpec = {
 
     listRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List all configured Grafana alert rules across folders and groups, so a workflow can inventory or reference rules.',
       input: GrafanaListRulesInputSchema,
@@ -181,6 +180,7 @@ export const Grafana: ConnectorSpec = {
 
     getAlertRule: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single Grafana alert rule by UID, including its condition, labels, and notification settings, so a workflow can inspect exactly what fired.',
       input: GrafanaGetAlertRuleInputSchema,
@@ -199,6 +199,7 @@ export const Grafana: ConnectorSpec = {
 
     listSilences: {
       isTool: true,
+      scope: 'read',
       description:
         'List active and pending Grafana silences, so a workflow can check whether an alert is already muted before acting.',
       input: GrafanaListSilencesInputSchema,
@@ -217,6 +218,7 @@ export const Grafana: ConnectorSpec = {
 
     getSilence: {
       isTool: true,
+      scope: 'read',
       description: 'Get a single Grafana silence by ID, returning its matchers and expiry.',
       input: GrafanaGetSilenceInputSchema,
       handler: async (ctx, input: GrafanaGetSilenceInput) => {
@@ -236,6 +238,7 @@ export const Grafana: ConnectorSpec = {
 
     createSilence: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a Grafana silence to mute alerts matching label matchers for a time window, so a workflow can suppress noise during maintenance or auto-remediation.',
       input: GrafanaCreateSilenceInputSchema,
@@ -261,6 +264,7 @@ export const Grafana: ConnectorSpec = {
 
     deleteSilence: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Expire a Grafana silence so matching alerts can fire again, closing the mute-and-restore loop once work completes.',
       input: GrafanaDeleteSilenceInputSchema,
@@ -281,6 +285,7 @@ export const Grafana: ConnectorSpec = {
 
     listAnnotations: {
       isTool: true,
+      scope: 'read',
       description:
         'List Grafana annotations, filterable by dashboard, tags, and time range, so a workflow can find the annotationId of an annotation posted earlier (e.g. to resolve/clean up an incident annotation) instead of relying on an ID from an earlier createAnnotation response.',
       input: GrafanaListAnnotationsInputSchema,
@@ -307,6 +312,7 @@ export const Grafana: ConnectorSpec = {
 
     createAnnotation: {
       isTool: true,
+      scope: 'write',
       description:
         'Post a Grafana dashboard annotation (deploy, remediation ran, incident opened) so operators see workflow context. Pass timeEnd to create a region/range annotation instead of a point-in-time marker.',
       input: GrafanaCreateAnnotationInputSchema,
@@ -330,6 +336,7 @@ export const Grafana: ConnectorSpec = {
 
     updateAnnotation: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing Grafana annotation (text, tags, or time range) — for example, set timeEnd to mark an incident resolved.',
       input: GrafanaUpdateAnnotationInputSchema,
@@ -354,6 +361,7 @@ export const Grafana: ConnectorSpec = {
 
     deleteAnnotation: {
       isTool: true,
+      scope: 'destroy',
       description: 'Delete a Grafana annotation for cleanup or false-positive correction.',
       input: GrafanaDeleteAnnotationInputSchema,
       handler: async (ctx, input: GrafanaDeleteAnnotationInput) => {
@@ -370,6 +378,7 @@ export const Grafana: ConnectorSpec = {
 
     searchDashboards: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Grafana dashboards and folders by query string or tag, so a workflow can resolve the dashboard UID it needs to link or annotate.',
       input: GrafanaSearchDashboardsInputSchema,
@@ -398,6 +407,7 @@ export const Grafana: ConnectorSpec = {
 
     getDashboard: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a Grafana dashboard by UID, returning its metadata and panels for linking/context.',
       input: GrafanaGetDashboardInputSchema,
@@ -416,6 +426,7 @@ export const Grafana: ConnectorSpec = {
 
     listContactPoints: {
       isTool: true,
+      scope: 'read',
       description: 'List configured Grafana contact points (notification targets).',
       input: GrafanaListContactPointsInputSchema,
       handler: async (ctx, input: GrafanaListContactPointsInput) => {
@@ -435,6 +446,7 @@ export const Grafana: ConnectorSpec = {
 
     listMuteTimings: {
       isTool: true,
+      scope: 'read',
       description:
         'List Grafana mute timings (recurring silence schedules) to reference in notification-policy logic.',
       input: GrafanaListMuteTimingsInputSchema,
@@ -453,6 +465,7 @@ export const Grafana: ConnectorSpec = {
 
     getNotificationPolicyTree: {
       isTool: true,
+      scope: 'read',
       description:
         "Read Grafana's notification policy tree, so a workflow can understand alert routing to contact points.",
       input: GrafanaGetNotificationPolicyTreeInputSchema,
@@ -472,7 +485,7 @@ export const Grafana: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.grafana.test.description', {
+    description: i18n.translate('connectorSpecs.grafana.test.description', {
       defaultMessage: 'Verifies the Grafana connection by listing configured alert rules',
     }),
     handler: async (ctx) => {

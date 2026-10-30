@@ -66,7 +66,7 @@ describe('test policy response handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as GetHostPolicyResponse;
       expect(result.policy_response.agent.id).toEqual(
         get(response, 'hits.hits.0._source.agent.id')

@@ -6,21 +6,20 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   notificationQueryParamsSchema,
   notificationReadSchema,
 } from '../../common/notification_schema';
 import type {
+  Notification,
   NotificationListItem,
   NotificationQueryParams,
   NotificationQueryParamsParsed,
   NotificationQueryResult,
 } from '../../common/types';
-import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { isReadAt, type NotificationReadState } from './read_state';
-import { severityTTLQuery } from './severity_ttl_query';
 
 /**
  * Max number of results the client will get back per query. This is enforced on the
@@ -30,7 +29,7 @@ import { severityTTLQuery } from './severity_ttl_query';
 export const NOTIFICATION_QUERY_RESULT_LIMIT = 1000;
 
 export interface NotificationQueryDeps {
-  dataStreams: DataStreamsStart;
+  esClient: ElasticsearchClient;
   logger: Logger;
 }
 
@@ -42,7 +41,7 @@ export interface NotificationQueryDeps {
  */
 const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryContainer[] => {
   const { namespace, type, from, to } = params;
-  const filters: QueryDslQueryContainer[] = [severityTTLQuery('visible')];
+  const filters: QueryDslQueryContainer[] = [];
   if (namespace) {
     filters.push({ term: { namespace } });
   }
@@ -61,7 +60,7 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
 /**
  * Fetch the notification list
  * - Return only the newest doc per `notification_id`, collapse duplicates.
- * - Filter by severity TTL, namespace, type and time-range
+ * - Filter by namespace, type and time-range
  * - Sort by newest first.
  * - Annotate results with read state if provided (headless consumers don't have a read state)
  */
@@ -70,13 +69,16 @@ export const queryNotifications = async (
   params: NotificationQueryParams = {},
   readState?: NotificationReadState | Promise<NotificationReadState | undefined>
 ): Promise<NotificationQueryResult> => {
-  const { dataStreams, logger } = deps;
+  const { esClient, logger } = deps;
   const validated = notificationQueryParamsSchema.parse(params);
 
-  const client = await getNotificationDataStreamClient(dataStreams);
   // Over-fetch by one collapse group so a full page is distinguishable from a truncated one
   const [response, resolvedReadState] = await Promise.all([
-    client.search({
+    esClient.search<Notification>({
+      index: NOTIFICATION_DATA_STREAM_NAME,
+      // Elasticsearch creates the stream from its descriptor on the first submitted
+      // notification, so until a producer writes one there is no index to read.
+      ignore_unavailable: true,
       query: { bool: { filter: buildFilters(validated) } },
       collapse: { field: 'notification_id' },
       sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],

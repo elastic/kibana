@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { MAX_LEADS_PER_RUN } from '../../../../../common/entity_analytics/lead_generation/constants';
 import type { LeadEntity, Observation, ObservationModule, ScoredEntity } from '../types';
 import { createLeadGenerationEngine, computeCohortContext } from './lead_generation_engine';
 import { llmSynthesizeBatch } from './llm_synthesize';
@@ -54,14 +55,14 @@ const createMockModule = (
     collect: collectFn,
   } as ObservationModule);
 
-/** Test helper: prepare all candidates then synthesize (sorted by priority). */
+/** Test helper: prepare the confident candidates then synthesize (sorted by priority). */
 const runEngine = async (
   engine: ReturnType<typeof createLeadGenerationEngine>,
   entities: LeadEntity[],
   chatModel: InferenceChatModel
 ) => {
-  const candidates = await engine.prepareLeadCandidates(entities);
-  const leads = await engine.synthesizeLeads(candidates, { chatModel });
+  const { confident } = await engine.prepareLeadCandidates(entities);
+  const leads = await engine.synthesizeLeads(confident, { chatModel });
   return [...leads].sort((a, b) => b.priority - a.priority);
 };
 
@@ -418,6 +419,79 @@ describe('LeadGenerationEngine', () => {
 
       const leads = await runEngine(engine, entities, fakeChatModel);
       expect(leads).toHaveLength(3);
+    });
+
+    it('returns entities beyond maxLeads as exploratory, not dropped', async () => {
+      const entities = Array.from({ length: 5 }, (_, i) => createMockEntity(`entity_${i}`));
+      const observations = entities.map((e, idx) =>
+        createMockObservation(e, 'mod', { score: 80 - idx * 10, confidence: 0.9 })
+      );
+
+      const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 3 } });
+      engine.registerModule(
+        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+      );
+
+      const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
+
+      expect(confident).toHaveLength(3);
+      expect(exploratory).toHaveLength(2);
+      // exploratory picks up where confident leaves off, in the same priority order
+      expect(exploratory.map((c) => c.entity.name)).toEqual(['entity_3', 'entity_4']);
+    });
+
+    it('selects the top MAX_LEADS_PER_RUN as confident from a realistic noisy pool, by score', async () => {
+      const poolSize = MAX_LEADS_PER_RUN + 8;
+      const entities = Array.from({ length: poolSize }, (_, i) => createMockEntity(`entity_${i}`));
+      const observations = entities.map((e, idx) =>
+        createMockObservation(e, 'mod', { score: 95 - idx * 3, confidence: 0.9 })
+      );
+
+      const engine = createLeadGenerationEngine({ logger });
+      engine.registerModule(
+        createMockModule('mod', 0.5, jest.fn().mockResolvedValue(observations))
+      );
+
+      const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
+
+      expect(confident).toHaveLength(MAX_LEADS_PER_RUN);
+      expect(exploratory).toHaveLength(poolSize - MAX_LEADS_PER_RUN);
+      expect(confident.map((c) => c.entity.name)).toEqual(
+        Array.from({ length: MAX_LEADS_PER_RUN }, (_, i) => `entity_${i}`)
+      );
+      expect(exploratory.map((c) => c.entity.name)).toEqual(
+        Array.from(
+          { length: poolSize - MAX_LEADS_PER_RUN },
+          (_, i) => `entity_${i + MAX_LEADS_PER_RUN}`
+        )
+      );
+    });
+
+    it('excludes entities below minObservations from both confident and exploratory', async () => {
+      const alice = createMockEntity('alice');
+      const bob = createMockEntity('bob');
+
+      const aliceObs1 = createMockObservation(alice, 'mod', { score: 80, confidence: 0.9 });
+      const aliceObs2 = createMockObservation(alice, 'mod', {
+        type: 'second_signal',
+        score: 70,
+        confidence: 0.8,
+      });
+      const bobObs = createMockObservation(bob, 'mod', { score: 60, confidence: 0.7 });
+
+      const engine = createLeadGenerationEngine({
+        logger,
+        config: { minObservations: 2, maxLeads: 0 },
+      });
+      engine.registerModule(
+        createMockModule('mod', 0.5, jest.fn().mockResolvedValue([aliceObs1, aliceObs2, bobObs]))
+      );
+
+      const { confident, exploratory } = await engine.prepareLeadCandidates([alice, bob]);
+
+      // maxLeads: 0 puts every qualifying entity in `exploratory`; bob never qualifies.
+      expect(confident).toEqual([]);
+      expect(exploratory.map((c) => c.entity.name)).toEqual(['alice']);
     });
 
     it('sorts leads by priority descending', async () => {

@@ -36,6 +36,7 @@ import * as knowledgeBaseIndex from './knowledge_base_index';
 
 import {
   getAgentTemplateAssetsMap,
+  getInstalledPackageManifests,
   getInstalledPackages,
   getPackageDependencies,
   getPackageFromSource,
@@ -482,8 +483,8 @@ test: invalid manifest
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
 
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledTimes(1);
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledWith(
         'Installed package invalidpackage 0.0.1 is not a valid package anymore'
       );
     });
@@ -1049,6 +1050,47 @@ owner: elastic`,
     });
   });
 
+  describe('getInstalledPackageManifests', () => {
+    it('parses a manifest stored as base64', async () => {
+      const soClient = savedObjectsClientMock.create();
+      // A Latin-1 byte in a comment makes the manifest invalid UTF-8, so storage keeps it as base64.
+      const manifest = Buffer.concat([
+        Buffer.from('name: test\ntitle: Test\nversion: 1.0.0\n# caf'),
+        Buffer.from([0xe9]),
+        Buffer.from('\ndescription: Test package\n'),
+      ]);
+      soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            type: ASSETS_SAVED_OBJECT_TYPE,
+            id: 'test-manifest',
+            attributes: {
+              package_name: 'test',
+              package_version: '1.0.0',
+              install_source: 'upload',
+              asset_path: 'test-1.0.0/manifest.yml',
+              media_type: 'text/yaml; charset=utf-8',
+              data_utf8: '',
+              data_base64: manifest.toString('base64'),
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      } as any);
+
+      const manifests = await getInstalledPackageManifests(soClient, [
+        { name: 'test', version: '1.0.0' },
+      ] as any);
+
+      expect(manifests.get('test-1.0.0/manifest.yml')).toMatchObject({
+        title: 'Test',
+        description: 'Test package',
+      });
+    });
+  });
+
   describe('getPackageInfo', () => {
     beforeEach(() => {
       const mockContract = createAppContextStartContractMock();
@@ -1233,7 +1275,7 @@ owner: elastic`,
           pkgName: 'nginx',
           pkgVersion: '1.0.0',
         })
-      ).rejects.toThrowError(PackageNotFoundError);
+      ).rejects.toThrow(PackageNotFoundError);
     });
 
     it('should do nothing if no excluded data streams', async () => {
@@ -1382,7 +1424,7 @@ owner: elastic`,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
-        ).rejects.toThrowError(PackageNotFoundError);
+        ).rejects.toThrow(PackageNotFoundError);
       });
 
       it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {

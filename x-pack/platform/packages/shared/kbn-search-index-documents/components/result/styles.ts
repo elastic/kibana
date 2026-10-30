@@ -12,12 +12,7 @@ import { type EuiThemeComputed } from '@elastic/eui';
 export const resultField = (euiTheme: EuiThemeComputed<{}>) =>
   css({
     padding: 0,
-    borderBottom: `1px solid ${euiTheme.colors.lightShade}`,
     position: 'relative',
-
-    '&:last-child': {
-      borderBottom: 'none',
-    },
 
     '> .euiTableRow:hover': {
       backgroundColor: euiTheme.colors.emptyShade,
@@ -29,7 +24,6 @@ export const resultField = (euiTheme: EuiThemeComputed<{}>) =>
 
       '> .euiTableCellContent': {
         padding: euiTheme.size.s,
-        fontFamily: euiTheme.font.familyCode,
         color: euiTheme.colors.mediumShade,
       },
     },

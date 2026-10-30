@@ -115,6 +115,16 @@ describe('ProjectPicker', () => {
     expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('All');
   });
 
+  it('should display customTooltipContent on the picker button when provided', async () => {
+    const customTooltipContent = 'Custom project picker tooltip';
+    await renderProjectPicker({ customTooltipContent });
+
+    await userEvent.hover(screen.getByTestId('cps-project-picker-button-tooltip'));
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent(customTooltipContent);
+  });
+
   it('should open the popover with the project list', async () => {
     await renderProjectPicker();
 

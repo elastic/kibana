@@ -1,5 +1,5 @@
 {
-  "sha1": "7f27721cea7abe4fe3e91a04cd0b0ecf304f6e99",
+  "sha1": "d20643699fde7ffb0d8196a806ecea92909b8151",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -44,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -58,8 +58,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -72,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -86,8 +86,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
-        "line": 37,
-        "column": 25
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "eefa919b3aad535-2c759207a1dba6b",
+      "title": "AddMonitor creates, edits, and deletes api monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/add_monitor.spec.ts",
+        "line": 39,
+        "column": 10
       }
     },
     {
@@ -226,22 +240,6 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/overview_sorting.spec.ts",
         "line": 28,
         "column": 7
-      }
-    },
-    {
-      "id": "41a5e8b53c1a295-ec9bfa8647930ac",
-      "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/step_details.spec.ts",
-        "line": 34,
-        "column": 28
       }
     }
   ]

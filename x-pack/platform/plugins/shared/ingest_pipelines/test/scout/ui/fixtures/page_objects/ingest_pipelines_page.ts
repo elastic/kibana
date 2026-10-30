@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
-import type { Locator, ScoutPage } from '@kbn/scout';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 import path from 'path';
 
 interface PipelineForm {
@@ -22,7 +22,10 @@ export class IngestPipelinesPage {
   public readonly navigationBlockConfirmModal: Locator;
   public readonly geoipEmptyListPrompt: Locator;
   public readonly deleteManagedAssetsCallout: Locator;
+  public readonly emptyListPrompt: Locator;
+  public readonly configurePipelineHeader: Locator;
   private readonly createPipelineDropdown: Locator;
+  private readonly addProcessorButton: Locator;
   private readonly createNewPipelineButton: Locator;
   private readonly createPipelineFromCsvButton: Locator;
   private readonly nameFieldInput: Locator;
@@ -47,7 +50,7 @@ export class IngestPipelinesPage {
   private readonly deletePipelineButton: Locator;
   private readonly manageProcessorsLink: Locator;
   private readonly manageProcessorsTitle: Locator;
-  private readonly appMenuOverflowButton: Locator;
+  private readonly appMenu: AppMenu;
   private readonly addGeoipDatabaseButton: Locator;
   private readonly databaseTypeSelect: Locator;
   private readonly databaseNameSelect: Locator;
@@ -64,6 +67,9 @@ export class IngestPipelinesPage {
     this.navigationBlockConfirmModal = this.page.testSubj.locator('navigationBlockConfirmModal');
     this.geoipEmptyListPrompt = this.page.testSubj.locator('geoipEmptyListPrompt');
     this.deleteManagedAssetsCallout = this.page.testSubj.locator('deleteManagedAssetsCallout');
+    this.emptyListPrompt = this.page.getByTestId('emptyList');
+    this.configurePipelineHeader = this.page.getByTestId('configurePipelineHeader');
+    this.addProcessorButton = this.page.getByTestId('addProcessorButton');
     this.createPipelineDropdown = this.page.testSubj.locator('createPipelineDropdown');
     this.createNewPipelineButton = this.page.testSubj.locator('createNewPipeline');
     this.createPipelineFromCsvButton = this.page.testSubj.locator('createPipelineFromCsv');
@@ -82,14 +88,14 @@ export class IngestPipelinesPage {
     this.detailsPanelTitle = this.page.testSubj.locator('detailsPanelTitle');
     this.tablePaginationPopoverButton = this.page.testSubj.locator('tablePaginationPopoverButton');
     this.tablePagination50Rows = this.page.testSubj.locator('tablePagination-50-rows');
-    this.logo = this.page.testSubj.locator('logo');
+    this.logo = this.page.getByTestId('logo').or(this.page.getByTestId('nav-header-logo'));
     this.filtersDropdown = this.page.testSubj.locator('filtersDropdown');
     this.managedFilter = this.page.testSubj.locator('managedFilter');
     this.actionsPopoverButton = this.page.testSubj.locator('actionsPopoverButton');
     this.deletePipelineButton = this.page.testSubj.locator('deletePipelineButton');
     this.manageProcessorsLink = this.page.testSubj.locator('manageProcessorsLink');
     this.manageProcessorsTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
-    this.appMenuOverflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
+    this.appMenu = new AppMenu(this.page);
     this.addGeoipDatabaseButton = this.page.testSubj.locator('addGeoipDatabaseButton');
     this.databaseTypeSelect = this.page.testSubj.locator('databaseTypeSelect');
     this.databaseNameSelect = this.page.testSubj.locator('databaseNameSelect');
@@ -124,6 +130,17 @@ export class IngestPipelinesPage {
     await this.detailsFlyout.waitFor();
   }
 
+  async openCreateForm() {
+    await this.createPipelineDropdown.click();
+    await this.createNewPipelineButton.click();
+    await this.nameFieldInput.waitFor();
+  }
+
+  async openAddProcessorFlyout() {
+    await this.addProcessorButton.click();
+    await this.configurePipelineHeader.waitFor();
+  }
+
   async createPipelineFromCsv({ name }: { name: string }) {
     await this.createPipelineDropdown.click();
     await this.createPipelineFromCsvButton.click();
@@ -131,7 +148,7 @@ export class IngestPipelinesPage {
     await this.fileInput.setInputFiles(
       path.join(
         process.cwd(),
-        'x-pack/platform/test/functional/fixtures/ingest_pipeline_example_mapping.csv'
+        'x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/fixtures/files/ingest_pipeline_example_mapping.csv'
       )
     );
 
@@ -209,8 +226,7 @@ export class IngestPipelinesPage {
   }
 
   async navigateToManageProcessorsPage() {
-    await this.appMenuOverflowButton.click();
-    await this.manageProcessorsLink.click();
+    await this.appMenu.clickItem(this.manageProcessorsLink);
     await this.manageProcessorsTitle.filter({ hasText: 'Manage Processors' }).waitFor();
   }
 

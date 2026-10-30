@@ -40,6 +40,7 @@ import {
   themeServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const spaceCategories = ['general', 'dashboard', 'notifications'];
 const globalCategories = ['custom branding'];
@@ -73,7 +74,7 @@ describe('Settings application', () => {
   it('replaces history while typing so browser back does not step through each character', async () => {
     const history = scopedHistoryMock.create({ pathname: '', search: '' });
     const activeSpace: Space = {
-      id: 'default',
+      id: asSpaceId('default'),
       name: 'Default',
       disabledFeatures: [],
       solution: 'classic',

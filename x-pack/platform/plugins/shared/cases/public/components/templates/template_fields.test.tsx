@@ -101,7 +101,7 @@ describe('Template fields', () => {
     await user.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           name: 'Template 1',
           templateDescription: 'this is a first template',
@@ -141,7 +141,7 @@ describe('Template fields', () => {
     await user.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           name: 'Sample template!!',
           templateDescription: 'This is a template description..',

@@ -18,13 +18,15 @@ import type { ConnectorSpec } from '../../connector_spec';
 const ABUSEIPDB_API = 'https://api.abuseipdb.com/api/v2';
 
 /** AbuseIPDB accepts IPv4 and IPv6 on check/report endpoints. */
-const IpAddressSchema = z.union([z.ipv4(), z.ipv6()]);
+const IpAddressSchema = lazySchema(() => z.union([z.ipv4().max(15), z.ipv6().max(45)]));
 
-const MaxAgeInDaysSchema = z.coerce.number().int().min(1).max(365);
+const MaxAgeInDaysSchema = lazySchema(() => z.coerce.number().int().min(1).max(365));
 
-const MAX_BLACKLIST_LIMIT = 10_000;
+// The highest subscription tier's blacklist hard limit; lower tiers are truncated by AbuseIPDB without error.
+const MAX_BLACKLIST_LIMIT = 500_000;
 const MAX_REPORT_CATEGORIES = 30;
-const MAX_COMMENT_LENGTH = 1024;
+// AbuseIPDB truncates report comments beyond 1024 bytes.
+const MAX_COMMENT_BYTES = 1024;
 
 export const AbuseIPDBConnector: ConnectorSpec = {
   metadata: {
@@ -44,6 +46,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
   actions: {
     checkIp: {
       isTool: true,
+      scope: 'read',
       description:
         'Check an IPv4 or IPv6 address against AbuseIPDB. Returns abuseConfidenceScore, totalReports, and lastReportedAt. Unknown or clean addresses return score 0 as data (do not treat as an error). Use getIpInfo when you need verbose geo/ISP/domain fields.',
       input: lazySchema(() =>
@@ -93,9 +96,14 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           comment: z
             .string()
             .min(1)
-            .max(MAX_COMMENT_LENGTH)
+            .max(MAX_COMMENT_BYTES)
+            .refine((value) => Buffer.byteLength(value, 'utf8') <= MAX_COMMENT_BYTES, {
+              message: `Comment must not exceed ${MAX_COMMENT_BYTES} bytes (UTF-8).`,
+            })
             .optional()
-            .describe('Optional comment describing the observed abuse (max 1024 characters).'),
+            .describe(
+              `Optional comment describing the observed abuse (max ${MAX_COMMENT_BYTES} bytes UTF-8).`
+            ),
         })
       ),
       handler: async (ctx, input: { ip: string; categories: number[]; comment?: string }) => {
@@ -121,6 +129,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getIpInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Verbose IP enrichment via /check?verbose=true. Prefer this over checkIp when workflows need isPublic, isWhitelisted, domain, or fuller geo/ISP context. Uses the same maxAgeInDays default (90) as checkIp so totalReports and lastReportedAt stay comparable.',
       input: lazySchema(() =>
@@ -157,6 +166,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     bulkCheck: {
       isTool: true,
+      scope: 'read',
       description:
         'Check a CIDR network block via /check-block. Returns network metadata and reported addresses within the block for subnet-level triage.',
       input: lazySchema(() =>
@@ -188,6 +198,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getBlacklist: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch the AbuseIPDB blacklist feed of most-reported IPs at or above a confidence threshold. Use for blocklist generation and enrichment feeds. Prefer confidenceMinimum 75-100 for denial-of-service style blocking.',
       input: lazySchema(() =>

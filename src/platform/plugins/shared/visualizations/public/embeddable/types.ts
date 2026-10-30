@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
@@ -17,8 +18,8 @@ import type {
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
-  PublishesDataViews,
-  PublishesEsqlUsage,
+  PublishesDataSources,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
@@ -62,11 +63,11 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 export type VisualizeApi = Partial<HasEditCapabilities> &
   CanCancelRequests &
   PublishesWritableTitle &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   PublishesRendered &
   PublishesProjectRoutingOverrides &
-  PublishesEsqlUsage &
+  PublishesEsql &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

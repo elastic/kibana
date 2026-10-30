@@ -264,6 +264,36 @@ describe('Monitor Detail Flyout', () => {
     }
   });
 
+  it('dispatches getMonitorAction.get exactly once on a plain mount', () => {
+    // The fetch effect and the retry effect both depend on the same
+    // `fetchSavedObject` callback, whose identity changes whenever `space`
+    // resolves. Without a guard, both effects fire in the same pass and
+    // double-dispatch the request.
+    const mockDispatch = jest.fn();
+    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="123456"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(1);
+    } finally {
+      dispatchSpy.mockRestore();
+    }
+  });
+
   it('renders details for fetch success', () => {
     const detailLink = '/app/synthetics/monitor/test-id';
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
@@ -543,12 +573,12 @@ describe('Monitor Detail Flyout', () => {
       },
     };
 
-    it('resolves a stale heartbeat monitor and renders it read-only (no Edit, no Go to monitor, no 404 callout)', () => {
+    it('resolves a stale heartbeat monitor and renders it read-only (Go to monitor, no Edit, no 404 callout)', () => {
       jest
         .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
         .mockReturnValue('/app/synthetics/monitor/hb-config-id?locationId=us-east');
 
-      const { queryByText } = render(
+      const { getByText, queryByText } = render(
         <MonitorDetailFlyout
           configId="hb-config-id"
           id="hb-config-id"
@@ -561,9 +591,7 @@ describe('Monitor Detail Flyout', () => {
         { state: heartbeatState }
       );
 
-      // Editing is not offered, and the read-only detail page isn't available
-      // yet (coming in a follow-up), so "Go to monitor" is hidden too.
-      expect(queryByText('Go to monitor')).not.toBeInTheDocument();
+      expect(getByText('Go to monitor')).toBeInTheDocument();
       expect(queryByText('Edit monitor')).not.toBeInTheDocument();
       // Remote-only affordances must not appear for heartbeat monitors.
       expect(queryByText('View on remote cluster')).not.toBeInTheDocument();
@@ -847,6 +875,95 @@ describe('duration chart attributes', () => {
 
     fireEvent.click(getByText('Performance'));
     expect(exploratoryViewEmbeddableMock).not.toHaveBeenCalled();
+  });
+
+  it('retries the saved-object fetch when a leftover monitor remains after switching in push mode', () => {
+    localStorage.setItem('synthetics.flyout.mode', 'push');
+    exploratoryViewEmbeddableMock.mockClear();
+    const mockDispatch = jest.fn();
+    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      const { getByText, queryByRole } = render<{
+        exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+      }>(
+        <MonitorDetailFlyout
+          configId="monitor-b"
+          id="monitor-b"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          core: {
+            exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+          },
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: {
+                config_id: 'monitor-a',
+                created_at: moment().subtract(2, 'hours').toISOString(),
+              },
+              syntheticsMonitorLoading: false,
+            },
+          },
+        }
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls.some(([action]) => action.payload?.monitorId === 'monitor-b')).toBe(
+        true
+      );
+
+      fireEvent.click(getByText('Performance'));
+      expect(queryByRole('progressbar')).toBeInTheDocument();
+      expect(exploratoryViewEmbeddableMock).not.toHaveBeenCalled();
+    } finally {
+      dispatchSpy.mockRestore();
+      localStorage.removeItem('synthetics.flyout.mode');
+    }
+  });
+
+  it('does not refetch after a non-404 saved-object error for the current monitor', () => {
+    const mockDispatch = jest.fn();
+    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="monitor-b"
+          id="monitor-b"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+              syntheticsMonitorLoading: false,
+              syntheticsMonitorError: {
+                body: { statusCode: 500, message: 'Internal Server Error' },
+                getPayload: { monitorId: 'monitor-b' },
+              },
+            },
+          },
+        }
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(1);
+    } finally {
+      dispatchSpy.mockRestore();
+    }
   });
 
   it('renders the default window when the saved object 404s but overview metadata is available', () => {

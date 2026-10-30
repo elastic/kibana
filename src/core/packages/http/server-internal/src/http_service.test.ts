@@ -172,8 +172,8 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   await service.setup(setupDeps);
   await service.start();
 
-  expect(httpServer.start).toBeCalledTimes(1);
-  expect(prebootHapiServer.stop).toBeCalledTimes(1);
+  expect(httpServer.start).toHaveBeenCalledTimes(1);
+  expect(prebootHapiServer.stop).toHaveBeenCalledTimes(1);
   await service.stop();
 });
 
@@ -501,4 +501,46 @@ test('passes versioned config to router', async () => {
       },
     })
   );
+});
+
+describe('self client hooks', () => {
+  const getStartContract = async () => {
+    mockHttpServer.mockImplementationOnce(() => ({
+      isListening: () => false,
+      setup: jest.fn().mockReturnValue({ server: fakeHapiServer, registerStaticDir: jest.fn() }),
+      start: noop,
+      stop: noop,
+    }));
+    mockHttpServer.mockImplementationOnce(() => ({
+      isListening: () => false,
+      setup: jest.fn().mockReturnValue({ server: fakeHapiServer }),
+      start: noop,
+      stop: noop,
+    }));
+
+    const service = new HttpService({ coreId, configService: createConfigService(), env, logger });
+    await service.preboot(prebootDeps);
+    await service.setup(setupDeps);
+    return { service, start: service.getStartContract() };
+  };
+
+  test('throws when the UIAM attestation getter is set twice', async () => {
+    const { service, start } = await getStartContract();
+
+    start.setSelfClientUiamAttestationGetter(jest.fn());
+    expect(() => service.getStartContract().setSelfClientUiamAttestationGetter(jest.fn())).toThrow(
+      'The self client UIAM attestation getter was already set'
+    );
+    await service.stop();
+  });
+
+  test('throws when the own client authentication check is set twice', async () => {
+    const { service, start } = await getStartContract();
+
+    start.setSelfClientOwnClientAuthenticationCheck(jest.fn());
+    expect(() =>
+      service.getStartContract().setSelfClientOwnClientAuthenticationCheck(jest.fn())
+    ).toThrow('The self client own client authentication check was already set');
+    await service.stop();
+  });
 });

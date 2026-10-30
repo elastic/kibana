@@ -71,10 +71,11 @@ import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
 import * as Registry from '../registry';
 import type { PackageAsset } from '../archive/storage';
-import { getEsPackage } from '../archive/storage';
+import { getEsPackage, packageAssetToArchiveEntry } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
 import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
@@ -349,6 +350,7 @@ export async function getPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -413,6 +415,7 @@ export async function getInstalledPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -443,7 +446,8 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
+      const { buffer } = packageAssetToArchiveEntry(asset.attributes);
+      acc.set(asset.attributes.asset_path, parse(buffer?.toString('utf8') ?? ''));
       return acc;
     },
     new Map()
@@ -827,6 +831,8 @@ export async function getInstallationObject(options: {
     return;
   }
 
+  installation.attributes = brandInstallationSpaceId(installation.attributes);
+
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
@@ -851,6 +857,7 @@ async function getInstallationObjects(options: {
   );
 
   for (const installation of installations) {
+    installation.attributes = brandInstallationSpaceId(installation.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,

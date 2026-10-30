@@ -54,7 +54,7 @@ export const generateWorkflow = async ({
         }
       );
 
-      if (!out.validation?.valid || !out.validation.parsedWorkflow) {
+      if (!out.validation?.valid || !out.validation.parsedWorkflow || !out.yaml) {
         const reason = out.validation?.errors.length
           ? out.validation.errors.join('; ')
           : 'no validated workflow produced';
@@ -65,9 +65,17 @@ export const generateWorkflow = async ({
       // exited the agent loop (no tool calls) — its text content is the
       // model's final natural-language response to surface to the caller.
       const lastAgentStep = findLastAgentStep(out.actions);
-      const response = lastAgentStep?.text ?? '';
+      const { unknownSources } = out.validation;
+      const response =
+        unknownSources.length > 0
+          ? `${
+              lastAgentStep?.text ?? ''
+            }\n\nThese ES|QL sources do not exist on this cluster yet and were kept as written:\n${unknownSources.join(
+              '\n'
+            )}`
+          : lastAgentStep?.text ?? '';
 
-      return { workflow: out.validation.parsedWorkflow, response };
+      return { workflow: out.validation.parsedWorkflow, yaml: out.yaml, response };
     }
   );
 };

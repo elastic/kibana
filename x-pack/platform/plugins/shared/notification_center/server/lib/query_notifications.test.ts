@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
-import { severityTTLBoundary } from './severity_ttl_query';
 
 const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) => ({
   '@timestamp': ts,
@@ -23,14 +22,13 @@ const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) =>
 });
 
 const setup = (docs: Array<Record<string, unknown>> = []) => {
-  const search = jest.fn().mockResolvedValue({
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.search.mockResolvedValue({
     hits: { hits: docs.map((source, i) => ({ _id: `doc-${i}`, _source: source })) },
-  });
-  const dataStreams = dataStreamServiceMock.createStartContract();
-  dataStreams.initializeClient.mockResolvedValue({ search } as never);
+  } as never);
 
-  const deps = { dataStreams, logger: loggingSystemMock.createLogger() };
-  return { deps, search };
+  const deps = { esClient, logger: loggingSystemMock.createLogger() };
+  return { deps, search: esClient.search };
 };
 
 describe('queryNotifications', () => {
@@ -49,52 +47,6 @@ describe('queryNotifications', () => {
     );
   });
 
-  it('applies one severity-TTL horizon window per tier plus a forward-compat window', async () => {
-    const { deps, search } = setup();
-
-    await queryNotifications(deps);
-
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter[0]).toEqual({
-      bool: {
-        should: [
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['info'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(30) } } },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['warning'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(60) } } },
-              ],
-            },
-          },
-          {
-            bool: {
-              filter: [
-                { terms: { severity: ['error', 'critical'] } },
-                { range: { '@timestamp': { gte: severityTTLBoundary(180) } } },
-              ],
-            },
-          },
-          // Unknown/future severity tiers stay visible for the longest window instead of dropping.
-          {
-            bool: {
-              must_not: { terms: { severity: ['info', 'warning', 'error', 'critical'] } },
-              filter: [{ range: { '@timestamp': { gte: severityTTLBoundary(180) } } }],
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    });
-  });
-
   it('composes namespace, type, and time-range filters', async () => {
     const { deps, search } = setup();
 
@@ -105,8 +57,8 @@ describe('queryNotifications', () => {
       to: '2026-07-20T00:00:00.000Z',
     });
 
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toEqual(
+    const [request] = search.mock.calls[0];
+    expect(request?.query?.bool?.filter).toEqual(
       expect.arrayContaining([
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
@@ -124,8 +76,8 @@ describe('queryNotifications', () => {
 
     await queryNotifications(deps);
 
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toHaveLength(1);
+    const [request] = search.mock.calls[0];
+    expect(request?.query?.bool?.filter).toEqual([]);
   });
 
   it('returns the full collapsed set for the client to paginate', async () => {

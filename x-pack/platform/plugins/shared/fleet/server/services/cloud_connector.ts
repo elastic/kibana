@@ -8,14 +8,16 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { isCloudConnectorSecretReference } from '../../common/types/models/cloud_connector';
-import type {
-  CloudConnector,
-  CloudConnectorListOptions,
-  CloudConnectorSecretReference,
-  AwsCloudConnectorVars,
-  AzureCloudConnectorVars,
-  GcpCloudConnectorVars,
+import {
+  CLOUD_CONNECTOR_IAC_REQUEST_KEYS,
+  isCloudConnectorSecretReference,
+  type CloudConnector,
+  type CloudConnectorIacState,
+  type CloudConnectorListOptions,
+  type CloudConnectorSecretReference,
+  type AwsCloudConnectorVars,
+  type AzureCloudConnectorVars,
+  type GcpCloudConnectorVars,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type {
@@ -37,6 +39,7 @@ import {
   buildPackagePolicyFilterExcludingHiddenPackages,
   CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
 } from '../../common/constants/cloud_connector';
+import { isIamRoleArn } from '../../common/services/cloud_connectors';
 
 import {
   CloudConnectorCreateError,
@@ -51,6 +54,38 @@ import { appContextService } from './app_context';
 import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
+
+export const hasIacConfirm = (iac: CloudConnectorIacState | undefined): boolean =>
+  Boolean(iac && CLOUD_CONNECTOR_IAC_REQUEST_KEYS.some((key) => iac[key] !== undefined));
+
+/**
+ * Maps confirm-time IaC fields onto connector SO attributes.
+ * A static-template fallback sends iac_key: null so no digest is stored.
+ */
+export const iacAttributesFromConfirm = (
+  iac: CloudConnectorIacState | undefined
+): Partial<CloudConnectorSOAttributes> => {
+  if (!iac || !hasIacConfirm(iac)) {
+    return {};
+  }
+
+  const attrs: Partial<CloudConnectorSOAttributes> = {};
+
+  if (iac.iac_key !== undefined) {
+    attrs.iac_key = iac.iac_key;
+  }
+  if (iac.iac_blueprint_id !== undefined) {
+    attrs.iac_blueprint_id = iac.iac_blueprint_id;
+  }
+  if (iac.iac_blueprint_version !== undefined) {
+    attrs.iac_blueprint_version = iac.iac_blueprint_version;
+  }
+  if (iac.iac_deployment_id !== undefined) {
+    attrs.iac_deployment_id = iac.iac_deployment_id;
+  }
+
+  return attrs;
+};
 
 export interface CloudConnectorServiceInterface {
   create(
@@ -256,6 +291,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         verification_status: 'pending',
+        ...iacAttributesFromConfirm(cloudConnector),
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -422,6 +458,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updateAttributes.vars = cloudConnectorUpdate.vars;
       }
 
+      Object.assign(updateAttributes, iacAttributesFromConfirm(cloudConnectorUpdate));
+
       // Update the saved object
       const updatedSavedObject = await soClient.update<CloudConnectorSOAttributes>(
         CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -543,6 +581,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!roleArn) {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
+      }
+
+      // Same rule as the browser's Role ARN field: the agent assumes this role, so a malformed
+      // value is rejected here rather than failing later at authentication.
+      if (!isIamRoleArn(roleArn)) {
+        logger.error('role_arn must be an IAM role ARN');
+        throw new CloudConnectorInvalidVarsError(
+          'role_arn must be an IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
+        );
       }
 
       // external_id is optional for AWS. When present, it must be a valid

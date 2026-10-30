@@ -11,10 +11,13 @@ import type {
   ConversationRoundStepMixin,
   ReasoningStep,
   CompactionStep,
+  SubstitutionStep,
+  InjectedContextStep,
   BackgroundAgentCompleteStep,
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
@@ -23,17 +26,21 @@ import type {
   ConversationAccessControl,
   ConversationInternalState,
 } from '@kbn/agent-builder-common/chat';
-import type {
-  AttachmentVersionRef,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type {
+  ConversationEvent,
+  ConversationWriteSource,
+  TimelineEvent,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
+import type { ExecutionPeek } from '../../execution/persistence';
+import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
-  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
+  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control' | 'active_execution'
 > & {
   id?: string;
   /**
@@ -41,7 +48,24 @@ export type ConversationCreateRequest = Omit<
    */
   user?: UserIdAndName;
   access_control?: ConversationAccessControl;
+  /** Makes this execution the new conversation's active execution. */
+  activeExecution?: AcquireActiveExecution;
 };
+
+/** Makes an execution the conversation's active execution, unless another live one holds it. */
+export interface AcquireActiveExecution {
+  action: 'acquire';
+  executionId: string;
+}
+
+/** Clears the conversation's active execution when this execution still holds it. */
+export interface ReleaseActiveExecution {
+  action: 'release';
+  executionId: string;
+}
+
+/** A change to the conversation's active execution, applied in the same write. */
+export type ActiveExecutionUpdate = AcquireActiveExecution | ReleaseActiveExecution;
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
@@ -49,6 +73,8 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       Conversation,
       | 'title'
       | 'rounds'
+      | 'events'
+      | 'schema_version'
       | 'attachments'
       | 'state'
       | 'status'
@@ -56,22 +82,17 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'pinned'
       | 'workspace_id'
       | 'access_control'
+      | 'feedback'
       | 'metadata'
       | 'template_id'
       | 'template_version'
+      | 'active_execution'
     >
-  > & { read_by?: ConversationReadByEntry[] };
+  > & { read_by?: ConversationReadByEntry[]; pinned_by?: ConversationPinnedByEntry[] };
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  | 'id'
-  | 'title'
-  | 'attachments'
-  | 'read'
-  | 'pinned'
-  | 'metadata'
-  | 'template_id'
-  | 'template_version'
+  'id' | 'title' | 'attachments' | 'read' | 'metadata' | 'template_id' | 'template_version'
 >;
 
 export interface GetEventsOptions {
@@ -81,38 +102,71 @@ export interface GetEventsOptions {
   limit?: number;
 }
 
-/**
- * Persists a single completed round as intent, not end state, so it can be merged into
- * whatever is stored. A caller-supplied `rounds` array would drop concurrent rounds.
- */
-export interface UpsertRoundRequest {
+/** Appends timeline events onto a conversation.*/
+export interface AppendEventsRequest {
   id: string;
-  /** Upserted by `round.id`: appended if new, replaced in place if present (HITL resume). */
-  round: ConversationRound;
-  /** `action: 'regenerate'` only: id of the round this one supersedes. */
-  replacesRoundId?: string;
+  /** Events to append; must be fully materialized (id, actor, created_at set). */
+  events: ConversationEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the append. */
+  status?: Conversation['status'];
   state?: ConversationInternalState;
   /** Reconciled into the stored list; `snapshot` is what the round started from. */
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
   /** Applied only when the stored conversation has no workspace yet. */
   workspaceId?: string;
+  /**
+   * When set, the write is skipped — the stored document is returned unchanged — if the stored
+   * events already contain a terminal lifecycle event (`execution_terminated`, `execution_failed`
+   * or `execution_aborted`) for this execution id. Evaluated inside the OCC read-modify-write, so
+   * it cannot race a concurrent write. Callers detect a skip by looking for their terminal event
+   * on the returned conversation.
+   */
+  skipIfTerminalExistsFor?: string;
+  /** Changes the active execution in the same write. */
+  activeExecution?: ActiveExecutionUpdate;
 }
 
-/**
- * Adds attachments to the conversation and references them from the last stored
- * round. Merge semantics: the target round and the attachment list are both
- * resolved against stored state, so concurrent round or attachment writes survive.
- */
-export interface AddAttachmentsToLastRoundRequest {
+export interface ReplaceRoundEventsRequest {
+  /** Conversation to update. */
   id: string;
-  /** Merged into the last stored round's `input.attachment_refs`. */
-  refs: AttachmentVersionRef[];
-  /** Reconciled into the stored list; `snapshot` is what the caller started from. */
-  attachments: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** The round whose stored events should be replaced. */
+  roundId: string;
+  /** The fresh canonical projection for the round. */
+  events: TimelineEvent[];
+  /** Generated title to persist in the same write (rides the END append). */
+  title?: string;
+  /** Round status to persist alongside the write. */
+  status?: Conversation['status'];
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+  /**
+   * When set, the write is skipped — the stored document is returned unchanged — if the stored
+   * events already contain a terminal lifecycle event (`execution_terminated`, `execution_failed`
+   * or `execution_aborted`) for this execution id. Evaluated inside the OCC read-modify-write, so
+   * it cannot race a concurrent write. Callers detect a skip by looking for their terminal event
+   * on the returned conversation.
+   */
+  skipIfTerminalExistsFor?: string;
+  /** Changes the active execution in the same write. */
+  activeExecution?: ActiveExecutionUpdate;
 }
 
 export interface ConversationListOptions {
   agentId?: string;
+  page?: number;
+  perPage?: number;
+  sortOrder?: 'asc' | 'desc';
+  pinned?: boolean;
+}
+
+export interface ConversationListResult {
+  results: ConversationWithoutRoundsWithPermissions[];
+  total: number;
 }
 
 /**
@@ -141,7 +195,10 @@ export type PersistentConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
-  | SubagentRosterUpdatedStep;
+  | PreExecutionWorkflowStep
+  | SubagentRosterUpdatedStep
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
@@ -179,7 +236,26 @@ export interface ConversationReadByEntry {
 }
 
 /**
- * Server-internal persistence shape of a conversation, carrying the per-user
- * `read_by` list that backs the public `Conversation.read` boolean.
+ * One user who has pinned a conversation. An entry object rather than a bare id string
+ * so fields such as `pinned_at` can be added later without another shape migration.
  */
-export type NormalizedConversation = Conversation & { read_by?: ConversationReadByEntry[] };
+export interface ConversationPinnedByEntry {
+  userId: string;
+}
+
+/**
+ * Server-internal persistence shape of a conversation, carrying the per-user
+ * `read_by` and `pinned_by` lists that back the public `Conversation.read` and
+ * `Conversation.pinned` booleans.
+ */
+export type NormalizedConversation = Conversation & {
+  read_by?: ConversationReadByEntry[];
+  pinned_by?: ConversationPinnedByEntry[];
+  execution?: ExecutionPeek;
+};
+
+/** Options of every conversation write that can emit `ai.conversation.updated`. */
+export interface ConversationWriteOptions {
+  /** The code path performing the write, recorded on the trigger event. */
+  source: ConversationWriteSource;
+}

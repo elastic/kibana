@@ -89,8 +89,21 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
-      cpsEnabled:
-        (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.crossProjectSearch,
+      isCpsActive: async (request) => {
+        if (!experimentalFeatures.crossProjectSearch) {
+          return false;
+        }
+
+        const [, startPlugins] = await core.getStartServices();
+
+        // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+        // resolved, which is not the same as there being none. Osquery collapses that to "do not
+        // fan out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+        // almost always a custom role missing `read_project_routing` -- and fanning those out would
+        // put exactly the principals we know least about on `asCurrentUser`. The cost is that such
+        // a role reads origin-only until the predefined roles carry the privilege.
+        return (await startPlugins.cps?.isCpsActive(request)) === true;
+      },
     };
 
     initSavedObjects(core.savedObjects);
@@ -141,8 +154,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     return {
       createActionService: this.createActionService,
-      checkResponseActionAuthz: (request, actionParams) =>
-        checkResponseActionAuthz(core, request, actionParams),
+      checkResponseActionAuthz: async (request, actionParams) =>
+        checkResponseActionAuthz(
+          core,
+          request,
+          actionParams,
+          plugins.spaces?.spacesService.getSpaceId(request)
+        ),
     } satisfies OsqueryPluginSetup;
   }
 
@@ -182,7 +200,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          await this.initialize(core, dataViewsService);
+          await this.initializeOsqueryResources(core, dataViewsService);
         }
 
         // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
@@ -196,7 +214,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             getPackagePolicyCreateCallback(
               core,
               this.osqueryAppContextService,
-              () => this.initialize(core, dataViewsService),
+              () => this.initializeOsqueryResources(core, dataViewsService),
               this.rruleSchedulingEnabled
             )
           );
@@ -224,8 +242,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.createActionService?.stop();
   }
 
-  async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
-    this.logger.debug('initialize');
+  async initializeOsqueryResources(
+    core: CoreStart,
+    dataViewsService: DataViewsService
+  ): Promise<void> {
+    this.logger.debug('initializeOsqueryResources');
     await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
     await createDataViews(dataViewsService);

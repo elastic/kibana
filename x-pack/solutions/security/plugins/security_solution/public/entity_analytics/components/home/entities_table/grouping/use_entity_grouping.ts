@@ -28,6 +28,7 @@ import {
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
   ENTITY_TYPE_FILTER,
+  MAX_GROUPING_LEVELS,
 } from '../constants';
 import { hasActiveTopLevelBoolClauses } from '../utils';
 import {
@@ -40,8 +41,6 @@ import {
 } from './use_fetch_grouped_data';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
-
-const MAX_GROUPING_LEVELS = 3;
 
 const EMPTY_TARGET_METADATA: TargetMetadataMap = new Map();
 
@@ -97,6 +96,7 @@ export const useEntityGrouping = ({
   selectedGroup,
   tableId,
   groupingId,
+  isQueryReady = true,
 }: {
   state: EntityURLStateResult;
   groupFilters?: Filter[];
@@ -109,6 +109,8 @@ export const useEntityGrouping = ({
    * accordion) pass their own and grouping state doesn't leak between tables.
    */
   groupingId: string;
+  /** False while the caller still builds `state.query`, so no groups are read with part of it. */
+  isQueryReady?: boolean;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
@@ -290,7 +292,8 @@ export const useEntityGrouping = ({
 
   const { data: nonResolutionData, isFetching: isNonResolutionFetching } = useFetchGroupedData({
     query: nonResolutionGroupingQuery,
-    enabled: !isResolutionGrouping && !!selectedGroup && !isNoneGroup([selectedGroup]),
+    enabled:
+      isQueryReady && !isResolutionGrouping && !!selectedGroup && !isNoneGroup([selectedGroup]),
   });
 
   const activeResolutionResult = isUserFilterActive

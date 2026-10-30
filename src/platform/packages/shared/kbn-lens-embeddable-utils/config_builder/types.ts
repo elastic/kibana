@@ -248,6 +248,9 @@ export interface LensHeatmapConfigBase {
   breakdown?: LensBreakdownConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
+  axisLabel?: { xAxis?: boolean; yAxis?: boolean };
+  /** Vertical-axis order. Becomes the heatmap `ySortPredicate`. Omitted keeps datasource order. */
+  ySort?: 'asc' | 'desc';
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
@@ -305,10 +308,13 @@ export interface LensXYConfigBase {
   layers: Array<LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer>;
   legend?: Identity<LensLegendConfig>;
   axisTitleVisibility?: Identity<LensAxisTitleVisibilityConfig>;
+  xTitle?: string;
+  yTitle?: string;
   emphasizeFitting?: boolean;
   fittingFunction?: 'None' | 'Zero' | 'Linear' | 'Carry' | 'Lookahead' | 'Average' | 'Nearest';
   yBounds?: LensYBoundsConfig;
   valueLabels?: 'hide' | 'show';
+  areaFill?: 'solid' | 'gradient';
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;

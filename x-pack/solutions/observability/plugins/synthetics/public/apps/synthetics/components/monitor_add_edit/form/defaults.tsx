@@ -8,7 +8,14 @@ import { formatKibanaNamespace } from '../../../../../../common/formatters';
 import { DEFAULT_FIELDS } from '../constants';
 
 import type { SyntheticsMonitor, BrowserFields, HTTPFields, ScheduleUnit } from '../types';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType } from '../types';
+import { ConfigKey, HttpAuthMethod, MonitorTypeEnum, FormMonitorType } from '../types';
+
+const getHttpAuthType = (monitor: HTTPFields): HttpAuthMethod => {
+  if (monitor[ConfigKey.NTLM]?.enabled) return HttpAuthMethod.NTLM;
+  if (monitor[ConfigKey.KERBEROS]?.enabled) return HttpAuthMethod.KERBEROS;
+  if (monitor[ConfigKey.USERNAME] || monitor[ConfigKey.PASSWORD]) return HttpAuthMethod.BASIC;
+  return HttpAuthMethod.NONE;
+};
 
 export const getDefaultFormFields = (
   spaceId: string = 'default'
@@ -25,6 +32,16 @@ export const getDefaultFormFields = (
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
+    [FormMonitorType.API]: {
+      ...DEFAULT_FIELDS[MonitorTypeEnum.API],
+      'source.inline': {
+        type: 'inline',
+        script: '',
+        fileName: '',
+      },
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.API,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
+    },
     [FormMonitorType.SINGLE]: {
       ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
@@ -33,6 +50,7 @@ export const getDefaultFormFields = (
     [FormMonitorType.HTTP]: {
       ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
       isTLSEnabled: false,
+      authType: HttpAuthMethod.NONE,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
       [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
@@ -86,18 +104,28 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
 
   // handle default monitor types from Uptime, which don't contain `ConfigKey.FORM_MONITOR_TYPE`
   if (!formMonitorType) {
-    formMonitorType =
-      monitorType === MonitorTypeEnum.BROWSER
-        ? FormMonitorType.MULTISTEP
-        : (monitorType as Omit<MonitorTypeEnum, MonitorTypeEnum.BROWSER> as FormMonitorType);
+    if (monitorType === MonitorTypeEnum.BROWSER) {
+      formMonitorType = FormMonitorType.MULTISTEP;
+    } else if (monitorType === MonitorTypeEnum.API) {
+      formMonitorType = FormMonitorType.API;
+    } else {
+      formMonitorType = monitorType as Omit<
+        MonitorTypeEnum,
+        MonitorTypeEnum.BROWSER | MonitorTypeEnum.API
+      > as FormMonitorType;
+    }
     monitorWithFormMonitorType[ConfigKey.FORM_MONITOR_TYPE] = formMonitorType;
   }
 
   switch (formMonitorType) {
     case FormMonitorType.MULTISTEP:
+    case FormMonitorType.API:
       return {
         ...monitorWithFormMonitorType,
         'source.inline': {
+          // API journeys never come from the recorder (recorder is a browser-only
+          // UI flow), but the metadata shape is shared with BROWSER monitors so
+          // we still read it the same way.
           type: browserMonitor[ConfigKey.METADATA]?.script_source?.is_generated_script
             ? 'recorder'
             : 'inline',
@@ -111,6 +139,11 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
         ...monitorWithFormMonitorType,
       };
     case FormMonitorType.HTTP:
+      return {
+        ...monitorWithFormMonitorType,
+        isTLSEnabled: (monitor as HTTPFields)[ConfigKey.METADATA].is_tls_enabled,
+        authType: getHttpAuthType(monitor as HTTPFields),
+      };
     case FormMonitorType.TCP:
       return {
         ...monitorWithFormMonitorType,

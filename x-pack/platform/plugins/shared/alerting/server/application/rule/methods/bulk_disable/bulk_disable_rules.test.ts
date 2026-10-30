@@ -137,12 +137,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -169,12 +171,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -202,12 +206,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -237,12 +243,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -272,6 +280,7 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -431,12 +440,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -464,12 +475,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -500,12 +513,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -648,12 +663,14 @@ describe('bulkDisableRules', () => {
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1', 'id2'], []);
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully disabled schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith('Failure to disable schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to disable schedules for underlying tasks: id2'
+      );
     });
 
     test('should call task manager bulkDeleteIfExist', async () => {
@@ -688,12 +705,14 @@ describe('bulkDisableRules', () => {
       expect(taskManager.bulkRemove).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['taskId1', 'taskId2']);
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(1);
-      expect(logger.error).toBeCalledWith('Failure to delete schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to delete schedules for underlying tasks: id2'
+      );
     });
 
     test('should disable one task if one rule was successfully disabled and one has 500 error', async () => {
@@ -711,11 +730,11 @@ describe('bulkDisableRules', () => {
       expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
       expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1'], []);
 
-      expect(logger.debug).toBeCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully disabled schedules for underlying tasks: id1'
       );
-      expect(logger.error).toBeCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
 
     test('should disable one task if one rule was successfully disabled and one was disabled from beginning', async () => {
@@ -748,7 +767,7 @@ describe('bulkDisableRules', () => {
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
-      expect(logger.error).toBeCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
         'Failure to disable schedules for underlying tasks: id1, id2. TaskManager bulkDisable failed with Error: Something happend during bulkDisable'
       );
@@ -773,7 +792,7 @@ describe('bulkDisableRules', () => {
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 
-      expect(logger.error).toBeCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledWith(
         'Failure to delete schedules for underlying tasks: taskId1. TaskManager bulkRemove failed with Error: Something happend during bulkRemove'
       );
@@ -807,7 +826,7 @@ describe('bulkDisableRules', () => {
         throw new Error('Unauthorized');
       });
 
-      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -820,7 +839,7 @@ describe('bulkDisableRules', () => {
         throw new Error('Error');
       });
 
-      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Error'
       );
 

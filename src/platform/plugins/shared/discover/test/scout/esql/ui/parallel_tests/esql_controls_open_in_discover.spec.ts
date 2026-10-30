@@ -13,7 +13,7 @@
  * opens.
  */
 
-import { DiscoverApp, extendPlaywrightPage } from '@kbn/scout';
+import { Controls, DiscoverApp, extendPlaywrightPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 
@@ -52,7 +52,7 @@ spaceTest.describe(
       async ({ kbnUrl, page, pageObjects }) => {
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
-        await expect(pageObjects.dashboard.getControlsGroupLocator()).toBeVisible();
+        await expect(pageObjects.controls.group).toBeVisible();
 
         // "Open in Discover" opens a new browser tab.
         const [openedPage] = await Promise.all([
@@ -62,16 +62,15 @@ spaceTest.describe(
 
         const discoverPage = extendPlaywrightPage({ page: openedPage, kbnUrl });
         const discover = new DiscoverApp(discoverPage);
+        const discoverControls = new Controls(discoverPage);
 
         await discover.waitUntilTabIsLoaded();
 
         // The dashboard control is carried over into Discover.
-        await expect(
-          discover.controls.getControlFrame(testData.ESQL_CONTROLS_CONTROL_ID)
-        ).toBeVisible();
+        await expect(discoverControls.getFrame(testData.ESQL_CONTROLS_CONTROL_ID)).toBeVisible();
 
         await expect(discoverPage.testSubj.locator('discoverDocTable')).toHaveAttribute(
-          'data-render-complete',
+          'data-table-loaded',
           'true'
         );
       }

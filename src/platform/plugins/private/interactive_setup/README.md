@@ -4,7 +4,7 @@ This plugin provides UI and APIs for interactive setup mode a.k.a "enrollment fl
 
 ## How to run interactive setup locally
 
-Kibana does not start interactive setup mode if it detects that an Elasticsearch connection has already been configured. This is always the case when running `yarn start` so in order to trigger interactive setup we need to run Elasticsearch manually and pass a special command line flag to the Kibana start command.
+Kibana does not start interactive setup mode if it detects that an Elasticsearch connection has already been configured. This is always the case when running `pnpm start` so in order to trigger interactive setup we need to run Elasticsearch manually and pass a special command line flag to the Kibana start command.
 
 1. Start a clean copy of Elasticsearch from inside your Kibana working directory:
 
@@ -27,7 +27,7 @@ Kibana does not start interactive setup mode if it detects that an Elasticsearch
 2. Start Kibana without dev credentials and config:
 
     ```
-    yarn start --no-dev-credentials --no-dev-config
+    pnpm start --no-dev-credentials --no-dev-config
     ```
 
     You should see the magic link get logged:

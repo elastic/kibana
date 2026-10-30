@@ -14,8 +14,7 @@ import type {
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settings';
-import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
+import { getAgentShardingLicenseStatus } from '../synthetics_service/private_location/agent_sharding_license';
 import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
 import {
@@ -25,10 +24,40 @@ import {
 } from '../synthetics_service/private_location/plan_rebalance';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
+import {
+  PL_REBALANCE_EVENT_TYPE,
+  PL_SHARDING_SNAPSHOT_EVENT_TYPE,
+  PL_SHARDING_STATE_EVENT_TYPE,
+} from '../telemetry/constants';
+import {
+  buildRebalanceEvent,
+  diffHealthyAgents,
+  getRebalanceReason,
+  hashLocationId,
+  isSnapshotDue,
+  reportShardingEvent,
+  summarizeDistribution,
+} from '../telemetry/sharding_telemetry';
+import type {
+  PrivateLocationRebalanceReason,
+  PrivateLocationShardingMode,
+} from '../telemetry/types';
+import {
+  isRebalancePrivateLocationShardsEnabled,
+  REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY,
+  REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
+  REBALANCE_SHARDS_TASK_ID,
+  REBALANCE_SHARDS_TASK_TYPE,
+} from './rebalance_shards_enabled';
 
-const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
-export const REBALANCE_SHARDS_TASK_ID = `${TASK_TYPE}-single-instance`;
+export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
+export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+
+const PIN_DRAIN_RESET = {
+  [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
+  [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+} as const;
 
 interface RebalanceTaskState extends Record<string, unknown> {
   /**
@@ -38,14 +67,30 @@ interface RebalanceTaskState extends Record<string, unknown> {
    * streak restarts next time they recover.
    */
   healthySince?: Record<string, number>;
+  /**
+   * True after a disabled cycle finished draining with no failed writes.
+   * Reset when the switch turns back on.
+   */
+  pinsCleared?: boolean;
+  /**
+   * Consecutive failed drain attempts while the switch is off. Stops retrying
+   * after MAX_PIN_CLEAR_ATTEMPTS; reset when the switch turns back on.
+   */
+  pinClearAttempts?: number;
+  /** Telemetry only: last sharding mode, to report mode changes. */
+  shardingMode?: PrivateLocationShardingMode;
+  /** Telemetry only: epoch ms of each location's last daily snapshot. */
+  snapshotAt?: Record<string, number>;
+  /** Telemetry only: locations already reported as broken, so a persistent fault is reported once. */
+  locationIssues?: Record<string, PrivateLocationRebalanceReason>;
 }
 
 /**
  * Keeps monitor→agent assignment aligned with the set of healthy agents for
- * scalable (condition-sharded) private locations, by rewriting each moved
+ * every private location (Enterprise license only), by rewriting each moved
  * monitor's `${agent.id}` condition. Intentionally separate from the already
  * overloaded `Synthetics:Sync-Private-Location-Monitors` task: it runs on its
- * own tighter interval and only ever touches condition-sharded locations.
+ * own tighter interval and only ever touches agent conditions.
  */
 export class RebalancePrivateLocationShardsTask {
   constructor(
@@ -55,7 +100,7 @@ export class RebalancePrivateLocationShardsTask {
 
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
-      [TASK_TYPE]: {
+      [REBALANCE_SHARDS_TASK_TYPE]: {
         title: 'Synthetics Rebalance Private Location Shards Task',
         description:
           'Reassigns monitors across the healthy agents of scalable private locations (by rewriting per-monitor agent conditions) for at-most-once execution and failover.',
@@ -83,28 +128,53 @@ export class RebalancePrivateLocationShardsTask {
       (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
       DEFAULT_REBALANCE_SCHEDULE;
     const schedule = { interval };
+    let currentMode: PrivateLocationShardingMode | undefined;
 
     try {
       signal.throwIfAborted();
-      const soClient = coreStart.savedObjects.createInternalRepository();
-
-      // Live layer on top of the boot-time config kill-switch: lets an already
-      // scheduled task be paused/resumed without a Kibana restart.
-      const dynamicSettings = await getSyntheticsDynamicSettings(soClient);
-      if (dynamicSettings.rebalancePrivateLocationShardsEnabled === false) {
-        this.debugLog('Rebalance private location shards disabled by dynamic setting; skipping.');
-        return { state: taskInstance.state, schedule };
+      const isSwitchOn = isRebalancePrivateLocationShardsEnabled(taskInstance);
+      const licenseStatus = isSwitchOn
+        ? await getAgentShardingLicenseStatus(this.serverSetup)
+        : 'unlicensed';
+      if (licenseStatus === 'unknown') {
+        this.debugLog('license unavailable; leaving agent pins as they are this cycle');
+        return { state: await this.returnedState(taskInstance), schedule };
+      }
+      const mode: PrivateLocationShardingMode = !isSwitchOn
+        ? 'switch_off'
+        : licenseStatus === 'licensed'
+        ? 'active'
+        : 'unlicensed';
+      currentMode = mode;
+      this.reportModeChange(taskInstance, mode);
+      if (licenseStatus === 'unlicensed') {
+        return {
+          state: {
+            ...(await this.runDisabledDrain(taskInstance, isSwitchOn, mode)),
+            shardingMode: mode,
+          },
+          schedule,
+        };
       }
 
-      const scalableLocations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
-        isConditionShardedLocation
-      );
+      const soClient = coreStart.savedObjects.createInternalRepository();
 
-      if (scalableLocations.length === 0) {
-        return { state: taskInstance.state, schedule };
+      const locations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+
+      if (locations.length === 0) {
+        return {
+          state: await this.returnedState(taskInstance, { ...PIN_DRAIN_RESET, shardingMode: mode }),
+          schedule,
+        };
       }
 
       const now = Date.now();
+      const taskState = taskInstance.state as RebalanceTaskState;
+      const priorSnapshotAt = taskState.snapshotAt ?? {};
+      const nextSnapshotAt: Record<string, number> = {};
+      const priorIssues = taskState.locationIssues ?? {};
+      const nextIssues: Record<string, PrivateLocationRebalanceReason> = {};
+      const { stackVersion, telemetry } = this.serverSetup;
       // Carry each agent's healthy streak across runs so a recovered agent only
       // becomes recovery-eligible after RECOVERY_STABILITY_MS. Rebuilt each run
       // from the currently-healthy agents; a dropped agent is forgotten so its
@@ -112,14 +182,21 @@ export class RebalancePrivateLocationShardsTask {
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
 
-      for (const location of scalableLocations) {
+      for (const location of locations) {
         signal.throwIfAborted();
+        const locationStartedAt = Date.now();
+        const lastSnapshotAt = priorSnapshotAt[location.id];
+        if (lastSnapshotAt !== undefined) {
+          nextSnapshotAt[location.id] = lastSnapshotAt;
+        }
+        let agentsTotal = 0;
         try {
           const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
 
           // Data-plane liveness veto: only worth a `synthetics-*` query when at
           // least one agent looks stale by check-in. In steady state (all fresh)
           // we skip it, so a healthy location adds no extra ES load.
+          agentsTotal = agents.size;
           const hasStaleAgent = [...agents.values()].some((info) => isCheckinStale(info, now));
           const activeAgentIds = hasStaleAgent
             ? await getRecentlyActiveAgentIds(
@@ -135,6 +212,7 @@ export class RebalancePrivateLocationShardsTask {
             healthyAgentIds,
             recoveryAgentIds,
             capacities,
+            browserAgentIds,
             nextHealthySince: locationHealthySince,
           } = planLocationRebalance({
             agents,
@@ -152,38 +230,136 @@ export class RebalancePrivateLocationShardsTask {
             logger.warn(
               `[RebalancePrivateLocationShardsTask] No healthy agents for private location ${location.id} (${location.label}); skipping rebalance.`
             );
+            nextIssues[location.id] = 'no_healthy_agents';
+            if (priorIssues[location.id] !== 'no_healthy_agents') {
+              reportShardingEvent(
+                telemetry,
+                logger,
+                PL_REBALANCE_EVENT_TYPE,
+                buildRebalanceEvent({
+                  locationId: location.id,
+                  reason: 'no_healthy_agents',
+                  stackVersion,
+                  durationMs: Date.now() - locationStartedAt,
+                  counts: { agentsTotal, agentsStale: agentsTotal },
+                })
+              );
+            }
             continue;
           }
 
           this.debugLog(
-            `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, recovery-eligible=${recoveryAgentIds.length}`
+            `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, browser-capable=${browserAgentIds.length}, recovery-eligible=${recoveryAgentIds.length}`
           );
 
           // Idempotent placement + diff-based writes: only monitors whose assigned
           // agent changed are rewritten; steady state performs zero writes.
-          const { total, moved } =
-            await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
-              location: {
-                id: location.id,
-                label: location.label,
-                agentPolicyId: location.agentPolicyId,
-              },
-              healthyAgentIds,
-              recoveryAgentIds,
-              capacities,
-              signal,
+          const result = await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
+            location: {
+              id: location.id,
+              label: location.label,
+              agentPolicyId: location.agentPolicyId,
+            },
+            healthyAgentIds,
+            recoveryAgentIds,
+            browserAgentIds,
+            capacities,
+            signal,
+          });
+          this.debugLog(
+            `location ${location.id}: moved ${result.moved}/${result.total} monitor(s)`
+          );
+
+          const { evicted, recovered: recoveredByDiff } = diffHealthyAgents({
+            priorHealthySince,
+            agentPolicyId: location.agentPolicyId,
+            healthyAgentIds,
+          });
+          // `healthySince` is empty after an all-unhealthy run, so the diff can't see the return.
+          const recovered =
+            priorIssues[location.id] === 'no_healthy_agents'
+              ? healthyAgentIds.length
+              : recoveredByDiff;
+          const reason = getRebalanceReason({
+            evicted,
+            recovered,
+            monitorsFailedOver: result.failedOver,
+            monitorsMoved: result.moved,
+            moveFailures: result.failed,
+          });
+          if (reason) {
+            reportShardingEvent(
+              telemetry,
+              logger,
+              PL_REBALANCE_EVENT_TYPE,
+              buildRebalanceEvent({
+                locationId: location.id,
+                reason,
+                stackVersion,
+                durationMs: Date.now() - locationStartedAt,
+                counts: {
+                  agentsTotal,
+                  agentsHealthy: healthyAgentIds.length,
+                  agentsStale: agentsTotal - healthyAgentIds.length,
+                  agentsEvicted: evicted,
+                  agentsRecovered: recovered,
+                  agentsRecoveryEligible: recoveryAgentIds.length,
+                  livenessVetoSavedAgents: [...agents].filter(
+                    ([agentId, info]) => isCheckinStale(info, now) && activeAgentIds?.has(agentId)
+                  ).length,
+                  monitorsTotal: result.total,
+                  monitorsMoved: result.moved,
+                  monitorsFailedOver: result.failedOver,
+                  monitorsUnpinned: result.unpinned,
+                  moveFailures: result.failed,
+                },
+              })
+            );
+          }
+          if (isSnapshotDue(lastSnapshotAt, now)) {
+            nextSnapshotAt[location.id] = now;
+            reportShardingEvent(telemetry, logger, PL_SHARDING_SNAPSHOT_EVENT_TYPE, {
+              locationHash: hashLocationId(location.id),
+              agentsTotal,
+              agentsHealthy: healthyAgentIds.length,
+              agentsWithCapacity: capacities.size,
+              monitorsTotal: result.total,
+              browserMonitors: result.browserMonitors,
+              ...summarizeDistribution(result.monitorsPerAgent),
+              stackVersion,
             });
-          this.debugLog(`location ${location.id}: moved ${moved}/${total} monitor(s)`);
+          }
         } catch (e) {
           if (signal.aborted) {
             throw e;
           }
           this.debugLog(`Rebalance failed for location ${location.id}; skipping: ${e.message}`);
+          nextIssues[location.id] = 'error';
+          if (priorIssues[location.id] !== 'error') {
+            reportShardingEvent(
+              telemetry,
+              logger,
+              PL_REBALANCE_EVENT_TYPE,
+              buildRebalanceEvent({
+                locationId: location.id,
+                reason: 'error',
+                stackVersion,
+                durationMs: Date.now() - locationStartedAt,
+                counts: { agentsTotal },
+              })
+            );
+          }
         }
       }
 
       return {
-        state: { ...taskInstance.state, healthySince: nextHealthySince },
+        state: await this.returnedState(taskInstance, {
+          healthySince: nextHealthySince,
+          ...PIN_DRAIN_RESET,
+          shardingMode: mode,
+          locationIssues: nextIssues,
+          snapshotAt: nextSnapshotAt,
+        }),
         schedule,
       };
     } catch (error) {
@@ -196,23 +372,19 @@ export class RebalancePrivateLocationShardsTask {
       );
     }
 
-    return { state: taskInstance.state, schedule };
+    return {
+      state: await this.returnedState(
+        taskInstance,
+        currentMode ? { shardingMode: currentMode } : {}
+      ),
+      schedule,
+    };
   }
 
   async start() {
     const {
-      config,
       pluginsStart: { taskManager },
     } = this.serverSetup;
-
-    if (!config.rebalancePrivateLocationShardsTaskEnabled) {
-      // Actively unschedule a previously-scheduled instance (not just skip
-      // scheduling), so flipping the kill-switch off stops the task firing
-      // instead of leaving a zombie that keeps running every cycle.
-      this.debugLog('Rebalance private location shards task disabled by config; unscheduling');
-      await taskManager.removeIfExists(REBALANCE_SHARDS_TASK_ID);
-      return;
-    }
 
     // Read the existing task schedule so ensureScheduled doesn't reset a
     // user-configured interval on every Kibana restart. Falls back to
@@ -231,10 +403,123 @@ export class RebalancePrivateLocationShardsTask {
       id: REBALANCE_SHARDS_TASK_ID,
       state: {},
       schedule,
-      taskType: TASK_TYPE,
+      taskType: REBALANCE_SHARDS_TASK_TYPE,
       params: {},
     });
+    // Earlier iterations stored the kill-switch on `task.enabled`. This task
+    // must stay claimable so a disabled cycle can drain leftover agent pins.
+    await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /**
+   * While off (switch off or no Enterprise license): drain leftover pins once,
+   * then skip Fleet listing until sharding is active again. Failed writes retry
+   * up to MAX_PIN_CLEAR_ATTEMPTS. A mid-run PUT true drops the latch, but only
+   * when the switch was off; unlicensed runs already see the switch on.
+   */
+  private async runDisabledDrain(
+    taskInstance: ConcreteTaskInstance,
+    wasSwitchOn: boolean,
+    mode: PrivateLocationShardingMode
+  ): Promise<Record<string, unknown>> {
+    const attemptsSoFar =
+      Number(taskInstance.state[REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]) || 0;
+
+    if (taskInstance.state[REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY] === true) {
+      this.debugLog('disabled; pins already cleared');
+      return this.returnedState(taskInstance);
+    }
+    if (attemptsSoFar >= MAX_PIN_CLEAR_ATTEMPTS) {
+      this.debugLog('disabled; pin drain retries exhausted');
+      return this.returnedState(taskInstance);
+    }
+
+    let cleared = 0;
+    let failed = 0;
+    try {
+      const result = await this.syntheticsMonitorClient.privateLocationAPI.clearShardConditions();
+      cleared = result.cleared;
+      failed = result.failed ?? 0;
+      this.debugLog(`disabled; cleared ${cleared} agent pin(s)`);
+    } catch (error) {
+      failed = 1;
+      const message = error instanceof Error ? error.message : String(error);
+      this.serverSetup.logger.warn(
+        `[RebalancePrivateLocationShardsTask] disabled; pin drain failed: ${message}`
+      );
+    }
+
+    reportShardingEvent(
+      this.serverSetup.telemetry,
+      this.serverSetup.logger,
+      PL_SHARDING_STATE_EVENT_TYPE,
+      {
+        event: 'pin_drain',
+        mode,
+        pinsCleared: cleared,
+        pinsFailed: failed,
+        drainAttempt: attemptsSoFar + 1,
+        stackVersion: this.serverSetup.stackVersion,
+      }
+    );
+
+    const live = await this.returnedState(taskInstance);
+    if (!wasSwitchOn && isRebalancePrivateLocationShardsEnabled({ state: live })) {
+      return { ...live, ...PIN_DRAIN_RESET };
+    }
+    if (failed > 0) {
+      const attempts = attemptsSoFar + 1;
+      if (attempts >= MAX_PIN_CLEAR_ATTEMPTS) {
+        this.serverSetup.logger.warn(
+          `[RebalancePrivateLocationShardsTask] disabled; pin drain failed after ${MAX_PIN_CLEAR_ATTEMPTS} attempts, giving up until the setting is turned back on`
+        );
+      }
+      return { ...live, [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: attempts };
+    }
+    return {
+      ...live,
+      [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
+      [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
+    };
+  }
+
+  // Re-read: TM persists run() state and would clobber a mid-run bulkUpdateState PUT.
+  private async returnedState(
+    taskInstance: ConcreteTaskInstance,
+    patch: Record<string, unknown> = {}
+  ): Promise<Record<string, unknown>> {
+    let liveState: Record<string, unknown> = taskInstance.state;
+    try {
+      const live = await this.serverSetup.pluginsStart.taskManager.get(REBALANCE_SHARDS_TASK_ID);
+      if (live?.state) {
+        liveState = live.state;
+      }
+    } catch {
+      // claimed instance is the best we have
+    }
+    return { ...liveState, ...patch };
+  }
+
+  private reportModeChange(taskInstance: ConcreteTaskInstance, mode: PrivateLocationShardingMode) {
+    const { shardingMode: previousMode } = taskInstance.state as RebalanceTaskState;
+    if (!previousMode || previousMode === mode) {
+      return;
+    }
+    reportShardingEvent(
+      this.serverSetup.telemetry,
+      this.serverSetup.logger,
+      PL_SHARDING_STATE_EVENT_TYPE,
+      {
+        event: 'mode_changed',
+        mode,
+        previousMode,
+        pinsCleared: 0,
+        pinsFailed: 0,
+        drainAttempt: 0,
+        stackVersion: this.serverSetup.stackVersion,
+      }
+    );
   }
 
   private debugLog(message: string) {

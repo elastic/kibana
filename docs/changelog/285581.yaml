@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/285581
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix Kafka dynamic topic validation for multi-field format strings in Fleet
-description: "Fixes a bug in Fleet where entering a multi-field format string (for example, `%{[data_stream.type]}-%{[data_stream.namespace]}`) in the Kafka output dynamic topic field would produce a double-wrapped invalid topic expression. The field now accepts the full format string directly and validates bracket syntax."

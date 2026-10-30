@@ -8,13 +8,17 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
+import { castArray, isEmpty, omit, pick } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
+  isBeatsOutput,
+  isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
+import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
 import type {
   FullAgentPolicy,
@@ -32,24 +36,28 @@ import type {
   FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
+  KafkaOutput,
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 
 import {
   dataTypes,
+  kafkaAuthType,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
 import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
+import { buildKafkaAuthData, buildKafkaSecrets } from '../outputs/kafka_auth';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import {
+  collectCompiledSecretRefIds,
   getFleetServerHostsSecretReferences,
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
@@ -66,9 +74,13 @@ import {
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 import { generateOtelcolConfig } from './otel_collector';
 
-async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string) {
+async function fetchAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  options?: { spaceId?: string }
+) {
   try {
-    return await agentPolicyService.get(soClient, id);
+    return await agentPolicyService.get(soClient, id, true, { spaceId: options?.spaceId });
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -86,6 +98,7 @@ export async function getFullAgentPolicy(
     agentVersion?: string;
     /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
     redactProxySecrets?: boolean;
+    spaceId?: string;
   }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
@@ -105,7 +118,11 @@ export async function getFullAgentPolicy(
     agentPolicy = options.agentPolicy;
   } else {
     logger.debug(`Fetching agent policy doc for [${id}]`);
-    agentPolicy = await fetchAgentPolicy(soClient, id);
+    agentPolicy = await fetchAgentPolicy(
+      soClient,
+      id,
+      options?.spaceId ? { spaceId: options.spaceId } : {}
+    );
   }
 
   if (!agentPolicy) {
@@ -121,7 +138,7 @@ export async function getFullAgentPolicy(
     dataOutput,
     fleetServerHost,
     monitoringOutput,
-    downloadSource,
+    downloadSources,
     downloadSourceProxy,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
 
@@ -156,9 +173,19 @@ export async function getFullAgentPolicy(
       packageInfoCache.set(pkgKey, packageInfo);
     })
   );
-  const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
+
+  // For cross-space callers (spaceId '*'), derive the actual SO namespace from the policy's
+  // own space_ids so that package-policy reads/writes are scoped to the right namespace.
+  // When space_ids[0] is '*' (policy shared to all spaces), pass undefined: shared-policy
+  // package policies are accessible from any namespace and soClient.get rejects '*' as a namespace.
+  const packagePoliciesNamespace =
+    options?.spaceId === '*'
+      ? agentPolicy.space_ids?.[0] === '*'
+        ? undefined
+        : agentPolicy.space_ids?.[0]
+      : options?.spaceId;
 
   const agentInputs = await storedPackagePoliciesToAgentInputs(
     agentPolicy.package_policies as PackagePolicy[],
@@ -168,14 +195,16 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags,
     options?.agentVersion,
     soClient,
-    agentPolicy.has_agent_version_conditions
+    agentPolicy.has_agent_version_conditions,
+    packagePoliciesNamespace
   );
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    const dataOutputProxy = dataOutput?.proxy_id
-      ? proxies.find((p) => p.id === dataOutput.proxy_id)
-      : undefined;
+    const dataOutputProxy =
+      dataOutput && isBeatsOutput(dataOutput) && dataOutput.proxy_id
+        ? proxies.find((p) => p.id === dataOutput.proxy_id)
+        : undefined;
 
     const packageOutputs = new Map<string, Output>();
     for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
@@ -200,6 +229,24 @@ export async function getFullAgentPolicy(
     });
   }
 
+  const getOutputProxy = (output: Output) =>
+    isBeatsOutput(output) && output.proxy_id
+      ? proxies.find((proxy) => output.proxy_id === proxy.id)
+      : undefined;
+
+  const fullPolicyOutputs = outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
+    acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+      output,
+      getOutputProxy(output),
+      standalone,
+      redactProxySecrets
+    );
+    return acc;
+  }, {});
+
+  // outputs generated for the fleet-server input from the ES SSL settings of the fleet server host
+  const bootstrapOutputs: FullAgentPolicy['outputs'] = {};
+
   const inputs = agentInputs
     // filter out the otelcol inputs, they will be added at the root of the policy
     .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
@@ -210,16 +257,20 @@ export async function getFullAgentPolicy(
         input.use_output = getOutputIdForAgentPolicy(output);
       }
       if (input.type === 'fleet-server' && fleetServerHost) {
-        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-        if (sslInputConfig) {
-          input = {
-            ...input,
-            ...sslInputConfig,
-            ...(bootstrapOutputConfig
-              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-              : {}),
-          };
-        }
+        const inputOutput = outputs.find(
+          (policyOutput) => getOutputIdForAgentPolicy(policyOutput) === input.use_output
+        );
+        const bootstrapOutput = generateFleetServerOutputSSLConfig(
+          fleetServerHost,
+          input.use_output ? fullPolicyOutputs[input.use_output] : undefined,
+          inputOutput ? getOutputProxy(inputOutput) : undefined
+        );
+        input = {
+          ...input,
+          ...generateSSLConfigForFleetServerInput(fleetServerHost),
+          ...(bootstrapOutput ? { use_output: Object.keys(bootstrapOutput)[0] } : {}),
+        };
+        Object.assign(bootstrapOutputs, bootstrapOutput);
       }
       return input;
     });
@@ -233,26 +284,59 @@ export async function getFullAgentPolicy(
   const fleetserverHostSecretReferences = fleetServerHost
     ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
-  const downloadSourceSecretReferences = downloadSource
-    ? getDownloadSourceSecretReferences(downloadSource)
+  const downloadSourceSecretReferences = downloadSources[0]
+    ? getDownloadSourceSecretReferences(downloadSources[0])
     : [];
-  const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
+  // Only include package policy secret refs that appear inline as `$co.elastic.secret{<id>}`
+  // placeholders in the compiled policy. Disabled inputs/policies, never-rendered secret vars,
+  // and stale SO entries would otherwise make Fleet Server fetch ids nothing references.
+  //
+  // Scan `agentInputs` (pre-OTel-filter) PLUS `otelcolConfig`: OTel inputs are removed from
+  // `inputs` below and re-emitted at the policy root, so their placeholders only appear there.
+  //
+  // Fail open: if the scan cannot serialize, keep every reference rather than dropping valid ones.
+  const rawPackagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
+  const compiledSecretIds =
+    rawPackagePolicySecretReferences.length > 0
+      ? collectCompiledSecretRefIds([agentInputs, otelcolConfig])
+      : new Set<string>();
+  let packagePolicySecretReferences = compiledSecretIds
+    ? rawPackagePolicySecretReferences.filter(({ id: refId }) => compiledSecretIds.has(refId))
+    : rawPackagePolicySecretReferences;
+
+  if (
+    compiledSecretIds &&
+    packagePolicySecretReferences.length < rawPackagePolicySecretReferences.length
+  ) {
+    const droppedIds = rawPackagePolicySecretReferences
+      .filter(({ id: refId }) => !compiledSecretIds.has(refId))
+      .map(({ id: refId }) => refId);
+    appContextService
+      .getLogger()
+      .info(
+        `Pruned ${
+          droppedIds.length
+        } package policy secret reference(s) not present in the compiled agent policy (agent policy: ${
+          agentPolicy.id
+        }): ${droppedIds.join(', ')}`
+      );
+  }
+
+  // Deduplicate: two package policies on one agent policy can legitimately share a secret id.
+  const seenSecretIds = new Set<string>();
+  packagePolicySecretReferences = packagePolicySecretReferences.filter(({ id: refId }) => {
+    if (seenSecretIds.has(refId)) return false;
+    seenSecretIds.add(refId);
+    return true;
+  });
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
-      ...(bootstrapOutputConfig ? bootstrapOutputConfig : {}),
-      ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
-          output,
-          output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone,
-          redactProxySecrets
-        );
-        return acc;
-      }, {}),
+      ...bootstrapOutputs,
+      ...fullPolicyOutputs,
     },
     inputs,
     ...(otelcolConfig ? otelcolConfig : {}),
@@ -264,7 +348,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
+      download: getBinarySourceSettings(downloadSources, downloadSourceProxy, redactProxySecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -350,12 +434,12 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
+    const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
     if (
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
-
       if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
@@ -380,7 +464,7 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      if (originalOutput?.write_to_logs_streams) {
+      if (originalOutput && isBeatsOutput(originalOutput) && originalOutput.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
             indices: [
@@ -395,7 +479,21 @@ export async function getFullAgentPolicy(
       }
 
       outputPermissions[outputId] = permissions;
+    } else if (
+      agentPolicy.supports_agentless &&
+      originalOutput &&
+      isOtlpOutput(originalOutput) &&
+      isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
+    ) {
+      outputPermissions[outputId] = {
+        _managed_otlp_apm: {
+          applications: [
+            { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+          ],
+        },
+      };
     }
+
     return outputPermissions;
   }, {});
 
@@ -570,6 +668,11 @@ export function transformOutputToFullPolicyOutput(
   standalone = false,
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
+  if (isOtlpOutput(output)) {
+    // otlp_exporter config and secrets are compiled into the OTel collector block by generateOtelcolExporter.
+    return { type: output.type };
+  }
+
   const {
     config_yaml,
     type,
@@ -584,6 +687,14 @@ export function transformOutputToFullPolicyOutput(
 
   const configJs = config_yaml ? parse(config_yaml) : {};
 
+  const outputSecrets =
+    type === outputType.Kafka
+      ? buildKafkaSecrets({
+          auth_type: (output as KafkaOutput).auth_type,
+          secrets: (output as KafkaOutput).secrets,
+        })
+      : secrets;
+
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
@@ -597,9 +708,12 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       compression_level,
+      auth_type,
       username,
       password,
       sasl,
+      oauth2,
+      kerberos,
       partition,
       random,
       round_robin,
@@ -642,13 +756,13 @@ export function transformOutputToFullPolicyOutput(
       key,
       compression,
       ...(compression === kafkaCompressionType.Gzip ? { compression_level } : {}),
-      ...(username ? { username } : {}),
-      ...(password ? { password } : {}),
-      ...(sasl ? { sasl } : {}),
+      ...buildKafkaAuthData({ auth_type, username, password, sasl, oauth2, kerberos }),
       partition: transformPartition(),
       topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
-      timeout,
+      // the agent runs a Kafka output with OAuth2 in the OTel collector, which does not support
+      // this setting: it would fall back to the Beats runtime, that cannot do OAuth2
+      ...(auth_type === kafkaAuthType.OAuth2 ? {} : { timeout }),
       broker_timeout,
       required_acks,
     };
@@ -684,7 +798,7 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...(secrets ? { secrets } : {}),
+    ...(outputSecrets ? { secrets: outputSecrets } : {}),
   };
   if (ssl) {
     newOutput.ssl = {
@@ -733,47 +847,144 @@ export function transformOutputToFullPolicyOutput(
     newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
-  if (outputTypeSupportPresets(output.type)) {
+  if (outputTypeSupportPresets(output)) {
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;
 }
 
+type OutputSsl = NonNullable<FullAgentPolicyOutput['ssl']>;
+
+// ssl settings of the client certificate that Fleet Server presents to Elasticsearch
+const CLIENT_CERTIFICATE_SSL_KEYS = ['certificate', 'key', 'key_passphrase', 'key_passphrase_path'];
+
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
-export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+//
+// The output is only generated when at least one ES SSL setting is set on the fleet server host.
+// When the output used by the fleet-server input is an elasticsearch output (`baseOutput`), the bootstrap
+// output is a copy of it, so that the hosts configured on the policy's output are not lost, and the ES SSL
+// settings of the fleet server host only fill the settings that the output does not set. The precedence is
+// output > fleet server host > install time `--fleet-server-es*` flags (filled in by fleet-server).
+// The CA of the proxy of the output is not an ES setting of the output: it is added to the CA list on top of the
+// ones of the output or of the fleet server host.
+// Otherwise it only contains the ES SSL settings and elastic-agent/fleet-server fill the remaining attributes
+// from the bootstrap configuration.
+export function generateFleetServerOutputSSLConfig(
+  fleetServerHost: FleetServerHost | undefined,
+  baseOutput?: FullAgentPolicyOutput,
+  baseOutputProxy?: FleetProxy
+):
   | {
       [key: string]: FullAgentPolicyOutput;
     }
   | undefined {
-  if (!fleetServerHost || (!fleetServerHost?.ssl && !fleetServerHost.secrets)) return undefined;
+  if (!fleetServerHost) return undefined;
 
-  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
-  if (fleetServerHost?.ssl) {
-    outputConfig.ssl = {
-      ...(fleetServerHost.ssl.es_certificate_authorities && {
-        certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+  const esSecretKey = fleetServerHost.secrets?.ssl?.es_key;
+  const esSsl = {
+    ...(fleetServerHost.ssl?.es_certificate_authorities && {
+      certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+    }),
+    ...(fleetServerHost.ssl?.es_certificate && {
+      certificate: fleetServerHost.ssl.es_certificate,
+    }),
+    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
+    ...(fleetServerHost.ssl?.es_key &&
+      !esSecretKey && {
+        key: fleetServerHost.ssl.es_key,
       }),
-      ...(fleetServerHost.ssl.es_certificate && {
-        certificate: fleetServerHost.ssl.es_certificate,
-      }),
-      ...(fleetServerHost.ssl.es_key &&
-        !fleetServerHost?.secrets?.ssl?.es_key && {
-          key: fleetServerHost.ssl.es_key,
-        }),
-    };
+  };
+
+  if (Object.keys(esSsl).length === 0 && !esSecretKey) return undefined;
+
+  // only an elasticsearch output can be copied, with its proxy; for any other one only the ES ssl settings are used
+  const esBaseOutput = baseOutput?.type === 'elasticsearch' ? baseOutput : undefined;
+  const {
+    secrets: baseSecrets,
+    ssl: baseNestedSsl,
+    ...baseWithDottedSsl
+  } = esBaseOutput ?? ({} as Partial<FullAgentPolicyOutput>);
+
+  // The Advanced YAML of an output (config_yaml) is copied as is into the compiled output, so its dotted
+  // keys (e.g. `ssl.certificate`) are flat keys next to the nested `ssl`. Move them into `ssl`, otherwise the
+  // output would have two definitions of the same setting once the ES ssl settings are layered on top.
+  const baseRest: Partial<FullAgentPolicyOutput> = {};
+  const baseDottedSsl: OutputSsl = {};
+  for (const [key, value] of Object.entries(baseWithDottedSsl)) {
+    if (key.startsWith('ssl.')) {
+      set(baseDottedSsl, key.slice('ssl.'.length), value);
+    } else {
+      baseRest[key] = value;
+    }
   }
-  // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets?.ssl?.es_key) {
-    outputConfig.secrets = {
-      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-    };
+  // The nested ssl wins over the dotted keys, except for the CA list where both are combined: when the output CA is
+  // only set with a dotted key, the nested list only has the CA of the proxy of the output (see
+  // transformOutputToFullPolicyOutput). The nested list goes last to keep the proxy CA at the end of the list.
+  const certificateAuthorities = [
+    ...castArray(baseDottedSsl.certificate_authorities ?? []),
+    ...castArray(baseNestedSsl?.certificate_authorities ?? []),
+  ];
+  const baseSsl: OutputSsl = {
+    ...baseDottedSsl,
+    ...baseNestedSsl,
+    ...(certificateAuthorities.length > 0
+      ? { certificate_authorities: certificateAuthorities }
+      : {}),
+  };
+
+  const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
+
+  // The client certificate, its key and its passphrase only work together, so they always come from the same
+  // source: if the output sets any of them, the whole group comes from the output and the one of the fleet
+  // server host is ignored.
+  const baseSetsClientCertificate =
+    !isEmpty(pick(baseSsl, CLIENT_CERTIFICATE_SSL_KEYS)) || Boolean(baseSecrets?.ssl?.key);
+
+  // transformOutputToFullPolicyOutput appends the CA of the proxy of the output to the CA list, so it is not
+  // a CA set by the output itself: take it out here and add it back once the CA list is merged.
+  const proxyCertificateAuthority = esBaseOutput
+    ? baseOutputProxy?.certificate_authorities
+    : undefined;
+  const baseCertificateAuthorities = baseSsl.certificate_authorities;
+  const outputCertificateAuthorities =
+    proxyCertificateAuthority &&
+    baseCertificateAuthorities?.[baseCertificateAuthorities.length - 1] ===
+      proxyCertificateAuthority
+      ? baseCertificateAuthorities.slice(0, -1)
+      : baseCertificateAuthorities;
+
+  // the ssl settings of the output win over the ones of the fleet server host, which only fill the gaps
+  const hostSsl = baseSetsClientCertificate ? omit(esSsl, CLIENT_CERTIFICATE_SSL_KEYS) : esSsl;
+  const ssl: OutputSsl = {
+    ...hostSsl,
+    ...omit(baseSsl, 'certificate_authorities'),
+    ...(outputCertificateAuthorities?.length
+      ? { certificate_authorities: outputCertificateAuthorities }
+      : {}),
+  };
+  if (proxyCertificateAuthority) {
+    ssl.certificate_authorities = [
+      ...(ssl.certificate_authorities ?? []),
+      proxyCertificateAuthority,
+    ];
+  }
+  if (Object.keys(ssl).length > 0) {
+    outputConfig.ssl = ssl;
+  }
+
+  const secrets: { ssl?: { key?: NonNullable<typeof esSecretKey> } } = { ...baseSecrets };
+  if (esSecretKey && !baseSetsClientCertificate) {
+    secrets.ssl = { ...secrets.ssl, key: esSecretKey };
+  }
+  if (Object.keys(secrets).length > 0) {
+    outputConfig.secrets = secrets;
   }
 
   return {
-    [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig,
+    [`fleetserver-output-${fleetServerHost.id}`]: outputConfig,
   };
 }
 
@@ -891,46 +1102,47 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 }
 
 export function getBinarySourceSettings(
-  downloadSource: DownloadSource,
+  downloadSources: DownloadSource[],
   downloadSourceProxy: FleetProxy | undefined,
   redactProxySecrets = false
 ) {
+  const primarySource = downloadSources[0];
+
+  // sourceURI kept for backwards compat with agents older than 9.6.0 that do not read `sources`
   const config: FullAgentPolicyDownload = {
-    sourceURI: downloadSource.host,
+    sourceURI: primarySource.host,
+    sources: downloadSources.map((ds) => ds.host),
   };
 
-  if (downloadSource?.ssl) {
+  if (primarySource?.ssl) {
     config.ssl = {
-      ...(downloadSource.ssl?.certificate_authorities && {
-        certificate_authorities: downloadSource.ssl.certificate_authorities,
+      ...(primarySource.ssl?.certificate_authorities && {
+        certificate_authorities: primarySource.ssl.certificate_authorities,
       }),
-      ...(downloadSource.ssl?.certificate && {
-        certificate: downloadSource.ssl.certificate,
+      ...(primarySource.ssl?.certificate && {
+        certificate: primarySource.ssl.certificate,
       }),
-      ...(downloadSource.ssl?.key &&
-        !downloadSource?.secrets?.ssl?.key && {
-          key: downloadSource.ssl.key,
+      ...(primarySource.ssl?.key &&
+        !primarySource?.secrets?.ssl?.key && {
+          key: primarySource.ssl.key,
         }),
     };
   }
 
-  if (downloadSource?.auth) {
+  if (primarySource?.auth) {
     const authConfig: FullAgentPolicyDownload['auth'] = {};
-    if (downloadSource.auth.username) {
-      authConfig.username = downloadSource.auth.username;
+    if (primarySource.auth.username) {
+      authConfig.username = primarySource.auth.username;
     }
-    if (
-      downloadSource.auth.password &&
-      typeof downloadSource?.secrets?.auth?.password !== 'object'
-    ) {
-      authConfig.password = downloadSource.auth.password;
+    if (primarySource.auth.password && typeof primarySource?.secrets?.auth?.password !== 'object') {
+      authConfig.password = primarySource.auth.password;
     }
-    if (downloadSource.auth.api_key && typeof downloadSource?.secrets?.auth?.api_key !== 'object') {
-      authConfig.api_key = downloadSource.auth.api_key;
+    if (primarySource.auth.api_key && typeof primarySource?.secrets?.auth?.api_key !== 'object') {
+      authConfig.api_key = primarySource.auth.api_key;
     }
     // Filter out empty headers (both key and value are empty)
-    if (downloadSource.auth.headers && downloadSource.auth.headers.length > 0) {
-      const filteredHeaders = downloadSource.auth.headers.filter(
+    if (primarySource.auth.headers && primarySource.auth.headers.length > 0) {
+      const filteredHeaders = primarySource.auth.headers.filter(
         (header) => header.key !== '' || header.value !== ''
       );
       if (filteredHeaders.length > 0) {
@@ -942,22 +1154,22 @@ export function getBinarySourceSettings(
     }
   }
 
-  if (downloadSource?.secrets) {
+  if (primarySource?.secrets) {
     const secretsConfig: FullAgentPolicyDownload['secrets'] = {};
 
-    if (downloadSource.secrets?.ssl?.key) {
+    if (primarySource.secrets?.ssl?.key) {
       secretsConfig.ssl = {
-        key: downloadSource.secrets.ssl.key,
+        key: primarySource.secrets.ssl.key,
       };
     }
 
-    if (downloadSource.secrets?.auth) {
+    if (primarySource.secrets?.auth) {
       const authSecretsConfig: NonNullable<FullAgentPolicyDownload['secrets']>['auth'] = {};
-      if (typeof downloadSource.secrets.auth.password === 'object') {
-        authSecretsConfig.password = downloadSource.secrets.auth.password;
+      if (typeof primarySource.secrets.auth.password === 'object') {
+        authSecretsConfig.password = primarySource.secrets.auth.password;
       }
-      if (typeof downloadSource.secrets.auth.api_key === 'object') {
-        authSecretsConfig.api_key = downloadSource.secrets.auth.api_key;
+      if (typeof primarySource.secrets.auth.api_key === 'object') {
+        authSecretsConfig.api_key = primarySource.secrets.auth.api_key;
       }
       if (Object.keys(authSecretsConfig).length > 0) {
         secretsConfig.auth = authSecretsConfig;

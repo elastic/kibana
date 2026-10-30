@@ -54,12 +54,42 @@ describe('useDeleteComment', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnDeleteComment).toBeCalledWith({
+      expect(spyOnDeleteComment).toHaveBeenCalledWith({
         caseId: basicCaseId,
         commentId,
       })
     );
   });
+
+  it.each([true, false])(
+    'uses the bulk route when includeRelated is %s',
+    async (includeRelated) => {
+      const spyOnDeleteComment = jest.spyOn(api, 'deleteComment');
+      const spyOnBulkDeleteAttachments = jest.spyOn(api, 'bulkDeleteAttachments');
+
+      const { result } = renderHook(() => useDeleteComment(), {
+        wrapper: TestProviders,
+      });
+
+      act(() => {
+        result.current.mutate({
+          caseId: basicCaseId,
+          commentId,
+          successToasterTitle,
+          includeRelated,
+        });
+      });
+
+      await waitFor(() =>
+        expect(spyOnBulkDeleteAttachments).toHaveBeenCalledWith({
+          caseId: basicCaseId,
+          request: { ids: [commentId] },
+          includeRelated,
+        })
+      );
+      expect(spyOnDeleteComment).not.toHaveBeenCalled();
+    }
+  );
 
   it('refreshes the case page view after delete', async () => {
     const { result } = renderHook(() => useDeleteComment(), {
@@ -74,7 +104,7 @@ describe('useDeleteComment', () => {
       });
     });
 
-    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
+    await waitFor(() => expect(useRefreshCaseViewPage()).toHaveBeenCalled());
   });
 
   it('shows a success toaster correctly', async () => {
@@ -115,7 +145,7 @@ describe('useDeleteComment', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnDeleteComment).toBeCalledWith({
+      expect(spyOnDeleteComment).toHaveBeenCalledWith({
         caseId: basicCaseId,
         commentId,
       });

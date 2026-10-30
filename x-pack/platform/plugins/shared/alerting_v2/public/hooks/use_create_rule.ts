@@ -10,8 +10,9 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RuleTemplatesApi } from '../services/rule_templates_api';
 import { RulesApi } from '../services/rules_api';
-import { paths } from '../constants';
+import { useAlertingLocators } from '../application/locator_context';
 import { ruleKeys } from './query_key_factory';
 import { invalidateRulesContentList } from './invalidate_rules_content_list';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
@@ -20,6 +21,8 @@ import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_err
 export interface CreateRuleVariables {
   payload: CreateRuleData;
   enabled?: boolean;
+  /** Installs the rule from this rule template, so the server records where it came from. */
+  templateId?: string;
 }
 
 /** Thrown when createRule succeeds but the follow-up disableRule fails. */
@@ -39,13 +42,13 @@ class DisableAfterCreateFailedError extends Error {
 
 export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
+  const ruleTemplatesApi = useService(RuleTemplatesApi);
   const { toasts } = useService(CoreStart('notifications'));
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
   const viewRuleActionProps = (ruleId: string) => {
-    const href = basePath.prepend(paths.ruleDetails(ruleId));
+    const href = rulesLocators.getRedirectUrl({ ruleId });
     return {
       primary: {
         children: i18n.translate('xpack.alertingV2.hooks.useCreateRule.viewRuleButtonLabel', {
@@ -54,7 +57,7 @@ export const useCreateRule = () => {
         href,
         onClick: (event: MouseEvent) => {
           event.preventDefault();
-          void navigateToUrl(href);
+          rulesLocators.navigateSync({ ruleId });
         },
         'data-test-subj': 'alertingV2ViewRuleToastLink',
       },
@@ -68,8 +71,14 @@ export const useCreateRule = () => {
   };
 
   return useMutation({
-    mutationFn: async ({ payload, enabled = true }: CreateRuleVariables): Promise<RuleResponse> => {
-      const rule = await rulesApi.createRule(payload);
+    mutationFn: async ({
+      payload,
+      enabled = true,
+      templateId,
+    }: CreateRuleVariables): Promise<RuleResponse> => {
+      const rule = templateId
+        ? await ruleTemplatesApi.installRuleTemplate(templateId, payload)
+        : await rulesApi.createRule(payload);
       if (enabled) {
         return rule;
       }

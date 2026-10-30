@@ -541,7 +541,16 @@ export class TemplatesService {
     return [...new Set(authors)].sort();
   }
 
-  async incrementUsageStats(templateId: string): Promise<void> {
+  /**
+   * Adds `caseCount` uses to a template's running tally, defaulting to a single use.
+   *
+   * The tally counts uses, not distinct cases: a case that loses this template and gets it again
+   * adds a second use. It is cumulative and never decreases, so clearing a template from a case, or
+   * deleting the case, leaves it untouched. It is also a read-then-write rather than an atomic
+   * increment, so concurrent callers can overwrite each other. Treat it as an approximate
+   * popularity signal, not an exact count.
+   */
+  async incrementUsageStats(templateId: string, caseCount: number = 1): Promise<void> {
     const template = await this._getTemplate(templateId);
 
     if (!template) {
@@ -554,7 +563,7 @@ export class TemplatesService {
           id: template.id,
           type: CASE_TEMPLATE_SAVED_OBJECT,
           attributes: {
-            usageCount: (template.attributes.usageCount ?? 0) + 1,
+            usageCount: (template.attributes.usageCount ?? 0) + caseCount,
             lastUsedAt: new Date().toISOString(),
           },
         },

@@ -17,6 +17,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import { PLUGIN_ID, PLUGIN_NAME, EVALS_API_PRIVILEGES, EVALS_UI_PRIVILEGES } from '../common';
 import type { EvalsConfig } from './config';
+import { createEvaluateContract } from './evaluation/create_evaluate_contract';
+import { createEvaluationService } from './evaluation/evaluation_service';
 import { createEvaluatorRegistry } from './evaluators/registry';
 import type { EvaluatorRegistry } from './evaluators/types';
 import {
@@ -35,6 +37,8 @@ import { DatasetService } from './storage/datasets/dataset_service';
 import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
+import { OnlineScoreService } from './storage/scores/online_score_service';
+import { onlineScoresDataStreamDefinition } from './storage/scores/online_scores_index_template';
 import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
 import { registerEvalsWorkflowSteps } from './workflows';
@@ -50,7 +54,8 @@ export class EvalsPlugin
   private datasetService?: DatasetService;
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
-  private taskProviderRegistry?: TaskProviderRegistry;
+  private onlineScoreService?: OnlineScoreService;
+  private started = false;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -60,31 +65,102 @@ export class EvalsPlugin
 
   setup(
     coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
+    dependencies: EvalsSetupDependencies
+  ): EvalsPluginSetup {
+    const { enabled, mode } = this.config;
+    if (!enabled) {
+      this.logger.info('Evals plugin is disabled');
+      return {
+        enabled: false,
+        mode,
+        registerTaskProvider: () => {},
+        registerEvaluator: () => {},
+      };
+    }
+
+    this.logger.info(`Setting up Evals plugin in ${mode} mode`);
+    const taskProviderRegistry = createTaskProviderRegistry();
+    // In runtime mode the user-defined store is never created, so only built-ins resolve.
+    const evaluatorRegistry = createEvaluatorRegistry({
+      getDefinitionClient: ({ spaceId }) => this.evaluatorDefinitionService?.getClient({ spaceId }),
+    });
+    this.evaluatorRegistry = evaluatorRegistry;
+
+    if (mode === 'full') {
+      this.setupFullProduct(coreSetup, dependencies, evaluatorRegistry, taskProviderRegistry);
+    } else {
+      this.logger.info(
+        'Evals routes, feature, data streams, app and workflow steps are not loaded in runtime mode. Set xpack.evals.mode: full to load them.'
+      );
+    }
+
+    return {
+      enabled: true,
+      mode,
+      registerTaskProvider: (provider) => taskProviderRegistry.register(provider),
+      registerEvaluator: (definition) => {
+        if (this.started) {
+          throw new Error(
+            `Cannot register evaluator "${definition.name}": evaluators must be registered during setup`
+          );
+        }
+        evaluatorRegistry.register(definition);
+      },
+    };
+  }
+
+  start(coreStart: CoreStart, plugins: EvalsStartDependencies): EvalsPluginStart {
+    if (!this.config.enabled) {
+      return {};
+    }
+    this.started = true;
+
+    const evaluatorRegistry = this.evaluatorRegistry;
+    if (!evaluatorRegistry) {
+      throw new Error('Evaluator registry has not been initialized');
+    }
+
+    // Runtime mode serves in-process callers, so `evaluate` is available in both modes.
+    const evaluate = createEvaluateContract({
+      evaluationService: createEvaluationService({
+        evaluatorRegistry,
+        logger: this.logger,
+        getInferenceStart: async () => plugins.inference,
+      }),
+      getSpaceId: (request) =>
+        plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      getTraceReader: (request) => coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+    });
+
+    if (this.config.mode !== 'full') {
+      return { evaluate };
+    }
+
+    return { ...this.startFullProduct(coreStart, plugins, evaluatorRegistry), evaluate };
+  }
+
+  stop() {}
+
+  /** Registers what only the evals product needs: storage, the feature, routes and steps. */
+  private setupFullProduct(
+    coreSetup: CoreSetup<EvalsStartDependencies, EvalsPluginStart>,
     {
       features,
       encryptedSavedObjects,
       workflowsExtensions,
       workflowsManagement,
-    }: EvalsSetupDependencies
-  ): EvalsPluginSetup {
-    if (!this.config.enabled) {
-      this.logger.info('Evals plugin is disabled');
-      return { enabled: false, registerTaskProvider: () => {} };
-    }
-
-    this.logger.info('Setting up Evals plugin');
+    }: EvalsSetupDependencies,
+    evaluatorRegistry: EvaluatorRegistry,
+    taskProviderRegistry: TaskProviderRegistry
+  ) {
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
-
-    this.taskProviderRegistry = createTaskProviderRegistry();
+    coreSetup.dataStreams.registerDataStream(onlineScoresDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
       type: EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
       attributesToEncrypt: new Set(['apiKey']),
       attributesToIncludeInAAD: new Set(['createdAt', 'url']),
-    });
-    this.evaluatorRegistry = createEvaluatorRegistry({
-      getDefinitionClient: ({ spaceId }) => this.evaluatorDefinitionService?.getClient({ spaceId }),
     });
 
     coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
@@ -93,8 +169,8 @@ export class EvalsPlugin
         if (
           !this.datasetService ||
           !this.evaluationScoreService ||
-          !this.evaluatorDefinitionService ||
-          !this.evaluatorRegistry
+          !this.onlineScoreService ||
+          !this.evaluatorDefinitionService
         ) {
           throw new Error('Evals storage services have not been initialized');
         }
@@ -102,8 +178,9 @@ export class EvalsPlugin
         return {
           datasetService: this.datasetService,
           evaluationScoreService: this.evaluationScoreService,
+          onlineScoreService: this.onlineScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
-          evaluatorRegistry: this.evaluatorRegistry,
+          evaluatorRegistry,
         };
       }
     );
@@ -196,7 +273,7 @@ export class EvalsPlugin
       router,
       logger: this.logger,
       canEncrypt: encryptedSavedObjects.canEncrypt,
-      evaluatorRegistry: this.evaluatorRegistry,
+      evaluatorRegistry,
       getInferenceStart,
       getEncryptedSavedObjectsStart: () =>
         coreSetup.getStartServices().then(([, pluginsStart]) => pluginsStart.encryptedSavedObjects),
@@ -205,14 +282,14 @@ export class EvalsPlugin
       getCurrentUsername,
       checkManageEvalsPrivileges,
       getAccessibleSpaceIds,
-      taskProviderRegistry: this.taskProviderRegistry,
+      taskProviderRegistry,
       workflowsManagement,
     });
 
     if (workflowsExtensions) {
       registerEvalsWorkflowSteps(workflowsExtensions, {
         logger: this.logger,
-        taskProviderRegistry: this.taskProviderRegistry,
+        taskProviderRegistry,
         getInferenceStart,
       });
     } else {
@@ -220,24 +297,13 @@ export class EvalsPlugin
         'workflowsExtensions plugin is not available. Evals workflow steps were not registered'
       );
     }
-
-    const taskProviderRegistry = this.taskProviderRegistry;
-    return {
-      enabled: true,
-      registerTaskProvider: (provider) => taskProviderRegistry.register(provider),
-    };
   }
 
-  start(coreStart: CoreStart, plugins: EvalsStartDependencies): EvalsPluginStart {
-    if (!this.config.enabled) {
-      return {};
-    }
-
-    const evaluatorRegistry = this.evaluatorRegistry;
-    if (!evaluatorRegistry) {
-      throw new Error('Evaluator registry has not been initialized');
-    }
-
+  private startFullProduct(
+    coreStart: CoreStart,
+    plugins: EvalsStartDependencies,
+    evaluatorRegistry: EvaluatorRegistry
+  ): EvalsPluginStart {
     this.datasetService = new DatasetService(
       this.logger,
       coreStart.elasticsearch.client.asInternalUser,
@@ -250,6 +316,7 @@ export class EvalsPlugin
       this.isServerless,
       evaluatorRegistry.isBuiltIn
     );
+    this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
 
     return {
       datasetService: this.datasetService,
@@ -274,8 +341,7 @@ export class EvalsPlugin
           type: connector.type,
         }));
       },
+      onlineScoreService: this.onlineScoreService,
     };
   }
-
-  stop() {}
 }

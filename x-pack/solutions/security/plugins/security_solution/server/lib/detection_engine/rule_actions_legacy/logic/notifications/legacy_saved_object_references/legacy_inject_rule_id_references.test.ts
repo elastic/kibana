@@ -83,7 +83,7 @@ describe('legacy_inject_rule_id_references', () => {
       ruleAlertId: '123',
       savedObjectReferences: [],
     });
-    expect(logger.error).toBeCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'The saved object reference was not found for the "ruleAlertId" when we were expecting to find it. Kibana migrations might not have run correctly or someone might have removed the saved object references manually. Returning the last known good "ruleAlertId" which might not work. "ruleAlertId" with its id being returned is: 123'
     );
   });

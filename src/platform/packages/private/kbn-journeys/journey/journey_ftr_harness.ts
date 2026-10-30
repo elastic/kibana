@@ -128,6 +128,8 @@ export class JourneyFtrHarness {
     }
 
     this.page = await this.context.newPage();
+    // first page loads can exceed Playwright's 30s default when serving unoptimized bundles locally
+    this.page.setDefaultNavigationTimeout(120_000);
 
     await this.interceptBrowserRequests(this.page);
 
@@ -368,7 +370,12 @@ export class JourneyFtrHarness {
     }
     return await this.withSpan('Browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
-      this.browser = await playwright.chromium.launch({ headless, timeout: 60_000 });
+      // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+      const args =
+        process.env.KIBANA_TEST_IPV6_ONLY === 'true'
+          ? ['--host-resolver-rules=MAP localhost [::1]']
+          : [];
+      this.browser = await playwright.chromium.launch({ headless, timeout: 60_000, args });
       return this.browser;
     });
   }

@@ -33,6 +33,8 @@ export interface AlertEpisodeTagsFlyoutProps {
    * the surrounding `EuiFlyout` shell. Default `false` for inline usage.
    */
   embedded?: boolean;
+  /** Extra tag values (e.g. from other alert sources) merged into suggestions. */
+  additionalSuggestions?: string[];
 }
 
 export function AlertEpisodeTagsFlyout({
@@ -41,6 +43,7 @@ export function AlertEpisodeTagsFlyout({
   services,
   onSave,
   embedded = false,
+  additionalSuggestions = [],
 }: AlertEpisodeTagsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const [searchValue, setSearchValue] = useState('');
@@ -51,9 +54,14 @@ export function AlertEpisodeTagsFlyout({
     });
 
   const allKnownTags = useMemo(() => {
-    const merged = new Set<string>([...suggestionTags, ...currentTags, ...selectedTags]);
+    const merged = new Set<string>([
+      ...suggestionTags,
+      ...additionalSuggestions,
+      ...currentTags,
+      ...selectedTags,
+    ]);
     return [...merged].sort((a, b) => a.localeCompare(b));
-  }, [suggestionTags, currentTags, selectedTags]);
+  }, [suggestionTags, additionalSuggestions, currentTags, selectedTags]);
 
   const trimmedSearch = searchValue.trim();
   const atTagCountLimit = selectedTags.length >= MAX_TAGS;

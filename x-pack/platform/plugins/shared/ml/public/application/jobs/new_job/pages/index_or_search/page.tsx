@@ -15,6 +15,7 @@ import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
+import { getIsMlCpsEnabled } from '../../../../services/ml_server_info';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
@@ -55,17 +56,18 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const mlLocator = useMlManagementLocator();
   const navigateToPath = useNavigateToPath();
   const cpsManager = cps?.cpsManager;
+  const isMlCpsEnabled = getIsMlCpsEnabled();
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState<string | undefined>(undefined);
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
 
   useEffect(() => {
-    if (cpsManager) {
+    if (isMlCpsEnabled && cpsManager) {
       setProjectRouting((prev) =>
         prev === undefined ? cpsManager.getDefaultProjectRouting() ?? undefined : prev
       );
     }
-  }, [cpsManager]);
+  }, [isMlCpsEnabled, cpsManager]);
 
   const fetchProjectsByRouting = useCallback(
     (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
@@ -110,7 +112,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
           back={anomalyDetectionJobsBack}
         />
         <EuiPanel hasShadow={false} hasBorder>
-          {totalProjectCount > 1 ? (
+          {isMlCpsEnabled && totalProjectCount > 1 ? (
             <>
               <EuiFormRow
                 fullWidth

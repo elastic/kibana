@@ -175,7 +175,7 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
     (event: React.MouseEvent) => {
       event.preventDefault();
       if (path) {
-        push(path, { fromHistory: true });
+        push(path);
       }
     },
     [push, path]
@@ -477,7 +477,6 @@ const UnifiedHistoryTableComponent = () => {
 
       if (row.packId) {
         return push(newQueryPath, {
-          fromHistory: true,
           form: pickBy(
             {
               packId: row.packId,
@@ -494,7 +493,6 @@ const UnifiedHistoryTableComponent = () => {
       }
 
       push(newQueryPath, {
-        fromHistory: true,
         form: pickBy(
           {
             query: row.queryText,

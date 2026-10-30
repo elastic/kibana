@@ -6,17 +6,18 @@
  */
 
 /**
- * Restated rather than taken from the spaces plugin, which neither this package
- * nor its offline callers can depend on.
+ * Restated rather than re-exported from `@kbn/core-spaces-common`, which types it
+ * as the branded `SpaceId`. Callers here pass plain strings, so the brand would
+ * have to be threaded through every one of them.
  */
 export const DEFAULT_SPACE_ID = 'default';
 
 /**
  * The spaces wildcard. Evaluations data is never assigned to it: a dataset for
- * several spaces names each one. Kept so the wildcard can be recognised and
+ * several spaces names each one. Re-exported so the wildcard can be recognised and
  * refused rather than stored as if it were a space id.
  */
-export const ALL_SPACES_ID = '*';
+export { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 
 /**
  * The space a dataset belongs to, which its id is derived from. The active space

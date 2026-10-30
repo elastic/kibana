@@ -6,11 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { manageAttachmentsTool } from './manage_attachments_tool';
+import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
+import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
@@ -26,6 +29,7 @@ const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerCont
     spaceId: 'default',
     logger: loggingSystemMock.createLogger(),
     attachments,
+    events: { sendUiEvent: jest.fn() },
   } as unknown as ToolHandlerContext);
 
 const buildRegistry = (
@@ -46,20 +50,21 @@ describe('manageAttachmentsTool', () => {
     casesClient = createCasesClientMock();
   });
 
-  const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) =>
-    manageAttachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+  const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) => {
+    return manageAttachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+  };
 
   it('has the correct tool id', () => {
     const tool = buildTool(buildRegistry([]), true);
     expect(tool.id).toBe('platform.core.cases.manage_attachments');
   });
 
-  it('has write (non-destructive) annotations', () => {
+  it('has destructive write annotations', () => {
     const tool = buildTool(buildRegistry([]), true);
     expect(tool.annotations).toEqual({
       title: 'Manage Case Attachments',
       readOnlyHint: false,
-      destructiveHint: false,
+      destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
     });
@@ -105,6 +110,66 @@ describe('manageAttachmentsTool', () => {
     ).rejects.toThrow(/no authorable attachment types/i);
   });
 
+  it('deletes attachments through the cases client without emitting a case', async () => {
+    const attachments = buildMockAttachments();
+    const tool = buildTool(buildRegistry([]), true);
+
+    const result = await tool.handler(
+      { mode: 'delete_attachments', case_id: 'case-1', ids: ['a-1', 'a-2'] } as never,
+      buildToolContext(attachments)
+    );
+
+    expect(casesClient.attachments.bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1', 'a-2'],
+    });
+    expect(attachments.add).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [{ type: 'other', data: { case_id: 'case-1', ids: ['a-1', 'a-2'] } }],
+    });
+  });
+
+  it('passes include_related to the cases client', async () => {
+    const tool = buildTool(buildRegistry([]), true);
+
+    await tool.handler(
+      {
+        mode: 'delete_attachments',
+        case_id: 'case-1',
+        ids: ['a-1'],
+        include_related: false,
+      } as never,
+      buildToolContext()
+    );
+
+    expect(casesClient.attachments.bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1'],
+      includeRelated: false,
+    });
+  });
+
+  it('throws when a deletion fails', async () => {
+    casesClient.attachments.bulkDelete.mockRejectedValue(new Error('Forbidden'));
+    const tool = buildTool(buildRegistry([]), true);
+
+    await expect(
+      tool.handler(
+        { mode: 'delete_attachments', case_id: 'case-1', ids: ['a-1'] } as never,
+        buildToolContext()
+      )
+    ).rejects.toThrow('Attachments could not be deleted on case "case-1": a-1. Reason: Forbidden');
+  });
+
+  it('rejects delete_attachments without ids before calling the cases client', async () => {
+    const tool = buildTool(buildRegistry([]), true);
+
+    await expect(
+      tool.handler({ mode: 'delete_attachments', case_id: 'case-1' } as never, buildToolContext())
+    ).rejects.toThrow(/ids/);
+    expect(casesClient.attachments.bulkDelete).not.toHaveBeenCalled();
+  });
+
   it('bulk-creates attachments and emits a case attachment when enabled', async () => {
     const theCase = {
       id: 'case-1',
@@ -122,7 +187,7 @@ describe('manageAttachmentsTool', () => {
       updated_at: null,
     };
     casesClient.cases.get.mockResolvedValue(theCase as never);
-    casesClient.attachments.bulkCreate.mockResolvedValue(theCase as never);
+    casesClient.attachments.bulkCreateAndGetCase.mockResolvedValue(theCase as never);
 
     const attachments = buildMockAttachments();
     const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), true);
@@ -135,12 +200,53 @@ describe('manageAttachmentsTool', () => {
       buildToolContext(attachments)
     );
 
-    expect(casesClient.attachments.bulkCreate).toHaveBeenCalledWith({
+    expect(casesClient.attachments.bulkCreateAndGetCase).toHaveBeenCalledWith({
       caseId: 'case-1',
       attachments: [{ type: 'comment', data: { content: 'hi' }, owner: 'securitySolution' }],
     });
     expect(attachments.add).toHaveBeenCalledTimes(1);
     const { results } = result as unknown as { results: Array<{ data: Record<string, unknown> }> };
     expect(results[0].data.attachment_ids).toEqual(['att-1']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tests: availability
+// ---------------------------------------------------------------------------
+
+describe('manageAttachmentsTool availability', () => {
+  it('returns unavailable for es solution', async () => {
+    const coreSetup = makeCoreWithSolution('es');
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = {
+      ...manageAttachmentsTool(jest.fn(), buildRegistry([]), true),
+      availability,
+    };
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
+    expect(result).toEqual({ status: 'unavailable', reason: expect.any(String) });
+  });
+
+  it('returns available for security solution', async () => {
+    const coreSetup = makeCoreWithSolution('security');
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = {
+      ...manageAttachmentsTool(jest.fn(), buildRegistry([]), true),
+      availability,
+    };
+    const request = httpServerMock.createKibanaRequest();
+    const result = await tool.availability!.handler({ request } as AvailabilityContext);
+    expect(result).toEqual({ status: 'available' });
+  });
+
+  it('cacheMode is space', () => {
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}]);
+    const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
+    const tool = {
+      ...manageAttachmentsTool(jest.fn(), buildRegistry([]), true),
+      availability,
+    };
+    expect(tool.availability?.cacheMode).toBe('space');
   });
 });

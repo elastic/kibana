@@ -185,6 +185,7 @@ describe('GCPReusableConnectorForm', () => {
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
+        name: 'GCP Connector 1',
         serviceAccount: 'service-account-1@project-123.iam.gserviceaccount.com',
         audience:
           '//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool-1/providers/provider-1',
@@ -208,6 +209,7 @@ describe('GCPReusableConnectorForm', () => {
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
+        name: 'GCP Connector 2',
         serviceAccount: 'service-account-2@project-456.iam.gserviceaccount.com',
         audience:
           '//iam.googleapis.com/projects/456/locations/global/workloadIdentityPools/pool-2/providers/provider-2',

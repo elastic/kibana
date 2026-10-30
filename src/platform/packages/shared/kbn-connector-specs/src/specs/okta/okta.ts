@@ -175,7 +175,7 @@ export const Okta: ConnectorSpec = {
   metadata: {
     id: '.okta',
     displayName: 'Okta',
-    description: i18n.translate('core.kibanaConnectorSpecs.okta.metadata.description', {
+    description: i18n.translate('connectorSpecs.okta.metadata.description', {
       defaultMessage:
         'Contain compromised Okta identities - suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events',
     }),
@@ -202,52 +202,40 @@ export const Okta: ConnectorSpec = {
             certificateBinding: { hidden: true },
             certificate: { hidden: true },
             tokenUrl: {
-              label: i18n.translate('core.kibanaConnectorSpecs.okta.auth.oauth.tokenUrl.label', {
+              label: i18n.translate('connectorSpecs.okta.auth.oauth.tokenUrl.label', {
                 defaultMessage: 'Token URL',
               }),
               placeholder: 'https://your-okta-domain.okta.com/oauth2/v1/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read (groups.manage is required for add/remove group membership or those calls return 403), assign an admin role that can manage users and groups, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  'Org Authorization Server token endpoint. Must match your Org URL, for example https://your-okta-domain.okta.com/oauth2/v1/token. Create an API Services app with Public key/Private key client authentication, grant scopes okta.users.manage okta.groups.manage okta.logs.read (groups.manage is required for add/remove group membership or those calls return 403), assign an admin role that can manage users and groups, and disable Require Demonstrating Proof of Possession (DPoP) on the app - Kibana does not send DPoP proofs yet.',
+              }),
             },
             clientId: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.clientId.helpText',
-                {
-                  defaultMessage: 'Client ID of the Okta API Services (service) app integration.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.clientId.helpText', {
+                defaultMessage: 'Client ID of the Okta API Services (service) app integration.',
+              }),
             },
             keyId: {
-              label: i18n.translate('core.kibanaConnectorSpecs.okta.auth.oauth.keyId.label', {
+              label: i18n.translate('connectorSpecs.okta.auth.oauth.keyId.label', {
                 defaultMessage: 'Key ID (kid)',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.okta.auth.oauth.keyId.helpText', {
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.keyId.helpText', {
                 defaultMessage:
                   'kid of the public key registered on the service app JWKS. Required for Okta private_key_jwt.',
               }),
             },
             privateKey: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.privateKey.helpText',
-                {
-                  defaultMessage:
-                    'PEM-encoded private key that matches the public key on the service app. Must begin with -----BEGIN PRIVATE KEY----- or -----BEGIN RSA PRIVATE KEY-----.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.privateKey.helpText', {
+                defaultMessage:
+                  'PEM-encoded private key that matches the public key on the service app. Must begin with -----BEGIN PRIVATE KEY----- or -----BEGIN RSA PRIVATE KEY-----.',
+              }),
             },
             passphrase: {
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.oauth.passphrase.helpText',
-                {
-                  defaultMessage:
-                    'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.oauth.passphrase.helpText', {
+                defaultMessage:
+                  'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
+              }),
             },
           },
         },
@@ -258,16 +246,13 @@ export const Okta: ConnectorSpec = {
         overrides: {
           meta: {
             apiToken: {
-              label: i18n.translate('core.kibanaConnectorSpecs.okta.auth.ssws.apiToken.label', {
+              label: i18n.translate('connectorSpecs.okta.auth.ssws.apiToken.label', {
                 defaultMessage: 'API token (SSWS)',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.okta.auth.ssws.apiToken.helpText',
-                {
-                  defaultMessage:
-                    'Paste the raw Okta API token from Security > API > Tokens. Do not include a prefix - the connector sends Authorization: SSWS automatically. Prefer the OAuth service-app auth type when possible. Token privileges must allow user lifecycle, sessions, groups, and System Log read (equivalent to okta.users.manage, okta.groups.manage, okta.logs.read).',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.okta.auth.ssws.apiToken.helpText', {
+                defaultMessage:
+                  'Paste the raw Okta API token from Security > API > Tokens. Do not include a prefix - the connector sends Authorization: SSWS automatically. Prefer the OAuth service-app auth type when possible. Token privileges must allow user lifecycle, sessions, groups, and System Log read (equivalent to okta.users.manage, okta.groups.manage, okta.logs.read).',
+              }),
               placeholder: '00…',
             },
           },
@@ -281,10 +266,10 @@ export const Okta: ConnectorSpec = {
       orgUrl: UISchemas.url('https://your-okta-domain.okta.com')
         .describe('Okta organization URL')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.okta.config.orgUrl.label', {
+          label: i18n.translate('connectorSpecs.okta.config.orgUrl.label', {
             defaultMessage: 'Org URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.okta.config.orgUrl.helpText', {
+          helpText: i18n.translate('connectorSpecs.okta.config.orgUrl.helpText', {
             defaultMessage:
               'Base URL of your Okta org, for example https://your-okta-domain.okta.com or https://your-okta-domain.oktapreview.com. Custom domains are supported. Do not include /api/v1.',
           }),
@@ -295,6 +280,7 @@ export const Okta: ConnectorSpec = {
   actions: {
     getUser: {
       isTool: true,
+      scope: 'read',
       description:
         'Resolve a full Okta user record by id, login, or email. Use this first when an alert only has a login or email so write actions can use the canonical user id. Returns profile, status, and credentials metadata.',
       input: GetUserInputSchema,
@@ -314,6 +300,7 @@ export const Okta: ConnectorSpec = {
 
     getUserGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'List group memberships for a user. Use for enrichment and to decide whether to add the user to a quarantine group or remove them from a privileged group.',
       input: GetUserGroupsInputSchema,
@@ -333,6 +320,7 @@ export const Okta: ConnectorSpec = {
 
     suspendUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Suspend an ACTIVE user so they cannot sign in while preserving the account for investigation. Prefer this for reversible containment; use deactivateUser only for confirmed-malicious accounts. Okta also clears sessions on suspend.',
       input: SuspendUserInputSchema,
@@ -353,6 +341,7 @@ export const Okta: ConnectorSpec = {
 
     unsuspendUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Lift a suspend (SUSPENDED → ACTIVE) after a false positive. Use only on users previously suspended with suspendUser.',
       input: UnsuspendUserInputSchema,
@@ -373,6 +362,7 @@ export const Okta: ConnectorSpec = {
 
     deactivateUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Deactivate a user (DEPROVISIONED) as a full lifecycle containment step beyond suspend. Destructive relative to suspend - prefer suspendUser when investigation may reverse the decision.',
       input: DeactivateUserInputSchema,
@@ -397,6 +387,7 @@ export const Okta: ConnectorSpec = {
 
     activateUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Activate a STAGED or DEPROVISIONED user after investigation clears them. May return an activation token when sendEmail is false.',
       input: ActivateUserInputSchema,
@@ -421,6 +412,7 @@ export const Okta: ConnectorSpec = {
 
     clearUserSessions: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Revoke all active Okta IdP sessions for a user so they must re-authenticate. Optionally also revoke OAuth tokens and forget remembered devices. Does not clear sessions created for some web or native apps.',
       input: ClearUserSessionsInputSchema,
@@ -447,6 +439,7 @@ export const Okta: ConnectorSpec = {
 
     resetFactors: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Un-enroll all MFA factors for a user (status stays ACTIVE). Use when a second factor is suspected lost or compromised. Confirm with getUserFactors first when possible.',
       input: ResetFactorsInputSchema,
@@ -467,6 +460,7 @@ export const Okta: ConnectorSpec = {
 
     getUserFactors: {
       isTool: true,
+      scope: 'read',
       description:
         'List enrolled MFA factors for a user so an author can decide whether resetFactors is warranted.',
       input: GetUserFactorsInputSchema,
@@ -486,6 +480,7 @@ export const Okta: ConnectorSpec = {
 
     resetPassword: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Start a password reset (user moves to RECOVERY). sendEmail is required: true emails the reset link; false returns resetPasswordUrl for a custom flow. Optionally revoke sessions.',
       input: ResetPasswordInputSchema,
@@ -513,6 +508,7 @@ export const Okta: ConnectorSpec = {
 
     expirePassword: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Force the user to change their password at next sign-in (PASSWORD_EXPIRED). Set tempPassword true to also generate a temporary password via expire_password_with_temp_password.',
       input: ExpirePasswordInputSchema,
@@ -532,6 +528,7 @@ export const Okta: ConnectorSpec = {
 
     addUserToGroup: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Add a user to a group (for example a quarantine group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Uses PUT and returns 204 on success.',
       input: AddUserToGroupInputSchema,
@@ -552,6 +549,7 @@ export const Okta: ConnectorSpec = {
 
     removeUserFromGroup: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Remove a user from a group (for example strip a privileged group) as a remediation lever. Requires okta.groups.manage (and a group-capable admin role) or Okta returns 403. Returns 204 on success.',
       input: RemoveUserFromGroupInputSchema,
@@ -571,6 +569,7 @@ export const Okta: ConnectorSpec = {
 
     listUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'List users with pagination only (limit/after). Okta does not allow sortBy on non-search list queries - use searchUsers with a search expression when you need sorting. Returns users plus the raw Link header for the next page when present.',
       input: ListUsersInputSchema,
@@ -598,6 +597,7 @@ export const Okta: ConnectorSpec = {
 
     searchUsers: {
       isTool: true,
+      scope: 'read',
       description:
         'Find users by keyword (q), advanced search expression, or SCIM filter. Use to resolve identities in bulk from partial alert identifiers. Do not combine search and filter in one call. sortBy/sortOrder require the search parameter (Okta rejects sort on q/filter-only or list queries).',
       input: SearchUsersInputSchema,
@@ -630,6 +630,7 @@ export const Okta: ConnectorSpec = {
 
     getLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Query Okta System Log events (failed logins, suspicious auth, admin actions). Filter with since/until, filter expressions, or keywords. Returns events plus Link header for pagination.',
       input: GetLogsInputSchema,

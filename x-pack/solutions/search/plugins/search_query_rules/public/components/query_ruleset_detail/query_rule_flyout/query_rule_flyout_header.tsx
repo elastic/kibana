@@ -8,17 +8,18 @@
 import React from 'react';
 
 import { EuiFlyoutHeader, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 const getHeaderText = (createMode: boolean) =>
   createMode ? (
     <FormattedMessage
-      id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.create"
+      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyoutTitle.create"
       defaultMessage="Create rule"
     />
   ) : (
     <FormattedMessage
-      id="xpack.search.queryRulesetDetail.queryRuleFlyoutTitle.edit"
+      id="xpack.queryRules.queryRulesetDetail.queryRuleFlyoutTitle.edit"
       defaultMessage="Edit rule"
     />
   );
@@ -32,6 +33,14 @@ export const QueryRuleFlyoutHeader: React.FC<QueryRuleFlyoutHeaderProps> = ({
   createMode,
   ruleId,
 }) => {
+  const ruleIdTooltipContent = i18n.translate(
+    'xpack.queryRules.queryRulesetDetail.queryRuleFlyout.ruleIdTooltip',
+    {
+      defaultMessage:
+        'The unique identifier of the query rule within the specified ruleset to retrieve',
+    }
+  );
+
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="queryRulesFlyoutHeader">
       <EuiFlexGroup direction="column">
@@ -45,18 +54,15 @@ export const QueryRuleFlyoutHeader: React.FC<QueryRuleFlyoutHeaderProps> = ({
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 defaultMessage="Rule ID: {ruleId}"
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.ruleId"
+                id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.ruleId"
                 values={{ ruleId }}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip
-                content={
-                  <FormattedMessage
-                    defaultMessage="The unique identifier of the query rule within the specified ruleset to retrieve"
-                    id="xpack.search.queryRulesetDetail.queryRuleFlyout.ruleIdTooltip"
-                  />
-                }
+                content={ruleIdTooltipContent}
+                aria-label={ruleIdTooltipContent}
+                disableScreenReaderOutput
                 position="right"
               />
             </EuiFlexItem>

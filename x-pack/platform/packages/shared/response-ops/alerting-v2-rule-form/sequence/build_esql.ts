@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import type { SequenceFormValues, SequenceStep } from './form_types';
 import {
   formatLookbackString,
   getCommonGroupingFields,
   hopWindowToSeconds,
+  recoveryTrackedStepIndices,
   totalLookbackSeconds,
 } from './form_types';
 
@@ -18,6 +20,7 @@ const hasSignalRules = (state: SequenceFormValues): boolean =>
 
 export const RULE_EVENTS_INDEX = '.rule-events';
 const GROUP_HASH_COL = 'group_hash';
+export const LAST_STEP_COL_LABEL = 'last';
 const SEQUENCE_GROUP_COL = 'sequence_group';
 const SEQUENCE_GROUP_VALUE = 'default';
 
@@ -39,19 +42,23 @@ const stepColNames = (stepIdx: number, step: SequenceStep): string[] => {
 interface RecoveryTrackingPair {
   stepIdx: number;
   ruleIdx?: number;
+  colSuffix: string;
   ruleId: string;
-  kind: 'alert' | 'signal';
+  ruleIds: string[];
+  kind: RuleKind;
   stalenessSeconds: number;
 }
 
-const recoveryTrackingColSuffix = (pair: RecoveryTrackingPair): string =>
-  pair.ruleIdx !== undefined ? `${pair.stepIdx}_${pair.ruleIdx}` : `${pair.stepIdx}`;
+const ruleIdPredicate = (pair: RecoveryTrackingPair): string => {
+  if (pair.ruleIds.length === 1) return `rule.id == "${pair.ruleIds[0]}"`;
+  return `rule.id IN (${pair.ruleIds.map((id) => `"${id}"`).join(', ')})`;
+};
 
-const resolveRecoveryTrackingPairs = (state: SequenceFormValues): RecoveryTrackingPair[] | null => {
-  const recoveryIndices: number[] =
-    state.recoveryStepIndices && state.recoveryStepIndices.length > 0
-      ? [...state.recoveryStepIndices].sort((a, b) => a - b)
-      : [state.recoveryStepIndex];
+const resolveRecoveryTrackingPairs = (
+  state: SequenceFormValues,
+  options: { trackedStepLabel?: string } = {}
+): RecoveryTrackingPair[] | null => {
+  const recoveryIndices = recoveryTrackedStepIndices(state);
 
   const recoveryPairs: RecoveryTrackingPair[] = [];
   for (const si of recoveryIndices) {
@@ -59,23 +66,29 @@ const resolveRecoveryTrackingPairs = (state: SequenceFormValues): RecoveryTracki
     if (!step || step.rules.length === 0) return null;
     const hopIdx = si > 0 ? si - 1 : 0;
     const stalenessSeconds = hopWindowToSeconds(state.hopWindows[hopIdx]);
+    const stepLabel = options.trackedStepLabel ?? `${si}`;
 
     if (isAndStep(step)) {
       for (let j = 0; j < step.rules.length; j++) {
+        const escapedId = escapeRuleId(step.rules[j].ruleId);
         recoveryPairs.push({
           stepIdx: si,
           ruleIdx: j,
-          ruleId: escapeRuleId(step.rules[j].ruleId),
+          colSuffix: `${stepLabel}_${j}`,
+          ruleId: escapedId,
+          ruleIds: [escapedId],
           kind: step.rules[j].kind,
           stalenessSeconds,
         });
       }
     } else {
-      const firstRule = step.rules[0];
+      const allEscaped = step.rules.map((r) => escapeRuleId(r.ruleId));
       recoveryPairs.push({
         stepIdx: si,
-        ruleId: escapeRuleId(firstRule.ruleId),
-        kind: firstRule.kind,
+        colSuffix: stepLabel,
+        ruleId: allEscaped[0],
+        ruleIds: allEscaped,
+        kind: step.rules[0].kind,
         stalenessSeconds,
       });
     }
@@ -84,7 +97,7 @@ const resolveRecoveryTrackingPairs = (state: SequenceFormValues): RecoveryTracki
 };
 
 const pairRecoveredExpr = (pair: RecoveryTrackingPair): string => {
-  const suffix = recoveryTrackingColSuffix(pair);
+  const suffix = pair.colSuffix;
   if (pair.kind === 'signal') {
     return `(a_${suffix} IS NULL OR DATE_DIFF("seconds", a_${suffix}, NOW()) > ${pair.stalenessSeconds})`;
   }
@@ -164,13 +177,14 @@ export const buildSequenceEsql = (state: SequenceFormValues): string => {
   }
 
   for (const pair of recoveryPairs) {
-    const suffix = recoveryTrackingColSuffix(pair);
+    const suffix = pair.colSuffix;
+    const idPred = ruleIdPredicate(pair);
     if (pair.kind !== 'signal') {
       statsCols.push(
-        `r_${suffix} = MAX(CASE(rule.id == "${pair.ruleId}" AND status == "recovered", @timestamp, NULL))`
+        `r_${suffix} = MAX(CASE(${idPred} AND status == "recovered", @timestamp, NULL))`
       );
     }
-    statsCols.push(`a_${suffix} = MAX(CASE(rule.id == "${pair.ruleId}", @timestamp, NULL))`);
+    statsCols.push(`a_${suffix} = MAX(CASE(${idPred}, @timestamp, NULL))`);
   }
 
   const byCol = isCorrelated ? GROUP_HASH_COL : SEQUENCE_GROUP_COL;
@@ -217,6 +231,106 @@ export const buildSequenceEsql = (state: SequenceFormValues): string => {
   return lines.join('\n');
 };
 
+const recoveryTypeFilter = (pairs: RecoveryTrackingPair[]): string => {
+  const hasAlert = pairs.some((p) => p.kind !== 'signal');
+  const hasSignal = pairs.some((p) => p.kind === 'signal');
+  if (hasAlert && hasSignal) return 'type IN ("alert", "signal")';
+  if (hasSignal) return 'type == "signal"';
+  return 'type == "alert"';
+};
+
+export const buildSequenceRecoveryEsql = (state: SequenceFormValues): string => {
+  if (state.steps.length < 2) return '';
+  if (state.hopWindows.length !== state.steps.length - 1) return '';
+
+  const tracksLastStep = state.recoveryMode === 'last';
+  const recoveryPairs = resolveRecoveryTrackingPairs(
+    state,
+    tracksLastStep ? { trackedStepLabel: LAST_STEP_COL_LABEL } : {}
+  );
+  if (!recoveryPairs) return '';
+
+  const isCorrelated = getCommonGroupingFields(state).length > 0;
+
+  if (recoveryPairs.length === 1 && tracksLastStep) {
+    const pair = recoveryPairs[0];
+    const { kind, stalenessSeconds } = pair;
+    const idFilter = ruleIdPredicate(pair);
+    const singleTypeFilter = kind === 'signal' ? 'type == "signal"' : 'type == "alert"';
+
+    if (kind === 'signal') {
+      if (isCorrelated) {
+        return [
+          `FROM ${RULE_EVENTS_INDEX}`,
+          `| WHERE ${singleTypeFilter} AND ${idFilter}`,
+          '| STATS latest_breach = MAX(CASE(status == "breached", @timestamp, NULL))',
+          `        BY ${GROUP_HASH_COL}`,
+          `| WHERE DATE_DIFF("seconds", latest_breach, NOW()) > ${stalenessSeconds}`,
+        ].join('\n');
+      }
+
+      return [
+        `FROM ${RULE_EVENTS_INDEX}`,
+        `| WHERE ${singleTypeFilter} AND ${idFilter}`,
+        '| STATS latest_breach = MAX(CASE(status == "breached", @timestamp, NULL))',
+        `| EVAL ${SEQUENCE_GROUP_COL} = "${SEQUENCE_GROUP_VALUE}"`,
+        `| WHERE latest_breach IS NULL OR DATE_DIFF("seconds", latest_breach, NOW()) > ${stalenessSeconds}`,
+      ].join('\n');
+    }
+
+    if (isCorrelated) {
+      return [
+        `FROM ${RULE_EVENTS_INDEX}`,
+        `| WHERE ${singleTypeFilter} AND ${idFilter}`,
+        '| STATS latest_recovered = MAX(CASE(status == "recovered", @timestamp, NULL)),',
+        '        latest_any        = MAX(@timestamp)',
+        `        BY ${GROUP_HASH_COL}`,
+        '| WHERE latest_recovered == latest_any',
+      ].join('\n');
+    }
+
+    return [
+      `FROM ${RULE_EVENTS_INDEX}`,
+      `| WHERE ${singleTypeFilter} AND ${idFilter}`,
+      '| SORT @timestamp DESC',
+      '| LIMIT 1',
+      `| EVAL ${SEQUENCE_GROUP_COL} = "${SEQUENCE_GROUP_VALUE}"`,
+      '| WHERE status == "recovered"',
+    ].join('\n');
+  }
+
+  const allRuleIds = [
+    ...new Set(recoveryPairs.flatMap((p) => p.ruleIds.map((id) => `"${id}"`))),
+  ].join(', ');
+  const typeFilter = recoveryTypeFilter(recoveryPairs);
+
+  const statsLines = recoveryPairs.flatMap((pair, i) => {
+    const suffix = pair.colSuffix;
+    const idPred = ruleIdPredicate(pair);
+    const comma = i < recoveryPairs.length - 1 ? ',' : '';
+    if (pair.kind === 'signal') {
+      return [`    a_${suffix} = MAX(CASE(${idPred}, @timestamp, NULL))${comma}`];
+    }
+    return [
+      `    r_${suffix} = MAX(CASE(${idPred} AND status == "recovered", @timestamp, NULL)),`,
+      `    a_${suffix} = MAX(CASE(${idPred}, @timestamp, NULL))${comma}`,
+    ];
+  });
+
+  const whereConditions = recoveryTrackingPredicate(recoveryPairs);
+
+  return [
+    `FROM ${RULE_EVENTS_INDEX}`,
+    `| WHERE ${typeFilter} AND rule.id IN (${allRuleIds})`,
+    `| STATS`,
+    ...statsLines,
+    ...(isCorrelated
+      ? [`    BY ${GROUP_HASH_COL}`]
+      : [`| EVAL ${SEQUENCE_GROUP_COL} = "${SEQUENCE_GROUP_VALUE}"`]),
+    `| WHERE ${whereConditions}`,
+  ].join('\n');
+};
+
 export const buildSequenceRuleQueryData = (
   state: SequenceFormValues
 ): {
@@ -228,13 +342,14 @@ export const buildSequenceRuleQueryData = (
   const breachQuery = buildSequenceEsql(state);
   if (!breachQuery) return null;
 
+  const recoveryQuery = buildSequenceRecoveryEsql(state);
   const lookback = totalLookbackSeconds(state);
   const isCorrelated = getCommonGroupingFields(state).length > 0;
   const groupingFields = isCorrelated ? [GROUP_HASH_COL] : [SEQUENCE_GROUP_COL];
 
   return {
     breachQuery,
-    recoveryQuery: '',
+    recoveryQuery,
     groupingFields,
     lookbackString: formatLookbackString(lookback),
   };

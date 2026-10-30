@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod';
 import {
   allowHiddenIndicesSchema,
+  fieldFiltersSchema,
   fieldSettingsFieldNameSchema,
   indexPatternSchema,
   timeFieldSchema,
@@ -19,7 +20,7 @@ import {
   savedCompositeRuntimeFieldSchema,
   savedPrimitiveRuntimeFieldSchema,
 } from '../runtime_fields/schema_saved_runtime_fields';
-import { fieldSettingsWithPopularitySchema } from '../schema_field_settings';
+import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
 
 export const savedFieldSettingsSchema = z
   .union([
@@ -43,14 +44,17 @@ export const savedDataViewSpecSchema = z
     }),
     name: nameSchema,
     allow_hidden_indices: allowHiddenIndicesSchema,
-    field_filters: z.array(z.string().min(1).max(1000)).max(10_000).optional().meta({
-      title: 'Field filters',
-      description:
-        "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
-    }),
+    field_filters: fieldFiltersSchema,
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
-    field_settings: z.record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema).optional(),
+    field_settings: z
+      .record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema)
+      .optional()
+      .meta({
+        title: 'Field settings',
+        description:
+          'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.',
+      }),
   })
   .strict()
   .meta({
