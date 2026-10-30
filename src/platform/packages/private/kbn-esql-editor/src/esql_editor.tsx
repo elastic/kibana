@@ -828,260 +828,264 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
-      <EuiFlexGroup
-        gutterSize="none"
-        css={{
-          zIndex: theme.euiTheme.levels.flyout,
-          position: 'relative',
-        }}
-        responsive={false}
-        ref={containerRef}
-      >
-        <div css={styles.resizableContainer}>
-          <EuiFlexItem
-            data-test-subj={dataTestSubj ?? 'ESQLEditor'}
-            className="ESQLEditor"
-            css={css`
-              max-width: 100%;
-              position: relative;
-            `}
-          >
-            <div css={styles.editorContainer}>
-              <CodeEditor
-                htmlId={htmlId}
-                aria-label={i18n.translate('esqlEditor.ariaLabel', {
-                  defaultMessage: 'ES|QL editor',
-                })}
-                languageId={ESQL_LANG_ID}
-                classNameCss={getEditorOverwrites(theme)}
-                value={code}
-                placeholder={placeholder}
-                options={codeEditorOptions}
-                width="100%"
-                suggestionProvider={suggestionProvider}
-                hoverProvider={codeEditorHoverProvider}
-                signatureProvider={signatureProvider}
-                inlineCompletionsProvider={inlineCompletionsProvider}
-                documentHighlightProvider={documentHighlightProvider}
-                codeActions={codeActionsProvider}
-                onChange={onQueryUpdate}
-                editorDidMount={async (editor) => {
-                  // Track editor init time once per mount
-                  reportInitLatency();
-
-                  editorRef.current = editor;
-                  const model = editor.getModel();
-                  if (model) {
-                    editorModel.current = model;
-                    editorModelUriRef.current = model.uri.toString();
-                    esqlDepsByModelUri.set(editorModelUriRef.current, {
-                      ...esqlCallbacks,
-                      telemetry: telemetryCallbacks,
-                      isSuggestFixEnabled: isNlToEsqlEnabled,
-                      getEditorMessages: () => editorMessagesRef.current,
-                    });
-                    await addLookupIndicesDecorator();
-                    if (enableResourceBrowser) {
-                      addSourcesDecorator();
-                    }
-                  }
-
-                  // Register custom commands
-                  const commandDisposables = registerCustomCommands({
-                    application,
-                    uiActions,
-                    telemetryService,
-                    editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
-                    getCurrentQuery: () =>
-                      fixESQLQueryWithVariables(
-                        editorRef.current?.getValue() || '',
-                        esqlVariablesRef.current
-                      ),
-                    esqlVariables: esqlVariablesRef,
-                    controlsContext: controlsContextRef,
-                    openTimePickerPopover,
-                    openIndicesBrowser: enableResourceBrowser ? openIndicesBrowser : undefined,
-                    openFieldsBrowser: enableResourceBrowser ? openFieldsBrowser : undefined,
-                  });
-
-                  // Add editor key bindings
-                  const keyBindingDisposables = addEditorKeyBindings(
-                    editor,
-                    stableOnQuerySubmit,
-                    stableOnPrettifyQuery,
-                    () => onGenerateFromCommentRef.current()
-                  );
-
-                  const ghostHintDisposables = setupGhostLineHint(editor);
-
-                  // Store disposables for cleanup
-                  const currentEditor = editorRef.current;
-                  if (currentEditor) {
-                    if (!editorCommandDisposables.current.has(currentEditor)) {
-                      editorCommandDisposables.current.set(currentEditor, [
-                        ...commandDisposables,
-                        ...keyBindingDisposables,
-                        ...ghostHintDisposables,
-                      ]);
-                    }
-                  }
-
-                  // Add Tab keybinding rules for inline suggestions
-                  addTabKeybindingRules();
-
-                  const mouseDownDisposable = editor.onMouseDown((e) => {
-                    if (datePickerOpenStatusRef.current) {
-                      setPopoverPosition({});
-                    }
-                    if (isVisorOpenRef.current) {
-                      setIsVisorOpen(false);
-                    }
-                    if (enableResourceBrowser) {
-                      sourcesLabelClickHandler(e);
-                    }
-                  });
-
-                  const focusDisposable = editor.onDidFocusEditorText(() => {
-                    // Skip triggering suggestions on initial focus to avoid interfering
-                    // with editor initialization and automated tests
-                    // Also skip when date picker is open to prevent overlap
-                    if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
-                      triggerSuggestions();
-                    }
-
-                    isFirstFocusRef.current = false;
-                  });
-
-                  const suggestionPopupDisposable = trackSuggestionPopupState(
-                    editor,
-                    isSuggestionPopupOpenRef
-                  );
-
-                  // An action, not a command: `addCommand` keybindings are page-wide and fire while
-                  // another editor on the page has focus.
-                  const commentLineDisposable = editor.addAction({
-                    id: 'esql.commentLine',
-                    label: i18n.translate('esqlEditor.query.commentLineLabel', {
-                      defaultMessage: 'Toggle line comment',
-                    }),
-                    // eslint-disable-next-line no-bitwise
-                    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
-                    run: onCommentLine,
-                  });
-
-                  setMeasuredEditorWidth(editor.getLayoutInfo().width);
-                  if (expandToFitQueryOnMount) {
-                    expandToFitContent();
-                  }
-
-                  const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
-                    onLayoutChangeRef.current(layoutInfoEvent);
-                  });
-
-                  const tabKeyDisposable = editor.onKeyDown((e) => {
-                    if (
-                      e.keyCode === monaco.KeyCode.Tab &&
-                      !e.shiftKey &&
-                      !isSuggestionPopupOpenRef.current
-                    ) {
-                      suppressSuggestionsRef.current = true;
-                    }
-                  });
-
-                  const modelContentDisposable = editor.onDidChangeModelContent(async () => {
-                    trackInputLatencyOnKeystroke(editor.getValue() ?? '');
-                    await addLookupIndicesDecorator();
-                    if (enableResourceBrowser) {
-                      addSourcesDecorator();
-                    }
-                    maybeTriggerSuggestions();
-                  });
-
-                  const listenerDisposables = [
-                    mouseDownDisposable,
-                    focusDisposable,
-                    layoutChangeDisposable,
-                    tabKeyDisposable,
-                    modelContentDisposable,
-                    suggestionPopupDisposable,
-                    commentLineDisposable,
-                  ];
-                  editorCommandDisposables.current.get(currentEditor)?.push(...listenerDisposables);
-
-                  // Auto-focus the editor and move the cursor to the end.
-                  if (!disableAutoFocus) {
-                    editor.focus();
-                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
-                  }
-                }}
-              />
-            </div>
-          </EuiFlexItem>
-        </div>
-      </EuiFlexGroup>
-      {!hideQuickSearch && Boolean(editorIsInline) && (
-        <QuickSearchVisor
-          query={code}
-          isInline
-          isVisible={isVisorOpen}
-          onNlResult={showVisorReview}
-          onUpdateAndSubmitQuery={(newQuery) =>
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH_KQL)
-          }
-          isDisabled={Boolean(isDisabled)}
-          disableSubmitAction={Boolean(disableSubmitAction)}
-          onKqlSubmitted={focusEditor}
-          hasOutline={Boolean(hasOutline)}
-        />
-      )}
-      {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
-        <ResizableButton
-          onMouseDownResizeHandler={(mouseDownEvent) => {
-            onMouseDownResize(
-              mouseDownEvent,
-              editorHeight,
-              setEditorHeight,
-              resizableContainerHeight,
-              setResizableContainerHeight
-            );
+      <EditorOutline outlined={Boolean(hasOutline)} shellCss={styles.outlineShell}>
+        <EuiFlexGroup
+          gutterSize="none"
+          css={{
+            zIndex: theme.euiTheme.levels.flyout,
+            position: 'relative',
           }}
-          onKeyDownResizeHandler={(keyDownEvent) =>
-            onKeyDownResize(
-              keyDownEvent,
-              editorHeight,
-              setEditorHeight,
-              resizableContainerHeight,
-              setResizableContainerHeight
-            )
-          }
+          responsive={false}
+          ref={containerRef}
+        >
+          <div css={styles.resizableContainer}>
+            <EuiFlexItem
+              data-test-subj={dataTestSubj ?? 'ESQLEditor'}
+              className="ESQLEditor"
+              css={css`
+                max-width: 100%;
+                position: relative;
+              `}
+            >
+              <div css={styles.editorContainer}>
+                <CodeEditor
+                  htmlId={htmlId}
+                  aria-label={i18n.translate('esqlEditor.ariaLabel', {
+                    defaultMessage: 'ES|QL editor',
+                  })}
+                  languageId={ESQL_LANG_ID}
+                  classNameCss={getEditorOverwrites(theme)}
+                  value={code}
+                  placeholder={placeholder}
+                  options={codeEditorOptions}
+                  width="100%"
+                  suggestionProvider={suggestionProvider}
+                  hoverProvider={codeEditorHoverProvider}
+                  signatureProvider={signatureProvider}
+                  inlineCompletionsProvider={inlineCompletionsProvider}
+                  documentHighlightProvider={documentHighlightProvider}
+                  codeActions={codeActionsProvider}
+                  onChange={onQueryUpdate}
+                  editorDidMount={async (editor) => {
+                    // Track editor init time once per mount
+                    reportInitLatency();
+
+                    editorRef.current = editor;
+                    const model = editor.getModel();
+                    if (model) {
+                      editorModel.current = model;
+                      editorModelUriRef.current = model.uri.toString();
+                      esqlDepsByModelUri.set(editorModelUriRef.current, {
+                        ...esqlCallbacks,
+                        telemetry: telemetryCallbacks,
+                        isSuggestFixEnabled: isNlToEsqlEnabled,
+                        getEditorMessages: () => editorMessagesRef.current,
+                      });
+                      await addLookupIndicesDecorator();
+                      if (enableResourceBrowser) {
+                        addSourcesDecorator();
+                      }
+                    }
+
+                    // Register custom commands
+                    const commandDisposables = registerCustomCommands({
+                      application,
+                      uiActions,
+                      telemetryService,
+                      editorRef: editorRef as React.RefObject<monaco.editor.IStandaloneCodeEditor>,
+                      getCurrentQuery: () =>
+                        fixESQLQueryWithVariables(
+                          editorRef.current?.getValue() || '',
+                          esqlVariablesRef.current
+                        ),
+                      esqlVariables: esqlVariablesRef,
+                      controlsContext: controlsContextRef,
+                      openTimePickerPopover,
+                      openIndicesBrowser: enableResourceBrowser ? openIndicesBrowser : undefined,
+                      openFieldsBrowser: enableResourceBrowser ? openFieldsBrowser : undefined,
+                    });
+
+                    // Add editor key bindings
+                    const keyBindingDisposables = addEditorKeyBindings(
+                      editor,
+                      stableOnQuerySubmit,
+                      stableOnPrettifyQuery,
+                      () => onGenerateFromCommentRef.current()
+                    );
+
+                    const ghostHintDisposables = setupGhostLineHint(editor);
+
+                    // Store disposables for cleanup
+                    const currentEditor = editorRef.current;
+                    if (currentEditor) {
+                      if (!editorCommandDisposables.current.has(currentEditor)) {
+                        editorCommandDisposables.current.set(currentEditor, [
+                          ...commandDisposables,
+                          ...keyBindingDisposables,
+                          ...ghostHintDisposables,
+                        ]);
+                      }
+                    }
+
+                    // Add Tab keybinding rules for inline suggestions
+                    addTabKeybindingRules();
+
+                    const mouseDownDisposable = editor.onMouseDown((e) => {
+                      if (datePickerOpenStatusRef.current) {
+                        setPopoverPosition({});
+                      }
+                      if (isVisorOpenRef.current) {
+                        setIsVisorOpen(false);
+                      }
+                      if (enableResourceBrowser) {
+                        sourcesLabelClickHandler(e);
+                      }
+                    });
+
+                    const focusDisposable = editor.onDidFocusEditorText(() => {
+                      // Skip triggering suggestions on initial focus to avoid interfering
+                      // with editor initialization and automated tests
+                      // Also skip when date picker is open to prevent overlap
+                      if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
+                        triggerSuggestions();
+                      }
+
+                      isFirstFocusRef.current = false;
+                    });
+
+                    const suggestionPopupDisposable = trackSuggestionPopupState(
+                      editor,
+                      isSuggestionPopupOpenRef
+                    );
+
+                    // An action, not a command: `addCommand` keybindings are page-wide and fire while
+                    // another editor on the page has focus.
+                    const commentLineDisposable = editor.addAction({
+                      id: 'esql.commentLine',
+                      label: i18n.translate('esqlEditor.query.commentLineLabel', {
+                        defaultMessage: 'Toggle line comment',
+                      }),
+                      // eslint-disable-next-line no-bitwise
+                      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash],
+                      run: onCommentLine,
+                    });
+
+                    setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    if (expandToFitQueryOnMount) {
+                      expandToFitContent();
+                    }
+
+                    const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
+                      onLayoutChangeRef.current(layoutInfoEvent);
+                    });
+
+                    const tabKeyDisposable = editor.onKeyDown((e) => {
+                      if (
+                        e.keyCode === monaco.KeyCode.Tab &&
+                        !e.shiftKey &&
+                        !isSuggestionPopupOpenRef.current
+                      ) {
+                        suppressSuggestionsRef.current = true;
+                      }
+                    });
+
+                    const modelContentDisposable = editor.onDidChangeModelContent(async () => {
+                      trackInputLatencyOnKeystroke(editor.getValue() ?? '');
+                      await addLookupIndicesDecorator();
+                      if (enableResourceBrowser) {
+                        addSourcesDecorator();
+                      }
+                      maybeTriggerSuggestions();
+                    });
+
+                    const listenerDisposables = [
+                      mouseDownDisposable,
+                      focusDisposable,
+                      layoutChangeDisposable,
+                      tabKeyDisposable,
+                      modelContentDisposable,
+                      suggestionPopupDisposable,
+                      commentLineDisposable,
+                    ];
+                    editorCommandDisposables.current
+                      .get(currentEditor)
+                      ?.push(...listenerDisposables);
+
+                    // Auto-focus the editor and move the cursor to the end.
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
+                  }}
+                />
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+        {!hideQuickSearch && Boolean(editorIsInline) && (
+          <QuickSearchVisor
+            query={code}
+            isInline
+            isVisible={isVisorOpen}
+            onNlResult={showVisorReview}
+            onUpdateAndSubmitQuery={(newQuery) =>
+              onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH_KQL)
+            }
+            isDisabled={Boolean(isDisabled)}
+            disableSubmitAction={Boolean(disableSubmitAction)}
+            onKqlSubmitted={focusEditor}
+            hasOutline={Boolean(hasOutline)}
+          />
+        )}
+        {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
+          <ResizableButton
+            onMouseDownResizeHandler={(mouseDownEvent) => {
+              onMouseDownResize(
+                mouseDownEvent,
+                editorHeight,
+                setEditorHeight,
+                resizableContainerHeight,
+                setResizableContainerHeight
+              );
+            }}
+            onKeyDownResizeHandler={(keyDownEvent) =>
+              onKeyDownResize(
+                keyDownEvent,
+                editorHeight,
+                setEditorHeight,
+                resizableContainerHeight,
+                setResizableContainerHeight
+              )
+            }
+          />
+        )}
+        <EditorFooter
+          styles={{
+            bottomContainer: styles.bottomContainer,
+            historyContainer: styles.historyContainer,
+          }}
+          onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
+          onPrettifyQuery={onPrettifyQuery}
+          editorIsInline={editorIsInline}
+          isSpaceReduced={isSpaceReduced}
+          isHistoryOpen={isHistoryOpen}
+          setIsHistoryOpen={onClickQueryHistory}
+          isLanguageComponentOpen={isLanguageComponentOpen}
+          setIsLanguageComponentOpen={setIsLanguageComponentOpen}
+          measuredContainerWidth={measuredEditorWidth}
+          resizableContainerButton={resizableContainerButton}
+          resizableContainerHeight={resizableContainerHeight}
+          displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+          dataErrorsControl={dataErrorsControl}
+          starredQueriesService={starredQueriesService}
+          queryStats={queryStats}
+          hideQueryHistory={hideQueryHistory}
+          enableCreateView={enableCreateView}
+          onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+          {...editorMessages}
+          onErrorClick={onErrorClick}
         />
-      )}
-      <EditorFooter
-        styles={{
-          bottomContainer: styles.bottomContainer,
-          historyContainer: styles.historyContainer,
-        }}
-        onUpdateAndSubmitQuery={onUpdateAndSubmitQuery}
-        onPrettifyQuery={onPrettifyQuery}
-        editorIsInline={editorIsInline}
-        isSpaceReduced={isSpaceReduced}
-        isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={onClickQueryHistory}
-        isLanguageComponentOpen={isLanguageComponentOpen}
-        setIsLanguageComponentOpen={setIsLanguageComponentOpen}
-        measuredContainerWidth={measuredEditorWidth}
-        resizableContainerButton={resizableContainerButton}
-        resizableContainerHeight={resizableContainerHeight}
-        displayDocumentationAsFlyout={displayDocumentationAsFlyout}
-        dataErrorsControl={dataErrorsControl}
-        starredQueriesService={starredQueriesService}
-        queryStats={queryStats}
-        hideQueryHistory={hideQueryHistory}
-        enableCreateView={enableCreateView}
-        onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-        {...editorMessages}
-        onErrorClick={onErrorClick}
-      />
+      </EditorOutline>
       {createPortal(
         Object.keys(popoverPosition).length > 0 && (
           <div
@@ -1193,6 +1197,26 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   return editorPanel;
+};
+
+const EditorOutline = ({
+  outlined,
+  shellCss,
+  children,
+}: {
+  outlined: boolean;
+  shellCss: ReturnType<typeof esqlEditorStyles>['outlineShell'];
+  children: React.ReactNode;
+}) => {
+  if (!outlined) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div css={shellCss} data-test-subj="ESQLEditor-outline">
+      {children}
+    </div>
+  );
 };
 
 const ESQLEditorWithActionsProvider = forwardRef<ESQLEditorApi, ESQLEditorPropsInternal>(
