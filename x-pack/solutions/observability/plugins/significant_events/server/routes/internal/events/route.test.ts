@@ -385,6 +385,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
         licensing: {},
         getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
+          findEventDeactivations: jest.fn().mockResolvedValue([]),
         }),
         getDetectionClient: () => ({
           findByIds: jest.fn().mockResolvedValue({ hits: [] }),
@@ -395,6 +396,176 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
+  });
+});
+
+describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations', () => {
+  const version = (
+    hour: number,
+    status: 'active' | 'inactive',
+    assessmentNote: string,
+    episodeId = 'episode-1'
+  ) => ({
+    event_id: 'event-1',
+    '@timestamp': `2026-01-01T0${hour}:00:00.000Z`,
+    status,
+    episode_id: episodeId,
+    assessment_note: assessmentNote,
+  });
+  const deactivation = (at: string, reason: string, episodeId = 'episode-1') => ({
+    '@timestamp': at,
+    episode_id: episodeId,
+    reason,
+  });
+  const versions = [
+    version(0, 'active', 'Original'),
+    version(1, 'inactive', 'Copied'),
+    version(2, 'active', 'Reopened', 'episode-2'),
+  ];
+
+  const getLifecycleEvents = async ({
+    deactivations,
+    includeSkipped = false,
+    hits = versions,
+  }: {
+    deactivations: Array<ReturnType<typeof deactivation>>;
+    includeSkipped?: boolean;
+    hits?: Array<Record<string, unknown>>;
+  }) => {
+    const response = await lifecycleRoute.handler({
+      params: {
+        path: { id: 'event-1' },
+        ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits }),
+          findEventDeactivations: jest.fn().mockResolvedValue(deactivations),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+          findSkippedForEvent: jest.fn().mockResolvedValue({ hits: [], truncated: false }),
+        }),
+      }),
+      server: {},
+    } as never);
+    return response.events;
+  };
+
+  it.each([false, true])(
+    'carries the operator reason as the note of the deactivated version (include_skipped: %s)',
+    async (includeSkipped) => {
+      const events = await getLifecycleEvents({
+        // Stamped just after the version it produced: the two are written separately.
+        deactivations: [deactivation('2026-01-01T01:00:00.200Z', 'Known noise')],
+        includeSkipped,
+      });
+
+      expect(events).toEqual([
+        versions[0],
+        { ...versions[1], assessment_note: 'Known noise' },
+        versions[2],
+      ]);
+    }
+  );
+
+  it('keeps the copied note when the operator gave no reason', async () => {
+    const events = await getLifecycleEvents({
+      deactivations: [deactivation('2026-01-01T00:59:59.900Z', '')],
+    });
+
+    expect(events).toEqual(versions);
+  });
+
+  it('gives each deactivation of a reopened episode to its own version', async () => {
+    const hits = [
+      version(0, 'active', 'Original'),
+      version(1, 'inactive', 'Copied'),
+      version(2, 'active', 'Reopened'),
+      version(3, 'inactive', 'Copied again'),
+    ];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [
+        deactivation('2026-01-01T00:59:59.900Z', 'First reason'),
+        deactivation('2026-01-01T02:59:59.900Z', 'Second reason'),
+      ],
+    });
+
+    expect(events.map(({ assessment_note: note }) => note)).toEqual([
+      'Original',
+      'First reason',
+      'Reopened',
+      'Second reason',
+    ]);
+  });
+
+  it('still matches when the engine writes another inactive version before the action is stamped', async () => {
+    const hits = [
+      version(0, 'active', 'Original'),
+      version(1, 'inactive', 'Copied'),
+      { ...version(1, 'inactive', 'Engine update'), '@timestamp': '2026-01-01T01:00:00.050Z' },
+    ];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [deactivation('2026-01-01T01:00:00.100Z', 'Known noise')],
+    });
+
+    expect(events.map(({ assessment_note: note }) => note)).toEqual([
+      'Original',
+      'Known noise',
+      'Engine update',
+    ]);
+  });
+
+  it('does not give an operator reason to a version the engine made inactive', async () => {
+    const hits = [
+      version(0, 'active', 'Original'),
+      version(1, 'inactive', 'Recovered'),
+      version(2, 'active', 'Reopened by an operator'),
+      version(3, 'inactive', 'Copied'),
+    ];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [deactivation('2026-01-01T02:59:59.900Z', 'Known noise')],
+    });
+
+    expect(events.map(({ assessment_note: note }) => note)).toEqual([
+      'Original',
+      'Recovered',
+      'Reopened by an operator',
+      'Known noise',
+    ]);
+  });
+
+  it('replaces only the note of the version that became inactive in the deactivated episode', async () => {
+    const noEpisode = {
+      event_id: 'event-1',
+      '@timestamp': '2026-01-01T05:00:00.000Z',
+      status: 'inactive',
+    };
+    const stillInactive = { ...version(4, 'inactive', 'Still inactive') };
+    const hits = [versions[0], versions[1], stillInactive, noEpisode];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [
+        deactivation('2026-01-01T00:59:59.900Z', 'Known noise'),
+        deactivation('2026-01-01T00:59:59.900Z', 'Ignored', 'unknown-episode'),
+      ],
+    });
+
+    expect(events).toEqual([
+      versions[0],
+      { ...versions[1], assessment_note: 'Known noise' },
+      stillInactive,
+      noEpisode,
+    ]);
   });
 });
 
@@ -457,6 +628,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
         licensing: {},
         getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [event] }),
+          findEventDeactivations: jest.fn().mockResolvedValue([]),
         }),
         getDetectionClient: () => ({
           findByIds: jest.fn().mockResolvedValue({ hits: embedded }),

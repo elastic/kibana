@@ -26,7 +26,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
-import type { ConversationEvent } from './timeline_events';
+import type { ActiveExecution, ConversationEvent } from './timeline_events';
 import type { ExecutionInterruption } from './events';
 import type { MetadataFieldValue } from '../templates';
 
@@ -319,6 +319,9 @@ export const createInjectedContextStep = (data: InjectedContextStepData): Inject
 export const isInjectedContextStep = (step: ConversationRoundStep): step is InjectedContextStep => {
   return step.type === ConversationRoundStepType.injectedContext;
 };
+
+/** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
+export const relevantSkillsHookId = 'relevant-skills';
 
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
@@ -826,6 +829,8 @@ export interface Conversation {
   read?: boolean;
   /** current status of the conversation */
   status?: ConversationRoundStatus;
+  /** The run lock held by the conversation's current execution. */
+  active_execution?: ActiveExecution;
   /**
    * Identifier of the bash/VFS workspace for this conversation.
    */
