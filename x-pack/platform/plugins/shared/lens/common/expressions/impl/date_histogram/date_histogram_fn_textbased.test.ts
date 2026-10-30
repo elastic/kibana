@@ -199,6 +199,70 @@ describe('lens_date_histogram_textbased', () => {
       });
     });
 
+    it('snaps weekly buckets to ISO weeks starting on Monday', async () => {
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          buildBucketColumn({
+            bucket: { interval: 1, unit: 'week' },
+            appliedTimeRange: {
+              from: '2026-01-05T00:00:00.000Z',
+              to: '2026-02-02T00:00:00.000Z',
+            },
+          }),
+          { id: 'b', name: 'B', meta: { type: 'number' } },
+        ],
+        rows: [{ a: Date.parse('2026-01-12T00:00:00.000Z'), b: 1 }],
+      };
+
+      const result = await dateHistogram.fn(input, {}, createMockExecutionContext());
+
+      expect(result.columns[0].meta.sourceParams?.computedDomain).toEqual({
+        min: Date.parse('2026-01-05T00:00:00.000Z'),
+        max: Date.parse('2026-01-26T00:00:00.000Z'),
+      });
+    });
+
+    it('aligns multi-month calendar buckets and drops the trailing partial', async () => {
+      const january = Date.parse('2026-01-01T00:00:00.000Z');
+      const april = Date.parse('2026-04-01T00:00:00.000Z');
+      const july = Date.parse('2026-07-01T00:00:00.000Z');
+      const october = Date.parse('2026-10-01T00:00:00.000Z');
+
+      const input: Datatable = {
+        type: 'datatable',
+        columns: [
+          buildBucketColumn({
+            bucket: { interval: 3, unit: 'month' },
+            appliedTimeRange: {
+              from: '2026-01-01T00:00:00.000Z',
+              to: '2026-10-01T00:00:00.000Z',
+            },
+          }),
+          { id: 'b', name: 'B', meta: { type: 'number' } },
+        ],
+        rows: [
+          { a: january, b: 1 },
+          { a: april, b: 2 },
+          { a: july, b: 3 },
+          { a: october, b: 4 },
+        ],
+      };
+
+      const result = await dateHistogram.fn(input, {}, createMockExecutionContext());
+
+      expect(result).not.toBe(input);
+      expect(result.rows).toStrictEqual([
+        { a: january, b: 1 },
+        { a: april, b: 2 },
+        { a: july, b: 3 },
+      ]);
+      expect(result.columns[0].meta.sourceParams?.computedDomain).toEqual({
+        min: january,
+        max: july,
+      });
+    });
+
     describe('DST', () => {
       const dateHistogramRome = getDateHistogramTextBased(
         createDatatableUtilitiesMock,
@@ -275,6 +339,36 @@ describe('lens_date_histogram_textbased', () => {
           { a: bar485, b: 485 },
         ]);
         expect(result.columns[0].meta.sourceParams?.computedDomain).toEqual(expectedDomain);
+      });
+
+      it('keeps a complete 30-minute bucket whose local end falls before the DST fallback', async () => {
+        const bucketStart = Date.parse('2026-10-25T00:00:00.000Z');
+        const nextBoundary = Date.parse('2026-10-25T00:30:00.000Z');
+        const input: Datatable = {
+          type: 'datatable',
+          columns: [
+            buildBucketColumn({
+              bucket: { interval: 30, unit: 'minute' },
+              appliedTimeRange: {
+                from: '2026-10-25T00:00:00.000Z',
+                to: '2026-10-25T00:45:00.000Z',
+              },
+            }),
+            { id: 'b', name: 'B', meta: { type: 'number' } },
+          ],
+          rows: [
+            { a: bucketStart, b: 1 },
+            { a: nextBoundary, b: 2 },
+          ],
+        };
+
+        const result = await dateHistogramRome.fn(input, {}, createMockExecutionContext());
+
+        expect(result.rows).toStrictEqual([{ a: bucketStart, b: 1 }]);
+        expect(result.columns[0].meta.sourceParams?.computedDomain).toEqual({
+          min: bucketStart,
+          max: bucketStart,
+        });
       });
     });
   });
