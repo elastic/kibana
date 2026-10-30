@@ -9,56 +9,41 @@ import type { Subscription } from 'rxjs';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
+import type { AppliedAttachmentsStore } from './applied_attachments_store';
 
 /*
- * keep the attachment's origin in sync with the dashboard's saved object id on dashboard save,
+ * keep the linked attachment's origin in sync with the dashboard's saved object id on dashboard save,
  * so that the attachment always points to the correct dashboard even after saving to a new dashboard
  * or saving an unsaved dashboard
  */
 export const createOriginSyncSubscription = ({
   api,
+  store,
   getAttachments,
-  checkSavedDashboardExist,
   updateOrigin,
 }: {
   api: DashboardApi;
+  store: AppliedAttachmentsStore;
   getAttachments: () => undefined | DashboardAttachment[];
-  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (
     attachmentId: string,
     origin: string
   ) => Promise<UpdateOriginResponse | undefined> | undefined;
 }): Subscription => {
-  return api.onSave$.subscribe(async ({ previousDashboardId, dashboardId }: DashboardSaveEvent) => {
+  return api.onSave$.subscribe(({ previousDashboardId, dashboardId }: DashboardSaveEvent) => {
     if (!dashboardId) {
       return;
     }
-    const attachments = getAttachments();
-    if (!attachments) {
+    const attachments = getAttachments() ?? [];
+    const linkedAttachmentId = store.linkedAttachmentIds.get(api);
+    const attachmentToSync =
+      attachments.find(({ id }) => id === linkedAttachmentId) ??
+      (previousDashboardId
+        ? attachments.find(({ origin }) => origin === previousDashboardId)
+        : undefined);
+    if (!attachmentToSync || attachmentToSync.origin === dashboardId) {
       return;
     }
-    const attachmentToSync = attachments.find(({ origin }) => {
-      if (origin === previousDashboardId || origin === dashboardId) {
-        return true;
-      }
-      return false;
-    });
-    if (attachmentToSync) {
-      return updateOrigin(attachmentToSync.id, dashboardId);
-    }
-
-    // if no attachment to sync, check if there is an attachment with a non-existing
-    // origin (dashboard has been removed)
-    let attachmentWithNonExistingOrigin: DashboardAttachment | undefined;
-    for (const attachment of attachments) {
-      if (attachment.origin && !(await checkSavedDashboardExist(attachment.origin))) {
-        attachmentWithNonExistingOrigin = attachment;
-        break;
-      }
-    }
-
-    if (attachmentWithNonExistingOrigin) {
-      return updateOrigin(attachmentWithNonExistingOrigin.id, dashboardId);
-    }
+    return updateOrigin(attachmentToSync.id, dashboardId);
   });
 };
