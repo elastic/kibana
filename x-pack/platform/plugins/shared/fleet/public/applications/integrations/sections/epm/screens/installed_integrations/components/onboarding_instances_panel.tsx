@@ -28,19 +28,21 @@ export const OnboardingInstancesPanel: React.FunctionComponent<{
   const paddingStyles = useEuiPaddingCSS();
   const [pageIndex, setPageIndex] = useState(0);
 
-  const { data, isLoading, isFetching, isError } = useGetCloudOnboardingDeploymentsQuery({
-    provider: 'aws',
-    packageName: installedPackage.name,
-    page: pageIndex + 1,
-    perPage: ONBOARDING_INSTANCES_PAGE_SIZE,
-  });
+  const { data, isLoading, isFetching, isError, isPreviousData } =
+    useGetCloudOnboardingDeploymentsQuery({
+      provider: 'aws',
+      packageName: installedPackage.name,
+      page: pageIndex + 1,
+      perPage: ONBOARDING_INSTANCES_PAGE_SIZE,
+    });
 
-  // Deleting the last instance of a page leaves it empty: go back to the previous one.
+  // Deleting the last instance of a page leaves it past the end: go to the last page. Placeholder
+  // data from the previous page is not for this one, so it is skipped.
   useEffect(() => {
-    if (pageIndex > 0 && data && data.items.length === 0) {
-      setPageIndex(pageIndex - 1);
-    }
-  }, [data, pageIndex]);
+    if (!data || isPreviousData) return;
+    const lastPageIndex = Math.max(0, Math.ceil(data.total / ONBOARDING_INSTANCES_PAGE_SIZE) - 1);
+    if (pageIndex > lastPageIndex) setPageIndex(lastPageIndex);
+  }, [data, isPreviousData, pageIndex]);
 
   return (
     <ResizablePanel

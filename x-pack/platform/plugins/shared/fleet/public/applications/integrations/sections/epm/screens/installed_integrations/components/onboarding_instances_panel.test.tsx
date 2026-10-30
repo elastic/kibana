@@ -107,6 +107,52 @@ describe('OnboardingInstancesPanel', () => {
     expect(mockQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1 }));
   });
 
+  it('goes back only to the new last page, not further', async () => {
+    mockQuery.mockReturnValue({
+      data: { items: [{ id: 'd1' }], total: 60, page: 1, perPage: 20 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+    render();
+    await act(async () => {
+      screen.getByTestId('nextPage').click();
+    });
+    await act(async () => {
+      screen.getByTestId('nextPage').click();
+    });
+    // Page 3 comes back empty after its last instance was deleted; 2 pages are left.
+    mockQuery.mockReturnValue({
+      data: { items: [], total: 40, page: 3, perPage: 20 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+
+    await act(async () => {
+      screen.getByTestId('nextPage').click();
+    });
+
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+  });
+
+  it('does not change page on placeholder data from the previous page', async () => {
+    render();
+    mockQuery.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isFetching: true,
+      isError: false,
+      isPreviousData: true,
+    });
+
+    await act(async () => {
+      screen.getByTestId('nextPage').click();
+    });
+
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
+  });
+
   it('shows the loading state while a page loads', () => {
     mockQuery.mockReturnValue({
       data: undefined,
