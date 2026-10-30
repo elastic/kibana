@@ -18,11 +18,7 @@ export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from '.
 export { getErrorMessage } from './src/utils';
 export type { DashboardFailure } from './src/utils';
 
-export type {
-  PanelContent,
-  PanelContentAttempt,
-  ResolveEsqlVariables,
-} from './src/resolve_panel';
+export type { PanelContent, PanelContentAttempt, ResolveEsqlVariables } from './src/resolve_panel';
 
 export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
 
