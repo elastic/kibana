@@ -5,18 +5,31 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
 import type { OpenAPIV3 } from 'openapi-types';
-import { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema } from './bulk_delete';
-import { bulkPurgeRollupSchema } from './bulk_purge_rollup';
-import { createSLOParamsSchema } from './create';
+import {
+  bulkDeleteParamsSchema,
+  bulkDeleteResponseSchema,
+  bulkDeleteStatusParamsSchema,
+  bulkDeleteStatusResponseSchema,
+} from './bulk_delete';
+import { bulkPurgeRollupResponseSchema, bulkPurgeRollupSchema } from './bulk_purge_rollup';
+import { createSLOParamsSchema, createSLOResponseSchema } from './create';
 import { deleteSLOInstancesParamsSchema } from './delete_instance';
-import { findSLOParamsSchema } from './find';
-import { findSloDefinitionsParamsSchema } from './find_definition';
-import { getSLOParamsSchema } from './get';
-import { bulkSnapshotParamsSchema, getSnapshotParamsSchema } from './snapshot';
-import { updateSLOParamsSchema } from './update';
+import { findSLOParamsSchema, findSLOResponseSchema } from './find';
+import {
+  findSloDefinitionsParamsSchema,
+  findSloDefinitionsResponseSchema,
+} from './find_definition';
+import { getSLOParamsSchema, getSLOResponseSchema } from './get';
+import { resetSLOResponseSchema } from './reset';
+import {
+  bulkSnapshotParamsSchema,
+  getSnapshotParamsSchema,
+  snapshotResponseSchema,
+} from './snapshot';
+import { updateSLOParamsSchema, updateSLOResponseSchema } from './update';
 
 interface RequestSchemas {
   params?: z.ZodType;
@@ -28,7 +41,7 @@ type Schema = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
 
 const ROUTE_METHOD = 'post';
 
-const generate = (request: RequestSchemas, path: string) =>
+const generate = (request: RequestSchemas, path: string, response?: z.ZodType) =>
   generateOpenApiDocument(
     {
       routers: [
@@ -40,7 +53,10 @@ const generate = (request: RequestSchemas, path: string) =>
               isVersioned: false,
               handler: jest.fn(),
               options: { access: 'public' },
-              validationSchemas: { request },
+              validationSchemas: {
+                request,
+                ...(response && { response: { 200: { body: () => response } } }),
+              },
             },
           ],
         },
@@ -220,6 +236,100 @@ describe('SLO public route request bodies are documented', () => {
         'requests',
         'requests[].instanceId',
       ])
+    );
+  });
+});
+
+describe('SLO public route responses are documented', () => {
+  const generateResponse = async (response: z.ZodType) => {
+    const doc = await generate({}, '/api/route', response);
+    const responseObject = doc.paths['/api/route']?.[ROUTE_METHOD]?.responses[200] as
+      | OpenAPIV3.ResponseObject
+      | undefined;
+    const schema = responseObject?.content && Object.values(responseObject.content)[0].schema;
+    const components = (doc.components?.schemas ?? {}) as Record<string, OpenAPIV3.SchemaObject>;
+    return { schema, components };
+  };
+
+  it.each([
+    ['create SLO', 'SLOCreateResponse', createSLOResponseSchema],
+    ['find SLOs', 'SLOFindResponse', findSLOResponseSchema],
+    ['get SLO', 'SLOWithSummaryResponse', getSLOResponseSchema],
+    ['update SLO', 'SLODefinition', updateSLOResponseSchema],
+    ['reset SLO', 'SLODefinition', resetSLOResponseSchema],
+    ['find SLO definitions', 'SLOFindDefinitionsResponse', findSloDefinitionsResponseSchema],
+    ['bulk delete SLOs', 'SLOBulkDeleteResponse', bulkDeleteResponseSchema],
+    ['bulk delete status', 'SLOBulkDeleteStatusResponse', bulkDeleteStatusResponseSchema],
+    ['bulk purge rollup data', 'SLOBulkPurgeRollupResponse', bulkPurgeRollupResponseSchema],
+    ['snapshot', 'SLOSnapshotResponse', snapshotResponseSchema],
+  ])('%s references the open %s component', async (_, id, response) => {
+    const { schema, components } = await generateResponse(response);
+    expect(schema).toEqual({ $ref: `#/components/schemas/${id}` });
+    expect(components[id]).toHaveProperty('additionalProperties', true);
+  });
+
+  it.each([
+    'SLOWithSummaryResponse',
+    'SLOSummary',
+    'SLOErrorBudget',
+    'SLODefinitionResponse',
+    'SLOBulkDeleteResult',
+  ])('documents the nested %s component as open', async (id) => {
+    const { components } = await generateResponse(
+      z.object({
+        find: findSLOResponseSchema,
+        definitions: findSloDefinitionsResponseSchema,
+        snapshot: snapshotResponseSchema,
+        bulkDeleteStatus: bulkDeleteStatusResponseSchema,
+      })
+    );
+    expect(components[id]).toHaveProperty('additionalProperties', true);
+  });
+
+  it('documents every snapshot result variant as open', async () => {
+    const { components } = await generateResponse(snapshotResponseSchema);
+    const { anyOf = [] } = components.SLOSnapshotResult;
+    expect(anyOf).toHaveLength(2);
+    for (const variant of anyOf) {
+      expect(variant).toHaveProperty('additionalProperties', true);
+    }
+  });
+
+  it('documents the meta and remote objects of an SLO as open', async () => {
+    const { components } = await generateResponse(getSLOResponseSchema);
+    const { meta, remote } = components.SLOWithSummaryResponse.properties ?? {};
+    expect(meta).toHaveProperty('additionalProperties', true);
+    expect(meta).toHaveProperty('properties.synthetics.additionalProperties', true);
+    expect(remote).toHaveProperty('additionalProperties', true);
+  });
+
+  it('keeps components shared with request bodies closed', async () => {
+    const { components } = await generateResponse(getSLOResponseSchema);
+    expect(components.SLOObjective).toHaveProperty('additionalProperties', false);
+    expect(components.SLOSettings).toHaveProperty('additionalProperties', false);
+  });
+
+  it('documents response dates as date-time', async () => {
+    const { components } = await generateResponse(
+      z.object({
+        definition: updateSLOResponseSchema,
+        slo: getSLOResponseSchema,
+        snapshot: snapshotResponseSchema,
+      })
+    );
+    for (const id of ['SLODefinition', 'SLOWithSummaryResponse']) {
+      expect(components[id].properties).toEqual(
+        expect.objectContaining({
+          createdAt: expect.objectContaining({ format: 'date-time' }),
+          updatedAt: expect.objectContaining({ format: 'date-time' }),
+        })
+      );
+    }
+    expect(components.SLOSummary.properties?.summaryUpdatedAt).toEqual(
+      expect.objectContaining({ format: 'date-time' })
+    );
+    expect(components.SLOSnapshotResponse.properties?.at).toEqual(
+      expect.objectContaining({ format: 'date-time' })
     );
   });
 });

@@ -21,29 +21,77 @@ const bulkSnapshotRequestItemSchema = lazySchema(() =>
   })
 );
 
-const snapshotErrorBudgetSchema = z.object({
-  initial: z.number(),
-  consumed: z.number().nullable(),
-  remaining: z.number().nullable(),
-});
+const snapshotErrorBudgetSchema = lazySchema(() =>
+  z
+    .object({
+      initial: z.number().describe('The initial error budget, derived from the SLO objective'),
+      consumed: z
+        .number()
+        .nullable()
+        .describe('The error budget consumed, or null when no data is available'),
+      remaining: z
+        .number()
+        .nullable()
+        .describe('The error budget remaining, or null when no data is available'),
+    })
+    .meta({ additionalProperties: true })
+);
 
-const snapshotSummarySchema = z.object({
-  status: statusSchema,
-  sliValue: z.number().nullable(),
-  errorBudget: snapshotErrorBudgetSchema,
-  good: z.number(),
-  total: z.number(),
-});
+const snapshotSummarySchema = lazySchema(() =>
+  z
+    .object({
+      status: statusSchema,
+      sliValue: z
+        .number()
+        .nullable()
+        .describe(
+          'The SLI value at the requested point in time, or null when no data is available'
+        ),
+      errorBudget: snapshotErrorBudgetSchema,
+      good: z.number().describe('The number of good events'),
+      total: z.number().describe('The total number of events'),
+    })
+    .meta({ additionalProperties: true })
+);
 
-const snapshotResultSchema = z.intersection(
+const snapshotResultBaseSchema = lazySchema(() =>
   z.object({
-    id: z.string(),
-    instanceId: z.string(),
-  }),
-  z.union([
-    z.object({ summary: snapshotSummarySchema }),
-    z.object({ error: z.object({ statusCode: z.number(), message: z.string() }) }),
-  ])
+    id: z.string().describe('The SLO definition id'),
+    instanceId: z
+      .string()
+      .describe("The SLO instance id. '*' represents the default (ungrouped) instance."),
+  })
+);
+
+const snapshotResultSchema = lazySchema(() =>
+  z
+    .union([
+      snapshotResultBaseSchema
+        .extend({
+          summary: snapshotSummarySchema.describe(
+            'The SLO instance summary at the requested point in time. Present when the computation succeeded.'
+          ),
+        })
+        .meta({ additionalProperties: true }),
+      snapshotResultBaseSchema
+        .extend({
+          error: z
+            .object({
+              statusCode: z.number().describe('The HTTP status code of the error'),
+              message: z.string().describe('The error message'),
+            })
+            .meta({ additionalProperties: true })
+            .describe(
+              'Error information when the computation failed for this SLO instance. Present when the computation failed.'
+            ),
+        })
+        .meta({ additionalProperties: true }),
+    ])
+    .meta({
+      id: 'SLOSnapshotResult',
+      description:
+        'The result of computing an SLO instance summary at a point in time. Contains either a summary (on success) or an error (on failure).',
+    })
 );
 
 const bulkSnapshotParamsSchema = lazySchema(() =>
@@ -59,10 +107,22 @@ const bulkSnapshotParamsSchema = lazySchema(() =>
   })
 );
 
-const snapshotResponseSchema = z.object({
-  at: z.string(),
-  results: z.array(snapshotResultSchema),
-});
+const snapshotResponseSchema = lazySchema(() =>
+  z
+    .object({
+      at: z
+        .string()
+        .meta({ format: 'date-time' })
+        .describe('The point in time at which the summaries were computed'),
+      results: z.array(snapshotResultSchema).describe('The per-instance computation results'),
+    })
+    .meta({
+      id: 'SLOSnapshotResponse',
+      description:
+        'The snapshot SLO response returns the point in time and the per-instance results. Each result contains either a summary (success) or an error (per-instance failure).',
+      additionalProperties: true,
+    })
+);
 
 // Query params cannot use the `dateType` codec: the OAS query converter rejects
 // codecs whose output is a class instance. The handler converts it to a Date.

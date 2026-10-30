@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
@@ -151,9 +151,11 @@ const artifactsWithIdSchema = dashboardsWithIdSchema.meta({
   description: 'Links to related assets for the SLO',
 });
 
-const sloDefinitionSchema = baseSloSchema
-  .extend({ artifacts: artifactsWithIdSchema.optional() })
-  .meta({ id: 'SLODefinition', description: 'The SLO definition' });
+const sloDefinitionSchema = lazySchema(() =>
+  baseSloSchema
+    .extend({ artifacts: artifactsWithIdSchema.optional() })
+    .meta({ id: 'SLODefinition', description: 'The SLO definition', additionalProperties: true })
+);
 const storedSloDefinitionSchema = baseSloSchema.extend({
   artifacts: dashboardsWithRefIdSchema.optional(),
 });

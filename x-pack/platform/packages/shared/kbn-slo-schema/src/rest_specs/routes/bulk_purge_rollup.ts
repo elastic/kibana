@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { z, lazySchema } from '@kbn/zod';
-import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { dateType } from '../../schema/common';
 import { durationType } from '../../schema/duration';
@@ -47,10 +46,23 @@ const bulkPurgeRollupSchema = lazySchema(() =>
   })
 );
 
-interface BulkPurgeRollupResponse {
-  taskId?: DeleteByQueryResponse['task'];
-}
+const bulkPurgeRollupResponseSchema = lazySchema(() =>
+  z
+    .object({
+      taskId: z
+        .union([z.string(), z.number()])
+        .optional()
+        .describe('The task id of the purge operation'),
+    })
+    .meta({
+      id: 'SLOBulkPurgeRollupResponse',
+      description:
+        'The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.',
+      additionalProperties: true,
+    })
+);
 
+type BulkPurgeRollupResponse = z.output<typeof bulkPurgeRollupResponseSchema>;
 type BulkPurgePolicyInput = z.input<typeof bulkPurgePolicy>;
 type BulkPurgeRollupInput = z.input<typeof bulkPurgeRollupSchema.shape.body>;
 type BulkPurgeRollupParams = z.output<typeof bulkPurgeRollupSchema.shape.body>;
@@ -61,4 +73,4 @@ export type {
   BulkPurgeRollupInput,
   BulkPurgeRollupParams,
 };
-export { bulkPurgeRollupSchema };
+export { bulkPurgeRollupResponseSchema, bulkPurgeRollupSchema };
