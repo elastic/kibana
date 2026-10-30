@@ -67,7 +67,7 @@ describe('processScoutReports', () => {
       pipeline: 'kibana-on-merge',
       prependTitle: '',
       updateGithub: true,
-      createIssues: true,
+      perTestIssues: true,
       indexInEs: true,
       reportUpdate: false,
     } as unknown as ProcessReportsParams);
@@ -95,7 +95,7 @@ describe('processScoutReports', () => {
     const fresh = createFailure({ id: 'fresh' });
     getScoutFailures.mockResolvedValue([tracked, fresh]);
     const params = createParams([tracked]);
-    params.createIssues = false;
+    params.perTestIssues = false;
 
     await processScoutReports(['/tmp/report.ndjson'], params);
 

@@ -94,7 +94,7 @@ const createParams = (
     pipeline: 'kibana-on-merge',
     prependTitle: '',
     updateGithub: true,
-    createIssues: true,
+    perTestIssues: true,
     indexInEs: true,
     reportUpdate: true,
     bkMeta: {},
@@ -208,7 +208,7 @@ describe('processJUnitReports with issue creation off', () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams([createExistingIssue(failures[0])]);
-    params.createIssues = false;
+    params.perTestIssues = false;
 
     await processJUnitReports(['report.xml'], params);
 
@@ -221,7 +221,7 @@ describe('processJUnitReports with issue creation off', () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const { params } = createParams();
-    params.createIssues = false;
+    params.perTestIssues = false;
 
     await processJUnitReports(['report.xml'], params);
 

@@ -10,11 +10,16 @@ failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every 
 started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
 the `--failing-suites-repo owner/name` given.
 
-`REPORT_FAILED_TESTS_CREATE_ISSUES=false` keeps it from opening new issues: tracked failures still
-bump their issue, failures without one are indexed, written to the failure report and left to
-`report_flaky_test_issues` below. Unset or `true` (the default) is the legacy behaviour, where every
-new failure opens an issue. Set it in the pipeline env next to `REPORT_FAILED_TESTS_TO_GITHUB` and flip
-it back to fall back to the legacy reporting at any time.
+`REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
+an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
+indexed and written to the failure report but gets no issue, its suite issue comes from
+`report_flaky_test_issues` below once it qualifies as flaky. Unset or `true` (the default) is the
+legacy behaviour, where every new failure opens a per-test issue. It only disables the per-test
+issues: `--report-failing-suites` still files `Failing … suite` issues. Set it in the pipeline env
+next to `REPORT_FAILED_TESTS_TO_GITHUB`, only on pipelines the daily flaky report reads
+(`FLAKY_TESTS_PIPELINES` of `kibana-report-flaky-tests`) and together with `REPORT_FAILING_SUITES`,
+anywhere else a new failure would never get an issue. Flip it back to fall back to the legacy
+reporting at any time.
 
 Issues for FTR, Jest (unit and integration) and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
