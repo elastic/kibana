@@ -89,6 +89,8 @@ export interface MatchAttachment {
   tag_fp_chain_alerts: boolean;
   /** The Investigation was not readable yet, so this attach writes the alert ids. */
   fingerprint_pending: boolean;
+  /** True only for a confirmed 404. A failed read must not retarget the fingerprint. */
+  retarget_if_missing: boolean;
   /** Written when the attach gives up because the Investigation changed under it. */
   own_fingerprint_id: string;
   host_entity_ids: string[];
@@ -892,6 +894,10 @@ const fingerprintStillPending = (
 ): boolean =>
   meta === undefined || (meta.unreadable === true && investigationStillPending(stored, now));
 
+/** A failed read still waits, but only a confirmed 404 may retarget the fingerprint. */
+const confirmedMissing = (meta: InvestigationMeta | undefined, pending: boolean): boolean =>
+  pending && meta === undefined;
+
 const fingerprintExpiresAt = (attack: AttackSignals, now: Date): string => {
   const last = attack.lastAlertAt === undefined ? Number.NaN : Date.parse(attack.lastAlertAt);
   return new Date((Number.isNaN(last) ? now.getTime() : last) + FINGERPRINT_TTL_MS).toISOString();
@@ -904,6 +910,7 @@ const attachmentOf = (
   retireAlerts: boolean,
   tagFpChain: boolean,
   fingerprintPending: boolean,
+  retargetIfMissing: boolean,
   spaceId: string,
   now: Date,
   analyzedAlertIds?: readonly string[]
@@ -921,6 +928,7 @@ const attachmentOf = (
   tag_correlated_alerts: tag,
   tag_fp_chain_alerts: tagFpChain,
   fingerprint_pending: fingerprintPending,
+  retarget_if_missing: retargetIfMissing,
   own_fingerprint_id: fingerprintId(spaceId, attack, investigationIdFromAttackId(attack.attackId)),
   host_entity_ids: uniqueSorted(attack.hostEntityIds).slice(0, STORED_ALERT_ID_CAP),
   user_entity_ids: uniqueSorted(attack.userEntityIds).slice(0, STORED_ALERT_ID_CAP),
@@ -937,6 +945,7 @@ const applyDecision = (
   reviews: MatchReview[],
   attachments: MatchAttachment[],
   fingerprintPending: boolean,
+  retargetIfMissing: boolean,
   spaceId: string,
   now: Date,
   analyzedAlertIds?: readonly string[]
@@ -951,6 +960,7 @@ const applyDecision = (
           decision.journalAlertsRetired,
           decision.tagFpChainAlerts,
           fingerprintPending,
+          retargetIfMissing,
           spaceId,
           now,
           decision.tagFpChainAlerts ? analyzedAlertIds : undefined
@@ -1048,16 +1058,15 @@ export const matchAttackFingerprints = async ({
 
     let attachedTo: StoredFingerprint | undefined;
     let fingerprintPending = false;
+    let retargetIfMissing = false;
     if (decision.kind === 'attach' && match !== undefined) {
       attachedTo = match;
       // Missing, or unreadable, and still inside the 15-minute window. The attach
-      // adds this attack's alert ids after the Investigation appears, or retargets
-      // this fingerprint if it does not.
-      fingerprintPending = fingerprintStillPending(
-        investigations.get(match.investigationId),
-        match,
-        now
-      );
+      // adds this attack's alert ids after the Investigation appears. Only a
+      // confirmed 404 may retarget the fingerprint if the wait then fails.
+      const matchedMeta = investigations.get(match.investigationId);
+      fingerprintPending = fingerprintStillPending(matchedMeta, match, now);
+      retargetIfMissing = confirmedMissing(matchedMeta, fingerprintPending);
       await extendFingerprint(
         esClient,
         match,
@@ -1124,6 +1133,7 @@ export const matchAttackFingerprints = async ({
           decision = adopted;
           attachedTo = conflicting;
           fingerprintPending = fingerprintStillPending(meta, conflicting, now);
+          retargetIfMissing = confirmedMissing(meta, fingerprintPending);
           await extendFingerprint(
             esClient,
             conflicting,
@@ -1159,6 +1169,7 @@ export const matchAttackFingerprints = async ({
       reviews,
       attachments,
       fingerprintPending,
+      retargetIfMissing,
       spaceId,
       now,
       attachedTo === undefined ? undefined : analyzedIdsOf(attachedTo)

@@ -76,9 +76,15 @@ triggers:
           description: >
             True when the matcher has not seen the Investigation yet. This run
             adds the continuation's alert ids to the fingerprint only after the
-            Investigation appears and the re-read still says to attach. If it
-            is still missing after the wait, the existing fingerprint is
-            retargeted at this attack. A second fingerprint is not created.
+            Investigation appears and the re-read still says to attach.
+        retarget_if_missing:
+          type: boolean
+          description: >
+            True only when the matcher confirmed a 404. After the wait, the
+            existing fingerprint is retargeted at this attack only when this is
+            true. A failed read leaves it false, so a privilege error or a 5xx
+            starts a review and does not rewrite the fingerprint. Omitted on a
+            direct call, which then keeps the retarget.
         own_fingerprint_id:
           type: string
           maxLength: 128
@@ -204,7 +210,7 @@ steps:
   # The same script is RETARGET_FINGERPRINT_SCRIPT in the matcher.
   - name: retarget_pending_fingerprint
     type: elasticsearch.update
-    if: "${{ inputs.fingerprint_pending == true and steps.wait_for_investigation.error != blank and steps.find_pending_fingerprint.output.hits.hits[0]._id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank }}"
+    if: "${{ inputs.fingerprint_pending == true and inputs.retarget_if_missing != false and steps.wait_for_investigation.error != blank and steps.find_pending_fingerprint.output.hits.hits[0]._id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank }}"
     on-failure:
       retry:
         max-attempts: 3

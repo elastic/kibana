@@ -56,6 +56,9 @@ export const matchAttackFingerprintsOutputSchema = lazySchema(() =>
           tag_correlated_alerts: z.boolean(),
           tag_fp_chain_alerts: z.boolean(),
           fingerprint_pending: z.boolean(),
+          retarget_if_missing: z
+            .boolean()
+            .describe('True only when the matcher confirmed the Investigation is missing'),
           own_fingerprint_id: z
             .string()
             .max(128)

@@ -93,13 +93,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID =
  *
  * Version 21 passes the fields a stale attach uses to write its own fingerprint
  * when the Investigation has closed, expired, or failed since the match.
+ *
+ * Version 22 passes `retarget_if_missing`. A failed Investigation read waits,
+ * but only a confirmed 404 may retarget the fingerprint after that wait.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 21,
+  version: 22,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -241,13 +244,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  *
  * Version 16 retargets only while the fingerprint still points at the earlier
  * Investigation. Alert ids, expiry, and the last alert become this attack's.
+ *
+ * Version 17 retargets only when the matcher confirmed the Investigation was
+ * missing. A privilege error or a 5xx starts a review and leaves the fingerprint.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 16,
+  version: 17,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

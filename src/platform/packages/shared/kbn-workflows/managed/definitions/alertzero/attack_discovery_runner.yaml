@@ -394,6 +394,7 @@ steps:
                 tag_fp_chain_alerts: "${{ foreach.item.tag_fp_chain_alerts }}"
                 journal_alerts_retired: "${{ foreach.item.journal_alerts_retired }}"
                 fingerprint_pending: "${{ foreach.item.fingerprint_pending }}"
+                retarget_if_missing: "${{ foreach.item.retarget_if_missing }}"
                 own_fingerprint_id: "{{ foreach.item.own_fingerprint_id }}"
                 host_entity_ids: "${{ foreach.item.host_entity_ids }}"
                 user_entity_ids: "${{ foreach.item.user_entity_ids }}"

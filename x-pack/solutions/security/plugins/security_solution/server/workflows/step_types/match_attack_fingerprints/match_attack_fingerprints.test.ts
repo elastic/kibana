@@ -953,6 +953,7 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews).toEqual([]);
     expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
     expect(output.attachments[0]?.fingerprint_pending).toBe(true);
+    expect(output.attachments[0]?.retarget_if_missing).toBe(true);
     expect(index).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1057,6 +1058,7 @@ describe('matchAttackFingerprints', () => {
     expect(output.reviews).toEqual([]);
     expect(output.attachments[0]?.investigation_id).toBe('11111111-1111-8111-8111-111111111111');
     expect(output.attachments[0]?.fingerprint_pending).toBe(true);
+    expect(output.attachments[0]?.retarget_if_missing).toBe(false);
     expect(index).toHaveBeenCalledTimes(1);
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({

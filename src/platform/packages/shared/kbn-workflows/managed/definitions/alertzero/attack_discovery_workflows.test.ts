@@ -3848,8 +3848,8 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 21 so a stale attach can write its own fingerprint', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(21);
+      it('bumps the runner to version 22 so a failed read does not retarget the fingerprint', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(22);
       });
 
       it('bumps batched generation to version 13 so the worker passes generation_source', () => {
@@ -3947,6 +3947,9 @@ describe('Attack Discovery worker chain', () => {
         );
         expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.type).toBe(
           'elasticsearch.update'
+        );
+        expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.if).toContain(
+          'inputs.retarget_if_missing != false'
         );
         expect(stepIn(attachSteps, 'retarget_pending_fingerprint')?.if).toContain(
           'steps.wait_for_investigation.error != blank'
@@ -4169,6 +4172,12 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
+      it('passes the confirmed-missing flag through as a typed boolean', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).retarget_if_missing).toBe(
+          '${{ foreach.item.retarget_if_missing }}'
+        );
+      });
+
       it('passes the retirement journal flag through as a typed boolean', () => {
         expect(asInputs(stepIn(workerSteps, 'run_attach')).journal_alerts_retired).toBe(
           '${{ foreach.item.journal_alerts_retired }}'
@@ -4181,8 +4190,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 16 so a retarget claims the fingerprint once', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(16);
+      it('bumps the attach workflow to version 17 so only a confirmed miss retargets', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(17);
       });
 
       it('keeps its alert tags in sync with the review', () => {

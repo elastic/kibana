@@ -515,6 +515,29 @@ export const disposition = (
     return review;
   }
 
+  const sharesAlerts = group.some((member) => alertOverlap(member.alertIds, stored.alertIds));
+  const onlyBuiltin =
+    !sharesAlerts &&
+    group.every(
+      (member) => !sameAttack(member, stored, false) || linksOnlyByBuiltinAccount(member, stored)
+    );
+  const closedFalsePositive =
+    investigation?.status === 'closed' && investigation.closeReason === 'false_positive';
+  const linkable = investigation !== undefined || investigationStillPending(stored, now);
+  // A built-in account does not wait. A failed read must not attach it to the
+  // other chain, which would skip FP/TP and add its alerts to that fingerprint.
+  if (onlyBuiltin && linkable) {
+    return {
+      kind: 'review_linked',
+      investigationId: freshInvestigationId,
+      relatedInvestigationId: stored.investigationId,
+      relatedLinkReason: closedFalsePositive ? 'false_positive' : 'builtin_account',
+      tagCorrelatedAlerts: false,
+      tagFpChainAlerts: false,
+      journalAlertsRetired: false,
+    };
+  }
+
   // A 5xx, a timeout, or a privilege error is not a missing Investigation.
   // Inside 15 minutes the review may still be creating it, so this waits, the
   // same as a 404. Older than that, retargeting would rewrite a fingerprint
@@ -532,27 +555,6 @@ export const disposition = (
       };
     }
     return review;
-  }
-
-  const sharesAlerts = group.some((member) => alertOverlap(member.alertIds, stored.alertIds));
-  const onlyBuiltin =
-    !sharesAlerts &&
-    group.every(
-      (member) => !sameAttack(member, stored, false) || linksOnlyByBuiltinAccount(member, stored)
-    );
-  const closedFalsePositive =
-    investigation?.status === 'closed' && investigation.closeReason === 'false_positive';
-  const linkable = investigation !== undefined || investigationStillPending(stored, now);
-  if (onlyBuiltin && linkable) {
-    return {
-      kind: 'review_linked',
-      investigationId: freshInvestigationId,
-      relatedInvestigationId: stored.investigationId,
-      relatedLinkReason: closedFalsePositive ? 'false_positive' : 'builtin_account',
-      tagCorrelatedAlerts: false,
-      tagFpChainAlerts: false,
-      journalAlertsRetired: false,
-    };
   }
 
   if (investigation === undefined) {

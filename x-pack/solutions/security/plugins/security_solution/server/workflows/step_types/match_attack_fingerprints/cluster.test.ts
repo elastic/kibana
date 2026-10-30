@@ -662,6 +662,32 @@ describe('disposition', () => {
     expect(decision.retargetFingerprint).toBeUndefined();
   });
 
+  it('reviews a built-in account when the Investigation could not be read', () => {
+    const now = new Date('2026-10-21T12:00:00.000Z');
+    const later = attack({
+      alertIds: ['b1'],
+      userEntityIds: ['NT AUTHORITY\\SYSTEM'],
+      entityPairs: ['NT AUTHORITY\\SYSTEM@host-1'],
+    });
+    const decision = disposition(
+      later,
+      stored({
+        writtenAt: now.toISOString(),
+        investigationId: 'live-inv',
+        alertIds: ['a1', 'a2'],
+        userEntityIds: ['NT AUTHORITY\\SYSTEM'],
+        entityPairs: ['NT AUTHORITY\\SYSTEM@host-1'],
+      }),
+      { unreadable: true },
+      [later],
+      now
+    );
+
+    expect(decision.kind).toBe('review_linked');
+    expect(decision.relatedLinkReason).toBe('builtin_account');
+    expect(decision.retargetFingerprint).toBeUndefined();
+  });
+
   it('returns attach and leaves an open in-analysis investigation untagged', () => {
     const decision = disposition(canonical, stored(), { status: 'open', verdict: 'In analysis' });
 
