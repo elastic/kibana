@@ -225,6 +225,11 @@ export class Authorization {
     }
   }
 
+  /** Returns the owners whose solution registered a Cases feature in this deployment. */
+  public getRegisteredOwners(): string[] {
+    return Array.from(this.registeredCaseOwners);
+  }
+
   /**
    * Returns the owners that exist in this deployment and that the user is authorized for.
    */

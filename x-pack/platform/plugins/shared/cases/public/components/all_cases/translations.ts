@@ -392,6 +392,10 @@ export const UNKNOWN = i18n.translate('xpack.cases.listView.unknown', {
   defaultMessage: 'Unknown',
 });
 
+export const LIST_SOLUTION = i18n.translate('xpack.cases.listView.solution', {
+  defaultMessage: 'Solution',
+});
+
 export const LIST_REPORTED_BY = i18n.translate('xpack.cases.listView.reportedBy', {
   defaultMessage: 'Reported by',
 });

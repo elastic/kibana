@@ -327,7 +327,56 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
   });
 
+  it("uses the configuration template's owner when owner is omitted", async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = jest.fn().mockResolvedValue([
+      { owner: 'securitySolution', templates: [] },
+      {
+        owner: 'observability',
+        templates: [
+          {
+            key: 'triage_template',
+            name: 'Triage template',
+            caseFields: { title: 'Template title', description: 'Template description' },
+          },
+        ],
+      },
+    ]);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      configure: { get },
+      cases: { create },
+    } as unknown as CasesClient);
+
+    const definition = createCaseFromTemplateStepDefinition(getCasesClient, false);
+    await definition.handler(createContext({ case_template_id: 'triage_template' }));
+
+    expect(get).toHaveBeenCalledWith({});
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ owner: 'observability' }));
+  });
+
   describe('when the templates feature is enabled (v2 path)', () => {
+    it("uses the template's owner when owner is omitted", async () => {
+      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = jest
+        .fn()
+        .mockResolvedValue(
+          buildTemplateSO(
+            { name: 'Triage default title', description: 'Triage default description', fields: [] },
+            { owner: 'observability' }
+          )
+        );
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      await definition.handler(createContext({ case_template_id: 'triage_template' }));
+
+      expect(create).toHaveBeenCalledWith(expect.objectContaining({ owner: 'observability' }));
+    });
+
     it('forwards a minimal payload that leaves severity/assignees/extractObservables to cases.create expansion', async () => {
       const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
       const getTemplate = jest.fn().mockResolvedValue(

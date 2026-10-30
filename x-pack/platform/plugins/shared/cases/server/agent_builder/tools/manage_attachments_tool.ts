@@ -24,7 +24,7 @@ import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
 import {
   CASES_TOOL_TEXT_INSTRUCTION,
-  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+  getCasesSolutionContextInstruction,
 } from '../utils/tool_instructions';
 import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
 
@@ -128,7 +128,7 @@ export const manageAttachmentsTool = (
   return {
     id: platformCoreCasesTools.manageAttachments,
     type: ToolType.builtin,
-    description: `Add or delete case attachments. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps), \`delete_attachments\` (permanently remove attachments by id). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Add or delete case attachments. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps), \`delete_attachments\` (permanently remove attachments by id). See \`mode\` field for required inputs.\n\n${getCasesSolutionContextInstruction()}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Manage Case Attachments',
       readOnlyHint: false,

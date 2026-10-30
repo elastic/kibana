@@ -14,7 +14,7 @@ import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
 import {
   CASES_TOOL_TEXT_INSTRUCTION,
-  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+  getCasesSolutionContextInstruction,
 } from '../utils/tool_instructions';
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
@@ -31,7 +31,7 @@ export const getAttachmentsTool = (
   return {
     id: platformCoreCasesTools.getAttachments,
     type: ToolType.builtin,
-    description: `Retrieve all comments, alerts, and events attached to a case.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Retrieve all comments, alerts, and events attached to a case.\n\n${getCasesSolutionContextInstruction()}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Get Case Attachments',
       readOnlyHint: true,

@@ -53,6 +53,8 @@ import {
   ensureTemplateVersionIsPinned,
   resolveTemplateForCreate,
 } from './expand_template_defaults';
+import type { CasePostRequestWithOptionalOwner } from './resolve_owner';
+import { resolveCaseOwner } from './resolve_owner';
 import {
   CREATE_CASE_WITHOUT_TEMPLATE_COUNTER,
   CREATE_CASE_WITH_TEMPLATE_COUNTER,
@@ -64,7 +66,7 @@ import {
  *
  */
 export const create = async (
-  data: CasePostRequest,
+  request: CasePostRequestWithOptionalOwner,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<Case> => {
@@ -83,6 +85,17 @@ export const create = async (
   } = clientArgs;
 
   try {
+    const data: CasePostRequest = {
+      ...request,
+      owner: await resolveCaseOwner({
+        request,
+        registeredOwners: auth.getRegisteredOwners(),
+        getTemplateOwner: async (templateId) =>
+          (
+            await templatesService.getTemplate(templateId)
+          )?.attributes.owner,
+      }),
+    };
     const rawQuery = decodeWithExcessOrThrowZod(CasePostRequestSchema)(data);
     let query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });

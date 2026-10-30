@@ -3156,7 +3156,7 @@ components:
     owner:
       type: string
       description: |
-        The application that owns the cases: Stack Management, Observability, or Elastic Security.
+        The solution the case comes from: Stack Management (`cases`), Observability, or Elastic Security. When Cases runs as a single app, it does not limit who can see the case.
       enum:
         - cases
         - observability
@@ -3222,7 +3222,6 @@ components:
       required:
         - connector
         - description
-        - owner
         - settings
         - tags
         - title
@@ -3241,7 +3240,10 @@ components:
         description:
           $ref: '#/components/schemas/case_description'
         owner:
-          $ref: '#/components/schemas/owner'
+          allOf:
+            - $ref: '#/components/schemas/owner'
+          description: |
+            The solution the case comes from. If you omit it, the case takes the owner of its template, the only solution in the deployment, or `cases`, in that order. It is required when `xpack.cases.topLevelApp.enabled` is `false`.
         settings:
           $ref: '#/components/schemas/settings'
         severity:

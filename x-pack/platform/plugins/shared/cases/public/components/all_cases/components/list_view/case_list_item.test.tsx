@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as topLevelApp from '../../../../common/top_level_app';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -90,6 +91,21 @@ describe('CaseListItem', () => {
     expect(reporter).toHaveTextContent(i18n.LIST_REPORTED_BY);
     expect(reporter).toHaveTextContent('Leslie Knope');
     expect(screen.queryByTestId('cases-list-item-created-at')).not.toBeInTheDocument();
+  });
+
+  it('shows the solution only in the top-level app', () => {
+    renderWithTestingProviders(<CaseListItem {...defaultProps} />);
+    expect(screen.queryByTestId('cases-list-item-solution')).not.toBeInTheDocument();
+  });
+
+  it('shows the solution in the top-level app', () => {
+    jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(true);
+    renderWithTestingProviders(
+      <CaseListItem {...defaultProps} theCase={{ ...mockCase, owner: 'securitySolution' }} />
+    );
+
+    expect(screen.getByTestId('cases-list-item-solution')).toHaveTextContent('Solution: Security');
+    jest.restoreAllMocks();
   });
 
   it('renders optional fields in a third row when enabled', () => {

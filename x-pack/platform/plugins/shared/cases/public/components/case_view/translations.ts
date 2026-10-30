@@ -336,6 +336,12 @@ export const TEMPLATE_NOT_FOUND_GENERIC = i18n.translate(
   }
 );
 
+export const SOLUTION = (name: string) =>
+  i18n.translate('xpack.cases.details.solution', {
+    defaultMessage: 'Solution: {name}',
+    values: { name },
+  });
+
 export const REPORTED_BY = (name: string) =>
   i18n.translate('xpack.cases.details.reportedBy', {
     defaultMessage: 'Reported by: {name}',

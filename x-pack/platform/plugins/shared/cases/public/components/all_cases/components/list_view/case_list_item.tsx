@@ -31,6 +31,7 @@ import { useCaseViewNavigation } from '../../../../common/navigation/hooks';
 import { ActionColumnComponent as ActionColumn } from '../../hooks/use_actions';
 import { severities } from '../../../severity/config';
 import { CASE_DETAILS_LINK_ARIA } from '../../../links/translations';
+import { getOwnerLabel, isTopLevelAppEnabled } from '../../../../common/top_level_app';
 import * as i18n from '../../translations';
 
 const LIST_ITEM_HEIGHT = 80;
@@ -302,6 +303,17 @@ export const CaseListItem: React.FC<{
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
+                  {isTopLevelAppEnabled() && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued" data-test-subj="cases-list-item-solution">
+                        <span css={styles.labelSpan}>
+                          {i18n.LIST_SOLUTION}
+                          {':'}
+                        </span>{' '}
+                        {getOwnerLabel(theCase.owner)}
+                      </EuiText>
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>

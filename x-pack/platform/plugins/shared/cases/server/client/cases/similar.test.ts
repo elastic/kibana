@@ -11,6 +11,7 @@ import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
 import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import Boom from '@hapi/boom';
+import { setTopLevelAppEnabled } from '../../common/top_level_app';
 
 const mockClientArgs = createCasesClientMockArgs();
 const mockCasesClient = createCasesClientMock();
@@ -158,6 +159,26 @@ describe('similar', () => {
           "sortOrder": undefined,
         }
       `);
+  });
+
+  describe('with the top-level Cases app', () => {
+    beforeEach(() => setTopLevelAppEnabled(true));
+    afterEach(() => setTopLevelAppEnabled(false));
+
+    it('does not limit similar cases to the source case owner', async () => {
+      await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
+
+      const { filter } = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+      expect(JSON.stringify(filter)).not.toContain('cases.attributes.owner');
+      expect(JSON.stringify(filter)).toContain('127.0.0.1');
+    });
+  });
+
+  it('limits similar cases to the source case owner when the top-level app is off', async () => {
+    await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
+
+    const { filter } = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
+    expect(JSON.stringify(filter)).toContain('cases.attributes.owner');
   });
 
   describe('attachment totals', () => {

@@ -64,7 +64,43 @@ const FIND_TEMPLATES_SECTION = `
 - \`total\` greater than 1, or the only match has \`nameMatch: false\` (it only matched a field/description, not the name): list the candidates (name + description) and ask the user which one they meant — never auto-pin a field-only match or a lone last-page row.
 `;
 
-export const buildCasesSkill = (isTemplatesEnabled: boolean) =>
+const SOLUTION_CONTEXT_SECTION = `## Solution context — highest-priority rule
+
+Cases are partitioned across \`securitySolution\` (Security), \`observability\` (Observability), and \`cases\` (Stack Management). A user is in exactly one. Operating in the wrong solution — or fanning out across all three — is always a bug.
+
+**Before any cases tool call**, \`solutionContext\` must be set, sourced ONLY from:
+- The user naming it in plain language ("in Security", "obs cases", etc.) in the current or an earlier message in this conversation.
+
+Topic-keyword inference does not count. If unset, your only valid action is to ask, verbatim:
+
+> "Which Elastic app is this in — Security, Observability, or Stack Management?"
+
+Once set: pass as \`owner\` on every search/filter, use as \`owner\` for \`create\`, treat as fixed unless the user explicitly switches.
+
+Never:
+- ❌ Call any cases tool with multiple \`owner\` values to "cover all three" (most common failure).
+- ❌ Silently fall back to another owner on empty results — say "No matching cases in <Solution>" and ask.
+- ❌ Skip this for case-id operations — IDs resolve a record, but solution context confirms intent.
+
+Examples:
+- "find the case about the failing payment service" → ask first.
+- "investigating a Suricata alert in Security — find related cases" → \`securitySolution\` (named directly).
+- (turn 2, Security established turn 1) "show me the open ones" → reuse, don't re-ask.
+- "update case abc-123 to high severity" with no context → ask first.
+
+`;
+
+const SOURCE_SECTION = `## Solution (source)
+
+Every case lives in one Cases app. \`owner\` records which solution a case came from: \`securitySolution\` (Security), \`observability\` (Observability), or \`cases\` (Stack Management). It is not a boundary: the user can work with every case they can access.
+
+- Searches: omit \`owner\` to cover every case; pass one only when the user asks for one solution's cases.
+- \`create\`: \`owner\` picks the solution profile the new case uses (its templates, custom fields, and connectors). Use the one the user names, or the template's owner; ask only when neither is clear.
+- Never ask which app the user is in.
+
+`;
+
+export const buildCasesSkill = (isTemplatesEnabled: boolean, topLevelAppEnabled = false) =>
   defineSkillType({
     id: 'cases-management',
     name: 'cases-management',
@@ -93,31 +129,7 @@ You have full read **and write** access to Elastic cases across Security, Observ
       isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
     }
 
-## Solution context — highest-priority rule
-
-Cases are partitioned across \`securitySolution\` (Security), \`observability\` (Observability), and \`cases\` (Stack Management). A user is in exactly one. Operating in the wrong solution — or fanning out across all three — is always a bug.
-
-**Before any cases tool call**, \`solutionContext\` must be set, sourced ONLY from:
-- The user naming it in plain language ("in Security", "obs cases", etc.) in the current or an earlier message in this conversation.
-
-Topic-keyword inference does not count. If unset, your only valid action is to ask, verbatim:
-
-> "Which Elastic app is this in — Security, Observability, or Stack Management?"
-
-Once set: pass as \`owner\` on every search/filter, use as \`owner\` for \`create\`, treat as fixed unless the user explicitly switches.
-
-Never:
-- ❌ Call any cases tool with multiple \`owner\` values to "cover all three" (most common failure).
-- ❌ Silently fall back to another owner on empty results — say "No matching cases in <Solution>" and ask.
-- ❌ Skip this for case-id operations — IDs resolve a record, but solution context confirms intent.
-
-Examples:
-- "find the case about the failing payment service" → ask first.
-- "investigating a Suricata alert in Security — find related cases" → \`securitySolution\` (named directly).
-- (turn 2, Security established turn 1) "show me the open ones" → reuse, don't re-ask.
-- "update case abc-123 to high severity" with no context → ask first.
-
-## Solution profiles
+${topLevelAppEnabled ? SOURCE_SECTION : SOLUTION_CONTEXT_SECTION}## Solution profiles
 
 | Solution | Triggers | Observables (IOCs) | \`critical\` severity means |
 |----------|----------|--------------------|---------------------------|

@@ -66,6 +66,10 @@ export const SOLUTION_SELECTOR_LABEL = i18n.translate('xpack.cases.create.soluti
   defaultMessage: 'Create case under:',
 });
 
+export const SOLUTION_LABEL = i18n.translate('xpack.cases.create.solutionLabel', {
+  defaultMessage: 'Solution',
+});
+
 export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
   'xpack.cases.create.defaultEmptyTemplateName',
   {

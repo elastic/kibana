@@ -22,7 +22,9 @@ import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import * as commonI18n from '../../../../../common/translations';
 import { useAddCaseToChat } from '../../../../../agent_builder/use_add_case_to_chat';
+import { getOwnerLabel, isTopLevelAppEnabled } from '../../../../../common/top_level_app';
 import {
+  SOLUTION,
   REPORTED_BY,
   CREATED_ON,
   UNKNOWN_REPORTER,
@@ -121,6 +123,17 @@ export const useCaseViewHeader = ({
       'data-test-subj': 'case-view-created-at',
     };
 
+    // One app shows every solution's cases, so the case says which solution it comes from.
+    const solutionItems = isTopLevelAppEnabled()
+      ? [
+          {
+            type: 'text' as const,
+            label: SOLUTION(getOwnerLabel(caseData.owner)),
+            'data-test-subj': 'case-view-solution',
+          },
+        ]
+      : [];
+
     if (typeof caseData.incrementalId === 'number') {
       return [
         {
@@ -128,13 +141,21 @@ export const useCaseViewHeader = ({
           label: `#${caseData.incrementalId}`,
           'data-test-subj': 'case-view-incremental-id',
         },
+        ...solutionItems,
         reportedByItem,
         createdAtItem,
       ];
     }
 
-    return [reportedByItem, createdAtItem];
-  }, [caseData.incrementalId, caseData.createdBy, caseData.createdAt, timeZone, dateFormat]);
+    return [...solutionItems, reportedByItem, createdAtItem];
+  }, [
+    caseData.incrementalId,
+    caseData.owner,
+    caseData.createdBy,
+    caseData.createdAt,
+    timeZone,
+    dateFormat,
+  ]);
 
   // Back
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);

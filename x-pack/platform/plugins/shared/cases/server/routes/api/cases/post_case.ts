@@ -7,8 +7,8 @@
 
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
+import type { CasePostRequestWithOptionalOwner } from '../../../client/cases/resolve_owner';
 import { createCasesRoute } from '../create_cases_route';
-import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
@@ -25,7 +25,7 @@ export const postCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const theCase = request.body as caseApiV1.CasePostRequest;
+      const theCase = request.body as CasePostRequestWithOptionalOwner;
 
       const res: caseDomainV1.Case = await casesClient.cases.create({ ...theCase });
 

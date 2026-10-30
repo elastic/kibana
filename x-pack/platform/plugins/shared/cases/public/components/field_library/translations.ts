@@ -140,7 +140,7 @@ export const REQUIRED_ON_CLOSE_BADGE = i18n.translate(
 );
 
 export const OWNER_COLUMN = i18n.translate('xpack.cases.fieldLibrary.ownerColumn', {
-  defaultMessage: 'Owner',
+  defaultMessage: 'Solution',
 });
 
 export const FIELD_DEFINITION_FORM_TITLE_CREATE = i18n.translate(

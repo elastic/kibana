@@ -7,7 +7,6 @@
 
 import type { Case, CaseCustomField, User } from '../../../common/types/domain';
 import type {
-  CasePostRequest,
   CasesFindResponse,
   CasesSearchResponse,
   CaseResolveResponse,
@@ -35,6 +34,7 @@ import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
+import type { CasePostRequestWithOptionalOwner } from './resolve_owner';
 import { deleteCases } from './delete';
 import { search } from './search';
 import { find } from './find';
@@ -81,7 +81,11 @@ export interface CasesSubClient {
   /**
    * Creates a case.
    */
-  create(data: CasePostRequest): Promise<Case>;
+  /**
+   * Creates a case. With the top-level app on, `owner` may be omitted and is resolved from the
+   * template, the deployment's only owner, or the stack owner.
+   */
+  create(data: CasePostRequestWithOptionalOwner): Promise<Case>;
   /**
    * Bulk create cases. `options` is internal-only (bulkCreate has no HTTP route) — see
    * {@link BulkCreateCasesClientOptions}.
@@ -234,8 +238,10 @@ export const createCasesSubClient = (
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
-    create: withUsageCounter(usageCounterByMethod.create, clientArgs, (data: CasePostRequest) =>
-      create(data, clientArgs, casesClient)
+    create: withUsageCounter(
+      usageCounterByMethod.create,
+      clientArgs,
+      (data: CasePostRequestWithOptionalOwner) => create(data, clientArgs, casesClient)
     ),
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,

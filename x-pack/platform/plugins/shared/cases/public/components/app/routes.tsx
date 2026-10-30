@@ -14,6 +14,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CreateCase } from '../create';
 import type { CasesRoutesProps } from './types';
+import { SolutionProfileScope } from '../configure_cases/solution_profile_scope';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import {
   getCasesConfigurePath,
@@ -96,7 +97,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
             <Route exact path={getCasesConfigureTemplatesPath(basePath)}>
               {permissions.manageTemplates ? (
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <AllTemplatesLazy />
+                  <SolutionProfileScope>
+                    <AllTemplatesLazy />
+                  </SolutionProfileScope>
                 </Suspense>
               ) : (
                 <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
@@ -108,7 +111,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
             <Route exact path={getCasesConfigureFieldLibraryPath(basePath)}>
               {permissions.manageTemplates ? (
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <AllFieldDefinitionsLazy />
+                  <SolutionProfileScope>
+                    <AllFieldDefinitionsLazy />
+                  </SolutionProfileScope>
                 </Suspense>
               ) : (
                 <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
@@ -120,7 +125,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
             <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
               {permissions.manageTemplates ? (
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <CreateTemplateLazy />
+                  <SolutionProfileScope>
+                    <CreateTemplateLazy />
+                  </SolutionProfileScope>
                 </Suspense>
               ) : (
                 <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
@@ -132,7 +139,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
             <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
               {permissions.manageTemplates ? (
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <EditTemplateLazy />
+                  <SolutionProfileScope>
+                    <EditTemplateLazy />
+                  </SolutionProfileScope>
                 </Suspense>
               ) : (
                 <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
@@ -143,7 +152,9 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
           <Route path={getCasesConfigurePath(basePath)}>
             {permissions.settings ? (
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <ConfigureCasesLazy />
+                <SolutionProfileScope>
+                  <ConfigureCasesLazy />
+                </SolutionProfileScope>
               </Suspense>
             ) : (
               <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />

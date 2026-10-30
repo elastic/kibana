@@ -32,10 +32,14 @@ import { parseTemplate } from '../../routes/api/templates/parse_template';
 const findTemplateById = (
   configurations: Configurations,
   templateId: string
-): TemplateConfiguration | undefined => {
-  return configurations
-    .flatMap((configuration) => configuration.templates ?? [])
-    .find((template) => template.key === templateId);
+): { template: TemplateConfiguration; owner: string } | undefined => {
+  for (const configuration of configurations) {
+    const template = configuration.templates?.find(({ key }) => key === templateId);
+    if (template) {
+      return { template, owner: configuration.owner };
+    }
+  }
+  return undefined;
 };
 
 export const createCaseFromTemplateStepDefinition = (
@@ -49,7 +53,8 @@ export const createCaseFromTemplateStepDefinition = (
       CreateCaseFromTemplateStepConfig,
       CreateCaseFromTemplateStepOutput['case']
     >(getCasesClient, async (casesClient, input) => {
-      const { case_template_id, owner, overwrites } = input;
+      // `owner` is optional: when omitted, the case takes the template's owner.
+      const { case_template_id, owner: requestedOwner, overwrites } = input;
       const normalizedOverwrites = overwrites
         ? normalizeCaseStepUpdatesForBulkPatch(overwrites)
         : {};
@@ -69,9 +74,12 @@ export const createCaseFromTemplateStepDefinition = (
           // seed this create — fail with clear owner context now rather than falling through to
           // `cases.create`'s generic "Template not found" error, which doesn't mention the owner
           // mismatch and leaves the caller guessing whether the template id itself was wrong.
-          if (templateSO.attributes.owner !== owner) {
-            throw new Error(`Case template "${case_template_id}" not found for owner "${owner}"`);
+          if (requestedOwner !== undefined && templateSO.attributes.owner !== requestedOwner) {
+            throw new Error(
+              `Case template "${case_template_id}" not found for owner "${requestedOwner}"`
+            );
           }
+          const owner = templateSO.attributes.owner;
 
           // `cases.create` re-fetches and re-parses the template for expansion; parsing here as well
           // is a small duplicate read on a cold create path, kept for the wire-required seed values
@@ -139,12 +147,19 @@ export const createCaseFromTemplateStepDefinition = (
       // Legacy path: the templates feature is disabled, or the id is not a v2 template SO — fall
       // back to the per-space configuration templates (`cases-configure`). No server-side expansion
       // applies here; the configuration template's `caseFields` are merged directly, as before.
-      const configurations = await casesClient.configure.get({ owner });
-      const template = findTemplateById(configurations, case_template_id);
+      const configurations = await casesClient.configure.get(
+        requestedOwner !== undefined ? { owner: requestedOwner } : {}
+      );
+      const found = findTemplateById(configurations, case_template_id);
 
-      if (!template) {
-        throw new Error(`Case template not found for owner "${owner}": ${case_template_id}`);
+      if (!found) {
+        throw new Error(
+          requestedOwner !== undefined
+            ? `Case template not found for owner "${requestedOwner}": ${case_template_id}`
+            : `Case template not found: ${case_template_id}`
+        );
       }
+      const { template, owner } = found;
 
       const templateCaseFields = template.caseFields ?? {};
       // Key-by-key settings merge: a partial overwrites.settings (e.g. only syncAlerts) must not

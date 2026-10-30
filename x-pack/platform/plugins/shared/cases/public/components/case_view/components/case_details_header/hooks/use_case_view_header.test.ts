@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as topLevelApp from '../../../../../common/top_level_app';
 import { act, renderHook } from '@testing-library/react';
 
 import { useCaseViewHeader } from './use_case_view_header';
@@ -146,6 +147,20 @@ describe('useCaseViewHeader', () => {
         'data-test-subj': 'case-view-incremental-id',
       })
     );
+  });
+
+  it('names the solution the case comes from in the top-level app', () => {
+    jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(true);
+    const { result } = renderHook(
+      () =>
+        useCaseViewHeader({ ...defaultArgs, caseData: { ...basicCase, owner: 'observability' } }),
+      { wrapper }
+    );
+
+    expect(
+      result.current.metadata.find((m) => m?.['data-test-subj'] === 'case-view-solution')
+    ).toEqual(expect.objectContaining({ label: 'Solution: Observability' }));
+    jest.restoreAllMocks();
   });
 
   it('does not include incremental ID in metadata when undefined', () => {

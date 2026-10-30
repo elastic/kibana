@@ -18,6 +18,7 @@ import { manageAttachmentsTool } from './tools/manage_attachments_tool';
 import { observablesTool } from './tools/observable_tools';
 import { findTemplatesTool } from './tools/find_templates_tool';
 import { buildCasesSkill } from './skills/cases_skill';
+import { isTopLevelAppEnabled } from '../common/top_level_app';
 import { casesAnalyticsSkill } from './skills/cases_analytics_skill';
 import { createCaseAttachmentType } from './attachments/case_attachment_type';
 import { createCasesAttachmentType } from './attachments/cases_attachment_type';
@@ -71,7 +72,10 @@ export function registerCasesAgentBuilderTools(
   if (templatesEnabled) {
     agentBuilder.tools.register({ ...findTemplatesTool(getCasesClient), availability });
   }
-  agentBuilder.skills.register({ ...buildCasesSkill(templatesEnabled), availability });
+  agentBuilder.skills.register({
+    ...buildCasesSkill(templatesEnabled, isTopLevelAppEnabled()),
+    availability,
+  });
   // Only expose the analytics skill when the analytics indices exist.
   if (analyticsV2Enabled) {
     agentBuilder.skills.register({ ...casesAnalyticsSkill, availability });

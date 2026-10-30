@@ -30,3 +30,7 @@ export const getCaseAppTarget = (
     deepLinkId: 'cases',
   };
 };
+
+/** The display name of the solution a case comes from. */
+export const getOwnerLabel = (owner: string): string =>
+  isValidOwner(owner) ? OWNER_INFO[owner].label : owner;

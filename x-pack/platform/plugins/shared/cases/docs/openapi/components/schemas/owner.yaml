@@ -1,7 +1,7 @@
 type: string
 description: >
-  The application that owns the cases: Stack Management, Observability, or
-  Elastic Security.
+  The solution the case comes from: Stack Management (`cases`), Observability, or Elastic
+  Security. When Cases runs as a single app, it does not limit who can see the case.
 enum:
   - cases
   - observability
