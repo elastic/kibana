@@ -261,10 +261,11 @@ export function getWebpackConfig(
           sideEffects: true,
           generator: { filename: 'maplibre-gl/[name][ext]' },
         },
-        // emits a separate file and exports the URL. Previously achievable by using file-loader.
+        // MapLibre 6 imports .mjs plugins, but evaluates .js plugins, which Kibana's CSP blocks.
         {
           include: [require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js')],
           type: 'asset/resource',
+          generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
         },
         // exports the source code of the asset. Previously achievable by using raw-loader.
         {
