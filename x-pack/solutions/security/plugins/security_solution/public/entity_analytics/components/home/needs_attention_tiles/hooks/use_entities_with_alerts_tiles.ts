@@ -148,6 +148,9 @@ export const useAlertBasedTiles = ({
 
   return {
     severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
+    // True only when the count query returned a result. A skipped, failed, timed-out or no-access
+    // count is not a genuine 0, so the tile must not show `count` (0) for it.
+    hasCount: shownResult !== undefined && !error && !indexError,
     severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
       : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
