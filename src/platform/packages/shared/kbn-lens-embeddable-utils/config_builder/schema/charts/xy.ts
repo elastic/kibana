@@ -1143,8 +1143,9 @@ export const xyConfigSchemaNoESQL = lazySchema(() =>
 
 /**
  * XY chart state for ES|QL data layers. Annotation and reference line layers may
- * accompany ES|QL data layers; annotation layers never use the ES|QL datasource
- * (query annotations resolve their own data view, manual annotations need none).
+ * accompany ES|QL data layers; annotation layers never use the chart's ES|QL datasource
+ * (ES|QL annotations carry their own query, manual annotations need none). DSL query
+ * annotations and library annotation groups are DSL-only.
  */
 export const xyConfigSchemaESQL = lazySchema(() =>
   z
@@ -1190,8 +1191,8 @@ export type AnnotationLayerByValueType =
   | AnnotationLayerESQLType;
 /**
  * Layers whose data source is ES|QL. Annotation layers are intentionally excluded
- * even though ES|QL charts may contain them: they never use the ES|QL datasource
- * (query annotations carry their own data-view data source, manual annotations none).
+ * even though ES|QL charts may contain them: they never use the chart's ES|QL datasource
+ * (ES|QL annotations carry their own query, manual annotations none).
  */
 export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
 export type LayerTypeNoESQL =

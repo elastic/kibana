@@ -388,6 +388,47 @@ describe('getFetchEventAnnotations', () => {
       expect(handleRequest).toHaveBeenCalledTimes(1);
     });
 
+    it('starts DSL requests without waiting for ES|QL requests to finish', async () => {
+      let resolveEsql: (value: Awaited<ReturnType<typeof dataMock.search.esql>>) => void = () => {};
+      jest.mocked(dataMock.search.esql).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveEsql = resolve;
+          })
+      );
+      const resultPromise = runGetFetchEventAnnotations({
+        interval: '1h',
+        groups: [
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            annotations: [annotation],
+          },
+          {
+            type: 'event_annotation_group',
+            ignoreGlobalFilters: false,
+            dataView: dataView1,
+            annotations: [queryAnnotationSamples.noExtraFields],
+          },
+        ],
+      });
+
+      // A macrotask lets every already-resolvable promise in the DSL path settle
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(handleRequest).toHaveBeenCalledTimes(1);
+
+      resolveEsql({
+        rawResponse: { columns: [], values: [], is_running: false },
+        datatable: {
+          type: 'datatable',
+          columns: [{ id: 'time-id', name: 'time', meta: { type: 'date' } }],
+          rows: [{ 'time-id': '2022-07-05T08:00:00Z' }],
+        },
+      });
+      const result = await resultPromise;
+      expect(result?.rows.map(({ id }) => id)).toEqual(['esql-events', 'ann1']);
+    });
+
     it('does not swallow query failures', async () => {
       jest.mocked(dataMock.search.esql).mockRejectedValueOnce(new Error('Query failed'));
       await expect(

@@ -492,6 +492,66 @@ describe('XY', () => {
         validator.xy.fromState(esqlChartWithManualAnnotationLayer);
       });
 
+      describe('rejects Lens state that mixes annotation modes', () => {
+        const replaceAnnotations = (
+          attributes: LensAttributes,
+          annotations: unknown[]
+        ): LensAttributes => {
+          const visualization = attributes.state.visualization as XYVisualizationState;
+          return {
+            ...attributes,
+            state: {
+              ...attributes.state,
+              visualization: {
+                ...visualization,
+                layers: visualization.layers.map((layer) =>
+                  layer.layerType === 'annotations' ? { ...layer, annotations } : layer
+                ),
+              },
+            },
+          } as LensAttributes;
+        };
+        const esqlAnnotation = {
+          id: 'esql-annotation',
+          type: 'esql',
+          key: { type: 'point_in_time' },
+          label: 'Deployments',
+          query: { esql: 'FROM deployments | KEEP @timestamp' },
+          timeColumn: '@timestamp',
+        };
+
+        it('throws for ES|QL annotations in a DSL chart', () => {
+          const builder = new LensConfigBuilder(undefined, true);
+          expect(() =>
+            builder.toAPIFormat(replaceAnnotations(annotationXY, [esqlAnnotation]))
+          ).toThrow('ES|QL annotations are not supported in non-ESQL charts');
+        });
+
+        it('throws for query annotations in an ES|QL chart', () => {
+          const builder = new LensConfigBuilder(undefined, true);
+          const [queryAnnotation] = (
+            annotationXY.state.visualization as XYVisualizationState
+          ).layers.flatMap((layer) => ('annotations' in layer ? layer.annotations : []));
+          const esqlChartWithQueryAnnotation = replaceAnnotations(
+            esqlChartWithManualAnnotationLayer,
+            [queryAnnotation]
+          );
+          // Query annotations need their data view reference to reach the mode check
+          const annotationDataViewReferences = annotationXY.references.filter(({ name }) =>
+            name.startsWith('xy-visualization-layer-')
+          );
+          expect(() =>
+            builder.toAPIFormat({
+              ...esqlChartWithQueryAnnotation,
+              references: [
+                ...esqlChartWithQueryAnnotation.references,
+                ...annotationDataViewReferences,
+              ],
+            })
+          ).toThrow('Query-based and library annotations are not supported in ES|QL charts');
+        });
+      });
+
       it('should convert an ES|QL chart with a form-based reference line layer', () => {
         validator.xy.fromState(esqlChartWithReferenceLineLayer);
       });
