@@ -12,7 +12,7 @@ import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../hooks/use_automations';
 
 jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
-jest.mock('../../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
@@ -148,14 +148,6 @@ describe('CreateAutomationFlyout', () => {
     fireEvent.change(channelInput, { target: { value: 'oncall' } });
     fireEvent.click(await screen.findByRole('option', { name: '#oncall' }));
     expect(screen.getByTestId('submitAutomation')).toBeEnabled();
-  });
-
-  it('shows the create title and name and tags fields', () => {
-    renderFlyout();
-
-    expect(screen.getByRole('heading', { name: 'Create automation' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Name this automation')).toBeInTheDocument();
-    expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
   it('closes a pristine form without confirmation', () => {

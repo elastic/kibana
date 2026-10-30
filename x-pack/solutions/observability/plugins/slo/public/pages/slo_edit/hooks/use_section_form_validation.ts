@@ -8,10 +8,10 @@
 import type { MetricCustomIndicator, TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   is,
-  metricCustomBasicMetricZod,
-  metricCustomDocCountMetricZod,
-  timesliceMetricBasicMetricWithFieldZod,
-  timesliceMetricPercentileMetricZod,
+  metricCustomBasicMetric,
+  metricCustomDocCountMetric,
+  timesliceMetricBasicMetricWithField,
+  timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
 import type {
   FormState,
@@ -40,11 +40,11 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (is(metricCustomDocCountMetricZod, metric)) {
+            if (is(metricCustomDocCountMetric, metric)) {
               return true;
             }
 
-            if (is(metricCustomBasicMetricZod, metric) && !isEmpty(metric.field)) {
+            if (is(metricCustomBasicMetric, metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -60,10 +60,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (is(metricCustomDocCountMetricZod, metric)) {
+            if (is(metricCustomDocCountMetric, metric)) {
               return true;
             }
-            if (is(metricCustomBasicMetricZod, metric) && !isEmpty(metric.field)) {
+            if (is(metricCustomBasicMetric, metric) && !isEmpty(metric.field)) {
               return true;
             }
             return false;
@@ -94,10 +94,10 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
         const areMetricsValid =
           isObject(data) &&
           (data.metrics ?? []).every((metric) => {
-            if (is(timesliceMetricBasicMetricWithFieldZod, metric)) {
+            if (is(timesliceMetricBasicMetricWithField, metric)) {
               return Boolean(metric.field);
             }
-            if (is(timesliceMetricPercentileMetricZod, metric)) {
+            if (is(timesliceMetricPercentileMetric, metric)) {
               return Boolean(metric.field) && Boolean(metric.percentile);
             }
             return true;

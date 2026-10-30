@@ -20,6 +20,7 @@ import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './con
 import { ShareUrlIconButton } from '../../shared/components/share_url_icon_button';
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 const SHARE_ATTACK_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.attack.header.shareAttackLabel',
@@ -49,9 +50,12 @@ export interface HeaderProps {
  * 2-column flex layout so they wrap together on narrow widths. Padding is
  * provided by the parent `EuiFlyoutHeader`; the header itself adds no extra
  * panel padding.
+ * The share button is only shown inside the Security Solution app: its link opens the attacks page,
+ * which would navigate users away from where they are (e.g. Discover, that has its own share button).
  */
 export const Header: FC<HeaderProps> = memo(({ hit, onAttackUpdated, onShowNotes }) => {
   const documentId = useMemo(() => hit.raw._id ?? '', [hit]);
+  const isInSecurityApp = useIsInSecurityApp();
 
   const attackDetailsLink = useGetAttackFlyoutLink({
     attackId: hit.raw._id ?? '',
@@ -63,7 +67,7 @@ export const Header: FC<HeaderProps> = memo(({ hit, onAttackUpdated, onShowNotes
     <>
       <FlyoutHeaderActions>
         <ShareUrlIconButton
-          url={attackDetailsLink}
+          url={isInSecurityApp ? attackDetailsLink : null}
           tooltip={SHARE_ATTACK_LABEL}
           ariaLabel={SHARE_ATTACK_LABEL}
           dataTestSubj={HEADER_SHARE_BUTTON_TEST_ID}

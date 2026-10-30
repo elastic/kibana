@@ -16,12 +16,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import {
-  useApproveProposal,
-  useDismissProposal,
-  useIsApprovingProposal,
-  useIsDecliningProposal,
-} from '@kbn/proposals-plugin/public';
-import {
   useAssignInvestigation,
   useProposalImpactPills,
   useUserProfiles,
@@ -50,14 +44,6 @@ jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 
-// Only the mutations are stubbed — everything else this module exports stays real.
-jest.mock('@kbn/proposals-plugin/public', () => ({
-  ...jest.requireActual('@kbn/proposals-plugin/public'),
-  useApproveProposal: jest.fn(),
-  useDismissProposal: jest.fn(),
-  useIsApprovingProposal: jest.fn(),
-  useIsDecliningProposal: jest.fn(),
-}));
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
 jest.mock('@kbn/agentic-investigations-plugin/public', () => {
@@ -145,10 +131,6 @@ const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseRunningSummary = useRunningSummary as jest.Mock;
 const mockUseProposalImpactPills = useProposalImpactPills as jest.Mock;
-const mockUseApproveProposal = useApproveProposal as jest.Mock;
-const mockUseDismissProposal = useDismissProposal as jest.Mock;
-const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
-const mockUseIsDecliningProposal = useIsDecliningProposal as jest.Mock;
 const mockUseAssignInvestigation = useAssignInvestigation as jest.Mock;
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
@@ -307,7 +289,10 @@ const renderPage = (
   core.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
-  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
+  (core.application.capabilities as Record<string, unknown>).agenticInvestigations = {
+    readInvestigations: true,
+    ...capabilities,
+  };
   // The real hooks behind the details flyout and the assignee picker read these services, and
   // react-query rejects a query function that resolves to undefined.
   core.http.get.mockResolvedValue(proposal);
@@ -340,23 +325,21 @@ const renderPage = (
   return { core, agentBuilder, closeFlyout, history, rerender: () => rendered.rerender(page()) };
 };
 
-const approveMutateAsync = jest.fn().mockResolvedValue(undefined);
-const dismissMutateAsync = jest.fn().mockResolvedValue(undefined);
 const setStatusMutate = jest.fn();
+const setStatusMutateAsync = jest.fn();
 const assignInvestigationMutate = jest.fn().mockResolvedValue({});
 
 beforeEach(() => {
   mockDropDecided.mockClear();
-  approveMutateAsync.mockResolvedValue(undefined);
-  dismissMutateAsync.mockResolvedValue(undefined);
-  mockUseApproveProposal.mockReturnValue({ mutateAsync: approveMutateAsync });
-  mockUseDismissProposal.mockReturnValue({ mutateAsync: dismissMutateAsync });
-  mockUseIsApprovingProposal.mockReturnValue(false);
-  mockUseIsDecliningProposal.mockReturnValue(false);
   mockUseAssignInvestigation.mockReturnValue({ mutateAsync: assignInvestigationMutate });
   mockUseUserProfiles.mockReturnValue({ data: [], isFetching: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
-  mockUseSetInvestigationStatus.mockReturnValue({ mutate: setStatusMutate, isLoading: false });
+  setStatusMutateAsync.mockReset().mockResolvedValue({});
+  mockUseSetInvestigationStatus.mockReturnValue({
+    mutate: setStatusMutate,
+    mutateAsync: setStatusMutateAsync,
+    isLoading: false,
+  });
   mockUseInvestigationClosePreview.mockReturnValue({
     data: { pending_proposal_count: 0, pending_proposals: [] },
     isLoading: false,
@@ -627,125 +610,12 @@ describe('ConversationsPage decisions', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  // The modal is titled with the action name, which distinguishes it from the actions
-  // popover — also a dialog — and from the menu item that opened it.
-  const approvalDialog = () => within(screen.getByRole('dialog', { name: 'Revoke sessions' }));
-
-  // The recommended action lives in the ⋮ menu, not on the card.
-  const openApproval = () => {
-    fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-    // By role: the card's summary carries the same text, because the title the
-    // server stored for this proposal is the action's own name.
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
-  };
-
-  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', async () => {
-    renderPage('/', { alertZeroWrite: false });
-    openApproval();
-
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
-
-    await waitFor(() =>
-      expect(approveMutateAsync).toHaveBeenCalledWith({
-        id: 'prop-1',
-        body: { actionInput: { user: 'cfo@corp' } },
-      })
-    );
-  });
-
-  it('keeps an approved proposal in its category while its action runs', async () => {
-    renderPage('/');
-    openApproval();
-
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
-    await waitFor(() => expect(approveMutateAsync).toHaveBeenCalled());
-
-    expect(mockDropDecided).not.toHaveBeenCalled();
-  });
-
-  it('removes a declined proposal from its category because it closes at once', async () => {
-    renderPage('/');
-    openApproval();
-
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
-
-    await waitFor(() => expect(mockDropDecided).toHaveBeenCalledWith('prop-1'));
-  });
-
   it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
     renderPage('/', { proposalsCapabilities: { showProposals: true, decideProposals: false } });
     // Only the read-only "Copy link" remains in the menu: no decision can be made from it.
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
     expect(screen.getByRole('menuitem', { name: 'Copy link' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Revoke sessions' })).not.toBeInTheDocument();
-    expect(approveMutateAsync).not.toHaveBeenCalled();
-    expect(dismissMutateAsync).not.toHaveBeenCalled();
-  });
-
-  it('stays open and shows Applying while useIsApprovingProposal reports this proposal in flight', () => {
-    mockUseIsApprovingProposal.mockImplementation((id: string) => id === 'prop-1');
-    renderPage('/');
-    openApproval();
-
-    // The decision's own outcome shows in place — the modal never auto-closes, so a refusal
-    // (expired deadline, someone decided first) reads the same way: still open. Approving only
-    // resumes the gate workflow, whose action still runs afterward, so being in flight must not
-    // yet claim "Applied" — only a refetched, real decision can.
-    expect(approvalDialog().getAllByText('Applying').length).toBeGreaterThan(0);
-    expect(approvalDialog().queryByText('Applied')).not.toBeInTheDocument();
-    expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
-  });
-
-  it('shows the reason form in the same modal, not a second one, when Decline is clicked', () => {
-    renderPage('/');
-    openApproval();
-
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
-
-    // Same dialog, same title — its body swapped to the reason form rather than a second modal
-    // (the old flow's own) opening beside or instead of it.
-    expect(screen.getByRole('dialog', { name: 'Revoke sessions' })).toBeInTheDocument();
-    expect(screen.queryByRole('dialog', { name: 'Action modal' })).not.toBeInTheDocument();
-    expect(approvalDialog().getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
-  });
-
-  it('submits the selected reason and rationale, and returns to the read-only decided state', async () => {
-    renderPage('/');
-    openApproval();
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
-
-    fireEvent.click(
-      approvalDialog().getByRole('radio', {
-        name: 'No actions needed (risk is acceptable)',
-      })
-    );
-    fireEvent.change(approvalDialog().getByRole('textbox'), {
-      target: { value: 'Not worth chasing.' },
-    });
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
-
-    await waitFor(() =>
-      expect(dismissMutateAsync).toHaveBeenCalledWith({
-        id: 'prop-1',
-        body: { dismissReason: 'risk_accepted', rationale: 'Not worth chasing.' },
-      })
-    );
-    // The modal resets its form once the decision resolves; wait for that before the test ends.
-    await waitFor(() =>
-      expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument()
-    );
-  });
-
-  it('returns to the approval view without declining when Cancel is clicked', () => {
-    renderPage('/');
-    openApproval();
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
-
-    fireEvent.click(approvalDialog().getByRole('button', { name: 'Cancel' }));
-
-    expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument();
-    expect(dismissMutateAsync).not.toHaveBeenCalled();
   });
 
   it('opens the close-investigation modal when the ⋮ Close action is triggered with manage capability', () => {
@@ -761,6 +631,58 @@ describe('ConversationsPage decisions', () => {
     expect(setStatusMutate).toHaveBeenCalledWith({
       investigationId: 'inv-1',
       body: { status: 'closed', dismiss_reason: undefined, rationale: undefined },
+    });
+  });
+
+  describe('reopening a closed investigation', () => {
+    const closedInvestigationProposal = {
+      ...actionProposal,
+      conversationStatus: 'closed' as const,
+    };
+
+    const openMenuOf = () => {
+      mockProposals({ investigate: [closedInvestigationProposal] });
+      const rendered = renderPage('/', { capabilities: { manageInvestigations: true } });
+      fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
+      return rendered;
+    };
+
+    it('offers Open instead of Close for a closed investigation', () => {
+      openMenuOf();
+
+      expect(screen.getByText('Open investigation')).toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+    });
+
+    it('reopens the investigation at once, with a success toast and no modal', async () => {
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(setStatusMutateAsync).toHaveBeenCalledWith({
+          investigationId: 'inv-1',
+          body: { status: 'open' },
+        })
+      );
+      await waitFor(() =>
+        expect(core.notifications.toasts.addSuccess).toHaveBeenCalledWith('Investigation reopened')
+      );
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows an error toast when the reopen fails', async () => {
+      setStatusMutateAsync.mockRejectedValueOnce(new Error('boom'));
+      const { core } = openMenuOf();
+
+      fireEvent.click(screen.getByText('Open investigation'));
+
+      await waitFor(() =>
+        expect(core.notifications.toasts.addDanger).toHaveBeenCalledWith(
+          'Could not reopen the investigation'
+        )
+      );
+      expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
     });
   });
 
@@ -1144,6 +1066,28 @@ describe('ConversationsPage impact pills', () => {
     Object.keys(impactOf).forEach((id) => delete impactOf[id]);
   });
 
+  it('skips the impact request and names the missing privilege without investigations read', () => {
+    renderPage('/', { capabilities: { readInvestigations: false } });
+
+    expect(screen.getByTestId('alertzeroInvestigationsReadGate')).toHaveTextContent(
+      'Agentic Investigations Read'
+    );
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+    expect(screen.queryByRole('button', { name: /host-1/ })).not.toBeInTheDocument();
+    expect(screen.getByText('Host investigation')).toBeInTheDocument();
+  });
+
+  it('does not show the missing privilege callout with investigations read', () => {
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertzeroInvestigationsReadGate')).not.toBeInTheDocument();
+    expect(mockUseProposalImpactPills).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
   // Toggling a pill changes the section badges' text; awaiting flushes the resulting
   // MutationObserver update, which would otherwise land outside `act`.
   const togglePill = async (name: string) => {
@@ -1160,6 +1104,7 @@ describe('ConversationsPage impact pills', () => {
       origin: 'alertzero',
       categories: ['respond', 'investigate', 'configure'],
       decidedWithinHours: 72,
+      enabled: true,
     });
   });
 

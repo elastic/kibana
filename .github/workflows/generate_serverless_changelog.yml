@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   generate:
@@ -34,6 +35,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Fetch ephemeral GitHub token
+        id: fetch-ephemeral-token
+        uses: elastic/ci-gh-actions/fetch-github-token@f1837d5894f688eb909c1d777aaaf2f1df705cef # v1.5.4
+        with:
+          vault-instance: ci-prod
+
       - name: Generate serverless changelog
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
@@ -42,7 +49,7 @@ jobs:
           BUILDKITE_BUILD_URL: ${{ inputs.build_url }}
           BUILDKITE_MESSAGE: ${{ inputs.build_message }}
         with:
-          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          github-token: ${{ steps.fetch-ephemeral-token.outputs.token }}
           script: |
             const generateServerlessChangelog = require('./.github/scripts/generate_serverless_changelog');
             await generateServerlessChangelog({ github, core });

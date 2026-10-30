@@ -305,69 +305,6 @@ download_artifact() {
   retry 3 1 timeout 10m buildkite-agent artifact download "$@"
 }
 
-# Restores a moon cache archive into ./.moon/cache, only if it passes validate_moon_cache_archive.
-extract_moon_cache() {
-  local archive="$1" staging_dir
-
-  if ! validate_moon_cache_archive "$archive"; then
-    echo "Skipping moon cache restore." >&2
-    return 1
-  fi
-
-  mkdir -p ./.moon
-  staging_dir="$(mktemp -d ./.moon/cache-restore.XXXXXX)"
-  if ! tar -xf "$archive" --zstd --no-same-owner --no-same-permissions -C "$staging_dir"; then
-    rm -rf "$staging_dir"
-    echo "Failed to extract ${archive}, skipping moon cache restore." >&2
-    return 1
-  fi
-
-  rm -rf ./.moon/cache
-  mv "$staging_dir/.moon/cache" ./.moon/cache
-  rm -rf "$staging_dir"
-}
-
-# Checks that a moon cache archive only contains regular files and directories under .moon/cache.
-validate_moon_cache_archive() {
-  local archive="$1" entries names
-
-  # `tar -tv` prints one line per entry, starting with its type and permissions (e.g. "-rw-r--r--")
-  if ! entries="$(tar -tvf "$archive" --zstd)"; then
-    echo "Unable to list ${archive}." >&2
-    return 1
-  fi
-
-  # `tar -t` prints only the entry paths
-  if ! names="$(tar -tf "$archive" --zstd)"; then
-    echo "Unable to list ${archive}." >&2
-    return 1
-  fi
-
-  # Only regular files ("-") and directories ("d") are allowed: no symlinks, devices or fifos
-  if grep -qv '^[-d]' <<< "$entries"; then
-    echo "${archive} contains entries that are not regular files or directories." >&2
-    return 1
-  fi
-
-  # Some tar implementations list hard links with a regular file type and a " link to <target>" suffix
-  if grep -q ' link to ' <<< "$entries"; then
-    echo "${archive} contains hard links." >&2
-    return 1
-  fi
-
-  # Every entry must be .moon/cache itself or live inside it (relative path, no leading "/" or "./")
-  if grep -qvE '^\.moon/cache(/|$)' <<< "$names"; then
-    echo "${archive} contains entries outside .moon/cache." >&2
-    return 1
-  fi
-
-  # No entry may contain a ".." path segment
-  if grep -qE '(^|/)\.\.(/|$)' <<< "$names"; then
-    echo "${archive} contains parent-directory path segments." >&2
-    return 1
-  fi
-}
-
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     echo "DRY_RUN is enabled."
