@@ -1,5 +1,5 @@
 {
-  "sha1": "df1463254567f3780bcc80dacee80865de1923d8",
+  "sha1": "baba7b601b49b25ff2f296cbd27a815ec2721610",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,664 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "8f09243be924ca9-f0d28bfa5092e65",
+      "title": "Doc counts - degraded counts documents with ignored fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_degraded.spec.ts",
+        "line": 34,
+        "column": 34
+      }
+    },
+    {
+      "id": "676b2404ef98627-5f7921fb71a496a",
+      "title": "Doc counts - failed counts documents sent to the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_failed.spec.ts",
+        "line": 25,
+        "column": 34
+      }
+    },
+    {
+      "id": "446f714c1f436b2-e5c5a127e6994b3",
+      "title": "Doc counts - ingestion with failure store documents folds failure store documents into the ingestion count for privileged users only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts_ingestion_failure_store.spec.ts",
+        "line": 28,
+        "column": 36
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-44a0516bcb88fc4",
+      "title": "Doc counts - total and ingestion returns total document counts for all streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 78,
+        "column": 20
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-44556eb7fd8fd46",
+      "title": "Doc counts - total and ingestion returns total document counts for a single stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 91,
+        "column": 15
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-dee7caecceb4dba",
+      "title": "Doc counts - total and ingestion returns range-scoped ingestion counts for all streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 100,
+        "column": 13
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-8d3570e9899d3a1",
+      "title": "Doc counts - total and ingestion excludes documents outside the requested time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 117,
+        "column": 25
+      }
+    },
+    {
+      "id": "8c04f5ffe1062e7-a09f3a17a992154",
+      "title": "Doc counts - total and ingestion returns ingestion counts for a single stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/data_quality/doc_counts.spec.ts",
+        "line": 134,
+        "column": 11
+      }
+    },
+    {
+      "id": "0fe5b266f0782b7-3fa04af2dc8e2a6",
+      "title": "Failure store - classic streams inherit defaults to disabled without an index template failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
+        "line": 36,
+        "column": 5
+      }
+    },
+    {
+      "id": "0fe5b266f0782b7-c41e159d66c6821",
+      "title": "Failure store - classic streams overrides the index template failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
+        "line": 73,
+        "column": 33
+      }
+    },
+    {
+      "id": "0fe5b266f0782b7-e7f7ac3c8b4b438",
+      "title": "Failure store - classic streams disables the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
+        "line": 95,
+        "column": 11
+      }
+    },
+    {
+      "id": "0fe5b266f0782b7-88a7ea5aac2261c",
+      "title": "Failure store - classic streams updates the failure store retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_classic.spec.ts",
+        "line": 107,
+        "column": 70
+      }
+    },
+    {
+      "id": "41e80709c78ab15-9077d58d3265460",
+      "title": "Failure store - disabled lifecycle is rejected rejects disabling the lifecycle on a wired stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled_serverless.spec.ts",
+        "line": 47,
+        "column": 27
+      }
+    },
+    {
+      "id": "41e80709c78ab15-404df26e7627da1",
+      "title": "Failure store - disabled lifecycle is rejected rejects disabling the lifecycle on a parent wired stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled_serverless.spec.ts",
+        "line": 58,
+        "column": 59
+      }
+    },
+    {
+      "id": "41e80709c78ab15-32c00f6f013949a",
+      "title": "Failure store - disabled lifecycle is rejected rejects disabling the lifecycle on a classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled_serverless.spec.ts",
+        "line": 74,
+        "column": 47
+      }
+    },
+    {
+      "id": "41e80709c78ab15-d206c9ed105f833",
+      "title": "Failure store - disabled lifecycle is rejected rejects disabling the lifecycle on the root stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled_serverless.spec.ts",
+        "line": 83,
+        "column": 55
+      }
+    },
+    {
+      "id": "dd8ec260f5def21-ac55fdaab58d47a",
+      "title": "Failure store - disabled lifecycle disables the lifecycle on a wired stream failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled.spec.ts",
+        "line": 35,
+        "column": 48
+      }
+    },
+    {
+      "id": "dd8ec260f5def21-967424e8e3d89d2",
+      "title": "Failure store - disabled lifecycle inherits a disabled lifecycle from the parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled.spec.ts",
+        "line": 58,
+        "column": 24
+      }
+    },
+    {
+      "id": "dd8ec260f5def21-a53b2457b1ebfbe",
+      "title": "Failure store - disabled lifecycle disables the lifecycle on a classic stream failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled.spec.ts",
+        "line": 90,
+        "column": 26
+      }
+    },
+    {
+      "id": "dd8ec260f5def21-b4f619365e7f3db",
+      "title": "Failure store - disabled lifecycle disables the lifecycle on the root stream failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_lifecycle_disabled.spec.ts",
+        "line": 114,
+        "column": 30
+      }
+    },
+    {
+      "id": "83c89b8285442eb-27e5c448395d03f",
+      "title": "Failure store - root stream updates the root failure store configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_root.spec.ts",
+        "line": 32,
+        "column": 48
+      }
+    },
+    {
+      "id": "83c89b8285442eb-2b996183727f302",
+      "title": "Failure store - root stream inherits the root failure store on creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_root.spec.ts",
+        "line": 57,
+        "column": 20
+      }
+    },
+    {
+      "id": "83c89b8285442eb-4fe3cb28c29f98b",
+      "title": "Failure store - root stream applies the root failure store to inheriting streams only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_root.spec.ts",
+        "line": 74,
+        "column": 14
+      }
+    },
+    {
+      "id": "83c89b8285442eb-de29ad7f4e6bf2a",
+      "title": "Failure store - root stream stores an updated root failure store retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_root.spec.ts",
+        "line": 128,
+        "column": 56
+      }
+    },
+    {
+      "id": "af0fe0c18bb4b73-4da2a6c2c7ea8e6",
+      "title": "Failure store - wired streams disables the failure store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_wired.spec.ts",
+        "line": 21,
+        "column": 11
+      }
+    },
+    {
+      "id": "af0fe0c18bb4b73-7cc350a9ae8e958",
+      "title": "Failure store - wired streams applies the nearest parent failure store when reset to inherit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_wired.spec.ts",
+        "line": 32,
+        "column": 6
+      }
+    },
+    {
+      "id": "af0fe0c18bb4b73-7f70557a1d4fa15",
+      "title": "Failure store - wired streams enables the failure store with a lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_wired.spec.ts",
+        "line": 93,
+        "column": 68
+      }
+    },
+    {
+      "id": "af0fe0c18bb4b73-e2818e8d8529fa7",
+      "title": "Failure store - wired streams updates the failure store retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/failure_store_wired.spec.ts",
+        "line": 109,
+        "column": 30
+      }
+    },
+    {
+      "id": "b410baaea7b2022-da363605a11fb34",
+      "title": "Lifecycle stats - DSL streams does not return ILM stats for a stream with a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_dsl_stats.spec.ts",
+        "line": 17,
+        "column": 11
+      }
+    },
+    {
+      "id": "cc863a58f1ff5ff-da0bbdcac5bda07",
+      "title": "Lifecycle - ILM policies creates a policy, rejects a duplicate and overwrites it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
+        "line": 37,
+        "column": 11
+      }
+    },
+    {
+      "id": "cc863a58f1ff5ff-4c521eed34751bb",
+      "title": "Lifecycle - ILM policies rejects policies without phases",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
+        "line": 90,
+        "column": 32
+      }
+    },
+    {
+      "id": "cc863a58f1ff5ff-180ccadca0910ae",
+      "title": "Lifecycle - ILM policies rejects new policies without a hot phase",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
+        "line": 100,
+        "column": 16
+      }
+    },
+    {
+      "id": "cc863a58f1ff5ff-94a7f9c16e4f3e6",
+      "title": "Lifecycle - ILM policies includes the data streams that use a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_policies.spec.ts",
+        "line": 110,
+        "column": 16
+      }
+    },
+    {
+      "id": "f7d5cddd15b5ef5-bb2062e340f9b3c",
+      "title": "Lifecycle stats - ILM streams reports a missing ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_stats.spec.ts",
+        "line": 42,
+        "column": 16
+      }
+    },
+    {
+      "id": "f7d5cddd15b5ef5-423baca5ff75616",
+      "title": "Lifecycle stats - ILM streams returns the effective ILM phases",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_ilm_stats.spec.ts",
+        "line": 51,
+        "column": 39
+      }
+    },
+    {
+      "id": "624d2f6d2057db6-3e57a42f3574583",
+      "title": "Lifecycle - snapshot repositories (Cloud) lists the Cloud default repository",
+      "expectedStatus": "passed",
+      "tags": [
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_snapshot_repositories_cloud.spec.ts",
+        "line": 17,
+        "column": 9
+      }
+    },
+    {
+      "id": "f6d13c1218ea99c-d2b7962f5f8318f",
+      "title": "Lifecycle - snapshot repositories lists the snapshot repositories",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle/lifecycle_snapshot_repositories.spec.ts",
+        "line": 17,
+        "column": 86
       }
     },
     {
