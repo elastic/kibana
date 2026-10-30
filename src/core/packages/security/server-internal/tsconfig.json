@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/access-control",
     "@kbn/core-security-server",
     "@kbn/logging",
     "@kbn/core-base-server-internal",

@@ -240,8 +240,16 @@ describe('preflightCheckForCreate', () => {
         id: obj9.id,
         error: { type: 'unresolvableConflict', metadata: { isNotOverwritable: true } },
       },
-      { type: obj10.type, id: obj10.id, error: { type: 'conflict' } },
-      { type: obj11.type, id: obj11.id, error: { type: 'conflict' } },
+      {
+        type: obj10.type,
+        id: obj10.id,
+        error: { type: 'conflict', conflictingDocument: expect.objectContaining({ found: true }) },
+      },
+      {
+        type: obj11.type,
+        id: obj11.id,
+        error: { type: 'conflict', conflictingDocument: expect.objectContaining({ found: true }) },
+      },
     ]);
   });
 });

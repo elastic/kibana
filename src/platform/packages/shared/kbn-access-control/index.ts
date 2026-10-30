@@ -40,6 +40,7 @@ export {
   getAclState,
   getPrincipalKind,
   isRestricted,
+  toObjectDecision,
   type EvaluateAclParams,
 } from './src/evaluate';
 export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/query';

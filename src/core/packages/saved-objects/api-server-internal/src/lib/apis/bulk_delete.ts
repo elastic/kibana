@@ -14,7 +14,11 @@ import type {
   SavedObjectsRawDoc,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  errorContent,
+  getAclObjectKey,
+} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   isLeft,
@@ -62,7 +66,7 @@ export const performBulkDelete = async <T>(
     mappings,
   }: ApiExecutionContext
 ): Promise<SavedObjectsBulkDeleteResponse> => {
-  const { common: commonHelper, preflight: preflightHelper } = helpers;
+  const { common: commonHelper, preflight: preflightHelper, acl: aclHelper } = helpers;
   const { securityExtension } = extensions;
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
@@ -141,6 +145,41 @@ export const performBulkDelete = async <T>(
     );
   } else expectedResults = expectedMultiNamespaceResults;
 
+  // Object-level security decides after feature authorization. Denied objects become per-object
+  // errors, and request indexes are renumbered because bulk results are read by that index.
+  const preflightDocs = new Map<string, SavedObjectsRawDoc>();
+  for (const result of expectedBulkGetResults) {
+    const index = isRight(result) ? result.value.esRequestIndex : undefined;
+    const doc = index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+    if (isRight(result) && isMgetDoc(doc) && doc.found) {
+      preflightDocs.set(
+        getAclObjectKey(result.value.type, result.value.id),
+        doc as SavedObjectsRawDoc
+      );
+    }
+  }
+  const aclDecisions = await aclHelper.authorize(
+    'delete',
+    namespace,
+    expectedResults.filter(isRight).map(({ value: { type, id } }) => ({
+      type,
+      id,
+      source: preflightDocs.get(getAclObjectKey(type, id))?._source,
+    }))
+  );
+  if (aclDecisions.size > 0) {
+    let esRequestIndex = 0;
+    expectedResults = expectedResults.map((result) => {
+      if (isLeft(result)) {
+        return result;
+      }
+      const aclError = aclHelper.getError(aclDecisions, result.value);
+      return aclError
+        ? left({ id: result.value.id, type: result.value.type, error: errorContent(aclError) })
+        : right({ ...result.value, esRequestIndex: esRequestIndex++ });
+    });
+  }
+
   // Filter valid objects
   const validObjects = expectedResults.filter(isRight);
   if (validObjects.length === 0) {
@@ -162,7 +201,13 @@ export const performBulkDelete = async <T>(
           expectedResult.value.id
         ),
         _index: commonHelper.getIndexForType(expectedResult.value.type),
-        ...getExpectedVersionProperties(undefined),
+        // With object-level security, each delete is bound to the document that was authorized.
+        ...getExpectedVersionProperties(
+          undefined,
+          aclHelper.isEnforced(expectedResult.value.type)
+            ? preflightDocs.get(getAclObjectKey(expectedResult.value.type, expectedResult.value.id))
+            : undefined
+        ),
       },
     });
   });

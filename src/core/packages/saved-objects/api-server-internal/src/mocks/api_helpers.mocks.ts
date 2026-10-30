@@ -17,6 +17,7 @@ import type {
   SerializerHelper,
   MigrationHelper,
   UserHelper,
+  IAclHelper,
 } from '../lib/apis/helpers';
 
 export type MigrationHelperMock = jest.Mocked<PublicMethodsOf<MigrationHelper>>;
@@ -117,6 +118,21 @@ const createUserHelperMock = (): UserHelperMock => {
   return mock;
 };
 
+export type AclHelperMock = jest.Mocked<IAclHelper>;
+
+// By default nothing is enforced, as for a type without an access policy.
+const createAclHelperMock = (): AclHelperMock => ({
+  isEnforced: jest.fn().mockReturnValue(false),
+  rejectUnsupported: jest.fn(),
+  authorize: jest.fn().mockResolvedValue(new Map()),
+  enforce: jest.fn().mockResolvedValue(undefined),
+  getError: jest.fn().mockReturnValue(undefined),
+  getInitialAcl: jest.fn().mockResolvedValue(undefined),
+  authorizeChange: jest.fn(),
+  getReadFilters: jest.fn().mockResolvedValue(new Map()),
+  runInAuditScope: jest.fn().mockImplementation((operation) => operation()),
+});
+
 export interface RepositoryHelpersMock {
   common: CommonHelperMock;
   encryption: EncryptionHelperMock;
@@ -125,6 +141,7 @@ export interface RepositoryHelpersMock {
   serializer: SerializerHelperMock;
   migration: MigrationHelperMock;
   user: UserHelperMock;
+  acl: AclHelperMock;
 }
 
 const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
@@ -136,6 +153,7 @@ const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
     serializer: createSerializerHelperMock(),
     migration: createMigrationHelperMock(),
     user: createUserHelperMock(),
+    acl: createAclHelperMock(),
   };
 };
 

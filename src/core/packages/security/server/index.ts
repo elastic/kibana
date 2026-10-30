@@ -21,6 +21,7 @@ export type {
   DeleteServiceAccountResult,
   ServiceAccountPlatformAssumer,
 } from './src/service_accounts';
+export type { CoreAccessControlService, CoreScopedAccessControl } from './src/access_control';
 export type {
   CoreServiceAccountsSetup,
   ServiceAccountWorkloadDetails,
@@ -52,6 +53,7 @@ export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
+  AccessControlServiceContract,
   ServiceAccountsServiceContract,
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,

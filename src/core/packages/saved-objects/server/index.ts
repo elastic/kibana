@@ -15,6 +15,7 @@ export type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
+  SavedObjectsAclExtensionFactory,
   SavedObjectsExtensionFactory,
 } from './src/client_factory';
 export type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './src/contracts';
@@ -133,11 +134,14 @@ export type {
   SetAccessControlToWriteParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
+export type { ISavedObjectsAclExtension, AclObject, AclOperation } from './src/extensions/acl';
+export { getAclObjectKey } from './src/extensions/acl';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
 export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
+  ACL_EXTENSION_ID,
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,

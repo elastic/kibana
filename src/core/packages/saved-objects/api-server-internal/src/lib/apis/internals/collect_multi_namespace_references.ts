@@ -14,7 +14,7 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
-import type { WithAuditName } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource, WithAuditName } from '@kbn/core-saved-objects-server';
 import {
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
@@ -27,6 +27,7 @@ import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-serve
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
+import type { IAclHelper } from '../helpers';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import {
   findSharedOriginObjects,
@@ -61,6 +62,7 @@ export interface CollectMultiNamespaceReferencesParams {
   getIndexForType: (type: string) => string;
   createPointInTimeFinder: CreatePointInTimeFinderFn;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
+  aclHelper: IAclHelper;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
   options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
@@ -164,6 +166,7 @@ async function getObjectsAndReferences({
   client,
   serializer,
   getIndexForType,
+  aclHelper,
   objects,
   options = {},
 }: CollectMultiNamespaceReferencesParams) {
@@ -209,14 +212,32 @@ async function getObjectsAndReferences({
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
+    // An object the caller cannot view counts as missing, and its references are not followed, so
+    // hidden objects never appear as the source of a reference.
+    const aclDecisions = await aclHelper.authorize(
+      'view',
+      namespace,
+      bulkGetObjects.flatMap(({ type, id }, index) => {
+        const doc = bulkGetResponse.body.docs[index];
+        return 'found' in doc && doc.found
+          ? [{ type, id, source: doc._source as SavedObjectsRawDocSource }]
+          : [];
+      })
+    );
+
     const newObjectsToGet = new Set<string>();
     for (let i = 0; i < bulkGetObjects.length; i++) {
       // For every element in bulkGetObjects, there should be a matching element in bulkGetResponse.body.docs
       const { type, id } = bulkGetObjects[i];
       const objectKey = getObjectKey({ type, id });
       const doc = bulkGetResponse.body.docs[i];
-      // @ts-expect-error MultiGetHit._source is optional
-      if (!doc.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
+      if (
+        // @ts-expect-error MultiGetHit._source is optional
+        !doc.found ||
+        // @ts-expect-error MultiGetHit._source is optional
+        !rawDocExistsInNamespace(registry, doc, namespace) ||
+        aclHelper.getError(aclDecisions, { type, id })
+      ) {
         objectMap.set(objectKey, null);
         continue;
       }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CanonicalAcl, CanonicalAclEntry } from './types';
+import type { AclDocument, CanonicalAcl, CanonicalAclEntry } from './types';
 
 /**
  * Root field that stores the ACL in a document source.
@@ -61,10 +61,15 @@ export const normalizeAclSource = (
 };
 
 /**
- * Turns a canonical ACL back into a source value for full-document rewrites. It indexes to the same
- * values, while dotted keys and empty leaves disappear.
+ * Returns the source value to write. A new ACL is written as is. A stored ACL that a full-document
+ * rewrite preserves is turned back into a source value that indexes to the same values, while dotted
+ * keys and empty leaves disappear.
  */
-export const toStoredAcl = (acl: CanonicalAcl): Record<string, unknown> => {
+export const toStoredAcl = (acl: AclDocument | CanonicalAcl): Record<string, unknown> => {
+  if (!isCanonicalAcl(acl)) {
+    return { ...acl };
+  }
+
   const stored: Record<string, unknown> = {};
   setLeaf(stored, 'version', acl.version);
   setLeaf(stored, 'general_access', acl.general_access);
@@ -171,6 +176,9 @@ const setLeaf = (target: Record<string, unknown>, leaf: string, values: unknown[
     target[leaf] = values.length === 1 ? values[0] : values;
   }
 };
+
+const isCanonicalAcl = (acl: AclDocument | CanonicalAcl): acl is CanonicalAcl =>
+  Array.isArray(acl.version);
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

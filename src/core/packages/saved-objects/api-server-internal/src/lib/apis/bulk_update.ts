@@ -90,6 +90,7 @@ export const performBulkUpdate = async <T>(
     migration: migrationHelper,
     user: userHelper,
     validation: validationHelper,
+    acl: aclHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const { migrationVersionCompatibility } = options;
@@ -240,6 +241,17 @@ export const performBulkUpdate = async <T>(
     'bulk_update'
   );
 
+  const aclDecisions = await aclHelper.authorize(
+    'edit',
+    namespace,
+    validObjects.flatMap(({ value: { type, id, esRequestIndex, objectNamespace } }) => {
+      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+      return isMgetDoc(doc) && doc.found
+        ? [{ type, id, source: doc._source, namespace: getNamespaceId(objectNamespace) }]
+        : [];
+    })
+  );
+
   let bulkUpdateRequestIndexCounter = 0;
   const bulkUpdateParams: object[] = [];
 
@@ -260,10 +272,14 @@ export const performBulkUpdate = async <T>(
           mergeAttributes,
         } = expectedBulkGetResult.value;
 
-        const versionProperties = getExpectedVersionProperties(version);
         const indexFound = bulkGetResponse?.statusCode !== 404;
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
         const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+        // With object-level security, the write is bound to the document that was authorized.
+        const versionProperties = getExpectedVersionProperties(
+          version,
+          docFound && aclHelper.isEnforced(type) ? (actualResult as SavedObjectsRawDoc) : undefined
+        );
         const isMultiNS = registry.isMultiNamespace(type);
 
         if (
@@ -280,6 +296,11 @@ export const performBulkUpdate = async <T>(
             type,
             error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
           });
+        }
+
+        const aclError = aclHelper.getError(aclDecisions, { type, id });
+        if (aclError) {
+          return left({ id, type, error: errorContent(aclError) });
         }
 
         let savedObjectNamespace: string | undefined;
