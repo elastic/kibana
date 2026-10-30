@@ -110,3 +110,53 @@ export const buildAnnotationConversionCases = ({
     expectedResultColumns: ['utc_time', 'geo.src', 'machine.os.raw'],
   },
 ];
+
+/** Data view runtime field the non-convertible cases reference; ES|QL cannot see it. */
+export const ANNOTATION_CONVERSION_RUNTIME_FIELD = 'runtime_hour';
+
+/** Data view scripted field the non-convertible cases reference; ES|QL cannot see it. */
+export const ANNOTATION_CONVERSION_SCRIPTED_FIELD = 'scripted_bytes_kb';
+
+export interface AnnotationNonConvertibleCase {
+  readonly description: string;
+  readonly annotation: AnnotationConversionInput;
+}
+
+/**
+ * Annotations that must keep conversion disabled because the ES|QL query would fail or
+ * silently match nothing. Unit-only: the data view fields exist only in the Lens data view.
+ */
+export const buildAnnotationNonConvertibleCases = (): AnnotationNonConvertibleCase[] => [
+  {
+    description: 'a runtime time field',
+    annotation: { timeField: ANNOTATION_CONVERSION_RUNTIME_FIELD },
+  },
+  {
+    description: 'a runtime text field',
+    annotation: { textVisibility: true, textField: ANNOTATION_CONVERSION_RUNTIME_FIELD },
+  },
+  {
+    description: 'a runtime tooltip field',
+    annotation: { extraFields: [ANNOTATION_CONVERSION_RUNTIME_FIELD] },
+  },
+  {
+    description: 'a scripted tooltip field',
+    annotation: { extraFields: [ANNOTATION_CONVERSION_SCRIPTED_FIELD] },
+  },
+  {
+    description: 'a KQL filter on a runtime field',
+    annotation: {
+      filter: { query: `${ANNOTATION_CONVERSION_RUNTIME_FIELD} : 3`, language: 'kuery' },
+    },
+  },
+  {
+    description: 'a Lucene filter on a scripted field',
+    annotation: {
+      filter: { query: `${ANNOTATION_CONVERSION_SCRIPTED_FIELD}:>10`, language: 'lucene' },
+    },
+  },
+  {
+    description: 'an unparseable KQL filter',
+    annotation: { filter: { query: 'geo.src : (', language: 'kuery' } },
+  },
+];
