@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { convertQueryToESQLExpression, sanitazeESQLInput } from '@kbn/esql-utils';
@@ -12,8 +14,8 @@ import {
   type EventAnnotationConfig,
   type QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import type { IndexPatternMap } from '@kbn/lens-common';
-import { layerTypes } from '../../..';
+import type { IndexPatternMap } from '../types';
+import { LENS_LAYER_TYPES } from '../visualizations/constants';
 
 interface AnnotationLayerShape {
   layerType?: string;
@@ -26,8 +28,8 @@ interface AnnotationLayerShape {
  * Converts DSL query annotations to ES|QL annotations that query the same index pattern.
  * Returns undefined when a layer cannot be converted without changing what it shows.
  *
- * Like `hasUnsupportedAnnotations`, the visualization state is probed structurally because
- * the conversion hook is visualization-agnostic.
+ * The visualization state is probed structurally because ES|QL conversion is
+ * visualization-agnostic.
  */
 export const convertQueryAnnotationsToEsql = (
   visualizationState: unknown,
@@ -41,7 +43,7 @@ export const convertQueryAnnotationsToEsql = (
   const convertedLayers: unknown[] = [];
   for (const layer of layers as AnnotationLayerShape[]) {
     const queryAnnotations = layer?.annotations?.filter(isQueryAnnotationConfig) ?? [];
-    if (layer?.layerType !== layerTypes.ANNOTATIONS || queryAnnotations.length === 0) {
+    if (layer?.layerType !== LENS_LAYER_TYPES.ANNOTATIONS || queryAnnotations.length === 0) {
       convertedLayers.push(layer);
       continue;
     }
