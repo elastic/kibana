@@ -25,6 +25,10 @@ jest.mock('../../../../common/lib/api', () => ({
   getAllIntegrationNames: jest.fn(() => Promise.resolve([])),
 }));
 
+jest.mock('./ai_connector_required_callout', () => ({
+  AiConnectorRequiredCallout: () => <div data-test-subj="aiConnectorRequiredCalloutMock" />,
+}));
+
 const mockServices = coreMock.createStart();
 
 const TestWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
@@ -65,6 +69,17 @@ describe('IntegrationDetails', () => {
     it('should render logo file picker', async () => {
       const { getByTestId } = await renderIntegrationDetails();
       expect(getByTestId('integrationLogoFilePicker')).toBeInTheDocument();
+    });
+
+    it('should render the AI connector callout below the step description', async () => {
+      const { container, getByTestId, getByText } = await renderIntegrationDetails();
+      const description = getByText(
+        'Name your integration, give it a description, and (optional) add a logo'
+      );
+      const callout = getByTestId('aiConnectorRequiredCalloutMock');
+      const elements = Array.from(container.querySelectorAll('*'));
+
+      expect(elements.indexOf(description)).toBeLessThan(elements.indexOf(callout));
     });
   });
 

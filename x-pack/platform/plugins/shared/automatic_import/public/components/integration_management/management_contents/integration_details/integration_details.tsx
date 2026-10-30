@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { AiConnectorRequiredCallout } from './ai_connector_required_callout';
 import { PackageCardPreview } from './package_card_preview';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
 import { MAX_LOGO_SIZE_BYTES } from '../../forms/constants';
@@ -118,6 +119,8 @@ export const IntegrationDetails = React.memo(() => {
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
+
+        <AiConnectorRequiredCallout />
 
         <EuiPanel paddingSize="none" hasShadow={false}>
           <EuiFlexGroup direction="row" gutterSize="m">

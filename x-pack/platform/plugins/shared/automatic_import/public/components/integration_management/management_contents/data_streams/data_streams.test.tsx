@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { DataStreams } from './data_streams';
@@ -23,17 +23,14 @@ jest.mock('../../../../common', () => ({
       variables: undefined,
     },
   })),
-  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
-  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
 }));
 const mockUseGetIntegrationById = useGetIntegrationById as jest.Mock;
 
-const mockUsePackageNames = jest.fn((): Set<string> | undefined => undefined);
 jest.mock('../../forms/integration_form', () => ({
   useIntegrationForm: jest.fn(),
-  usePackageNames: () => mockUsePackageNames(),
 }));
 const mockUseIntegrationForm = useIntegrationForm as jest.Mock;
+const mockValidateFields = jest.fn();
 
 const mockReportDataStreamFlyoutOpened = jest.fn();
 jest.mock('../../../telemetry_context', () => ({
@@ -86,8 +83,9 @@ describe('DataStreams', () => {
       error: null,
       refetch: jest.fn(),
     });
+    mockValidateFields.mockResolvedValue({ areFieldsValid: true, isFormValid: true });
     mockUseIntegrationForm.mockReturnValue({
-      formData: { title: 'Integration title', description: 'Integration description' },
+      form: { validateFields: mockValidateFields },
     });
   });
 
@@ -141,7 +139,7 @@ describe('DataStreams', () => {
   });
 
   describe('flyout interactions', () => {
-    it('should open flyout when add button is clicked', () => {
+    it('should open flyout when add button is clicked', async () => {
       mockUseGetIntegrationById.mockReturnValue({
         integration: undefined,
         isLoading: false,
@@ -156,10 +154,12 @@ describe('DataStreams', () => {
       fireEvent.click(getByTestId('addDataStreamButton'));
 
       // Flyout should now be visible
-      expect(getByTestId('createDataStreamFlyoutMock')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(getByTestId('createDataStreamFlyoutMock')).toBeInTheDocument();
+      });
     });
 
-    it('should close flyout when close is triggered', () => {
+    it('should close flyout when close is triggered', async () => {
       mockUseGetIntegrationById.mockReturnValue({
         integration: undefined,
         isLoading: false,
@@ -169,7 +169,9 @@ describe('DataStreams', () => {
 
       // Open the flyout
       fireEvent.click(getByTestId('addDataStreamButton'));
-      expect(getByTestId('createDataStreamFlyoutMock')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(getByTestId('createDataStreamFlyoutMock')).toBeInTheDocument();
+      });
 
       // Close the flyout
       fireEvent.click(getByTestId('mockFlyoutClose'));
@@ -180,7 +182,7 @@ describe('DataStreams', () => {
   });
 
   describe('telemetry', () => {
-    it('should call reportDataStreamFlyoutOpened when add data stream button is clicked', () => {
+    it('should call reportDataStreamFlyoutOpened when add data stream button is clicked', async () => {
       mockUseGetIntegrationById.mockReturnValue({
         integration: undefined,
         isLoading: false,
@@ -190,9 +192,11 @@ describe('DataStreams', () => {
 
       fireEvent.click(getByTestId('addDataStreamButton'));
 
-      expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
-        expect.objectContaining({ integrationId: 'test-id' })
-      );
+      await waitFor(() => {
+        expect(mockReportDataStreamFlyoutOpened).toHaveBeenCalledWith(
+          expect.objectContaining({ integrationId: 'test-id' })
+        );
+      });
     });
   });
 
@@ -215,87 +219,54 @@ describe('DataStreams', () => {
     });
   });
 
-  describe('create integration page', () => {
-    it('disables add data stream when integration name is empty', () => {
-      mockUseIntegrationForm.mockReturnValue({
-        formData: { title: '', description: 'Has description' },
-      });
+  describe('add data stream validation', () => {
+    beforeEach(() => {
       mockUseGetIntegrationById.mockReturnValue({
         integration: undefined,
         isLoading: false,
       });
-
-      const { getByTestId } = renderDataStreams();
-      expect(getByTestId('addDataStreamButton')).toBeDisabled();
     });
 
-    it('disables add data stream when description is empty', () => {
-      mockUseIntegrationForm.mockReturnValue({
-        formData: { title: 'Has title', description: '   ' },
-      });
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: undefined,
-        isLoading: false,
-      });
-
+    it('keeps the add data stream button enabled', () => {
       const { getByTestId } = renderDataStreams();
-      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+      expect(getByTestId('addDataStreamButton')).toBeEnabled();
     });
 
-    it('disables add data stream when integration name has only one character', () => {
-      mockUseIntegrationForm.mockReturnValue({
-        formData: { title: 'A', description: 'Valid description' },
-      });
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: undefined,
-        isLoading: false,
-      });
-
+    it('validates the integration name, description, and connector on click', async () => {
       const { getByTestId } = renderDataStreams();
-      expect(getByTestId('addDataStreamButton')).toBeDisabled();
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+
+      await waitFor(() => {
+        expect(mockValidateFields).toHaveBeenCalledWith(['title', 'description', 'connectorId']);
+      });
     });
 
-    it('enables add data stream when name and description are set', () => {
-      mockUseIntegrationForm.mockReturnValue({
-        formData: { title: 'My integration', description: 'A description' },
-      });
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: undefined,
-        isLoading: false,
-      });
-
-      const { getByTestId } = renderDataStreams();
-      expect(getByTestId('addDataStreamButton')).not.toBeDisabled();
-    });
-
-    it('disables add data stream when integration name already exists', () => {
-      mockUseIntegrationForm.mockReturnValue({
-        formData: { title: 'Existing Integration', description: 'A description' },
-      });
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: undefined,
-        isLoading: false,
-      });
-      mockUsePackageNames.mockReturnValue(new Set(['existing_integration']));
-
-      const { getByTestId } = renderDataStreams();
-      expect(getByTestId('addDataStreamButton')).toBeDisabled();
-    });
-
-    it('does not open flyout when add button is disabled on create page', () => {
-      mockUseIntegrationForm.mockReturnValue({
-        formData: { title: '', description: '' },
-      });
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: undefined,
-        isLoading: false,
-      });
+    it('does not open the flyout when the integration fields are invalid', async () => {
+      mockValidateFields.mockResolvedValue({ areFieldsValid: false, isFormValid: false });
 
       const { getByTestId, queryByTestId } = renderDataStreams();
 
       fireEvent.click(getByTestId('addDataStreamButton'));
+
+      await waitFor(() => {
+        expect(mockValidateFields).toHaveBeenCalled();
+      });
       expect(queryByTestId('createDataStreamFlyoutMock')).not.toBeInTheDocument();
       expect(mockReportDataStreamFlyoutOpened).not.toHaveBeenCalled();
+    });
+
+    it('also validates the integration fields on the edit page', async () => {
+      mockValidateFields.mockResolvedValue({ areFieldsValid: false, isFormValid: false });
+
+      const { getByTestId, queryByTestId } = renderDataStreams('test-id');
+
+      fireEvent.click(getByTestId('addDataStreamButton'));
+
+      await waitFor(() => {
+        expect(mockValidateFields).toHaveBeenCalledWith(['title', 'description', 'connectorId']);
+      });
+      expect(queryByTestId('createDataStreamFlyoutMock')).not.toBeInTheDocument();
     });
   });
 });

@@ -26,8 +26,12 @@ import {
 const mockAddWarning = jest.fn();
 const mockAddError = jest.fn();
 const mockUploadMutateAsync = jest.fn();
+const mockFetchTakenPackageNames = jest.fn(
+  (): Promise<Set<string>> => Promise.resolve(new Set<string>())
+);
 
 jest.mock('../../../../common', () => ({
+  fetchTakenPackageNames: () => mockFetchTakenPackageNames(),
   useFetchIndices: jest.fn(),
   useValidateIndex: jest.fn(),
   useGetIntegrationById: jest.fn(),
@@ -77,7 +81,8 @@ const mockRefetch = jest.fn();
 const mockServices = coreMock.createStart();
 
 const createWrapper = (
-  initialValue?: React.ComponentProps<typeof IntegrationFormProvider>['initialValue']
+  initialValue?: React.ComponentProps<typeof IntegrationFormProvider>['initialValue'],
+  existingDataStreamTitles?: Set<string>
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -96,7 +101,11 @@ const createWrapper = (
             <MemoryRouter initialEntries={['/create']}>
               <Route path={['/edit/:integrationId', '/create']}>
                 <UIStateProvider>
-                  <IntegrationFormProvider onSubmit={jest.fn()} initialValue={initialValue}>
+                  <IntegrationFormProvider
+                    onSubmit={jest.fn()}
+                    initialValue={initialValue}
+                    existingDataStreamTitles={existingDataStreamTitles}
+                  >
                     <UseField path="title">{() => null}</UseField>
                     <UseField path="description">{() => null}</UseField>
                     <UseField path="connectorId">{() => null}</UseField>
@@ -157,7 +166,41 @@ describe('CreateDataStreamFlyout', () => {
     });
 
     mockUploadMutateAsync.mockResolvedValue({ success: true });
+    mockFetchTakenPackageNames.mockResolvedValue(new Set<string>());
   });
+
+  const validForm = {
+    title: 'Integration',
+    description: 'Integration description',
+    connectorId: 'connector-1',
+    dataStreamTitle: 'My stream',
+    dataStreamDescription: 'Stream description',
+    dataCollectionMethod: ['filestream'],
+    logSample: '2024-01-01 level=info msg=test',
+  };
+
+  const renderFlyout = async (
+    initialValue?: React.ComponentProps<typeof IntegrationFormProvider>['initialValue'],
+    existingDataStreamTitles?: Set<string>
+  ) => {
+    const Wrapper = createWrapper(initialValue, existingDataStreamTitles);
+    const result = render(
+      <Wrapper>
+        <CreateDataStreamFlyout onClose={mockOnClose} />
+      </Wrapper>
+    );
+    await waitFor(() => {
+      expect(mockFetchTakenPackageNames).toHaveBeenCalled();
+      expect(result.getByTestId('analyzeLogsButton')).toBeInTheDocument();
+    });
+    return result;
+  };
+
+  const expectNothingSubmitted = () => {
+    expect(mockUploadMutateAsync).not.toHaveBeenCalled();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
+    expect(mockOnClose).not.toHaveBeenCalled();
+  };
 
   describe('rendering', () => {
     it('should render the flyout with form fields', async () => {
@@ -213,89 +256,116 @@ describe('CreateDataStreamFlyout', () => {
     });
   });
 
-  describe('analyze button state', () => {
-    it('should have analyze button disabled when form is empty', async () => {
-      const Wrapper = createWrapper();
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
-      );
+  describe('analyze button validation', () => {
+    it('keeps the analyze button enabled when the form is empty', async () => {
+      const { getByTestId } = await renderFlyout();
 
-      await waitFor(() => {
-        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
-      });
-
-      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      expect(getByTestId('analyzeLogsButton')).toBeEnabled();
     });
 
-    it('should keep analyze button disabled when data stream description is empty', async () => {
-      const Wrapper = createWrapper({
+    it('shows inline errors for empty required fields on click and does not submit', async () => {
+      const { getByTestId, getByText } = await renderFlyout({
         title: 'Integration',
         description: 'Integration description',
         connectorId: 'connector-1',
-        dataStreamTitle: 'My stream',
+      });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(getByText('Data stream title is required')).toBeInTheDocument();
+      });
+      expect(getByText('Data stream description is required')).toBeInTheDocument();
+      expect(getByText('Please select a data collection method')).toBeInTheDocument();
+      expect(getByText('A log sample is required for analysis')).toBeInTheDocument();
+      expect(getByTestId('dataStreamTitleInputV2')).toHaveAttribute('aria-invalid', 'true');
+      expectNothingSubmitted();
+    });
+
+    it('does not show inline errors before the analyze button is clicked', async () => {
+      const { queryByText } = await renderFlyout();
+
+      expect(queryByText('Data stream title is required')).not.toBeInTheDocument();
+    });
+
+    it('shows an inline error when the data stream description is empty', async () => {
+      const { getByTestId, getByText } = await renderFlyout({
+        ...validForm,
         dataStreamDescription: '',
-        dataCollectionMethod: ['filestream'],
-        logSample: '2024-01-01 level=info msg=test',
       });
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
-      );
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
 
       await waitFor(() => {
-        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+        expect(getByText('Data stream description is required')).toBeInTheDocument();
       });
-
-      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      expectNothingSubmitted();
     });
 
-    it('should keep analyze button disabled when integration title is a single character', async () => {
-      const Wrapper = createWrapper({
-        title: 'A',
-        description: 'Integration description',
-        connectorId: 'connector-1',
-        dataStreamTitle: 'Valid stream',
-        dataStreamDescription: 'Stream description',
-        dataCollectionMethod: ['filestream'],
-        logSample: '2024-01-01 level=info msg=test',
-      });
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
-      );
-
-      await waitFor(() => {
-        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
-      });
-
-      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
-    });
-
-    it('should keep analyze button disabled when data stream title is a single character', async () => {
-      const Wrapper = createWrapper({
-        title: 'Integration',
-        description: 'Integration description',
-        connectorId: 'connector-1',
+    it('shows an inline error when the data stream title is a single character', async () => {
+      const { getByTestId, getByText } = await renderFlyout({
+        ...validForm,
         dataStreamTitle: 'B',
-        dataStreamDescription: 'Stream description',
-        dataCollectionMethod: ['filestream'],
-        logSample: '2024-01-01 level=info msg=test',
       });
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
-      );
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
 
       await waitFor(() => {
-        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+        expect(getByText('Name must be at least 2 characters long')).toBeInTheDocument();
+      });
+      expectNothingSubmitted();
+    });
+
+    it('shows an inline error when the index source is selected without an index', async () => {
+      const { getByTestId, getByText } = await renderFlyout({
+        ...validForm,
+        logSample: undefined,
       });
 
-      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      const radio = getByTestId('logsSourceIndexCard').querySelector('input[type="radio"]');
+      fireEvent.click(radio!);
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(getByText('Please select an index')).toBeInTheDocument();
+      });
+      expectNothingSubmitted();
+    });
+
+    it('shows the integration details callout when the connector is missing', async () => {
+      const { getByTestId, getByText } = await renderFlyout({ ...validForm, connectorId: '' });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(getByTestId('integrationDetailsInvalidCallout')).toBeInTheDocument();
+      });
+      expect(getByText('Please select a connector')).toBeInTheDocument();
+      expectNothingSubmitted();
+    });
+
+    it('shows the integration details callout when the integration title is a single character', async () => {
+      const { getByTestId } = await renderFlyout({ ...validForm, title: 'A' });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(getByTestId('integrationDetailsInvalidCallout')).toHaveTextContent(
+          'Name must be at least 2 characters long'
+        );
+      });
+      expectNothingSubmitted();
+    });
+
+    it('does not show the integration details callout when integration fields are valid', async () => {
+      const { getByTestId, queryByTestId } = await renderFlyout(validForm);
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      });
+      expect(queryByTestId('integrationDetailsInvalidCallout')).not.toBeInTheDocument();
     });
   });
 
@@ -464,68 +534,32 @@ describe('CreateDataStreamFlyout', () => {
   });
 
   describe('duplicate data stream name validation', () => {
-    it('should disable analyze button when entering a duplicate data stream name', async () => {
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: {
-          integrationId: 'test-integration',
-          title: 'Test Integration',
-          description: 'Test description',
-          dataStreams: [{ dataStreamId: 'ds-1', title: 'Existing Data Stream', inputTypes: [] }],
-        },
-        isLoading: false,
-        isError: false,
-        error: null,
-        refetch: mockRefetch,
-      });
-
-      const Wrapper = createWrapper();
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
+    it('shows an inline error and does not submit a duplicate data stream name', async () => {
+      const { getByTestId, getByText } = await renderFlyout(
+        { ...validForm, dataStreamTitle: 'existing data stream' },
+        new Set(['existing_data_stream'])
       );
 
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
       await waitFor(() => {
-        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+        expect(getByText('A data stream with this name already exists')).toBeInTheDocument();
       });
-
-      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
-        target: { value: 'existing data stream' },
-      });
-
-      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      expectNothingSubmitted();
     });
 
-    it('should disable analyze button for case-insensitive duplicate names', async () => {
-      mockUseGetIntegrationById.mockReturnValue({
-        integration: {
-          integrationId: 'test-integration',
-          title: 'Test Integration',
-          description: 'Test description',
-          dataStreams: [{ dataStreamId: 'ds-1', title: 'My Data Stream', inputTypes: [] }],
-        },
-        isLoading: false,
-        isError: false,
-        error: null,
-        refetch: mockRefetch,
-      });
-
-      const Wrapper = createWrapper();
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
+    it('treats duplicate data stream names case-insensitively', async () => {
+      const { getByTestId, getByText } = await renderFlyout(
+        { ...validForm, dataStreamTitle: 'MY DATA STREAM' },
+        new Set(['my_data_stream'])
       );
 
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
       await waitFor(() => {
-        expect(getByTestId('dataStreamTitleInputV2')).toBeInTheDocument();
+        expect(getByText('A data stream with this name already exists')).toBeInTheDocument();
       });
-
-      fireEvent.change(getByTestId('dataStreamTitleInputV2'), {
-        target: { value: 'MY DATA STREAM' },
-      });
-
-      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+      expectNothingSubmitted();
     });
 
     it('should allow unique data stream names', async () => {
@@ -563,25 +597,22 @@ describe('CreateDataStreamFlyout', () => {
   });
 
   describe('duplicate integration name validation', () => {
-    it('should disable analyze button when integration name already exists', async () => {
-      mockGetInstalledPackages.mockResolvedValue({
-        items: [{ id: 'existing_integration', type: 'integration' }],
+    it('shows the integration details callout when the integration name already exists', async () => {
+      mockFetchTakenPackageNames.mockResolvedValue(new Set(['existing_integration']));
+
+      const { getByTestId } = await renderFlyout({
+        ...validForm,
+        title: 'Existing Integration',
       });
 
-      const Wrapper = createWrapper({
-        title: 'Existing Integration',
-        description: 'Some description',
-        connectorId: 'test-connector',
-      });
-      const { getByTestId } = render(
-        <Wrapper>
-          <CreateDataStreamFlyout onClose={mockOnClose} />
-        </Wrapper>
-      );
+      fireEvent.click(getByTestId('analyzeLogsButton'));
 
       await waitFor(() => {
-        expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+        expect(getByTestId('integrationDetailsInvalidCallout')).toHaveTextContent(
+          'An integration with this name already exists'
+        );
       });
+      expectNothingSubmitted();
     });
   });
 
@@ -601,15 +632,6 @@ describe('CreateDataStreamFlyout', () => {
   });
 
   describe('sample upload limits', () => {
-    const validForm = {
-      title: 'Integration',
-      description: 'Integration description',
-      connectorId: 'connector-1',
-      dataStreamTitle: 'My stream',
-      dataStreamDescription: 'Stream description',
-      dataCollectionMethod: ['filestream'],
-    };
-
     it('still uploads the capped samples when the file exceeds the line limit', async () => {
       const extraLines = 5;
       const logSample = Array.from({ length: 1000 + extraLines }, (_, i) => `log line ${i}`).join(

@@ -25,3 +25,11 @@ export const DEFAULT_INTEGRATION_VALUES = {
 };
 
 export const INTEGRATION_DETAILS_UNTRACKED_FIELDS = ['connectorId', 'integrationId'];
+
+export const INTEGRATION_DETAILS_REQUIRED_FIELDS = ['title', 'description', 'connectorId'];
+
+export const DATA_STREAM_DETAILS_FIELDS = [
+  'dataStreamTitle',
+  'dataStreamDescription',
+  'dataCollectionMethod',
+];
