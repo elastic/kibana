@@ -227,9 +227,37 @@ describe('useAddToCase', () => {
         noAttachmentsToaster: {
           title: 'Already attached to the case',
           content:
-            'Everything you selected is already attached to this case, so nothing was added.',
+            'The attacks and alerts that fit in this case are already attached to it, so nothing was added.',
         },
       })
+    );
+  });
+
+  it('passes onNoAttachmentsAdded to the add to existing case modal', () => {
+    const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({ open: jest.fn() });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal,
+          },
+        },
+      },
+    });
+    const onNoAttachmentsAdded = jest.fn();
+
+    renderHook(
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          onNoAttachmentsAdded,
+          title: mockTitle,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(useCasesAddToExistingCaseModal).toHaveBeenCalledWith(
+      expect.objectContaining({ onNoAttachmentsAdded })
     );
   });
 });

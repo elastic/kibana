@@ -234,6 +234,30 @@ describe('useAttackCaseAttachments', () => {
         title: '2 attacks were already attached to this case and were not added again.',
       });
     });
+
+    it('counts an attack attached more than once as one attack', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(
+        theCase,
+        updatedCaseWith(attackComment('attack-1', '2026-10-29T09:00:00.000Z'), {
+          ...attackComment('attack-1', '2026-10-29T09:30:00.000Z'),
+          id: 'comment-attack-1-dup',
+        })
+      );
+
+      expect(appToasts.addWarning).toHaveBeenCalledWith({
+        title: '1 attack was already attached to this case and was not added again.',
+      });
+    });
+
+    it('only reports truncation when there is no updated case', () => {
+      const { result } = renderHook(() => useAttackCaseAttachments(attacksToAttach));
+
+      result.current?.onAttached(theCase);
+
+      expect(appToasts.addWarning).not.toHaveBeenCalled();
+    });
   });
 
   it('does not warn while building the attachments, even when they are truncated', () => {

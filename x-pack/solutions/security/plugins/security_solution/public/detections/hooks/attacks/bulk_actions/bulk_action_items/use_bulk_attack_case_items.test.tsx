@@ -345,6 +345,19 @@ describe('useBulkAttackCaseItems', () => {
       expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
     });
 
+    it('warns that the alerts did not fit when the server added nothing to a full case', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+
+      const theCase = { id: 'case-1', totalAlerts: MAX_ALERTS_PER_CASE } as CaseUI;
+      resolveAttachments(theCase);
+      const { onNoAttachmentsAdded } = useAddToCase.mock.lastCall[0];
+      onNoAttachmentsAdded(theCase);
+
+      expect(appToastsMock.addWarning).toHaveBeenCalledTimes(1);
+    });
+
     it('truncates against the chosen case, so a case with room takes every alert', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 

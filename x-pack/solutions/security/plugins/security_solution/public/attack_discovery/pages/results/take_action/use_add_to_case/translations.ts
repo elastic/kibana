@@ -25,7 +25,7 @@ export const ALREADY_ATTACHED_TO_CASE_CONTENT = i18n.translate(
   'xpack.securitySolution.attackDiscovery.results.takeAction.useAddToCase.alreadyAttachedToCaseContent',
   {
     defaultMessage:
-      'Everything you selected is already attached to this case, so nothing was added.',
+      'The attacks and alerts that fit in this case are already attached to it, so nothing was added.',
   }
 );
 

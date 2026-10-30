@@ -28,7 +28,8 @@ export interface AttackCaseAttachments {
   getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
   /**
    * Warns about anything that did not fit, or was already on the case, once the attachments have
-   * been posted to `theCase`. `updatedCase` is the case the server returned, when there is one.
+   * been posted to `theCase`. `updatedCase` is the case the server returned; without it, as when
+   * the server added nothing, only what did not fit is reported.
    */
   onAttached: (theCase: CaseUI, updatedCase?: CaseUI) => void;
 }
@@ -37,6 +38,9 @@ export interface AttackCaseAttachments {
  * Counts the posted attacks that were already on the case, which the server drops as duplicates.
  * Adding an attachment always moves the case's `updatedAt` past the attachment's `createdAt`, so
  * an attack created no later than the case's pre-attach `updatedAt` was there before this attach.
+ * The pre-attach case is the picker's snapshot, so attacks attached concurrently since it loaded
+ * are missed, and clock skew between Kibana nodes larger than the gap since the case's last update
+ * can make a newly added attack read as already attached.
  */
 const countAlreadyAttachedAttacks = (
   { attachments }: AttackAttachmentsResult,
@@ -54,12 +58,16 @@ const countAlreadyAttachedAttacks = (
   );
   const caseUpdatedAt = Date.parse(updatedAt);
 
-  return comments
-    .filter(isAttackAttachment)
-    .filter(
-      ({ attachmentId, createdAt }) =>
-        postedAttackIds.has(attachmentId) && Date.parse(createdAt) <= caseUpdatedAt
-    ).length;
+  // Cases from before attack deduplication can hold the same attack more than once.
+  return new Set(
+    comments
+      .filter(isAttackAttachment)
+      .filter(
+        ({ attachmentId, createdAt }) =>
+          postedAttackIds.has(attachmentId) && Date.parse(createdAt) <= caseUpdatedAt
+      )
+      .map(({ attachmentId }) => attachmentId)
+  ).size;
 };
 
 /**

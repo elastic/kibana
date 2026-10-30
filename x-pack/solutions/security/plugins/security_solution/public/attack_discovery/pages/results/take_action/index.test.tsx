@@ -723,6 +723,31 @@ describe('TakeAction', () => {
       expect(onAttached).toHaveBeenCalledTimes(1);
       expect(onAttached).toHaveBeenCalledWith(theCase, updatedCase);
     });
+
+    it('reports what did not fit when the server added nothing to the case', async () => {
+      const onAttached = jest.fn();
+      mockUseAttackCaseAttachments.mockReturnValue({
+        getAttachments: jest.fn(() => []),
+        onAttached,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            attackDiscoveries={[{ ...getMockAttackDiscoveryAlerts()[0], index: '.alerts-index' }]}
+          />
+        </TestProviders>
+      );
+
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      const { onNoAttachmentsAdded } = useAddToCase.mock.lastCall[0];
+      const theCase = { id: 'case-1', totalAlerts: 3 } as CaseUI;
+      onNoAttachmentsAdded(theCase);
+
+      expect(onAttached).toHaveBeenCalledTimes(1);
+      expect(onAttached).toHaveBeenCalledWith(theCase);
+    });
   });
 
   describe('when case permissions are disabled', () => {

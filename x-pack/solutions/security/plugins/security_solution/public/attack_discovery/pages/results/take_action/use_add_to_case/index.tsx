@@ -26,6 +26,8 @@ interface Props {
    * existing case, the case the server returned.
    */
   onSuccess?: (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => void;
+  /** Called instead of `onSuccess` when the server added nothing to the chosen case. */
+  onNoAttachmentsAdded?: (theCase: CaseUI) => void;
   title: string;
 }
 
@@ -51,6 +53,7 @@ export const useAddToCase = ({
   canUserCreateAndReadCases,
   onClick,
   onSuccess,
+  onNoAttachmentsAdded,
   title,
 }: Props): {
   disabled: boolean;
@@ -73,6 +76,7 @@ export const useAddToCase = ({
     },
     onClose: onClick,
     onSuccess,
+    onNoAttachmentsAdded,
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
     },

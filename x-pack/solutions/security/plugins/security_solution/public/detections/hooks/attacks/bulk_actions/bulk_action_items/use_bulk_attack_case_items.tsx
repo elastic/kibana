@@ -71,10 +71,16 @@ export const useBulkAttackCaseItems = ({
     [attackCaseAttachments, telemetry, telemetrySource]
   );
 
+  const onNoAttachmentsAdded = useCallback(
+    (theCase: CaseUI) => attackCaseAttachments?.onAttached(theCase),
+    [attackCaseAttachments]
+  );
+
   const { onAddToCase, disabled } = useAddToCase({
     canUserCreateAndReadCases,
     onClick: onCasesAdd,
     onSuccess: onAddToCaseSuccess,
+    onNoAttachmentsAdded,
     title,
   });
 

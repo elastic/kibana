@@ -219,9 +219,15 @@ const TakeActionComponent: React.FC<Props> = ({
     [attackCaseAttachments, refetchFindAttackDiscoveries]
   );
 
+  const onNoAttachmentsAdded = useCallback(
+    (theCase: CaseUI) => attackCaseAttachments?.onAttached(theCase),
+    [attackCaseAttachments]
+  );
+
   const { disabled: addToCaseDisabled, onAddToCase } = useAddToCase({
     canUserCreateAndReadCases,
     onSuccess: onAddToCaseSuccess,
+    onNoAttachmentsAdded,
     title: attackDiscoveries.map((discovery) => discovery.title).join(', '),
   });
 
