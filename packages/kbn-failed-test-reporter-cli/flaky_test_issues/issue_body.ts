@@ -24,12 +24,14 @@ import {
   formatPercent,
   FRAMEWORK_LABELS,
   inlineCode,
+  isFlakyBranch,
   isPullRequestRef,
   KIBANA_BLOB_URL,
   plural,
   table,
   targetEnvironment,
   testsTable,
+  type BranchThresholds,
 } from './markdown';
 import type { FlakySuite } from './suites';
 
@@ -384,31 +386,54 @@ interface BranchSkip {
 }
 
 /**
- * `🔴 \`main\` | 49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `✅ \`9.1\` | 0 / 58 |`
- * for a clean row, or `⏭️` with when it last ran for a skipped one. Reports written before the
- * build was recorded get the time alone.
+ * `49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `0 / 58 |` for a clean row.
+ * Reports written before the build was recorded get the time alone.
  */
-const failuresRow = (
-  label: string,
-  { worst, latest }: WorstFailures<BuildCounts>,
-  skip?: BranchSkip
-): string[] => {
-  const failure = latest
+const failuresCells = ({ worst, latest }: WorstFailures<BuildCounts>): string[] => [
+  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
+  latest
     ? formatBuildLink(
         { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
         latest.lastFailedAt
       )
-    : undefined;
-  const skipped = skip
-    ? skip.lastRanAt
-      ? `skipped, last ran ${formatDay(skip.lastRanAt)}`
-      : 'skipped in every run'
-    : undefined;
-  return [
-    `${skip ? '⏭️' : worst.failedBuilds > 0 ? '🔴' : '✅'} ${label}`,
-    worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
-    [failure, skipped].filter((part) => part !== undefined).join(' · '),
-  ];
+    : '',
+];
+
+/** What the suite does on a branch, in the order the branch table lists them. */
+const BRANCH_STATUSES = ['flaky', 'failing', 'skipped', 'clean'] as const;
+type BranchStatus = (typeof BRANCH_STATUSES)[number];
+
+/** Branches where any test of the suite clears the report's thresholds, as in the tests table. */
+const flakyBranches = (suite: FlakySuite, thresholds: BranchThresholds): Set<string> =>
+  new Set(
+    suite.tests.flatMap((test) =>
+      test.byBranch.filter((stats) => isFlakyBranch(stats, thresholds)).map(({ branch }) => branch)
+    )
+  );
+
+const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): BranchStatus => {
+  if (skip) {
+    return 'skipped';
+  }
+  if (flaky) {
+    return 'flaky';
+  }
+  return worst.failedBuilds > 0 ? 'failing' : 'clean';
+};
+
+const branchStatusLabel = (status: BranchStatus, skip?: BranchSkip): string => {
+  switch (status) {
+    case 'flaky':
+      return '🔴 Flaky';
+    case 'failing':
+      return '🟠 Some failures';
+    case 'skipped':
+      return skip?.lastRanAt
+        ? `⏭️ Skipped, last ran ${formatDay(skip.lastRanAt)}`
+        : '⏭️ Skipped in every run';
+    case 'clean':
+      return '✅ No failures';
+  }
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
@@ -433,26 +458,38 @@ const branchSkips = (suite: FlakySuite): Map<string, BranchSkip> => {
   );
 };
 
-/** Which branches the suite fails on, is skipped on and is clean on, at a glance. */
-const failuresByBranch = (suite: FlakySuite): string | undefined => {
+/** `main` or a version branch like `9.4`; feature and pull request branches are not. */
+const isMainOrVersionBranch = (branch: string): boolean =>
+  branch === 'main' || /^\d+\.\d+$/.test(branch);
+
+/** Whether the suite is flaky, fails, is skipped or is clean on `main` and each version branch. */
+const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): string | undefined => {
   const skipped = branchSkips(suite);
-  const group = ({ worst }: WorstFailures<BuildCounts & { branch: string }>): number =>
-    skipped.has(worst.branch) ? 1 : worst.failedBuilds > 0 ? 0 : 2;
+  const flaky = flakyBranches(suite, thresholds);
+  // The counts shown are the worst test's, the status covers every test
   const branches = worstPerKey(
     suite,
-    (test) => test.byBranch,
+    (test) => test.byBranch.filter(({ branch }) => isMainOrVersionBranch(branch)),
     (stats) => stats.branch
-  ).sort((a, b) => group(a) - group(b));
+  ).map((row) => {
+    const { branch } = row.worst;
+    const skip = skipped.get(branch);
+    return { row, skip, status: branchStatus(row.worst, flaky.has(branch), skip) };
+  });
   if (branches.length === 0) {
     return undefined;
   }
-  const rows = branches.map((row) =>
-    failuresRow(inlineCode(row.worst.branch), row, skipped.get(row.worst.branch))
-  );
+  const rows = branches
+    .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
+    .map(({ row, skip, status }) => [
+      inlineCode(row.worst.branch),
+      branchStatusLabel(status, skip),
+      ...failuresCells(row),
+    ]);
   return [
-    '#### Failures by Branch',
+    '#### Status by Branch',
     '',
-    table(['Branch', 'Failed builds', 'Sample failure'], rows),
+    table(['Branch', 'Status', 'Failed builds', 'Sample failure'], rows),
   ].join('\n');
 };
 
@@ -473,10 +510,11 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
   if (targets.length === 0) {
     return undefined;
   }
-  const rows = targets.map((row) => {
-    const [target, ...rest] = failuresRow(inlineCode(row.worst.mode), row);
-    return [target, targetEnvironment(row.worst), ...rest];
-  });
+  const rows = targets.map((row) => [
+    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(row.worst.mode)}`,
+    targetEnvironment(row.worst),
+    ...failuresCells(row),
+  ]);
   return [
     '#### Failures by Target',
     '',
@@ -492,10 +530,8 @@ interface SuiteError {
   key: string;
   /** The newest failure's message across the tests. */
   message: string;
-  failures: number;
-  /** Only known when a single test hit the error; a build failing two tests would count twice. */
-  builds?: number;
-  byPipeline: Map<string, number>;
+  /** Build ids per pipeline; a build failing two tests counts once. */
+  byPipeline: Map<string, Set<string>>;
   branches: Set<string>;
   targets: Set<string>;
   /** Titles of the tests that hit the error, in ranking order. */
@@ -506,7 +542,11 @@ interface SuiteError {
   lastFailedJobId?: string;
 }
 
-/** The errors of every test in the suite, merged on the report's key, most failures first. */
+/** Distinct builds with the error; a build belongs to one pipeline, so the counts add up. */
+const errorBuilds = (error: SuiteError): number =>
+  [...error.byPipeline.values()].reduce((sum, builds) => sum + builds.size, 0);
+
+/** The errors of every test in the suite, merged on the report's key, most builds first. */
 const suiteErrors = (suite: FlakySuite): SuiteError[] => {
   const byKey = new Map<string, SuiteError>();
   for (const test of suite.tests) {
@@ -516,10 +556,8 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
         byKey.set(error.key, {
           key: error.key,
           message: error.message,
-          failures: error.failuresCount,
-          builds: error.buildsCount,
           byPipeline: new Map(
-            error.byPipeline.map(({ pipeline, failuresCount }) => [pipeline, failuresCount])
+            error.byPipeline.map(({ pipeline, buildIds }) => [pipeline, new Set(buildIds)])
           ),
           branches: new Set(error.branches),
           targets: new Set(error.targets),
@@ -531,10 +569,11 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
         });
         continue;
       }
-      current.failures += error.failuresCount;
-      current.builds = undefined;
-      for (const { pipeline, failuresCount } of error.byPipeline) {
-        current.byPipeline.set(pipeline, (current.byPipeline.get(pipeline) ?? 0) + failuresCount);
+      for (const { pipeline, buildIds } of error.byPipeline) {
+        current.byPipeline.set(
+          pipeline,
+          new Set([...(current.byPipeline.get(pipeline) ?? []), ...buildIds])
+        );
       }
       for (const branch of error.branches) current.branches.add(branch);
       for (const target of error.targets) current.targets.add(target);
@@ -550,7 +589,9 @@ const suiteErrors = (suite: FlakySuite): SuiteError[] => {
       }
     }
   }
-  return [...byKey.values()].sort((a, b) => b.failures - a.failures || a.key.localeCompare(b.key));
+  return [...byKey.values()].sort(
+    (a, b) => errorBuilds(b) - errorBuilds(a) || a.key.localeCompare(b.key)
+  );
 };
 
 /**
@@ -572,25 +613,30 @@ const escapeHtml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** `` `kibana-pull-request` (597), `kibana-on-merge` (128) ``, or `` `kibana-on-merge` only ``. */
-const formatErrorPipelines = (byPipeline: Map<string, number>): string => {
-  const entries = [...byPipeline.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const formatErrorPipelines = (byPipeline: Map<string, Set<string>>): string => {
+  const entries = [...byPipeline.entries()]
+    .map(([pipeline, builds]): [string, number] => [pipeline, builds.size])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   if (entries.length === 1) {
     return `${inlineCode(entries[0][0])} only`;
   }
-  return entries.map(([pipeline, failures]) => `${inlineCode(pipeline)} (${failures})`).join(', ');
+  return entries.map(([pipeline, builds]) => `${inlineCode(pipeline)} (${builds})`).join(', ');
 };
 
 /**
- * One error, collapsed under its share of the suite's failures and its first line; inside, the
- * full message, then where it was seen.
+ * One error, under its share of the suite's failed builds and its first line, collapsed unless
+ * `open`; inside, the full message, then where it was seen.
  */
-const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: number): string => {
-  const counts =
-    error.builds !== undefined
-      ? `${error.failures} in ${plural(error.builds, 'build')}`
-      : `${error.failures} across ${plural(error.tests.length, 'test')}`;
+const errorSection = (
+  suite: FlakySuite,
+  error: SuiteError,
+  failedBuilds: number,
+  open: boolean
+): string => {
+  const builds = errorBuilds(error);
+  const share = formatPercent(failedBuilds > 0 ? builds / failedBuilds : 0);
   const summary =
-    `<b>${formatPercent(error.failures / totalFailures)} of failures</b> (${counts}) · ` +
+    `<b>${share} of failed builds</b> (${builds} of ${failedBuilds}) · ` +
     `<code>${escapeHtml(errorTitle(error.message))}</code> · ` +
     formatDateRange(error.firstFailedAt, error.lastFailedAt);
   const targets = [...error.targets].filter((target) => target !== UNKNOWN_TARGET_MODE).sort();
@@ -619,7 +665,8 @@ const errorSection = (suite: FlakySuite, error: SuiteError, totalFailures: numbe
     summary,
     [codeBlock(formatFullFailureMessage(error.message)), table(['Field', 'Value'], rows)].join(
       '\n\n'
-    )
+    ),
+    { open }
   );
 };
 
@@ -631,9 +678,10 @@ const isPullRequestOnly = (error: SuiteError): boolean =>
   error.branches.size > 0 && [...error.branches].every(isPullRequestRef);
 
 /**
- * The suite's distinct errors over the window, most failures first, at most `MAX_ERRORS` shown.
- * Errors seen only on pull request builds are left out, and the section says so, so that it
- * describes what the suite does on real branches.
+ * The suite's distinct errors over the window, most builds first, at most `MAX_ERRORS` shown.
+ * The first is open, so the likely cause shows without a click. Errors seen only on pull request
+ * builds are left out, and the section says so, so that it describes what the suite does on real
+ * branches.
  */
 const failuresByErrorMessage = (suite: FlakySuite): string => {
   const all = suiteErrors(suite);
@@ -648,10 +696,13 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
   if (errors.length === 0) {
     return ['#### Failures by Error Message', leftOut].join('\n\n');
   }
-  const totalFailures = errors.reduce((sum, error) => sum + error.failures, 0);
+  // A build that hit two errors counts once, so the shares can add up to more than 100%
+  const failedBuilds = new Set(
+    errors.flatMap((error) => [...error.byPipeline.values()].flatMap((builds) => [...builds]))
+  ).size;
   const shown = errors
     .slice(0, MAX_ERRORS)
-    .map((error) => errorSection(suite, error, totalFailures));
+    .map((error, index) => errorSection(suite, error, failedBuilds, index === 0));
   const rest = errors.length - shown.length;
   return [
     '#### Failures by Error Message',
@@ -721,7 +772,7 @@ const reportSections = (suite: FlakySuite, report: FlakyTestReport): Array<strin
 
 const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
   failuresByErrorMessage(suite),
-  failuresByBranch(suite),
+  statusByBranch(suite, report),
   failuresByTarget(suite),
   failuresByPipeline(suite, report),
 ];

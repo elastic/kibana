@@ -65,6 +65,18 @@ const samplePrivateKey = (): string => {
   return privateKey;
 };
 
+const sampleServiceAccountJson = (): string =>
+  JSON.stringify({
+    type: 'service_account',
+    project_id: 'contract-mock',
+    private_key_id: 'contract-mock',
+    private_key: samplePrivateKey(),
+    client_email: 'contract-mock@contract-mock.iam.gserviceaccount.com',
+    client_id: 'contract-mock',
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+  });
+
 const FORM_BOUNDARY = 'contract-mock-boundary';
 
 // The http adapter sends FormData as multipart; axios' fetch adapter would label it
@@ -91,6 +103,7 @@ const toMultipart = async (form: FormData): Promise<Buffer> => {
 
 // Secrets whose schema takes any string, but that auth types decode.
 const DECODED_PLACEHOLDERS: Readonly<Record<string, () => string>> = {
+  serviceAccountJson: sampleServiceAccountJson,
   accountKey: () => Buffer.from('contract-mock-accountKey').toString('base64'),
 };
 
@@ -140,18 +153,42 @@ const silentLogger: Logger = {
   get: () => silentLogger,
 };
 
-const createAuthContext = (): AuthContext => ({
+const createAuthContext = (mockFetch: typeof fetch): AuthContext => ({
   getCustomHostSettings: () => undefined,
   getToken: async () => ACCESS_TOKEN,
   logger: silentLogger,
   sslSettings: {},
+  fetchTestOnly: mockFetch,
 });
 
-// Jest's jsdom has no `crypto.subtle`, which the signing auth types (AWS SigV4, GCP and Azure
-// keys) call as a global, as Kibana's server provides it.
-const ensureWebCrypto = (): void => {
+// Auth types sign with Web Crypto, which jest environments leave out.
+const ensureWebCrypto = () => {
   if (!globalThis.crypto?.subtle) {
     Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
+  }
+};
+
+let guards = 0;
+let globalFetch: typeof fetch | undefined;
+
+/**
+ * Runs `run` with the global `fetch` failing, so code that should use the context's `fetch`
+ * can't reach the network unnoticed.
+ */
+const withoutGlobalFetch = async <T>(run: () => Promise<T>): Promise<T> => {
+  if (guards++ === 0) {
+    globalFetch = globalThis.fetch;
+    globalThis.fetch = async (input) => {
+      const url = input instanceof Request ? input.url : String(input);
+      throw new Error(`${url} was requested with the global fetch, bypassing the contract mock`);
+    };
+  }
+  try {
+    return await run();
+  } finally {
+    if (--guards === 0 && globalFetch) {
+      globalThis.fetch = globalFetch;
+    }
   }
 };
 
@@ -167,7 +204,6 @@ export const createContractContext = async ({
   config = {},
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
-  ensureWebCrypto();
   const mock = createEmulatorFetch(mockOptions);
   const definitions = connector.auth?.types.length ? connector.auth.types : ['none'];
   const definition =
@@ -206,7 +242,10 @@ export const createContractContext = async ({
   for (const [name, value] of Object.entries(connector.auth?.headers ?? {})) {
     client.defaults.headers.common[name] = value;
   }
-  await findAuthType(id).configure(createAuthContext(), client, authSecrets);
+  ensureWebCrypto();
+  await withoutGlobalFetch(() =>
+    findAuthType(id).configure(createAuthContext(mock.fetch), client, authSecrets)
+  );
 
   const ctx: ActionContext = {
     client,
@@ -216,6 +255,7 @@ export const createContractContext = async ({
     getClient: async (clientType) => {
       throw new Error(`Client ${String(clientType)} is not available in contract tests`);
     },
+    fetchTestOnly: mock.fetch,
   };
 
   const runAction = async (name: string, input: unknown): Promise<unknown> => {
@@ -224,7 +264,7 @@ export const createContractContext = async ({
       throw new Error(`${connector.metadata.id} has no action ${name}`);
     }
     const parsed = await action.input.parseAsync(input);
-    return action.handler(ctx, parsed);
+    return withoutGlobalFetch(() => action.handler(ctx, parsed));
   };
 
   return { ctx, mock, runAction };
