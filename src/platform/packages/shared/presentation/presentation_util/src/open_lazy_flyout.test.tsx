@@ -54,11 +54,12 @@ describe('openLazyFlyout', () => {
         maxWidth: 800,
         size: 500,
         outsideClickCloses: true,
-        ownFocus: true,
         paddingSize: 'm',
         type: 'push',
       })
     );
+    // ownFocus omitted so EuiProvider componentDefaults apply
+    expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('ownFocus');
   });
 
   it('calls overlayTracker.openOverlay when parentApi supports it', () => {
@@ -86,7 +87,22 @@ describe('openLazyFlyout', () => {
       expect.anything(),
       expect.objectContaining({
         type: 'overlay',
-        ownFocus: false,
+      })
+    );
+    expect(openFlyout.mock.calls[0][1]).not.toHaveProperty('ownFocus');
+  });
+
+  it('forwards explicit ownFocus from flyoutProps', () => {
+    openLazyFlyout({
+      core,
+      loadContent,
+      flyoutProps: { ownFocus: true },
+    });
+
+    expect(openFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        ownFocus: true,
       })
     );
   });

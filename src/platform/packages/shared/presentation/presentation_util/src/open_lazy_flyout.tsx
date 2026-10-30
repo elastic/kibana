@@ -71,7 +71,8 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
   const panelFlyoutTypeFromParent = overlayTracker?.panelFlyoutType;
   const type = flyoutProps?.type ?? panelFlyoutTypeFromParent ?? 'push';
-  const ownFocus = flyoutProps?.ownFocus ?? panelFlyoutTypeFromParent !== 'overlay';
+  // Do not invent ownFocus — omit it so EuiProvider componentDefaults apply.
+  // Pass ownFocus via flyoutProps to opt in/out explicitly.
 
   const previouslyFocusedElement =
     document.activeElement instanceof HTMLElement && document.activeElement !== document.body
@@ -123,7 +124,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       paddingSize: 'm',
       minWidth: 400,
       maxWidth: 800,
-      ownFocus,
       isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',
