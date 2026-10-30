@@ -11,22 +11,19 @@ import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Scout server configuration for Snapshot & Restore tests that need on-prem repository types.
+ * Scout server configuration for tests that need an on-prem (not cloud-enabled) deployment.
  *
  * The default stateful config sets `--xpack.cloud.id`, which makes the Cloud plugin report
- * `isCloudEnabled`. The plugin's `repository_types` route then drops `ON_PREM_REPOSITORY_TYPES`
- * (fs/url), so the register-repository wizard never offers the `fs` type. That setting is read at
- * setup and cannot be toggled at runtime, so this config set removes it — reproducing the on-prem
- * environment the migrated FTR suite ran in.
+ * `isCloudEnabled`. That setting is read at setup and cannot be toggled at runtime, so this
+ * config set removes it. Tests under `test/scout_onprem/` run against it, for example Snapshot &
+ * Restore's on-prem repository types (fs/url) and the self-managed subscription status badge.
  *
  * Start servers:
- *   node scripts/scout.js start-server --arch stateful --domain classic \
- *     --serverConfigSet snapshot_restore_onprem
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet onprem
  *
- * Run tests:
+ * Run tests (the config set is derived from the `scout_onprem` directory):
  *   node scripts/scout.js run-tests --arch stateful --domain classic \
- *     --serverConfigSet snapshot_restore_onprem \
- *     --config x-pack/platform/plugins/private/snapshot_restore/test/scout_snapshot_restore_onprem/ui/playwright.config.ts
+ *     --config x-pack/platform/plugins/private/snapshot_restore/test/scout_onprem/ui/playwright.config.ts
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

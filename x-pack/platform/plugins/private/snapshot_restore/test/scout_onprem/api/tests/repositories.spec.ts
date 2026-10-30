@@ -30,7 +30,7 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
 
-      // The `snapshot_restore_onprem` config set omits `xpack.cloud.id`, so on top of the module
+      // The `onprem` config set omits `xpack.cloud.id`, so on top of the module
       // repository types the plugin also serves the on-prem file system and url types. That cannot
       // be done on real ECH, hence local only.
       expect(response.body).toStrictEqual(['azure', 'gcs', 's3', 'fs', 'url']);
