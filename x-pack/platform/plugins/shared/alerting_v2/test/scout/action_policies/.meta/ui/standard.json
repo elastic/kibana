@@ -1,5 +1,5 @@
 {
-  "sha1": "b9bba22a52e6f4eae98900116d33ef5de25a3bd0",
+  "sha1": "7b35b9c31b7d3b5ea8c3a7c29a7a49238cb324be",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 160,
-        "column": 22
+        "line": 178,
+        "column": 31
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 175,
-        "column": 11
+        "line": 193,
+        "column": 26
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 208,
-        "column": 18
+        "line": 225,
+        "column": 38
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/action_policies/ui/tests/action_policy_attachment_canvas.spec.ts",
-        "line": 220,
-        "column": 83
+        "line": 237,
+        "column": 85
       }
     }
   ]

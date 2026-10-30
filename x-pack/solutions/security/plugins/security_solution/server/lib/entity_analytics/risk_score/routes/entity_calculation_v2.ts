@@ -127,6 +127,11 @@ const handler: (
           getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
           idBasedRiskScoringEnabled,
           logger,
+          telemetry: securityContext.getAnalytics(),
+          profiling: {
+            profile: securityConfig.entityAnalytics.riskEngine.esqlProfiling,
+            profileInterval: securityConfig.entityAnalytics.riskEngine.esqlProfilingInterval,
+          },
           alertSampleSizePerShard:
             securityConfig.entityAnalytics?.riskEngine?.alertSampleSizePerShard,
         }),

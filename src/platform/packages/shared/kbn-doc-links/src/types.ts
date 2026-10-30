@@ -705,6 +705,9 @@ export interface DocLinks {
   readonly endpoints: {
     readonly troubleshooting: string;
   };
+  readonly osquery: {
+    readonly guide: string;
+  };
   readonly legal: {
     readonly privacyStatement: string;
     readonly generalPrivacyStatement: string;
