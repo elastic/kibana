@@ -27,11 +27,11 @@ import {
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
-} from './app/app_header';
+} from './components/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useDeveloperMode } from './hooks/use_developer_mode';
-import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
