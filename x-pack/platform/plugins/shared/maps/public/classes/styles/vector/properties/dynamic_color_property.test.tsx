@@ -334,7 +334,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         fieldMetaOptions,
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
-      expect(colorProperty._getMbColor()).toBeNull();
+      expect(colorProperty._getMbColor()).toBeUndefined();
     });
 
     test('should return null when field name is not provided', async () => {
@@ -345,7 +345,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       };
       // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
-      expect(colorProperty._getMbColor()).toBeNull();
+      expect(colorProperty._getMbColor()).toBeUndefined();
     });
 
     describe('interpolate color ramp', () => {
@@ -355,7 +355,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBeNull();
+        expect(colorProperty._getMbColor()).toBeUndefined();
       });
       test('should return mapbox expression for color ramp', async () => {
         const field = {
@@ -445,7 +445,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBeNull();
+        expect(colorProperty._getMbColor()).toBeUndefined();
       });
 
       test('should return null when customColorRamp is empty', async () => {
@@ -456,7 +456,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBeNull();
+        expect(colorProperty._getMbColor()).toBeUndefined();
       });
 
       test('should use `feature-state` for geojson source', async () => {

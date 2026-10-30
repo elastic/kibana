@@ -111,13 +111,15 @@ export class LabelPositionProperty extends AbstractStyleProperty<
       const dynamicIconSizeOptions = (this._iconSizeProperty as DynamicSizeProperty).getOptions();
       const interpolateExpression = (
         this._iconSizeProperty as DynamicSizeProperty
-      ).getMbSizeExpression({
+      ).getMbInterpolateSizeExpression({
         forceFeatureProperties: true,
         maxStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.maxSize, labelSize)],
         minStopOutput: ['literal', this._getTextOffset(dynamicIconSizeOptions.minSize, labelSize)],
       });
-      mbMap.setLayoutProperty(mbLayerId, 'text-offset', interpolateExpression);
-      return;
+      if (interpolateExpression) {
+        mbMap.setLayoutProperty(mbLayerId, 'text-offset', interpolateExpression);
+        return;
+      }
     }
 
     const iconSize = !this._iconSizeProperty.isDynamic()
@@ -127,7 +129,7 @@ export class LabelPositionProperty extends AbstractStyleProperty<
   }
 
   // https://maplibre.org/maplibre-gl-js-docs/style-spec/layers/#layout-symbol-text-offset
-  _getTextOffset(symbolSize: number, labelSize: number) {
+  _getTextOffset(symbolSize: number, labelSize: number): [number, number] {
     const ems = symbolSize / labelSize;
     // Positive values indicate right and down, while negative values indicate left and up
     const verticalTextOffset = this._options.position === LABEL_POSITIONS.BOTTOM ? ems : ems * -1;
