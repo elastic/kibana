@@ -148,6 +148,8 @@ export const javascriptOverrides: OxlintOverride[] = [
       'no-redeclare': 'error',
       'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
       'no-sequences': 'error',
+      'no-unsanitized/method': 'error',
+      'no-unsanitized/property': 'error',
       'no-use-before-define': ['error', 'nofunc'],
       'no-var': 'error',
       'one-var': ['error', 'never'],

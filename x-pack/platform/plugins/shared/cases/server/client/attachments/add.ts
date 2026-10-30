@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AttachmentV2, Case } from '../../../common/types/domain';
+import type { AttachmentV2, Case, UnifiedAttachment } from '../../../common/types/domain';
 import {
   UnifiedAttachmentPayloadSchema,
   type UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { getIDsAndIndicesAsArrays } from '../../common/utils';
+import {
+  flattenAttachmentSavedObject,
+  flattenAttachmentSavedObjects,
+  getIDsAndIndicesAsArrays,
+} from '../../common/utils';
 import { isAlertAttachmentType, isEventAttachmentType } from '../../../common/utils/attachments';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
+import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 import type { AddArgs } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
@@ -37,21 +45,12 @@ const isSameAlertOrEventFamily = (storedType: string, requestType: string): bool
 };
 
 /**
- * Locates the attachment produced by a create: the newly created one, or on a
- * duplicate alert/event request the existing attachment that already covers it.
- * Used by the internal write route to derive the unified single-attachment
- * response from the encoded case.
+ * Locates the attachment that already covers a create whose ids are all on the case.
  */
-export const pickCreatedOrExistingAttachment = (
-  comments: AttachmentV2[] | undefined,
-  savedObjectID: string,
+export const findExistingAttachment = (
+  attachments: AttachmentV2[],
   query: UnifiedAttachmentPayload
 ): AttachmentV2 | undefined => {
-  const created = comments?.find((comment) => comment.id === savedObjectID);
-  if (created != null) {
-    return created;
-  }
-
   const requestedIds = getIDsAndIndicesAsArrays(query).ids;
   if (requestedIds.length === 0) {
     return undefined;
@@ -59,22 +58,50 @@ export const pickCreatedOrExistingAttachment = (
 
   const requestedIdSet = new Set(requestedIds);
 
-  return comments?.find(
-    (comment) =>
-      isSameAlertOrEventFamily(comment.type, query.type) &&
-      getIDsAndIndicesAsArrays(comment as AttachmentRequestV2).ids.some((id) =>
+  return attachments.find(
+    (attachment) =>
+      isSameAlertOrEventFamily(attachment.type, query.type) &&
+      getIDsAndIndicesAsArrays(attachment as AttachmentRequestV2).ids.some((id) =>
         requestedIdSet.has(id)
       )
   );
 };
 
-/**
- * Create an attachment to a case.
- *
- * @ignore
- */
-export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
-  const { comment, caseId, id } = addArgs;
+const getExistingAttachment = async (
+  caseId: string,
+  query: UnifiedAttachmentPayload,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  const comments = await clientArgs.services.caseService.getAllCaseComments({
+    id: caseId,
+    options: {
+      fields: [],
+      page: 1,
+      perPage: MAX_DOCS_PER_PAGE,
+    },
+  });
+
+  const existing = findExistingAttachment(
+    flattenAttachmentSavedObjects(comments.saved_objects),
+    query
+  );
+
+  if (existing == null) {
+    throw Boom.notFound(`Failed to locate the existing attachment on case ${caseId}`);
+  }
+
+  return toUnifiedAttachment(existing);
+};
+
+const createAttachment = async (
+  addArgs: AddArgs,
+  clientArgs: CasesClientArgs
+): Promise<{
+  query: UnifiedAttachmentPayload;
+  model: CaseCommentModel;
+  createdAttachment?: AttachmentSavedObjectTransformedV2;
+}> => {
+  const { comment, caseId } = addArgs;
 
   const {
     logger,
@@ -88,7 +115,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
-    const savedObjectID = id ?? SavedObjectsUtils.generateId();
+    const savedObjectID = SavedObjectsUtils.generateId();
     await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [
@@ -107,22 +134,25 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     const createdDate = new Date().toISOString();
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-    const updatedModel = await model.createComment({
+    const { model: updatedModel, attachment: createdAttachment } = await model.createComment({
       createdDate,
       commentReq: query,
       id: savedObjectID,
     });
 
-    const updatedCase = await updatedModel.encodeWithComments();
-
-    const created = updatedCase.comments?.some((c) => c.id === savedObjectID) ?? false;
-    if (created) {
-      emitAttachmentsAddedEvent(clientArgs, updatedCase, [savedObjectID], query.type);
-      // This call never throws — failures are logged and do not abort the attachment creation.
-      await extractAndAddObservables(caseId, [query], updatedCase, clientArgs);
+    if (createdAttachment == null) {
+      return { query, model: updatedModel };
     }
 
-    return updatedCase;
+    const {
+      attributes: { owner, settings },
+    } = model.savedObject;
+
+    emitAttachmentsAddedEvent(clientArgs, { id: caseId, owner }, [savedObjectID], query.type);
+    // This call never throws — failures are logged and do not abort the attachment creation.
+    await extractAndAddObservables(caseId, [query], { settings }, clientArgs);
+
+    return { query, model: updatedModel, createdAttachment };
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,
@@ -130,4 +160,37 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
       logger,
     });
   }
+};
+
+/**
+ * Create an attachment to a case. Returns the created attachment, or the attachment that
+ * already covers the request when every referenced id is on the case.
+ *
+ * @ignore
+ */
+export const addComment = async (
+  addArgs: AddArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  const { query, createdAttachment } = await createAttachment(addArgs, clientArgs);
+
+  if (createdAttachment == null) {
+    return getExistingAttachment(addArgs.caseId, query, clientArgs);
+  }
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(createdAttachment));
+};
+
+/**
+ * Create an attachment to a case. Returns the case with all its attachments.
+ *
+ * @ignore
+ */
+export const addCommentAndGetCase = async (
+  addArgs: AddArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const { model } = await createAttachment(addArgs, clientArgs);
+
+  return model.encodeWithComments();
 };

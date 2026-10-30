@@ -7,7 +7,7 @@ date: 2026-10-28
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'oxlint', 'plugin']
 ---
 
-Oxlint runs ESLint plugins as JS plugins, but its rule context implements ESLint 9's API. Plugins written for ESLint 8 call the context methods ESLint 9 removed (`context.getScope()`, `context.getAncestors()`, `context.getSourceCode()` and the `SourceCode` methods ESLint 8 forwarded from the context) or read `context.parserServices`, and fail with a `TypeError` in Oxlint.
+Oxlint runs ESLint plugins as JS plugins, but its rule context implements ESLint 9's API. Plugins written for ESLint 8 call the context methods ESLint 9 removed (`context.getScope()`, `context.getAncestors()`, `context.getSource()` and the `SourceCode` methods ESLint 8 forwarded from the context) or read `parserServices`, and fail with a `TypeError` in Oxlint.
 
 `eslint8_context.js` wraps a plugin's rules so they get those methods back. Each entry point wraps one plugin and keeps its name, so rule names and `eslint-disable` comments don't change:
 

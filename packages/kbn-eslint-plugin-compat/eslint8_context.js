@@ -9,8 +9,8 @@
 
 // Oxlint's rule context implements ESLint 9's API. Plugins written for ESLint 8 still call the
 // context methods ESLint 9 removed (`context.getScope()`, `context.getAncestors()`,
-// `context.getSourceCode()`, the forwarded `SourceCode` methods) and read
-// `context.parserServices`, so these wrappers add them back on top of Oxlint's context.
+// `context.getSource()`, the forwarded `SourceCode` methods) and read `parserServices`, so these
+// wrappers add them back on top of Oxlint's context.
 
 // `@typescript-eslint/parser` without `parserOptions.project`, as ESLint runs it here: no
 // `ts.Program`, so rules that only use type information when it is configured skip it.
@@ -36,13 +36,9 @@ const wrapRule = (rule) => {
         sourceCode: { value: legacySourceCode },
         parserServices: { value: PARSER_SERVICES },
         getSourceCode: { value: () => legacySourceCode },
-        getFilename: { value: () => context.filename },
         getSource: { value: (...args) => sourceCode.getText(...args) },
-        getPhysicalFilename: { value: () => context.physicalFilename },
-        getCwd: { value: () => context.cwd },
         getAncestors: { value: () => sourceCode.getAncestors(currentNode) },
         getScope: { value: () => sourceCode.getScope(currentNode) },
-        getDeclaredVariables: { value: (node) => sourceCode.getDeclaredVariables(node) },
         markVariableAsUsed: {
           value: (name) => sourceCode.markVariableAsUsed(name, currentNode),
         },
@@ -62,8 +58,9 @@ const wrapRule = (rule) => {
       return Object.fromEntries(
         Object.entries(visitor).map(([selector, handler]) => [
           selector,
-          // Code path handlers receive code paths and segments, not the visited node.
-          typeof handler === 'function' && !selector.startsWith('onCodePath')
+          // Code path handlers (`onCodePathStart`, `onUnreachableCodePathSegmentStart`, ...) receive
+          // code paths and segments, not the visited node. Node selectors never start with `on`.
+          typeof handler === 'function' && !selector.startsWith('on')
             ? (node, ...args) => {
                 currentNode = node;
                 return handler(node, ...args);
