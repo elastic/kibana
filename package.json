@@ -2051,7 +2051,7 @@
     "@parcel/watcher": "2.5.1",
     "@playwright/test": "1.63.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.6.2",
-    "@redocly/cli": "2.53.3",
+    "@redocly/cli": "2.64.1",
     "@rsdoctor/rspack-plugin": "1.6.1",
     "@rspack/core": "2.1.8",
     "@rspack/plugin-react-refresh": "2.0.2",
