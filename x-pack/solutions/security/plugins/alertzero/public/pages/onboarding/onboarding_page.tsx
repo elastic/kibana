@@ -38,7 +38,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   const history = useHistory();
   const [step, setStep] = useState<'intro' | 'workers'>('intro');
 
-  useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
+  useAlertZeroDocTitle();
 
   const canWrite = Boolean(application.capabilities[ALERTZERO_FEATURE_ID]?.write);
 
