@@ -240,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:sync_namespace_templates',
         'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',
+        'fleet:uninstall_action:retry',
         'fleet:update_agent_tags:retry',
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',

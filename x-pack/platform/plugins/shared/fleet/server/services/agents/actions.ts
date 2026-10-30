@@ -56,6 +56,7 @@ const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set([
   'UPGRADE',
   'MIGRATE',
   'RESTART',
+  'UNINSTALL',
 ]);
 
 /**
@@ -129,7 +130,7 @@ export async function createAgentAction(
   auditLoggingService.writeCustomAuditLog({
     message: `${
       newAgentAction.is_automatic ? 'Automatic Upgrade' : 'User'
-    } created Fleet action [id=${actionId}]`,
+    } created Fleet action [id=${actionId}, type=${newAgentAction.type}]`,
   });
 
   return {

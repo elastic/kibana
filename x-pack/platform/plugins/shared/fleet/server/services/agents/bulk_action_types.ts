@@ -15,4 +15,5 @@ export enum BulkActionTaskType {
   PRIVILEGE_LEVEL_CHANGE_RETRY = 'fleet:privilege_level_change:retry',
   ROLLBACK_RETRY = 'fleet:rollback_action:retry',
   RESTART_RETRY = 'fleet:restart_action:retry',
+  UNINSTALL_RETRY = 'fleet:uninstall_action:retry',
 }
