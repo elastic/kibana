@@ -22,7 +22,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 const createEs = () => {
   const es = {
     indices: {
-      create: jest.fn(async () => ({})),
+      create: jest.fn(async (_params: { index: string }) => ({})),
+      // The detections index exists by default, as on a stack where a rule has already run.
+      exists: jest.fn(async () => true),
       delete: jest.fn(async () => ({})),
       putIndexTemplate: jest.fn(async () => ({})),
       createDataStream: jest.fn(async () => ({})),
@@ -97,6 +99,25 @@ describe('AlertZeroRuntime.read', () => {
       '/api/workflows/executions/exec',
       expect.objectContaining({ query: { includeOutput: true } })
     );
+  });
+});
+
+describe('AlertZeroRuntime.waitForGateParked', () => {
+  afterEach(() => jest.useRealTimers());
+
+  it('keeps waiting through RUNNING and returns once the gate is waiting for input', async () => {
+    jest.useFakeTimers();
+    const statuses = [
+      ExecutionStatus.RUNNING,
+      ExecutionStatus.RUNNING,
+      ExecutionStatus.WAITING_FOR_INPUT,
+    ];
+    const fetch = createFetch(() => ({ id: 'gate', status: statuses.shift() }));
+    const pending = new AlertZeroRuntime(fetch).waitForGateParked('gate');
+    await jest.advanceTimersByTimeAsync(5_000);
+
+    await expect(pending).resolves.toMatchObject({ status: ExecutionStatus.WAITING_FOR_INPUT });
+    expect(fetch).toHaveBeenCalledTimes(3);
   });
 });
 
@@ -258,6 +279,51 @@ describe('AlertZeroRuntime.installWorker', () => {
       enabled: true,
       settings: { serviceAccountId: 'sa-existing' },
       settingsRevision: null,
+    });
+  });
+
+  it('rebinds the original service account on restore when the worker ran as another identity', async () => {
+    let revision = 7;
+    const fetch = createFetch((path, options) => {
+      if (path === '/internal/security/service_account' && !options?.method) {
+        return {
+          serviceAccounts: [{ id: 'sa-suite', name: 'alertzero_endpoint_analysis' }],
+        };
+      }
+      if (path === '/internal/alertzero/workers' && !options?.method) {
+        return {
+          workers: [
+            {
+              id: WORKER,
+              enabled: true,
+              settingsRevision: revision,
+              settings: { serviceAccountId: 'sa-custom' },
+            },
+          ],
+        };
+      }
+      if (path === `/internal/alertzero/workers/${WORKER}` && options?.method === 'PATCH') {
+        // The install PATCH bumps the revision the restore PATCH has to carry.
+        revision += 1;
+      }
+      return {};
+    });
+    const runtime = new AlertZeroRuntime(fetch);
+    await runtime.installWorker(WORKER);
+    await runtime.restoreWorker();
+
+    const patchBodies = fetch.mock.calls
+      .filter(
+        ([path, options]) =>
+          String(path).startsWith('/internal/alertzero/workers/') && options?.method === 'PATCH'
+      )
+      .map(([, options]) => JSON.parse((options as { body: string }).body));
+    expect(patchBodies).toHaveLength(2);
+    expect(patchBodies[0].settings).toEqual({ serviceAccountId: 'sa-suite' });
+    // Already enabled before the suite: restore only puts the account back, it does not disable.
+    expect(patchBodies[1]).toEqual({
+      settings: { serviceAccountId: 'sa-custom' },
+      settingsRevision: 8,
     });
   });
 
@@ -575,6 +641,62 @@ describe('seedAlertZeroEndpoint', () => {
     expect(constituentIds).toHaveLength(1);
     expect(constituent?.index).toBe('.alerts-security.alerts-default');
     expect(constituent?.document.host).toEqual({ name: fixture.host });
+  });
+
+  describe('on a stack without a detections index', () => {
+    const DETECTIONS = '.alerts-security.alerts-default';
+
+    it('creates it with a keyword host.name before the first write', async () => {
+      const es = createEs();
+      es.indices.exists.mockResolvedValue(false as never);
+      await seedAlertZeroEndpoint(es, createFetch());
+
+      const createCall = es.indices.create.mock.calls.find(
+        ([params]) => (params as { index: string }).index === DETECTIONS
+      );
+      expect(createCall?.[0]).toMatchObject({
+        mappings: { properties: { host: { properties: { name: { type: 'keyword' } } } } },
+      });
+      const createdAt =
+        es.indices.create.mock.invocationCallOrder[
+          es.indices.create.mock.calls.findIndex(
+            ([params]) => (params as { index: string }).index === DETECTIONS
+          )
+        ];
+      const writtenAt =
+        es.index.mock.invocationCallOrder[
+          indexed(es).findIndex(({ index }) => index === DETECTIONS)
+        ];
+      expect(createdAt).toBeLessThan(writtenAt);
+    });
+
+    it('drops the index it created on cleanup, not just the document', async () => {
+      const es = createEs();
+      es.indices.exists.mockResolvedValue(false as never);
+      const fixture = await seedAlertZeroEndpoint(es, createFetch());
+      await fixture.cleanup();
+
+      expect(es.indices.delete).toHaveBeenCalledWith({ index: DETECTIONS });
+      const deletedDocs = (es.delete.mock.calls as unknown[][]).map(
+        ([params]) => (params as { index: string }).index
+      );
+      expect(deletedDocs).not.toContain(DETECTIONS);
+    });
+  });
+
+  it('leaves a pre-existing detections index in place and deletes only its document', async () => {
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch());
+    await fixture.cleanup();
+
+    expect(
+      es.indices.create.mock.calls.some(
+        ([params]) => (params as { index: string }).index === '.alerts-security.alerts-default'
+      )
+    ).toBe(false);
+    expect(es.indices.delete).not.toHaveBeenCalledWith({
+      index: '.alerts-security.alerts-default',
+    });
   });
 
   it('cleans up the seeded constituent detection with the Attack Discovery alert', async () => {

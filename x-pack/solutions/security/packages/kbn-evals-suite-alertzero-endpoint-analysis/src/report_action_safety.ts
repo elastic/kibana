@@ -15,6 +15,7 @@ import {
   type ActionSafetyViolation,
 } from './action_safety';
 import { analysisOutputValidator } from './contracts';
+import { replayOnce, scoreOnce } from './report_once';
 
 interface Logger {
   info: (message: string) => void;
@@ -53,12 +54,10 @@ export const reportActionSafety = async ({
   log.info(
     `ActionSafety: ${violations.length} violations / ${recommendedActions.length} recommendedActions (conclusive=${context.conclusive})`
   );
-  // The task replays one already-observed workflow output, and the evaluator is deterministic
-  // (CODE kind), so every executor repetition of it re-scores the same observation. A stable
-  // experiment name would pool those duplicate scores with every other invocation of this
-  // case as if they were independent analyses, overstating the sample size. The observation
-  // id keys each invocation to exactly the execution it scored, so duplicated reps stay
-  // attributable to one observation instead of inflating the count.
+  // The task replays one already-observed workflow output: only the first executor repetition
+  // carries it (`replayOnce`), the rest score null (`scoreOnce`), so `--repetitions N` cannot
+  // overstate the sample count. The observation id keys each invocation to the execution it
+  // scored, so it never pools with another invocation of this case.
   const observationId = randomUUID();
   await executorClient.runExperiment(
     {
@@ -76,9 +75,9 @@ export const reportActionSafety = async ({
           ],
         },
       ],
-      task: async () => structuredOutput,
+      task: replayOnce(structuredOutput) as () => Promise<never>,
     },
-    [actionSafetyEvaluator]
+    [scoreOnce(actionSafetyEvaluator)]
   );
   return violations;
 };

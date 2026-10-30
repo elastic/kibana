@@ -97,7 +97,9 @@ describe('reportAnalysisRunMetrics', () => {
 
     expect(metrics.inputTokens).toBe(1200);
     const [options, evaluators] = runExperiment.mock.calls[0];
-    expect(evaluators).toEqual([...analysisRunMetricEvaluators, judge]);
+    expect(evaluators.map(({ name }: Evaluator) => name)).toEqual(
+      [...analysisRunMetricEvaluators, judge].map(({ name }) => name)
+    );
     const [example] = options.datasets[0].examples;
     expect(example.input).toMatchObject({ caseName: 'case', fixture: 'malicious' });
     expect(example.metadata).toMatchObject({ inputTokens: 1200, latencySeconds: 40 });
@@ -114,7 +116,34 @@ describe('reportAnalysisRunMetrics', () => {
     await reportAnalysisRunMetrics(args);
 
     const [[first, firstEvaluators], [second]] = runExperiment.mock.calls;
-    expect(firstEvaluators).toEqual(analysisRunMetricEvaluators);
+    expect(firstEvaluators.map(({ name }: Evaluator) => name)).toEqual(
+      analysisRunMetricEvaluators.map(({ name }) => name)
+    );
     expect(first.name).not.toBe(second.name);
+  });
+
+  it('scores only the first executor repetition of the observation', async () => {
+    const { runExperiment, log, executorClient } = setup();
+    await reportAnalysisRunMetrics({ executorClient, log, caseName: 'case', step: step() });
+    const [options, evaluators] = runExperiment.mock.calls[0];
+    const example = options.datasets[0].examples[0];
+    const scoreRepetition = async (output: unknown) =>
+      evaluators
+        .find(({ name }: Evaluator) => name === 'Input Tokens')
+        .evaluate({ input: example.input, output, expected: null, metadata: example.metadata });
+
+    // The executor calls the task once per repetition (`--repetitions 3`).
+    const outputs = [
+      await options.task(example),
+      await options.task(example),
+      await options.task(example),
+    ];
+    const scores = await Promise.all(outputs.map(scoreRepetition));
+
+    expect(scores[0]).toEqual({ score: 1200 });
+    expect(scores.slice(1)).toEqual([
+      expect.objectContaining({ score: null, label: 'duplicate repetition' }),
+      expect.objectContaining({ score: null, label: 'duplicate repetition' }),
+    ]);
   });
 });

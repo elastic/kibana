@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 
 import type { Evaluator, EvalsExecutorClient } from '@kbn/evals';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { replayOnce, scoreOnce } from './report_once';
 
 interface Logger {
   info: (message: string) => void;
@@ -90,9 +91,9 @@ const formatMetric = (value: number | undefined, digits = 0) =>
 /**
  * Scores token usage, latency and, optionally, an LLM judge for one observed analysis run, so
  * a model comparison reads cost and quality from the same experiment. Like
- * `reportActionSafety`, each invocation is keyed to one observation so executor repetitions
- * never pool duplicate scores of a single run as independent samples. Never throws on missing
- * usage; `assertAnalysisExecution` owns that check.
+ * `reportActionSafety`, each invocation is keyed to one observation and only the first executor
+ * repetition is scored, so duplicate scores of a single run never count as independent
+ * samples. Never throws on missing usage; `assertAnalysisExecution` owns that check.
  */
 export const reportAnalysisRunMetrics = async ({
   executorClient,
@@ -139,9 +140,9 @@ export const reportAnalysisRunMetrics = async ({
           ],
         },
       ],
-      task: async () => structuredOutput ?? null,
+      task: replayOnce(structuredOutput ?? null) as () => Promise<never>,
     },
-    judge ? [...analysisRunMetricEvaluators, judge] : analysisRunMetricEvaluators
+    (judge ? [...analysisRunMetricEvaluators, judge] : analysisRunMetricEvaluators).map(scoreOnce)
   );
   return metrics;
 };
