@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { takeRight } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
@@ -39,6 +38,7 @@ import {
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
+import { ML_INTERNAL_USER_REQUEST } from '../../shared_services/internal_user_request';
 import type { RegisterAlertParams } from './register_ml_alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 
@@ -258,10 +258,9 @@ export function registerAnomalyDetectionAlertType({
       spaceId,
       rule,
     }: ExecutorOptions<MlAnomalyDetectionAlertParams>) => {
-      const fakeRequest = Object.create(null) as KibanaRequest;
       const alertingService = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
-        fakeRequest
+        ML_INTERNAL_USER_REQUEST
       );
 
       const { alertsClient } = services;

@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {
   BoundOptions,
@@ -139,7 +140,7 @@ export const createClientWithoutRequest = ({
   };
 
   return createInferenceClient({
-    request: {} as KibanaRequest,
+    request: kibanaRequestFactory({ headers: {}, path: '/' }),
     namespace: 'default',
     actions,
     logger: logger.get('client'),

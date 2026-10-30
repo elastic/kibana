@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { MlDatafeedStats, MlJob, MlPluginSetup } from '@kbn/ml-plugin/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { MlJobMetric, MlJobUsageMetric } from './types';
 
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
@@ -40,11 +41,13 @@ export const getMlJobMetrics = async ({
   }
 
   try {
-    const fakeRequest = { headers: {} } as KibanaRequest;
-
-    const modules = await mlClient.modulesProvider(fakeRequest, savedObjectsClient).listModules();
+    const modules = await mlClient
+      .modulesProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient)
+      .listModules();
     const moduleJobs = modules.flatMap((module) => module.jobs);
-    const jobs = await mlClient.jobServiceProvider(fakeRequest, savedObjectsClient).jobsSummary();
+    const jobs = await mlClient
+      .jobServiceProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient)
+      .jobsSummary();
 
     jobsUsage = jobs.filter(isSecurityJob).reduce((usage, job) => {
       const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);
@@ -55,18 +58,18 @@ export const getMlJobMetrics = async ({
 
     const jobsType = 'security';
     const securityJobStats = await mlClient
-      .anomalyDetectorsProvider(fakeRequest, savedObjectsClient)
+      .anomalyDetectorsProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient)
       .jobStats(jobsType);
 
     const jobDetails = await mlClient
-      .anomalyDetectorsProvider(fakeRequest, savedObjectsClient)
+      .anomalyDetectorsProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient)
       .jobs(jobsType);
 
     const jobDetailsCache = new Map<string, MlJob>();
     jobDetails.jobs.forEach((detail) => jobDetailsCache.set(detail.job_id, detail));
 
     const datafeedStats = await mlClient
-      .anomalyDetectorsProvider(fakeRequest, savedObjectsClient)
+      .anomalyDetectorsProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient)
       .datafeedStats();
 
     const datafeedStatsCache = new Map<string, MlDatafeedStats>();

@@ -6,6 +6,7 @@
  */
 
 export * from './lib/capabilities/errors';
+export { ML_INTERNAL_USER_REQUEST } from './shared_services/internal_user_request';
 export type { ModuleSetupPayload } from './shared_services/providers/modules';
 
 import type { SharedServices } from './shared_services';

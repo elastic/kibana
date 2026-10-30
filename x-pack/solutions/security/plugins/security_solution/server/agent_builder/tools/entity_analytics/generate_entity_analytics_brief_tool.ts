@@ -15,6 +15,7 @@ import type { BuiltinAttachmentBoundedTool } from '@kbn/agent-builder-server/att
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
 import { WatchlistConfigClient } from '../../../lib/entity_analytics/watchlists/management/watchlist_config';
@@ -42,7 +43,7 @@ const FAILED_MESSAGE = "The brief couldn't be generated. Try again.";
 /**
  * The installed ML jobs of the request's space, through the ML plugin's job service, which keeps to the
  * space the saved objects client is scoped to. ML rejects an agent request that it can't check privileges
- * for, so the job list falls back to the request the Security ML jobs skill uses. Only the job list: the
+ * for, so the job list falls back to ML's internal user request. Only the job list: the
  * anomaly records are read as the user.
  */
 const getJobService = (
@@ -55,7 +56,7 @@ const getJobService = (
       return await ml.jobServiceProvider(request, savedObjectsClient).jobsSummary();
     } catch {
       return await ml
-        .jobServiceProvider(Object.create(null) as KibanaRequest, savedObjectsClient)
+        .jobServiceProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient)
         .jobsSummary();
     }
   },

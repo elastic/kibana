@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ByteSize,
@@ -39,6 +38,7 @@ import {
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import { ML_INTERNAL_USER_REQUEST } from '../../shared_services/internal_user_request';
 import { assertUserError } from './utils';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
@@ -272,10 +272,9 @@ export function registerJobsMonitoringRuleType({
         throw new AlertsClientError();
       }
 
-      const fakeRequest = Object.create(null) as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
         services.savedObjectsClient,
-        fakeRequest,
+        ML_INTERNAL_USER_REQUEST,
         logger
       );
       const executionResult = await getTestsResults(options).catch(assertUserError);

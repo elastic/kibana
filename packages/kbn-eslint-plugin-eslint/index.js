@@ -18,6 +18,7 @@ module.exports = eslintCompatPlugin({
     no_export_all: require('./rules/no_export_all'),
     no_async_promise_body: require('./rules/no_async_promise_body'),
     no_async_foreach: require('./rules/no_async_foreach'),
+    no_kibana_request_literal: require('./rules/no_kibana_request_literal'),
     no_trailing_import_slash: require('./rules/no_trailing_import_slash'),
     no_constructor_args_in_property_initializers: require('./rules/no_constructor_args_in_property_initializers'),
     no_this_in_property_initializers: require('./rules/no_this_in_property_initializers'),

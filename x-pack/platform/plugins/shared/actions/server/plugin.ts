@@ -21,6 +21,7 @@ import type {
   SavedObjectsBulkGetObject,
   ISavedObjectsRepository,
 } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   EncryptedSavedObjectsClient,
@@ -960,14 +961,7 @@ export class ActionsPlugin
   private getUnsecuredSavedObjectsClientWithFakeRequest = (
     savedObjects: CoreStart['savedObjects']
   ) => {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
+    const fakeRequest = kibanaRequestFactory({ headers: {}, path: '/' });
     return savedObjects.getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes,

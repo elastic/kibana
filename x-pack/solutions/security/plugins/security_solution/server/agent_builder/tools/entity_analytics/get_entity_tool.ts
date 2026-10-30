@@ -12,7 +12,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { resolveHistorySnapshotIndexPatterns } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
 import type { AnomalyRecord } from '../../../lib/entity_analytics/enriched_entity/service/utils/get_anomaly_data';
 import { EnrichEntityService } from '../../../lib/entity_analytics/enriched_entity';
@@ -532,9 +533,8 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
           logger,
           mitreDataClient: mitreAttack?.getMitreDataClient?.(),
           ml,
-          // this is a workaround for a bug in the ML providers where Kibana privileges not read correctly from fake requests
-          // (which is what the tool receives from the agent builder context when running as a background task)
-          request: {} as KibanaRequest,
+          // ML can't check Kibana privileges of the fake requests that background agent tasks run with
+          request: ML_INTERNAL_USER_REQUEST,
           soClient: savedObjectsClient,
           spaceId,
           uiSettingsClient,

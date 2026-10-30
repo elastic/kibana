@@ -28,6 +28,7 @@ export {
   UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
+  ML_INTERNAL_USER_REQUEST,
 } from './shared';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {

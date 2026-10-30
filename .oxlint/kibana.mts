@@ -183,6 +183,35 @@ export const kibanaOverrides: OxlintOverride[] = [
     },
   },
   {
+    files: ['**/*.{ts,tsx}'],
+    excludeFiles: [
+      '**/*.test.{ts,tsx}',
+      '**/*.test_helpers.{ts,tsx}',
+      '**/*.spec.{ts,tsx}',
+      '**/*.mock.{ts,tsx}',
+      '**/*.mocks.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/__fixtures__/**',
+      '**/integration_tests/**',
+      '**/test/**',
+      '**/tests/**',
+      '**/test_utils/**',
+      '**/*test_utils.{ts,tsx}',
+      '**/test_fixtures.{ts,tsx}',
+      '**/mocks/**',
+      '**/scripts/**',
+      '**/cypress/**',
+      '**/e2e/**',
+      '**/ftr_e2e/**',
+      '**/.storybook/**',
+    ],
+    rules: {
+      '@kbn/eslint/no_kibana_request_literal': 'error',
+    },
+  },
+  {
     // Plugin and core index files must list the APIs they expose instead of using `export *`.
     files: [
       'src/core/{server,public,common}/index.ts',

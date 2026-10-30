@@ -8,8 +8,9 @@
 import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
@@ -75,9 +76,8 @@ const getAnomalies = async (
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
-  const fakeRequest = {} as KibanaRequest;
   const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(
-    fakeRequest,
+    ML_INTERNAL_USER_REQUEST,
     savedObjectsClient
   );
 

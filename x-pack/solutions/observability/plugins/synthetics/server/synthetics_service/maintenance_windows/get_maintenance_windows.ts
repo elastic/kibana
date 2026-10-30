@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SyntheticsServerSetup } from '../../types';
 
 export const getMaintenanceWindows = async (server: SyntheticsServerSetup, spaceId: string) => {
-  const maintenanceWindowClient = server.getMaintenanceWindowClientInternal({} as KibanaRequest);
+  const maintenanceWindowClient = server.getMaintenanceWindowClientInternal(
+    kibanaRequestFactory({ headers: {}, path: '/' })
+  );
 
   if (!maintenanceWindowClient) {
     return [];

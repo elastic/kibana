@@ -15,9 +15,9 @@ import type {
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   getAlertDetailsUrl,
@@ -149,9 +149,11 @@ export function registerAnomalyRuleType({
       const apmIndices = await getApmIndices(savedObjectsClient);
 
       const ruleParams = params;
-      const request = {} as KibanaRequest;
-      const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
-      const anomalyDetectors = ml.anomalyDetectorsProvider(request, savedObjectsClient);
+      const { mlAnomalySearch } = ml.mlSystemProvider(ML_INTERNAL_USER_REQUEST, savedObjectsClient);
+      const anomalyDetectors = ml.anomalyDetectorsProvider(
+        ML_INTERNAL_USER_REQUEST,
+        savedObjectsClient
+      );
 
       const mlJobs = await getMLJobs(anomalyDetectors, ruleParams.environment);
 

@@ -12,11 +12,11 @@ import type {
   AuthenticatedUser,
   Logger,
   ElasticsearchClient,
-  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { ML_INTERNAL_USER_REQUEST } from '@kbn/ml-plugin/server';
 import type { Subject } from 'rxjs';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
@@ -482,7 +482,7 @@ export class AIAssistantService {
         elserId: await this.getElserId(),
         esClient,
         getTrainedModelsProvider: () =>
-          this.options.ml.trainedModelsProvider({} as KibanaRequest, soClient),
+          this.options.ml.trainedModelsProvider(ML_INTERNAL_USER_REQUEST, soClient),
         logger: this.options.logger,
         index: this.knowledgeBaseDataStream.name,
       });
