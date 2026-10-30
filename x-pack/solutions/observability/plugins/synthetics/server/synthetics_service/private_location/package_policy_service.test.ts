@@ -10,19 +10,13 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentPolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import { PackagePolicyService } from './package_policy_service';
-import { scheduleAgentPolicyRevisionBumps } from './agent_policy_revision_bump_task';
+import { PackagePolicyService, bumpAgentPolicyRevision } from './package_policy_service';
 import type { ConditionUpdate } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 import type { SyntheticsServerSetup } from '../../types';
 
-jest.mock('./agent_policy_revision_bump_task', () => ({
-  scheduleAgentPolicyRevisionBumps: jest.fn().mockResolvedValue(undefined),
-}));
-
-const scheduleBumps = scheduleAgentPolicyRevisionBumps as jest.MockedFunction<
-  typeof scheduleAgentPolicyRevisionBumps
->;
+// Fleet's debounced `agentPolicyService.scheduleRevisionBump`, shared by every server mock here.
+const scheduleBumps = jest.fn().mockResolvedValue(undefined);
 
 beforeEach(() => {
   scheduleBumps.mockClear();
@@ -54,7 +48,7 @@ const makeServer = () => {
         getByIDs: fleetGetByIDs,
         delete: fleetDelete,
       },
-      agentPolicyService: { getByIds },
+      agentPolicyService: { getByIds, scheduleRevisionBump: scheduleBumps },
     },
     coreStart: {
       savedObjects: { getUnsafeInternalClient, createInternalRepository: () => ({}) },
@@ -241,7 +235,7 @@ describe('PackagePolicyService scheduled revision bumps', () => {
       expect.anything(),
       expect.objectContaining({ bumpRevision: false })
     );
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['policyId'], { immediate: undefined });
+    expect(scheduleBumps).toHaveBeenCalledWith(['policyId'], undefined);
   });
 
   it('skips the batching window for Test Now creates', async () => {
@@ -254,7 +248,7 @@ describe('PackagePolicyService scheduled revision bumps', () => {
       immediate: true,
     });
 
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['policyId'], { immediate: true });
+    expect(scheduleBumps).toHaveBeenCalledWith(['policyId'], { delayMs: 0 });
   });
 
   it('writes updates without a bump and schedules one', async () => {
@@ -273,7 +267,7 @@ describe('PackagePolicyService scheduled revision bumps', () => {
       [updatedPolicy],
       expect.objectContaining({ bumpRevision: false })
     );
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['policyId'], { immediate: undefined });
+    expect(scheduleBumps).toHaveBeenCalledWith(['policyId'], undefined);
   });
 
   it('schedules bumps only for deletes that succeeded', async () => {
@@ -298,7 +292,7 @@ describe('PackagePolicyService scheduled revision bumps', () => {
       ['deleted', 'failed'],
       expect.objectContaining({ bumpRevision: false })
     );
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['ap-ok'], { immediate: undefined });
+    expect(scheduleBumps).toHaveBeenCalledWith(['ap-ok'], undefined);
   });
 });
 
@@ -326,7 +320,7 @@ describe('PackagePolicyService deferred revision bumps', () => {
     await service.scheduleRevisionBumps(deferredBumps);
 
     expect(scheduleBumps).toHaveBeenCalledTimes(1);
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['policyId']);
+    expect(scheduleBumps).toHaveBeenCalledWith(['policyId'], undefined);
     expect(deferredBumps.size).toBe(0);
   });
 
@@ -351,6 +345,63 @@ describe('PackagePolicyService deferred revision bumps', () => {
 
     expect(deferredBumps).toEqual(new Set(['policyId', 'otherPolicyId']));
     expect(scheduleBumps).not.toHaveBeenCalled();
+  });
+});
+
+describe('bumpAgentPolicyRevision', () => {
+  const makeBumpServer = (agentPolicies: Array<Partial<AgentPolicy>>) => {
+    const asScopedToNamespace = jest.fn((space: string) => ({ __space: space }));
+    const getByIds = jest.fn().mockResolvedValue(agentPolicies);
+    const bumpRevision = jest.fn().mockResolvedValue(undefined);
+    const server = {
+      fleet: { agentPolicyService: { getByIds, bumpRevision } },
+      coreStart: {
+        savedObjects: {
+          getUnsafeInternalClient: () => ({ asScopedToNamespace }),
+          createInternalRepository: () => ({ __unscoped: true }),
+        },
+        elasticsearch: { client: { asInternalUser: { __es: true } } },
+      },
+    } as unknown as SyntheticsServerSetup;
+    return { server, getByIds, bumpRevision };
+  };
+
+  it('looks the agent policy up across all spaces with an unscoped client', async () => {
+    const { server, getByIds } = makeBumpServer([{ id: 'policyId', space_ids: ['default'] }]);
+
+    await bumpAgentPolicyRevision(server, 'policyId');
+
+    expect(getByIds).toHaveBeenCalledWith(
+      { __unscoped: true },
+      [{ id: 'policyId', spaceId: ALL_SPACES_ID }],
+      expect.objectContaining({ ignoreMissing: true })
+    );
+  });
+
+  it('bumps through a space the agent policy lives in', async () => {
+    const { server, bumpRevision } = makeBumpServer([{ id: 'policyId', space_ids: ['team-x'] }]);
+
+    await bumpAgentPolicyRevision(server, 'policyId');
+
+    expect(bumpRevision).toHaveBeenCalledWith({ __space: 'team-x' }, { __es: true }, 'policyId', {
+      asyncDeploy: true,
+    });
+  });
+
+  it('bumps through the default space for an all-spaces agent policy', async () => {
+    // `*` is not a writable namespace, so an all-spaces policy bumps via default.
+    const { server, bumpRevision } = makeBumpServer([
+      { id: 'policyId', space_ids: [ALL_SPACES_ID] },
+    ]);
+
+    await bumpAgentPolicyRevision(server, 'policyId');
+
+    expect(bumpRevision).toHaveBeenCalledWith(
+      { __space: DEFAULT_SPACE_ID },
+      expect.anything(),
+      'policyId',
+      { asyncDeploy: true }
+    );
   });
 });
 
@@ -456,7 +507,7 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       logger: loggerMock.create(),
       fleet: {
         packagePolicyService: { bulkUpdatePartial },
-        agentPolicyService: { getByIds },
+        agentPolicyService: { getByIds, scheduleRevisionBump: scheduleBumps },
       },
       coreStart: {
         savedObjects: {
@@ -526,7 +577,7 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       spaceId: 'team-x',
     });
 
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['ap-1', 'ap-1']);
+    expect(scheduleBumps).toHaveBeenCalledWith(['ap-1', 'ap-1'], undefined);
   });
 
   it('bumps only the agent policies whose writes actually landed', async () => {
@@ -542,6 +593,6 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
     });
 
     expect(failed).toHaveLength(1);
-    expect(scheduleBumps).toHaveBeenCalledWith(server, ['ap-ok']);
+    expect(scheduleBumps).toHaveBeenCalledWith(['ap-ok'], undefined);
   });
 });

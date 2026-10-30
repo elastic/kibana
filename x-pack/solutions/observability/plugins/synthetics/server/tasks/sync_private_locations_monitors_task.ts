@@ -28,7 +28,7 @@ import {
 import type { HeartbeatConfig } from '../../common/runtime_types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
-import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/agent_policy_revision_bump_task';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';

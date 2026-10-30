@@ -98,7 +98,10 @@ describe('SyntheticsPrivateLocation', () => {
         bulkCreate: jest.fn(),
         getByIDs: jest.fn().mockReturnValue([{ policy_ids: ['policyId'] }]),
       },
-      agentPolicyService: { getByIds: jest.fn().mockReturnValue([]) },
+      agentPolicyService: {
+        getByIds: jest.fn().mockReturnValue([]),
+        scheduleRevisionBump: jest.fn().mockResolvedValue(undefined),
+      },
       runWithCache: async (cb: any) => await cb(),
     },
     spaces: {

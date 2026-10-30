@@ -12,7 +12,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SyntheticsServerSetup } from '../../types';
-import { scheduleAgentPolicyRevisionBumps } from './agent_policy_revision_bump_task';
 import type { ConditionUpdate, ShardedPackagePolicy } from './rebalance_writes';
 import { SHARDED_PACKAGE_POLICY_FIELDS } from './rebalance_writes';
 
@@ -38,6 +37,49 @@ const getSpaceSoClientFor = (server: SyntheticsServerSetup, spaceId: string) =>
 const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
   server.coreStart.elasticsearch.client.asInternalUser;
 
+/**
+ * Bumps one agent policy's revision right away, scoping the write to a space
+ * the agent policy actually lives in. Monitor writes go through Fleet's
+ * debounced `scheduleRevisionBump` instead; this is for the maintenance tasks
+ * that bump once per run.
+ *
+ * Resolves the space from the agent policy itself: `spaceId: ALL_SPACES_ID` on
+ * an unscoped client finds it wherever it lives (agent policies are
+ * `namespaceType: 'multiple'`, so the write itself still needs a single
+ * concrete namespace).
+ *
+ * Uses `createInternalRepository()`, not `getUnsafeInternalClient()`: the
+ * latter always attaches a spaces extension backed by a synthetic, headerless
+ * request, and resolving the `*` namespace made that extension issue an ES
+ * `_has_privileges` check with no credentials, failing the write outright.
+ */
+export const bumpAgentPolicyRevision = async (
+  server: SyntheticsServerSetup,
+  policyId: string
+): Promise<void> => {
+  const unscopedSoClient = server.coreStart.savedObjects.createInternalRepository();
+  const [agentPolicy] = await server.fleet.agentPolicyService.getByIds(
+    unscopedSoClient,
+    [{ id: policyId, spaceId: ALL_SPACES_ID }],
+    { ignoreMissing: true, fields: ['name'] }
+  );
+  const spaceIds = agentPolicy?.space_ids ?? [];
+  // Prefer the default space when the policy is there (or is all-spaces): it
+  // matches the create/edit routing fallback, and an all-spaces policy cannot
+  // be written through a literal `*` namespace.
+  const bumpSpaceId =
+    spaceIds.length === 0 || spaceIds.includes(DEFAULT_SPACE_ID) || spaceIds.includes(ALL_SPACES_ID)
+      ? DEFAULT_SPACE_ID
+      : spaceIds[0];
+
+  await server.fleet.agentPolicyService.bumpRevision(
+    getSpaceSoClientFor(server, bumpSpaceId),
+    getInternalEsClientFor(server),
+    policyId,
+    { asyncDeploy: true }
+  );
+};
+
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
 
@@ -58,7 +100,21 @@ export class PackagePolicyService {
   async scheduleRevisionBumps(deferredBumps: Set<string>): Promise<void> {
     const policyIds = [...deferredBumps];
     deferredBumps.clear();
-    await scheduleAgentPolicyRevisionBumps(this.server, policyIds);
+    await this.scheduleAgentPolicyRevisionBumps(policyIds);
+  }
+
+  /**
+   * Fleet shares one bump per agent policy across all writes made to it within
+   * a short window, from any Kibana node, so it redeploys once per window.
+   */
+  private async scheduleAgentPolicyRevisionBumps(
+    policyIds: string[],
+    { immediate = false }: { immediate?: boolean } = {}
+  ): Promise<void> {
+    await this.server.fleet.agentPolicyService.scheduleRevisionBump(
+      policyIds,
+      immediate ? { delayMs: 0 } : undefined
+    );
   }
 
   private async scheduleOrDeferRevisionBumps(
@@ -69,7 +125,7 @@ export class PackagePolicyService {
       policyIds.forEach((policyId) => deferredBumps.add(policyId));
       return;
     }
-    await scheduleAgentPolicyRevisionBumps(this.server, policyIds, { immediate });
+    await this.scheduleAgentPolicyRevisionBumps(policyIds, { immediate });
   }
 
   private getInternalEsClient() {
@@ -173,7 +229,7 @@ export class PackagePolicyService {
 
   /**
    * Every write below goes out with `bumpRevision: false` and hands its agent
-   * policies to {@link scheduleAgentPolicyRevisionBumps}, so a burst of monitor
+   * policies to Fleet's debounced `scheduleRevisionBump`, so a burst of monitor
    * writes redeploys each agent policy once instead of once per write.
    */
   async bulkCreate({
@@ -295,8 +351,7 @@ export class PackagePolicyService {
       policiesToUpdate.map(({ update, agentPolicyIds }) => [update.id, agentPolicyIds])
     );
 
-    await scheduleAgentPolicyRevisionBumps(
-      this.server,
+    await this.scheduleAgentPolicyRevisionBumps(
       updatedPolicies.flatMap(({ id }) => agentPolicyIdsByPackagePolicyId.get(id) ?? [])
     );
 

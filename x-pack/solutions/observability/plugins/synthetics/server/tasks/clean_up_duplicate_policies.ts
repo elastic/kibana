@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
-import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/agent_policy_revision_bump_task';
+import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import type { SyntheticsServerSetup } from '../types';
 
