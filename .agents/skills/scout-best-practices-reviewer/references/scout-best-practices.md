@@ -61,6 +61,7 @@
 ### Waiting + Flake Control
 
 - Don’t use `waitForTimeout`.
+- Gate app navigation on the app's own ready element: in a page object `goto()`, use `gotoApp(app, { readyWhen: <app's ready locator> })`. It resolves on `commit` and makes that locator the single readiness gate (30s by default; raise `readyTimeout` with a comment only for slow apps). Keep the default `gotoApp()` (waits for `load`) when the test asserts a redirect or URL. Don't hand-wire `waitUntil: 'commit'` / `'domcontentloaded'` plus a separate wait, and never use `'networkidle'`.
 - Wait on stable readiness signals: loading indicator hidden, key container visible, render-complete markers, or `expect.poll` on element counts.
 - Use `test.step(...)` to make multi-step flows debuggable without splitting into many small tests.
 
