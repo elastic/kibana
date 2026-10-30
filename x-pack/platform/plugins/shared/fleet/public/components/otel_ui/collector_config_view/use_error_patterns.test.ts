@@ -5,7 +5,73 @@
  * 2.0.
  */
 
-import { buildQuery, TIME_RANGE_TO_MS } from './use_error_patterns';
+import React from 'react';
+import { of, throwError } from 'rxjs';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+
+import { buildQuery, TIME_RANGE_TO_MS, useErrorPatterns } from './use_error_patterns';
+
+const mockSearch = jest.fn();
+jest.mock('../../../hooks', () => ({
+  useStartServices: () => ({ data: { search: { search: mockSearch } } }),
+}));
+
+describe('useErrorPatterns', () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    queryClient = new QueryClient({
+      logger: { log: () => {}, warn: () => {}, error: () => {} },
+      defaultOptions: { queries: { retry: false } },
+    });
+    mockSearch.mockReset();
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+  });
+
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+  it('stops loading and returns empty patterns when the search has no aggregations', async () => {
+    mockSearch.mockReturnValue(of({ rawResponse: {} }));
+
+    const { result } = renderHook(
+      () => useErrorPatterns({ serviceInstanceId: 'my-host', timeRange: '1h' }),
+      { wrapper }
+    );
+
+    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.errorPatterns).toEqual([]);
+    expect(result.current.warningPatterns).toEqual([]);
+    expect(result.current.error).toBeUndefined();
+  });
+
+  it('stops loading and exposes the error when the search fails', async () => {
+    mockSearch.mockReturnValue(throwError(() => new Error('search failed')));
+
+    const { result } = renderHook(
+      () => useErrorPatterns({ serviceInstanceId: 'my-host', timeRange: '1h' }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.error?.message).toBe('search failed');
+  });
+
+  it('is not loading and does not search when serviceInstanceId is empty', () => {
+    const { result } = renderHook(
+      () => useErrorPatterns({ serviceInstanceId: '', timeRange: '1h' }),
+      { wrapper }
+    );
+
+    expect(result.current.isLoading).toBe(false);
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+});
 
 describe('buildQuery', () => {
   const now = 1_700_000_000_000; // fixed epoch ms for deterministic assertions
