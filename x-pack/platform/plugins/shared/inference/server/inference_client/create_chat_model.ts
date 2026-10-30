@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
+import { InferenceChatModel, type InferenceChatModelBaseParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceCallbacks } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
@@ -26,7 +26,7 @@ export interface CreateChatModelOptions {
   connectorId: string;
   actions: ActionsClientProvider;
   logger: Logger;
-  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
+  chatModelOptions: Omit<InferenceChatModelBaseParams, 'connector' | 'logger'>;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
   regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;

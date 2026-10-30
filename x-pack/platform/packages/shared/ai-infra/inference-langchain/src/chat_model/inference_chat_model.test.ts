@@ -665,6 +665,103 @@ describe('InferenceChatModel', () => {
       });
     });
 
+    it('forwards tools and toolChoice on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        telemetryMetadata,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        tool_choice: 'test_tool',
+        tools: [
+          {
+            name: 'test_tool',
+            description: 'Just some test tool',
+            schema: z.object({
+              city: z.string().describe('The city to get the weather for'),
+              zipCode: z.number().optional().describe('The zipCode to get the weather for'),
+            }),
+          },
+        ],
+      });
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        featureId: 'my-feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        toolChoice: { function: 'test_tool' },
+        tools: {
+          test_tool: {
+            description: 'Just some test tool',
+            schema: {
+              properties: {
+                city: {
+                  description: 'The city to get the weather for',
+                  type: 'string',
+                },
+                zipCode: {
+                  description: 'The zipCode to get the weather for',
+                  type: 'number',
+                },
+              },
+              required: ['city'],
+              type: 'object',
+            },
+          },
+        },
+        stream: false,
+        metadata,
+      });
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('connectorId');
+    });
+
+    it('forwards bound tools on the feature path', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        featureId: 'my-feature',
+        telemetryMetadata,
+      }).bindTools([
+        {
+          name: 'test_tool',
+          description: 'Just some test tool',
+          schema: z.object({
+            city: z.string().describe('The city to get the weather for'),
+          }),
+        },
+      ]);
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith({
+        featureId: 'my-feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        toolChoice: 'auto',
+        tools: {
+          test_tool: {
+            description: 'Just some test tool',
+            schema: {
+              properties: {
+                city: {
+                  description: 'The city to get the weather for',
+                  type: 'string',
+                },
+              },
+              required: ['city'],
+              type: 'object',
+            },
+          },
+        },
+        stream: false,
+        metadata,
+      });
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('connectorId');
+    });
+
     it('forwards temperature on the feature path', async () => {
       const chatModel = new InferenceChatModel({
         chatComplete,

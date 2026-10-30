@@ -31,7 +31,7 @@ import type {
   InferenceClient,
   InferenceConnector,
 } from '@kbn/inference-common';
-import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
+import type { InferenceChatModel, InferenceChatModelBaseParams } from '@kbn/inference-langchain';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import type {
   AnonymizationPluginStart,
@@ -311,5 +311,5 @@ export interface CreateChatModelOptions {
   /**
    * Additional parameters to be passed down to the model constructor.
    */
-  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
+  chatModelOptions: Omit<InferenceChatModelBaseParams, 'connector' | 'logger'>;
 }
