@@ -742,6 +742,14 @@ steps:
         {%- assign period = cs | times: runs -%}
         {{- period | times: 1.0 | divided_by: ps | ceil | at_least: 1 -}}
 
+  # A rule with a data view searches the view's indices and ignores its own `index`,
+  # so only a rule without one has an index list worth checking.
+  - name: probe_indices
+    type: data.set
+    if: "${{ steps.fetch_rule.output.data_view_id == blank }}"
+    with:
+      index: "${{ steps.fetch_rule.output.index | default: consts.no_items }}"
+
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
   # slot and a lost resume strands this run in waiting_for_child.
@@ -755,6 +763,13 @@ steps:
       run-as-mode: inherit
       inputs:
         space_id: "{{ workflow.spaceId }}"
+        # An ES|QL rule names its indices in the query and a data view rule in the
+        # view, so neither has an `index` to check; both rely on the preview's own
+        # missing-indices warning instead. The threat index is searched either way.
+        indices: >-
+          ${{ steps.probe_indices.output.index
+            | default: consts.no_items
+            | concat: steps.fetch_rule.output.threat_index }}
         preview_body:
           type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
@@ -887,6 +902,12 @@ steps:
       proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
       proposed_is_aborted: "${{ steps.run_previews.output.proposed_is_aborted | default: false }}"
       proposed_error_text: "{{ steps.run_previews.output.proposed_error_text }}"
+      unreadable_indices: "{{ steps.run_previews.output.unreadable_indices }}"
+      no_matching_indices: >-
+        ${{ steps.run_previews.output.no_matching_indices == true
+          or steps.run_previews.output.proposed_no_matching_indices == true }}
+      current_limit_reached: "${{ steps.run_previews.output.alert_limit_reached == true }}"
+      proposed_limit_reached: "${{ steps.run_previews.output.proposed_alert_limit_reached == true }}"
 
   # Diagnosis notes go to the investigation rather than into the proposal, which
   # keeps only what the decision needs. `ai.conversation.add_user_message` appends
@@ -1026,6 +1047,17 @@ steps:
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
+        {% if steps.record_preview_outcome.output.unreadable_indices != blank %}
+        The backtest did not run: the Rule Tuning worker's service account cannot read these rule indices: `{{ steps.record_preview_outcome.output.unreadable_indices }}`.
+        The worker reads only the default security index patterns, so a rule on other indices cannot be backtested.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {% elsif steps.record_preview_outcome.output.no_matching_indices == true %}
+        The backtest did not run: no index the Rule Tuning worker can read matches the rule's index patterns, so there is no data to count alerts in.
+        Either the indices do not exist, or the worker's service account cannot read them: it reads only the default security index patterns, so a rule on other indices cannot be backtested.
+        To check the change yourself, ask the agent in this investigation to preview the rule with and without it.
+        Approving still applies the proposed change.
+        {% else %}
         The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions with interval {{ steps.fetch_rule.output.interval }}
         and lookback {{ steps.fetch_rule.output.from }}. It ends at the newest false positive, {{ inputs.last_fp_at }}.
         This time span is usually much shorter than the span of the false positives.
@@ -1033,20 +1065,25 @@ steps:
         The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions with interval {{ steps.diagnose_rule.output.structured_output.proposed_interval }} and lookback {{ steps.diagnose_rule.output.structured_output.proposed_from }}, over the same time span.
         {% endif %}
 
-        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
-        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the current rule: {% if steps.record_preview_outcome.output.current_succeeded and steps.record_preview_outcome.output.current_is_aborted == false %}{% if steps.record_preview_outcome.output.current_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.current_alert_count }}{% else %}inconclusive{% endif %}
+        Alerts with the proposed change: {% if steps.record_preview_outcome.output.proposed_succeeded and steps.record_preview_outcome.output.proposed_is_aborted == false %}{% if steps.record_preview_outcome.output.proposed_limit_reached == true %}at least {% endif %}{{ steps.record_preview_outcome.output.proposed_alert_count }}{% else %}inconclusive{% endif %}
+        {% if steps.record_preview_outcome.output.current_limit_reached == true or steps.record_preview_outcome.output.proposed_limit_reached == true %}
+        A count marked "at least" stopped at the rule's maximum alerts per execution ({{ steps.fetch_rule.output.max_signals }}), so the real number is higher.
+        {% endif %}
         {% if steps.record_preview_outcome.output.current_error_text != '' %}
         Current preview errors: {{ steps.record_preview_outcome.output.current_error_text }}
         {% endif %}
         {% if steps.record_preview_outcome.output.proposed_error_text != '' %}
         Proposed preview errors: {{ steps.record_preview_outcome.output.proposed_error_text }}
         {% endif %}
+        {% endif %}
         {% else %}
         No backtest is available for this change.
         {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
         The preview does not support saved query rules or machine learning rules.
         {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
-        The preview cannot apply an exception to an ES|QL rule, which has no filters.
+        The backtest simulates an exception as a query filter, and an ES|QL rule has no place for one, so it cannot simulate this change. The rule itself still honours the exception when it runs.
+        To check the effect yourself, ask the agent in this investigation to preview the rule's query with the exception's conditions excluded.
         {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
         The agent could not convert the proposed exception into a preview filter.
         {% else %}
@@ -1449,7 +1486,8 @@ steps:
           and steps.propose_manual.output.decision != 'approved'
           and steps.resolve_applied.output.landed != true }}
       backtest_ran: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true }}"
-      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
+      # A proposed count that stopped at max_signals is a floor, so it cannot show a reduction.
+      backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_limit_reached != true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
       rule_unavailable: "${{ steps.fetch_rule.error != null or steps.fetch_rule.output.enabled != true }}"
       # The rule's own type; the step maps it to the event's vocabulary.
       rule_type: "{{ steps.fetch_rule.output.type }}"
