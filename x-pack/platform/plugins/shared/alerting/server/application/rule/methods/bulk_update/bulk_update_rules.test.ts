@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
@@ -171,6 +172,17 @@ describe('bulkUpdateRules', () => {
             yield { saved_objects: savedObjects };
           },
         };
+      });
+  };
+  const mockRealtimeGet = (byId: Record<string, SavedObject<Partial<RawRule>>>) => {
+    encryptedSavedObjects.getDecryptedAsInternalUser = jest
+      .fn()
+      .mockImplementation(async (_type: string, id: string) => {
+        const savedObject = byId[id];
+        if (!savedObject) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, id);
+        }
+        return savedObject;
       });
   };
 
@@ -612,11 +624,9 @@ describe('bulkUpdateRules', () => {
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     });
 
-    test('409 reloads only conflicted ids and retries the same payload', async () => {
-      mockPit(
-        [so('id-1', { version: '1' } as never), so('id-2', { version: '1' } as never)],
-        [so('id-2', { version: '2' } as never)]
-      );
+    test('409 reloads only conflicted ids realtime and retries the same payload', async () => {
+      mockPit([so('id-1', { version: '1' } as never), so('id-2', { version: '1' } as never)]);
+      mockRealtimeGet({ 'id-2': so('id-2', { version: '2' } as never) });
       unsecuredSavedObjectsClient.bulkCreate
         .mockResolvedValueOnce(
           buildBulkResponse([
@@ -637,10 +647,20 @@ describe('bulkUpdateRules', () => {
       expect(
         (unsecuredSavedObjectsClient.bulkCreate.mock.calls[1][0] as Array<{ id: string }>)[0].id
       ).toBe('id-2');
+      expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        'id-2',
+        { namespace: 'default' }
+      );
+      expect(
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledTimes(1);
     });
 
     test('gives up after OCC retries are exhausted', async () => {
       mockPit([so('id-1')]);
+      mockRealtimeGet({ 'id-1': so('id-1') });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
         buildBulkResponse([{ id: 'id-1', error: { message: 'conflict', statusCode: 409 } }])
       );
@@ -661,7 +681,8 @@ describe('bulkUpdateRules', () => {
     });
 
     test('409 then missing on reload is a per-item error', async () => {
-      mockPit([so('id-1'), so('id-2')], []);
+      mockPit([so('id-1'), so('id-2')]);
+      mockRealtimeGet({});
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
         buildBulkResponse([
           { id: 'id-1' },

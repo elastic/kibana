@@ -309,7 +309,7 @@ async function writeWithRetry<Params extends RuleParams>({
     logger.debug(`bulkUpdateRules conflict, retrying ${attempt.conflicts.length} rule(s) ...`);
     await new Promise((resolve) => setTimeout(resolve, RetryForConflictsDelay));
     retries -= 1;
-    remaining = await loadPending(context, byId, attempt.conflicts, errors);
+    remaining = await loadPending(context, byId, attempt.conflicts, errors, { realtime: true });
   }
 
   return { successfulIds, errors };
