@@ -22,7 +22,9 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     await this.setQueryMode(options.queryMode);
     await this.page.gotoApp(
       'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined,
+      // Resolve on 'commit': `waitForDiscoverPage()` is a stronger gate, with a longer budget.
+      { waitUntil: 'commit' }
     );
     await this.waitForDiscoverPage();
     if (options.queryMode === 'esql') {
