@@ -13,7 +13,7 @@ import { identity } from 'fp-ts/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { getUserDisplayName } from '@kbn/user-profile-components';
+import { getUserDisplayName } from '@kbn/user-profile-components/src/user_profile';
 import * as Boom from '@hapi/boom';
 import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {

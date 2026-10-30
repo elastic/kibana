@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { getUserDisplayName } from '@kbn/user-profile-components';
+import { getUserDisplayName } from '@kbn/user-profile-components/src/user_profile';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { SavedTimeline } from '../../../../../common/api/timeline';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../../common/api/timeline';
