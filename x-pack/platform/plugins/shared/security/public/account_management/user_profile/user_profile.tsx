@@ -995,11 +995,21 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
 
       // Update profile only if it's available for the current user.
       if (values.data) {
+        // Only send the locale when the user picked a new one, so saving other settings
+        // doesn't fail when the stored or fallback locale isn't enabled in `i18n.locales`.
+        const { locale, ...otherUserSettings } = values.data.userSettings;
+        const profileData = {
+          ...values.data,
+          userSettings:
+            locale !== initialValues.data?.userSettings.locale
+              ? values.data.userSettings
+              : otherUserSettings,
+        };
         submitActions.push(
           update(
             values.avatarType === 'image'
-              ? values.data
-              : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }
+              ? profileData
+              : { ...profileData, avatar: { ...profileData.avatar, imageUrl: null } }
           )
         );
       }
