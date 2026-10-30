@@ -9,6 +9,8 @@ import type { ApiClientFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 const TERMINAL = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
+const DELETE_CONFLICT_ATTEMPTS = 6;
+const DELETE_CONFLICT_DELAY_MS = 2000;
 
 export interface StepExecution {
   stepId: string;
@@ -54,13 +56,24 @@ export const deleteLeftoverWorkflows = async (): Promise<void> => {
 export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<string, string>) => {
   const allHeaders = { 'kbn-xsrf': 'true', ...headers };
   // Without `force` the delete is soft: the workflow stays and its id is not reusable.
+  // A force delete answers 409 while the engine is still finishing its writes for a run that just
+  // reached a terminal status (running-execution check, version conflicts), so retry briefly.
   const remove = async (workflowId: string) => {
-    const response = await apiClient.delete(
-      `api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
-      { headers: allHeaders }
-    );
-    if (response.statusCode >= 300 && response.statusCode !== 404) {
-      throw new Error(`Deleting workflow ${workflowId} failed with ${response.statusCode}`);
+    for (let attempt = 1; ; attempt++) {
+      const response = await apiClient.delete(
+        `api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
+        { headers: allHeaders, responseType: 'json' }
+      );
+      if (response.statusCode < 300 || response.statusCode === 404) return;
+      if (response.statusCode !== 409 || attempt >= DELETE_CONFLICT_ATTEMPTS) {
+        throw new Error(
+          `Deleting workflow ${workflowId} failed with ${response.statusCode}: ${JSON.stringify(
+            response.body
+          )}`
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, DELETE_CONFLICT_DELAY_MS));
     }
   };
 
