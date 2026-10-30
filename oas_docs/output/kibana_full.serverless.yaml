@@ -2997,6 +2997,8 @@ paths:
                 getConversationByIdResponseExample:
                   description: Example response containing the contents of a convesation with the chat agent
                   value:
+                    active_execution:
+                      execution_id: 3b0a8c1e-6f2d-4c57-9a43-1d8e5f7b2a90
                     agent_id: elastic-ai-agent
                     created_at: '2025-09-19T17:45:39.554Z'
                     id: bcc176c5-38f6-40be-be0c-898e34fa1480
@@ -20676,6 +20678,389 @@ paths:
       tags:
         - cases
       x-state: Technical preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/cases/{caseId}/attachments:
+    delete:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes all attachments from a case. Attached files are also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: deleteCaseAttachmentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404_no_attachments'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case doesn't exist or has no attachments.
+      summary: Delete all case attachments
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of attachments for a case, optionally filtered by type. Attachments that you do not have privileges to read are not returned. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: findCaseAttachmentsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_type_filter'
+        - $ref: '#/components/parameters/Cases_page_index'
+        - $ref: '#/components/parameters/Cases_page_size'
+        - $ref: '#/components/parameters/Cases_attachment_sort_order'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                findAttachmentsResponse:
+                  $ref: '#/components/examples/Cases_find_unified_attachments_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachments_find_response'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_attachments_query'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: A query parameter is invalid or exceeds its limit.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+      summary: Find case attachments
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Adds a single attachment, such as a comment or an alert, to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case. NOTE: Each case can have a maximum of 1,000 alerts.
+      operationId: createCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createAlertAttachmentRequest:
+                $ref: '#/components/examples/Cases_create_unified_alert_attachment_request'
+              createCommentAttachmentRequest:
+                $ref: '#/components/examples/Cases_create_unified_comment_attachment_request'
+            schema:
+              $ref: '#/components/schemas/Cases_unified_attachment_request'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createAttachmentResponse:
+                  $ref: '#/components/examples/Cases_get_unified_attachment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachment_response'
+          description: |
+            Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_attachment'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: |
+            The request failed for one of these reasons:
+            - The request body is invalid.
+            - The attachment type isn't registered, or is `file`.
+            - The owner doesn't match the case owner.
+            - A case limit was exceeded.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case was not found.
+      summary: Create a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/cases/{caseId}/attachments/{attachmentId}:
+    delete:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments/{attachmentId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes a single attachment from a case. If it's a file, the file is also deleted. If it's an attack (`security.attack`), the alerts it added are also removed from the case, unless they're attached separately or by another attack. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: deleteCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment was not found in the case.
+      summary: Delete a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments/{attachmentId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a single attachment from a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: getCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_id'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAttachmentResponse:
+                  $ref: '#/components/examples/Cases_get_unified_attachment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachment_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment was not found in the case.
+      summary: Get a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/attachments/{attachmentId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Fully replaces an attachment. You cannot change the attachment type or owner. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case.
+      operationId: replaceCaseAttachmentDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_kbn_xsrf'
+        - $ref: '#/components/parameters/Cases_case_id'
+        - $ref: '#/components/parameters/Cases_attachment_id'
+      requestBody:
+        content:
+          application/json:
+            examples:
+              replaceAttachmentRequest:
+                $ref: '#/components/examples/Cases_update_unified_attachment_request'
+            schema:
+              $ref: '#/components/schemas/Cases_unified_attachment_put_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                replaceAttachmentResponse:
+                  $ref: '#/components/examples/Cases_replace_unified_attachment_response'
+              schema:
+                $ref: '#/components/schemas/Cases_unified_attachment_response'
+          description: Indicates a successful call. Returns the replaced attachment.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_attachment'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: |
+            The request failed for one of these reasons:
+            - The request body is invalid.
+            - The attachment type is `file`.
+            - The request changes the attachment type or owner.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: You don't have the required privileges for this case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment was not found in the case.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409_attachment_version_conflict'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The attachment changed since you read it. Get the latest version and retry.
+      summary: Replace a case attachment
+      tags:
+        - cases
+      x-state: Technical preview; added in 9.6.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -40044,6 +40429,7 @@ paths:
           name: sourceId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -40125,6 +40511,7 @@ paths:
           name: sourceId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -40319,6 +40706,7 @@ paths:
           name: sourceId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -40630,6 +41018,7 @@ paths:
           name: sortField
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Sort order, ascending or descending
           in: query
@@ -40651,6 +41040,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
           in: query
@@ -40909,6 +41299,7 @@ paths:
                 ids:
                   description: list of package policy ids
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -41000,6 +41391,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -41101,6 +41493,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -41199,6 +41592,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -41318,6 +41712,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -41413,6 +41808,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: If true, returns the policy as a downloadable file
           in: query
@@ -41531,6 +41927,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: If true, returns the policy as a downloadable file
           in: query
@@ -41643,6 +42040,7 @@ paths:
           name: agentPolicyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -41891,6 +42289,7 @@ paths:
           name: policyId
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Filter by one or more agent policy IDs
           in: query
@@ -41898,6 +42297,7 @@ paths:
           required: false
           schema:
             items:
+              minLength: 0
               type: string
             maxItems: 1000
             type: array
@@ -41906,6 +42306,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -42021,6 +42422,7 @@ paths:
           required: true
           schema:
             items:
+              minLength: 0
               type: string
             maxItems: 10000
             type: array
@@ -42029,6 +42431,7 @@ paths:
           name: pkgName
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Filter by integration package version
           in: query
@@ -43528,6 +43931,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When true, include agentless agents in the results
           in: query
@@ -43569,6 +43973,7 @@ paths:
           name: sortField
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Sort order, ascending or descending
           in: query
@@ -44082,6 +44487,7 @@ paths:
               properties:
                 actionIds:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -44172,6 +44578,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -44256,6 +44663,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: When true, include CPU and memory metrics in the response
           in: query
@@ -44729,6 +45137,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -44746,6 +45155,7 @@ paths:
               properties:
                 tags:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
@@ -45213,6 +45623,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45389,6 +45800,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -45463,6 +45875,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45515,6 +45928,7 @@ paths:
                       type: string
                     tags:
                       items:
+                        minLength: 0
                         type: string
                       maxItems: 10
                       type: array
@@ -45601,6 +46015,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45698,6 +46113,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -45712,6 +46128,7 @@ paths:
               type: object
               properties:
                 policy_id:
+                  minLength: 0
                   type: string
               required:
                 - policy_id
@@ -45787,6 +46204,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -45839,6 +46257,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46019,6 +46438,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -46075,7 +46495,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Unenroll a specific agent, optionally revoking its enrollment API key.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll a specific agent. By default, the agent stops sending data and its API keys are invalidated after it acknowledges the unenroll action. To invalidate the API keys immediately, use `revoke`. **Force unenroll** in the UI sends `revoke: true`.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -46090,6 +46510,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46106,8 +46527,10 @@ paths:
               type: object
               properties:
                 force:
+                  description: Unenrolls the agent even if it is enrolled in a hosted agent policy or is a managed agent. Does not revoke API keys immediately. To do so, also set `revoke`.
                   type: boolean
                 revoke:
+                  description: Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.
                   type: boolean
       responses:
         '200':
@@ -46159,6 +46582,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46247,6 +46671,7 @@ paths:
           name: agentId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -46579,6 +47004,7 @@ paths:
           name: actionId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -46842,6 +47268,7 @@ paths:
                       type: string
                     tags:
                       items:
+                        minLength: 0
                         type: string
                       maxItems: 10
                       type: array
@@ -47081,6 +47508,7 @@ paths:
                   default: false
                   type: boolean
                 policy_id:
+                  minLength: 0
                   type: string
               required:
                 - policy_id
@@ -47599,7 +48027,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Unenroll multiple agents, optionally revoking their enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll multiple agents. By default, the agents stop sending data and their API keys are invalidated after they acknowledge the unenroll action. To invalidate the API keys immediately, use `revoke`. **Force unenroll** in the UI sends `revoke: true`.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47640,13 +48068,13 @@ paths:
                 dryRun:
                   type: boolean
                 force:
-                  description: Unenrolls hosted agents too
+                  description: Also unenrolls agents that are enrolled in hosted agent policies or are managed agents. Does not revoke API keys immediately. To do so, also set `revoke`.
                   type: boolean
                 includeInactive:
                   description: When passing agents by KQL query, unenrolls inactive agents too
                   type: boolean
                 revoke:
-                  description: Revokes API keys of agents
+                  description: Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.
                   type: boolean
               required:
                 - agents
@@ -47766,11 +48194,13 @@ paths:
                   type: boolean
                 tagsToAdd:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
                 tagsToRemove:
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
@@ -47989,6 +48419,7 @@ paths:
           name: fileId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -48064,6 +48495,7 @@ paths:
           name: fileId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: The name of the uploaded file
           in: path
@@ -48340,6 +48772,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When true, include tags from inactive agents
           in: query
@@ -48518,6 +48951,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -48950,6 +49384,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: If true, forces deletion even if the cloud connector is in use.
           in: query
@@ -49027,6 +49462,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -49193,6 +49629,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -49442,6 +49879,7 @@ paths:
           name: cloudConnectorId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: The page number for pagination.
           in: query
@@ -49686,6 +50124,37 @@ paths:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
                   type: string
+                instances:
+                  description: Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental
                 integrationName:
                   description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
@@ -49900,6 +50369,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -50256,6 +50756,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -50502,6 +51033,37 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                instances:
+                  description: Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
                   maxLength: 160
@@ -50686,6 +51248,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -50969,6 +51562,37 @@ paths:
                           type: string
                         id:
                           type: string
+                        instances:
+                          description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              instanceId:
+                                description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                              isDuplicate:
+                                description: Whether the instance is a duplicate of another service.
+                                type: boolean
+                              name:
+                                description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                                maxLength: 255
+                                type: string
+                              serviceId:
+                                description: ID of the service this instance belongs to.
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                            required:
+                              - instanceId
+                              - serviceId
+                              - name
+                              - isDuplicate
+                          maxItems: 1000
+                          type: array
+                          x-state: Experimental
                         integrationName:
                           description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
@@ -51344,6 +51968,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -51607,6 +52232,7 @@ paths:
           name: keyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.
           in: query
@@ -51696,6 +52322,7 @@ paths:
           name: keyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -52031,6 +52658,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -52727,6 +53355,7 @@ paths:
           name: taskId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -52866,6 +53495,7 @@ paths:
           name: taskId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -53014,6 +53644,7 @@ paths:
           name: taskId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -53480,6 +54111,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -53558,6 +54190,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -53671,6 +54304,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -53792,6 +54426,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -53882,6 +54517,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -53964,6 +54600,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -53976,6 +54613,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -54043,6 +54681,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54127,6 +54766,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54206,6 +54846,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54298,6 +54939,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54390,6 +55032,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -54503,6 +55146,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -54582,6 +55226,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -54645,6 +55290,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -54893,6 +55539,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -55091,6 +55738,7 @@ paths:
                           minItems: 1
                           type: array
                         id:
+                          minLength: 0
                           type: string
                         is_default:
                           default: false
@@ -55101,8 +55749,10 @@ paths:
                           default: false
                           type: boolean
                         name:
+                          minLength: 0
                           type: string
                         proxy_id:
+                          minLength: 0
                           nullable: true
                           type: string
                         secrets:
@@ -55119,6 +55769,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -55130,6 +55781,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -55141,6 +55793,7 @@ paths:
                                       type: object
                                       properties:
                                         id:
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -55283,6 +55936,7 @@ paths:
                   minItems: 1
                   type: array
                 id:
+                  minLength: 0
                   type: string
                 is_default:
                   default: false
@@ -55293,8 +55947,10 @@ paths:
                   default: false
                   type: boolean
                 name:
+                  minLength: 0
                   type: string
                 proxy_id:
+                  minLength: 0
                   nullable: true
                   type: string
                 secrets:
@@ -55311,6 +55967,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55322,6 +55979,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55333,6 +55991,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55415,6 +56074,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -55425,8 +56085,10 @@ paths:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_id:
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -55443,6 +56105,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55454,6 +56117,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55465,6 +56129,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55574,6 +56239,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -55655,6 +56321,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -55692,6 +56359,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -55702,8 +56370,10 @@ paths:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_id:
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -55720,6 +56390,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55731,6 +56402,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55742,6 +56414,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55861,6 +56534,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -55894,9 +56568,11 @@ paths:
                 is_internal:
                   type: boolean
                 name:
+                  minLength: 0
                   type: string
                 proxy_id:
                   default: null
+                  minLength: 0
                   nullable: true
                   type: string
                 secrets:
@@ -55913,6 +56589,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55924,6 +56601,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -55935,6 +56613,7 @@ paths:
                               type: object
                               properties:
                                 id:
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -56014,6 +56693,7 @@ paths:
                         minItems: 1
                         type: array
                       id:
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -56024,8 +56704,10 @@ paths:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_id:
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -56042,6 +56724,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56053,6 +56736,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56064,6 +56748,7 @@ paths:
                                     type: object
                                     properties:
                                       id:
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -56192,6 +56877,7 @@ paths:
               type: object
               properties:
                 id:
+                  minLength: 0
                   type: string
               required:
                 - id
@@ -58271,6 +58957,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58370,6 +59057,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58478,6 +59166,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -58597,6 +59286,7 @@ paths:
           name: outputId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58691,6 +59381,7 @@ paths:
           name: sortField
           required: false
           schema:
+            minLength: 0
             type: string
         - description: Sort order, ascending or descending
           in: query
@@ -58712,6 +59403,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -58990,6 +59682,7 @@ paths:
                 ids:
                   description: list of package policy ids
                   items:
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -59100,6 +59793,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: When true, delete the package policy even if it is managed
           in: query
@@ -59170,6 +59864,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -59288,6 +59983,7 @@ paths:
           name: packagePolicyId
           required: true
           schema:
+            minLength: 0
             type: string
         - description: 'Format for the response: simplified or legacy'
           in: query
@@ -59842,11 +60538,13 @@ paths:
                           nullable: true
                           type: string
                         id:
+                          minLength: 0
                           type: string
                         is_preconfigured:
                           default: false
                           type: boolean
                         name:
+                          minLength: 0
                           type: string
                         proxy_headers:
                           additionalProperties:
@@ -59952,11 +60650,13 @@ paths:
                   nullable: true
                   type: string
                 id:
+                  minLength: 0
                   type: string
                 is_preconfigured:
                   default: false
                   type: boolean
                 name:
+                  minLength: 0
                   type: string
                 proxy_headers:
                   additionalProperties:
@@ -60002,11 +60702,13 @@ paths:
                         nullable: true
                         type: string
                       id:
+                        minLength: 0
                         type: string
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_headers:
                         additionalProperties:
@@ -60084,6 +60786,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -60165,6 +60868,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -60197,11 +60901,13 @@ paths:
                         nullable: true
                         type: string
                       id:
+                        minLength: 0
                         type: string
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_headers:
                         additionalProperties:
@@ -60289,6 +60995,7 @@ paths:
           name: itemId
           required: true
           schema:
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -60316,6 +61023,7 @@ paths:
                   nullable: true
                   type: string
                 name:
+                  minLength: 0
                   type: string
                 proxy_headers:
                   additionalProperties:
@@ -60358,11 +61066,13 @@ paths:
                         nullable: true
                         type: string
                       id:
+                        minLength: 0
                         type: string
                       is_preconfigured:
                         default: false
                         type: boolean
                       name:
+                        minLength: 0
                         type: string
                       proxy_headers:
                         additionalProperties:
@@ -61417,6 +62127,7 @@ paths:
           name: uninstallTokenId
           required: true
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -142832,6 +143543,24 @@ components:
         updated_at: null
         updated_by: null
         version: WzUzMiwxXQ==
+    Cases_create_unified_alert_attachment_request:
+      summary: Adds an Elastic Security alert to a case.
+      value:
+        attachmentId: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+        metadata:
+          index: .internal.alerts-security.alerts-default-000001
+          rule:
+            id: 94309390-b76c-11ee-b4d6-39d8a0fcbc1b
+            name: Endpoint Security
+        owner: securitySolution
+        type: security.alert
+    Cases_create_unified_comment_attachment_request:
+      summary: Adds a comment to a case.
+      value:
+        data:
+          content: A new comment.
+        owner: cases
+        type: comment
     Cases_field_definition_write_request:
       summary: Create or update a reusable field definition.
       value:
@@ -143016,6 +143745,29 @@ components:
           isPreconfigured: false
           name: my-Jira
           referencedByCount: 0
+    Cases_find_unified_attachments_response:
+      summary: A page of case attachments.
+      value:
+        data:
+          - created_at: '2026-09-30T19:32:13.104Z'
+            created_by:
+              email: null
+              full_name: null
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+              username: elastic
+            data:
+              content: A new comment.
+            id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+            owner: cases
+            pushed_at: null
+            pushed_by: null
+            type: comment
+            updated_at: null
+            updated_by: null
+            version: WzIzLDFd
+        page: 1
+        per_page: 20
+        total: 1
     Cases_get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
@@ -143315,6 +144067,25 @@ components:
         - security
         - tag 1
         - tag 2
+    Cases_get_unified_attachment_response:
+      summary: A single comment attachment.
+      value:
+        created_at: '2026-09-30T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        data:
+          content: A new comment.
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        owner: cases
+        pushed_at: null
+        pushed_by: null
+        type: comment
+        updated_at: null
+        updated_by: null
+        version: WzIzLDFd
     Cases_push_case_response:
       summary: The push case API returns a JSON object with details about the case and the external service.
       value:
@@ -143373,6 +144144,41 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzE3NjgsM10=
+    Cases_replace_unified_attachment_response:
+      summary: A replaced comment attachment.
+      value:
+        created_at: '2026-09-30T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        data:
+          content: An updated comment.
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        owner: cases
+        pushed_at: null
+        pushed_by: null
+        type: comment
+        updated_at: '2026-10-01T08:45:21.512Z'
+        updated_by:
+          email: null
+          full_name: null
+          profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+          username: elastic
+        version: WzI0LDFd
+    Cases_response_400_invalid_attachment:
+      summary: The attachment payload is invalid.
+      value:
+        error: Bad Request
+        message: "Invalid attachment payload for type 'comment': data.content: Comment content must be a non-empty string"
+        statusCode: 400
+    Cases_response_400_invalid_attachments_query:
+      summary: A query parameter exceeds its limit.
+      value:
+        error: Bad Request
+        message: '[request query]: The provided perPage value is too high. The maximum allowed perPage value is 100.'
+        statusCode: 400
     Cases_response_400_invalid_template:
       summary: The request is invalid.
       value:
@@ -143403,11 +144209,23 @@ components:
         error: Not Found
         message: Saved object [cases-template/9da1ea2a-09f8-4d0e-bf9d-09bf8c9d0f42] not found
         statusCode: 404
+    Cases_response_404_no_attachments:
+      summary: The case has no attachments.
+      value:
+        error: Not Found
+        message: No attachments found for case 293f1bc0-74f6-11ea-b83a-553aecdb28b6.
+        statusCode: 404
     Cases_response_409:
       summary: A resource conflict occurred.
       value:
         error: Conflict
         message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
+    Cases_response_409_attachment_version_conflict:
+      summary: The attachment version is out of date.
+      value:
+        error: Conflict
+        message: This attachment has been updated. Please refresh before saving additional updates.
         statusCode: 409
     Cases_set_case_configuration_request:
       summary: Set the closure type, custom fields, and default connector for Stack Management cases.
@@ -143773,6 +144591,14 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzIwNjM2LDFd
+    Cases_update_unified_attachment_request:
+      summary: Replaces the content of a comment.
+      value:
+        data:
+          content: An updated comment.
+        owner: cases
+        type: comment
+        version: WzIzLDFd
     Data_views_create_data_view_request:
       description: Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.
       summary: Create a data view with runtime fields.
@@ -146265,6 +147091,47 @@ components:
         oneOf:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
+    Cases_attachment_id:
+      description: |
+        The ID of the attachment, which is its `id` field, not `attachmentId`. To get it, use the find case attachments API.
+      in: path
+      name: attachmentId
+      required: true
+      schema:
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+        maxLength: 512
+        type: string
+    Cases_attachment_sort_order:
+      description: 'Sorts attachments by creation date: `asc` (oldest first) or `desc` (newest first).'
+      example: asc
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+          - asc
+          - desc
+        type: string
+    Cases_attachment_type_filter:
+      description: |
+        Filters the returned attachments by one or more attachment types, such as `comment` or `security.alert`. To filter by multiple types, repeat the parameter. Limited to 20 types.
+      example: comment
+      in: query
+      name: type
+      required: false
+      schema:
+        oneOf:
+          - maxLength: 50
+            minLength: 1
+            type: string
+          - items:
+              maxLength: 50
+              minLength: 1
+              type: string
+            maxItems: 20
+            minItems: 1
+            type: array
     Cases_case_id:
       description: The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.
       in: path
@@ -149519,6 +150386,205 @@ components:
             $ref: '#/components/schemas/Cases_template_tags'
       type: array
       x-state: Technical preview
+    Cases_unified_attachment_attachment_id:
+      description: |
+        The ID of the attached item, such as an alert or a dashboard. To attach several alerts, use an array. This isn't the attachment's own ID (`id`).
+      example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
+      oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+    Cases_unified_attachment_data:
+      additionalProperties: true
+      description: |
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
+      example:
+        content: A new comment.
+      nullable: true
+      type: object
+    Cases_unified_attachment_metadata:
+      additionalProperties: true
+      description: |
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
+      nullable: true
+      type: object
+    Cases_unified_attachment_put_request:
+      description: |
+        The full replacement for the attachment. The `type` and `owner` must match the existing attachment. Reference attachment types require `attachmentId`. Value attachment types require `data` and don't accept `attachmentId`. Unknown properties are rejected.
+      oneOf:
+        - additionalProperties: false
+          properties:
+            attachmentId:
+              $ref: '#/components/schemas/Cases_unified_attachment_attachment_id'
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+            version:
+              $ref: '#/components/schemas/Cases_unified_attachment_version'
+          required:
+            - attachmentId
+            - owner
+            - type
+            - version
+          title: Reference attachment
+          type: object
+        - additionalProperties: false
+          properties:
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+            version:
+              $ref: '#/components/schemas/Cases_unified_attachment_version'
+          required:
+            - data
+            - owner
+            - type
+            - version
+          title: Value attachment
+          type: object
+      title: Replace case attachment request
+    Cases_unified_attachment_request:
+      description: |
+        The attachment to add to the case. Reference attachment types, such as alerts, require `attachmentId`. Value attachment types, such as comments, require `data` and don't accept `attachmentId`. The `owner` must match the owner of the case. Unknown properties are rejected.
+      oneOf:
+        - additionalProperties: false
+          properties:
+            attachmentId:
+              $ref: '#/components/schemas/Cases_unified_attachment_attachment_id'
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+          required:
+            - attachmentId
+            - owner
+            - type
+          title: Reference attachment
+          type: object
+        - additionalProperties: false
+          properties:
+            data:
+              $ref: '#/components/schemas/Cases_unified_attachment_data'
+            metadata:
+              $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+            owner:
+              $ref: '#/components/schemas/Cases_owner'
+            type:
+              $ref: '#/components/schemas/Cases_unified_attachment_type'
+          required:
+            - data
+            - owner
+            - type
+          title: Value attachment
+          type: object
+      title: Create case attachment request
+    Cases_unified_attachment_response:
+      title: Case attachment response
+      type: object
+      properties:
+        attachmentId:
+          $ref: '#/components/schemas/Cases_unified_attachment_attachment_id'
+        created_at:
+          example: '2026-09-30T09:16:17.416Z'
+          format: date-time
+          type: string
+        created_by:
+          $ref: '#/components/schemas/Cases_case_response_created_by_properties'
+        data:
+          $ref: '#/components/schemas/Cases_unified_attachment_data'
+        id:
+          description: The attachment identifier.
+          example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+          type: string
+        metadata:
+          $ref: '#/components/schemas/Cases_unified_attachment_metadata'
+        owner:
+          $ref: '#/components/schemas/Cases_owner'
+        pushed_at:
+          description: |
+            When this attachment was last pushed to an external system, such as Jira. Is `null` if it hasn't been pushed.
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        pushed_by:
+          $ref: '#/components/schemas/Cases_case_response_pushed_by_properties'
+        type:
+          $ref: '#/components/schemas/Cases_unified_attachment_type'
+        updated_at:
+          example: null
+          format: date-time
+          nullable: true
+          type: string
+        updated_by:
+          $ref: '#/components/schemas/Cases_case_response_updated_by_properties'
+        version:
+          description: The attachment's current version. Include it when you replace the attachment.
+          example: WzIwNDMxLDFd
+          type: string
+      required:
+        - created_at
+        - created_by
+        - id
+        - owner
+        - pushed_at
+        - pushed_by
+        - type
+        - updated_at
+        - updated_by
+        - version
+    Cases_unified_attachment_type:
+      description: |
+        The attachment type, such as `comment`, `security.alert`, `observability.alert`, `stack.alert`, `security.event`, `lens`, `dashboard`, or `file`. `security.*` types only work on Security cases, `observability.*` on Observability cases, and `stack.*` on Stack Management cases. Use `comment` (not the legacy `user` type) and a `*.alert` type (not `alert`). You can't add or replace file attachments with this API. To add a file, use `POST /api/cases/{caseId}/files`.
+      example: comment
+      type: string
+    Cases_unified_attachment_version:
+      description: |
+        The current version of the attachment. To retrieve it, use the get case attachment API. If the attachment changed since you read it, the request fails with a 409 status code.
+      example: WzIwNDMxLDFd
+      type: string
+    Cases_unified_attachments_find_response:
+      title: Find case attachments response
+      type: object
+      properties:
+        data:
+          description: The attachments on the requested page.
+          items:
+            $ref: '#/components/schemas/Cases_unified_attachment_response'
+          type: array
+        page:
+          description: The current page number.
+          example: 1
+          type: integer
+        per_page:
+          description: The number of items per page.
+          example: 20
+          type: integer
+        total:
+          description: |
+            The total number of matching attachments you can access. Attachments with invalid or unsupported data are counted but not returned, so a page can have fewer than `per_page` items.
+          example: 1
+          type: integer
+      required:
+        - data
+        - page
+        - per_page
+        - total
     Cases_update_alert_comment_request_properties:
       description: Defines properties for case comment requests when type is alert.
       type: object
@@ -154100,10 +155166,12 @@ components:
           type: boolean
         kuery:
           description: KQL query to select enrollment tokens to delete.
+          minLength: 0
           type: string
         tokenIds:
           description: List of enrollment token IDs to delete.
           items:
+            minLength: 0
             type: string
           maxItems: 10000
           type: array
@@ -154164,11 +155232,13 @@ components:
         packages:
           items:
             anyOf:
-              - type: string
+              - minLength: 0
+                type: string
               - additionalProperties: false
                 type: object
                 properties:
                   name:
+                    minLength: 0
                     type: string
                   prerelease:
                     type: boolean
@@ -154270,6 +155340,7 @@ components:
         packages:
           description: Package names to apply the customization changes to.
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           minItems: 1
@@ -154364,6 +155435,7 @@ components:
             properties:
               name:
                 description: Package name to rollback
+                minLength: 0
                 type: string
             required:
               - name
@@ -154395,6 +155467,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               version:
                 type: string
@@ -154466,6 +155539,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               version:
                 type: string
@@ -154964,6 +156038,7 @@ components:
       additionalProperties: false
       properties:
         description:
+          minLength: 0
           type: string
         name:
           minLength: 1
@@ -155278,6 +156353,7 @@ components:
         force:
           type: boolean
         integrationName:
+          minLength: 0
           type: string
       required:
         - integrationName
@@ -155538,6 +156614,7 @@ components:
           type: array
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
+          minLength: 0
           nullable: true
           type: string
         cloud_connector_name:
@@ -155556,6 +156633,7 @@ components:
           type: boolean
         description:
           description: Package policy description
+          minLength: 0
           type: string
         enabled:
           type: boolean
@@ -155569,6 +156647,7 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -155583,6 +156662,7 @@ components:
           type: array
         id:
           description: Package policy unique identifier
+          minLength: 0
           type: string
         inputs:
           items:
@@ -155614,6 +156694,7 @@ components:
               enabled:
                 type: boolean
               id:
+                minLength: 0
                 type: string
               keep_enabled:
                 type: boolean
@@ -155682,6 +156763,7 @@ components:
                     enabled:
                       type: boolean
                     id:
+                      minLength: 0
                       type: string
                     keep_enabled:
                       type: boolean
@@ -155752,12 +156834,14 @@ components:
           type: boolean
         name:
           description: Unique name for the package policy.
+          minLength: 0
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
+          minLength: 0
           nullable: true
           type: string
         overrides:
@@ -155777,16 +156861,19 @@ components:
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
+          minLength: 0
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
         spaceIds:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -156281,6 +157368,7 @@ components:
       properties:
         agentPolicyId:
           description: The ID of the agent policy
+          minLength: 0
           type: string
         force:
           description: bypass validation checks that can prevent agent policy deletion
@@ -156337,6 +157425,7 @@ components:
           type: boolean
         packagePolicyIds:
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -156404,6 +157493,7 @@ components:
       properties:
         packagePolicyIds:
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -159082,8 +160172,10 @@ components:
             type: object
             properties:
               id:
+                minLength: 0
                 type: string
               type:
+                minLength: 0
                 type: string
             required:
               - id
@@ -159384,6 +160476,7 @@ components:
         ids:
           description: list of package policy ids
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -160632,6 +161725,7 @@ components:
         space_ids:
           description: When provided, assets are installed in the specified spaces instead of the current space.
           items:
+            minLength: 0
             type: string
           maxItems: 100
           minItems: 1
@@ -169687,13 +170781,16 @@ components:
                     memory:
                       type: string
         data_output_id:
+          minLength: 0
           nullable: true
           type: string
         description:
+          minLength: 0
           type: string
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
+          minLength: 0
           nullable: true
           type: string
         download_source_ids:
@@ -169704,6 +170801,7 @@ components:
           maxItems: 3
           type: array
         fleet_server_host_id:
+          minLength: 0
           nullable: true
           type: string
         force:
@@ -169715,6 +170813,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -169730,6 +170829,7 @@ components:
         has_fleet_server:
           type: boolean
         id:
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -169803,6 +170903,7 @@ components:
               minimum: 0
               type: number
         monitoring_output_id:
+          minLength: 0
           nullable: true
           type: string
         monitoring_pprof_enabled:
@@ -169858,6 +170959,7 @@ components:
           type: array
         space_ids:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -169956,8 +171058,10 @@ components:
           maxLength: 20
           type: string
         name:
+          minLength: 0
           type: string
         policy_id:
+          minLength: 0
           type: string
       required:
         - policy_id
@@ -178343,13 +179447,16 @@ components:
         bumpRevision:
           type: boolean
         data_output_id:
+          minLength: 0
           nullable: true
           type: string
         description:
+          minLength: 0
           type: string
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
+          minLength: 0
           nullable: true
           type: string
         download_source_ids:
@@ -178360,6 +179467,7 @@ components:
           maxItems: 3
           type: array
         fleet_server_host_id:
+          minLength: 0
           nullable: true
           type: string
         force:
@@ -178371,6 +179479,7 @@ components:
             type: object
             properties:
               name:
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -178386,6 +179495,7 @@ components:
         has_fleet_server:
           type: boolean
         id:
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -178459,6 +179569,7 @@ components:
               minimum: 0
               type: number
         monitoring_output_id:
+          minLength: 0
           nullable: true
           type: string
         monitoring_pprof_enabled:
@@ -178514,6 +179625,7 @@ components:
           type: array
         space_ids:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -178692,6 +179804,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -179020,6 +180133,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -179036,6 +180150,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
               required:
                 - key
         shipper:
@@ -179127,6 +180242,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -179194,6 +180310,7 @@ components:
                           required:
                             - id
                         - type: string
+                      nullable: true
                     tpm:
                       additionalProperties: false
                       type: object
@@ -179210,6 +180327,7 @@ components:
                               required:
                                 - id
                             - type: string
+                          nullable: true
                         owner_auth:
                           anyOf:
                             - additionalProperties: false
@@ -179222,6 +180340,7 @@ components:
                               required:
                                 - id
                             - type: string
+                          nullable: true
         type:
           enum:
             - otlp
@@ -179305,6 +180424,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -179321,6 +180441,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         service_token:
           nullable: true
           type: string
@@ -179357,6 +180478,7 @@ components:
           type: array
         cloud_connector_id:
           description: ID of the cloud connector associated with this package policy.
+          minLength: 0
           nullable: true
           type: string
         cloud_connector_name:
@@ -179372,6 +180494,7 @@ components:
           type: string
         description:
           description: Package policy description
+          minLength: 0
           type: string
         enabled:
           type: boolean
@@ -179384,6 +180507,7 @@ components:
             properties:
               name:
                 description: The name of the custom field. Cannot contain spaces.
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -179426,6 +180550,7 @@ components:
               enabled:
                 type: boolean
               id:
+                minLength: 0
                 type: string
               keep_enabled:
                 type: boolean
@@ -179494,6 +180619,7 @@ components:
                     enabled:
                       type: boolean
                     id:
+                      minLength: 0
                       type: string
                     keep_enabled:
                       type: boolean
@@ -179563,12 +180689,14 @@ components:
         is_managed:
           type: boolean
         name:
+          minLength: 0
           type: string
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
         output_id:
+          minLength: 0
           nullable: true
           type: string
         overrides:
@@ -179588,16 +180716,19 @@ components:
         policy_id:
           deprecated: true
           description: ID of the agent policy which the package policy will be added to.
+          minLength: 0
           nullable: true
           type: string
         policy_ids:
           items:
             description: IDs of the agent policies that the package policy will be added to.
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
         spaceIds:
           items:
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -179907,6 +181038,7 @@ components:
       properties:
         packagePolicyIds:
           items:
+            minLength: 0
             type: string
           maxItems: 1000
           type: array
@@ -186113,6 +187245,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationLayerESQL'
       description: XY chart layer types for ES|QL queries.
     Kibana_HTTP_APIs_visXyLayersNoESQL:
@@ -186480,9 +187613,168 @@ components:
         visible:
           description: When true, shows the legend table series header.
           type: boolean
+    Kibana_HTTP_APIs_visXyReferenceLineLayerESQL:
+      additionalProperties: false
+      description: Reference lines defined by numeric columns from a layer-specific ES|QL query.
+      properties:
+        data_source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        thresholds:
+          description: Array of ES|QL-based reference line thresholds
+          items:
+            type: object
+            properties:
+              axis:
+                anyOf:
+                  - enum:
+                      - x
+                    type: string
+                  - enum:
+                      - 'y'
+                    type: string
+                  - enum:
+                      - y2
+                    type: string
+                default: 'y'
+                description: The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.
+              color:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                default:
+                  type: auto
+              column:
+                description: Column to use
+                type: string
+              fill:
+                anyOf:
+                  - enum:
+                      - above
+                    type: string
+                  - enum:
+                      - below
+                    type: string
+                description: Fill direction for reference line
+              format:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+              icon:
+                anyOf:
+                  - enum:
+                      - asterisk
+                    type: string
+                  - enum:
+                      - alert
+                    type: string
+                  - enum:
+                      - bell
+                    type: string
+                  - enum:
+                      - bolt
+                    type: string
+                  - enum:
+                      - bug
+                    type: string
+                  - enum:
+                      - circle
+                    type: string
+                  - enum:
+                      - editor_comment
+                    type: string
+                  - enum:
+                      - flag
+                    type: string
+                  - enum:
+                      - heart
+                    type: string
+                  - enum:
+                      - map_marker
+                    type: string
+                  - enum:
+                      - pin_filled
+                    type: string
+                  - enum:
+                      - star_empty
+                    type: string
+                  - enum:
+                      - star_filled
+                    type: string
+                  - enum:
+                      - tag
+                    type: string
+                  - enum:
+                      - triangle
+                    type: string
+                description: Icon to display on the reference line
+              label:
+                description: Label for the operation
+                type: string
+              position:
+                anyOf:
+                  - enum:
+                      - auto
+                    type: string
+                  - enum:
+                      - left
+                    type: string
+                  - enum:
+                      - right
+                    type: string
+                description: Position of the icon and label relative to the reference line
+              stroke_dash:
+                anyOf:
+                  - enum:
+                      - solid
+                    type: string
+                  - enum:
+                      - dashed
+                    type: string
+                  - enum:
+                      - dotted
+                    type: string
+                description: Line style
+              stroke_width:
+                description: Line width in pixels
+                maximum: 10
+                minimum: 1
+                type: number
+              text:
+                additionalProperties: false
+                description: Reference line text label configuration
+                type: object
+                properties:
+                  visible:
+                    description: Show text label on the reference line
+                    type: boolean
+                required:
+                  - visible
+            required:
+              - column
+          maxItems: 100
+          minItems: 1
+          type: array
+        type:
+          enum:
+            - reference_lines
+          type: string
+      required:
+        - data_source
+        - type
+        - thresholds
+      title: ES|QL Reference Line Layer
+      type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic:
       additionalProperties: false
-      description: Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.
+      description: Reference lines defined by constant numeric values on ES|QL charts.
       properties:
         data_source:
           discriminator:
@@ -186649,7 +187941,7 @@ components:
         - data_source
         - type
         - thresholds
-      title: Reference Line Layer (ES|QL, static values)
+      title: Static Reference Line Layer for ES|QL Charts
       type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL:
       additionalProperties: false

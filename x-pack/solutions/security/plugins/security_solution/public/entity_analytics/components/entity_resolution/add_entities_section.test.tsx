@@ -17,6 +17,7 @@ import {
   ADD_ENTITIES_SHOWING_TEST_ID,
 } from './test_ids';
 import { useSearchEntities } from './hooks/use_search_entities';
+import { ADD_ENTITY_BUTTON, INSUFFICIENT_PRIVILEGES_TOOLTIP } from './translations';
 
 jest.mock('./hooks/use_search_entities');
 
@@ -125,6 +126,41 @@ describe('AddEntitiesSection', () => {
     fireEvent.click(addButtons[0]);
 
     expect(defaultProps.onAddEntity).toHaveBeenCalledWith(mockRecords[0]);
+  });
+
+  it('exposes the permission explanation to screen readers when the user cannot modify', async () => {
+    const { getByTestId, getAllByLabelText, findByText } = render(
+      <TestProviders>
+        <AddEntitiesSection {...defaultProps} canModify={false} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId(ADD_ENTITIES_ACCORDION_TEST_ID).querySelector('button')!);
+
+    const [addButton] = getAllByLabelText(/add to resolution group/i);
+    fireEvent.mouseOver(addButton.parentElement!);
+    expect(await findByText(INSUFFICIENT_PRIVILEGES_TOOLTIP)).toBeInTheDocument();
+    // EuiToolTip only links the trigger to its content via `aria-describedby` when it is not
+    // screen-reader-disabled. The accessible description can't be asserted here because EUI's
+    // test build gives every generated id the same value (the accordion button shares it).
+    expect(addButton).toHaveAttribute('aria-describedby');
+  });
+
+  it('does not show the permission tooltip while privileges are still loading', async () => {
+    const { getByTestId, getAllByLabelText, findByText, queryByText } = render(
+      <TestProviders>
+        <AddEntitiesSection {...defaultProps} canModify={false} isPrivilegesLoading />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId(ADD_ENTITIES_ACCORDION_TEST_ID).querySelector('button')!);
+
+    const [addButton] = getAllByLabelText(/add to resolution group/i);
+    expect(addButton).toBeDisabled();
+    fireEvent.mouseOver(addButton.parentElement!);
+
+    expect(await findByText(ADD_ENTITY_BUTTON)).toBeInTheDocument();
+    expect(queryByText(INSUFFICIENT_PRIVILEGES_TOOLTIP)).not.toBeInTheDocument();
   });
 
   it('calls onEntityNameClick when expand button is clicked', () => {
