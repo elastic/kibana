@@ -16,6 +16,7 @@ export const setContinuousOnboardingEnabled = async ({
   spaceId,
   enabled,
   logger,
+  waitForRunningExecutions,
 }: {
   uiSettingsClient: IUiSettingsClient;
   workflowService: ContinuousOnboardingWorkflowService;
@@ -23,6 +24,7 @@ export const setContinuousOnboardingEnabled = async ({
   spaceId: string;
   enabled: boolean;
   logger: Logger;
+  waitForRunningExecutions?: boolean;
 }): Promise<void> => {
   const previousEnabled = await uiSettingsClient.get<boolean>(
     OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
@@ -34,7 +36,12 @@ export const setContinuousOnboardingEnabled = async ({
   await uiSettingsClient.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, enabled);
 
   try {
-    await workflowService.ensureWorkflow({ enabled, request, spaceId });
+    await workflowService.ensureWorkflow({
+      enabled,
+      request,
+      spaceId,
+      ...(waitForRunningExecutions === undefined ? {} : { waitForRunningExecutions }),
+    });
   } catch (error) {
     await uiSettingsClient
       .set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, previousEnabled)

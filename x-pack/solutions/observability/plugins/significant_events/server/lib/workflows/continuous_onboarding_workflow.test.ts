@@ -226,6 +226,35 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 
+  it('can disable without waiting for running executions to drain', async () => {
+    getWorkflow.mockResolvedValue({ enabled: true });
+    let resolveExecutions: (value: { results: []; total: number }) => void = () => {};
+    const executions = new Promise<{ results: []; total: number }>((resolve) => {
+      resolveExecutions = resolve;
+    });
+    (managementApi.getWorkflowExecutions as jest.Mock).mockReturnValue(executions);
+
+    await expect(
+      createService().ensureWorkflow({
+        enabled: false,
+        request,
+        spaceId,
+        waitForRunningExecutions: false,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      workflowDocumentId,
+      { enabled: false },
+      spaceId,
+      request
+    );
+    expect(managementApi.getWorkflowExecutions).toHaveBeenCalled();
+
+    resolveExecutions({ results: [], total: 0 });
+    await executions;
+  });
+
   it('leaves the legacy default-space document alone outside the default space', async () => {
     getWorkflow.mockResolvedValue({ enabled: false });
 

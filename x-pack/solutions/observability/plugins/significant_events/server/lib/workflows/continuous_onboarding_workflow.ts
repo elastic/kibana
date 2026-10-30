@@ -34,6 +34,8 @@ export interface ContinuousOnboardingWorkflowService {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
+    /** Disable immediately, but let execution draining finish outside the caller's request. */
+    waitForRunningExecutions?: boolean;
   }): Promise<void>;
 }
 
@@ -126,7 +128,7 @@ export const createContinuousOnboardingWorkflowService = ({
   };
 
   return {
-    async ensureWorkflow({ enabled, request, spaceId }) {
+    async ensureWorkflow({ enabled, request, spaceId, waitForRunningExecutions = true }) {
       const workflowId = `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${spaceId}`;
       const managedWorkflowOptions = { spaceId, workflowIdSuffix: spaceId };
 
@@ -161,13 +163,19 @@ export const createContinuousOnboardingWorkflowService = ({
       // stays: uninstalling force-deletes it, which purges its execution history.
       await setManagedEnabled({ enabled: false, workflowId, spaceId, request });
 
-      await cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
-        log.warn(`Failed to cancel running continuous onboarding executions: ${err}`)
-      );
-
-      await streamsKIsOnboardingClient
-        .cancelAllRunning({ request })
-        .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
+      const drainRunningExecutions = async () => {
+        await cancelAndAwaitTermination({ workflowId, spaceId, request }).catch((err) =>
+          log.warn(`Failed to cancel running continuous onboarding executions: ${err}`)
+        );
+        await streamsKIsOnboardingClient
+          .cancelAllRunning({ request })
+          .catch((err) => log.warn(`Failed to cancel running onboarding workflows: ${err}`));
+      };
+      if (waitForRunningExecutions) {
+        await drainRunningExecutions();
+      } else {
+        void drainRunningExecutions();
+      }
 
       log.info(`Disabled continuous KI onboarding workflow in space ${spaceId}`);
     },
