@@ -151,6 +151,8 @@ export const SecretConnectionPanel = () => {
   const [testResult, setTestResult] = useState<SecretConnectionTestResult | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [hostError, setHostError] = useState<string | undefined>();
+  // Text typed into the allowed hosts field that was not turned into a host yet.
+  const [hostInput, setHostInput] = useState('');
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
@@ -168,14 +170,16 @@ export const SecretConnectionPanel = () => {
   const closeFlyout = () => {
     invalidateTest();
     setHostError(undefined);
+    setHostInput('');
     setEditing(null);
   };
 
-  const addAllowedMonitorHost = (value: string) => {
+  /** Returns false for an invalid host, which keeps the typed text visible next to the error. */
+  const addAllowedMonitorHost = (value: string): boolean => {
     const host = normalizeAllowedMonitorHost(value);
     if (!isAllowedMonitorHostShape(host)) {
       setHostError(ALLOWED_MONITOR_HOSTS_INVALID);
-      return;
+      return false;
     }
     setHostError(undefined);
     setEditing((f) => {
@@ -183,6 +187,7 @@ export const SecretConnectionPanel = () => {
       if (f.allowedMonitorHosts.length >= MAX_ALLOWED_MONITOR_HOSTS) return f;
       return { ...f, allowedMonitorHosts: [...f.allowedMonitorHosts, host] };
     });
+    return true;
   };
 
   const load = useCallback(async () => {
@@ -232,16 +237,26 @@ export const SecretConnectionPanel = () => {
 
   const onSave = async () => {
     if (!editing) return;
+    // A host typed but not confirmed with Enter still counts: dropping it would save the
+    // connection without the restriction the admin asked for.
+    const pendingHost = normalizeAllowedMonitorHost(hostInput);
+    if (pendingHost && !isAllowedMonitorHostShape(pendingHost)) {
+      setHostError(ALLOWED_MONITOR_HOSTS_INVALID);
+      return;
+    }
+    const allowedMonitorHosts = [...new Set([...editing.allowedMonitorHosts, pendingHost])].filter(
+      Boolean
+    );
     setSaving(true);
     try {
       const body = {
         name: editing.name.trim(),
         type: editing.type,
-        ...toConnectionPayload(editing),
+        ...toConnectionPayload({ ...editing, allowedMonitorHosts }),
       };
       await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);
-      setEditing(null);
+      closeFlyout();
       await load();
     } catch (e) {
       notifications?.toasts.addError(e as Error, { title: SAVE_ERROR_TOAST });
@@ -289,6 +304,7 @@ export const SecretConnectionPanel = () => {
           description: EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
+          'data-test-subj': 'syntheticsVaultEditConnection',
           onClick: (c: SecretConnectionStatus) => {
             setTestResult(null);
             setEditing(toForm(c));
@@ -535,10 +551,9 @@ export const SecretConnectionPanel = () => {
                         f ? { ...f, allowedMonitorHosts: options.map(({ label }) => label) } : f
                       );
                     }}
-                    // The input is also cleared right after a create attempt, which must not
-                    // hide the error, so only typing resets it.
                     onSearchChange={(value) => {
-                      if (value) setHostError(undefined);
+                      setHostInput(value);
+                      setHostError(undefined);
                     }}
                   />
                 </EuiFormRow>
