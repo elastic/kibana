@@ -3456,7 +3456,11 @@ describe('bulkEnqueueExecution()', () => {
       `undefined`
     );
 
-    expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(unsecuredSavedObjectsClient, opts);
+    expect(bulkExecutionEnqueuer).toHaveBeenCalledWith(
+      unsecuredSavedObjectsClient,
+      opts,
+      expect.any(Function)
+    );
   });
 });
 
@@ -3919,6 +3923,19 @@ describe('object-level security', () => {
       output: { statusCode: 404 },
     });
     expect(actionExecutor.execute).not.toHaveBeenCalled();
+  });
+
+  test('checks use for the connectors it enqueues', async () => {
+    deny('forbidden');
+    await actionsClient.bulkEnqueueExecution([]);
+    const [, , ensureConnectorsUsable] = bulkExecutionEnqueuer.mock.calls[0];
+
+    await expect(ensureConnectorsUsable?.([{ id: '1', acl: PRIVATE_ACL }])).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: 'use', objects: [{ id: '1', acl: PRIVATE_ACL }] })
+    );
   });
 
   test('validates requested access before the pre-save hook, and creates in one request', async () => {

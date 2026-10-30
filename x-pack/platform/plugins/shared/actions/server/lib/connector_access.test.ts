@@ -10,6 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CanonicalAcl } from '@kbn/access-control';
 import {
   ensureConnectorOperation,
+  ensureConnectorsOperation,
   getConnectorSpaceId,
   operationForAuthMode,
 } from './connector_access';
@@ -88,6 +89,34 @@ describe('ensureConnectorOperation', () => {
       output: { statusCode: 403 },
       message: 'Unable to delete connector: missing "delete" permission',
     });
+  });
+
+  it('decides several connectors at once, and fails on the first denied one', async () => {
+    const { context, scoped } = createContext();
+    scoped.authorize.mockResolvedValue(
+      new Map([
+        ['c1', { status: 'allowed' }],
+        ['c2', { status: 'forbidden', operation: 'use' }],
+      ])
+    );
+    const connectors = [
+      { id: 'c1', acl: ACL },
+      { id: 'c2', acl: ACL },
+    ];
+
+    await expect(
+      ensureConnectorsOperation(context, { connectors, operation: 'use' })
+    ).rejects.toMatchObject({ output: { statusCode: 403 } });
+    expect(scoped.authorize).toHaveBeenCalledTimes(1);
+    expect(scoped.authorize).toHaveBeenCalledWith(expect.objectContaining({ objects: connectors }));
+  });
+
+  it('makes no decision for an empty list', async () => {
+    const { context, scoped } = createContext();
+
+    await ensureConnectorsOperation(context, { connectors: [], operation: 'use' });
+
+    expect(scoped.authorize).not.toHaveBeenCalled();
   });
 });
 

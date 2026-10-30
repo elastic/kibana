@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CanonicalAcl } from '@kbn/access-control';
+import type { ConnectorWithAcl } from '@kbn/actions-plugin/server/application/connector/types';
+import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { getAvailableConnectors } from './workflow_connectors';
 
 const mockActionType = (overrides: Record<string, unknown> = {}) => ({
@@ -29,11 +32,26 @@ const mockConnector = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const mockGetAllWithAcl = (
+  connectors: Array<ReturnType<typeof mockConnector>>,
+  acls: Record<string, CanonicalAcl> = {}
+) =>
+  jest
+    .fn()
+    .mockResolvedValue(
+      connectors.map((connector) => ({ connector, acl: acls[connector.id] } as ConnectorWithAcl))
+    );
+
 describe('getAvailableConnectors', () => {
-  const request = {} as any;
+  const request = httpServerMock.createKibanaRequest();
+  let accessControl: ReturnType<typeof securityServiceMock.createStart>['accessControl'];
+
+  beforeEach(() => {
+    accessControl = securityServiceMock.createStart().accessControl;
+  });
 
   it('groups connectors by type and returns the configured action-type metadata', async () => {
-    const actionsClient = { getAll: jest.fn().mockResolvedValue([mockConnector()]) };
+    const actionsClient = { getAllWithAcl: mockGetAllWithAcl([mockConnector()]) };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([mockActionType()]),
     };
@@ -41,6 +59,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -55,7 +74,7 @@ describe('getAvailableConnectors', () => {
   });
 
   it('includes action types that have no connector instances with an empty instances array', async () => {
-    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+    const actionsClient = { getAllWithAcl: mockGetAllWithAcl([]) };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.email', name: 'Email' })]),
     };
@@ -63,6 +82,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -73,12 +93,10 @@ describe('getAvailableConnectors', () => {
 
   it('drops connectors whose actionTypeId is not in the allowed action-types list', async () => {
     const actionsClient = {
-      getAll: jest
-        .fn()
-        .mockResolvedValue([
-          mockConnector(),
-          mockConnector({ id: 'legacy-1', actionTypeId: '.legacy' }),
-        ]),
+      getAllWithAcl: mockGetAllWithAcl([
+        mockConnector(),
+        mockConnector({ id: 'legacy-1', actionTypeId: '.legacy' }),
+      ]),
     };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([mockActionType()]),
@@ -87,22 +105,24 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
 
     expect(Object.keys(result.connectorTypes)).toEqual(['.slack']);
     expect(result.connectorTypes['.slack'].instances).toHaveLength(1);
-    // `totalConnectors` still reflects the raw connector count, even those we filter out — the
-    // facade previously asserted this; preserving here as regression guard.
+    // `totalConnectors` still counts every visible connector, even those of types we filter out —
+    // the facade previously asserted this; preserving here as regression guard.
     expect(result.totalConnectors).toBe(2);
   });
 
   it('groups multiple instances of the same type together', async () => {
     const actionsClient = {
-      getAll: jest
-        .fn()
-        .mockResolvedValue([mockConnector(), mockConnector({ id: 'slack-2', name: 'Secondary' })]),
+      getAllWithAcl: mockGetAllWithAcl([
+        mockConnector(),
+        mockConnector({ id: 'slack-2', name: 'Secondary' }),
+      ]),
     };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([mockActionType()]),
@@ -111,6 +131,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -123,7 +144,7 @@ describe('getAvailableConnectors', () => {
 
   it('surfaces inference taskType config in the instance payload', async () => {
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
+      getAllWithAcl: mockGetAllWithAcl([
         mockConnector({
           id: 'inf-1',
           name: 'Inference',
@@ -141,6 +162,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -153,7 +175,7 @@ describe('getAvailableConnectors', () => {
 
   it('surfaces selectedActions config for any connector that has it', async () => {
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
+      getAllWithAcl: mockGetAllWithAcl([
         mockConnector({
           id: 'pd-1',
           name: 'PagerDuty',
@@ -171,6 +193,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -183,9 +206,9 @@ describe('getAvailableConnectors', () => {
 
   it('omits config entirely for connectors with no taskType or selectedActions', async () => {
     const actionsClient = {
-      getAll: jest
-        .fn()
-        .mockResolvedValue([mockConnector({ id: 'slack-1', actionTypeId: '.slack', config: {} })]),
+      getAllWithAcl: mockGetAllWithAcl([
+        mockConnector({ id: 'slack-1', actionTypeId: '.slack', config: {} }),
+      ]),
     };
     const actionsClientWithRequest = {
       listTypes: jest.fn().mockResolvedValue([mockActionType({ id: '.slack', name: 'Slack' })]),
@@ -194,6 +217,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -203,7 +227,7 @@ describe('getAvailableConnectors', () => {
 
   it('surfaces both taskType and selectedActions for an inference connector that has both', async () => {
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
+      getAllWithAcl: mockGetAllWithAcl([
         mockConnector({
           id: 'inf-2',
           actionTypeId: '.inference',
@@ -220,6 +244,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -237,7 +262,7 @@ describe('getAvailableConnectors', () => {
       minimumLicenseRequired: 'gold',
     });
     const actionsClient = {
-      getAll: jest.fn().mockResolvedValue([
+      getAllWithAcl: mockGetAllWithAcl([
         mockConnector({
           id: 'testyng',
           name: 'testyng',
@@ -255,6 +280,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -268,12 +294,13 @@ describe('getAvailableConnectors', () => {
   });
 
   it('returns an empty payload when there are neither connectors nor action types', async () => {
-    const actionsClient = { getAll: jest.fn().mockResolvedValue([]) };
+    const actionsClient = { getAllWithAcl: mockGetAllWithAcl([]) };
     const actionsClientWithRequest = { listTypes: jest.fn().mockResolvedValue([]) };
 
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -281,9 +308,9 @@ describe('getAvailableConnectors', () => {
     expect(result).toEqual({ connectorTypes: {}, totalConnectors: 0 });
   });
 
-  it('fires getAll and listTypes in parallel (both started before either resolves)', async () => {
+  it('fires getAllWithAcl and listTypes in parallel (both started before either resolves)', async () => {
     const order: string[] = [];
-    const getAll = jest.fn().mockImplementation(async () => {
+    const getAllWithAcl = jest.fn().mockImplementation(async () => {
       order.push('getAll:start');
       await Promise.resolve();
       order.push('getAll:end');
@@ -297,8 +324,9 @@ describe('getAvailableConnectors', () => {
     });
 
     await getAvailableConnectors({
-      getActionsClient: jest.fn().mockResolvedValue({ getAll }),
+      getActionsClient: jest.fn().mockResolvedValue({ getAllWithAcl }),
       getActionsClientWithRequest: jest.fn().mockResolvedValue({ listTypes }),
+      accessControl,
       spaceId: 'default',
       request,
     });
@@ -306,5 +334,93 @@ describe('getAvailableConnectors', () => {
     // Both starts precede both ends — proves parallel, not sequential.
     expect(order.indexOf('getAll:start')).toBeLessThan(order.indexOf('listTypes:end'));
     expect(order.indexOf('listTypes:start')).toBeLessThan(order.indexOf('getAll:end'));
+  });
+
+  describe('object-level security', () => {
+    const PRIVATE_ACL: CanonicalAcl = {
+      version: [1],
+      owner: { type: ['user'], id: ['u_owner'] },
+      general_access: ['none'],
+      entries: [],
+    };
+    const connectors = [
+      mockConnector({ id: 'public', name: 'Public Slack' }),
+      mockConnector({ id: 'private', name: 'Private Slack' }),
+      mockConnector({ id: 'preconfigured', name: 'Preconfigured Slack', isPreconfigured: true }),
+    ];
+
+    const listConnectors = (
+      filterVisible: (objects: Array<{ id: string; acl?: CanonicalAcl }>) => string[]
+    ) => {
+      const scoped = securityServiceMock.createScopedAccessControl();
+      scoped.filterVisible.mockImplementation(async ({ objects }) => {
+        const visibleIds = filterVisible(objects);
+        return objects.filter(({ id }) => visibleIds.includes(id));
+      });
+      accessControl.asScoped.mockReturnValue(scoped);
+
+      const actionsClient = {
+        getAllWithAcl: mockGetAllWithAcl(connectors, { private: PRIVATE_ACL }),
+      };
+      return {
+        scoped,
+        actionsClient,
+        result: getAvailableConnectors({
+          getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+          getActionsClientWithRequest: jest.fn().mockResolvedValue({
+            listTypes: jest.fn().mockResolvedValue([mockActionType()]),
+          }),
+          accessControl,
+          spaceId: 'my-space',
+          request,
+        }),
+      };
+    };
+
+    it('keeps an unrestricted list unchanged', async () => {
+      const { result, actionsClient } = listConnectors((objects) => objects.map(({ id }) => id));
+
+      const { connectorTypes, totalConnectors } = await result;
+
+      expect(actionsClient.getAllWithAcl).toHaveBeenCalledWith('my-space');
+      expect(connectorTypes['.slack'].instances.map(({ id }) => id)).toEqual([
+        'public',
+        'private',
+        'preconfigured',
+      ]);
+      expect(totalConnectors).toBe(3);
+    });
+
+    it('leaves out a restricted connector the request cannot view, and does not count it', async () => {
+      const { result, scoped } = listConnectors((objects) =>
+        objects.filter(({ acl }) => !acl).map(({ id }) => id)
+      );
+
+      const { connectorTypes, totalConnectors } = await result;
+
+      expect(accessControl.asScoped).toHaveBeenCalledWith(request);
+      expect(scoped.filterVisible).toHaveBeenCalledWith({
+        type: 'action',
+        spaceId: 'my-space',
+        objects: [
+          expect.objectContaining({ id: 'public', acl: undefined }),
+          expect.objectContaining({ id: 'private', acl: PRIVATE_ACL }),
+          expect.objectContaining({ id: 'preconfigured', acl: undefined }),
+        ],
+      });
+      expect(connectorTypes['.slack'].instances.map(({ id }) => id)).toEqual([
+        'public',
+        'preconfigured',
+      ]);
+      expect(totalConnectors).toBe(2);
+    });
+
+    it('never returns the ACL with a connector', async () => {
+      const { result } = listConnectors((objects) => objects.map(({ id }) => id));
+
+      const { connectorTypes } = await result;
+
+      expect(JSON.stringify(connectorTypes)).not.toContain('u_owner');
+    });
   });
 });

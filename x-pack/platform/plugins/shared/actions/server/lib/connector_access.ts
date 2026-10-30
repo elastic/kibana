@@ -52,9 +52,21 @@ export const getConnectorAccessControl = (context: ConnectorAccessContext) => {
 export const ensureConnectorOperation = async (
   context: ConnectorAccessContext,
   { id, acl, operation }: { id: string; acl?: CanonicalAcl; operation: ConnectorOperation }
+) => ensureConnectorsOperation(context, { connectors: [{ id, acl }], operation });
+
+/**
+ * Throws unless the caller can perform the operation on every stored connector, with one decision
+ * for all of them. Errors are the same as for {@link ensureConnectorOperation}.
+ */
+export const ensureConnectorsOperation = async (
+  context: ConnectorAccessContext,
+  {
+    connectors,
+    operation,
+  }: { connectors: Array<{ id: string; acl?: CanonicalAcl }>; operation: ConnectorOperation }
 ) => {
   const accessControl = getConnectorAccessControl(context);
-  if (!accessControl) {
+  if (!accessControl || connectors.length === 0) {
     return;
   }
 
@@ -62,14 +74,16 @@ export const ensureConnectorOperation = async (
     type: ACTION_SAVED_OBJECT_TYPE,
     spaceId: getConnectorSpaceId(context),
     operation,
-    objects: [{ id, acl }],
+    objects: connectors,
   });
-  const decision = decisions.get(id);
-  if (decision?.status === 'not_found') {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundError(ACTION_SAVED_OBJECT_TYPE, id);
-  }
-  if (decision?.status === 'forbidden') {
-    throw Boom.forbidden(`Unable to ${operation} connector: missing "${operation}" permission`);
+  for (const { id } of connectors) {
+    const decision = decisions.get(id);
+    if (decision?.status === 'not_found') {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(ACTION_SAVED_OBJECT_TYPE, id);
+    }
+    if (decision?.status === 'forbidden') {
+      throw Boom.forbidden(`Unable to ${operation} connector: missing "${operation}" permission`);
+    }
   }
 };
 

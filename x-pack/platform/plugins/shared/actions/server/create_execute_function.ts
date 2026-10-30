@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { CanonicalAcl } from '@kbn/access-control';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -67,6 +68,7 @@ export interface GetConnectorsResult {
   connector: InMemoryConnector | RawAction;
   isInMemory: boolean;
   id: string;
+  acl?: CanonicalAcl;
 }
 
 export type ExecutionEnqueuer<T> = (
@@ -74,9 +76,17 @@ export type ExecutionEnqueuer<T> = (
   options: ExecuteOptions
 ) => Promise<T>;
 
+/**
+ * Throws unless the caller can run every stored connector it is about to enqueue.
+ */
+export type EnsureConnectorsUsable = (
+  connectors: Array<{ id: string; acl?: CanonicalAcl }>
+) => Promise<void>;
+
 export type BulkExecutionEnqueuer<T> = (
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
-  actionsToExectute: ExecuteOptions[]
+  actionsToExectute: ExecuteOptions[],
+  ensureConnectorsUsable?: EnsureConnectorsUsable
 ) => Promise<T>;
 
 export enum ExecutionResponseType {
@@ -106,7 +116,8 @@ export function createBulkExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): BulkExecutionEnqueuer<ExecutionResponse> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    actionsToExecute: ExecuteOptions[]
+    actionsToExecute: ExecuteOptions[],
+    ensureConnectorsUsable?: EnsureConnectorsUsable
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -135,6 +146,11 @@ export function createBulkExecutionEnqueuerFunction({
       unsecuredSavedObjectsClient,
       inMemoryConnectors,
       connectorIds
+    );
+    // Checked before anything is queued, so an execution the caller cannot run never waits in the
+    // queue. Execution checks again, because access can change in between.
+    await ensureConnectorsUsable?.(
+      connectors.filter(({ isInMemory }) => !isInMemory).map(({ id, acl }) => ({ id, acl }))
     );
     const runnableActions: ExecuteOptions[] = [];
 
@@ -311,6 +327,7 @@ async function getConnectors(
         isInMemory: false,
         connector: item.attributes,
         id: item.id,
+        acl: item.acl,
       });
     }
   }

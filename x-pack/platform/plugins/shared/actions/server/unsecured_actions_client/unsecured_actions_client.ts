@@ -17,8 +17,12 @@ import { asNotificationExecutionSource, NOTIFICATIONS_REQUESTER_ID } from '../li
 import type { RelatedSavedObjects, ActionExecutorContract } from '../lib';
 import type { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
-import type { ConnectorWithExtraFindData } from '../application/connector/types';
-import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
+import type { ConnectorWithAcl, ConnectorWithExtraFindData } from '../application/connector/types';
+import {
+  getAllUnsecured,
+  getAllUnsecuredWithAcl,
+} from '../application/connector/methods/get_all/get_all';
+import type { GetAllUnsecuredParams } from '../application/connector/methods/get_all/types/params';
 import type { ActionTypeRegistry } from '../action_type_registry';
 
 // requests from background tasks (primarily for EDR)
@@ -51,6 +55,11 @@ type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
 
 export interface IUnsecuredActionsClient {
   getAll: (spaceId: SpaceId) => Promise<ConnectorWithExtraFindData[]>;
+  /**
+   * Same as `getAll`, with the ACL of each stored connector. The caller must keep only the
+   * connectors its request can view, for example with `filterVisible` of Core's access control.
+   */
+  getAllWithAcl: (spaceId: SpaceId) => Promise<ConnectorWithAcl[]>;
   execute: (opts: UnsecuredExecuteOptions) => Promise<ActionTypeExecutorResult<unknown>>;
   bulkEnqueueExecution: (
     requesterId: string,
@@ -120,7 +129,15 @@ export class UnsecuredActionsClient {
   }
 
   public async getAll(spaceId: SpaceId): Promise<ConnectorWithExtraFindData[]> {
-    return getAllUnsecured({
+    return getAllUnsecured(this.getAllParams(spaceId));
+  }
+
+  public async getAllWithAcl(spaceId: SpaceId): Promise<ConnectorWithAcl[]> {
+    return getAllUnsecuredWithAcl(this.getAllParams(spaceId));
+  }
+
+  private getAllParams(spaceId: SpaceId): GetAllUnsecuredParams {
+    return {
       esClient: this.opts.clusterClient.asInternalUser,
       inMemoryConnectors: this.opts.inMemoryConnectors,
       kibanaIndices: this.opts.kibanaIndices,
@@ -128,7 +145,7 @@ export class UnsecuredActionsClient {
       internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
       spaceId,
       connectorTypeRegistry: this.opts.connectorTypeRegistry,
-    });
+    };
   }
 
   private getSourceFromRequester(

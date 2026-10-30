@@ -31,6 +31,8 @@ export interface Principal {
 
 export interface OlsTestContext {
   spaceId: string;
+  /** Names of the roles the personas have, for credentials a test creates itself. */
+  roles: { actionsAll: string; actionsRead: string; noActions: string; somAll: string };
   /** Request headers for a persona, including its credentials. */
   headers: (persona: Persona) => Record<string, string>;
   /** Profile principal of a user persona. */
@@ -108,7 +110,11 @@ export const createOlsTestContext = async ({
       path: `/api/security/role/${name}`,
       body: { elasticsearch: { cluster: [] }, kibana: [{ base: [], feature, spaces }] },
     });
-  await putRole(roles.actionsAll, { actions: ['all'], stackAlerts: ['all'] });
+  await putRole(roles.actionsAll, {
+    actions: ['all'],
+    stackAlerts: ['all'],
+    workflowsManagement: ['all'],
+  });
   await putRole(roles.actionsRead, { actions: ['read'] });
   await putRole(roles.noActions, { discover: ['read'] });
   await putRole(roles.somAll, { actions: ['all'], savedObjectsManagement: ['all'] }, ['*']);
@@ -214,6 +220,7 @@ export const createOlsTestContext = async ({
 
   return {
     spaceId,
+    roles,
     headers: (persona) => headers[persona],
     principal: (persona) => principals[persona],
     path,

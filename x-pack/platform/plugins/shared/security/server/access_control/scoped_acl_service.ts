@@ -237,8 +237,37 @@ export class ScopedAclService implements CoreScopedAccessControl {
     spaceId: string;
     objects: T[];
   }): Promise<T[]> {
-    const decisions = await this.authorize({ type, spaceId, operation: 'view', objects });
-    return objects.filter(({ id }) => decisions.get(id)?.status === 'allowed');
+    const policy = this.getPolicy(type);
+    const restricted =
+      policy && this.isEnabled()
+        ? objects.filter(({ acl }) => !generalAccessPermits(policy, acl, 'view'))
+        : [];
+    if (!policy || restricted.length === 0) {
+      return objects;
+    }
+
+    // A list is audited like a search: hidden objects are left out without an event each, and
+    // recovery is audited once for the list.
+    const principal = await this.getPrincipal();
+    const recovery = await this.hasRecovery(type, spaceId);
+    if (recovery) {
+      this.audit({
+        action: 'access_control_admin_override',
+        type,
+        spaceId,
+        operation: 'find',
+        principal,
+      });
+    }
+
+    const hiddenIds = new Set<string>();
+    for (const { id, acl } of restricted) {
+      this.reportInvalidAcl(type, id, acl);
+      if (!evaluateAcl({ policy, acl, principal, recovery }).operations.has('view')) {
+        hiddenIds.add(id);
+      }
+    }
+    return objects.filter(({ id }) => !hiddenIds.has(id));
   }
 
   /**

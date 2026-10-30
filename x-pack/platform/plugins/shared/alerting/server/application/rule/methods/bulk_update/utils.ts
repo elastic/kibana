@@ -31,6 +31,7 @@ import {
   updateMetaAttributes,
   validateActions,
   migrateLegacyLastRunOutcomeMsg,
+  validateRuleKeyConnectorAccess,
 } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule } from '../../../../types';
@@ -186,6 +187,15 @@ export const prepareUpdate = async <Params extends RuleParams>({
     if (newKeys.apiKey || newKeys.uiamApiKey) {
       apiKeys.set(id, newKeys);
     }
+    // A refused key is invalidated below, with the other keys of rules that failed.
+    await validateRuleKeyConnectorAccess(context, {
+      spaceId: context.spaceId,
+      connectorIds: data.actions.map((action) => action.id),
+      apiKey: apiKeyAttributes.apiKey,
+      uiamApiKey: apiKeyAttributes.uiamApiKey,
+      uiamApiKeyExternal: apiKeyAttributes.uiamApiKeyExternal,
+      createdInThisRequest: !apiKeyAttributes.apiKeyCreatedByUser,
+    });
 
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 

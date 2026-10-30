@@ -6,7 +6,11 @@
  */
 
 import { omit } from 'lodash';
-import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import {
   authorizeRuleTypeParams,
   getRuleNotifyWhenType,
@@ -19,7 +23,13 @@ import {
   injectReferencesIntoArtifacts,
   API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
-import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
+import {
+  createNewAPIKeySet,
+  extractReferences,
+  getReferencedConnectorIds,
+  updateMeta,
+  validateNewRuleKeyConnectorAccess,
+} from '../../lib';
 import type {
   BulkOperationError,
   NormalizedAlertActionWithGeneratedValues,
@@ -194,6 +204,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
       ruleType,
       apiKeysMap,
       ruleAttributes,
+      references,
       hasUpdateApiKeyOperation,
       username,
       profileUid
@@ -220,6 +231,7 @@ async function prepareApiKeys(
   ruleType: RuleType,
   apiKeysMap: ApiKeysMap,
   attributes: RawRule,
+  references: SavedObjectReference[],
   hasUpdateApiKeyOperation: boolean,
   username: string | null,
   profileUid: string | null
@@ -233,6 +245,14 @@ async function prepareApiKeys(
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
     refresh: false,
+  });
+
+  // Every edit that gives the rule a new key is checked, even one that changes no action. A
+  // refused key is invalidated right away, since the rule fails and never holds it.
+  await validateNewRuleKeyConnectorAccess(context, {
+    spaceId: context.spaceId,
+    connectorIds: getReferencedConnectorIds(references),
+    keySet: apiKeyAttributes,
   });
 
   // collect generated API keys
