@@ -112,7 +112,7 @@ export const registerDashboardAppIntegration = ({
     });
     // changes become versions of the linked attachment, otherwise the dashboard is staged as a draft
     const attachmentId = linkedAttachment?.id ?? draftAttachmentId.current;
-    appliedAttachments.linkedAttachmentIds.set(api, attachmentId);
+    appliedAttachments.setLinkedAttachmentId(api, attachmentId);
 
     if (linkedAttachment && isAttachmentShownInDashboard(api, dashboard, linkedAttachment.data)) {
       unstage();
@@ -153,6 +153,7 @@ export const registerDashboardAppIntegration = ({
       }
 
       const { id: conversationId, conversation } = change;
+      appliedAttachments.setActiveConversationId(conversationId);
       const versionedDashboardAttachments =
         conversation?.attachments?.filter(isDashboardAttachment);
       const dashboardAttachments = versionedDashboardAttachments?.flatMap(

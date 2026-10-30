@@ -35,7 +35,7 @@ export const createOriginSyncSubscription = ({
       return;
     }
     const attachments = getAttachments() ?? [];
-    const linkedAttachmentId = store.linkedAttachmentIds.get(api);
+    const linkedAttachmentId = store.getLinkedAttachmentId(api);
     const attachmentToSync =
       attachments.find(({ id }) => id === linkedAttachmentId) ??
       (previousDashboardId

@@ -8,13 +8,14 @@
 import { isEqual, omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
-import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
+import { ChatEventType, type ChatEvent, type Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { registerDashboardAppIntegration } from './dashboard_app_integration';
 import { applyAttachmentToDashboard, MANUAL_CHANGES_DEBOUNCE_MS } from './apply_attachment';
 import {
@@ -149,6 +150,7 @@ describe('registerDashboardAppIntegration', () => {
   let emitDashboardStateChange: () => void;
   let removeAttachment: jest.Mock;
   let appliedAttachments: AppliedAttachmentsStore;
+  let notifyOtherDashboardUpdated: jest.Mock;
 
   beforeEach(() => {
     const mockAnyStateChange$ = new BehaviorSubject(undefined);
@@ -219,13 +221,14 @@ describe('registerDashboardAppIntegration', () => {
     };
 
     appliedAttachments = createAppliedAttachmentsStore();
+    notifyOtherDashboardUpdated = jest.fn();
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       draftAttachmentId,
       appliedAttachments,
       getUpdateOrigin,
-      notifyOtherDashboardUpdated: jest.fn(),
+      notifyOtherDashboardUpdated,
     });
   };
 
@@ -602,6 +605,138 @@ describe('registerDashboardAppIntegration', () => {
     cleanup();
 
     expect(removeAttachment).toHaveBeenCalledWith('draft-attachment-id-1');
+  });
+
+  describe('an unsaved dashboard linked to an attachment of another conversation', () => {
+    const linkedAttachment = createDashboardAttachment({ id: 'linked-attachment-id' });
+    const otherAttachment = createDashboardAttachment({
+      id: 'other-attachment-id',
+      data: { title: 'Other Dashboard', description: '', panels: [] },
+    });
+
+    beforeEach(() => {
+      mockApi.layout$.next({ panels: { 'panel-1': {} }, pinnedPanels: {} });
+    });
+
+    const emitAgentUpdate = (conversationId: string, attachment: DashboardAttachment) => {
+      chatEventsByConversationId.get(conversationId)?.next({
+        type: ChatEventType.toolUi,
+        data: {
+          tool_id: 'tool',
+          tool_call_id: 'call',
+          custom_event: DASHBOARD_UPDATED_UI_EVENT,
+          data: {
+            attachment: {
+              ...attachment,
+              data: { title: 'Agent Dashboard', description: '', panels: [] },
+            },
+          },
+        },
+      } as ChatEvent);
+    };
+
+    it('stays a draft when edited in a conversation with a single unsaved attachment', () => {
+      register();
+      emitConversationChange({
+        id: 'conversation-1',
+        attachments: [createVersionedAttachment(linkedAttachment)],
+      });
+      jest.runOnlyPendingTimers();
+      emitConversationChange({
+        id: 'conversation-2',
+        attachments: [createVersionedAttachment(otherAttachment)],
+      });
+      jest.runOnlyPendingTimers();
+      addAttachment.mockClear();
+
+      simulateDashboardStateChange();
+      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+      expect(addAttachment).toHaveBeenCalledTimes(1);
+      expect(addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'draft-attachment-id-1' })
+      );
+    });
+
+    it('applies agent updates again after visiting another conversation', () => {
+      const conversation1Attachments = [
+        createVersionedAttachment(linkedAttachment),
+        createVersionedAttachment(otherAttachment),
+      ];
+      register();
+      emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
+      jest.runOnlyPendingTimers();
+      simulateDashboardStateChange();
+      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+      emitConversationChange({ id: 'conversation-2', attachments: [] });
+      jest.runOnlyPendingTimers();
+      emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
+      jest.runOnlyPendingTimers();
+
+      expect(addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'linked-attachment-id' })
+      );
+
+      emitAgentUpdate('conversation-1', linkedAttachment);
+
+      expect(notifyOtherDashboardUpdated).not.toHaveBeenCalled();
+      expect(mockApi.setState).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays linked after sending a draft in another conversation', () => {
+      const conversation1Attachments = [
+        createVersionedAttachment(linkedAttachment),
+        createVersionedAttachment(otherAttachment),
+      ];
+      register();
+      emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
+      jest.runOnlyPendingTimers();
+      simulateDashboardStateChange();
+      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+      emitConversationChange({ id: 'conversation-2', attachments: [] });
+      jest.runOnlyPendingTimers();
+      emitConversationChange({
+        id: 'conversation-2',
+        attachments: [
+          createVersionedAttachment(
+            createDashboardAttachment({
+              id: 'draft-attachment-id-1',
+              data: { title: 'Edited Dashboard', description: 'Test Description', panels: [] },
+            })
+          ),
+        ],
+      });
+      jest.runOnlyPendingTimers();
+      emitConversationChange({ id: 'conversation-1', attachments: conversation1Attachments });
+      jest.runOnlyPendingTimers();
+
+      expect(addAttachment).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'linked-attachment-id' })
+      );
+    });
+
+    it('keeps the link of a new conversation once it gets its id', () => {
+      const draftAttachment = createDashboardAttachment({
+        id: 'draft-attachment-id-1',
+        data: { title: 'Edited Dashboard', description: 'Test Description', panels: [] },
+      });
+      register();
+      emitConversationChange({});
+      jest.runOnlyPendingTimers();
+      simulateDashboardStateChange();
+      jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
+
+      emitConversationChange({
+        id: 'conversation-1',
+        attachments: [createVersionedAttachment(draftAttachment)],
+      });
+      emitAgentUpdate('conversation-1', draftAttachment);
+
+      expect(notifyOtherDashboardUpdated).not.toHaveBeenCalled();
+      expect(mockApi.setState).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('regenerates the pending attachment id once the draft attachment is in the conversation', () => {

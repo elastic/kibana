@@ -36,7 +36,7 @@ export const getLinkedAttachment = ({
   }
 
   // the dashboard was applied from or staged as this attachment, which may not have an origin yet
-  const linkedAttachmentId = store.linkedAttachmentIds.get(api);
+  const linkedAttachmentId = store.getLinkedAttachmentId(api);
   const linkedAttachment = attachments.find(({ id }) => id === linkedAttachmentId);
   if (linkedAttachment) {
     return linkedAttachment;
@@ -51,9 +51,7 @@ export const getLinkedAttachment = ({
   }
 
   // a dashboard linked to an attachment of another conversation doesn't stand for this one's
-  const isLinkedElsewhere =
-    linkedAttachmentId !== undefined && linkedAttachmentId !== draftAttachmentId;
-  if (dashboardId || isLinkedElsewhere) {
+  if (dashboardId || store.isLinkedInOtherConversation(api, draftAttachmentId)) {
     return undefined;
   }
   // an unsaved dashboard can only stand for an attachment without an origin, when there is one
@@ -74,7 +72,7 @@ export const canShowAttachmentInDashboard = ({
   store: AppliedAttachmentsStore;
   attachment: Pick<DashboardAttachment, 'id' | 'origin'>;
 }): boolean => {
-  if (store.linkedAttachmentIds.get(api) === attachment.id) {
+  if (store.getLinkedAttachmentId(api) === attachment.id) {
     return true;
   }
   const dashboardId = api.savedObjectId$.getValue();

@@ -14,8 +14,17 @@ import type { DashboardApi } from '@kbn/dashboard-plugin/public';
  * are not mistaken for manual changes.
  */
 export interface AppliedAttachmentsStore {
-  /** Attachment each open dashboard was applied from or staged as, so it stays linked before it has an origin. */
-  linkedAttachmentIds: WeakMap<DashboardApi, string>;
+  /** Sets the conversation links are read and written for; a new conversation that got its id keeps its links. */
+  setActiveConversationId: (conversationId: string | undefined) => void;
+  /**
+   * Attachment of the active conversation the dashboard was applied from or staged as, so it
+   * stays linked before it has an origin.
+   */
+  getLinkedAttachmentId: (api: DashboardApi) => string | undefined;
+  /** Links the dashboard to an attachment of the active conversation. */
+  setLinkedAttachmentId: (api: DashboardApi, attachmentId: string) => void;
+  /** Whether the dashboard is linked to an attachment of another conversation, other than the draft. */
+  isLinkedInOtherConversation: (api: DashboardApi, draftAttachmentId: string) => boolean;
   /**
    * Runs the apply once the previous ones settled, so the dashboard is never compared
    * while it is still applying another attachment.
@@ -39,9 +48,37 @@ export const createAppliedAttachmentsStore = (): AppliedAttachmentsStore => {
   let pendingApplies = 0;
   let lastApply: Promise<void> = Promise.resolve();
   const shownVersions$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
+  // links per conversation id, where `undefined` is a new conversation
+  const linkedAttachmentIds = new Map<string | undefined, WeakMap<DashboardApi, string>>();
+  let activeConversationId: string | undefined;
 
   return {
-    linkedAttachmentIds: new WeakMap(),
+    setActiveConversationId: (conversationId) => {
+      // a new conversation gets its id once its first message is sent
+      const newConversationLinks = linkedAttachmentIds.get(undefined);
+      if (activeConversationId === undefined && conversationId !== undefined) {
+        linkedAttachmentIds.delete(undefined);
+        if (newConversationLinks && !linkedAttachmentIds.has(conversationId)) {
+          linkedAttachmentIds.set(conversationId, newConversationLinks);
+        }
+      }
+      activeConversationId = conversationId;
+    },
+    getLinkedAttachmentId: (api) => linkedAttachmentIds.get(activeConversationId)?.get(api),
+    setLinkedAttachmentId: (api, attachmentId) => {
+      const links = linkedAttachmentIds.get(activeConversationId) ?? new WeakMap();
+      links.set(api, attachmentId);
+      linkedAttachmentIds.set(activeConversationId, links);
+    },
+    isLinkedInOtherConversation: (api, draftAttachmentId) =>
+      [...linkedAttachmentIds].some(([conversationId, links]) => {
+        const linkedAttachmentId = links.get(api);
+        return (
+          conversationId !== activeConversationId &&
+          linkedAttachmentId !== undefined &&
+          linkedAttachmentId !== draftAttachmentId
+        );
+      }),
     queueApply: (apply) => {
       // an idle queue starts the apply right away, so the dashboard updates in the same tick
       const isIdle = pendingApplies++ === 0;

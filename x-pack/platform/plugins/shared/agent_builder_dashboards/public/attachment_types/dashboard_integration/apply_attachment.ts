@@ -103,7 +103,7 @@ export const applyAttachmentToDashboard = ({
   attachment: DashboardAttachment;
 }): Promise<void> =>
   store.queueApply(async () => {
-    store.linkedAttachmentIds.set(api, attachment.id);
+    store.setLinkedAttachmentId(api, attachment.id);
     if (isAttachmentShownInDashboard(api, getDashboardSnapshot(api), attachment.data)) {
       return;
     }
