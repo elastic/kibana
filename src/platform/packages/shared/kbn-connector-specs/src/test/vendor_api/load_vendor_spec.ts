@@ -8,7 +8,13 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
-import { convertDiscovery, convertSwagger2, isDiscoveryDocument } from '@kbn/connector-emulate';
+import {
+  convertDiscovery,
+  convertSmithy,
+  convertSwagger2,
+  isDiscoveryDocument,
+  isSmithyModel,
+} from '@kbn/connector-emulate';
 import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
 import type { ManifestSource } from './manifest';
@@ -37,13 +43,19 @@ export const loadVendorSpec = async (
   fetchText: (url: string) => Promise<string>
 ): Promise<LoadedVendorSpec> => {
   const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
-  // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
+  // Discovery `$ref`s are schema names, and Smithy's are shape targets, which bundling would take
+  // for relative URLs.
   const discovery = isDiscoveryDocument(parsed);
-  const document = discovery ? convertDiscovery(parsed) : parsed;
+  const smithy = isSmithyModel(parsed);
+  const document = discovery ? convertDiscovery(parsed) : smithy ? convertSmithy(parsed) : parsed;
   const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
   const bundled = await bundleSpec(document, { url, load });
-  if (discovery) {
-    return { format: 'discovery', ...apiVersionOf(bundled), document: bundled };
+  if (discovery || smithy) {
+    return {
+      format: discovery ? 'discovery' : 'smithy',
+      ...apiVersionOf(bundled),
+      document: bundled,
+    };
   }
   return bundled.swagger === '2.0'
     ? { format: 'swagger', ...apiVersionOf(bundled), document: convertSwagger2(bundled) }

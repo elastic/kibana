@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generateKeyPairSync } from 'crypto';
+import { generateKeyPairSync, webcrypto } from 'crypto';
 import { Readable } from 'stream';
 import axios from 'axios';
 import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
@@ -147,6 +147,14 @@ const createAuthContext = (): AuthContext => ({
   sslSettings: {},
 });
 
+// Jest's jsdom has no `crypto.subtle`, which the signing auth types (AWS SigV4, GCP and Azure
+// keys) call as a global, as Kibana's server provides it.
+const ensureWebCrypto = (): void => {
+  if (!globalThis.crypto?.subtle) {
+    Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true });
+  }
+};
+
 /**
  * Builds an action context whose client is answered in-process by the contract mock: a real
  * axios instance on the mock's `fetch`, authenticated by the connector's own auth type and
@@ -159,6 +167,7 @@ export const createContractContext = async ({
   config = {},
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
+  ensureWebCrypto();
   const mock = createEmulatorFetch(mockOptions);
   const definitions = connector.auth?.types.length ? connector.auth.types : ['none'];
   const definition =

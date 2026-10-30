@@ -14,7 +14,7 @@ import { toStableJson } from './stable_json';
 const sourceSchema = z
   .object({
     /** The format the vendor publishes; snapshots are always OpenAPI 3.x JSON. */
-    format: z.enum(['openapi', 'swagger', 'discovery']),
+    format: z.enum(['openapi', 'swagger', 'discovery', 'smithy']),
     url: z.url(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
