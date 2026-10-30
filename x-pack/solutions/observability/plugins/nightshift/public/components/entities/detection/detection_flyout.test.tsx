@@ -27,7 +27,7 @@ const mockOpenChat = jest.fn();
 
 const mockStreamFeatures = jest.fn();
 
-jest.mock('../../../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../data/knowledge_indicators/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => mockStreamFeatures(),
 }));
 
