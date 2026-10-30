@@ -227,6 +227,22 @@ describe('SessionsTab', () => {
     expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
   });
 
+  it('warns when sessions were set up by a newer Kibana, which this one cannot update', async () => {
+    respondWith({
+      sessionsStatus: status({
+        installedVersion: 2,
+        currentVersion: 1,
+        reason: 'Sessions transforms are from version 2; upgrade Kibana to manage them.',
+      }),
+    });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsNewerVersion')).toHaveTextContent(
+      'upgrade Kibana to manage them'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionsUpdate')).not.toBeInTheDocument();
+  });
+
   it('shows a failing transform with its reason', async () => {
     respondWith({
       sessionsStatus: status({ health: 'degraded', reason: 'Transform failed: out of memory' }),
@@ -416,6 +432,49 @@ describe('SessionsTab', () => {
         window.localStorage.getItem('xpack.digitalExperience.sessions.hiddenColumns') ?? '[]'
       )
     ).not.toContain('location');
+  });
+
+  it('goes back to the first page when the time range changes', async () => {
+    respondWith({ list: listResponse({ total: 60 }) });
+    const history = renderTab({ search: '&page=2' });
+    await screen.findByTestId('digitalExperienceSessionRow-session-1');
+
+    jest.mocked(useTimeRange).mockReturnValue({
+      timeRange: { rangeFrom: 'now-24h', rangeTo: 'now' },
+      isTimeRangeInUrl: true,
+      setTimeRange: jest.fn(),
+    });
+    act(() => {
+      history.push(`/shop/sessions?rangeFrom=now-24h&rangeTo=now&source=otel&page=2`);
+    });
+
+    await waitFor(() => expect(searchParams(history).page).toBeUndefined());
+    expect(searchParams(history).rangeFrom).toBe('now-24h');
+  });
+
+  it('says the environment filter does not apply to sessions yet', async () => {
+    respondWith();
+    renderTab({ search: '&environment=staging' });
+
+    expect(await screen.findByTestId('digitalExperienceSessionsAllEnvironments')).toHaveTextContent(
+      'the staging filter does not apply'
+    );
+  });
+
+  it('shows the exit page of a visit that returns to an earlier page', async () => {
+    respondWith({
+      list: listResponse({
+        sessions: [session({ journey: ['/', '/products'], entryPage: '/', exitPage: '/' })],
+      }),
+    });
+    renderTab();
+
+    const journey = await screen.findByTestId('digitalExperienceSessionJourney');
+    expect(journey).toHaveTextContent('/+1/');
+    expect(journey).not.toHaveTextContent('/products');
+    expect(journey).toHaveAccessibleName(
+      'Pages, in order of first visit: / → /products. Exit page: /.'
+    );
   });
 
   it('explains how sessions get there when the range has none', async () => {

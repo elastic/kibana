@@ -12,19 +12,33 @@ import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 
 /**
- * A session's pages in one line: entry page → number of pages in between → exit page, with the
- * full journey in a tooltip.
+ * A session's pages in one line: entry page → number of other pages → exit page, with every page
+ * in a tooltip. The journey lists each page once, in order of first visit, so the entry and exit
+ * come from the session: a visit `/` → `/products` → `/` exits on `/`, not on `/products`.
  */
-export function JourneyTrail({ journey }: { journey: string[] }) {
+export function JourneyTrail({
+  journey,
+  entryPage,
+  exitPage,
+}: {
+  journey: string[];
+  entryPage: string | null;
+  exitPage: string | null;
+}) {
   const { euiTheme } = useEuiTheme();
 
-  if (journey.length === 0) {
+  const entry = entryPage ?? journey[0];
+  const exit = exitPage ?? journey[journey.length - 1];
+  if (!entry) {
     return <EmptyCellValue />;
   }
-
-  const entry = journey[0];
-  const exit = journey[journey.length - 1];
-  const hidden = journey.length - 2;
+  const others = journey.filter((page) => page !== entry && page !== exit).length;
+  const showExit = exit !== undefined && (exit !== entry || others > 0);
+  const pages = journey.length > 0 ? journey : [entry];
+  const tooltip = i18n.translate('xpack.digitalExperience.sessions.journey.tooltip', {
+    defaultMessage: 'Pages, in order of first visit: {pages}. Exit page: {exit}.',
+    values: { pages: pages.join(' → '), exit: exit ?? entry },
+  });
 
   const trailCss = css({
     display: 'flex',
@@ -45,29 +59,26 @@ export function JourneyTrail({ journey }: { journey: string[] }) {
   const arrow = <EuiIcon type="sortRight" size="s" color="subdued" aria-hidden={true} />;
 
   return (
-    <EuiToolTip content={journey.join(' → ')}>
+    <EuiToolTip content={tooltip}>
       <span
         css={trailCss}
         tabIndex={0}
-        aria-label={i18n.translate('xpack.digitalExperience.sessions.journey.ariaLabel', {
-          defaultMessage: 'Journey: {journey}',
-          values: { journey: journey.join(', ') },
-        })}
+        aria-label={tooltip}
         data-test-subj="digitalExperienceSessionJourney"
       >
         <span css={pageCss}>{entry}</span>
-        {hidden > 0 && (
+        {others > 0 && (
           <>
             {arrow}
             <EuiBadge color="hollow">
               {i18n.translate('xpack.digitalExperience.sessions.journey.hiddenPagesLabel', {
                 defaultMessage: '+{count}',
-                values: { count: hidden },
+                values: { count: others },
               })}
             </EuiBadge>
           </>
         )}
-        {journey.length > 1 && (
+        {showExit && (
           <>
             {arrow}
             <span css={pageCss}>{exit}</span>

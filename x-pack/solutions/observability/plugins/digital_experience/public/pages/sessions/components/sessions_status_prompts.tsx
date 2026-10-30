@@ -98,6 +98,28 @@ export function SessionsStatusCallout({
   enabling,
   enableError,
 }: EnableProps & { status: SessionsStatus }) {
+  // Set up by a newer Kibana (a rollback, or an older node in a rolling upgrade): this one can't
+  // update them, and their summaries may not match what it reads.
+  if (status.installedVersion !== null && status.installedVersion > status.currentVersion) {
+    return (
+      <>
+        <KbnWarningCallout
+          data-test-subj="digitalExperienceSessionsNewerVersion"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.sessions.status.newerVersionTitle', {
+            defaultMessage: 'Sessions were set up by a newer version of Kibana',
+          })}
+          text={
+            status.reason ??
+            i18n.translate('xpack.digitalExperience.sessions.status.newerVersionDescription', {
+              defaultMessage: 'Upgrade Kibana to manage sessions.',
+            })
+          }
+        />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
   if (status.needsUpdate) {
     return (
       <>

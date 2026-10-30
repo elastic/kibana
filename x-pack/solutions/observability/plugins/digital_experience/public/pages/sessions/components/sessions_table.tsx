@@ -305,7 +305,9 @@ export function SessionsTable({
       journey: {
         field: 'journey',
         name: COLUMN_LABELS.journey,
-        render: (journey: string[]) => <JourneyTrail journey={journey} />,
+        render: (journey: string[], { entryPage, exitPage }: SessionSummary) => (
+          <JourneyTrail journey={journey} entryPage={entryPage} exitPage={exitPage} />
+        ),
       },
       duration: {
         field: 'durationMs',

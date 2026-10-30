@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { CSSProperties } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -22,6 +23,16 @@ import type { SessionWaterfallLayout } from '../utils/session_timeline';
 import { formatOffset } from '../utils/session_timeline';
 
 const BAR_HEIGHT = 28;
+const MARKER_HIT_WIDTH = 8;
+
+/** Places a tooltip anchor on the bar, from its runtime offset and width. */
+const anchorStyle = (position: CSSProperties): CSSProperties => ({
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  minWidth: 3,
+  ...position,
+});
 
 /** A color per page, the same for each visit of the page, in order of first visit. */
 export const pageColors = (pageVisits: SessionPageVisit[]): Map<string, string> => {
@@ -57,22 +68,26 @@ export function SessionWaterfall({
     background: euiTheme.colors.backgroundBaseSubdued,
     overflow: 'hidden',
   });
+  // The tooltip anchors are positioned on the bar (`anchorStyle`), so tooltips point at them;
+  // segments and markers fill their anchor.
   const segmentCss = css({
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    minWidth: 3,
+    display: 'block',
+    width: '100%',
+    height: '100%',
     borderRight: `1px solid ${euiTheme.colors.emptyShade}`,
   });
+  // A hit area wider than the 2px line, so the marker can be hovered and focused for its tooltip.
   const markerCss = css({
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 2,
-    marginLeft: -1,
-    background: euiTheme.colors.danger,
-    boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
-    pointerEvents: 'none',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    '&::after': {
+      content: '""',
+      width: 2,
+      background: euiTheme.colors.danger,
+      boxShadow: `0 0 0 1px ${euiTheme.colors.emptyShade}`,
+    },
   });
   const swatchCss = css({
     display: 'inline-block',
@@ -101,7 +116,13 @@ export function SessionWaterfall({
             }
           );
           return (
-            <EuiToolTip key={index} content={label}>
+            <EuiToolTip
+              key={index}
+              content={label}
+              anchorProps={{
+                style: anchorStyle({ left: `${offsetPercent}%`, width: `${widthPercent}%` }),
+              }}
+            >
               <span
                 data-test-subj="digitalExperienceSessionWaterfallSegment"
                 // Focusable, so keyboard users get the tooltip too.
@@ -109,26 +130,38 @@ export function SessionWaterfall({
                 role="img"
                 aria-label={label}
                 css={segmentCss}
-                style={{
-                  left: `${offsetPercent}%`,
-                  width: `${widthPercent}%`,
-                  background: colors.get(page),
-                }}
+                style={{ background: colors.get(page) }}
               />
             </EuiToolTip>
           );
         })}
-        {layout.errorMarkers.map(({ offsetPercent, event }, index) => (
-          <span
-            key={index}
-            data-test-subj="digitalExperienceSessionWaterfallError"
-            title={`${formatOffset(event.offsetMs)} ${event.name}${
-              event.detail ? `: ${event.detail}` : ''
-            }`}
-            css={markerCss}
-            style={{ left: `${offsetPercent}%` }}
-          />
-        ))}
+        {layout.errorMarkers.map(({ offsetPercent, event }, index) => {
+          const label = `${formatOffset(event.offsetMs)} ${event.name}${
+            event.detail ? `: ${event.detail}` : ''
+          }`;
+          return (
+            <EuiToolTip
+              key={index}
+              content={label}
+              anchorProps={{
+                style: anchorStyle({
+                  left: `${offsetPercent}%`,
+                  width: MARKER_HIT_WIDTH,
+                  marginLeft: -MARKER_HIT_WIDTH / 2,
+                }),
+              }}
+            >
+              <span
+                data-test-subj="digitalExperienceSessionWaterfallError"
+                // Focusable, so keyboard users get the error's details too.
+                tabIndex={0}
+                role="img"
+                aria-label={label}
+                css={markerCss}
+              />
+            </EuiToolTip>
+          );
+        })}
       </div>
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>

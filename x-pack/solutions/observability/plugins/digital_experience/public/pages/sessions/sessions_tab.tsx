@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { omitBy, isUndefined } from 'lodash';
 import {
   EuiButton,
@@ -17,12 +17,13 @@ import {
   EuiLoadingLogo,
   EuiSpacer,
 } from '@elastic/eui';
+import { getEnvironmentLabel } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { canManageSessions } from '../../capabilities';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
@@ -31,6 +32,7 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt
 import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
+import { useEnvironment } from '../../hooks/use_environment';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useTimeRange } from '../../hooks/use_time_range';
@@ -142,6 +144,7 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
   const apiClient = useApiClient();
   const formatters = useFormatters();
   const { timeRange } = useTimeRange();
+  const { environment } = useEnvironment();
   const { state, update, setSearch, clearFilters, hasActiveFilters } = useSessionsListQuery();
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions');
   const { sessionHref } = useApplicationLinks(serviceName, source);
@@ -153,6 +156,18 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
     columnIds: SESSIONS_OPTIONAL_COLUMN_IDS,
     hiddenByDefault: SESSIONS_HIDDEN_BY_DEFAULT,
   });
+
+  // A new time range lists other sessions, so a later page may not exist anymore: start over.
+  const previousTimeRange = useRef(timeRange);
+  useEffect(() => {
+    if (previousTimeRange.current === timeRange) {
+      return;
+    }
+    previousTimeRange.current = timeRange;
+    if (state.page > 0) {
+      update({ page: undefined }, true);
+    }
+  }, [timeRange, state.page, update]);
 
   const {
     value: response,
@@ -234,6 +249,20 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {environment && (
+        <>
+          <KbnInfoCallout
+            data-test-subj="digitalExperienceSessionsAllEnvironments"
+            size="s"
+            title={i18n.translate('xpack.digitalExperience.sessions.allEnvironmentsTitle', {
+              defaultMessage:
+                'Sessions include every environment: the {environment} filter does not apply to them yet.',
+              values: { environment: getEnvironmentLabel(environment) },
+            })}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <SessionsKpis kpis={response?.kpis} isLoading={isLoading} formatters={formatters} />
       <EuiSpacer size="m" />
       {response && response.failedSummaries > 0 && (

@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiPageHeader,
+  EuiPageSection,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -230,7 +231,12 @@ export function SessionDetailPage({
   };
 
   return (
-    <>
+    // The app shell is unpadded since each page pads its own content (see `render_app.tsx`).
+    <EuiPageSection
+      paddingSize="m"
+      restrictWidth={false}
+      data-test-subj="digitalExperienceSessionPage"
+    >
       <EuiPageHeader
         pageTitle={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
           defaultMessage: 'Session',
@@ -276,6 +282,6 @@ export function SessionDetailPage({
       />
       <EuiSpacer size="m" />
       {renderContent()}
-    </>
+    </EuiPageSection>
   );
 }

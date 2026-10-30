@@ -208,12 +208,19 @@ describe('SessionDetailPage', () => {
 
     const waterfall = await screen.findByTestId('digitalExperienceSessionWaterfall');
     const segments = within(waterfall).getAllByTestId('digitalExperienceSessionWaterfallSegment');
-    expect(segments.map(({ style }) => [style.left, style.width])).toEqual([
+    // Positioned through their tooltip anchors, so the tooltips point at them.
+    expect(
+      segments.map(({ parentElement }) => [parentElement?.style.left, parentElement?.style.width])
+    ).toEqual([
       ['0%', '50%'],
       ['50%', '50%'],
     ]);
     expect(segments[1]).toHaveAccessibleName('/cart: 30 s, 0 clicks, 1 error');
-    expect(within(waterfall).getByTestId('digitalExperienceSessionWaterfallError')).toHaveStyle({
+    const marker = within(waterfall).getByTestId('digitalExperienceSessionWaterfallError');
+    // Focusable, with the error in its name, as its tooltip shows it.
+    expect(marker).toHaveAttribute('tabindex', '0');
+    expect(marker).toHaveAccessibleName('0:45 TypeError: cart is undefined');
+    expect(marker.parentElement).toHaveStyle({
       left: '75%',
     });
   });

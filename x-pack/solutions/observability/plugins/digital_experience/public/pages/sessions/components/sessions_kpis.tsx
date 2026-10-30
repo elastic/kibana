@@ -62,7 +62,8 @@ export function SessionsKpis({
     },
     {
       id: 'avgPageViews',
-      title: withValue(kpis?.avgPageViews, (value) => value.toFixed(1)),
+      // One decimal, in the Advanced Settings number format.
+      title: withValue(kpis?.avgPageViews, (value) => formatNumber(Math.round(value * 10) / 10)),
       description: i18n.translate('xpack.digitalExperience.sessions.kpis.avgPageViewsLabel', {
         defaultMessage: 'Pages per session',
       }),

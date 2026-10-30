@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreWebVital, VitalRating } from '../../common/core_web_vitals';
 import { CORE_WEB_VITALS, getVitalRating } from '../../common/core_web_vitals';
 import type { SessionWebVitals } from '../../common/sessions';
+import { formatDurationMs } from '../utils/format_duration';
 
 const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
   good: 'success',
@@ -49,21 +50,12 @@ export const VITAL_LABELS: Record<CoreWebVital, string> = {
   }),
 };
 
-/** A vital's value with its unit: CLS is unitless, the others are times. */
-export const formatVital = (vital: CoreWebVital, value: number): string => {
-  if (vital === 'cls') {
-    return value.toFixed(3);
-  }
-  return value >= 1000
-    ? i18n.translate('xpack.digitalExperience.sessionDetail.vitals.secondsValue', {
-        defaultMessage: '{value} s',
-        values: { value: (value / 1000).toFixed(2) },
-      })
-    : i18n.translate('xpack.digitalExperience.sessionDetail.vitals.millisecondsValue', {
-        defaultMessage: '{value} ms',
-        values: { value: Math.round(value) },
-      });
-};
+/**
+ * A vital's value with its unit, as the Overview formats it: CLS is unitless (3 decimals, like the
+ * applications list), the others are times.
+ */
+export const formatVital = (vital: CoreWebVital, value: number): string =>
+  vital === 'cls' ? value.toFixed(3) : formatDurationMs(value);
 
 /** One vital's value, colored by its rating, with the rating in a tooltip. */
 export function WebVitalBadge({
