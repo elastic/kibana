@@ -274,6 +274,15 @@ describe('Significant Events run quota routes', () => {
     expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
       limits: { detection: 5 },
     });
+
+    await putRoute.handler({
+      ...handlerParams,
+      params: { body: { activateLimits: { detection: 5 }, limits: { investigation: null } } },
+    } as never);
+    expect(patchRunQuotaSettings).toHaveBeenLastCalledWith(repository, {
+      activateLimits: { detection: 5 },
+      limits: { investigation: 0 },
+    });
   });
 
   it.each<RunQuotaConsumeRequest>([

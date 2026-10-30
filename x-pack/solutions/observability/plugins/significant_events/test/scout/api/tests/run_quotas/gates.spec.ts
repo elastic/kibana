@@ -58,9 +58,9 @@ apiTest.describe(
     ): Promise<RunQuotaSnapshot> => {
       const current = await readSnapshot(apiClient);
       const limits = Object.fromEntries(
-        Object.entries(desired.limits ?? {}).filter(
-          ([group, limit]) => current.limits[group as RunQuotaGroup] !== (limit ?? 0)
-        )
+        Object.entries(desired.limits ?? {})
+          .filter(([group, limit]) => current.limits[group as RunQuotaGroup] !== (limit ?? 0))
+          .map(([group, limit]) => [group, group === 'investigation' && limit === 0 ? null : limit])
       ) as Partial<Record<RunQuotaGroup, number | null>>;
       const body = {
         ...(desired.enabled !== undefined && desired.enabled !== current.enabled

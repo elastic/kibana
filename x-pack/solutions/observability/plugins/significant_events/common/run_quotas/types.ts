@@ -64,7 +64,7 @@ export type RunQuotaSettingsPatch =
   | {
       activateLimits: Partial<Record<RunQuotaGroup, number>>;
       enabled?: never;
-      limits?: never;
+      limits?: Partial<Record<RunQuotaGroup, number>>;
     };
 
 export type RunQuotaSettingsUpdate =
@@ -82,7 +82,7 @@ export type RunQuotaSettingsUpdate =
        */
       activateLimits: Partial<Record<RunQuotaGroup, number>>;
       enabled?: never;
-      limits?: never;
+      limits?: { investigation: number | null };
     };
 
 export type RunQuotaConsumeRequest =

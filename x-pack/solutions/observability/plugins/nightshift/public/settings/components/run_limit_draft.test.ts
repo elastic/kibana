@@ -98,6 +98,23 @@ describe('run quota drafts', () => {
     });
   });
 
+  it('keeps an investigation edit made in the same save as a legacy activation', () => {
+    let state = setRunLimitEnabled(createRunQuotaDraftState(response), 'detection', true);
+    state.draft.limits.investigation = 5;
+
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 15 },
+      limits: { investigation: 5 },
+    });
+
+    state = setRunLimitEnabled(state, 'investigation', false);
+
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 15 },
+      limits: { investigation: null },
+    });
+  });
+
   it('activates legacy enforcement after a cleared limit is repaired', () => {
     let state = createRunQuotaDraftState(response);
     state = setRunLimitEnabled(state, 'detection', true);

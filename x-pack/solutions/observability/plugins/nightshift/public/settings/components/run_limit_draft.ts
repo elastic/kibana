@@ -158,7 +158,19 @@ export const buildRunQuotaSettingsUpdate = (
       )
     ) as Partial<Record<RunQuotaGroup, number>>;
 
-    return Object.keys(activateLimits).length > 0 ? { activateLimits } : undefined;
+    const investigationLimit = state.draft.limits.investigation;
+    return Object.keys(activateLimits).length > 0
+      ? {
+          activateLimits,
+          ...(state.saved.limits.investigation === investigationLimit
+            ? {}
+            : {
+                limits: {
+                  investigation: investigationLimit === MIN_RUN_LIMIT ? null : investigationLimit,
+                },
+              }),
+        }
+      : undefined;
   }
 
   const update: RunQuotaSettingsUpdate = {};

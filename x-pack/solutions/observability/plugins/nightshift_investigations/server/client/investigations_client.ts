@@ -556,6 +556,10 @@ export class NightshiftInvestigationsClient {
       },
     });
     const isFollowUp = investigationId !== newInvestigationId;
+    if (isFollowUp) {
+      await this.releaseBudget(globalBudget);
+      await this.releaseBudget(automationBudget);
+    }
     const existing = isFollowUp
       ? await findInvestigationConversation(conversations, investigationId)
       : undefined;
@@ -565,10 +569,6 @@ export class NightshiftInvestigationsClient {
     const telemetryTarget = isFollowUp
       ? existing?.telemetryTarget ?? telemetry_target
       : telemetry_target ?? this.telemetryConfig?.default_telemetry_target;
-    if (isFollowUp) {
-      await this.releaseBudget(globalBudget);
-      await this.releaseBudget(automationBudget);
-    }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install stays because the run

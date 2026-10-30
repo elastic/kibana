@@ -78,22 +78,35 @@ const activateLimitsSchema = z
     message: 'At least one run limit to activate is required',
   });
 
-const settingsUpdateSchema = z.union([
-  z
-    .object({
-      enabled: z.boolean().optional(),
-      limits: limitsUpdateSchema.optional(),
-    })
-    .strict()
-    .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
-      message: 'At least one run quota setting is required',
-    }),
-  z
-    .object({
-      activateLimits: activateLimitsSchema,
-    })
-    .strict(),
-]);
+const settingsUpdateSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        enabled: z.boolean().optional(),
+        limits: limitsUpdateSchema.optional(),
+      })
+      .strict()
+      .refine((update) => update.enabled !== undefined || update.limits !== undefined, {
+        message: 'At least one run quota setting is required',
+      }),
+    z
+      .object({
+        activateLimits: activateLimitsSchema,
+        limits: z
+          .object({
+            investigation: z
+              .number()
+              .int()
+              .min(MIN_RUN_LIMIT + 1)
+              .max(MAX_RUN_LIMIT)
+              .nullable(),
+          })
+          .strict()
+          .optional(),
+      })
+      .strict(),
+  ])
+);
 
 const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('detection') }).strict(),
@@ -111,7 +124,11 @@ const toStoredLimits = ({
 
 const toStoredPatch = (body: z.infer<typeof settingsUpdateSchema>): RunQuotaSettingsPatch => {
   if ('activateLimits' in body) {
-    return body;
+    const { limits: investigationLimit, ...activation } = body;
+    return {
+      ...activation,
+      ...(investigationLimit ? { limits: toStoredLimits(investigationLimit) } : {}),
+    };
   }
   const { limits, ...rest } = body;
   return { ...rest, ...(limits ? { limits: toStoredLimits(limits) } : {}) };

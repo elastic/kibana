@@ -1533,6 +1533,15 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         expect(release).toHaveBeenCalledTimes(1);
       });
 
+      it('releases the automation slot and fails the start when the quota check is unavailable', async () => {
+        investigationQuotaCallback.mockRejectedValue(new Error('Storage unavailable'));
+
+        await expect(startWithBudget(1)).rejects.toBeInstanceOf(InvestigationUnavailableError);
+
+        expect(await usage()).toBe(0);
+        expect(release).not.toHaveBeenCalled();
+      });
+
       it('releases both slots when the claim attempt fails', async () => {
         subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
 
