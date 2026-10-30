@@ -681,6 +681,10 @@ describe('huntCoordinator', () => {
           '*:logs-aws.cloudtrail-*',
           'logs-endpoint.events.process-default*',
           '*:logs-endpoint.events.process-default*',
+          // The universe's exclusions ride along, so a widened target cannot reach what the
+          // hunt excludes.
+          '-*elastic-cloud-logs-*',
+          '*:-*elastic-cloud-logs-*',
         ],
       }),
       esClient,

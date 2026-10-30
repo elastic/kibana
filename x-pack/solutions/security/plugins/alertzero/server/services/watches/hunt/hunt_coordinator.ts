@@ -21,7 +21,7 @@ import {
   FINAL_WHEN_NOTHING_SEARCHABLE,
   huntCompletenessOf,
 } from './common/completeness';
-import { scopeGuardPatterns } from './common/cps_scope';
+import { tier2AllowedIndices } from './common/cps_scope';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
@@ -1031,7 +1031,11 @@ const huntCoordinatorCore = async (
         row_limit: scope.row_limit,
         // Every reader downstream (the allowlist, the schema probe, the publish/execute
         // gates, the hit bar) treats this as the set Tier 2 may read.
-        allowed_indices: scopeGuardPatterns(targets.tier2_targets, crossProjectSearch),
+        allowed_indices: tier2AllowedIndices({
+          targets: targets.tier2_targets,
+          universe: scope.index_patterns,
+          crossProjectSearch,
+        }),
         ...(continuation
           ? {
               already_searched_technique_ids: continuation.already_searched_technique_ids,

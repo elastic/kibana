@@ -6,7 +6,7 @@
  */
 
 import { assertEsqlSourcesAllowed } from '../tier2/assert_esql_sources_allowed';
-import { scopeGuardPatterns, withLinkedProjectTwins } from './cps_scope';
+import { scopeGuardPatterns, tier2AllowedIndices, withLinkedProjectTwins } from './cps_scope';
 import { buildMatchesRequired } from './matches_required';
 
 describe('withLinkedProjectTwins', () => {
@@ -69,5 +69,36 @@ describe('guards over widened patterns', () => {
       reason: expect.stringContaining('outside the hunt index scope'),
     });
     expect(assertEsqlSourcesAllowed(query, widened)).toEqual({ ok: true });
+  });
+});
+
+describe('tier2AllowedIndices', () => {
+  const universe = ['logs-*', 'linked:-logs-aws.cloudtrail-*', '-logs-elastic_agent*'];
+  const targets = ['logs-aws.cloudtrail-*'];
+
+  it('returns the targets as they are without cross-project search', () => {
+    expect(tier2AllowedIndices({ targets, universe, crossProjectSearch: false })).toEqual(targets);
+  });
+
+  it('widens the targets and carries the universe exclusions, qualified or not', () => {
+    expect(tier2AllowedIndices({ targets, universe, crossProjectSearch: true })).toEqual([
+      'logs-aws.cloudtrail-*',
+      '*:logs-aws.cloudtrail-*',
+      'linked:-logs-aws.cloudtrail-*',
+      '-logs-elastic_agent*',
+      '*:-logs-elastic_agent*',
+    ]);
+  });
+
+  it('keeps a project the universe excludes by name out of reach of the widened targets', () => {
+    const allowed = tier2AllowedIndices({ targets, universe, crossProjectSearch: true });
+    const matches = buildMatchesRequired(allowed);
+
+    expect(matches('logs-aws.cloudtrail-default')).toBe(true);
+    expect(matches('other:logs-aws.cloudtrail-default')).toBe(true);
+    expect(matches('linked:logs-aws.cloudtrail-default')).toBe(false);
+    expect(
+      assertEsqlSourcesAllowed('FROM linked:logs-aws.cloudtrail-* | LIMIT 1', allowed).ok
+    ).toBe(false);
   });
 });

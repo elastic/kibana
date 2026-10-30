@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseIndexScopeEntry } from '../../../../../common/remote_cluster';
+import { isIndexExclusion, parseIndexScopeEntry } from '../../../../../common/remote_cluster';
 
 /**
  * Under cross-project search an unqualified entry reaches every project the space routes to,
@@ -24,6 +24,25 @@ export const withLinkedProjectTwins = (patterns: string[]): string[] => {
   });
   return [...new Set(expanded)];
 };
+
+/**
+ * What Tier 2 may read: the targets, widened to linked projects under cross-project search,
+ * with the universe's exclusions carried along. A widened `*:logs-aws.*` would otherwise
+ * reach a project the universe excludes by name (`linked:-logs-aws.*`), since targets hold
+ * positive entries only. Without cross-project search the targets stand as they are.
+ */
+export const tier2AllowedIndices = ({
+  targets,
+  universe,
+  crossProjectSearch,
+}: {
+  targets: string[];
+  universe: string[];
+  crossProjectSearch: boolean;
+}): string[] =>
+  crossProjectSearch
+    ? withLinkedProjectTwins([...targets, ...universe.filter(isIndexExclusion)])
+    : targets;
 
 /** The patterns the guards compare against: widened when cross-project search is on. */
 export const scopeGuardPatterns = (patterns: string[], crossProjectSearch: boolean): string[] =>
