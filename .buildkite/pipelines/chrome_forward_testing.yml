@@ -18,13 +18,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    agents:
-      machineType: n2-highcpu-8
 
   - wait
 
