@@ -342,6 +342,101 @@ describe('inferenceAdapter', () => {
       });
     });
 
+    describe('strict function calling', () => {
+      const toolsOfRequestFor = (config: Record<string, unknown>) => {
+        executorMock.getConnector.mockImplementation(() => ({
+          type: InferenceConnectorType.Inference,
+          name: 'inference connector',
+          connectorId: '.id',
+          config,
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        }));
+
+        inferenceAdapter
+          .chatComplete({
+            logger,
+            executor: executorMock,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            tools: {
+              foo: {
+                description: 'my tool',
+                schema: {
+                  type: 'object',
+                  properties: { id: { type: 'string' }, is_prebuilt: { type: 'boolean' } },
+                  required: ['id'],
+                },
+              },
+            },
+            toolChoice: ToolChoiceType.auto,
+          })
+          .subscribe(noop);
+
+        const body = executorMock.invoke.mock.calls[0]?.[0].subActionParams?.body as
+          | OpenAI.ChatCompletionCreateParams
+          | undefined;
+        return body?.tools;
+      };
+
+      const strictConnectors: Array<[string, Record<string, unknown>]> = [
+        ['an EIS GPT model', { provider: 'elastic', inferenceId: '.openai-gpt-5.5-chat_completion' }],
+        ['an OpenAI endpoint', { provider: 'openai' }],
+      ];
+      strictConnectors.forEach(([label, config]) => {
+        it(`should send tools in strict mode for ${label}`, () => {
+          expect(toolsOfRequestFor(config)).toEqual([
+            {
+              type: 'function',
+              function: {
+                name: 'foo',
+                description: 'my tool',
+                strict: true,
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    is_prebuilt: { anyOf: [{ type: 'boolean' }, { type: 'null' }] },
+                  },
+                  required: ['id', 'is_prebuilt'],
+                  additionalProperties: false,
+                },
+              },
+            },
+          ]);
+        });
+      });
+
+      const nonStrictConnectors: Array<[string, Record<string, unknown>]> = [
+        [
+          'an EIS Claude model',
+          { provider: 'elastic', inferenceId: '.anthropic-claude-4.6-sonnet-chat_completion' },
+        ],
+        [
+          'an EIS GPT-OSS model',
+          { provider: 'elastic', inferenceId: '.openai-gpt-oss-120b-chat_completion' },
+        ],
+      ];
+      nonStrictConnectors.forEach(([label, config]) => {
+        it(`should send tools unchanged for ${label}`, () => {
+          expect(toolsOfRequestFor(config)).toEqual([
+            {
+              type: 'function',
+              function: {
+                name: 'foo',
+                description: 'my tool',
+                parameters: {
+                  type: 'object',
+                  properties: { id: { type: 'string' }, is_prebuilt: { type: 'boolean' } },
+                  required: ['id'],
+                },
+              },
+            },
+          ]);
+        });
+      });
+    });
+
     it('omits the reasoning default when the model does not tolerate disabled reasoning', () => {
       executorMock.getConnector.mockImplementation(() => {
         return {

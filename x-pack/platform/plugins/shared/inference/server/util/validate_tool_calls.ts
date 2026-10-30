@@ -15,7 +15,7 @@ import {
   createToolNotFoundError,
   createToolValidationError,
 } from '../../common/chat_complete/errors';
-import { repairJsonEncodedArguments } from './repair_json_encoded_arguments';
+import { repairToolCallArguments } from './repair_tool_call_arguments';
 
 export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
@@ -73,13 +73,13 @@ export function validateToolCalls({
       if (zodSchema) {
         const firstAttempt = zodSchema.safeParse(serializedArguments);
         if (!firstAttempt.success) {
-          const repair = repairJsonEncodedArguments(serializedArguments, zodSchema);
+          const repair = repairToolCallArguments(serializedArguments, zodSchema);
           if (!repair) {
             throw firstAttempt.error;
           }
           logger.debug(
             () =>
-              `Repaired JSON-encoded arguments of ${toolCall.function.name} (${
+              `Repaired arguments of ${toolCall.function.name} (${
                 toolCall.toolCallId
               }) at: ${repair.repairedPaths.join(', ')}`
           );

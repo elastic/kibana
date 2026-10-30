@@ -24,6 +24,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     temperature = 0,
     modelName,
     reasoning,
+    strictToolNames,
   } = applyProviderTransforms(options);
 
   // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
@@ -49,7 +50,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   } else {
-    const openAiTools = toolsToOpenAI(tools);
+    const openAiTools = toolsToOpenAI(tools, strictToolNames);
     const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
     const resolvedReasoning = resolveChatCompletionReasoning({
       reasoning,
