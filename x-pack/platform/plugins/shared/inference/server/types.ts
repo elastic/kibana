@@ -69,6 +69,14 @@ export type ScopedFeatureEndpointResolver = (
 ) => ReturnType<FeatureEndpointResolver>;
 
 /**
+ * The model to call: either a connector directly, or a feature whose top endpoint is resolved
+ * through the registered {@link FeatureEndpointResolver}. The two are mutually exclusive.
+ */
+export type InferenceModelTarget =
+  | { connectorId: string; featureId?: never }
+  | { featureId: string; connectorId?: never };
+
+/**
  * An {@link InferenceClient} whose `chatComplete` also accepts a `featureId` instead of a `connectorId`.
  */
 export type InferenceServerClient = InferenceClient & { chatComplete: FeatureChatCompleteAPI };
