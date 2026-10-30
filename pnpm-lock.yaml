@@ -428,8 +428,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.33.0
-        version: 4.33.0(monaco-editor@0.56.0)
+        specifier: 4.34.0
+        version: 4.34.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -5519,6 +5519,9 @@ importers:
       '@kbn/eslint-plugin-imports':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-imports
+      '@kbn/eslint-plugin-kbn-monaco':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-kbn-monaco
       '@kbn/eslint-plugin-kbn-ui':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-kbn-ui
@@ -6707,9 +6710,6 @@ importers:
       marge:
         specifier: 1.0.1
         version: 1.0.1
-      mini-css-extract-plugin:
-        specifier: 2.9.1
-        version: 2.9.1(webpack@5.96.1)
       minimist:
         specifier: 1.2.8
         version: 1.2.8
@@ -6842,9 +6842,6 @@ importers:
       table:
         specifier: 6.9.0
         version: 6.9.0
-      terser-webpack-plugin:
-        specifier: 5.3.17
-        version: 5.3.17(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack@5.96.1)
       tough-cookie:
         specifier: 6.0.0
         version: 6.0.0
@@ -7025,6 +7022,8 @@ importers:
   packages/kbn-eslint-plugin-i18n: {}
 
   packages/kbn-eslint-plugin-imports: {}
+
+  packages/kbn-eslint-plugin-kbn-monaco: {}
 
   packages/kbn-eslint-plugin-kbn-ui: {}
 
@@ -11244,8 +11243,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.33.0':
-    resolution: {integrity: sha512-S+ceGgCwEOougTdYvykdeGUWq5dBGrXcc2Ul2Cw/mLRUV0ElYZycpnPcjoOsdhpwJZdoetcuZG4QLnm1N4RHZw==}
+  '@elastic/monaco-esql@4.34.0':
+    resolution: {integrity: sha512-5fI1zfp4IPeROP6CGpb/FtdBDeKNRRY9oAjYZZIMTKTi/eLAYGDOAfCLvoZOY0ganWRWiPn0QaxcaS7APND68A==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -21148,12 +21147,6 @@ packages:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
 
-  mini-css-extract-plugin@2.9.1:
-    resolution: {integrity: sha512-+Vyi+GCCOHnrJ2VPS+6aPoXN2k2jgUzDRhTFLjjTBn23qyXJXkjUWQgTL+mXpF5/A8ixLdCc6kWsoeOjKGejKQ==}
-    engines: {node: '>= 12.13.0'}
-    peerDependencies:
-      webpack: ^5.0.0
-
   minimalistic-assert@1.0.1:
     resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
 
@@ -27433,7 +27426,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.33.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.34.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.34.0
       monaco-editor: 0.56.0
@@ -39166,12 +39159,6 @@ snapshots:
     optional: true
 
   min-indent@1.0.1: {}
-
-  mini-css-extract-plugin@2.9.1(webpack@5.96.1):
-    dependencies:
-      schema-utils: 4.5.0
-      tapable: 2.3.3
-      webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
 

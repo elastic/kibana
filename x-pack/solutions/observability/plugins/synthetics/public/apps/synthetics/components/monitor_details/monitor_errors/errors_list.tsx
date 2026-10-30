@@ -164,9 +164,7 @@ export const ErrorsList = ({
         if (isActive(item)) {
           return (
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
-              <EuiFlexItem grow={false} className="eui-textNoWrap">
-                {link}
-              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{link}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge iconType="clock" iconSide="right" css={{ maxWidth: 'max-content' }}>
                   {ACTIVE_LABEL}
@@ -206,7 +204,7 @@ export const ErrorsList = ({
           {
             field: 'monitor.check_group',
             name: FAILED_STEP_LABEL,
-            truncateText: true,
+            truncateText: { lines: 2 },
             sortable: (a: PingState) => {
               const failedStep = failedSteps.find(
                 (step) => step.monitor.check_group === a.monitor.check_group
@@ -228,10 +226,11 @@ export const ErrorsList = ({
                   <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
                 );
               }
+              const stepLabel = `${failedStep.synthetics?.step?.index}. ${failedStep.synthetics?.step?.name}`;
               return (
-                <EuiText size="s">
-                  {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
-                </EuiText>
+                <span css={breakAnywhere} title={stepLabel}>
+                  {stepLabel}
+                </span>
               );
             },
           },
@@ -240,9 +239,12 @@ export const ErrorsList = ({
     {
       field: 'error.message',
       name: ERROR_MESSAGE_LABEL,
-      css: css`
-        max-width: 400px;
-      `,
+      truncateText: { lines: 3 },
+      render: (message: string) => (
+        <span css={breakAnywhere} title={message}>
+          {message}
+        </span>
+      ),
     },
     ...(hasHttpStatusCodes
       ? [
@@ -386,6 +388,11 @@ export const ErrorsList = ({
     </div>
   );
 };
+
+// Long tokens (URLs, command lines) must not force a column wider than the table.
+const breakAnywhere = css`
+  overflow-wrap: anywhere;
+`;
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorStatesList.label', {
   defaultMessage: 'Error states list',
