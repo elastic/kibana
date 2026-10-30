@@ -1292,3 +1292,118 @@ describe('Hunt Watch worker chain', () => {
     });
   });
 });
+
+describe('Hunt Watch worker: a retired_incomplete hunt', () => {
+  const liquid = createWorkflowLiquidEngine();
+  const packageInputs = () => stepIn(workerSteps, 'package_report')?.with?.inputs ?? {};
+  const outcomeWith = () =>
+    stepIn(workerSteps, 'resolve_run_outcome')?.with as Record<string, string>;
+  const conclusion = (context: Record<string, unknown>): string => {
+    const message = (
+      stepIn(workerSteps, 'write_run_conclusion')?.with?.inputs as Record<string, string>
+    ).message;
+    return liquid
+      .parseAndRenderSync(message, {
+        foreach: { item: 'rpt-1' },
+        execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+        ...context,
+      })
+      .trim();
+  };
+  const retiredContext = (huntStatus: string) => ({
+    steps: {
+      resolve_run_outcome: { output: { outcome: 'completed' } },
+      hunt: {
+        output: {
+          status: huntStatus,
+          headline: 'No confirmed hits',
+          reason: 'The hunt left a gap a later run could not close.',
+        },
+      },
+      package_report: {
+        output: { status: 'packaged', summary: 'Closed this Investigation as benign.' },
+      },
+    },
+  });
+
+  it('forwards the hunt coverage gaps to packaging, and an empty list when there are none', () => {
+    const gap = { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' };
+    expect(
+      evaluateExpression(packageInputs().coverageGaps as string, {
+        steps: { hunt: { output: { coverage_gaps: [gap] } } },
+      })
+    ).toEqual([gap]);
+    expect(
+      evaluateExpression(packageInputs().coverageGaps as string, {
+        steps: { hunt: { output: {} } },
+      })
+    ).toEqual([]);
+  });
+
+  it.each([
+    ['packaged it', 'packaged', 'completed'],
+    ['could not package it', 'run_incomplete', 'partial'],
+  ])('counts the branch by what packaging did when it %s', (_name, packageStatus, expected) => {
+    expect(
+      liquid
+        .parseAndRenderSync(outcomeWith().outcome, {
+          steps: {
+            hunt: { output: { status: 'retired_incomplete' } },
+            package_report: { output: { status: packageStatus } },
+          },
+        })
+        .trim()
+    ).toBe(expected);
+  });
+
+  it('closes with a heading that says the report retired without a full search', () => {
+    const message = conclusion(retiredContext('retired_incomplete'));
+    expect(message).toContain(
+      '### Hunt Watch run completed: the report is retired without a full search'
+    );
+    expect(message).toContain('The report will not be swept again on its own');
+    expect(message).toContain('Closed this Investigation as benign.');
+  });
+
+  it('keeps the generic completed heading for a successful hunt', () => {
+    const message = conclusion(retiredContext('success'));
+    expect(message).toContain('### Hunt Watch run completed\n');
+    expect(message).not.toContain('retired without a full search');
+  });
+});
+
+describe('Hunt Watch packaging summary for a settled no-hit run', () => {
+  const template = (
+    stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
+  ).package_summary;
+  const summary = (huntStatus: string, status = 'packaged') =>
+    createWorkflowLiquidEngine()
+      .parseAndRenderSync(template, {
+        inputs: { huntStatus },
+        steps: {
+          decide_and_package: {
+            output: {
+              status,
+              dismiss: true,
+              converged: [],
+              proposals: [],
+              coverage: { written: [1, 2, 3], skipped: [] },
+            },
+          },
+        },
+        variables: { package_status: status === 'packaged' ? 'success' : 'run_incomplete' },
+      })
+      .trim();
+
+  it('says part of the report could not be searched, without a count, for a retired run', () => {
+    expect(summary('retired_incomplete')).toBe(
+      'No confirmed hits, so packaging closed this Investigation as benign, but part of the report could not be searched and the report is retired without a full search; the Investigation summary and the coverage knowledge item name what was not searched; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+
+  it('keeps the clean wording for a successful run', () => {
+    expect(summary('success')).toBe(
+      'No confirmed hits, so packaging closed this Investigation as benign and recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+});

@@ -77,6 +77,31 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
       },
       {
         inputs: {
+          hasConfirmedHit: false,
+          huntStatus: 'retired_incomplete',
+          investigationConversationId: INVESTIGATION_ID,
+          tier2_invoked: true,
+        },
+        steps: {
+          decide_and_package: {
+            output: {
+              coverage: { skipped: [], written: [{ kiId: 'ki-1' }, { kiId: 'ki-2' }] },
+              dismiss: true,
+              mintSuppression: 'none',
+              proposals: [],
+              status: 'packaged',
+            },
+          },
+          dismiss_investigation_if_clean: { output: CHANGED_STATUS },
+        },
+        variables: {
+          dismiss_close_failed: false,
+          dispatch_failed_count: 0,
+          package_status: 'success',
+        },
+      },
+      {
+        inputs: {
           hasConfirmedHit: true,
           huntStatus: 'partial',
           investigationConversationId: INVESTIGATION_ID,
