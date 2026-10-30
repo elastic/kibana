@@ -38,10 +38,13 @@ export function ColumnSelector<TColumnId extends string>({
   columns,
   visibleColumns,
   onChange,
+  ebtElement = APPLICATIONS_LIST_EBT_ELEMENTS.COLUMN_SELECTOR,
 }: {
-  columns: Array<{ id: TColumnId; label: string }>;
+  columns: ReadonlyArray<{ id: TColumnId; label: string }>;
   visibleColumns: ReadonlySet<TColumnId>;
   onChange: (visibleColumnIds: TColumnId[]) => void;
+  /** Names the table's selector in click telemetry. */
+  ebtElement?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'digitalExperienceColumnSelector' });
@@ -69,7 +72,7 @@ export function ColumnSelector<TColumnId extends string>({
           data-test-subj="digitalExperienceColumnSelector"
           {...getEbtProps({
             action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SELECT_COLUMNS,
-            element: APPLICATIONS_LIST_EBT_ELEMENTS.COLUMN_SELECTOR,
+            element: ebtElement,
           })}
           size="s"
           color="text"
