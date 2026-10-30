@@ -25,6 +25,8 @@ import type { RouteDependencies } from '../types';
 import {
   API_VERSION,
   AVAILABILITY,
+  MAX_DATEMATH_LENGTH,
+  MAX_FILTER_VALUE_LENGTH,
   MAX_PAGE_SIZE,
   MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
   OAS_TAG,
@@ -34,6 +36,7 @@ import {
   canReadManagedWorkflowExecutions,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
+import { validatePaginationWindow } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const ALLOWED_SORT_FIELDS = ['startedAt', 'duration', 'workflowId', 'triggeredBy'] as const;
@@ -46,90 +49,106 @@ const executionTypeSchema = schema.oneOf(
   ExecutionTypeValues.map((t) => schema.literal(t)) as [Type<ExecutionType>]
 );
 
-const querySchema = schema.object({
-  kql: schema.maybe(
-    schema.string({
-      maxLength: MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
-      meta: { description: 'KQL query string to filter executions.' },
-    })
-  ),
-  statuses: schema.maybe(
-    schema.oneOf(
-      [
-        executionStatusSchema,
-        schema.arrayOf(executionStatusSchema, { maxSize: ExecutionStatusValues.length }),
-      ],
-      { defaultValue: [], meta: { description: 'Filter by execution status.' } }
-    )
-  ),
-  executionTypes: schema.maybe(
-    schema.oneOf(
-      [
-        executionTypeSchema,
-        schema.arrayOf(executionTypeSchema, { maxSize: ExecutionTypeValues.length }),
-      ],
-      { defaultValue: [], meta: { description: 'Filter by execution type.' } }
-    )
-  ),
-  executedBy: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-      defaultValue: [],
-      meta: { description: 'Filter by the user who triggered the execution.' },
-    })
-  ),
-  concurrencyGroupKey: schema.maybe(
-    schema.string({ meta: { description: 'Filter by evaluated concurrency group key.' } })
-  ),
-  startedAfter: schema.maybe(
-    schema.string({
-      meta: { description: 'Datemath lower bound for filtering executions by startedAt.' },
-    })
-  ),
-  startedBefore: schema.maybe(
-    schema.string({
-      meta: { description: 'Datemath upper bound for filtering executions by startedAt.' },
-    })
-  ),
-  finishedAfter: schema.maybe(
-    schema.string({
-      meta: { description: 'Datemath lower bound for filtering executions by finishedAt.' },
-    })
-  ),
-  finishedBefore: schema.maybe(
-    schema.string({
-      meta: { description: 'Datemath upper bound for filtering executions by finishedAt.' },
-    })
-  ),
-  collapse: schema.maybe(
-    schema.oneOf(
-      WorkflowExecutionCollapseFields.map((f) => schema.literal(f)) as [
-        Type<WorkflowExecutionCollapseField>
-      ],
-      { meta: { description: 'Field to collapse execution results by.' } }
-    )
-  ),
-  sortField: schema.maybe(
-    schema.oneOf(ALLOWED_SORT_FIELDS.map((f) => schema.literal(f)) as [Type<AllowedSortField>], {
-      meta: { description: `Field to sort by. One of: ${ALLOWED_SORT_FIELDS.join(', ')}.` },
-    })
-  ),
-  sortOrder: schema.maybe(
-    schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-      meta: { description: 'Sort direction.' },
-    })
-  ),
-  page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
-  size: schema.maybe(
-    schema.number({
-      min: 1,
-      max: MAX_PAGE_SIZE,
-      meta: { description: 'Number of results to return.' },
-    })
-  ),
-  trackTotalHits: schema.maybe(
-    schema.boolean({ meta: { description: 'Whether to track total hit count.' } })
-  ),
-});
+const querySchema = schema.object(
+  {
+    kql: schema.maybe(
+      schema.string({
+        maxLength: MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
+        meta: { description: 'KQL query string to filter executions.' },
+      })
+    ),
+    statuses: schema.maybe(
+      schema.oneOf(
+        [
+          executionStatusSchema,
+          schema.arrayOf(executionStatusSchema, { maxSize: ExecutionStatusValues.length }),
+        ],
+        { defaultValue: [], meta: { description: 'Filter by execution status.' } }
+      )
+    ),
+    executionTypes: schema.maybe(
+      schema.oneOf(
+        [
+          executionTypeSchema,
+          schema.arrayOf(executionTypeSchema, { maxSize: ExecutionTypeValues.length }),
+        ],
+        { defaultValue: [], meta: { description: 'Filter by execution type.' } }
+      )
+    ),
+    executedBy: schema.maybe(
+      schema.oneOf(
+        [
+          schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }),
+          schema.arrayOf(schema.string({ maxLength: MAX_FILTER_VALUE_LENGTH }), { maxSize: 100 }),
+        ],
+        {
+          defaultValue: [],
+          meta: { description: 'Filter by the user who triggered the execution.' },
+        }
+      )
+    ),
+    concurrencyGroupKey: schema.maybe(
+      schema.string({
+        maxLength: MAX_FILTER_VALUE_LENGTH,
+        meta: { description: 'Filter by evaluated concurrency group key.' },
+      })
+    ),
+    startedAfter: schema.maybe(
+      schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
+        meta: { description: 'Datemath lower bound for filtering executions by startedAt.' },
+      })
+    ),
+    startedBefore: schema.maybe(
+      schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
+        meta: { description: 'Datemath upper bound for filtering executions by startedAt.' },
+      })
+    ),
+    finishedAfter: schema.maybe(
+      schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
+        meta: { description: 'Datemath lower bound for filtering executions by finishedAt.' },
+      })
+    ),
+    finishedBefore: schema.maybe(
+      schema.string({
+        maxLength: MAX_DATEMATH_LENGTH,
+        meta: { description: 'Datemath upper bound for filtering executions by finishedAt.' },
+      })
+    ),
+    collapse: schema.maybe(
+      schema.oneOf(
+        WorkflowExecutionCollapseFields.map((f) => schema.literal(f)) as [
+          Type<WorkflowExecutionCollapseField>
+        ],
+        { meta: { description: 'Field to collapse execution results by.' } }
+      )
+    ),
+    sortField: schema.maybe(
+      schema.oneOf(ALLOWED_SORT_FIELDS.map((f) => schema.literal(f)) as [Type<AllowedSortField>], {
+        meta: { description: `Field to sort by. One of: ${ALLOWED_SORT_FIELDS.join(', ')}.` },
+      })
+    ),
+    sortOrder: schema.maybe(
+      schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+        meta: { description: 'Sort direction.' },
+      })
+    ),
+    page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
+    size: schema.maybe(
+      schema.number({
+        min: 1,
+        max: MAX_PAGE_SIZE,
+        meta: { description: 'Number of results to return.' },
+      })
+    ),
+    trackTotalHits: schema.maybe(
+      schema.boolean({ meta: { description: 'Whether to track total hit count.' } })
+    ),
+  },
+  { validate: validatePaginationWindow(MAX_PAGE_SIZE) }
+);
 
 export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
