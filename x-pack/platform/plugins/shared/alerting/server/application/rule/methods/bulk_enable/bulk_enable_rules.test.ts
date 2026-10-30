@@ -583,6 +583,52 @@ describe('bulkEnableRules', () => {
     });
   });
 
+  test('skips a rule and records an error when the rule type params authorizer denies its persisted params', async () => {
+    // Simulates params persisted through a path that skips the authorizer (e.g. import).
+    const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+    const disabledRuleWithPrivilegedParams: SavedObject<RawRule> = {
+      ...disabledRule1,
+      attributes: { ...disabledRule1.attributes, params: persistedParams },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [disabledRuleWithPrivilegedParams, disabledRule2],
+    });
+
+    const authorizeParams = jest
+      .fn()
+      .mockImplementation((params: unknown) =>
+        params === persistedParams
+          ? Promise.reject(new Error('Unauthorized to enable a privileged param'))
+          : Promise.resolve()
+      );
+    (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+      id: 'fakeType',
+      authorize: { params: { authorize: authorizeParams } },
+    });
+
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps2],
+    });
+
+    const result = await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(authorizeParams).toHaveBeenCalledWith(
+      persistedParams,
+      expect.objectContaining({ request: rulesClientParams.request })
+    );
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: 'id2' })],
+      { overwrite: true }
+    );
+    expect(result.errors).toEqual([
+      {
+        message: 'Unauthorized to enable a privileged param',
+        rule: { id: 'id1', name: 'fakeName' },
+      },
+    ]);
+  });
+
   test('should return both rules if one is already enabled and one is disabled when bulk enable is based on ids', async () => {
     mockCreatePointInTimeFinderAsInternalUser({
       saved_objects: [disabledRule1, enabledRuleForBulkOps2],
