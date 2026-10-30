@@ -24,7 +24,7 @@ export const createDetectionEngineMicrosoftDefenderRuleIfNeeded = async (
     `logs-microsoft_defender_endpoint.log${indexNamespace}*`,
     `logs-m365_defender.alert${indexNamespace}*`,
     `logs-m365_defender.incident${indexNamespace}*`,
-    `logs-m365_defender.log${indexNamespace}*`,
+    `logs-m365_defender.event${indexNamespace}*`,
   ];
   const ruleQueryValue = 'cloud.instance.id:*';
 
