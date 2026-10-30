@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
@@ -703,7 +704,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         !canEditConnector &&
         connectorAccess.data ? (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="s"
               iconType="lock"

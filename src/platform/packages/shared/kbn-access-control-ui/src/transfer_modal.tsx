@@ -11,7 +11,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -22,6 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { Principal } from '@kbn/access-control';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { AccessList } from './access_list';
@@ -98,10 +98,9 @@ export const TransferModal = ({
         {isOwnerSelf ? (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               size="s"
-              color="warning"
               iconType="warning"
               title={i18n.translate('accessControlUi.transfer.selfWarning', {
                 defaultMessage: "You won't be able to manage access to this {objectNoun} anymore.",

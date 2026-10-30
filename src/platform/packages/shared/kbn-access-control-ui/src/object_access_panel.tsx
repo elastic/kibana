@@ -11,7 +11,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
 import {
   toAclDocument,
@@ -128,7 +128,7 @@ export const ObjectAccessPanel = ({
   // nothing it could save.
   if (!policy.data?.enabled) {
     return (
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount
         size="s"
         iconType="info"
@@ -161,9 +161,8 @@ export const ObjectAccessPanel = ({
 
       {state.state === 'invalid' ? (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
             iconType="error"
             data-test-subj="accessPanelInvalidAcl"
             title={i18n.translate('accessControlUi.panel.invalidAcl', {
@@ -176,7 +175,7 @@ export const ObjectAccessPanel = ({
         </>
       ) : state.via_recovery.includes('manage_access') ? (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             size="s"
             iconType="lockOpen"
@@ -192,7 +191,7 @@ export const ObjectAccessPanel = ({
 
       {state.can_claim ? (
         <>
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             iconType="user"
             data-test-subj="accessPanelClaimCallout"
@@ -200,13 +199,31 @@ export const ObjectAccessPanel = ({
               defaultMessage: 'This {objectNoun} has no owner',
               values: { objectNoun: copy.objectNoun },
             })}
+            text={
+              <p>
+                {i18n.translate('accessControlUi.panel.claimDescription', {
+                  defaultMessage:
+                    'Become the owner to decide who can access it from now on. Everyone keeps their current access unless you restrict it.',
+                })}
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate('accessControlUi.panel.claim', {
+                  defaultMessage: 'Become the owner',
+                }),
+                isLoading: isSaving,
+                'data-test-subj': 'accessPanelClaim',
+                onClick: () =>
+                  runChange(
+                    () => api.claim(type, id, state.version, restrictOnClaim ? 'none' : undefined),
+                    i18n.translate('accessControlUi.panel.claimed', {
+                      defaultMessage: 'You are now the owner.',
+                    })
+                  ),
+              },
+            }}
           >
-            <p>
-              {i18n.translate('accessControlUi.panel.claimDescription', {
-                defaultMessage:
-                  'Become the owner to decide who can access it from now on. Everyone keeps their current access unless you restrict it.',
-              })}
-            </p>
             <EuiCheckbox
               id={claimCheckboxId}
               checked={restrictOnClaim}
@@ -215,25 +232,7 @@ export const ObjectAccessPanel = ({
                 defaultMessage: 'Also make it visible only to me',
               })}
             />
-            <EuiSpacer size="s" />
-            <EuiButton
-              size="s"
-              isLoading={isSaving}
-              data-test-subj="accessPanelClaim"
-              onClick={() =>
-                runChange(
-                  () => api.claim(type, id, state.version, restrictOnClaim ? 'none' : undefined),
-                  i18n.translate('accessControlUi.panel.claimed', {
-                    defaultMessage: 'You are now the owner.',
-                  })
-                )
-              }
-            >
-              {i18n.translate('accessControlUi.panel.claim', {
-                defaultMessage: 'Become the owner',
-              })}
-            </EuiButton>
-          </EuiCallOut>
+          </KbnInfoCallout>
           <EuiSpacer size="m" />
         </>
       ) : null}
@@ -322,30 +321,26 @@ const ErrorCallout = ({
 }) => {
   if (error?.statusCode === 409) {
     return (
-      <EuiCallOut
+      <KbnWarningCallout
         announceOnMount
-        color="warning"
         iconType="refresh"
         data-test-subj="accessPanelConflict"
         title={i18n.translate('accessControlUi.panel.conflict', {
           defaultMessage: 'Access changed since you opened it.',
         })}
-      >
-        <EuiButton
-          size="s"
-          color="warning"
-          onClick={onReload}
-          data-test-subj="accessPanelConflictReload"
-        >
-          {i18n.translate('accessControlUi.panel.reload', { defaultMessage: 'Reload' })}
-        </EuiButton>
-      </EuiCallOut>
+        actionProps={{
+          primary: {
+            children: i18n.translate('accessControlUi.panel.reload', { defaultMessage: 'Reload' }),
+            onClick: onReload,
+            'data-test-subj': 'accessPanelConflictReload',
+          },
+        }}
+      />
     );
   }
 
   return (
-    <EuiCallOut
-      color="danger"
+    <KbnDangerCallout
       iconType="error"
       data-test-subj="accessPanelError"
       title={
