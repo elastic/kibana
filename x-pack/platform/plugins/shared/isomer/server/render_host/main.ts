@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// The render process: draws PNGs for its parent, charts included, in its own main thread. It owns every drawing
-// engine (jsdom, Elastic Charts, Skia, takumi), so their memory goes when it exits.
+// The render process: draws PNGs and PDFs for its parent, charts included, in its own main thread. It owns every
+// drawing engine (jsdom, Elastic Charts, Skia, takumi), so their memory goes when it exits.
 
 import { dashboardChartSize } from '@kbn/isomer-primitives-dashboard';
 
@@ -20,10 +20,13 @@ const toDrawOptions = ({
   dashboardWidth,
   chartHints,
   scale,
+  format,
+  metadata,
   ...options
-}: HostDrawOptions): DrawOptions & { scale?: number } => ({
+}: HostDrawOptions): DrawOptions & { scale?: number; metadata?: HostDrawOptions['metadata'] } => ({
   ...options,
   ...(scale === undefined ? {} : { scale }),
+  ...(metadata === undefined ? {} : { metadata }),
   ...(dashboardWidth === undefined
     ? {}
     : { sizeFor: dashboardChartSize(dashboardWidth) as DrawOptions['sizeFor'] }),
@@ -36,7 +39,11 @@ let drawing: Promise<ChartsDrawing> | undefined;
 
 process.on('message', (message: HostMessage) => {
   if (message.type === 'init') {
-    drawing = createChartsDrawing({ geometry: message.geometry, inline: true, pdf: false });
+    drawing = createChartsDrawing({
+      geometry: message.geometry,
+      inline: true,
+      ...(message.pdfThread ? { pdfThread: message.pdfThread } : {}),
+    });
     drawing.then(
       () => send({ type: 'ready' }),
       (error: unknown) => send({ type: 'failed', error: messageOf(error) })
@@ -45,9 +52,13 @@ process.on('message', (message: HostMessage) => {
   }
   const { id, composition, options } = message;
   void (drawing ?? Promise.reject(new Error('the render process was not started')))
-    .then((ready) => ready.drawPng(composition, toDrawOptions(options)))
+    .then((ready) =>
+      options.format === 'pdf'
+        ? ready.drawPdf(composition, toDrawOptions(options))
+        : ready.drawPng(composition, toDrawOptions(options))
+    )
     .then(
-      (png): HostReply => ({ type: 'drawn', id, png }),
+      (bytes): HostReply => ({ type: 'drawn', id, bytes }),
       (error: unknown): HostReply => ({ type: 'error', id, error: messageOf(error) })
     )
     .then(send);

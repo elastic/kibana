@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import type { DrawOptions } from '@kbn/isomer-plugin/server';
+import type { DrawOptions, HostDrawOptions } from '@kbn/isomer-plugin/server';
 import {
   convertDashboard,
   engineHintFromLens,
@@ -50,6 +50,8 @@ const pdfBody = schema.object({
   layout: layoutSchema('grid'),
   width: widthSchema,
   controls: controlsSchema,
+  // Draws in the isomer plugin's render process instead of this one.
+  host: schema.boolean({ defaultValue: false }),
 });
 // A composition from the composition route, gzipped by the flyout; DRAW_MAX_BYTES bounds it.
 const drawBody = schema.object({
@@ -123,6 +125,47 @@ const drawOptions = ({
   };
 };
 
+/** Every node in the composition with an id the hints name, so hints convert ahead of a cross-process draw. */
+const nodesById = (
+  value: unknown,
+  hints: Record<string, unknown>,
+  found = new Map<string, unknown>()
+) => {
+  if (Array.isArray(value)) {
+    value.forEach((item) => nodesById(item, hints, found));
+  } else if (value && typeof value === 'object') {
+    const { id } = value as { id?: unknown };
+    if (typeof id === 'string' && hints[id] && 'type' in value) {
+      found.set(id, value);
+    }
+    Object.values(value).forEach((item) => nodesById(item, hints, found));
+  }
+  return found;
+};
+
+/** {@link drawOptions} as the render process takes them: hints converted here, charts sized from the grid there. */
+const hostDrawOptions = (
+  composition: unknown,
+  {
+    layout,
+    width,
+    hints,
+  }: { layout: DashboardLayout; width?: number; hints: Record<string, Record<string, unknown>> }
+): HostDrawOptions => {
+  const page = width ?? PAGE_WIDTH[layout];
+  return {
+    width: page,
+    frame: DASHBOARD_FRAME,
+    dashboardWidth: page - 2 * DASHBOARD_PAGE_PADDING,
+    chartHints: Object.fromEntries(
+      [...nodesById(composition, hints)].map(([id, node]) => [
+        id,
+        engineHintFromLens(hints[id] as never, node as never) as Record<string, unknown>,
+      ])
+    ),
+  };
+};
+
 /** Registers the demo's routes: a dashboard as a PDF, and as an HTML view. */
 export const registerRoutes = (
   router: IRouter,
@@ -134,7 +177,8 @@ export const registerRoutes = (
     { id, timeRange, layout, width, controls }: RenderRequest
   ) => {
     const [, { isomer, dataViews }] = await getStartServices();
-    const drawing = await isomer.getDrawing();
+    // Validation needs only the packs' schemas, so no drawing engine starts until a route draws here.
+    const runtime = await isomer.getRuntime();
     // The page, and the dashboard's grid inside the frame's padding.
     const page = width ?? PAGE_WIDTH[layout];
     const gridWidth = page - 2 * DASHBOARD_PAGE_PADDING;
@@ -200,12 +244,12 @@ export const registerRoutes = (
       layout,
       href,
       valid: (node) => {
-        const [error] = drawing.runtime.validate({ type: 'view', body: [node] } as never).errors;
+        const [error] = runtime.validate({ type: 'view', body: [node] } as never).errors;
         return error ? `${error.path}: ${error.message}` : undefined;
       },
     });
     return {
-      drawing,
+      isomer,
       converted,
       composition,
       hints,
@@ -273,19 +317,26 @@ export const registerRoutes = (
     },
     async (context, request, response) => {
       const { id } = request.params;
-      const { timeRange, layout, width, controls } = request.body as TypeOf<typeof pdfBody>;
+      const { timeRange, layout, width, controls, host } = request.body as TypeOf<typeof pdfBody>;
       try {
-        const { drawing, converted, composition, options } = await prepare(context, request, {
+        const { isomer, converted, composition, hints, options } = await prepare(context, request, {
           id,
           ...(timeRange ? { timeRange } : {}),
           layout,
           ...(width ? { width } : {}),
           ...(controls ? { controls: controls as PinnedControl[] } : {}),
         });
-        const pdf = await drawing.drawPdf(composition as never, {
-          ...options,
-          metadata: { title: converted.title, creator: 'Kibana (Isomer)' },
-        });
+        const metadata = { title: converted.title, creator: 'Kibana (Isomer)' };
+        const pdf = host
+          ? await (
+              await isomer.getRenderHost()
+            ).drawPdf(composition as never, {
+              ...hostDrawOptions(composition, { layout, ...(width ? { width } : {}), hints }),
+              metadata,
+            })
+          : await (
+              await isomer.getDrawing()
+            ).drawPdf(composition as never, { ...options, metadata });
         return response.ok({
           body: pdf,
           headers: {
@@ -375,14 +426,14 @@ export const registerRoutes = (
       const { id } = request.params;
       const { from, to, layout, width, controls } = request.query as TypeOf<typeof viewQuery>;
       try {
-        const { drawing, converted, composition, options } = await prepare(context, request, {
+        const { isomer, converted, composition, options } = await prepare(context, request, {
           id,
           ...(from && to ? { timeRange: { from, to } } : {}),
           layout,
           ...(width ? { width } : {}),
           ...(controls ? { controls: parseControls(controls) } : {}),
         });
-        const html = await drawing.drawHtml(composition as never, options);
+        const html = await (await isomer.getDrawing()).drawHtml(composition as never, options);
         return response.renderHtml({
           body: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(
             converted.title

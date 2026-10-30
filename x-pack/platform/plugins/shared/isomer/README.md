@@ -12,11 +12,20 @@ xpack.isomer.charts.serverDraw: true
 
 `server/charts_drawing.ts` draws charts with Elastic Charts in a jsdom window on Skia (`@kbn/isomer-charts-elastic-node`), in a worker thread: `html` carries each chart as drawn, and `snapshot` returns a PNG rasterized by takumi. With this setting, the dev tools below use it; it isn't on the start contract yet.
 
+## Drawing in the render service
+
+```yaml
+xpack.isomer.renderService.url: http://localhost:3000
+```
+
+With this setting, `getRenderHost()` draws in the Isomer render service (`scripts/render_service`) instead of a forked process: the same draw options, posted to `POST /v1/render-composition` with the vocabulary digest of this runtime's packs (`server/vocabulary.ts`), which the service checks before it draws. A saturated or draining answer is retried until `xpack.isomer.renderService.timeoutMs`. With `serverDraw` also on, the forked process draws whenever the service is unavailable or renders another vocabulary; a request the service rejected on its merits is not retried locally.
+
 ## Dev tools
 
 - In dev mode, a hidden `isomerChartsBench` app draws compositions in the browser with the Elastic Charts engine, either chart by chart at a given size or as a whole composition, for comparison with Lens.
 - In dev mode with server drawing on, `POST /internal/isomer/charts/render` renders with per-request hints and chart size.
 - `scripts/render_dashboards.js`, a dev tool for the charts spike rather than for general use, draws converted dashboards on the server through the plugin's own drawing: a self-contained HTML grid page and a 2x PNG of it per dashboard. With `--compare` it also diffs each drawn panel against its Lens reference.
+- `ISOMER_MEMORY_PROBE=1` logs one line per server drawing to stderr: live heap and external memory after a forced GC at each stage (charts drawn, markup rendered, rasterized, released), the chart thread's own heap, the peak RSS, heap and external across the draw, and what remains after. Set it to a `.log` file name to append each record as JSON under `data/` as well. It works in Kibana, in the render process, and in `scripts/probe_memory.js`, which draws one exported composition (`*.isomer.json` from the composition route) over and over and tabulates the records: `--format pdf|png|html`, `--pixel-ratio`, `--scale`, `--inline`, or `--render-host` with `--heap-mb` and `--pdf-thread worker|inline`.
 
 ## Follow-ups
 
