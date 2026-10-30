@@ -3973,6 +3973,17 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
+      it('leaves a fingerprint younger than 15 minutes to its review', () => {
+        const script = stepIn(attachSteps, 'retarget_pending_fingerprint')?.with?.script as {
+          source?: string;
+          params?: { expected?: { pending_ms?: number } };
+        };
+
+        expect(script.source).toContain('params.expected.pending_ms');
+        expect(script.source).toContain("ctx._source['@timestamp']");
+        expect(script.params?.expected?.pending_ms).toBe(15 * 60 * 1000);
+      });
+
       it('writes this attack its own fingerprint when a failed read never clears', () => {
         const names = attach.steps?.map((step) => step.name) ?? [];
         const write = stepIn(attachSteps, 'write_own_fingerprint_when_unreadable');
@@ -4216,8 +4227,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 18 so a failed read still has a fingerprint', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(18);
+      it('bumps the attach workflow to version 19 so a young fingerprint is not retargeted', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(19);
       });
 
       it('keeps its alert tags in sync with the review', () => {

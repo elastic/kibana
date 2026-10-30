@@ -19,6 +19,7 @@ import type { AttackSignals, Disposition, InvestigationMeta, StoredFingerprint }
 import { FingerprintIndexUnscopedError } from './fingerprint_index_unscoped_error';
 import {
   FINGERPRINT_TTL_MS,
+  INVESTIGATION_PENDING_MS,
   STORED_ALERT_ID_CAP,
   analyzedIdsOf,
   bestStoredForGroup,
@@ -650,7 +651,10 @@ const retargetStoredFingerprint = async (
           lang: 'painless',
           source: RETARGET_FINGERPRINT_SCRIPT,
           params: {
-            expected: { investigation_id: stored.investigationId },
+            expected: {
+              investigation_id: stored.investigationId,
+              pending_ms: INVESTIGATION_PENDING_MS,
+            },
             next: {
               written_at: now.toISOString(),
               investigation_id: investigationIdFromAttackId(span.attackId),
@@ -863,12 +867,15 @@ const assertFingerprintWritesAllowed = async (
 
 /**
  * Succeeds only while the document still points at the Investigation the caller
- * read. A second attack that timed out against the same fingerprint no-ops and
- * starts its own review. Hosts, users, and tactics stay as stored. The same
- * script is inlined in attack_discovery_attach.yaml.
+ * read, and only once that fingerprint is at least 15 minutes old. A second
+ * attack that timed out against the same fingerprint no-ops and starts its own
+ * review. Hosts, users, and tactics stay as stored. The same script is inlined
+ * in attack_discovery_attach.yaml.
  */
 const RETARGET_FINGERPRINT_SCRIPT = `
   if (ctx._source.attributes == null || ctx._source.attributes.investigation_id != params.expected.investigation_id) {
+    ctx.op = 'noop';
+  } else if (ctx._source['@timestamp'] != null && ZonedDateTime.parse(params.next.written_at).toInstant().toEpochMilli() - ZonedDateTime.parse(ctx._source['@timestamp']).toInstant().toEpochMilli() < params.expected.pending_ms) {
     ctx.op = 'noop';
   } else {
     ctx._source['@timestamp'] = params.next.written_at;

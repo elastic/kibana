@@ -1014,6 +1014,9 @@ describe('matchAttackFingerprints', () => {
         retry_on_conflict: 3,
         script: expect.objectContaining({
           source: expect.stringContaining("ctx.op = 'noop'"),
+          params: expect.objectContaining({
+            expected: expect.objectContaining({ pending_ms: 15 * 60 * 1000 }),
+          }),
         }),
       }),
       expect.anything()

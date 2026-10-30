@@ -206,8 +206,10 @@ steps:
   # The wait failed. Point the existing fingerprint at this attack, in one
   # write, so a later match waits for this review instead of opening another
   # Investigation. The write is a no-op once another attack has already claimed
-  # it. Hosts, users, and tactics stay. Alert ids become this attack's only.
-  # The same script is RETARGET_FINGERPRINT_SCRIPT in the matcher.
+  # it, and while the fingerprint is still younger than 15 minutes. The retry
+  # loop can end before that window. Hosts, users, and tactics stay. Alert ids
+  # become this attack's only. The same script is RETARGET_FINGERPRINT_SCRIPT
+  # in the matcher.
   - name: retarget_pending_fingerprint
     type: elasticsearch.update
     if: "${{ inputs.fingerprint_pending == true and inputs.retarget_if_missing != false and steps.wait_for_investigation.error != blank and steps.find_pending_fingerprint.output.hits.hits[0]._id != blank and steps.resolve_own_investigation_id.output.investigation_id != blank }}"
@@ -224,6 +226,8 @@ steps:
         lang: painless
         source: >-
           if (ctx._source.attributes == null || ctx._source.attributes.investigation_id != params.expected.investigation_id) {
+            ctx.op = 'noop';
+          } else if (ctx._source['@timestamp'] != null && ZonedDateTime.parse(params.next.written_at).toInstant().toEpochMilli() - ZonedDateTime.parse(ctx._source['@timestamp']).toInstant().toEpochMilli() < params.expected.pending_ms) {
             ctx.op = 'noop';
           } else {
             ctx._source['@timestamp'] = params.next.written_at;
@@ -242,6 +246,7 @@ steps:
         params:
           expected:
             investigation_id: "{{ inputs.investigation_id }}"
+            pending_ms: 900000
           next:
             written_at: "${{ now }}"
             investigation_id: "{{ steps.resolve_own_investigation_id.output.investigation_id }}"

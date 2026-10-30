@@ -250,13 +250,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  *
  * Version 18 writes that review's own fingerprint when the failed read's wait
  * still fails. A confirmed 404 still retargets and does not create a second one.
+ *
+ * Version 19 leaves a fingerprint younger than 15 minutes in place. The wait
+ * can end before that window, and retargeting then would take a review that
+ * may still be starting.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 18,
+  version: 19,
   yaml: ATTACK_DISCOVERY_ATTACH_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
