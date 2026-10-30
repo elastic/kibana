@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/esql-server-utils'
   - '@kbn/esql-utils'
+  - '@kbn/esql-types'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/logging'
   - '@kbn/palettes'

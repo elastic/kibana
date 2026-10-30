@@ -27,12 +27,13 @@ import {
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
-} from './app/app_header';
+} from './components/app_header';
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useDeveloperMode } from './hooks/use_developer_mode';
-import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
+import { StartInvestigationPanel } from './components/start_investigation_panel';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
@@ -189,6 +190,22 @@ export function NightshiftPage(): React.ReactElement | null {
   const isOnboarding = !canUseAutomationsPage && onboarding.showOnboarding;
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
+
+  // The landing page owns the start investigation modal so the header's primary action can toggle it.
+  const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
+  const toggleStartInvestigation = useCallback(
+    () => setIsStartInvestigationOpen((isOpen) => !isOpen),
+    []
+  );
+  const closeStartInvestigation = useCallback(() => setIsStartInvestigationOpen(false), []);
+  useEffect(() => {
+    setIsStartInvestigationOpen(false);
+  }, [pathname]);
+  const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
+  // Starting an investigation only needs the investigations client, so the action and its modal
+  // don't depend on what the landing list renders.
+  const canStartInvestigation =
+    canManage && isLandingContent && nightshiftInvestigations?.investigationsClient != null;
 
   // Nightshift only works as its service account, so a space that is not set up shows the setup
   // step instead of the app. A failed status read (e.g. missing privileges) does not block it.
@@ -412,6 +429,7 @@ export function NightshiftPage(): React.ReactElement | null {
             automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
             onDetectionsClick={!hidesHeaderActions ? navigateToDetections : undefined}
             detectionsHref={!hidesHeaderActions ? detectionsHref : undefined}
+            onStartInvestigationClick={canStartInvestigation ? toggleStartInvestigation : undefined}
             back={
               canUseAutomationsPage
                 ? {
@@ -453,6 +471,9 @@ export function NightshiftPage(): React.ReactElement | null {
             )}
           </EuiPageTemplate.Section>
         </>
+      )}
+      {canStartInvestigation && isStartInvestigationOpen && (
+        <StartInvestigationPanel onClose={closeStartInvestigation} />
       )}
       {canViewCustomContext && isCustomContextFlyoutOpen && (
         <CustomContextFlyout canEdit={canManage} onClose={closeCustomContextFlyout} />
