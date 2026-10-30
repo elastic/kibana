@@ -6,7 +6,6 @@
  */
 
 import React, { lazy, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { OpenFindingInSystemFlyoutHandle } from '@kbn/cloud-security-posture-plugin/public';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
@@ -19,10 +18,8 @@ import type { VulnerabilityProps } from './vulnerability/main';
 import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
 import {
   FLYOUT_DESCRIPTOR_KIND,
-  decodeFlyoutV2UrlParam,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the CSP finding flyout graph into
 // their bundle; the chunk only loads when a finding is actually opened.
@@ -86,19 +83,14 @@ export interface CspFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useCspFlyoutApi = (): CspFlyoutApi => {
-  const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
-
-  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
-    if (!history?.location) return null;
-    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
-    const stack = decodeFlyoutV2UrlParam(raw);
-    return stack?.[0] ?? null;
-  }, [history, urlParamKey]);
+  const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
+    urlParamKey,
+    historyKey
+  );
 
   const openMisconfigurationFinding = useCallback(
     (params: MisconfigurationProps): OpenFindingInSystemFlyoutHandle => {
@@ -127,7 +119,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       params: MisconfigurationProps,
       options?: OpenCspFindingAsChildOptions
     ): OpenFindingInSystemFlyoutHandle => {
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.cspMisconfiguration,
@@ -160,7 +152,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       open,
       defaultDocumentFlyoutProperties,
       historyKey,
-      readFirstDescriptor,
+      readRootDescriptor,
       writeOnOpen,
       buildOnClose,
     ]
@@ -196,7 +188,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       params: VulnerabilityProps,
       options?: OpenCspFindingAsChildOptions
     ): OpenFindingInSystemFlyoutHandle => {
-      const parentDescriptor = readFirstDescriptor();
+      const parentDescriptor = readRootDescriptor();
       writeOnOpen(
         {
           kind: FLYOUT_DESCRIPTOR_KIND.cspVulnerability,
@@ -232,7 +224,7 @@ export const useCspFlyoutApi = (): CspFlyoutApi => {
       open,
       defaultDocumentFlyoutProperties,
       historyKey,
-      readFirstDescriptor,
+      readRootDescriptor,
       writeOnOpen,
       buildOnClose,
     ]

@@ -16,15 +16,5 @@ export const SEARCH_SPAN_NAMES: Record<ApplicationSource, string> = {
 /** Maximum number of applications returned per source. */
 export const MAX_APPLICATIONS_PER_SOURCE = 1000;
 
-/** Maximum number of environments listed for the picker, per environment field of each source. */
-export const MAX_ENVIRONMENTS = 100;
-
-/**
- * Longest environment the route accepts, the `ignore_above` of APM's `service.environment`. The
- * picker leaves out longer ones, which only the logs-mode OTel indices keep (up to 8191), as the
- * encoded URL could exceed the request header limit.
- */
-export const MAX_ENVIRONMENT_LENGTH = 1024;
-
 /** Maximum number of environments listed per application; keeps the bucket count bounded. */
 export const MAX_ENVIRONMENTS_PER_APPLICATION = 10;

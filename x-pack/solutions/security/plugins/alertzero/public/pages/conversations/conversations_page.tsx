@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { PROPOSALS_UI_CAPABILITY_SHOW } from '@kbn/proposals-common';
@@ -48,6 +48,7 @@ import { useQueuePolling } from '../../hooks/use_queue_polling';
 import { useSettlingProposalsPolling } from '../../hooks/use_settling_proposals_polling';
 import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
+import { ALERTZERO_PAGE_CONTENT_WIDTH } from '../../components/layout/constants';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
@@ -127,7 +128,6 @@ const POLLED_QUERY_KEYS = [
 const POLLED_ALL_PAGES_QUERY_KEYS = [impactPillsQueryKeys.proposals()];
 
 const ConversationsPageContent: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
   // Impact pills and the entity filter go through the investigations impact client, which needs
@@ -390,19 +390,16 @@ const ConversationsPageContent: React.FC = () => {
     [conversations, modalState.recordId]
   );
 
-  const pageContentProps = useMemo(
-    () => ({
-      css: css`
-        padding-block: ${euiTheme.size.xxl};
-        align-self: center;
-        max-width: 1000px;
-      `,
-    }),
-    [euiTheme.size.xxl]
-  );
-
   return (
-    <AlertZeroPageSection contentProps={pageContentProps}>
+    <AlertZeroPageSection
+      contentProps={{
+        css: css`
+          width: ${ALERTZERO_PAGE_CONTENT_WIDTH}px;
+          max-width: 100%;
+          margin-inline: auto;
+        `,
+      }}
+    >
       <InvestigationActionModals
         action={modalState.type}
         investigation={actionInvestigation}

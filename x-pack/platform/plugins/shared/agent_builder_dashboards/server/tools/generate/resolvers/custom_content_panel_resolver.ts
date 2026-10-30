@@ -63,7 +63,7 @@ const resolveCustomContentState = async (
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
-  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
+  return { ...existing, esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };
 
 /**
