@@ -670,6 +670,12 @@ export const ALERTING_LOG_CODES = {
     'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
   /** `manage_rule` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `attach_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_RULE_FAILED: 'AGENT_BUILDER_ATTACH_RULE_FAILED',
+  /** `attach_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED: 'AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED',
+  /** `find_action_policies` tool failed; returns an error result. */
+  AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED: 'AGENT_BUILDER_FIND_ACTION_POLICIES_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
@@ -689,6 +695,13 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * A background task that could not be removed.
+   * if the task exists from an earlier start it
+   * keeps running until the next removal attempt.
+   * The task type is carried in `labels.task_id`.
+   */
+  TASKS_REMOVE_FAILED: 'TASKS_REMOVE_FAILED',
   /**
    * The pending API-key invalidation background task run failed. Keys queued
    * for invalidation remain until the next scheduled run.

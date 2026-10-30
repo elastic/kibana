@@ -30,7 +30,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -39,11 +39,12 @@ import { buildFeatureDiscoverParams } from '../../../../common/discover_helpers'
 import { getKnowledgeIndicatorTitle } from '../../utils/get_knowledge_indicator_title';
 import { getConfidenceColor } from '../../../../common/get_confidence_color';
 import { FlyoutMetadataCard } from '../../../../components/ui/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../../common/flyout_toolbar_header';
+import { FlyoutToolbarHeader } from '../../../../components/ui/flyout_toolbar_header';
 import { SeverityBadge } from '../../../../components/ui/severity_badge';
 import { DurabilityBadge } from '../durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../utils/get_knowledge_indicator_expires_at';
-import { useStreamKnowledgeIndicatorsBulkDelete } from '../../../../data/knowledge_indicators/use_stream_knowledge_indicators_bulk_delete';
+import { useKnowledgeIndicatorsBulkDelete } from '../../../../data/knowledge_indicators/use_knowledge_indicators_bulk_delete';
+import { useSourcesById } from '../../../../data/sources/use_sources_by_id';
 import { useRulesDemote } from '../../../../data/rules/use_rules_demote';
 import {
   useKnowledgeIndicatorActions,
@@ -57,6 +58,7 @@ import { useBlocksNewActivity } from '../../../../data/maintenance/use_significa
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorSourceId } from '../../utils/get_knowledge_indicator_source_id';
+import { withViewedInstance } from '../../utils/with_viewed_instance';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
@@ -64,7 +66,7 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
-  features: Feature[];
+  features: AggregatedFeature[];
   /** Source of the knowledge indicator; absent while the source list loads or if it was deleted. */
   source?: NightshiftSource;
   pageIndex?: number;
@@ -97,20 +99,33 @@ export function KnowledgeIndicatorDetailsFlyout({
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const sourceId = getKnowledgeIndicatorSourceId(knowledgeIndicator);
+  const { sourcesById, getSourceTitle } = useSourcesById();
+
+  // Header and body show the viewed copy; actions keep targeting the whole row. A uuid left over
+  // from a previous indicator matches nothing and falls back to the representative.
+  const [viewedInstanceUuid, setViewedInstanceUuid] = useState<string | undefined>();
+  const viewedKnowledgeIndicator = useMemo(
+    () => withViewedInstance(knowledgeIndicator, viewedInstanceUuid),
+    [knowledgeIndicator, viewedInstanceUuid]
+  );
+  const viewedSourceId = getKnowledgeIndicatorSourceId(viewedKnowledgeIndicator);
+  const viewedSource = viewedSourceId === sourceId ? source : sourcesById.get(viewedSourceId);
 
   const featureFilter =
-    knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
+    viewedKnowledgeIndicator.kind === 'feature'
+      ? viewedKnowledgeIndicator.feature.filter
+      : undefined;
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const openFeatureInDiscover = useMemo(() => {
-    if (!featureFilter || !discoverLocator || !source) {
+    if (!featureFilter || !discoverLocator || !viewedSource) {
       return undefined;
     }
     return () =>
-      discoverLocator.navigate(buildFeatureDiscoverParams(source, featureFilter, timeState));
-  }, [discoverLocator, featureFilter, source, timeState]);
+      discoverLocator.navigate(buildFeatureDiscoverParams(viewedSource, featureFilter, timeState));
+  }, [discoverLocator, featureFilter, viewedSource, timeState]);
 
   const streamFeatures = useMemo(
-    () => features.filter((f) => f.source_id === sourceId),
+    () => features.filter((f) => f.sources.includes(sourceId)),
     [features, sourceId]
   );
 
@@ -120,11 +135,11 @@ export function KnowledgeIndicatorDetailsFlyout({
     promoteQuery,
     setDurability,
     isMutating: isActionMutating,
-  } = useKnowledgeIndicatorActions({ sourceId, onSuccess: onClose });
+  } = useKnowledgeIndicatorActions({ onSuccess: onClose });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const { deleteKnowledgeIndicatorsInBulk, isDeleting: isKIDeleting } =
-    useStreamKnowledgeIndicatorsBulkDelete({ sourceId, onSuccess: onClose });
+    useKnowledgeIndicatorsBulkDelete({ onSuccess: onClose });
 
   const { demoteRules, isPending: isDemoting } = useRulesDemote({ onSuccess: onClose });
 
@@ -178,7 +193,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature);
             }}
           >
             {RESTORE_LABEL}
@@ -192,7 +207,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature);
             }}
           >
             {EXCLUDE_LABEL}
@@ -366,19 +381,21 @@ export function KnowledgeIndicatorDetailsFlyout({
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-            {knowledgeIndicator.kind === 'feature' ? (
+            {viewedKnowledgeIndicator.kind === 'feature' ? (
               <>
                 <EuiFlexItem>
                   <FlyoutMetadataCard title={CONFIDENCE_LABEL}>
-                    <EuiHealth color={getConfidenceColor(knowledgeIndicator.feature.confidence)}>
-                      {knowledgeIndicator.feature.confidence}
+                    <EuiHealth
+                      color={getConfidenceColor(viewedKnowledgeIndicator.feature.confidence)}
+                    >
+                      {viewedKnowledgeIndicator.feature.confidence}
                     </EuiHealth>
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <FlyoutMetadataCard title={TYPE_LABEL}>
                     <EuiBadge color="hollow">
-                      {upperFirst(knowledgeIndicator.feature.type)}
+                      {upperFirst(viewedKnowledgeIndicator.feature.type)}
                     </EuiBadge>
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
@@ -387,7 +404,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               <>
                 <EuiFlexItem>
                   <FlyoutMetadataCard title={SEVERITY_LABEL}>
-                    <SeverityBadge score={knowledgeIndicator.query.severity_score} />
+                    <SeverityBadge score={viewedKnowledgeIndicator.query.severity_score} />
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -400,28 +417,32 @@ export function KnowledgeIndicatorDetailsFlyout({
             <EuiFlexItem>
               <FlyoutMetadataCard title={STREAM_LABEL}>
                 <EuiBadge color="hollow" iconType="database" iconSide="left">
-                  {source?.title ?? sourceId}
+                  {viewedSource?.title ?? viewedSourceId}
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={DURABILITY_LABEL}>
-                <DurabilityBadge expiresAt={getKnowledgeIndicatorExpiresAt(knowledgeIndicator)} />
+                <DurabilityBadge
+                  expiresAt={getKnowledgeIndicatorExpiresAt(viewedKnowledgeIndicator)}
+                />
               </FlyoutMetadataCard>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          {knowledgeIndicator.kind === 'feature' ? (
+          {viewedKnowledgeIndicator.kind === 'feature' ? (
             <KnowledgeIndicatorFeatureDetailsContent
-              feature={knowledgeIndicator.feature}
+              feature={viewedKnowledgeIndicator.feature}
+              getSourceTitle={getSourceTitle}
+              onSelectInstance={setViewedInstanceUuid}
               onOpenInDiscover={openFeatureInDiscover}
             />
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
-              query={knowledgeIndicator.query}
-              occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
+              query={viewedKnowledgeIndicator.query}
+              occurrences={occurrencesByQueryId[viewedKnowledgeIndicator.query.id]}
               streamFeatures={streamFeatures}
             />
           )}
