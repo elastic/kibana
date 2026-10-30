@@ -13,6 +13,7 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiDataGrid,
   EuiFlexGroup,
@@ -53,7 +54,8 @@ import {
   getTruncatedSummary,
 } from './translations';
 
-const DEFAULT_PAGE_SIZE = 25;
+export const DEFAULT_PAGE_SIZE = 10;
+const NO_BADGE_COLUMNS: readonly string[] = [];
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 type SortingColumns = EuiDataGridSorting['columns'];
@@ -97,7 +99,7 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
     services: { uiSettings },
   } = useKibana();
   const { type, name: typeName } = entityType;
-  const { iconType, nameFields } = getDisplayConfig(type);
+  const { iconType, nameFields, badgeColumns = NO_BADGE_COLUMNS } = getDisplayConfig(type);
 
   const defaultVisibleColumns = useMemo(
     () => getDefaultVisibleColumns(type, list.columns),
@@ -171,9 +173,19 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       if (columnId === 'last_seen' && typeof value === 'string') {
         return moment(value).format(dateFormat);
       }
-      return formatCellValue(value) ?? <EmptyCellValue />;
+      const text = formatCellValue(value);
+      if (text === null) {
+        return <EmptyCellValue />;
+      }
+      return badgeColumns.includes(columnId) ? (
+        <EuiBadge color="hollow" data-test-subj="entityInventoryCellBadge">
+          {text}
+        </EuiBadge>
+      ) : (
+        text
+      );
     },
-    [sortedRows, nameFields, iconType, dateFormat]
+    [sortedRows, nameFields, iconType, badgeColumns, dateFormat]
   );
 
   const toolbarVisibility = useMemo<EuiDataGridToolBarVisibilityOptions>(

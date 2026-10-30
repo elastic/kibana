@@ -33,6 +33,8 @@ export interface EntityTypeDisplayConfig {
   nameFields: readonly string[];
   /** Columns visible by default, in order; `undefined` shows every attribute. */
   defaultVisibleColumns?: readonly string[];
+  /** Columns whose values render as badges, for values that name a group such as a cluster. */
+  badgeColumns?: readonly string[];
 }
 
 const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, EntityTypeDisplayConfig>> = {
@@ -55,6 +57,7 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, EntityTypeDisplayConfi
     iconType: 'logoKubernetes',
     nameFields: ['kubernetes.deployment.name', 'entity.id'],
     defaultVisibleColumns: [NAME_COLUMN_ID, 'kubernetes.namespace', 'cluster', 'last_seen'],
+    badgeColumns: ['cluster'],
   },
 };
 

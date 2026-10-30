@@ -9,10 +9,14 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildListResponseFixture, HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
+import {
+  buildListResponseFixture,
+  HOST_TYPE_FIXTURE,
+  K8S_DEPLOYMENT_TYPE_FIXTURE,
+} from '../../../inventory_api/fixture_data';
 import type { InventoryListResponse, InventoryRow } from '../../../inventory_api/types';
 import { createAppServicesMock } from '../../../mocks';
-import { EntityTable } from './entity_table';
+import { DEFAULT_PAGE_SIZE, EntityTable } from './entity_table';
 import { NAME_COLUMN_ID, getDefaultVisibleColumns } from './entity_type_config';
 import {
   NO_VALUE_LABEL,
@@ -131,7 +135,7 @@ describe('EntityTable', () => {
     renderTable(list);
 
     expect(screen.getByTestId('entityInventoryTableSummary')).toHaveTextContent(
-      getCompleteSummary({ start: 1, end: 25, total: list.rows.length })
+      getCompleteSummary({ start: 1, end: DEFAULT_PAGE_SIZE, total: list.rows.length })
     );
   });
 
@@ -140,7 +144,12 @@ describe('EntityTable', () => {
     renderTable(list);
 
     expect(screen.getByTestId('entityInventoryTableSummary')).toHaveTextContent(
-      getTruncatedSummary({ start: 1, end: 25, returned: list.rows.length, total: list.total ?? 0 })
+      getTruncatedSummary({
+        start: 1,
+        end: DEFAULT_PAGE_SIZE,
+        returned: list.rows.length,
+        total: list.total ?? 0,
+      })
     );
   });
 
@@ -149,8 +158,60 @@ describe('EntityTable', () => {
     renderTable(list);
 
     expect(screen.getByTestId('entityInventoryTableSummary')).toHaveTextContent(
-      getTotalUnknownSummary({ start: 1, end: 25, returned: list.rows.length })
+      getTotalUnknownSummary({ start: 1, end: DEFAULT_PAGE_SIZE, returned: list.rows.length })
     );
+  });
+
+  it('shows 10 rows per page by default', () => {
+    renderTable(getFixture('normal'));
+
+    expect(DEFAULT_PAGE_SIZE).toBe(10);
+    expect(screen.getByRole('button', { name: 'Rows per page: 10' })).toBeInTheDocument();
+  });
+
+  it('renders the cluster of a deployment as a badge and leaves an empty cluster as a placeholder', () => {
+    const k8sList = buildListResponseFixture('k8s.deployment', 'normal');
+    if (!k8sList) {
+      throw new Error('Missing k8s.deployment fixture');
+    }
+    const row = (overrides: InventoryRow): InventoryRow => ({
+      ...Object.fromEntries(k8sList.columns.map(({ name }) => [name, null])),
+      ...overrides,
+    });
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={createAppServicesMock()}>
+          <EntityTable
+            entityType={K8S_DEPLOYMENT_TYPE_FIXTURE}
+            list={{
+              ...k8sList,
+              rows: [
+                row({ 'kubernetes.deployment.name': 'frontend', cluster: 'prod-cluster-0' }),
+                row({ 'kubernetes.deployment.name': 'cart', cluster: null }),
+              ],
+              total: 2,
+              truncated: false,
+            }}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+
+    expect(
+      within(getCell(0, 'cluster') as HTMLElement).getByTestId('entityInventoryCellBadge')
+    ).toHaveTextContent('prod-cluster-0');
+    expect(
+      within(getCell(1, 'cluster') as HTMLElement).queryByTestId('entityInventoryCellBadge')
+    ).not.toBeInTheDocument();
+    expect(within(getCell(1, 'cluster') as HTMLElement).getByText(NO_VALUE_LABEL)).toBeTruthy();
+  });
+
+  it('keeps cells of other columns as plain text', () => {
+    renderTable(smallList([hostRow({ 'host.name': 'web-001', 'os.name': 'Ubuntu' })]));
+
+    expect(
+      within(getCell(0, 'os.name') as HTMLElement).queryByTestId('entityInventoryCellBadge')
+    ).not.toBeInTheDocument();
   });
 
   it('restores the default columns on reset', async () => {
