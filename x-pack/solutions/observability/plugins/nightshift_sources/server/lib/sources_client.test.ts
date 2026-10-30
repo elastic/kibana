@@ -14,7 +14,11 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
+import {
+  MAX_SOURCES_PER_PAGE,
+  getNightshiftSourceViewName,
+  type NightshiftSource,
+} from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
   type NightshiftSourceAttributes,
@@ -168,6 +172,29 @@ describe('SourcesClient', () => {
 
       const recommendations = await client.listRecommended();
 
+      expect(recommendations.some(({ id }) => id === 'logs')).toBe(false);
+    });
+
+    it('finds a matching source on a later page', async () => {
+      const { client, soClient } = setup();
+      const unrelatedSources = Array.from({ length: MAX_SOURCES_PER_PAGE }, (_, index) =>
+        makeAttributes({ esql: `FROM unrelated-${index}` })
+      );
+      const total = MAX_SOURCES_PER_PAGE + 1;
+      soClient.find
+        .mockResolvedValueOnce({ ...makeFindResponse(...unrelatedSources), total })
+        .mockResolvedValueOnce({
+          ...makeFindResponse(makeAttributes({ esql: 'FROM logs*' })),
+          total,
+          page: 2,
+        });
+
+      const recommendations = await client.listRecommended();
+
+      expect(soClient.find).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ page: 2, perPage: MAX_SOURCES_PER_PAGE })
+      );
       expect(recommendations.some(({ id }) => id === 'logs')).toBe(false);
     });
   });

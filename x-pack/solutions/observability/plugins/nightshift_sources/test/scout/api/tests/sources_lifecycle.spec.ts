@@ -60,30 +60,42 @@ apiTest.describe(
 
     apiTest(
       'lists the Logs recommendation until a matching source exists',
-      async ({ apiClient }) => {
-        const hasLogsRecommendation = async (): Promise<boolean> => {
-          const response = await listRecommendedSources(apiClient, manager.cookieHeader);
-          expect(response).toHaveStatusCode(200);
-          const { recommendations } = response.body as RecommendedSourcesResponse;
-          return recommendations.some(({ id }) => id === 'logs');
-        };
-
-        expect(await hasLogsRecommendation()).toBe(true);
-
-        const created = await createSource(apiClient, manager.cookieHeader, {
-          title: `${TITLE_PREFIX}-${suffix}-recommended`,
-          esql: 'FROM logs*',
-        });
-        expect(created).toHaveStatusCode(200);
-        const { id } = created.body.source as NightshiftSource;
-
+      async ({ apiClient, apiServices }) => {
+        const spaceId = `ns-recommended-${suffix}`;
+        await apiServices.spaces.create({ id: spaceId, name: spaceId });
         try {
-          expect(await hasLogsRecommendation()).toBe(false);
-        } finally {
-          await deleteSourceChecked(apiClient, manager.cookieHeader, id);
-        }
+          const hasLogsRecommendation = async (): Promise<boolean> => {
+            const response = await listRecommendedSources(apiClient, manager.cookieHeader, {
+              spaceId,
+            });
+            expect(response).toHaveStatusCode(200);
+            const { recommendations } = response.body as RecommendedSourcesResponse;
+            return recommendations.some(({ id }) => id === 'logs');
+          };
 
-        expect(await hasLogsRecommendation()).toBe(true);
+          expect(await hasLogsRecommendation()).toBe(true);
+
+          const created = await createSource(
+            apiClient,
+            manager.cookieHeader,
+            {
+              title: `${TITLE_PREFIX}-${suffix}-recommended`,
+              esql: 'FROM logs*',
+            },
+            { spaceId }
+          );
+          expect(created).toHaveStatusCode(200);
+          const sourceId = (created.body.source as NightshiftSource).id;
+
+          try {
+            expect(await hasLogsRecommendation()).toBe(false);
+          } finally {
+            await deleteSourceChecked(apiClient, manager.cookieHeader, sourceId, { spaceId });
+          }
+          expect(await hasLogsRecommendation()).toBe(true);
+        } finally {
+          await apiServices.spaces.delete(spaceId);
+        }
       }
     );
 
