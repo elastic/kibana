@@ -213,7 +213,8 @@ export const getEcfServiceConfigs = (
  * Ensures a CloudWatch log group ARN ends with `:*` as required by the ECF template's
  * `CloudWatchLogGroups` parameter.
  */
-const normaliseLogGroupArn = (arn: string): string => (arn.endsWith(':*') ? arn : `${arn}:*`);
+export const normaliseLogGroupArn = (arn: string): string =>
+  arn.endsWith(':*') ? arn : `${arn}:*`;
 
 /**
  * Appends the default port (443 for https, 80 for http) to an OTLP endpoint URL when no

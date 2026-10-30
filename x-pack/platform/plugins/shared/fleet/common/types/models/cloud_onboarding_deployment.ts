@@ -24,6 +24,15 @@ export interface CloudOnboardingEcfStack {
   stackArn?: string;
   /** Service IDs active when the stack was last launched or updated. Used to detect staleness on session resume. */
   serviceIds?: string[];
+  /** Stack-relevant settings (bucket and log group ARNs) per service when the stack was last launched or updated. Used to detect settings drift on session resume. */
+  serviceConfigs?: CloudOnboardingEcfServiceConfig[];
+}
+
+/** The per-service values that feed an ECF stack's parameters. */
+export interface CloudOnboardingEcfServiceConfig {
+  serviceId: string;
+  bucketArns: string[];
+  logGroupArns: string[];
 }
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';

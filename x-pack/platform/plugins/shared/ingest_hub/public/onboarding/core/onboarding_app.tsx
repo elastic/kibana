@@ -172,6 +172,11 @@ export async function hydrateOnboardingSession(
               .filter((s) => s.serviceIds !== undefined)
               .map((s) => [s.family, s.serviceIds])
           ),
+          launchedConfigs: Object.fromEntries(
+            item.ecfStacks
+              .filter((s) => s.serviceConfigs !== undefined)
+              .map((s) => [s.family, s.serviceConfigs])
+          ),
         })
       );
     }
