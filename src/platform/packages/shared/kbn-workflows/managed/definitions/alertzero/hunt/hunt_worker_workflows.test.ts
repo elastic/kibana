@@ -1310,7 +1310,7 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
       })
       .trim();
   };
-  const retiredContext = (huntStatus: string) => ({
+  const retiredContext = (huntStatus: string, coverageGaps: unknown[] = []) => ({
     steps: {
       resolve_run_outcome: { output: { outcome: 'completed' } },
       hunt: {
@@ -1318,6 +1318,7 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
           status: huntStatus,
           headline: 'No confirmed hits',
           reason: 'The hunt left a gap a later run could not close.',
+          coverage_gaps: coverageGaps,
         },
       },
       package_report: {
@@ -1365,6 +1366,22 @@ describe('Hunt Watch worker: a retired_incomplete hunt', () => {
     expect(message).toContain('Closed this Investigation as benign.');
   });
 
+  it('says the Investigation summary names the gaps only when the hunt reported some', () => {
+    const withGaps = conclusion(
+      retiredContext('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])
+    );
+    const withoutGaps = conclusion(retiredContext('retired_incomplete'));
+    expect(withGaps).toContain('The Investigation summary names what was not searched.');
+    expect(withoutGaps).not.toContain('names what was not searched');
+    expect(withoutGaps).toContain('The report will not be swept again on its own');
+  });
+
+  it('never claims coverage items were recorded, which the Worker cannot see', () => {
+    expect(conclusion(retiredContext('retired_incomplete'))).not.toContain(
+      'coverage knowledge item'
+    );
+  });
+
   it('keeps the generic completed heading for a successful hunt', () => {
     const message = conclusion(retiredContext('success'));
     expect(message).toContain('### Hunt Watch run completed\n');
@@ -1376,10 +1393,10 @@ describe('Hunt Watch packaging summary for a settled no-hit run', () => {
   const template = (
     stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
   ).package_summary;
-  const summary = (huntStatus: string, status = 'packaged') =>
+  const summary = (huntStatus: string, coverageGaps?: unknown[], status = 'packaged') =>
     createWorkflowLiquidEngine()
       .parseAndRenderSync(template, {
-        inputs: { huntStatus },
+        inputs: { huntStatus, ...(coverageGaps ? { coverageGaps } : {}) },
         steps: {
           decide_and_package: {
             output: {
@@ -1395,9 +1412,15 @@ describe('Hunt Watch packaging summary for a settled no-hit run', () => {
       })
       .trim();
 
-  it('says part of the report could not be searched, without a count, for a retired run', () => {
+  it('says the Investigation summary names what was not searched when the gaps arrived', () => {
+    expect(summary('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])).toBe(
+      'No confirmed hits, so packaging closed this Investigation as benign, but part of the report could not be searched and the report is retired without a full search; the Investigation summary names what was not searched; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+
+  it('makes no claim about naming the gaps when none arrived (an older Worker)', () => {
     expect(summary('retired_incomplete')).toBe(
-      'No confirmed hits, so packaging closed this Investigation as benign, but part of the report could not be searched and the report is retired without a full search; the Investigation summary and the coverage knowledge item name what was not searched; recorded 3 coverage knowledge items for Detection Watch.'
+      'No confirmed hits, so packaging closed this Investigation as benign, but part of the report could not be searched and the report is retired without a full search; recorded 3 coverage knowledge items for Detection Watch.'
     );
   });
 

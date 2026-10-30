@@ -497,6 +497,10 @@ describe('runPackageReport', () => {
       expect(result.closureSummary).toContain('2 gaps left part of the report unsearched');
       expect(result.closureSummary).toContain('retired without a full search');
       expect(result.closureSummary).not.toContain('nothing in this environment matched');
+      // This string is the Investigation's own summary, so it names what was not searched.
+      expect(result.closureSummary).toContain(
+        'Not searched: T9999 (unknown technique id), input truncated.'
+      );
       expect(result.coverage.written.length).toBeGreaterThan(0);
     });
 
@@ -528,6 +532,7 @@ describe('runPackageReport', () => {
         if (result.status !== 'packaged') return;
         expect(result.dismiss).toBe(true);
         expect(result.closureSummary).toContain('part of the report could not be searched');
+        expect(result.closureSummary).not.toContain('Not searched:');
         expect(result.closureSummary).not.toMatch(/\d+ gaps?/);
         expect(result.closureSummary).not.toContain('nothing in this environment matched');
         const [subjects] = writeCoverageKis.mock.calls[0];

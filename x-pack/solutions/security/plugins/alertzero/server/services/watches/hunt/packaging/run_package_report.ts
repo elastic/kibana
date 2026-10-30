@@ -27,7 +27,7 @@ import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
-import { dedupeCoverageGaps, gapCountPhrase } from './dedupe_coverage_gaps';
+import { dedupeCoverageGaps, describeGaps, gapCountPhrase } from './dedupe_coverage_gaps';
 import { deriveCleanCoverageSubjects } from './derive_clean_coverage_subjects';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import type { EsReportContextClient } from './load_report_hunt_context';
@@ -40,6 +40,9 @@ import type {
   CoverageWriteResult,
   UnresolvedMintPayload,
 } from './types';
+
+/** Keeps the Investigation's summary short; the report-scoped KI carries the full list. */
+const MAX_CLOSURE_GAP_CHARS = 500;
 
 export class PackageReportIdentityError extends Error {
   constructor(message: string) {
@@ -121,11 +124,14 @@ const buildNoHitClosureSummary = ({
   dismissHold,
   retired,
   gapPhrase,
+  gapDescription,
 }: {
   reportId: string;
   dismissHold: DismissHold;
   retired: boolean;
   gapPhrase?: string;
+  /** What was not searched, bounded; this closure summary is the Investigation's own summary. */
+  gapDescription?: string;
 }): string => {
   const found = `Hunt for report ${reportId} found no confirmed hits`;
   if (dismissHold !== 'none') {
@@ -144,7 +150,8 @@ const buildNoHitClosureSummary = ({
     ? `${gapPhrase} left part of the report unsearched`
     : 'part of the report could not be searched';
   const cannotClose = gapPhrase === '1 gap' ? 'it' : 'them';
-  return `${found}, but ${unsearched} and a later run cannot close ${cannotClose}. Closing: the report is retired without a full search.`;
+  const named = gapDescription ? ` Not searched: ${gapDescription}.` : '';
+  return `${found}, but ${unsearched} and a later run cannot close ${cannotClose}.${named} Closing: the report is retired without a full search.`;
 };
 
 /**
@@ -281,6 +288,7 @@ export const runPackageReport = async ({
           dismissHold,
           retired,
           gapPhrase: hasGaps ? gapCountPhrase(unsearched) : undefined,
+          gapDescription: hasGaps ? describeGaps(unsearched, MAX_CLOSURE_GAP_CHARS) : undefined,
         }),
         expectedProposalCount: 0,
         mintSuppression: 'none',
