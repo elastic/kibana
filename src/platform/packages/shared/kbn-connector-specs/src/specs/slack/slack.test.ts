@@ -603,11 +603,6 @@ describe('Slack', () => {
   });
 
   describe('getConversationHistory action', () => {
-    it('accepts a channel name longer than an id', () => {
-      const channel = `#${'a'.repeat(80)}`;
-      expect(SlackGetConversationHistoryInputSchema.parse({ channel }).channel).toBe(channel);
-    });
-
     it('should fetch history with defaults', async () => {
       const mockResponse = {
         data: {

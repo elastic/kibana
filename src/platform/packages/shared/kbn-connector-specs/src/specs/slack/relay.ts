@@ -8,7 +8,8 @@
  */
 
 import { RELAY_AUTH_ID } from '../../auth_types/relay';
-import type { ActionContext, RelayActionClient } from '../../connector_spec';
+import type { ActionContext } from '../../connector_spec';
+import type { RelayActionClient } from '../../relay_action_client';
 import type {
   SlackGetConversationHistoryInput,
   SlackListChannelsInput,
@@ -16,7 +17,6 @@ import type {
   SlackSendMessageInput,
   SlackUpdateMessageInput,
 } from './types';
-import { SlackResolveChannelIdInputSchema } from './types';
 
 const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
 
@@ -299,7 +299,8 @@ const SLACK_WINDOW_BOUND = /^\d{1,12}(\.\d{1,6})?$/;
 
 const RELAY_MAX_READ_LIMIT = 200;
 
-/** The Relay's own default, made explicit so later pages keep the same floor. */
+// The Relay's own default, made explicit so later pages keep the same floor:
+// https://github.com/elastic/relay-service/blob/6d468f0d7334954531c6d7ad90ec2f1c190d0197/src/contracts/http/slack-read.ts#L31
 const RELAY_DEFAULT_HISTORY_WINDOW_SECONDS = 2 * 60 * 60;
 
 /**
@@ -365,31 +366,6 @@ const decodeReadCursor = (cursor: string): ReadWindow => {
   return { ...(oldest ? { oldest } : {}), ...(latest ? { latest } : {}) };
 };
 
-const resolveReadChannel = async (
-  connection: SlackRelayConnection,
-  ctx: ActionContext,
-  channel: string
-): Promise<string | undefined> => {
-  const trimmed = channel.trim();
-  if (SLACK_CONVERSATION_ID.test(trimmed)) {
-    return trimmed;
-  }
-  const resolved = await relayResolveChannelId(
-    connection,
-    ctx,
-    SlackResolveChannelIdInputSchema.parse({ name: trimmed })
-  );
-  if (resolved.found) {
-    return resolved.id;
-  }
-  if (resolved.nextCursor) {
-    throw new Error(
-      `Channel "${trimmed}" is not in the first ${resolved.pagesFetched} pages of connected channels. Pass its id from listChannels instead.`
-    );
-  }
-  return undefined;
-};
-
 /**
  * Reads a connected public channel through the Relay, newest first. The Relay has no cursor, so
  * `nextCursor` encodes the next window: the same floor, ending just before the oldest message
@@ -412,9 +388,11 @@ export async function relayGetConversationHistory(
     throw new Error('oldest and latest take Slack timestamps, e.g. "1700000000.000100".');
   }
 
-  const channelId = await resolveReadChannel(connection, ctx, input.channel);
-  if (!channelId) {
-    return { ok: false as const, reason: 'not_readable' as const, channel: input.channel };
+  const channelId = input.channel.trim();
+  if (!SLACK_CONVERSATION_ID.test(channelId)) {
+    throw new Error(
+      `"${channelId}" is not a channel ID. Pass the channel ID (C...) from listChannels.`
+    );
   }
 
   const window = input.cursor

@@ -608,35 +608,11 @@ describe('relayGetConversationHistory', () => {
     expect(readMessages).not.toHaveBeenCalled();
   });
 
-  it('resolves a channel name against the connected channels first', async () => {
-    const readMessages = jest.fn().mockResolvedValue(page());
-    const listBindings = jest
-      .fn()
-      .mockResolvedValue({ bindings: [{ scope_id: 'C123', display_name: 'alerts' }] });
-
-    await read({ channel: '#alerts' }, { readMessages, listBindings });
-
-    expect(readMessages).toHaveBeenCalledWith(expect.objectContaining({ channelId: 'C123' }));
-  });
-
-  it('returns not_readable for a name that is not connected, without reading', async () => {
+  it('rejects a channel name before calling Relay', async () => {
     const readMessages = jest.fn();
-    const listBindings = jest.fn().mockResolvedValue({ bindings: [] });
 
-    await expect(read({ channel: '#secret' }, { readMessages, listBindings })).resolves.toEqual({
-      ok: false,
-      reason: 'not_readable',
-      channel: '#secret',
-    });
-    expect(readMessages).not.toHaveBeenCalled();
-  });
-
-  it('fails instead of not_readable when the name scan stops before the last page', async () => {
-    const readMessages = jest.fn();
-    const listBindings = jest.fn().mockResolvedValue({ bindings: [], nextCursor: 'next' });
-
-    await expect(read({ channel: '#alerts' }, { readMessages, listBindings })).rejects.toThrow(
-      /Pass its id from listChannels/
+    await expect(read({ channel: '#alerts' }, { readMessages })).rejects.toThrow(
+      /Pass the channel ID/
     );
     expect(readMessages).not.toHaveBeenCalled();
   });

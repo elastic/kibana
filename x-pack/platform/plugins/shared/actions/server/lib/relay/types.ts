@@ -124,7 +124,8 @@ export interface RelayTriggerResponse {
 
 /**
  * A window of a bound public channel (`GET .../channels/:id/messages`). The Relay defaults a
- * channel read to the last two hours and refuses a window longer than seven days.
+ * channel read to the last two hours and refuses a window longer than seven days:
+ * https://github.com/elastic/relay-service/blob/6d468f0d7334954531c6d7ad90ec2f1c190d0197/src/contracts/http/slack-read.ts#L31-L32
  */
 export interface RelayReadMessagesInput {
   tenantKey: string;
@@ -133,7 +134,7 @@ export interface RelayReadMessagesInput {
   /** Slack ts or whole epoch seconds. */
   oldest?: string;
   latest?: string;
-  /** 1-200; the Relay defaults to 50. */
+  /** 1-200. */
   limit?: number;
 }
 
