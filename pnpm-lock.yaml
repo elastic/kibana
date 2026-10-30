@@ -452,8 +452,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@elastic/schemas':
-        specifier: 0.10.0
-        version: 0.10.0
+        specifier: 0.11.0
+        version: 0.11.0
       '@elastic/search-ui':
         specifier: 1.24.2
         version: 1.24.2
@@ -5519,6 +5519,9 @@ importers:
       '@kbn/eslint-plugin-imports':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-imports
+      '@kbn/eslint-plugin-kbn-monaco':
+        specifier: workspace:*
+        version: link:packages/kbn-eslint-plugin-kbn-monaco
       '@kbn/eslint-plugin-kbn-ui':
         specifier: workspace:*
         version: link:packages/kbn-eslint-plugin-kbn-ui
@@ -6707,9 +6710,6 @@ importers:
       marge:
         specifier: 1.0.1
         version: 1.0.1
-      mini-css-extract-plugin:
-        specifier: 2.9.1
-        version: 2.9.1(webpack@5.96.1)
       minimist:
         specifier: 1.2.8
         version: 1.2.8
@@ -6842,9 +6842,6 @@ importers:
       table:
         specifier: 6.9.0
         version: 6.9.0
-      terser-webpack-plugin:
-        specifier: 5.3.17
-        version: 5.3.17(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack@5.96.1)
       tough-cookie:
         specifier: 6.0.0
         version: 6.0.0
@@ -7025,6 +7022,8 @@ importers:
   packages/kbn-eslint-plugin-i18n: {}
 
   packages/kbn-eslint-plugin-imports: {}
+
+  packages/kbn-eslint-plugin-kbn-monaco: {}
 
   packages/kbn-eslint-plugin-kbn-ui: {}
 
@@ -11294,8 +11293,8 @@ packages:
   '@elastic/request-crypto@2.0.4':
     resolution: {integrity: sha512-15BH4l6BhHG73WEbeNLghEtAxI/zezFFdiOCx5ubsdxfuXh8tFV2XaRYkWgieTGAXCML9GSlztt1Ewf8WxsoPw==}
 
-  '@elastic/schemas@0.10.0':
-    resolution: {integrity: sha512-NBQJNDJ5rRvLOApi2Hjb75uns0cUsN6QdnVWs5X/a77OoK5soDIR7CpwzFlNsNwwttM+/NODgqyl3A005B0Fng==}
+  '@elastic/schemas@0.11.0':
+    resolution: {integrity: sha512-hQ9VLf2uBE2OTmwN6svVlmvBmDLX4LEEEUTX1hmEn48weyB5X40xaCO3fdbX5qR+VtFWE0svo3jDCRcwAxFhbg==}
     engines: {node: '>=20'}
 
   '@elastic/search-ui-app-search-connector@1.24.1':
@@ -21148,12 +21147,6 @@ packages:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
 
-  mini-css-extract-plugin@2.9.1:
-    resolution: {integrity: sha512-+Vyi+GCCOHnrJ2VPS+6aPoXN2k2jgUzDRhTFLjjTBn23qyXJXkjUWQgTL+mXpF5/A8ixLdCc6kWsoeOjKGejKQ==}
-    engines: {node: '>= 12.13.0'}
-    peerDependencies:
-      webpack: ^5.0.0
-
   minimalistic-assert@1.0.1:
     resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
 
@@ -27561,7 +27554,7 @@ snapshots:
       '@types/node-jose': 1.1.10
       node-jose: 2.2.0
 
-  '@elastic/schemas@0.10.0':
+  '@elastic/schemas@0.11.0':
     optionalDependencies:
       zod: 4.6.5
 
@@ -39166,12 +39159,6 @@ snapshots:
     optional: true
 
   min-indent@1.0.1: {}
-
-  mini-css-extract-plugin@2.9.1(webpack@5.96.1):
-    dependencies:
-      schema-utils: 4.5.0
-      tapable: 2.3.3
-      webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
 

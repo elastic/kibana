@@ -1,8 +1,0 @@
-title: Filter
-description: Defines properties for a filter
-type: object
-properties:
-  query:
-    type: object
-  meta:
-    $ref: "filter_meta.yaml"
