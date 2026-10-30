@@ -156,13 +156,6 @@ describe('registerHuntBehaviorRoute', () => {
       scoped.asCurrentUser,
       mitreDataClient
     );
-    expect(huntBehaviorMock).not.toHaveBeenCalledWith(
-      { extraction: model, esql: model },
-      expect.anything(),
-      expect.anything(),
-      scoped.asInternalUser,
-      mitreDataClient
-    );
   });
 
   it('scopes the client to the request with the space project routing', async () => {

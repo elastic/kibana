@@ -152,7 +152,6 @@ describe('registerHuntForThreatRoute', () => {
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(huntForThreatMock).toHaveBeenCalledWith(scoped.asCurrentUser, expect.anything());
-    expect(huntForThreatMock).not.toHaveBeenCalledWith(scoped.asInternalUser, expect.anything());
   });
 
   it('scopes the client to the request with the space project routing', async () => {

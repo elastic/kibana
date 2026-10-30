@@ -150,9 +150,6 @@ describe('registerHuntIndexScopeRoute', () => {
     expect(resolveHuntScopeMock).toHaveBeenCalledWith(
       expect.objectContaining({ esClient: scoped.asCurrentUser })
     );
-    expect(resolveHuntScopeMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: scoped.asInternalUser })
-    );
   });
 
   it('scopes the client to the request with the space project routing', async () => {

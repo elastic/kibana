@@ -26,7 +26,7 @@ const RUN = Date.now();
 const LINKED_ALIAS = 'linked_local_project';
 const LINKED_STREAM = `logs-cps-hunt-${RUN}`;
 const ORIGIN_STREAM = `logs-cps-hunt-origin-${RUN}`;
-const LINKED_PATTERN = `${LINKED_ALIAS}:logs-cps-hunt-*`;
+const LINKED_PATTERN = `${LINKED_ALIAS}:${LINKED_STREAM}*`;
 const CUSTOM_PATTERN = `custom-edr-cps-${RUN}-*`;
 const CUSTOM_INDEX = `custom-edr-cps-${RUN}-1`;
 const SPACE = `hunt-cps-${RUN}`;
@@ -101,16 +101,6 @@ apiTest.describe.serial(
 
     apiTest.afterAll(async ({ apiServices, apiClient, esClient, linkedProject }) => {
       await runCleanupSteps([
-        {
-          name: 'clear the default index',
-          run: () =>
-            setDefaultIndexInSpace({
-              apiClient,
-              headers: adminHeaders,
-              spaceId: SPACE,
-              patterns: undefined,
-            }),
-        },
         {
           name: 'delete the linked data stream',
           run: () => linkedProject.esClient.indices.deleteDataStream({ name: LINKED_STREAM }),
