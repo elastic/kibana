@@ -7,8 +7,6 @@
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { isValidEsqlSourceIndex } from '../../risk_score/validate_esql_source_index';
 
 export const riskEngineConfigurationTypeName = 'risk-engine-configuration';
 
@@ -156,39 +154,6 @@ const version4: SavedObjectsModelVersion = {
   ],
 };
 
-// `dataViewId` is resolved to the source index the risk scoring ES|QL reads via
-// `FROM ${index}`, which runs as the internal user. The field is writable through the
-// generic saved-objects API, so the `create` schema validates it on create/overwrite to
-// reject invalid values. `forwardCompatibility` leaves it unvalidated so
-// reads of configurations stored before this version never throw (the ES|QL source-index
-// validation rejects such values at query time). Every other attribute is left
-// unconstrained (`unknowns: 'allow'`) so neither schema rejects a valid configuration.
-const buildConfigurationSchema = ({ validateDataViewId }: { validateDataViewId: boolean }) =>
-  schema.object(
-    {
-      dataViewId: schema.maybe(
-        schema.string({
-          maxLength: 4096,
-          ...(validateDataViewId
-            ? {
-                validate: (value: string) =>
-                  isValidEsqlSourceIndex(value) ? undefined : 'must be a valid index expression',
-              }
-            : {}),
-        })
-      ),
-    },
-    { unknowns: 'allow' }
-  );
-
-const version5: SavedObjectsModelVersion = {
-  changes: [],
-  schemas: {
-    create: buildConfigurationSchema({ validateDataViewId: true }),
-    forwardCompatibility: buildConfigurationSchema({ validateDataViewId: false }),
-  },
-};
-
 export const riskEngineConfigurationType: SavedObjectsType = {
   name: riskEngineConfigurationTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -200,6 +165,5 @@ export const riskEngineConfigurationType: SavedObjectsType = {
     2: version2,
     3: version3,
     4: version4,
-    5: version5,
   },
 };
