@@ -98,22 +98,38 @@ describe('digitalExperienceRouter', () => {
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
-      search: '?source=otel&hasErrors=yes&duration=forever&sortField=user&browser=Chrome',
+      search: `?source=otel&hasErrors=true&duration=forever&sortField=user&page=1001&perPage=30&os=&country=${'X'.repeat(
+        17
+      )}&browser=Chrome`,
     };
 
     expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
       expect.objectContaining({
-        patched: expect.objectContaining({ query: { source: 'otel', browser: 'Chrome' } }),
+        patched: expect.objectContaining({
+          query: { source: 'otel', hasErrors: 'true', browser: 'Chrome' },
+        }),
       })
     );
+  });
+
+  it('reads the sessions list params as their types', () => {
+    const location = {
+      ...locationOf('/my-app/sessions'),
+      search: '?source=otel&hasErrors=true&page=2&perPage=50&browser=Chrome',
+    };
+
+    expect(digitalExperienceRouter.getParams('/{serviceName}/sessions', location)).toEqual({
+      path: { serviceName: 'my-app' },
+      query: { source: 'otel', hasErrors: true, page: 2, perPage: 50, browser: 'Chrome' },
+    });
   });
 
   it('links a session with the sessions list state', () => {
     expect(
       digitalExperienceRouter.link('/{serviceName}/sessions/{sessionId}', {
         path: { serviceName: 'my-app', sessionId: 'abc' },
-        query: { source: 'otel', hasErrors: 'true' },
+        query: { source: 'otel', hasErrors: true, perPage: 50 },
       })
-    ).toBe('/my-app/sessions/abc?hasErrors=true&source=otel');
+    ).toBe('/my-app/sessions/abc?hasErrors=true&perPage=50&source=otel');
   });
 });

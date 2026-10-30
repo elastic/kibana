@@ -8,7 +8,16 @@
 import * as t from 'io-ts';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SESSION_SORT_FIELDS, type SessionSortField } from '../../common/sessions';
+import type { NonEmptyString } from '@kbn/io-ts-utils';
+import { inRangeFromStringRt, nonEmptyStringRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  SESSION_SORT_FIELDS,
+  SESSIONS_LIST_MAX_FACET_LENGTHS,
+  SESSIONS_LIST_MAX_PAGE,
+  SESSIONS_LIST_MAX_PER_PAGE,
+  SESSIONS_LIST_MAX_SEARCH_LENGTH,
+  type SessionSortField,
+} from '../../common/sessions';
 
 const SECOND_MS = 1000;
 const MINUTE_MS = 60 * SECOND_MS;
@@ -73,22 +82,53 @@ const sortFieldRt = t.keyof(
   >
 );
 
+export interface MaxLengthBrand {
+  readonly MaxLength: unique symbol;
+}
+
+/** A non-empty string the list API accepts, at most `maxLength` long. */
+const filterValueRt = (maxLength: number) =>
+  t.brand(
+    nonEmptyStringRt,
+    (value): value is t.Branded<NonEmptyString, MaxLengthBrand> => value.length <= maxLength,
+    'MaxLength'
+  );
+
+/** `toBooleanRt` for a URL param: an unset param stays unset rather than becoming `false`. */
+const booleanParamRt = new t.Type<boolean, boolean, unknown>(
+  'BooleanParam',
+  toBooleanRt.is,
+  (input, context) =>
+    input === undefined ? t.failure(input, context) : toBooleanRt.validate(input, context),
+  toBooleanRt.encode
+);
+
+const pageSizeRt = t.union([
+  t.literal(10),
+  t.literal(25),
+  t.literal(50),
+  t.literal(SESSIONS_LIST_MAX_PER_PAGE),
+]);
+
+/** The table's page sizes. */
+export const SESSIONS_PAGE_SIZES = pageSizeRt.types.map(({ value }) => value);
+
 /**
- * The sessions list's state in the URL; the router replaces an invalid value with none (see
- * `routes.tsx`). Paging stays a string, as `useSessionsListQuery` bounds it.
+ * The sessions list's state in the URL. The router removes an invalid value (see `routes.tsx`),
+ * e.g. an empty filter, a page past the API's last one or a page size the table doesn't offer.
  */
 export const sessionsListQueryRt = t.partial({
-  search: t.string,
-  browser: t.string,
-  os: t.string,
-  country: t.string,
-  entryPage: t.string,
-  hasErrors: t.literal('true'),
+  search: filterValueRt(SESSIONS_LIST_MAX_SEARCH_LENGTH),
+  browser: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.browser),
+  os: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
+  country: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
+  entryPage: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
+  hasErrors: booleanParamRt,
   duration: durationBucketRt,
   sortField: sortFieldRt,
   sortDirection: t.keyof({ asc: null, desc: null }),
-  page: t.string,
-  perPage: t.string,
+  page: inRangeFromStringRt(0, SESSIONS_LIST_MAX_PAGE).pipe(t.Int),
+  perPage: toNumberRt.pipe(pageSizeRt),
 });
 
 export type SessionsListUrlQuery = t.TypeOf<typeof sessionsListQueryRt>;

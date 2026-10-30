@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { FacetBucket, SessionListFacets } from '../../../../common/sessions';
+import {
+  SESSIONS_LIST_MAX_SEARCH_LENGTH,
+  type FacetBucket,
+  type SessionListFacets,
+} from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
@@ -150,6 +154,7 @@ export function SessionsFilters({
             defaultMessage: 'Search sessions',
           })}
           value={search}
+          maxLength={SESSIONS_LIST_MAX_SEARCH_LENGTH}
           onChange={(event) => setSearch(event.target.value)}
           // Enter searches at once, without waiting for the debounce.
           onSearch={(value) => onSearch(value)}
