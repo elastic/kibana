@@ -65,7 +65,7 @@ const customContentPanelContentSchema = lazySchema(() =>
     renderer: z
       .literal('custom_content')
       .describe(
-        'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
+        'An HTML/CSS layout generated server-side. Required to edit a custom content panel; it is not inferred from the panel.'
       ),
     query: z
       .string()
@@ -73,7 +73,7 @@ const customContentPanelContentSchema = lazySchema(() =>
       .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
       .optional()
       .describe(
-        'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible.'
+        'What to display, in plain words; the HTML template is generated from it, so do not write markup. Required for a new panel. On an existing panel, what to change (layout and design are kept where possible); omit it only when the edit just replaces or removes the ES|QL query.'
       ),
     esql: z
       .string()
@@ -81,26 +81,26 @@ const customContentPanelContentSchema = lazySchema(() =>
       .nullable()
       .optional()
       .describe(
-        'An ES|QL query the user supplied verbatim; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
+        'An ES|QL query the user supplied verbatim; it is used as is and wins over hasData. On an existing panel it replaces the current query: omit it to keep the query, or pass null to remove it. Never write one yourself: set hasData to true and let the server generate it.'
       ),
     hasData: z
       .boolean()
       .optional()
       .describe(
-        'Required for a new panel: true when it shows live Elasticsearch values, so the server generates the ES|QL query from "query" (and "index"); false for static content such as a banner, a legend or a note, which has no query. Always state which one it is. On an existing panel: true ensures it has data, generating a query from "query" only when it has none; false removes the query so the panel is static; omit to keep the current data state.'
+        'Required for a new panel: true when it shows live Elasticsearch values, so the server generates the ES|QL query from `query` (and `index`); false for static content such as a banner, a legend or a note, which has no query. Always state which one it is. On an existing panel: true ensures it has a query, generating one from `query` only when it has none; false removes the query so the panel is static; omit it to keep the current state.'
       ),
     regenerateESQL: z
       .boolean()
       .optional()
       .describe(
-        'Existing panel only. Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "query".'
+        'Existing panels only. Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from `query`, keeping the parts the request does not change. Omit it for edits that only change the look: colors, sizes, wording, layout. Requires `query`; cannot be combined with hasData false.'
       ),
     index: z
       .string()
       .max(256)
       .optional()
       .describe(
-        'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
+        'Index, alias, data stream, or pattern the data comes from. Pass it whenever known, with hasData true or on an edit that regenerates or adds the query.'
       ),
   })
 );
