@@ -1503,3 +1503,116 @@ describe('#generateRawLegacyUrlAliasId', () => {
     });
   });
 });
+
+describe('access control lists', () => {
+  const owner = { type: 'user', id: 'u_owner' };
+  const canonicalAcl = {
+    version: [1],
+    owner: { type: ['user'], id: ['u_owner'] },
+    general_access: ['none'],
+    entries: [
+      { type: ['user'], id: ['u_grantee'], access: ['use'], added_at: ['2026-10-21T00:00:00Z'] },
+    ],
+  };
+
+  describe('#rawToSavedObject', () => {
+    test.each([
+      ['namespace-agnostic', namespaceAgnosticSerializer],
+      ['single-namespace', singleNamespaceSerializer],
+      ['multi-namespace', multiNamespaceSerializer],
+      ['legacy access control disabled', accessControlDisabledSerializer],
+    ])('returns a canonical ACL (%s)', (_name, serializer) => {
+      const actual = serializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          foo: {},
+          acl: {
+            version: 1,
+            owner,
+            general_access: 'none',
+            entries: [
+              { type: 'user', id: 'u_grantee', access: 'use', added_at: '2026-10-21T00:00:00Z' },
+            ],
+          },
+        },
+      });
+      expect(actual.acl).toEqual(canonicalAcl);
+    });
+
+    test('merges dotted root keys into the canonical ACL', () => {
+      const actual = multiNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          foo: {},
+          acl: { version: 1, general_access: 'edit' },
+          'acl.owner.id': 'u_owner',
+          'acl.owner.type': 'user',
+          'acl.general_access': 'none',
+        },
+      });
+      expect(actual.acl).toEqual({
+        version: [1],
+        owner: { type: ['user'], id: ['u_owner'] },
+        general_access: ['edit', 'none'],
+        entries: [],
+      });
+    });
+
+    test('omits the ACL when the document has none', () => {
+      const actual = multiNamespaceSerializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: { type: 'foo', foo: {}, acl: null },
+      });
+      expect(actual).not.toHaveProperty('acl');
+    });
+  });
+
+  describe('#savedObjectToRaw', () => {
+    test('writes an ACL document as is', () => {
+      const aclDocument = {
+        version: 1 as const,
+        owner: { type: 'user' as const, id: 'u_owner' },
+        general_access: 'none' as const,
+        entries: [],
+      };
+      const actual = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        id: 'bar',
+        attributes: {},
+        references: [],
+        acl: aclDocument,
+      });
+      expect(actual._source.acl).toEqual(aclDocument);
+    });
+
+    test('writes a canonical ACL back as a source value that indexes to the same values', () => {
+      const actual = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        id: 'bar',
+        attributes: {},
+        references: [],
+        acl: { ...canonicalAcl, general_access: ['edit', 'none'] },
+      });
+      expect(actual._source.acl).toEqual({
+        version: 1,
+        owner: { type: 'user', id: 'u_owner' },
+        general_access: ['edit', 'none'],
+        entries: [
+          { type: 'user', id: 'u_grantee', access: 'use', added_at: '2026-10-21T00:00:00Z' },
+        ],
+      });
+    });
+
+    test('writes no ACL when the object has none', () => {
+      const actual = multiNamespaceSerializer.savedObjectToRaw({
+        type: 'foo',
+        id: 'bar',
+        attributes: {},
+        references: [],
+      });
+      expect(actual._source).not.toHaveProperty('acl');
+    });
+  });
+});

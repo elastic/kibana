@@ -143,4 +143,36 @@ describe('createActionConnector', () => {
       ]
     `);
   });
+
+  test('should send the initial access control in the create request', async () => {
+    http.post.mockResolvedValueOnce({
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      is_deprecated: false,
+      name: 'My test',
+      config: {},
+      secrets: {},
+      id: '123',
+    });
+    const accessControl = {
+      general_access: 'none' as const,
+      entries: [{ type: 'user' as const, id: 'u_alice', access: 'use' as const }],
+    };
+
+    await createActionConnector({
+      http,
+      connector: { actionTypeId: 'test', name: 'My test', config: {}, secrets: {} },
+      accessControl,
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/api/actions/connector', {
+      body: JSON.stringify({
+        name: 'My test',
+        config: {},
+        secrets: {},
+        connector_type_id: 'test',
+        access_control: accessControl,
+      }),
+    });
+  });
 });

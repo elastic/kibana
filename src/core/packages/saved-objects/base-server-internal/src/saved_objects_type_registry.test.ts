@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { FIXTURE_POLICY } from '@kbn/access-control';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
@@ -293,7 +294,98 @@ describe('SavedObjectTypeRegistry', () => {
       });
     });
 
+    describe('accessPolicy', () => {
+      it('registers a `multiple-isolated` type with a valid policy', () => {
+        registry.registerType(
+          createType({
+            name: 'typeOLS',
+            namespaceType: 'multiple-isolated',
+            accessPolicy: FIXTURE_POLICY,
+          })
+        );
+
+        expect(registry.getAccessPolicy('typeOLS')).toEqual(FIXTURE_POLICY);
+      });
+
+      it('throws for an invalid policy', () => {
+        expect(() =>
+          registry.registerType(
+            createType({
+              name: 'typeOLS',
+              namespaceType: 'multiple-isolated',
+              accessPolicy: {
+                ...FIXTURE_POLICY,
+                generalAccess: { default: 'view', allowed: ['none', 'edit'] },
+              },
+            })
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeOLS: Invalid 'accessPolicy'. Default general access \\"view\\" is not one of the allowed levels."`
+        );
+      });
+
+      it.each(['single', 'multiple', 'agnostic'] as const)(
+        'throws when namespaceType is `%s`',
+        (namespaceType) => {
+          expect(() =>
+            registry.registerType(
+              createType({ name: 'typeOLS', namespaceType, accessPolicy: FIXTURE_POLICY })
+            )
+          ).toThrow(
+            "Type typeOLS: Cannot specify 'accessPolicy' unless 'namespaceType' is 'multiple-isolated'."
+          );
+        }
+      );
+
+      it('throws when the type also sets `supportsAccessControl`', () => {
+        expect(() =>
+          registry.registerType(
+            createType({
+              name: 'typeOLS',
+              namespaceType: 'multiple-isolated',
+              supportsAccessControl: true,
+              accessPolicy: FIXTURE_POLICY,
+            })
+          )
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeOLS: Cannot specify both 'accessPolicy' and 'supportsAccessControl'."`
+        );
+      });
+
+      it('validates the policy even when access control is disabled', () => {
+        registry.setAccessControlEnabled(false);
+
+        expect(() =>
+          registry.registerType(
+            createType({
+              name: 'typeOLS',
+              namespaceType: 'multiple-isolated',
+              supportsAccessControl: true,
+              accessPolicy: FIXTURE_POLICY,
+            })
+          )
+        ).toThrow("Cannot specify both 'accessPolicy' and 'supportsAccessControl'.");
+      });
+    });
+
     // TODO: same test with 'onImport'
+  });
+
+  describe('#getAccessPolicy', () => {
+    it('returns the policy of a registered type and undefined otherwise', () => {
+      registry.registerType(
+        createType({
+          name: 'typeOLS',
+          namespaceType: 'multiple-isolated',
+          accessPolicy: FIXTURE_POLICY,
+        })
+      );
+      registry.registerType(createType({ name: 'typeA', namespaceType: 'multiple-isolated' }));
+
+      expect(registry.getAccessPolicy('typeOLS')).toEqual(FIXTURE_POLICY);
+      expect(registry.getAccessPolicy('typeA')).toBeUndefined();
+      expect(registry.getAccessPolicy('unknownType')).toBeUndefined();
+    });
   });
 
   describe('#getType', () => {

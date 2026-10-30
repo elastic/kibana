@@ -91,6 +91,16 @@ describe('isRootLevelAttribute', () => {
   it('returns false when referring to a path to a valid root level type field', () => {
     expect(isRootLevelAttribute('foo.foo', mockMappings, ['foo'])).toBe(false);
   });
+  it('returns false when referring to the access control list, even when it is mapped', () => {
+    const mappingsWithAcl = {
+      properties: {
+        ...mockMappings.properties,
+        acl: { properties: { owner: { properties: { id: { type: 'keyword' } } } } },
+      },
+    } as const;
+    expect(isRootLevelAttribute('foo.acl', mappingsWithAcl, ['foo'])).toBe(false);
+    expect(isRootLevelAttribute('foo.acl.owner.id', mappingsWithAcl, ['foo'])).toBe(false);
+  });
 });
 
 describe('rewriteRootLevelAttribute', () => {

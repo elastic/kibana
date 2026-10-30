@@ -99,7 +99,12 @@ export const PrincipalPicker = ({
 
   const options: Array<EuiComboBoxOptionOption<SuggestedUser>> = users
     .filter(({ uid }) => !isExcluded({ type: 'user', id: uid }))
-    .map((user) => ({ key: user.uid, label: getUserDisplayName(user.user), value: user }));
+    .map((user) => ({
+      key: user.uid,
+      label: getUserDisplayName(user.user),
+      value: user,
+      'data-test-subj': `${dataTestSubj}Option-${user.uid}`,
+    }));
 
   const renderOption = ({ value: user }: EuiComboBoxOptionOption<SuggestedUser>) =>
     user ? (
@@ -154,6 +159,8 @@ export const PrincipalPicker = ({
       <EuiComboBox<SuggestedUser>
         async
         fullWidth
+        // Adds one person per pick and closes the list, so it does not cover the controls below.
+        singleSelection={{ asPlainText: true }}
         isLoading={isLoading}
         isDisabled={isDisabled}
         options={options}

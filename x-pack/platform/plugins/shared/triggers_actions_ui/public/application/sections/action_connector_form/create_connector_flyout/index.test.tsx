@@ -82,6 +82,8 @@ describe('CreateConnectorFlyout', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true },
     };
+    // The flyout loads the connector access policy; an empty response leaves access control off.
+    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({});
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(createConnectorResponse);
     appMockRenderer.coreStart.http.head = jest.fn().mockResolvedValue({});
   });

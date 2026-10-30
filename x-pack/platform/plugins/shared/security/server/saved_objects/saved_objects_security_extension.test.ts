@@ -113,7 +113,13 @@ function setupSimpleCheckPrivsMockResolve(
   } as CheckPrivilegesResponse);
 }
 
-function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: boolean } = {}) {
+function setup({
+  includeSavedObjectNames = true,
+  primeRecovery,
+}: {
+  includeSavedObjectNames?: boolean;
+  primeRecovery?: jest.Mock;
+} = {}) {
   const actions = new Actions();
   jest
     .spyOn(actions.savedObject, 'get')
@@ -136,8 +142,16 @@ function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: b
     checkPrivileges,
     getCurrentUser,
     typeRegistry: typeRegistryMocked,
+    primeRecovery,
   });
-  return { actions, auditLogger, errors, checkPrivileges, securityExtension };
+  return {
+    actions,
+    auditLogger,
+    errors,
+    checkPrivileges,
+    securityExtension,
+    typeRegistry: typeRegistryMocked,
+  };
 }
 
 // ToDo: test inaccessible objects when authorizing objects with access control
@@ -1301,6 +1315,113 @@ describe('#authorize (unpublished by interface)', () => {
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('#authorize recovery priming for types with an access policy', () => {
+  const types = new Set(['action', 'b']);
+  const spaces = new Set(['x']);
+  const actions = new Set([SecurityAction.GET]);
+
+  const setupWithAccessPolicy = (primeRecovery?: jest.Mock) => {
+    const result = setup({ primeRecovery });
+    result.typeRegistry.getAccessPolicy.mockImplementation((type) =>
+      type === 'action' ? ({} as ReturnType<typeof result.typeRegistry.getAccessPolicy>) : undefined
+    );
+    return result;
+  };
+
+  const mockPrivileges = (
+    checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges>,
+    recovery: { resource?: string; authorized: boolean }
+  ) =>
+    checkPrivileges.mockResolvedValue({
+      // Elasticsearch reports the missing recovery privilege as not all requested.
+      hasAllRequested: recovery.authorized,
+      privileges: {
+        kibana: [
+          { resource: 'x', privilege: 'mock-saved_object:action/get', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/get', authorized: true },
+          {
+            resource: recovery.resource,
+            privilege: `mock-saved_object:action/${MANAGE_ACCESS_CONTROL_ACTION}`,
+            authorized: recovery.authorized,
+          },
+          { resource: 'x', privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+  test('requests recovery together with the requested actions', async () => {
+    const primeRecovery = jest.fn();
+    const { securityExtension, checkPrivileges } = setupWithAccessPolicy(primeRecovery);
+    mockPrivileges(checkPrivileges, { resource: 'x', authorized: false });
+
+    // eslint-disable-next-line dot-notation
+    await securityExtension['authorize']({ types, spaces, actions });
+
+    expect(checkPrivileges).toHaveBeenCalledTimes(1);
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      [
+        'mock-saved_object:action/get',
+        'mock-saved_object:b/get',
+        `mock-saved_object:action/${MANAGE_ACCESS_CONTROL_ACTION}`,
+        'login:',
+      ],
+      ['x']
+    );
+  });
+
+  test('stays fully authorized when only recovery is missing and hides it from the result', async () => {
+    const primeRecovery = jest.fn();
+    const { securityExtension, checkPrivileges } = setupWithAccessPolicy(primeRecovery);
+    mockPrivileges(checkPrivileges, { resource: 'x', authorized: false });
+
+    // eslint-disable-next-line dot-notation
+    const result = await securityExtension['authorize']({ types, spaces, actions });
+
+    expect(result.status).toBe('fully_authorized');
+    expect(result.typeMap.get('action')).toEqual({
+      get: { authorizedSpaces: ['x'] },
+      'login:': { authorizedSpaces: ['x'] },
+    });
+    expect(primeRecovery).toHaveBeenCalledTimes(1);
+    expect(primeRecovery).toHaveBeenCalledWith('action', ['x'], false);
+  });
+
+  test('primes granted recovery, globally for a privilege without a space', async () => {
+    const primeRecovery = jest.fn();
+    const { securityExtension, checkPrivileges } = setupWithAccessPolicy(primeRecovery);
+    mockPrivileges(checkPrivileges, { resource: undefined, authorized: true });
+
+    // eslint-disable-next-line dot-notation
+    const result = await securityExtension['authorize']({ types, spaces, actions });
+
+    expect(result.status).toBe('fully_authorized');
+    expect(primeRecovery).toHaveBeenCalledWith('action', ['*'], true);
+  });
+
+  test('does not request recovery without a primeRecovery callback', async () => {
+    const { securityExtension, checkPrivileges } = setupWithAccessPolicy();
+    checkPrivileges.mockResolvedValue({
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { resource: 'x', privilege: 'mock-saved_object:action/get', authorized: true },
+          { resource: 'x', privilege: 'mock-saved_object:b/get', authorized: true },
+          { resource: 'x', privilege: 'login:', authorized: true },
+        ],
+      },
+    } as CheckPrivilegesResponse);
+
+    // eslint-disable-next-line dot-notation
+    const result = await securityExtension['authorize']({ types, spaces, actions });
+
+    expect(result.status).toBe('fully_authorized');
+    expect(checkPrivileges).toHaveBeenCalledWith(
+      ['mock-saved_object:action/get', 'mock-saved_object:b/get', 'login:'],
+      ['x']
+    );
   });
 });
 

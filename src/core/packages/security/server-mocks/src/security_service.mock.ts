@@ -78,14 +78,10 @@ const createScopedAccessControlMock = (): jest.Mocked<CoreScopedAccessControl> =
   primeRecovery: jest.fn(),
 });
 
-const createAccessControlMock = () => {
-  const scoped = createScopedAccessControlMock();
-  return {
-    isEnabled: jest.fn().mockReturnValue(false),
-    asScoped: jest.fn().mockReturnValue(scoped),
-    scoped,
-  };
-};
+const createAccessControlMock = () => ({
+  isEnabled: jest.fn().mockReturnValue(false),
+  asScoped: jest.fn().mockImplementation(createScopedAccessControlMock),
+});
 
 export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart, 'audit'>> & {
   audit: MockedAuditService;
@@ -154,6 +150,7 @@ const createServiceMock = () => {
   const mock = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
+    setAccessPolicyProvider: jest.fn(),
     stop: jest.fn(),
   });
 

@@ -266,8 +266,13 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const connectorAccess = useObjectAccess(http, 'action', connector.id, {
     isEnabled: isAccessControlEnabled,
   });
+  // Until the caller's access is known, the configuration cannot be saved.
+  const isLoadingAccess =
+    accessPolicy.isLoading ||
+    (isAccessControlEnabled && !connectorAccess.data && !connectorAccess.error);
   const canEditConnector =
-    !isAccessControlEnabled || !!connectorAccess.data?.permissions.includes('edit');
+    !isLoadingAccess &&
+    (!isAccessControlEnabled || !!connectorAccess.data?.permissions.includes('edit'));
 
   const {
     actionTypeModel,

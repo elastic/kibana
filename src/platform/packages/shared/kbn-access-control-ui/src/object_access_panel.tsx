@@ -104,7 +104,7 @@ export const ObjectAccessPanel = ({
         toasts?.addWarning(
           i18n.translate('accessControlUi.panel.savedWithWarnings', {
             defaultMessage:
-              'Access saved. {count, plural, one {# person} other {# people}} need a role with more privileges before their access applies.',
+              'Access saved. {count, plural, one {# person needs} other {# people need}} a role with more privileges before their access applies.',
             values: { count: result.warnings.length },
           })
         );
