@@ -2230,22 +2230,6 @@ groups:
           serverless:
             security: ga
 
-      - setting: "securitySolution:enableNewFlyout"
-        id: security-solution-enable-new-flyout
-        description: |
-          Enables the new flyout system for document (alert and event), attack, host, user, rule, network, indicator of compromise, misconfigurations, and vulnerabilities details.
-
-          Turn this setting off to use the previous flyout layout, which uses right, left, and preview panels instead of a single flyout with [child flyouts](docs-content://solutions/security/get-started/elastic-security-ui.md#details-flyouts).
-        datatype: bool
-        default: true
-        applies_to:
-          stack: ga 9.5+
-          ech: ga
-          ece: ga
-          eck: ga
-          self: ga
-          serverless: unavailable
-
       - setting: "securitySolution:enableRuleChangesHistory"
         id: security-solution-enable-rule-changes-history
         description: |
