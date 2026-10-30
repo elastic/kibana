@@ -6,7 +6,9 @@
  */
 
 import type { AuthMode } from '@kbn/connector-specs';
+import type { CanonicalAcl } from '@kbn/access-control';
 import type { RawAction, ActionType } from '../../../types';
+import { ensureConnectorOperation } from '../../../lib/connector_access';
 import { getActionKibanaPrivileges } from '../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../lib/is_system_action';
@@ -50,6 +52,7 @@ export async function getConnectorAuth(
   let actionTypeId: string | undefined;
   let authMode: AuthMode | undefined;
   let config: Record<string, unknown> = {};
+  let acl: CanonicalAcl | undefined;
 
   try {
     if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {
@@ -61,11 +64,12 @@ export async function getConnectorAuth(
       authMode = connector?.authMode;
       config = (connector?.config ?? {}) as Record<string, unknown>;
     } else {
-      const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>(
+      const { attributes, acl: connectorAcl } = await unsecuredSavedObjectsClient.get<RawAction>(
         ACTION_SAVED_OBJECT_TYPE,
         connectorId
       );
 
+      acl = connectorAcl;
       actionTypeId = attributes.actionTypeId;
       authMode = attributes.authMode;
       config = attributes.config ?? {};
@@ -87,6 +91,12 @@ export async function getConnectorAuth(
   const inMemoryAction = inMemoryConnectors.find(
     (inMemoryConnector) => inMemoryConnector.id === connectorId
   );
+
+  // Handing out credentials needs the same access as running the connector, checked before the
+  // secrets are decrypted.
+  if (!inMemoryAction) {
+    await ensureConnectorOperation(context, { id: connectorId, acl, operation: 'use' });
+  }
 
   let secrets;
 

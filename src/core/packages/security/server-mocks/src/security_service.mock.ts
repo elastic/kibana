@@ -80,7 +80,11 @@ const createScopedAccessControlMock = (): jest.Mocked<CoreScopedAccessControl> =
 
 const createAccessControlMock = () => {
   const scoped = createScopedAccessControlMock();
-  return { asScoped: jest.fn().mockReturnValue(scoped), scoped };
+  return {
+    isEnabled: jest.fn().mockReturnValue(false),
+    asScoped: jest.fn().mockReturnValue(scoped),
+    scoped,
+  };
 };
 
 export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart, 'audit'>> & {

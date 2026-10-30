@@ -89,6 +89,8 @@ export const oauthDisconnectRoute = (
         // Verify the connector exists and the user has access via the actions client
         const actionsClient = (await context.actions).getActionsClient();
         await actionsClient.get({ id: connectorId });
+        // Checked before the configuration is decrypted and before any token is deleted.
+        await actionsClient.ensureOAuthAccess(connectorId);
 
         const core = await context.core;
         const [, { encryptedSavedObjects }] = await coreSetup.getStartServices();

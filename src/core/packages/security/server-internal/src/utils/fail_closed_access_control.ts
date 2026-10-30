@@ -34,6 +34,7 @@ export const createFailClosedAccessControl = (
   };
 
   return {
+    isEnabled: () => true,
     asScoped: () => ({
       isEnabled: () => true,
       getPrincipal: async () => undefined,

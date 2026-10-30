@@ -55,6 +55,7 @@ import {
 import { connectorModelVersions } from './model_versions/connector_model_versions';
 import { actionEncryptedRegistrationV3 } from './action_encryption';
 import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
+import { CONNECTOR_ACCESS_POLICY } from '../../common/access_policy';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -73,6 +74,7 @@ export function setupSavedObjects(
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
+    accessPolicy: CONNECTOR_ACCESS_POLICY,
     mappings: actionMappings,
     migrations: getActionsMigrations(encryptedSavedObjects),
     management: {

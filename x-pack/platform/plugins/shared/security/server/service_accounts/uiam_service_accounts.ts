@@ -385,6 +385,12 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
    * Repeating a revoke while UIAM still holds the record succeeds, so a retry is safe. Once UIAM
    * drops the record, the same call answers 404.
    */
+  // shortcut: UIAM service accounts cannot receive object-level grants until Kibana can check that
+  // one exists without a caller, so every id is reported as unknown.
+  async exists(_id: string) {
+    return false;
+  }
+
   async delete(request: KibanaRequest, id: string): Promise<DeleteServiceAccountResponse> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
