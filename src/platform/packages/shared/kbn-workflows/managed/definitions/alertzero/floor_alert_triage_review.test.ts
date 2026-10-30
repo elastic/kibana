@@ -183,11 +183,17 @@ describe('floor_alert_triage_review — create collision', () => {
     );
     // The owner gets the alerts and the same join message as a join made when the batch ran.
     expect(names).toEqual(
-      expect.arrayContaining(['attach_joined_alert_chunk', 'post_comment_joined_owner'])
+      expect.arrayContaining(['tag_joined_alert_chunk', 'post_comment_joined_owner'])
     );
-    expect(stepByName('attach_joined_alert_chunk')?.with?.conversation_id).toBe(
-      '{{ steps.join_on_collision.output.conversation_id }}'
+    expect(stepByName('attach_joined_alerts')).toBeUndefined();
+    // Its Investigation tag puts them in the owner's Investigation, whose attachment matches it.
+    expect(stepByName('tag_joined_alerts')?.foreach).toBe(
+      '${{ steps.join_on_collision.output.alert_ids | chunk: 500 | json }}'
     );
+    expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: ['az:triage_investigation:{{ steps.join_on_collision.output.conversation_id }}'],
+      tags_to_remove: [],
+    });
     const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
     expect(
       renderString(message, {
@@ -664,8 +670,11 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.with?.alert_ids).toBe('${{ inputs.fp_candidate_ids }}');
   });
 
-  it('keeps no kibana.SetAlertTags step: the typed step does every re-tag', () => {
-    expect(allSteps.some((step) => step.type === 'kibana.SetAlertTags')).toBe(false);
+  it('keeps no kibana.SetAlertTags step that re-tags: the typed step does every re-tag', () => {
+    const setTags = allSteps.filter((step) => step.type === 'kibana.SetAlertTags');
+    // The only one adds the owner's Investigation tag to joined alerts and removes nothing.
+    expect(setTags.map(({ name }) => name)).toEqual(['tag_joined_alert_chunk']);
+    expect((setTags[0].with?.tags as { tags_to_remove: string[] }).tags_to_remove).toEqual([]);
   });
 
   it.each([

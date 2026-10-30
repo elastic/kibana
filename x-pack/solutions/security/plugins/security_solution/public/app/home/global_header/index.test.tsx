@@ -204,6 +204,7 @@ describe('global header', () => {
     '/administration/trusted_apps',
     '/administration/response_actions_history',
     '/administration/script_library',
+    '/manage',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {
