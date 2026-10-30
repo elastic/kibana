@@ -219,6 +219,23 @@ describe('MemoryKeywordTreemap', () => {
   });
 
   /**
+   * `clipText` cannot be left on for a single cell.
+   *
+   * The chart builds the fill label's clip out of the canvas path its previous
+   * draw left behind (the cell rectangles, which a save/restore does not cover),
+   * and one cell's own rectangle winds against the clip rectangle: the label is
+   * laid out, painted, and then clipped away entirely. Dropping `clipText` takes
+   * the chart out of that path, and with one cell the label is laid out inside
+   * the whole panel either way.
+   */
+  it('asks the chart not to clip when a single keyword is left', () => {
+    renderTreemap({ pages: [summary({ tags: ['memory', 'agent-builder'] })] });
+
+    expect(partition().data).toHaveLength(1);
+    expect(layer().fillLabel!.clipText).toBe(false);
+  });
+
+  /**
    * The chip's remove affordance is the one thing standing between a filter and
    * the person who wants it gone, so it has to be a button of its own rather than
    * part of the chip's click target.

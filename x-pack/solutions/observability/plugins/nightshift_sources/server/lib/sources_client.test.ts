@@ -376,6 +376,18 @@ describe('SourcesClient', () => {
   });
 
   describe('create', () => {
+    it('puts the request space into the view name', async () => {
+      const { client } = setup({ spaceId: 'marketing' });
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+      });
+
+      expect(source.view_name).toBe(getNightshiftSourceViewName('marketing', 'nginx-errors'));
+    });
+
     it('appends -2 when an orphaned view already uses that name', async () => {
       const { client, soClient, viewsClient } = setup();
       viewsClient.getView
