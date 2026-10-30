@@ -903,32 +903,36 @@ const fingerprintExpiresAt = (attack: AttackSignals, now: Date): string => {
   return new Date((Number.isNaN(last) ? now.getTime() : last) + FINGERPRINT_TTL_MS).toISOString();
 };
 
+interface AttachmentFlags {
+  tagCorrelatedAlerts: boolean;
+  journalAlertsRetired: boolean;
+  tagFpChainAlerts: boolean;
+  fingerprintPending: boolean;
+  retargetIfMissing: boolean;
+  analyzedAlertIds?: readonly string[];
+}
+
 const attachmentOf = (
   attack: AttackSignals,
   investigationId: string,
-  tag: boolean,
-  retireAlerts: boolean,
-  tagFpChain: boolean,
-  fingerprintPending: boolean,
-  retargetIfMissing: boolean,
   spaceId: string,
   now: Date,
-  analyzedAlertIds?: readonly string[]
+  flags: AttachmentFlags
 ): MatchAttachment => ({
   attack_discovery_id: attack.attackId.slice(0, 512),
   title: attack.title.slice(0, 1024),
   // A false-positive continuation retires only the alerts the review judged.
-  alert_ids: (analyzedAlertIds === undefined
+  alert_ids: (flags.analyzedAlertIds === undefined
     ? attack.alertIds
-    : sharedIds(attack.alertIds, analyzedAlertIds)
+    : sharedIds(attack.alertIds, flags.analyzedAlertIds)
   ).slice(0, MAX_ALERT_IDS),
   summary_markdown: attack.summaryMarkdown.slice(0, 8000),
   investigation_id: investigationId.slice(0, 256),
-  journal_alerts_retired: retireAlerts,
-  tag_correlated_alerts: tag,
-  tag_fp_chain_alerts: tagFpChain,
-  fingerprint_pending: fingerprintPending,
-  retarget_if_missing: retargetIfMissing,
+  journal_alerts_retired: flags.journalAlertsRetired,
+  tag_correlated_alerts: flags.tagCorrelatedAlerts,
+  tag_fp_chain_alerts: flags.tagFpChainAlerts,
+  fingerprint_pending: flags.fingerprintPending,
+  retarget_if_missing: flags.retargetIfMissing,
   own_fingerprint_id: fingerprintId(spaceId, attack, investigationIdFromAttackId(attack.attackId)),
   host_entity_ids: uniqueSorted(attack.hostEntityIds).slice(0, STORED_ALERT_ID_CAP),
   user_entity_ids: uniqueSorted(attack.userEntityIds).slice(0, STORED_ALERT_ID_CAP),
@@ -953,18 +957,14 @@ const applyDecision = (
   if (decision.kind === 'attach') {
     for (const member of group) {
       attachments.push(
-        attachmentOf(
-          member,
-          decision.investigationId,
-          decision.tagCorrelatedAlerts,
-          decision.journalAlertsRetired,
-          decision.tagFpChainAlerts,
+        attachmentOf(member, decision.investigationId, spaceId, now, {
+          tagCorrelatedAlerts: decision.tagCorrelatedAlerts,
+          journalAlertsRetired: decision.journalAlertsRetired,
+          tagFpChainAlerts: decision.tagFpChainAlerts,
           fingerprintPending,
           retargetIfMissing,
-          spaceId,
-          now,
-          decision.tagFpChainAlerts ? analyzedAlertIds : undefined
-        )
+          analyzedAlertIds: decision.tagFpChainAlerts ? analyzedAlertIds : undefined,
+        })
       );
     }
     return;
@@ -983,7 +983,13 @@ const applyDecision = (
   );
   for (const member of group.slice(1)) {
     attachments.push(
-      attachmentOf(member, decision.investigationId, false, false, false, false, false, spaceId, now)
+      attachmentOf(member, decision.investigationId, spaceId, now, {
+        tagCorrelatedAlerts: false,
+        journalAlertsRetired: false,
+        tagFpChainAlerts: false,
+        fingerprintPending: false,
+        retargetIfMissing: false,
+      })
     );
   }
 };
