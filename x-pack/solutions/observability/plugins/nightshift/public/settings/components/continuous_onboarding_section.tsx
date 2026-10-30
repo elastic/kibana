@@ -45,7 +45,7 @@ export const ContinuousOnboardingSection = ({
               })
             : i18n.translate('xpack.nightshift.settings.continuousKiOnboardingHelp', {
                 defaultMessage:
-                  'Run knowledge indicator onboarding automatically on enabled sources at the configured interval.',
+                  'Turns on when this space gets its first source. Runs knowledge indicator onboarding on enabled sources at the configured interval.',
               })}
         </p>
       }

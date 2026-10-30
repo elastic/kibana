@@ -6,16 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
 import { MIN_EXTRACTION_INTERVAL_HOURS } from '../../../../../common/constants';
+import { setContinuousOnboardingEnabled } from '../../../../lib/continuous_onboarding/set_continuous_onboarding_enabled';
 
 const putContinuousKiExtractionSettingsBodySchema = z.object({
   continuousKiExtraction: z.object({
@@ -69,11 +67,6 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     }
 
     const updates: Record<string, boolean | number | string> = {};
-
-    if (continuousKiExtraction.enabled !== undefined) {
-      updates[OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED] =
-        continuousKiExtraction.enabled;
-    }
     if (continuousKiExtraction.intervalHours !== undefined) {
       updates[OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS] =
         continuousKiExtraction.intervalHours;
@@ -89,28 +82,24 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
       await uiSettingsClient.setMany(updates);
     }
 
-    // Only reconcile the workflow on an actual enabled-state transition. Interval
-    // changes are picked up by the running workflow at execution time.
-    const previousEnabled = allSettings[
-      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
-    ] as boolean;
-    const nextEnabled = continuousKiExtraction.enabled;
-
-    if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
-      try {
-        await continuousOnboardingWorkflowService.ensureWorkflow({
-          enabled: nextEnabled,
+    try {
+      if (continuousKiExtraction.enabled !== undefined) {
+        await setContinuousOnboardingEnabled({
+          uiSettingsClient,
+          workflowService: continuousOnboardingWorkflowService,
+          enabled: continuousKiExtraction.enabled,
           request,
           spaceId: request.spaceId,
+          logger,
         });
-      } catch (err) {
-        if (Object.keys(previousValues).length > 0) {
-          await uiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
-            logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
-          });
-        }
-        throw err;
       }
+    } catch (err) {
+      if (Object.keys(previousValues).length > 0) {
+        await uiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+          logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+        });
+      }
+      throw err;
     }
 
     return { success: true };

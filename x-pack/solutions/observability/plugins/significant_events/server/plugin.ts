@@ -135,6 +135,8 @@ import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboa
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { getContinuousOnboardingTarget } from './lib/continuous_onboarding/get_continuous_onboarding_target';
+import { setContinuousOnboardingEnabled } from './lib/continuous_onboarding/set_continuous_onboarding_enabled';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -564,6 +566,46 @@ export class SignificantEventsPlugin
           if ((await this.maintenanceService?.getState({ request })) !== 'paused') {
             await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
           }
+        },
+        syncContinuousOnboarding: async (event) => {
+          if (event.type === 'updated' || !continuousOnboardingWorkflowService) {
+            return;
+          }
+
+          const isPaused =
+            (await this.maintenanceService?.getState({ request: event.request })) === 'paused';
+          if (isPaused) {
+            return;
+          }
+
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          const sourcesClient = await pluginsStart.nightshiftSources.getSourcesClient({
+            request: event.request,
+          });
+          // Concurrent first creates can both observe total 2 and miss the transition.
+          const { total } = await sourcesClient.list({ page: 1, perPage: 1 });
+          const enabled = getContinuousOnboardingTarget({
+            eventType: event.type,
+            total,
+            isPaused,
+          });
+          if (enabled === undefined) {
+            return;
+          }
+
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+            coreStart.savedObjects
+              .getUnsafeInternalClient()
+              .asScopedToNamespace(event.request.spaceId)
+          );
+          await setContinuousOnboardingEnabled({
+            uiSettingsClient,
+            workflowService: continuousOnboardingWorkflowService,
+            request: event.request,
+            spaceId: event.request.spaceId,
+            enabled,
+            logger: this.logger,
+          });
         },
       })
     );
