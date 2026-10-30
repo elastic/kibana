@@ -9,7 +9,6 @@
 
 import type { ComponentType } from 'react';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
@@ -137,7 +136,6 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   dataViews: DataViewsServicePublic;
   embeddable: EmbeddableSetup;
-  expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
   home?: HomePublicPluginSetup;
   inspector: InspectorPublicPluginSetup;
@@ -163,7 +161,6 @@ export interface DiscoverStartPlugins {
   dataVisualizer?: DataVisualizerPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
-  expressions: ExpressionsStart;
   fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPublicPluginStart;
