@@ -25,3 +25,11 @@ export type {
 } from './api/workflows_management_api';
 
 export type { WorkflowsManagementClient } from './api/workflows_management_client';
+
+export type {
+  AlertDocumentsLookup,
+  LoadAlertDocumentsRequest,
+  LoadedAlertDocument,
+  LoadedAlertDocuments,
+} from './api/routes/executions/utils/load_alert_documents';
+export { AlertDocumentsTooLargeError } from './api/routes/executions/utils/alert_documents_too_large_error';

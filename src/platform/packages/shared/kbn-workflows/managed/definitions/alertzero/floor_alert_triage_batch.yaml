@@ -147,6 +147,7 @@ steps:
       continue: true
     with:
       alert_ids: "${{ inputs.alert_ids }}"
+      space_id: "{{ workflow.spaceId }}"
 
   - name: guard_load_succeeded
     type: if
