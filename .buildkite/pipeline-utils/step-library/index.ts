@@ -15,9 +15,11 @@ export { buildFipsImage } from './steps/build_fips_image.ts';
 export { buildCloudFipsImageSteps } from './steps/build_cloud_fips_image.ts';
 export { buildCloudImageSteps } from './steps/build_cloud_image.ts';
 export { buildProjectSteps } from './steps/build_project.ts';
+export { apiContracts } from './steps/api_contracts.ts';
 export { checkNextDocs } from './steps/check_next_docs.ts';
 export { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
 export { checkSavedObjects } from './steps/check_saved_objects.ts';
+export { codeQuality } from './steps/code_quality.ts';
 export { cpsTests } from './steps/cps_testing.ts';
 export { deployCloudSteps } from './steps/deploy_cloud.ts';
 export { deployProjectSteps } from './steps/deploy_project.ts';
@@ -31,13 +33,16 @@ export {
   warmStartMemoryBenchSteps,
 } from './steps/benchmarks.ts';
 export { fleetCypressSteps } from './steps/fleet_cypress.ts';
+export { kbnHandlebars } from './steps/kbn_handlebars.ts';
 export { localCheck } from './steps/local_check.ts';
 export { postBuildSteps } from './steps/post_build.ts';
+export { promptChanges } from './steps/prompt_changes.ts';
 export { renovateValidation } from './steps/renovate.ts';
 export { responseOpsCasesSteps } from './steps/response_ops_cases.ts';
 export { responseOpsSteps } from './steps/response_ops.ts';
 export { scoutFleetRealAgentSteps } from './steps/scout_fleet_real_agent.ts';
 export { storybooks } from './steps/storybooks.ts';
+export { syncModelLabels } from './steps/sync_model_labels.ts';
 export { verifyFipsEnabled } from './steps/verify_fips_enabled.ts';
 export { workflowsOomTestingSteps } from './steps/workflows_oom_testing.ts';
 export { ai4dsocSteps } from './steps/security_solution/ai4dsoc.ts';

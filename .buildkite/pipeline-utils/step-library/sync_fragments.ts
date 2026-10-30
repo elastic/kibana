@@ -21,14 +21,17 @@ const ARRAY_START = 'export const FRAGMENTS: readonly Fragment[] = [';
 const NAME = /yamlFragment\('([^']+)'\)/;
 const PLAIN_ENTRY = /^ {2}yamlFragment\('([^']+)'\),$/;
 
-export const listPullRequestYamlNames = (root: string): string[] =>
-  fs
-    .readdirSync(path.join(root, '.buildkite/pipelines', PREFIX), {
-      recursive: true,
-      encoding: 'utf8',
-    })
+export const listPullRequestYamlNames = (root: string): string[] => {
+  const dir = path.join(root, '.buildkite/pipelines', PREFIX);
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(dir, { recursive: true, encoding: 'utf8' })
     .filter((file) => file.endsWith('.yml'))
     .map((file) => `${PREFIX}${file.slice(0, -'.yml'.length)}`);
+};
 
 const nameOf = (line: string): string => {
   const [, name] = NAME.exec(line) ?? [];
