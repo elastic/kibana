@@ -188,7 +188,6 @@
       "solutions/observability/plugins/significant_events",
       "platform/packages/shared/kbn-significant-events-schema"
     ],
-    "xpack.significantEventsApp": ["solutions/observability/plugins/significant_events_app"],
     "xpack.streams": [
       "platform/plugins/shared/streams_app",
       "platform/packages/shared/kbn-streams-ai",

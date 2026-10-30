@@ -336,7 +336,6 @@ exports[`pull_request fragments pull_request/base 1`] = `
     },
     {
       "agents": {
-        "image": "family/kibana-minimal-ubuntu-2604",
         "machineType": "n2-standard-2",
       },
       "command": ".buildkite/scripts/steps/test/pick_test_group_run_order.sh",
@@ -664,6 +663,8 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
         "preemptible": true,
       },
       "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
+      "concurrency": 1,
+      "concurrency_group": "kibana/cloud-image/pr-\${GITHUB_PR_NUMBER}",
       "key": "build_cloud_image",
       "label": "Build Cloud Image",
       "retry": {
@@ -682,6 +683,8 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
         "preemptible": true,
       },
       "command": ".buildkite/scripts/steps/cloud/deploy.sh",
+      "concurrency": 1,
+      "concurrency_group": "kibana/cloud-deploy/pr-\${GITHUB_PR_NUMBER}",
       "depends_on": [
         "build_cloud_image",
       ],

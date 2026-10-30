@@ -85,6 +85,13 @@ export interface RiskInputsTabProps<T extends EntityType> {
    *  flag on this is the only view shown (no sub-tab toggle): the right panel's risk summary
    *  decides whether the entity or the resolution-group score is being explained. */
   subTab?: RiskScoreLeftPanelSubTab;
+  /** Initial risk score history range. Defaults to the last 90 days. */
+  historyDefaultRange?: HistoryRange;
+}
+
+interface HistoryRange {
+  from: string;
+  to: string;
 }
 
 const RISK_INPUTS_ALERTS_CONTEXT = buildExecutionContext(
@@ -152,6 +159,7 @@ export const RiskInputsTab = <T extends EntityType>({
   entityId,
   onShowAlert,
   subTab: subTabProp,
+  historyDefaultRange,
 }: RiskInputsTabProps<T>) => {
   const panels = useStableExpandableFlyoutState();
   const { openLeftPanel } = useExpandableFlyoutApi();
@@ -337,6 +345,7 @@ export const RiskInputsTab = <T extends EntityType>({
       liveCriticality={liveCriticality}
       onShowAlert={onShowAlert}
       onSubTabChange={onSubTabChange}
+      historyDefaultRange={historyDefaultRange}
     />
   );
 };
@@ -365,6 +374,7 @@ interface RiskInputsTabContentProps<T extends EntityType> {
   liveCriticality: CriticalityLevelWithUnassigned | undefined;
   onShowAlert: (id: string, indexName: string) => void;
   onSubTabChange: (subTab: RiskScoreLeftPanelSubTab) => void;
+  historyDefaultRange?: HistoryRange;
 }
 
 const RiskInputsTabContent = <T extends EntityType>({
@@ -387,12 +397,13 @@ const RiskInputsTabContent = <T extends EntityType>({
   liveCriticality,
   onShowAlert,
   onSubTabChange,
+  historyDefaultRange = DEFAULT_HISTORY_RANGE,
 }: RiskInputsTabContentProps<T>) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const euidApi = useEntityStoreEuidApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
-  const [historyRange, setHistoryRange] = useState(DEFAULT_HISTORY_RANGE);
+  const [historyRange, setHistoryRange] = useState(historyDefaultRange);
   const [selectedTimestamp, setSelectedTimestamp] = useState<string | undefined>(undefined);
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
 
@@ -449,7 +460,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     [pitEntry, historyEntityId, entityType, historyEntityName]
   );
 
-  const onHistoryRangeChange = useCallback((range: { from: string; to: string }) => {
+  const onHistoryRangeChange = useCallback((range: HistoryRange) => {
     setHistoryRange(range);
     setSelectedTimestamp((current) =>
       isTimestampWithinRange(current, range) ? current : undefined
@@ -1135,12 +1146,9 @@ const formatContribution = (value: number): string => {
   return fixedValue;
 };
 
-const DEFAULT_HISTORY_RANGE = { from: 'now-90d', to: 'now' };
+const DEFAULT_HISTORY_RANGE: HistoryRange = { from: 'now-90d', to: 'now' };
 
-const isTimestampWithinRange = (
-  timestamp: string | undefined,
-  range: { from: string; to: string }
-): boolean => {
+const isTimestampWithinRange = (timestamp: string | undefined, range: HistoryRange): boolean => {
   if (timestamp === undefined) {
     return false;
   }
