@@ -29,8 +29,13 @@ const SERVERLESS_ROLE = 'admin';
 
 /**
  * Serverless suites create their service accounts as the mock IdP's organization admin, as the
- * other service account suites do: an account a project admin's session created could not
- * exchange for a token (403).
+ * other service account suites do.
+ *
+ * TODO: this may not be needed. The 403 on the token exchange that led here was the Kibana
+ * certificate naming a search project (see `withUiamCertOfProject`), not who created the account,
+ * and the Serverless FTR suite creates its account from the admin's session without trouble. Once
+ * elasticsearch-controller defines the detection engine role, try creating the account from the
+ * admin's session here too, and drop this key.
  */
 // Copied from `MOCK_IDP_UIAM_ORG_ADMIN_API_KEY` in `@kbn/mock-idp-utils`, a private platform package
 // this plugin cannot import.

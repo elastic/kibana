@@ -418,8 +418,19 @@ export async function resetMaintenance(
 
 /**
  * Sets the space up to run the detection engine as its service account, which resuming Significant
- * Events and creating queries (and so rules) require. On stateful the account's role has to exist
- * first; the setup creates the account itself.
+ * Events and creating queries (and so rules) require. The account's role has to exist first; the
+ * setup creates the account itself.
+ *
+ * The same suite runs on the stateful and on the local Serverless test stacks, and both define the
+ * role the same way: as a native Elasticsearch role (the Serverless FTR config turns native roles
+ * on), which is the role the account is given.
+ *
+ * TODO: Serverless does not define the `nightshift_detection_engine` role yet: it will come from
+ * elasticsearch-controller, as a platform (UIAM) role. Until then this is only correct because the
+ * suite never runs against a real Serverless project. Once the role exists, drop the `putRole`
+ * here, and check that `_enable` with an empty body still creates the account with it.
+ * The Scout fixture (`test/scout/api/fixtures/detection_engine_service_account.ts`) has the same
+ * workaround and the same TODO.
  */
 export async function setUpDetectionEngine(
   apiClient: SignificantEventsSupertestRepositoryClient,
