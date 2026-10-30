@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type {
   InventorySourceError,
   InventoryUnavailableColumn,
@@ -28,19 +28,16 @@ export const EntityTableTruncationCallout = ({
   returned: number;
   total: number | null;
 }) => (
-  <EuiCallOut
-    color="warning"
-    iconType="warning"
+  <KbnWarningCallout
     size="s"
     title={
       total === null
         ? getTruncationTotalUnknownTitle({ returned })
         : getTruncationTitle({ returned, total })
     }
+    text={<p>{TRUNCATION_BODY}</p>}
     data-test-subj="entityInventoryTruncationCallout"
-  >
-    <p>{TRUNCATION_BODY}</p>
-  </EuiCallOut>
+  />
 );
 
 /**
@@ -59,14 +56,10 @@ export const EntityTableDiagnosticsCallout = ({
   }
 
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
+    <KbnWarningCallout
       size="s"
       title={DIAGNOSTICS_TITLE}
-      data-test-subj="entityInventoryDiagnosticsCallout"
-    >
-      <EuiText size="s">
+      text={
         <ul>
           {errors.map((error, index) => (
             <li key={`error-${index}`}>{getSourceErrorText(error)}</li>
@@ -75,7 +68,8 @@ export const EntityTableDiagnosticsCallout = ({
             <li key={`column-${index}`}>{getUnavailableColumnText(unavailableColumn)}</li>
           ))}
         </ul>
-      </EuiText>
-    </EuiCallOut>
+      }
+      data-test-subj="entityInventoryDiagnosticsCallout"
+    />
   );
 };

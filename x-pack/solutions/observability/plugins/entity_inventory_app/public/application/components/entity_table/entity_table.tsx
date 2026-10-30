@@ -23,6 +23,11 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import { UI_SETTINGS } from '@kbn/data-service';
+import { getEbtProps } from '@kbn/ebt-click';
+import {
+  ENTITY_INVENTORY_EBT_ACTIONS,
+  ENTITY_INVENTORY_EBT_ELEMENTS,
+} from '../../../ebt_constants';
 import type {
   InventoryCellValue,
   InventoryEntityType,
@@ -187,16 +192,21 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
         right: (
           <EuiButtonEmpty
             size="xs"
-            iconType="editorUndo"
+            iconType="undo"
             onClick={onReset}
             data-test-subj="entityInventoryTableReset"
+            {...getEbtProps({
+              action: ENTITY_INVENTORY_EBT_ACTIONS.RESET_TABLE,
+              element: ENTITY_INVENTORY_EBT_ELEMENTS.ENTITY_TABLE,
+              detail: type,
+            })}
           >
             {RESET_TO_DEFAULT_LABEL}
           </EuiButtonEmpty>
         ),
       },
     }),
-    [list, pageIndex, pageSize, onReset]
+    [list, pageIndex, pageSize, onReset, type]
   );
 
   return (

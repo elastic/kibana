@@ -14,6 +14,11 @@ import {
   EuiLoadingSpinner,
   EuiProgress,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import {
+  ENTITY_INVENTORY_EBT_ACTIONS,
+  ENTITY_INVENTORY_EBT_ELEMENTS,
+} from '../../../ebt_constants';
 import { EntityTypeNotFoundError, useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
 import {
@@ -37,7 +42,7 @@ export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
     if (error instanceof EntityTypeNotFoundError) {
       return (
         <EuiEmptyPrompt
-          iconType="search"
+          iconType="magnify"
           title={<h2>{getTypeNotAvailableTitle(entityType)}</h2>}
           data-test-subj="entityInventoryTypeNotAvailable"
         />
@@ -51,7 +56,16 @@ export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
           title={<h2>{LOAD_ERROR_TITLE}</h2>}
           body={<p>{error.message}</p>}
           actions={
-            <EuiButton color="danger" onClick={refresh}>
+            <EuiButton
+              color="danger"
+              onClick={refresh}
+              data-test-subj="entityInventoryTableRetry"
+              {...getEbtProps({
+                action: ENTITY_INVENTORY_EBT_ACTIONS.RETRY_LOAD,
+                element: ENTITY_INVENTORY_EBT_ELEMENTS.ENTITY_TABLE,
+                detail: entityType,
+              })}
+            >
               {RETRY_LABEL}
             </EuiButton>
           }
@@ -92,7 +106,7 @@ export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
       <EuiFlexItem>
         {isEmpty ? (
           <EuiEmptyPrompt
-            iconType="search"
+            iconType="magnify"
             title={<h2>{getEmptyTitle(description.name)}</h2>}
             body={<p>{EMPTY_BODY}</p>}
             data-test-subj="entityInventoryTableEmpty"
