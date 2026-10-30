@@ -21,7 +21,6 @@ const request = {} as KibanaRequest;
 const ROUND = {
   id: 'round-1',
   started_at: '2026-10-29T10:00:00.000Z',
-  time_to_last_token: 120_000,
   trace_id: 'trace-round-1',
   input: { message: 'Why did the checkout alert fire?' },
   response: { message: 'A bad deploy of the payments service.' },
@@ -51,6 +50,7 @@ const INPUT = {
   evaluators: [{ name: 'conclusion_quality' }, { name: 'rca_reward', version: '1.0.0' }],
   judge_connector_id: 'judge-connector',
   investigation_started_at: '2026-10-29T09:59:58.000Z',
+  investigation_ended_at: '2026-10-29T10:02:00.000Z',
   investigation_execution_id: 'investigation-exec-1',
   entry_point: 'automation',
 };
@@ -213,22 +213,7 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
       output: { scored: true, evaluator_count: 2, failed_count: 2, skipped_count: 0 },
     });
     expect(evaluate).not.toHaveBeenCalled();
-    expect(reportOnlineEvalScore.mock.calls[0][0]).not.toHaveProperty('investigation_ended_at');
-  });
-
-  it("still scores a round whose end time can't be worked out", async () => {
-    const evaluate = jest
-      .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
-      .mockResolvedValue([okResult('conclusion_quality')]);
-    const { run, reportOnlineEvalScore } = setup({
-      evaluate,
-      rounds: [{ ...ROUND, time_to_last_token: undefined }],
-    });
-
-    await expect(run({ evaluators: [{ name: 'conclusion_quality' }] })).resolves.toEqual({
-      output: { scored: true, evaluator_count: 1, failed_count: 0, skipped_count: 0 },
-    });
-    expect(reportOnlineEvalScore.mock.calls[0][0]).not.toHaveProperty('investigation_ended_at');
+    expect(reportOnlineEvalScore).toHaveBeenCalledTimes(1);
   });
 
   it('sends nothing when the kill switch is on', async () => {

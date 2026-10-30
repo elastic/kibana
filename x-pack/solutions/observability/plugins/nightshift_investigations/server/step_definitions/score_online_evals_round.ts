@@ -54,6 +54,14 @@ const inputSchema = lazySchema(() =>
       .max(100)
       .refine(isDate, 'Must be a date')
       .describe('When the scored investigation run started.'),
+    investigation_ended_at: z
+      .string()
+      .max(100)
+      .refine(isDate, 'Must be a date')
+      .optional()
+      .describe(
+        'When the scored investigation run ended, set by the investigation workflow when it hands off to scoring.'
+      ),
     investigation_execution_id: z
       .string()
       .max(1024)
@@ -134,7 +142,6 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
       let failedEvaluators: ScoreInput['evaluators'] = [];
       let agentId: string | undefined;
       let roundTraceId: string | undefined;
-      let investigationEndedAt: string | undefined;
       try {
         const agentBuilder = getAgentBuilder();
         if (!agentBuilder) {
@@ -148,11 +155,6 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           throw new Error(`Round "${input.round_id}" not found in the investigation`);
         }
         roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
-        const roundEndedAt = Date.parse(round.started_at) + round.time_to_last_token;
-        investigationEndedAt = Number.isFinite(roundEndedAt)
-          ? new Date(roundEndedAt).toISOString()
-          : undefined;
-
         results = await evaluate({
           request,
           spaceId: workflow.spaceId,
@@ -189,7 +191,9 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
           ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
           judge_connector_id: input.judge_connector_id,
           investigation_started_at: input.investigation_started_at,
-          ...(investigationEndedAt ? { investigation_ended_at: investigationEndedAt } : {}),
+          ...(input.investigation_ended_at
+            ? { investigation_ended_at: input.investigation_ended_at }
+            : {}),
           scoring_duration_ms: Date.now() - scoringStartedAt,
         },
         results,
