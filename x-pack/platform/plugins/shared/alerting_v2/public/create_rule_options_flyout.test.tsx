@@ -61,7 +61,10 @@ jest.mock('./components/rule_create_options/rule_create_options_flyout', () => (
       <div data-test-subj="mockRuleCreateOptionsFlyout">
         <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
         <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
-        <button data-test-subj="thresholdBtn" onClick={props.onCreateThresholdRule as () => void} />
+        <button
+          data-test-subj="thresholdBtn"
+          onClick={() => (props.onCreateBuilderRule as (type: string) => void)('threshold')}
+        />
       </div>
     );
   },
@@ -73,6 +76,8 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
     capturedComposeProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
   },
+  registerRuleBuilder: jest.fn(),
+  getRuleBuilderCreateOptions: () => [],
 }));
 
 const mockCreateActionPolicyFormFlyout = () => null;

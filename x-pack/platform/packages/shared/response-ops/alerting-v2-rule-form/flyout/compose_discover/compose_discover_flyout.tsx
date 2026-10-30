@@ -205,7 +205,9 @@ const getFlyoutTitle = ({
     });
   }
   if (builderType) {
-    return RULE_BUILDER_REGISTRY[builderType]?.createFlyoutTitle ?? CREATE_RULE_FALLBACK_TITLE;
+    return (
+      RULE_BUILDER_REGISTRY[builderType]?.createOption?.flyoutTitle ?? CREATE_RULE_FALLBACK_TITLE
+    );
   }
   return CREATE_ESQL_TITLE;
 };
