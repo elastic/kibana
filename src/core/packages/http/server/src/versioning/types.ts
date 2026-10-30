@@ -152,7 +152,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *         },
  *         response: {
  *           200: {
- *             body: () => schema.object({ foo: schema.string({ maxLength: 1000 }) }),
+ *             body: () => schema.object({ foo: schema.string({ maxLength: 2000 }) }),
  *           },
  *         },
  *       },
@@ -177,7 +177,7 @@ export type VersionedRouteRegistrar<Method extends RouteMethod, Ctx extends RqCt
  *         },
  *         response: {
  *           200: {
- *             body: () => schema.object({ fooName: schema.string({ maxLength: 1000 }) }),
+ *             body: () => schema.object({ fooName: schema.string({ maxLength: 2000 }) }),
  *           },
  *         },
  *       },
