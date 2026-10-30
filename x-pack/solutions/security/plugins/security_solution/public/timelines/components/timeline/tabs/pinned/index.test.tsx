@@ -32,7 +32,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 jest.mock('../../../../containers', () => ({
   useTimelineEvents: jest.fn(),
@@ -48,7 +47,6 @@ jest.mock('../../../../../common/components/user_privileges');
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -134,7 +132,6 @@ describe('PinnedTabContent', () => {
 
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     useKibanaMock.mockReturnValue(kibanaMockResult);
 
