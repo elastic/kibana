@@ -23,9 +23,9 @@ export function buildEsqlParams({
 }): Array<Record<string, FieldValue>> | undefined {
   const timeParams = buildTimeRangeParams(timeRange) ?? [];
   // Looked up in the query, since a retry can add or drop a variable.
-  const variableParams = esqlVariables?.length
-    ? (getNamedParams(query, undefined, esqlVariables) as Array<Record<string, FieldValue>>)
-    : [];
+  const variableParams = getNamedParams(query, undefined, esqlVariables) as Array<
+    Record<string, FieldValue>
+  >;
   const params = [...timeParams, ...variableParams];
   return params.length > 0 ? params : undefined;
 }

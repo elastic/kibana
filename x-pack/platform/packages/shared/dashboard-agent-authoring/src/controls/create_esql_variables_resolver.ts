@@ -55,6 +55,8 @@ const getEsqlVariablesForSection = (
  * The values of a query-based control are cast by the column type its query returns, as a live control
  * does. Finding it takes a request, so it is made only for a control whose variable the queries refer
  * to and whose selection looks like a number, and once per control.
+ *
+ * Call the result with a panel's section to get that panel's `ResolveEsqlVariables`.
  */
 export const createEsqlVariablesResolver = ({
   pinnedPanels = [],
@@ -102,8 +104,11 @@ export const createEsqlVariablesResolver = ({
     return columnType;
   };
 
-  return (sectionId) =>
-    async (queries, { anyVariable = false } = {}) => {
+  return (sectionId) => {
+    const resolveEsqlVariables: ResolveEsqlVariables = async (
+      queries,
+      { anyVariable = false } = {}
+    ) => {
       const usedNames = new Set(queries.flatMap((query) => getESQLQueryVariables(query)));
       const types: Record<string, string> = {};
       await Promise.all(
@@ -118,4 +123,6 @@ export const createEsqlVariablesResolver = ({
       );
       return getEsqlVariablesForSection(toVariables(entries, types), sectionId);
     };
+    return resolveEsqlVariables;
+  };
 };

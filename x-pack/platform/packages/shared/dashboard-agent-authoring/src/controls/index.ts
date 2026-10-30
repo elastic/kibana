@@ -10,4 +10,4 @@ export type { IdentifiedControl, PlannedControl } from './planned_control';
 export { resolveControls } from './resolve_controls';
 export { reportUnderPlannedIdentifiers } from './control_ids';
 export { applyControls } from './apply_controls';
-export { createEsqlVariablesResolver } from './get_esql_variables';
+export { createEsqlVariablesResolver } from './create_esql_variables_resolver';

@@ -7,7 +7,7 @@
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { createEsqlVariablesResolver } from './get_esql_variables';
+import { createEsqlVariablesResolver } from './create_esql_variables_resolver';
 
 const esqlControl = (name: string, selected: string[], extra: Record<string, unknown> = {}) => ({
   id: `control-${name}`,
