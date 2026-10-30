@@ -220,9 +220,8 @@ describe('SessionDetailPage', () => {
     // Focusable, with the error in its name, as its tooltip shows it.
     expect(marker).toHaveAttribute('tabindex', '0');
     expect(marker).toHaveAccessibleName('0:45 TypeError: cart is undefined');
-    expect(marker.parentElement).toHaveStyle({
-      left: '75%',
-    });
+    // At the error's offset, shifted back by the same share of its width so it stays in the bar.
+    expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
   });
 
   it('says when the timeline is cut short', async () => {

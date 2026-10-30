@@ -145,9 +145,12 @@ export function SessionWaterfall({
               content={label}
               anchorProps={{
                 style: anchorStyle({
+                  // Shifted back by the same share of its width, so it stays inside the bar,
+                  // which clips: centered mid-bar, flush with the end for an error at 100%, as
+                  // errors often end a session.
                   left: `${offsetPercent}%`,
+                  transform: `translateX(-${offsetPercent}%)`,
                   width: MARKER_HIT_WIDTH,
-                  marginLeft: -MARKER_HIT_WIDTH / 2,
                 }),
               }}
             >
